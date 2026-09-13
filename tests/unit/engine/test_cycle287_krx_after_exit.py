@@ -498,9 +498,14 @@ async def test_k5b_dial_default_is_44_when_key_absent(
 ) -> None:
     """K5 (RED) — 키 부재 = `44`.
 
-    ⚠️ 전략 7파일은 이 사이클에서 **diff 0** 이라 `DEFAULT_PARAMS` 에 키가 없다
-    (브리프 제약이 자문 §9-F 보다 우선한다). 그래서 "키 부재 = 44" 가 유일한 운영
-    기본이고, 자문의 `DEFAULT_PARAMS`/`param_catalog` 등재는 **후속 사이클**이다.
+    cycle290(2026-09-13)이 7 전략 전부의 `DEFAULT_PARAMS`/`param_catalog` 에 이 키를
+    등재했다(등재 값은 코드 상수와 동일 — `"44"`) — **더 이상 "미등재"가 사실이
+    아니다.** 이 테스트가 재는 것은 실 전략이 아니라 이 파일의 합성
+    `_DummyStrategy`(키를 넣지 않으면 `config.params` 에 존재하지 않는다)의
+    키 부재 시 **폴백 경로**이고, 그 경로 자체는 cycle290 이후에도 여전히 살아
+    있다(운영 DB 드리프트로 이 키가 지워지는 경우의 안전망). 실 전략의 등재값이
+    코드 상수와 같은지는 `tests/unit/engine/test_cycle290_killswitch_registration.py`
+    (`test_g290_12` 등)가 잰다.
     """
     engine, _ = _make_engine()
     assert "after_market_exit_division" not in engine.registry.get(_SID).config.params

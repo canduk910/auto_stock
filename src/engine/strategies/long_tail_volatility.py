@@ -154,6 +154,14 @@ class LongTailVolatilityStrategy(StrategyBase):
         "llm_gate_min_score": 70,
         "llm_gate_daily_call_cap": 20,
         "llm_gate_timeout_secs": 20,
+        # cycle290 (2026-09-13) — 장중 킬스위치 등재. 값은 코드 상수와 **같은 값**이라
+        # 등재 자체의 매매 행위 변경은 0 이다(`order_engine._ORDER_EXCHANGE_CLOCK_MODE_DEFAULT`
+        # ·`_AFTER_EXIT_DIVISION_DEFAULT`). `PARAM_RANGES`/`INT_PARAMS` 편입 금지 —
+        # AI 자문이 청산 수단을 끄는 스위치를 뒤집으면 안 된다. 장중 롤백은 PUT 뿐
+        # (SQL UPDATE 는 다음 재시작에서만, cycle232 D6). 사고 중 조작 순서 =
+        # `_workspace/00_leader_trading_rules.md` 「거래소 라우팅」 절.
+        "order_exchange_clock_mode": "enforce",
+        "after_market_exit_division": "44",
     }
 
     def __init__(self, config: StrategyConfig):

@@ -233,6 +233,72 @@ KIS OpenAPI 기반 국내주식 자동매매시스템. 다중 전략 아키텍�
 2종이 추가됐다(41~47 중 손절 수단으로 유효한 둘만, IOC/FOK·최우선지정가는 손절
 수단이 아니라서 제외). 상세는 `src/engine/CLAUDE.md` §order_engine.py 「cycle287」 절.
 
+**cycle290(2026-09-13) — 장중 킬스위치 두 키를 등재했다.** cycle287 이 만든 두 스위치
+(`order_engine._route_exchange_by_clock` 의 `mode` · KRX 애프터 청산 호가유형)는 배포
+당시 `param_catalog`/`DEFAULT_PARAMS` 어디에도 없어 `PUT /api/strategies/{id}/params`
+가 `unknown_key` 422 였다 — 이 사이클이 두 키를 **7 전략 전부**의 `DEFAULT_PARAMS` +
+`param_catalog` 에 코드 상수와 같은 값으로 등재해 PUT 통로를 열었다(매매 행위는
+등재 자체로는 변경 0).
+
+| 키 | 기본값 | 허용값 | 부재/오타 시 해석 |
+|---|---|---|---|
+| `order_exchange_clock_mode` | `enforce` | `enforce` · `sell_only` · `off` | `enforce`(라우터에 mode 화이트리스트가 없어 미지 값은 조용히 `enforce` 로 읽힌다) |
+| `after_market_exit_division` | `"44"` | `"44"` · `"41"`(문자열) | `"44"`(허용 밖·정수·부재는 전부 이 값으로 폴백) |
+
+롤백은 **`PUT` 뿐**이다 — `strategy_config` SQL 직접 UPDATE 는 다음 백엔드 재시작에서만
+반영되고(cycle232 D6 가 보유 중 장중 재시작을 금지), 1커밋 revert + 재배포는 그 자체가
+그 창의 재시작이다.
+
+⚠️ **전제 — 두 스위치는 `exchange ∈ {"NXT","SOR"}` 일 때만 효력이 있다.**
+`_route_exchange_by_clock` 의 clause 1(`base ∉ {"NXT","SOR"}` → 그대로 반환)이 mode
+검사보다 **앞**에서 발화하므로, 어떤 전략의 `exchange` 가 `"KRX"` 로 바뀌면(코드
+기본값이 이미 그렇다) `enforce`·`sell_only`·`off` 세 값이 그 전략에서 **완전히 동일한
+무동작**이 된다. **지금(2026-09-13) 운영 DB 는 7 전략 전부 `exchange="SOR"`** 라 아래
+절차가 실제로 작동한다(실측 = `src/engine/CLAUDE.md` cycle286 C4-a 절 · 본 문서 위쪽
+「거래소 라우팅」 cycle287 절). `exchange` 를 KRX 로 마이그레이션하는 날부터는 이
+전제가 깨지고 `[order_channel] reason=base_krx` 가 그 증거다 — 그날은 아래 절차
+대신 곧바로 코드 재배포(`order_engine.py`)가 필요하다.
+
+⚠️ **두 스위치는 전략별이다 — 전역 킬스위치가 없다.** 보유가 여러 전략에 걸쳐
+있으면 사고 중 그 전략 **각각**에 PUT 해야 한다(예: `momentum`·`donchian_swing`
+둘 다 보유 중이면 두 번). 하나만 누르고 "껐다"고 믿지 않는다.
+
+⚠️ **첫 PUT 이 그 전략의 두 값을 DB 에 영구 고정한다.** `PUT /api/strategies/{id}/params`
+는 병합된 **전체** `params` dict 를 저장하므로, 어떤 키든 그 전략에 처음 PUT 하는
+순간부터 이 두 값도 DB 에 박혀 그 뒤로는 **코드 상수를 바꿔도 그 전략에는 반영되지
+않는다**(재시작해도 DB 값이 이긴다). 사고 중 한 값을 되돌렸으면(예: `off`→`enforce`)
+그것으로 끝이 아니라 **그 전략은 이제부터 계속 DB 값을 산다**는 뜻이다 — 익일
+`SELECT strategy_id, params->>'order_exchange_clock_mode', params->>'after_market_exit_division'
+FROM strategy_config` 로 어느 전략이 이제 DB 지배로 넘어갔는지 확인한다.
+
+**사고 중 조작 순서 (스위치를 만지기 전에 반드시 이 순서로)** —
+
+0. 스위치를 만지기 전에 세 마커로 증상부터 가른다. 거부 / 미체결 / 악체결은 처방이
+   반대다. 보유 중인 **전략마다** 아래를 확인한다(전략별 스위치라 증상도 전략별일
+   수 있다).
+   - `[order_channel_config] strategy= mode= division=` → 지금 살아 있는 값. **이
+     마커는 그 전략이 주문을 낼 때만 찍힌다** — 부재는 실패의 증거가 아니라
+     "아직 그 전략이 주문을 내지 않았다"는 뜻이다. PUT 직후의 즉시 증거는 이
+     마커가 아니라 **PUT 200 응답의 `data.applied`**(라우트가 즉시 반영하므로)다.
+   - `[after_exit_division] ticker= div= unpr= cur= dial=` → 변환이 일어났는가,
+     **`cur=` 이 0 인가**
+   - `[after_exit_rejected]` / `[after_exit_giveup]` → 거부인가 아닌가
+1. **매도 거부**(`[after_exit_rejected]` 있음) — `order_exchange_clock_mode` 는 만지지
+   않는다. `[after_exit_division]` 의 `cur>0` 을 **먼저 확인**하고 그때만
+   `after_market_exit_division="41"`. `cur=0` 이면 **41 금지** — 44 로 두고 포기 래치가
+   다음 09:00 청산으로 착지시키게 둔다.
+2. **매도가 접수됐는데 미체결/악체결**(`[after_exit_rejected]` 없음) — `41` 의 본래
+   용도. 같은 `cur>0` 조건.
+3. **매수만 거부**(LTV 야간) — `order_exchange_clock_mode="sell_only"`. 매도·취소는
+   계속 KRX 라 44/41 청산이 살아 있다. 애프터 창에서 mode 를 만지는 유일한 정당
+   용도다. ⚠️ 이 값은 16:00~19:50 LTV 야간 매수도 함께 되살린다(방어 다이얼이
+   아니다).
+4. **그래도 안 되면** `off` 가 아니라 `PUT {"exchange":"KRX"}` — clause 1 이 mode
+   검사보다 앞서 발화해 KRX 로 고정되면서 44/41 전환이 보존된다(부작용은 프리장
+   주문도 KRX 로 가는 것 하나).
+5. **`off` 는 라우터 자체 고장 증거**(`reason=probe_error` 반복)가 있을 때만 — 애프터
+   44/41 청산까지 함께 죽는다. 안전한 후퇴가 아니다.
+
 ### 보드(매매 시간대) 화이트리스트
 각 전략 `tradable_boards` 파라미터로 매매 가능 보드를 결정:
 
@@ -809,6 +875,9 @@ DEFAULT_PARAMS = {
     "max_scan_stocks": 4000,
     # 일반
     "daily_loss_limit": -6.0,
+    # cycle290 — 장중 킬스위치 등재. 값은 order_engine 코드 상수와 동일(행위 변경 0).
+    "order_exchange_clock_mode": "enforce",
+    "after_market_exit_division": "44",
 }
 ```
 
@@ -958,6 +1027,9 @@ DEFAULT_PARAMS = {
     "max_scan_stocks": 4000,
     # 일반
     "daily_loss_limit": -8.0,
+    # cycle290 — 장중 킬스위치 등재. 값은 order_engine 코드 상수와 동일(행위 변경 0).
+    "order_exchange_clock_mode": "enforce",
+    "after_market_exit_division": "44",
 }
 ```
 

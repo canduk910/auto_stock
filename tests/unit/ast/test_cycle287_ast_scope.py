@@ -20,16 +20,17 @@
 7 전략 `DEFAULT_PARAMS` 에 명시하라고 했지만, **브리프 제약이 전략 7파일·`strategy_base.py`
 를 diff 0 으로 못 박는다.** 그래서 이 사이클의 계약은:
 
-* 두 키는 **어느 전략 `DEFAULT_PARAMS` 에도 없다**(S5).
-* 기본값은 `order_engine` 의 **모듈 상수**가 정본이고, 키 부재 = `enforce` / `44` 다(S5).
-* 🔴 **장중 킬스위치는 존재하지 않는다**(S7, 자문 §5-B). 종전 Red 헤더는 "롤백 경로는
-  PUT 하나뿐" 이라고 적었지만 그것은 **사실이 아니다** — 두 키가 `param_catalog` 에도
-  `current_params` 에도 없으므로 `validate_params` 가 `unknown_key` 로 만들고 라우트가
-  422 + all-or-nothing 이다(실측). 롤백은 **1커밋 revert + 장외 배포**뿐이고, 급성
-  상황의 우회는 기존 키 `PUT {"exchange":"KRX"}`(라우팅 전면 정지)인데 **프리장 청산과
-  `stock_master` 프로브가 함께 꺼지는** 부작용이 있다.
-* `DEFAULT_PARAMS`·`param_catalog` 등재와 화면 문구(자문 §3·§9-K)는 **cycle287b** 이며,
-  그때 비로소 정식 킬스위치가 생긴다 — 그 사이클이 S5·S7 을 함께 갱신한다.
+* cycle287 배포 시점에는 두 키가 **어느 전략 `DEFAULT_PARAMS` 에도 없었다**(S5).
+* 기본값은 `order_engine` 의 **모듈 상수**가 정본이고, 등재 전 키 부재 = `enforce` / `44` 였다(S5).
+* ✅ **정정(cycle290, 2026-09-13)** — 장중 킬스위치가 이제 **있다.** cycle287 배포
+  당일 실측 = `validate_params` 가 `key not in current_params or spec is None` 을
+  `unknown_key` 로 만들고 라우트가 422 + all-or-nothing 이었다(그래서 종전 이 문서는
+  그런 킬스위치가 없다고 적었다). cycle290 이 두 키를 **7 전략 전부**의
+  `DEFAULT_PARAMS` + `param_catalog` 에 코드 상수와 같은 값으로 등재해 그 PUT 통로를
+  열었다(매매 행위는 등재 자체로 변경 0). `test_s5b`(아래) 는 이제 **존재** 를,
+  `test_s7`(아래) 은 이제 **PUT 200 + accepted** 를 단언한다.
+* `DEFAULT_PARAMS`·`param_catalog` 등재와 화면 문구(자문 §3·§9-K)는 **cycle290** 이며,
+  그 사이클이 S5·S7 을 함께 갱신했다(이 파일).
 
 ## 왜 `ast.dump` 의 sha 를 핀하지 않는가
 
@@ -129,23 +130,27 @@ _BASE_SHA = {
     # 거부 분류기 — 키워드 집합을 늘리지 않는다(미분류 봉인이 정면 대응이다).
     "src/api/balance.py":
         "d8f3da874b3e2623695935d768cf5a502a3756e3425c41185e42576c27f6aa35",
-    # 전략 7파일 (+ 패키지) — 브리프 제약: **전원 diff 0**
+    # 전략 7파일 (+ 패키지) — cycle287 당시 "전원 diff 0" 이었으나 **cycle290(킬스위치
+    # 등재) 이 정당하게 갱신**했다 — `DEFAULT_PARAMS` 말미에 `order_exchange_clock_mode`
+    # `after_market_exit_division` 2키 추가뿐, 그 외 한 글자도 안 바뀌었다는 증거는
+    # `test_cycle290_ast_scope.py::test_g290_2`(세그먼트 sha 28핀) 가 별도로 잠근다.
+    # 구 값(cycle287 기준선)은 이 dict 의 git 이력에 남는다.
     "src/engine/strategies/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "src/engine/strategies/bull_flag_breakout.py":
-        "0b7cfe745c6f437a7f55b7c6773e549c5c545f0c5b6c85be51623221a3b6afb0",
+        "f63ee57cd169e4472f24fa76b26ca9ca63e69a1a170da8e57c822fd0028f2ebe",
     "src/engine/strategies/donchian_swing.py":
-        "107246d21feeac07ed6556269897b60d61ab1b617746d3c2f6aacd3d1385dfa0",
+        "1db81a3966985fc23baf64996134af07ac81c90e56b90d8405c46f5b1efce880",
     "src/engine/strategies/kojiro.py":
-        "bfc614808831b7a50664f8d4b7a7e168c3a77fd70fa51f55289cea78b5a84a47",
+        "eb8057d44c86cfe73088aa65d2036b715ce1a979aab08c47b7a7fb3363f58c65",
     "src/engine/strategies/long_tail_volatility.py":
-        "728fc2d51edd6db9c0a6f6448b60d8b15872c273e5158caae3f814dd4394a8ee",
+        "51b50560a1240df3fc6085da7253438605079d7d453ff3e77a806e814473be25",
     "src/engine/strategies/momentum.py":
-        "5bfc25a183a13ec0e00bdce7ff0e1727d323bd62f1ba8b8937561a4eb74c0da1",
+        "4d7fac9abab4d5fca55509a8682633d31c4bb9868f5bb4cc77d4771ecda68894",
     "src/engine/strategies/vcp_breakout.py":
-        "f77ffc1896037692c47a6611a6d3b8aecf66bf17f3c6161a1cf52bc96f0ce3dd",
+        "09c7e1aa02493d678844c06f5850200dcb93f1e08d062d11468c220e5450d727",
     "src/engine/strategies/volatility_breakout.py":
-        "9034476410029bc14622cbf8ec32e0647406cf470e91b9aa740a3f7d5b6cd5e3",
+        "d13efaa4a9424e2822b5476ce159987d2a5192a4bca30af3f1a0cae9c3ffcabc",
 }
 
 #: `src/**/*.py` 전수(세 변경 파일 제외)의 (경로, 내용sha) 누적 digest.
@@ -162,8 +167,17 @@ _SRC_TREE_FILES = 148
 #: cycle287b 배포분의 digest 는
 #: `7d122ab634df31ce986770c6390a52b245f68d2e693835880d608dff64e73b6a` 였다.
 #: 기준선은 옮겨도 단언은 그대로다 — 다음 사이클이 `src/` 를 조용히 바꾸면 여전히 붉어진다.
+#: ⚠️ **cycle290(킬스위치 등재, 2026-09-13) 기준선으로 갱신** — 전략 7파일의
+#: `DEFAULT_PARAMS` 에 키 2개가 추가돼 그 파일들의 sha 가 바뀌었고, 이 digest 는 그
+#: sha 를 포함해 재계산한 것이다. 파일 수는 148 로 불변(신규 파일 0).
+#: cycle290 Green 직후 값은 `b3997180dbe258f7816e51725d12b2de88d9234f7f9e3405008f12a5a3a70bb0`
+#: 였다 — **cycle290 적대 검증 반영**(help 텍스트 정직화: 전제 조건·전략별 스위치·
+#: 카나리아 과장 정정을 `param_catalog.py` 에 추가)으로 `param_catalog.py` 내용이
+#: 다시 바뀌어 이 값으로 갱신한다. 전략 7파일 세그먼트 sha(`_DEFAULT_PARAMS_SHA`,
+#: `test_cycle278_ast_catalog_guards.py`)는 무접촉 — 움직인 것은 `param_catalog.py`
+#: 하나뿐이다.
 _SRC_TREE_DIGEST = (
-    "239a21e95d596b9664d8b9118cd8e15626fd4279c3b3eb2465032eb93e137379"
+    "d491c518cb200717246577be3bcfd904c854f9a6c9fe625e28f639666477a277"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
@@ -719,15 +733,18 @@ def test_s5_new_keys_are_not_in_param_ranges_or_int_params(key: str) -> None:
 
 @pytest.mark.parametrize("rel", sorted(_STRATEGY_FILES))
 @pytest.mark.parametrize("key", _NEW_PARAM_KEYS)
-def test_s5b_new_keys_are_absent_from_strategy_defaults(rel: str, key: str) -> None:
-    """S5 — 두 키는 **어느 전략 파일에도 없다**(브리프 제약 = 전략 7파일 diff 0).
+def test_s5b_new_keys_are_present_in_strategy_defaults(rel: str, key: str) -> None:
+    """S5 — ✅ **정정(cycle290)** — 두 키는 이제 **7 전략 전부**의 파일에 있다.
 
-    ⚠️ 자문 §9-F 는 `DEFAULT_PARAMS` 등재를 요구했지만 브리프가 그것을 막는다.
-    따라서 **키 부재 = `enforce` / `44`** 가 유일한 운영 기본이고, 등재·`param_catalog`·
-    화면 문구는 후속 사이클이다. 그 사이클이 이 테스트를 갱신한다.
+    cycle287 배포 시점엔 브리프 제약(전략 7파일 diff 0)으로 부재였다(구 계약 =
+    "어느 전략 파일에도 없다"). cycle290 이 두 키를 `DEFAULT_PARAMS` 말미에
+    `order_engine` 모듈 상수와 같은 값으로 등재했다 — 라우팅·애프터 청산은
+    `strategy_id` 로 params 를 조회하는 전 전략 공통 경로라 일부만 등재하면
+    나머지 전략은 여전히 `unknown_key` 422 다.
     """
-    assert key not in _src(rel), (
-        f"{rel} 에 `{key}` 가 들어왔다 — 전략 7파일 diff 0 계약 위반"
+    assert key in _src(rel), (
+        f"{rel} 에 `{key}` 가 없다 — cycle290 등재가 되돌려졌다(그 전략은 장중에 "
+        f"끌 수 없다)"
     )
 
 
@@ -739,10 +756,13 @@ def test_s5b_new_keys_are_absent_from_strategy_defaults(rel: str, key: str) -> N
     ],
 )
 def test_s5c_default_constants_live_in_order_engine(const: str, value: str) -> None:
-    """S5 (RED) — 기본값의 정본은 `order_engine` **모듈 상수**다.
+    """S5 — 기본값의 정본은 `order_engine` **모듈 상수**다.
 
-    전략 `DEFAULT_PARAMS` 가 비어 있으므로 상수가 유일한 정본이다. 리터럴을 판정
-    지점마다 흩뿌리면 롤백 PUT 이 한쪽만 바꾸는 사고가 난다.
+    ✅ **정정(cycle290)** — 두 키는 이제 7 전략 `DEFAULT_PARAMS` 에도 등재돼 있지만
+    (`test_s5b`), 그 등재 값은 **이 상수와 같은 값**이라야 한다는 것이 계약이다
+    (cycle290 A3). 즉 이 모듈 상수는 여전히 "부재 시 폴백"의 정본이자, 등재값이
+    지켜야 하는 기준선이다 — 리터럴을 판정 지점마다 흩뿌리면 롤백 PUT 이 한쪽만
+    바꾸는 사고가 난다.
     """
     from src.engine import order_engine as _oe
 
@@ -855,35 +875,33 @@ def test_s6e_sync_cancel_paths_go_through_apply_clock(method: str) -> None:
 
 
 # ===========================================================================
-# S7 — 🔴 장중 킬스위치는 **없다** (자문 §5-B — 종전 Red 의 S5 주장을 뒤집는다)
+# S7 — ✅ 정정(cycle290) — 장중 킬스위치가 **있다** (등재 후 PUT 이 통한다)
 # ===========================================================================
 @pytest.mark.parametrize("key", _NEW_PARAM_KEYS)
-def test_s7_new_keys_cannot_be_put_at_runtime(key: str) -> None:
-    """S7 — 두 신규 키는 `PUT /api/strategies/{id}/params` 로 **바꿀 수 없다**.
+def test_s7_new_keys_can_be_put_at_runtime(key: str) -> None:
+    """S7 — ✅ **정정(cycle290)** — 두 신규 키는 이제 `PUT` 으로 바꿀 수 있다.
 
-    ⚠️ 종전 Red 헤더는 "장중 롤백 경로는 PUT 하나뿐" 이라고 적었지만 그것은 **사실이
-    아니다**(자문 §5-B). `validate_params` 는 `key not in current_params or spec is None`
-    을 `unknown_key` **오류**로 만들고, 라우트가 오류 1건에 422 + all-or-nothing 이다.
-    두 키는 (브리프 제약 때문에) 어느 전략 `DEFAULT_PARAMS` 에도 없고 `param_catalog`
-    에도 없으므로 **항상** `unknown_key` 다.
+    🔴 이 테스트는 종전 합성 dict `{"exchange": ..., "tradable_boards": ...}` 를
+    `current_params` 로 넘겼었는데, 그 dict 에는 두 키가 애초에 없으므로
+    `param_validation` 의 `key not in current_params or spec is None` 판정이
+    등재와 **무관하게** 영원히 `unknown_key` 였다 — 초록인 채로 "장중 킬스위치는
+    없다"는 거짓 주장을 계속 지키는 가짜 가드였다. 이제 실제 `DEFAULT_PARAMS` 를
+    `current_params` 로 써서 진짜 등재 여부를 잰다.
 
-    ⇒ **이 사이클에 장중 킬스위치는 존재하지 않는다.** 롤백은 1커밋 revert + 장외
-    배포(15:30~19:55 · 21:35~07:45 · 주말)뿐이고, 급성 시에는 기존 키
-    `PUT {"exchange":"KRX"}` 가 라우팅을 전면 정지시키지만 **프리장 청산과
-    `stock_master` 프로브가 함께 꺼지는** 부작용이 있다.
-
-    이 테스트는 그 불편한 사실을 **고정**한다 — 두 키를 `param_catalog` +
-    `DEFAULT_PARAMS` 에 등재하는 cycle287b 가 이 테스트를 갱신하고, 그때 비로소
-    정식 킬스위치가 생긴다. (그 전에 누가 "PUT 으로 끄면 된다" 고 적으면 거짓이다.)
+    cycle290 이 두 키를 7 전략 전부의 `DEFAULT_PARAMS` + `param_catalog` 에 등재해
+    `PUT /api/strategies/{id}/params` 가 200 + `accepted` 로 통과한다. 롤백은 이
+    PUT 뿐이다(SQL UPDATE 는 다음 재시작에서만, cycle232 D6).
     """
     from src.engine.param_validation import validate_params
+    from src.engine.strategies.long_tail_volatility import LongTailVolatilityStrategy
 
-    current = {"exchange": "SOR", "tradable_boards": ["main"]}
-    result = validate_params("long_tail_volatility", current, {key: "off"})
+    current = dict(LongTailVolatilityStrategy.DEFAULT_PARAMS)
+    value = "off" if key == "order_exchange_clock_mode" else "41"
+    result = validate_params("long_tail_volatility", current, {key: value})
     codes = {(e.key, e.code) for e in result.errors}
-    assert (key, "unknown_key") in codes, (
-        f"`{key}` 가 PUT 으로 통과한다 — 킬스위치가 생겼다면 이 테스트와 "
-        f"`_NEW_PARAM_KEYS` 주석, 그리고 cycle287 보고서의 롤백 절을 함께 갱신하라. "
+    assert (key, "unknown_key") not in codes, (
+        f"`{key}` 가 여전히 `unknown_key` 다 — cycle290 등재가 되돌려졌다. "
         f"실제 오류: {codes}"
     )
-    assert result.accepted == {}, result.accepted
+    assert result.errors == (), result.errors
+    assert result.accepted == {key: value}, result.accepted

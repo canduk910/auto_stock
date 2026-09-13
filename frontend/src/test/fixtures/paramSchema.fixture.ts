@@ -1,7 +1,7 @@
 /**
  * cycle278 Red — `GET /api/strategies/params-schema` 응답 **골든 픽스처**.
  *
- * ⚠️ 손으로 쓰지 않는다. `src/engine/param_catalog.py` 의 99 스펙과 7 전략
+ * ⚠️ 손으로 쓰지 않는다. `src/engine/param_catalog.py` 의 101 스펙과 7 전략
  * `DEFAULT_PARAMS` 에서 **기계 생성**했다 (생성기:
  * `_workspace/red/cycle278_param_catalog_ui_spec.md` §7.4 · 생성 스크립트는 사이클 산출물).
  *
@@ -101,7 +101,7 @@ export interface ParamSchemaData {
 }
 
 export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
-  "catalog_version": "cycle278.1",
+  "catalog_version": "cycle290.1",
   "groups": [
     {
       "id": "entry",
@@ -2401,6 +2401,98 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
       "help": "`HH:MM`(KST). 이 시각 후에는 신규 매수를 하지 않는다(청산은 계속)."
     },
     {
+      "key": "order_exchange_clock_mode",
+      "label_ko": "시각 기반 거래소 라우팅",
+      "group": "time_board",
+      "type": "enum",
+      "min": null,
+      "max": null,
+      "step": null,
+      "unit": "",
+      "editable": true,
+      "risk": "identity",
+      "auto_tunable": false,
+      "deprecated": false,
+      "deprecated_for": [],
+      "range_src": "enum",
+      "pattern": null,
+      "min_items": 0,
+      "forbidden_choices": [],
+      "choices": [
+        {
+          "value": "enforce",
+          "label_ko": "강제 (권장 — 정규장·애프터는 KRX)",
+          "deprecated": false,
+          "help": "현행 기본. 09:00~15:30 정규장과 16:00~20:00 KRX 애프터마켓은 KRX 로, 프리장 08:00~09:00 은 저장된 거래소로 나간다"
+        },
+        {
+          "value": "sell_only",
+          "label_ko": "매도만 라우팅 (애프터 청산 유지)",
+          "deprecated": false,
+          "help": "매도·취소만 KRX 로 — 애프터 44/41 청산이 살아 있고 매수만 저장된 거래소로 돌아간다. 16:00 이후 야간 매수가 전량 거부될 때 쓴다"
+        },
+        {
+          "value": "off",
+          "label_ko": "끄기 (⚠️ 애프터 청산도 함께 꺼진다)",
+          "deprecated": false,
+          "help": "라우팅 전면 정지. 안전한 후퇴가 아니다 — 16:00~20:00 손절이 KRX 44/41 을 못 타고, 정규장 손절도 거부 한 왕복을 더 탄다. 4단계 뒤의 마지막 수단"
+        }
+      ],
+      "applies_to": [
+        "momentum",
+        "volatility_breakout",
+        "long_tail_volatility",
+        "donchian_swing",
+        "bull_flag_breakout",
+        "vcp_breakout",
+        "kojiro"
+      ],
+      "help": "cycle287 **규칙 1 킬스위치**. `enforce`(기본)면 정규장(09:00~15:30)과 KRX 애프터마켓(16:00~20:00, 2026-09-14 신설)의 주문이 저장된 `exchange` 값과 무관하게 KRX 로 나간다. 프리장(08:00~09:00)은 세 값 모두에서 무접촉이다.\n**사고 중 조작 순서** — 스위치를 만지기 전에 ① `[order_channel_config]` 로 살아 있는 값 ② `[after_exit_division]` 의 `cur=` ③ `[after_exit_rejected]`/`[after_exit_giveup]` 을 읽어 **거부 / 미체결 / 악체결**을 먼저 가른다. 처방이 반대다. ⑴ **매도 거부**면 이 키는 만지지 않고 `after_market_exit_division` 을 본다. ⑵ **매수만 거부**(LTV 야간)면 `sell_only` — 애프터 청산이 살아 있는 유일한 정당 용도다. ⑶ 그래도 안 되면 `off` 가 아니라 `PUT {\"exchange\":\"KRX\"}` — clause 1 이 mode 검사보다 앞서 발화해 KRX 로 고정되면서 **44/41 전환이 보존된다**(부작용은 프리장 주문도 KRX 로 가는 것 하나). ⑷ `off` 는 라우터 자체가 엉뚱한 시장으로 보낸다는 증거가 있을 때만.\n⚠️ **`off` 는 애프터마켓 청산도 함께 끈다** — 44/41 변환의 게이트가 \"거래소가 KRX 인가\"라서, 라우팅을 끄면 거래소가 저장값으로 남아 변환 분기에 도달하지 않고 16:00~20:00 청산이 NXT 애프터로 시장가를 발사한다(NXT 는 시장가를 받지 않는다). 09:00~15:30 손절도 같은 이유로 거부 한 왕복을 더 탄 뒤 5호가 지정가로 떨어진다. 게다가 **NXT 비대상 종목(`nxt_tradable=False`)에는 `off` 가 듣지 않는다** — 이미 KRX 로 다운그레이드돼 계속 44/41 을 탄다. 절반만 꺼지는 스위치다.\n⚠️ `sell_only` 는 **16:00~19:50 LTV 야간 매수를 다시 켠다** — `enforce` 에서는 그 매수가 KRX 로 라우팅돼 시장가를 받지 않는 창에서 전량 거부되고 있다. 순수 방어 다이얼이 아니다.\n⚠️ 오타·대소문자(`OFF`)는 이 선택지 목록이 422 로 막지만, DB 를 직접 UPDATE 해 들어온 미지 값은 읽는 쪽이 **`enforce`** 로 해석한다(라우터에 mode 화이트리스트가 없다). 그래서 오타를 막는 관문은 이 enum **하나**다.\nPUT 은 **즉시** 반영되고 `strategy_config` SQL 은 다음 재시작에서만 반영된다 — 보유 중 장중 재시작은 금지(D6)이므로 장중 실효 수단은 PUT 뿐이다. ⚠️ **이 키는 전략별이다** — 전역 스위치가 없으므로 보유 중인 전략 각각에 PUT 한다. 반영의 즉시 증거는 PUT 200 응답의 `data.applied`다. `[order_channel_config] strategy= mode= division=` 카나리아는 **그 전략이 실제로 주문을 낼 때만** 1행 찍히므로 부재가 실패의 증거는 아니다(`off` 는 `[order_channel]` 을 아예 남기지 않는다). ⚠️ **이 스위치는 그 전략의 `exchange` 가 `NXT`/`SOR` 일 때만 효력이 있다** — clause 1 이 mode 검사보다 앞서 `exchange=\"KRX\"` 면 세 값 모두 무동작이다(`reason=base_krx` 가 그 증거). AI 자동 튜닝 대상이 아니다(`PARAM_RANGES` 편입 금지)."
+    },
+    {
+      "key": "after_market_exit_division",
+      "label_ko": "KRX 애프터 청산 호가유형",
+      "group": "time_board",
+      "type": "enum",
+      "min": null,
+      "max": null,
+      "step": null,
+      "unit": "",
+      "editable": true,
+      "risk": "identity",
+      "auto_tunable": false,
+      "deprecated": false,
+      "deprecated_for": [],
+      "range_src": "enum",
+      "pattern": null,
+      "min_items": 0,
+      "forbidden_choices": [],
+      "choices": [
+        {
+          "value": "44",
+          "label_ko": "최유리지정가 (권장 — 현재가 불필요)",
+          "deprecated": false,
+          "help": "반대편 최우선호가에 즉시 붙는다(ORD_UNPR=0). 거부되면 41 로 성격이 다른 폴백을 한 번 탄다"
+        },
+        {
+          "value": "41",
+          "label_ko": "지정가 5호가 아래 (⚠️ 현재가 있는 종목만)",
+          "deprecated": false,
+          "help": "가격을 우리가 통제한다. 현재가를 못 받는 종목에서는 변환이 취소되고 시장가가 그대로 나가며 거부 관측·TTL·포기 래치가 전부 꺼진다"
+        }
+      ],
+      "applies_to": [
+        "momentum",
+        "volatility_breakout",
+        "long_tail_volatility",
+        "donchian_swing",
+        "bull_flag_breakout",
+        "vcp_breakout",
+        "kojiro"
+      ],
+      "help": "cycle287 **규칙 2 다이얼**. KRX 애프터마켓(16:00~20:00)에서 시장가 청산을 어떤 호가유형으로 바꿔 보낼지 고른다 — 그 창의 KRX 는 시장가(`01`)도 지정가(`00`)도 받지 않고 `41~47` 만 받는다.\n`\"44\"`(기본, 최유리지정가 `ORD_UNPR=0`) = 반대편 최우선호가에 즉시 붙는다. **현재가가 없어도 주문이 성립**하고, 거부되면 `41` 로 성격이 다른 폴백을 한 번 탄다.\n`\"41\"`(지정가 `현재가 5호가 아래`) = 우리가 가격을 통제한다. **언제 쓰는가** = 주문은 접수됐는데 **미체결이거나 최유리가 얇은 호가를 크로스해 악체결**될 때. 코드 재배포 없이 쓸 수 있는 유일한 완화책이다.\n🔴 **`41` 로 바꾸기 전에 `[after_exit_division]` 의 `cur=` 을 확인하라.** 현재가를 못 받는 종목(WS 무송출 등)에서는 변환이 취소되고 **시장가가 그대로 나가 100% 거부되는데, 그때는 거부 관측(`[after_exit_rejected]`)·30초 TTL·그날 밤 포기 래치가 전부 작동하지 않는다** — 애프터마켓은 실시간 연속체결이라 브레이크 없는 반복 발사가 된다. `44` 에는 이 창이 아예 없다(`unpr=0` 이라 현재가가 불필요). `cur=0` 이면 44 로 두고 포기 래치가 다음 09:00 청산으로 착지시키게 두는 것이 옳다.\n⚠️ `41` 의 폴백도 `41` 이라 **호가유형이 다변화되지 않는다**(가격만 다시 계산한 재발사).\n⚠️ **문자열로 보낸다** — `44`(정수)는 선택지 밖으로 거부된다. 허용 집합 밖·부재·예외는 읽는 쪽이 `\"44\"` 로 폴백한다(클램프가 아니라 화이트리스트). IOC/FOK(42/43/45/46)는 잔량 자동취소로 손절 잔여를 잃고 47(최우선지정가)은 체결 보장이 없어 제외됐다.\n이 값은 **청산 판정을 바꾸지 않는다**(팔지 말지·언제 팔지는 그대로) — 이미 결정된 매도 주문의 호가 표현만 고른다. 정규장·프리장·15:30~16:00 은 무관하고, `order_exchange_clock_mode=\"off\"` 에서는 애프터 청산이 KRX 로 가지 않아 이 값이 읽히지 않는다. 이 변환은 실전(`is_production=True`) 계정에서만 발화한다(모의투자는 무접촉). AI 자동 튜닝 대상이 아니다."
+    },
+    {
       "key": "open_entry_hold_secs",
       "label_ko": "개장 직후 진입 보류",
       "group": "observe_gate",
@@ -2784,7 +2876,9 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "max_positions",
         "max_lot_ratio_mult",
         "tradable_boards",
-        "exchange"
+        "exchange",
+        "order_exchange_clock_mode",
+        "after_market_exit_division"
       ],
       "params": {
         "buy_threshold": 27.0,
@@ -2799,7 +2893,9 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
           "krx_open",
           "main"
         ],
-        "exchange": "KRX"
+        "exchange": "KRX",
+        "order_exchange_clock_mode": "enforce",
+        "after_market_exit_division": "44"
       },
       "defaults": {
         "buy_threshold": 29.0,
@@ -2814,7 +2910,9 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
           "krx_open",
           "main"
         ],
-        "exchange": "KRX"
+        "exchange": "KRX",
+        "order_exchange_clock_mode": "enforce",
+        "after_market_exit_division": "44"
       },
       "deprecated_for_keys": []
     },
@@ -2841,6 +2939,8 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "max_scan_stocks",
         "tradable_boards",
         "exchange",
+        "order_exchange_clock_mode",
+        "after_market_exit_division",
         "open_entry_hold_secs",
         "open_price_scope_mode",
         "llm_gate_mode",
@@ -2875,6 +2975,8 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
           "main"
         ],
         "exchange": "KRX",
+        "order_exchange_clock_mode": "enforce",
+        "after_market_exit_division": "44",
         "open_entry_hold_secs": 90,
         "open_price_scope_mode": "enforce",
         "llm_gate_mode": "shadow",
@@ -2909,6 +3011,8 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
           "main"
         ],
         "exchange": "KRX",
+        "order_exchange_clock_mode": "enforce",
+        "after_market_exit_division": "44",
         "open_entry_hold_secs": 90,
         "open_price_scope_mode": "enforce",
         "llm_gate_mode": "shadow",
@@ -2953,6 +3057,8 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "max_scan_stocks",
         "tradable_boards",
         "exchange",
+        "order_exchange_clock_mode",
+        "after_market_exit_division",
         "open_entry_hold_secs",
         "open_price_scope_mode",
         "llm_gate_mode",
@@ -2986,6 +3092,8 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
           "post_nxt"
         ],
         "exchange": "KRX",
+        "order_exchange_clock_mode": "enforce",
+        "after_market_exit_division": "44",
         "open_entry_hold_secs": 90,
         "open_price_scope_mode": "enforce",
         "llm_gate_mode": "shadow",
@@ -3019,6 +3127,8 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
           "post_nxt"
         ],
         "exchange": "KRX",
+        "order_exchange_clock_mode": "enforce",
+        "after_market_exit_division": "44",
         "open_entry_hold_secs": 90,
         "open_price_scope_mode": "enforce",
         "llm_gate_mode": "shadow",
@@ -3061,7 +3171,9 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "exclude_tickers",
         "nxt_tradable",
         "tradable_boards",
-        "exchange"
+        "exchange",
+        "order_exchange_clock_mode",
+        "after_market_exit_division"
       ],
       "params": {
         "donchian_period": 20,
@@ -3094,7 +3206,9 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "tradable_boards": [
           "main"
         ],
-        "exchange": "KRX"
+        "exchange": "KRX",
+        "order_exchange_clock_mode": "enforce",
+        "after_market_exit_division": "44"
       },
       "defaults": {
         "donchian_period": 20,
@@ -3127,7 +3241,9 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "tradable_boards": [
           "main"
         ],
-        "exchange": "KRX"
+        "exchange": "KRX",
+        "order_exchange_clock_mode": "enforce",
+        "after_market_exit_division": "44"
       },
       "deprecated_for_keys": []
     },
@@ -3170,7 +3286,9 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "tradable_boards",
         "exchange",
         "entry_start",
-        "entry_end"
+        "entry_end",
+        "order_exchange_clock_mode",
+        "after_market_exit_division"
       ],
       "params": {
         "breakout_volume_mult": 2.0,
@@ -3209,7 +3327,9 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         ],
         "exchange": "KRX",
         "entry_start": "09:05",
-        "entry_end": "13:00"
+        "entry_end": "13:00",
+        "order_exchange_clock_mode": "enforce",
+        "after_market_exit_division": "44"
       },
       "defaults": {
         "breakout_volume_mult": 2.0,
@@ -3248,7 +3368,9 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         ],
         "exchange": "KRX",
         "entry_start": "09:05",
-        "entry_end": "13:00"
+        "entry_end": "13:00",
+        "order_exchange_clock_mode": "enforce",
+        "after_market_exit_division": "44"
       },
       "deprecated_for_keys": []
     },
@@ -3293,7 +3415,9 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "tradable_boards",
         "exchange",
         "entry_start",
-        "entry_end"
+        "entry_end",
+        "order_exchange_clock_mode",
+        "after_market_exit_division"
       ],
       "params": {
         "ema_short": 50,
@@ -3334,7 +3458,9 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         ],
         "exchange": "KRX",
         "entry_start": "09:05",
-        "entry_end": "14:30"
+        "entry_end": "14:30",
+        "order_exchange_clock_mode": "enforce",
+        "after_market_exit_division": "44"
       },
       "defaults": {
         "ema_short": 50,
@@ -3375,7 +3501,9 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         ],
         "exchange": "KRX",
         "entry_start": "09:05",
-        "entry_end": "14:30"
+        "entry_end": "14:30",
+        "order_exchange_clock_mode": "enforce",
+        "after_market_exit_division": "44"
       },
       "deprecated_for_keys": []
     },
@@ -3419,6 +3547,8 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "nxt_tradable",
         "tradable_boards",
         "exchange",
+        "order_exchange_clock_mode",
+        "after_market_exit_division",
         "max_units_per_stock",
         "max_units_total"
       ],
@@ -3460,6 +3590,8 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
           "main"
         ],
         "exchange": "KRX",
+        "order_exchange_clock_mode": "enforce",
+        "after_market_exit_division": "44",
         "max_units_per_stock": 2,
         "max_units_total": 10
       },
@@ -3501,6 +3633,8 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
           "main"
         ],
         "exchange": "KRX",
+        "order_exchange_clock_mode": "enforce",
+        "after_market_exit_division": "44",
         "max_units_per_stock": 2,
         "max_units_total": 10
       },

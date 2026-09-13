@@ -66,9 +66,9 @@ function stripFullLineComments(source: string): { line: number; text: string }[]
 }
 
 describe('cycle278 F37 — 편집 3파일에 파라미터 키 하드코딩 0건', () => {
-  it('픽스처가 99키를 준다 (방어 가드 — 목록이 비면 이 가드는 아무것도 안 막는다)', () => {
-    expect(ALL_KEYS.length).toBe(99)
-    expect(new Set(ALL_KEYS).size).toBe(99)
+  it('픽스처가 101키를 준다 (방어 가드 — 목록이 비면 이 가드는 아무것도 안 막는다, cycle290 99→101)', () => {
+    expect(ALL_KEYS.length).toBe(101)
+    expect(new Set(ALL_KEYS).size).toBe(101)
   })
 
   it.each(TARGETS.map((t) => [path.basename(t.file), t] as const))(

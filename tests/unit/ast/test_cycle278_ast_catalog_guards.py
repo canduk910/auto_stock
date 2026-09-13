@@ -125,29 +125,35 @@ _SEGMENT_SHA: dict[tuple[str, str, str | None], str] = {
         "c2a0d4d45123c409c5e977b787dab0a44b25f90920d2969e15338d0fef679066",
 }
 
+#: 🔁 cycle290(킬스위치 등재, 2026-09-13) 재핀 — `DEFAULT_PARAMS` 말미에
+#: `order_exchange_clock_mode`·`after_market_exit_division` 2키를 코드 상수와 같은
+#: 값으로 추가한 것이 그 사이클의 **정당한 목적**이라(카탈로그가 값을 편집하는
+#: 수단을 만드는 사이클이지만, 이 두 키는 카탈로그 등재와 짝을 이루는 등재 자체다),
+#: 아래 docstring "값 변경은 이 사이클의 범위 밖" 은 **cycle278 한정**이고
+#: cycle290 에는 적용되지 않는다 — cycle290 은 이 세그먼트를 정당하게 갱신했다.
 _DEFAULT_PARAMS_SHA: dict[str, tuple[str, str, str]] = {
-    # 전략 id: (파일, 클래스, base 34ba9e6 세그먼트 sha256)
+    # 전략 id: (파일, 클래스, cycle290 기준 세그먼트 sha256 — 구 base 34ba9e6 값은 git 이력)
     "momentum": (
         "src/engine/strategies/momentum.py", "MomentumStrategy",
-        "a5a6c29d25b65382975451e65245f5e56d58811037f241b51f2b15aa07d02fe7"),
+        "2bdedaaa5d676c4daac38e6bbaff73fbfdf0d2fc56744bb974e5adcc1ba895ee"),
     "volatility_breakout": (
         "src/engine/strategies/volatility_breakout.py", "VolatilityBreakoutStrategy",
-        "ac62e960114e18faa3c43eecb91c4f40741d180b88cf5d055ae5c2872bc40bed"),
+        "f91b1acc5ebf7278e7a4a85419a415b8cb4c6ec70cc19d8fac8e789e4e3751a0"),
     "long_tail_volatility": (
         "src/engine/strategies/long_tail_volatility.py", "LongTailVolatilityStrategy",
-        "b7262c11495da4a69884081785cab734c84ef440def6217707d1a01d4045b8b8"),
+        "41e0b7b5a790c11af934bf3dea1895463b5fc569d42b940db6ef36639279d96e"),
     "donchian_swing": (
         "src/engine/strategies/donchian_swing.py", "DonchianSwingStrategy",
-        "e011b180bbc987b3d2cb2782d87fff3035d23616ba420d53548fb3f22edeedc8"),
+        "ea85f925555b2a4b99a718451099d2e32fbfa5e0f350590909b6162d9b716b31"),
     "bull_flag_breakout": (
         "src/engine/strategies/bull_flag_breakout.py", "BullFlagBreakoutStrategy",
-        "425646e63e3c19f0ba3cb5f5b1783018bbc2cea07c23f1058fe561605b7102b0"),
+        "bd1a80167f0bf0c3cc90ddbd1c95ba58abde05e3cdd6df7add483c7a862a6eaf"),
     "vcp_breakout": (
         "src/engine/strategies/vcp_breakout.py", "VcpBreakoutStrategy",
-        "05e571d0cf591f7b4e3ac4465fb9b2c1cbea833bd0fe7aef9236573393771967"),
+        "f56226ba2f7f71a98f9a4b8b9e7c8fa8169457ad2d1658ec3bbfac4a8433ba1b"),
     "kojiro": (
         "src/engine/strategies/kojiro.py", "KojiroStrategy",
-        "8da764519ec05067a9354b7d25d4795dea8c9ecada3c713473fbaa549aad265f"),
+        "e7ff138a438d58dfcf509728ec552d0a1920537799ac5ec37c83751d573e068b"),
 }
 
 
@@ -178,8 +184,9 @@ def test_seven_strategy_default_params_source_sha_unchanged(strategy_id: str):
     """
     rel, cls_name, expected = _DEFAULT_PARAMS_SHA[strategy_id]
     assert _segment_sha(rel, "DEFAULT_PARAMS", cls_name) == expected, (
-        f"{strategy_id}: DEFAULT_PARAMS 가 바뀌었다 — 값 변경은 이 사이클의 범위 밖"
-        " (사람이 화면에서 고치는 것이 이 사이클의 산출물이다)"
+        f"{strategy_id}: DEFAULT_PARAMS 가 cycle290 기준선에서 또 바뀌었다 — 값 변경은"
+        " cycle278/290 범위 밖(사람이 화면에서 고치는 것이 cycle278 의 산출물이고,"
+        " cycle290 은 킬스위치 2키 등재만 정당하다)"
     )
 
 
@@ -218,18 +225,19 @@ _BASE_SHA = {
         "50658e06062a0d38afecab1baa08871b89212e295cc95f2a3af62a2ae076115d",
     "src/engine/strategy_base.py":
         "869dc20ca561adc561a9ebe9fdb5fe5a3e097f7ec176fdf274d577d509de9252",
+    # 🔁 cycle290(킬스위치 등재, 2026-09-13) 재핀 — `DEFAULT_PARAMS` 말미 2키 추가뿐.
     "src/engine/strategies/momentum.py":
-        "5bfc25a183a13ec0e00bdce7ff0e1727d323bd62f1ba8b8937561a4eb74c0da1",
-    "src/engine/strategies/volatility_breakout.py": "9034476410029bc14622cbf8ec32e0647406cf470e91b9aa740a3f7d5b6cd5e3",
-    "src/engine/strategies/long_tail_volatility.py": "728fc2d51edd6db9c0a6f6448b60d8b15872c273e5158caae3f814dd4394a8ee",
+        "4d7fac9abab4d5fca55509a8682633d31c4bb9868f5bb4cc77d4771ecda68894",
+    "src/engine/strategies/volatility_breakout.py": "d13efaa4a9424e2822b5476ce159987d2a5192a4bca30af3f1a0cae9c3ffcabc",
+    "src/engine/strategies/long_tail_volatility.py": "51b50560a1240df3fc6085da7253438605079d7d453ff3e77a806e814473be25",
     "src/engine/strategies/donchian_swing.py":
-        "107246d21feeac07ed6556269897b60d61ab1b617746d3c2f6aacd3d1385dfa0",
+        "1db81a3966985fc23baf64996134af07ac81c90e56b90d8405c46f5b1efce880",
     "src/engine/strategies/bull_flag_breakout.py":
-        "0b7cfe745c6f437a7f55b7c6773e549c5c545f0c5b6c85be51623221a3b6afb0",
+        "f63ee57cd169e4472f24fa76b26ca9ca63e69a1a170da8e57c822fd0028f2ebe",
     "src/engine/strategies/vcp_breakout.py":
-        "f77ffc1896037692c47a6611a6d3b8aecf66bf17f3c6161a1cf52bc96f0ce3dd",
+        "09c7e1aa02493d678844c06f5850200dcb93f1e08d062d11468c220e5450d727",
     "src/engine/strategies/kojiro.py":
-        "bfc614808831b7a50664f8d4b7a7e168c3a77fd70fa51f55289cea78b5a84a47",
+        "eb8057d44c86cfe73088aa65d2036b715ce1a979aab08c47b7a7fb3363f58c65",
 }
 
 

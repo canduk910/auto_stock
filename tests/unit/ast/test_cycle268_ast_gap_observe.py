@@ -86,15 +86,20 @@ VERDICTS = ("candidate", "no_data", "skip_up", "skip_down", "collapse", "pass")
 GAP_UP_LOG = "고지로 갭업 스킵: %s 갭률 %.1f%% ≥ %.1f%%"
 GAP_DOWN_LOG = "고지로 갭다운 스킵: %s 갭률 %.1f%% ≤ %.1f%%"
 
-# 2026-09-07 HEAD 실측. 신규 키 금지 — 늘어나면 사용자 결정 사안이다.
+# 2026-09-07 HEAD 실측(37키). 신규 키 금지 — 늘어나면 사용자 결정 사안이다.
+# ⚠️ cycle290(2026-09-13, 킬스위치 등재)이 37→39 로 갱신했다 — 사용자 결정
+# 사안(장중 킬스위치 PUT 개통)에 해당하는 유일한 예외. 이 두 키는 값이 코드
+# 상수와 동일해 매매 행위 변경은 0 이다.
 KOJIRO_PARAM_KEYS = (
-    "atr_period", "atr_ratio_max", "atr_ratio_min", "breakeven_promote_atr",
+    "atr_period", "atr_ratio_max", "atr_ratio_min", "after_market_exit_division",
+    "breakeven_promote_atr",
     "daily_loss_limit", "ema_long", "ema_mid", "ema_short", "exchange",
     "exclude_tickers", "gap_down_skip_pct", "gap_up_skip_pct", "hard_stop_pct",
     "macd_signal", "max_lot_ratio_mult", "max_lot_units", "max_open_risk_pct",
     "max_positions", "max_positions_per_sector", "max_scan_stocks",
     "max_units_per_stock", "max_units_total", "min_market_cap",
-    "min_trade_amount", "min_vol_floor_pct", "nxt_tradable", "position_ratio",
+    "min_trade_amount", "min_vol_floor_pct", "nxt_tradable",
+    "order_exchange_clock_mode", "position_ratio",
     "rank_w_band", "rank_w_fresh", "rank_w_macd3", "risk_pct", "sizing_mode",
     "slope_lookback", "stage1_freshness", "stop_atr", "tradable_boards",
     "trail_atr",

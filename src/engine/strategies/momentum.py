@@ -63,6 +63,14 @@ class MomentumStrategy(StrategyBase):
         "max_positions": 4,
         "daily_loss_limit": -5.0,
         "max_lot_ratio_mult": 2.5,   # cycle245 — 랏 명목 ρ축 상한(K_ρ). 명목 ≤ K_ρ×position_ratio×예산, 1주도 못 사면 미매수. 터틀 모드에선 K축(max_lot_units)이 우선하고 그것이 fail-open 할 때만 백스톱. PARAM_RANGES 미편입. 롤백 = DB 20.0
+        # cycle290 (2026-09-13) — 장중 킬스위치 등재. 값은 코드 상수와 **같은 값**이라
+        # 등재 자체의 매매 행위 변경은 0 이다(`order_engine._ORDER_EXCHANGE_CLOCK_MODE_DEFAULT`
+        # ·`_AFTER_EXIT_DIVISION_DEFAULT`). `PARAM_RANGES`/`INT_PARAMS` 편입 금지 —
+        # AI 자문이 청산 수단을 끄는 스위치를 뒤집으면 안 된다. 장중 롤백은 PUT 뿐
+        # (SQL UPDATE 는 다음 재시작에서만, cycle232 D6). 사고 중 조작 순서 =
+        # `_workspace/00_leader_trading_rules.md` 「거래소 라우팅」 절.
+        "order_exchange_clock_mode": "enforce",
+        "after_market_exit_division": "44",
     }
 
     def __init__(self, config: StrategyConfig):

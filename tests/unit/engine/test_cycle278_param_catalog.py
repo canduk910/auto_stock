@@ -1,7 +1,7 @@
 """cycle278 Red — 파라미터 카탈로그 데이터 계약 (C1~C10 · B01~B24).
 
 정본 명세 = `_workspace/red/cycle278_param_catalog_ui_spec.md` §1 · §3.1 · §7.1.
-대상 = `src/engine/param_catalog.py` (99 키의 **단일 진실원**).
+대상 = `src/engine/param_catalog.py` (101 키의 **단일 진실원**, cycle290 이 99→101).
 
 이 사이클은 **사람이 값을 고칠 수단**을 만든다. 값은 한 글자도 바꾸지 않는다 —
 전략 7파일 · `strategy_base.py` · `PARAM_RANGES`/`INT_PARAMS` 는 무접촉이고,
@@ -15,12 +15,12 @@
   `STRATEGY_IDS` 순이며, 빈 `applies_to`(유령 키)는 0건이다.
 * **C4/C5** `auto_tunable` ⊆ `PARAM_RANGES` — 카탈로그가 AI 자동 튜닝 집합을 **넓히지 못한다**.
   `range_src="param_ranges"` 인 키의 (min, max) 는 `PARAM_RANGES` 원문과 정확히 같다.
-* **C6** 99키 × `applies_to` 전수에 대해 **그 전략의 기본값이 카탈로그 범위·자료형 안**이다.
+* **C6** 101키(cycle290 이후) × `applies_to` 전수에 대해 **그 전략의 기본값이 카탈로그 범위·자료형 안**이다.
   (기본값이 범위 밖이면 운영자가 아무것도 안 바꾸고 저장만 눌러도 422 가 된다.)
 * **C9** `range_src="none"` 이면 `min`/`max` 는 `None` 이다 — 근거 없는 범위를 숫자로 위장하지 않는다.
   특히 `max_scan_stocks`(PARAM_RANGES 상한 500 vs bfb/vcp/kojiro 기본값 4000)를 파생시키면
   3 전략이 전면 저장 불가가 된다(HAZARD-1).
-* **C7/C7b/C8** `deprecated` 8키(전부 `editable=False`) · `risk="identity"` 13키 ·
+* **C7/C7b/C8** `deprecated` 8키(전부 `editable=False`) · `risk="identity"` 15키(cycle290 이 13→15) ·
   `deprecated_for` ⊆ `applies_to`.
 * **C10** 모듈 순수성 — `src.*` import 0 · 모듈 레벨 부작용 0 · 재로드해도 같은 데이터.
 
@@ -63,6 +63,9 @@ _STRATEGY_META: tuple[tuple[str, str, str], ...] = (
 
 #: 브리프 3-1 이 못 박은 리스크 정체성 상수 13키. 카탈로그가 2단계 확인 대상을
 #: 임의로 넓히거나 좁히지 못한다(C7b).
+#: 🔁 cycle290(킬스위치 등재, 2026-09-13) — 청산 수단을 끄는 스위치 2개
+#: (`order_exchange_clock_mode`·`after_market_exit_division`)가 추가돼 13→15.
+#: 기존 모드 킬스위치(`open_price_scope_mode`·`llm_gate_mode`)와 같은 등급이다.
 _BRIEF_IDENTITY_KEYS = frozenset({
     "max_positions",
     "max_lot_units",
@@ -77,6 +80,8 @@ _BRIEF_IDENTITY_KEYS = frozenset({
     "llm_gate_min_score",
     "llm_gate_daily_call_cap",
     "llm_gate_timeout_secs",
+    "order_exchange_clock_mode",
+    "after_market_exit_division",
 })
 
 #: 명세 §1.3 — **어느 전략에서도** 행위 참조 0건인 잔존 키 8개.
@@ -183,13 +188,13 @@ def test_catalog_when_compared_to_default_params_then_key_sets_identical():
     assert not ghost, f"어느 전략에도 없는 유령 키: {sorted(ghost)}"
 
 
-def test_catalog_when_counted_then_99_specs_no_duplicates():
-    """B02/C2 — 스펙 99개, 키 중복 0."""
-    assert len(pc.PARAM_SPECS) == 99, f"스펙 {len(pc.PARAM_SPECS)}개 (기대 99)"
+def test_catalog_when_counted_then_101_specs_no_duplicates():
+    """B02/C2 — 스펙 101개(cycle290 이 킬스위치 2키 등재해 99→101), 키 중복 0."""
+    assert len(pc.PARAM_SPECS) == 101, f"스펙 {len(pc.PARAM_SPECS)}개 (기대 101)"
     keys = [s.key for s in pc.PARAM_SPECS]
     dupes = sorted({k for k in keys if keys.count(k) > 1})
     assert not dupes, f"중복 키: {dupes}"
-    assert len(pc.SPEC_BY_KEY) == 99
+    assert len(pc.SPEC_BY_KEY) == 101
 
 
 def test_catalog_when_key_missing_from_default_params_then_fails():
@@ -221,7 +226,7 @@ def test_ast_extracted_keys_match_imported_default_params():
 # ===========================================================================
 @pytest.mark.parametrize("key", _ALL_SPEC_KEYS)
 def test_applies_to_when_compared_then_matches_default_params_exactly(key: str):
-    """B04/C3 — 99키 전수: `applies_to` ≡ 그 키를 가진 전략 집합."""
+    """B04/C3 — 101키(cycle290 이후) 전수: `applies_to` ≡ 그 키를 가진 전략 집합."""
     spec = pc.get_spec(key)
     expected = tuple(sid for sid, _f, _c in _STRATEGY_META if key in _ast_keys()[sid])
     assert spec.applies_to == expected, (
@@ -302,7 +307,7 @@ def test_range_src_param_ranges_when_read_then_bounds_equal_param_ranges_verbati
 # ===========================================================================
 @pytest.mark.parametrize("key", _ALL_SPEC_KEYS)
 def test_defaults_when_checked_then_within_catalog_range(key: str):
-    """B10/C6 — 99키 × `applies_to` 전수: 기본값이 `[min, max]` 안.
+    """B10/C6 — 101키(cycle290 이후) × `applies_to` 전수: 기본값이 `[min, max]` 안.
 
     기본값이 범위 밖이면 운영자가 **아무것도 바꾸지 않고 저장만 눌러도** 422 다.
     """
@@ -459,8 +464,8 @@ def test_k_value_nxt_post_when_read_then_not_globally_deprecated_but_inactive_fo
         assert spec.editable is True
 
 
-def test_identity_when_listed_then_exactly_thirteen_brief_keys():
-    """B20/C7b — `risk="identity"` 는 브리프의 13키와 정확히 일치한다.
+def test_identity_when_listed_then_exactly_fifteen_brief_keys():
+    """B20/C7b — `risk="identity"` 는 브리프의 15키(cycle290 이 13→15)와 정확히 일치한다.
 
     화면의 2단계 확인 대상을 카탈로그가 임의로 넓히거나 좁히지 못한다.
     """

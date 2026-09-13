@@ -36,7 +36,7 @@
  * identity/deprecated/deprecated_for/range_src=none 을 한 전략 안에서 모두 갖는 유일한 전략이다.
  */
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, within, waitFor } from '@testing-library/react'
+import { render, screen, within, waitFor, cleanup } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { http, HttpResponse } from 'msw'
@@ -808,5 +808,140 @@ describe('cycle278 후속 시정 2 — localBlocks 의 금지 선택지 갈래 (
 
     expect(blocks).toHaveLength(1)
     expect(blocks[0].msg).toMatch(/최소 1개/)
+  })
+})
+
+describe('cycle290 — 장중 킬스위치 두 키가 편집기에 노출된다 (등재 전엔 PUT 이 422 였다)', () => {
+  it('order_exchange_clock_mode / after_market_exit_division 이 time_board 그룹에 렌더된다', async () => {
+    const { user } = renderEditor()
+    await waitEditor()
+    const body = await openGroup(user, 'time_board')
+
+    expect(
+      within(body).getByTestId('strategy-params-row-order-exchange-clock-mode'),
+    ).toBeInTheDocument()
+    expect(
+      within(body).getByTestId('strategy-params-row-after-market-exit-division'),
+    ).toBeInTheDocument()
+  })
+
+  it('두 키 모두 risk=identity 배지("정체성 상수")를 단다 — 청산 수단을 끄는 스위치다', async () => {
+    const { user } = renderEditor()
+    await waitEditor()
+    await openGroup(user, 'time_board')
+
+    expect(
+      screen.getByTestId('strategy-params-badge-identity-order-exchange-clock-mode'),
+    ).toHaveTextContent('정체성 상수')
+    expect(
+      screen.getByTestId('strategy-params-badge-identity-after-market-exit-division'),
+    ).toHaveTextContent('정체성 상수')
+  })
+
+  it('두 키는 auto_tunable 배지("AI 자동조정")가 없다 — AI 자문이 킬스위치를 뒤집으면 안 된다', async () => {
+    const { user } = renderEditor()
+    await waitEditor()
+    await openGroup(user, 'time_board')
+
+    expect(
+      screen.queryByTestId('strategy-params-badge-autotune-order-exchange-clock-mode'),
+    ).toBeNull()
+    expect(
+      screen.queryByTestId('strategy-params-badge-autotune-after-market-exit-division'),
+    ).toBeNull()
+  })
+
+  it('order_exchange_clock_mode 는 select + 3 선택지(enforce/sell_only/off), 기본값 enforce', async () => {
+    const { user } = renderEditor()
+    await waitEditor()
+    await openGroup(user, 'time_board')
+
+    const select = (await screen.findByTestId(
+      'strategy-params-select-order-exchange-clock-mode',
+    )) as HTMLSelectElement
+    expect(select.value, '코드 기본값과 같은 값이라 등재 자체는 행위 변경이 아니다').toBe(
+      'enforce',
+    )
+    expect(within(select).getByText(/강제/)).toBeInTheDocument()
+    expect(within(select).getByText(/매도만 라우팅/)).toBeInTheDocument()
+    // off 라벨은 "끈다"로만 보이면 안 된다 — 애프터 청산도 같이 죽는다는 사실이 라벨에 있어야 한다.
+    expect(within(select).getByText(/애프터 청산도 함께 꺼진다/)).toBeInTheDocument()
+  })
+
+  it('after_market_exit_division 은 select + 2 선택지(44/41), 기본값 44', async () => {
+    const { user } = renderEditor()
+    await waitEditor()
+    await openGroup(user, 'time_board')
+
+    const select = (await screen.findByTestId(
+      'strategy-params-select-after-market-exit-division',
+    )) as HTMLSelectElement
+    expect(select.value).toBe('44')
+    expect(within(select).getByText(/최유리지정가/)).toBeInTheDocument()
+    // "41" 은 현재가 없는 종목에선 위험하다는 경고가 라벨에 있어야 한다.
+    expect(within(select).getByText(/현재가 있는 종목만/)).toBeInTheDocument()
+  })
+
+  it('help 설명이 두 키 모두 존재하고 사고 중 조작 순서·부작용을 담는다(잘리지 않는다)', async () => {
+    const { user } = renderEditor()
+    await waitEditor()
+    await openGroup(user, 'time_board')
+
+    const modeRow = screen.getByTestId('strategy-params-row-order-exchange-clock-mode')
+    await user.click(within(modeRow).getByText('설명'))
+    const modeHelp = within(modeRow).getByTestId(
+      'strategy-params-help-order-exchange-clock-mode',
+    )
+    expect(modeHelp.textContent ?? '').toMatch(/사고 중 조작 순서/)
+    expect(modeHelp.textContent ?? '').toMatch(/16:00~19:50 LTV 야간 매수를 다시 켠다/)
+
+    const divisionRow = screen.getByTestId(
+      'strategy-params-row-after-market-exit-division',
+    )
+    await user.click(within(divisionRow).getByText('설명'))
+    const divisionHelp = within(divisionRow).getByTestId(
+      'strategy-params-help-after-market-exit-division',
+    )
+    expect(divisionHelp.textContent ?? '').toMatch(/cur=/)
+  })
+
+  it('7 전략 전부에 두 키가 존재한다 — 라우팅·애프터 청산은 전 전략 공통 경로다', async () => {
+    const STRATEGY_IDS = [
+      'momentum',
+      'volatility_breakout',
+      'long_tail_volatility',
+      'donchian_swing',
+      'bull_flag_breakout',
+      'vcp_breakout',
+      'kojiro',
+    ]
+    for (const sid of STRATEGY_IDS) {
+      const { user } = renderEditor({ strategyId: sid })
+      await waitEditor()
+      await openGroup(user, 'time_board')
+      expect(
+        screen.getByTestId('strategy-params-row-order-exchange-clock-mode'),
+        `${sid} 에 order_exchange_clock_mode 없음`,
+      ).toBeInTheDocument()
+      expect(
+        screen.getByTestId('strategy-params-row-after-market-exit-division'),
+        `${sid} 에 after_market_exit_division 없음`,
+      ).toBeInTheDocument()
+      cleanup() // 다음 루프의 render 가 이전 전략의 DOM 과 섞이지 않게 정리
+    }
+  })
+
+  it('값을 기본값과 다르게 바꾸면 정체성 2단계 확인 체크박스가 나타난다', async () => {
+    const { user } = renderEditor()
+    await waitEditor()
+    await openGroup(user, 'time_board')
+
+    const select = (await screen.findByTestId(
+      'strategy-params-select-after-market-exit-division',
+    )) as HTMLSelectElement
+    await user.selectOptions(select, '41')
+
+    expect(screen.getByTestId('strategy-params-identity-ack')).toBeInTheDocument()
+    expect(screen.getByTestId('strategy-params-save')).toBeDisabled()
   })
 })

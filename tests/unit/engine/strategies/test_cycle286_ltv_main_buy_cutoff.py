@@ -609,12 +609,17 @@ def test_s5_6_observation_failure_does_not_change_behavior(monkeypatch, caplog) 
 # S6 — 킬스위치 파라미터 **금지** (모듈 상수 = DB override 불가)
 # ===========================================================================
 def test_s6_1_no_new_default_params_key() -> None:
-    """S1-2 (RED): `DEFAULT_PARAMS` 키 집합이 cycle276 시점과 동일하다.
+    """S1-2 (RED): `DEFAULT_PARAMS` 키 집합이 cycle276 시점과 동일하다(cycle286 한정).
 
     매수를 **막는** 통제라 "키 부재 = OFF"(cycle245) 도 "키 부재 = ON"(cycle272) 도
     부적합하다. 두 선례가 모두 맞지 않는 것이 곧 "키를 만들지 말라"는 신호다.
     새 키 1개는 `param_catalog` 99→100 + 프론트 골든 픽스처 2개 재생성 +
     `DEFAULT_PARAMS` 세그먼트 sha 재핀까지 끌고 온다.
+
+    🔁 **cycle290(2026-09-13, 킬스위치 등재)** — 이 계약이 금지하는 것은 컷(§S1-2
+    자체)과 무관한 새 매수 게이트 키다. `order_exchange_clock_mode`·
+    `after_market_exit_division` 은 컷과 무관한 **거래소 라우팅** 킬스위치라
+    27→29 로 갱신됐다(사용자 결정 "나머지는 권고대로" — cycle290 브리프).
     """
     expected = {
         "tradable_boards", "k_period", "min_prdy_rate",
@@ -627,11 +632,12 @@ def test_s6_1_no_new_default_params_key() -> None:
         "max_lot_ratio_mult", "open_entry_hold_secs", "open_price_scope_mode",
         "llm_gate_mode", "llm_gate_min_score", "llm_gate_daily_call_cap",
         "llm_gate_timeout_secs",
+        "order_exchange_clock_mode", "after_market_exit_division",
     }
     got = set(LongTailVolatilityStrategy.DEFAULT_PARAMS)
     assert got == expected, (
         f"신규 {sorted(got - expected)} / 삭제 {sorted(expected - got)} — "
-        "cycle286 은 `DEFAULT_PARAMS` 무접촉이다(킬스위치 키 금지)"
+        "cycle286 은 `DEFAULT_PARAMS` 무접촉이다(킬스위치 키 금지, cycle290 등재 2키 제외)"
     )
 
 

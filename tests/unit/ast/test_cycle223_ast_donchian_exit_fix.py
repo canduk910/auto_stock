@@ -576,12 +576,28 @@ def test_g223_11_eight_areas_have_no_donchian_exit_symbols():
 #    `check_exit_signal`/`calc_buy_quantity`/`prepare`/`on_open_price_confirmed`
 #    는 byte 동일(`tests/unit/ast/test_cycle286_ast_scope.py::_LTV_FROZEN_METHODS`).
 #    TODO(cycle286 커밋 후): 아래 LTV 항목을 **삭제**하고 dict 를 다시 비운다.
+# ✅ 2026-09-13 (cycle290) — 장중 킬스위치 두 키 등재. 사용자 결정("나머지는 권고대로")
+#    + 도메인 자문 조건부 GO. **7 전략 전부**의 `DEFAULT_PARAMS` 말미에
+#    `order_exchange_clock_mode`·`after_market_exit_division` 2줄만 추가(값은
+#    `order_engine` 모듈 상수와 동일 — 매매 행위 변경 0). 세그먼트(진입/청산/사이징/
+#    준비) 28핀은 `test_cycle290_ast_scope.py::test_g290_2` 가 별도로 불변 증명한다.
+#    그동안 이 dict 에 없던 momentum·vcp_breakout·bull_flag_breakout 3 항목을 신규
+#    등록(이전 사이클들은 이 세 파일을 건드리지 않았다). donchian_swing.py 는 여전히
+#    이 dict 소관이 아니다(파일 상단 `_BASE` — 별도 세그먼트 가드로 다룬다).
+#    TODO(cycle290 커밋 후): 이 항목들 삭제하고 dict 를 다시 비운다.
 _CYCLE228_STRATEGY_CONTENT_SHA: dict[str, str] = {
     "src/engine/strategies/volatility_breakout.py":
-        "9034476410029bc14622cbf8ec32e0647406cf470e91b9aa740a3f7d5b6cd5e3",
+        "d13efaa4a9424e2822b5476ce159987d2a5192a4bca30af3f1a0cae9c3ffcabc",
     "src/engine/strategies/long_tail_volatility.py":
-        "728fc2d51edd6db9c0a6f6448b60d8b15872c273e5158caae3f814dd4394a8ee",
-    "src/engine/strategies/kojiro.py": "bfc614808831b7a50664f8d4b7a7e168c3a77fd70fa51f55289cea78b5a84a47",
+        "51b50560a1240df3fc6085da7253438605079d7d453ff3e77a806e814473be25",
+    "src/engine/strategies/kojiro.py":
+        "eb8057d44c86cfe73088aa65d2036b715ce1a979aab08c47b7a7fb3363f58c65",
+    "src/engine/strategies/momentum.py":
+        "4d7fac9abab4d5fca55509a8682633d31c4bb9868f5bb4cc77d4771ecda68894",
+    "src/engine/strategies/vcp_breakout.py":
+        "09c7e1aa02493d678844c06f5850200dcb93f1e08d062d11468c220e5450d727",
+    "src/engine/strategies/bull_flag_breakout.py":
+        "f63ee57cd169e4472f24fa76b26ca9ca63e69a1a170da8e57c822fd0028f2ebe",
 }
 
 

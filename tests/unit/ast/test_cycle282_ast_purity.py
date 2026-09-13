@@ -408,23 +408,24 @@ _BASE_SHA = {
         "50658e06062a0d38afecab1baa08871b89212e295cc95f2a3af62a2ae076115d",
     "src/engine/strategy_base.py":
         "869dc20ca561adc561a9ebe9fdb5fe5a3e097f7ec176fdf274d577d509de9252",
-    # 전략 7파일
+    # 전략 7파일 — 🔁 cycle290(킬스위치 등재, 2026-09-13) 재핀. `DEFAULT_PARAMS`
+    # 말미 2키 추가뿐, 그 외 diff 0.
     "src/engine/strategies/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "src/engine/strategies/bull_flag_breakout.py":
-        "0b7cfe745c6f437a7f55b7c6773e549c5c545f0c5b6c85be51623221a3b6afb0",
+        "f63ee57cd169e4472f24fa76b26ca9ca63e69a1a170da8e57c822fd0028f2ebe",
     "src/engine/strategies/donchian_swing.py":
-        "107246d21feeac07ed6556269897b60d61ab1b617746d3c2f6aacd3d1385dfa0",
+        "1db81a3966985fc23baf64996134af07ac81c90e56b90d8405c46f5b1efce880",
     "src/engine/strategies/kojiro.py":
-        "bfc614808831b7a50664f8d4b7a7e168c3a77fd70fa51f55289cea78b5a84a47",
+        "eb8057d44c86cfe73088aa65d2036b715ce1a979aab08c47b7a7fb3363f58c65",
     "src/engine/strategies/long_tail_volatility.py":
-        "728fc2d51edd6db9c0a6f6448b60d8b15872c273e5158caae3f814dd4394a8ee",
+        "51b50560a1240df3fc6085da7253438605079d7d453ff3e77a806e814473be25",
     "src/engine/strategies/momentum.py":
-        "5bfc25a183a13ec0e00bdce7ff0e1727d323bd62f1ba8b8937561a4eb74c0da1",
+        "4d7fac9abab4d5fca55509a8682633d31c4bb9868f5bb4cc77d4771ecda68894",
     "src/engine/strategies/vcp_breakout.py":
-        "f77ffc1896037692c47a6611a6d3b8aecf66bf17f3c6161a1cf52bc96f0ce3dd",
+        "09c7e1aa02493d678844c06f5850200dcb93f1e08d062d11468c220e5450d727",
     "src/engine/strategies/volatility_breakout.py":
-        "9034476410029bc14622cbf8ec32e0647406cf470e91b9aa740a3f7d5b6cd5e3",
+        "d13efaa4a9424e2822b5476ce159987d2a5192a4bca30af3f1a0cae9c3ffcabc",
 }
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

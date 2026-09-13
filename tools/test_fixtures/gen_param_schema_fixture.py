@@ -274,7 +274,7 @@ def render(header: str, data: dict) -> str:
 FRONT_HEADER = '''/**
  * cycle278 Red — `GET /api/strategies/params-schema` 응답 **골든 픽스처**.
  *
- * ⚠️ 손으로 쓰지 않는다. `src/engine/param_catalog.py` 의 99 스펙과 7 전략
+ * ⚠️ 손으로 쓰지 않는다. `src/engine/param_catalog.py` 의 {n_specs} 스펙과 7 전략
  * `DEFAULT_PARAMS` 에서 **기계 생성**했다 (생성기:
  * `_workspace/red/cycle278_param_catalog_ui_spec.md` §7.4 · 생성 스크립트는 사이클 산출물).
  *
@@ -307,7 +307,8 @@ def main() -> None:
     front = ROOT / "frontend/src/test/fixtures/paramSchema.fixture.ts"
     e2e = ROOT / "e2e/fixtures/param-schema.fixture.ts"
     front.parent.mkdir(parents=True, exist_ok=True)
-    front.write_text(render(FRONT_HEADER, data), encoding="utf-8")
+    front_header = FRONT_HEADER.format(n_specs=len(data["params"]))
+    front.write_text(render(front_header, data), encoding="utf-8")
     e2e.write_text(render(E2E_HEADER, data), encoding="utf-8")
     print("params:", len(data["params"]), "strategies:", len(data["strategies"]))
     print(front, front.stat().st_size)
