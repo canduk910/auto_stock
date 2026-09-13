@@ -255,16 +255,20 @@ def test_k1_after_market_divisions_exist() -> None:
 
 
 def test_k1b_ioc_fok_and_best_priority_are_not_added() -> None:
-    """K1 (RED) — 42/43/45/46(IOC/FOK) · 47(최우선지정가)는 **추가하지 않는다**.
+    """K1 — 42/43/45/46(IOC/FOK) · 47(최우선지정가) · 28/29(GTP최유리/최우선)는
+    **추가하지 않는다**.
 
     IOC/FOK 는 잔량을 자동취소해 `_schedule_cancel_and_reorder`(cycle273a) 계약과
     충돌하며 손절 잔여를 잃는다. 47 은 자기 방향 최우선호가라 크로스하지 않아
-    체결 보장이 없다 = 손절 수단이 아니다.
+    체결 보장이 없다 = 손절 수단이 아니다. **cycle291(2026-09-13)** — `28`/`29`
+    도 같은 규율로 제외한다(`28` 은 `ORD_UNPR` 규약이 현금·신용 문서 사이에서
+    갈리고, `29` 는 자기 방향 최우선호가라 크로스하지 않는다) — `27`(GTP지정가,
+    프리마켓 매수 승격)만 정당하게 추가됐다.
     """
     values = {d.value for d in OrderDivision}
-    forbidden = values & {"42", "43", "45", "46", "47"}
+    forbidden = values & {"28", "29", "42", "43", "45", "46", "47"}
     assert forbidden == set(), f"금지 호가유형이 들어왔다: {sorted(forbidden)}"
-    assert values == {"00", "01", "41", "44"}, f"enum 값 집합 {sorted(values)}"
+    assert values == {"00", "01", "27", "41", "44"}, f"enum 값 집합 {sorted(values)}"
 
 
 def test_k1c_legacy_values_are_byte_identical() -> None:

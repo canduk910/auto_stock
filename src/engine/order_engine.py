@@ -242,6 +242,15 @@ class OrderEngine:
         # 취소 경로가 취소 시각의 라우터 재평가 대신 이 값을 우선 사용한다
         # (원주문·취소가 시간 경계를 사이에 두고 다른 거래소로 갈리는 것을 막는다).
         self._order_exchange: dict[str, str] = {}
+        # cycle291 — order_no -> 그 주문에 실제로 실린 ORD_DVSN 값(전송한 것만
+        # 기록 — 지역변수가 아니라 `place_kwargs` 에서 뽑는다). `_order_exchange`
+        # 와 완전 대칭(같은 등록 자리·같은 pop·같은 clear) — 취소 축 Stage A
+        # 관측(`[after_cancel_result]` 의 `orig_dvsn=`)이 소비한다.
+        self._order_division: dict[str, str] = {}
+        # cycle291 적대 검증 시정(B5) — `[pre_nxt_division_config]` 카나리아 cap.
+        # DailyEmitCap[str] 단일 키("config") 1회/일. `_order_channel_config_logged`
+        # 와 같은 패턴, 별개 인스턴스(값-무관 순수 1회/일이라 tuple 키 불필요).
+        self._pre_nxt_division_config_logged: DailyEmitCap[str] = DailyEmitCap[str]()
         self._selling: set[str] = set()  # 매도 진행 중인 종목 (중복 매도 차단)
         self._selling_since: dict[str, datetime] = {}  # ticker -> _selling 진입 시각 (KST). stale 재대조 age gate.
         # 체결통보가 place_order 응답보다 먼저 도착해 COMPLETED row를 직접 INSERT한 order_no.
@@ -409,6 +418,28 @@ class OrderEngine:
         logger.info(
             "[order_channel_config] strategy=%s mode=%s division=%s",
             strategy_id, mode, dial,
+        )
+
+    def _emit_pre_nxt_division_config(
+        self, *, effective: int, production: int, exchange_gate: str,
+    ) -> None:
+        """cycle291 적대 검증 시정(B5) — `[pre_nxt_division_config]` 카나리아 1회/일.
+
+        프리장 매수는 대부분의 날 0~2건이라 `[market_order_preconvert_pre_nxt]`
+        만으로는 "게이트가 무장됐는가" 를 주문 없이 확인할 채널이 없었다
+        (`[order_channel_config]`/`[ratio_cap_config]` 관례 답습). 값-무관
+        순수 1회/일 — 그날 첫 평가 결과만 남긴다(그 뒤 게이트 판정이 시각
+        경계를 넘어 바뀌어도 갱신하지 않는다, 카나리아이지 실시간 상태가
+        아니다).
+        """
+        key = "config"
+        if key in self._pre_nxt_division_config_logged:
+            return
+        self._pre_nxt_division_config_logged.add(key)
+        logger.info(
+            "[pre_nxt_division_config] division=%s effective=%d production=%d "
+            "exchange_gate=%s",
+            OrderDivision.NXT_GTP_LIMIT.value, effective, production, exchange_gate,
         )
 
     def _register_after_exit_disallowed(
@@ -782,11 +813,73 @@ class OrderEngine:
             if is_pre_nxt_period and buy_exchange in ("NXT", "SOR"):
                 order_price = step_up(current_price, steps=5)
                 order_division = OrderDivision.LIMIT
+                # cycle291 (2026-09-13) — GTP(27) 승격. `27` 은 NXT 프리마켓
+                # 전용호가로, 미체결 잔량을 거래소가 프리마켓 종료(08:50)에
+                # 일괄 취소한다 — 그 자동취소가 GTP 의 정체성이고, 우리가 이
+                # 코드를 쓰는 유일한 이유다. 지금 보내는 `00`(지정가)은 그
+                # 취소를 받지 못해 미체결이 NXT 정규장(09:00:30~)으로 새고,
+                # 새는 방향이 역선택 쪽으로만 치우쳐 있다(자문 §1-a) — 프리장
+                # 매수는 `step_up(현재가,5)` 라 상승이 이어지면 체결되지
+                # 않고, 가설이 깨져 시세가 내려올 때만 우리 호가를 때린다.
+                #
+                # 순수 승격(순수 옵셔널) — 위에서 이미 `order_price`/
+                # `order_division` 을 `00`(LIMIT) 으로 확정했다. 아래 판정이
+                # 어떤 이유로든 실패하면 그 값이 그대로 남아 **오늘과 byte
+                # 동일**하게 나간다(fail-safe). 게이트 4중(자문 §6 조건 5):
+                #   (1) 실전 전용 — VTS 는 `EXCG_ID_DVSN_CD` 가 KRX 만 허용해
+                #       NXT 주문 자체가 불가(cycle287 애프터 변환 선례와
+                #       같은 게이트).
+                #   (2) NXT 전용 — SOR 의 27 지원은 정본 미확인
+                #       (`market_state._gtp` 의 `exchanges_unknown={"SOR"}`).
+                #   (3) 그 시각 NXT 가 `27` 을 실제로 받는가 — `market_state`
+                #       표가 시행일(2026-09-14)·프리마켓 종료(08:50) 경계를
+                #       **유일하게** 쥐고 있다. 날짜·시각 리터럴을 여기
+                #       복제하지 않는다.
+                #   (4) 위 프리장 판정(이미 참으로 진입했다).
+                # 어느 하나라도 실패·예외면 위에서 확정한 `00` 이 그대로
+                # 나간다.
+                _gtp_reason = "ok"
+                _gtp_production = -1  # 적대 검증 시정(B5) — 카나리아용, 판정에 미사용
+                try:
+                    from src.config import settings as _settings
+
+                    _gtp_production = 1 if _settings.is_production else 0
+                    if not _settings.is_production:
+                        _gtp_reason = "vts"
+                    elif buy_exchange != "NXT":
+                        _gtp_reason = "exchange"
+                    else:
+                        from src.engine.market_state import get_market_state
+
+                        if OrderDivision.NXT_GTP_LIMIT.value in get_market_state(
+                            datetime.now(_KST_TZ), market="NXT",
+                        ).order_divisions:
+                            order_division = OrderDivision.NXT_GTP_LIMIT
+                        else:
+                            _gtp_reason = "not_effective"
+                except Exception:
+                    _gtp_reason = "probe_error"
                 logger.info(
                     "[market_order_preconvert_pre_nxt] ticker=%s exchange=%s "
-                    "current_price=%d converted_to_limit_price=%d",
+                    "current_price=%d converted_to_limit_price=%d div=%s gtp=%d reason=%s",
                     ticker, buy_exchange, current_price, order_price,
+                    order_division.value,
+                    1 if order_division is OrderDivision.NXT_GTP_LIMIT else 0,
+                    _gtp_reason,
                 )
+                # 적대 검증 시정(MEDIUM, 3렌즈 공통 지적 — 명세 B5) — 프리장 매수는
+                # 대부분의 날 0~2건이라 주문이 없는 날은 위 마커도 침묵해 "게이트가
+                # 무장됐는가" 를 확인할 채널이 없었다. 프리장 첫 매수 후보 평가
+                # 시점(=이 블록 진입, 실제 후보가 있어야 발화 — 후보 0인 날은 여전히
+                # 침묵한다, D+1 판독표에 명시) 1회/일. 관측 실패가 매수를 막지 않는다.
+                try:
+                    self._emit_pre_nxt_division_config(
+                        effective=1 if order_division is OrderDivision.NXT_GTP_LIMIT else 0,
+                        production=_gtp_production,
+                        exchange_gate=buy_exchange,
+                    )
+                except Exception:
+                    logger.debug("[pre_nxt_division_config] 발화 실패", exc_info=True)
                 # pending_buy_amounts 도 변환된 가격 기준으로 동기 갱신 (1주 폴백 잔여 자금 정합성)
                 state.pending_buy_amounts[ticker] = order_price * quantity
         except Exception:
@@ -797,7 +890,10 @@ class OrderEngine:
             order_price = 0
 
         try:
-            # order_division 키워드는 MARKET 일 때 생략 가능하지만 LIMIT 일 때 명시 필수.
+            # order_division 키워드는 MARKET 일 때 생략 가능하지만 그 외(LIMIT·
+            # cycle291 GTP) 일 때 명시 필수. cycle291 — 화이트리스트 금지
+            # (cycle287 `test_s4d` 원칙). `== LIMIT` 열거는 새 호가유형을
+            # 조용히 삼켜 `place_order` 기본값 시장가로 되돌린다.
             place_kwargs = dict(
                 ticker=ticker,
                 side=OrderSide.BUY,
@@ -805,14 +901,16 @@ class OrderEngine:
                 price=order_price,
                 exchange=buy_exchange,
             )
-            if order_division == OrderDivision.LIMIT:
-                place_kwargs["order_division"] = OrderDivision.LIMIT
+            if order_division != OrderDivision.MARKET:
+                place_kwargs["order_division"] = order_division
             result = await place_order(**place_kwargs)
 
             # 주문번호 매핑 즉시 등록 — await insert_trade 진입 전 동기 영역에서 처리.
             # 시장가 즉시체결 시 체결통보가 insert_trade await 도중 도착해도 매핑이 보장된다.
             # PR-F: 사전 변환된 경우 record_price 는 변환 가격(order_price), 시장가 경로면 current_price.
-            record_price = order_price if order_division == OrderDivision.LIMIT else current_price
+            record_price = (
+                order_price if order_division != OrderDivision.MARKET else current_price
+            )
             self._order_qty[result.order_no] = quantity
             self._order_strategy[result.order_no] = strategy.strategy_id
             self._order_ticker[result.order_no] = ticker
@@ -823,6 +921,11 @@ class OrderEngine:
             # — "동기 3 호출부도 라우터를 거친다" 는 "매번 새로 판정한다" 를
             # 뜻하지 않았다. `cancel_order` 계약도 "원주문이 접수된 거래소" 다).
             self._order_exchange[result.order_no] = buy_exchange
+            # cycle291 — 전송한 값만 기록한다(`place_kwargs` 에서 뽑는다, 지역
+            # 변수 `order_division` 이 아니다 — B2 를 놓쳤을 때 매핑이 거짓말
+            # 하는 것을 구조적으로 막는다).
+            _sent_division = place_kwargs.get("order_division", OrderDivision.MARKET)
+            self._order_division[result.order_no] = _sent_division.value
             self._pending_buy_orders[result.order_no] = {
                 "ticker": ticker,
                 "price": record_price,
@@ -843,7 +946,11 @@ class OrderEngine:
                     order_kst=datetime.now(_KST_TZ),
                     order_price_won=record_price,
                     ordered_qty=quantity,
-                    order_division=getattr(order_division, "value", order_division),
+                    # 적대 검증 시정(LOW, exit) — 지역변수 `order_division` 이 아니라
+                    # `_sent_division`(=`place_kwargs` 에서 뽑은 값, :886)을 쓴다.
+                    # B2 게이트가 회귀해도(예: `== LIMIT` 로 되돌아가도) 이 필드는
+                    # 실제 전송값과 항상 같다 — `_order_division` 매핑과 동일 소스.
+                    order_division=_sent_division.value,
                     order_path="market",
                     exchange=buy_exchange,
                     current_price_won=current_price,
@@ -903,7 +1010,22 @@ class OrderEngine:
                     int(BUY_BLOCK_DURATION), t(ticker), strategy.strategy_id, e.msg_cd, e.msg1,
                 )
                 return
-            if is_market_order_disallowed(e):
+            # cycle291 — GTP(27) 거부는 우리 분류기 어디에도 걸리지 않는다
+            # (`_MARKET_ORDER_DISALLOWED_KEYWORDS` 8종은 전부 "시장가"/"지정가만"
+            # 계열, `_MARKET_CLOSED_KEYWORDS` 는 시간 계열). 미분류 매수 거부는
+            # 이 핸들러 끝 `raise` 로 `risk.on_tick` 을 죽인다(cycle229 실증:
+            # 8/20~8/27 매수 9건이 매일 15:30 WS 재연결을 유발). 그래서 게이트를
+            # 키워드가 아니라 **"우리가 27 을 보냈다" 는 우리 쪽 사실**에 건다 —
+            # 폴백 본문은 이미 같은 가격 `step_up(5)` + `00` 이라 신설 경로가 없다.
+            if is_market_order_disallowed(e) or (
+                order_division is OrderDivision.NXT_GTP_LIMIT
+            ):
+                if order_division is OrderDivision.NXT_GTP_LIMIT:
+                    logger.warning(
+                        "[pre_nxt_gtp_fallback] ticker=%s reason=rejected "
+                        "msg_cd=%s msg1=%s",
+                        t(ticker), e.msg_cd, e.msg1,
+                    )
                 # 시장가 거부 → 지정가 5호가 폴백 1회 (시장가 의도 보존)
                 fallback_price = step_up(current_price, steps=5)
                 try:
@@ -925,6 +1047,8 @@ class OrderEngine:
                     self._order_strategy[result.order_no] = strategy.strategy_id
                     self._order_ticker[result.order_no] = ticker
                     self._order_exchange[result.order_no] = buy_exchange
+                    # cycle291 — 폴백은 항상 `00`(LIMIT) 을 전송한다.
+                    self._order_division[result.order_no] = OrderDivision.LIMIT.value
                     self._pending_buy_orders[result.order_no] = {
                         "ticker": ticker,
                         "price": fallback_price,
@@ -1193,6 +1317,9 @@ class OrderEngine:
                 self._order_strategy[result.order_no] = strategy_id
                 self._order_ticker[result.order_no] = ticker
                 self._order_exchange[result.order_no] = target_exchange
+                # cycle291 — 매도 주 경로. 전송한 값(정규장/프리장 `00`·`01`,
+                # 애프터 `41`/`44`, 지정가 매도 `00`)을 그대로 기록한다.
+                self._order_division[result.order_no] = order_division.value
 
                 # 체결통보가 응답보다 먼저 도착해 COMPLETED row가 이미 INSERT됐다면 PENDING INSERT 생략
                 if result.order_no in self._completed_orders:
@@ -1529,6 +1656,9 @@ class OrderEngine:
                             self._order_strategy[fb_result.order_no] = strategy_id
                             self._order_ticker[fb_result.order_no] = ticker
                             self._order_exchange[fb_result.order_no] = target_exchange
+                            # cycle291 — 매도 폴백(`fallback_div` — 정규장/
+                            # 프리장 `00`, 애프터 `41`)의 실제 전송값을 기록한다.
+                            self._order_division[fb_result.order_no] = fallback_div.value
 
                             # 체결통보 선행 race 가드 (매수 폴백·시장가 경로 동일 규약)
                             if fb_result.order_no in self._completed_orders:
@@ -2031,6 +2161,7 @@ class OrderEngine:
             self._order_strategy.pop(order_no, None)
             self._order_ticker.pop(order_no, None)
             self._order_exchange.pop(order_no, None)
+            self._order_division.pop(order_no, None)  # cycle291 — 선례와 같은 자리
             # P1-B (B-1) — 전량 체결 처리 완료 시점 동기 등록. 매핑 pop 이후 도착하는
             # 동일 order_no 후속 체결통보를 함수 진입부에서 즉시 무시하기 위한 멱등 마커.
             self._completed_buy_orders.add(order_no)
@@ -2184,6 +2315,7 @@ class OrderEngine:
             self._order_strategy.pop(order_no, None)
             self._order_ticker.pop(order_no, None)
             self._order_exchange.pop(order_no, None)
+            self._order_division.pop(order_no, None)  # cycle291 — 선례와 같은 자리
             logger.info("매도 전량 체결: %s %d주 @ %d (손익: %d, 전략: %s)", t(ticker), total_filled, price, profit_loss, strategy_id)
             # cycle273a (D2-가-a) — 자기 order_no 의 잔여취소/재주문 타이머 해제(매수 축과
             # 동일 게이트, §1.4). 해제하지 않으면 `_cancel_and_reorder` 가 30초 뒤 잔량 0 인
@@ -2236,6 +2368,11 @@ class OrderEngine:
                     self._strategy_exchange(strategy_id), strategy_id,
                     side="sell", ticker=ticker,
                 )
+            # cycle291 — Stage A 관측. `orig_dvsn`/`dvsn_src` 는 원주문이 실제로
+            # 실었던 호가유형(매핑 부재 = fail-open `-`/`absent`)이고, `ord_dvsn`
+            # 은 이 취소 요청이 **실제로 보낸** 값이다(Stage A 는 `order_division`
+            # 을 전달하지 않으므로 언제나 `"00"` — 리터럴이 아니라 사실이다).
+            _orig_div = self._order_division.get(order_no)
             _cancel_ok = False
             _cancel_err = ""
             try:
@@ -2248,8 +2385,10 @@ class OrderEngine:
                 # K11(자문 §4-C1) — 관측만. `ORD_DVSN="00"` 하드코딩은 변경 0.
                 logger.info(
                     "[after_cancel_result] ticker=%s order_no=%s ord_dvsn=00 "
-                    "exchange=%s result=%s err=%s",
-                    ticker, order_no, ex, "ok" if _cancel_ok else "error", _cancel_err,
+                    "orig_dvsn=%s dvsn_src=%s exchange=%s result=%s err=%s",
+                    ticker, order_no, _orig_div if _orig_div else "-",
+                    "map" if _orig_div else "absent",
+                    ex, "ok" if _cancel_ok else "error", _cancel_err,
                 )
             await update_trade_status(ticker, TradeType.BUY, TradeStatus.CANCELLED, strategy=strategy_id, order_no=order_no)
             logger.info("부분 체결 잔여 취소: %s (주문번호: %s)", t(ticker), order_no)
@@ -2295,6 +2434,8 @@ class OrderEngine:
                     self._strategy_exchange(strategy_id), strategy_id,
                     side="sell", ticker=ticker,
                 )
+            # cycle291 — Stage A 관측(`_cancel_after_wait` 와 동일 규약).
+            _orig_div = self._order_division.get(order_no)
             _cancel_ok = False
             _cancel_err = ""
             try:
@@ -2307,8 +2448,10 @@ class OrderEngine:
                 # K11(자문 §4-C1) — 관측만. `ORD_DVSN="00"` 하드코딩은 변경 0.
                 logger.info(
                     "[after_cancel_result] ticker=%s order_no=%s ord_dvsn=00 "
-                    "exchange=%s result=%s err=%s",
-                    ticker, order_no, ex, "ok" if _cancel_ok else "error", _cancel_err,
+                    "orig_dvsn=%s dvsn_src=%s exchange=%s result=%s err=%s",
+                    ticker, order_no, _orig_div if _orig_div else "-",
+                    "map" if _orig_div else "absent",
+                    ex, "ok" if _cancel_ok else "error", _cancel_err,
                 )
             await update_trade_status(ticker, TradeType.SELL, TradeStatus.CANCELLED, strategy=strategy_id, order_no=order_no)
             logger.info("매도 잔여 취소: %s %d주", t(ticker), remaining)
@@ -2385,6 +2528,8 @@ class OrderEngine:
         self._order_channel_config_logged.clear()
         self._after_exit_fails.clear()  # cycle287 K9 봉인2 일일 정리
         self._order_exchange.clear()  # cycle287 적대 검증 시정 — order_no 는 하루 단위로만 유일
+        self._order_division.clear()  # cycle291 — 선례와 같은 정리 주기
+        self._pre_nxt_division_config_logged.clear()  # cycle291 B5 카나리아 일일 정리
 
     async def cancel_remaining(self, ticker: str, strategy_id: str) -> None:
         """미체결 잔량을 취소한다."""
@@ -2403,6 +2548,8 @@ class OrderEngine:
                     self._strategy_exchange(strategy_id), strategy_id,
                     side="sell", ticker=ticker,
                 )
+            # cycle291 — Stage A 관측(`_cancel_after_wait` 와 동일 규약).
+            _orig_div = self._order_division.get(pos.order_no)
             _cancel_ok = False
             _cancel_err = ""
             try:
@@ -2415,8 +2562,10 @@ class OrderEngine:
                 # K11(자문 §4-C1) — 관측만.
                 logger.info(
                     "[after_cancel_result] ticker=%s order_no=%s ord_dvsn=00 "
-                    "exchange=%s result=%s err=%s",
-                    ticker, pos.order_no, ex, "ok" if _cancel_ok else "error", _cancel_err,
+                    "orig_dvsn=%s dvsn_src=%s exchange=%s result=%s err=%s",
+                    ticker, pos.order_no, _orig_div if _orig_div else "-",
+                    "map" if _orig_div else "absent",
+                    ex, "ok" if _cancel_ok else "error", _cancel_err,
                 )
             logger.info("미체결 취소: %s (주문번호: %s)", t(ticker), pos.order_no)
         except Exception:

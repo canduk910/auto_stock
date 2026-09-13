@@ -193,10 +193,16 @@ _SCHEDULER_LINE_CAP = 3900
 #: 키 = 구간 이름 / 값 = (시작 부분문자열, 끝 부분문자열, sha256).
 _FROZEN_SEGMENTS = {
     # 매수 PR-F 사전 변환 — 브리프: "로직 자체는 byte 동일해야 한다".
+    # ⚠️ cycle291(2026-09-13) 이 이 구간을 **정당하게** 바꿨다(GTP(27) 승격 —
+    # 사용자 결정 "(나)안"). 자문이 명시한 절차대로 값만 새 기준선으로 옮긴다 —
+    # `execute_buy` 의 시장가/`00` 사전 변환 *로직*(anchors 사이 구조)은 여전히
+    # byte 동일해야 한다는 원 계약은 유지되고, 그 안에 GTP 승격이 순수 추가됐다.
+    # sha 는 cycle291 적대 검증(3렌즈) 시정 반영 후 값으로 한 번 더 갱신됐다
+    # (B5 카나리아 `[pre_nxt_division_config]` 배관이 이 구간 안에 순수 추가).
     "execute_buy_prf": (
         "        order_division = OrderDivision.MARKET\n        order_price = 0\n",
         "            order_price = 0\n",
-        "e08d54fc2bd52080360b1e6cd1157f3528216279c5ae274957a9eb171ecee11d",
+        "8d8b23a042f33020d0c4339201777ec7f45baa872af8df08f5295a9fdbc8f039",
     ),
     # 매도 프리장 사전 지정가 변환 — 애프터 분기는 이 블록 **뒤**에 순수 추가한다.
     "execute_sell_pre_nxt_preconvert": (
@@ -600,14 +606,16 @@ def test_s3h_limit_price_nxt_branch_is_still_present() -> None:
 # S4 — enum · cancel_order
 # ===========================================================================
 def test_s4_order_division_members_are_exactly_four() -> None:
-    """S4 (RED) — `OrderDivision` 값 집합 == `{00, 01, 41, 44}`.
+    """S4 — `OrderDivision` 값 집합 == `{00, 01, 27, 41, 44}`.
 
     IOC/FOK(42/43/45/46)는 잔량 자동취소라 손절 잔여를 잃고, 47(최우선지정가)은
-    크로스하지 않아 체결 보장이 없다 = 손절 수단이 아니다(자문 §3-A).
+    크로스하지 않아 체결 보장이 없다 = 손절 수단이 아니다(자문 §3-A). **cycle291
+    (2026-09-13)이 `27`(NXT GTP지정가, 프리마켓 매수 승격)을 정당하게 추가했다** —
+    함수명은 base 시점 이름을 보존한다(다섯 번째가 됐다는 사실은 값으로 잰다).
     """
     from src.models.order import OrderDivision
 
-    assert {d.value for d in OrderDivision} == {"00", "01", "41", "44"}
+    assert {d.value for d in OrderDivision} == {"00", "01", "27", "41", "44"}
     assert OrderDivision.LIMIT.value == "00"
     assert OrderDivision.MARKET.value == "01"
 
@@ -628,47 +636,103 @@ def test_s4b_models_order_is_not_pinned_anywhere() -> None:
     assert hits == [], f"`{_MODELS_ORDER_REL}` 가 sha 핀 dict 키로 등장한다: {hits}"
 
 
-def test_s4c_cancel_order_ord_dvsn_stays_hardcoded_00() -> None:
-    """S4 — 취소의 `ORD_DVSN` 은 **`"00"` 하드코딩 유지 · 인자 추가 없음**.
+def test_s4c_cancel_order_gains_an_opt_in_order_division() -> None:
+    """S4 — ⚠️ **반전(cycle291, 2026-09-13)**. `cancel_order` 는 이제 취소 축
+    Stage A(배관+매핑+관측)의 opt-in 인자를 갖는다 — 자문 §4·§7 이 이 사이클
+    밖으로 밀어냈던 것을 사용자 결정 "(나)안" 이 다시 열었다. 조건 3개가
+    이전 계약이 지키던 것을 대신 잰다:
 
-    ⚠️ 이 테스트는 종전 Red 를 **뒤집은** 것이다(자문 §4-C1·§S7 우선). 종전 Red 는
-    `cancel_order(..., order_division="00")` opt-in 인자를 요구했지만 자문이 그것을
-    이 사이클 밖으로 밀어냈다. 근거 셋:
-
-    * KIS **공식 취소 샘플**이 `ord_dvsn="00"` + 0 아닌 `ord_unpr` 를 쓴다.
-    * 국내주식 스펙에 "취소 시 원주문 호가유형을 실어라" 는 규약이 **없다**
-      (선물옵션 API 는 "[취소] 01 로 입력" 이라 명시하는데, 국내주식엔 그 문장이 없다).
-    * 16:00~20:00 의 취소·부분체결 실적이 **all-time 0건** — 지금 바꿀 근거가 0이고,
-      추측으로 바꾸면 **작동 중인 정규장 취소**를 위험에 넣는다.
-
-    그래서 배관을 열지 않고 `[after_cancel_result]` 관측만 붙여 첫날 실측으로
-    판정한다(`result=error` 가 나오면 그때 opt-in 을 넣는다).
+    1. `order_division` 은 **키워드 전용** + 기본값 `None`(AST 구조 — 위치
+       인자로 승격하면 `cancel_order(order_no, 0, cancel_all=…)` 3 호출부의
+       위치 의미가 흔들린다).
+    2. 미전달 시 KIS body 가 **런타임으로** `"00"` 과 완전히 같다(소스
+       리터럴이 아니라 `kis_post` 캡처로 잰다 — 표현만 바꾸면 무력해지는
+       문자열 가드를 피한다. cycle291 Stage A 는 호출자 3곳이 아직 전달하지
+       않으므로 이것이 "정규장 byte 동일" 의 실제 증거다).
+    3. 화이트리스트가 없다 — `44` 를 조용히 지우던 함정(`execute_buy` 의
+       `== LIMIT` 열거)을 재현하지 않는다.
     """
-    body_src = ast.get_source_segment(
-        _src(_API_ORDER_REL), _function(_API_ORDER_REL, "cancel_order")[1]
-    ) or ""
-    assert '"ORD_DVSN": "00"' in body_src, (
-        "취소의 `ORD_DVSN` 하드코딩이 사라졌다 — 이 사이클은 그 값을 바꾸지 않는다"
-    )
     _s2, fn = _function(_API_ORDER_REL, "cancel_order")
-    names = [a.arg for a in fn.args.args] + [a.arg for a in fn.args.kwonlyargs]
-    assert "order_division" not in names, (
-        f"`cancel_order` 에 `order_division` 인자가 들어왔다: {names}. "
-        "쓰지 않는 인자를 먼저 넣지 않는다 — 첫날 실측(`[after_cancel_result]`) 뒤다"
+    kwonly = [a.arg for a in fn.args.kwonlyargs]
+    positional = [a.arg for a in fn.args.args]
+    assert "order_division" not in positional, (
+        f"`order_division` 이 위치 인자로 들어왔다: {positional}"
     )
+    assert "order_division" in kwonly, (
+        f"`cancel_order` 에 opt-in `order_division` 이 없다: {kwonly}"
+    )
+    idx = kwonly.index("order_division")
+    default = fn.args.kw_defaults[idx]
+    assert isinstance(default, ast.Constant) and default.value is None, (
+        "기본값이 `None` 이 아니다 — 미전달 시 byte 동일이 성립하지 않는다"
+    )
+
+    body_src = ast.get_source_segment(_src(_API_ORDER_REL), fn) or ""
+    for needle in ("order_division in (", "order_division in [", "order_division in {",
+                   "order_division not in (", "order_division not in [",
+                   "order_division not in {",
+                   "order_division ==", "order_division !="):
+        assert needle not in body_src, (
+            f"`cancel_order` 에 값 비교 {needle!r} 가 들어왔다 — 화이트리스트 금지"
+        )
+
+
+@pytest.mark.asyncio
+async def test_s4c_2_cancel_order_body_is_byte_identical_when_not_passed() -> None:
+    """S4 — 미전달 시 KIS body 10키가 **현행과 완전히 동일**하다(런타임 캡처).
+
+    호출자 3곳이 아직 전달하지 않는 cycle291 Stage A 에서 정규장 취소가 한
+    글자도 바뀌지 않는 것이 이 사이클의 절대 조건이다.
+    """
+    import src.api.order as _order
+    from src.config import settings
+    from unittest.mock import AsyncMock
+
+    captured: dict = {}
+
+    async def _fake_post(url, tr_id, body, hashkey=None):
+        captured.update(body)
+        return {"output": {"ODNO": "C", "ORD_TMD": "100031", "KRX_FWDG_ORD_ORGNO": ""}}
+
+    mp = pytest.MonkeyPatch()
+    try:
+        mp.setattr(_order, "kis_post", _fake_post)
+        mp.setattr(_order, "generate_hashkey", AsyncMock(return_value="hk"))
+        await _order.cancel_order("0000000800", 0, cancel_all=True, exchange="NXT")
+    finally:
+        mp.undo()
+
+    assert captured == {
+        "CANO": settings.kis_account_no,
+        "ACNT_PRDT_CD": settings.kis_account_product,
+        "KRX_FWDG_ORD_ORGNO": "",
+        "ORGN_ODNO": "0000000800",
+        "ORD_DVSN": "00",
+        "RVSE_CNCL_DVSN_CD": "02",
+        "ORD_QTY": "0",
+        "ORD_UNPR": "0",
+        "QTY_ALL_ORD_YN": "Y",
+        "EXCG_ID_DVSN_CD": "NXT",
+    }, captured
 
 
 def test_s4c2_api_order_change_is_documentation_only() -> None:
-    """S4 (RED) — `src/api/order.py` 의 변경은 **docstring 뿐**이다(자문 §S7).
+    """S4 (RED, cycle287) — `src/api/order.py` 의 **cycle287 시점** 변경은 docstring
+    뿐이었다(자문 §S7). ⚠️ **cycle291 정정** — 이름·의도는 cycle287 것을 그대로
+    두지만, cycle291 이 `cancel_order` 에 진짜 kwonly 인자(`order_division`)를
+    추가했다. 그건 **본문 문장이 아니라 시그니처**라 아래 "본문 문장 수" 단언은
+    여전히 성립하고(dict 안 조건식 하나로만 흡수 — `test_a11`/`test_s4c` 가 그
+    계약을 직접 잰다), 이 테스트가 잠그는 것은 "cycle287 이 손댄 본문이 cycle291
+    이후에도 문장 수 기준으로 늘지 않았다" 는 더 좁은 사실이다.
 
-    `place_order` docstring 이 `ORD_DVSN` 표(00·01·41·44 + 애프터 시장가 없음 +
+    `place_order` docstring 이 `ORD_DVSN` 표(00·01·27·41·44 + 애프터 시장가 없음 +
     ETP 불가)와 거래소 규칙을 담고, `cancel_order` docstring 이 "애프터 원주문 취소는
     미검증" 을 명시한다. 그래야 다음 사람이 `"00"` 하드코딩을 보고 "검증됐다" 고
     오독하지 않는다.
 
-    본문 byte 동일은 이 사이클의 계약이므로, docstring 을 제외한 **AST 구조**가
-    base 와 같은지를 함수별 인자·본문 문장 수로 잰다(`ast.dump` sha 는 3.12/3.13
-    출력차 때문에 금지 — cycle256 G-250-5).
+    본문(문장 수) byte 동일은 이 사이클의 계약이므로, docstring 을 제외한 **AST
+    구조**가 base 와 같은지를 함수별 인자·본문 문장 수로 잰다(`ast.dump` sha 는
+    3.12/3.13 출력차 때문에 금지 — cycle256 G-250-5).
     """
     src = _src(_API_ORDER_REL)
     place_doc = ast.get_docstring(_function(_API_ORDER_REL, "place_order")[1]) or ""
@@ -698,7 +762,8 @@ def test_s4c2_api_order_change_is_documentation_only() -> None:
         )]
         assert len(body) == stmts, (
             f"`{fname}` 본문 문장 수가 {len(body)} (base {stmts}) — "
-            "이 사이클의 `api/order.py` 변경은 docstring 뿐이다"
+            "cycle287 시점 본문(문장 수 기준)이 그대로다. 시그니처(kwonly 인자) "
+            "변경은 cycle291 이 별도로 반영한다(`test_a11`/`test_s4c` 참조)"
         )
     del src
 

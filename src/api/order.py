@@ -46,13 +46,17 @@ async def place_order(
       |---|---|---|---|
       | 정규장·프리장 | "01" | 시장가(MARKET, 기본) | |
       | 정규장·프리장 폴백 | "00" | 지정가(LIMIT) | 매수 `step_up(5)` / 매도 `step_down(5)` |
-      | KRX 애프터(16:00~20:00, 2026-09-14 신설) 1차 | "44" | 최유리지정가 | `ORD_UNPR="0"` — 정본에 명시된 유일한 값(§4-A). **시장가(01) 없음**. **ETP(ETF/ETN) 거래 불가**(공지 verbatim) |
+      | NXT 프리마켓(08:00~08:50) 매수 승격(cycle291) | "27" | GTP지정가 | `ORD_UNPR=step_up(현재가,5)` — `00` 폴백과 **같은 값**(가격 행위 변경 0). 미체결잔량은 거래소가 08:50 에 일괄취소한다(GTP 의 정체성). 게이트 4중(실전·NXT·그 시각 유효·프리장) 중 하나라도 실패하면 `00` 이 그대로 나간다 — **매도는 여전히 `00`**(자문 §2, GTP 매도는 08:50 자동취소가 `_selling` 을 잠가 손절 재평가를 억제한다) |
+      | KRX 애프터(16:00~20:00, 2026-09-14 신설) 1차 | "44" | 최유리지정가 | `ORD_UNPR="0"` — **정본 명시 없음**(현금주문 문서는 "시장가 등" 만 언급하는 비열거형 문구이고, 신용주문 문서는 "장전/장후 시간외·시장가" 를 열거하며 최유리(03)·최우선(04)는 **그 열거에서 빠져 있다** — 두 문서가 갈린다). `0` 을 고른 것은 비대칭 판단(§4-A: 0이 틀리면 즉시 거부돼 41 폴백이 받고, 가격을 실었는데 0이 맞았다면 무해 — 반대로 가격을 실었는데 0이 필요했다면 상한가 기준 주문금액 산정 위험이 있다). **시장가(01) 없음**. **ETP(ETF/ETN) 거래 불가**(공지 verbatim) |
       | KRX 애프터 폴백 | "41" | 지정가 | 우리가 가격을 통제(`step_down(5)`) |
 
       41~47 전체(41 지정가/42 IOC/43 FOK/44 최유리/45 IOC최유리/46 FOK최유리/
       47 최우선)가 애프터 전용이나, 이 시스템은 41·44 둘만 보낸다(`OrderDivision`
       멤버가 그 둘뿐 — IOC/FOK 는 잔량 자동취소로 손절 잔여를 잃고, 47 은 자기
-      방향 최우선호가라 크로스하지 않아 체결 보장이 없다).
+      방향 최우선호가라 크로스하지 않아 체결 보장이 없다). 27~29(NXT GTP) 전체도
+      같은 규율로 `27`(GTP지정가) 하나만 보낸다 — `28`(GTP최유리)은 `ORD_UNPR`
+      규약이 현금·신용 문서 사이에서 갈리고 얇은 프리마켓 호가에서 1레벨에
+      멈추며, `29`(GTP최우선)는 자기 방향 최우선호가라 크로스하지 않는다.
 
     EXCG_ID_DVSN_CD (거래소):
       - "KRX" = 한국거래소 메인 (기본). 09:00~15:30·16:00~20:00 은 시각이 강제한다
@@ -111,6 +115,7 @@ async def cancel_order(
     *,
     cancel_all: bool = True,
     exchange: str = "KRX",
+    order_division: str | None = None,
 ) -> OrderResult:
     """주문 정정 또는 취소를 실행한다.
 
@@ -118,18 +123,24 @@ async def cancel_order(
     `RVSE_CNCL_DVSN_CD`: "01" 정정 / "02" 취소.
     `exchange`: 원주문이 접수된 거래소. `KRX`(기본) / `NXT` / `SOR`.
 
-    ORD_DVSN 은 `"00"` 하드코딩을 유지한다(cycle287 자문 §4-C1) — KIS 공식
-    취소 샘플이 `ord_dvsn="00"` 을 쓰고, 국내주식 스펙에 "취소 시 원주문
-    호가유형을 실어라" 는 규약이 없다(선물옵션 API 만 그 문장이 있다).
-    ⚠️ **KRX 애프터마켓(16:00~20:00, `ORD_DVSN` 41/44)에서 접수한 원주문의
-    취소가 이 하드코딩으로 정상 처리되는지는 미검증·미실측·미확인이다** —
-    그 창의 취소·부분체결 실적이 all-time 0건이라 추측으로 바꾸면 작동 중인
-    정규장 취소를 위험에 넣는다. 관측 자체는 구현돼 있다 — 호출부
-    (`order_engine.py::_cancel_after_wait`/`_cancel_and_reorder`/
-    `cancel_remaining`)가 매 취소 시도마다 `[after_cancel_result]
-    ticker= order_no= ord_dvsn=00 exchange= result=ok|error err=` 1행을
-    남긴다. 첫 애프터 실측에서 `result=error` 가 나오면 그때
-    `order_division` opt-in 인자를 검토한다 — 지금은 관측만이다.
+    `order_division` — cycle291(2026-09-13) Stage A. **opt-in, 미전달 시
+    `"00"` 하드코딩과 body byte 동일**(자문 §4). KIS 정본에 "취소 시 원주문
+    호가유형을 실어라" 는 규약이 **없다**(국내주식 정정취소 필드표엔 그
+    문장이 없고, 선물옵션 API 만 `[취소] 01 로 입력` = 고정값을 명시하며,
+    KIS 공식 취소 샘플도 `ord_dvsn="00"` 을 쓴다). 그래서 이 인자는 **아직
+    호출자 3곳(`_cancel_after_wait`/`_cancel_and_reorder`/`cancel_remaining`)
+    이 전달하지 않는 배관·매핑만이다** — Stage B(실제 전송) 전환은 D+1 이후
+    `[after_cancel_result]` 의 `orig_dvsn` 층화 실측 + **매매 행위 변경 =
+    별도 승인**이 필요하다. 값 화이트리스트는 두지 않는다(`44` 를 조용히
+    지우는 함정을 재현하지 않는다) — falsy(`None`/`""`) 만 `"00"` 으로
+    폴백한다. ⚠️ **KRX 애프터마켓(16:00~20:00, `ORD_DVSN` 41/44)·NXT 프리마켓
+    GTP(27)에서 접수한 원주문의 취소가 `"00"` 으로 정상 처리되는지는
+    미검증·미실측·미확인이다** — 그 창의 취소·부분체결 실적이 all-time
+    0건이라 추측으로 바꾸면 작동 중인 정규장 취소를 위험에 넣는다. 관측
+    자체는 구현돼 있다 — 호출부가 매 취소 시도마다 `[after_cancel_result]
+    ticker= order_no= ord_dvsn= orig_dvsn= dvsn_src= exchange= result=ok|error
+    err=` 1행을 남긴다. 첫 실측에서 `result=error` 가 비-`{00,01}` `orig_dvsn`
+    에만 몰리면 그때 Stage B 를 검토한다 — 지금은 배관 + 관측만이다.
     """
     tr_id = settings.get_tr_id("TTTC0013U")
 
@@ -138,7 +149,7 @@ async def cancel_order(
         "ACNT_PRDT_CD": settings.kis_account_product,
         "KRX_FWDG_ORD_ORGNO": "",
         "ORGN_ODNO": original_order_no,
-        "ORD_DVSN": "00",
+        "ORD_DVSN": order_division if order_division else "00",
         "RVSE_CNCL_DVSN_CD": cancel_type.value,
         "ORD_QTY": str(quantity),
         "ORD_UNPR": str(price),
