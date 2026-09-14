@@ -141,6 +141,42 @@ def _probe_tuple_present(pool, tr_id: str, ticker: str) -> bool:
     return any((tr_id, ticker) in _session_tuples(ws) for ws in _pool_sessions(pool))
 
 
+def _register_probe_exclusion(tr_id: str, ticker: str) -> None:
+    """cycle293 — 이 튜플이 **프로브** 임을 TICK 집계 쪽에 알린다.
+
+    프로브는 진단 도구이므로 라이브 TICK 뷰(K stale watcher 재등록 · universe guard
+    축출 · 5분 delta 해제 · F1 재검증 · `[tick_coverage]` 분모)에 들어가면 안 된다.
+    종전에는 그 격리를 "전용 채널은 집계에 없다" 는 **채널 동일성**이 대신했는데,
+    cycle293 이 전용 채널을 실 구독에 쓰기 시작해 그 추론이 죽었다.
+
+    등록·회수·판정은 전부 `websocket` 의 세 헬퍼를 경유한다 — 집합을 직접
+    변형하면 수명 dict(`_PROBE_EXCLUSION_DAY`)와 갈려 전날 잔존 항목이 라이브
+    구독을 은폐한다.
+
+    ⚠️ 등록 실패 시 최악은 **종전과 같은 노출이 아니다** — cycle293 부터 프로브가
+    라이브 TICK 집계에 섞여 5분 `_scan_loop` delta 가 `current - new_set` 으로
+    프로브를 해제해 측정을 끊는다. 그래도 never-raise 로 둔다: 측정 도구의
+    격리 실패가 프로브 시작을 막는 것보다는 낫고, 끊기면 `received=False` 로
+    드러난다.
+    """
+    try:
+        from src.realtime.websocket import register_probe_exclusion
+
+        register_probe_exclusion(tr_id, ticker)
+    except Exception:  # pragma: no cover — never-raise
+        logger.debug("[krx_channel_probe] 프로브 제외 등록 실패", exc_info=True)
+
+
+def _unregister_probe_exclusion(tr_id: str, ticker: str) -> None:
+    """프로브 종료·드롭 시 제외 등록 회수 (남기면 그 종목이 영구 집계 밖이 된다)."""
+    try:
+        from src.realtime.websocket import unregister_probe_exclusion
+
+        unregister_probe_exclusion(tr_id, ticker)
+    except Exception:  # pragma: no cover — never-raise
+        logger.debug("[krx_channel_probe] 프로브 제외 회수 실패", exc_info=True)
+
+
 def _release_routing_if_orphaned(pool, ticker: str) -> bool:
     """`_ticker_to_session[ticker]` 가 가리키는 세션에 그 종목의 튜플이 **하나도** 없을
     때만 라우팅을 pop 한다.
@@ -151,6 +187,11 @@ def _release_routing_if_orphaned(pool, ticker: str) -> bool:
     흔적을 남기지 않는 것이 이 함수의 역할이다. 반대로 그 세션에 같은 종목의 다른
     tr_id 튜플(라이브 H0UNCNT0)이 남아 있으면 절대 pop 하지 않는다 — 그 라우팅은
     라이브 경로의 것이다.
+
+    cycle293 Green (적대 검증 F6) — 병행 dict `_ticker_to_tr_id` 도 **같은 자리에서**
+    pop 한다. `_ticker_to_session` 만 비우면 유령 채널 항목이 남고,
+    `stale_watcher_core._actual_or_desired_tick_tr_id` 는 `_ticker_to_session` 을
+    보지 않고 그 dict 만 읽으므로 구독 0건인 종목에 "실제 채널" 을 보고한다.
     """
     routing = getattr(pool, "_ticker_to_session", None)
     if not isinstance(routing, dict):
@@ -161,6 +202,9 @@ def _release_routing_if_orphaned(pool, ticker: str) -> bool:
     if any(tk == ticker for _tid, tk in _session_tuples(routed)):
         return False
     routing.pop(ticker, None)
+    tr_map = getattr(pool, "_ticker_to_tr_id", None)
+    if isinstance(tr_map, dict):
+        tr_map.pop(ticker, None)
     return True
 
 
@@ -187,6 +231,9 @@ async def _unsubscribe_probe_everywhere(pool, tr_id: str, ticker: str) -> list[s
                 ticker, tr_id, exc_info=True,
             )
     _release_routing_if_orphaned(pool, ticker)
+    # cycle293 — 프로브가 끝나면 제외 등록도 함께 회수한다. 이 함수가 stop·evict
+    # 양쪽의 단일 choke point 라 여기 한 곳이면 누락이 없다.
+    _unregister_probe_exclusion(tr_id, ticker)
     return removed_from
 
 
@@ -397,7 +444,9 @@ async def get_subscriptions() -> ApiResponse:
         sessions         — [{label, subscribed, acked, fresh, stale, limit, ws_connected, reconnect_count}, ...]
     """
     # 지연 import — scanner 가 websocket 을 참조하므로 순환 의존 회피
-    from src.engine.scanner import TICK_TR_ID, ticker_last_tick
+    # cycle293 — `TICK_TR_ID` 는 이 함수에서 쓰이지 않는다(구독 집합은 풀이 세 채널
+    # 합집합으로 준다). 남겨 두면 다음 사람이 "이 함수는 통합 채널만 본다" 고 오독한다.
+    from src.engine.scanner import ticker_last_tick
     from src.realtime.websocket import MAX_SUBSCRIPTIONS
     from src.realtime.websocket_pool import kis_ws_pool
 
@@ -528,7 +577,7 @@ async def resubscribe_stale() -> ApiResponse:
         data.tickers      : sorted ticker 리스트
     """
     # 지연 import — scanner 가 websocket 을 참조하므로 순환 의존 회피
-    from src.engine.scanner import TICK_TR_ID, ticker_last_tick
+    from src.engine.scanner import TICK_TR_ID, TICK_TR_IDS, ticker_last_tick
     from src.realtime.websocket import VERIFY_FRESHNESS_SECS, kis_ws
 
     # WebSocket 끊김 → 메시지 발송 불가 → 400 (조용한 200 금지)
@@ -540,6 +589,13 @@ async def resubscribe_stale() -> ApiResponse:
 
     # 현재 TICK 구독 집합 (SEND 기준, Phase D `get_subscribed_tickers`)
     subscribed = kis_ws.get_subscribed_tickers()
+    # cycle293 — 재전송은 그 종목이 **실제로 구독된 채널**로 나가야 한다. 구독
+    # 사실이 정본이고(리졸버의 현재 판정이 아니다), 매핑에 없으면 현행 통합 채널.
+    tick_channel_of = {
+        tr_key: tr_id
+        for tr_id, tr_key in kis_ws._subscriptions
+        if tr_id in TICK_TR_IDS
+    }
 
     now = datetime.now(_KST_TZ)
     threshold = timedelta(seconds=VERIFY_FRESHNESS_SECS)
@@ -553,7 +609,9 @@ async def resubscribe_stale() -> ApiResponse:
 
     # 각 stale ticker 재구독 — `_send_subscribe` 만 사용
     for ticker in stale:
-        await kis_ws._send_subscribe(TICK_TR_ID, ticker, subscribe=True)
+        await kis_ws._send_subscribe(
+            tick_channel_of.get(ticker, TICK_TR_ID), ticker, subscribe=True,
+        )
         await asyncio.sleep(0.05)  # Rate Limit 보호
 
     # 영구 로그 — count=0 도 기록 (운영자가 빈 stale 도 확인 가능)
@@ -697,6 +755,13 @@ async def start_channel_probe(req: ChannelProbeIn) -> ApiResponse:
             detail="WebSocket 연결 끊김 — 프로브 구독 메시지 발송 불가",
         )
 
+    # cycle293 — 프로브 튜플을 **구독 발사 전에** 제외 집합에 등록한다. 종전에는
+    # "전용 채널은 TICK 집계에 없다" 는 채널 동일성이 격리를 대신했지만, cycle293 이
+    # 그 채널을 실 구독에 쓰기 시작하며 그 추론이 죽었다(`websocket.
+    # PROBE_EXCLUDED_TUPLES` docstring). 등록이 늦으면 그 사이 5분 `_scan_loop` delta
+    # 가 프로브를 `current - new_set` 으로 해제해 측정을 끊는다.
+    _register_probe_exclusion(tr_id, ticker)
+
     session_label = await kis_ws_pool.subscribe(
         tr_id, ticker, priority="LOW", bypass_limit=False,
     )
@@ -708,6 +773,7 @@ async def start_channel_probe(req: ChannelProbeIn) -> ApiResponse:
     if session_label is None or not _probe_tuple_present(kis_ws_pool, tr_id, ticker):
         reason = "all_sessions_full" if session_label is None else "no_tuple_after_subscribe"
         released = _release_routing_if_orphaned(kis_ws_pool, ticker)
+        _unregister_probe_exclusion(tr_id, ticker)   # 등록 실패분 즉시 회수
         logger.warning(
             "[krx_channel_probe] action=dropped ticker=%s tr_id=%s session=%s reason=%s "
             "routing_released=%s",
@@ -797,3 +863,186 @@ async def stop_channel_probe(ticker: str) -> ApiResponse:
     )
 
     return ApiResponse(success=True, data=row, message="")
+
+
+# ---------------------------------------------------------------------------
+# cycle293 — 시세 채널 리졸버 킬스위치 (§8-B)
+#
+# 🔴 cycle287 의 실패를 반복하지 않는다. 그 사이클은 킬스위치 2개를
+#    `param_catalog` 미등재로 만들어 `PUT /api/strategies/{id}/params` 가
+#    `unknown_key` 422 를 돌려줬다 = **장중에 끌 수 없었다**. 리졸버는 전략별
+#    설정이 아니라 인프라 축이라 `system_config` 한 키가 정본이고, 그 키를
+#    **재시작 없이** 바꾸는 경로를 같은 커밋에 넣는다:
+#
+#      curl -X PUT .../api/realtime/tick-channel-mode -d '{"mode":"off"}'
+#
+#    이 PUT 은 DB 에 쓰고 **같은 요청 안에서** 엔진 메모리 값까지 덮는다(즉시).
+#    폴링 경로(`scanner.subscribe_filtered_stocks` 5분 · `stale_watcher_core`
+#    120초)는 그 뒤의 정합 보장용이다.
+#
+# ⚠️ 롤백이 즉시가 아닌 지점 — §3-C/§6-D 의 "장중 전환 금지" 때문에 이미 전용
+#    채널에 올라간 종목은 **다음 `_boot`/재구독 사이클까지** 그 채널에 남는다.
+# ---------------------------------------------------------------------------
+class TickChannelModeRequest(BaseModel):
+    mode: str
+    #: cycle294 §9-D — 전환 다이얼. **모드 enum 에 태우지 않는다**(결정 카드 D-5):
+    #: 「채널이 문제」(`mode`)와 「전환이 문제」(`switch_enabled`)는 다른 결정이고,
+    #: 사고 중에 쓸 카드가 `off` 하나뿐이면 운영자가 146종목 대량 전환을 장중에
+    #: 실행하게 된다(§9-B — `off` 는 이미 올라간 구독을 되돌리지 않는다).
+    #: `false` 면 종목이 첫 구독 채널에 머문다 — `nxt_true` 는 NXT 종일이고 NXT 는
+    #: 정규장·애프터에 체결을 실으므로 **blind 가 아니다**. 이것이 §5 자동 원복의
+    #: 수동 대응물이다. 생략(`None`)하면 현행 값을 건드리지 않는다.
+    switch_enabled: bool | None = None
+    #: 🔴 cycle294 적대 검증 CRITICAL-1 — **NXT 단독 연속 구간** 커버리지 다이얼.
+    #: 09-15 기준 15:40~16:00 은 KRX 에 연속 체결이 없고 NXT 만 열려 있다(표 파생).
+    #: `true`(기본) 면 그 20분 동안 **HIGH(보유·익일청산)만** NXT 를 따라간다 —
+    #: `false` 로 내리면 그 구간의 손절 트리거가 사라지므로 **되돌릴 때만** 쓴다.
+    #: 생략(`None`)하면 현행 값을 건드리지 않는다.
+    gap_hold_enabled: bool | None = None
+
+
+def _nxt_gap_window_repr():
+    """그날 NXT 단독 연속 구간 `"HH:MM:SS~HH:MM:SS"` — 없으면 `None`."""
+    try:
+        from src.engine import tick_channel_clock
+
+        start, end = tick_channel_clock.nxt_only_continuous_window()
+        if start is None or end is None:
+            return None
+        return f"{start}~{end}"
+    except Exception:  # pragma: no cover — never-raise
+        return None
+
+
+def _switch_windows_repr():
+    """그날 전환 허용 창 목록 — 운영자가 화면 없이 확인하는 유일한 채널."""
+    try:
+        from src.engine import tick_channel_clock, tick_channel_mode
+
+        return [
+            {"start": str(start), "end": str(end), "label": label}
+            for start, end, label in tick_channel_clock.switch_windows(
+                offset_secs=tick_channel_mode.switch_offset_secs(),
+            )
+        ]
+    except Exception:  # pragma: no cover — never-raise
+        return []
+
+
+@router.get("/tick-channel-mode", response_model=ApiResponse)
+async def get_tick_channel_mode():
+    """현재 리졸버 모드 + DB 저장값 + 유효 어휘."""
+    from src.db import system_config
+    from src.engine import tick_channel_mode
+
+    try:
+        stored = await system_config.get_tick_channel_resolver_mode()
+    except Exception:
+        stored = None
+    return ApiResponse(
+        success=True,
+        data={
+            "mode": tick_channel_mode.current_mode(),
+            "stored": stored,
+            "default": tick_channel_mode.DEFAULT_MODE,
+            "valid_modes": sorted(tick_channel_mode.VALID_MODES),
+            "config_key": tick_channel_mode.CONFIG_KEY,
+            # cycle294 §9-D — 전환 다이얼은 모드와 **별개 축**이다.
+            "switch_enabled": tick_channel_mode.switch_enabled(),
+            "switch_offset_secs": tick_channel_mode.switch_offset_secs(),
+            "switch_config_key": tick_channel_mode.SWITCH_ENABLED_KEY,
+            # cycle294 적대 검증 CRITICAL-1 — NXT 단독 연속 구간 다이얼 + 그날 창.
+            "gap_hold_enabled": tick_channel_mode.gap_hold_enabled(),
+            "gap_config_key": tick_channel_mode.GAP_HOLD_ENABLED_KEY,
+            "nxt_gap_window": _nxt_gap_window_repr(),
+            "switch_windows": _switch_windows_repr(),
+        },
+        message="",
+    )
+
+
+@router.put("/tick-channel-mode", response_model=ApiResponse)
+async def put_tick_channel_mode(req: TickChannelModeRequest):
+    """리졸버 모드 변경 — DB 저장 + 즉시 메모리 반영 (재시작 불요).
+
+    어휘 밖 값은 **422**(조용히 기본값으로 흡수하면 운영자가 무엇이 적용됐는지
+    모른다). DB 쓰기가 실패해도 메모리 반영은 시도한다 — 사고 중 `off` 는 이번
+    프로세스에서 듣는 것이 먼저다(다음 재시작에 되살아나는 것은 그 다음 문제).
+    """
+    from src.db import system_config
+    from src.engine import tick_channel_mode
+
+    mode = (req.mode or "").strip()
+    if mode not in tick_channel_mode.VALID_MODES:
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                f"mode must be one of {sorted(tick_channel_mode.VALID_MODES)}, "
+                f"got {req.mode!r}"
+            ),
+        )
+
+    persisted = True
+    try:
+        await system_config.set_tick_channel_resolver_mode(mode)
+    except Exception:
+        persisted = False
+        logger.exception("[tick_channel_mode] DB 저장 실패 — 메모리만 반영 시도")
+
+    applied = tick_channel_mode.apply_mode(mode)
+
+    # cycle294 §9-D — 선택 필드. 생략하면 현행 값 무접촉(부분 갱신)이라 모드만
+    # 바꾸는 기존 호출은 **byte 동일**하게 동작한다. 신규 엔드포인트 0 이 계약이다.
+    switch_applied = tick_channel_mode.switch_enabled()
+    switch_persisted: bool | None = None
+    if req.switch_enabled is not None:
+        switch_persisted = True
+        try:
+            await system_config.set_tick_channel_switch_enabled(bool(req.switch_enabled))
+        except Exception:
+            switch_persisted = False
+            logger.exception("[tick_channel_mode] switch_enabled DB 저장 실패 — 메모리만 반영 시도")
+        switch_applied = tick_channel_mode.apply_switch_enabled(bool(req.switch_enabled))
+
+    gap_applied = tick_channel_mode.gap_hold_enabled()
+    gap_persisted: bool | None = None
+    if req.gap_hold_enabled is not None:
+        gap_persisted = True
+        try:
+            await system_config.set_tick_channel_gap_hold_enabled(
+                bool(req.gap_hold_enabled),
+            )
+        except Exception:
+            gap_persisted = False
+            logger.exception("[tick_channel_mode] gap_hold DB 저장 실패 — 메모리만 반영 시도")
+        gap_applied = tick_channel_mode.apply_gap_hold_enabled(bool(req.gap_hold_enabled))
+
+    logger.warning(
+        "[tick_channel_mode] mode=%s persisted=%s switch_enabled=%s switch_persisted=%s"
+        " gap_hold=%s gap_persisted=%s — 운영자 변경 (즉시 반영)",
+        applied, persisted, switch_applied, switch_persisted, gap_applied, gap_persisted,
+    )
+    failed = [
+        label for label, ok in (
+            ("mode", persisted),
+            ("switch_enabled", switch_persisted),
+            ("gap_hold_enabled", gap_persisted),
+        )
+        if ok is False
+    ]
+    return ApiResponse(
+        success=True,
+        data={
+            "mode": applied,
+            "persisted": persisted,
+            "switch_enabled": switch_applied,
+            "switch_persisted": switch_persisted,
+            "gap_hold_enabled": gap_applied,
+            "gap_persisted": gap_persisted,
+        },
+        message=(
+            ""
+            if not failed
+            else f"DB 저장 실패({', '.join(failed)}) — 메모리만 반영됨(재시작 시 원복)"
+        ),
+    )

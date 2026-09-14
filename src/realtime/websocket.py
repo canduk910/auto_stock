@@ -22,7 +22,7 @@ from websockets.asyncio.client import ClientConnection
 from src.auth.token import token_manager
 from src.config import settings
 from src.db.system_logs import write_log
-from src.engine.daily_emit_cap import DailyEmitCap  # 사이클 197 — 41-cap WARNING 1회/키/일 (의존성 0, 순환 없음)
+from src.engine.daily_emit_cap import DailyEmitCap, KstDailyEmitCap  # 사이클 197 — 41-cap WARNING 1회/키/일 (의존성 0, 순환 없음)
 from src.realtime.handler import set_aes_keys
 
 logger = logging.getLogger(__name__)
@@ -54,6 +54,83 @@ _AUTO_RESTART_WINDOW_SECS = 3600.0    # 1시간 슬라이딩 윈도우
 # `_handle_raw` SUBSCRIBE SUCCESS 분기에서 메인 세션 + 이 tr_id 만 모듈 전역 AES 키 저장.
 # 보조 세션 또는 시세 SUBSCRIBE SUCCESS 는 skip — 체결통보 키 덮어쓰기 race 차단.
 _EXECUTION_NOTICE_TR_IDS = frozenset({"H0STCNI0", "H0STCNI9"})
+
+# cycle293 (2026-09-14) — cycle253 운영자 진단 프로브 튜플 제외 집합.
+#
+# 🔴 격리 기준이 **채널 → 프로브 정체성**으로 옮겨졌다. cycle253 은 "TICK 집계는
+# `H0UNCNT0` 만 센다" 는 **채널 동일성**에 프로브 격리를 얹었고, 그 덕분에 프로브가
+# K stale watcher(재등록) · universe guard(축출) · `delta_unsubscribe_dropped`(5분
+# delta 해제) · F1 재검증 어디에도 등장하지 않았다. cycle293 이 그 전용 채널을
+# **실제 구독**에 쓰기 시작하면서 그 추론이 죽었다 — 채널만 보면 이제 프로브와 실
+# 구독을 구분할 수 없고, 프로브를 그냥 노출하면 다음 `_scan_loop`(5분)이
+# `current - new_set` 으로 프로브를 해제해 측정을 끊는다.
+#
+# 그래서 격리를 "어느 채널인가" 가 아니라 "그 튜플이 프로브인가" 로 판정한다.
+# 집합은 `src/routes/realtime.py` 의 프로브 시작/종료가 유지한다(프로세스 메모리,
+# 20:00 `unsubscribe_all` 과 같은 수명). 비어 있는 것이 정상 운영 상태다 —
+# 프로브는 기본 OFF 이고 cap 3 이다.
+PROBE_EXCLUDED_TUPLES: set[tuple[str, str]] = set()
+
+#: 각 제외 항목이 등록된 KST 날짜. 🔴 **수명 관리가 이 dict 다.**
+#:
+#: 적대 검증(HIGH) — 종전 주석은 이 집합의 수명이 "20:00 `unsubscribe_all` 과
+#: 같다" 고 적었지만 `unsubscribe_all` 은 이 집합을 **비우지 않았다**. 회수 지점은
+#: `routes/realtime.py::_unsubscribe_probe_everywhere` 하나뿐이고 `_evict_stale_probes`
+#: 는 **다음 프로브 POST 진입 시에만** 돈다. 프로브를 stop 없이 두고 다음 POST 가
+#: 없으면 그 `(tr_id, ticker)` 가 프로세스 수명 내내 남고, cycle293 이 **같은
+#: 채널을 실 구독에 쓰기 시작**했으므로 그 종목의 라이브 구독이
+#: `get_subscribed_tickers()` 에서 조용히 사라진다 = K stale watcher 블라인드 ·
+#: `delta_unsubscribe_dropped` 미해제(실제 슬롯 누수) · 매 5분 재SEND ·
+#: `[tick_coverage]` 분모 감소 = 이 사이클이 없애려던 §5-B 피해 그대로다.
+#:
+#: 그래서 (a) `is_probe_excluded()` 가 **KST 날짜가 다르면 스스로 회수**하고
+#: (b) `WebsocketPool.unsubscribe_all()`/`stop()` 이 `reset_probe_exclusions()` 를
+#: 부른다. 어느 호출자도 남기지 못하는 구조가 정본이다.
+_PROBE_EXCLUSION_DAY: dict[tuple[str, str], str] = {}
+
+
+def _probe_exclusion_today() -> str:
+    try:
+        return datetime.now(_KST_TZ).date().isoformat()
+    except Exception:  # pragma: no cover — never-raise
+        return ""
+
+
+def register_probe_exclusion(tr_id: str, tr_key: str) -> None:
+    """이 튜플이 **프로브**임을 TICK 집계 쪽에 알린다 (cycle253 격리, cycle293 재기준).
+
+    `routes/realtime.py` 의 프로브 시작 경로만 부른다. 집합을 **재바인딩하지
+    않고 변형**한다 — `websocket_pool` 이 같은 객체를 import 로 들고 있다.
+    """
+    PROBE_EXCLUDED_TUPLES.add((tr_id, tr_key))
+    _PROBE_EXCLUSION_DAY[(tr_id, tr_key)] = _probe_exclusion_today()
+
+
+def unregister_probe_exclusion(tr_id: str, tr_key: str) -> None:
+    """프로브 종료·드롭 시 회수."""
+    PROBE_EXCLUDED_TUPLES.discard((tr_id, tr_key))
+    _PROBE_EXCLUSION_DAY.pop((tr_id, tr_key), None)
+
+
+def is_probe_excluded(tr_id: str, tr_key: str) -> bool:
+    """이 튜플을 TICK 집계에서 제외해야 하는가 (날짜 경과분은 여기서 자기 회수)."""
+    key = (tr_id, tr_key)
+    if key not in PROBE_EXCLUDED_TUPLES:
+        return False
+    day = _PROBE_EXCLUSION_DAY.get(key)
+    today = _probe_exclusion_today()
+    if day and today and day != today:
+        # 전날 잔존 — 라이브 구독을 은폐하기 전에 스스로 회수한다.
+        PROBE_EXCLUDED_TUPLES.discard(key)
+        _PROBE_EXCLUSION_DAY.pop(key, None)
+        return False
+    return True
+
+
+def reset_probe_exclusions() -> None:
+    """제외 등록 전부 회수 (20:00 `unsubscribe_all` · `stop` · 테스트 격리 seam)."""
+    PROBE_EXCLUDED_TUPLES.clear()
+    _PROBE_EXCLUSION_DAY.clear()
 
 # 구독 거절 감지 키워드 (E2, 2026-05-12) — msg1 대소문자 무시 substring 매칭.
 # rt_cd != "0" 1순위, 키워드는 보조. 한국어/영문 변형 누적.
@@ -88,6 +165,85 @@ def _is_rejection_response(rt_cd: str | None, msg1: str) -> bool:
     if any(kw in msg1 for kw in _REJECT_KEYWORDS_KO):
         return True
     return False
+
+
+#: cycle294 §7-B — 레거시 통합 요청 재라우팅 관측 cap (1회/ticker/일, KST 자기 리셋).
+_legacy_reroute_cap: "KstDailyEmitCap[str]" = KstDailyEmitCap()
+
+
+def _reroute_legacy_unified(tr_id: str, tr_key: str) -> str:
+    """cycle294 §7-B — 통합 채널 요청을 전용 채널로 되돌린다(레거시 호출자 구제).
+
+    `scheduler.py` 는 이 사이클의 무접촉 대상인데 그 안의 두 줄(익일청산 시가
+    수신 · 스윙 매수 직후)이 풀을 **우회해** 통합 채널로 직접 구독한다. 그 둘을
+    그대로 두면 「통합 구독 0」 이 성립하지 않는다 — `websocket.py` 가 그것을
+    잡을 수 있는 유일한 자리다.
+
+    🔴 재라우팅 조건은 **`tr_id` 가 정확히 통합일 때** 하나뿐이다. 3단계에서
+    통합은 아무도 의도적으로 고르지 않는 값이므로, 통합 요청 = 「리졸버를 안
+    거친 호출」 의 확실한 신호다. 체결통보(`H0STCNI0`/`H0STCNI9`)·장운영정보
+    (`H0UNMKO0`)·전용 2채널 요청은 이 함수를 **byte 동일**로 통과한다 — 그 넷 중
+    하나라도 재라우팅되면 포지션 등록·손절이 끊기거나 이중 채널이 생긴다.
+
+    풀의 세션들도 이 메서드를 쓰지만, 풀은 이미 리졸버가 고른 전용 채널을
+    넘기므로 첫 조건에서 빠져나간다(멱등).
+
+    ⚠️ 이것은 **증상 차단**이다. 근본 시정(그 두 줄을 리졸버 경유로 바꾸는 것)은
+    `scheduler.py` 2줄 치환이고 별도 승인 대상이다.
+    """
+    try:
+        from src.engine import tick_channel_mode
+        from src.engine.scanner import (
+            DEDICATED_TICK_TR_IDS,
+            TICK_TR_IDS,
+            subscribed_tick_tr_id,
+        )
+
+        # 「시세 채널이면서 전용이 아닌 것」 = 통합. 등가 비교(`tr_id == TICK_TR_ID`)를
+        # 쓰지 않는 이유는 cycle293 A3(`test_a3_no_equality_comparison_against_tick_tr_id`)
+        # 다 — 그 가드는 채널 판정을 **집합 멤버십**으로만 하도록 잠갔다. 두 정본
+        # 집합에서 파생하면 채널이 하나 더 생겨도 이 판정이 조용히 낡지 않는다.
+        if tr_id not in TICK_TR_IDS or tr_id in DEDICATED_TICK_TR_IDS:
+            return tr_id
+        if tick_channel_mode.current_mode() in (
+            tick_channel_mode.MODE_OFF,
+            tick_channel_mode.MODE_OBSERVE,
+            # 🔴 적대 검증 HIGH-1(부팅) 시정 — `enforce_low` 는 **HIGH(보유·
+            #    익일청산)를 스코프 밖**에 두는 단계적 롤아웃이다. 그런데 이
+            #    함수는 우선순위를 모르므로 그 단계에서 레거시 통합 요청을
+            #    전용 채널로 되돌리면 S1 의 안전장치가 통째로 무력화된다 —
+            #    실측: `tick_tr_id_for(HIGH)` 는 통합을 돌려주는데 세션은
+            #    전용 채널을 구독해 병행 dict 가 갈리고, 이어지는 해제가
+            #    없는 튜플을 겨눠 KIS `OPSP0003` + 영구 고아를 만든다.
+            #    레거시 직접 호출자 둘(익일청산 시가·스윙 매수 직후)은 전부
+            #    HIGH 성격이라 `enforce_low` 에서 통과시키는 것이 정합이다.
+            tick_channel_mode.MODE_ENFORCE_LOW,
+        ):
+            return tr_id                     # 롤백·다크런치·S1 은 오늘과 byte 동일
+        routed = subscribed_tick_tr_id(tr_key)     # 풀 `_ticker_to_tr_id` 우선
+        if not isinstance(routed, str) or routed == tr_id:
+            return tr_id
+        _emit_legacy_reroute(tr_key, tr_id, routed)
+        return routed
+    except Exception:  # pragma: no cover — never-raise
+        return tr_id                         # 재라우팅 실패가 구독을 막지 않는다
+
+
+def _emit_legacy_reroute(tr_key: str, from_tr_id: str, to_tr_id: str) -> None:
+    """`[tick_channel_legacy_reroute]` — 1회/(ticker)/일.
+
+    `scheduler.py` 두 줄의 **실제 발화 빈도**를 처음으로 재는 유일한 마커다.
+    """
+    try:
+        if not _legacy_reroute_cap.should_emit(tr_key):
+            return
+        logger.warning(
+            "[tick_channel_legacy_reroute] ticker=%s from=%s to=%s caller=legacy_direct",
+            tr_key, from_tr_id, to_tr_id,
+        )
+        _legacy_reroute_cap.mark_emitted(tr_key)
+    except Exception:  # pragma: no cover — never-raise
+        pass
 
 
 class KisWebSocket:
@@ -444,6 +600,8 @@ class KisWebSocket:
 
     # -- subscribe / unsubscribe / restore / verify --------------------------------
 
+
+
     async def subscribe(self, tr_id: str, tr_key: str, *, bypass_limit: bool = False) -> None:
         """종목 구독을 등록한다.
 
@@ -456,6 +614,7 @@ class KisWebSocket:
         ``_subscriptions`` set 도 add 안 함 → 다음 자연 재시도 시 일관 동작.
         ``bypass_limit=True`` (HIGH 보유/익일청산) 는 검사 skip — 손절 우선 보장.
         """
+        tr_id = _reroute_legacy_unified(tr_id, tr_key)
         if not bypass_limit:
             until = self._opsp_backoff_until.get((tr_id, tr_key), 0.0)
             now = _time.time()
@@ -493,14 +652,23 @@ class KisWebSocket:
             await self._send_subscribe(tr_id, tr_key, subscribe=False)
 
     def get_subscribed_tickers(self) -> set[str]:
-        """현재 TICK(H0UNCNT0) 구독 종목 집합을 반환한다 (Phase D 가시성 보강).
+        """현재 TICK 구독 종목 집합을 반환한다 (세 시세 채널 합집합).
 
         scheduler._report_tick_coverage 가 5분 주기로 호출해 미수신 종목 카운트 노출.
         체결통보(H0STCNI0/H0STCNI9)·장운영정보(H0UNMKO0) 등 비-시세 구독은 제외.
+
+        cycle293 — 종전에는 `tr_id == TICK_TR_ID` 등가 비교라 전용 채널
+        (`H0STCNT0`/`H0NXCNT0`)로 옮긴 종목이 이 집합에서 **조용히 사라졌다**.
+        그 집합은 K stale watcher · `already_in_pool` · `delta_unsubscribe_dropped`
+        · `[tick_coverage]` 분모의 공통 원천이라, 빠지면 그 종목이 영영 감시 밖에
+        놓이고 숫자만 좋아진다(§5-B).
         """
         # 지연 import: scanner→websocket 순환 의존 회피 (scanner에서 kis_ws 사용)
-        from src.engine.scanner import TICK_TR_ID
-        return {tr_key for tr_id, tr_key in self._subscriptions if tr_id == TICK_TR_ID}
+        from src.engine.scanner import TICK_TR_IDS
+        return {
+            tr_key for tr_id, tr_key in self._subscriptions
+            if tr_id in TICK_TR_IDS and not is_probe_excluded(tr_id, tr_key)
+        }
 
     def get_acked_tickers(self) -> set[str]:
         """KIS 정상 SUBSCRIBE SUCCESS 응답을 받은 TICK 구독만 반환 (G1, 2026-05-12).
@@ -509,8 +677,11 @@ class KisWebSocket:
         둘의 차이가 "SEND 후 무응답" 카운트 — 운영자가 즉시 식별 가능.
         체결통보·장운영정보 등 비-TICK 구독은 동일하게 제외.
         """
-        from src.engine.scanner import TICK_TR_ID
-        return {tr_key for tr_id, tr_key in self._subscriptions_acked if tr_id == TICK_TR_ID}
+        from src.engine.scanner import TICK_TR_IDS
+        return {
+            tr_key for tr_id, tr_key in self._subscriptions_acked
+            if tr_id in TICK_TR_IDS and not is_probe_excluded(tr_id, tr_key)
+        }
 
     async def _restore_subscriptions_after_reconnect(self) -> None:
         """재연결 직후 기존 구독을 다시 보내고 ACK set 을 비운다 (G1, 2026-05-12).
@@ -554,16 +725,26 @@ class KisWebSocket:
                 return
 
             # 지연 import: scanner→websocket 순환 의존 회피
-            from src.engine.scanner import TICK_TR_ID, ticker_last_tick
+            from src.engine.scanner import TICK_TR_IDS, ticker_last_tick
 
             now = datetime.now(_KST_TZ)
             threshold = timedelta(seconds=VERIFY_FRESHNESS_SECS)
             # TICK 구독만 검증 대상 — 체결통보(H0STCNI0/9), 장운영정보(H0UNMKO0) 등 제외.
             # sorted 로 결정론적 순서 — preview 로그 truncate 가 일관되게 동작.
-            subscribed = sorted(
-                tr_key for tr_id, tr_key in self._subscriptions
-                if tr_id == TICK_TR_ID
-            )
+            # cycle293 — 세 채널 합집합(등가 비교 금지). 재전송 tr_id 는 아래에서
+            # **그 종목이 실제로 구독된 채널**을 그대로 쓴다(리졸버의 판정이 아니라
+            # 구독 사실 — 틀린 채널로 재전송하면 KIS 가 OPSP0003 를 돌려준다).
+            # cycle293 Green (적대 검증 F7) — `PROBE_EXCLUDED_TUPLES` docstring 이
+            # 격리 대상으로 명시한 4곳 중 F1 재검증에만 필터가 빠져 있었다.
+            # 프로브는 진단 도구이므로 재연결 후 자동 재전송 대상이 아니다
+            # (프로브 상태는 `GET /api/realtime/channel-probe` 가 received=False
+            # 로 정직하게 알린다).
+            tick_channel_of = {
+                tr_key: tr_id
+                for tr_id, tr_key in self._subscriptions
+                if tr_id in TICK_TR_IDS and not is_probe_excluded(tr_id, tr_key)
+            }
+            subscribed = sorted(tick_channel_of)
             min_dt = datetime.min.replace(tzinfo=_KST_TZ)
             stale = [
                 t for t in subscribed
@@ -585,7 +766,9 @@ class KisWebSocket:
             for ticker in stale:
                 # SUBSCRIBE 메시지 1회 재전송 — _subscriptions set 은 이미 보유.
                 # 거절 응답이 오면 E2 가 자동으로 _subscriptions.discard 처리.
-                await self._send_subscribe(TICK_TR_ID, ticker, subscribe=True)
+                await self._send_subscribe(
+                    tick_channel_of[ticker], ticker, subscribe=True,
+                )
                 # KIS Rate Limit 보호 — 짧은 sleep
                 await asyncio.sleep(0.05)
         except Exception:

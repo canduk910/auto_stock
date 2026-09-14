@@ -19,7 +19,8 @@ from typing import Any, TYPE_CHECKING
 
 from src.api.condition import MIN_CHANGE_RATE, fetch_rising_stocks
 from src.db.system_config import get_price_filter, get_trade_amount_filter
-from src.engine.daily_emit_cap import DailyEmitCap
+from src.engine.daily_emit_cap import DailyEmitCap, KstDailyEmitCap
+from src.engine import no_feed_registry, tick_channel_clock, tick_channel_mode
 from src.realtime.websocket import kis_ws
 from src.realtime.websocket_pool import kis_ws_pool
 
@@ -503,6 +504,698 @@ TICK_TR_ID = "H0UNCNT0"
 TICK_TR_ID_KRX = "H0STCNT0"   # KRX 메인 전용 (09:00~15:39:59)
 TICK_TR_ID_NXT = "H0NXCNT0"   # NXT 프리/애프터 전용 (08:00~08:59:59, 15:40~20:00)
 
+# cycle293 (2026-09-14) — 세 시세 채널의 **단일 정본 집합**.
+#
+# 종전에는 `stale_diagnostics` 안에 같은 집합이 **함수 지역 변수**로 있어 아무도
+# import 할 수 없었고, 나머지 9파일은 `tr_id == TICK_TR_ID` 등가 비교를 썼다. 그
+# 등가 비교가 하나라도 남으면 전용 채널로 옮긴 종목이 `get_subscribed_tickers()`
+# 에서 **조용히 사라져** (a) K stale watcher 가 영원히 못 보고 (b) 유니버스 이탈
+# 종목이 영구 슬롯을 점유하고 (c) `already_in_pool` 미포함으로 매 5분 재SEND 하고
+# (d) `[tick_coverage] subscribed=` 분모가 줄어 **숫자만 좋아진다**(cycle252
+# 「은폐 금지」 계약 위반). 그래서 소비처는 전부 이 집합의 **멤버십**을 쓴다.
+#
+# ⚠️ 원소를 리터럴로 적는 것은 의도다 — 회귀 가드가 "세 채널을 담은 컬렉션
+#    리터럴은 소스에 딱 하나" 를 세어 두 번째 정본이 생기는 것을 막는다. 값이
+#    위 세 상수와 갈리지 않는 것은 `test_a7_tick_constants_unchanged` 가 그 세
+#    상수를 리터럴로 핀해서 보장한다.
+TICK_TR_IDS: frozenset[str] = frozenset({"H0UNCNT0", "H0STCNT0", "H0NXCNT0"})
+
+# 통합(`TICK_TR_ID`)이 **아닌** 전용 채널. "이 종목은 전용 채널로 옮겨졌는가" 를
+# 묻는 곳은 등가 비교가 아니라 이 집합의 멤버십으로 판정한다.
+DEDICATED_TICK_TR_IDS: frozenset[str] = frozenset({TICK_TR_ID_KRX, TICK_TR_ID_NXT})
+
+# ── cycle293 리졸버 관측 상태 ───────────────────────────────────────────────
+#: ticker → 오늘 그 종목에 **적용된** 채널.
+_channel_applied: dict[str, str] = {}
+#: ticker → 오늘 이미 한 번 채널을 옮겼는가(§6-D 백스톱 = 같은 날 재전환 금지).
+_channel_flipped_today: dict[str, bool] = {}
+#: 위 두 dict 의 KST 날짜 키 (자기 리셋).
+_channel_day: str = ""
+#: cycle294 §6-C — ticker → 오늘 이 종목이 **통합 채널 무송출 코호트**인가.
+#: 구독을 발사하는 시점에 확정하고, 매수 축 게이트는 이 스탬프만 읽는다.
+#: `_sync_channel_day()` 가 KST 날짜 경계에서 `_channel_applied` 와 함께 비운다.
+_channel_cohort: dict[str, bool] = {}
+#: 출처 미확인 판정을 받은 종목 (그날 누적 — `[tick_channel_provenance_unknown]` 의 n=).
+_channel_provenance_unknown: set[str] = set()
+#: 관측 cap — 키는 복합 문자열. `KstDailyEmitCap` 이 KST 날짜 경계를 자기 리셋한다.
+_channel_emit_cap: "KstDailyEmitCap[str]" = KstDailyEmitCap()
+
+
+def reset_tick_channel_observation_caps() -> None:
+    """관측 cap + 출처 미확인 집합 초기화 (모드 전환 시 `tick_channel_mode` 가 호출).
+
+    채널 판정 이력(`_channel_applied` / `_channel_flipped_today`)은 **건드리지
+    않는다** — 그것은 관측이 아니라 §6-D 플리커 백스톱의 상태다.
+    """
+    global _channel_emit_cap, _channel_provenance_unknown
+    _channel_emit_cap = KstDailyEmitCap()
+    _channel_provenance_unknown = set()
+
+
+def reset_tick_channel_state_for_test() -> None:
+    """채널 판정 이력까지 전부 초기화 (테스트 전용 seam)."""
+    global _channel_applied, _channel_flipped_today, _channel_day, _channel_cohort
+    _channel_applied = {}
+    _channel_flipped_today = {}
+    _channel_cohort = {}
+    _channel_day = ""
+    reset_tick_channel_observation_caps()
+    try:
+        from src.engine import tick_channel_clock
+
+        tick_channel_clock.reset_state_for_test()
+    except Exception:  # pragma: no cover — never-raise
+        pass
+
+
+def _channel_today() -> str:
+    try:
+        return datetime.now(KST_TZ).date().isoformat()
+    except Exception:  # pragma: no cover — never-raise
+        return ""
+
+
+def _sync_channel_day() -> None:
+    """KST 날짜가 바뀌면 판정 이력을 비운다 (날짜 키 자기 리셋)."""
+    global _channel_day
+    today = _channel_today()
+    if not today:
+        return
+    if _channel_day == "":
+        _channel_day = today
+        return
+    if _channel_day != today:
+        _channel_day = today
+        _channel_applied.clear()
+        _channel_flipped_today.clear()
+        # cycle294 §6-C — 코호트 스탬프는 **하루 수명**이다. 날짜 경계에서 비우지
+        # 않으면 「닫힘 우세」 단방향 래치가 **영구 좌초**가 되어, NXT 에 재편입한
+        # 종목(064550 계열)의 매수가 영원히 막힌다.
+        _channel_cohort.clear()
+        # cycle293 Green — `_channel_provenance_unknown` 도 날짜 경계에서 비운다.
+        # 종전에는 `reset_tick_channel_observation_caps()`(모드 전환 시에만 호출)
+        # 만이 이 집합을 비웠고 `_channel_emit_cap`(`KstDailyEmitCap`)은 스스로
+        # 리셋되므로, 마커는 매일 다시 뜨는데 `n=`/`sample=` 은 **프로세스 수명
+        # 누적**이었다 = 2일째부터 "그날 몇 건" 으로 읽으면 틀린 값이다.
+        _channel_provenance_unknown.clear()
+
+
+def _classify_channel(ticker: str) -> tuple[str, str, bool]:
+    """이 종목이 어느 채널로 가야 하는가 — **순수 판정**(상태 변경 0).
+
+    Returns: `(desired_tr_id, reason, decided)`.
+    `decided=False` = 판정 불가 ⇒ 호출자는 현행(`TICK_TR_ID`)을 유지한다.
+
+    ## 출처(provenance) 검사가 왜 필요한가 (§6-C)
+
+    `_full_universe_load_krx_primary` 가 KRX raw 로 `nxt_tradable=False` 를 2,674
+    종목에 **도장**하고 16:1x basics_refresh(부팅 날은 07:53~08:08)가 진실을
+    복원한다. 그 창 안에 `TIME_PRESUBSCRIBE`(07:59)가 들어 있어 09-14 실측으로
+    그 순간 **2,344/3,583(65.4%)** 이 도장 상태였고 그중 **420종목은 실제로
+    `True`**(NXT 지정 유니버스 602 중 69.8%)였다. 값을 그대로 믿으면 진짜 NXT
+    종목 420개를 NXT 체결을 실을 수 없는 채널로 보낸다 — 그래서 그 행의 raw 에
+    KIS `cptt_trad_tr_psbl_yn` 키가 있을 때만 권위 있는 값으로 취급한다(도장에는
+    그 키가 없다, 2,674/2,674 정확 일치).
+
+    보유 종목 특례는 **불필요하다** — 07:45:45 eager refresh 가 보유·익일청산
+    종목에 권위 있는 값을 도장 **전에** 주므로(그래서 `skipped_ttl=11`) 그들에게는
+    출처 검사가 즉시 통과한다.
+    """
+    try:
+        classified = bool(no_feed_registry.is_classified(ticker))
+    except Exception:
+        return TICK_TR_ID, "lookup_error", False
+    if not classified:
+        # cycle293 Green — **미지**(레지스트리 미적재)와 **송출 정상**을 갈랐다.
+        # 종전에는 `is_no_feed()` 의 "모르면 False" 가 둘을 `decided=True,
+        # reason="nxt_feed"` 로 접어 버려 INV-4("판정 실패 + 보유 = WARNING 으로
+        # 노출")가 **구조적으로 성립하지 않았다** — 레지스트리가 차가운 07:59
+        # 사전 구독 시점에 전 종목이 조용히 "판정 성공(통합 유지)" 으로 기록됐다.
+        return TICK_TR_ID, "not_classified", False
+    try:
+        no_feed = bool(no_feed_registry.is_no_feed(ticker))
+    except Exception:
+        return TICK_TR_ID, "lookup_error", False
+    if not no_feed:
+        # 통합 채널이 이 종목의 프레임을 정상 송출한다 — 현행 유지(분류는 성공).
+        # `nxt_tradable=True` 는 KRX 도장(항상 False)이 만들 수 없는 값이라
+        # 출처 검사 없이도 신뢰할 수 있다.
+        return TICK_TR_ID, "nxt_feed", True
+    try:
+        provenance_ok = bool(no_feed_registry.is_provenance_ok(ticker))
+    except Exception:
+        return TICK_TR_ID, "provenance_error", False
+    if not provenance_ok:
+        return TICK_TR_ID, "provenance_unknown", False
+    return TICK_TR_ID_KRX, "no_feed", True
+
+
+def _resolve_channel(
+    ticker: str, now=None, *, offset_secs: int | None = None, priority: str = "LOW",
+) -> tuple[str, str, bool]:
+    """cycle294 §1-E — **시각축 × 속성축** 합성. `(tr_id, reason)`.
+
+    시각축이 KRX 창을 돌려주면 속성축을 **보지 않는다**(그 창에는 L2 층이 존재
+    하지 않는다). 프리 창 **과 NXT 단독 연속 구간**(CRITICAL-1, HIGH 한정)에서만
+    `_classify_channel` 로 `nxt_false` 를 KRX 로 내린다 — 그 종목은 프리장에 **시장이 없어** 어느 채널이든 프레임이 0 이고
+    (NXT 미거래 + KRX 시가 단일가), KRX 에 두면 정규장 개장 첫 체결을 **전환
+    없이** 받는다(§2-C). 부수 효과로 전환 폭이 ~40% 줄어든다.
+
+    🔴 `_classify_channel` 의 통합 반환은 여기서 **전부 NXT 로 흡수된다** — 그것이
+    절대 규칙 1(통합 반환 0)의 구조적 보증이다. 속성축 본문은 byte 동일로 남긴다
+    (cycle293 의 출처 검사·극성·fail-open 근거를 재작성하지 않는다).
+
+    ## 프리 창 미판정의 폴백이 NXT 인 이유 (§3-B L2 — 비대칭)
+
+    모르는 종목을 KRX 로 보내면 진짜 `nxt_true` 의 프리장 체결을 **새로 잃는다**
+    (오늘은 통합 채널이 그것을 준다 ⇒ INV-1 위반). NXT 로 보내면 진짜
+    `nxt_false` 가 프레임 0 이 되는데 그 구간엔 그 종목의 시장이 없어 **잃을 것이
+    0** 이다. 잃을 수 있는 쪽을 보존한다.
+
+    ⚠️ 부수 발견(§3-D) — 그 방향 때문에 cycle293 이 출처 검사로 막던 **W2 도장
+    오염**(사전 구독 시각에 65.4%, 그중 420종목이 실제로는 `nxt_true`)의 **실패
+    비용이 3단계에서 0** 이 된다. 오염된 420종목이 정답인 NXT 로 간다. 출처
+    검사를 없애지는 않는다 — 프리 창에서 `nxt_false` 를 KRX 로 **내리는** 판단에는
+    여전히 권위가 필요하고, §2-C 의 전환 폭 축소 이득이 거기서 나온다.
+    """
+    if offset_secs is None:
+        offset_secs = tick_channel_mode.switch_offset_secs()
+    if now is None:
+        now = datetime.now(KST_TZ)
+    chan, why = tick_channel_clock.clock_channel(
+        now, offset_secs=offset_secs, priority=priority,
+    )
+    if chan == TICK_TR_ID_KRX:
+        # KRX 창에는 **L2 층이 존재하지 않는다** — 속성축을 보지 않으므로 판정
+        # 불가라는 상태 자체가 없다(09-14 16:39 실측이 그 채널의 종목 속성 무관
+        # 수신을 확정했다). 세 번째 원소를 `True` 로 돌려 INV-4 관측을 침묵시키는
+        # 것이 옳다 — 그 창에서 "모른다" 는 채널 선택을 하나도 바꾸지 않는다.
+        return TICK_TR_ID_KRX, why, True
+    desired, attr_reason, decided = _classify_channel(ticker)
+    if decided and desired == TICK_TR_ID_KRX:
+        return TICK_TR_ID_KRX, f"{why}|{attr_reason}", True
+    return TICK_TR_ID_NXT, f"{why}|{attr_reason}", bool(decided)
+
+
+def _stamp_cohort(ticker: str) -> None:
+    """cycle294 §6-C — 구독 발사 시점에 코호트를 **확신할 때만** 심는다.
+
+    🔴 심지 않는 경우(= 스탬프 부재)는 게이트에서 **열린다**(fail-open). 그
+    방향의 근거는 §6-D 비대칭이다 — 닫힘 오류는 **레지스트리 전체 실패 한 번**
+    으로 전 종목에 동시에 일어나고(상관된 실패 = 5전략 매수 0), 열림 오류는
+    종목별로 독립이다. 절대 규칙 5 가 이 사이클 최대 위험으로 지목한 것이
+    전자다.
+
+    스탬프 부재가 구조적으로 0 에 가까운 근거 = cycle293 이
+    `subscribe_filtered_stocks` 안에서 리졸버보다 **먼저**
+    `no_feed_registry.ensure_fresh(_channel_probe)` 를 부르게 한 덕이다
+    (`test_a22_registry_is_warmed_before_the_resolver_runs` 가 AST 로 잠갔다).
+    그 가드가 붉어지면 이 fail-open 의 전제가 무너진다 — **두 가드는 서로를
+    인용한다**.
+    """
+    try:
+        if not no_feed_registry.is_classified(ticker):
+            return                                  # 미분류 → 스탬프 없음
+        nf = bool(no_feed_registry.is_no_feed(ticker))
+        if nf and not no_feed_registry.is_provenance_ok(ticker):
+            return                                  # 출처 미확인 → 스탬프 없음
+        _sync_channel_day()
+        # 🔴 하루 단방향(닫힘 우세) 래치 — 매수를 **여는** 방향의 하루 중 변화는
+        #    다음 날로 미룬다. 매일 리셋되므로 cycle293 §6-D 가 금지한 '영구 좌초
+        #    래치' 와 다르다(그건 채널 축이고 이건 매수 축이며 수명이 하루다).
+        _channel_cohort[ticker] = bool(_channel_cohort.get(ticker, False) or nf)
+    except Exception:  # pragma: no cover — never-raise
+        return
+
+
+def clock_desired_tick_tr_id(ticker: str, *, priority: str = "LOW", now=None) -> str:
+    """모드를 **보지 않는** 시각축×속성축 희망 채널 — 순수·관측 전용.
+
+    `desired_tick_tr_id` 는 모드 스코프를 거치므로 `off`/`observe` 에서 통합을
+    돌려준다. 그러면 "전환 창을 지나쳤는데 몇 종목이 안 옮겨졌나" 를 세는 관측이
+    모드에 따라 **항상 0** 이 된다(적대 검증 MEDIUM-3(부팅) — `off` 를 창 안에
+    누르면 상태가 갈린 채 고정되는데 그 사실이 로그에 안 남았다).
+    """
+    try:
+        chan, _reason, _decided = _resolve_channel(ticker, now, priority=priority)
+        return chan
+    except Exception:  # pragma: no cover — never-raise
+        return TICK_TR_ID
+
+
+def restamp_cohorts(tickers) -> int:
+    """🔴 적대 검증 CRITICAL-1(부팅)/F-2(매수축) 시정 — 코호트 스탬프 **재시도**.
+
+    종전에는 스탬프를 심는 유일한 자리가 `tick_tr_id_for` 였고, LOW 종목은
+    `subscribe_filtered_stocks` 의 `already_in_pool` skip 이 그 호출보다 **앞**에
+    있어 그날 **07:59 단 한 번만** 스탬프 기회를 가졌다. 그런데 07:59 는
+    `_full_universe_load_krx_primary` 의 `nxt_tradable=False` 도장이 마스터의
+    65.4% 를 덮고 있는 시각이라(cycle293 §6-C 실측), 그 순간 출처 검사가 실패한
+    종목은 **영영 미스탬프**로 남았다 — 08:08 에 진실이 복원돼도 다시 심지
+    않았다. 그 종목이 실제로 `nxt_false` 면 09:00 부터 KRX 프레임을 받으면서
+    매수 게이트는 열린 채가 된다 = **승인 없는 B-2(매수 개방) 부분 발생**.
+
+    이 함수는 구독 여부와 무관하게 주어진 집합 전체를 다시 스탬프한다. 스탬프는
+    **닫힘 우세 단방향 래치**라 재호출이 매수를 더 열 수 없고(여는 방향의 변화는
+    다음 날로 미뤄진다), 순수 메모리 연산이라 부작용이 없다. 배선 = 5분
+    `subscribe_filtered_stocks` + 120초 `stale_watcher_core` 둘 다 `ensure_fresh`
+    **직후**(레지스트리가 더워진 뒤라야 판정이 성립한다).
+
+    Returns: 이번 호출로 새로 스탬프된 종목 수(관측용).
+    """
+    before = len(_channel_cohort)
+    try:
+        for ticker in dict.fromkeys(tickers or ()):
+            _stamp_cohort(ticker)
+    except Exception:  # pragma: no cover — never-raise
+        return 0
+    return max(0, len(_channel_cohort) - before)
+
+
+def tick_buy_cohort_blocked(ticker: str) -> bool:
+    """오늘 이 종목이 **무송출 코호트**로 확정됐는가 — 읽기 전용·순수.
+
+    `risk._tick_buy_eval_blocked_by_channel` 이 틱마다 부르는 유일한 공개 술어다.
+    상태를 변이하지 않는다(`_sync_channel_day` 의 날짜 경계 자기 정리는 관측이
+    아니라 자기 정리라 예외다). 모드를 **보지 않는다** — `off` 는 이미 전용
+    채널에 올라간 구독을 되돌리지 않으므로(§9-B), 모드를 보면 사고 중에 누르는
+    안전 조치가 5전략의 매수를 그 코호트에 열어 준다.
+    """
+    try:
+        _sync_channel_day()
+        return bool(_channel_cohort.get(ticker, False))
+    except Exception:  # pragma: no cover — never-raise
+        return False
+
+
+def note_channel_switched(ticker: str, tr_id: str) -> None:
+    """cycle294 §4-C S6 — **성공한** 전환만 적용 이력·전환 예산에 기록한다.
+
+    실패가 예산(`_channel_flipped_today`)을 먹으면 그날 재시도가 막힌다.
+    """
+    try:
+        _sync_channel_day()
+        _channel_applied[ticker] = tr_id
+        _channel_flipped_today[ticker] = True
+    except Exception:  # pragma: no cover — never-raise
+        pass
+
+
+def _mode_scoped_desired(ticker: str, priority: str, now=None) -> tuple[str, str]:
+    """모드 스코프를 적용한 판정 — `(desired, reason)`.
+
+    모드가 통합을 강제하는 경우(`off`/`observe`/`enforce_low`×HIGH)만 통합이
+    나온다. 그 밖에는 §1-E 합성 결과 = **전용 2채널 중 하나**다(절대 규칙 1).
+    """
+    mode = tick_channel_mode.current_mode()
+    if mode == tick_channel_mode.MODE_OFF:
+        return TICK_TR_ID, "kill_switch_off"
+    resolved, reason, _decided = _resolve_channel(ticker, now, priority=priority)
+    if mode == tick_channel_mode.MODE_OBSERVE:
+        return TICK_TR_ID, reason
+    if mode == tick_channel_mode.MODE_ENFORCE_LOW and str(priority).upper() == "HIGH":
+        return TICK_TR_ID, reason
+    return resolved, reason
+
+
+def desired_tick_tr_id(ticker: str, *, priority: str = "LOW", now=None) -> str:
+    """**순수** 판정 — 상태 변경 0 · 로그 0.
+
+    `tick_tr_id_for` 는 순수 함수가 **아니다**(아래 docstring). 판정만 알고 싶은
+    호출자 — 해제 경로 · 카나리아 집계 · 읽기 전용 진단 · 전환 목표 산출 — 는 이
+    함수를 쓴다. 해제에 판정 이력을 심으면 그 종목의 하루 전환 예산을 **사라지는
+    종목**이 먹어 버려서, 같은 날 재구독이 분류와 반대 채널로 나간다.
+
+    ⚠️ `now` 기본값은 상수 `None` 이다 — `def f(now=datetime.now())` 로 쓰면 기본
+    인자가 **모듈 로드 시각에 한 번** 평가돼 부팅 프로세스가 종일 그 시각을 본다
+    (= 전 종목이 프리 창에 영구 고착).
+    """
+    desired, _reason = _mode_scoped_desired(ticker, priority, now)
+    return desired
+
+
+def applied_tick_channel(ticker: str) -> str | None:
+    """오늘 이 종목에 **적용된** 채널 (없으면 `None`) — 읽기 전용 접근자.
+
+    `_channel_applied` 를 외부에서 직접 읽지 않게 한다. 이 값은 모드를 내려도
+    (`off`) 지워지지 않는다 — 구독이 되돌아가지 않으므로 "무엇이 적용돼 있는가"
+    도 되돌아가면 안 된다(§9-B: 이미 전용 채널에 올라간 종목은 다음 `_boot`
+    까지 그 채널에 남는다).
+    """
+    try:
+        _sync_channel_day()
+        return _channel_applied.get(ticker)
+    except Exception:  # pragma: no cover — never-raise
+        return None
+
+
+def subscribed_tick_tr_id(ticker: str, *, priority: str = "LOW", now=None) -> str:
+    """그 종목이 **실제로 구독된** TICK 채널, 모르면 순수 판정 (해제 경로 전용).
+
+    해제(UNSUBSCRIBE)는 판정이 아니라 **사실**을 따라야 한다 — 틀린 채널로
+    해제하면 KIS 가 `OPSP0003 UNSUBSCRIBE ERROR not found!` 를 돌려주고(cycle215~218
+    이 잡은 그 ERROR) 구 채널 튜플이 **영구 고아**로 41 슬롯을 잠식한다. 그래서
+    풀의 병행 dict `_ticker_to_tr_id` 를 1순위로 읽고, 없을 때만 순수 판정으로
+    폴백한다(풀 미사용 환경·부팅 전 구독).
+    """
+    try:
+        from src.realtime.websocket_pool import kis_ws_pool as _pool
+
+        mapping = getattr(_pool, "_ticker_to_tr_id", None)
+        if isinstance(mapping, dict):
+            current = mapping.get(ticker)
+            if isinstance(current, str) and current in TICK_TR_IDS:
+                return current
+    except Exception:  # pragma: no cover — never-raise
+        pass
+    return desired_tick_tr_id(ticker, priority=priority, now=now)
+
+
+def tick_tr_id_for(ticker: str, *, priority: str = "LOW", now=None) -> str:
+    """이 종목의 체결 시세를 받을 TICK 채널 TR_ID 를 고른다 (cycle294 §1-E).
+
+    🔴 **순수 함수가 아니다** — `await`/DB/HTTP 는 없지만(그 성질은 AST 가드가
+    강제한다) `_stamp_cohort`(매수 축 코호트)와 `_apply_channel_decision`(하루
+    1회 전환 예산)을 통해 상태를 변이하고 관측 마커를 낸다. 그래서 **구독을
+    실제로 발사하는 자리에서만** 부른다. 판정만 필요한 곳(해제·집계·게이트)은
+    `desired_tick_tr_id`(순수) 또는 `subscribed_tick_tr_id`(구독 사실 우선)를 쓴다.
+
+    🔴 **정상 경로에서 통합 채널을 반환하지 않는다**(절대 규칙 1). 판정 실패의
+    폴백은 통합이 아니라 **시각 기반 기본값**이다 — 프리 창은 NXT, 그 밖은 KRX
+    (§3-B). 통합이 나오는 유일한 자리는 아래 모드 분기 셋(`off` 롤백 ·
+    `observe` 다크런치 · `enforce_low`×HIGH)뿐이다.
+
+    `priority` 는 `enforce_low` 단계(HIGH = 보유·익일청산 제외)를 위해 필요하다 —
+    가설이 어떤 보유 종목에 대해 틀렸을 때 잃는 것이 손절 커버리지다.
+    """
+    mode = tick_channel_mode.current_mode()
+    if mode == tick_channel_mode.MODE_OFF:
+        # 롤백 위치 — 판정도 관측도 하지 않는다(배포 전과 동일).
+        return TICK_TR_ID
+    resolved, reason, decided = _resolve_channel(ticker, now, priority=priority)
+    if not decided:
+        # INV-4 — 판정 불가를 **사람에게 올린다**. 3단계의 L2 fail-open 은 프리
+        # 창에서 NXT 로 떨어지는데(§3-B), 그 선택이 옳았는지는 아무도 모른다.
+        # 보유(HIGH) 종목이면 종목별 WARNING 으로 따로 남는다 — 그 종목의 손절이
+        # REST 폴에만 의존하게 되고 REST 폴은 donchian·kojiro 두 전략만 덮는다.
+        _emit_channel_undecided(ticker, priority, reason)
+    if mode == tick_channel_mode.MODE_OBSERVE:
+        # 다크런치 — 판정만 남기고 채널은 바꾸지 않는다(행위 0). 적용 이력도
+        # 기록하지 않는다(기록하면 `enforce` 로 올리는 순간이 '재전환' 이 되어
+        # 백스톱이 첫 적용을 막는다).
+        _emit_channel_resolve(ticker, mode, resolved, TICK_TR_ID, reason)
+        return TICK_TR_ID
+    if mode == tick_channel_mode.MODE_ENFORCE_LOW and str(priority).upper() == "HIGH":
+        # S1 은 HIGH(보유·익일청산)를 스코프 **밖**에 둔다 — 적용 이력도 건드리지
+        # 않는다(HIGH 호출이 LOW 의 전환 예산을 먹으면 안 된다).
+        return TICK_TR_ID
+    # 🔴 코호트 스탬프는 적용 **앞**이다 — 적용이 예외로 빠져도 구독이 나간
+    #    종목에는 스탬프가 남아야 한다(§6-C · A13).
+    _stamp_cohort(ticker)
+    applied = _apply_channel_decision(ticker, resolved, reason)
+    _emit_channel_resolve(ticker, mode, resolved, applied, reason)
+    return applied
+
+
+def _apply_channel_decision(ticker: str, desired: str, reason: str) -> str:
+    """§6-D 백스톱 — **같은 종목은 하루에 한 번만 채널을 옮긴다.**
+
+    래치는 두지 않는다(양방향) — "한 번 no_feed 면 영구 전용 채널" 로 만들면
+    064550 처럼 NXT 에 재편입한 종목을 NXT 체결을 못 받는 채널에 영구 좌초시킨다
+    (09-02 16:06 `False` → 09-14 07:59:09 `True` 실측이 전환의 양방향성을 증명한다).
+    대신 그날 두 번째 전환만 막는다 — 채널 왕복(KIS 공지 「비정상 케이스 2:
+    무한 등록/해제」)을 값싸게 차단한다. **시간 창 리터럴은 두지 않는다**(C-2) —
+    오염 창의 양끝이 일정 파생값이고 그 일정은 이미 두 번 움직였다.
+    """
+    try:
+        _sync_channel_day()
+        current = _channel_applied.get(ticker)
+        if current is None:
+            _channel_applied[ticker] = desired
+            return desired
+        if desired == current:
+            return current
+        if _channel_flipped_today.get(ticker):
+            _emit_channel_flip(ticker, current, desired, reason, blocked=True)
+            return current
+        _channel_flipped_today[ticker] = True
+        _channel_applied[ticker] = desired
+        _emit_channel_flip(ticker, current, desired, reason, blocked=False)
+        return desired
+    except Exception:  # pragma: no cover — never-raise (관측 실패가 판정을 막지 않는다)
+        _trace_channel_observer_failure("[tick_channel_flip]", ticker)
+        return desired
+
+
+def _trace_channel_observer_failure(marker: str, key: str) -> None:
+    try:
+        from src.engine.observer_trace import trace_observer_failure
+
+        trace_observer_failure(marker, key, None, dest_logger=logger)
+    except Exception:  # pragma: no cover — 2차 예외도 흡수
+        pass
+
+
+def _emit_channel_resolve(
+    ticker: str, mode: str, desired: str, applied: str, reason: str,
+) -> None:
+    """`[tick_channel_resolve]` — 1회/(ticker, 채널)/일.
+
+    통합 유지 판정(`desired == TICK_TR_ID`)은 남기지 않는다 — 하루 ~3,000행이
+    되고 판독 가치가 0이다. 카운트는 `[tick_channel_config]` 가 담당한다.
+
+    ⚠️ **`applied=` 는 리졸버가 고른 값이지 풀이 수락한 값이 아니다.** 이미
+    구독 중인 종목에 다른 채널을 요청하면 풀이 §3-C(장중 전환 금지)에 따라
+    요청을 버리고 현행 채널을 유지한다 — 그 사실은 같은 (ticker)/일의
+    `[tick_channel_request_denied]` 로 읽는다(그 행이 없으면 수락된 것이다).
+    그리고 "정말로 두 채널에 동시 구독돼 있는가" 는 세 번째 마커
+    `[tick_channel_dual_detected]`(전 세션 전수 대조)가 따로 답한다.
+    """
+    if desired not in DEDICATED_TICK_TR_IDS:
+        return
+    # ⚠️ cycle293 마커 5종은 **완성된 문자열**로 남긴다(lazy %-args 금지) —
+    #   회귀 가드가 `record.args` 가 빈 것을 전제로 `record.message` 를 직접 읽고,
+    #   운영 grep 도 최종 문자열만 본다. 인자를 남기면 `message % args` 가 깨진다.
+    _channel_emit_cap.emit_once(
+        f"resolve|{ticker}|{desired}",
+        logger.info,
+        f"[tick_channel_resolve] ticker={ticker} mode={mode} would={desired} "
+        f"applied={applied} reason={reason} provenance=cptt_key",
+    )
+
+
+def _emit_channel_undecided(ticker: str, priority: str, reason: str) -> None:
+    """`[tick_channel_provenance_unknown]` — 판정 불가를 사람에게 올린다 (INV-4).
+
+    fail-open 은 "모르면 blind 유지" 라서 보수적이지 않다 — 보유 종목에서 판정이
+    실패하면 그 종목은 계속 blind 이고, 그 사실이 로그에 없으면 아무도 모른다.
+    그래서 cap 키에 `priority` 를 넣어 **보유(HIGH) 종목의 판정 실패는 따로**
+    남는다. 그 종목의 손절은 REST 폴에만 의존하고, REST 폴은 donchian·kojiro 두
+    전략만 덮는다(BFB/VCP 가 잡으면 종일 손절 평가 0).
+    """
+    try:
+        _sync_channel_day()
+        _channel_provenance_unknown.add(ticker)
+        is_high = str(priority).upper() == "HIGH"
+        # cycle293 Green — cap 키를 **먼저** 만들고 `emit_once` 가 억제하는지
+        # 판정한 뒤에만 `sorted(...)` 를 돈다. 그 집합은 W2 도장 창에서 수천
+        # 개까지 커질 수 있고 이 함수는 `risk.on_tick`(틱 경로)에서도 도달
+        # 가능하다 — 관측이 cap 밖에서 일하면 안 된다.
+        #
+        # 그리고 **보유(HIGH)만 종목별로** WARNING 을 낸다. INV-4 가 요구하는
+        # 것은 "판정 실패 + 보유 = 사람에게 올린다" 이고, LOW 미지까지 종목별로
+        # 내면 레지스트리가 차가운 첫 사이클에 수천 행이 된다. LOW 는 그날 1행
+        # 요약(n=/sample=)으로 규모만 남긴다.
+        key = f"undecided|{ticker}|{priority}" if is_high else "undecided|low_summary"
+        if not _channel_emit_cap.should_emit(key):
+            return
+        sample = sorted(_channel_provenance_unknown)[:5]
+        msg = (
+            f"[tick_channel_provenance_unknown] ticker={ticker} priority={priority} "
+            f"reason={reason} n={len(_channel_provenance_unknown)} sample={sample}"
+        ) if is_high else (
+            f"[tick_channel_provenance_unknown] ticker=- priority=LOW "
+            f"reason={reason} n={len(_channel_provenance_unknown)} sample={sample}"
+        )
+        # peek→로그→mark (cycle226 D-3) — 로그 자기실패가 그날 관측을 지우지 않는다.
+        logger.warning(msg)
+        _channel_emit_cap.mark_emitted(key)
+    except Exception:  # pragma: no cover — never-raise
+        _trace_channel_observer_failure("[tick_channel_provenance_unknown]", ticker)
+
+
+def _emit_channel_flip(
+    ticker: str, from_tr_id: str, to_tr_id: str, reason: str, *, blocked: bool,
+) -> None:
+    """`[tick_channel_flip]` — 채널 전환 시도(성공·차단 모두), 1회/(ticker,전환,차단)/일.
+
+    🔴 **cap 이 반드시 있어야 한다.** `same_day_blocked=1` 분기는 일시적
+    이벤트가 아니라 **지속 상태**다 — `_apply_channel_decision` 이 차단 시
+    `_channel_applied` 를 바꾸지 않으므로 판정이 계속 어긋나 있으면 **모든 후속
+    호출**이 그 분기를 다시 밟는다. 무cap 이면 `risk.on_tick` 계열에서 도달할 때
+    틱당 1행이 되고(실측 200틱 → 200행) `_DbLogHandler` 가 `system_logs` 로
+    적재해 cycle237(donchian 청산 로그 하루 1만 행)과 같은 폭주가 된다.
+    """
+    try:
+        _channel_emit_cap.emit_once(
+            f"flip|{ticker}|{from_tr_id}|{to_tr_id}|{1 if blocked else 0}",
+            logger.warning,
+            f"[tick_channel_flip] ticker={ticker} from={from_tr_id} to={to_tr_id} "
+            f"reason={reason} same_day_blocked={1 if blocked else 0}",
+        )
+    except Exception:  # pragma: no cover — never-raise
+        _trace_channel_observer_failure("[tick_channel_flip]", ticker)
+
+
+def emit_tick_channel_config(tickers) -> None:
+    """`[tick_channel_config]` — 하루 1행 **배포 카나리아** (§9-A).
+
+    이 행이 없으면 배포가 실제로 반영됐는지, `resolved_krx` 가 0이 아닌지(= S0
+    다크런치의 진행 게이트)를 알 수 없다. 판정은 `_classify_channel` 순수 호출만
+    쓴다 — 관측이 전환 이력(`_channel_flipped_today`)을 소모하면 안 된다.
+
+    🔴 **레벨이 WARNING 인 것은 의도다.** `log_metrics_collector` 의
+    `pattern_by_level` 은 `{WARNING, ERROR, CRITICAL}` 만 21:30 일일 리포트
+    `top_patterns` 에 넣는다 — INFO 로 두면 **배포 반영 여부가 리포트에 한 글자도
+    안 뜬다**(cycle245 가 `[ratio_cap_config]` 로 겪은 그 함정). 하루 1행이라
+    비용은 0 이다.
+
+    `unclassified=` 는 H1(사전 구독 코호트 누락)의 판독 축이다 — 레지스트리가
+    차가운 순간에 이 값이 크면 `resolved_krx` 가 작은 이유가 "옮길 게 없다" 가
+    아니라 "아직 분류를 못 했다" 다.
+    """
+    try:
+        now = datetime.now(KST_TZ)
+        # cycle294 §11-A — 표 파생 경계 3개를 하루 1행으로 남긴다. 이 호출이
+        # `subscribe_filtered_stocks` 를 타므로 사실상 그날 **첫 구독 시점**의
+        # 카나리아다(07:59 사전 구독). 실패해도 never-raise 다.
+        tick_channel_clock.emit_clock_config(
+            now, offset_secs=tick_channel_mode.switch_offset_secs(),
+        )
+        # cycle294 §2-D — 프리 창이 닫힌 뒤 그날 프리 창 프레임 실측을 남긴다
+        # (창 안에서는 건수가 확정되지 않아 발화하지 않는다). 기대값 = 0행.
+        tick_channel_clock.emit_pre_window_frame_summary(now)
+
+        mode = tick_channel_mode.current_mode()
+        resolved_krx = 0
+        resolved_unified = 0
+        provenance_ok = 0
+        provenance_unknown = 0
+        unclassified = 0
+        # cycle294 §11-B — 라벨 3분할. `resolved_*` 는 **속성축**(cycle293) 집계라
+        # 3단계에서는 "채널이 어디로 갔나" 를 더 이상 답하지 못한다. 실제 적용
+        # 채널은 시각축이 정하므로 `clock_krx`/`clock_nxt` 를 따로 센다. 구 라벨을
+        # **지우지 않는** 이유 = cycle293 D+1 판독 사슬(`resolved_unified=0` 이
+        # 3단계 성공 서명)이 그 이름에 걸려 있다. ⚠️ 배포 전후 grep 합산 금지.
+        clock_krx = 0
+        clock_nxt = 0
+        cohort_no_feed = 0
+        for ticker in dict.fromkeys(tickers or ()):
+            desired, _reason, _decided = _classify_channel(ticker)
+            if desired in DEDICATED_TICK_TR_IDS:
+                resolved_krx += 1
+            else:
+                resolved_unified += 1
+            try:
+                chan, _why, _decided = _resolve_channel(ticker, now)
+                if chan == TICK_TR_ID_NXT:
+                    clock_nxt += 1
+                elif chan == TICK_TR_ID_KRX:
+                    clock_krx += 1
+            except Exception:
+                pass
+            try:
+                if tick_buy_cohort_blocked(ticker):
+                    cohort_no_feed += 1
+            except Exception:
+                pass
+            try:
+                if not no_feed_registry.is_classified(ticker):
+                    unclassified += 1
+            except Exception:
+                unclassified += 1
+            try:
+                if no_feed_registry.is_provenance_ok(ticker):
+                    provenance_ok += 1
+                else:
+                    provenance_unknown += 1
+            except Exception:
+                provenance_unknown += 1
+        _channel_emit_cap.emit_once(
+            f"config|{mode}|{_clock_phase(now)}",
+            logger.warning,
+            f"[tick_channel_config] mode={mode} resolved_krx={resolved_krx} "
+            f"resolved_unified={resolved_unified} clock_krx={clock_krx} "
+            f"clock_nxt={clock_nxt} cohort_no_feed={cohort_no_feed} "
+            f"provenance_ok={provenance_ok} "
+            f"provenance_unknown={provenance_unknown} unclassified={unclassified}",
+        )
+        _emit_tick_buy_gate(tickers)
+    except Exception:  # pragma: no cover — never-raise
+        _trace_channel_observer_failure("[tick_channel_config]", "-")
+
+
+def _clock_phase(now) -> str:
+    """관측 cap 을 가르는 **시각 구간 라벨** — 리터럴 0건(시각축 leaf 파생).
+
+    🔴 적대 검증 CRITICAL-2(부팅)/F-3(매수축) 시정 — 종전에는 cap 키가
+    `config|{mode}` · `"buy_gate"` 라 **하루 1행**이었고, 그 1행은 07:59 사전
+    구독의 `subscribe_filtered_stocks` 에서 나왔다. 그 시각은 W2 도장 오염이
+    최악이라 `[tick_buy_gate]` 가 매일 `unstamped=거의 전부` 를 찍었고,
+    `cohort_no_feed` 도 늘 0 이었다 — fail-open 을 재는 **유일한 계측기**가
+    결함과 무관하게 항상 같은 값을 내니 아무것도 못 잡는다. 구간 라벨을 키에
+    넣어 프리 창 1행 + 정규장 창 1행(= 스탬프가 다 심긴 뒤)을 남긴다.
+    """
+    try:
+        _chan, reason = tick_channel_clock.clock_channel(
+            now, offset_secs=tick_channel_mode.switch_offset_secs(),
+        )
+        return str(reason).split("|")[0]
+    except Exception:  # pragma: no cover — never-raise
+        return "unknown"
+
+
+def _emit_tick_buy_gate(tickers) -> None:
+    """`[tick_buy_gate] stamped_no_feed= stamped_feed= unstamped=` — 하루 1행 WARNING.
+
+    §6-D 의 fail-open(스탬프 부재 = 매수를 **열어 둔다**)이 조용하지 않게 만드는
+    유일한 장치다. `unstamped` 가 크면 스탬프 배선이 깨진 것이고, 그러면 매수 축이
+    통제 없이 열려 있다는 뜻이다 — 그 상태가 리포트에 뜨지 않으면 아무도 모른다.
+
+    🔴 **판독 규칙(적대 검증 CRITICAL-2 시정 이후)** — 이 마커는 하루 **두 행**이다.
+    cap 키가 `buy_gate|<시각 구간>` 이라 프리 창에서 1행, 정규장 창에서 1행 나온다.
+    **판단은 정규장 창 행으로 한다** — 프리 창 행의 `unstamped` 는 W2 도장 오염
+    (사전 구독 시각에 마스터의 65.4%)을 재는 값이라 크게 나오는 것이 정상이고,
+    그 값으로 배선을 판정하면 매일 거짓 경보다. 정규장 창 행에서도 `unstamped`
+    가 크면 그때가 진짜 결함이다(`restamp_cohorts` 가 5분·120초 두 배선에서
+    돌기 때문에 08:10 이후에는 0 에 수렴해야 한다).
+
+    `unstamped` 가 구조적으로 0 에 가까운 근거 = cycle293
+    `test_a22_registry_is_warmed_before_the_resolver_runs` 가 "리졸버 호출 **전에**
+    `ensure_fresh`" 를 AST 로 잠갔다. 그 가드가 붉어지면 이 fail-open 의 전제가
+    무너진다 — **두 가드를 서로 인용한다**.
+    """
+    try:
+        stamped_no_feed = 0
+        stamped_feed = 0
+        unstamped = 0
+        for ticker in dict.fromkeys(tickers or ()):
+            if ticker in _channel_cohort:
+                if _channel_cohort.get(ticker):
+                    stamped_no_feed += 1
+                else:
+                    stamped_feed += 1
+            else:
+                unstamped += 1
+        _channel_emit_cap.emit_once(
+            f"buy_gate|{_clock_phase(datetime.now(KST_TZ))}",
+            logger.warning,
+            f"[tick_buy_gate] stamped_no_feed={stamped_no_feed} "
+            f"stamped_feed={stamped_feed} unstamped={unstamped}",
+        )
+    except Exception:  # pragma: no cover — never-raise
+        _trace_channel_observer_failure("[tick_buy_gate]", "-")
+
 
 async def scan_stocks() -> list[str]:
     """당일 급등 종목을 스캔하여 매수 후보를 반환한다.
@@ -959,6 +1652,62 @@ async def subscribe_filtered_stocks(
     extra = extra_tickers or []
     all_tickers = list(dict.fromkeys(tickers + extra))  # 순서 유지 중복 제거
 
+    # cycle293 — 킬스위치 재조회(5분 `_scan_loop` 주기) + 배포 카나리아 1행.
+    # `scheduler.py` 는 무접촉이라 재조회 배선을 여기와 `stale_watcher_core`
+    # (120초)에 둔다 — 둘 중 어느 쪽이든 ≤5분 안에 `off` 가 닿는다. 둘 다
+    # never-raise: 킬스위치 조회 실패가 구독 사이클을 끊으면 안 된다.
+    try:
+        await tick_channel_mode.refresh_mode()
+    except Exception:
+        logger.debug("[tick_channel_mode] refresh 실패 — 현재 모드 유지", exc_info=True)
+    _channel_probe = list(
+        dict.fromkeys(
+            all_tickers
+            + list((priority_groups or {}).get("positions") or [])
+            + list((priority_groups or {}).get("next_day_clear") or [])
+        )
+    )
+    # 🔴 cycle293 Green (적대 검증 H1) — 리졸버를 부르기 **전에** 이 사이클이
+    # 구독할 종목 전부를 분류해 둔다.
+    #
+    # 종전에는 `no_feed_registry.ensure_fresh` 의 유일한 호출자가
+    # `stale_watcher_core`(120초 루프, 첫 호출 07:47:47)였고 그 인자는
+    # `subscribed ∪ 보유·익일청산` 이었다 — **아직 구독하지 않은 후보는 원리상
+    # 그 집합에 들어갈 수 없다**. 그래서 07:59 `TIME_PRESUBSCRIBE` 의 LOW 후보
+    # ~134종목은 전부 `is_classified()=False` 로 판정 불가 ⇒ 통합 채널로 확정되고,
+    # 다음 5분 사이클부터는 `already_in_pool` skip 이 리졸버 호출보다 **앞**에
+    # 있어 그날 다시 판정되지 않는다. 실효 전환 대상이 "레지스트리가 더워진 뒤
+    # 새로 등장하는 후보" 뿐으로 쪼그라들어, 09-14 실측 stale 64종목의 대부분
+    # (= 07:59 코호트)에 대해 리졸버가 **아무것도 하지 않는다**.
+    #
+    # never-raise — 분류 실패는 fail-open(전원 통합 = 오늘과 동일)이고, 그것이
+    # 구독 사이클을 끊으면 4중 안전망의 한 축이 사라진다.
+    try:
+        await no_feed_registry.ensure_fresh(_channel_probe)
+    except Exception:
+        logger.debug(
+            "[no_feed_registry] 구독 전 ensure_fresh 실패 — 이번 사이클 전원 통합 유지",
+            exc_info=True,
+        )
+    # 🔴 cycle294 적대 검증 CRITICAL-1(부팅) — 코호트 스탬프를 **매 사이클 재시도**
+    #    한다. `tick_tr_id_for` 안의 스탬프는 LOW 종목에 대해 그날 07:59 한 번뿐이고
+    #    (그 뒤로는 `already_in_pool` skip 이 리졸버 호출보다 앞에 있다), 07:59 는
+    #    W2 도장 오염이 최악인 시각이라 그때 출처 검사가 실패한 종목이 영영
+    #    미스탬프로 남아 매수 축 게이트가 열린 채 방치됐다. 순수 메모리 연산 ·
+    #    닫힘 우세 단방향 래치라 재호출이 매수를 더 열 수 없다.
+    #    `emit_tick_channel_config` **앞**이어야 카나리아가 진짜 스탬프 상태를 센다.
+    restamp_cohorts(_channel_probe)
+    emit_tick_channel_config(_channel_probe)
+    # 적대 검증 F3/CRITICAL — 이중 채널 검출은 `WebsocketPool.subscribe` 의 중복
+    # 분기가 아니라 **전 세션 `_subscriptions` 전수 대조**여야 한다. 그 분기는
+    # 풀을 경유한 요청만 보므로 §4-C 가 드러내려던 두 줄
+    # (`scheduler.py:1382`·`:2728` = `kis_ws.subscribe` 직접 호출)을 **구조적으로
+    # 볼 수 없었다**. 여기(5분 `_scan_loop`)에서 사실을 직접 센다.
+    try:
+        kis_ws_pool.detect_dual_tick_channels()
+    except Exception:
+        logger.debug("[tick_channel_dual_detected] 전수 대조 실패", exc_info=True)
+
     if priority_groups is not None:
         # 우선순위 큐: HIGH → LOW
         positions = list(dict.fromkeys(priority_groups.get("positions") or []))
@@ -999,8 +1748,10 @@ async def subscribe_filtered_stocks(
             if t in already:
                 continue
             already.add(t)
+            # cycle293 — 채널은 리졸버가 고른다. `priority`/`bypass_limit` 은
+            # 글자 그대로 불변(INV-2 — 보유 시세는 절대 보장이다).
             await kis_ws_pool.subscribe(
-                TICK_TR_ID, t, priority="HIGH", bypass_limit=True,
+                tick_tr_id_for(t, priority="HIGH"), t, priority="HIGH", bypass_limit=True,
             )
         # 2) next_day_clear — priority='HIGH', bypass_limit=True (절대 보장)
         for t in next_day_clear:
@@ -1008,7 +1759,7 @@ async def subscribe_filtered_stocks(
                 continue
             already.add(t)
             await kis_ws_pool.subscribe(
-                TICK_TR_ID, t, priority="HIGH", bypass_limit=True,
+                tick_tr_id_for(t, priority="HIGH"), t, priority="HIGH", bypass_limit=True,
             )
 
         # 3~5) 후순위 — 2-pass 슬롯 흡수 (PR-E P1, 2026-05-15)
@@ -1066,7 +1817,7 @@ async def subscribe_filtered_stocks(
                     continue
                 already.add(t)
                 await kis_ws_pool.subscribe(
-                    TICK_TR_ID, t, priority="LOW", bypass_limit=False,
+                    tick_tr_id_for(t, priority="LOW"), t, priority="LOW", bypass_limit=False,
                 )
 
         # 2-pass: breakout overflow 잔여 슬롯 흡수
@@ -1096,7 +1847,7 @@ async def subscribe_filtered_stocks(
             absorbed_overflow += 1
             # 사이클 7-C — overflow 도 LOW priority 로 풀에 위임
             await kis_ws_pool.subscribe(
-                TICK_TR_ID, t, priority="LOW", bypass_limit=False,
+                tick_tr_id_for(t, priority="LOW"), t, priority="LOW", bypass_limit=False,
             )
         # 흡수 못 한 overflow 만 최종 drop 에 합산 (중복 skip 차감).
         drop_counts["breakout"] += max(
@@ -1133,7 +1884,7 @@ async def subscribe_filtered_stocks(
     else:
         # 기존 평탄 처리 (외부 호환 fallback)
         for ticker in all_tickers:
-            await kis_ws.subscribe(TICK_TR_ID, ticker)
+            await kis_ws.subscribe(tick_tr_id_for(ticker), ticker)
 
     if source_counts is not None:
         vb = int(source_counts.get("vb", 0))
@@ -1170,7 +1921,9 @@ async def unsubscribe_all() -> None:
 
     # 보강: pool 분배 추적에 없는 메인 직접 구독 (체결통보 제외 TICK) 잔존 정리
     for tr_id, tr_key in list(kis_ws._subscriptions):
-        if tr_id == TICK_TR_ID:
+        # cycle293 — 등가 비교 금지. 전용 채널로 옮긴 종목이 이 정리에서 빠지면
+        # 그 튜플이 영구 고아로 41 슬롯을 잠식한다(§5-B).
+        if tr_id in TICK_TR_IDS:
             try:
                 await kis_ws.unsubscribe(tr_id, tr_key)
             except Exception:

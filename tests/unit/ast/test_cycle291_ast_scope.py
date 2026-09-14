@@ -6,8 +6,9 @@
 
 ## 이 파일이 지키는 것
 
-* **A1** 금지 파일의 내용 sha — 특히 `scheduler.py`(3,897L · 상한 3,900 · 여유 3줄 ·
-  오늘 별도 사이클 cycle292 가 리팩터 예정)와 전략 7파일(cycle290 이 방금
+* **A1** 금지 파일의 내용 sha — 특히 `scheduler.py`(cycle291 착수 시점 3,897L · 상한
+  3,900 · 여유 3줄. 예고한 cycle292 리팩터가 실제로 수행돼 **3,726L / 여유 174줄**이
+  됐고, 그 사이클이 A1·A2 핀을 새 기준선으로 옮겼다)와 전략 7파일(cycle290 이 방금
   `DEFAULT_PARAMS` 에 키 2개를 넣었다 — 또 건드리면 그 "+8/-0" 증명이 무너진다).
 * **A2** `scheduler.py` 라인 수 정확 일치 + 영구 상한.
 * **A3** cycle287 frozen 세그먼트 중 **매도** 프리장 사전변환은 자문 판정대로 **불변**
@@ -72,11 +73,11 @@ def _function(rel: str, name: str) -> tuple[str, ast.AST]:
 _BASE_SHA: dict[str, str] = {
     # 8영역 — 엔진 (order_engine 은 이 사이클의 접촉 대상이라 **제외**)
     "src/engine/risk.py":
-        "19f48b4a4f7c3b4aa47b99a1426d22ec26884277a9f711c279753d6d7452dcc7",
+        "e8614235cc0bea638f8c349b2f6910c94f5f9a5b849f5d65bef0583f959d81c9",
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
     "src/engine/scanner.py":
-        "fa8c0377f850b031d1983923957eb92ea593dc0eb9c1423359d8561efde78fb9",
+        "079272e7c4907c6ecc5fdf9b73de70021a9dc2435c7a568538183a7ead98804f",
     "src/engine/strategy_registry.py":
         "d794696e54ffdc36efa6df917879d780e86bc1f373bb3b5d8dcbc0beac8cef8b",
     # 8영역 — realtime 전부
@@ -85,9 +86,9 @@ _BASE_SHA: dict[str, str] = {
     "src/realtime/handler.py":
         "23768e6d89ed54b626cce2645a07cc5472ce10120c0b1c81f5d6436ff521ed47",
     "src/realtime/websocket.py":
-        "1589cffb955e5af28ad0f145860bcc127ea8fda2b25d6817bd79c079472d5c4f",
+        "d4c443bde2ed7aeafba3e9471db0ca4efc15a654610555435145a9b305150c5b",
     "src/realtime/websocket_pool.py":
-        "bd1108dd40da4e72eab10581485b1b032e58af7c06754a9118fc7fafc20c8de7",
+        "8b02442bcf5f558d6f7095b47d2016f004e3746e07ddc91dae8768b1dd46a10d",
     # 8영역 — auth 전부
     "src/auth/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -95,9 +96,16 @@ _BASE_SHA: dict[str, str] = {
         "7c2aacc703839bdc274b463ee48777006504d70e4d59a1e57120ac5b612396d2",
     "src/auth/token.py":
         "049341c7286b57a06337b6bc73ff4b0269efffad8f4554d97f275e7b8ec30a54",
-    # 🔴 라인 상한 3,900 에 3줄 남았고 오늘 cycle292 가 리팩터한다 — 한 줄도 금지.
+    # ⚠️ cycle292(2026-09-14) 재핀 — `_subscribe_market_operation_tickers` 176줄을
+    # 신규 leaf `src/engine/market_op_subscribe.py` 로 추출(행위 변경 0 · 5줄 위임
+    # wrapper · 3,897→3,726L, 사용자 승인). 여섯 자매 핀(cycle274/276/278/282/290/291)
+    # 을 **한 값으로 동시에** 옮겼다 — 한 곳만 넣으면 나머지가 "코드를 되돌려라" 로
+    # 붉어져 승인된 변경을 되돌리도록 오도한다. 직전 값 =
+    # `50658e06062a0d38afecab1baa08871b89212e295cc95f2a3af62a2ae076115d`.
+    # 🔴 cycle291 시점: 라인 상한 3,900 에 3줄 남아 한 줄도 금지였다. cycle292 가
+    # 예고대로 리팩터해 3,726L 이 됐다(아래 핀 = 그 결과).
     "src/engine/scheduler.py":
-        "50658e06062a0d38afecab1baa08871b89212e295cc95f2a3af62a2ae076115d",
+        "9bf05ccae11bd0c12d5275f36be70863decd83f1f34d77352f505bc15e549d8a",
     # 🔴 cycle290 이 방금 `DEFAULT_PARAMS` 를 건드렸다 — 또 건드리면 그 증명이 무너진다.
     "src/engine/strategy_base.py":
         "869dc20ca561adc561a9ebe9fdb5fe5a3e097f7ec176fdf274d577d509de9252",
@@ -127,7 +135,11 @@ _BASE_SHA: dict[str, str] = {
         "7cef2efeb55a7184391ac2cc447c90102fdd7ba507fd6e3834d24a8ad9ce006b",
 }
 
-_SCHEDULER_LINES = 3897
+#: ⚠️ cycle292(2026-09-14) 가 `_subscribe_market_operation_tickers` 176줄을
+#: 신규 leaf `src/engine/market_op_subscribe.py` 로 추출해(행위 변경 0 · 5줄
+#: 위임 wrapper) 3,897 → 3,726 이 됐다. 값만 옮긴다 — 정확 핀을 상한 핀으로
+#: 완화하면 cycle291 의 무접촉 대리 지표가 사라진다.
+_SCHEDULER_LINES = 3726
 _SCHEDULER_LINE_CAP = 3900
 
 
@@ -299,9 +311,29 @@ def test_a7_order_engine_top_level_src_imports_are_unchanged() -> None:
 
 
 def test_a8_no_new_leaf_in_src_engine() -> None:
-    """A8 — `src/engine/*.py` 신규 파일 금지(이 사이클은 leaf 를 만들지 않는다)."""
+    """A8 — `src/engine/*.py` 신규 파일 금지(cycle291 은 leaf 를 만들지 않았다).
+
+    ⚠️ cycle292(2026-09-14)가 `market_op_subscribe.py` 를 **승인 하에** 신설해 60 → 61
+    이 됐다(`scheduler.py` 라인 상한 3,900 예산 확보 — 176줄 추출, 행위 변경 0).
+    값만 새 기준선으로 옮긴다 — 단언 형태는 그대로라 다음 사이클의 무단 신규 파일은
+    여전히 붉어진다. 이름 축 가드는
+    `test_cycle290_ast_scope.py::test_g290_3_no_new_module_under_src_engine` 다.
+
+    ⚠️ cycle293(2026-09-14)이 킬스위치 leaf `tick_channel_mode.py` 를 **승인 하에**
+    신설해 61 → 62 가 됐다. 리졸버 모드를 전략 `DEFAULT_PARAMS` 가 아니라 인프라 축
+    (`system_config` 한 키)에 두기로 한 결정의 산물이고(cycle287 이 킬스위치를
+    `param_catalog` 미등재로 만들어 장중에 끌 수 없었던 실패의 시정), `scheduler.py`
+    는 무접촉이다.
+
+    ⚠️ cycle294(2026-09-14, 시세 채널 3단계)가 leaf 2개를 **승인 하에** 신설해
+    62 → **64** 가 됐다 — `tick_channel_clock.py`(시각축 판정: 구간 경계 셋을
+    `market_state.get_market_table` 에서만 파생, 시각 리터럴 0건)와
+    `tick_channel_switch.py`(전환 창 안의 HIGH make-before-break 전환 + 09:03
+    자동 원복). `scheduler.py` 무접촉 계약이 그 둘을 기존 주기 루프
+    (`stale_watcher_core.check_and_resubscribe_stale`, 120초)에 얹게 만들었다.
+    """
     got = len(list((_ROOT / "src" / "engine").glob("*.py")))
-    assert got == 60, f"`src/engine/*.py` 파일 수 {got} (착수 시점 60)"
+    assert got == 64, f"`src/engine/*.py` 파일 수 {got} (cycle294 기준선 64)"
 
 
 # ===========================================================================

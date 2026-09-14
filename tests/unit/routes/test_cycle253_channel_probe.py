@@ -243,13 +243,28 @@ class _Env:
 # ===========================================================================
 @pytest.fixture(autouse=True)
 def _reset_probe_state():
-    """모듈 상태 `_channel_probes` 격리 (Red 단계에서는 부재 — graceful)."""
+    """모듈 상태 `_channel_probes` + 프로브 제외 등록 격리.
+
+    🔴 cycle293 Green (적대 검증 HIGH) — `PROBE_EXCLUDED_TUPLES` 도 함께 비운다.
+    이 파일의 `test_p1c_*` 가 `("H0NXCNT0","005935")` 를 넣고 회수하지 않아
+    **다음 파일로 새고 있었다**: `tests/unit/routes` 를 `tests/unit/engine` 보다
+    먼저 수집하는 순서에서 `test_g5_pool_aggregation_keeps_all_three_channels`
+    가 005935 소실로 붉어졌다(기본 알파벳 순서에서는 잠복, 3덩어리 분할 실행은
+    프로세스가 갈려 구조적으로 못 본다). 검증 신호까지 오염시켰다 — 뮤테이션
+    2건이 이 누수 때문에 "KILLED" 로 잘못 보고됐다.
+    """
     import src.routes.realtime as rt
 
     def _clear() -> None:
         probes = getattr(rt, "_channel_probes", None)
         if isinstance(probes, dict):
             probes.clear()
+        try:
+            from src.realtime.websocket import reset_probe_exclusions
+
+            reset_probe_exclusions()
+        except Exception:  # pragma: no cover — Red 단계 graceful
+            pass
 
     _clear()
     yield
@@ -767,13 +782,26 @@ def _real_pool():
 
 
 def test_p8a_tick_filter_excludes_probe_tuple_on_real_pool():
-    """라우트 없이도 성립하는 **구조 사실** — TICK 집합 함수는 tr_id 로 자른다.
+    """라우트 없이도 성립하는 **구조 사실** — TICK 집합 함수는 프로브를 뺀다.
 
     K stale watcher · universe guard · delta unsubscribe · F1 재검증이 전부 이
     필터를 지나므로, 프로브 튜플은 그 어느 경로에도 등장하지 않는다(재등록 대상
     아님 · 삭제 대상 아님 · stale 집계 밖).
+
+    🔴 **의미 전환 (cycle293, 2026-09-14) — 격리 기준이 채널에서 프로브 정체성으로
+    옮겨졌다.** 종전 계약은 "필터는 `tr_id` 로 자른다"(= `H0UNCNT0` 만 센다)였고 이
+    테스트는 등록되지 않은 `("H0STCNT0", …)` 튜플이 집계 밖임을 단언했다. cycle293
+    이 그 전용 채널을 **실제 구독**에 쓰기 시작하면서(§5-B — 실 구독이 집계에서
+    사라지면 K stale watcher 가 그 종목을 영원히 못 보고 `[tick_coverage]` 분모만
+    좋아진다) 채널 동일성으로는 프로브와 실 구독을 구분할 수 없게 됐다. 그래서
+    격리는 `websocket.PROBE_EXCLUDED_TUPLES`(프로브 시작/종료가 유지)로 판정한다.
+
+    아래 단언은 **두 방향을 함께** 잠근다 — (1) 등록된 프로브 튜플은 여전히 집계
+    밖 (2) 등록되지 않은 전용 채널 튜플(= cycle293 의 실 구독)은 **반드시 집계 안**.
+    (2)가 없으면 채널 기준 격리로 되돌아가도 이 테스트가 초록이 된다.
     """
     from src.engine.scanner import TICK_TR_ID
+    from src.realtime.websocket import PROBE_EXCLUDED_TUPLES
 
     pool = _real_pool()
     pool._main._subscriptions.update(
@@ -783,11 +811,20 @@ def test_p8a_tick_filter_excludes_probe_tuple_on_real_pool():
         {(TICK_TR_ID, LIVE_TICKER), ("H0STCNT0", PROBE_TICKER)}
     )
 
-    assert pool.get_subscribed_tickers() == {LIVE_TICKER}
-    assert pool.get_acked_tickers() == {LIVE_TICKER}
-    for session in pool.get_session_status():
-        assert PROBE_TICKER not in session["tickers"]["subscribed"]
-        assert PROBE_TICKER not in session["tickers"]["acked"]
+    # (2) 프로브 등록 **전** — 전용 채널 구독은 실 구독으로 셈된다 (cycle293 §5-B)
+    assert pool.get_subscribed_tickers() == {LIVE_TICKER, PROBE_TICKER}
+    assert pool.get_acked_tickers() == {LIVE_TICKER, PROBE_TICKER}
+
+    # (1) 프로브로 등록하면 집계 밖 — 라우트의 `_register_probe_exclusion` 과 동일
+    PROBE_EXCLUDED_TUPLES.add(("H0STCNT0", PROBE_TICKER))
+    try:
+        assert pool.get_subscribed_tickers() == {LIVE_TICKER}
+        assert pool.get_acked_tickers() == {LIVE_TICKER}
+        for session in pool.get_session_status():
+            assert PROBE_TICKER not in session["tickers"]["subscribed"]
+            assert PROBE_TICKER not in session["tickers"]["acked"]
+    finally:
+        PROBE_EXCLUDED_TUPLES.discard(("H0STCNT0", PROBE_TICKER))
 
     # 슬롯은 정직하게 셈된다 (41 cap 은 tr_id 무관 `_subscriptions` 길이)
     assert len(pool._main._subscriptions) == 2

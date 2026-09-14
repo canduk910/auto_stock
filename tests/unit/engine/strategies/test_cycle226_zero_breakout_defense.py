@@ -1152,14 +1152,32 @@ _EIGHT_AREAS = [
 #    네 곳 전부 같은 값. TODO(cycle286 커밋 후): 아래 항목을 **삭제**한다.
 _ALLOWED_CONTENT_SHA: dict[str, str] = {
     "src/engine/scanner.py":
-        "fa8c0377f850b031d1983923957eb92ea593dc0eb9c1423359d8561efde78fb9",
+        "079272e7c4907c6ecc5fdf9b73de70021a9dc2435c7a568538183a7ead98804f",
     # (비어 있음 — cycle273 그룹 1·2, cycle274 병합 뒤 2026-09-11 정리. 등록은 승인된 사이클의 Green 이, 비우기는 병합 후속 커밋이 한다)
     "src/engine/order_engine.py":
-        "f65cfc923d1d68497d2fdc8ba0c0008d9e20e631750c6eb20d41748d54d0d0ad",
+        "84e84a972774cd2fbf8ceb70e5569f7760d43a228c2be21d2a1b90f48fd4ce75",
     # ✅ 2026-09-12 (cycle287) — 시각이 거래소·호가유형을 정한다. docstring 만
     # (본문 byte 동일). 자매 가드 네 곳 전부 같은 값.
     "src/api/order.py":
         "08c5cafd7b8678ec0d0fa85f856fdea3cce38ad92488c6d74c03cd13faa415bb",
+    # ✅ 2026-09-14 (cycle293) — 시세 채널 리졸버 2단계(속성축 배관). 사용자 승인
+    #    8영역 4파일(`scanner`·`websocket`·`websocket_pool`·`order_engine`) +
+    #    §3-E B-1 매수 축 보존 게이트 때문에 `risk.py` 1건(별도 승인 대상, 근거는
+    #    `test_cycle293_ast_channel_resolver.py::test_a1b` docstring).
+    #    자매 가드 **네 곳 전부** 같은 값이어야 한다(`_PIN_GUARD_FILES` 정본).
+    #    등록은 승인된 사이클의 Green 이, 비우기는 병합 후속 커밋이 한다.
+    "src/engine/risk.py":
+        "e8614235cc0bea638f8c349b2f6910c94f5f9a5b849f5d65bef0583f959d81c9",
+    "src/realtime/websocket.py":
+        "d4c443bde2ed7aeafba3e9471db0ca4efc15a654610555435145a9b305150c5b",
+    "src/realtime/websocket_pool.py":
+        "8b02442bcf5f558d6f7095b47d2016f004e3746e07ddc91dae8768b1dd46a10d",
+    # 📄 2026-09-14 (cycle293) — **문서 전용 변경**(`src/realtime/**` 이 8영역 디렉터리라
+    #    `.md` 도 이 가드에 잡힌다). 「시세 채널」 절이 속성축 리졸버 2단계 착지·프로브
+    #    격리 기준 전환·`get_subscribed_tickers()` 합집합 서술을 담도록 갱신됐다.
+    #    프로덕션 코드 영향 0. 등록은 Green 이, 비우기는 병합 후속 커밋이 한다.
+    "src/realtime/CLAUDE.md":
+        "12bf914da7c13cfb13ed6caaa0825f7cfe77dff7b95c72260f439171c054480a",
 }
 
 

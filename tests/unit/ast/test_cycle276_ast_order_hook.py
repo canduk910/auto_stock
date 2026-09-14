@@ -336,17 +336,23 @@ _BASE_PLACE_KWARGS_DICT = ["exchange", "price", "quantity", "side", "ticker"]
 #    승계 때와 같은 절차). 나머지 핀은 불변이다.
 _BASE_SHA = {
     "src/engine/risk.py":
-        "19f48b4a4f7c3b4aa47b99a1426d22ec26884277a9f711c279753d6d7452dcc7",
+        "e8614235cc0bea638f8c349b2f6910c94f5f9a5b849f5d65bef0583f959d81c9",
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
     "src/engine/scanner.py":
-        "fa8c0377f850b031d1983923957eb92ea593dc0eb9c1423359d8561efde78fb9",
+        "079272e7c4907c6ecc5fdf9b73de70021a9dc2435c7a568538183a7ead98804f",
     "src/engine/strategy_registry.py":
         "d794696e54ffdc36efa6df917879d780e86bc1f373bb3b5d8dcbc0beac8cef8b",
     "src/api/order.py":
         "08c5cafd7b8678ec0d0fa85f856fdea3cce38ad92488c6d74c03cd13faa415bb",
+    # ⚠️ cycle292(2026-09-14) 재핀 — `_subscribe_market_operation_tickers` 176줄을
+    # 신규 leaf `src/engine/market_op_subscribe.py` 로 추출(행위 변경 0 · 5줄 위임
+    # wrapper · 3,897→3,726L, 사용자 승인). 여섯 자매 핀(cycle274/276/278/282/290/291)
+    # 을 **한 값으로 동시에** 옮겼다 — 한 곳만 넣으면 나머지가 "코드를 되돌려라" 로
+    # 붉어져 승인된 변경을 되돌리도록 오도한다. 직전 값 =
+    # `50658e06062a0d38afecab1baa08871b89212e295cc95f2a3af62a2ae076115d`.
     "src/engine/scheduler.py":
-        "50658e06062a0d38afecab1baa08871b89212e295cc95f2a3af62a2ae076115d",
+        "9bf05ccae11bd0c12d5275f36be70863decd83f1f34d77352f505bc15e549d8a",
     "src/engine/strategy_base.py":
         "869dc20ca561adc561a9ebe9fdb5fe5a3e097f7ec176fdf274d577d509de9252",
     "src/auth/token.py":
@@ -356,9 +362,9 @@ _BASE_SHA = {
     "src/realtime/handler.py":
         "23768e6d89ed54b626cce2645a07cc5472ce10120c0b1c81f5d6436ff521ed47",
     "src/realtime/websocket.py":
-        "1589cffb955e5af28ad0f145860bcc127ea8fda2b25d6817bd79c079472d5c4f",
+        "d4c443bde2ed7aeafba3e9471db0ca4efc15a654610555435145a9b305150c5b",
     "src/realtime/websocket_pool.py":
-        "bd1108dd40da4e72eab10581485b1b032e58af7c06754a9118fc7fafc20c8de7",
+        "8b02442bcf5f558d6f7095b47d2016f004e3746e07ddc91dae8768b1dd46a10d",
     # 🔁 cycle290(킬스위치 등재, 2026-09-13) 재핀 — `DEFAULT_PARAMS` 말미 2키 추가뿐.
     "src/engine/strategies/momentum.py":
         "4d7fac9abab4d5fca55509a8682633d31c4bb9868f5bb4cc77d4771ecda68894",
@@ -723,10 +729,18 @@ def test_c5_1b_realtime_and_auth_have_no_new_python_files() -> None:
     assert seen <= set(_BASE_SHA), f"8영역 디렉터리에 신규 파일: {sorted(seen - set(_BASE_SHA))}"
 
 
-def test_c5_2_scheduler_line_count_is_3897() -> None:
-    """C13 — `scheduler.py` 는 이 사이클에서 무접촉이라 3,897L 그대로다(cycle283 재핀)."""
+def test_c5_2_scheduler_line_count_is_pinned() -> None:
+    """C13 — `scheduler.py` 정확 라인 핀 = cycle276 무접촉의 대리 지표.
+
+    🔴 함수명에서 숫자를 뺐다(`…_is_3897` → `…_is_pinned`) — 이름에 값을 박으면
+    정당한 라인 변경마다 개명이 따라온다.
+    cycle292(2026-09-14)가 `_subscribe_market_operation_tickers` 176줄을 신규 leaf
+    `src/engine/market_op_subscribe.py` 로 추출(행위 변경 0 · 5줄 위임 wrapper)해
+    3,897 → 3,726 으로 줄었다. 🔴 정확 핀을 상한 핀(`< 3900`)으로 완화하지 않는다 —
+    그러면 확보한 174줄 예산의 무단 증식을 아무도 못 잡는다.
+    """
     lines = len(_read(_SCHEDULER).splitlines())
-    assert lines == 3897, f"scheduler.py {lines}L (기대 3,897 — cycle276 은 무접촉; cycle283 뒤 재핀)"
+    assert lines == 3726, f"scheduler.py {lines}L (기대 3,726 — cycle283 뒤 3,897 → cycle292 leaf 추출 후 재핀)"
 
 
 def test_c5_3_scheduler_line_cap_is_not_looser_than_cycle257() -> None:
@@ -896,8 +910,21 @@ def test_c6_4b_cycle223_sibling_content_pin_matches_current_source() -> None:
 #:   · `order_engine.py` = cycle276(AI 매수평가 주문 발화 시점 이동) → cycle287 재핀
 #:   · `scanner.py`      = cycle283(오늘봉 커트오프 15:40 → 20:00)
 #:   · `api/order.py`    = cycle287(시각이 거래소·호가유형을 정한다, docstring 만)
+#:   · `websocket.py` / `websocket_pool.py` = cycle293(시세 채널 리졸버 2단계 —
+#:     등가 비교 → 집합 멤버십 + 병행 dict `_ticker_to_tr_id`, 사용자 승인 2026-09-14)
+#:   · `risk.py`      = cycle293 §3-E B-1 **매수 축 보존 게이트**. 🔴 오케스트레이션
+#:     지시는 `risk.py` diff 0 을 요구했고 이 항목은 그것과 상충한다 — **사용자
+#:     승인 1건이 열려 있다**(판단 근거 =
+#:     `test_cycle293_ast_channel_resolver.py::test_a1b` docstring). 승인이 거절되면
+#:     이 줄과 자매 4곳의 `risk.py` 핀을 함께 지우고 리졸버를 HIGH 전용으로 좁힌다.
+#:   · `src/realtime/CLAUDE.md` = cycle293 **문서 전용**. `src/realtime/**` 이 8영역
+#:     디렉터리라 `.md` 도 diff 가드에 잡힌다 — 프로덕션 코드 영향 0 이고, 적대
+#:     검증이 "합집합 서술이 이제 참이다 / 프로브 격리 기준이 채널→정체성으로
+#:     바뀌었다 / `H0UNCNT0` 무송출 사실이 이 문서에 0회 등장한다" 를 지적해 갱신했다.
 _APPROVED_EIGHT_AREA_PINS = {
     _ORDER_ENGINE_REL, "src/engine/scanner.py", "src/api/order.py",
+    "src/realtime/websocket.py", "src/realtime/websocket_pool.py",
+    "src/engine/risk.py", "src/realtime/CLAUDE.md",
 }
 
 

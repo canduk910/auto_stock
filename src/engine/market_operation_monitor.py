@@ -119,7 +119,14 @@ def is_ticker_stale_excluded(ticker: str) -> bool:
 def get_market_op_active_tickers() -> set[str]:
     """VI ∪ 거래정지 합집합 (외부 호출자용 read-only view).
 
-    `_subscribe_market_operation_tickers` 영역 delta 계산 + UI 진단 응답.
+    ⚠️ **현재 프로덕션 소비처 0건**(2026-09-14 전수 확인 — 호출은 단위 테스트뿐).
+    종전 docstring 이 적었던 "`_subscribe_market_operation_tickers` 영역 delta 계산 +
+    UI 진단 응답" 은 두 절 다 사실이 아니다: 그 훅의 델타는 이 함수가 아니라
+    `scheduler._market_op_subs` 로 재고(`market_op_subscribe.py` 본문
+    `set(scheduler._market_op_subs) - target_set`), 후보 VI 배치 자체가 cycle221 F2 로
+    삭제됐다. UI 는 `get_market_op_state_summary()` 를 쓴다.
+    read-only view 라 무해해서 남긴다 — 지우는 것은 "비활성화 시 심층 검증 의무"
+    대상이라 별건이다.
     """
     return _vi_active_tickers | _halt_active_tickers
 

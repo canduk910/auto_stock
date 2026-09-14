@@ -1114,7 +1114,9 @@ def test_c7_reset_daily_state_clears_the_division_mapping() -> None:
     """C7 (RED) — `OrderEngine.reset_daily_state()` 가 `_order_division` 도 clear.
 
     🔴 clear 를 `scheduler._reset_daily_state` 에 두면 `scheduler.py` diff 0 이
-    깨진다(3,897L · 상한 3,900 · cycle292 리팩터 예정). `_order_exchange` 와 같은
+    깨진다(cycle291 착수 시점 3,897L · 상한 3,900 — 여유 3줄. cycle292 가 예고대로
+    leaf 추출을 수행해 3,726L 이 됐지만 **이 배치 결정은 그대로다**: clear 의 소유자는
+    라인 예산이 아니라 `_order_division` 의 소유자다). `_order_exchange` 와 같은
     위임 쪽에 둔다 — order_no 는 하루 단위로만 유일하다.
     """
     engine, _ = _make_engine()

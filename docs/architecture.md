@@ -120,7 +120,7 @@ src/
 │   ├── risk.py              # RiskManager (on_tick → 보드 가드 → 전략별 신호 순회)
 │   ├── order_engine.py      # OrderEngine (주문/체결/포지션 관리)
 │   ├── scheduler.py         # TradingScheduler (KRX/NXT 통합 운영 08:00~20:00)
-│   └── scanner.py           # 종목 스캔 + 공용 시세 캐시 (TICK_TR_ID=H0UNCNT0 현행 유일 활성 채널. 사이클 26 시간대별 분기는 미배선으로 cycle257 삭제 — 속성 기반 재분리는 P1-7 B)
+│   └── scanner.py           # 종목 스캔 + 공용 시세 캐시 + **시세 채널 리졸버**(cycle293 속성축 → **cycle294 시각축 합성**. `tick_tr_id_for(ticker, *, priority, now)` 가 프리장은 H0NXCNT0 · 정규장+애프터는 H0STCNT0 로 보내고 **정상 경로에서 통합을 반환하지 않는다**. 정본 집합 TICK_TR_IDS. 사이클 26 시각 분기는 cycle257 삭제)
 │
 ├── db/                  # RDS PostgreSQL CRUD (asyncpg)
 │   ├── pg.py                # asyncpg 풀 + 쿼리 헬퍼 (현재 DB 클라이언트 정본)
@@ -268,7 +268,7 @@ TradingScheduler (scheduler.py)
        │  + register_board_handler(SessionTracker.on_h0nxmko0)
        │  + _session_loop() task — 30초 주기 SessionTracker.tick()
        │  _collect_presubscribe_tickers() →
-       │     subscribe(H0UNCNT0, 종목들)  (KRX+NXT 통합 시세)
+       │     subscribe(tick_tr_id_for(t), 종목들)  (cycle294 — 프리장 NXT 전용 H0NXCNT0 / 정규장+애프터 KRX 전용 H0STCNT0. 통합 H0UNCNT0 는 킬스위치 off 에서만)
        │  유니버스 비어있으면 prepare() 재실행 (KIS API 일시장애 대비)
        │                         │
 08:00  PRE_NXT 보드 진입       (TIME_PRE_NXT_OPEN)
@@ -289,7 +289,7 @@ TradingScheduler (scheduler.py)
        │  _phase = "trading"  (모멘텀 매수 감시 시작)
        │  ├─ _scan_loop() 시작 (5분 주기)
        │                         │
-       │         ←───────────────┤ H0UNCNT0 실시간 체결가 (KRX+NXT 통합)
+       │         ←───────────────┤ 실시간 체결가 (H0STCNT0 KRX 전용 / H0NXCNT0 NXT 전용 — 47필드 동일, 한 파서)
        │                         │
        │  RiskManager.on_tick()  │
        │  ├─ session_tracker.is_tradable(strategy)  ← Phase 8 보드 가드
@@ -861,13 +861,14 @@ GitHub Secrets: `EC2_HOST`, `EC2_USERNAME`, `EC2_SSH_KEY`
 
 - 매매 정책 = KRX 메인 09:00~15:20 단독. VB/LTV `tradable_boards=("main",)` (PRE_NXT/POST_NXT 매수 비활성)
 - `MarketBoard` 3 보드: `pre_nxt` (08:00~09:00) / `main` (09:00~15:40) / `post_nxt` (15:40~20:00)
-- 시세 채널 시간대별 6 구간 분기 + 사전 구독 마진(50초) 종목별 원자 전환은 **108일간 미배선으로 cycle257 에서 삭제** — 실제 구독은 처음부터 `TICK_TR_ID=H0UNCNT0`(통합) 단일. 속성 기반 재분리는 P1-7 B
+- 시세 채널 시간대별 6 구간 분기 + 사전 구독 마진(50초) 종목별 원자 전환은 **108일간 미배선으로 cycle257 에서 삭제**. **cycle293(2026-09-14)이 그 자리에 속성축 리졸버를 놓았고(2단계), cycle294 가 시각축을 합성해 통합 채널을 반환 경로에서 지웠다(3단계)** — `scanner.tick_tr_id_for(ticker, *, priority, now)` 가 프리장은 `H0NXCNT0`, 정규장+애프터는 `H0STCNT0` 를 돌려주고, 전환은 `tick_channel_clock.switch_windows()` 가 표에서 파생한 **창 안에서만** 일어난다(아침 1 + NXT 단독 연속 구간 경계 2). 판정 실패의 폴백도 전용 채널이다(L1=KRX / L2=프리 창 NXT / L3=`off` 만 통합). 킬스위치 `system_config.tick_channel_resolver_mode`(기본 `observe` = 행위 0) + 다이얼 5키. 종착지였던 통합 채널 폐기(2026-09-07 사용자 결정)는 **이 단계가 그 종착지다** — 상세 = `src/realtime/CLAUDE.md` 「시세 채널」 절
 - 15:20 KRX 메인 강제 청산 (`_force_clear_main_only`) 영속 — VB 전량 + LTV 상한가 미도달
 
 ### 14.2 사이클 149 — 종목별 H0UNMKO0 구독 + VI/거래정지 stale 회피
 
 - `src/api/market_operation.py` — `MARKET_OP_TR_ID=H0UNMKO0` + 10 컬럼 (TRHT_YN/VI_CLS_CODE/OVTM_VI_CLS_CODE/ISCD_STAT_CLS_CODE 등). REST 폴백 `inquire_vi_status_today` (FHPST01390000)
-- `src/engine/market_operation_monitor.py` — `is_ticker_stale_excluded()` hook. 보유+익일청산+후보 합집합 (HIGH bypass + LOW cap=20)
+- `src/engine/market_operation_monitor.py` — H0UNMKO0 **수신·상태 추적** + `is_ticker_stale_excluded()` hook
+- `src/engine/market_op_subscribe.py` — **구독 배치**(cycle292 가 `scheduler._subscribe_market_operation_tickers` 본체를 leaf 로 추출, 행위 변경 0 · scheduler 에는 5줄 위임 wrapper). 현행 계약 = 대상은 **보유+익일청산뿐**(후보 VI 는 cycle221 F2 로 삭제 — 실질 noop 이던 경로) · 메인 세션 **0건**(cycle230 이 cycle214 의 `bypass_limit=True` 메인 직접 구독을 폐기 — 08-19 OPSP0008 사고) · 보조 세션 **직접** 라운드로빈 + `bypass_limit=False` · 실효 상한은 `MAX_SUBSCRIPTIONS`(41)이고 `cap`(기본 60) 은 cycle214 시그니처 잔재(vestigial)
 - `stale_watcher_core` VI/halt grace 회피 + REST 폴백 부팅 1회 seed
 
 ### 14.3 사이클 150 — SUPABASE 용량 정합

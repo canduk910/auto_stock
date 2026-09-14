@@ -413,7 +413,7 @@ async def delta_unsubscribe_dropped(scheduler: Any, new_set: set[str]) -> list[s
     - `_subscriptions` set 직접 수정 금지 — `kis_ws_pool.unsubscribe` 만 사용
     - 본체 예외는 호출자(`_scan_loop`)가 try/except 로 흡수
     """
-    from src.engine.scanner import TICK_TR_ID
+    from src.engine.scanner import subscribed_tick_tr_id
     from src.realtime.websocket_pool import kis_ws_pool
 
     current = kis_ws_pool.get_subscribed_tickers()
@@ -424,7 +424,9 @@ async def delta_unsubscribe_dropped(scheduler: Any, new_set: set[str]) -> list[s
     unsubscribed: list[str] = []
     for ticker in delta_remove:
         try:
-            await kis_ws_pool.unsubscribe(TICK_TR_ID, ticker)
+            # cycle293 — 유니버스에서 이탈한 종목을 **그 종목의 채널**로 해제한다.
+            # 고정 tr_id 면 전용 채널 종목이 영원히 해제되지 않는다 = 실제 슬롯 누수.
+            await kis_ws_pool.unsubscribe(subscribed_tick_tr_id(ticker), ticker)
             unsubscribed.append(ticker)
         except Exception:
             logger.exception("[delta_unsubscribe] %s 실패", ticker)

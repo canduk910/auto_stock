@@ -81,6 +81,38 @@ AWS RDS PostgreSQL CRUD 모듈. 현재 DB 클라이언트 정본 = **`pg.py` (as
   (`build_messages` 3인자 전체, 요약·절단 금지 = 오프라인 재채점의 유일한 다리). 분석 시 `trade_history.status` 로
   **체결/부분체결/미체결/취소 4분류를 반드시 분리**한다(미체결을 손익 0 으로 섞으면 통째로 오염).
 
+## positions.py — 보유 포지션 영속화
+
+매매 hot path 의 영속 계층이다. 재시작이 보유 상태를 잃으면 손절이 통째로 사라지므로,
+`positions` 테이블이 메모리 `scheduler.positions` 의 복구 원천이다.
+
+| 함수 | 계약 |
+|---|---|
+| `save_position(ticker, ticker_name, buy_price, quantity, order_no, strategy_id, buy_date, high_since_buy=0)` | `ON CONFLICT (ticker) DO UPDATE` upsert. **ticker 가 PK** = 한 종목은 한 포지션. `high_since_buy` 가 0·미지정이면 `buy_price` 로 채운다(트레일링 고점의 하한이 매수가라는 계약 — 0 으로 남기면 첫 틱에 고점이 0 에서 출발해 트레일링이 즉시 발동한다) |
+| `delete_position(ticker)` | 청산 완료 시 1행 삭제 |
+| `load_all() -> list[dict]` | 부팅 복구용 전량 조회 |
+| `update_high(ticker, high)` | 트레일링 고점 갱신 |
+| `clear_all()` | 전량 삭제 — **운영 복구용**이지 일상 경로가 아니다 |
+
+`buy_date` 는 DATE 라 `_kst.to_date()` 계약을 따른다(익일 청산 판정의 기준일).
+
+## strategy_config.py — 전략 설정 (`strategy_id` PK, `params` JSONB)
+
+🔴 **비중 단위는 비율 `0.0~1.0` 이다** — 값 크기로 단위를 추측하는 분기를 어느 계층에도 두지 않는다
+(루트 `CLAUDE.md` 「비중 단위 추론 변환 금지」). 로그 문자열의 `weight * 100` 은 표시 전용이다.
+
+| 함수 | 계약 |
+|---|---|
+| `load_all() -> dict[str, dict]` | `{strategy_id: {"enabled", "weight", "params"}}`. `params` 가 dict 가 아니면 `{}` 로 방어(JSONB 오염이 전략 부팅을 죽이지 않게) |
+| `save(strategy_id, enabled, weight, params)` | `ON CONFLICT (strategy_id) DO UPDATE` upsert. `updated_at` 은 `datetime.fromisoformat(now_kst_iso())` — **str 바인딩 불가**(사이클 68 KST 문자열 계약은 보존하고 바인딩 직전에만 변환) |
+| `save_weights(weights)` | 비중만 갱신. 종목별로 **기존 `params` 를 먼저 읽어** 그대로 다시 넣는다(안 그러면 `params` 가 통째로 지워진다). `enabled = weight > 0` 을 함께 정한다 |
+| `save_params(strategy_id, params)` | `params` JSONB 만 갱신 |
+
+⚠️ **이 테이블에 쓴 값은 다음 백엔드 재시작에서만 전략 객체에 반영된다** —
+`_load_strategy_config` 의 `_config_loaded` 가 프로세스당 1회이고 07:55 `_boot` 재호출은 no-op 이다.
+장중 즉시 반영이 필요하면 `PUT /api/strategies/{id}/params`(라우트가 in-memory `config.params` 를 덮는다)를
+쓴다. cycle232 D6 가 보유 중 장중 재시작을 금지하므로 **장중 실효 수단은 PUT 뿐**이다.
+
 ## daily_performance.py — 일일 실적
 
 - `upsert_daily_performance()`: 16:10 정산 시 당일 실적 기록. `daily_realized_pnl`/`daily_profit_rate` 모두 **실현손익 기준** (SELL 매도 실현분만 합산). 매도 0건 → 둘 다 0 정상. 평가손익은 `BalanceTable.eval_profit_loss` 별도 표시. 컬럼: total_asset / daily_profit_rate / daily_realized_pnl / net_external_cashflow / deposit / cumulative_return_rate (TWR 복리, 실현손익 누적)
@@ -109,6 +141,8 @@ AWS RDS PostgreSQL CRUD 모듈. 현재 DB 클라이언트 정본 = **`pg.py` (as
 ## system_config.py — 시스템 설정 키-값 헬퍼
 
 - **read 경로 `pg._with_retry` 경유 (asyncpg, 사이클 189 계보)**: `get_cash_usage_ratio`/`get_auto_regime_adjust`/`_get_bool_or_none`/`get_buy_block_mode`/`_get_float_or_default`/`_get_bool_or_default`/`_get_int_or_default`/`_get_str_or_default_UNUSED`/`_get_string_or_none` 등 read 는 `pg.fetch`/`fetchrow`/`fetchval` (= `_with_retry` 내장) 경유 — connection 계열 예외 1회 재시도, 기존 폴백 기본값 불변. 쓰기(`_upsert`/`_set_*`)는 `pg.execute` (retry 미경유)
+- **`get_tick_channel_resolver_mode() -> str | None` / `set_tick_channel_resolver_mode(mode)`** (cycle293, 2026-09-14): 키 `tick_channel_resolver_mode`, 시세 채널 리졸버 킬스위치의 **DB 정본**(`off`/`observe`/`enforce_low`/`enforce`). read 는 `_get_string_or_none` 경유 = **캐시 0 · TTL 0**(`pg.fetch` 직행) — 캐시를 붙이면 장중 킬스위치가 그만큼 늦어진다. 소비 = `engine/tick_channel_mode.refresh_mode()`(5분·120초 폴링) + `PUT /api/realtime/tick-channel-mode`(즉시 반영). 키 부재·조회 실패는 `None` → 엔진이 **현재 모드 유지**(기본값 되돌림 금지)
+- **cycle294 (2026-09-14) — 3단계 전환 다이얼 5키** (전부 `system_config` 축, 전략 `DEFAULT_PARAMS`·`param_catalog` **편입 금지**): `get_tick_channel_switch_enabled()`/`set_tick_channel_switch_enabled(enabled)` (`tick_channel_switch_enabled`, bool — **살아 있는 구독의 전환만** 끈다) · `get_tick_channel_switch_offset_secs()` (`tick_channel_switch_offset_secs`, float — 프리장 종료 뒤 전환까지, 클램프는 읽는 쪽) · `get_tick_channel_switch_ack_timeout_secs()` (`tick_channel_switch_ack_timeout_secs`, float — HIGH make-before-break ACK 대기) · `get_tick_channel_revert_probe_secs()` (`tick_channel_revert_probe_secs`, float — 자동 원복 측정 시점. 기본값은 새 숫자가 아니라 `stale_diagnostics.SUBSCRIBE_GRACE_SECS` 재사용이고 그 상수의 단일 정의처는 거기다) · 🔴 `get_tick_channel_gap_hold_enabled()`/`set_tick_channel_gap_hold_enabled(enabled)` (`tick_channel_gap_hold_enabled`, bool — **NXT 단독 연속 구간**(09-15 = 15:40~16:00, KRX 에 연속 체결이 없고 NXT 만 있는 20분)에 보유(HIGH)가 NXT 를 따라가는가. 기본 `true` — 꺼짐이 기본이면 그 구간의 손절 blind 가 기본이 된다). 전부 `_get_bool_or_none`/`_get_float_or_none` 경유 = **캐시 0 · TTL 0**. 키 부재·조회 실패는 `None` → 엔진이 **현재 값 유지**(기본값 되돌림 금지). 소비 = `engine/tick_channel_mode.refresh_switch_params()`(5분·120초 폴링) + `PUT /api/realtime/tick-channel-mode` 의 선택 필드 `switch_enabled`/`gap_hold_enabled`(즉시 반영)
 - **`get_auto_start() -> bool` / `set_auto_start(enabled)`** (사이클 M5): 키 `auto_start`, JSONB `{"value": bool}` 왕복. `main.py` lifespan + `routes/strategies.py` auto-start 라우트가 직접 supabase.table() 호출하던 것을 헬퍼로 추출 (M5 split-brain 시정)
 - **task 신선도 마커 (사이클 193, 2026-07-04)**: `get_task_last_success(task_label) -> str | None` (키 `task_last_success_<label>`, `_get_string_or_none` 경유 = 189 retry 자동 수혜) / `set_task_last_success(task_label, iso_ts)` (upsert 패턴, 쓰기 = retry 미경유 영속). `task_loop_helper.run_periodic_task_loop` 의 `immediate_skip_if_fresh_hours` 게이트 전용 — 재시작 immediate run 이 N시간 이내 성공 마커 존재 시 skip (아침 프리마켓 burst 완화). 값은 KST ISO (`now_kst_iso()`). **`get_task_last_success_bulk(task_labels) -> dict` (cycle285)** — 위 마커를 `key = ANY($1)` **단일 쿼리**로 묶어 조회한다(`GET /api/market-ops` 야간작업 타임라인이 폴링마다 라벨 수만큼 왕복하지 않도록). 결측 라벨은 반환 dict 에 **키 자체가 없다**(빈 문자열 아님). 쿼리 실패는 빈 dict(fail-open)
 - `get_cash_usage_ratio() -> float` / `set_cash_usage_ratio(ratio)`: 키 `cash_usage_ratio`, JSONB `{"value": float}`. 범위 `[0.0, 1.0]`, 5% 단위 자동 보정, 기본 1.0
@@ -229,6 +263,7 @@ KIS 공식 일일 마스터 파일 (`kospi_code.mst` / `kosdaq_code.mst`) 영역
 
 ### CRUD 함수 영역 (사이클 129, +77L 영속)
 
+- **`get_nxt_provenance_map(tickers) -> dict[str, bool]`** (cycle293, 2026-09-14): 그 종목 행의 `raw` 에 KIS CTPF1002R 키 `cptt_trad_tr_psbl_yn` 이 **존재하는가**(값이 아니라 키 존재 — `raw ? 'cptt_trad_tr_psbl_yn'`). 형제 `get_nxt_tradable_map` 과 같은 `= ANY($1::text[])` 1회 왕복 형태. 용도 = 시세 채널 리졸버가 `nxt_tradable` 값을 **믿어도 되는지**의 판정. `_full_universe_load_krx_primary` 가 KRX raw 로 `nxt_tradable=False` 를 2,674종목에 도장하는데 그 raw 엔 이 키가 **없고**(09-14 실측 2,674/2,674 정확 일치), 16:1x basics_refresh(부팅 날은 07:53~08:08)가 진실을 복원한다 — 그 오염 창 안에 `TIME_PRESUBSCRIBE`(07:59)가 들어 있다. ⚠️ 소비처(`engine/no_feed_registry.ensure_fresh`)는 이 조회를 `get_nxt_tradable_map` 과 **독립 try** 로 감싼다 — 한 try 로 묶으면 출처 쿼리가 실패하는 날 cycle252 의 churn 차단까지 함께 죽는다
 - `upsert_master_raw(ticker, master_raw: dict, *, is_kospi200: bool = False, is_kosdaq150: bool = False) -> None` — master_raw JSONB upsert + `master_raw_updated_at` KST 강제 (사이클 68 `_kst.now_kst_iso()` 영속). **사이클 153 (2026-06-16)** `is_kospi200` / `is_kosdaq150` 동행 명시 영속 (Q1=A 사용자 결정 영속 + 사이클 146 nxt_tradable 패턴 답습) — ON CONFLICT DO UPDATE 영역이 payload 키 영역만 SET → 기존 ticker 갱신 시 명시 의무
 - `get_master_raw(ticker) -> Optional[dict]` — 단건 조회 (lazy fallback 없음, 16:30 KST 매스 적재 영역)
 - `count_master_raw_today() -> int` — KST 영업일 기준 master_raw_updated_at 카운트 (운영 진단 영역)
@@ -262,6 +297,31 @@ KIS 공식 일일 마스터 파일 (`kospi_code.mst` / `kosdaq_code.mst`) 영역
 - `count="exact"` 동일 쿼리에 동봉 → 정확한 `total_count` 반환 (페이징 정합성 의무)
 - 정렬: `refreshed_at DESC` 영속
 - 호출자: `GET /api/stock-master/list` 라우트만 (UI 페이징 전용). `list_by_filter()` (사이클 108 scanner 전용) 와 영역 분리 영속
+
+## backtest_runs.py — 외부 MCP 백테스트 실행 이력
+
+20:00 AI 자문 직후 6 전략 × 2 kind = 12 job 을 fire-and-forget 으로 띄운 기록이다.
+
+| 함수 | 계약 |
+|---|---|
+| `insert_run(target_date, strategy_id, params_kind, params_snapshot) -> dict \| None` | `status="queued"` 로 1행. `params_kind` 는 `"current"`/`"recommended"` 둘뿐이고 그 밖은 **`ValueError`**(조용한 흡수 금지). 🔴 **UNIQUE `(target_date, strategy_id, params_kind)` 충돌은 예외가 아니라 `None`** — 자문 사이클이 재진입해도 멱등하게 넘어가라는 계약이다 |
+| `get_by_id(run_id)` · `list_by_date(target_date)` | 조회 |
+| `update_status(run_id, status, *, mcp_job_id=None, error_message=None, metrics=None)` | `running`=mcp_job_id 부여 / `completed`=metrics + `completed_at` / `failed`=error_message + `completed_at` / `skipped`=YAML DSL 미지원 전략, `completed_at` 기록 |
+
+`target_date` 는 DATE 라 `_kst.to_date()` 로 강제 변환한다(str 입력도 받는다).
+
+## market_regime_snapshots.py — dkstock.cloud 매크로 일일 스냅샷
+
+`_boot()` 시점에 1행. 매크로 레짐은 **관찰 지표**이고 매수를 차단하지 않는다(사이클 I, 2026-08-03) —
+`buy_blocked` 컬럼은 그날의 판정을 남기는 기록이지 게이트가 아니다.
+
+| 함수 | 계약 |
+|---|---|
+| `insert_snapshot(snapshot_date, regime, regime_desc, cycle_phase, vix, fear_greed_score, buffett_ratio, raw_response, computed_cash_usage_ratio, buy_blocked, block_reason) -> dict \| None` | 🔴 **같은 `snapshot_date` 가 이미 있으면 예외가 아니라 `None`**(graceful) — 하루 두 번 부팅해도 첫 기록이 이긴다 |
+| `get_by_date(snapshot_date)` · `get_latest()` · `list_recent(days=30)` | 조회. `list_recent` 가 `GET /api/market-regime/history` 의 소스 |
+
+`raw_response` JSONB 는 외부 응답 **원문**이다 — 정규화해서 넣지 않는다(외부 스키마가 바뀐 날
+무엇이 왔는지 되짚을 수 있는 유일한 기록이다).
 
 ## parameter_recommendations.py — 전략수정 AI자문 이력
 

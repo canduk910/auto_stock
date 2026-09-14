@@ -67,13 +67,14 @@ def build_session_subscription_view(scheduler: Any) -> list[dict]:
     L2810 본체를 그대로 이주. self.* → scheduler.* 치환만.
     """
     from datetime import datetime as _dt
-    from src.engine.scanner import KST_TZ as _KST_TZ, ticker_last_tick
+    from src.engine.scanner import KST_TZ as _KST_TZ, TICK_TR_IDS, ticker_last_tick
     from src.realtime.websocket import MAX_SUBSCRIPTIONS as _MAX_SUB
     from src.realtime.websocket_pool import kis_ws_pool
 
-    # 시세 채널 TR_ID 집합 — H0UNCNT0(통합 deprecated) + H0STCNT0(KRX) + H0NXCNT0(NXT).
-    # 사이클 26 시간대별 분리 이후 동적이므로 set 으로 한 번에 매칭.
-    _TICK_TR_IDS = frozenset({"H0UNCNT0", "H0STCNT0", "H0NXCNT0"})
+    # cycle293 — 세 시세 채널 집합은 `scanner.TICK_TR_IDS` **단일 정본**을 쓴다.
+    # 종전에는 여기 함수 지역 변수로 같은 집합이 있어 아무도 import 할 수 없었고,
+    # 나머지 9파일은 등가 비교를 썼다. 두 번째 집합이 생기면 두 판정이 갈리고,
+    # 갈린 순간 "구독은 A 채널, 해제는 B 채널" 이 된다(§5-B).
 
     groups = kis_ws_pool.get_subscriptions_by_session()
     if not groups:
@@ -110,9 +111,14 @@ def build_session_subscription_view(scheduler: Any) -> list[dict]:
             )
 
         if ws_obj is not None:
+            # cycle293 Green (적대 검증 F7) — 프로브 튜플은 세지 않는다. 세면
+            # 같은 세션의 `cap_used` 와 `get_session_status().subscribed` 가
+            # 어긋나 대시보드 슬롯 판독이 갈린다(프로브 격리 계약).
+            from src.realtime.websocket import is_probe_excluded
+
             cap_used = sum(
                 1 for tr_id, _tk in getattr(ws_obj, "_subscriptions", set())
-                if tr_id in _TICK_TR_IDS
+                if tr_id in TICK_TR_IDS and not is_probe_excluded(tr_id, _tk)
             )
         else:
             cap_used = len(tickers)

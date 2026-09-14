@@ -26,13 +26,18 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
+import time as _time
 from typing import Optional
 
 from src.realtime.websocket import (
     MAX_SUBSCRIPTIONS,
     KisWebSocket,
+    _reroute_legacy_unified,
+    is_probe_excluded,
     kis_ws,
+    reset_probe_exclusions,
 )
 
 logger = logging.getLogger(__name__)
@@ -57,6 +62,48 @@ class QuoteSessionExecutionNoticeError(RuntimeError):
 
 
 _EXECUTION_NOTICE_TR_IDS = frozenset({"H0STCNI0", "H0STCNI9"})
+
+#: cycle293 §9-A — 마커 2종의 1회/(ticker)/일 cap. 값은 KST 날짜 문자열이라
+#: 날짜가 바뀌면 스스로 다시 열린다(새 dict·새 테이블 0). 여기에
+#: `KstDailyEmitCap` 을 쓰지 않는 이유 = `src/realtime` → `src/engine` 모듈-레벨
+#: import 를 새로 만들지 않는다(의존 방향 보존).
+#:
+#: 🔴 두 마커를 **가른 이유**(적대 검증 MEDIUM-1) — 종전에는 `subscribe()` 중복
+#: 분기의 "요청 채널 거부" 와 "같은 종목이 두 채널에 동시 구독됨" 이 같은 마커
+#: `[tick_channel_dual_detected]` 를 썼다. 그런데 거부는 **정상 운영 경로**에서
+#: 뜬다 — `enforce` 에서 보유 종목은 `scanner` HIGH always-call 이 5분마다
+#: 통합을 요청하고 현행이 전용 채널이면 거부된다(채널은 올바르게 유지된다).
+#: 그 양성 발화가 §8-A S1 진행 게이트 "`[tick_channel_dual_detected]` 0건" 을
+#: 달성 불가로 만들고, 운영자가 진짜 이중 구독과 구별할 수 없게 한다.
+_tick_channel_denied_logged: dict[str, str] = {}
+_tick_channel_dual_logged: dict[str, str] = {}
+
+
+def _cap_once(store: dict, key: str) -> bool:
+    """`store` 기준 1회/(key)/일 cap. True 면 발화해도 된다.
+
+    `_kst_today_str()` 이 `""` 를 돌려주는 예외 경로에서도 **cap 이 열리지
+    않는다**(적대 검증 L4 — 종전 판정식 `... == today and today` 는 그 경우
+    무제한 발화였다). 날짜를 모르면 "이미 찍었다" 로 본다 — 관측 1행을
+    잃는 것이 폭주보다 싸다.
+    """
+    today = _kst_today_str()
+    if not today:
+        return False
+    if store.get(key) == today:
+        return False
+    store[key] = today
+    return True
+
+
+def _kst_today_str() -> str:
+    """KST 날짜 문자열. 실패는 "" 로 흡수(그 경우 cap 이 열린 채로 동작)."""
+    try:
+        from datetime import datetime, timedelta, timezone
+
+        return datetime.now(timezone(timedelta(hours=9))).date().isoformat()
+    except Exception:  # pragma: no cover — never-raise
+        return ""
 
 
 def _enforce_main_only_execution_notice(
@@ -93,6 +140,15 @@ class WebsocketPool:
         self._quotes: list[KisWebSocket] = []
         # ticker → KisWebSocket 분배 추적. unsubscribe / stale 재구독에 활용.
         self._ticker_to_session: dict[str, KisWebSocket] = {}
+        # cycle293 §5-C — tr_key → 그 종목이 실제로 구독된 TICK 채널 TR_ID.
+        # `_ticker_to_session` **키는 바꾸지 않는다**(C-1) — 단일 키가 곧 「같은
+        # 종목 이중 채널 금지」의 구조적 강제 장치다(`ticker_last_tick` ·
+        # `ticker_prices` · `tick_volume` 이 전부 ticker 단일 키이고, 두 채널이
+        # 같은 종목 프레임을 주면 `record_acml_vol` last-write-wins 가 BFB/VCP
+        # 거래량 게이트를 프레임 도착 순서에 좌우시킨다). 이 병행 dict 는
+        # "이 종목은 어느 채널인가" 만 알려 이중 요청을 드러낸다.
+        # `_market_op_subs`(제2 라우팅 dict) 선례와 같은 구조다.
+        self._ticker_to_tr_id: dict[str, str] = {}
         # 라운드로빈 인덱스 (보조 세션 회전용)
         self._round_robin_idx: int = 0
         # 사이클 7-C — 보조 세션 connect task (graceful per-session 보장)
@@ -222,6 +278,10 @@ class WebsocketPool:
                 logger.debug("[pool_stop] 보조 세션 disconnect 실패", exc_info=True)
         self._quotes.clear()
         self._ticker_to_session.clear()
+        self._ticker_to_tr_id.clear()
+        # cycle293 Green — 프로브 제외 등록도 함께 회수한다. 남기면 그 튜플이
+        # 라이브 구독과 **같은 식별자**라 다음 사이클의 실 구독을 은폐한다.
+        reset_probe_exclusions()
         self._started = False
 
     # -- 세션 분배 --------------------------------------------------------
@@ -299,15 +359,49 @@ class WebsocketPool:
         Returns:
             사용된 세션 label (``"main"`` / ``"quote-N"``). drop 발생 시 ``None``.
         """
+        # 🔴 cycle294 적대 검증 HIGH-1(부팅) 시정 — 세션의 `subscribe` 첫 문장이
+        #    레거시 통합 요청을 전용 채널로 되돌리는데(`_reroute_legacy_unified`),
+        #    그 재라우팅은 **세션 안에서** 일어나 호출자의 지역 변수를 못 바꾼다.
+        #    그래서 풀은 재라우팅 **전** 값을 `_ticker_to_tr_id` 에 적어 왔고,
+        #    이후 `unsubscribe`(자기 교정) · `switch_channel_same_session`(old_tr_id) ·
+        #    `stale_watcher_core._actual_or_desired_tick_tr_id` 가 전부 틀린 채널을
+        #    봤다 — 실측: 존재하지 않는 튜플에 UNSUBSCRIBE 를 보내 KIS `OPSP0003`
+        #    을 받고 진짜 튜플은 영구 고아가 된다. 진입에서 한 번 적용하면 아래
+        #    모든 기록이 **실제로 구독되는 채널**과 같아진다(재라우팅은 멱등이라
+        #    세션 안 호출은 no-op 이 된다).
+        tr_id = _reroute_legacy_unified(tr_id, tr_key)
+
         # 1) 체결통보 메인 강제 — priority 무시
         if tr_id in _EXECUTION_NOTICE_TR_IDS:
             await self._main.subscribe(tr_id, tr_key, bypass_limit=True)
             self._ticker_to_session[tr_key] = self._main
+            self._ticker_to_tr_id[tr_key] = tr_id
             return "main"
 
         # 2) 중복 ticker 처리
         existing = self._ticker_to_session.get(tr_key)
         if existing is not None:
+            # cycle293 §5-C — 같은 종목에 **다른 채널** 요청이 오면 무음 통과시키지
+            # 않는다. 현행 중복 분기는 `tr_id` 를 보지 않아 SEND 없이 성공을
+            # 반환했고(cycle221 이 종목별 VI 구독에서 정확히 이 함정을 밟아 "실질
+            # noop" 이 됐다), 그래서 `scheduler.py` 의 풀 우회 직접 구독 2곳
+            # (`:1382` 익일청산 시가 · `:2728` 매수 직후)이 만드는 이중 채널이
+            # 아무 흔적도 남기지 않았다. **요청 채널을 버리고 현행 채널을
+            # 유지**하되(전환 금지 — §3-C) 승격(promote)은 그대로 진행한다:
+            # 채널을 거부하는 것이 HIGH 보장을 거부하는 것이 되면 안 된다.
+            existing_tr_id = self._ticker_to_tr_id.get(tr_key)
+            if existing_tr_id is not None and existing_tr_id != tr_id:
+                self._emit_tick_channel_request_denied(tr_key, existing_tr_id, tr_id)
+                if is_probe_excluded(existing_tr_id, tr_key):
+                    # 기존 것이 **진단 프로브**(cycle253)면 라이브 구독을 그 채널로
+                    # 끌고 가지 않는다 — ≤15분 살다 DELETE 되는 도구가 그 종목의
+                    # 라이브 채널을 정하면 안 된다. 라우팅의 주인은 라이브다.
+                    self._ticker_to_tr_id[tr_key] = tr_id
+                else:
+                    tr_id = existing_tr_id
+            elif existing_tr_id is None:
+                # 추적 공백(부팅 전 구독·구버전 상태) — 최선의 정보로 채운다.
+                self._ticker_to_tr_id[tr_key] = tr_id
             # 메인에 이미 있는데 LOW 로 들어옴 → 그대로 메인 사용
             if existing is self._main:
                 return "main"
@@ -324,6 +418,7 @@ class WebsocketPool:
                     logger.debug("[pool_promote] 보조 unsubscribe 실패", exc_info=True)
                 await self._main.subscribe(tr_id, tr_key, bypass_limit=True)
                 self._ticker_to_session[tr_key] = self._main
+                self._ticker_to_tr_id[tr_key] = tr_id
                 return "main"
             # 보조에 있는데 LOW 로 또 들어옴 → 그대로 유지 (noop)
             return self._session_label(existing)
@@ -332,6 +427,7 @@ class WebsocketPool:
         if priority == "HIGH":
             await self._main.subscribe(tr_id, tr_key, bypass_limit=True)
             self._ticker_to_session[tr_key] = self._main
+            self._ticker_to_tr_id[tr_key] = tr_id
             return "main"
 
         # 4) LOW — 보조 라운드로빈, 가용 없으면 메인 fallback
@@ -359,7 +455,215 @@ class WebsocketPool:
 
         await chosen.subscribe(tr_id, tr_key, bypass_limit=bypass_limit)
         self._ticker_to_session[tr_key] = chosen
+        self._ticker_to_tr_id[tr_key] = tr_id
         return self._session_label(chosen)
+
+    def _emit_tick_channel_request_denied(
+        self, tr_key: str, existing_tr_id: str, requested_tr_id: str,
+    ) -> None:
+        """`[tick_channel_request_denied]` — 다른 채널 요청을 **거부**했다 (1회/ticker/일).
+
+        이것은 이중 구독이 아니다 — 현행 채널을 유지했다는 기록이다(§3-C 장중 전환
+        금지). 정상 운영에서도 뜬다: `enforce` 에서 보유 종목의 HIGH always-call 이
+        5분마다 통합을 요청하고 현행이 전용 채널이면 여기로 온다. **진짜 이중
+        구독은 `[tick_channel_dual_detected]` 가 따로 센다**(전 세션 전수 대조).
+        """
+        try:
+            if not _cap_once(_tick_channel_denied_logged, tr_key):
+                return
+            caller = "unknown"
+            try:
+                import sys as _sys
+
+                frame = _sys._getframe(2)
+                fname = frame.f_code.co_filename.rsplit("/", 1)[-1]
+                caller = f"{fname}:{frame.f_lineno}"
+            except Exception:
+                pass
+            # cycle293 마커는 완성된 문자열로 남긴다(회귀 가드가 `record.args`
+            # 가 빈 것을 전제로 `record.message` 를 직접 읽는다).
+            logger.warning(
+                f"[tick_channel_request_denied] ticker={tr_key} "
+                f"existing={existing_tr_id} requested={requested_tr_id} caller={caller}"
+            )
+        except Exception:  # pragma: no cover — never-raise (관측이 구독을 막지 않는다)
+            logger.debug("[tick_channel_request_denied] emit 실패", exc_info=True)
+
+    def detect_dual_tick_channels(self) -> dict[str, list[str]]:
+        """🔴 같은 종목이 **두 TICK 채널에 동시 구독**돼 있는지 전 세션에서 센다.
+
+        ## 왜 `subscribe()` 중복 분기가 아니라 여기인가 (적대 검증 CRITICAL)
+
+        §4-C 가 이 관측에 맡긴 임무는 **풀을 우회하는 직접 구독 2곳**
+        (`scheduler.py:1382` 익일청산 시가 수신 · `:2728` 스윙 매수 직후 — 둘 다
+        `kis_ws.subscribe(...)` 단일 세션 직접)을 드러내는 것이다. 그 두 줄은
+        `_ticker_to_session` 을 **건드리지 않으므로** `subscribe()` 의 중복 분기에
+        영원히 도달하지 못한다 — 종전 구현은 자기가 지킨다고 적은 것을 지키지
+        못했다(실증: 풀 구독 뒤 `kis_ws.subscribe` 우회로 튜플 2개가 생겼는데
+        WARNING 0행).
+
+        그래서 판정 근거를 **구독 사실**로 옮긴다: 전 세션의 `_subscriptions` 를
+        훑어 같은 `tr_key` 에 TICK tr_id 가 2개 이상이면 발화한다. 프로브 튜플은
+        제외한다(진단 도구가 이중 채널로 잡히면 §7 측정이 못 돌아간다).
+
+        Returns: `{ticker: [tr_id, ...]}` — 이중인 종목만. 정상 상태는 빈 dict.
+        """
+        found: dict[str, list[str]] = {}
+        try:
+            from src.engine.scanner import TICK_TR_IDS
+
+            by_ticker: dict[str, set[str]] = {}
+            for ws in [self._main, *self._quotes]:
+                try:
+                    subs = getattr(ws, "_subscriptions", None) or set()
+                except Exception:
+                    continue
+                for tr_id, tr_key in set(subs):
+                    if tr_id not in TICK_TR_IDS:
+                        continue
+                    if is_probe_excluded(tr_id, tr_key):
+                        continue
+                    by_ticker.setdefault(tr_key, set()).add(tr_id)
+            for tr_key, channels in by_ticker.items():
+                if len(channels) < 2:
+                    continue
+                found[tr_key] = sorted(channels)
+                if not _cap_once(_tick_channel_dual_logged, tr_key):
+                    continue
+                tracked = self._ticker_to_tr_id.get(tr_key, "-")
+                logger.warning(
+                    f"[tick_channel_dual_detected] ticker={tr_key} "
+                    f"channels={sorted(channels)} tracked={tracked} "
+                    f"source=session_scan"
+                )
+        except Exception:  # pragma: no cover — never-raise (관측이 구독을 막지 않는다)
+            logger.debug("[tick_channel_dual_detected] 전수 대조 실패", exc_info=True)
+        return found
+
+    def session_of(self, tr_key: str):
+        """그 종목을 담당하는 세션 (없으면 `None`) — 읽기 전용 접근자.
+
+        cycle294 §4-D — 전환은 **세션 안 채널 교체**다. 호출자가
+        `_ticker_to_session` 을 직접 만지지 않게 한다.
+        """
+        return self._ticker_to_session.get(tr_key)
+
+    async def switch_channel_same_session(
+        self,
+        tr_key: str,
+        new_tr_id: str,
+        *,
+        make_before_break: bool = True,
+        ack_timeout_secs: float = 5.0,
+        poll_interval: float = 0.2,
+    ) -> str:
+        """cycle294 §4-C — 살아 있는 구독의 **채널만** 바꾼다. 세션은 그대로.
+
+        Returns: ``"switched"`` / ``"switched_orphan"``(구 채널 해제 실패) /
+        ``"ack_timeout"`` / ``"noop"`` / ``"no_route"`` / ``"low_drop"``.
+
+        ## 🔴 HIGH 는 make-before-break (절대 규칙 2)
+
+        S2 신 채널 등록 → S3 **ACK 확인**(`_subscriptions` ∧ `_subscriptions_acked`
+        2집합) → S5 구 채널 해제 → S6 병행 dict 갱신. `_subscriptions` 만 보면
+        SEND 직후 무응답을 성공으로 읽고 구 채널을 끊는다(cycle14-C 가
+        `_subscribed=0/_acked=N` 격차로 잡은 그 계열). ACK 실패는 **신 채널만
+        즉시 회수**하고 구 채널을 유지한다 — 그 종목의 blind 구간은 0 이다.
+
+        LOW 는 break-before-make — 전환 창에 잃을 프레임이 없고, 슬롯·SEND 를
+        아끼며 실패해도 다음 사이클이 재시도한다.
+
+        ## 🔴 세션 재추첨 금지 (§4-D)
+
+        `unsubscribe` 는 `_ticker_to_session` 이 가리키는 **한 세션**만 본다. 신규
+        구독을 라운드로빈으로 다른 세션에 떨어뜨리면 그 dict 가 덮이고 구 채널
+        해제가 새 세션에서 `(old, tr_key)` 를 찾다 실패해 **구 세션 튜플이 영구
+        고아**로 41 슬롯을 잠식한다(cycle253 프로브가 밟은 그 함정). 그래서 이
+        메서드는 세션을 고르지 않는다 — `_ticker_to_session` 은 **읽기만** 한다.
+        """
+        old_tr_id = self._ticker_to_tr_id.get(tr_key)
+        if not old_tr_id or old_tr_id == new_tr_id:
+            return "noop"
+        session = self._ticker_to_session.get(tr_key)
+        if session is None:
+            return "no_route"
+        if make_before_break:
+            await session.subscribe(new_tr_id, tr_key, bypass_limit=True)
+            acked = False
+            deadline = _time.monotonic() + max(0.0, float(ack_timeout_secs))
+            while True:
+                subs = getattr(session, "_subscriptions", None) or set()
+                acked_set = getattr(session, "_subscriptions_acked", None) or set()
+                if (new_tr_id, tr_key) in subs and (new_tr_id, tr_key) in acked_set:
+                    acked = True
+                    break
+                if _time.monotonic() >= deadline:
+                    break
+                await asyncio.sleep(poll_interval)
+            if not acked:
+                # S4 — 고아 튜플 즉시 회수. 구 채널은 **건드리지 않는다**.
+                try:
+                    await session.unsubscribe(new_tr_id, tr_key)
+                except Exception:
+                    logger.debug("[tick_channel_switch] 고아 회수 실패", exc_info=True)
+                return "ack_timeout"
+            try:
+                await session.unsubscribe(old_tr_id, tr_key)
+            except Exception:
+                logger.debug("[tick_channel_switch] 구 채널 해제 실패", exc_info=True)
+                # 🔴 적대 검증 MEDIUM-2 시정 — `KisWebSocket.unsubscribe` 는
+                # `_subscriptions.discard` 를 **먼저** 하고 SEND 하므로, SEND 가
+                # 실패하면 KIS 쪽 구독은 살아 있는데 로컬 집합에서는 사라진다.
+                # 그러면 20:00 `unsubscribe_all()`(로컬 튜플 전수 순회)이 그것을
+                # 회수하지 못해 **영구 고아**가 되고 41 슬롯을 잠식하며, 두 채널
+                # 프레임이 동시에 들어와도 `detect_dual_tick_channels` 가 못 본다.
+                # 튜플을 되돌려 놓아 회수 경로와 이중 채널 탐지를 모두 살린다.
+                try:
+                    subs = getattr(session, "_subscriptions", None)
+                    if isinstance(subs, set):
+                        subs.add((old_tr_id, tr_key))
+                except Exception:
+                    pass
+                self._ticker_to_tr_id[tr_key] = new_tr_id
+                return "switched_orphan"
+            self._ticker_to_tr_id[tr_key] = new_tr_id
+            return "switched"
+        try:
+            await session.unsubscribe(old_tr_id, tr_key)
+        except Exception:
+            logger.debug("[tick_channel_switch] LOW 구 채널 해제 실패", exc_info=True)
+            self._release_switch_routing(tr_key, old_tr_id, stage="unsub")
+            return "low_drop"
+        await session.subscribe(new_tr_id, tr_key, bypass_limit=False)
+        live = getattr(session, "_subscriptions", None) or set()
+        if (new_tr_id, tr_key) not in live:
+            self._release_switch_routing(tr_key, new_tr_id, stage="sub")
+            return "low_drop"
+        self._ticker_to_tr_id[tr_key] = new_tr_id
+        return "switched"
+
+    def _release_switch_routing(self, tr_key: str, tr_id: str, *, stage: str) -> None:
+        """🔴 적대 검증 HIGH-1 시정 — LOW 전환 실패 시 **라우팅을 비운다**.
+
+        종전에는 실패해도 `_ticker_to_session`/`_ticker_to_tr_id` 를 그대로 뒀다.
+        그러면 그 종목은 세션에 튜플이 0개인데 풀은 "구독돼 있다" 고 믿는 상태가
+        되어 (a) `get_subscribed_tickers()` 에서 빠져 K stale watcher 가 영원히
+        못 보고 (b) `delta_unsubscribe_dropped` 의 정리 대상도 아니며 (c) 다음
+        `subscribe_filtered_stocks` 가 중복 분기(`existing is not None`)에서 SEND
+        없이 조기 반환한다 ⇒ 20:00 `unsubscribe_all()` 또는 프로세스 재시작까지
+        **자가 치유 경로가 없다**. 기존 `unsubscribe_in_pool` 은 두 dict 를 모두
+        pop 해 다음 사이클이 재분배하도록 해 왔다 — 신규 경로만 그 관례를 안
+        따랐다. 라우팅을 비우면 다음 5분 사이클의 재구독이 되살린다.
+        """
+        try:
+            self._ticker_to_session.pop(tr_key, None)
+            self._ticker_to_tr_id.pop(tr_key, None)
+            logger.warning(
+                "[tick_channel_switch_failed] ticker=%s stage=low_%s tr_id=%s "
+                "routing=released", tr_key, stage, tr_id,
+            )
+        except Exception:  # pragma: no cover — never-raise
+            pass
 
     async def unsubscribe(self, tr_id: str, tr_key: str) -> None:
         """분배 추적된 세션에서 unsubscribe. 기록 없으면 noop (다음 _scan_loop 자연 정리).
@@ -369,11 +673,24 @@ class WebsocketPool:
         if tr_id in _EXECUTION_NOTICE_TR_IDS:
             await self._main.unsubscribe(tr_id, tr_key)
             self._ticker_to_session.pop(tr_key, None)
+            self._ticker_to_tr_id.pop(tr_key, None)
             return
 
         chosen = self._ticker_to_session.pop(tr_key, None)
+        tracked_tr_id = self._ticker_to_tr_id.pop(tr_key, None)
         if chosen is None:
             return
+        # cycle293 — 호출자가 리졸버의 **현재** 판정을 넘겼는데 그 종목이 실제로는
+        # 다른 채널에 구독돼 있을 수 있다(모드를 장중에 바꾼 뒤 매도가 나가는 경우).
+        # 틀린 채널로 UNSUBSCRIBE 를 보내면 KIS 가 `OPSP0003 not found!` 를 돌려주고
+        # (cycle215~218 이 잡은 그 ERROR) 구 채널 튜플은 **영구 고아**로 41 슬롯을
+        # 잠식한다. 실제 구독 사실이 요청보다 우선이다.
+        if tracked_tr_id is not None and tracked_tr_id != tr_id:
+            logger.debug(
+                "[pool_unsubscribe] 채널 자기 교정 tr_key=%s requested=%s actual=%s",
+                tr_key, tr_id, tracked_tr_id,
+            )
+            tr_id = tracked_tr_id
         try:
             await chosen.unsubscribe(tr_id, tr_key)
         except Exception:
@@ -384,9 +701,11 @@ class WebsocketPool:
         # 분배 추적 기반 unsubscribe — 메인 + 보조 모두 커버
         for tr_key, ws in list(self._ticker_to_session.items()):
             try:
-                # tr_id 는 TICK_TR_ID 가정 — 분배 추적에 들어간 ticker 는 TICK 만
-                # (체결통보 / 장운영정보는 별도 처리). 안전을 위해 ws._subscriptions 에서
-                # tr_key 매칭하는 (tr_id, tr_key) 찾아 unsubscribe.
+                # tr_id 를 가정하지 않는다 — `ws._subscriptions` 에서 tr_key 로
+                # 매칭되는 `(tr_id, tr_key)` 튜플을 **전수** 찾아 해제한다. 그래서
+                # 세 시세 채널 어느 것이든, 그리고 체결통보·장운영정보가 섞여
+                # 들어와도 실제 구독된 튜플만 정확히 해제된다(cycle293 — 종전
+                # 주석의 "tr_id 는 TICK_TR_ID 가정" 은 코드 실제와 달랐다).
                 matches = [
                     (tid, tk) for tid, tk in ws._subscriptions if tk == tr_key
                 ]
@@ -395,6 +714,10 @@ class WebsocketPool:
             except Exception:
                 logger.debug("[pool_unsubscribe_all] %s 해제 실패", tr_key, exc_info=True)
         self._ticker_to_session.clear()
+        self._ticker_to_tr_id.clear()
+        # 20:00 `TIME_NXT_POST_CLOSE` — 프로브 튜플도 여기서 죽으므로 제외
+        # 등록을 함께 회수한다(cycle293 Green: 수명 주석과 코드를 일치시킨다).
+        reset_probe_exclusions()
 
     async def resend_subscribe_for_ticker(self, tr_id: str, tr_key: str) -> None:
         """K stale watcher 헬퍼 — 분배 추적된 세션에서 ``_send_subscribe`` 재전송.
@@ -416,9 +739,12 @@ class WebsocketPool:
         ticker 가 다른 세션으로 라운드로빈 될 수 있음을 명시.
         """
         chosen = self._ticker_to_session.pop(tr_key, None)
+        tracked_tr_id = self._ticker_to_tr_id.pop(tr_key, None)
         if chosen is None:
             # 추적 없는 ticker — 메인에서 시도 (안전 디폴트)
             chosen = self._main
+        if tracked_tr_id is not None and tracked_tr_id != tr_id:
+            tr_id = tracked_tr_id
         try:
             await chosen.unsubscribe(tr_id, tr_key)
         except Exception:
@@ -467,6 +793,7 @@ class WebsocketPool:
         for tr_key in list(self._ticker_to_session.keys()):
             if self._ticker_to_session[tr_key] is target:
                 del self._ticker_to_session[tr_key]
+                self._ticker_to_tr_id.pop(tr_key, None)
 
         # disconnect — 예외 swallow (정합성 유지)
         try:
@@ -484,25 +811,30 @@ class WebsocketPool:
     # -- 통합 조회 / 진단 -----------------------------------------------
 
     def get_subscribed_tickers(self) -> set[str]:
-        """메인 + 보조 모든 세션의 TICK 구독 합집합 (Phase D 호환 인터페이스)."""
+        """메인 + 보조 모든 세션의 TICK 구독 합집합 (Phase D 호환 인터페이스).
+
+        cycle293 — 세 채널 합집합(등가 비교 금지, §5-B). 진단 프로브 튜플은
+        `PROBE_EXCLUDED_TUPLES`(프로브 정체성 기준)로만 빠진다 — 채널 기준 격리는
+        전용 채널이 실 구독에 쓰이는 순간 성립하지 않는다.
+        """
         # 지연 import — scanner 가 websocket_pool 참조 가능성 차단
-        from src.engine.scanner import TICK_TR_ID
+        from src.engine.scanner import TICK_TR_IDS
 
         result: set[str] = set()
         for ws in [self._main, *self._quotes]:
             for tr_id, tr_key in ws._subscriptions:
-                if tr_id == TICK_TR_ID:
+                if tr_id in TICK_TR_IDS and not is_probe_excluded(tr_id, tr_key):
                     result.add(tr_key)
         return result
 
     def get_acked_tickers(self) -> set[str]:
         """메인 + 보조 모든 세션의 ACK 받은 TICK 구독 합집합."""
-        from src.engine.scanner import TICK_TR_ID
+        from src.engine.scanner import TICK_TR_IDS
 
         result: set[str] = set()
         for ws in [self._main, *self._quotes]:
             for tr_id, tr_key in ws._subscriptions_acked:
-                if tr_id == TICK_TR_ID:
+                if tr_id in TICK_TR_IDS and not is_probe_excluded(tr_id, tr_key):
                     result.add(tr_key)
         return result
 
@@ -531,18 +863,22 @@ class WebsocketPool:
         사이클 43 (2026-05-22) — 라벨 통일: 1-based index ("quote-N") → DB 라벨 (ISA/sub/gold).
         보조 세션 `KisWebSocket.__init__(label=...)` 주입값 직접 반환.
         """
-        from src.engine.scanner import TICK_TR_ID
+        from src.engine.scanner import TICK_TR_IDS
 
         # 사이클 43 — 보조 세션 label = ws._label (DB 라벨). graceful 폴백 "unknown".
         sessions = []
         for ws, label in [(self._main, "main")] + [
             (q, getattr(q, "_label", "") or "unknown") for q in self._quotes
         ]:
+            # cycle293 — 세 채널 합집합. 등가 비교를 남기면 전용 채널 20종목을
+            # 가진 세션이 대시보드에 `sub=0/41` 로 보여 운영자가 슬롯을 못 읽는다.
             subscribed = {
-                tr_key for tr_id, tr_key in ws._subscriptions if tr_id == TICK_TR_ID
+                tr_key for tr_id, tr_key in ws._subscriptions
+                if tr_id in TICK_TR_IDS and not is_probe_excluded(tr_id, tr_key)
             }
             acked = {
-                tr_key for tr_id, tr_key in ws._subscriptions_acked if tr_id == TICK_TR_ID
+                tr_key for tr_id, tr_key in ws._subscriptions_acked
+                if tr_id in TICK_TR_IDS and not is_probe_excluded(tr_id, tr_key)
             }
             sessions.append({
                 "label": label,

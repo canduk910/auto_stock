@@ -22,7 +22,20 @@ db/pg.py (asyncpg 풀) ← 전 db 모듈 + engine/scheduler·boot_manager·log_a
 db/        ← engine/, routes/
 models/    ← 모든 모듈
 middleware/api_auth.py ← main.py (최외곽 미들웨어 — MetricsMiddleware 보다 바깥)
+
+engine/market_state.py → engine/tick_channel_clock.py (시장 시간표 파생 — 시각 리터럴 0건)
+engine/tick_channel_mode.py ← engine/{scanner,tick_channel_clock,tick_channel_switch,no_feed_registry,stale_watcher_core}.py
+                              + realtime/websocket.py, routes/realtime.py   (킬스위치 — 어디서든 읽는다)
+engine/tick_channel_clock.py ← engine/{scanner,risk,tick_channel_switch}.py, routes/realtime.py
+engine/tick_channel_switch.py ← engine/stale_watcher_core.py (120초 트리거 — 유일 호출자), routes/realtime.py
+engine/market_op_subscribe.py ← engine/scheduler.py (5줄 위임 wrapper)
 ```
+
+> **시세 채널 리졸버 (cycle293·294, 2026-09-14)** — 어느 종목을 어느 WebSocket 채널로 구독할지는
+> `engine/scanner.py::tick_tr_id_for(ticker, *, priority, now)` 하나가 정한다. 시각축은
+> `engine/tick_channel_clock.py`(시장 시간표 파생, **시각 리터럴 0건**), 살아 있는 구독의 전환은
+> `engine/tick_channel_switch.py`, 킬스위치는 `engine/tick_channel_mode.py` +
+> `PUT /api/realtime/tick-channel-mode` 다. 상세 = `src/realtime/CLAUDE.md` 「시세 채널」 절
 
 > **예정 (cycle279 프로세스 분리 1단계, 코드 아직 없음)** — `engine/llm_buy_gate` 가
 > `db/llm_buy_evaluations` 에 요청 행을 남기면 별도 프로세스 `llm_worker` 가 그 행을 선점해 채운다.

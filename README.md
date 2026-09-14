@@ -328,14 +328,14 @@ KIS OpenAPI가 NXT(넥스트레이드 ATS) 주문/시세를 정식 지원함에 
 
 | 항목 | 사용 |
 |------|------|
-| 시세 채널 | `TICK_TR_ID=H0UNCNT0` (통합) 단일 — 사이클 26(2026-05-20)이 설계한 시간대별 6구간 분기(`H0STCNT0`/`H0NXCNT0`)는 108일간 미배선으로 cycle257(2026-09-05)에서 삭제됐다. 속성 기반 재분리는 P1-7 B |
+| 시세 채널 | **KRX 전용 `H0STCNT0` + NXT 전용 `H0NXCNT0` 2채널** (cycle293·294, 2026-09-14). 통합 `H0UNCNT0` 은 `stock_master.nxt_tradable=False` 종목의 체결 프레임을 보내지 않아 폐기했다 — 정상 경로에서 반환하지 않는다(킬스위치 `off` 만 예외). 채널은 `scanner.tick_tr_id_for(ticker, *, priority, now)` 가 고른다: 프리장은 NXT, 정규장·애프터마켓은 KRX. 전환은 하루 1회이고 `tick_channel_clock.switch_windows()` 가 시장 시간표에서 파생한 창 안에서만 일어난다(시각 리터럴 0건). 킬스위치 = `PUT /api/realtime/tick-channel-mode` (`system_config.tick_channel_resolver_mode`, 기본 `observe` = 행위 0). 사이클 26(2026-05-20)이 설계한 시간대별 6구간 분기는 108일간 미배선으로 cycle257(2026-09-05)에서 삭제됐다 |
 | 통합 장운영정보 | `H0UNMKO0` / 대표 종목 `005930` 구독 (실전 한정). `MKOP_CLS_CODE`(110/112/121/129/130~159) 시장 전체 공통이라 1종목으로 보드 전환 수신. SessionTracker 가 시각 기반 tick + H0UNMKO0 코드 동시 사용 |
 | 주문 라우팅 | `place_order(..., exchange=...)` body 에 `EXCG_ID_DVSN_CD` (`KRX`/`NXT`/`SOR`). 모의(VTS) 는 KRX 만 허용 — SOR/NXT 는 실전 한정. 사이클 26 신규 매수는 전략 `tradable_boards=("main",)` 로 KRX 만 유효 |
 | 조회 거래소 옵션 | `get_balance(afhr_flpr=...)` — `N`(정규장)/`Y`(시간외)/`X`(NXT 정규장). `get_daily_orders(exchange="ALL")` — KRX+NXT+SOR 합산 |
 | 보드 추상화 (사이클 26, 3 보드) | `src/engine/session.py::MarketBoard` enum 활성 3 보드: `pre_nxt` (08:00~09:00) / `main` (09:00~15:40) / `post_nxt` (15:40~20:00). `_BOARD_SCHEDULE` 도 3 구간. `krx_open`/`krx_after` enum 값은 *호환성 보존* (실제 스케줄 미사용). `SessionTracker` 30s 주기 tick + `register_board_handler` 콜백 |
 | 전략별 매매 가능 보드 | `DEFAULT_TRADABLE_BOARDS` — `momentum`: KRX_OPEN+MAIN (코드 enum 유지, 활성 보드는 MAIN) / **`volatility_breakout`·`long_tail_volatility`: MAIN only (사이클 26 KRX ONLY)** / `donchian_swing`·`bull_flag_breakout`·`vcp_breakout`·`kojiro`: MAIN only |
 | VB/LTV K값 | `k_value_krx_main` (기본 1.0) — KRX 09:00 시가 기준 단독 사용. `k_value_nxt_pre`/`k_value_nxt_post` 키는 DB/AI 자문 응답 호환 보존만 (사이클 26 PRE_NXT 매수 제거) |
-| 종목 단위 원자 전환 / 사전 구독 마진 | 사이클 26 이 설계했던 보드 전환 원자 처리(50초 사전 구독 마진 2 시각)는 유일 소비 경로가 미배선이라 cycle257 에서 함께 삭제 — 위 시세 채널 행 참조 |
+| 종목 단위 원자 전환 / 사전 구독 마진 | 사이클 26 이 설계했던 보드 전환 원자 처리(50초 사전 구독 마진 2 시각)는 유일 소비 경로가 미배선이라 cycle257 에서 함께 삭제 — 위 시세 채널 행 참조. cycle294 의 채널 전환은 그 설계의 부활이 아니라 별개 구현이다(창은 시장 시간표에서 파생하고, 보유 종목은 make-before-break 로 옮긴다) |
 | 익일 청산 시점 | 다음 영업일 NXT 프리 첫 거래(08:00 부근) + 30초 안정화 후 청산 (`NEXT_DAY_STABILIZE_SECS=30`). 대상: `momentum`, `long_tail_volatility` 상한가 모드, `volatility_breakout` 안전망 |
 | 15:20 강제 청산 | `_force_clear_main_only` — `tradable_boards` 에 POST_NXT 가 있는 전략은 보유 유지 (현재 해당 없음). **시간 가드 (2026-05-15 hotfix)**: 함수 진입 시 `>=15:30` 이면 즉시 skip + 익일 청산 안전망 위임 |
 | 스윙 일중 시세 REST 폴링 | `_swing_rest_poll_loop` — **2단 창**(사이클 222-a): **09:05~09:30 = 보유 종목 전용 + stale 중립**(REST 가 `ticker_last_tick` 을 갱신하면 개장 러시 blind 종목이 '신선'으로 보여 강제 재구독이 안 걸린다) / **09:30~15:20 = 전체 폴**(후보 포함 + `last_tick` 갱신). 대상 전략 = `_SWING_POLL_STRATEGIES = ("donchian_swing", "kojiro")` — **BFB·VCP 는 비멤버라 REST 보강이 없고 틱으로만 매수 평가한다**(미구독 = 매수 기회 완전 상실). 60s 주기로 `_scanned_tickers ∪ positions ∪ pending_buys` 합집합을 `fetch_stock_detail` 폴링 → `scanner.ticker_prices` 갱신 + `ticker_last_tick` touch + `ticker_names` 보강. 보유 종목만 `RiskManager.on_tick` 호출로 기존 트레일링/-7% 손절 평가 재사용. WS stale 시 ATR 트레일링 평가 끊김 차단 (2026-05-15 결함 B) |
@@ -375,6 +375,7 @@ KIS OpenAPI가 NXT(넥스트레이드 ATS) 주문/시세를 정식 지원함에 
 | GET | `/api/realtime/subscriptions` | WebSocket 구독 슬롯 진단 (total/acked/fresh_60s/stale_60s/limit/tickers/reconnect_count/ws_connected) + **사이클 35/37**: `sessions[*].tickers_detail` (ticker/ticker_name/stale/last_tick/retries/last_resub/`last_cntg_hour`/`today_volume`). KIS `inquire_ccnl` 캐시(TTL 5분 + cap 20)로 KIS 실제 체결시각 동봉 — WS 구독 의심 진단용 |
 | POST | `/api/realtime/resubscribe` | stale(60s 미수신) TICK 구독 종목 즉시 일괄 재구독 (J2). 응답 `{resubscribed, tickers}`. F1 자동 재구독과 별개의 운영자 수동 트리거 (ScanMonitor 인라인 버튼). WebSocket 끊김 시 400 |
 | GET | `/api/realtime/market-operation` | **사이클 186** 장운영상태 (VI/거래정지/종목상태/서킷브레이커) 현황 (관찰성 전용). summary(`vi_active_count`/`halt_active_count`/`iscd_stat_active_count` + `circuit_breaker` 휴리스틱) + `details`(종목별 vi_code/halt_yn/halt_reason/mkop_cls_code, cap 200). cycle 149 H0UNMKO0 모니터 소스. RealtimeHealth 5번째 카드 노출. 매수 가드 미연계 |
+| GET·PUT | `/api/realtime/tick-channel-mode` | **cycle293·294 (2026-09-14) — 시세 채널 장중 킬스위치.** GET 은 현재 모드·전환 다이얼·그날 전환 창을 돌려준다. PUT body `{mode}` ∈ `off`/`observe`/`enforce_low`/`enforce` (어휘 밖 값은 422). DB 저장과 엔진 메모리 반영이 **같은 요청에서** 끝나 재시작이 필요 없다. 선택 필드 `switch_enabled`(전환만 정지)·`gap_hold_enabled`(NXT 단독 연속 구간에 보유가 NXT 를 따라가는가)는 생략하면 현행 값 무접촉 |
 | GET | `/api/strategy-funnel?strategy_id=&target_date=` | **사이클 34**: 전략별 조건검색 단계별 후보/탈락 종목 (`survived_tickers` cap 200 / `excluded_sample` cap 20) |
 | GET | `/api/strategy-funnel/recent?strategy_id=&days=7` | 최근 N영업일 추이 |
 | POST | `/api/strategy-funnel/snapshot` | 수동 trigger — 각 전략 `get_scan_stats()` + `get_scanned_tickers()` 로 최종 단계 (`step_no=99`) 즉시 snapshot 생성 |

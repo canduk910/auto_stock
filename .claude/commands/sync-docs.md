@@ -126,10 +126,22 @@ git diff 를 보지 말고 **지정 영역의 코드를 직접 읽는다**.
 디렉터리 정본은 그 디렉터리의 모듈을 **빠짐없이** 담아야 한다. 기계적으로 확인한다:
 
 ```bash
-for f in src/engine/*.py; do b=$(basename $f .py); [ "$b" = "__init__" ] && continue;
-  grep -q "$b" src/engine/CLAUDE.md || echo "누락: $b.py"; done
+for d in api db engine models realtime routes; do
+  for f in src/$d/*.py; do b=$(basename $f .py); [ "$b" = "__init__" ] && continue;
+    grep -qE "(^|[^A-Za-z0-9_])$b\.py" src/$d/CLAUDE.md || echo "누락 src/$d: $b.py"; done; done
 ```
-`src/{api,db,engine,models,realtime,routes}` 각각에 같은 검사를 돌린다.
+
+🔴 **`grep -q "$b"`(맨 모듈명 부분 문자열)로 검사하지 않는다 — 거짓 통과한다.**
+2026-09-14(cycle292) 실측: 신규 `src/engine/market_op_subscribe.py` 는 모듈 맵에 항목이
+**없는데도** 검사를 통과했다. 같은 문서 안 로그 마커 `[market_op_subscribe_skip]` 와 가드
+파일명 `test_market_op_subscribe_import_path_guard.py` 가 부분 문자열을 매치시켰기 때문이다.
+그 시점 느슨한 검사는 6개 디렉터리 전부에서 **누락 0건**(전부 거짓 초록)이었고, 위처럼
+`.py` 확장자 + 단어 경계로 조이자 **누락 9건**이 드러났다 — 그중 1건이 cycle292 자신의 신규
+leaf 이고 나머지 **선재 8건**(engine 1 · db 4 · api 1 · routes 2)은 남은 별건 카드다. 마커·테스트 파일명이 모듈명을 부분 포함하는 한 옛 검사는 **영구히** 거짓 통과한다.
+
+⚠️ 반대로 `\*\*$b\.py\*\*`(굵게 표기 강제)까지 조이면 **과잉**이다 — engine 에서만 오탐
+25건이 나온다(`order_engine.py`·`scanner.py`·`risk.py` 등 핵심 모듈은 의존 관계 도식 줄에
+평문으로 적혀 있고 그것이 정당한 등재다).
 (2026-09-07 실측으로 engine 4건·routes 1건·middleware 1건이 이 검사로 드러났다.)
 
 **손대지 않는 영역**:

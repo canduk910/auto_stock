@@ -19,6 +19,15 @@
   `kis_ws` 참조는 구독이 아니라 **점유 계측**(`get_subscribed_tickers`/`_subscriptions`) 목적.
 
 봉인 정본은 `tests/unit/ast/test_cycle221_ast_market_op_no_main.py`.
+
+## cycle292 (2026-09-14) 재조준
+
+본체가 `scheduler.py` → `src/engine/market_op_subscribe.py::subscribe_market_operation_tickers`
+로 이동했다(행위 변경 0, 라인 상한 예산 확보). `scheduler` 에는 5줄 위임 wrapper 만 남아
+`_get_function_node(..., "_subscribe_market_operation_tickers")` 로는 **wrapper 노드**가 잡힌다
+— 그러면 G-214-5 는 시끄럽게 실패하지만 G-214-5b(부정 단언)는 **조용히 초록**이 된다.
+그래서 둘 다 `_BODY_PATH`/`_BODY_FN` 으로 재조준하고, 5b 에는 양성 대조군
+(`bypass_limit` 키워드 ≥1건)을 추가했다.
 """
 
 from __future__ import annotations
@@ -30,6 +39,9 @@ from pathlib import Path
 _ROOT = Path(__file__).resolve().parents[3]
 _SCHEDULER_PATH = _ROOT / "src" / "engine" / "scheduler.py"
 _POOL_PATH = _ROOT / "src" / "realtime" / "websocket_pool.py"
+# cycle292 — VI 구독 본체가 사는 leaf. 가드는 wrapper 가 아니라 본체를 재야 한다.
+_BODY_PATH = _ROOT / "src" / "engine" / "market_op_subscribe.py"
+_BODY_FN = "subscribe_market_operation_tickers"
 
 
 def _get_function_node(tree: ast.AST, name: str) -> ast.AST:
@@ -61,6 +73,15 @@ def _collect_names(node: ast.AST) -> set[str]:
     return {n.id for n in ast.walk(node) if isinstance(n, ast.Name)}
 
 
+def _vi_body() -> ast.AST:
+    """VI 구독 **본체** 노드 (cycle292 부터 leaf 파일)."""
+    assert _BODY_PATH.exists(), (
+        f"본체 leaf 부재: {_BODY_PATH} — 기준선 소실은 명시 FAIL(공허 초록 차단)"
+    )
+    tree = ast.parse(_BODY_PATH.read_text(encoding="utf-8"))
+    return _get_function_node(tree, _BODY_FN)
+
+
 def test_G_214_5_pool_referenced_for_quote_sessions_only() -> None:
     """[의미 전환 G-214-5] 참조는 남되 **의미가 다르다**.
 
@@ -68,8 +89,7 @@ def test_G_214_5_pool_referenced_for_quote_sessions_only() -> None:
     - `kis_ws` = 메인 **점유 계측**(`get_subscribed_tickers`/`_subscriptions`) 소스 +
       소켓 OPEN 가드. 구독 SEND 는 0건(cycle221 AST 가드가 별도 봉인).
     """
-    tree = ast.parse(_SCHEDULER_PATH.read_text(encoding="utf-8"))
-    fn = _get_function_node(tree, "_subscribe_market_operation_tickers")
+    fn = _vi_body()
     names = _collect_names(fn)
 
     assert "kis_ws_pool" in names, (
@@ -95,22 +115,26 @@ def test_G_214_5b_bypass_true_is_now_forbidden() -> None:
     그러나 R4 의 보호 대상은 **시세(tick)** 이고, VI 관찰 채널이 그 계약을 빌려 쓰면
     메인이 서버 한도 41 을 넘겨 OPSP0008 로 **tick 이 밀린다**(08-19 실증).
     """
-    tree = ast.parse(_SCHEDULER_PATH.read_text(encoding="utf-8"))
-    fn = _get_function_node(tree, "_subscribe_market_operation_tickers")
+    fn = _vi_body()
 
     offenders = []
+    present = 0
     for node in ast.walk(fn):
         if isinstance(node, ast.Call):
             for kw in node.keywords:
-                if (
-                    kw.arg == "bypass_limit"
-                    and isinstance(kw.value, ast.Constant)
-                    and kw.value.value is True
-                ):
+                if kw.arg != "bypass_limit":
+                    continue
+                present += 1
+                if isinstance(kw.value, ast.Constant) and kw.value.value is True:
                     offenders.append(node.lineno)
     assert offenders == [], (
         "VI(H0UNMKO0) 구독은 bypass_limit=True 금지 — 서버 한도 41 우회 불가. "
         f"위반 라인: {offenders}"
+    )
+    # cycle292 양성 대조군 — 키워드가 통째로 사라지면(기본값 의존) 위 단언은 공허하다.
+    assert present >= 1, (
+        "`bypass_limit` 키워드 0건 — 명시 False 소멸. realtime 기본값 변경이 조용히 "
+        "VI 를 메인 한도 우회로 되돌릴 수 있다"
     )
 
 

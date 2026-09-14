@@ -93,6 +93,7 @@ KIS OpenAPI REST 호출 모듈. 모든 호출은 `base.py` 공통 래퍼를 통�
 - 잔고조회: TTTC8434R / 매수가능조회: TTTC8908R
 - **자금 안전**: 본 모듈은 `kis_get` (메인 단일) 만 사용. 보조 시세 풀 함수 절대 import 안 함 — `test_balance_module_never_imports_quote_pool` 가드
 - `get_balance(afhr_flpr="N")`: `AFHR_FLPR_YN` query. `N`(기본 정규장) / `Y`(시간외 단일가) / `X`(NXT 정규장) — required
+- 🔴 **`get_balance()` 의 `prpr`(현재가)은 KRX 애프터마켓 체결을 반영하지 않는다 (2026-09-14 라이브 실측).** 16:00~20:00 내내 보유 11종목의 `prpr` 이 전부 무변동이었는데, 같은 종목 `004020` 을 `quotation.inquire_ccnl` 로 조회하면 `last_cntg_hour=195947`(19:59:47 체결)이 나온다 — **REST 시세 조회는 그 체결을 본다.** **실측 범위는 `prpr` 하나다** — `evlu_amt`(평가금액)·`nass_amt`(순자산, `summary.net_asset` 의 원천)는 KIS 가 서버에서 계산해 내려주는 별도 필드라 같이 얼었는지 **재지 않았다**. 얼었다고 보는 것이 자연스럽지만(같은 현재가에서 파생될 것이므로) 그건 **[추론]** 이다. 확인 방법 = 애프터 구간에 `evlu_amt` 와 `prpr × hldg_qty` 를 대조한다 — 어긋나면 별도 갱신 경로가 있다는 뜻이다. ⚠️ 2026-09-14 제도 변경으로 그 창이 연속 체결 구간이 됐으니, 애프터마켓 가격을 근거로 판단하는 코드는 `get_balance` 가 아니라 시세 조회를 써야 한다(현재 소비처 = 대시보드 표시 · `account_risk_watcher` 의 `summary.net_asset`)
 - `get_daily_orders(target_date="", exchange="ALL")`: TTTC0081R. `EXCG_ID_DVSN_CD` query required — `ALL`(기본, KRX+NXT+SOR 합산) / `KRX` / `NXT` / `SOR`. NXT 체결 누락 방지 위해 기본 ALL
 
 ### KIS 거부 응답 분류 헬퍼
@@ -249,6 +250,26 @@ KRX 키 관리 인프라 + Supabase 저장 + 마스킹. 본 사이클 = 인프�
 - `KrxApiError` 예외 클래스 (사이클 88 G-REJECT 영속)
 - `fetch_krx_open_api(endpoint_path, params)` 추상 (사이클 115 시정 = GET + query params + AUTH_KEY query 영속)
 - Supabase 동적 키 로드 (`get_krx_open_api_config()`)
+
+## market_operation.py — 장운영정보(H0UNMKO0) 정본 + VI 현황 REST 폴백 (사이클 149, 2026-06-16)
+
+WebSocket 장운영정보의 **파싱 정본**이 여기 있다. 구독을 보내는 쪽은 `src/engine/market_op_subscribe.py`,
+받은 상태를 쌓는 쪽은 `src/engine/market_operation_monitor.py` 다 — 셋의 역할이 다르다.
+
+| 심볼 | 내용 |
+|---|---|
+| `MARKET_OP_TR_ID = "H0UNMKO0"` | 통합 장운영정보 TR_ID |
+| `VI_STATUS_TR_ID = "FHPST01390000"` · `VI_STATUS_URL = "/uapi/domestic-stock/v1/quotations/inquire-vi-status"` | 부팅 시드용 REST 보조 폴백. 이 path 는 시세 풀 화이트리스트에 **있어야 한다**(2026-08-04 추가 — 없던 동안 매 부팅 `QuotePoolPathError` 로 VI 시드가 100% 실패했다) |
+| `@dataclass MarketOpEvent` | KIS 10컬럼 전수 파싱 결과 |
+| `parse_market_op_payload(tr_key, payload) -> MarketOpEvent` | `^` 구분 페이로드 → 이벤트 |
+| `is_event_blocking(event) -> bool` | stale 회피 판정 = VI 활성 + 거래정지 + 종목상태 이상(MRKT_TRTM 제외) |
+| `inquire_vi_status_today() -> set[str]` | 부팅 REST 1회 시드. graceful — 실패해도 매매 안전성 영향 0 |
+
+🔴 **`VI_CLS_CODE` 의 `"0"`/`""`/`None` 은 전부 비활성이다**(truthy 매핑 = 블랙리스트 방식).
+KIS 가 코드를 늘려도 새 값이 자동으로 "활성" 으로 읽히게 하려는 의도다.
+
+매매 안전성 무영향이 명문화된 영역이다 — 이 모듈이 바꾸는 것은 stale 판정의 *지연*뿐이고
+`risk.on_tick`·`order_engine`·`auth` 는 건드리지 않는다.
 
 ## quotation.py — 주식현재가 체결 (사이클 32, 2026-05-21)
 

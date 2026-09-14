@@ -87,6 +87,78 @@ _PRE_MARKET_EXIT_EVAL_STRATEGIES = frozenset({"long_tail_volatility"})
 #   복붙하지 않는다). 매수는 `_swing_buy_poll_loop`(REST `stck_oprc`)에서만.
 _TICK_BUY_EVAL_SKIP_STRATEGIES = frozenset({"donchian_swing", "kojiro"})
 
+
+def _tick_buy_eval_blocked_by_channel(ticker: str) -> bool:
+    """cycle294 §6 — **코호트 축** WS 틱 매수 평가 skip 판정.
+
+    ## 왜 술어가 「채널」이 아니라 「코호트」인가 (🔴 절대 규칙 5)
+
+    cycle293 은 술어를 「이 종목이 **전용 채널**에 구독돼 있는가」
+    (`applied in DEDICATED_TICK_TR_IDS`)로 두었다. 3단계는 통합 채널을 없애고
+    **모든** 종목을 전용 채널로 보내므로 그 술어는 **전 종목 참**이 되어
+    momentum·volatility_breakout·long_tail_volatility·bull_flag_breakout·
+    vcp_breakout **5전략의 틱 매수가 통째로 죽는다** — 그 5전략은 틱이 **유일**
+    매수 경로다(donchian/kojiro 는 `_TICK_BUY_EVAL_SKIP_STRATEGIES` 로 이미
+    skip 이고 `_swing_buy_poll_loop` REST 폴이 매수를 담당한다).
+
+    술어의 **원래 의도**는 채널이 아니라 코호트였다 — 「오늘까지 통합 채널에서
+    프레임이 **0건**이던 종목(`nxt_tradable=False` ∧ 출처 권위)에 프레임이 새로
+    들어와 5전략의 매수 평가가 시총 1,000억↑ 유니버스의 **64%** 를 새로 잡는
+    것」. `nxt_true` 종목은 **어제도 통합 채널에서 프레임을 받았고** 매수 평가를
+    이미 받고 있었다 ⇒ 3단계는 그들에게 **채널만 바꾼다** ⇒ 매수 평가가
+    계속돼야 한다.
+
+    ## 🔴 모드를 **보지 않는다** (금기 9)
+
+    킬스위치 `off` 는 이미 전용 채널에 올라간 구독을 **되돌리지 않는다**(§9-B).
+    모드를 보면 「사고 중에 누르는 안전 조치가 5전략의 매수를 그 코호트에 열어
+    준다」 = cycle293 적대 검증 CRITICAL 의 재현이다. 스탬프는 모드와 무관하게
+    **구독 사실**을 따른다(구독을 발사하는 `tick_tr_id_for` 안에서 심긴다).
+
+    ## 스탬프 부재 = 열어 둔다 (§6-D 비대칭)
+
+    닫힘 오류는 **레지스트리 전체 실패 한 번**으로 전 종목에 동시에 일어나고
+    (상관된 실패 = 그날 5전략 매수 0), 열림 오류는 종목별로 독립이다. 절대 규칙
+    5 가 이 사이클 최대 위험으로 지목한 것이 전자다. 그 상태는 조용하지 않다 —
+    `scanner` 의 `[tick_buy_gate] ... unstamped=` 가 하루 1행 WARNING 으로
+    규모를 남긴다.
+
+    B-2(매수 개방)는 이 함수 호출 1줄을 걷는 것이고 **별도 승인 +
+    `domain-consult` + `ACML_VOL` 스코프 대조 1일**(N-2)이 선행 조건이다.
+    """
+    try:
+        from src.engine.scanner import tick_buy_cohort_blocked
+
+        return bool(tick_buy_cohort_blocked(ticker))
+    except Exception:  # pragma: no cover — never-raise, fail-open
+        return False
+
+
+def _note_pre_window_krx_frame(ticker: str) -> None:
+    """cycle294 §2-D — 프리 창에 **무송출 코호트** 틱이 들어온 사실을 센다(관측만).
+
+    호출자는 코호트 판정이 **참**인 자리에서만 부른다. 그 코호트는 프리 창에
+    `H0STCNT0`(KRX 전용)로 구독되므로(§2-C 선택지 (가)) 그때 들어오는 프레임은
+    곧 「KRX 가 시가 단일가 구간에 프레임을 보냈다」는 뜻이다.
+
+    그 일이 일어나는가에 대한 우리 답은 **[추론, 확신 ≈80%] 보내지 않는다**
+    (`H0STCNT0` 은 체결가 채널이고 단일가 구간에는 체결이 없다). 이 함수가 그
+    추론을 D+1 실측으로 바꾼다. 🔴 **행위는 바꾸지 않는다** — 프레임을 막는
+    게이트를 더하는 것은 매매 행위 변경이라 별도 승인 대상이다.
+
+    노출 자체가 이미 좁다 — 08:00~09:00 은 `PRE_NXT ∈ active ∧ MAIN ∉ active`
+    라 `_defers_pre_market_exit` 가 LTV 외 6전략의 청산 평가를 이미 보류한다.
+
+    never-raise · 창 밖이면 leaf 안에서 즉시 반환한다(hot path).
+    """
+    try:
+        from src.engine import tick_channel_clock
+
+        tick_channel_clock.note_pre_window_frame(ticker, _now_kst())
+    except Exception:  # pragma: no cover — never-raise
+        return
+
+
 # cycle222-a3 (2026-08-21, F-B / G-4 로 근거 정정) — 당일고가 앵커 채택 **제외** 전략.
 #
 # 여기 있는 전략은 `day_high` 를 앵커(`high_since_buy`)에 절대 채택하지 않는다.
@@ -541,6 +613,16 @@ class RiskManager:
         # 끝까지 발생하지 않는 결함. 2026-05-11 운영 중 13종목 중 5종목 돌파 상태인데
         # VB 매수 신호 로그 0건 확인. 이벤트 루프 부담보다 매수 기회 누락이 큰 손실이라 즉시 롤백.
 
+        # cycle293 §3-E B-1 — 종목 축 매수 평가 skip 판정을 **틱당 1회** 계산한다
+        # (전략 루프 안에서 부르면 전략 수만큼 반복된다 — 위 `ticker_last_tick`
+        # 주석의 "추가 연산 금지" 규약). 값은 **매수 분기에서만** 소비되므로
+        # 청산·트레일링·익일청산 평가에는 어떤 영향도 없다.
+        chan_buy_blocked = _tick_buy_eval_blocked_by_channel(ticker)
+        if chan_buy_blocked:
+            # cycle294 §2-D — 관측 전용(행위 0). 코호트가 참일 때만 부르므로
+            # 비용이 그 코호트에 한정되고, 창 밖이면 leaf 가 즉시 반환한다.
+            _note_pre_window_krx_frame(ticker)
+
         # 2. 활성화된 전략별 순회
         for strategy in self.registry.enabled():
             state = strategy.state
@@ -653,6 +735,13 @@ class RiskManager:
             # `_TICK_BUY_EVAL_SKIP_STRATEGIES` 주석). 청산(check_exit_signal)은 위
             # 분기에서 이미 평가됐다 — 이 skip 은 매수에만 영향, 무접촉.
             if strategy.strategy_id in _TICK_BUY_EVAL_SKIP_STRATEGIES:
+                continue
+            # cycle293 §3-E B-1 — 종목 축 skip. 채널 리졸버가 이 종목을 전용
+            # 채널로 옮겼다면(= 오늘까지 프레임 0 이던 종목에 프레임이 새로 들어
+            # 온다) **매수는 열지 않는다**. 청산(`check_exit_signal`)은 위 분기에서
+            # 이미 평가됐다 — 이 skip 은 매수에만 영향한다. 근거·해제 조건은
+            # `_tick_buy_eval_blocked_by_channel` docstring.
+            if chan_buy_blocked:
                 continue
             signal = strategy.check_buy_signal(ticker, current_price, open_price)
             if signal == Signal.BUY:

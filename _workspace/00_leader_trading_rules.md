@@ -226,8 +226,9 @@ KIS OpenAPI 기반 국내주식 자동매매시스템. 다중 전략 아키텍�
 `KRX` 로 강제하고, 그 밖(프리장 08:00~08:50·15:30~16:00 등 우리가 보낼 수 있는
 호가유형이 그 시각 그 거래소에 아예 없는 창)은 DB 값(SOR/NXT)을 그대로 쓴다.
 **정규장에 NXT/SOR 을 쓰지 않는다는 것이 사용자의 명시 확정 규약이다**("SOR이
-최적호가라는 보장도 없다" — 재론 대상 아님). 운영 DB 7 전략 `exchange` 는 실측
-전부 `SOR` 이고, cycle287 은 그 값을 바꾸지 않았다(라우팅이 읽기 전용으로 가로챈다,
+최적호가라는 보장도 없다" — 재론 대상 아님). 운영 DB 7 전략 `exchange` 는
+**전부 `NXT`**(2026-09-13 사용자 결정 D3 의 `SOR`→`NXT` PUT · 09-14 09:2x 재확인,
+SOR 잔여 0)이고, cycle287 은 그 값을 바꾸지 않는다(라우팅이 읽기 전용으로 가로챈다,
 `param_catalog`·화면 문구·DB 마이그레이션은 cycle287b). 호가유형도 시각이 정한다 —
 `OrderDivision` 에 KRX 애프터마켓 전용 `44`(최유리지정가, 1차) · `41`(지정가, 폴백)
 2종이 추가됐다(41~47 중 손절 수단으로 유효한 둘만, IOC/FOK·최우선지정가는 손절
@@ -268,9 +269,14 @@ KIS OpenAPI 기반 국내주식 자동매매시스템. 다중 전략 아키텍�
 `_route_exchange_by_clock` 의 clause 1(`base ∉ {"NXT","SOR"}` → 그대로 반환)이 mode
 검사보다 **앞**에서 발화하므로, 어떤 전략의 `exchange` 가 `"KRX"` 로 바뀌면(코드
 기본값이 이미 그렇다) `enforce`·`sell_only`·`off` 세 값이 그 전략에서 **완전히 동일한
-무동작**이 된다. **지금(2026-09-13) 운영 DB 는 7 전략 전부 `exchange="SOR"`** 라 아래
-절차가 실제로 작동한다(실측 = `src/engine/CLAUDE.md` cycle286 C4-a 절 · 본 문서 위쪽
-「거래소 라우팅」 cycle287 절). `exchange` 를 KRX 로 마이그레이션하는 날부터는 이
+무동작**이 된다. **2026-09-14 09:2x 실측 — 운영 DB 는 7 전략 전부 `exchange="NXT"`**
+(09-13 결정 D3 반영. 종전 서술 `"SOR"` 은 D3 이전 상태였다) 라 아래
+절차가 실제로 작동한다 — `NXT ∈ {"NXT","SOR"}` 이라 clause 1 이 발화하지 않는다.
+**라이브 증거(09-14 09:09:30)** = `[order_channel] side=buy ticker=007660
+strategy=volatility_breakout base=NXT exchange=KRX reason=krx_by_clock` — `base=NXT` 가
+찍혔다는 것이 곧 그 전략이 clause 1 을 지나 mode 검사까지 도달했다는 뜻이다
+(같은 날 `nxt_tradable=false` 인 032820·204270 은 `[nxt_downgrade]` 로 base 가 먼저
+KRX 가 되어 마커가 침묵했다 — 그 두 종목에 대해서는 스위치가 무동작이다). `exchange` 를 KRX 로 마이그레이션하는 날부터는 이
 전제가 깨지고 `[order_channel] reason=base_krx` 가 그 증거다 — 그날은 아래 절차
 대신 곧바로 코드 재배포(`order_engine.py`)가 필요하다.
 
@@ -1072,8 +1078,13 @@ DEFAULT_PARAMS = {
 - 손절 시 부분 체결: 체결된 부분은 손절 완료로 처리, 잔여는 재주문
 
 ### 체결 기반 포지션 관리
-- **체결통보 WebSocket 구독 필수**: 시세(H0UNCNT0 KRX+NXT 통합) 외에 체결통보(실전: H0STCNI0, 모의: H0STCNI9)를 반드시 구독해야 함
-- 통합 시세 `H0UNCNT0`로 KRX/NXT 거래가 같은 콜백으로 흘러옴 — 거래소 식별은 체결통보 `ODER_KIND` 필드에서
+- **체결통보 WebSocket 구독 필수**: 시세 외에 체결통보(실전: H0STCNI0, 모의: H0STCNI9)를 반드시 구독해야 함
+- **시세 채널은 KRX 전용 `H0STCNT0` + NXT 전용 `H0NXCNT0` 2채널이다** (cycle293·294, 2026-09-14).
+  통합 `H0UNCNT0` 은 `stock_master.nxt_tradable=False` 종목의 체결을 보내지 않아 폐기했다 —
+  정상 경로에서 반환하지 않는다. 세 TR_ID 는 **47필드 포맷이 같아 파서가 하나**이고, `handler` 가
+  `on_tick` 에 tr_id 를 넘기지 않으므로 **매매 로직은 어느 채널에서 온 틱인지 모른다**.
+  🔴 그래서 **한 종목을 두 채널에 동시 구독하는 것이 금지**다(같은 키에 두 누적값이 번갈아 쓰인다).
+  거래소 식별은 시세가 아니라 체결통보 `ODER_KIND` 필드에서 한다
 - **장운영정보 H0UNMKO0 구독** (실전 한정): 대표 종목(`005930`) 1개로 보드 전환 코드(`MKOP_CLS_CODE`) 실시간 수신
 - 주문 접수 시 pending_buys에 등록 (중복 주문 차단)
 - **체결통보 수신 시** 포지션 등록/제거 (주문 직후가 아님 — 체결 확인 전 포지션 등록하면 안 됨)
@@ -1145,12 +1156,10 @@ DEFAULT_PARAMS = {
 | `TIME_BOOT` | 07:55 | 프로세스 부트 (사이클 92 — KIS 07:50 강제 중단 후 5분 마진) |
 | `TIME_PRESUBSCRIBE` | 07:59 | 사전 구독 (사이클 92 — _boot 완료 후 4분 마진, race 회피) |
 | `TIME_PRE_NXT_OPEN` | 08:00 | NXT 프리 진입 (익일 청산 + VB/LTV PRE_NXT) |
-| `TIME_KRX_MAIN_OPEN_PRESUBSCRIBE` | 08:59:10 | KRX 채널 사전 subscribe 시작 (사이클 26 — 보드 전환 50초 선행) |
 | `TIME_KRX_OPEN_CONFIRM` | 09:00:05 | KRX 메인 시가 확정 |
 | `TIME_SCAN_START` | 09:30 | 모멘텀 스캔 |
 | `TIME_KRX_MAIN_BUY_STOP` | 15:20 | KRX 메인 매수 중단 + 강제 청산 |
 | `TIME_KRX_MAIN_CLOSE` | 15:30 | KRX 메인 마감 (종가 흡수 마진 시작, `_force_clear_main_only` 가드 기준) |
-| `TIME_POST_NXT_OPEN_PRESUBSCRIBE` | 15:39:10 | NXT 채널 사전 subscribe 시작 (사이클 26) |
 | `TIME_POST_NXT_OPEN` | 15:40 | NXT 애프터 진입 (사이클 26: 15:30 → 15:40) |
 | `TIME_STOCK_MASTER_DAILY_LOAD` | 20:30 | KIS 일봉 일괄 적재 (사이클 122 → cycle273f 18:10 → **cycle283 D2** 20:30 — 애프터마켓 종료 후) |
 | `TIME_STOCK_MASTER_BASICS_REFRESH` | 16:10 | KIS CTPF1002R 매스 보강 (사이클 126) |

@@ -48,6 +48,58 @@ logger = logging.getLogger("src.engine.scheduler")  # 사이클 60 I1 영속 (ca
 RESUBSCRIBE_THROTTLE_SECS = 3 * STALE_FRESHNESS_SECS  # = 180
 
 
+# ── cycle293 — 채널 리졸버 보조 헬퍼 ────────────────────────────────────────
+def _actual_or_desired_tick_tr_id(kis_ws_pool, ticker: str, priority: str) -> str:
+    """그 종목이 **실제로 구독된** TICK 채널, 모르면 리졸버의 판정.
+
+    해제·재등록 쌍이 이 값 **하나**를 함께 쓴다 — 그래서 이 경로는 채널을 바꾸지
+    않는다(§3-C: 살아 있는 구독의 전환 경로를 만들지 않는다). 실제 구독 채널을
+    우선하는 이유 = 틀린 채널로 UNSUBSCRIBE 를 보내면 KIS 가 `OPSP0003
+    UNSUBSCRIBE ERROR not found!` 를 돌려주고(cycle215~218 이 잡은 그 ERROR) 구
+    채널 튜플이 **영구 고아**로 41 슬롯을 잠식한다.
+
+    풀이 mock 이거나 병행 dict 가 없는 환경은 리졸버 단독으로 fail-open 한다
+    (`isinstance(dict)` 가드 = 사이클 135 `_ack_map_raw` 패턴 답습).
+
+    ⚠️ 폴백은 **순수** 판정(`desired_tick_tr_id`)이다 — `tick_tr_id_for` 는 판정
+    이력(`_channel_applied`/`_channel_flipped_today` = §6-D 하루 1회 전환 예산)을
+    변이한다. 재등록 경로가 그 예산을 먹으면 같은 날 실제 구독 전환이 조용히
+    차단된다(적대 검증 F4·MEDIUM-3).
+    """
+    from src.engine.scanner import TICK_TR_IDS, desired_tick_tr_id
+
+    mapping = getattr(kis_ws_pool, "_ticker_to_tr_id", None)
+    if isinstance(mapping, dict):
+        current = mapping.get(ticker)
+        if isinstance(current, str) and current in TICK_TR_IDS:
+            return current
+    return desired_tick_tr_id(ticker, priority=priority)
+
+
+def _collect_protected_for_classification(scheduler) -> set[str]:
+    """보유 + 익일청산 종목 (no_feed 분류 대상의 **채널 무관** 축, §6-E).
+
+    `high_tickers` 계산과 목적이 다르다 — 그쪽은 재등록 우선순위를 정하고(그래서
+    호출 위치·예외 규약이 cycle252 계약에 묶여 있다), 이쪽은 "누구를 분류해 둬야
+    하는가" 만 답한다. 예외는 전부 흡수(빈 집합) — 분류 대상 수집 실패가 stale
+    사이클을 끊으면 4중 안전망의 한 축이 사라진다.
+    """
+    held: set[str] = set()
+    try:
+        for strategy in scheduler.registry.all():
+            try:
+                held.update(strategy.state.positions.keys())
+            except Exception:
+                pass
+    except Exception:
+        pass
+    try:
+        held.update(t for (t, _sid) in scheduler._pending_next_day_clear)
+    except Exception:
+        pass
+    return held
+
+
 # ── 사이클 74 옵션 C 조건부 — [stale_watcher] 5분 aggregation collector ─────────────
 
 _stale_watcher_collector: list[dict] = []
@@ -72,6 +124,13 @@ def flush_stale_watcher_collector() -> None:
 
     cycle252 — 기존 5필드 prefix 는 byte 보존, 끝에 ` no_feed_skipped=%d`(합계)
     를 추가만 한다(키 부재 = 0, 구 형태 stats 와 혼재해도 KeyError 없음).
+
+    🔴 **cycle293 배포 전후 값을 합산하거나 나란히 놓지 말 것 (§9-B 의미 전환).**
+    cycle252 계약에서 `no_feed_skipped` 는 "회복 가치 0 인 재등록을 건너뛴 수"
+    였고 **높은 것이 정상**이었다. cycle293 이후 전용 채널로 옮긴 종목은 프레임이
+    실제로 오므로 skip 대상에서 **빠진다** — 즉 이 값의 **감소가 성공 서명**이다.
+    같은 이유로 `[stale_force_retry]` 도 감소가 정상이다. 두 사이클의 수치는
+    서로 다른 것을 재는 계기다.
     """
     if not _stale_watcher_collector:
         return
@@ -113,6 +172,13 @@ def _maybe_emit_no_feed_held(tickers: set, now: datetime) -> None:
     `observer_trace.trace_observer_failure` 단일 호출로 흡수한다(cap=None —
     이 사이트는 폭주 차단 cap 이 없던 자리이므로 WARNING 승격 없이 debug
     스택만 남긴다, 기존 계약 그대로).
+
+    🔴 **cycle293 §9-B 의미 전환 — 배포 전후 합산 금지.** cycle252 계약에서 이
+    행은 "보유 종목이 WS blind, 손절은 REST 폴만" 을 **매일 알리는** 것이었다.
+    cycle293 S2(`enforce`) 이후에는 **0 이 되는 것이 정상**이고, 0 이 아니면
+    판정 실패(출처 미확인·미분류) 또는 전환 실패다. ⚠️ 단 배포 **직후**에는
+    계속 비영인 것이 정상이다 — 기본 모드가 `observe`(행위 0)이고, `enforce_low`
+    는 HIGH 를 스코프 밖에 두기 때문이다.
     """
     try:
         if not _no_feed_held_logged.should_emit(_NO_FEED_HELD_KEY, now=now):
@@ -171,7 +237,26 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
     else:
         from src.realtime.websocket_pool import kis_ws_pool  # type: ignore[assignment]
 
-    from src.engine.scanner import KST_TZ as _KST_TZ, TICK_TR_ID, ticker_last_tick
+    # cycle293 — 리졸버는 `_actual_or_desired_tick_tr_id` 가 대신 부른다(그 헬퍼가
+    # "실제 구독 채널 우선" 규약의 단일 지점이다). 여기서 `tick_tr_id_for` 를 직접
+    # import 하면 "이 함수가 판정을 한다" 고 오독된다.
+    from src.engine.scanner import (
+        DEDICATED_TICK_TR_IDS,
+        KST_TZ as _KST_TZ,
+        TICK_TR_IDS,
+        ticker_last_tick,
+    )
+
+    # cycle293 — 킬스위치 재조회(120초 주기). `scheduler.py` 무접촉 계약 때문에
+    # 재조회 배선은 이 경로와 `scanner.subscribe_filtered_stocks`(5분) 둘이다 —
+    # 둘 중 어느 쪽이든 `off` 가 ≤2분 안에 닿는다(재시작 요구 금지, §8-B).
+    try:
+        from src.engine import tick_channel_mode as _tick_channel_mode
+
+        await _tick_channel_mode.refresh_mode()
+        await _tick_channel_mode.refresh_switch_params()
+    except Exception:
+        logger.debug("[tick_channel_mode] refresh 실패 — 현재 모드 유지", exc_info=True)
 
     # 사이클 13-E (2026-05-18): 메인 단독 → 풀 전체로 확장
     subscribed = kis_ws_pool.get_subscribed_tickers()
@@ -180,12 +265,51 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
 
     # cycle252 — no_feed 분류 신선도 보장(§2(a)). 예외는 흡수 — 관측 개선이
     # 사이클 완주를 막으면 안 된다(4중 안전망의 한 축, W6).
+    #
+    # cycle293 §6-E — 인자는 **채널 무관 집합**이어야 한다. `get_subscribed_tickers()`
+    # 를 그대로 넘기던 종전 코드는(그 함수가 통합 채널만 세던 시절) 자기 강화
+    # 플리커를 만들었다: 리졸버가 62종목을 전용 채널로 옮기면 → 다음 인자에서
+    # 그 62개가 빠짐 → `_no_feed` 에서 탈락 → `is_no_feed()` False → 리졸버가
+    # 다시 통합으로 판정 → **600s TTL 마다 채널 왕복**(KIS 공지 「비정상 케이스 2:
+    # 무한 등록/해제」 그 자체). 지금은 집계도 세 채널 합집합이지만, 인자를 그
+    # 함수에 다시 묶으면 같은 함정이 부활하므로 **보유·익일청산 합집합**을 더해
+    # 채널 축과 구조적으로 분리한다.
+    _classify_targets = set(subscribed) | _collect_protected_for_classification(scheduler)
     try:
-        await no_feed_registry.ensure_fresh(subscribed)
+        await no_feed_registry.ensure_fresh(_classify_targets)
     except Exception:
         logger.debug(
             "[no_feed_registry] ensure_fresh 실패 — 이번 사이클 no_feed 판정 skip"
         )
+
+    # 🔴 cycle294 적대 검증 CRITICAL-1(부팅) — 매수 축 코호트 스탬프 **재시도**.
+    # `scanner.tick_tr_id_for` 안의 스탬프는 LOW 종목에 대해 그날 07:59 한 번뿐이고
+    # (`already_in_pool` skip 이 리졸버 호출보다 앞), 07:59 는 W2 도장 오염이 최악인
+    # 시각이라 그때 출처 검사가 실패한 종목이 영영 미스탬프로 남는다. 이 120초 루프가
+    # 07:47 부터 돌기 때문에 여기에 얹으면 08:08 진실 복원 뒤 **2분 안에** 코호트가
+    # 닫힌다(5분 `_scan_loop` 은 09:30 에야 생긴다). 순수 메모리 연산 · 닫힘 우세
+    # 단방향 래치라 재호출이 매수를 더 열 수 없다. never-raise.
+    try:
+        from src.engine import scanner as _scanner_mod
+
+        _scanner_mod.restamp_cohorts(_classify_targets)
+    except Exception:
+        logger.debug("[tick_buy_gate] 코호트 재스탬프 실패 — 다음 주기 재시도")
+
+    # cycle294 §4-B — 살아 있는 구독의 **채널 전환**은 이 120초 루프가 유일한
+    # 트리거다. `_scan_loop`(300초)은 `TIME_SCAN_START`(09:30)에 생성되므로 아침
+    # 전환 창에 **존재하지 않는다**. 자리는 `ensure_fresh` **직후**(레지스트리가
+    # 더워진 뒤라야 시각축×속성축 합성이 성립한다) · stale 판정 루프 **앞**
+    # (전환 직후 종목이 같은 사이클에서 stale 로 오인되지 않는다).
+    # never-raise — 전환 실패가 4중 안전망의 한 축을 끊으면 안 된다.
+    try:
+        from src.engine import tick_channel_switch as _tick_channel_switch
+
+        await _tick_channel_switch.run_switch_cycle(
+            scheduler, kis_ws_pool, now=_dt_mod.now(_KST_TZ),
+        )
+    except Exception:
+        logger.debug("[tick_channel_switch] 전환 사이클 실패 — 다음 주기 재시도", exc_info=True)
 
     now = _dt_mod.now(_KST_TZ)
     threshold = timedelta(seconds=STALE_FRESHNESS_SECS)
@@ -205,6 +329,21 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
     _ack_map_raw = getattr(kis_ws_pool, "_subscribed_at", None)
     ack_map = _ack_map_raw if isinstance(_ack_map_raw, dict) else {}
 
+    # cycle293 §4-B — ACK 조회 키를 **채널 무관**으로 만든다. `_subscribed_at` 은
+    # `(tr_id, tr_key)` 키라(`websocket.py:186`) 전용 채널 ACK 은 `("H0STCNT0", t)`
+    # 에 심긴다. 조회 키를 `(TICK_TR_ID, t)` 로 고정하면 그 종목만 **180초 구독
+    # grace 가 영구 miss** → 구독 직후 stale 판정 → 즉시 강제 재등록 = cycle252 가
+    # 없앤 하루 ≈14,600 SEND 폭주의 조용한 부활. 구독 사실(어느 채널에 심겼는가)이
+    # 판정의 정본이므로 역인덱스를 1회 만들어 쓴다.
+    ack_at_by_ticker: dict[str, object] = {}
+    for _ack_key, _ack_val in list(ack_map.items()):
+        if (
+            isinstance(_ack_key, tuple)
+            and len(_ack_key) == 2
+            and _ack_key[0] in TICK_TR_IDS
+        ):
+            ack_at_by_ticker[_ack_key[1]] = _ack_val
+
     def _is_within_grace(t: str) -> bool:
         """grace 영역 영구 영속 판정 영구 영속.
 
@@ -214,7 +353,7 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
         """
         if t in ticker_last_tick:
             return False  # 첫 시세 입수 후 = grace 미적용 (G-GRACE-7 영속)
-        ack_at = ack_map.get((TICK_TR_ID, t))
+        ack_at = ack_at_by_ticker.get(t)
         if not isinstance(ack_at, datetime):
             return False  # ACK 미확인 = race 보호, 기존 60s 영속 (G-GRACE-6)
         try:
@@ -349,7 +488,27 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
         # REST 가 5분당 ≈1회 → 2회(+35~78 호출/5분 ≈0.12~0.26/s, KIS 20/s 대비
         # 무시 가능). D+1 은 `[universe_excluded]` 건수와 두 path 의 api_metrics
         # 로 예상 범위인지 확인한다. 근본 시정 B(H0STCNT0 리졸버) 착지 시 소멸.
-        if sub_priority == "LOW" and no_feed_registry.is_no_feed(ticker):
+        # cycle293 — 이 종목이 실제로 어느 채널에 있는가(모르면 리졸버 판정).
+        # unsubscribe·subscribe 가 **같은 값**을 쓴다 = 이 경로는 채널을 바꾸지
+        # 않는다(§3-C — 살아 있는 구독의 전환 경로를 만들지 않는다).
+        tick_tr_id = _actual_or_desired_tick_tr_id(kis_ws_pool, ticker, sub_priority)
+
+        # cycle252(b) 의 skip 을 cycle293 §9-B 로 좁힌다 — 전용 채널로 옮긴 종목은
+        # 프레임이 실제로 오므로 **회복 가치가 생긴다**. skip 을 그대로 두면 그
+        # 채널의 진짜 stale 을 영원히 못 고친다.
+        # 🔴 cycle293 Green (적대 검증 H4) — 킬스위치 `off` 는 **churn 차단까지**
+        # 복원한다. 판정만 끄면 이미 전용 채널에 올라간 종목은 채널이 그대로라
+        # (§3-C 장중 전환 금지) 이 skip 조건이 거짓이 되어 하루 ≈14,600 SEND 의
+        # 일부가 부활하고, `off` 로는 그날 멈출 수 없다(다음 `_boot` 까지). `off`
+        # 는 "오늘과 동일" 을 뜻해야 하므로 그때는 채널 축을 보지 않는다.
+        from src.engine import tick_channel_mode as _tcm
+
+        _resolver_off = _tcm.current_mode() == _tcm.MODE_OFF
+        if (
+            sub_priority == "LOW"
+            and no_feed_registry.is_no_feed(ticker)
+            and (_resolver_off or tick_tr_id not in DEDICATED_TICK_TR_IDS)
+        ):
             if retry > MAX_STALE_RETRIES:
                 scheduler._stale_retry_count[ticker] = MAX_STALE_RETRIES + 1
             no_feed_skipped += 1
@@ -405,10 +564,10 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
             # 사이클 29-R3 — sub_priority/sub_bypass 분기 적용 (HIGH/LOW)
             age_disp = f"{age_secs:.0f}s" if age_secs != float("inf") else "inf"
             try:
-                await kis_ws_pool.unsubscribe_in_pool(TICK_TR_ID, ticker)
+                await kis_ws_pool.unsubscribe_in_pool(tick_tr_id, ticker)
                 await asyncio.sleep(0.05)
                 await kis_ws_pool.subscribe(
-                    TICK_TR_ID, ticker,
+                    tick_tr_id, ticker,
                     priority=sub_priority, bypass_limit=sub_bypass,
                 )
                 # 핵심: 카운터 0 리셋 (영구 stale 의심 해제 → 신규 사이클 시작).
@@ -421,6 +580,9 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
                 force_retry_count += 1
 
                 logger.info(
+                    # 🔴 cycle293 §9-B — 이 마커의 건수는 **배포 전후 합산 금지**다.
+                    # 전용 채널로 옮긴 종목은 프레임이 와서 stale 을 벗어나므로
+                    # 감소가 정상이다(cycle252 기준선과 다른 것을 잰다).
                     "[stale_force_retry] ticker=%s retries=%d last_resub_age=%s "
                     "— 강제 재시도 + 카운터 리셋",
                     ticker, retry, age_disp,
@@ -436,10 +598,10 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
         # KIS 공식 답변: "기등록한 사항을 재등록하지 않도록" (LMS + 앱정보 이용중지 위험)
         # 사이클 29-R3 — sub_priority/sub_bypass 분기 적용 (사이클 25-B 패턴 K stale watcher 확장)
         try:
-            await kis_ws_pool.unsubscribe_in_pool(TICK_TR_ID, ticker)
+            await kis_ws_pool.unsubscribe_in_pool(tick_tr_id, ticker)
             await asyncio.sleep(0.05)
             await kis_ws_pool.subscribe(
-                TICK_TR_ID, ticker,
+                tick_tr_id, ticker,
                 priority=sub_priority, bypass_limit=sub_bypass,
             )
             force_reregistered += 1
@@ -554,7 +716,8 @@ async def resubscribe_stale_priority(scheduler: Any, cap: int = 10) -> list[str]
     else:
         from src.realtime.websocket_pool import kis_ws_pool  # type: ignore[assignment]
 
-    from src.engine.scanner import KST_TZ as _KST_TZ, TICK_TR_ID, ticker_last_tick
+    # cycle293 — 채널 판정은 `_actual_or_desired_tick_tr_id`(위) 단일 지점.
+    from src.engine.scanner import KST_TZ as _KST_TZ, ticker_last_tick
 
     now = _dt_mod.now(_KST_TZ)
     threshold = timedelta(seconds=STALE_FRESHNESS_SECS)
@@ -671,17 +834,24 @@ async def resubscribe_stale_priority(scheduler: Any, cap: int = 10) -> list[str]
         else:
             sub_priority = "LOW"
             sub_bypass = False
+        # cycle293 — 해제·재등록이 같은 tr_id 를 쓴다(채널 전환 경로 아님).
+        tick_tr_id = _actual_or_desired_tick_tr_id(kis_ws_pool, ticker, sub_priority)
         try:
             if ticker in subscribed_snapshot:
-                await kis_ws_pool.unsubscribe_in_pool(TICK_TR_ID, ticker)
+                await kis_ws_pool.unsubscribe_in_pool(tick_tr_id, ticker)
                 await asyncio.sleep(0.05)
             else:
                 try:
                     kis_ws_pool._ticker_to_session.pop(ticker, None)
+                    # cycle293 §5-C — 병행 dict 동행 pop. 한쪽만 남으면 유령
+                    # 항목이 이중 채널 오탐·미탐을 동시에 만든다.
+                    _t2tr = getattr(kis_ws_pool, "_ticker_to_tr_id", None)
+                    if isinstance(_t2tr, dict):
+                        _t2tr.pop(ticker, None)
                 except Exception:
                     pass
             await kis_ws_pool.subscribe(
-                TICK_TR_ID, ticker,
+                tick_tr_id, ticker,
                 priority=sub_priority, bypass_limit=sub_bypass,
             )
             resubscribed.append(ticker)

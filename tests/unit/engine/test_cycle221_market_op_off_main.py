@@ -57,6 +57,16 @@ VI 훅을 돌린다. 따라서 (a) 이미 TICK 이 붙은 종목은 step2 "중�
 변경은 `src/engine/scheduler.py` 단일 함수 + 필드 1개. **8영역 diff 0**
 (`realtime/websocket.py`, `realtime/websocket_pool.py`, `engine/scanner.py` 무변경).
 
+⚠️ **cycle292(2026-09-14) — 그 '단일 함수' 의 본체는 이제
+`src/engine/market_op_subscribe.py::subscribe_market_operation_tickers` 에 있다**(행위 변경 0,
+`scheduler` 에는 5줄 위임 wrapper 만 잔존). 이 파일은 **변경 없이** 그대로 통과한다 —
+진입점을 `sched._subscribe_market_operation_tickers(...)` 로 유지했고 monkeypatch 도
+*정의 모듈*(`src.realtime.websocket.*` / `src.realtime.websocket_pool.*`)을 찍기 때문이다.
+🔴 그 monkeypatch seam 이 이 파일의 **부정 단언 전체를 떠받친다** — leaf 의 함수-로컬
+import 5줄을 모듈 최상단으로 올리면 patch 가 무력화돼 `_ws is None → return 0` 조기
+반환이 되고, 여기 22건이 조용히 초록이 된다(실측). AST 쪽 봉인 =
+`tests/unit/ast/test_cycle292_ast_market_op_leaf.py::G-292-1`.
+
 설계: 사이클 221 설계 §4 회귀 가드 목록 (a)~(d).
 """
 
@@ -470,6 +480,56 @@ async def test_release_uses_session_not_pool(monkeypatch) -> None:
     assert session_unsubs == 1, "세션 객체 직접 해제 1회"
     assert fake_pool.unsubscribe.await_count == 0, (
         "pool.unsubscribe 는 _ticker_to_session[ticker] 를 pop 해 TICK 라우팅을 지운다"
+    )
+
+
+@pytest.mark.asyncio
+async def test_release_pops_tracking_before_awaiting_unsubscribe(
+    monkeypatch, caplog
+) -> None:
+    """(c-5, cycle292) 해제 SEND 가 **실패해도** 추적 맵에서는 이미 빠져 있다.
+
+    `sess = scheduler._market_op_subs.pop(ticker, None)` 가 `await sess.unsubscribe(...)`
+    **앞**에 오는 것이 계약이다. 순서를 뒤집으면(= `unsubscribe` 성공 후에만 pop) 해제가
+    실패한 종목이 맵에 남고, 다음 5분 사이클마다 같은 해제를 재시도하며(사이클 17 LMS
+    chain 압력), 그 종목이 다시 target 에 들어오면 "이미 살아있는 구독" 분기가 **죽었을 수
+    있는 세션**을 그대로 재사용해 재SEND 를 건너뛴다.
+
+    적대 검증(cycle292)이 짚은 공백이다 — 그 순서 교환은 파일 sha 핀과 트리 digest 에서만
+    붉어졌고 행위 테스트가 0건이었다. `released` 카운터는 `await` **뒤**에 증가하므로 실패
+    건은 세지 않는다(요약 로그 `released=0` 이 그 증거다).
+    """
+    fake_main, fake_pool = _patch_ws(monkeypatch)
+    sched = _make_scheduler(positions={"111111"}, pending=set())
+
+    await sched._subscribe_market_operation_tickers(set())
+    assert "111111" in sched._market_op_subs
+    sess = sched._market_op_subs["111111"]
+
+    # 해제 SEND 가 실패한다 — 소켓이 죽었거나 KIS 가 거부한 상황.
+    sess.unsubscribe = AsyncMock(side_effect=RuntimeError("send failed"))
+    sched.registry.all.return_value = [
+        SimpleNamespace(state=SimpleNamespace(positions={}))
+    ]
+
+    caplog.set_level(logging.WARNING, logger="src.engine.scheduler")
+    n = await sched._subscribe_market_operation_tickers(set())
+
+    assert sess.unsubscribe.await_count == 1, "해제는 한 번 시도한다"
+    assert "111111" not in sched._market_op_subs, (
+        "pop 이 `await sess.unsubscribe(...)` 앞에 있어야 한다 — 실패 종목이 추적 맵에 "
+        "남으면 매 사이클 재시도 + 죽은 세션 재사용"
+    )
+    assert n == 0, "해제만 일어난 사이클의 반환값은 신규 구독 수(0)"
+    assert any(
+        "[market_op_subscribe] VI 해제 실패" in r.message for r in caplog.records
+    ), "해제 실패는 WARNING 1행으로 남는다(은닉 금지)"
+    summary = [
+        r for r in caplog.records
+        if "[market_op_subscribe_summary]" in r.getMessage()
+    ]
+    assert all("released=0" in r.getMessage() for r in summary), (
+        "`released` 는 `await` 성공 뒤에만 증가한다 — 실패를 성공으로 세면 안 된다"
     )
 
 

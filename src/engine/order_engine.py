@@ -1946,9 +1946,12 @@ class OrderEngine:
                     )
                     return
             # 모두 통과 → unsubscribe
-            from src.engine.scanner import TICK_TR_ID
+            # cycle293 — 매도 전량 체결 뒤 구독 정리는 **그 종목의 실제 채널**로
+            # 나가야 한다. 틀린 채널 해제 = `OPSP0003 UNSUBSCRIBE ERROR not found!`
+            # 스팸(cycle215~218 이 잡은 그 ERROR) + 구 채널 튜플의 영구 고아화.
+            from src.engine.scanner import subscribed_tick_tr_id
             from src.realtime.websocket_pool import kis_ws_pool
-            await kis_ws_pool.unsubscribe(TICK_TR_ID, ticker)
+            await kis_ws_pool.unsubscribe(subscribed_tick_tr_id(ticker), ticker)
             logger.info("[sell_unsubscribe] %s WS 구독 정리", t(ticker))
         except Exception:
             logger.exception("[sell_unsubscribe] %s 실패", ticker)

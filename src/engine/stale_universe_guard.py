@@ -62,7 +62,7 @@ async def evaluate_universe_guard(
     """
     from src.api.quotation import inquire_acml_vol, inquire_ccnl
     from src.engine import tick_volume
-    from src.engine.scanner import TICK_TR_ID
+    from src.engine.scanner import subscribed_tick_tr_id
     from src.realtime.websocket_pool import kis_ws_pool
 
     # 사전 가드 — 보유 / 익일청산 / 이미 제외된 종목 사전 차단 (KIS 호출 절약)
@@ -158,7 +158,9 @@ async def evaluate_universe_guard(
         # 제외 set 등록 + WebSocket unsubscribe
         scheduler._universe_excluded_today.add(ticker)
         try:
-            await kis_ws_pool.unsubscribe(TICK_TR_ID, ticker)
+            # cycle293 — 그 종목의 **실제 채널**로 해제한다. 고정 tr_id 는 틀린
+            # 채널일 때 OPSP0003 스팸 + 영구 고아 튜플(41 슬롯 잠식)을 만든다.
+            await kis_ws_pool.unsubscribe(subscribed_tick_tr_id(ticker), ticker)
         except Exception:
             logger.exception(
                 "[universe_excluded] unsubscribe 실패 ticker=%s", ticker

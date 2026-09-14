@@ -710,6 +710,37 @@ async def is_stale(ticker: str, max_age_hours: int = 24) -> bool:
     return age > timedelta(hours=max_age_hours)
 
 
+async def get_nxt_provenance_map(tickers: list[str]) -> dict[str, bool]:
+    """cycle293 §6-C — `nxt_tradable` 값의 **출처가 권위 있는가** 를 ticker 별로 답한다.
+
+    판별자 = 그 행의 `raw` 에 KIS CTPF1002R 키 `cptt_trad_tr_psbl_yn` 이 있는가.
+    `_full_universe_load_krx_primary`(W2)는 KRX raw 로 `nxt_tradable=False` 를
+    도장하는데 그 raw 에는 이 키가 **없다**(09-14 실측 2,674/2,674 정확 일치).
+    `_stock_master_basics_refresh_once`(W1)가 CTPF1002R 로 복원하면 키가 생긴다.
+
+    그래서 이 함수가 False 를 주는 종목은 "지금 읽은 `nxt_tradable` 이 도장값일
+    수 있다" 는 뜻이고, 채널 리졸버는 그 종목을 **옮기지 않는다**(현행 유지).
+    시각 창 리터럴을 쓰지 않는 이유 = 오염 창의 양끝(07:45~08:08)이 일정
+    파생값이고 그 일정은 이미 두 번 움직였다(일봉 16:00→18:10→20:30).
+
+    반환은 **요청 ticker 전부**를 키로 갖는다(DB 미존재 = `False` = 모른다).
+    빈 입력은 쿼리 자체를 생략한다(`get_nxt_tradable_map` 규약 답습).
+    """
+    if not tickers:
+        return {}
+    rows = await pg.fetch(
+        "SELECT ticker, (raw ? 'cptt_trad_tr_psbl_yn') AS has_cptt "
+        "FROM stock_master WHERE ticker = ANY($1::text[])",
+        list(tickers),
+    )
+    result: dict[str, bool] = {t: False for t in tickers}
+    for row in rows:
+        ticker = row.get("ticker")
+        if ticker in result:
+            result[ticker] = bool(row.get("has_cptt"))
+    return result
+
+
 async def get_nxt_tradable_map(tickers: list[str]) -> dict[str, bool | None]:
     """cycle252 — `no_feed_registry.ensure_fresh` 전용 벌크 조회.
 

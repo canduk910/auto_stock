@@ -89,11 +89,11 @@ _CHANGED = (_MODELS_ORDER_REL, _ORDER_ENGINE_REL, _API_ORDER_REL)
 _BASE_SHA = {
     # 8영역 — 엔진 4파일 (order_engine 은 승인된 변경 대상이라 제외)
     "src/engine/risk.py":
-        "19f48b4a4f7c3b4aa47b99a1426d22ec26884277a9f711c279753d6d7452dcc7",
+        "e8614235cc0bea638f8c349b2f6910c94f5f9a5b849f5d65bef0583f959d81c9",
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
     "src/engine/scanner.py":
-        "fa8c0377f850b031d1983923957eb92ea593dc0eb9c1423359d8561efde78fb9",
+        "079272e7c4907c6ecc5fdf9b73de70021a9dc2435c7a568538183a7ead98804f",
     "src/engine/strategy_registry.py":
         "d794696e54ffdc36efa6df917879d780e86bc1f373bb3b5d8dcbc0beac8cef8b",
     # 8영역 — realtime 전부
@@ -102,9 +102,9 @@ _BASE_SHA = {
     "src/realtime/handler.py":
         "23768e6d89ed54b626cce2645a07cc5472ce10120c0b1c81f5d6436ff521ed47",
     "src/realtime/websocket.py":
-        "1589cffb955e5af28ad0f145860bcc127ea8fda2b25d6817bd79c079472d5c4f",
+        "d4c443bde2ed7aeafba3e9471db0ca4efc15a654610555435145a9b305150c5b",
     "src/realtime/websocket_pool.py":
-        "bd1108dd40da4e72eab10581485b1b032e58af7c06754a9118fc7fafc20c8de7",
+        "8b02442bcf5f558d6f7095b47d2016f004e3746e07ddc91dae8768b1dd46a10d",
     # 8영역 — auth 전부
     "src/auth/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -161,7 +161,20 @@ _BASE_SHA = {
 #: 시정) 기준선이다 — cycle287 이 이 수를 바꿨다는 뜻이 아니다. 파일 수는 148 로
 #: **불변**(신규 파일 0 — market_ops.py 는 기존 파일을 편집만 했다). cycle287b
 #: 배포분에서는 147 이었다(신규 파일 없음).
-_SRC_TREE_FILES = 148
+#: ⚠️ **cycle293(시세 채널 리졸버 2단계, 2026-09-14) 기준선으로 갱신** — 파일 수가
+#: 149 → **150**(신규 킬스위치 leaf `src/engine/tick_channel_mode.py` 1개). digest 에는
+#: 그 leaf + 이 사이클이 정당하게 바꾼 파일들(`scanner.py`·`websocket.py`·
+#: `websocket_pool.py`·`risk.py`·`no_feed_registry.py`·`stale_*`·`db/stock_master.py`·
+#: `db/system_config.py`·`routes/realtime.py`)이 포함돼 재계산했다. `_CHANGED` 3파일
+#: (`models/order.py`·`order_engine.py`·`api/order.py`)은 digest 에서 제외되고
+#: `_BASE_SHA`/자매 핀이 따로 잡는다. 검사 면적은 여전히 `src/**/*.py` 전수다.
+#: ⚠️ **cycle294(시세 채널 3단계 · 시각축 전환, 2026-09-14) 기준선으로 갱신** —
+#: 파일 수가 150 → **152**(신규 leaf 2개: `tick_channel_clock.py` 시각축 판정 ·
+#: `tick_channel_switch.py` 전환/자동 원복. 둘 다 8영역 **밖**이고 사용자 승인
+#: 범위 안이다). digest 에는 그 둘 + 이 사이클이 정당하게 바꾼 파일들
+#: (`scanner.py`·`risk.py`·`websocket.py`·`websocket_pool.py`·`stale_watcher_core.py`·
+#: `tick_channel_mode.py`·`routes/realtime.py`)이 포함돼 재계산했다.
+_SRC_TREE_FILES = 152
 #: ⚠️ 값은 **cycle285 적대 검증 반영** 기준선이다. 그 직전(초판 cycle285 배포)
 #: digest 는 `97483c5114a1d00dc8f7ca7c1ed08e1b3dc1d0b585065b14176dc227da9bed8c` 였다.
 #: cycle287b 배포분의 digest 는
@@ -176,8 +189,28 @@ _SRC_TREE_FILES = 148
 #: 다시 바뀌어 이 값으로 갱신한다. 전략 7파일 세그먼트 sha(`_DEFAULT_PARAMS_SHA`,
 #: `test_cycle278_ast_catalog_guards.py`)는 무접촉 — 움직인 것은 `param_catalog.py`
 #: 하나뿐이다.
+#: ⚠️ **cycle292(`_subscribe_market_operation_tickers` leaf 추출, 2026-09-14) 기준선으로
+#: 갱신** — 파일 수가 148 → **149** 로 처음 늘었다(신규 leaf
+#: `src/engine/market_op_subscribe.py` 1개). `scheduler.py` 는 176줄이 빠지고 5줄 위임
+#: wrapper 가 들어와 sha 가 바뀌었으며 digest 는 그 둘을 포함해 재계산했다. 행위 변경 0
+#: (본체 라인 단위 동일 — `self.` → `scheduler.` 6곳 + dedent 뿐). 검사 면적은 그대로
+#: `src/**/*.py` 전수다 — **좁아지지 않았다**.
+#: cycle290 적대 검증 반영분 값은
+#: `d491c518cb200717246577be3bcfd904c854f9a6c9fe625e28f639666477a277` 였다.
+#: ⚠️ **cycle292 적대 검증 반영으로 한 번 더 갱신** — `market_operation_monitor.py` 의
+#: `get_market_op_active_tickers()` docstring 이 적은 소비처 2개가 **둘 다 거짓**임이
+#: 확인돼(프로덕션 호출자 0건 · 델타는 `scheduler._market_op_subs` 로 잰다) 정직화했다.
+#: **docstring 1곳뿐 — 코드(AST) 불변**. 그 직전(추출 직후) 값은
+#: `94ff236b51ad636e914f9ab271d87306d187119c5b1a291a8c8d2e918fa7c7c6` 였다.
+#: ⚠️ cycle292 배포분 값은
+#: `78c0618e60cefe842b9108f93e1e8a50fcce07a228f87a368a85d792c3bcb3a5` 였다
+#: (cycle293 기준선으로 갱신 — 위 `_SRC_TREE_FILES` 주석 참조).
+#: ⚠️ cycle293 Green(적대 검증 시정) 직전 값은
+#: `b7731d72a1e3fd3587d805459b2bfbdb80f0c77784b2daaf75d73bd275116308` 였다.
+#: ⚠️ cycle293 착지(= cycle294 착수) 값은
+#: `61401aa6dbf4fc2d816a30454a9d6501259152bd8d5d29e09e33a4b9996d19cd` 였다.
 _SRC_TREE_DIGEST = (
-    "d491c518cb200717246577be3bcfd904c854f9a6c9fe625e28f639666477a277"
+    "7b496e80aa6dbb3e3b132367cb3c356c2bb93ee1136486b0af6ddf4cfe20b767"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
@@ -186,7 +219,11 @@ _SRC_TREE_DIGEST = (
 _PINNED_DIRS = ("src/realtime", "src/auth", "src/engine/strategies", "src/engine")
 
 #: `scheduler.py` 정확 라인 수 + cycle257 영구 상한.
-_SCHEDULER_LINES = 3897
+#: ⚠️ cycle292(2026-09-14) 가 `_subscribe_market_operation_tickers` 176줄을
+#: 신규 leaf `src/engine/market_op_subscribe.py` 로 추출해(행위 변경 0 · 5줄
+#: 위임 wrapper) 3,897 → 3,726 이 됐다. 값만 옮긴다 — 정확 핀을 상한 핀으로
+#: 완화하면 cycle287 의 무접촉 대리 지표가 사라진다.
+_SCHEDULER_LINES = 3726
 _SCHEDULER_LINE_CAP = 3900
 
 #: 손대지 않기로 한 **원문 구간**의 sha256 (base `a42f519`).

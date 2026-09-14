@@ -26,7 +26,17 @@ H0UNMKO0(장운영정보)는 VI·거래정지 이벤트 채널 — 시세(TICK)�
 - 루프 중 `ConnectionClosedError` — 그 순간 소켓이 닫힌 것이므로 남은 종목도
   전부 실패한다. 즉시 break + **WARNING 1행**(종목별 ERROR 폭주 대신, 재연결
   중 예상 상태이므로 ERROR 아님).
-- realtime 미접촉 — scheduler 이 duck-typing 으로 `_ws.state` 만 읽는다.
+- realtime 미접촉 — 훅이 duck-typing 으로 `_ws.state` 만 읽는다.
+
+## cycle292 (2026-09-14)
+
+훅 **본체**가 `scheduler.py` 에서 `src/engine/market_op_subscribe.py::
+subscribe_market_operation_tickers` 로 이동했다(행위 변경 0 · 본체 라인 단위 동일 ·
+라인 상한 3,900 예산 확보). `scheduler._subscribe_market_operation_tickers` 는 5줄 위임
+wrapper 다. 행위 테스트는 **무수정**으로 통과한다 — 전부 `sched._subscribe_market_operation_tickers(...)`
+를 호출하고 `src.realtime.*` **정의 모듈의 속성**을 monkeypatch 하며, leaf 가 함수-로컬
+import 를 유지하므로 그 patch 가 매 호출 걸린다. 소스 검사 1건만
+`test_guard_reads_socket_state_in_leaf` 로 재조준했다.
 
 ## cycle221 (2026-08-20) 픽스처 적응 — 계약은 그대로
 
@@ -263,9 +273,29 @@ def test_realtime_send_subscribe_unchanged():
     assert "State.OPEN" not in src
 
 
-def test_guard_reads_socket_state_in_scheduler():
-    """가드가 scheduler 훅에 있다 — 소켓 open 상태를 읽는다."""
-    src = inspect.getsource(
-        TradingScheduler._subscribe_market_operation_tickers
+def test_guard_reads_socket_state_in_leaf():
+    """가드가 VI 구독 **본체**에 있다 — 소켓 open 상태를 읽는다.
+
+    cycle292 — 본체가 `scheduler.py` 에서
+    `src/engine/market_op_subscribe.py::subscribe_market_operation_tickers` 로 이동했다.
+    🔴 wrapper docstring 에 "state" 라는 단어를 넣어 이 가드를 통과시키는 것은 금지다
+    (`inspect.getsource` 는 docstring 을 포함하므로 **통과하지만 아무것도 검증하지
+    않는다**). 그래서 대상을 leaf 로 옮기면서 **동시에 조인다** — 종전
+    `"State" in src or "state" in src` 라는 대단히 느슨한 부분문자열 검사를
+    ① `State.OPEN` 리터럴 ② 실제 판정식 `getattr(_ws_obj, "state", None)`
+    ③ `from websockets.protocol import State` import 존재 셋으로 대체했다.
+    자매 = `test_cycle221_ast_market_op_no_main.py::test_socket_state_guard_persists`.
+    """
+    from src.engine import market_op_subscribe as leaf_mod
+
+    src = inspect.getsource(leaf_mod.subscribe_market_operation_tickers)
+    assert "State.OPEN" in src, (
+        "닫힌 소켓 send 레이스 가드(2026-08-07) 제거 금지 — State.OPEN 비교 필수"
     )
-    assert "State" in src or "state" in src
+    assert 'getattr(_ws_obj, "state", None)' in src, (
+        "소켓 상태 판정식이 사라졌다 — `_ws` None 검사만으로는 '존재하지만 닫힌' "
+        "상태(재연결 레이스)를 통과시켜 HIGH 종목마다 ConnectionClosedError 가 터진다"
+    )
+    assert "from websockets.protocol import State" in src, (
+        "`State` 는 함수-로컬 import 여야 한다(모듈 최상단 승격 금지 — monkeypatch 무력화)"
+    )

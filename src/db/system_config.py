@@ -749,6 +749,92 @@ async def _set_string(key: str, value: str) -> None:
     await _upsert_value(key, {"value": str(value)})
 
 
+_TICK_CHANNEL_RESOLVER_MODE_KEY = "tick_channel_resolver_mode"
+
+
+async def get_tick_channel_resolver_mode() -> Optional[str]:
+    """cycle293 §8-B — 시세 채널 리졸버 킬스위치 모드 조회.
+
+    값 어휘는 `src/engine/tick_channel_mode.py` 가 정본이고
+    (`off`/`observe`/`enforce_low`/`enforce`), 이 함수는 **문자열을 그대로**
+    돌려준다 — 유효성 판정을 두 곳에 두면 갈린다. 키 부재·조회 실패는 `None`
+    (호출자가 현재 모드를 유지한다 = 기본값으로 되돌리지 않는다).
+    """
+    return await _get_string_or_none(_TICK_CHANNEL_RESOLVER_MODE_KEY)
+
+
+async def set_tick_channel_resolver_mode(mode: str) -> None:
+    """리졸버 모드 저장. 어휘 검증은 호출자(라우트)가 `VALID_MODES` 로 수행한다."""
+    await _set_string(_TICK_CHANNEL_RESOLVER_MODE_KEY, mode)
+
+
+# ── cycle294 §9-E — 3단계 전환 파라미터 4키 ─────────────────────────────────
+#
+# 🔴 전략 `DEFAULT_PARAMS`·`param_catalog`·`PARAM_RANGES`·`INT_PARAMS` **편입
+#    금지**. 리졸버는 인프라 축이고 7전략에 넣으면 7곳이 갈린다. 조회 실패·키
+#    부재는 전부 `None` — 호출자가 **현재 값을 유지**한다(기본값 되돌림 금지).
+_TICK_CHANNEL_SWITCH_ENABLED_KEY = "tick_channel_switch_enabled"
+_TICK_CHANNEL_SWITCH_OFFSET_SECS_KEY = "tick_channel_switch_offset_secs"
+_TICK_CHANNEL_SWITCH_ACK_TIMEOUT_SECS_KEY = "tick_channel_switch_ack_timeout_secs"
+_TICK_CHANNEL_REVERT_PROBE_SECS_KEY = "tick_channel_revert_probe_secs"
+_TICK_CHANNEL_GAP_HOLD_ENABLED_KEY = "tick_channel_gap_hold_enabled"
+
+
+async def get_tick_channel_switch_enabled() -> bool | None:
+    """살아 있는 구독의 **전환만** 켜고 끄는 다이얼 (§9-D · 결정 카드 D-5).
+
+    「채널이 문제다」와 「전환이 문제다」는 다른 결정이라 모드 enum 에 태우지
+    않는다 — 전환만 끄면 종목은 첫 구독 채널에 머물고(`nxt_true` → NXT 종일 =
+    정규장·애프터 프레임 수신 = **blind 아님**) 위험이 즉시 동결된다.
+    """
+    return await _get_bool_or_none(_TICK_CHANNEL_SWITCH_ENABLED_KEY)
+
+
+async def set_tick_channel_switch_enabled(enabled: bool) -> None:
+    await _set_string(_TICK_CHANNEL_SWITCH_ENABLED_KEY, "true" if enabled else "false")
+
+
+async def get_tick_channel_switch_offset_secs() -> float | None:
+    """프리장 종료 뒤 전환까지의 offset (초). 클램프는 읽는 쪽이 한다(§1-C)."""
+    return await _get_float_or_none(_TICK_CHANNEL_SWITCH_OFFSET_SECS_KEY)
+
+
+async def get_tick_channel_switch_ack_timeout_secs() -> float | None:
+    """make-before-break 의 신 채널 ACK 대기 상한 (초)."""
+    return await _get_float_or_none(_TICK_CHANNEL_SWITCH_ACK_TIMEOUT_SECS_KEY)
+
+
+async def get_tick_channel_gap_hold_enabled() -> bool | None:
+    """🔴 cycle294 적대 검증 CRITICAL-1 — **NXT 단독 연속 구간** 커버리지 다이얼.
+
+    표가 말하는 사실: 09-15 기준 15:40~16:00 은 KRX 에 연속 체결이 없고
+    (K4 종가단일가 · K5 시간외 종가) NXT N6 애프터만 열려 있다. 그 20분을 KRX
+    채널로 덮으면 `nxt_true` **보유** 종목의 손절 트리거가 매일 20분씩 사라진다
+    (오늘은 통합 채널이 그 체결을 싣는다 = INV-1 위반).
+
+    `true`(기본) 면 그 구간 동안 **HIGH(보유·익일청산)만** NXT 를 따라간다.
+    `false` 면 cycle294 배포 직후 설계(아침 1회 전환)와 동일하게 돌아간다 —
+    그 20분의 blind 를 감수하는 선택이므로 **되돌릴 때만** 쓴다.
+    """
+    return await _get_bool_or_none(_TICK_CHANNEL_GAP_HOLD_ENABLED_KEY)
+
+
+async def set_tick_channel_gap_hold_enabled(enabled: bool) -> None:
+    await _set_string(
+        _TICK_CHANNEL_GAP_HOLD_ENABLED_KEY, "true" if enabled else "false",
+    )
+
+
+async def get_tick_channel_revert_probe_secs() -> float | None:
+    """자동 원복 측정 시점 = 정규장 개장 + 이 값 (초).
+
+    기본값은 새 숫자가 아니라 `stale_diagnostics.SUBSCRIBE_GRACE_SECS` 의
+    **재사용**이다 — 의미가 같다("구독이 살아났다고 인정하기까지 주는 시간").
+    그 상수의 단일 정의처는 `stale_diagnostics` 이고 여기서 재정의하지 않는다.
+    """
+    return await _get_float_or_none(_TICK_CHANNEL_REVERT_PROBE_SECS_KEY)
+
+
 async def get_krx_open_api_config():
     """KRX 정식 OPEN API 키 + base URL + enabled 통합 조회.
 

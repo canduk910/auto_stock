@@ -90,25 +90,262 @@ KIS WebSocket 실시간 시세 수신 + 체결통보 처리. 메인 + 보조 N �
 
 ### get_subscribed_tickers / get_acked_tickers
 
-- `get_subscribed_tickers() -> set[str]` — TICK(H0STCNT0/H0NXCNT0/H0UNCNT0) 구독 합집합. 체결통보·장운영정보 제외. 현행 구독은 `H0UNCNT0`(통합) 단일 — H0STCNT0/H0NXCNT0 는 P1-7 B 리졸버 착지 전까지 예약 상수
+- `get_subscribed_tickers() -> set[str]` — TICK(H0STCNT0/H0NXCNT0/H0UNCNT0) 구독 **합집합**. 체결통보·장운영정보 제외
 - `get_acked_tickers() -> set[str]` — TICK 필터 ACK set. KIS REST/WS 슬롯 사용현황 조회 API 미존재 → 우리 측 ACK 추적이 "SEND 후 무응답" 가시화의 유일한 길
+- 🔴 **cycle293(2026-09-14) — "합집합" 이 이제 참이다.** 종전 서술("현행 구독은
+  `H0UNCNT0` 단일, 나머지 둘은 예약 상수")은 폐기한다. 판정은 `tr_id == TICK_TR_ID`
+  등가 비교가 아니라 **단일 정본 집합 `scanner.TICK_TR_IDS` 의 멤버십**이다 —
+  등가 비교가 하나라도 남으면 전용 채널로 옮긴 종목이 이 집합에서 **조용히
+  사라져** K stale watcher 블라인드 · `delta_unsubscribe_dropped` 미해제(실제
+  슬롯 누수) · 매 5분 재SEND · `[tick_coverage]` 분모 감소(= cycle252 「은폐
+  금지」 계약 위반)가 한꺼번에 생긴다
+- **진단 프로브 격리 기준이 「채널」→「프로브 정체성」으로 바뀌었다.** cycle253 은
+  "TICK 집계는 `H0UNCNT0` 만 센다" 는 **채널 동일성**에 프로브 격리를 얹었는데,
+  cycle293 이 그 전용 채널을 실 구독에 쓰기 시작하며 그 추론이 죽었다. 지금은
+  `websocket.is_probe_excluded(tr_id, tr_key)` 가 판정하고 집합은
+  `PROBE_EXCLUDED_TUPLES`(+ 수명 dict `_PROBE_EXCLUSION_DAY`)에 있다. 수명 =
+  프로브 stop · 20:00 `unsubscribe_all`/`stop`(`reset_probe_exclusions()`) ·
+  **KST 날짜 경과 시 판정 시점 자기 회수**. 비어 있는 것이 정상 상태다 —
+  남으면 라이브 구독을 은폐한다(그 튜플이 실 구독과 **같은 식별자**다)
 
-### 시세 채널 시간대별 전환 — 미배선·cycle257 삭제, 속성 기반 리졸버는 P1-7 B
+### 시세 채널 — **속성축 리졸버 2단계 착지(cycle293)**, 시간축 전환은 3단계
 
 사이클 26(2026-05-20, 커밋 f7f0766)이 도입한 시각 기반 채널 전환(활성 TR_ID 판정 함수 +
 종목 단위 원자 전환 루프)은 **108일간 `src/` 호출자가 0**이었다 — 정의만 있고 어디서도
 호출되지 않아 실제 구독은 처음부터 `TICK_TR_ID = H0UNCNT0`(통합) 단일 채널로만 동작했다.
-cycle257(2026-09-05)이 이를 삭제(`scanner.py`/`scheduler.py`)했다. 채널을 시간대·종목
-속성 기반으로 다시 분리할 필요가 생기면 이 문단이 아니라 **P1-7 B(속성 기반
-`tick_tr_id_for(ticker)` 리졸버)** 로 간다 — `TICK_TR_ID_KRX`/`TICK_TR_ID_NXT` 두 상수는
-그 리졸버의 반환값 자리로 `scanner.py` 에 보존돼 있다.
+cycle257(2026-09-05)이 이를 삭제(`scanner.py`/`scheduler.py`)했다.
+
+**cycle293(2026-09-14)이 그 자리에 속성축 리졸버를 놓았다 — 자문 §5 의 2단계다.**
+
+| | |
+|---|---|
+| 종착지(재론 금지) | 통합 채널 `H0UNCNT0` **폐기**. KRX 전용 `H0STCNT0` + NXT 전용 `H0NXCNT0` 2채널 (2026-09-07 사용자 결정 + 09-14 재확인) |
+| 이 단계가 한 것 | `scanner.tick_tr_id_for(ticker, *, priority)` 도입 + 9파일 25+ 사이트의 등가 비교를 **집합 멤버십**으로 전환(부채 상환) |
+| 판정 시점 | **첫 구독 시점 1회.** ⚠️ **cycle294 가 뒤집었다** — 3단계는 전환 창 안에서 살아 있는 구독을 옮긴다. 이 줄은 2단계 기록이다 |
+| 판정 규칙 | `no_feed_registry.is_no_feed(t)` ∧ 출처 확인(`raw ? 'cptt_trad_tr_psbl_yn'`) → `H0STCNT0` / 그 밖(미분류·출처 미확인·예외) → 현행 유지 |
+| fail-open 방향 | `TICK_TR_ID`(통합) — ⚠️ **2단계 한정 과도기 장치**였다. cycle294 가 폴백을 시각 기반 전용 채널로 교체했다(아래 L1/L2/L3 표) |
+| 킬스위치 | `system_config.tick_channel_resolver_mode` ∈ `off`/`observe`(기본)/`enforce_low`/`enforce`. **즉시 반영** = `PUT /api/realtime/tick-channel-mode` |
+| 매수 축 | **열지 않았다**(B-1). `risk._tick_buy_eval_blocked_by_channel` 이 종목 축으로 막는다. ⚠️ **cycle294 가 그 술어를 「구독 사실(채널)」에서 「코호트」로 교체했다** — 아래 cycle294 절이 현행이고, 이 줄의 `applied_tick_channel` 서술은 **2단계 당시의 기록**이다(그 접근자는 지금 프로덕션 소비처가 0 이다) |
+
+#### cycle294(2026-09-14) — **3단계 시간축 전환 · 통합 채널 소멸**
+
+2단계의 두 규약(「첫 구독 시점 1회」·「fail-open = 통합」)은 그 문서가 스스로
+**2단계 한정**이라 못박은 과도기 장치였다. 3단계가 둘 다 대체한다.
+
+**구간표 — 전환은 하루 1회다.**
+
+```
+프리장(N1)              → H0NXCNT0   그 시각 NXT 만 연속 체결을 싣는다
+전환 창                 → 주문 0건 · cycle241 시장 침묵 ⇒ 전환 비용 ≈ 0
+정규장 + 애프터마켓     → H0STCNT0   연속
+🔴 NXT 단독 연속 구간    → H0NXCNT0   **보유(HIGH)만** — 아래 CRITICAL-1
+```
+
+09-14 16:39~16:41 라이브 실측(`000815`·`005385` = `nxt_false` / `000660` =
+`nxt_true`)에서 셋 다 `H0STCNT0` 로 KRX 애프터마켓 체결을 받았다 ⇒ 그 채널은
+**종목 속성과 무관하게** 정규장 개장부터 연속 체결 종료까지를 덮는다.
+
+🔴 **CRITICAL-1(착지 직후 적대 검증) — "KRX 창" 은 KRX 가 연속일 때만 참이다.**
+`krx_continuous_end` 는 `max(end)` 라 09-15 기준 20:00 이고, 그 하나로
+09:00~20:00 을 한 구간으로 묶으면 표와 어긋난다. 표 실측:
+
+    KRX  REGULAR 09:00~15:20 continuous / CLOSE_AUCTION 15:20~15:30 single_auction
+         AFTER_CLOSE_FIXED 15:30~16:00 fixed_price / AFTER_MARKET 16:00~20:00 continuous
+    NXT  AFTER_MARKET 15:40~20:00 continuous   ← 🔴 15:40~16:00 은 NXT 뿐
+
+⇒ **15:40~16:00(20분) 은 NXT 에만 연속 체결이 있다.** 그 20분을 KRX 채널로 덮으면
+`nxt_true` **보유** 종목의 손절 트리거가 매일 20분씩 사라진다(오늘은 통합 채널이
+그 체결을 싣는다 = INV-1 위반). 사용자 결정("전환 1회")의 근거였던 「cycle287 이
+애프터 주문을 KRX 로 보내므로 KRX 가격이 정합」은 **16:00~20:00 에만 참**이다 —
+`order_engine._route_exchange_by_clock("SOR", side="sell")` 을 실행하면 15:45·15:55
+는 `("SOR","krx_unsupported_keep")`, 16:05·19:00 은 `("KRX","krx_by_clock")` 다.
+즉 그 20분의 매도는 **NXT 로 나간다** ⇒ 같은 원칙이 그 구간의 평가 가격도 NXT 로
+정한다. 시정은 사용자 결정과 충돌하지 않고 그 결정이 다루지 않은 구간에 그 원칙을
+적용한 것이다.
+
+범위는 **HIGH 로 한정**한다 — 그 구간에 필요한 것은 손절 커버리지 하나이고, LOW
+~130종목을 하루 두 번 왕복시키면 KIS 공지 「비정상 케이스 2: 무한 등록/해제」다.
+HIGH 는 실측 ~12종목 + make-before-break 이라 커버리지 공백이 0 이다. 그 구간에도
+**속성축이 이긴다**(`nxt_false` 보유는 KRX 유지 — NXT 로 보내면 새 blind 다).
+킬스위치 = `system_config.tick_channel_gap_hold_enabled`(기본 `true`).
+
+🔴 **시각 리터럴 0건이 계약이다.** 경계 셋은 전부
+`market_state.get_market_table(on_date)` **공개 API** 파생이다 —
+`nxt_pre_end`(NXT·PRE_MARKET 의 end) · `krx_regular_open`(KRX·REGULAR 의 start) ·
+`krx_continuous_end`(KRX 중 **`match_kind=="continuous"`** 의 end 최댓값).
+`MARKET_TABLE` 을 직접 순회하지 않는 이유 = `effective_from`/`effective_to`
+해석기(`_is_effective`)가 private 이고, 빠뜨리면 09-13 이전 날짜에서 20:00 이
+나와 거짓이 된다. `krx_continuous_end` 를 `phase` 가 아니라 `match_kind` 로 고른
+이유 = KRX 가 연속 구간을 또 신설해도 열거가 낡지 않는다.
+전환 시각 = `clamp(nxt_pre_end + offset, nxt_pre_end, krx_regular_open)`,
+`offset` 기본 300초.
+
+**fail-open 이 층마다 다르다** (2단계의 단일 폴백을 대체한다):
+
+| 층 | 실패 | 폴백 | 근거 |
+|---|---|---|---|
+| L1 시각축 | 표 조회 실패·행 부재·`now` 이상 | **`H0STCNT0`** | 09-14 실측이 확정한 채널 · 구독 수명의 92% 가 KRX 창 · 셋 중 **모의(VTS) 지원은 그것뿐** |
+| L2 속성축 | 분류 미적재·예외·출처 미확인 | **프리 창에서 `H0NXCNT0`** | 비대칭 — 모르는 종목을 KRX 로 보내면 진짜 `nxt_true` 의 프리장 체결을 **새로 잃지만**, NXT 로 보내면 진짜 `nxt_false` 는 그 구간에 시장이 없어 **잃을 것이 0**. KRX 창에는 이 층이 없다 |
+| L3 킬스위치 | `mode == "off"` | **`H0UNCNT0`** | 유일한 통합 반환 경로 |
+
+⚠️ L2 의 방향 때문에 cycle293 이 출처 검사로 막던 **W2 도장 오염**(07:59 에 65.4%,
+그중 420종목이 실제로는 `nxt_true`)의 **실패 비용이 3단계에서 0** 이 된다 — 오염된
+420종목이 정답인 NXT 로 간다. 출처 검사는 없애지 않았다(프리 창에서 `nxt_false` 를
+KRX 로 **내리는** 판단에는 여전히 권위가 필요하고, 전환 폭 40% 축소가 거기서 나온다).
+
+**전환 — 창 안에서만, 창 밖은 금지.** 창은 `tick_channel_clock.switch_windows()`
+가 표에서 파생한다 — `pre_to_krx`(아침) · `krx_to_nxt_gap`(NXT 단독 구간 진입) ·
+`nxt_gap_to_krx`(복귀, 폭은 아침과 같은 `offset_secs`). 🔴 **창 안에서도 종목마다
+경계를 다시 본다**(적대 검증 HIGH-3) — 120초 루프는 부팅 시각 기준 고정 위상이라
+창 끝 직전에 진입할 수 있고, 종전 구현은 그 뒤 `MAX_PER_CYCLE`/`BUDGET_SECS` 가 찰
+때까지 창을 넘겨 계속 옮겼다(개장 직후 LOW break-before-make = 실제 blind). 경과
+시각은 벽시계 재조회가 아니라 **`now` + monotonic 경과**다(두 시계가 갈리지 않게).
+트리거는 120초
+`stale_watcher_core.check_and_resubscribe_stale` **하나뿐**이다(`_scan_loop` 는
+`TIME_SCAN_START` 에 생성돼 아침 전환 창에 존재하지 않는다). HIGH(보유·익일청산)는
+**make-before-break** — 신 채널 SEND → ACK 확인(`_subscriptions` ∧
+`_subscriptions_acked` **두 집합**) → 구 채널 해제. ACK 실패는 신 채널만 즉시
+회수하고 구 채널을 유지하며 **전환 예산을 소모하지 않는다**. LOW 는
+break-before-make. 🔴 **세션 재추첨 금지** — 다른 세션에 떨어뜨리면
+`_ticker_to_session` 이 덮여 구 세션 튜플이 **영구 고아**가 된다.
+
+**전환 창 REST 백스톱에 대한 정직한 답** — 그 창엔 REST 도 새 체결가를 주지 않는다
+(NXT 휴장 + KRX 시가 단일가). 백스톱은 REST 호출이 아니라 make-before-break +
+창 밖 전환 금지 + `[tick_channel_switch_window_missed]` 미전환 관측으로 구현했고
+KIS 호출 증가는 **0** 이다.
+
+**자동 원복** = `krx_regular_open + revert_probe_secs`(기본 180초, =
+`stale_diagnostics.SUBSCRIBE_GRACE_SECS` 재사용). 착지 직후 적대 검증이 이 장치의
+**세 구멍**을 찾아 전부 닫았다:
+
+* **표본**(CRITICAL-2 A·D / HIGH-2) — 종전 표본은 "그날 아침 전환에 **성공한** HIGH"
+  뿐이었다. 그러면 프리 창부터 KRX 였던 `nxt_false` 보유 종목(이 사이클이 겨냥한
+  바로 그 코호트)이 영영 표본에 못 들어오고, `nxt_true` 보유가 0인 날이나
+  `enforce_low` 단계에서는 표본이 비어 **원복 자체가 존재하지 않았다**. 지금 표본은
+  **「지금 KRX 전용 채널에 앉은 HIGH」** 로 전환 이력과 무관하다.
+* **교차 확인**(CRITICAL-2 A) — 종전에는 비교 코호트가 전부 침묵이면 `market_wide`
+  로 **결론지어** 그날 다시 재지 않았다. 그런데 3단계 `enforce` 의 정상 상태가
+  "전 종목 같은 채널" 이라 그 채널이 진짜 죽은 날엔 비교 코호트도 함께 침묵한다 ⇒
+  **진짜 고장에서만 발화하지 못하는** 교차 확인이었다. 지금은 ① 비교 코호트 ≥2 가
+  fresh → 되돌린다 ② 비교 코호트는 있는데 전부 침묵 → **비결론**, 2×probe 까지
+  기다렸다가 그래도 침묵이면 되돌린다(`all_silent_escalated`) ③ 비교 코호트 자체가
+  없다 → 같은 시한 뒤 되돌린다(`all_silent_no_cross`).
+* **1회성**(CRITICAL-2 C) — 종전에는 판정 **전에** `_revert_probe_done=True` 를 세워
+  첫 측정이 비결론이면 그날 다시는 재지 않았다. 지금은 **결론적인 판정**
+  (`frames_present` = 건강 / 되돌림)만 래치하고, 비결론은 다음 사이클이 다시 잰다
+  (상한 `MAX_REVERT_PROBE_ATTEMPTS=10`).
+
+🔴 **되돌림도 make-before-break 다**(CRITICAL-3). 종전에는 보유 종목에
+`make_before_break=False`(선해제 + `bypass_limit=False`)를 09:03 **라이브 구간에**
+걸고 반환값도 읽지 않았다 — 41-cap·OPSP 백오프에 걸리면 그 종목이 어느 채널에도
+없는 채로 종일 남는다. "되돌림의 전제가 프레임 0" 이라는 근거는 **오발화 시 거짓**
+이고, 절대 규칙 2 와도 모순이었다. 되돌린 상태는 `day_reverted` 래치로 그날 종일
+**프리 창 규칙**이다(단순 「전원 NXT」면 `nxt_false` 가 새 blind 가 된다). 되돌린 뒤
+**그날 재시도는 없다.** 래치는 벽시계 날짜로 스스로 풀리고, 시계를 못 읽는 경로
+에서도 날짜 키가 비지 않는다(영구 좌초 차단).
+
+🔴 **매수 축 술어가 「채널」에서 「코호트」로 바뀌었다.** 3단계는 `nxt_true` 까지
+전 종목을 전용 채널로 보내므로, cycle293 의 채널 축 술어를 그대로 두면
+momentum·VB·LTV·BFB·VCP **5전략의 틱 매수가 통째로 죽는다**(그 5전략은 틱이 유일
+매수 경로다). 이제 `scanner._stamp_cohort` 가 **구독 발사 시점에 확신할 때만**
+코호트를 심고(하루 단방향 닫힘 래치, 매일 리셋), `risk._tick_buy_eval_blocked_by_channel`
+은 `scanner.tick_buy_cohort_blocked(ticker)` 하나만 읽으며 **모드를 보지 않는다**
+(`off` 가 매수를 여는 cycle293 함정이 구조적으로 소멸). **스탬프 부재 = 열어 둔다** —
+닫힘 오류는 레지스트리 한 번 실패로 전 종목에 동시에 일어나고(상관 실패) 열림
+오류는 종목별 독립이라, 최대 위험은 전자다.
+
+🔴 **스탬프는 재시도된다**(적대 검증 CRITICAL-1 부팅 / F-2 매수축). 종전에는 스탬프를
+심는 유일한 자리가 `tick_tr_id_for` 였고 LOW 종목은 `already_in_pool` skip 이 그
+호출보다 **앞**이라 그날 **07:59 한 번**만 기회를 가졌다. 그런데 07:59 는
+`_full_universe_load_krx_primary` 의 도장이 마스터의 65.4% 를 덮은 시각이라, 그때
+출처 검사가 실패한 종목은 08:08 에 진실이 복원돼도 **영영 미스탬프**로 남아 09:00
+부터 KRX 프레임을 받으면서 매수 게이트가 열린 채였다 = 승인 없는 B-2 부분 발생.
+지금은 `scanner.restamp_cohorts(tickers)` 를 5분 `subscribe_filtered_stocks` 와 **120초
+`stale_watcher_core`** 둘 다에서 `ensure_fresh` 직후에 부른다(후자가 아침 창을 덮는다
+— `_scan_loop` 은 `TIME_SCAN_START` 에야 생긴다). 닫힘 우세 단방향이라 재호출이 매수를
+더 열 수 없다.
+
+규모는 `[tick_buy_gate] stamped_no_feed= stamped_feed= unstamped=` 가 남긴다 —
+⚠️ **하루 두 행**이다(cap 키가 시각 구간별). **판단은 정규장 창 행으로 한다** — 프리
+창 행의 `unstamped` 는 도장 오염을 재는 값이라 크게 나오는 것이 정상이고, 그 값으로
+배선을 판정하면 매일 거짓 경보다. 종전에는 하루 1행이 07:59 에만 나와 **항상 같은
+값**을 찍었고, 그래서 그 계측기는 아무것도 잡지 못했다(적대 검증 CRITICAL-2 부팅).
+
+출처 조회가 통째로 실패하는 날은 **상관된 열림**이다 — `[no_feed_provenance_unavailable]`
+1회/일 **WARNING**(종전 `logger.debug` 라 리포트에 한 글자도 안 떴다).
+
+**`scheduler.py` 무접촉의 잔여** — `scheduler.py` 의 두 줄(익일청산 시가 수신 ·
+스윙 매수 직후)이 풀을 우회해 통합 채널로 직접 구독한다. `KisWebSocket.subscribe`
+첫 문장의 `_reroute_legacy_unified(tr_id, tr_key)` 가 그것을 흡수한다 — 요청 tr_id 가
+**시세 채널이면서 전용이 아닐 때**(= 통합)만 재라우팅하고, 체결통보(`H0STCNI0/9`)·
+장운영정보(`H0UNMKO0`)·전용 2채널은 **byte 동일**로 통과한다. `off`/`observe`/**`enforce_low`** 도
+통과다 — `enforce_low` 를 통과시키는 것은 적대 검증 HIGH-1 시정이다. 이 함수는
+우선순위를 모르므로 S1(HIGH 를 스코프 밖에 두는 단계)에서 재라우팅하면 그 안전
+장치가 통째로 무력화되고, 풀의 병행 dict 와 세션 실구독이 갈려 없는 튜플에
+UNSUBSCRIBE 를 보내 KIS `OPSP0003` + 영구 고아를 만든다. 같은 이유로
+**`WebsocketPool.subscribe` 진입에서도 한 번 적용**해 `_ticker_to_tr_id` 가 항상
+세션이 실제로 구독한 채널과 같게 만들었다(재라우팅은 멱등이라 세션 안 호출은 no-op). 관측 = `[tick_channel_legacy_reroute]` 1회/(ticker)/일. ⚠️ 이것은 **증상
+차단**이고 근본 시정(그 두 줄을 리졸버 경유로)은 별도 승인 대상이다.
+
+🔴 **`off` 를 눌러도 이미 전용 채널에 올라간 구독은 되돌아가지 않는다.** 장중에
+146종목을 대량 전환하는 것이 더 위험하고, 되돌림 대상인 통합은 `nxt_false` 에게
+프레임 0 이라 **킬스위치가 손절을 악화시킨다**. `off` 가 막는 것은 새 판정·새 전환·
+레거시 재라우팅이다. **완전 복귀는 다음 `_boot`(익일 07:45)** 다 — 장중 즉시 복귀는
+재시작이 필요하고 D6 가 막는다.
+
+**운영 다이얼** (전부 `system_config` 축 — 전략 `DEFAULT_PARAMS`·`param_catalog`
+편입 금지):
+
+| 키 | 기본 | 뜻 |
+|---|---|---|
+| `tick_channel_resolver_mode` | `observe` | `off`/`observe`/`enforce_low`/`enforce` |
+| `tick_channel_switch_enabled` | `true` | **전환만** 끈다. 종목이 첫 구독 채널에 머문다 — `nxt_true` 는 NXT 종일이고 NXT 는 정규장·애프터에 체결을 실으므로 **blind 가 아니다**. 자동 원복의 수동 대응물 |
+| `tick_channel_switch_offset_secs` | 300 | `nxt_pre_end` 에서 전환까지 |
+| `tick_channel_switch_ack_timeout_secs` | — | HIGH make-before-break ACK 대기 |
+| `tick_channel_revert_probe_secs` | 180 | 개장 후 원복 판정 시점 |
+| `tick_channel_gap_hold_enabled` | `true` | 🔴 **NXT 단독 연속 구간**(09-15 = 15:40~16:00)에 보유(HIGH)가 NXT 를 따라가는가. `false` 면 그 20분의 손절 트리거가 사라지므로 **되돌릴 때만** |
+
+즉시 반영(재시작 불요):
+
+```bash
+curl -X PUT .../api/realtime/tick-channel-mode -d '{"mode":"enforce"}'
+curl -X PUT .../api/realtime/tick-channel-mode \
+     -d '{"mode":"enforce","switch_enabled":false}'   # 채널은 유지, 전환만 정지
+curl -X PUT .../api/realtime/tick-channel-mode \
+     -d '{"mode":"enforce","gap_hold_enabled":false}' # 15:40~16:00 NXT 추종 해제
+curl -X PUT .../api/realtime/tick-channel-mode -d '{"mode":"off"}'   # 배포 전과 동일
+```
+
+⚠️ **배포만으로는 아무 일도 일어나지 않는다** — `DEFAULT_MODE` 는 `observe` 이고
+`system_config` 에 그 키를 넣는 마이그레이션도 초기화 코드도 없다. 3단계를 실제로
+켜려면 **07:45 부팅 전에** `tick_channel_resolver_mode='enforce'` 가 DB 에 있어야
+한다(부팅 뒤 올려도 코호트 스탬프는 재시도로 따라잡지만, 07:59 사전 구독이 이미
+통합으로 나가 그날 「통합 구독 0」이 성립하지 않는다).
+
+「채널이 문제」(`mode`)와 「전환이 문제」(`switch_enabled`)는 **다른 결정**이라 모드
+enum 에 태우지 않았다 — 사고 중에 쓸 카드가 `off` 하나뿐이면 운영자가 장중 대량
+전환을 실행하게 된다. `switch_enabled`·`gap_hold_enabled` 는 **선택 필드**라 생략하면 현행 값 무접촉이다.
+`GET /api/realtime/tick-channel-mode` 는 그날 `nxt_gap_window` 와 `switch_windows`
+(창 3개)를 함께 돌려준다 — 운영자가 화면 없이 "오늘 전환이 몇 시로 잡혔는가" 를
+확인하는 유일한 채널이다.
+
+🔴 **마커 의미 전환 — 배포 전후 grep 합산 금지**: `[tick_channel_config]` 는
+`clock_krx=`/`clock_nxt=`/`cohort_no_feed=` 3라벨이 붙었고 `resolved_unified=` 는
+**0 이 정상**이다 · `[tick_coverage] stale` 은 분모 불변 + `fresh` 증가가 성공 서명 ·
+`[no_feed_held]` 와 `[stale_watcher_summary] no_feed_skipped=` 는 **0 에 수렴**해야
+한다 · `[tick_channel_dual_detected]` 0 이 정상.
+
+`TICK_TR_ID_KRX`/`TICK_TR_ID_NXT` 두 상수는 리졸버의 반환값 자리로 `scanner.py` 에
+있고, 세 값을 담은 **단일 정본 집합**이 `scanner.TICK_TR_IDS` 다(두 번째 집합을
+만들면 두 판정이 갈리고, 갈린 순간 "구독은 A 해제는 B" 가 된다 — AST 가드가 컬렉션
+리터럴 개수를 1 로 잠근다).
 
 `on_tick` 중복 호출 안전: `scanner.ticker_prices[ticker]` 마지막 값 채택 + `_selling`/`is_ticker_blocked_for_buy` 중복 매수 차단.
 
 ## handler.py — 메시지 처리
 
 - 파이프(`|`) 구분 메시지 파싱
-- **실시간 체결가** (H0STCNT0/H0NXCNT0/H0UNCNT0): 현재가/시가/등락률 추출 → `RiskManager.on_tick` 콜백 (세 TR_ID 동일 포맷 → 단일 파서). 현행 구독은 H0UNCNT0(통합) 단일 — H0STCNT0/H0NXCNT0 는 P1-7 B 리졸버 예약 상수(cycle257)
+- **실시간 체결가** (H0STCNT0/H0NXCNT0/H0UNCNT0): 현재가/시가/등락률 추출 → `RiskManager.on_tick` 콜백 (세 TR_ID 동일 포맷 → 단일 파서). ⚠️ **구 서술("현행 구독은 H0UNCNT0 단일 — 나머지 둘은 예약 상수")은 거짓이다** — cycle293 이 무송출 종목을 `H0STCNT0` 로 보내기 시작했고 cycle294 는 정상 경로에서 통합을 **아예 반환하지 않는다**(프리장 `H0NXCNT0` / 정규장·애프터 `H0STCNT0`). `handler` 는 여전히 tr_id 를 `on_tick` 으로 넘기지 않으므로(P1-7 N-4, `handler.py` 는 미승인 8영역) `tick_volume` 의 채널 구분은 **이중 채널 금지 + 전환 창 프레임 0** 으로만 닫힌다
 - **체결통보** (H0STCNI0/H0STCNI9): AES-256-CBC 복호화 → **계좌번호 필터** → `OrderEngine.handle_execution_notice` 콜백
 - **NXT 장운영정보** (H0NXMKO0): 보드 전환 이벤트 → `register_board_handler` 등록 콜백(SessionTracker) 전달. KIS 명세 필드 미기재 → 운영 데이터 기반 확정
 - 체결통보 필드 매핑 (`^` 구분, **cycle235 정본 정정** — KIS `ccnl_notice` 26컬럼): [0]CUST_ID(HTS ID), **[1]계좌번호(8)+상품코드(2)**, [2]주문번호, [3]원주문번호, [4]매도매수구분(02:매수/01:매도), [5]정정구분, [6]주문종류, [7]주문조건, **[8]종목코드**, **[9]CNTG_QTY 체결수량(통보 건별 증분)**, [10]CNTG_UNPR 체결단가, [11]체결시간, [12]거부여부, [13]CNTG_YN 체결구분(1:접수,2:체결), [14]ACPT_YN, [15]BRNC_NO, **[16]ODER_QTY 주문수량**, [17]고객명, [18]ORD_COND_PRC. ⚠️ 종전 표기([9]주문수량/[16]체결수량)는 정본과 **반대**였고 코드가 이를 따라 fields[16] 을 수량으로 오독 — 단일 전량 체결(두 값 동일)에선 잠복, 부분/분할 체결에서 positions 과대(08-28 257720 실사고: 실체결 2주가 3주 등록 → 익일 매도 전량 APBK0400). cycle235 가 fields[9] 로 시정 + AST 봉인(`test_cycle235_ast_execution_qty.py`) + 엔진 overrun 클램프(`[fill_qty_overrun]`) 이중 방어
@@ -245,9 +482,9 @@ VB/LTV 의 보드 시가 → `target = open + offset` 으로 흘러간다(포렌
 
 | TR_ID | 용도 | 구독 키 | 비고 |
 |-------|------|---------|------|
-| H0UNCNT0 | 실시간 체결가 (KRX+NXT 통합) | 종목코드 | 현재 사용 — `scanner.TICK_TR_ID`. NXT 거래 즉시 반영 |
-| H0STCNT0 | 실시간 체결가 (KRX 단독) | 종목코드 | H0UNCNT0 동일 포맷. 호환성 유지 |
-| H0NXCNT0 | 실시간 체결가 (NXT 단독) | 종목코드 | 동일 포맷 |
+| H0UNCNT0 | 실시간 체결가 (KRX+NXT 통합) | 종목코드 | `scanner.TICK_TR_ID`. 🔴 **cycle294(2026-09-14)부터 정상 경로에서 반환하지 않는다** — 유일한 반환 자리는 킬스위치 `mode == "off"` 분기다. 🔴 **`stock_master.nxt_tradable=False`(KRX 단독) 종목의 체결 프레임을 보내지 않는다** — SUBSCRIBE 는 SUCCESS ACK 를 받으므로 구독은 살아 있는 것처럼 보이고 프레임만 영구 0 이다(포렌식 `_workspace/forensics/stale_candidates_0904.md`: 나흘 × ~200종목 예외 0, 유동주 포함, 최소 2026-07-24 부터 만성. 마스터 전체 **83.2%** 가 KRX 단독). **종착지는 폐기**(2026-09-07 사용자 결정) |
+| H0STCNT0 | 실시간 체결가 (KRX 단독) | 종목코드 | H0UNCNT0 동일 포맷(47필드 인덱스 전부 동일). **cycle293 부터 실 구독**(무송출 종목) → **cycle294 부터 정규장+애프터마켓 전 종목**. 09-14 16:39~16:41 라이브 실측 — `000815`·`005385`(`nxt_false`)와 `000660`(**`nxt_true`**) 셋 다 구독 1~5초 뒤 첫 틱을 받았다 = **종목 속성과 무관하게** KRX 애프터마켓 체결을 싣는다. 판정 실패(L1)의 폴백도 이 채널이다. cycle253 프로브 실측으로 진짜 KRX 개장가 수신 확인. **모의(VTS) 지원 — 셋 중 유일** |
+| H0NXCNT0 | 실시간 체결가 (NXT 단독) | 종목코드 | 동일 포맷. **cycle294 부터 실 구독** — 프리장 전 종목 + NXT 단독 연속 구간(09-15 = 15:40~16:00)의 **보유(HIGH)만**. 09-14 19:52~19:55 `000660` 지속 수신으로 라이브 확인(애프터 구간 대리 증거 — 프리장 08:00~08:50 프레임은 아직 실증 전이다). **모의(VTS) 미지원** |
 | H0UNMKO0 | 통합 장운영정보 (KRX+NXT) | 종목코드 | 현재 사용 — MKOP_CLS_CODE 시장 전체 공통이라 대표 종목 1개(005930)만 구독. **모의(VTS) 미지원 — 실전 한정** |
 | H0STMKO0 | KRX 단독 장운영정보 | 종목코드 | H0UNMKO0 동일 |
 | H0NXMKO0 | NXT 단독 장운영정보 | 종목코드 | H0UNMKO0 동일. 통합 구독으로 충분 |

@@ -557,19 +557,25 @@ def test_c17_4_leaf_does_not_import_eight_area_modules() -> None:
 #    또 다른 사이클(cycle286)의 사용자 명시 8영역 승인 하에 `order_engine.py` 를
 #    바꿨다. 값만 현재 워킹트리로 재산출한다(같은 승계 절차).
 _BASE_SHA = {
-    "src/engine/risk.py": "19f48b4a4f7c3b4aa47b99a1426d22ec26884277a9f711c279753d6d7452dcc7",
+    "src/engine/risk.py": "e8614235cc0bea638f8c349b2f6910c94f5f9a5b849f5d65bef0583f959d81c9",
     # 🔁 cycle276 → cycle286 — 사용자 명시 승인 하에 order_engine.py 를 바꾼 두 사이클의
     # 누적 결과값이다. A-ATOMIC 구간은 byte 동일.
-    "src/engine/order_engine.py": "f65cfc923d1d68497d2fdc8ba0c0008d9e20e631750c6eb20d41748d54d0d0ad",
+    "src/engine/order_engine.py": "84e84a972774cd2fbf8ceb70e5569f7760d43a228c2be21d2a1b90f48fd4ce75",
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
     "src/engine/scanner.py":
-        "fa8c0377f850b031d1983923957eb92ea593dc0eb9c1423359d8561efde78fb9",
+        "079272e7c4907c6ecc5fdf9b73de70021a9dc2435c7a568538183a7ead98804f",
     "src/engine/strategy_registry.py":
         "d794696e54ffdc36efa6df917879d780e86bc1f373bb3b5d8dcbc0beac8cef8b",
     "src/api/order.py":
         "08c5cafd7b8678ec0d0fa85f856fdea3cce38ad92488c6d74c03cd13faa415bb",
-    "src/engine/scheduler.py": "50658e06062a0d38afecab1baa08871b89212e295cc95f2a3af62a2ae076115d",
+    # ⚠️ cycle292(2026-09-14) 재핀 — `_subscribe_market_operation_tickers` 176줄을
+    # 신규 leaf `src/engine/market_op_subscribe.py` 로 추출(행위 변경 0 · 5줄 위임
+    # wrapper · 3,897→3,726L, 사용자 승인). 여섯 자매 핀(cycle274/276/278/282/290/291)
+    # 을 **한 값으로 동시에** 옮겼다 — 한 곳만 넣으면 나머지가 "코드를 되돌려라" 로
+    # 붉어져 승인된 변경을 되돌리도록 오도한다. 직전 값 =
+    # `50658e06062a0d38afecab1baa08871b89212e295cc95f2a3af62a2ae076115d`.
+    "src/engine/scheduler.py": "9bf05ccae11bd0c12d5275f36be70863decd83f1f34d77352f505bc15e549d8a",
     "src/engine/strategy_base.py":
         "869dc20ca561adc561a9ebe9fdb5fe5a3e097f7ec176fdf274d577d509de9252",
     "src/auth/token.py":
@@ -579,9 +585,9 @@ _BASE_SHA = {
     "src/realtime/handler.py":
         "23768e6d89ed54b626cce2645a07cc5472ce10120c0b1c81f5d6436ff521ed47",
     "src/realtime/websocket.py":
-        "1589cffb955e5af28ad0f145860bcc127ea8fda2b25d6817bd79c079472d5c4f",
+        "d4c443bde2ed7aeafba3e9471db0ca4efc15a654610555435145a9b305150c5b",
     "src/realtime/websocket_pool.py":
-        "bd1108dd40da4e72eab10581485b1b032e58af7c06754a9118fc7fafc20c8de7",
+        "8b02442bcf5f558d6f7095b47d2016f004e3746e07ddc91dae8768b1dd46a10d",
     # 🔁 cycle290(킬스위치 등재, 2026-09-13) 재핀 — `DEFAULT_PARAMS` 말미에 키 2개
     #    추가뿐, 그 외는 불변(세그먼트 sha 는 `test_cycle290_ast_scope.py` 가 잠근다).
     "src/engine/strategies/momentum.py":
@@ -623,12 +629,18 @@ def test_c15_2_realtime_and_auth_have_no_new_python_files() -> None:
 
 
 # ===========================================================================
-# C16 — `scheduler.py` 라인 상한 (무접촉이므로 3,897 그대로)
+# C16 — `scheduler.py` 정확 라인 핀 (cycle274 무접촉 → cycle292 추출 후 재핀)
 # ===========================================================================
 def test_c16_1_scheduler_line_count_unchanged() -> None:
-    """C16 — `scheduler.py` 는 이 사이클에서 **무접촉**이라 3,897L 그대로다."""
+    """C16 — `scheduler.py` 정확 라인 핀 = cycle274 무접촉의 대리 지표.
+
+    cycle292(2026-09-14)가 `_subscribe_market_operation_tickers` 176줄을 신규 leaf
+    `src/engine/market_op_subscribe.py` 로 추출(행위 변경 0 · 5줄 위임 wrapper)해
+    3,897 → 3,726 으로 줄었다. 🔴 정확 핀을 상한 핀(`< 3900`)으로 완화하지 않는다 —
+    그러면 확보한 174줄 예산의 무단 증식을 아무도 못 잡는다.
+    """
     lines = len(_read(_SCHEDULER).splitlines())
-    assert lines == 3897, f"scheduler.py {lines}L (기대 3,897 — cycle274 는 무접촉; cycle283 저녁 창 재설계 뒤 재핀)"
+    assert lines == 3726, f"scheduler.py {lines}L (기대 3,726 — cycle283 저녁 창 재설계 뒤 3,897 → cycle292 leaf 추출 후 재핀)"
 
 
 def test_c16_2_scheduler_line_cap_is_not_looser_than_cycle257() -> None:

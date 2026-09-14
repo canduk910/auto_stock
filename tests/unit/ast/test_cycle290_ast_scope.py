@@ -99,13 +99,13 @@ def _sha(text: str) -> str:
 _BASE_SHA: dict[str, str] = {
     # 8영역 — 엔진 5파일 전부 (order_engine 포함! cycle290 은 무접촉)
     "src/engine/order_engine.py":
-        "f65cfc923d1d68497d2fdc8ba0c0008d9e20e631750c6eb20d41748d54d0d0ad",
+        "84e84a972774cd2fbf8ceb70e5569f7760d43a228c2be21d2a1b90f48fd4ce75",
     "src/engine/risk.py":
-        "19f48b4a4f7c3b4aa47b99a1426d22ec26884277a9f711c279753d6d7452dcc7",
+        "e8614235cc0bea638f8c349b2f6910c94f5f9a5b849f5d65bef0583f959d81c9",
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
     "src/engine/scanner.py":
-        "fa8c0377f850b031d1983923957eb92ea593dc0eb9c1423359d8561efde78fb9",
+        "079272e7c4907c6ecc5fdf9b73de70021a9dc2435c7a568538183a7ead98804f",
     "src/engine/strategy_registry.py":
         "d794696e54ffdc36efa6df917879d780e86bc1f373bb3b5d8dcbc0beac8cef8b",
     # 8영역 — api/order
@@ -117,9 +117,9 @@ _BASE_SHA: dict[str, str] = {
     "src/realtime/handler.py":
         "23768e6d89ed54b626cce2645a07cc5472ce10120c0b1c81f5d6436ff521ed47",
     "src/realtime/websocket.py":
-        "1589cffb955e5af28ad0f145860bcc127ea8fda2b25d6817bd79c079472d5c4f",
+        "d4c443bde2ed7aeafba3e9471db0ca4efc15a654610555435145a9b305150c5b",
     "src/realtime/websocket_pool.py":
-        "bd1108dd40da4e72eab10581485b1b032e58af7c06754a9118fc7fafc20c8de7",
+        "8b02442bcf5f558d6f7095b47d2016f004e3746e07ddc91dae8768b1dd46a10d",
     # 8영역 — auth 전부
     "src/auth/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -127,9 +127,15 @@ _BASE_SHA: dict[str, str] = {
         "7c2aacc703839bdc274b463ee48777006504d70e4d59a1e57120ac5b612396d2",
     "src/auth/token.py":
         "049341c7286b57a06337b6bc73ff4b0269efffad8f4554d97f275e7b8ec30a54",
+    # ⚠️ cycle292(2026-09-14) 재핀 — `_subscribe_market_operation_tickers` 176줄을
+    # 신규 leaf `src/engine/market_op_subscribe.py` 로 추출(행위 변경 0 · 5줄 위임
+    # wrapper · 3,897→3,726L, 사용자 승인). 여섯 자매 핀(cycle274/276/278/282/290/291)
+    # 을 **한 값으로 동시에** 옮겼다 — 한 곳만 넣으면 나머지가 "코드를 되돌려라" 로
+    # 붉어져 승인된 변경을 되돌리도록 오도한다. 직전 값 =
+    # `50658e06062a0d38afecab1baa08871b89212e295cc95f2a3af62a2ae076115d`.
     # 8영역은 아니지만 이 사이클이 무접촉을 약속한 파일
     "src/engine/scheduler.py":
-        "50658e06062a0d38afecab1baa08871b89212e295cc95f2a3af62a2ae076115d",
+        "9bf05ccae11bd0c12d5275f36be70863decd83f1f34d77352f505bc15e549d8a",
     "src/engine/strategy_base.py":
         "869dc20ca561adc561a9ebe9fdb5fe5a3e097f7ec176fdf274d577d509de9252",
     # 🔴 등재만으로 판정이 통해야 한다 — 검증 로직을 고쳐 통과시키면 안 된다.
@@ -142,7 +148,11 @@ _BASE_SHA: dict[str, str] = {
 
 #: cycle257 이 세운 영구 상한(정본). 종전 표기 `4,000` 은 느슨한 쪽이라 폐기됐다.
 _SCHEDULER_LINE_CAP = 3900
-_SCHEDULER_LINES = 3897
+#: ⚠️ cycle292(2026-09-14) 가 `_subscribe_market_operation_tickers` 176줄을
+#: 신규 leaf `src/engine/market_op_subscribe.py` 로 추출해(행위 변경 0 · 5줄
+#: 위임 wrapper) 3,897 → 3,726 이 됐다. 값만 옮긴다 — 정확 핀을 상한 핀으로
+#: 완화하면 cycle290 의 무접촉 대리 지표가 사라진다.
+_SCHEDULER_LINES = 3726
 
 
 @pytest.mark.parametrize("rel", sorted(_BASE_SHA))
@@ -283,6 +293,11 @@ _ENGINE_PY_FILES: dict[str, tuple[str, ...]] = {
         "data_load_tasks.py", "kojiro_band_observe.py", "kojiro_gap_observe.py",
         "kojiro_indicators.py", "llm_buy_gate.py", "llm_features.py",
         "log_analysis_engine.py", "log_metrics_collector.py",
+        # cycle292 — `scheduler._subscribe_market_operation_tickers` 본체 leaf.
+        # 형제 `market_operation_monitor.py`(H0UNMKO0 수신·상태 추적) 와 역할이 반대다
+        # (이쪽은 송신·구독 배치). 이름 축을 개수 축으로 바꾸지 말 것 — 등재해도
+        # "다음 신규 파일"은 여전히 붉어진다.
+        "market_op_subscribe.py",
         "market_operation_monitor.py", "market_regime.py", "market_state.py",
         "metrics_collector.py", "no_feed_registry.py", "observer_trace.py",
         "open_price_observe.py", "open_price_rest.py", "order_engine.py",
@@ -296,7 +311,9 @@ _ENGINE_PY_FILES: dict[str, tuple[str, ...]] = {
         "stock_master_basics_metrics.py", "stock_master_daily_metrics.py",
         "stock_master_master_metrics.py", "stock_master_metrics.py", "strategy.py",
         "strategy_base.py", "strategy_registry.py", "ta_indicators.py",
-        "task_loop_helper.py", "te_metrics.py", "tick_volume.py",
+        "task_loop_helper.py", "te_metrics.py", "tick_channel_clock.py",
+        "tick_channel_mode.py", "tick_channel_switch.py",
+        "tick_volume.py",
         "turtle_sizing.py", "uptime_monitor.py",
     ),
     "src/engine/strategies": (
@@ -311,8 +328,17 @@ _ENGINE_PY_FILES: dict[str, tuple[str, ...]] = {
 def test_g290_3_no_new_module_under_src_engine(rel_dir: str) -> None:
     """S3 — 이 사이클은 신규 모듈을 만들지 않는다(등재는 기존 파일 편집이다).
 
-    cycle287 `_PINNED_DIRS` + `_SRC_TREE_FILES=148` 이 같은 계약을 잠근다 — 신규
+    cycle287 `_PINNED_DIRS` + `_SRC_TREE_FILES` 가 같은 계약을 잠근다 — 신규
     `.py` 를 만들면 그 가드까지 함께 붉어진다.
+
+    ⚠️ **이름 축 기준선 이동 이력** — 승인된 신설만 여기에 더한다. 단언 형태는
+    그대로라 무단 신규 파일은 여전히 붉어진다.
+      * cycle292 `market_op_subscribe.py`(장운영 구독 leaf)
+      * cycle293 `tick_channel_mode.py`(리졸버 킬스위치 leaf)
+      * cycle294 `tick_channel_clock.py`(시각축 판정) · `tick_channel_switch.py`
+        (살아 있는 구독의 채널 전환 + 자동 원복) — 둘 다 8영역 **밖**이고,
+        `scheduler.py` 무접촉 계약 때문에 판정·전환을 기존 주기 루프
+        (`stale_watcher_core`)에 얹으려면 leaf 가 필요했다.
     """
     got = tuple(sorted(p.name for p in (_ROOT / rel_dir).glob("*.py")))
     assert got == _ENGINE_PY_FILES[rel_dir], (

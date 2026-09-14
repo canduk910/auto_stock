@@ -51,6 +51,404 @@
 | 21:30 | 정산 | `'금일 매매 종료'` 1행(21:31~21:35) · `daily_performance` 오늘 행 | — |
 | 21:30 | 일일 리포트 | `daily_log_reports` 09-14 행이 **정확히 1개** · `created_at≈20:05` · `summary`·`model` 채워짐 · `ext_provider` 생존 | 행이 둘이거나 `ext_*` 가 비면 upsert SET 절 확인 |
 
+### 🟠 09-14 발견 ④ — 문서 점검기 자체가 공허했다 + 선재 모듈 누락 8건
+
+`/sync-docs` 의 「모듈 누락 자가 점검」이 `grep -q "$b"`(맨 모듈명 **부분 문자열**)였다.
+같은 문서 안의 로그 마커(`[market_op_subscribe_skip]`)나 테스트 파일명
+(`test_market_op_subscribe_import_path_guard.py`)이 모듈명을 부분 포함하면 **등재된 적 없는
+모듈도 통과**한다. cycle292 가 신규 leaf 를 만들고도 이 검사를 통과한 것이 실증이다.
+
+**2026-09-14 시정** — `.claude/commands/sync-docs.md` 의 검사를 `.py` 확장자 + 단어 경계로 조였다:
+
+```bash
+grep -qE "(^|[^A-Za-z0-9_])$b\.py" src/$d/CLAUDE.md
+```
+
+| | 결과 |
+|---|---|
+| 구 검사(부분 문자열) | **0건** — 6개 디렉터리 전부 거짓 초록 |
+| 신 검사(`.py` + 단어 경계) | **8건** (전부 선재 부채, cycle292 leaf 는 등재 완료) |
+
+⚠️ 반대로 `**$b.py**`(굵게 표기 강제)까지 조이면 **과잉**이다 — engine 에서만 오탐 25건
+(`order_engine.py`·`scanner.py`·`risk.py` 등이 의존 관계 도식에 평문으로 적혀 있고 그게 정당한 등재).
+
+**선재 누락 8건 (별건 카드 — 등재만, 이번 사이클 범위 밖)**
+
+| 디렉터리 | 모듈 |
+|---|---|
+| `src/api/` | `market_operation.py` |
+| `src/db/` | `backtest_runs.py` · `market_regime_snapshots.py` · `positions.py` · `strategy_config.py` |
+| `src/engine/` | `daily_metrics_snapshot.py` (cycle283 신규, 인덱스·문서 미등재) |
+| `src/routes/` | `market_regime.py` · `portfolio.py` |
+
+`positions.py`·`strategy_config.py` 는 매매 hot path 의 영속 계층인데 디렉터리 정본에
+항목이 없다 — 우선순위가 높다.
+
+✅ **2026-09-14 `/sync-docs` 모드 B 에서 8건 전부 등재 완료** — 신 검사(`.py` + 단어 경계)로
+6개 디렉터리 재검사 시 누락 **0건**. 이 카드는 닫혔다.
+
+### 🟠 09-14 발견 ⑦ — **`/sync-docs` 와 8영역 sha 핀이 구조적으로 충돌한다** (작업 순서 문제)
+
+`src/realtime/**` 는 8영역이므로 **그 디렉터리의 `CLAUDE.md` 도 `_APPROVED_CONTENT_SHA` 핀 대상**이다.
+그런데 규약상 작업 순서가 이렇다:
+
+```
+사이클 구현 → 8영역 sha 핀 박음 → /sync-docs (커밋 전 필수) 가 그 문서를 또 고침 → 핀 깨짐
+```
+
+**2026-09-14 실측** — cycle294 착지 시 `tests/unit/ast` 1,618 passed 였는데, `/sync-docs` 가
+`src/realtime/CLAUDE.md` 를 고친 직후 **7건 FAILED**:
+
+```
+test_cycle222a3_ast_followup_fixes.py::test_ga3_6_eight_areas_touched_are_only_handler_and_risk
+test_cycle223_ast_donchian_exit_fix.py::test_g223_10_eight_areas_diff_zero
+test_cycle223f_ast_manual_apply_safeguard.py::test_g223f_9_eight_areas_diff_zero
+test_cycle223g3_ast_guard_sees_staged.py::test_g3_7_…[donchian_exit_fix]
+test_cycle223g3_ast_guard_sees_staged.py::test_g3_7_…[manual_apply_safeguard]
+test_cycle223g3_ast_guard_sees_staged.py::test_g3_9b_eight_area_changes_are_pinned_in_every_sibling_guard
+test_cycle276_ast_order_hook.py::test_c6_4c_cycle222a3_approves_only_order_engine
+```
+
+해당 sha 는 **4개 파일에 복창**돼 있다(`test_cycle222a3_…` · `test_cycle223f_…` ·
+`test_cycle223_…` · `tests/unit/engine/strategies/test_cycle226_zero_breakout_defense.py`).
+전부 갱신해야 초록이 된다.
+
+⚠️ **이건 결함이 아니라 순서 문제다.** 핀은 "8영역이 승인 없이 바뀌지 않는다" 를 지키는 장치이고
+제 일을 정확히 했다 — 승인 범위 밖에서 그 파일이 또 바뀌었음을 알렸다. 문제는 우리가 그 변경을
+**규약으로 강제**(커밋 전 `/sync-docs` 필수)해 놓고 재핀 절차를 순서에 안 넣은 것이다.
+
+**다음 사이클 절차 (권고)**
+
+1. 구현 → 검증 → **`/sync-docs` 먼저 돌린다**
+2. **그 다음에** 8영역 sha 핀을 산출한다
+3. 핀 산출 뒤에는 8영역 문서를 더 고치지 않는다
+4. 그래도 고쳤으면 재핀 후 `tests/unit/ast` 재실행 — **`git commit` 전에 반드시 한 번 더 돌린다**
+
+재핀은 기계적이다:
+```bash
+python3 -c "import hashlib,pathlib;print(hashlib.sha256(pathlib.Path('src/realtime/CLAUDE.md').read_bytes()).hexdigest())"
+grep -rln "<옛 sha>" tests/   # 자매 가드 전수
+```
+
+### 🔴 09-14 발견 ⑥ — **`get_balance()` 의 `prpr` 은 애프터마켓을 반영하지 않는다** (감시기 무력화 실측)
+
+오늘 밤 blind 4종목 감시기를 `get_balance()` 기반으로 만들었다. 결과는 **경보 0건**이었으나
+그것은 안전의 증거가 아니었다.
+
+| 구간 | 11 보유 종목 중 가격이 한 번이라도 바뀐 종목 |
+|---|---|
+| 15:25~16:00 | **6 종목** ← 계측기 자체는 살아 있다 |
+| **16:00~20:00** | **0 종목** ← 4시간 내내 전 종목 무변동 |
+
+교차 확인 — 같은 종목 `004020 현대제철` 을 REST 시세(`quotation.inquire_ccnl`, FHKST01010100)로
+조회하면:
+
+```
+last_cntg_hour = 195947   ← 19:59:47 체결(애프터 마감 13초 전)
+last_volume    = 10
+today_volume   = 1405
+```
+
+**거래는 있었다.** 그런데 `get_balance()` 는 그 4시간 내내 15:30 종가를 돌려줬다.
+
+#### 따라오는 것
+
+1. **오늘 밤 감시 결과는 무효다.** "경보 0건" 을 "공백이 실해를 안 냈다" 로 읽으면 안 된다 —
+   계측기가 그 창을 못 봤을 뿐이다. blind 4종목이 애프터에 어떻게 움직였는지 **우리는 모른다.**
+2. **`_sync_positions_from_balance`(15분 주기)도 애프터 가격을 못 본다.** 그 경로는 포지션
+   대조용이고 손절 평가는 `risk.on_tick` 소관이라 직접 피해는 없으나, 애프터 구간의
+   평가손익·UI 표시가 15:30 값으로 고정된다는 뜻이다.
+3. 🔵 **REST 시세 조회는 본다** — 이것이 이 발견의 유일한 좋은 소식이다.
+   오늘 아침 「발견 ②」에 시정 후보로 적은 **REST 폴 창 확장**
+   (`SWING_REST_POLL_WINDOW_END` 15:20 → 20:00, `held_only`)은 **실제로 애프터 가격을 본다**.
+   그 루프는 `scanner._fetch_stock_detail` 계열을 쓰므로 `get_balance` 의 한계에 걸리지 않는다.
+   ⇒ 채널 리졸버(채널 축)와 REST 폴 확장(시각 축)은 여전히 **중복이 아니고**, 후자의
+   실효성이 오늘 실측으로 올라갔다.
+4. **다음에 감시기를 만들 때** — 애프터 구간 가격은 `get_balance` 가 아니라
+   `quotation.inquire_ccnl` 로 읽는다. 계측기를 만들면 **그 계측기가 대상 구간에서 살아 있는지**
+   부터 확인한다(오늘은 15:25~16:00 에 6종목이 움직여 살아 있다고 착각했다 — 그 구간은
+   정규장 잔여·시간외 종가라 다른 경로였다).
+
+### 🔴 09-14 발견 ⑤ — **메서드가 조용히 사라진 상태가 워크트리에 있었다** (배포 직전 발견)
+
+cycle294 작업 중 `src/realtime/websocket.py` 가 **구조적으로 파괴**된 채로 남아 있었다.
+모듈 레벨에 두어야 할 58줄 블록(`_reroute_legacy_unified` 계열)이 `class KisWebSocket:`
+**본문 안**에 들여쓰기 0으로 삽입돼, 뒤따르던 `    async def subscribe(...)` 부터가
+그 함수의 **중첩 함수**로 파싱됐다.
+
+```
+KisWebSocket 메서드 19개 → 10개
+소실: subscribe · unsubscribe · get_subscribed_tickers · get_acked_tickers
+      _send_subscribe · _receive_loop · _handle_raw
+      _restore_subscriptions_after_reconnect · _verify_subscriptions_after_reconnect
+```
+
+🔴 **파이썬은 이것을 문법 오류로 잡지 않고 `import` 도 성공한다.** 구독·해제·수신 루프·
+체결통보 처리가 통째로 사라진 클래스가 정상으로 보인다. **배포됐다면 WS 전체가 죽고
+그 순간 보유 종목 손절이 전부 멈춘다.**
+
+다음 단계 에이전트가 발견해 복구했고(블록을 `class` 선언 앞으로 이동) 이 세션이 직접
+재확인했다 — 19개 전부 존재, `python -c "import src.main"` 통과.
+
+**왜 기존 가드가 못 잡았나** — `websocket.py` 는 sha 로 핀돼 있지만 sha 는 "파일이 바뀌었다"
+만 말한다. 승인된 변경 중에는 늘 바뀌므로 그 신호가 이 사고를 **구별해 주지 못한다.**
+
+**시정 (2026-09-14 배포 전 추가)** — `tests/unit/ast/test_realtime_callable_surface_pin.py`(179L).
+`websocket.py`·`websocket_pool.py`·`handler.py` 의 **클래스·모듈 호출 가능 표면**(메서드 이름 집합)을
+AST 로 핀한다. 소실은 "무엇이 사라졌는지" 를 이름으로 말하고, 추가는 "의도했으면 핀을 갱신하라" 를 말한다.
+`test_kis_websocket_keeps_the_nine_that_matter` 는 위 9개를 **핀 갱신으로도 지울 수 없게** 따로 못박는다.
+뮤테이션 확인 = `subscribe` 개명 시 2건 FAILED, 원복 시 4 passed.
+
+**교훈** — 워크플로가 중간 단계에서 죽거나 교체될 때 **문법은 맞지만 의미가 파괴된** 워크트리가
+남을 수 있다. 다음 단계가 그 위에 쌓으면 발견이 늦어진다. `import` 성공은 건전성의 증거가 아니다.
+
+### 🟠 09-14 발견 ③ — **공허 가드 1건** `test_cycle287_ast_scope.py::test_s1d`
+
+cycle292 검증이 찾았고 이 세션이 소스로 재확인했다.
+
+```python
+found  = {디스크 rglob("src/engine/**/*.py")}
+_,_, all_rels = _tree_digest()        # ← 이것도 디스크 순회다
+pinned = {rel for rel in all_rels if rel.startswith(rel_dir + "/")} | _CHANGED∩...
+assert found == pinned                # 양변이 같은 소스 ⇒ 항상 참
+```
+
+**항상 통과하는 테스트다.** cycle292 가 실제로 `src/engine/market_op_subscribe.py` 를 신규
+생성했을 때 `test_s1d` 는 **초록**이었고, 붉어진 것은 `test_s1b`(트리 파일 수 `_SRC_TREE_FILES`
++ `_SRC_TREE_DIGEST` 핀) · `test_g290_3` · `test_a8` 셋뿐이다.
+
+⚠️ **공허 가드는 가드 없음보다 나쁘다** — 사람이 그 이름을 근거로 인용하기 때문이다.
+실제로 `src/engine/CLAUDE.md` 가 "`_PINNED_DIRS` 가 `src/engine/` 최상위 신규 파일을 막고"
+라고 적고 있었고(**2026-09-14 시정 완료**), 이 세션도 그 문장을 읽고 사용자에게
+"리프를 만들면 그 가드가 붉어집니다" 라고 잘못 보고했다.
+
+**처분 (미결 — 다음 사이클)**: `test_s1d` 는 (a) `pinned` 를 디스크가 아니라 **고정 목록
+리터럴**에서 만들게 고치거나 (b) `test_s1b` 와 중복이므로 **삭제**한다. 둘 중 하나를 고르는
+것은 판단이 필요하고 cycle287 가드 파일을 건드리므로 이번 사이클에서 하지 않았다.
+`test_s1b` 가 같은 일을 실제로 하고 있으므로 **차단력 공백은 없다**.
+
+**같은 계열 점검 권고** — 다른 `*_ast_scope.py` 의 `_PINNED_DIRS` 가드도 같은 형태인지
+(cycle286/290/291) 한 번 훑는다. cycle292 명세 §6-A 가 "cycle286 `_PINNED_DIRS` 에는
+`src/engine` 이 없어 무관" 이라고 적었으나 **공허성 자체는 별도 문제**다.
+
+### 🔴 09-14 발견 ② — **16:00~20:00 에 손절을 평가하는 주체가 없다** (제도 변경이 만든 신규 공백)
+
+cycle287 이 확보한 것은 청산 **수단**(KRX 애프터 44/41 호가)이고 **방아쇠**가 아니다.
+`execute_sell` 은 신호가 와야 불린다.
+
+**`check_exit_signal` 의 호출 경로는 정확히 둘뿐이다**(전수 grep 확인):
+
+| 경로 | 소스 | 16:00~20:00 에서 |
+|---|---|---|
+| WS 틱 | `handler.py:631` → `risk.py:604` | 프레임이 와야 한다 |
+| REST 폴 | `scheduler.py:2858` → `risk.py:604` | **없다** — `SWING_REST_POLL_WINDOW_END = 15:20` |
+
+그래서:
+
+- **`nxt_false` 보유 종목 = 확정 공백.** `H0UNCNT0` 이 그 종목 프레임을 아예 안 보내므로
+  (P1-7, 최소 07-24 부터) WS 0 + REST 0 = **손절 평가 0**.
+  ⚠️ **공백 구간은 16:00~20:00 보다 넓다(09-14 정정)** — REST 폴 창이 09:00:30~15:20 이므로
+  실제 공백은 **15:20 ~ 익일 09:00:30**(17시간 40분)이고 15:20~15:30 종가단일가·15:30~16:00
+  시간외 종가도 그 안이다. 09-14 부터 **새로** 위험해진 것은 16:00~20:00 구간뿐이다
+  (그 전에는 KRX 단독 종목이 그 시간에 거래될 곳이 사실상 없었다).
+  ⚠️ **REST 폴은 전 전략을 덮지 않는다** — `held_set` 의 소스가
+  `_SWING_POLL_STRATEGIES = ("donchian_swing", "kojiro")` 두 전략뿐이다(`scheduler.py:145`·`:2778-2794`).
+  그런데 **나머지 5전략은 `nxt_false` 를 애초에 살 수 없다** — 매수 평가가 WS 틱(`risk.on_tick`)
+  전용이고 프레임이 0이라 신호가 구조적으로 안 난다. 30일 실측이 이를 확증한다:
+  `nxt_false` 매수 = donchian 14건 중 **8건** · kojiro 11건 중 **3건** · **나머지 5전략 0건**.
+  ⇒ 지금의 공백은 **폴이 닿는 두 전략에만** 생긴다(우연이 아니라 구조다). 리졸버가 채널을 열면
+  이 대칭이 깨진다 — §아래 「리졸버가 매수를 연다」 참조.
+  09-14 09:4x 실측 = 보유 12종목 중 **4종목**:
+
+  | 종목 | 전략 | 매수가 | 수량 | 명목 | 고정% 손절선 |
+  |---|---|---|---|---|---|
+  | 003470 유안타증권 | kojiro | 4,730 | 2 | 9,460 | −8% → 4,352 |
+  | 003490 대한항공 | kojiro | 28,050 | 2 | 56,100 | −8% → 25,806 |
+  | 036540 SFA반도체 | donchian_swing | 6,960 | 4 | 27,840 | −6% → 6,542 |
+  | 204270 제이앤티씨 | donchian_swing | 22,600 | 1 | 22,600 | −6% → 21,244 |
+
+  **명목 합 116,000원 = 순자산(2,549,494)의 4.6%.** 네 종목이 전부 애프터 하한(−30%)까지
+  빠지는 최악의 경우 손실 ≈35,000원 = 순자산 **1.4%**. 실재하지만 크기는 작다.
+  ⚠️ 실제 손절선은 터틀 ATR 기반(kojiro 2.5ATR 샹들리에 · donchian `atr_trail_mult=1.8`)이라
+  위 고정%보다 **높다**(더 타이트하다) — 위 표는 "확실히 손절 구간" 하한이다. 정확한 값은
+  실행 중 프로세스의 `_entry_atr` 스탬프 안에만 있고 **종목별로 노출하는 라우트가 없다**
+  (`routes/portfolio.py:93` 이 `get_effective_stop_price` 를 내부에서만 쓴다).
+
+- **`nxt_true` 보유 8종목 = 미지.** `H0UNCNT0` 이 KRX 애프터 체결을 실어 주는지 모른다
+  (= 이 문서 「09-14 이후 첫 영업일에 재야 할 것」 **3번**). 오늘 저녁이 그 측정이다.
+
+**어제까지는 무해했다** — KRX 단독 종목은 NXT 애프터에서 거래가 안 되고, 폐지된 시간외
+단일가는 저유동 10분 경매였다. **오늘부터 ±30% 연속체결이다.**
+
+#### 오늘 밤 조치 (사용자 결정 2026-09-14 = "오늘은 관측 + 감시")
+
+코드 변경 0. 읽기 전용 감시기를 EC2 에 띄웠다.
+
+| | |
+|---|---|
+| 스크립트 | `~/watch/watch.sh` + `~/watch/probe.py` (리포 밖, git 무영향) |
+| 로그 | `~/watch/aftermarket_20260914.log` |
+| 동작 | 15:25 개시 → 20:05 종료. 60초 주기로 `get_balance()` 1회(= 엔진이 15분마다 쓰는 그 호출) → 전 보유 12종목 시세 기록 + blind 4종목만 임계 판정 |
+| 경보 | `ALERT_HARD`(고정 손절선 이탈) · `ALERT_DROP`(기준가 −2%) · `ALERT_RUN`(+3% — 트레일링 고점 갱신이 반영 안 되는 방향) |
+| 기준가 | 15:25 이후 첫 성공 판독값 |
+| 부수 산출 | REST 가 애프터마켓 시세를 주는지 자체가 오늘의 미지 항목 하나를 답한다 |
+
+확인 = `ssh ubuntu@3.38.228.74 'tail -40 ~/watch/aftermarket_20260914.log'`
+정지 = `ssh ubuntu@3.38.228.74 'pkill -f "bash /home/ubuntu/watch/watch.sh"'`
+
+⚠️ **감시기는 주문을 내지 않는다.** 경보가 뜨면 사람이 판단해 MTS 로 청산한다.
+
+#### 🔴 cycle293 명세가 찾은 것 — 리졸버는 원안보다 위험하다 (2026-09-14)
+
+명세 = `_workspace/red/cycle293_tick_channel_resolver_spec.md`(649행). 원안(2026-09-05)이
+몰랐던 것 셋 중 둘을 이 세션이 직접 검증했다.
+
+**① 리졸버는 매수 행위 변경이다.** 지금 `nxt_false` 는 프레임 0 이라 5전략(momentum·VB·LTV·
+BFB·VCP)의 매수 평가에서 **구조적으로 배제**돼 있다(BFB/VCP 는 거래량 게이트가
+`vol_gate_no_data` fail-closed, 나머지는 틱 평가 0). 30일 실측 = 그 5전략의 `nxt_false` 매수
+**0건**. 채널을 열면 시총 1,000억↑ 유니버스의 **64%**가 5전략 매수 평가에 새로 노출된다.
+⇒ 명세가 **B-1(청산 축 단독 + 종목 축 매수 skip 게이트)** / **B-2(매수 개방, 별도 승인 +
+`domain-consult`)** 로 분할했다. B-2 를 B-1 에 끼워 넣지 않는 것이 계약이다.
+
+**② 아침 오염 창 — 지금은 무해하고 리졸버가 유해하게 만든다.**
+`scanner.py:1833` 의 `_full_universe_load_krx_primary` 가 `nxt_tradable=False` 를 **하드코딩**한다
+(주석 = "KRX 영역은 NXT 정보 부재 — 보수적 False"). 09-14 실측 upsert 분포:
+
+```
+07:45   625건
+07:46 2,060건   ← KRX 1차가 일괄 도장
+07:53~08:08 ~250건/분   ← CTPF1002R(basics)이 복원, 08:08 종료
+TIME_PRESUBSCRIBE = 07:59  ← 복원 도중(scheduler.py:59)
+```
+
+명세 측정 = 07:59 시점 NXT 유니버스 602 중 **420(69.8%)이 `False` 로 읽혔다.**
+**지금은 무해하다** — 이 값의 현행 소비자는 주문 라우팅(`_probe_nxt_downgrade_base`)과
+`no_feed_registry`(600s TTL)뿐이고, `[nxt_downgrade]` 30일 시각 분포가 **09:00 이후에만**
+발화한다(07:50~09:00 **0건** — 그 시각에 주문을 안 낸다). **리졸버가 유해하게 만든다** —
+07:59 의 구독 결정은 하루 종일 지속되므로 그 순간의 오염이 종일 채널 오배정이 되고,
+진짜 NXT 종목 ~420개가 NXT 프리장 체결을 실을 수 없는 채널로 간다(LTV `tradable_boards`
+실측 `["main","pre_nxt"]` = 살아 있는 유일한 보드에 새 사각).
+판별자 = `raw ? 'cptt_trad_tr_psbl_yn'` 출처 검사(2,674/2,674 정확 일치, 명세 §W2).
+
+**③ 명세가 정정한 워크리스트 서술** — 이 문서 P1-7 B 항목의 "사이클 26 시간대별 전환
+(`get_active_tick_tr_ids`·`_board_transition_loop`)은 죽은 코드 — refactor-review 로 처분" 은
+**이미 완료된 과거**다(cycle257 `4cf479a`+`1b30dd6` 가 삭제). 라인 예산 기여 0.
+잔여는 `handler.py:81` 주석 1줄(삭제된 `scanner._TIME_KRX_MAIN_END` 를 인용).
+
+**실질 작업량은 리졸버 함수가 아니라 등가 비교 8곳의 집합화**다
+(`websocket.py:503/513/565` · `websocket_pool.py:494/505/542/545` · `scanner.py:1173`).
+하나라도 놓치면 `get_subscribed_tickers()` 에서 종목이 사라져 delta 누수(영구 슬롯) +
+매 5분 재SEND(cycle252 churn 의 은폐된 부활) + `[tick_coverage]` 분모 감소로 **숫자가 좋아진다**.
+
+> ✅ **cycle293(2026-09-14)이 그 8곳을 전부 전환했다 — 잔존 0곳.** 단일 정본 집합
+> `scanner.TICK_TR_IDS`(종전 `stale_diagnostics` **함수 지역 변수**라 아무도 import 할 수
+> 없었다)를 모듈 레벨로 승격하고 소비처가 그 **멤버십**을 쓴다. AST 가드가 (a) 소스 전체의
+> `== TICK_TR_ID` 등가 비교 0건 (b) 세 채널을 담은 컬렉션 리터럴이 **정확히 1개**이고 값이
+> 세 상수와 정확 일치(넓히는 뮤테이션 차단) (c) 소비처가 그 이름을 **AST Load 로 실제 사용**
+> (주석에 남기는 위장 차단)을 잠근다. 함께 전환된 곳 = `stale_watcher_core`(ACK grace 역인덱스·
+> no_feed skip 3항·해제/재등록 채널) · `stale_universe_guard` · `stale_session_recovery` ·
+> `order_engine`(매도 뒤 정리) · `routes/realtime`(수동 재구독·프로브 격리).
+41-cap 은 제약이 아니다(09-14 09:56 실측 풀 160/328 · 잔여 168 · `[priority_drop]` 0건) —
+제약은 전부 정합성이다.
+
+#### 근본 시정 후보 (아직 승인 대상)
+
+1. **REST 폴 창 확장** `SWING_REST_POLL_WINDOW_END` 15:20 → 20:00 (`held_only`).
+   그 루프는 `if ticker in held_set:` 로 **보유 종목만** `on_tick` 을 부르므로 청산 전용이다
+   (`scheduler.py:2856`). 매매 행위 변경이라 **승인 + `domain-consult` 선행**이다.
+   ⚠️ 라인 상한(<3,900)은 여전히 존재하지만 **더는 압박이 아니다** — cycle292(09-14)가 VI 구독
+   176줄을 leaf 로 빼서 3,897 → **3,726L(여유 174)** 이 됐다. 승인·자문 요건만 남는다.
+2. **채널 리졸버**(P1-7 B, cycle293 명세 중) — `nxt_false` 를 `H0STCNT0` 로 옮겨 WS 를 살린다.
+   ⚠️ 애프터 체결이 어느 채널로 오는지 모르는 상태에서 옮기면 **새 사각을 만들 수 있다**.
+   🔴 **cycle293 명세가 미룬 근거 하나가 소멸했다** — 명세 §(`:519`/`:556`)가 `scheduler.py` 풀 우회
+   2곳(`:1382`·`:2728`) 시정을 **"여유 3줄"** 때문에 관측으로 축소했는데, cycle292(09-14) 이후
+   여유는 **174줄**이다. 명세를 다시 열 때 그 축소를 재검토한다 — 등재하지 않으면 다음 사람이
+   없는 제약을 믿고 또 관측만 넣는다. (8영역 승인 요건은 그대로다.)
+3. 둘은 **중복이 아니다** — 1은 시각 축, 2는 채널 축이다. 1이 있으면 2가 실패해도 폴이 받고,
+   2가 있으면 1의 60초 해상도보다 촘촘하다.
+
+### ✅ 09-14 실측 ① — GTP 자동취소는 **체결통보를 만든다** (제도 변경 첫날 09:17 확인)
+
+사용자가 MTS 로 낸 **의도적 미체결 주문**으로 잰 것이다. cycle291 자문 §1-d 의 전제("거래소발
+취소는 우리에게 어떤 통보도 만들지 않는다")를 **반증**했다.
+
+| | 값 |
+|---|---|
+| 종목·주문 | 073240 금호타이어 · 1주 · **5,160원**(그날 하한가) · NXT |
+| 호가유형 | `ord_dvsn_cd=27` · `ord_dvsn_name=GTP지정가` ← **우리 enum `NXT_GTP_LIMIT="27"` 실측 확정** |
+| 주문번호 | `0000149100` |
+| 체결통보 1 | `08:29:34` `체결통보 접수(미체결): order_no=0000149100` |
+| **체결통보 2** | **`08:50:00` 정각 — 같은 주문번호로 두 번째 프레임** |
+| KIS 주문내역 | `sll_buy_dvsn_cd_name='GTP매수자동취소*'` · `ord_qty=1` · `tot_ccld_qty=0` · `rmn_qty=0` |
+
+**따라오는 것 셋**
+
+1. `src/engine/CLAUDE.md` 의 "어떤 통보도 만들지 않는다" 서술을 시정했다(자문 문서에는 원문 보존 +
+   실측 정정 주석). cycle291 커밋 서술도 같은 전제를 담고 있다. ✅ 09-14 확인 = `docs/HARNESS_CHANGELOG.md` 에 **cycle291 행 자체가 없다**(cycle290 도 없다 — 두 사이클이 changelog·루트 표 동기화를 건너뛰었다). 그러니 여기서 고칠 행은 없고, 그 둘의 이력 행을 쓸 때 이 전제를 빼고 쓴다.
+2. **시정 수단이 싸졌다** — 잔존 상태(`pending_buys` 등 + `trade_history` PENDING) 정리에
+   08:50 REST 스윕(`scheduler.py` 접촉)이 **불필요**하다. 결론은 그대로지만 근거는 하나 줄었다:
+   "라인 상한 압박" 은 cycle292(09-14, 여유 3 → **174줄**)로 소멸했고, 남은 근거는
+   "체결통보가 이미 온다" 하나다. 이미 구독 중인
+   체결통보 채널로 취소가 온다. 접촉 = `handler.py` + `order_engine.py`(둘 다 8영역, **승인 필요**),
+   `scheduler.py` 무접촉.
+3. 🔴 **아직 못 잰 것 = 접수와 취소를 가르는 필드.** 현행 DEBUG 줄이 `order_no`·`ticker` 두 필드만
+   찍으므로 그 프레임의 `fields[5]`(RCTF_CLS 정정구분)·`fields[12]`(RFUS_YN)·`fields[14]`
+   (ACPT_YN 1:주문접수 2:확인 3:취소) **실제 값을 모른다**. 이걸 확정하지 않고 분기를 짜면 접수
+   통보를 취소로 오인해 **살아 있는 주문의 상태를 지운다**. 관측 = 그 DEBUG 줄에 `fields[:20]` 를
+   싣고 GTP 미체결 1건(`handler.py` 1줄, 8영역 승인 대상). 09-15(화) 아침 목록 6번(KRX 애프터
+   20:00 미체결 처리)과 **같은 방법으로 같이 잰다**.
+
+### 🧰 09-14 저녁 첫 KRX 애프터마켓 — 붙여 쓰는 비상 명령 (09-14 09:3x 준비)
+
+**무장 상태 실측(09-14 09:3x, 읽기 전용)** — 실행 중 엔진의 in-memory 값:
+
+```
+7전략 전부  exchange=NXT  order_exchange_clock_mode=enforce  after_market_exit_division=44  enabled=True
+```
+
+DB `strategy_config.params` 에는 `long_tail_volatility` 하나만 두 키가 명시돼 있고 나머지 6은
+비어 있으나 **킬스위치는 7전략 전부 작동한다** — cycle290 이 두 키를 `DEFAULT_PARAMS` 에
+등재했고 `param_validation` 의 미지 키 판정이 **병합된 in-memory `current_params`** 를 보기
+때문이다(`key not in current_params` → 7전략 모두 통과). `exchange=NXT` 이므로
+`_route_exchange_by_clock` clause 1(`base ∉ {"NXT","SOR"}` → 즉시 반환)이 발화하지 않아
+`mode` 검사까지 도달한다. ⚠️ 단, 그 종목이 `nxt_tradable=false` 면 `[nxt_downgrade]` 가
+base 를 먼저 KRX 로 내리므로 **그 종목에 대해서는 두 스위치가 무동작**이다(09-14 실측 = 032820·204270).
+
+**⚠️ 아래 명령은 읽기 경로(GET)만 실측했고 PUT 자체는 실행하지 않았다** — 매매 설정 변경은
+사용자 결정이다. 문법은 라우트 시그니처(`PUT /api/strategies/{strategy_id}/params`,
+바디 = 부분 dict 병합)에서 그대로 따왔다.
+
+EC2 에서 nginx 를 우회해 백엔드에 직접 쏜다(Basic 자격 불필요, `$API_AUTH_KEY` 는 컨테이너 env):
+
+```bash
+# ① 현재 상태 읽기 (항상 이것부터)
+ssh ubuntu@3.38.228.74 'cd ~/auto_stock && docker compose -f docker-compose.prod.yml exec -T backend \
+  sh -c "curl -s -H \"X-API-Key: \$API_AUTH_KEY\" http://localhost:8000/api/strategies" ' \
+  | python3 -c 'import sys,json; d=json.load(sys.stdin)["data"]; [print(k, (v.get("params") or {}).get("order_exchange_clock_mode"), (v.get("params") or {}).get("after_market_exit_division")) for k,v in d.items()]'
+
+# ② 애프터 청산 호가를 44(최유리) → 41(지정가)로 — 44가 쓸려 내려갈 때
+SID=donchian_swing
+ssh ubuntu@3.38.228.74 "cd ~/auto_stock && docker compose -f docker-compose.prod.yml exec -T backend \
+  sh -c 'curl -s -X PUT -H \"X-API-Key: \$API_AUTH_KEY\" -H \"Content-Type: application/json\" \
+  -d \"{\\\"after_market_exit_division\\\": \\\"41\\\"}\" http://localhost:8000/api/strategies/$SID/params'"
+
+# ③ 라우팅 자체를 끈다 — ⚠️ 최후수단. 44/41 애프터 청산 변환도 함께 꺼진다
+#    (그 게이트가 "거래소가 KRX 인가"를 보기 때문). 아래 ④ 를 먼저 검토할 것
+ssh ubuntu@3.38.228.74 "... -d \"{\\\"order_exchange_clock_mode\\\": \\\"off\\\"}\" .../$SID/params"
+
+# ④ ③ 보다 안전한 비상정지 — 거래소를 KRX 로 고정
+#    clause 1 이 mode 검사보다 앞에서 발화해 KRX 로 굳고 44/41 전환은 보존된다.
+#    부작용은 프리장 주문도 KRX 로 가는 것 하나뿐.
+ssh ubuntu@3.38.228.74 "... -d \"{\\\"exchange\\\": \\\"KRX\\\"}\" .../$SID/params"
+```
+
+**전역 스위치는 없다.** 보유 종목이 여럿 전략에 걸쳐 있으면 `SID` 를 바꿔 그 전략마다 쏜다.
+그날 보유 전략 확인 = `GET /api/trading/status` 또는 `positions` 테이블.
+
+**PUT 은 즉시 반영되고 DB SQL UPDATE 는 다음 재시작에서만 반영된다** — 장중(보유 중)에는
+재시작이 금지(cycle232 D6)이므로 **PUT 이 유일 경로**다. 사고 중 판단 순서(거부/미체결/악체결
+3분류 + 5단계)는 `_workspace/00_leader_trading_rules.md` 「거래소 라우팅」 cycle290 절.
+
 ### 09-15(화) 아침에 재는 것
 
 | # | 무엇 | 왜 |
@@ -125,6 +523,88 @@ cycle287 이 만든 두 킬스위치는 **`param_catalog` 미등재**라 `PUT /a
 - `exchange` 파라미터 — cycle287 부터 **프리장에서만** 실효(09:00 이후는 시각이 정한다)
 - `market_state` 의 `confidence` — cycle289 가 10개 코드를 `unconfirmed` → `confirmed` 로 옮겼다
 
+## ✅ cycle292 — `scheduler.py` 라인 예산 확보(VI 구독 176줄 → leaf) (2026-09-14, **순수 리팩터·행위 변경 0** · ⏳ 미커밋)
+
+> 사용자 승인 "스케쥴러 리팩터 오늘 수행하자". 명세 =
+> `_workspace/red/cycle292_scheduler_market_op_leaf_spec.md`.
+> `scheduler._subscribe_market_operation_tickers` 본체를 신규 leaf
+> `src/engine/market_op_subscribe.py::subscribe_market_operation_tickers` 로 옮기고
+> scheduler 에는 **5줄 위임 wrapper** 만 남겼다. **3,897 → 3,726L**(상한 3,900, 여유 3 → **174**).
+> 8영역·`src/engine/strategies/` diff 0. 백엔드 전체 **10,03x PASS / 0 FAIL** ·
+> `TZ=UTC` 동일 · `--log-level=DEBUG` 수치 동일.
+
+**행위 보존은 기계 증명됐다** — 본체는 `self.` → `scheduler.` **6곳** + 4칸 dedent 뿐이고,
+변환 후 `ast.get_source_segment` sha `0343fe38…`(176줄, bare `self` 0건)가 명세 §3.2 가 **착수 전에
+산출해 둔 기대값과 일치**했다. 그 핀은 커밋 뒤 공허해지므로 영속 가드에 넣지 않았다(cycle264 C7 선례).
+
+**이 사이클의 진짜 위험은 추출이 아니라 가드가 조용히 공허해지는 것이었다.** cycle214/221 의 봉인은
+전부 "…가 0건" 부정 단언이라, 본체가 scheduler 를 떠나면 `_get_function_node` 가 남은 **wrapper 노드**를
+찾아 전부 참이 된다 — 08-19 실사고(메인 45/41 → OPSP0008 117건 중 시세 7건 → 보유 4종목 ~58분
+tick blind) 재발 방지가 소리 없이 사라진다. 그래서 AST 가드 4파일을 leaf 로 **재조준**하면서 각각
+**양성 대조군**을 심었다. 그 대조군이 **HEAD 에서 새던 구멍을 실제로 닫았다** — `bypass_limit` 키워드를
+통째로 지우는 뮤테이션이 HEAD 가드에서는 `19 passed` 로 ESCAPE 했고 cycle292 가드에서는 2건 KILL 이다.
+뮤테이션 **37종 전수 KILLED / ESCAPED 0**(3렌즈 합산).
+
+🔴 **다음 사람이 지켜야 할 것 둘** (leaf 배너에도 적혀 있다)
+1. **함수-로컬 import 5줄을 모듈 최상단으로 올리지 않는다.** 회귀 4파일이 *정의 모듈의 속성*
+   (`src.realtime.websocket.*` / `src.realtime.websocket_pool.*`)을 monkeypatch 하는데, 승격하면 이름이
+   import 시점에 바인딩돼 patch 가 무력화되고 `_ws is None → return 0` 조기 반환이 **부정 단언을 조용히
+   초록**으로 만든다(승격 뮤테이션에 행위 테스트 22건 red = seam 이 load-bearing). 두 줄 분리도 유지 —
+   합치면 2026-07-24 의 매 호출 ImportError(cycle214 배포 이래 완전 미작동, 하루 117건) 재발이다.
+2. **`logger = logging.getLogger("src.engine.scheduler")` 고정.** 마커 5종이 전부 기존이라 `__name__` 으로
+   바꾸면 `system_logs` 접두가 갈려 D+1 판독 사슬이 끊긴다.
+
+### 적대 검증 4렌즈 처리 (전건 종결)
+
+| 렌즈 | 지적 | 조치 |
+|---|---|---|
+| 행위보존 | 뮤테이션 15종·차분 런타임 14시나리오·세그먼트 sha 전부 일치 / LOW 2건은 동시 편집 관측 | 코드 조치 없음(결함 아님). 현재 sha 가 정본임을 재확인 |
+| 가드무력화 | ② cycle221 "메인 0건" 이 **별칭 `ws = kis_ws` 로 우회**(선재, HEAD 도 동일) | **G-292-9a/9b 신설** — 값 흐름 금지(바인딩·컨테이너 수집·순회) + 구독 owner 출처 증명(`ws` ← `quotes[...]` ← `kis_ws_pool._quotes`). 뮤테이션 2종 KILL |
+| 가드무력화 | ⑤ 요약 로그 **필드 순서**·해제 **pop 순서**가 sha 로만 잡힘 | **G-292-8 신설**(서식 + 인자 원문 순서 핀) · **행위 테스트 1건 신설**(`test_release_pops_tracking_before_awaiting_unsubscribe`). 뮤테이션 3종 KILL |
+| 가드무력화 | ③ `test_s1d` 구조적 공허(선재) | 명세 지시대로 **무접촉** — F-292-1 로 등재 |
+| 문서정합 | 🔴 `/sync-docs` 자가 점검이 **부분 문자열 매치라 거짓 통과** | `.py` + 단어 경계로 조임. 과잉안(`**$b.py**`)은 engine 오탐 25건이라 **불채택**(근거 병기) |
+| 문서정합 | 모듈 맵 누락 · `3,897L` 거짓 · cycle230 절 위치 서술 · monitor docstring · architecture 3중 거짓 · changelog · 루트 표 · "자매 가드 7곳" · 워크리스트 예산 해제 | **전건 반영** |
+| 전량실행 | 명세 §3.2 1회용 sha 핀이 커밋까지 살아 있음 | 명세에 **폐기 배너** 부착(값은 감사 기록으로 보존, 영속 가드 편입 0건 — `grep 0343fe38 tests/ src/` = 0) |
+
+### 🔴 배포 (아직 안 했다)
+
+- **커밋·push 0건.** HEAD = `adabbdf` 그대로.
+- `src/**` 변경이라 cycle248 분류상 **full 모드 = backend 재시작**이다. 09-14(월)는 **정규장 중 · 보유
+  11종목**이라 D6 로 금지. **20:00~21:35 도 금지**(D8). 창은 **15:30~19:55** 또는 **21:35~익일 07:45**.
+- 배포 직전에 `shasum -a 256 src/engine/scheduler.py src/engine/market_op_subscribe.py` 로 핀 값과
+  대조한다(다르면 핀 7곳이 붉어져 자동으로 드러난다).
+
+### 열린 후속 (등재만 — 이번 사이클 범위 밖)
+
+- **F-292-1** `tests/unit/ast/test_cycle287_ast_scope.py::test_s1d` 는 **구조적으로 공허**하다 —
+  `found` 도 `pinned` 도 둘 다 라이브 FS 에서 만들어져 신규 파일에 대해 어긋날 수가 없다. 실제 탐지는
+  같은 파일 `test_s1b` 의 하드코딩 `_SRC_TREE_FILES`/`_SRC_TREE_DIGEST` 가 한다(cycle292 신규 leaf 에
+  붉어진 것도 `test_s1b`·`test_g290_3`·`test_a8` 셋뿐이었다). ⚠️ 그 파일은 cycle292 **무접촉 증거**라
+  이번엔 손대지 않았다 — 별도 사이클에서 고친다.
+- **F-292-2** `/sync-docs` 모듈 누락 자가 점검을 조이자 드러난 **선재 8건** — `src/engine/daily_metrics_snapshot.py`
+  (cycle283) · `src/db/{backtest_runs,market_regime_snapshots,positions,strategy_config}.py` ·
+  `src/api/market_operation.py` · `src/routes/{market_regime,portfolio}.py`. 각 디렉터리 `CLAUDE.md` 에 항목 추가.
+- **F-292-3** `market_operation_monitor.get_market_op_active_tickers()` 는 프로덕션 호출자 **0건**이다.
+  이번엔 docstring 만 정직화했다 — 삭제는 "비활성화 시 심층 검증 의무" 대상이라 별건.
+- **F-292-4** cycle221 AST 가드의 "메인 0건" 은 G-292-9(별칭·수집 금지 + 구독 owner 출처 증명)로 조였지만
+  여전히 **이름 기반**이지 도달성 기반이 아니다. 완전한 봉인은 행위 테스트 20건이 맡는다.
+- **F-292-5** `docs/HARNESS_CHANGELOG.md`·루트 `CLAUDE.md` 15행 표에 **cycle290·cycle291 행이 없다**
+  (두 사이클이 동기화를 건너뛰었다). 그 둘의 이력 행을 쓸 때 cycle291 의 "거래소발 취소는 통보를 만들지
+  않는다" 전제는 09-14 실측으로 반증됐으므로 빼고 쓴다.
+- **F-292-7** 🔴 **`src/engine/scheduler.py:2425-2426` 의 호출부 주석이 거짓이다** — `docs/architecture.md`
+  가 갖고 있던 것과 **정확히 같은 3중 거짓**("보유/익일청산 (HIGH) + 전략 후보 (LOW cap=20) 합집합" ·
+  "메인 세션 단일 + bypass_limit=True (HIGH)" · "cap=20 (LOW)"). cycle214 가 cap 을 60 으로, cycle221 F2 가
+  후보 배치를 삭제, cycle230 이 메인 직접 구독을 폐기했다. 하필 이번에 옮긴 함수의 **호출부**라 위임
+  wrapper 를 따라온 독자가 제일 먼저 만난다.
+  ⚠️ **cycle292 에서 고치지 않았다** — 주석 한 줄이라 행위·라인 수(3,726)는 불변이지만 `scheduler.py`
+  sha 가 바뀌고, 그 sha(`9bf05cca…`)는 **적대 검증 3렌즈가 각자 스냅샷 앵커로 기록한 값**이다. 검증이
+  끝난 뒤 조용히 움직이면 세 검증이 전부 무효가 된다. 다음에 `scheduler.py` 를 정당하게 여는 사이클이
+  같이 고치고 sha 핀 7곳(cycle274/276/278/282/287/290/291 + cycle292)을 함께 옮긴다.
+- **F-292-6** 과거 사이클 내부 서술의 잔여 stale 수치(손대지 않았다 — 그 사이클 시점의 역사 서술):
+  `test_cycle268:21,602`("라인 여유 3행") · `test_cycle272:511`("현재 3,898") · `test_cycle273b_ast:11,156,205` ·
+  `test_cycle273b_selling_hold_observe:16,67` · `test_cycle283_metrics_snapshot:22` ·
+  `tests/unit/engine/test_cycle221_market_op_off_main.py:174`(cycle221 **이전**의 결함 위치 `scheduler.py:3283` 인용).
+
 ## 🔴 2026-09-14(월) 시장 제도 변경 — 우리 시스템 접점과 실측 목록
 
 > **사실의 집은 이 문서가 아니다.** 제도·시간표·보드 영향 = [`src/engine/CLAUDE.md`](../src/engine/CLAUDE.md) 의
@@ -172,7 +652,7 @@ cycle287b(프론트 `exchange` 파라미터 정직화·`param_catalog`·`market_
 |---|---|---|---|
 | 1 | **체결 프레임 payload 필드 순서** | `MARKET_CLS_CODE` 가 꼬리 추가가 아니라 중간 삽입이면 뒤 인덱스가 **전부 밀린다**. `handler._parse_day_high` 는 `fields[27]` 이 밀려도 예외도 로그도 없이 `0` 을 반환한다 — 고가 비채택이 **무음**으로 일어난다 | 16:00 이후 첫 체결 프레임 원문을 그대로 덤프해 필드 수·인덱스 대조 |
 | 2 | **애프터마켓 주문 거부 `msg1` 원문** | 우리 폴백이 `is_market_order_disallowed`(지정가 5호가 재시도 → 청산 가능)로 가는지 `is_market_closed_rejection`(보류 + `nxt_tradable=False` 오염)으로 가는지가 여기서 갈린다 | 16:00~20:00 구간 `[kis_rejection]` 로그 |
-| 3 | **애프터 체결이 `H0STCNT0`/`H0UNCNT0` 로 오는지** | 온다면 구독 배관 변경이 불필요하다 | 16:00 이후 프레임 수신 건수 |
+| 3 | **KRX 애프터 체결이 `H0STCNT0`(KRX 전용)로 오는지** | 채널 분리의 **세부방향**을 정한다 — 애프터 구간(16:00~20:00)을 KRX 전용 채널에 배치할 수 있는지. ⚠️ **"통합 채널을 유지할지" 를 재는 것이 아니다**(통합 폐기는 2026-09-07 사용자 결정, 재론 대상 아님) | 16:00 이후 `H0STCNT0` 프레임 수신 건수. 비교군으로 `H0UNCNT0` 도 같이 센다 |
 | 4 | **시간외 전용 채널 3종(`H0STOUP0`·`H0STOAA0`·`H0STOAC0`) 거동** | 구독이 계속 ACK 되는지 · 프레임이 오는지 · 거부되는지 | 구독 응답 + 프레임 카운트 |
 | 5 | **KIS 일봉(FHKST03010100) 확정 시각** | 거래가 20:00 까지 이어지므로 적재 시각의 하한이 바뀐다 | 한 종목을 20:05 / 20:20 / 20:40 / 21:00 에 재조회해 `acml_vol` 이 언제 멈추는지 |
 
@@ -1407,13 +1887,78 @@ F-6 선택 효과 6개월 검정(배수가 높을수록 **수익률**도 나쁘�
 
 - 가을 팔레트(`index.css` @theme 별칭 재정의로 기존 className 무수정) + Gmarket Sans 3 weight + 손익색/전략 7색 재정의 + 브랜드명 "AutoStock"→"DK Stock". tester 적대 검토가 별칭 재정의 부작용(보드·토글·게이트·체결상태 배지 hex 충돌 4건)과 nginx `/fonts/` 캐시 결손을 찾아 시정 완료. 게이트 전부 PASS(`tsc -b` 0·`npm test` 76/557·`npm run build`·e2e 33·백엔드 frontend 가드 235). 상세 = `docs/HARNESS_CHANGELOG.md` cycle261 행, 명세 = `_workspace/specs/cycle261_dk_stock_design_v2.md`.
 
-## 🔴 P1-7 · 통합 채널 H0UNCNT0 무송출 — KRX 단독(`nxt_tradable=False`) 종목 장중 stale 33% (포렌식 2026-09-05 확정, A=cycle252 야간 진행 · B=8영역 승인 대기)
+## 🔴 P1-7 · 통합 채널 H0UNCNT0 무송출 — KRX 단독(`nxt_tradable=False`) 종목 장중 stale 33% (포렌식 2026-09-05 확정, A=cycle252 배포 완료 · **B-1 = cycle293(2단계) + cycle294(3단계) 구현 완료(2026-09-14), 미커밋·미배포**)
+
+> 🟢 **3단계 진행 상황 (2026-09-14 밤, cycle294 + 적대 검증 시정)** — 통합 채널을 정상
+> 경로에서 **반환하지 않는다**. 프리장 `H0NXCNT0` / 정규장+애프터 `H0STCNT0` / NXT 단독
+> 연속 구간(09-15 = 15:40~16:00)은 **보유(HIGH)만** `H0NXCNT0`. 전환 창은 표 파생 3개
+> (`pre_to_krx` · `krx_to_nxt_gap` · `nxt_gap_to_krx`)이고 창 안에서도 종목마다 경계를
+> 다시 본다. 신규 leaf 2 = `src/engine/tick_channel_clock.py`(시각축, 순수) +
+> `src/engine/tick_channel_switch.py`(전환·자동 원복). 접촉 8영역 4파일
+> (`scanner`·`risk`·`websocket`·`websocket_pool`) — `order_engine.py` 는 승인받았으나
+> **diff 0**. `scheduler.py` 무접촉(3,726L).
+>
+> **착지 직후 적대 검증 3렌즈가 CRITICAL 4 · HIGH 4 를 찾아 전부 닫았다** —
+> ① 15:40~16:00 NXT 단독 연속 구간(INV-1 위반, 매일 20분 손절 blind) ② 자동 원복이
+> 진짜 고장에서 구조적으로 발화 못 함(표본·교차 확인·1회성 3중) ③ 원복이 보유 종목에
+> break-before-make ④ LOW 전환 실패가 **구독 좀비**(20:00 까지 자가 치유 없음)
+> ⑤ 코호트 스탬프가 07:59 도장 창에 **1회 기회**뿐이라 매수 축이 ≈38종목에서 샘
+> ⑥ `[tick_buy_gate]` 가 스탬프 **전**에 하루 1행이라 ⑤를 영구 은폐 ⑦ `enforce_low`
+> 의 HIGH 제외가 레거시 재라우팅으로 무력화 + 풀 병행 dict 발산 ⑧ 창 끝을 넘겨 계속
+> 전환. 시정 회귀 = `tests/unit/engine/test_cycle294b_adversarial_fixes.py`(41).
+>
+> 🔴 **배포 가부의 유일한 미해결 게이트 = N-1** — 프리장(08:00~08:50) `H0NXCNT0` 의
+> 라이브 프레임을 **내일 08:00 전에는 실증할 수 없다**(09-14 16:39 프로브는 같은 채널의
+> **애프터 구간** 대리 증거다). 자동 원복은 09:03 에야 돌아 그 구간을 못 잡는다.
+> 못 닫으면 `tick_channel_switch_enabled=false` 로 내보내는 선택지가 있다 — 신규 구독부터
+> 통합이 사라지고 전환 위험은 0, 미전환 잔여는 NXT 에 남아 blind 가 아니다.
+
+> 🟢 **B-1 진행 상황 (2026-09-14)** — `cycle293` 이 자문 §5 의 **2단계(속성축 배관)** 를 구현했다.
+> 실질 작업량으로 지목했던 「등가 비교 8곳 집합화」는 **0곳**으로 끝났고(단일 정본 집합
+> `scanner.TICK_TR_IDS` 승격 + 9파일 소비처 전환), 리졸버 `tick_tr_id_for(ticker, *, priority)` 와
+> 킬스위치(`system_config.tick_channel_resolver_mode`, 기본 `observe` = **행위 0**, 즉시 경로
+> `PUT /api/realtime/tick-channel-mode`)가 같은 커밋에 들어갔다. **매수 축은 닫혀 있다(B-1)** —
+> `risk._tick_buy_eval_blocked_by_channel` 이 종목 축으로 막고, 그 술어는 **구독 사실**이지
+> 리졸버 재호출이 아니다(적대 검증 CRITICAL 시정 — 재호출이면 킬스위치 `off` 가 매수를 연다).
+> **남은 것 3** = ① `risk.py` 접촉의 **8영역 추가 승인 1건**(브리프의 「diff 0」과 명세 §3-E 의
+> 「게이트의 유일 위치」가 정면 충돌 — 핀이 `_PIN_PENDING_APPROVAL` 로 분리돼 있다) ② **§7 저녁
+> 측정(16:00~20:00 채널별 프레임 수신) 판독이 배포 게이트** ③ `off` 가 아닌 모드로 올리는 것은
+> 별도 결정(단계표 = 명세 §8-A S0→S1→S2). **§4-C 풀 우회 2곳**(`scheduler.py:1382`·`:2728`)은
+> 이 사이클에서 **관측만** 했다 — 검출기가 `pool.subscribe` 중복 분기 안에 있으면 그 두 줄에
+> 구조적으로 도달하지 못해 **전 세션 `_subscriptions` 전수 대조**로 옮겼고, 실제 시정은
+> `scheduler.py` 별도 승인이다(cycle292 로 여유 174줄 확보됨).
 
 - **사실**: 09-01~09-04 구독 184~209종목이 `nxt_true ↔ H0UNCNT0 프레임>0` / `nxt_false ↔ 프레임=0` 으로 예외 0 완전 분할(064550 NXT 편출 자연 실험 포함). 유동주(005935 3,538억·035720 등) 포함 = 채널 결함(가설 ≈90%, KIS 문서·MCP 샘플에 대상 범위 무명시). 최소 07-24 부터 만성 — "09-01 이후" 는 INFO 2일 retention 착시. 정본 = `_workspace/forensics/stale_candidates_0904.md`.
 - **비용**: K watcher 종목당 ~134회/일 unsub/sub → SEND ≈14,600/일 · `[ws_ack_orphan]` 7,120 · 풀 슬롯 22~24% 낭비. **손절 사각**: 보유 000815·003490(kojiro) WS blind, REST 폴 60s(09:05~15:20)만 — 공백 09:00~09:05 + 15:20~15:30. tick 전략이 nxt_false 를 보유하면(편출 사건) 손절 평가 0. tick 전략 매수 35일 60건 100% nxt_true = KRX 단독(시총≥1,000억의 64%) 구조적 배제.
 - **A (cycle252, 비8영역) — ✅ 구현·검증 완료(2026-09-05 03:0x, 뮤테이션 26/26·차분 6,200 조합 0 불일치·회귀 51, 커밋·배포 = 야간 진행)**: LOW no_feed 종목의 K watcher SEND·스탬프·history 만 중단(HIGH byte 동일, `_stale_retry_count` 는 계속 — universe guard 축출 경로 보존), `[no_feed_held]` 1회/일, `[stale_watcher_summary] no_feed_skipped=`. `[tick_coverage] stale` 은 **불변이 정상**(scheduler 무접촉·은폐 금지). D+1 = `[stale_force_retry]` 09:05~15:20 399→≈0, 보조 SUBSCRIBE ≈957→<150.
 - **B-0 프로브(cycle253, 2026-09-05 야간 구현·검증 완료, 배포 = 야간 진행)**: `POST/GET/DELETE /api/realtime/channel-probe` — 8영역 무접촉, 기본 OFF. **월 09-07 09:30 실행이 승인 사안**(절차 = `_workspace/morning_0905_report.md` §7). `received=true` → B 착수 / 15분 미수신 → KIS 문의.
-- **B (승인 필요)**: 속성 기반 채널 리졸버 `tick_tr_id_for(ticker)`(`nxt_false → H0STCNT0`) — `TICK_TR_ID` 직접 사용처 전부 경유 + 풀 TICK 필터 집합화 + 동일 종목 이중 채널 금지 + 편출/플리커 debounce. **1단계 = 다크런치 프로브**(보조 세션 1개, 005935·035720 H0STCNT0 구독 → 프레임 실측 1시간). 접촉 8영역 = `scanner.py`·`websocket.py`·`websocket_pool.py`·`order_engine.py:1104`. 사이클 26 시간대별 전환(`get_active_tick_tr_ids`·`_board_transition_loop`)은 죽은 코드 — refactor-review 로 처분 + `src/realtime/CLAUDE.md` 전환 서술 정정.
+- 🔴 **종착지 = 통합 채널 `H0UNCNT0` 폐기, KRX 전용 + NXT 전용 2채널만 쓴다** (2026-09-07 사용자
+  결정 · 정본 `_workspace/consult/2026-09-07_channel_split_by_session.md` 「프리장=NXT / KRX장=KRX,
+  통합 채널 폐기」 · 2026-09-14 사용자 재확인 "H0UNCNT0는 아예 쓸 생각이 없어").
+  **이 방향은 재론 대상이 아니다.** 실측은 *할지 말지* 가 아니라 **세부방향**(어느 구간을 어느
+  채널에 배치할지 · 전환 시각 · 전환 중 커버리지)을 정하려는 것이다.
+  ⚠️ 종전에 이 자리에 있던 "속성 기반 리졸버(`nxt_false → H0STCNT0`), 그 외는 `H0UNCNT0` 유지"
+  서술은 **09-07 결정 이전의 설계**였다 — 폐기. 그 서술이 2026-09-14 에 서브에이전트 5명을
+  잘못된 전제로 브리핑시켜 649행 명세를 통째로 다시 써야 하게 만들었다.
+- **B (승인 완료 2026-09-14 · 8영역 4파일)** — 자문 §5 가 둘로 쪼갠 실행 경로를 따른다.
+  - **2단계 = 속성축 배관** (`tick_tr_id_for(ticker, now)` 도입, `now` 는 시그니처에만 두고
+    **전환 없음**). 목적은 종착지가 아니라 **부채 상환** — 9파일 25+ 사이트의
+    `tr_id == TICK_TR_ID` 등가 비교를 **집합 멤버십**으로 바꾼다(이 프로젝트 최대 split-brain
+    표면, cycle215~218 이 4 사이클을 쓴 결함 계열). 전환 위험 0 으로 3단계 배관을 깐다.
+    동반 필수 = `no_feed_registry` 채널 인식화(§7-⑧) · `_ticker_to_session` 이중 채널 금지 ·
+    채널 모드 런타임 읽기 경로(§7-⑨ — 없으면 D6 때문에 **장중 롤백 경로가 없다**) ·
+    `scheduler.py` leaf 위임(여유 3행).
+  - **3단계 = 시간축 전환** — 2단계 리졸버의 `now` 에 구간 배치를 채운다. 코드 변화는 작다.
+    필수 동반 = HIGH **make-before-break**(§7-⑤ — 생략하면 자문이 기각으로 바뀐다) ·
+    전환 시각 **파라미터화**(권고 08:55 / 15:34, 리터럴 금지) · 전환 창 REST 백스톱 ·
+    자동 원복 트리거. **첫 배포는 전환 1회만**(아침만 켜고 오후는 다음 사이클).
+  - 접촉 8영역 = `scanner.py`·`websocket.py`·`websocket_pool.py`·`order_engine.py:1104`
+    (+ 자문이 센 9파일 25+ 사이트: `stale_watcher_core`·`stale_universe_guard`·
+    `stale_session_recovery`·`scheduler`·`routes/realtime`).
+  - ~~사이클 26 시간대별 전환(`get_active_tick_tr_ids`·`_board_transition_loop`) 처분~~
+    **이미 완료** — cycle257 이 삭제했고 소스 grep **0건**(2026-09-14 확인). 라인 예산 기여 0.
+    잔여는 `handler.py:81` 주석 1줄(삭제된 `scanner._TIME_KRX_MAIN_END` 인용) +
+    `src/realtime/CLAUDE.md` 전환 서술 정정.
 - **C (임시)**: `SWING_REST_POLL_EARLY_START` 09:05 → 09:00:30(held_only) — scheduler 상수 1줄(라인 상한 주의). **D (관측 정정)**: `[stale_watcher_detail] @ts` 는 마지막 재등록 시각(`resub@` 로 정직화), 루틴 리포터 가이드 "stale 35~38 은 A 배포 전까지 예상값 — 재구독·재시작 처방 금지".
 
 ## 🔐 cycle249 · 일일 로그 분석 이관 1단계 — 리포터 스코프 + 번들/외부 API (2026-09-05 00:29 배포 완료 2f76490 · W1/W2 종결)

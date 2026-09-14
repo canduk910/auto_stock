@@ -22,6 +22,21 @@
 "src/engine/scheduler.py":
   - "tests/integration/*"
 
+# cycle292 — `_subscribe_market_operation_tickers` 본체가 scheduler 에서 이 leaf 로
+# 옮겨왔다. scheduler.py 의 `tests/integration/*` 매핑은 leaf 로 **자동 승계되지 않으므로**
+# 명시한다(보수적 선택 — 이 함수는 KIS WS 구독을 SEND 한다). 영향 테스트 선택 힌트일
+# 뿐이라 더 많이 도는 쪽으로 틀리는 게 안전하다.
+"src/engine/market_op_subscribe.py":
+  - "tests/integration/*"
+  - "tests/unit/engine/test_cycle221_market_op_off_main.py"
+  - "tests/unit/engine/test_market_op_subscribe_socket_guard.py"
+  - "tests/unit/engine/test_market_op_subscribe_import_regression.py"
+  - "tests/unit/engine/test_cycle214_h0unmko0_pool.py"
+  - "tests/unit/ast/test_cycle292_ast_market_op_leaf.py"
+  - "tests/unit/ast/test_cycle221_ast_market_op_no_main.py"
+  - "tests/unit/ast/test_cycle214_ast_h0unmko0_pool.py"
+  - "tests/unit/ast/test_market_op_subscribe_import_path_guard.py"
+
 # config.py의 TR_ID 매핑은 모든 KIS 호출에 영향
 "src/config.py":
   - "tests/unit/api/*"
