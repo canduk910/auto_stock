@@ -1425,8 +1425,8 @@ BLNG 다중 호출로 VB/LTV 각 30종목 → dedup 후 28 breakout 슬롯 점�
 1. EC2 `.env` 추가:
    ```
    DKSTOCK_API_URL=https://dkstock.cloud
-   DKSTOCK_USERNAME=autostock
-   DKSTOCK_PASSWORD=AUTOSTOCK1
+   DKSTOCK_USERNAME=<redacted — 2026-09-17 평문 제거, 실제 값은 EC2 .env 에만>
+   DKSTOCK_PASSWORD=<redacted — 2026-09-17 평문 제거, 실제 값은 EC2 .env 에만>
    DKSTOCK_REGIME_ENABLED=false   # 1단계: false 로 코드만 배포 검증
    ```
 2. Supabase 마이그 022 (market_regime_snapshots) + 023 (cash_usage_ratio 범위 COMMENT) 적용
