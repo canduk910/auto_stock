@@ -77,7 +77,7 @@ notional=56200 cap=25378 ratio=2.21` — K_ρ=2.5 이하라 통과(캡이 실제
 | 08:55 | 채널 전환(W1 `pre_to_krx`) | `[tick_channel_switch]` 발화, HIGH 먼저 · 창 끝 넘김 0 |
 | 09:03 | 자동 원복 판정 | 결론적 판정만 래치 · `day_reverted` 영구화 0 |
 | 09:00~15:30 | 정규장 커버리지 | `fresh` 가 프리장보다 크게 증가(전 종목이 KRX 창) |
-| 15:40~16:00 | **갭 홀드** | `nxt_true` **보유**만 NXT 추종(cycle294 CRITICAL ① 시정) |
+| 15:30~16:00 | **완전 휴식(cycle295)** | 채널은 KRX 유지(HIGH/LOW 구분 없음) · **주문 흔적 0건** · `[market_rest_window]` 1행. cycle294 갭 홀드는 철회 |
 | 16:00~20:00 | KRX 애프터 | `H0STCNT0` 수신 지속 · 애프터 청산 시 호가유형 `44`→`41` |
 | 20:00~21:30 | 저녁 블록 | 자문 20:00 · metrics 20:05 · 일봉 20:30 · 정산 21:30 |
 
@@ -93,6 +93,103 @@ notional=56200 cap=25378 ratio=2.21` — K_ρ=2.5 이하라 통과(캡이 실제
 - `max_lot_units` 는 turtle 4전략 모두 2.0(K=20 선반영 해소됨).
 - `breakeven_promote_atr = 1.5` 가 BFB·VCP·donchian·kojiro **네 전략 모두**에 들어 있다
   (코드 기본값은 donchian 만 1.5, 나머지 0.0).
+
+## 🔴 오늘 라이브에 도달 가능한 결함 2건 — 4단계와 무관한 별건 (승인 필요)
+
+> **이 절은 계획 항목이 아니다.** 아래 둘은 프로세스 분리 4단계 문서(`docs/architecture.md` 15.5)를
+> 쓰면서 코드를 실측하다 나왔고, **4단계 승인 여부와 무관하게 지금 돌고 있는 코드에서 발생한다.**
+> 사이클 대기 항목과 섞이면 묻히므로 절을 따로 둔다. 둘 다 **승인 대상 파일**이다 —
+> `order_engine.py` 는 8영역이고, `scheduler.py` 는 8영역은 아니지만 라인 상한(<3,900L) 때문에
+> 같은 승인 대상이다. 지금은 등재만 하고 코드는 건드리지 않았다.
+
+### L-1 🔴 손절 잔여 재주문이 주문번호 매핑을 하나도 등록하지 않는다 (`order_engine.py:2505`)
+
+`_cancel_and_reorder` 는 미체결 잔여를 취소하고 같은 함수에서 다시 주문한다. 그런데 그 재주문만
+**`order_engine.py` 의 `place_order` 호출 5곳 중 유일하게 반환값을 버린다.**
+(엔진 밖 6번째 호출부 `src/routes/trading.py:128` 수동 매도는 반환값을 받되 매핑 3종만 등록한다 — B-4 카드.)
+
+| 위치 | 호출 형태 | 매핑 등록 |
+|---|---|---|
+| `:906` 매수 주 경로 | `result = await place_order(**place_kwargs)` | 6종(`_order_qty`·`_order_strategy`·`_order_ticker`·`_order_exchange`·`_order_division`·`_pending_buy_orders`) |
+| `:1035` 매수 시장가 거부 폴백 | `result = await place_order(...)` | 등록함 |
+| `:1305` 매도 주 경로 | `result = await place_order(...)` | 5종 + `_completed_orders` 선행 가드 |
+| `:1645` 매도 폴백 | `fb_result = await place_order(...)` | 등록함 |
+| **`:2505` 손절 잔여 재주문** | **`await place_order(**place_kwargs)`** | 🔴 **0종** |
+
+그 재주문의 `order_no` 는 어느 dict 에도 들어가지 않고 `trade_history` 에도 행이 없다
+(원주문 행은 바로 앞 `:2459` 에서 `CANCELLED` 로 바뀌었고 재주문용 INSERT 는 없다).
+따라서 그 체결통보가 도착하면 `_handle_sell_fill` 이 **`_order_strategy` miss →
+`_lookup_strategy_from_trade_history` miss → `:2233` 의 `"momentum"` 하드코딩 폴백**으로 흐른다.
+
+- 귀결 = **매도 전략 오귀속**(momentum 포지션·실현손익으로 잡힌다). 손절이 실행된 진짜 전략의
+  장부와 어긋난다.
+- `_order_qty` 부재는 원주문 수량을 **통보받은 체결 수량으로 대체**시킨다
+  (`ordered_qty = self._order_qty.get(order_no, quantity)`, `:1877`) — 재주문이 부분 체결돼도
+  `total_filled == ordered_qty` 가 되어 **전량 체결로 읽히고**, 잔여 취소·재주문 사슬이 거기서 끊긴다.
+  `_order_ticker` 부재는 종목코드 보정(`:1846`)을, `_order_division` 부재는 cycle291 의
+  `[after_cancel_result] orig_dvsn=` 을 그 주문번호에 대해 비운다.
+- 발화 조건 = **매도가 부분 체결로 끝나 `_schedule_cancel_and_reorder(..., is_stop_loss=True)`
+  가 걸리는 것**(`:2340`) → 30초 뒤 잔여 취소 → `is_stop_loss and remaining > 0`(`:2462`)에서 재주문.
+  애프터마켓(16:00~20:00)이면 그 재주문이 cycle287 의 `44`(최유리)/`41`(지정가)로 나간다(`:2467-2491`).
+- 최소 시정 = `result = await place_order(**place_kwargs)` 로 받고, 같은 함수가 이미 갖고 있는
+  `strategy_id`·`ticker`·`remaining`·`ex`·`reorder_division` 으로 매도 경로(`:1314-1320`)와
+  **같은 5종을 등록** + `_completed_orders` 선행 가드 동일 적용.
+- ⚠️ 시정 범위 판단 필요 = 매도 주 경로는 매핑 등록 뒤 PENDING INSERT 도 한다. 재주문에도
+  같은 INSERT 를 붙일지(= `trade_history` 행이 하나 더 생긴다)는 별도 결정이다.
+
+### L-2 🔴 익일청산 큐가 주문 성공 여부와 무관하게 지워진다 (`scheduler.py:1583`)
+
+`_drain_pending_next_day_clear` 는 `try: await execute_sell(...)` 뒤 `finally:` 에서
+**무조건** `_pending_next_day_clear` 를 `discard` 하고 `delete_pending_ndc` 로 DB 행까지 지운다.
+
+그런데 `execute_sell` 은 **주문을 내지 않고 정상 반환하는 경로가 여럿**이다 — `_selling` 중복 ·
+`SellRejectionTracker` TTL 차단 · 전략/포지션 없음 · 장운영시간 외 거부 · 수량 락. 그 경우
+예외가 없으므로 `finally` 는 "처리됐다" 로 보고 큐에서 지운다.
+
+- **오늘도 부분적으로 틀리다.** 완충은 다음 날 `_execute_next_day_clear` 가 다시 수집하는 것뿐이라,
+  그날 하루는 청산 대상이 큐에서 사라진 채 남는다.
+- 4단계에서는 **100% 틀린다**(메시지를 큐에 넣은 시점에 반환하므로 거부·차단이 원리적으로
+  반환값에 담기지 않는다) — 다만 시정 이유는 4단계가 아니라 **오늘의 오작동**이다.
+- 따라야 할 규율의 원형은 이미 코드에 있다 = `_selling` 은 `execute_sell` 진입에 add 되고
+  **`_handle_sell_fill` 전량 체결에서만** discard 된다(`order_engine.py:2269`).
+- 최소 시정 방향 = 큐·DB 행 제거를 **체결 확정 이벤트**에 묶는다. `execute_sell` 이 "주문을
+  냈는가" 를 반환하거나(시그니처 변경 = 매도 전 경로 영향), drain 이 제거를 하지 않고
+  체결 처리 쪽이 지우게 한다. 어느 쪽이든 승인 대상 2파일을 건드리고, **청산 규약**을 바꾸는 쪽이면 루트 `CLAUDE.md` 의
+  "매매 행위를 바꾸는 코드 변경"(승인 + `domain-consult` 선행)에 해당하는지부터 판단해야 한다.
+
+---
+
+## 🟣 프로세스 분리 4단계 (방향 기록 · 승인 전) — 붙은 항목 10건
+
+> 정본 = [`docs/architecture.md`](../docs/architecture.md) **15.5**(2026-09-15 신설). 그 절은
+> **승인된 설계가 아니라 방향 기록**이다 — "할 것이다" 가 아니라 "이렇게 하려면 무엇이 필요하다".
+> 구조 = 전송 전담 2프로세스(**W** KIS WS 수신·라우팅 / **R** KIS REST 단일 게이트웨이) +
+> 업무 3프로세스(**1** 시세·전략평가 · **2** 주문 · **3** 체결). **4단계는 3단계(15.4)를 흡수하므로
+> 3단계 선행은 불필요**하고, 15.5.9 의 결론은 **"지금 착수를 권고하지 않는다"** 다
+> (cycle248 이 장중 고통의 86% 를 이미 없앴고 4단계 몫은 장중 파일 터치의 약 1.6% · 크래시 사고 기록 0건).
+> 아래 A·B 는 **착수 판단 자체에 필요한 것**이라 4단계를 하지 않기로 해도 A 는 값이 남는다.
+
+### A. 착수 판단 전에 재야 할 미확인 숫자 5건 — 지금 전부 미실측
+
+1~4 는 EC2 명령 한 줄씩이고 **코드 변경 0**이다. 5 만 관측 1줄이 필요하다.
+
+| # | 숫자 | 재는 법 | 왜 필요한가 |
+|---|---|---|---|
+| 1 | backend 실 RSS | `GET /api/system/memory`(이미 구현 — `src/routes/system.py:37-47`) 장중 1회 + 장외 1회 | 15.5.9 의 "145MB → 약 380MB(+235MB)" 는 **로컬 py3.13/darwin-arm64 대리 측정**이다. 프로덕션(python:3.12-slim / Graviton2)과 절대값이 다르므로 이 값 없이는 "+235MB 가 들어가나" 에 답할 수 없다 |
+| 2 | 박스 여유 | `free -m`(MemAvailable) + `df -h` | 상주 RSS 가 2~3배가 된 상태에서 `up --build` 가 **같은 t4g.small 2GB 박스**에서 도는지 |
+| 3 | 프로세스 크래시 이력 | `docker inspect --format '{{.RestartCount}}' <컨테이너>` + `journalctl -k \| grep -i oom` | 크래시 격리 상금의 유무. 리포 문서에는 0건인데 `restart: unless-stopped` 가 조용히 되살린 재기동은 문서에 안 남는다 |
+| 4 | 실제 `mode=full` 배포 횟수·시각 | GitHub Actions deploy 로그의 `mode=full` 90일 집계(`tools/deploy/compose_up_changed.sh:176` 의 `log "mode=..."` 가 남긴다 — `architecture.md` 15.5.9 는 `:181` 로 적었으나 실측은 **`:176`**) | 15.5.9 의 "하루 0.83건" 은 커밋 타임스탬프 **대리 추정**이다 |
+| 5 | 틱 프레임 실측 카운터 | `[dispatch_drop_summary]` 와 **같은 5분 윈도우**로 `frames_total` 관측 1줄(행위 0) | 지금 쓰는 "하루 1.25M~1.75M 프레임" 은 포렌식의 **부하 추정치**이고 세는 마커가 없다. **버스 설계의 1차 제약이 추정 위에 서 있다** |
+
+### B. 사용자 결정 카드 5건 — 회신 대기
+
+| # | 결정할 것 | 지금 사실 | 안 정하면 생기는 일 |
+|---|---|---|---|
+| 1 | **문서 구조** — 15.4(3단계)를 "4단계 설계로 대체 검토 중" 으로 다시 쓸 것인가, 지금처럼 병존시킬 것인가 | 15.4 의 보류 근거 ①~④ 는 넷 다 아직 참이라 "보류" 표기를 지우지 않았다 | 지금 문서만 읽으면 **"3단계를 먼저 해야 4단계"** 로 읽힐 여지가 있다(사실은 그 반대 — 먼저 하면 공유 인프라 둘을 만들었다 버린다) |
+| 2 | **2단계를 건너뛰나** | 15.3 이 지적한 `recommendation_engine.py:626`/`:657` 의 **살아 있는 전략 객체 직접 변이**(20:00 자문 `auto_apply` 의 즉시 반영 유일 경로)는 4단계에서 **전략평가 프로세스 안**이면 그대로 산다 | 4단계가 2단계의 최대 난점을 오히려 쉽게 만든다 — 순서를 안 정하면 2단계에서 그 경로를 우회 설계했다가 4단계에서 되돌리게 된다 |
+| 3 | **`/oauth2/Approval` 에 KIS 측 발급 한도가 있나** — `kis-mcp-query` 로 확인 | 우리 코드·주석은 `/oauth2/tokenP` 에 대해서만 분당 1건을 말한다(`src/auth/token.py:10`, `:47`). `get_approval_key()` 는 `_GLOBAL_ISSUE_LOCK` 을 타지 않는다(`:183-197`) | 한도가 없다고 전제하고 W 를 독립시켰다가 재연결 폭주로 403 을 맞으면 **시세와 체결통보가 동시에 끊긴다** |
+| 4 | **`routes/trading.py:128-142` 수동 매도의 프로세스 귀속** | 이 라우트는 주문 엔진의 private dict 를 **프로세스 밖에서 쓰는 유일한 곳**이고, 지금도 매핑 3종만 쓰며 `_order_exchange`·`_order_division` 과 `_completed_orders` 선행 가드가 **없다** | 4단계에서 어느 프로세스가 이 요청을 받는지 안 정하면 수동 매도만 매핑 규약 밖에 남는다(L-1 과 같은 계열의 오귀속) |
+| 5 | **체결 → 포지션 반영 지연의 허용 상한** | 4단계는 그 반영을 **두 홉**(W→3→1)으로 만든다. 후보 상한 = 틱 간격(정규장 활성 종목 1초 미만) | 상한을 넘기면 **"체결됐는데 손절이 안 걸린 종목"** 이 생기고 그건 손절 커버리지 위반이다 |
 
 ---
 
@@ -138,7 +235,7 @@ notional=56200 cap=25378 ratio=2.21` — K_ρ=2.5 이하라 통과(캡이 실제
 | 09:0x~09:4x | `nxt_downgrade` 프로브 생존 | `[nxt_downgrade]` 평소(≈0.77건/일) 수준 발화 | 0건이면 프로브가 죽었다(라우팅이 그 앞을 가로챘는지 확인) |
 | 15:20 | **LTV 매수 컷(286)** | `[ltv_main_buy_cutoff]` 발화 시 would_buy 기록 1행 | — (전 기간 0건이라 미발화가 정상) |
 | 15:20~15:30 | 강제청산 | `_force_clear_main_only` 정상 · 그 뒤 신규 매수 0 | 15:21 이후 LTV 매수가 있으면 컷 실패 |
-| 15:30~16:00 | **휴식 구간(주문 경로 축)** | `[order_channel] reason=krx_by_clock` **0행** — 이 구간은 base 유지다 | `krx_by_clock` 이 뜨면 규약 위반. ⚠️ **"주문 0건" 이 정상이라는 뜻이 아니다** — cycle287 은 15:40~16:00 의 NXT 애프터 실체결 경로를 **의도적으로 보존**했다(09-08 15:45 필옵틱스 실측). 그 구간에 NXT 매도가 나가는 것은 정상이고, 여기서 0 이어야 하는 것은 **KRX 로 재라우팅된 흔적**뿐이다 |
+| 15:30~16:00 | 🔴 **완전 휴식(cycle295 B) — 의미가 반전됐다** | **성공 서명** = `[market_rest_window] start=15:30 end=16:00 source=market_table` 1행 **∧** 그 구간 `place_order`·`trade_history` 흔적 **0건**. 차단이 실제로 일어난 날은 `[market_rest_blocked] side= ticker= strategy= base= reason=market_rest` 가 종목·방향당 1행 — 이것이 **이 사이클이 무엇을 잃는지의 유일한 분모**다 | **실패 서명** = ① 그 구간에 주문 흔적이 **하나라도** 있다(게이트가 뚫렸다 — 컷은 발사점 3곳에만 걸리므로 `POST /api/trading/manual-sell` 면제 경로부터 확인한다. 그 경로는 접수 로그에 `[market_rest_manual_exempt]` 가 붙는다) ② `[market_rest_window]` **0행**(배선이 죽었다 — 0 은 «정상»과 «죽음»을 구별하지 못하므로 카나리아가 그 둘을 가른다) ③ `[market_rest_blocked]` 가 0 인데 그날 그 구간 손절 신호가 있었다(게이트가 평가되지 않았다). 🔴 **배포 전후 grep 합산 금지** — cycle287 시절 이 칸은 「그 구간 NXT 매도가 나가는 것이 정상」이었다(cycle295 가 그 결론을 뒤집었다). ⚠️ `[order_channel] reason=krx_by_clock` **0행**은 종전대로 유지(base 유지 구간) |
 | **16:00~20:00** | **KRX 애프터 첫날(287 핵심)** | 청산 발생 시 `[after_exit_division] div=44 unpr=0` → 성공 | `div=41`(폴백 발화) · `[after_exit_rejected]` · `[after_exit_giveup] fails=5`(CRITICAL) |
 | 16:00~20:00 | 애프터 거부 원문 | — | `[after_exit_rejected] ... msg1=` 이 **미지 해소의 유일한 기회**다. 원문을 그대로 기록해 둘 것 |
 | 16:00~20:00 | 체결 슬리피지 | `slip_bp = (체결가 − cur) / cur × 10000`, `cur` 은 `[after_exit_division]` 의 필드. **1틱(20~21bp) 이내면 44 정상** | 5틱에 가까우면 최유리가 지정가처럼 쓸려 내려간 것 — 재조사. ⚠️ **5틱의 bp 값은 종목 가격대(호가단위)마다 다르다** — 보유 11종목 범위로 38~110bp, 자문이 표본 2종목(유안타 4,730 / 롯데지주 24,800)으로 계산한 값은 101~106bp다. 두 수를 같은 것으로 놓지 말고 **그 종목의 호가단위로 직접 계산**하라. 판정 기준으로 쓸 수 있는 것은 두 정본이 일치하는 **1틱 20~21bp** 쪽이다 |

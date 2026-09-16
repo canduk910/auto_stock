@@ -471,7 +471,7 @@ _APPROVED_CONTENT_SHA: dict[str, str] = {
     "src/engine/scanner.py":
         "079272e7c4907c6ecc5fdf9b73de70021a9dc2435c7a568538183a7ead98804f",
     "src/engine/order_engine.py":
-        "84e84a972774cd2fbf8ceb70e5569f7760d43a228c2be21d2a1b90f48fd4ce75",
+        "f13519d6429c5b79698fe2607f5eb76262f803a16fb8d58addd1558cfcf264c7",
     "src/api/order.py":
         "08c5cafd7b8678ec0d0fa85f856fdea3cce38ad92488c6d74c03cd13faa415bb",
     # ✅ 2026-09-14 (cycle293) — 시세 채널 리졸버 2단계(속성축 배관). 사용자 승인
@@ -490,8 +490,12 @@ _APPROVED_CONTENT_SHA: dict[str, str] = {
     #    `.md` 도 이 가드에 잡힌다). 「시세 채널」 절이 속성축 리졸버 2단계 착지·프로브
     #    격리 기준 전환·`get_subscribed_tickers()` 합집합 서술을 담도록 갱신됐다.
     #    프로덕션 코드 영향 0. 등록은 Green 이, 비우기는 병합 후속 커밋이 한다.
+    # 📄 2026-09-15 (cycle295, A축) — **문서 전용 변경**. 갭 홀드 CRITICAL-1 절이
+    #    철회 서술로 재작성됐고(§6-4 — 삭제 아님), 다이얼 표·런북 curl·전환 창
+    #    라벨이 「전환 1회」로 되돌아갔다. 프로덕션 코드 영향 0(이 사이클의 코드
+    #    영향은 8영역 밖 4파일 — `_APPROVED_CONTENT_SHA` 대상이 아니다).
     "src/realtime/CLAUDE.md":
-        "12bf914da7c13cfb13ed6caaa0825f7cfe77dff7b95c72260f439171c054480a",
+        "061c5c5c68fd586722d4139d19f15e30e2ba036af6f3d4ce7906f84a93714f5b",
 }
 
 

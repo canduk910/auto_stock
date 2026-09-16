@@ -560,7 +560,7 @@ _BASE_SHA = {
     "src/engine/risk.py": "e8614235cc0bea638f8c349b2f6910c94f5f9a5b849f5d65bef0583f959d81c9",
     # 🔁 cycle276 → cycle286 — 사용자 명시 승인 하에 order_engine.py 를 바꾼 두 사이클의
     # 누적 결과값이다. A-ATOMIC 구간은 byte 동일.
-    "src/engine/order_engine.py": "84e84a972774cd2fbf8ceb70e5569f7760d43a228c2be21d2a1b90f48fd4ce75",
+    "src/engine/order_engine.py": "f13519d6429c5b79698fe2607f5eb76262f803a16fb8d58addd1558cfcf264c7",
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
     "src/engine/scanner.py":

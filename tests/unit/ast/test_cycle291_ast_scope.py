@@ -525,15 +525,18 @@ def test_a10b_scheduler_never_touches_the_new_mapping() -> None:
 
 
 def test_a10c_mapping_is_registered_at_every_place_order_success_site() -> None:
-    """A10 (RED) — 등록은 `_order_exchange` 와 **같은 횟수**(4곳)다.
+    """A10 (RED) — 등록은 `_order_exchange` 와 **같은 횟수**(cycle295 부터 5곳)다.
 
-    매수 주 경로 · 매수 지정가 폴백 · 매도 주 경로 · 매도 폴백. 한 곳만 빠뜨리면
-    그 경로의 취소 관측이 조용히 `dvsn_src=absent` 로 퇴화한다.
+    매수 주 경로 · 매수 지정가 폴백 · 매도 주 경로 · 매도 폴백 · (cycle295 D,
+    §2-0b) 손절 잔여 재주문(`_cancel_and_reorder`). 다섯 번째 자리 전에는
+    그 재주문이 매핑을 남기지 않아 체결통보가 `_order_strategy` miss →
+    `trade_history` miss → `"momentum"` 오귀속으로 흘렀다(D 축 실측). 한 곳만
+    빠뜨리면 그 경로의 취소 관측이 조용히 `dvsn_src=absent` 로 퇴화한다.
     """
     src = _src(_ORDER_ENGINE_REL)
     ex_sets = src.count("self._order_exchange[")
     div_sets = src.count("self._order_division[")
-    assert ex_sets == 4, f"선례 등록 지점 수가 {ex_sets} 로 바뀌었다"
+    assert ex_sets == 5, f"선례 등록 지점 수가 {ex_sets} 로 바뀌었다"
     assert div_sets == ex_sets, (
         f"`_order_division` 등록 {div_sets}곳 / `_order_exchange` {ex_sets}곳 — "
         "같은 자리여야 한다"

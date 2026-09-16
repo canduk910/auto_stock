@@ -224,6 +224,26 @@ def mock_get_balance(monkeypatch: pytest.MonkeyPatch) -> AsyncMock:
     return mock
 
 
+@pytest.fixture(autouse=True)
+def _reset_session_board_cache(monkeypatch: pytest.MonkeyPatch):
+    """cycle295 (B) — `session_tracker.active` 오염 차단.
+
+    `execute_sell` 이 이제 재시도 루프 진입 전에 `_market_rest_now` 를 거치고,
+    그 술어의 프리장 예외는 `session_tracker.active or boards_at(now.time())`
+    로 판정한다(§3-3). `session_tracker` 는 여러 테스트 파일이 공유하는 **모듈
+    싱글톤**이고 일부 파일이 `monkeypatch` 없이 `_active` 를 직접 대입해 두면
+    (예: `test_cycle264_open_source_compare.py`) 그 값이 이 파일까지 새어 든다
+    (cycle295 이전에는 이 함수가 `execute_sell` 어디에서도 읽히지 않아 무해
+    했다). 빈 집합으로 리셋해 두면 `boards_at(now.time())` 폴백이 각 테스트의
+    frozen 시각으로 정확히 재계산된다(이 파일은 `@freeze_time` **데코레이터**를
+    쓰므로 fixture 본문 시점의 `datetime.now()` 는 아직 얼어 있지 않다 —
+    그래서 값을 미리 계산하지 않고 빈 집합만 남긴다).
+    """
+    from src.engine.session import session_tracker
+
+    monkeypatch.setattr(session_tracker, "_active", frozenset())
+
+
 def _market_closed_error_apbk0918() -> KisApiError:
     """KST 08:00~09:00 NXT 프리/KRX 진입 전 매도 거부 원문."""
     return KisApiError(

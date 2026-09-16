@@ -1,5 +1,13 @@
 """cycle293 — 시세 채널 리졸버 킬스위치 모드 leaf.
 
+🔴 cycle295 — NXT 단독 연속 구간(15:40~16:00) 갭 홀드 다이얼
+(`GAP_HOLD_ENABLED_KEY`/`gap_hold_enabled()`/`apply_gap_hold_enabled()`)은
+2026-09-15 사용자 결정("15:30~16:00 완전 휴식")으로 **제거**됐다. 그 시정이
+지키려던 사실(그 20분은 NXT 만 연속)은 여전히 참이지만, 사용자가 그 손절
+커버리지 손실을 비용으로 수용해 되돌렸다 — 상세는
+`src/engine/tick_channel_clock.py` 모듈 docstring 과
+`_workspace/red/cycle295_gap_hold_removal_spec.md`.
+
 `scanner.tick_tr_id_for()` 가 **얼마나** 적용될지를 고르는 단일 상태다. 값은
 `system_config.tick_channel_resolver_mode` 한 키에서 온다(전략 파라미터 축이
 아니다 — 리졸버는 인프라 축이고, 7전략 `DEFAULT_PARAMS` 에 넣으면 7곳이 갈릴
@@ -89,12 +97,8 @@ SWITCH_ENABLED_KEY = "tick_channel_switch_enabled"
 SWITCH_OFFSET_SECS_KEY = "tick_channel_switch_offset_secs"
 SWITCH_ACK_TIMEOUT_SECS_KEY = "tick_channel_switch_ack_timeout_secs"
 REVERT_PROBE_SECS_KEY = "tick_channel_revert_probe_secs"
-#: 🔴 적대 검증 CRITICAL-1 — NXT 단독 연속 구간(09-15 = 15:40~16:00) 커버리지.
-GAP_HOLD_ENABLED_KEY = "tick_channel_gap_hold_enabled"
 
 DEFAULT_SWITCH_ENABLED = True
-#: 기본 **켜짐** — 꺼짐이 기본이면 INV-1 위반(매일 20분 손절 blind)이 기본이 된다.
-DEFAULT_GAP_HOLD_ENABLED = True
 #: 전환 offset 기본값의 정본은 `tick_channel_clock.DEFAULT_SWITCH_OFFSET_SECS` 다.
 DEFAULT_SWITCH_ACK_TIMEOUT_SECS = 5.0
 _ACK_TIMEOUT_RANGE = (1.0, 30.0)
@@ -103,7 +107,6 @@ _REVERT_PROBE_RANGE = (60.0, 900.0)
 # ── 모듈 전역 상태 ──────────────────────────────────────────────────────────
 _mode: str = DEFAULT_MODE
 _switch_enabled: bool = DEFAULT_SWITCH_ENABLED
-_gap_hold_enabled: bool = DEFAULT_GAP_HOLD_ENABLED
 _switch_offset_secs: int | None = None
 _switch_ack_timeout_secs: float = DEFAULT_SWITCH_ACK_TIMEOUT_SECS
 _revert_probe_secs: float | None = None
@@ -116,11 +119,6 @@ _param_warned: "KstDailyEmitCap[str]" = KstDailyEmitCap()
 def switch_enabled() -> bool:
     """살아 있는 구독의 전환을 실행해도 되는가 (§9-D)."""
     return _switch_enabled
-
-
-def gap_hold_enabled() -> bool:
-    """NXT 단독 연속 구간에서 HIGH 가 NXT 를 따라가는가 (CRITICAL-1 다이얼)."""
-    return _gap_hold_enabled
 
 
 def switch_offset_secs() -> int:
@@ -221,7 +219,7 @@ async def refresh_switch_params() -> None:
     `stale_watcher_core`)에서 불린다. 실패·키 부재·범위 밖은 현재 값 유지.
     """
     global _switch_enabled, _switch_offset_secs, _switch_ack_timeout_secs
-    global _revert_probe_secs, _gap_hold_enabled
+    global _revert_probe_secs
     try:
         import src.db.system_config as sysconf  # lazy — 테스트 patch seam
     except Exception:  # pragma: no cover — never-raise
@@ -232,14 +230,6 @@ async def refresh_switch_params() -> None:
             _switch_enabled = bool(raw)
     except Exception:
         logger.debug("[tick_channel_mode] switch_enabled 조회 실패 — 현재 값 유지")
-    try:
-        getter = getattr(sysconf, "get_tick_channel_gap_hold_enabled", None)
-        if getter is not None:
-            raw = await getter()
-            if raw is not None:
-                _gap_hold_enabled = bool(raw)
-    except Exception:
-        logger.debug("[tick_channel_mode] gap_hold 조회 실패 — 현재 값 유지")
     try:
         raw = await sysconf.get_tick_channel_switch_offset_secs()
         if raw is not None:
@@ -276,13 +266,6 @@ def apply_switch_enabled(enabled: bool) -> bool:
     return _switch_enabled
 
 
-def apply_gap_hold_enabled(enabled: bool) -> bool:
-    """라우트용 즉시 반영 진입점 — DB 쓰기는 호출자 책임(CRITICAL-1 다이얼)."""
-    global _gap_hold_enabled
-    _gap_hold_enabled = bool(enabled)
-    return _gap_hold_enabled
-
-
 def apply_mode(mode: str) -> str:
     """라우트(`PUT /api/realtime/tick-channel-mode`)용 즉시 반영 진입점.
 
@@ -316,10 +299,9 @@ def reset_state_for_test() -> None:
     앞 테스트의 잔재를 본다.
     """
     global _mode, _switch_enabled, _switch_offset_secs, _switch_ack_timeout_secs
-    global _revert_probe_secs, _gap_hold_enabled
+    global _revert_probe_secs
     _mode = DEFAULT_MODE
     _switch_enabled = DEFAULT_SWITCH_ENABLED
-    _gap_hold_enabled = DEFAULT_GAP_HOLD_ENABLED
     _switch_offset_secs = None
     _switch_ack_timeout_secs = DEFAULT_SWITCH_ACK_TIMEOUT_SECS
     _revert_probe_secs = None
@@ -344,15 +326,16 @@ def set_switch_params_for_test(
     offset_secs: int | None = None,
     ack_timeout_secs: float | None = None,
     revert_probe_secs: float | None = None,
-    gap_hold_enabled: bool | None = None,
 ) -> None:
-    """전환 파라미터 5키 테스트 seam (§9-E + CRITICAL-1). 준 것만 덮는다."""
+    """전환 파라미터 4키 테스트 seam (§9-E). 준 것만 덮는다.
+
+    cycle295 — `gap_hold_enabled` 키워드는 사라졌다(다이얼 자체가 없다). 옛
+    호출자가 그 키워드를 주면 `TypeError` 다 — 조용히 흡수하지 않는다.
+    """
     global _switch_enabled, _switch_offset_secs, _switch_ack_timeout_secs
-    global _revert_probe_secs, _gap_hold_enabled
+    global _revert_probe_secs
     if switch_enabled is not None:
         _switch_enabled = bool(switch_enabled)
-    if gap_hold_enabled is not None:
-        _gap_hold_enabled = bool(gap_hold_enabled)
     if offset_secs is not None:
         _switch_offset_secs = int(offset_secs)
     if ack_timeout_secs is not None:

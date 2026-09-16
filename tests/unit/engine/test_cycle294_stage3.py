@@ -1280,7 +1280,14 @@ async def test_f4_revert_respects_the_attribute_axis(monkeypatch, _pool_env):
     _patch_classification(monkeypatch, no_feed=(NO_FEED,),
                           provenance_ok=(NO_FEED, NXT_TRUE), classified=(NO_FEED, NXT_TRUE))
     _set_mode("enforce")
-    setter()
+    # 🔴 시각 드리프트 시정(cycle295 적대 검증) — 인자 없는 `setter()` 는 **벽시계
+    # 오늘**로 래치를 심는데 아래 판정은 `DAY`(2026-09-15) 로 묻는다.
+    # `day_reverted(now)` 는 `now.date() < _revert_for` 면 되돌림을 보지 않으므로,
+    # 이 테스트는 **실행일이 DAY 를 넘긴 다음 날부터 영구히 붉었다**(2026-09-16
+    # 실측 — cycle295 착수 전 baseline 에서도 동일 재현 = 선재 결함).
+    # 자매 파일 `test_cycle294b_adversarial_fixes.py:761` 은 처음부터 `DAY` 를
+    # 명시한다. 메모리 「시각 창 게이트 테스트는 시각 고정」 답습.
+    setter(DAY)
 
     assert _desired(NXT_TRUE, _at(10, 0)) == NXT_ONLY, (
         "원복 뒤 `nxt_true` 가 NXT 로 돌아가지 않았다"

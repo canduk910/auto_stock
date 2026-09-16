@@ -68,14 +68,116 @@ OFF 는 **재시작을 못 견딘다**. [실측]
 
 ---
 
-## §2 무엇을 바꾸나 — 두 축으로 가른다
+## §2 무엇을 바꾸나 — 네 축으로 가른다
 
 | 축 | 내용 | 8영역 | 승인 |
 |---|---|---|---|
 | **(A)** | 갭 홀드 코드 제거 (시세 채널 축) | 코드는 전부 밖 · **문서 `src/realtime/CLAUDE.md` 는 안** | 문서 1건 |
 | **(B)** | 15:30~16:00 명시 주문 컷 | `src/engine/order_engine.py` **1파일** | 필요 |
+| **(C)** | `_get_bool_or_none` 왕복 불변식 시정 | `src/db/system_config.py` — **밖** | 불요(사용자 승인 완료 2026-09-15) |
+| **(D)** | 손절 잔여 재주문 매핑 등록 | `src/engine/order_engine.py` (B 와 같은 파일) | 필요(승인 완료 2026-09-15) |
 
-두 축을 한 커밋에 묶지 않는다. (A) 가 (B) 승인을 기다리게 되기 때문이다.
+(A) 와 (B) 를 한 커밋에 묶지 않는다 — (A) 가 (B) 승인을 기다리게 되기 때문이다.
+**(C) 는 (A) 보다 먼저 간다**(§2-0 참조). (D) 는 (B) 와 같은 파일이라 (B) 커밋에 함께 넣는다.
+
+### 2-0 🔴 (C) 를 가장 먼저 하는 이유 — 킬스위치가 "끄면 켜진다"
+
+**2026-09-15 실증.** 10:0x 에 `PUT {"mode":"enforce","gap_hold_enabled":false}` 를 보냈고 응답이
+`gap_hold_enabled: false · gap_persisted: true` 였다. 그런데 **15:41:56 에 갭 전환 7건이 그대로
+일어났다**(`[tick_channel_switch] ... from=H0STCNT0 to=H0NXCNT0 mode=high` ×7 +
+`[tick_channel_switch_summary] window=krx_to_nxt_gap`).
+
+원인 = **setter 와 getter 의 왕복 불변식 파괴**.
+
+```
+set_tick_channel_gap_hold_enabled(False)
+  → _set_string(key, "false")          → DB: {"value": "false"}   ← 문자열
+_get_bool_or_none(key)
+  → raw = {"value": "false"}  (dict)
+  → isinstance(raw, dict) 분기 진입
+  → return bool(raw.get("value")) = bool("false") = True          ← 🔴
+```
+
+`_get_bool_or_none` 은 바로 아래에 `"true"/"false"` 문자열 정규화 분기를 갖고 있지만
+(`system_config.py:237-242`), **dict 로 감싸인 값은 그 분기에 도달하지 못한다**. PUT 직후에는
+`apply_gap_hold_enabled(False)` 가 메모리를 직접 덮어 False 지만, 5분·120초 `refresh_switch_params()`
+가 DB 를 다시 읽어 `bool("false")=True` 로 **되돌린다**.
+
+**영향 범위 = cycle294 가 만든 bool 다이얼 2개뿐** [실측]:
+
+| setter | 저장 방식 | 왕복 |
+|---|---|---|
+| `set_dkstock_regime_enabled` | `_set_bool` | ✅ |
+| `set_kis_mcp_enabled` | `_set_bool` | ✅ |
+| `set_auto_start` | JSONB `{"value": bool}` | ✅ |
+| `set_tick_channel_switch_enabled` (`:793`) | `_set_string("true"/"false")` | 🔴 |
+| `set_tick_channel_gap_hold_enabled` (`:822`) | `_set_string("true"/"false")` | 🔴 |
+
+⚠️ `set_auto_start` 의 docstring 이 이 함정을 이미 경고하고 있었다 —
+*"JSONB `{"value": bool}` — `get_auto_start` 의 `raw.get("value")` 파싱 계약과 정합
+(**왕복 불변식 = split-brain 해소 핵심**)"*. cycle294 가 그 관례를 답습하지 않았다.
+
+**즉시 조치(2026-09-15 실행 완료)** — DB 값을 JSON boolean 으로 교체했다:
+`{"value": "false"}` → `{"value": false}` (`jsonb_typeof(value->'value') = boolean` 확인).
+이것은 **우회**이고 코드 결함은 그대로다 — 누구든 다시 PUT 하면 문자열로 되돌아간다.
+
+**(C) 시정** — `_get_bool_or_none` 의 dict 분기가 문자열을 정규화하게 한다(아래 셋 중 택일,
+권고 = ①+②):
+① dict 분기에서 꺼낸 `v` 를 기존 문자열 정규화 경로로 흘려보낸다(한 곳만 고쳐 모든 키가 이득)
+② 두 setter 를 `_set_bool` 로 바꾼다(cycle294 가 답습했어야 할 관례)
+③ 회귀 가드 = **왕복 불변식 테스트** — 모든 bool 다이얼에 대해 `set(False)` → `get()` 이
+   `False` 인지 실 PG 로 단언한다. `switch_enabled` 는 현재 DB 에 행이 없어 잠복 중이므로
+   이 가드가 없으면 같은 결함이 다음에 또 잠복한다.
+
+**⚠️ (C) 는 cycle295 가 `gap_hold` 를 제거해도 필요하다** — `tick_channel_switch_enabled` 가
+같은 결함을 그대로 갖고 남기 때문이다(그 킬스위치도 지금 작동하지 않는다).
+
+### 2-0b (D) 손절 잔여 재주문이 매핑을 남기지 않는다
+
+**2026-09-15 확인.** `order_engine.py` 의 프로덕션 `place_order` 호출 5곳 중 **`:2505` 하나만**
+반환값을 버린다.
+
+```
+:906   result = await place_order(...)   →  매수 6종 등록
+:1035  result = await place_order(...)   →  매수 폴백 5종
+:1305  result = await place_order(...)   →  매도 5종 + _completed_orders.discard
+:1645  fb_result = await place_order(...)
+:2505  await place_order(**place_kwargs) →  🔴 0종
+```
+
+그 자리는 `_cancel_and_reorder`(`:2420`, `PARTIAL_FILL_WAIT=30` 뒤 잔여 취소 후 재주문,
+유일 호출자가 `is_stop_loss=True`)다. 매핑이 없으면 그 재주문의 체결통보가:
+
+```
+_order_strategy.get(order_no)          → miss
+_lookup_strategy_from_trade_history()  → miss (재주문은 trade_history INSERT 도 없다)
+:2233  strategy_id = "momentum"        → 🔴 매도 전략 오귀속
+```
+
+추가로 `_order_qty` 부재 때문에 `ordered_qty` 가 통보 수량으로 대체돼(`:1877`)
+**부분 체결이 전량 체결로 읽힌다**.
+
+**시정 = 나머지 4곳과 같은 모양.** 필요한 값이 **전부 이미 그 스코프에 있다** [실측] —
+`strategy_id`(`:2430`) · `ex`(`:2434`) · `ticker`/`remaining`(인자) · `reorder_division`.
+
+```python
+result = await place_order(**place_kwargs)
+if result is not None and getattr(result, "order_no", None):
+    self._order_qty[result.order_no] = remaining
+    self._order_strategy[result.order_no] = strategy_id
+    self._order_ticker[result.order_no] = ticker
+    self._order_exchange[result.order_no] = ex
+    if reorder_division is not None:
+        self._order_division[result.order_no] = reorder_division.value
+    self._completed_orders.discard(result.order_no)
+```
+
+⚠️ `strategy_id` 는 `:2430` 에서 `"momentum"` 폴백을 이미 탈 수 있다(원주문 매핑이 없을 때).
+(D) 가 고치는 것은 **재주문이 원주문의 전략을 승계하지 못하는 것**이고, 원주문 매핑 자체의
+결손은 별개다.
+
+⚠️ 이 결함은 **4단계(프로세스 분리)와 무관하게 오늘 라이브에 도달 가능**하다 — 발화 조건은
+"손절 주문이 부분체결되는 것" 하나다.
 
 ### 2-1 (A) 제거 대상 — 파일:행 [실측, `ast` 산출]
 
@@ -799,6 +901,19 @@ cycle295 착지 뒤 **정확히 반대**가 된다:
 > (청산 가능 시간의 3.0%), 알려진 실체결 표본 1건(09-08 필옵틱스 +2,000원, 그마저도
 > 6시간 45분 좌초돼 있던 익일청산이 풀린 사례), 16:00 KRX 애프터 재개까지 **최대 20분
 > 유예**. 15:30~15:40 은 오히려 **순이득**입니다(헛 왕복과 다음-09:00 TTL 래치 제거).
+
+### 7-2b (C)(D) 축 — 2026-09-15 승인 완료
+
+사용자가 **"즉시 조치하자. 그리고 사이클 295에도 포함시키자. 손절 잔여 재주문 매핑 누락까지
+한 사이클에 넣어서 진행하자"** 로 셋을 한 번에 승인했다. 따라서:
+
+- **(C)** `src/db/system_config.py` — 8영역 밖. 즉시 조치(DB boolean 교체)는 **실행 완료**,
+  코드 시정은 이 사이클에 포함.
+- **(D)** `src/engine/order_engine.py` — (B) 와 같은 파일이므로 **같은 커밋**에 넣는다.
+  sha 핀 9곳을 한 번만 갱신하면 된다.
+
+(D) 를 (B) 와 묶는 것이 핀 비용 면에서 유리하지만, **행위 축이 다르다** — (B) 는 주문을 막고
+(D) 는 매핑을 채운다. 커밋 메시지에서 두 의도를 분명히 가른다. 회귀도 각각 독립으로 세운다.
 
 ### 7-3 `domain-consult` 선행 — 면제
 

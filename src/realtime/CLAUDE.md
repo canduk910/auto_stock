@@ -137,13 +137,23 @@ cycle257(2026-09-05)이 이를 삭제(`scanner.py`/`scheduler.py`)했다.
 ```
 프리장(N1)              → H0NXCNT0   그 시각 NXT 만 연속 체결을 싣는다
 전환 창                 → 주문 0건 · cycle241 시장 침묵 ⇒ 전환 비용 ≈ 0
-정규장 + 애프터마켓     → H0STCNT0   연속
-🔴 NXT 단독 연속 구간    → H0NXCNT0   **보유(HIGH)만** — 아래 CRITICAL-1
+정규장 + 애프터마켓     → H0STCNT0   연속 (15:30~16:00 포함, 아래 CRITICAL-1)
 ```
 
 09-14 16:39~16:41 라이브 실측(`000815`·`005385` = `nxt_false` / `000660` =
 `nxt_true`)에서 셋 다 `H0STCNT0` 로 KRX 애프터마켓 체결을 받았다 ⇒ 그 채널은
 **종목 속성과 무관하게** 정규장 개장부터 연속 체결 종료까지를 덮는다.
+
+🔴 **cycle295(2026-09-15) — 아래 CRITICAL-1 의 *시정*은 철회됐다. *사실*(15:40~
+16:00 은 KRX 가 연속이 아니고 NXT 만 연속이다)은 그대로다.** 사용자가 "청산측으로도
+참여를 하지 않고자 해. 15:30~16:00 은 완전 휴식하도록 변경해야해" 로 그 20분의
+손절 커버리지 손실을 비용으로 수용했다 — cycle294 가 승인 없이 추가한 전환 창 2개
+(`krx_to_nxt_gap`·`nxt_gap_to_krx`)와 킬스위치 `tick_channel_gap_hold_enabled`
+가 코드에서 **전부 제거**됐다(갭 함수·DB 헬퍼·라우트 필드 포함,
+`_workspace/red/cycle295_gap_hold_removal_spec.md`). 아래 절의 서술은 **그
+시정이 살아 있던 동안의 기록**으로 읽는다 — 되돌리기 전에 표가 바뀌었는지
+(KRX 가 그 시각에 연속 체결을 갖게 됐는지)와 사용자 결정이 바뀌었는지를 먼저
+가른다.
 
 🔴 **CRITICAL-1(착지 직후 적대 검증) — "KRX 창" 은 KRX 가 연속일 때만 참이다.**
 `krx_continuous_end` 는 `max(end)` 라 09-15 기준 20:00 이고, 그 하나로
@@ -167,7 +177,9 @@ cycle257(2026-09-05)이 이를 삭제(`scanner.py`/`scheduler.py`)했다.
 ~130종목을 하루 두 번 왕복시키면 KIS 공지 「비정상 케이스 2: 무한 등록/해제」다.
 HIGH 는 실측 ~12종목 + make-before-break 이라 커버리지 공백이 0 이다. 그 구간에도
 **속성축이 이긴다**(`nxt_false` 보유는 KRX 유지 — NXT 로 보내면 새 blind 다).
-킬스위치 = `system_config.tick_channel_gap_hold_enabled`(기본 `true`).
+🔴 이 문단(범위 한정·킬스위치)은 **cycle295 에서 철회**됐다 — 그 20분에도
+HIGH·LOW 무관 KRX 를 유지한다(완전 휴식). 킬스위치 자체가 제거돼 되돌릴 다이얼이
+없다 — 되살리려면 새 승인 사이클이 필요하다.
 
 🔴 **시각 리터럴 0건이 계약이다.** 경계 셋은 전부
 `market_state.get_market_table(on_date)` **공개 API** 파생이다 —
@@ -194,8 +206,9 @@ HIGH 는 실측 ~12종목 + make-before-break 이라 커버리지 공백이 0 �
 KRX 로 **내리는** 판단에는 여전히 권위가 필요하고, 전환 폭 40% 축소가 거기서 나온다).
 
 **전환 — 창 안에서만, 창 밖은 금지.** 창은 `tick_channel_clock.switch_windows()`
-가 표에서 파생한다 — `pre_to_krx`(아침) · `krx_to_nxt_gap`(NXT 단독 구간 진입) ·
-`nxt_gap_to_krx`(복귀, 폭은 아침과 같은 `offset_secs`). 🔴 **창 안에서도 종목마다
+가 표에서 파생한다 — 🔴 **cycle295 부터 `pre_to_krx`(아침) 하나뿐이다**(사용자
+결정 「전환은 하루 1회」로 복귀 — cycle294 가 CRITICAL-1 커버리지를 위해 추가했던
+`krx_to_nxt_gap`·`nxt_gap_to_krx` 두 창은 철회됐다). 🔴 **창 안에서도 종목마다
 경계를 다시 본다**(적대 검증 HIGH-3) — 120초 루프는 부팅 시각 기준 고정 위상이라
 창 끝 직전에 진입할 수 있고, 종전 구현은 그 뒤 `MAX_PER_CYCLE`/`BUDGET_SECS` 가 찰
 때까지 창을 넘겨 계속 옮겼다(개장 직후 LOW break-before-make = 실제 blind). 경과
@@ -303,7 +316,12 @@ UNSUBSCRIBE 를 보내 KIS `OPSP0003` + 영구 고아를 만든다. 같은 이�
 | `tick_channel_switch_offset_secs` | 300 | `nxt_pre_end` 에서 전환까지 |
 | `tick_channel_switch_ack_timeout_secs` | — | HIGH make-before-break ACK 대기 |
 | `tick_channel_revert_probe_secs` | 180 | 개장 후 원복 판정 시점 |
-| `tick_channel_gap_hold_enabled` | `true` | 🔴 **NXT 단독 연속 구간**(09-15 = 15:40~16:00)에 보유(HIGH)가 NXT 를 따라가는가. `false` 면 그 20분의 손절 트리거가 사라지므로 **되돌릴 때만** |
+
+🔴 **cycle295 — 다섯 번째 키(`tick_channel_gap_hold_enabled`)는 표에서 사라졌다.**
+그 키·게터/세터·소비처가 코드에서 전부 제거됐다(§ 위 CRITICAL-1 절두 참조). DB 에
+남은 `false` 값 행은 읽는 곳이 0 이라 노출되지 않지만 **DELETE 하지 않는다** —
+**이 키 이름을 재사용하지 마라**, 같은 이름을 반대 의미로 되살리면 저장된 `false`
+가 조용히 적용된다.
 
 즉시 반영(재시작 불요):
 
@@ -311,8 +329,6 @@ UNSUBSCRIBE 를 보내 KIS `OPSP0003` + 영구 고아를 만든다. 같은 이�
 curl -X PUT .../api/realtime/tick-channel-mode -d '{"mode":"enforce"}'
 curl -X PUT .../api/realtime/tick-channel-mode \
      -d '{"mode":"enforce","switch_enabled":false}'   # 채널은 유지, 전환만 정지
-curl -X PUT .../api/realtime/tick-channel-mode \
-     -d '{"mode":"enforce","gap_hold_enabled":false}' # 15:40~16:00 NXT 추종 해제
 curl -X PUT .../api/realtime/tick-channel-mode -d '{"mode":"off"}'   # 배포 전과 동일
 ```
 
@@ -324,10 +340,12 @@ curl -X PUT .../api/realtime/tick-channel-mode -d '{"mode":"off"}'   # 배포 �
 
 「채널이 문제」(`mode`)와 「전환이 문제」(`switch_enabled`)는 **다른 결정**이라 모드
 enum 에 태우지 않았다 — 사고 중에 쓸 카드가 `off` 하나뿐이면 운영자가 장중 대량
-전환을 실행하게 된다. `switch_enabled`·`gap_hold_enabled` 는 **선택 필드**라 생략하면 현행 값 무접촉이다.
-`GET /api/realtime/tick-channel-mode` 는 그날 `nxt_gap_window` 와 `switch_windows`
-(창 3개)를 함께 돌려준다 — 운영자가 화면 없이 "오늘 전환이 몇 시로 잡혔는가" 를
-확인하는 유일한 채널이다.
+전환을 실행하게 된다. `switch_enabled` 는 **선택 필드**라 생략하면 현행 값
+무접촉이다. 🔴 옛 런북의 `gap_hold_enabled` 필드는 **조용히 무시**된다(422 로
+막지 않는다 — 같은 요청의 `mode` 킬스위치까지 막히기 때문이다).
+`GET /api/realtime/tick-channel-mode` 는 그날 `switch_windows`(창 하나,
+`pre_to_krx`)를 함께 돌려준다 — 운영자가 화면 없이 "오늘 전환이 몇 시로 잡혔는가"
+를 확인하는 유일한 채널이다.
 
 🔴 **마커 의미 전환 — 배포 전후 grep 합산 금지**: `[tick_channel_config]` 는
 `clock_krx=`/`clock_nxt=`/`cohort_no_feed=` 3라벨이 붙었고 `resolved_unified=` 는

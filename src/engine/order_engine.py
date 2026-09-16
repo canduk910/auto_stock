@@ -198,6 +198,75 @@ def _classify_after_exit_rejection(e: KisApiError) -> str:
     return "unclassified"
 
 
+def _market_rest_now(now: datetime) -> tuple[bool, str]:
+    """cycle295 (B) — 순수·never-raise 술어, 모듈 레벨. 시각 리터럴 0건.
+
+    2026-09-15 사용자 결정 — 프리장은 NXT, 그 밖에는 KRX 가 우리 호가유형을
+    받을 때만 주문한다. 「15:30~16:00 완전 휴식」은 그 규칙의 따름정리다.
+
+    (가) 사실 — 15:40~16:00 은 KRX 에 연속 체결이 없고 NXT 애프터만 continuous 다
+         (`market_state.MARKET_TABLE` 파생. 감시자 = `test_cycle294b::test_n1`).
+    (나) cycle294 의 판단 — 따라서 그 구간을 KRX 채널로 덮으면 `nxt_true` 보유의
+         손절 커버리지가 매일 20분 사라진다. **이 문장은 여전히 참이다.**
+    (다) 2026-09-15 사용자 결정 — "청산측으로도 참여를 하지 않고자 해.
+         15:30~16:00 은 완전 휴식하도록 변경해야해." 그 20분의 커버리지 손실을
+         **비용으로 수용**했다. 결함이 아니라 결정이다 — 되돌리기 전에
+         `_workspace/00_URGENT_WORKLIST.md` 의 2026-09-15 결정을 확인하라.
+
+    🔴 이 함수를 라우터(`_route_exchange_by_clock`) **안**에 넣지 않는다(§3-2 —
+    `_probe_nxt_downgrade_base` 가 `nxt_tradable=False` 코호트(마스터 83.2%)를
+    `base="KRX"` 로 만들어 clause 1 에서 즉시 반환되므로, 라우터 안에 두면 컷이
+    가장 필요한 다수 코호트를 통째로 비껴간다). 대신 주문 발사점
+    (`execute_sell`/`execute_buy`/`_cancel_and_reorder`)에서만 이 술어를 부른다.
+    """
+    try:
+        from src.engine.market_state import get_market_state
+        from src.engine.session import MarketBoard, boards_at, session_tracker
+
+        active = session_tracker.active or boards_at(now.time())
+        if MarketBoard.PRE_NXT in active and MarketBoard.MAIN not in active:
+            # 프리장 예외 — 라우터 clause 4·매도 프리장 사전 지정가 변환과
+            # 같은 출처(`session_tracker.active`)로 판정한다(§3-3 근거 3).
+            return False, "pre_nxt_keep"
+
+        krx = get_market_state(now, market="KRX")
+        if _SENDABLE_DIVISIONS & set(krx.order_divisions):
+            return False, "krx_sendable"  # KRX 가 우리 호가유형을 받는다
+
+        nxt = get_market_state(now, market="NXT")
+        if not krx.order_divisions and not nxt.order_divisions:
+            return False, "no_session"  # 야간 — 현행 안전망 보존
+
+        return True, "market_rest"
+    except Exception:
+        return False, "probe_error"  # fail-open
+
+
+def _market_rest_window_bounds(now: datetime) -> tuple[int, int] | None:
+    """§3-6 카나리아 전용 — 정오 이후 KRX 가 우리 호가유형을 처음 안 받는 분과
+    다시 받는 분(분 단위, `[start, end)`). `market_state` 표에서 역산한다 —
+    리터럴이 아니다. 못 찾으면 `None`(카나리아는 그 호출에서 조용히 스킵).
+    """
+    from src.engine.market_state import get_market_state
+
+    on_date = now.date()
+    start: int | None = None
+    for minute in range(720, 1440):
+        moment = datetime(
+            on_date.year, on_date.month, on_date.day,
+            minute // 60, minute % 60, tzinfo=_KST_TZ,
+        )
+        sendable = bool(
+            _SENDABLE_DIVISIONS & set(get_market_state(moment, market="KRX").order_divisions)
+        )
+        if start is None:
+            if not sendable:
+                start = minute
+        elif sendable:
+            return start, minute
+    return None
+
+
 def _compute_next_market_open_kst(now: datetime) -> datetime:
     """now KST 기준 다음 KRX 정규시간 시작 시각 (09:00) 반환.
 
@@ -278,6 +347,17 @@ class OrderEngine:
         # cycle287 K9 봉인2 — (ticker, KST date) -> 그 저녁 애프터 청산 실패 횟수.
         # `_AFTER_EXIT_GIVEUP_THRESHOLD` 도달 시 그날 밤은 포기(다음 09:00 래치).
         self._after_exit_fails: dict = {}
+        # cycle295 (B) — 15:30~16:00 주문 컷 관측 cap. `KstDailyEmitCap` 은 KST
+        # 날짜 경계에서 자기 리셋하므로 `reset_daily_state()` 배선이 불필요하다
+        # (§3-6). 키 = (ticker, side) — `[market_rest_blocked]` 1회/(ticker,side)/일.
+        # lazy import — 모듈 최상단 `src.*` import 집합 불변 계약(`test_c4_2` 등)을
+        # 지킨다. 애노테이션도 그 별칭을 쓴다(원 이름은 모듈 스코프에 없어
+        # `get_type_hints`/mypy/pyflakes 가 해석에 실패한다).
+        from src.engine.daily_emit_cap import KstDailyEmitCap as _KstDailyEmitCap
+
+        self._market_rest_blocked_cap: "_KstDailyEmitCap[tuple[str, str]]" = _KstDailyEmitCap()
+        # `[market_rest_window]` 카나리아 — 1회/일(단일 키, 차단 여부 무관).
+        self._market_rest_window_cap: "_KstDailyEmitCap[str]" = _KstDailyEmitCap()
 
     # ──────────────────────────── 사이클 52 호환 layer (사이클 55 R-1)
 
@@ -441,6 +521,113 @@ class OrderEngine:
             "exchange_gate=%s",
             OrderDivision.NXT_GTP_LIMIT.value, effective, production, exchange_gate,
         )
+
+    # ──────────────────────── cycle295 (B) — 15:30~16:00 주문 컷 게이트 ────────
+
+    def _emit_market_rest_window(self, now: datetime) -> None:
+        """§3-6 카나리아 — `[market_rest_window]` 1회/일, 컷 0건인 날에도.
+
+        D+1 판독의 성공 서명은 "그 구간 주문 흔적 0건"인데, 0 은 «배선이
+        죽었다»와 «정상»을 구별하지 못한다. 차단 여부와 무관하게 게이트가
+        평가될 때마다 이 카나리아를 남긴다. `start=`/`end=` 는 리터럴이 아니라
+        표에서 역산한다(`_market_rest_window_bounds`). never-raise.
+        """
+        try:
+            if not self._market_rest_window_cap.should_emit("window", now=now):
+                return
+            bounds = _market_rest_window_bounds(now)
+            if bounds is None:
+                return
+            start_m, end_m = bounds
+            self._market_rest_window_cap.emit_once(
+                "window", logger.info,
+                "[market_rest_window] start=%02d:%02d end=%02d:%02d source=market_table",
+                start_m // 60, start_m % 60, end_m // 60, end_m % 60,
+                now=now,
+            )
+        except Exception:
+            try:
+                from src.engine.observer_trace import trace_observer_failure
+                trace_observer_failure(
+                    "[market_rest_window]", "window", self._market_rest_window_cap, now=now,
+                )
+            except Exception:  # pragma: no cover — 2차 예외도 흡수
+                pass
+
+    def _emit_market_rest_blocked(
+        self, *, side: str, ticker: str, strategy_id: str | None,
+        base: str, reason: str, now: datetime,
+    ) -> None:
+        """§3-6 — `[market_rest_blocked]` 1회/(ticker,side)/일.
+
+        이 사이클이 무엇을 잃는지의 유일한 분모다(§4-5). never-raise
+        (`emit_once` 자체가 never-raise).
+
+        적대 검증 시정(MEDIUM) — `base=` 가 빠져 있었다. 그 값이 없으면
+        `nxt_tradable=False` 코호트(마스터 83.2%)가 실제로 컷에 걸렸는지
+        (§3-2 "라우터 안에 두면 컷을 비껴간다" 의 라이브 증거)를 로그만으로는
+        확인할 수 없다.
+
+        ⚠️ **호출부마다 해석 단계가 다르다** — 판독 시 같은 것으로 읽지 마라.
+        `execute_sell` = `target_exchange`(다운그레이드 + 시각 라우팅까지 끝난
+        값 ⇒ `nxt_false` 코호트가 `base=KRX` 로 보이는 것이 §3-2 증거다) /
+        `_cancel_and_reorder` = 원주문의 실제 거래소(`_order_exchange`), 없으면
+        전략 설정값 / `execute_buy` = **아직 거래소 해석 전**이라 전략 설정값
+        (`_strategy_exchange`)이다. 게이트 자리를 해석 뒤로 옮겨 이 차이를
+        없애려 하지 마라 — `execute_buy` 의 자리는 A-ATOMIC 구간 밖이어야 하고
+        `get_buyable` 앞이어야 한다(§3-5②).
+        """
+        self._market_rest_blocked_cap.emit_once(
+            (ticker, side), logger.warning,
+            "[market_rest_blocked] side=%s ticker=%s strategy=%s base=%s reason=%s",
+            side, ticker, strategy_id, base, reason,
+            now=now,
+        )
+
+    def _market_rest_gate(
+        self, *, side: str, ticker: str, strategy_id: str | None,
+        base: str, now: datetime,
+    ) -> bool:
+        """cycle295 (B) 발사점 게이트 — 컷 여부를 판정하고 관측을 남긴다.
+
+        `True` 반환 = 그 주문을 컷한다(호출부는 주문을 내지 않고 즉시 return
+        해야 한다 — `_selling`/`pending_buys` 등 **곁가지 상태 정리는 호출부의
+        몫**이다. `execute_sell`·`execute_buy`·`_cancel_and_reorder` 셋이 각자
+        다른 상태를 갖고 있어 이 헬퍼가 공통으로 만질 수 없다). 카나리아는
+        차단 여부와 무관하게 매 호출 평가된다(§3-6). fail-open — 판정 예외는
+        `_market_rest_now` 자체가 흡수해 `(False, "probe_error")` 를 낸다.
+
+        🔴 **현실 관측 fail-open(§9-Q2 권고)은 착지 직후 적대 검증으로 철회**
+        했다. 해제 키가 `scanner.ticker_last_tick` 신선도였는데 두 가지가 동시에
+        성립해 컷을 **100% 무력화**했다 — ① `risk.on_tick` 이 같은 콜스택에서
+        그 dict 를 먼저 쓰고(`risk.py:585`) 곧바로 `execute_sell`/`execute_buy`
+        를 부르므로 게이트가 재는 틱 나이가 **항상 0.0초**다(그 구간의 청산
+        트리거는 WS 틱 단독 — REST 폴은 15:20 에 끝난다) ② 설령 그 타이밍을
+        고쳐도 KRX K5(15:30~16:00 장후 시간외 종가, `fixed_price`)가 **같은 채널
+        `H0STCNT0` 로 실제 체결 프레임을 보낸다**(표 실측). 즉 "틱이 온다" 와
+        "우리 호가유형이 접수된다" 는 완전히 분리된 사실인데 신선도는 둘을
+        같은 것으로 취급한다.
+
+        ⚠️ 그래서 **표가 정본이고 해제 조건이 없다.** 남은 한계(§4-6) =
+        `market_state` 표는 날짜 범위만 보는 고정 벽시계라 **특별 개장일(지연
+        개장, 수능일이 표준 사례)을 모른다** — 그런 날 15:30~16:00 은 실제로
+        연속체결 중인 정규장인데 컷이 30분 무음 차단한다(연 1회 수준). 이
+        한계는 표에 거래일·특별일 입력을 넣는 별건 카드로 닫는다. 신선도
+        기반 해제를 다시 들이지 마라 — 위 ①②가 그대로 재현된다.
+        """
+        self._emit_market_rest_window(now)
+
+        blocked, reason = _market_rest_now(now)
+        if not blocked:
+            return False
+
+        self._emit_market_rest_blocked(
+            side=side, ticker=ticker, strategy_id=strategy_id,
+            base=base, reason=reason, now=now,
+        )
+        return True
+
+    # ─────────────────────────────────────────────────────────────────────────
 
     def _register_after_exit_disallowed(
         self, ticker: str, now_kst: datetime, *, fallback_succeeded: bool,
@@ -700,6 +887,18 @@ class OrderEngine:
                 "전략 간 중복 매수 차단: %s (요청 전략: %s, 다른 전략이 보유/주문중/당일매도)",
                 t(ticker), strategy.strategy_id,
             )
+            return
+
+        # cycle295 (B) — 15:30~16:00 완전 휴식(§9-Q5 결정 = 매수 축도 넣는다).
+        # 중복매수 가드 **직후**·`get_buyable` **앞**(§3-5②) — A-ATOMIC 구간
+        # (`calc_buy_quantity`~`pending_buys.add`) 밖에 있어야 한다. 그 구간
+        # 매수는 오늘 구조적 0(LTV `tradable_boards` 에 `post_nxt` 없음)이라
+        # 순수 방어선이다.
+        if self._market_rest_gate(
+            side="buy", ticker=ticker, strategy_id=strategy.strategy_id,
+            base=self._strategy_exchange(strategy.strategy_id),
+            now=datetime.now(_KST_TZ),
+        ):
             return
 
         now_ts = time.time()
@@ -1200,6 +1399,20 @@ class OrderEngine:
             target_exchange = await self._strategy_exchange_async(
                 strategy_id, ticker=ticker, side="sell"
             )
+
+        # cycle295 (B) — 15:30~16:00 완전 휴식. `target_exchange` 산출 직후·
+        # 재시도 루프 앞(§3-5①) — base·side·mode 와 무관하게 발사점에서
+        # 판정한다(§3-2 반증: 라우터 안에 넣으면 `nxt_tradable=False` 코호트가
+        # clause 1 에서 즉시 반환돼 컷을 통째로 비껴간다). "하지 말아야 할 것"
+        # 4가지(§3-5①) — 거부 등록 안 함·익일청산 전환 안 함·포지션 불변·
+        # `_selling` 유지 금지(유지하면 그 자체가 stale `_selling` 좀비다).
+        if self._market_rest_gate(
+            side="sell", ticker=ticker, strategy_id=strategy_id,
+            base=target_exchange, now=datetime.now(_KST_TZ),
+        ):
+            self._selling.discard(ticker)
+            self._selling_since.pop(ticker, None)
+            return
 
         # NXT 프리 시장가 매도 사전 지정가 변환 (2026-08-06 — 매수 PR-F :323 대칭).
         # NXT 프리(08:00~09:00)는 KIS 정책상 지정가만 허용 — 시장가는 APBK0918 로
@@ -2428,6 +2641,22 @@ class OrderEngine:
         try:
             await asyncio.sleep(PARTIAL_FILL_WAIT)
             strategy_id = self._order_strategy.get(order_no, "momentum")
+
+            # cycle295 (B) — 쌍 게이트(§3-5③). 이 함수만 취소 3경로 중 유일하게
+            # `sleep(30) → cancel_order → place_order` 의 atomic replace 다.
+            # 절반만 막으면 "호가창의 손절을 우리가 빼고 아무것도 안 넣은" 상태가
+            # 된다 — 컷이면 취소도 하지 않고 작동 중인 주문을 그대로 둔다(16:00
+            # 이후 `cancel_remaining` 또는 `risk.on_tick` 재평가에 위임한다).
+            if self._market_rest_gate(
+                side="sell", ticker=ticker, strategy_id=strategy_id,
+                base=(
+                    self._order_exchange.get(order_no)
+                    or self._strategy_exchange(strategy_id)
+                ),
+                now=datetime.now(_KST_TZ),
+            ):
+                return
+
             # 적대 검증 시정(HIGH) — `_cancel_after_wait` 와 동일 이유로 원주문의
             # 실제 거래소(`_order_exchange`)를 우선한다. 매핑이 없을 때만
             # 현행 라우터 재평가로 fail-open.
@@ -2502,7 +2731,23 @@ class OrderEngine:
                 )
                 if reorder_division is not None:
                     place_kwargs["order_division"] = reorder_division
-                await place_order(**place_kwargs)
+                # cycle295 (D, §2-0b) — 나머지 4곳(매수 주 경로·매수 지정가 폴백·
+                # 매도 주 경로·매도 폴백)과 같은 모양으로 결과를 받아 매핑을
+                # 등록한다. 필요한 값은 전부 이미 스코프에 있다(`strategy_id`·
+                # `ex`·`ticker`·`remaining`·`reorder_division`). 매핑이 없으면
+                # 이 재주문의 체결통보가
+                # `_order_strategy` miss → `trade_history` miss →
+                # `"momentum"` 오귀속으로 흐르고, `_order_qty` 부재로 부분체결이
+                # 전량체결로 읽힌다(§2-0b 실측).
+                result = await place_order(**place_kwargs)
+                if result is not None and getattr(result, "order_no", None):
+                    self._order_qty[result.order_no] = remaining
+                    self._order_strategy[result.order_no] = strategy_id
+                    self._order_ticker[result.order_no] = ticker
+                    self._order_exchange[result.order_no] = ex
+                    if reorder_division is not None:
+                        self._order_division[result.order_no] = reorder_division.value
+                    self._completed_orders.discard(result.order_no)
                 logger.info("손절 잔여 재주문: %s %d주", t(ticker), remaining)
         except asyncio.CancelledError:
             pass  # 새 task로 교체됨 — pop은 새 task가 관리

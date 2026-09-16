@@ -725,7 +725,13 @@ async def test_r5d_buy_side_is_declared_to_the_router(
     [
         (_F_0830, "SOR", "프리장 = 현행"),
         (_F_1100, "KRX", "정규장 = KRX"),
-        (_F_1545, "SOR", "15:45 = KRX 미지원 → 현행"),
+        # cycle295 (B, 2026-09-15) — 15:30~16:00 완전 휴식. 이 행이 배관하던
+        # "KRX 미지원 → 현행(SOR) 라우팅" 계약은 `_route_exchange_by_clock`
+        # 안에서 여전히 참이다(§2-5 byte 동일 — G-295-C5). 다만 그 값이 실릴
+        # 주문 자체가 발사점 게이트(§3-5①)에 걸려 나가지 않는다 — `expected`
+        # 를 `None` 으로 표시해 "라우팅 계약이 사라졌다" 가 아니라 "발사가
+        # 컷됐다" 임을 드러낸다(§5-5 "정상 파괴 — 기대값 갱신, 삭제 금지").
+        (_F_1545, None, "15:45 = cycle295 컷 — 라우팅은 SOR 이지만 발사되지 않는다"),
         (_F_1605, "KRX", "애프터 = KRX"),
     ],
 )
@@ -733,14 +739,23 @@ async def test_r6_sell_exchange_plumbing(
     monkeypatch: pytest.MonkeyPatch,
     mock_place_order: AsyncMock,
     frozen: str,
-    expected: str,
+    expected: str | None,
     label: str,
 ) -> None:
-    """R6 (RED) — 매도 `place_order(exchange=)` 가 라우팅 결과를 그대로 싣는다."""
+    """R6 (RED) — 매도 `place_order(exchange=)` 가 라우팅 결과를 그대로 싣는다.
+
+    cycle295 (B) 이후 — `expected is None` 인 행은 15:30~16:00 컷 구간이라
+    place_order 자체가 나가지 않는다(위 주석).
+    """
     engine, _ = _make_engine(exchange="SOR")
     with freeze_time(frozen):
         _pin_boards(monkeypatch, datetime.now(KST_TZ))
         await engine.execute_sell(_TICKER, Signal.STOP_LOSS, _SID)
+    if expected is None:
+        assert mock_place_order.await_count == 0, (
+            f"{label} — cycle295 컷 구간인데 주문이 나갔다"
+        )
+        return
     assert mock_place_order.await_count == 1
     assert mock_place_order.await_args.kwargs["exchange"] == expected, label
 

@@ -209,8 +209,19 @@ _SRC_TREE_FILES = 152
 #: `b7731d72a1e3fd3587d805459b2bfbdb80f0c77784b2daaf75d73bd275116308` 였다.
 #: ⚠️ cycle293 착지(= cycle294 착수) 값은
 #: `61401aa6dbf4fc2d816a30454a9d6501259152bd8d5d29e09e33a4b9996d19cd` 였다.
+#: ⚠️ **cycle295(갭 홀드 제거 + 15:30~16:00 주문 컷, 2026-09-16) 기준선으로 갱신.**
+#: 움직인 파일 6 = `engine/tick_channel_clock.py`·`engine/tick_channel_mode.py`(A축 —
+#: 갭 판정·다이얼 삭제) · `db/system_config.py`(A축 getter/setter 삭제 + C축 bool 정규화)
+#: · `routes/realtime.py`(A축 라우트 표면) · `engine/order_engine.py`(B·D축 — 컷 게이트
+#: + 손절 잔여 재주문 매핑) · `routes/trading.py`(§9-Q3 ② manual-sell 컷 **면제** 경고).
+#: 그중 `order_engine.py` 만 이 가드의 **예외 3파일**에 이미 들어 있어 digest 에는
+#: 나머지 5개의 변경이 반영됐다. 파일 수는 **152 로 불변**(신규 파일 0 — 이 사이클의
+#: 신규는 테스트뿐이다). `engine/tick_channel_switch.py` 는 docstring 1곳만 바뀌었다
+#: (전환 창 3→1 서술 정정, AST 불변).
+#: cycle294 착지(= cycle295 착수) 값은
+#: `7b496e80aa6dbb3e3b132367cb3c356c2bb93ee1136486b0af6ddf4cfe20b767` 였다.
 _SRC_TREE_DIGEST = (
-    "7b496e80aa6dbb3e3b132367cb3c356c2bb93ee1136486b0af6ddf4cfe20b767"
+    "d4d6622a112829230c2d342b70a99b99153fa465527a38d1e9cd78ddd056c685"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

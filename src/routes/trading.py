@@ -98,12 +98,50 @@ class ManualSellRequest(BaseModel):
     quantity: int
 
 
+def _market_rest_note() -> str:
+    """cycle295 §4-7/§9-Q3 ② — 15:30~16:00 컷의 **명시 면제** 표기.
+
+    이 라우트의 `place_order` 는 `execute_sell` 도 `_apply_clock` 도
+    `_route_exchange_by_clock` 도 거치지 않으므로 `_market_rest_gate` 에 닿는
+    경로가 **구조적으로 없다**. 운영자의 수동 조작은 컷하지 않기로 했지만
+    (③ `execute_sell` 위임은 행위 반경이 커서 별건 카드), 아무것도 안 적으면
+    다음 사람이 "15:30~16:00 주문 0건" 판독을 하다가 이 한 건에 걸려 게이트가
+    고장났다고 오진한다. 그래서 응답 message 와 로그에 면제 사실을 남긴다.
+
+    never-raise — 판정 실패는 빈 문자열(주문 자체엔 영향 0).
+    """
+    try:
+        from datetime import datetime
+
+        from src.engine.order_engine import _KST_TZ, _market_rest_now
+
+        blocked, _reason = _market_rest_now(datetime.now(_KST_TZ))
+        if not blocked:
+            return ""
+        return (
+            " ⚠️ 지금은 자동매매 휴식 구간(15:30~16:00)입니다 — "
+            "수동 매도는 컷 면제라 주문이 실제로 나갑니다(cycle295 §4-7)"
+        )
+    except Exception:
+        return ""
+
+
 @router.post("/manual-sell", response_model=ApiResponse)
 async def manual_sell(req: ManualSellRequest):
     """수동 매도 주문을 실행한다.
 
     자동매매와 동일하게 시장가 매도 + trade_history 기록.
     포지션이 있는 전략을 자동으로 찾아서 해당 전략으로 기록한다.
+
+    🔴 cycle295 (B) **컷 면제 경로**(§4-7 · §9-Q3 ②) — 이 라우트는
+    `order_engine._market_rest_gate` 를 거치지 않는다. 15:30~16:00 에 이 버튼을
+    누르면 주문은 실제로 나간다(운영자의 수동 조작은 막지 않기로 한 결정).
+    D+1 판독에서 그 구간 주문이 1건 나오면 **이 라우트를 먼저 본다.**
+
+    ⚠️ 알려진 별건(cycle287 잔여, 이 사이클 범위 밖) — 16:00~20:00 KRX 애프터에
+    이 버튼을 누르면 44/41 호가유형 변환도 KRX 라우팅도 없이 시장가가 나가
+    APBK3013 로 거부되고, 실패 경로에 `_selling.discard` 가 없어 stale
+    `_selling` 이 남는다. 처분 = §9-Q3 ③(`execute_sell` 위임) 별도 카드.
     """
     from src.api.order import place_order
     from src.models.order import OrderSide
@@ -157,12 +195,17 @@ async def manual_sell(req: ManualSellRequest):
         )
         await insert_trade(record)
 
-        logger.info("수동 매도 주문 접수: %s %d주 (주문번호: %s, 전략: %s)",
-                     t(req.ticker), req.quantity, result.order_no, strategy_id)
+        rest_note = _market_rest_note()
+        logger.info("수동 매도 주문 접수: %s %d주 (주문번호: %s, 전략: %s)%s",
+                     t(req.ticker), req.quantity, result.order_no, strategy_id,
+                     " [market_rest_manual_exempt]" if rest_note else "")
 
         return ApiResponse(
             success=True,
-            message=f"{name or req.ticker} {req.quantity}주 매도 주문 접수 (주문번호: {result.order_no})",
+            message=(
+                f"{name or req.ticker} {req.quantity}주 매도 주문 접수 "
+                f"(주문번호: {result.order_no}){rest_note}"
+            ),
         )
 
     except Exception as e:

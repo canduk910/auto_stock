@@ -220,17 +220,56 @@ _DKSTOCK_REGIME_ENABLED_KEY = "dkstock_regime_enabled"
 _KIS_MCP_ENABLED_KEY = "kis_mcp_enabled"
 
 
+def _normalize_bool_value(v: object) -> bool | None:
+    """`{"value": v}` 의 `v` 를 bool 로 정규화한다 (cycle295 §2-0 C1).
+
+    `_get_bool_or_none` 의 dict 분기 전용 — JSON boolean 은 그대로, 문자열
+    `'true'/'false'`(대소문자·공백 무관)는 정규화, 그 밖의 문자열(`"maybe"`/`""`
+    등)은 **`None`**(「모른다」— bool 이 아닌 문자열을 `True` 로 읽는 것이 원래
+    결함의 본질이라 안전한 쪽으로 떨어뜨린다). 숫자는 `bool(v)`, `None` 은 `None`.
+
+    ⚠️ **방향 전환 1건(적대 검증 기록)** — 비-bool dict 값이 종전 `bool(v)`
+    (대개 `False`: `""`·`[]`·`{}`)에서 **`None`** 으로 바뀐다.
+    `dkstock_regime_enabled`·`kis_mcp_enabled` 는 `None` 이 「DB 에 답이 없다 →
+    `.env` 를 보라」는 신호이므로(`services/dkstock_client.py` ·
+    `services/mcp_client.py` · `engine/backtest_engine.py` ·
+    `routes/system_integrations.py`), 오염된 행이 있으면 판정 주체가 DB 에서
+    환경변수로 옮겨간다. 세 키 모두 setter 가 `_set_bool` 이라 그런 값을 쓸
+    경로가 코드에 **없고**(현재 도달 불가), `auto_apply_enabled`·
+    `etf_regime_enabled`·`krx_open_api_enabled` 는 `None`→`False` 로 접으므로
+    무영향이다. 기록만 남긴다 — 「비활성화는 제거가 아니라 경로 변경일 수 있다」.
+    """
+    if v is None:
+        return None
+    if isinstance(v, bool):
+        return v
+    if isinstance(v, str):
+        normalized = v.strip().lower()
+        if normalized == "true":
+            return True
+        if normalized == "false":
+            return False
+        return None
+    if isinstance(v, (int, float)):
+        return bool(v)
+    return None
+
+
 async def _get_bool_or_none(key: str) -> bool | None:
-    """system_config 의 bool JSONB 값을 안전하게 조회. 키 부재 → None."""
+    """system_config 의 bool JSONB 값을 안전하게 조회. 키 부재 → None.
+
+    **cycle295 §2-0 C1** — dict 분기(`{"value": v}`)도 `_normalize_bool_value`
+    로 문자열을 정규화한다. 종전에는 `bool(raw.get("value"))` 로 끝나 dict 로
+    감싸인 문자열 `"false"` 가 `True` 로 읽히는 왕복 불변식 파괴가 있었다
+    (`tick_channel_gap_hold_enabled`/`tick_channel_switch_enabled` 실증,
+    2026-09-15). bare(문자열 직저장) 분기는 기존 계약 그대로 보존한다.
+    """
     try:
         raw = await _select_value(key)
         if raw is _MISSING:
             return None
         if isinstance(raw, dict):
-            v = raw.get("value")
-            if v is None:
-                return None
-            return bool(v)
+            return _normalize_bool_value(raw.get("value"))
         if isinstance(raw, bool):
             return raw
         # 문자열 'true'/'false' 호환 (마이그레이션 텍스트 INSERT 대비)
@@ -773,11 +812,15 @@ async def set_tick_channel_resolver_mode(mode: str) -> None:
 # 🔴 전략 `DEFAULT_PARAMS`·`param_catalog`·`PARAM_RANGES`·`INT_PARAMS` **편입
 #    금지**. 리졸버는 인프라 축이고 7전략에 넣으면 7곳이 갈린다. 조회 실패·키
 #    부재는 전부 `None` — 호출자가 **현재 값을 유지**한다(기본값 되돌림 금지).
+#: cycle295 §2-1 — `tick_channel_gap_hold_enabled` 키는 소비처와 함께 코드에서
+#: 사라졌다(사용자 결정 「15:30~16:00 완전 휴식」). 값 `false` 잔존 행은 **DELETE
+#: 하지 않는다**(§2-4 — 어디에도 노출되지 않고, 되돌리기 어려운 운영 조치라
+#: 승인 대상이다). ⚠️ **이 키 이름을 재사용하지 마라** — 같은 이름을 반대
+#: 의미로 되살리면 저장된 `false` 가 조용히 적용된다.
 _TICK_CHANNEL_SWITCH_ENABLED_KEY = "tick_channel_switch_enabled"
 _TICK_CHANNEL_SWITCH_OFFSET_SECS_KEY = "tick_channel_switch_offset_secs"
 _TICK_CHANNEL_SWITCH_ACK_TIMEOUT_SECS_KEY = "tick_channel_switch_ack_timeout_secs"
 _TICK_CHANNEL_REVERT_PROBE_SECS_KEY = "tick_channel_revert_probe_secs"
-_TICK_CHANNEL_GAP_HOLD_ENABLED_KEY = "tick_channel_gap_hold_enabled"
 
 
 async def get_tick_channel_switch_enabled() -> bool | None:
@@ -791,7 +834,13 @@ async def get_tick_channel_switch_enabled() -> bool | None:
 
 
 async def set_tick_channel_switch_enabled(enabled: bool) -> None:
-    await _set_string(_TICK_CHANNEL_SWITCH_ENABLED_KEY, "true" if enabled else "false")
+    """cycle295 §2-0 B3 — `_set_string("true"/"false")` → `_set_bool` (정본 형태).
+
+    저장 형태를 JSONB `{"value": bool}` 로 고정한다(`set_auto_start` 관례).
+    `_set_string` 이 남긴 문자열은 `_get_bool_or_none` 의 dict 분기가 왕복
+    불변식을 깨뜨리는 원인이었다(2026-09-15 실증).
+    """
+    await _set_bool(_TICK_CHANNEL_SWITCH_ENABLED_KEY, enabled)
 
 
 async def get_tick_channel_switch_offset_secs() -> float | None:
@@ -802,27 +851,6 @@ async def get_tick_channel_switch_offset_secs() -> float | None:
 async def get_tick_channel_switch_ack_timeout_secs() -> float | None:
     """make-before-break 의 신 채널 ACK 대기 상한 (초)."""
     return await _get_float_or_none(_TICK_CHANNEL_SWITCH_ACK_TIMEOUT_SECS_KEY)
-
-
-async def get_tick_channel_gap_hold_enabled() -> bool | None:
-    """🔴 cycle294 적대 검증 CRITICAL-1 — **NXT 단독 연속 구간** 커버리지 다이얼.
-
-    표가 말하는 사실: 09-15 기준 15:40~16:00 은 KRX 에 연속 체결이 없고
-    (K4 종가단일가 · K5 시간외 종가) NXT N6 애프터만 열려 있다. 그 20분을 KRX
-    채널로 덮으면 `nxt_true` **보유** 종목의 손절 트리거가 매일 20분씩 사라진다
-    (오늘은 통합 채널이 그 체결을 싣는다 = INV-1 위반).
-
-    `true`(기본) 면 그 구간 동안 **HIGH(보유·익일청산)만** NXT 를 따라간다.
-    `false` 면 cycle294 배포 직후 설계(아침 1회 전환)와 동일하게 돌아간다 —
-    그 20분의 blind 를 감수하는 선택이므로 **되돌릴 때만** 쓴다.
-    """
-    return await _get_bool_or_none(_TICK_CHANNEL_GAP_HOLD_ENABLED_KEY)
-
-
-async def set_tick_channel_gap_hold_enabled(enabled: bool) -> None:
-    await _set_string(
-        _TICK_CHANNEL_GAP_HOLD_ENABLED_KEY, "true" if enabled else "false",
-    )
 
 
 async def get_tick_channel_revert_probe_secs() -> float | None:

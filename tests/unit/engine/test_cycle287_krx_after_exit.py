@@ -92,6 +92,9 @@ _M_GIVEUP = "[after_exit_giveup]"
 
 # ── UTC 리터럴 ↔ KST ──────────────────────────────────────────────────────
 _F_0830 = "2026-09-13 23:30:00"     # KST 2026-09-14 08:30:00 (NXT 프리마켓)
+_F_0855 = "2026-09-13 23:55:00"     # KST 2026-09-14 08:55:00 (프리장 — cycle295 컷 예외)
+_F_0905 = "2026-09-14 00:05:00"     # KST 2026-09-14 09:05:00 (KRX 정규장 진입 직후)
+_F_2100 = "2026-09-14 12:00:00"     # KST 2026-09-14 21:00:00 (야간 — 양 시장 CLOSED)
 _F_1100 = "2026-09-14 02:00:00"     # KST 2026-09-14 11:00:00 (KRX 정규장)
 _F_1520 = "2026-09-14 06:20:00"     # KST 2026-09-14 15:20:00 (종가 단일가)
 _F_1535 = "2026-09-14 06:35:00"     # KST 2026-09-14 15:35:00 (K5·N5 = 수단 0)
@@ -380,20 +383,27 @@ async def test_k3b_1530_to_1600_keeps_today_path(
     exchange: str,
     label: str,
 ) -> None:
-    """K3 (RED) — **15:30~16:00 은 현행 유지**(자문 카드 A = 선택 (가) 계열).
+    """K3 (RED → cycle295 재서술, 2026-09-15) — **15:30~16:00 은 이제 완전 휴식이다.**
 
-    선택지 (다)("그 30분 청산 불가로 못박음")는 `register_market_closed` 의
-    **다음-09:00 래치** 때문에 성립하지 않는다 — 15:35 거부 한 건이 그 종목의
-    매도를 16:00~20:00 애프터 4시간 내내 차단해 이 사이클의 목표를 무효화한다.
+    이 테스트가 원래 지키던 계약("현행 유지" = 주문을 **보내서** SOR 로 나가는
+    것)은 cycle295(B) 사용자 결정 "청산측으로도 참여를 하지 않고자 해" 로
+    철회됐다. cycle287 자문의 (다)("그 30분 청산 불가로 못박음") 기각 논리는
+    **지금도 유효하다** — 단 그 기각은 *거부를 받는* 컷을 가정했다
+    (`register_market_closed` 의 다음-09:00 래치가 15:35 거부 한 건으로
+    16:00~20:00 애프터 4시간을 통째로 잠그는 것이 무효화 사유였다). cycle295
+    의 컷은 *보내지 않는* 컷이라 그 래치 경로를 아예 통과하지 않는다(§3-5① —
+    거부가 없으므로 `SellRejectionTracker` 미등록, T8 이 그 행위를 잰다).
+    이 테스트가 붉어졌다면 먼저 `_workspace/00_URGENT_WORKLIST.md` 의
+    2026-09-15 결정을 확인하라(표가 바뀌었는지 결정이 바뀌었는지를 가르기
+    전에는 기대값을 고치지 마라).
     """
     engine, _ = _make_engine()
     with freeze_time(frozen):
         _pin_boards(monkeypatch)
         await _sell(engine)
-    kw = mock_place_order.await_args.kwargs
-    assert kw["exchange"] == exchange, label
-    assert kw["order_division"] is OrderDivision.MARKET, label
-    assert kw["price"] == 0
+    assert mock_place_order.await_count == 0, (
+        f"{label} — cycle295 컷 구간인데 주문이 나갔다"
+    )
 
 
 @pytest.mark.asyncio
@@ -457,20 +467,25 @@ async def test_k3e_2000_is_outside_the_after_window(
 async def test_k4_pre_reform_1605_is_untouched(
     monkeypatch: pytest.MonkeyPatch, mock_place_order: AsyncMock, caplog
 ) -> None:
-    """K4 (RED) — **09-14 이전** 16:05 는 변환 0 · 거래소 SOR = 오늘의 경로.
+    """K4 (RED → cycle295 재서술, 2026-09-15) — **09-14 이전** 16:05 는 이제 컷이다.
 
-    `market_state` K6 은 `effective_from=2026-09-14` 이고 그 전날까지는 K7(시간외
-    단일가 `07`)이다. 날짜 차원이 표에 있으므로 이 커밋을 09-14 전에 배포해도
-    저녁 청산이 오늘과 같다 — 리터럴로 `16:00` 을 적으면 이 성질을 잃는다.
+    원 계약("변환 0 · 거래소 SOR = 오늘의 경로")은 K6/K7 의 `effective_from`
+    날짜 게이팅이 09-14 이전을 건드리지 않는다는 **cycle287 축 관측**이었다.
+    cycle295(B)의 `_market_rest_now` 는 그보다 먼저 발사점에 앉는다 — K6 이
+    없는 날짜는 KRX 가 15:30 부터 자정까지 우리 호가유형을 한 번도 받지
+    못해(§3-4 T12b 실측: 컷이 15:30~19:59 로 벌어진다) **이 시각도 그 안에
+    든다**. 그래서 cycle287 이 관측하려던 "변환 0" 은 이제 "발사 자체가
+    없다" 로 원인이 바뀌었을 뿐 결론(그 저녁 KRX 애프터 44/41 변환이 발화하지
+    않는다 = `_M_DIV` 마커 0행)은 그대로다 — 이 테스트는 그 사실을 감시한다.
     """
     engine, _ = _make_engine()
     caplog.set_level(logging.INFO, logger=_OE_LOGGER)
     with freeze_time(_F_PRE_1605):
         _pin_boards(monkeypatch)
         await _sell(engine)
-    kw = mock_place_order.await_args.kwargs
-    assert kw["order_division"] is OrderDivision.MARKET
-    assert kw["exchange"] == "SOR"
+    assert mock_place_order.await_count == 0, (
+        "pre-reform 16:05 에 주문이 나갔다 — cycle295 컷(§3-4 T12b)이 죽었다"
+    )
     assert _marker_lines(caplog, _M_DIV) == []
 
 
@@ -960,20 +975,34 @@ async def test_k9g_exit_capable_window_uses_the_five_minute_ttl(
 async def test_k9h_non_exit_capable_window_keeps_the_long_ttl(
     monkeypatch: pytest.MonkeyPatch, mock_place_order: AsyncMock
 ) -> None:
-    """K9 (RED) — 15:35(K5 `06` · N5 없음)은 **팔 수단이 0** 이라 긴 TTL 유지.
+    """K9 (RED → cycle295 재앵커, 2026-09-15) — **팔 수단이 0** 인 창은 긴 TTL 유지.
 
-    TTL 축을 "매도 가능 창" 으로 재정의하는 것이지 전부 5분으로 미는 것이 아니다.
+    원 픽스처(15:35, K5 `06`·N5 없음)는 cycle295(B)의 발사점 게이트에 먼저
+    걸려 `place_order` 가 아예 호출되지 않는다(§3-5① — "거부 등록 안 함",
+    T8 이 그 행위를 잰다) — 이 테스트가 재려는 "거부 *받은* 뒤의 TTL 축
+    재정의"를 더 이상 그 시각에서 관측할 수 없다(cycle295 스펙 §5-5 G-B2 ·
+    test_k11d 재앵커와 동형 처분).
+
+    21:00(양 시장 CLOSED — `no_session`)으로 재앵커한다. 08:00~08:59:59
+    (프리장 예외 구간)은 `now < 09:00` 이라 TTL 만료가 그날 09:00 까지 ≤60분
+    이라 "긴 TTL" 단언과 맞지 않는다 — `now >= 09:00` 이면서 게이트가
+    `no_session` 으로 막지 않는 유일한 대(帶)는 이 야간 창이다. `_market_rest_now`
+    는 KRX·NXT 양쪽 `order_divisions` 가 모두 빈 시각을 "야간 안전망 보존"
+    (§3-3 근거 4)으로 컷하지 않고, KRX phase 는 커서 부재로 `CLOSED`
+    (`_EXIT_CAPABLE_KRX_PHASES` 밖)라 "팔 수단이 없는 창은 길게 막는다"는
+    원 계약을 그대로 관측한다.
     """
     engine, _ = _make_engine()
     mock_place_order.side_effect = [_closed_err()]
-    with freeze_time(_F_1535):
+    with freeze_time(_F_2100):
         _pin_boards(monkeypatch)
         await _sell(engine)
         now = datetime.now(KST_TZ)
         expiry = engine._sell_rejection._blocked_until.get(_TICKER)
+    assert mock_place_order.await_count == 1, "야간 안전망이 깨져 컷이 발화했다"
     assert expiry is not None
     assert expiry > now + timedelta(hours=1), (
-        f"15:35 거부 TTL 이 {expiry} — 팔 수단이 없는 창은 길게 막는 것이 안전측이다"
+        f"21:00 거부 TTL 이 {expiry} — 팔 수단이 없는 창은 길게 막는 것이 안전측이다"
     )
 
 
@@ -1159,17 +1188,26 @@ async def test_k11d_cancel_survives_a_clock_boundary_crossed_during_the_wait(
     mock_cancel_order: AsyncMock,
     mock_update_status: AsyncMock,
 ) -> None:
-    """K11d (적대 검증 시정 — exit 렌즈 HIGH-3) — 원주문·취소가 시각 경계를
+    """K11d (적대 검증 시정 — exit 렌즈 HIGH-3, cycle295 재앵커 2026-09-15) —
 
-    사이에 두고 **다른 거래소로 갈리지 않는다**. `PARTIAL_FILL_WAIT`(30초) 동안
-    시각이 15:59:45 → 16:00:15 처럼 창 경계를 넘으면, 취소 시점에 라우터를
-    다시 부르는 구현은 원주문(KRX·krx_unsupported_keep 유지 SOR)과 다른 값
-    (KRX·krx_by_clock)을 낸다. `_order_exchange[order_no]` 가 원주문 시점 값을
-    기억해 이 갈림을 막는다(자문 §4-C2 실제 의도 — "라우터를 거친다" 는
-    "매번 새로 판정한다" 가 아니다).
+    원주문·취소가 시각 경계를 사이에 두고 **다른 거래소로 갈리지 않는다**.
+    `PARTIAL_FILL_WAIT`(30초) 동안 시각이 창 경계를 넘으면, 취소 시점에
+    라우터를 다시 부르는 구현은 원주문과 다른 값을 낸다. `_order_exchange[order_no]`
+    가 원주문 시점 값을 기억해 이 갈림을 막는다(자문 §4-C2 실제 의도 —
+    "라우터를 거친다" 는 "매번 새로 판정한다" 가 아니다).
+
+    원 픽스처(15:45 → 16:00)는 앞이 이제 cycle295(B) 컷 구간이라 주문 자체가
+    나가지 않는다(§5-5 — "경계쌍을 15:25(KRX) → 15:35(컷) 또는 08:55(pre) →
+    09:05(KRX) 로 재앵커한다"). 뒤쪽 대안(15:35)은 `_cancel_and_reorder` 자신도
+    컷 구간이라 이 테스트가 재려는 "경계에서 갈리는가" 자체를 관측할 수
+    없다(§3-5③ 쌍 게이트) — 그래서 **앞쪽 대안**(08:55 프리장 → 09:05 KRX
+    정규장)으로 재앵커한다. 08:55 는 `_market_rest_now` 의 프리장 예외로
+    컷을 비껴가 SOR 그대로 원주문이 나가고, 09:05 는 KRX 가 `00`/`01` 을
+    받아(`krx_sendable`) 컷도 비껴가면서 라우터를 그 시점에 다시 불렀다면
+    "KRX" 로 갈렸을 경계를 그대로 보존한다.
     """
     engine, _ = _make_engine()
-    with freeze_time(_F_1545):  # 15:45 — SOR base, krx_unsupported_keep 유지
+    with freeze_time(_F_0855):  # 08:55 — 프리장 예외, SOR 유지
         _pin_boards(monkeypatch)
         await _sell(engine)
     order_no = "ORD-1"
@@ -1177,7 +1215,7 @@ async def test_k11d_cancel_survives_a_clock_boundary_crossed_during_the_wait(
     recorded = engine._order_exchange[order_no]
     assert recorded == "SOR", f"원주문은 SOR 유지였어야 한다: {recorded!r}"
 
-    with freeze_time(_F_1600):  # 16:00 — 그 사이 애프터가 열려 라우터라면 KRX 를 준다
+    with freeze_time(_F_0905):  # 09:05 — 그 사이 정규장이 열려 라우터라면 KRX 를 준다
         _pin_boards(monkeypatch)
         engine._schedule_cancel_and_reorder(_TICKER, order_no, 2, is_stop_loss=False)
         await engine._pending_cancel_tasks[_TICKER]

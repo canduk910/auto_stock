@@ -893,25 +893,11 @@ class TickChannelModeRequest(BaseModel):
     #: 정규장·애프터에 체결을 실으므로 **blind 가 아니다**. 이것이 §5 자동 원복의
     #: 수동 대응물이다. 생략(`None`)하면 현행 값을 건드리지 않는다.
     switch_enabled: bool | None = None
-    #: 🔴 cycle294 적대 검증 CRITICAL-1 — **NXT 단독 연속 구간** 커버리지 다이얼.
-    #: 09-15 기준 15:40~16:00 은 KRX 에 연속 체결이 없고 NXT 만 열려 있다(표 파생).
-    #: `true`(기본) 면 그 20분 동안 **HIGH(보유·익일청산)만** NXT 를 따라간다 —
-    #: `false` 로 내리면 그 구간의 손절 트리거가 사라지므로 **되돌릴 때만** 쓴다.
-    #: 생략(`None`)하면 현행 값을 건드리지 않는다.
-    gap_hold_enabled: bool | None = None
-
-
-def _nxt_gap_window_repr():
-    """그날 NXT 단독 연속 구간 `"HH:MM:SS~HH:MM:SS"` — 없으면 `None`."""
-    try:
-        from src.engine import tick_channel_clock
-
-        start, end = tick_channel_clock.nxt_only_continuous_window()
-        if start is None or end is None:
-            return None
-        return f"{start}~{end}"
-    except Exception:  # pragma: no cover — never-raise
-        return None
+    # 🔴 cycle295 — `gap_hold_enabled` 필드는 여기 없다(다이얼 자체가 제거됐다,
+    # `src/engine/tick_channel_clock.py` 모듈 docstring 참조). 옛 런북 payload의
+    # 이 키는 `model_config` 기본 `extra="ignore"` 로 **조용히 무시**된다 —
+    # 422 로 막지 않는다(같은 요청의 `mode` 킬스위치까지 막히기 때문). §6-1 대로
+    # 그 런북 자체를 지운다.
 
 
 def _switch_windows_repr():
@@ -951,10 +937,6 @@ async def get_tick_channel_mode():
             "switch_enabled": tick_channel_mode.switch_enabled(),
             "switch_offset_secs": tick_channel_mode.switch_offset_secs(),
             "switch_config_key": tick_channel_mode.SWITCH_ENABLED_KEY,
-            # cycle294 적대 검증 CRITICAL-1 — NXT 단독 연속 구간 다이얼 + 그날 창.
-            "gap_hold_enabled": tick_channel_mode.gap_hold_enabled(),
-            "gap_config_key": tick_channel_mode.GAP_HOLD_ENABLED_KEY,
-            "nxt_gap_window": _nxt_gap_window_repr(),
             "switch_windows": _switch_windows_repr(),
         },
         message="",
@@ -1004,29 +986,15 @@ async def put_tick_channel_mode(req: TickChannelModeRequest):
             logger.exception("[tick_channel_mode] switch_enabled DB 저장 실패 — 메모리만 반영 시도")
         switch_applied = tick_channel_mode.apply_switch_enabled(bool(req.switch_enabled))
 
-    gap_applied = tick_channel_mode.gap_hold_enabled()
-    gap_persisted: bool | None = None
-    if req.gap_hold_enabled is not None:
-        gap_persisted = True
-        try:
-            await system_config.set_tick_channel_gap_hold_enabled(
-                bool(req.gap_hold_enabled),
-            )
-        except Exception:
-            gap_persisted = False
-            logger.exception("[tick_channel_mode] gap_hold DB 저장 실패 — 메모리만 반영 시도")
-        gap_applied = tick_channel_mode.apply_gap_hold_enabled(bool(req.gap_hold_enabled))
-
     logger.warning(
         "[tick_channel_mode] mode=%s persisted=%s switch_enabled=%s switch_persisted=%s"
-        " gap_hold=%s gap_persisted=%s — 운영자 변경 (즉시 반영)",
-        applied, persisted, switch_applied, switch_persisted, gap_applied, gap_persisted,
+        " — 운영자 변경 (즉시 반영)",
+        applied, persisted, switch_applied, switch_persisted,
     )
     failed = [
         label for label, ok in (
             ("mode", persisted),
             ("switch_enabled", switch_persisted),
-            ("gap_hold_enabled", gap_persisted),
         )
         if ok is False
     ]
@@ -1037,8 +1005,6 @@ async def put_tick_channel_mode(req: TickChannelModeRequest):
             "persisted": persisted,
             "switch_enabled": switch_applied,
             "switch_persisted": switch_persisted,
-            "gap_hold_enabled": gap_applied,
-            "gap_persisted": gap_persisted,
         },
         message=(
             ""

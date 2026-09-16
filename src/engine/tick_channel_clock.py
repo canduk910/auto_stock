@@ -6,37 +6,33 @@
 
     프리장(N1 구간)        → NXT 전용   (그 시각 NXT 만 연속 체결을 싣는다)
     전환 창                → 주문 0건 · cycle241 시장 침묵 ⇒ 전환 비용 ≈ 0
-    정규장 + 애프터마켓    → KRX 전용   (연속)
-    🔴 NXT 단독 연속 구간  → **보유(HIGH)만** NXT 전용 (아래 §CRITICAL-1)
+    정규장 + 애프터마켓    → KRX 전용   (연속, 15:30~16:00 포함)
 
-## 🔴 적대 검증 CRITICAL-1 시정 — "KRX 창" 은 KRX 가 연속일 때만 참이다
+## 🔴 cycle295 — CRITICAL-1 *시정* 은 철회됐다. *사실* 은 그대로다
 
-착지 직후 검증이 찾은 결함: `krx_continuous_end` 는 `max(end)` 라 **09-15 기준
-20:00** 이고, 그 하나로 09:00~20:00 을 KRX 단일 구간으로 묶으면 표가 말하는 사실과
-어긋난다. 실측 표(`get_market_table(2026-09-15)`):
+cycle294 착지 직후 적대 검증이 찾은 사실은 지금도 참이다 — `krx_continuous_end`
+는 **연속** 구간 end 최댓값인데, 09-15 표에는 그 사이에 연속이 아닌 구간이 끼어
+있다(`get_market_table(2026-09-15)` 실측):
 
     KRX  REGULAR            09:00~15:20  continuous
     KRX  CLOSE_AUCTION      15:20~15:30  single_auction     ← 연속 아님
     KRX  AFTER_CLOSE_FIXED  15:30~16:00  fixed_price        ← 연속 아님
     KRX  AFTER_MARKET       16:00~20:00  continuous
-    NXT  AFTER_MARKET       15:40~20:00  continuous         ← 🔴 15:40~16:00 은 NXT 뿐
+    NXT  AFTER_MARKET       15:40~20:00  continuous         ← 15:40~16:00 은 NXT 뿐
 
-⇒ **15:40~16:00(20분) 은 NXT 에만 연속 체결이 있다.** 그 20분을 KRX 채널로 덮으면
-`nxt_true` 보유 종목의 손절 트리거가 매일 20분씩 사라진다 — 오늘은 통합 채널이 그
-체결을 싣고 있으므로(부록 A: 09-08 15:45 필옵틱스 실체결) **INV-1 위반**이다.
+⇒ **15:40~16:00(20분) 은 NXT 에만 연속 체결이 있다** — 이 문장은 여전히 참이다.
 
-사용자 결정("전환은 하루 1회")의 근거는 「cycle287 이 애프터 주문을 KRX 로 보내므로
-그 구간에 KRX 가격을 보는 것이 정합(평가 가격 = 체결 가격)」이었다. 그 근거는
-**16:00~20:00 에만 참**이다 — `order_engine._route_exchange_by_clock("SOR", side="sell")`
-을 실행해 보면 15:45·15:55 는 `("SOR", "krx_unsupported_keep")`, 16:05·19:00 은
-`("KRX", "krx_by_clock")` 이다. 즉 15:40~16:00 의 매도는 **NXT 로 나간다** ⇒ 같은
-원칙을 적용하면 그 구간의 평가 가격도 NXT 여야 한다. 이 시정은 사용자 결정과
-충돌하지 않고 그 결정의 원칙을 결정이 다루지 않은 구간에 적용한 것이다.
-
-범위는 **HIGH(보유·익일청산)로 한정**한다 — 그 구간에 필요한 것은 손절 커버리지
-하나이고, LOW 후보 ~130종목을 하루 두 번 왕복시키면 KIS 공지 「비정상 케이스 2:
-무한 등록/해제」에 정면으로 걸린다. HIGH 는 실측 ~12종목이고 make-before-break 라
-커버리지 공백이 0 이다. 킬스위치 = `tick_channel_gap_hold_enabled=false`.
+cycle294 는 그 20분 동안 **보유(HIGH)만** NXT 를 따라가는 전환 창 2개
+(`krx_to_nxt_gap`·`nxt_gap_to_krx`)와 킬스위치 `tick_channel_gap_hold_enabled`
+를 사용자 결정 「전환은 하루 1회」에 **승인 없이** 추가했다. 2026-09-15 사용자가
+"청산측으로도 참여를 하지 않고자 해. 15:30~16:00 은 완전 휴식하도록 변경해야해"
+로 그 시정을 **철회**했다 — 그 20분의 손절 커버리지 손실을 비용으로 수용한
+것이다. cycle295(`_workspace/red/cycle295_gap_hold_removal_spec.md`)가 이 배선을
+**구조적으로 0** 으로 만들었다 — 갭 함수·킬스위치·전환 창 2개·DB 헬퍼 2개·라우트
+필드 4개가 전부 제거됐다. **되돌리기 전에 그 명세의 §1·§6-4 를 먼저 읽어라** —
+표가 바뀌어서(KRX 가 그 시각에 연속체결을 갖게 됐다)인지 사용자 결정이 바뀌어서
+인지를 가르기 전에는 이 절을 되살리지 마라. 판별식은
+`tests/unit/engine/test_cycle294b_adversarial_fixes.py::test_n1` 이다.
 
 09-14 16:39~16:41 라이브 실측 — `000815`(nxt_false)·`005385`(nxt_false)·
 `000660`(nxt_true) 전부 KRX 전용 채널에서 KRX 애프터마켓 체결을 받았다. 즉 그
@@ -84,8 +80,6 @@ DEFAULT_SWITCH_OFFSET_SECS = 300
 
 REASON_PRE_WINDOW = "pre_window"
 REASON_KRX_WINDOW = "krx_window"
-#: 🔴 CRITICAL-1 — KRX 가 연속이 아니고 NXT 만 연속인 구간(09-15 = 15:40~16:00).
-REASON_NXT_GAP_WINDOW = "nxt_gap_window"
 REASON_POST_CLOSE = "post_close"
 REASON_DAY_REVERTED = "day_reverted"
 REASON_TABLE_INCOMPLETE = "table_incomplete"
@@ -109,10 +103,6 @@ _CHANNELS: tuple[str, str] | None = None
 #: `reset_state_for_test()` 가 비운다(`MARKET_TABLE` 은 sha 핀된 모듈 상수다).
 _WINDOW_MEMO: dict = {}
 _SWITCH_AT_MEMO: dict = {}
-_GAP_MEMO: dict = {}
-
-#: 구간 길이 비교용 고정 기준일 — 날짜 의미 없음(시각 차만 쓴다).
-_EPOCH_DAY = _date(2000, 1, 1)
 
 
 def _channels() -> tuple[str, str]:
@@ -175,93 +165,6 @@ def _windows(on_date: _date | None = None):
     return result
 
 
-def _spans(rows, market: str) -> list[tuple]:
-    """그 시장의 **연속 체결**(`match_kind=="continuous"`) 구간 목록."""
-    return sorted(
-        (r.start, r.end) for r in rows
-        if r.market == market and r.match_kind == "continuous"
-    )
-
-
-def _subtract(span, cuts) -> list[tuple]:
-    """`span` 에서 `cuts` 구간들을 뺀 나머지(열린 오른쪽 끝 기준)."""
-    segments = [span]
-    for c0, c1 in cuts:
-        rest: list[tuple] = []
-        for s0, s1 in segments:
-            if c1 <= s0 or c0 >= s1:
-                rest.append((s0, s1))
-                continue
-            if c0 > s0:
-                rest.append((s0, c0))
-            if c1 < s1:
-                rest.append((c1, s1))
-        segments = rest
-    return [(a, b) for a, b in segments if a < b]
-
-
-def nxt_only_continuous_window(on_date: _date | None = None):
-    """🔴 CRITICAL-1 — 정규장 개장 **이후** KRX 는 연속이 아닌데 NXT 만 연속인 구간.
-
-    `(start, end)` 또는 `(None, None)`. 09-15 기준 **15:40~16:00**(NXT N6 애프터가
-    15:40 에 열리고 KRX K6 애프터는 16:00 에 열린다). 09-13 이전 날짜에서는
-    `effective_from=2026-09-14` 인 K6 가 표에 없어 15:40~20:00 전체가 이 구간이다
-    — 그 날짜에도 그것이 **사실**이므로 특례를 두지 않는다.
-
-    ⚠️ 시각 리터럴 0건 — 두 시장의 연속 구간 집합을 빼기만 한다. KRX 가 연속
-    구간을 하나 더 신설하거나 NXT 애프터 시각이 또 움직여도 이 질의는 낡지 않는다.
-    여러 조각이 나오면 **가장 긴 조각** 하나를 고른다(현실적으로 1개다).
-    """
-    memo_key = on_date
-    cached = _GAP_MEMO.get(memo_key)
-    if cached is not None:
-        return cached
-    try:
-        from src.engine.market_state import get_market_table
-
-        rows = get_market_table(on_date)
-    except Exception:
-        return None, None
-    try:
-        krx_regular_open, _pre_end, _krx_end = _windows(on_date)
-        if krx_regular_open is None:
-            return None, None
-        krx_spans = _spans(rows, "KRX")
-        pieces: list[tuple] = []
-        for span in _spans(rows, "NXT"):
-            pieces.extend(_subtract(span, krx_spans))
-        pieces = [(a, b) for a, b in pieces if a >= krx_regular_open]
-        if not pieces:
-            result = (None, None)
-        else:
-            best = max(
-                pieces,
-                key=lambda ab: (
-                    _datetime.combine(_EPOCH_DAY, ab[1])
-                    - _datetime.combine(_EPOCH_DAY, ab[0])
-                ),
-            )
-            result = best
-    except Exception:
-        return None, None
-    _GAP_MEMO[memo_key] = result
-    return result
-
-
-def gap_hold_enabled() -> bool:
-    """NXT 단독 연속 구간을 HIGH 가 따라가는가 — 킬스위치(기본 켜짐).
-
-    `tick_channel_mode` 를 **지연 참조**한다(그 모듈이 이 모듈을 import 하므로).
-    조회 실패는 **켜짐**으로 흡수한다 — 꺼짐이 기본이면 INV-1 위반이 기본이 된다.
-    """
-    try:
-        from src.engine import tick_channel_mode
-
-        return bool(tick_channel_mode.gap_hold_enabled())
-    except Exception:  # pragma: no cover — never-raise
-        return True
-
-
 def switch_at(on_date: _date | None = None, *, offset_secs: int | None = None):
     """전환 시각 = `clamp(nxt_pre_end + offset, nxt_pre_end, krx_regular_open)`.
 
@@ -310,10 +213,12 @@ def clock_channel(
     tz-naive `now` 도 예외 없이 전용 채널로 떨어진다(§3-C) — 여기서 던지면
     `subscribe_filtered_stocks` 가 그 사이클의 구독을 통째로 잃는다.
 
-    🔴 `priority` 는 **NXT 단독 연속 구간**(CRITICAL-1) 하나에만 쓰인다. 그
-    구간에서 HIGH(보유·익일청산)만 NXT 를 따라가고 LOW 후보는 KRX 에 남는다 —
-    그 20분에 필요한 것은 손절 커버리지뿐이고, LOW ~130종목을 하루 두 번
-    왕복시키면 KIS 공지 「비정상 케이스 2: 무한 등록/해제」에 정면으로 걸린다.
+    🔴 cycle295 — `priority` 는 **판정에 쓰이지 않는다.** cycle294 가 NXT 단독
+    연속 구간(모듈 docstring §CRITICAL-1)에서 HIGH 만 NXT 를 따라가게 했던 분기는
+    2026-09-15 사용자 결정("15:30~16:00 완전 휴식")으로 **철회**됐다 — 그 결정의
+    *근거*였던 사실(15:40~16:00 은 NXT 만 연속)은 여전히 참이지만, *시정*은
+    되돌렸다. 시그니처는 `scanner.py`(8영역) diff 0 을 위해 유지한다(§2-3) —
+    판정은 코호트 축(`scanner.tick_buy_cohort_blocked`)만 본다.
     """
     krx_only, nxt_only = _channels()
     try:
@@ -328,8 +233,6 @@ def clock_channel(
         if current < boundary:
             return nxt_only, REASON_PRE_WINDOW
         if current < krx_continuous_end:
-            if in_nxt_gap(current, on_date) and str(priority).upper() == "HIGH":
-                return nxt_only, REASON_NXT_GAP_WINDOW
             return krx_only, REASON_KRX_WINDOW
         # 연속 체결 종료 이후 — 구독 자체가 없는 구간이다(20:00 `unsubscribe_all`).
         return krx_only, REASON_POST_CLOSE
@@ -337,60 +240,27 @@ def clock_channel(
         return krx_only, REASON_CLOCK_ERROR
 
 
-def in_nxt_gap(current_time, on_date: _date | None = None) -> bool:
-    """그 시각이 **NXT 단독 연속 구간** 안인가 — 킬스위치까지 함께 본다."""
-    try:
-        if not gap_hold_enabled():
-            return False
-        gap_start, gap_end = nxt_only_continuous_window(on_date)
-        if gap_start is None or gap_end is None:
-            return False
-        return gap_start <= current_time < gap_end
-    except Exception:  # pragma: no cover — never-raise
-        return False
-
-
 def switch_windows(on_date: _date | None = None, *, offset_secs: int | None = None):
     """그날 **전환이 허용되는 창** 목록 `[(start, end, label), …]`.
 
-    창 밖 전환 금지(§4-A)의 근거 셋은 아침 창에서 동시에 성립한다. NXT 단독
-    구간의 두 경계는 그 셋 중 ①(프레임 0)이 성립하지 않지만, 대상이 HIGH 뿐이고
-    make-before-break 이라 커버리지 공백이 0 이며 이중 채널 노출은 종목당 1~5초다.
-    그 비용이 "매일 20분 손절 blind"(INV-1 위반)보다 작다.
+    cycle295 — 사용자 결정 「전환은 하루 1회」로 되돌아온다. cycle294 가 NXT
+    단독 연속 구간(모듈 docstring §CRITICAL-1) 커버리지를 위해 추가했던
+    `krx_to_nxt_gap`·`nxt_gap_to_krx` 두 창은 **철회**됐다 — 그 시정의 *근거*는
+    여전히 참이지만, 사용자가 그 손절 커버리지 손실을 비용으로 수용했다.
 
       W1 `pre_to_krx`     [switch_at, krx_regular_open)      — 프리 창 → KRX
-      W2 `krx_to_nxt_gap` [gap_start, gap_end)               — HIGH 만 NXT 로
-      W3 `nxt_gap_to_krx` [gap_end, gap_end + offset)        — 되돌아오기
-
-    W3 의 폭에 새 숫자를 짓지 않는다 — 아침 창과 같은 `offset_secs` 를 쓴다.
     """
     try:
         target = on_date if on_date is not None else _wall_date()
         if target is None:
             return []
-        krx_regular_open, _pre_end, krx_continuous_end = _windows(target)
+        krx_regular_open, _pre_end, _krx_end = _windows(target)
         if krx_regular_open is None:
             return []
         windows: list[tuple] = []
         boundary = switch_at(target, offset_secs=offset_secs)
         if boundary is not None and boundary < krx_regular_open:
             windows.append((boundary, krx_regular_open, "pre_to_krx"))
-        if gap_hold_enabled():
-            gap_start, gap_end = nxt_only_continuous_window(target)
-            if gap_start is not None and gap_end is not None:
-                windows.append((gap_start, gap_end, "krx_to_nxt_gap"))
-                span = offset_secs if offset_secs is not None else DEFAULT_SWITCH_OFFSET_SECS
-                try:
-                    span = max(0, int(span))
-                except (TypeError, ValueError):
-                    span = DEFAULT_SWITCH_OFFSET_SECS
-                back = (
-                    _datetime.combine(target, gap_end) + timedelta(seconds=span)
-                ).time()
-                if krx_continuous_end is not None and back > krx_continuous_end:
-                    back = krx_continuous_end
-                if back > gap_end:
-                    windows.append((gap_end, back, "nxt_gap_to_krx"))
         return windows
     except Exception:  # pragma: no cover — never-raise
         return []
@@ -482,19 +352,20 @@ def emit_clock_config(now=None, *, offset_secs: int | None = None) -> None:
     함정 — cycle293 이 `[tick_channel_config]` 를 WARNING 으로 올린 그 이유).
 
     never-raise — 카나리아 실패가 구독 사이클을 끊지 않는다.
+
+    🔴 cycle295 — `nxt_gap=`·`gap_hold=` 두 필드가 빠졌다(§6-6, 그 배선 자체가
+    사라졌다). 나머지 4필드는 byte 동일하게 남는다.
     """
     try:
         on_date = now.date() if now is not None else _wall_date()
         krx_regular_open, nxt_pre_end, krx_continuous_end = _windows(on_date)
         boundary = switch_at(on_date, offset_secs=offset_secs)
         wanted = offset_secs if offset_secs is not None else DEFAULT_SWITCH_OFFSET_SECS
-        gap_start, gap_end = nxt_only_continuous_window(on_date)
         _clock_config_cap.emit_once(
             f"clock|{on_date}",
             logger.warning,
             f"[tick_channel_clock] switch_at={boundary} krx_open={krx_regular_open} "
             f"krx_end={krx_continuous_end} nxt_pre_end={nxt_pre_end} "
-            f"nxt_gap={gap_start}~{gap_end} gap_hold={int(gap_hold_enabled())} "
             f"offset_secs={wanted} source=market_table",
         )
     except Exception:  # pragma: no cover — never-raise
@@ -602,7 +473,6 @@ def reset_state_for_test() -> None:
     _pre_frame_day = ""
     _WINDOW_MEMO.clear()
     _SWITCH_AT_MEMO.clear()
-    _GAP_MEMO.clear()
     _pre_frame_counts.clear()
     _pre_frame_first.clear()
     _clock_config_cap.clear()

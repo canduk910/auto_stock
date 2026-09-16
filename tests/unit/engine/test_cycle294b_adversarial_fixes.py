@@ -4,9 +4,14 @@
 다수를 닫은 코드를 잠근다. 자매 = `tests/unit/engine/test_cycle294_stage3.py`
 (3단계 본체) · `tests/unit/ast/test_cycle294_ast_stage3.py`.
 
+🔴 **cycle295 철회 (2026-09-15)** — N2·N3·N5·N7 은 CRITICAL-1 *시정*(보유만 NXT
+따라가는 예외)이 사용자 결정 「15:30~16:00 완전 휴식」으로 철회된 뒤의 값으로
+바뀌었다. N1(표 사실)·N4(경계 KRX)·N6(속성축 우선)은 그 시정과 무관하게 참이라
+그대로 존치한다. 상세 = `src/engine/tick_channel_clock.py` 모듈 docstring.
+
 | ID | 등급 | 닫은 것 |
 |----|------|---------|
-| N1~N6 | 🔴 CRITICAL-1 | **15:40~16:00 NXT 단독 연속 구간** — KRX 채널로 덮으면 `nxt_true` 보유 종목의 손절 트리거가 매일 20분 사라진다(INV-1 위반) |
+| N1~N6 | 🔴 CRITICAL-1 (철회, 위 참조) | **15:40~16:00 NXT 단독 연속 구간** — 그 사실은 참이지만 대응(보유만 NXT 추종)은 cycle295 에서 되돌아갔다 |
 | R1~R6 | 🔴 CRITICAL-2 | 자동 원복이 진짜 고장에서 발화하고, 비결론 판정은 래치하지 않는다 |
 | M1~M3 | 🔴 CRITICAL-3 | 원복도 **make-before-break** — 보유 종목에 break-before-make 금지 |
 | Z1~Z3 | 🟠 HIGH-1 | LOW 전환 실패가 **구독 좀비**를 만들지 않는다 + 고아 튜플 회수 |
@@ -77,30 +82,34 @@ def test_n1_table_says_krx_has_no_continuous_matching_between_1540_and_1600():
     assert any(a <= gap_t < b for a, b in nxt), "NXT 애프터(15:40~20:00)가 표에서 사라졌다"
 
 
-def test_n2_gap_window_is_derived_from_the_table_not_from_literals():
-    """N2 — 구간은 두 시장의 연속 집합 **빼기**로 나온다(시각 리터럴 0건)."""
-    start, end = _clock().nxt_only_continuous_window(DAY)
-    assert (start, end) == (_dt.time(15, 40), _dt.time(16, 0)), (
-        f"09-15 NXT 단독 연속 구간이 15:40~16:00 이 아니다: {start}~{end}"
+def test_n2_gap_window_helper_is_removed():
+    """N2 — cycle295 철회. `nxt_only_continuous_window` 자체가 사라졌다.
+
+    🔴 되돌리기 전에 이 파일 상단의 「되돌리기 방지」절을 읽어라. 반대 방향
+    (함수를 되살리는 것)이 정당해지는 유일한 전제는 `test_n1` 이 함께 붉어지는
+    것 — 즉 표가 바뀌어 KRX 가 그 시각에 연속 체결을 갖게 되는 것이다.
+    """
+    assert not hasattr(_clock(), "nxt_only_continuous_window"), (
+        "cycle295 가 제거한 갭 구간 함수가 다시 나타났다 — 사용자 결정 "
+        "「완전 휴식」을 확인하지 않고 되살린 것인지 점검하라"
     )
 
 
-def test_n3_high_follows_nxt_in_the_gap_but_low_stays_on_krx():
-    """🔴 N3 — 그 20분에 **보유(HIGH)만** NXT 를 따라간다.
+def test_n3_high_no_longer_follows_nxt_in_the_gap():
+    """N3 — cycle295 철회. 그 20분에도 HIGH·LOW 모두 KRX 다(완전 휴식).
 
-    LOW 후보 ~130종목을 하루 두 번 왕복시키면 KIS 공지 「비정상 케이스 2:
-    무한 등록/해제」에 정면으로 걸린다. 그 구간에 필요한 것은 손절 커버리지뿐이다.
+    cycle294 가 넣었던 "보유(HIGH)만 NXT 로" 예외는 2026-09-15 사용자 결정
+    ("청산측으로도 참여를 하지 않고자 해")으로 철회됐다 — `test_gd2` 계열의
+    자매 단언(`tests/unit/engine/test_cycle295_gap_hold_removed.py`).
     """
     c = _clock()
     for hh, mm in ((15, 41), (15, 59)):
         now = _at(hh, mm)
-        assert c.clock_channel(now, offset_secs=300, priority="HIGH")[0] == NXT_ONLY, (
-            f"{hh}:{mm} 에 보유 종목이 KRX 채널에 남는다 — 그 시각 KRX 에는 연속 "
-            "체결이 없어 손절 트리거가 통째로 사라진다(INV-1 위반)"
+        assert c.clock_channel(now, offset_secs=300, priority="HIGH")[0] == KRX_ONLY, (
+            f"{hh}:{mm} 에 보유 종목이 NXT 로 갔다 — cycle295 는 그 20분도 "
+            "완전 휴식(KRX 유지)으로 되돌렸다"
         )
-        assert c.clock_channel(now, offset_secs=300, priority="LOW")[0] == KRX_ONLY, (
-            "LOW 후보까지 NXT 로 옮기면 하루 두 번 ~130종목 왕복이다"
-        )
+        assert c.clock_channel(now, offset_secs=300, priority="LOW")[0] == KRX_ONLY
 
 
 @pytest.mark.parametrize("hh_mm", [(15, 25), (15, 39), (16, 0), (16, 5), (19, 0)])
@@ -110,12 +119,21 @@ def test_n4_gap_is_closed_on_both_edges(hh_mm):
     assert _clock().clock_channel(now, offset_secs=300, priority="HIGH")[0] == KRX_ONLY
 
 
-def test_n5_gap_dial_off_restores_the_single_morning_switch():
-    """N5 — 킬스위치. `gap_hold_enabled=false` 면 배포 직후 설계와 동일하다."""
-    _set_switch_params(gap_hold_enabled=False)
+def test_n5_gap_dial_itself_is_gone():
+    """N5 — cycle295. 다이얼 자체가 없다 — 켤 수단이 없다.
+
+    사용자가 지목한 것은 "변수와 그 변수를 케어하는 로직" 이다. 다이얼만 끄는
+    것이 아니라 다이얼 자체를 없앴다 — `set_switch_params_for_test` 에
+    `gap_hold_enabled` 를 주면 `TypeError` 다(조용히 흡수하지 않는다).
+    """
+    from src.engine import tick_channel_mode
+
+    assert not hasattr(tick_channel_mode, "gap_hold_enabled")
+    with pytest.raises(TypeError):
+        _set_switch_params(gap_hold_enabled=False)
     assert _clock().clock_channel(_at(15, 45), offset_secs=300, priority="HIGH")[0] == KRX_ONLY
     assert len(_clock().switch_windows(DAY, offset_secs=300)) == 1, (
-        "다이얼을 내렸는데 NXT 구간 전환 창이 남아 있다"
+        "전환 창은 항상 아침 하나뿐이어야 한다"
     )
 
 
@@ -132,13 +150,13 @@ def test_n6_no_feed_high_stays_on_krx_inside_the_gap(monkeypatch):
     assert _scanner().desired_tick_tr_id(NO_FEED, priority="HIGH", now=_at(15, 45)) == KRX_ONLY
 
 
-def test_n7_three_switch_windows_exist_and_do_not_overlap():
-    """N7 — 창 목록은 아침 1 + 구간 경계 2 이고 서로 겹치지 않는다."""
+def test_n7_only_the_morning_switch_window_exists():
+    """N7 — cycle295. 창 목록은 아침 하나뿐이다(사용자 결정 「전환 1회」)."""
     windows = _clock().switch_windows(DAY, offset_secs=300)
     labels = [label for _s, _e, label in windows]
-    assert labels == ["pre_to_krx", "krx_to_nxt_gap", "nxt_gap_to_krx"], labels
-    for (s1, e1, _l1), (s2, _e2, _l2) in zip(windows, windows[1:]):
-        assert s1 < e1 <= s2, f"창이 겹치거나 역전됐다: {windows}"
+    assert labels == ["pre_to_krx"], labels
+    start, end, _label = windows[0]
+    assert start < end, f"아침 전환 창이 빈 구간이다: {windows}"
 
 
 # ===========================================================================

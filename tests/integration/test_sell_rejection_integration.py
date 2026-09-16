@@ -97,6 +97,23 @@ def engine(registry: StrategyRegistry) -> OrderEngine:
     return OrderEngine(registry)
 
 
+@pytest.fixture(autouse=True)
+def _reset_session_board_cache(monkeypatch: pytest.MonkeyPatch):
+    """cycle295 (B) — `session_tracker.active` 오염 차단.
+
+    `execute_sell` 이 재시도 루프 진입 전에 `_market_rest_now` 를 거치고, 그
+    술어의 프리장 예외는 `session_tracker.active or boards_at(now.time())`
+    로 판정한다(§3-3). `session_tracker` 는 여러 테스트 파일이 공유하는 모듈
+    싱글톤이라 다른 파일이 `monkeypatch` 없이 `_active` 를 직접 대입해 두면
+    이 파일까지 새어 든다 — 이 파일은 그 값을 여태 한 번도 다루지 않았다.
+    빈 집합으로 리셋해 두면 `boards_at(now.time())` 폴백이 각 테스트의
+    frozen 시각으로 정확히 재계산된다.
+    """
+    from src.engine.session import session_tracker
+
+    monkeypatch.setattr(session_tracker, "_active", frozenset())
+
+
 @pytest.fixture
 def mock_insert_trade(monkeypatch: pytest.MonkeyPatch) -> AsyncMock:
     mock = AsyncMock(return_value=None)
@@ -362,7 +379,7 @@ async def test_c3_when_market_order_disallowed_then_fallback_and_tracker_registe
 # C-4 — market_order_disallowed + NXT + 폴백 실패 → next_day_clear 등록 (Q2)
 # ===========================================================================
 @pytest.mark.asyncio
-@freeze_time("2026-06-03 16:00:00", tz_offset=-9)  # NXT 애프터
+@freeze_time("2026-06-03 08:30:00", tz_offset=-9)  # NXT 프리마켓(cycle295 재앵커)
 async def test_c4_when_nxt_fallback_failed_then_pending_next_day_clear_add(
     engine: OrderEngine,
     mock_insert_trade: AsyncMock,
@@ -373,6 +390,15 @@ async def test_c4_when_nxt_fallback_failed_then_pending_next_day_clear_add(
 ):
     """C-4 (Q2 핵심): NXT 시간대 market_order_disallowed 폴백 실패 →
     `_pending_next_day_clear_provider().add(ticker)` 호출 (다음 영업일 09:00 KRX 시장가 전환).
+
+    cycle295 (B, 2026-09-15) 재앵커 — 원 픽스처(16:00, "NXT 애프터")는 이제
+    `_market_rest_now` 의 15:30~16:00 완전 휴식 컷에 걸려 `place_order` 자체가
+    나가지 않는다(§3-5①). 이 테스트가 재려는 것은 `is_nxt_session_hours`
+    (08:00~09:00 ∪ 15:30~20:00, `sell_rejection.py` 무접촉) 축의 폴백 실패
+    행위이지 애프터 시간대 자체가 아니다 — 같은 판정에 걸리는 08:30(NXT
+    프리마켓)으로 옮기면 컷(프리장 예외, §3-3 근거 3)도 비껴가고 cycle287
+    KRX 애프터 전환 블록(`KRX phase is AFTER_MARKET` 조건)도 애초에 무관해
+    이 파일의 다른 NXT 프리마켓 케이스(C-2/C-3)와 같은 성질이 된다.
     """
     # scheduler 의 _pending_next_day_clear set 모의 — provider 주입
     next_day_set: set[str] = set()
