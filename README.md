@@ -173,7 +173,7 @@ done
 040_funnel_provisional.sql            # strategy_funnel_snapshots.is_provisional (cycle171, 저녁 잠정 캡처 구분)
 041_stock_master_financial.sql        # KIS 재무 5 TR 정규화 PK(ticker, stac_yymm, div_cls) + 18 NUMERIC + raw JSONB (cycleC1, 마법공식·F-Score-7 원천)
 042_daily_log_reports_external.sql    # daily_log_reports ext_* 6컬럼 (cycle249 외부 리포터 루틴 쓰기 대상)
-043_llm_buy_evaluations.sql           # AI 매수평가(LLM) 주문 시점 기록 PK(trade_date, account_no, ticker, order_no) (cycle276, 관측 전용 — 매매 hot path 무관)
+043_llm_buy_evaluations.sql           # AI 매수평가(LLM) — 주문이 나갈 때 남기는 기록 PK(trade_date, account_no, ticker, order_no) (cycle276, 관측 전용 — 매매 hot path 무관)
 ```
 
 ### 3. Docker Compose로 실행 (권장)
@@ -256,7 +256,7 @@ cd .. && npx playwright install && npx playwright test --config=e2e/playwright.c
 1. `.env`에서 `KIS_ENV=vts` 확인
 2. 백엔드 + 프론트엔드 실행 — 「3. Docker Compose」(권장) 또는 「3-1. 로컬 직접 실행」 중 하나. 어느 쪽이든 브라우저로 `http://localhost:3000` 을 연다
 3. 대시보드에서 [시작] 버튼 클릭 → 확인 모달에서 승인
-4. 스케줄에 따라 자동매매 진행 — 07:45 자동 시작 → 07:55 부팅 → 08:00 NXT 프리 진입 → 09:00~15:30 KRX 정규장(15:20 신규 매수 중단 + 강제 청산) → 15:40 NXT 애프터 보드(`post_nxt`) 진입 → 16:00 부터 주문·시세 거래소가 KRX 애프터마켓으로 전환(2026-09-14 신설, 16:00~20:00 실시간 체결. 보드는 20:00 까지 `post_nxt` 그대로다) → 19:50 신규 매수 중단 → 20:00 매매 종료 → 21:30 정산 + 일일 로그 분석
+4. 스케줄에 따라 자동매매 진행 — 07:45 자동 시작 → 07:55 부팅 → 08:00 NXT 프리 진입 → 09:00~15:30 KRX 정규장(15:20 신규 매수 중단 + 강제 청산) → 15:40 NXT 애프터 보드(`post_nxt`) 진입 → 16:00 부터 주문·시세 거래소가 KRX 애프터마켓으로 전환(16:00~20:00 실시간 체결. 보드는 20:00 까지 `post_nxt` 그대로다) → 19:50 신규 매수 중단 → 20:00 매매 종료 → 21:30 정산 + 일일 로그 분석
 5. [정지] 버튼으로 수동 중지 가능
 
 ### 대시보드 화면
@@ -274,7 +274,7 @@ cd .. && npx playwright install && npx playwright test --config=e2e/playwright.c
 | 종목마스터 (`/stock-master`) | KIS 마스터(시총·거래대금·NXT가능·거래정지·관리종목·KOSPI200/KOSDAQ150 플래그) + 일봉·시총 분포 카드 + 4종 필터(시장·시총·거래대금·종목명) + 수동 실행 버튼 4개(유니버스·기본정보·일봉·공식 마스터). 상단 진행률 배너(`RefreshProgressBanner`)는 5초마다 갱신된다 (cycle84+·127) |
 | 장운영상태 (`/market-state`) | 「지금 시장은」(실시간 VI · 거래정지 · 서킷브레이커**(추정)** 배지 + 관측 커버리지 "이벤트 수신 N종목 기준" 항상 표시) + 「오늘 야간작업」 타임라인(`GET /api/market-ops` 14행 시각순, 상태 어휘 10종) + 장 운영 시간표 + 주문유형 카탈로그. 읽기 전용 — 작업 재실행 버튼은 없다 (cycle282·285) |
 | 실시간 상태 (`/realtime-health`) | WebSocket 구독 슬롯(total/acked/fresh_60s/stale_60s/limit) + 세션별 종목 expand + KIS `inquire_ccnl` 캐시(last_cntg_hour·today_volume, TTL 5분) + 수동 재구독 버튼. 다섯 번째 카드 **「장운영 요약」**(VI 활성·거래정지·종목상태 이상 + 서킷브레이커 추정 배지 + 종목별 상세, 관찰 전용). 독립 화면 **장운영상태(`/market-state`)** 의 「지금 시장은」 과 **같은 응답**(`GET /api/realtime/market-operation`)을 쓰는 축약판이다 (cycle103+·186) |
-| 설정 (`/settings`) | 전략 파라미터 조정, 자금 비중, 자동 시작 토글, 가격/거래대금 필터, 매수 가드 4모드(cycleI 이후 **표시/관찰 전용** — 매수를 차단·축소하지 않는다), 외부 통합 토글 |
+| 설정 (`/settings`) | 전략 파라미터 조정, 자금 비중, 자동 시작 토글, 가격/거래대금 필터, 매수 가드 4모드(**표시/관찰 전용** — 매수를 차단·축소하지 않는다), 외부 통합 토글 |
 
 ### 실전 전환
 
@@ -358,7 +358,7 @@ KIS_HTS_ID_REAL=실전용_HTS_ID
 | 구분 | 규칙 |
 |------|------|
 | 종목군 | 코스피+코스닥 전체, 시총/거래대금 필터, 노이즈 비율 기반 동적 K값 |
-| 매매 가능 보드 | **MAIN only** — cycle26 (2026-05-20) KRX ONLY 정책. 시가 확정 09:00:05 / **매수 개시 09:01:30 ~ 15:20** — `open_entry_hold_secs = 90` 이 09:00 직후 90초 동안 신규 진입을 보류한다(0 = OFF, 장중 롤백 = `PUT {"open_entry_hold_secs":0}`). 목표가 = KRX 09:00 시가 + (전일 Range × `k_value_krx_main`, 기본 1.0). PRE_NXT/POST_NXT 매수 비활성 (보유 종목 손절/트레일링 매도는 보드 가드 무관 작동). `k_value_nxt_pre`/`k_value_nxt_post` 키는 DB/AI 자문 호환 보존만 |
+| 매매 가능 보드 | **MAIN only** — KRX ONLY 정책(cycle26). 시가 확정 09:00:05 / **매수 개시 09:01:30 ~ 15:20** — `open_entry_hold_secs = 90` 이 09:00 직후 90초 동안 신규 진입을 보류한다(0 = OFF, 장중 롤백 = `PUT {"open_entry_hold_secs":0}`). 목표가 = KRX 09:00 시가 + (전일 Range × `k_value_krx_main`, 기본 1.0). PRE_NXT/POST_NXT 매수 비활성 (보유 종목 손절/트레일링 매도는 보드 가드 무관 작동). `k_value_nxt_pre`/`k_value_nxt_post` 키는 DB/AI 자문 호환 보존만 |
 | 진입 조건 | 현재가가 목표가(= KRX 09:00 시가 + 전일 Range × K값)를 돌파 |
 | 매수 | 돌파 순간, 할당 자금 10% 비중. 기준가는 **KRX REST `stck_oprc`(시장 `J`) 단일 출처**다(`open_price_scope_mode = "enforce"`) — WebSocket 이 실어 온 시가는 거부되고, REST 로 시가가 아직 프린트되지 않은 종목은 그 시점 매수가 불가하다. `pre_nxt`/`post_nxt` 보드는 이 게이트 스코프 밖. **당일 매도한 종목은 재매수하지 않는다** |
 | AI 매수평가 | 매수 주문이 KIS 에 접수된 **직후** `llm_buy_gate.observe_order` 가 LLM 점수를 `llm_buy_evaluations` 테이블에 남긴다(주문 1건 = 1행, 실패도 1행). `llm_gate_mode` 기본 `"shadow"` = **기록만 하고 매수를 막지 않는다**(`enforce` 미구현 — `shadow` 외 모든 값은 `off` 로 낙하). 롤백 = `PUT /api/strategies/{id}/params {"llm_gate_mode":"off"}` |
@@ -370,7 +370,7 @@ KIS_HTS_ID_REAL=실전용_HTS_ID
 | 구분 | 규칙 |
 |------|------|
 | 종목군 | 변동성 돌파와 동일 + 연속상한가 종목 제외 |
-| 매매 가능 보드 | **PRE_NXT(08:00~09:00) + MAIN + POST_NXT(15:40~20:00)** — 7 전략 중 LTV 만 세 보드 전부에서 신규 매수한다(cycle38 에서 사용자 의도로 복원 — 연속 상한가 익일청산 + 야간 매수). MAIN 은 시가 확정 09:00:05 / 매수 개시 09:01:30(`open_entry_hold_secs = 90`) ~ 모듈 상수 `MAIN_BUY_CUTOFF_KST = 15:20`, POST_NXT 매수는 19:50 `TIME_NXT_POST_BUY_STOP` 에서 끊긴다. 단 이 세 보드는 `DEFAULT_TRADABLE_BOARDS` **코드 기본값**이고 실제 허용 보드는 DB `strategy_config.params.tradable_boards` 가 덮어쓴다(운영 실측 `["main","pre_nxt"]` = 야간 매수는 이미 꺼진 상태). 상한가 모드 종목의 POST_NXT 시간대 손절 모니터링은 `risk.on_tick` 청산 평가가 보드 가드 무관 작동 |
+| 매매 가능 보드 | **PRE_NXT(08:00~09:00) + MAIN + POST_NXT(15:40~20:00)** — 7 전략 중 LTV 만 세 보드 전부에서 신규 매수한다(연속 상한가 익일청산 + 야간 매수, cycle38). MAIN 은 시가 확정 09:00:05 / 매수 개시 09:01:30(`open_entry_hold_secs = 90`) ~ 모듈 상수 `MAIN_BUY_CUTOFF_KST = 15:20`, POST_NXT 매수는 19:50 `TIME_NXT_POST_BUY_STOP` 에서 끊긴다. 단 이 세 보드는 `DEFAULT_TRADABLE_BOARDS` **코드 기본값**이고 실제 허용 보드는 DB `strategy_config.params.tradable_boards` 가 덮어쓴다(운영 실측 `["main","pre_nxt"]` = 야간 매수는 이미 꺼진 상태). 상한가 모드 종목의 POST_NXT 시간대 손절 모니터링은 `risk.on_tick` 청산 평가가 보드 가드 무관 작동 |
 | 진입 조건 | 변동성 돌파(목표가 = 보드별 시가 + 전일 Range × K값) + 전일대비 ≥ `min_prdy_rate`(기본 5%) |
 | 매수 | 돌파 순간. `main` 보드 기준가는 VB 와 같은 **KRX REST `stck_oprc` 단일 출처**(`open_price_scope_mode`) — `pre_nxt`/`post_nxt` 보드는 스코프 밖 |
 | AI 매수평가 | VB 와 동일 — 매수 주문 접수 직후 `llm_buy_gate.observe_order` 가 점수를 `llm_buy_evaluations` 에 기록한다. `llm_gate_mode` 기본 `"shadow"` = 기록만, 매수 차단 없음 |
@@ -393,10 +393,10 @@ KIS_HTS_ID_REAL=실전용_HTS_ID
 | 보유 기간 | 멀티데이 (평균 5~15 영업일). DB `positions` 영속화로 일자 넘어 유지 |
 | 종목명 | KIS `hts_kor_isnm` 우선 + `scanner.STATIC_TICKER_NAMES`(KOSPI200/KOSDAQ150 인라인 코멘트 자동 파싱)로 fallback |
 
-### 전략 E: 눌림목 돌파 (`bull_flag_breakout`, 2026-05-15 추가)
+### 전략 E: 눌림목 돌파 (`bull_flag_breakout`)
 | 구분 | 규칙 |
 |------|------|
-| 종목군 | `stock_master.list_by_filter` (**전체 상장 확대 유니버스** — 시총 ≥ 100억 + 거래대금 ≥ 15억, ETF/ETN 제외) — cycle108 KIS 순위 API 폐기 / 2026-08-08 확대(지수 무제약 유지, 거래대금 20억→15억, `max_scan_stocks` 100→4000) |
+| 종목군 | `stock_master.list_by_filter` — **전체 상장 유니버스**(시총 ≥ 100억 + 거래대금 ≥ 15억, ETF/ETN 제외, `max_scan_stocks` 4000). 지수 제약 없음 |
 | 매매 가능 보드 | MAIN(09:05~13:00) |
 | 진입 조건 | **폴 자동 검출**(직전 3~10영업일 누적 +15%↑, 음봉 비율 ≤ 45%) + **플래그 자동 검출**(2~10영업일 횡보, 조정 폭 ≤ 폴 폭의 50%, 거래량 < 폴 평균의 60%) → 플래그 상단(`flag_high`) 돌파 + 당일 거래량 ≥ `flag_avg_volume × 2`. 거래량은 **실시간 틱 누적(`tick_volume`) 단일 출처**이고 미관측은 매수 거부다(fail-closed). 거래량을 채워도 **추격 상한 `max_breakout_extension_pct` = 5.0%**(돌파선 대비 현재가)를 넘으면 매수하지 않는다 |
 | 매수 | 종목당 1회 + 3영업일 쿨다운. 부분봉 가드(`candles[0]==오늘`이면 [1]부터) |
@@ -405,10 +405,10 @@ KIS_HTS_ID_REAL=실전용_HTS_ID
 | 청산 | 측정된 이동(`flag_high + (pole_high - pole_start)`) 도달 → 1차 절반 청산(`_partial_exit` 마킹, 1차 구현은 전량) → 잔여 `high_since_buy − ATR×2` 트레일링 / 5영업일 시간 청산 (캘린더일 +2 보정) |
 | 보유 기간 | 단기 (평균 1~5 영업일) |
 
-### 전략 F: 변동성 수축 돌파 (`vcp_breakout`, 미네르비니식, 2026-05-15 추가)
+### 전략 F: 변동성 수축 돌파 (`vcp_breakout`, 미네르비니식)
 | 구분 | 규칙 |
 |------|------|
-| 종목군 | **전체 상장 확대 유니버스**(2026-08-08 확대 — 지수 제약 제거 `is_kospi200/is_kosdaq150=None`) → 시총 ≥ 100억 + 거래대금 ≥ 10억 컷, 100일 일봉(prepare cap) |
+| 종목군 | **전체 상장 유니버스**(지수 제약 없음 — `is_kospi200/is_kosdaq150=None`) → 시총 ≥ 100억 + 거래대금 ≥ 10억 컷, 100일 일봉(prepare cap) |
 | 매매 가능 보드 | MAIN(09:05~14:30) |
 | 진입 조건 | **추세 필터**(종가 > 50EMA > 60EMA > 장기EMA + 장기 EMA 1개월(20영업일) 우상향 — 장기선 설정값은 120 이나 KIS 일봉 100일 한도 때문에 런타임 값은 `effective_ema_long = min(120, 가용길이 − 25)` ≈ **75EMA** 이고, 그 값이 30 미만이면 후보에서 탈락한다) → **베이스 자동 검출**(25~75영업일, 깊이 ≤ 30%) → **pullback 점진 수축**(ATR threshold ZigZag 검출 `min_swing_atr_mult=0.5`, 2~4회, 직전 대비 폭 감소, 마지막 ≤ 12%) → **거래량 수축**(마지막 5일 평균 < 베이스 직전 20일 평균 × 70%) → 베이스 상단(`base_high`) 돌파 + 당일 거래량 ≥ 20일 평균 × 1.5. 거래량은 **실시간 틱 누적(`tick_volume`) 단일 출처**이고 미관측은 매수 거부다(fail-closed). 거래량을 채워도 **추격 상한 `max_breakout_extension_pct` = 7.5%** 를 넘으면 매수하지 않는다 |
 | 매수 | 종목당 1회 + 7영업일 쿨다운 |
@@ -417,10 +417,10 @@ KIS_HTS_ID_REAL=실전용_HTS_ID
 | 청산 | `high_since_buy − ATR×2` 트레일링 / 50일 EMA 이탈 → TRAILING_STOP. **시간·15:20 청산 없음** — 멀티데이 보유 (`Position._MULTIDAY_STRATEGIES` 멤버) |
 | 보유 기간 | 멀티데이 (VCP 통상 2~6주) |
 
-### 전략 G: 고지로 대순환 스윙 (`kojiro`, 이동평균선 대순환, 2026-07 Phase 1)
+### 전략 G: 고지로 대순환 스윙 (`kojiro`, 이동평균선 대순환)
 | 구분 | 규칙 |
 |------|------|
-| 종목군 | **전체 상장**(`is_kospi200/is_kosdaq150=None`, `max_scan_stocks≥3577`) → 시총/거래대금 컷 → 일봉 100일(`min_required=80`) → **ATR/종가 변동성 밴드 1.0~6.0%**(비협상 판별 필터, 2026-07-20 상한 4.5→6.0 백테스트 PF 0.86→1.60) |
+| 종목군 | **전체 상장**(`is_kospi200/is_kosdaq150=None`, `max_scan_stocks≥3577`) → 시총/거래대금 컷 → 일봉 100일(`min_required=80`) → **ATR/종가 변동성 밴드 1.0~6.0%**(비협상 판별 필터. 상한 6.0 의 근거 = 백테스트 PF 1.60) |
 | 매매 가능 보드 | MAIN(09:05~09:30) |
 | 진입 조건 | **strict entry(4조건 AND)**: ① 현재 스테이지1(EMA 단기>중기>장기) ② 최근 5영업일 내 6→1 전환 인접(신선도 `stage1_freshness=5`) ③ EMA 5/20/40 모두 우상향 ④ 전일 종가 > EMA5. 갭업 ≥5% / 갭다운 ≤-4% / 장중 붕괴(현재가<시가) 스킵 |
 | 매수 | 종목당 1회. **터틀 유닛 sizing 은 배선까지 완료된 opt-in** — DB `sizing_mode = "turtle"` 이면 `compute_unit_qty_guarded`(유닛 리스크 `risk_pct` 0.5%)가 수량을 정하고, 코드 기본값은 `position_ratio` 다. Phase 2 로 연기된 것은 조기진입·피라미딩뿐이며, `max_units_per_stock`/`max_units_total` 은 소비처 0건(미배선)이라 리스크 한도로 오인하면 안 된다 |
@@ -429,7 +429,7 @@ KIS_HTS_ID_REAL=실전용_HTS_ID
 | 청산 | 스테이지3 진입(추세 종료, 익일 아침 발화) / `high_since_buy − 2.5×ATR` 트레일링 → TRAILING_STOP. **시간·15:20 청산 없음** — 멀티데이 |
 | 보유 기간 | 멀티데이 (`_MULTIDAY_STRATEGIES` 멤버). 지표 순수모듈 `kojiro_indicators.py`(Wilder ATR ewm(1/20)) |
 
-> 프론트엔드 Settings 페이지에서 전략별 자금 비중 조절 가능. 대시보드 "조건검색 현황 → 20일 신고가 스윙" 탭에서 8단계 깔때기 통계 + 후보 종목 진입상태(보유 중 / 진입 대기 / 갭 스킵 / 장 시작 전 / 진입 시간 종료) 시각화. 신규 3 전략(`bull_flag_breakout`/`vcp_breakout`/`kojiro`)은 **코드 등록 기본값**이 `enabled=False, weight=0.0` 이다 — Settings 에서 수동 활성화 권장 (백테스트/모의 검증 후). ⚠️ **가동 여부와 비중의 정본은 DB `strategy_config`(= Settings 화면)** 다. 부팅 시 `_load_strategy_config` 가 DB 행으로 `enabled`/`weight` 를 무조건 덮어쓰므로, 위 표의 코드 기본값을 현재 운영 상태로 읽으면 안 된다
+> 프론트엔드 Settings 페이지에서 전략별 자금 비중 조절 가능. 대시보드 "조건검색 현황 → 20일 신고가 스윙" 탭에서 8단계 깔때기 통계 + 후보 종목 진입상태(보유 중 / 진입 대기 / 갭 스킵 / 장 시작 전 / 진입 시간 종료) 시각화. `bull_flag_breakout`·`vcp_breakout`·`kojiro` 는 **코드 등록 기본값**이 `enabled=False, weight=0.0` 이다 — Settings 에서 수동 활성화 권장 (백테스트/모의 검증 후). ⚠️ **가동 여부와 비중의 정본은 DB `strategy_config`(= Settings 화면)** 다. 부팅 시 `_load_strategy_config` 가 DB 행으로 `enabled`/`weight` 를 무조건 덮어쓰므로, 위 표의 코드 기본값을 현재 운영 상태로 읽으면 안 된다
 
 ### 매매 안전장치
 
@@ -456,7 +456,7 @@ KIS_HTS_ID_REAL=실전용_HTS_ID
 | 랏당 최대 유닛 상한 (`max_lot_units`, K=2.0) | `sizing_mode="turtle"` 전략의 **모든** 매수 랏을 `floor(K × 예산 × risk_pct ÷ ATR)` 주 이하로 자르고, 그 값이 0 이면 매수하지 않는다. `min` 연산이라 수량을 늘리는 방향은 없다. ATR 결측·모호(`atr`↔`atr14` 불일치)·`risk_pct ≤ 0`·예외는 fail-open(현행 수량 유지 + `[fallback_cap_skipped]` WARNING) |
 | 랏 명목 상한 (`max_lot_ratio_mult`, K_ρ=2.5) | **7 전략 모든 랏**의 명목을 `cap_qty = int(K_ρ × int(예산 × position_ratio)) // 현재가` 로 자르고, **1주도 못 사면 매수하지 않는다**. 비중 수량·터틀 수량은 이미 명목 상한 안이라 항등적으로 무접촉이고 **실효 대상은 1주 폴백 랏**이다 — 주가가 컷오프보다 비싼 종목은 폴백 매수가 막힌다. 키 부재 = OFF, 판정 실패는 fail-open(`[ratio_cap_skipped]`) |
 | 시각이 거래소를 정한다 | `_route_exchange_by_clock` 이 시각 리터럴 없이 `market_state.MARKET_TABLE` 에서 경계를 파생해 주문 거래소를 고른다 — 프리장 08:00~09:00 은 base(NXT) 유지, 정규장과 KRX 애프터마켓은 KRX. 호가유형도 구간별로 갈린다: 프리장 매수는 `step_up(현재가,5)` 지정가 `00`(실전·NXT·시행일 이후면 NXT 프리마켓 전용호가 GTP `27` 로 승격 — 미체결 잔량을 거래소가 프리마켓 종료 08:50 에 일괄취소하고, 거부되면 같은 가격 `00` 으로 1회 재주문) / 프리장 매도는 `step_down(현재가,5)` / 정규장은 시장가 `01` → 거부 시 지정가 `00`. 킬스위치 = 전략 `DEFAULT_PARAMS` 의 `order_exchange_clock_mode`(기본 `enforce`) |
-| KRX 애프터마켓 청산 호가유형 | 2026-09-14 신설된 KRX 애프터마켓(16:00~20:00, 실시간 연속체결)에서 청산은 **최유리지정가 `44`(`ORD_UNPR=0`) → 거부 시 `41` 지정가 + `step_down(현재가,5)`** 로 나간다. `44` 는 시장가가 아니라 반대편 최우선호가 지정가라 실질 최악이 1틱이다. 킬스위치 = `after_market_exit_division`(기본 `"44"`, 허용값 `44`/`41`). 종목당 5회 실패면 그날 포기 래치 + `[after_exit_giveup]` CRITICAL, NXT 폴백 실패는 익일 청산으로 전환 |
+| KRX 애프터마켓 청산 호가유형 | KRX 애프터마켓(16:00~20:00)에서 청산은 **최유리지정가 `44`(`ORD_UNPR=0`) → 거부 시 `41` 지정가 + `step_down(현재가,5)`** 로 나간다. `44` 는 시장가가 아니라 반대편 최우선호가 지정가라 실질 최악이 1틱이다. 킬스위치 = `after_market_exit_division`(기본 `"44"`, 허용값 `44`/`41`). 종목당 5회 실패면 그날 포기 래치 + `[after_exit_giveup]` CRITICAL, NXT 폴백 실패는 익일 청산으로 전환 |
 | NXT 거래가능 사전 판별 (Phase G) | KIS `CTPF1002R` 응답 `cptt_trad_tr_psbl_yn=="Y" AND nxt_tr_stop_yn=="N"`로 `nxt_tradable` 파생. `stock_master` 테이블(24h TTL)에 캐시. `OrderEngine._strategy_exchange_async`가 `nxt_tradable=False`면 NXT/SOR → KRX 강제 다운그레이드 + `[nxt_downgrade]` 로그. `scheduler._execute_next_day_clear`는 1순위 판별로 사용 → 시가 폴링/안정화 거치지 않고 즉시 보류(NXT 주문 시도 0). `execute_sell`이 NXT 시간대 매도 거부 받으면 `stock_master.upsert_one(nxt_tradable=False)` 사후 보강 |
 | 매도 거부 단일 정책 | KIS 가 매도를 거부하는 네 가지 상황을 `src/engine/sell_rejection.py::SellRejectionTracker` 한 곳에서 처리한다. 거부 종류마다 **다시 시도하지 않는 시간(TTL)** 이 다르고, 마지막 수단은 익일 청산이다 — 표 아래 「매도 거부 처리 규칙」 참조 |
 
@@ -480,21 +480,22 @@ KIS_HTS_ID_REAL=실전용_HTS_ID
 
 ## NXT/KRX 통합 운영 (08:00~20:00)
 
-KIS OpenAPI가 NXT(넥스트레이드 ATS) 주문/시세를 정식 지원함에 따라 KRX 메인장 외 NXT 프리/애프터 시간대까지 매매 가능. **cycle26 (2026-05-20) — 매매 정책 KRX ONLY + 보드 단순화 5→3**: 신규 매수는 원칙적으로 KRX 메인 단독이고(`momentum`·`volatility_breakout`·`donchian_swing`·`bull_flag_breakout`·`vcp_breakout`·`kojiro` 의 `tradable_boards` 가 MAIN 계열), PRE_NXT/POST_NXT 의 나머지 활동은 보유 종목 매도(손절/트레일링)다. **예외 = `long_tail_volatility`** — cycle38 (2026-05-22) 에서 사용자 의도로 복원돼 `tradable_boards=("pre_nxt","main","post_nxt")` 로 PRE_NXT·POST_NXT 신규 매수를 한다. LTV 의 MAIN 보드 매수는 모듈 상수 `MAIN_BUY_CUTOFF_KST = 15:20` 에서 끊긴다(cycle286 — 보드 자체는 15:39:59 까지 MAIN).
+KIS OpenAPI 가 NXT(넥스트레이드 ATS) 주문·시세를 정식 지원하므로 KRX 메인장 밖 NXT 프리/애프터 시간대에도 매매한다. 2026-09-14 부터는 KRX 애프터마켓(16:00~20:00, 실시간 연속체결)이 신설돼 그 시간대 주문·시세가 KRX 로 나간다.
+
+**매매 정책 = KRX ONLY · 보드 3개**(`pre_nxt`/`main`/`post_nxt`). 신규 매수는 KRX 메인 단독이 원칙이고(`momentum`·`volatility_breakout`·`donchian_swing`·`bull_flag_breakout`·`vcp_breakout`·`kojiro` 의 `tradable_boards` 가 MAIN 계열), PRE_NXT/POST_NXT 의 나머지 활동은 보유 종목 매도(손절/트레일링)다. **예외 = `long_tail_volatility`** — `tradable_boards=("pre_nxt","main","post_nxt")` 로 PRE_NXT·POST_NXT 신규 매수를 한다(cycle38). LTV 의 MAIN 보드 매수는 모듈 상수 `MAIN_BUY_CUTOFF_KST = 15:20` 에서 끊긴다 — 보드 자체는 15:39:59 까지 MAIN 이지만 15:20 뒤 체결은 오버나이트로 남기 때문이다(cycle286).
 
 | 항목 | 사용 |
 |------|------|
-| 시세 채널 | **KRX 전용 `H0STCNT0` + NXT 전용 `H0NXCNT0` 2채널**(cycle293·294). `H0…` 는 KIS 가 실시간 데이터 종류마다 붙인 코드다. **어느 채널을 쓸지는 시각이 정한다** — 프리장은 NXT, 정규장·애프터마켓은 KRX(`scanner.tick_tr_id_for(ticker, *, priority, now)`). 통합 채널 `H0UNCNT0` 은 `stock_master.nxt_tradable=False` 종목의 체결을 아예 보내지 않아 폐기했다. ⚠️ **다만 그 폐기가 실제로 적용되는 모드는 `enforce` 뿐이다.** 통합 채널이 그대로 나가는 분기가 셋 남아 있다 — `off`(롤백) · `observe`(다크런치 = **배포 기본값**) · `enforce_low` × HIGH(보유·익일청산은 스코프 밖). 즉 **배포만으로는 아무 일도 일어나지 않는다** — 07:45 부팅 전에 `system_config.tick_channel_resolver_mode` 를 `enforce` 로 올려야 2채널이 실제로 적용된다. 전환 창은 `tick_channel_clock.switch_windows()` 가 시장 시간표에서 파생한다(시각 리터럴 0건). **전환은 아침 창(`pre_to_krx`) 1회뿐이고 후보(LOW)·보유(HIGH)가 같다** — cycle294 가 CRITICAL-1 커버리지로 추가했던 15:40~16:00 갭 홀드(`krx_to_nxt_gap`·`nxt_gap_to_krx` 두 창 + `tick_channel_gap_hold_enabled` 다이얼)는 **cycle295 (2026-09-16) 로 철회**됐다. 사용자 결정 「15:30~16:00 완전 휴식」으로 그 20분엔 **주문 자체를 내지 않으므로** 그 구간만 NXT 시세를 따라갈 이유가 사라졌다(그 20분 KRX 커버리지 공백은 그 결정이 수용한 비용이다 — 되돌리기 전에 `_workspace/00_URGENT_WORKLIST.md` 의 2026-09-15 결정을 확인하라). 끄는 방법은 이제 하나다 — `PUT /api/realtime/tick-channel-mode`(`system_config.tick_channel_resolver_mode`) |
-| 통합 장운영정보 / VI | `H0UNMKO0` — ① **보드 전환 수신용** 대표 종목 `005930` 1건 (실전 한정). `MKOP_CLS_CODE`(110/112/121/129/130~159) 가 시장 전체 공통이라 1종목으로 전체 보드 전환을 받는다. ② **VI·서킷브레이커 수신용 HIGH 종목**(보유 + 익일청산) — leaf `src/engine/market_op_subscribe.py::subscribe_market_operation_tickers` 가 보조 세션에 델타 배치하고(cycle292 가 scheduler 에서 추출), 후보(LOW)는 cycle221 F2 로 제외돼 관측 카운트만 남는다. SessionTracker 가 시각 기반 tick + H0UNMKO0 코드 동시 사용 |
-| 주문 라우팅 | `place_order(..., exchange=...)` body 에 `EXCG_ID_DVSN_CD` (`KRX`/`NXT`/`SOR`). 모의(VTS) 는 KRX 만 허용 — SOR/NXT 는 실전 한정. **cycle287 (2026-09-12) — 시각이 거래소를 정한다**: `order_engine._route_exchange_by_clock(base, *, side, mode, now)` 가 `market_state.MARKET_TABLE` 에서 경계를 뽑아 판정한다(그 함수 안 시각 리터럴 0건) — 프리장(PRE_NXT 활성 ∧ MAIN 비활성)은 base(NXT/SOR) 유지(`pre_nxt_keep`), 그 밖에는 KRX 가 받는 주문유형이 있으면 `("KRX", "krx_by_clock")`, 없고 NXT 만 있으면 base 유지(`krx_unsupported_keep`), 예외는 fail-open(`probe_error`). 실행값 = 15:45·15:55 `krx_unsupported_keep` / 16:05·19:00 `krx_by_clock`. 킬스위치 `order_exchange_clock_mode`(기본 `enforce`)·`after_market_exit_division`(기본 `"44"`) 은 cycle290 이 `param_catalog` 에 등재해(둘 다 `risk="identity"` = 화면 저장 시 2단계 확인, `auto_tunable=False`) `PUT /api/strategies/{id}/params` 로 장중 조정이 된다 |
+| 시세 채널 | **KRX 전용 `H0STCNT0` + NXT 전용 `H0NXCNT0` 2채널**(cycle293·294). `H0…` 는 KIS 가 실시간 데이터 종류마다 붙인 코드다. **어느 채널을 쓸지는 시각이 정한다** — 프리장은 NXT, 정규장·애프터마켓은 KRX(`scanner.tick_tr_id_for(ticker, *, priority, now)`). 통합 채널 `H0UNCNT0` 은 `stock_master.nxt_tradable=False` 종목의 체결을 아예 보내지 않아 폐기했다. ⚠️ **다만 그 폐기가 실제로 적용되는 모드는 `enforce` 뿐이다.** 통합 채널이 그대로 나가는 분기가 셋 남아 있다 — `off`(롤백) · `observe`(다크런치 = **배포 기본값**) · `enforce_low` × HIGH(보유·익일청산은 스코프 밖). 즉 **배포만으로는 아무 일도 일어나지 않는다** — 07:45 부팅 전에 `system_config.tick_channel_resolver_mode` 를 `enforce` 로 올려야 2채널이 실제로 적용된다. 전환 창은 `tick_channel_clock.switch_windows()` 가 시장 시간표에서 파생한다(시각 리터럴 0건). **전환은 아침 창(`pre_to_krx`) 1회뿐이고 후보(LOW)·보유(HIGH)가 같다.** 15:30~16:00 은 완전 휴식이라 주문을 내지 않으므로, 그 20분의 KRX 커버리지 공백은 수용한 비용이다(사용자 결정 2026-09-15 — 되돌리기 전에 `_workspace/00_URGENT_WORKLIST.md` 를 확인한다). 끄는 방법 = `PUT /api/realtime/tick-channel-mode`(`system_config.tick_channel_resolver_mode`) |
+| 통합 장운영정보 / VI | `H0UNMKO0` — ① **보드 전환 수신용** 대표 종목 `005930` 1건 (실전 한정). `MKOP_CLS_CODE`(110/112/121/129/130~159) 가 시장 전체 공통이라 1종목으로 전체 보드 전환을 받는다. ② **VI·서킷브레이커 수신용 HIGH 종목**(보유 + 익일청산) — leaf `src/engine/market_op_subscribe.py::subscribe_market_operation_tickers` 가 보조 세션에 델타 배치한다. 후보(LOW)는 구독하지 않고 관측 카운트만 남긴다. SessionTracker 가 시각 기반 tick + H0UNMKO0 코드 동시 사용 |
+| 주문 라우팅 | `place_order(..., exchange=...)` body 에 `EXCG_ID_DVSN_CD` (`KRX`/`NXT`/`SOR`). 모의(VTS) 는 KRX 만 허용 — SOR/NXT 는 실전 한정. **시각이 거래소를 정한다**(cycle287): `order_engine._route_exchange_by_clock(base, *, side, mode, now)` 가 `market_state.MARKET_TABLE` 에서 경계를 뽑아 판정한다(그 함수 안 시각 리터럴 0건) — 프리장(PRE_NXT 활성 ∧ MAIN 비활성)은 base(NXT/SOR) 유지(`pre_nxt_keep`), 그 밖에는 KRX 가 받는 주문유형이 있으면 `("KRX", "krx_by_clock")`, 없고 NXT 만 있으면 base 유지(`krx_unsupported_keep`), 예외는 fail-open(`probe_error`). 실행값 = 15:45·15:55 `krx_unsupported_keep` / 16:05·19:00 `krx_by_clock`. 킬스위치 `order_exchange_clock_mode`(기본 `enforce`)·`after_market_exit_division`(기본 `"44"`) 은 `param_catalog` 등재라(둘 다 `risk="identity"` = 화면 저장 시 2단계 확인, `auto_tunable=False`) `PUT /api/strategies/{id}/params` 로 장중 조정된다 |
 | 조회 거래소 옵션 | `get_balance(afhr_flpr=...)` — `N`(정규장)/`Y`(시간외)/`X`(NXT 정규장). `get_daily_orders(exchange="ALL")` — KRX+NXT+SOR 합산 |
 | 보드 추상화 (cycle26, 3 보드) | `src/engine/session.py::MarketBoard` enum 활성 3 보드: `pre_nxt` (08:00~09:00) / `main` (09:00~15:40) / `post_nxt` (15:40~20:00). `_BOARD_SCHEDULE` 도 3 구간. `krx_open`/`krx_after` enum 값은 *호환성 보존* (실제 스케줄 미사용). `SessionTracker` 30s 주기 tick + `register_board_handler` 콜백 |
-| 전략별 매매 가능 보드 | `DEFAULT_TRADABLE_BOARDS` — `momentum`: KRX_OPEN+MAIN (코드 enum 유지, 활성 보드는 MAIN) / **`volatility_breakout`: MAIN only (cycle26 KRX ONLY)** / **`long_tail_volatility`: PRE_NXT+MAIN+POST_NXT (cycle38 사용자 의도 복원 — 연속 상한가 익일 청산 + 야간 매수)** / `donchian_swing`·`bull_flag_breakout`·`vcp_breakout`·`kojiro`: MAIN only. `session.py` 의 fallback dict `_DEFAULT_TRADABLE_BOARDS` 는 momentum·VB·LTV·donchian 4전략만 담고, BFB·VCP·kojiro 는 각 전략 파일의 `DEFAULT_PARAMS["tradable_boards"]`(전부 `("main",)`) 로 결정된다 |
+| 전략별 매매 가능 보드 | `DEFAULT_TRADABLE_BOARDS` — `momentum`: KRX_OPEN+MAIN (코드 enum 유지, 활성 보드는 MAIN) / **`volatility_breakout`: MAIN only** / **`long_tail_volatility`: PRE_NXT+MAIN+POST_NXT (연속 상한가 익일 청산 + 야간 매수)** / `donchian_swing`·`bull_flag_breakout`·`vcp_breakout`·`kojiro`: MAIN only. `session.py` 의 fallback dict `_DEFAULT_TRADABLE_BOARDS` 는 momentum·VB·LTV·donchian 4전략만 담고, BFB·VCP·kojiro 는 각 전략 파일의 `DEFAULT_PARAMS["tradable_boards"]`(전부 `("main",)`) 로 결정된다 |
 | VB/LTV K값 | `k_value_krx_main` (기본 1.0) — KRX 09:00 시가 기준. 보드별 K 키는 `_BOARD_K_KEY` 가 고른다(`main`→`k_value_krx_main` / `pre_nxt`→`k_value_nxt_pre` / `post_nxt`→`k_value_nxt_post`). **VB 는** 보드가 `("main",)` 라 뒤 두 키가 곱해지는 경로가 없어 DB/AI 자문 응답 호환 보존만이고(`param_catalog` `deprecated_for=("volatility_breakout",)`), **LTV 는 프리·애프터 목표가에 실제로 곱한다** |
-| 종목 단위 원자 전환 / 사전 구독 마진 | cycle26 이 설계했던 보드 전환 원자 처리(50초 사전 구독 마진 2 시각)는 유일 소비 경로가 미배선이라 cycle257 에서 함께 삭제 — 위 시세 채널 행 참조. cycle294 의 채널 전환은 그 설계의 부활이 아니라 별개 구현이다(창은 시장 시간표에서 파생하고, 보유 종목은 make-before-break 로 옮긴다) |
 | 익일 청산 시점 | 다음 영업일 NXT 프리 첫 거래(08:00 부근) + 30초 안정화 후 청산 (`NEXT_DAY_STABILIZE_SECS=30`). 대상 = `momentum` · `long_tail_volatility` 상한가 모드 · `volatility_breakout` **안전망**(VB 는 오버나이트를 하지 않는다 — 시세 미수신·시장가 거부·재시작 race 로 15:20 청산이 누락된 비상 상황에서만 `_execute_next_day_clear` 가 받아 WARNING 과 함께 청산한다) |
-| 15:20 강제 청산 | `_force_clear_main_only` — 대상은 VB·LTV 두 전략이고 각 전략의 `check_force_clear()` 가 목록을 정한다. VB = 전량. LTV = `_limit_up_reached`(상한가 모드) 종목만 제외하고 나머지는 청산한다 — **POST_NXT 가 `tradable_boards` 에 있어도 보유가 유지되지 않는다**(cycle142 시정: 종전 `keeps_post_nxt` 전량 보류 분기가 사용자 의도 위반이었다). **시간 가드 (2026-05-15 hotfix)**: 함수 진입 시 `>=15:30` 이면 즉시 skip + 익일 청산 안전망 위임 |
-| 스윙 일중 시세 REST 폴링 | `_swing_rest_poll_loop` — **2단 창**(cycle222-a): **09:00:30~09:30 = 보유 종목 전용 + stale 중립**(`SWING_REST_POLL_EARLY_START`, D9 2026-09-05: 09:05 → 09:00:30 — WS 무송출(no_feed) 보유 종목의 시가 직후 손절 사각 5분 축소. REST 가 `ticker_last_tick` 을 갱신하면 개장 러시 blind 종목이 '신선'으로 보여 강제 재구독이 안 걸린다) / **09:30~15:20 = 전체 폴**(후보 포함 + `last_tick` 갱신). 대상 전략 = `_SWING_POLL_STRATEGIES = ("donchian_swing", "kojiro")` — **BFB·VCP 는 비멤버라 REST 보강이 없고 틱으로만 매수 평가한다**(미구독 = 매수 기회 완전 상실). 60s 주기로 `_scanned_tickers ∪ positions ∪ pending_buys` 합집합을 `fetch_stock_detail` 폴링 → `scanner.ticker_prices` 갱신 + `ticker_last_tick` touch + `ticker_names` 보강. 보유 종목만 `RiskManager.on_tick` 호출로 기존 트레일링/-7% 손절 평가 재사용. WS stale 시 ATR 트레일링 평가 끊김 차단 (2026-05-15 결함 B) |
+| 15:20 강제 청산 | `_force_clear_main_only` — 대상은 VB·LTV 두 전략이고 각 전략의 `check_force_clear()` 가 목록을 정한다. VB = 전량. LTV = `_limit_up_reached`(상한가 모드) 종목만 제외하고 나머지는 청산한다 — **POST_NXT 가 `tradable_boards` 에 있어도 보유가 유지되지 않는다**(cycle142). **시간 가드**: 함수 진입 시 `>=15:30` 이면 즉시 skip + 익일 청산 안전망 위임 |
+| 스윙 일중 시세 REST 폴링 | `_swing_rest_poll_loop` — **2단 창**(cycle222-a): **09:00:30~09:30 = 보유 종목 전용 + stale 중립**(`SWING_REST_POLL_EARLY_START` — 09:00:30 부터 도는 이유는 WS 무송출(no_feed) 보유 종목의 시가 직후 손절 사각을 줄이기 위해서다. 'stale 중립' 인 이유는 REST 가 `ticker_last_tick` 을 갱신하면 개장 러시 blind 종목이 '신선'으로 보여 강제 재구독이 안 걸리기 때문이다) / **09:30~15:20 = 전체 폴**(후보 포함 + `last_tick` 갱신). 대상 전략 = `_SWING_POLL_STRATEGIES = ("donchian_swing", "kojiro")` — **BFB·VCP 는 비멤버라 REST 보강이 없고 틱으로만 매수 평가한다**(미구독 = 매수 기회 완전 상실). 60s 주기로 `_scanned_tickers ∪ positions ∪ pending_buys` 합집합을 `fetch_stock_detail` 폴링 → `scanner.ticker_prices` 갱신 + `ticker_last_tick` touch + `ticker_names` 보강. 보유 종목만 `RiskManager.on_tick` 호출로 기존 트레일링/-7% 손절 평가 재사용. WS stale 시 ATR 트레일링 평가 끊김 차단 (2026-05-15 결함 B) |
 
 ## API 엔드포인트
 
@@ -525,11 +526,11 @@ KIS OpenAPI가 NXT(넥스트레이드 ATS) 주문/시세를 정식 지원함에 
 | GET | `/api/strategies/params-schema` | cycle278 파라미터 카탈로그 전체 + 전략별 적용 키·현재값·기본값. 편집 폼은 **이 한 응답**으로 렌더한다 (키·범위·선택지 프론트 하드코딩 금지) |
 | GET | `/api/strategies/te?months=3` | cycleF 전략별 TE(트레이딩 예지치)/RR(손익비) 최근 N개월(`months`×30일) 지표 — 관찰 전용, 5분 프로세스 캐시. 전략별 계산 실패는 그 전략만 빈 값으로 격리 |
 | PUT | `/api/strategies/weights` | 전략별 비중 수정 (매수금액 하한선 검증). body `{weights: {strategy_id: ratio}}` — **단위는 비율 `0.0~1.0`, 퍼센트(0~100) 금지**(2026-08-18 확정). 범위 위반 422, Σ>1.0 은 `success=false`(저장 미수행), 부분 payload(Σ<1) 허용. `GET /api/strategies` 의 `weight` 와 단위가 같아 왕복 항등 |
-| PUT | `/api/strategies/{id}/params` | 전략 파라미터 수정 (부분 dict **병합** — 요청에 없는 키는 보존). **cycle278 부터 미지 키·읽기 전용 키·자료형·선택지·범위·예산 불변식 위반은 422 다**(종전엔 조용히 버렸다). 오류가 하나라도 있으면 아무것도 저장하지 않는다. 알 수 없는 전략 id 는 200 + `success=false` |
+| PUT | `/api/strategies/{id}/params` | 전략 파라미터 수정 (부분 dict **병합** — 요청에 없는 키는 보존). **미지 키·읽기 전용 키·자료형·선택지·범위·예산 불변식 위반은 422 다**(cycle278). 오류가 하나라도 있으면 아무것도 저장하지 않는다. 알 수 없는 전략 id 는 200 + `success=false` |
 | GET | `/api/strategies/system/auto-start` | 자동 매매 설정 조회 |
 | PUT | `/api/strategies/system/auto-start` | 자동 매매 설정 변경 |
 | GET | `/api/strategies/system/cash-usage-ratio` | 매매 가용 자금 비율 조회 (J3, 2026-05-12) |
-| PUT | `/api/strategies/system/cash-usage-ratio` | 매매 가용 자금 비율 변경 — body `{ratio}` 는 **비율 `0.0~1.0`**(퍼센트 아님), `0.05` 단위로 자동 반올림한다. 범위 밖이면 400. 다음 영업일 `_boot()` 부터 반영. cycle2 (2026-05-17) 에서 하한 0.5 → 0.0 으로 확장했다(방어 레짐 자동 조정이 0.25 를 넣는다) |
+| PUT | `/api/strategies/system/cash-usage-ratio` | 매매 가용 자금 비율 변경 — body `{ratio}` 는 **비율 `0.0~1.0`**(퍼센트 아님), `0.05` 단위로 자동 반올림한다. 범위 밖이면 400. 다음 영업일 `_boot()` 부터 반영. 하한이 0.0 인 이유 = 방어 레짐 자동 조정이 0.25 를 넣기 때문이다 |
 | GET | `/api/logs` | 시스템 로그 조회 |
 | GET | `/api/logs/search?q=&level=&start=&end=&limit=` | 시스템 로그 키워드 검색 (대소문자 무시 부분일치). `limit` 1~1000 / 기본 200. 응답 `{logs, total, has_more}` |
 | GET | `/api/recommendations` | 전략수정 AI자문 목록 (최근 30일) |
@@ -554,20 +555,20 @@ KIS OpenAPI가 NXT(넥스트레이드 ATS) 주문/시세를 정식 지원함에 
 | GET | `/api/realtime/channel-probe` | 진행 중인 프로브 상태 폴링 (읽기 전용, 구독 변경 0) |
 | DELETE | `/api/realtime/channel-probe/{ticker}` | 프로브 종료 — 세션 전수 순회로 구독 해제. 프로브가 없으면 404 (조용한 200 금지). 응답 `removed_from` = 실제 해제된 세션 라벨 |
 | GET | `/api/realtime/market-operation` | 장운영상태(VI·거래정지·종목상태·서킷브레이커) 현황 — 관찰 전용, 매수 가드와 연결되지 않는다. `summary`(`vi_active_count`/`halt_active_count`/`iscd_stat_active_count` + `circuit_breaker` 휴리스틱) + `details`(종목별 vi_code/halt_yn/halt_reason/mkop_cls_code, cap 200). `H0UNMKO0` 모니터가 원천이다(cycle149·186). 장운영상태 화면의 「지금 시장은」 과 실시간 상태 화면의 「장운영 요약」 카드가 이 한 응답을 함께 쓴다 |
-| GET·PUT | `/api/realtime/tick-channel-mode` | **cycle293·294 (2026-09-14) — 시세 채널 장중 킬스위치.** GET 은 현재 모드·전환 다이얼·그날 전환 창을 돌려준다. PUT body `{mode}` ∈ `off`/`observe`/`enforce_low`/`enforce` (어휘 밖 값은 422). DB 저장과 엔진 메모리 반영이 **같은 요청에서** 끝나 재시작이 필요 없다. 선택 필드는 `switch_enabled`(전환만 정지) **하나**뿐이고 생략하면 현행 값 무접촉. ⚠️ **`gap_hold_enabled` 는 cycle295 로 폐기**됐다 — 지금 보내면 422 가 아니라 **조용히 무시**된다(같은 요청의 `mode` 킬스위치까지 막으면 안 되므로). 옛 런북을 보고 그 키를 보내면 `success:true` 를 받고 아무 일도 일어나지 않는다 |
+| GET·PUT | `/api/realtime/tick-channel-mode` | **시세 채널 장중 킬스위치.** GET 은 현재 모드·전환 다이얼·그날 전환 창을 돌려준다. PUT body `{mode}` ∈ `off`/`observe`/`enforce_low`/`enforce` (어휘 밖 값은 422). DB 저장과 엔진 메모리 반영이 **같은 요청에서** 끝나 재시작이 필요 없다. 선택 필드는 `switch_enabled`(전환만 정지) **하나**뿐이고 생략하면 현행 값 무접촉. ⚠️ **그 둘 밖의 키는 422 가 아니라 조용히 무시된다** — 같은 요청의 `mode` 킬스위치까지 막으면 안 되기 때문이다(pydantic `extra=ignore`). 모르는 키를 보내면 `success:true` 를 받고 아무 일도 일어나지 않는다 |
 | GET | `/api/market-state?on_date=` | cycle282 거래소 장 운영 표 전체 + KRX·NXT 커서 + 주문유형 카탈로그. 표는 코드 상수라 DB 장애와 무관하게 살아 있다 — 휴장일 조회 실패는 `is_trading_day=null` + 200. `on_date` 로 다른 날짜 미리보기(오늘 ±365일, 범위 밖 422 · 그 날짜에 유효 행 0 이면 404 · **오늘** 표가 비면 500) |
 | GET | `/api/market-ops` | cycle285 「오늘 야간작업」 타임라인 14행 (상태 10종 — 예정/진행/완료/실패/건너뜀 2종(신선·주간)/덮어씀/미발화/휴장/확인불가). 예정 시각은 `scheduler.TIME_*` 에서만 읽는다(시각 리터럴 0건). 읽기 전용 — 재실행 버튼 없음 |
 | GET | `/api/backtest/mcp/health` | 외부 MCP 백테스트 서버 헬스체크. `KIS_MCP_ENABLED=false`(기본)면 외부 호출 0회로 `reachable=false`. 어떤 경우에도 200 (graceful) |
-| GET | `/api/market-regime/current` | 현재 매크로 레짐 + `cash_usage_ratio` + `auto_regime_adjust` + ETF 레짐(관찰). 🔴 `buy_blocked` 는 **항상 false** — cycleI (2026-08-03) 가 레짐 매수 게이트를 제거했다. `block_reason` 은 관찰용 사유로만 남는다 |
+| GET | `/api/market-regime/current` | 현재 매크로 레짐 + `cash_usage_ratio` + `auto_regime_adjust` + ETF 레짐(관찰). 🔴 `buy_blocked` 는 **항상 false** — 레짐은 매수에 개입하지 않는다(cycleI). `block_reason` 은 관찰용 사유로만 남는다 |
 | GET | `/api/market-regime/history?days=30` | `market_regime_snapshots` 최근 N일 (`days` 는 1~365 로 클램프) |
 | GET | `/api/strategy-funnel?strategy_id=&target_date=` | cycle34: 전략별 조건검색 단계별 후보/탈락 종목 (`survived_tickers` cap 200 / `excluded_sample` cap 20) |
 | GET | `/api/strategy-funnel/recent?strategy_id=&days=7` | 최근 N영업일 추이 |
-| POST | `/api/strategy-funnel/snapshot` | 수동 trigger — 각 전략 `get_scan_stats()` + `get_scanned_tickers()` 로 최종 단계 (`step_no=99`) 즉시 snapshot 생성 |
+| POST | `/api/strategy-funnel/snapshot` | 수동 trigger — `scheduler.capture_funnel_snapshots(registry, is_provisional=False)` 로 09:30 자동 hook 과 같은 단계별 + `step_no=99` 캡처. prepare 는 재실행하지 않고 최근 결과(`_funnel_steps`)만 담는다. 응답 `{target_date, saved_count, count}` |
 | GET·PUT | `/api/integrations/dkstock-regime` | 외부 매크로 서버(dkstock.cloud) 활성 토글. DB 우선 / `.env` fallback. 활성화 시 백그라운드 fetch 발화, 비활성화 시 메모리 레짐 리셋. 매크로 fetch 실패는 graceful(토글 자체는 성공) |
 | GET·PUT | `/api/integrations/kis-mcp` | 외부 백테스트 MCP 서버 활성 토글. 즉시 fetch 없음 — 백테스트는 20:00 자문 시점에 발화한다 |
 | GET·PUT | `/api/integrations/auto-regime-adjust` | 매크로 레짐에 따라 `cash_usage_ratio` 를 자동 갱신할지 토글. 다음 영업일 `_boot` 부터 반영. **새로 쓰는 코드는 이 경로를 쓴다**(Settings 화면도 이쪽). 별칭 `PUT /api/market-regime/auto-adjust` 는 같은 키·같은 동작으로 남아 있다 |
 | GET·PUT | `/api/integrations/etf-regime` | 지수ETF 고지로 스테이지 레짐 **관찰** 토글 (기본 false, `.env` fallback 없음). 매수에 개입하지 않는다 |
-| GET·PUT | `/api/integrations/buy-block` | 매수 가드 모드(`OFF`/`WARN`/`SOFT`/`HARD`) + 임계값 4종. **cycleI (2026-08-03) 에서 매수 게이트가 제거돼 표시 전용**이다. PUT 범위 위반 422 (VIX [10,50] · FG_high [50,100] · FG_low [0,50]) |
+| GET·PUT | `/api/integrations/buy-block` | 매수 가드 모드(`OFF`/`WARN`/`SOFT`/`HARD`) + 임계값 4종. **표시 전용**이다 — 매수 게이트는 없다(cycleI). PUT 범위 위반 422 (VIX [10,50] · FG_high [50,100] · FG_low [0,50]) |
 | GET·PUT | `/api/integrations/auto-apply` | 전략수정 AI자문 자동 적용 토글 (기본 false). ON 이면 20:00 자문 직후 비중 감액(50% cap) + 보수적 파라미터를 자동 적용한다 |
 | GET·PUT | `/api/integrations/krx-open-api` | KRX 정식 OPEN API 설정 (활성·`base_url`·key). **응답은 key 마스킹 전용**(`****1234`, 평문 미노출). 이 토글이 `scanner._full_universe_load_krx_primary`(전체 유니버스 적재 **주 소스**)를 켠다 — 끄면 KIS 시가총액 폴백으로 degrade 한다(2026-08-08 실측 3,577→60종목) |
 | GET·POST | `/api/integrations/quote-accounts?active_only=false` | 보조 KIS 시세 수신 계좌 목록·등록 (cycle7-A). **app_secret 평문은 절대 노출하지 않는다**(마스킹). POST 201 / label 중복 409 / 빈 값 422. 매매·잔고 활용 0 — 시세 수신 풀 전용 |
@@ -644,17 +645,17 @@ auto_stock/
 
 이 프로젝트는 Claude Code의 서브에이전트 + 스킬 시스템을 활용한 **다중 에이전트 협업 구조**로 개발·운영된다. 사용자 요청 유형에 따라 오케스트레이터 스킬이 적합한 에이전트와 스킬을 자동 호출한다.
 
-### 에이전트 (`.claude/agents/`) — 8명 (report-writer 는 2026-09-05 추가)
+### 에이전트 (`.claude/agents/`) — 8명
 
 | 에이전트 | 역할 | 모델 | 호출 시점 |
 |---------|------|------|---------|
 | **team-leader** | 트레이더 출신 팀장 — 매매 규칙 *정의 + 감독*, 작업 분배, 산출물 검수. 모든 사용자 요청의 1차 진입점 | opus | 전체 요청 |
-| **domain-expert** *(신규 cycle27)* | 데이/스윙 트레이더 출신 *깊이있는 자문* — 신규 전략, 파라미터 결정, 시장 미시구조, 보드 행태, 시장 레짐, KIS 거부 해석 | opus | Phase 2.5 명세 분해 *전* + 사이클 중 행위 영향 평가 |
+| **domain-expert** | 데이/스윙 트레이더 출신 *깊이있는 자문* — 신규 전략, 파라미터 결정, 시장 미시구조, 보드 행태, 시장 레짐, KIS 거부 해석 | opus | Phase 2.5 명세 분해 *전* + 사이클 중 행위 영향 평가 |
 | **tdd-engineer** | Red 테스트 선작성 + Green 검증 + 영향 인덱스 갱신 (KIS MCP 응답 시리즈 합성 포함) | opus | 모든 코드 변경의 TDD 사이클 입구 |
 | **backend-dev** | FastAPI + KIS OpenAPI + 매매 엔진 + WebSocket + RDS PostgreSQL(asyncpg, `src/db/pg.py`). 신규 API 통합 시 KIS MCP 정본 확인 | sonnet | Red 테스트 수신 후 Green 구현 |
 | **frontend-dev** | React 트레이딩 대시보드 (구동 관리, 실적/잔고, 거래 내역, Settings) | sonnet | UI Red 테스트 수신 후 Green 구현 |
 | **tester** | 사후 통합/경계면/E2E/안전성. KIS MCP 응답을 정본으로 양쪽 동시 읽기 | opus | 모듈 완성 후 통합 검증 |
-| **refactor-expert** *(신규 cycle27)* | *주기적* 코드 품질 검토 — 중복/명명/모듈 비대화/dead code/아키텍처 드리프트. 카드 단위 분할 + 위험 등급 + 회귀 가드 동반 | opus | Phase 4.5 — 사이클 5회 누적 또는 명시 요청 |
+| **refactor-expert** | *주기적* 코드 품질 검토 — 중복/명명/모듈 비대화/dead code/아키텍처 드리프트. 카드 단위 분할 + 위험 등급 + 회귀 가드 동반 | opus | Phase 4.5 — 사이클 5회 누적 또는 명시 요청 |
 | **report-writer** | 긴 작업 주기 끝의 쉬운 말 보고서(HTML 아티팩트) + 원문 md + 결정 카드. 두 번째 임무 = `/sync-docs` 문서 동기화 실행 주체 | opus | Phase 5 — 사이클 3회 이상 연속 · 자율 진행 구간 종료 · 사용자 "리포트" 요청 (`cycle-report` 스킬) / Phase 4.8 문서 동기화 |
 
 ### 스킬 (`.claude/skills/`) — 10개
@@ -667,10 +668,10 @@ auto_stock/
 | **kis-api-integration** | KIS OAuth/REST/WebSocket/TR_ID 변환 등 연동 코드 | "KIS API", "주식 주문", "잔고 조회", "실시간 시세" |
 | **trading-dashboard** | React 대시보드 화면 구현 | "대시보드", "화면", "UI", "차트" |
 | **trading-test** | KIS 연동/주문 흐름/DB 정합성 통합 테스트 + Playwright E2E | "테스트", "검증", "QA", "정합성 확인" |
-| **domain-consult** *(신규 cycle27)* | domain-expert 자문 요청 흐름 — 매매 의사결정 깊이 자문 | "도메인 자문", "트레이더 시각", "파라미터 근거", "시장 미시구조" |
-| **refactor-review** *(신규 cycle27)* | refactor-expert 주기적 검토 흐름 — 행위 보존 카드 단위 권고 | "리팩토링", "코드 정리", "중복 제거", "구조 개선", "모듈 분해" |
-| **kis-mcp-query** *(신규 cycle27)* | KIS Code Assistant MCP (`mcp__kis-code-assistant__*`) 활용 가이드 — 공식 저장소 `koreainvestment/open-trading-api` 기반. backend-dev / tdd-engineer / tester / refactor-expert 공유 | "KIS 응답 재확인", "TR_ID 확인", "KIS 스펙 정본" |
-| **cycle-report** *(신규 2026-09-05)* | report-writer 호출 흐름 — 주기 마무리 보고서(쉬운 말 아티팩트 + 원문 md + 결정 카드) | "리포트", "보고서", "정리해 줘" |
+| **domain-consult** | domain-expert 자문 요청 흐름 — 매매 의사결정 깊이 자문 | "도메인 자문", "트레이더 시각", "파라미터 근거", "시장 미시구조" |
+| **refactor-review** | refactor-expert 주기적 검토 흐름 — 행위 보존 카드 단위 권고 | "리팩토링", "코드 정리", "중복 제거", "구조 개선", "모듈 분해" |
+| **kis-mcp-query** | KIS Code Assistant MCP (`mcp__kis-code-assistant__*`) 활용 가이드 — 공식 저장소 `koreainvestment/open-trading-api` 기반. backend-dev / tdd-engineer / tester / refactor-expert 공유 | "KIS 응답 재확인", "TR_ID 확인", "KIS 스펙 정본" |
+| **cycle-report** | report-writer 호출 흐름 — 주기 마무리 보고서(쉬운 말 아티팩트 + 원문 md + 결정 카드) | "리포트", "보고서", "정리해 줘" |
 
 ### 협업 규약
 
@@ -824,10 +825,9 @@ bash tools/deploy/compose_up_changed.sh   # 자동 배포와 같은 판정 · �
 > `TIME_SESSION_START_CUTOFF`(20:00) 가 그 창의 재기동을 **거부**해서, 재기동 시점 이후의
 > 저녁 작업(20:05 metrics 스냅샷 · 20:30 일봉 적재 · 21:30 정산과 일일 로그 분석 · 로그
 > retention)이 그날치 통째로 결손된다(cycle283 D8). 장외 배포 창 =
-> **15:30~16:00 · 21:35~익일 07:45**. 16:00~20:00 은 2026-09-14 신설된 KRX 애프터마켓
-> 실시간 연속체결 구간이라 재시작이 같은 tick blind 를 만든다(종전 `15:30~19:55` 는 시간외
-> 단일가 시절 값). 08:00~08:50 NXT 프리장도 실매매 구간이다. 모드가 `full` 인지 불확실하면
-> full 로 간주한다.
+> **15:30~16:00 · 21:35~익일 07:45**. 16:00~20:00 은 KRX 애프터마켓 실시간 연속체결
+> 구간이라 재시작이 같은 tick blind 를 만들고, 08:00~08:50 NXT 프리장도 실매매 구간이다.
+> 모드가 `full` 인지 불확실하면 full 로 간주한다.
 
 ## 스케줄 — KRX/NXT 통합 운영 (08:00~20:00)
 
@@ -848,25 +848,25 @@ bash tools/deploy/compose_up_changed.sh   # 자동 배포와 같은 판정 · �
 | 07:45 | 자동 매매 시작 (AUTO_START 활성 시, 주말+공휴일 자동 건너뜀 — KIS chk-holiday API) |
 | 07:55 | `_boot()` — 토큰 사전 순차 발급 (cycle20: 메인+보조 N 분당 1개 한도 직렬화) → DB 포지션 복구 → KIS 잔고 교차 검증 → 미체결 복구 → `stock_master` eager 갱신 (보유+익일청산) → 매크로 fetch + `market_regime_snapshots` INSERT → `cash_usage_ratio` 자동 조정 → 전략 prepare |
 | 07:59 | 사전 구독 — 돌파(VB/LTV) + 스윙(donchian) 스캔 종목 + 보유 포지션. WebSocket 연결 + 체결통보 + (실전) `H0UNMKO0` 구독. 유니버스 비어있으면 prepare 재실행 |
-| 08:00 | NXT 프리 진입 — 익일 청산 백그라운드 (`NEXT_DAY_STABILIZE_SECS=30s` 안정화 후 NXT 시가 청산) + `_confirm_breakout_open_prices(board="pre_nxt")` 로 NXT 프리 시가 확정(후보가 있으면 phase `pre_nxt_trading`). VB 는 cycle26 으로 PRE_NXT 매수가 빠졌지만 **LTV 는 cycle38 에서 복원돼 `tradable_boards=("pre_nxt","main","post_nxt")` 로 프리장 매수를 한다** |
+| 08:00 | NXT 프리 진입 — 익일 청산 백그라운드 (`NEXT_DAY_STABILIZE_SECS=30s` 안정화 후 NXT 시가 청산) + `_confirm_breakout_open_prices(board="pre_nxt")` 로 NXT 프리 시가 확정(후보가 있으면 phase `pre_nxt_trading`). 프리장에서 신규 매수하는 전략은 **LTV 하나**다(`tradable_boards=("pre_nxt","main","post_nxt")`) |
 | 09:00:05 | KRX 메인 시가 확정 — `_confirm_breakout_open_prices(board="main")` VB/LTV target_price 계산 (KRX 09:00 시가 + 전일Range × `k_value_krx_main`). 직후 `_drain_pending_next_day_clear()` — 08:00 보류 종목 KRX 시장가 일괄 청산 |
 | 09:05~09:30 | donchian 스윙 진입창 — 시장가 1주문/종목, 갭 +3%↑ 스킵 |
 | 09:30 | 모멘텀(상한가) 종목 스캔 시작, 매수 감시. 5분 주기 `_scan_loop` 시작 — 모멘텀+돌파+스윙+보유 합집합 시세 재구독 |
-| 15:20 | KRX 메인 신규 매수 중단 + 강제 청산 (`_force_clear_main_only`) — VB 전체 + LTV 상한가 미도달 청산. 시간 가드(2026-05-15 hotfix): `>=15:30` 진입 시 skip + 익일 청산 안전망 위임 |
+| 15:20 | KRX 메인 신규 매수 중단 + 강제 청산 (`_force_clear_main_only`) — VB 전체 + LTV 상한가 미도달 청산. 시간 가드: `>=15:30` 진입 시 skip + 익일 청산 안전망 위임 |
 | 15:30 | KRX 메인 마감 (15:30~15:39:59 종가 흡수 마진 — MAIN 보드 유지). 직후 `_confirm_breakout_open_prices(board="post_nxt")` 로 POST_NXT 시가 확정 폴링 (`board` 명시 = SessionTracker 30초 전환 race 회피). LTV 의 `tradable_boards` 에 post_nxt 가 있어 확정 대상이 실제로 존재한다 — 누락되면 화면에 "시가 대기" 종목이 잠복한다 (2026-05-12 운영 사고) |
-| **15:40** | **cycle26 — POST_NXT 진입** (기존 15:30 → 15:40 변경). VB 는 매도만이고, **LTV 는 POST_NXT 신규 매수를 한다**(연속 상한가 종목 익일 청산 모드 진입, cycle38) |
-| 16:00 | **KRX 애프터마켓 개시** (2026-09-14 신설, 16:00~20:00 실시간 연속체결). 보드는 `post_nxt` 그대로지만 **주문 거래소가 이 시각부터 KRX 로 바뀐다** — 「매매 안전장치」의 「시각이 거래소를 정한다」·「KRX 애프터마켓 청산 호가유형」 참조. 15:40~16:00 은 KRX 에 연속 체결이 없어 NXT 애프터만 열려 있다 |
+| 15:40 | **POST_NXT 진입**. VB 는 매도만이고, **LTV 는 POST_NXT 신규 매수를 한다**(연속 상한가 종목 익일 청산 모드 진입) |
+| 16:00 | **KRX 애프터마켓 개시** (16:00~20:00 실시간 연속체결). 보드는 `post_nxt` 그대로지만 **주문 거래소가 이 시각부터 KRX 로 바뀐다** — 「매매 안전장치」의 「시각이 거래소를 정한다」·「KRX 애프터마켓 청산 호가유형」 참조. 15:40~16:00 은 KRX 에 연속 체결이 없어 NXT 애프터만 열려 있다 |
 | 16:10 | (장 마감 후 데이터 계층) `stock_master` basics 보강 — KIS CTPF1002R 매스 (`TIME_STOCK_MASTER_BASICS_REFRESH`) |
-| 16:15 | `stock_master_daily` retention purge (`TIME_STOCK_MASTER_DAILY_PURGE`) — 적재가 20:30 으로 밀려 이제 적재보다 4시간 15분 **앞**이다(그날 적재분은 다음 날 purge 대상). 전일까지의 경계만 다루므로 행위 무영향 |
+| 16:15 | `stock_master_daily` retention purge (`TIME_STOCK_MASTER_DAILY_PURGE`) — 적재(20:30)보다 **앞**이라 그날 적재분은 다음 날 purge 대상이다. 전일까지의 경계만 다루므로 행위 무영향 |
 | 16:20 | 저녁 잠정 funnel 캡처 (`TIME_EVENING_FUNNEL_CAPTURE`, 운영자 밤 후보 확인용) |
 | 16:30 | KIS 종목 마스터 파일 적재 — `kospi_code.mst` / `kosdaq_code.mst` (`TIME_STOCK_MASTER_MASTER_LOAD`) |
 | 16:40 | 퀀트 재무 5 TR 주1회 적재 — `_stock_master_financial_load_task_loop` (마스터 16:30 후 stagger, 주1회 신선도 게이트). 매매 무관 (cycleC1~C3, 마법공식·F-Score-7 원천) |
 | 19:50 | NXT 애프터 신규 매수 중단 (`TIME_NXT_POST_BUY_STOP` — 전 전략 `buy_disabled=True`. 이 시각에 하는 일은 매수 중단뿐이다) |
 | 20:00 | NXT 애프터 종료 + WebSocket 구독 해제(`unsubscribe_all`) → 전략수정 AI 자문 생성 (OpenAI → `parameter_recommendations`, `TIME_RECOMMENDATION`) → 직후 `auto_apply_recommendations()` (cycle23, 감액만 + 50% cap, `auto_apply_enabled=true` 시) |
 | 20:00:05 | 전체 유니버스 적재 (`TIME_FULL_UNIVERSE_LOAD` — 전략수정 AI자문 직후 5초 마진) |
-| 20:05 | metrics 1차 스냅샷 (`TIME_METRICS_SNAPSHOT` → `daily_metrics_snapshot.run_daily_metrics_snapshot`, OpenAI 미호출). `api_metrics`·`strategy_funnel` 은 프로세스 메모리 전용이라, 정산이 21:30 으로 옮겨져 생긴 90분 유실 노출을 5분으로 줄인다 |
-| 20:30 | `stock_master_daily` 일봉 적재 (`TIME_STOCK_MASTER_DAILY_LOAD` — 종전 16:00. KRX 애프터마켓(16:00~20:00) 동안 일봉 거래량이 계속 늘어 16:00 적재는 부분값이었다) |
-| 21:30 | 전략별 + 합산 일일 정산 (`TIME_SETTLEMENT` — 종전 20:10, 일봉 적재 20:30 뒤로 이동), DB 실적 기록. 직후 일일 로그 분석 리포트 생성 (OpenAI → `daily_log_reports`). 직후 `purge_old_logs()` (INFO 2일 / WARNING+ 30일 retention 자동 정리, cycle6) |
+| 20:05 | metrics 1차 스냅샷 (`TIME_METRICS_SNAPSHOT` → `daily_metrics_snapshot.run_daily_metrics_snapshot`, OpenAI 미호출). `api_metrics`·`strategy_funnel` 은 프로세스 메모리 전용이라, 21:30 정산 전에 재시작이 나면 통째로 사라진다. 이 스냅샷이 그 유실 노출을 5분으로 줄인다 |
+| 20:30 | `stock_master_daily` 일봉 적재 (`TIME_STOCK_MASTER_DAILY_LOAD` — KRX 애프터마켓(16:00~20:00) 동안 일봉 거래량이 계속 늘어 그 뒤에 적재한다) |
+| 21:30 | 전략별 + 합산 일일 정산 (`TIME_SETTLEMENT` — 일봉 적재 20:30 뒤), DB 실적 기록. 직후 일일 로그 분석 리포트 생성 (OpenAI → `daily_log_reports`). 직후 `purge_old_logs()` (INFO 2일 / WARNING+ 30일 retention 자동 정리, cycle6) |
 
 **중간 시각 시작 시**: 현재 시각 이후 스케줄부터 실행. **20:00**(`TIME_SESSION_START_CUTOFF`) 이후 시작은 거부한다 — 정산 시각(21:30)과 분리된 별도 경계다. 그 창의 재기동은 그날 20:30 일봉 적재 · `_settle()` · 일일 로그 분석 · retention 정리를 통째로 잃는다.
 

@@ -97,7 +97,7 @@ git diff 를 보지 말고 **지정 영역의 코드를 직접 읽는다**.
 | `Dockerfile`, `docker-compose*.yml`, `.github/workflows/*` | `CLAUDE.md`(Docker/배포), `README.md`(빌드/실행), `docs/architecture.md`(12. 배포) |
 | `requirements.txt`, `frontend/package.json` | `README.md`(의존성 — 영향 있을 때만) |
 | 신규 전략/매매 규칙 | `CLAUDE.md`(다중 전략 섹션) + 전략 명세 + `_workspace/00_leader_trading_rules.md` 동기화 여부 안내 |
-| 사이클 단위 변경 이력 (하네스) | `docs/HARNESS_CHANGELOG.md`(verbatim 상세) + `CLAUDE.md`(하네스 변경 이력 요약 표 1줄) |
+| 사이클 단위 변경 이력 (하네스) | `docs/HARNESS_CHANGELOG.md` 상단에 1행(verbatim 상세) — **이력의 유일한 정본**. 정본 문서에 이력 표를 만들지 않는다. 그 사이클이 정본의 규칙을 바꿨으면 정본은 새 값으로 **덮어쓰고**, 바뀐 경위는 `docs/history/<정본 이름>.history.md` 에 append |
 | `.claude/agents/*`, `.claude/skills/*`, `.claude/commands/*` | `CLAUDE.md`(하네스 절 — 에이전트 목록·모델 라우팅·스킬 트리거). 하네스 구성을 바꿨으면 **루트 CLAUDE.md 가 정본**이므로 반드시 같이 본다 |
 | 운영 결함·후속 과제 발생 | `_workspace/00_URGENT_WORKLIST.md` — 루트 CLAUDE.md 가 "다른 작업 전에 먼저 읽을 것"으로 지목한 문서다. 열린 과제가 생기거나 닫히면 **여기가 정본**이다 |
 
@@ -117,6 +117,7 @@ git diff 를 보지 말고 **지정 영역의 코드를 직접 읽는다**.
 | `_workspace/00_URGENT_WORKLIST.md` | 열린 과제 정본 |
 | `_workspace/00_leader_trading_rules.md` | 매매 규칙 정본 (`DEFAULT_PARAMS` 변경 시 동기화 의무) |
 | `.claude/agents/*.md` · `.claude/skills/**/SKILL.md` · `.claude/commands/*.md` | 하네스 구성 |
+| `docs/history/*.history.md` · `docs/history/README.md` | 이력(append-only) — **덧칠 검사·모듈 누락 점검 대상 아님**. 규약은 `docs/history/README.md` |
 
 **전용 `CLAUDE.md` 가 없는 코드 디렉터리** (누락이 반복되는 지점): `src/services/` · `src/middleware/` ·
 `tools/` · `e2e/`. 이 넷은 상위 문서(`src/CLAUDE.md` 또는 루트 `CLAUDE.md`)가 정본이므로 **거기를 본다**.
@@ -144,10 +145,46 @@ leaf 이고 나머지 **선재 8건**(engine 1 · db 4 · api 1 · routes 2)은 
 평문으로 적혀 있고 그것이 정당한 등재다).
 (2026-09-07 실측으로 engine 4건·routes 1건·middleware 1건이 이 검사로 드러났다.)
 
+### 덧칠 패턴 검사 (모드 B 필수 · 커밋 전)
+
+정본은 **현재 상태만** 적는다(루트 `CLAUDE.md` 「문서 규약」 절). 그 규약을 기계로 재는 검사다.
+아래 패턴을 센다 — **0 이어야 통과**. 0 이 아닌 줄은 정본에서 걷어내
+`docs/history/<정본 이름>.history.md` 에 **원문 그대로** append 하고, 정본에는 새 값만 남긴다.
+
+| 패턴(정규식) | 잡는 덧칠 유형 | 오탐 주의 |
+|---|---|---|
+| `종전(에는\|엔\| 표기\| 값)?` | 시점 주석 | 코드 식별자 인용(`advance_if_passed`)과는 무관 |
+| `~~[^~]+~~` | 취소선 폐기 표시 | — |
+| `\(구\)\|\(신\)\|구 서술\|구 결정` | 신·구 병존 | — |
+| `당시(의)? \|시점 값\|시점 기록\|시점 서술` | 시점 주석 | "당시" 가 금기의 근거 문장 안에 있으면 그 한 문장은 정본에 남기고 나머지를 history 로 |
+| `→ 완료\|→ 폐기\|→ cycle\d+ (완료\|착지)` | 인계 목록의 이행 표시 | — |
+| `이제 (더 이상\|는)?` | 변경 접속 | 규칙 문장에서 "이제" 는 거의 항상 덧칠 |
+| `(정정\|갱신) —\|— \d{4}-\d{2}-\d{2} 정정` | 정정 각주 | — |
+| `\|\s*20\d\d-\d\d-\d\d\s*\|\s*.*cycle\d+.*\|` | 정본 안 이력 표(표 행) | `docs/HARNESS_CHANGELOG.md` 는 제외 |
+| `\d+ PASS\|\d+,\d+ PASS\|0 failed\|diff 0` | 검증 수치 — git 과 CI 가 이미 갖고 있다 | — |
+
+**검사 대상이 아닌 곳** = `docs/history/**` · `docs/HARNESS_CHANGELOG.md` · `docs/kis/**` ·
+`_workspace/{red,analysis,domain_consult,reports,forensics}/**`. 시점 문서이거나 이력 그 자체다.
+
+```bash
+PAT='종전|~~[^~]+~~|\(구\)|\(신\)|구 서술|구 결정|시점 값|시점 기록|→ 완료|→ 폐기|이제 더 이상| PASS|0 failed|diff 0'
+for f in CLAUDE.md README.md docs/architecture.md docs/backtest-monitoring.md \
+         src/CLAUDE.md src/engine/CLAUDE.md src/engine/strategies/CLAUDE.md \
+         src/api/CLAUDE.md src/realtime/CLAUDE.md src/db/CLAUDE.md src/routes/CLAUDE.md \
+         src/auth/CLAUDE.md src/models/CLAUDE.md frontend/CLAUDE.md _workspace/00_leader_trading_rules.md; do
+  n=$(grep -cE "$PAT" "$f"); [ "$n" -gt 0 ] && echo "DOC_OVERPAINT $f $n"
+done
+# 어느 줄인지 보려면: grep -nE "$PAT" <파일>
+```
+
+⚠️ 정리가 아직 안 끝난 정본이 남아 있는 동안은 통과 조건을 **"직전 커밋보다 줄어들 것"** 으로 둔다.
+전 파일이 0 이 된 뒤부터 0 을 강제한다. 수치는 §6 보고에 적는다.
+
 **손대지 않는 영역**:
 - `docs/kis/` — KIS 공식 API 스펙. 코드 동기화 대상 아님.
 - `docs/architecture.md` — 시스템 흐름이 실제로 변한 경우에만 갱신 (도식·시퀀스 보존).
 - `docs/HARNESS_CHANGELOG.md` — verbatim 누적 이력. 신규 사이클 행 추가만, 기존 행 재작성 금지.
+- `docs/history/**` — 정본에서 걷어낸 이력. **append-only**, 기존 문장 재작성 금지. 덧칠 검사 대상이 아니다.
 
 ---
 
@@ -188,6 +225,7 @@ leaf 이고 나머지 **선재 8건**(engine 1 · db 4 · api 1 · routes 2)은 
 - 문서가 이미 정확하면 손대지 않는다 (불필요한 리포맷·재배열 금지).
 - 신규 개념은 기존 문서 톤·구조(간결·명사형·표/코드 블록)에 맞춰 흡수.
 - 폐기된 개념은 문서에서도 제거.
+- **정본에 이력을 덧칠하지 않는다.** 값이 바뀌었으면 새 값으로 덮어쓰고, 바뀐 경위가 필요하면 `docs/history/<정본 이름>.history.md` 에 원문 그대로 append 한다(루트 `CLAUDE.md` 「문서 규약」 절).
 - 추측·미래형 금지. "현재 코드 그대로"의 사실만.
 - 의미 검증 미완(외부 확인 필요)인 항목은 단정하지 말고 ⚠️ 표시 + 검증 대기 명시.
 
@@ -200,6 +238,7 @@ Edit/Write 로 필요한 부분만 갱신한다.
 수정 후:
 - `git diff -- '*.md'` — 문서 변경 요약
 - 코드 사실 ↔ 문서 라인 paired 요약 (어느 코드 사실이 어느 문서 라인에 반영됐는지)
+- **덧칠 패턴 검사 수치** — 파일별 `DOC_OVERPAINT` 값(직전 값 대비 증감). 모드 B 는 필수.
 
 사용자에게 **4분류**로 보고:
 1. **정정** — 코드와 어긋나 고친 항목

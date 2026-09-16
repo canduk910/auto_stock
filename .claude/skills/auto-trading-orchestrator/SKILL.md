@@ -241,8 +241,11 @@ Agent(
 그 명령의 §2 매핑 표와 **대상 문서 정본 목록**을 근거로 삼는다(그게 누락 방지의 유일한 체크리스트다).
 
 - 최소 의무 = ① 변경된 코드 위치 → 매핑 표로 갱신 후보 문서 확정 ② **모듈 누락 자가 점검**
-  (디렉터리 정본이 그 디렉터리의 새 모듈을 담고 있는가 — 기계적 grep) ③ 루트 `CLAUDE.md`
-  하네스 표 1행 + `docs/HARNESS_CHANGELOG.md` verbatim ④ 열린 과제는 `_workspace/00_URGENT_WORKLIST.md`
+  (디렉터리 정본이 그 디렉터리의 새 모듈을 담고 있는가 — 기계적 grep) ③ `docs/HARNESS_CHANGELOG.md`
+  상단에 1행 verbatim — **이력의 유일한 정본**이고 정본 문서에는 이력 표를 만들지 않는다. 그 사이클이
+  정본의 규칙을 바꿨으면 정본은 새 값으로 **덮어쓰고** 바뀐 경위만 `docs/history/<정본 이름>.history.md`
+  에 append ④ 열린 과제는 `_workspace/00_URGENT_WORKLIST.md` ⑤ **덧칠 패턴 검사**(`/sync-docs` 의
+  `DOC_OVERPAINT`)가 0 또는 직전 커밋 대비 감소
 - **전용 `CLAUDE.md` 가 없는 디렉터리**(`src/services/` · `src/middleware/` · `tools/` · `e2e/`)를
   건드렸으면 상위 문서를 본다 — 이 넷이 누락이 반복되는 지점이다.
 - ⚠️ `src/**` 는 확장자 무관 **이미지 입력**이라 `src/*/CLAUDE.md` 수정만으로도 배포가 full 이 된다.
