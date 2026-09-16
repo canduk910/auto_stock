@@ -768,8 +768,13 @@ async def test_c19_2_mode_off_still_emits_config_canary(monkeypatch, caplog):
 @pytest.mark.parametrize("strategy_id", [
     "momentum", "donchian_swing", "bull_flag_breakout", "vcp_breakout", "kojiro",
 ])
-async def test_c19_3_five_other_strategies_do_nothing(monkeypatch, strategy_id, caplog):
-    """C16 — 나머지 5전략의 실제 `DEFAULT_PARAMS` 로 훅을 태워도 task 0 · 기록 0."""
+async def test_c19_3_five_other_strategies_now_shadow_evaluate(monkeypatch, strategy_id, caplog):
+    """C16 — 🔁 cycle297 반전(2026-09-17). 원래 이 테스트는 "나머지 5전략은 task 0·기록
+    0" 을 잠갔다 — 그때는 4키가 VB·LTV 에만 있었기 때문이다. 사용자 결정 "결정 2 진행"
+    으로 5전략에도 같은 4키(`llm_gate_mode="shadow"` 포함)가 추가됐으므로, 이제 실제
+    `DEFAULT_PARAMS` 로 훅을 태우면 **task 1건 · `[llm_buy_score]` 1행**이 남아야 한다
+    (함수는 지우지 않고 기대값만 뒤집는다 — cycle274/276 소유 축 가드와 같은 패턴).
+    """
     caplog.set_level(logging.INFO, logger=_LOGGER)
     mod = _setup(monkeypatch)
     _wire(mod, monkeypatch, FakeClient())
@@ -781,11 +786,16 @@ async def test_c19_3_five_other_strategies_do_nothing(monkeypatch, strategy_id, 
         if isinstance(obj, type) and name.endswith("Strategy")
         and getattr(obj, "DEFAULT_PARAMS", None) is not None
     )
+    assert cls.DEFAULT_PARAMS.get("llm_gate_mode") == "shadow", (
+        f"{strategy_id}: DEFAULT_PARAMS 에 llm_gate_mode=shadow 가 없다(cycle297 회귀)"
+    )
     _observe(mod, strategy_id=strategy_id, params_snapshot=dict(cls.DEFAULT_PARAMS))
     await _spin()
 
-    assert tasks == [], f"{strategy_id}: task {len(tasks)}건 (기대 0)"
-    assert _lines(caplog, "[llm_buy_score]") == []
+    assert len(tasks) == 1, f"{strategy_id}: task {len(tasks)}건 (기대 1 — cycle297 개방)"
+    assert _lines(caplog, "[llm_buy_score]") != [], (
+        f"{strategy_id}: `[llm_buy_score]` 가 없다 — shadow 평가가 발화하지 않았다"
+    )
 
 
 async def test_c21_1_empty_order_no_records_persist_error_only(monkeypatch, caplog):
@@ -1483,15 +1493,21 @@ async def test_c30_1_raw_response_keeps_the_unparsed_content(monkeypatch):
 # C30 — 버전 고정 2열
 # ===========================================================================
 def test_c30_2_prompt_and_feature_version_are_12_hex():
-    """C30 — 두 버전 값은 12자리 hex. 프롬프트·지표가 바뀐 전후 행을 섞어 회귀하면 안 된다."""
+    """C30 — 두 버전 값은 12자리 hex. 프롬프트·지표가 바뀐 전후 행을 섞어 회귀하면 안 된다.
+
+    🔁 cycle297 — `_prompt_version` 이 `strategy_id` 인자를 받는 **전략별** 함수로
+    바뀌었다(명세 §3.4). `_feature_version` 은 무인자 그대로다.
+    """
     mod = _g()
-    for fn_name in ("_prompt_version", "_feature_version"):
-        fn = getattr(mod, fn_name, None)
-        assert fn is not None, f"`{fn_name}` 이 없다(Red)"
-        val = fn()
-        assert isinstance(val, str) and re.fullmatch(r"[0-9a-f]{12}", val), (
-            f"{fn_name}() = {val!r} (기대 12자리 hex)"
-        )
+    assert re.fullmatch(r"[0-9a-f]{12}", mod._prompt_version(_VB)), (
+        f"_prompt_version({_VB!r}) 이 12자리 hex 가 아니다"
+    )
+    fv = getattr(mod, "_feature_version", None)
+    assert fv is not None, "`_feature_version` 이 없다(Red)"
+    val = fv()
+    assert isinstance(val, str) and re.fullmatch(r"[0-9a-f]{12}", val), (
+        f"_feature_version() = {val!r} (기대 12자리 hex)"
+    )
 
 
 def test_c30_2b_prompt_version_covers_snapshot_schema(monkeypatch):
@@ -1504,16 +1520,16 @@ def test_c30_2b_prompt_version_covers_snapshot_schema(monkeypatch):
     from src.engine import llm_features as lf
 
     mod = _g()
-    # 버전은 모듈 수명 1회만 계산해 캐시한다(`_prompt_version_cache`) — 그 캐시를
-    # 비우는 것이 "다시 재려면" 의 유일한 seam 이다(`reset_llm_buy_gate_state` 는
-    # 래치·cap·일봉 캐시만 건드린다).
-    monkeypatch.setattr(mod, "_prompt_version_cache", None)
-    base = mod._prompt_version()
+    # 버전은 전략별로 1회만 계산해 캐시한다(`_prompt_version_cache`, cycle297 —
+    # `dict[str, str]` 로 확대) — 그 캐시를 비우는 것이 "다시 재려면" 의 유일한
+    # seam 이다(`reset_llm_buy_gate_state` 는 래치·cap·일봉 캐시만 건드린다).
+    monkeypatch.setattr(mod, "_prompt_version_cache", {})
+    base = mod._prompt_version(_VB)
     assert re.fullmatch(r"[0-9a-f]{12}", base), f"prompt_version={base!r}"
 
     monkeypatch.setattr(lf, "_SNAPSHOT_KEYS", tuple(lf._SNAPSHOT_KEYS) + ("extra_key",))
-    monkeypatch.setattr(mod, "_prompt_version_cache", None)
-    changed = mod._prompt_version()
+    monkeypatch.setattr(mod, "_prompt_version_cache", {})
+    changed = mod._prompt_version(_VB)
 
     assert changed != base, (
         "스냅샷 키를 바꿨는데 prompt_version 이 그대로다 — payload 스키마가 버전에서 빠졌다"
@@ -1546,7 +1562,7 @@ async def test_c30_3_version_computation_failure_is_fail_open(monkeypatch):
     mod = _setup(monkeypatch)
     _wire(mod, monkeypatch, FakeClient())
     calls = _upsert_spy(monkeypatch)
-    monkeypatch.setattr(mod, "_prompt_version", lambda: "")
+    monkeypatch.setattr(mod, "_prompt_version", lambda *a, **kw: "")
     monkeypatch.setattr(mod, "_feature_version", lambda: "")
 
     _observe(mod)

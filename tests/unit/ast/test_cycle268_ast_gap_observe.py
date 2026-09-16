@@ -90,11 +90,17 @@ GAP_DOWN_LOG = "고지로 갭다운 스킵: %s 갭률 %.1f%% ≤ %.1f%%"
 # ⚠️ cycle290(2026-09-13, 킬스위치 등재)이 37→39 로 갱신했다 — 사용자 결정
 # 사안(장중 킬스위치 PUT 개통)에 해당하는 유일한 예외. 이 두 키는 값이 코드
 # 상수와 동일해 매매 행위 변경은 0 이다.
+# ⚠️ cycle297(2026-09-17, LLM 매수평가 5전략 shadow 확대)이 39→43 으로 갱신했다 —
+# 사용자 결정 "결정 2 진행"(매매 파라미터 신규 키 승인 완료)에 해당하는 예외. 4키는
+# `shadow` 모드 기록만(주문 경로 byte 동일, `check_buy_signal`/`check_exit_signal`
+# 세그먼트 무변경 — 명세 `_workspace/red/cycle297_llm_gate_all_strategies_spec.md`).
 KOJIRO_PARAM_KEYS = (
     "atr_period", "atr_ratio_max", "atr_ratio_min", "after_market_exit_division",
     "breakeven_promote_atr",
     "daily_loss_limit", "ema_long", "ema_mid", "ema_short", "exchange",
     "exclude_tickers", "gap_down_skip_pct", "gap_up_skip_pct", "hard_stop_pct",
+    "llm_gate_daily_call_cap", "llm_gate_min_score", "llm_gate_mode",
+    "llm_gate_timeout_secs",
     "macd_signal", "max_lot_ratio_mult", "max_lot_units", "max_open_risk_pct",
     "max_positions", "max_positions_per_sector", "max_scan_stocks",
     "max_units_per_stock", "max_units_total", "min_market_cap",

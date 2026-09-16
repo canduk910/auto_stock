@@ -355,8 +355,9 @@ _BASE_SHA = {
         "9bf05ccae11bd0c12d5275f36be70863decd83f1f34d77352f505bc15e549d8a",
     "src/engine/strategy_base.py":
         "869dc20ca561adc561a9ebe9fdb5fe5a3e097f7ec176fdf274d577d509de9252",
+    # 🔁 cycle296(2026-09-17) 재핀 — 사용자 승인 `issue()` 매니저 단위 in-flight 합류(`src/auth/**`). 같은 값을 10곳 동시 갱신했다.
     "src/auth/token.py":
-        "049341c7286b57a06337b6bc73ff4b0269efffad8f4554d97f275e7b8ec30a54",
+        "bfbdcfbe2bd595055bcc38f5e094e2815ef67854f2153aa20c40629c9e4e6764",
     "src/auth/hashkey.py":
         "7c2aacc703839bdc274b463ee48777006504d70e4d59a1e57120ac5b612396d2",
     "src/realtime/handler.py":
@@ -367,15 +368,15 @@ _BASE_SHA = {
         "8b02442bcf5f558d6f7095b47d2016f004e3746e07ddc91dae8768b1dd46a10d",
     # 🔁 cycle290(킬스위치 등재, 2026-09-13) 재핀 — `DEFAULT_PARAMS` 말미 2키 추가뿐.
     "src/engine/strategies/momentum.py":
-        "4d7fac9abab4d5fca55509a8682633d31c4bb9868f5bb4cc77d4771ecda68894",
+        "50d5c0b9a232d6110f6b85fc524569853f2b8edffe2fd44adc24289800b95ae2",
     "src/engine/strategies/donchian_swing.py":
-        "1db81a3966985fc23baf64996134af07ac81c90e56b90d8405c46f5b1efce880",
+        "cc57e5673f9982aca97f61677084e040171fff307483fedf10459b567a4679e3",
     "src/engine/strategies/kojiro.py":
-        "eb8057d44c86cfe73088aa65d2036b715ce1a979aab08c47b7a7fb3363f58c65",
+        "9477790e9d20eb6d17f36fc7586ada77ac5e2e4b0136a334888244afdb7e9cbc",
     "src/engine/strategies/vcp_breakout.py":
-        "09c7e1aa02493d678844c06f5850200dcb93f1e08d062d11468c220e5450d727",
+        "bbebddd45780a9e19f8bb3c69557d4db50fffc61e8e9da20564476a1be9598a0",
     "src/engine/strategies/bull_flag_breakout.py":
-        "f63ee57cd169e4472f24fa76b26ca9ca63e69a1a170da8e57c822fd0028f2ebe",
+        "0feb3b629bab5ad08ad589315ca12e76b57a73950b948570a78dfe84ba792595",
 }
 
 # cycle272 시점 = cycle274 배선 **이전**의 메서드 세그먼트 sha. C11 은 이 값으로의
@@ -823,11 +824,24 @@ def test_c6_2_strategies_have_no_llm_buy_gate_import_or_call(kind: str) -> None:
     assert not refs, f"{kind}: `llm_buy_gate` 참조가 남아 있다 (lines {refs})"
 
 
+#: cycle297(2026-09-17) — 5전략 LLM 매수평가 shadow 확대로 소유 축이 {VB, LTV} →
+#: **7전략 전부**로 뒤집혔다(사용자 결정 "결정 2 진행"). 가드는 삭제·skip 하지 않고
+#: 기대값만 반전한다(명세 §5.2 — cycle297 자체 가드 `test_g2_1b` 가 존재·무회피를 잠근다).
+_ALL_SEVEN_STRATEGY_RELS = frozenset(
+    f"src/engine/strategies/{name}.py"
+    for name in (
+        "momentum", "volatility_breakout", "long_tail_volatility",
+        "donchian_swing", "bull_flag_breakout", "vcp_breakout", "kojiro",
+    )
+)
+
+
 @pytest.mark.parametrize("key", _KEYS)
 def test_c6_3a_four_keys_live_in_exactly_vb_and_ltv(key: str) -> None:
-    """C12 — 4키를 `DEFAULT_PARAMS` 에 가진 전략 파일 = 정확히 {VB, LTV}.
+    """C12 — 4키를 `DEFAULT_PARAMS` 에 가진 전략 파일 = **7전략 전부**.
 
-    나머지 5전략에 새면 그 전략이 조용히 LLM 비용을 쓰기 시작한다(명세 §6 스코프).
+    🔁 cycle297 반전 — 원래 {VB, LTV} 였다(명세 §6 스코프). 사용자 결정으로 5전략이
+    추가됐고, 함수명·존재는 유지한 채 기대값만 뒤집는다(삭제·skip 금지).
     """
     owners: list[str] = []
     for path in _STRATEGY_DIR.rglob("*.py"):
@@ -842,8 +856,8 @@ def test_c6_3a_four_keys_live_in_exactly_vb_and_ltv(key: str) -> None:
             for k in node.value.keys:
                 if isinstance(k, ast.Constant) and k.value == key:
                     owners.append(path.relative_to(_ROOT).as_posix())
-    assert sorted(set(owners)) == sorted({_VB_REL, _LTV_REL}), (
-        f"`{key}` 보유 전략 {sorted(set(owners))} (기대 VB·LTV 둘뿐)"
+    assert sorted(set(owners)) == sorted(_ALL_SEVEN_STRATEGY_RELS), (
+        f"`{key}` 보유 전략 {sorted(set(owners))} (기대 = 7전략 전부)"
     )
 
 
@@ -921,10 +935,13 @@ def test_c6_4b_cycle223_sibling_content_pin_matches_current_source() -> None:
 #:     디렉터리라 `.md` 도 diff 가드에 잡힌다 — 프로덕션 코드 영향 0 이고, 적대
 #:     검증이 "합집합 서술이 이제 참이다 / 프로브 격리 기준이 채널→정체성으로
 #:     바뀌었다 / `H0UNCNT0` 무송출 사실이 이 문서에 0회 등장한다" 를 지적해 갱신했다.
+#:   · `src/auth/token.py` = cycle296(`TokenManager.issue()` 매니저 단위 in-flight
+#:     합류, 사용자 결정 "결정 1 진행" 2026-09-17). 범위 = `issue()` + `__init__`
+#:     신규 필드뿐 — `get_token`/`revoke`/`_is_valid` 는 세그먼트 sha 로 무접촉 증명.
 _APPROVED_EIGHT_AREA_PINS = {
     _ORDER_ENGINE_REL, "src/engine/scanner.py", "src/api/order.py",
     "src/realtime/websocket.py", "src/realtime/websocket_pool.py",
-    "src/engine/risk.py", "src/realtime/CLAUDE.md",
+    "src/engine/risk.py", "src/realtime/CLAUDE.md", "src/auth/token.py",
 }
 
 

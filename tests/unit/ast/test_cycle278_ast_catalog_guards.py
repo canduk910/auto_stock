@@ -135,7 +135,7 @@ _DEFAULT_PARAMS_SHA: dict[str, tuple[str, str, str]] = {
     # 전략 id: (파일, 클래스, cycle290 기준 세그먼트 sha256 — 구 base 34ba9e6 값은 git 이력)
     "momentum": (
         "src/engine/strategies/momentum.py", "MomentumStrategy",
-        "2bdedaaa5d676c4daac38e6bbaff73fbfdf0d2fc56744bb974e5adcc1ba895ee"),
+        "a7a6b610b339b24fb0c87b9d5784c0b5384771834014ae7cf024ebdac4dbc1bc"),
     "volatility_breakout": (
         "src/engine/strategies/volatility_breakout.py", "VolatilityBreakoutStrategy",
         "f91b1acc5ebf7278e7a4a85419a415b8cb4c6ec70cc19d8fac8e789e4e3751a0"),
@@ -144,16 +144,16 @@ _DEFAULT_PARAMS_SHA: dict[str, tuple[str, str, str]] = {
         "41e0b7b5a790c11af934bf3dea1895463b5fc569d42b940db6ef36639279d96e"),
     "donchian_swing": (
         "src/engine/strategies/donchian_swing.py", "DonchianSwingStrategy",
-        "ea85f925555b2a4b99a718451099d2e32fbfa5e0f350590909b6162d9b716b31"),
+        "f8700a1080c7a4750a171c42ae5940f5add35ee793ccb53e6d4ec64b6e7d08ca"),
     "bull_flag_breakout": (
         "src/engine/strategies/bull_flag_breakout.py", "BullFlagBreakoutStrategy",
-        "bd1a80167f0bf0c3cc90ddbd1c95ba58abde05e3cdd6df7add483c7a862a6eaf"),
+        "93866d299eebc76149e3d713ce4d00afc00812a9e8c270f442a8b6df79caa3a8"),
     "vcp_breakout": (
         "src/engine/strategies/vcp_breakout.py", "VcpBreakoutStrategy",
-        "f56226ba2f7f71a98f9a4b8b9e7c8fa8169457ad2d1658ec3bbfac4a8433ba1b"),
+        "dc255d77abcbbda79e1712d4b242ff4bbd649d997eb2ec5595f6fa0c5348d736"),
     "kojiro": (
         "src/engine/strategies/kojiro.py", "KojiroStrategy",
-        "e7ff138a438d58dfcf509728ec552d0a1920537799ac5ec37c83751d573e068b"),
+        "cabe7c99e834d4a27689de905216a13d81b5fded1722a03d607c62c4bdc0312b"),
 }
 
 
@@ -211,8 +211,9 @@ _BASE_SHA = {
         "d794696e54ffdc36efa6df917879d780e86bc1f373bb3b5d8dcbc0beac8cef8b",
     "src/api/order.py":
         "08c5cafd7b8678ec0d0fa85f856fdea3cce38ad92488c6d74c03cd13faa415bb",
+    # 🔁 cycle296(2026-09-17) 재핀 — 사용자 승인 `issue()` 매니저 단위 in-flight 합류(`src/auth/**`). 같은 값을 10곳 동시 갱신했다.
     "src/auth/token.py":
-        "049341c7286b57a06337b6bc73ff4b0269efffad8f4554d97f275e7b8ec30a54",
+        "bfbdcfbe2bd595055bcc38f5e094e2815ef67854f2153aa20c40629c9e4e6764",
     "src/auth/hashkey.py":
         "7c2aacc703839bdc274b463ee48777006504d70e4d59a1e57120ac5b612396d2",
     "src/realtime/handler.py":
@@ -233,17 +234,17 @@ _BASE_SHA = {
         "869dc20ca561adc561a9ebe9fdb5fe5a3e097f7ec176fdf274d577d509de9252",
     # 🔁 cycle290(킬스위치 등재, 2026-09-13) 재핀 — `DEFAULT_PARAMS` 말미 2키 추가뿐.
     "src/engine/strategies/momentum.py":
-        "4d7fac9abab4d5fca55509a8682633d31c4bb9868f5bb4cc77d4771ecda68894",
+        "50d5c0b9a232d6110f6b85fc524569853f2b8edffe2fd44adc24289800b95ae2",
     "src/engine/strategies/volatility_breakout.py": "d13efaa4a9424e2822b5476ce159987d2a5192a4bca30af3f1a0cae9c3ffcabc",
     "src/engine/strategies/long_tail_volatility.py": "51b50560a1240df3fc6085da7253438605079d7d453ff3e77a806e814473be25",
     "src/engine/strategies/donchian_swing.py":
-        "1db81a3966985fc23baf64996134af07ac81c90e56b90d8405c46f5b1efce880",
+        "cc57e5673f9982aca97f61677084e040171fff307483fedf10459b567a4679e3",
     "src/engine/strategies/bull_flag_breakout.py":
-        "f63ee57cd169e4472f24fa76b26ca9ca63e69a1a170da8e57c822fd0028f2ebe",
+        "0feb3b629bab5ad08ad589315ca12e76b57a73950b948570a78dfe84ba792595",
     "src/engine/strategies/vcp_breakout.py":
-        "09c7e1aa02493d678844c06f5850200dcb93f1e08d062d11468c220e5450d727",
+        "bbebddd45780a9e19f8bb3c69557d4db50fffc61e8e9da20564476a1be9598a0",
     "src/engine/strategies/kojiro.py":
-        "eb8057d44c86cfe73088aa65d2036b715ce1a979aab08c47b7a7fb3363f58c65",
+        "9477790e9d20eb6d17f36fc7586ada77ac5e2e4b0136a334888244afdb7e9cbc",
 }
 
 

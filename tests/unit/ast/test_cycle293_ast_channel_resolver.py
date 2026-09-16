@@ -152,8 +152,9 @@ _BASE_SHA: dict[str, str] = {
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "src/auth/hashkey.py":
         "7c2aacc703839bdc274b463ee48777006504d70e4d59a1e57120ac5b612396d2",
+    # 🔁 cycle296(2026-09-17) 재핀 — 사용자 승인 `issue()` 매니저 단위 in-flight 합류(`src/auth/**`). 같은 값을 10곳 동시 갱신했다.
     "src/auth/token.py":
-        "049341c7286b57a06337b6bc73ff4b0269efffad8f4554d97f275e7b8ec30a54",
+        "bfbdcfbe2bd595055bcc38f5e094e2815ef67854f2153aa20c40629c9e4e6764",
     # 8영역 realtime — `handler.py` 는 G10(파싱 무변경)의 대상이다.
     # 🔴 `handler.py:400` 의 3채널 **튜플**은 이 사이클이 집합화하지 않는다 —
     #    파싱 경로 byte 동일이 계약이라 A4 가 이 파일을 면제한다.
@@ -173,22 +174,22 @@ _BASE_SHA: dict[str, str] = {
     "src/engine/strategies/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "src/engine/strategies/bull_flag_breakout.py":
-        "f63ee57cd169e4472f24fa76b26ca9ca63e69a1a170da8e57c822fd0028f2ebe",
+        "0feb3b629bab5ad08ad589315ca12e76b57a73950b948570a78dfe84ba792595",
     "src/engine/strategies/donchian_swing.py":
-        "1db81a3966985fc23baf64996134af07ac81c90e56b90d8405c46f5b1efce880",
+        "cc57e5673f9982aca97f61677084e040171fff307483fedf10459b567a4679e3",
     "src/engine/strategies/kojiro.py":
-        "eb8057d44c86cfe73088aa65d2036b715ce1a979aab08c47b7a7fb3363f58c65",
+        "9477790e9d20eb6d17f36fc7586ada77ac5e2e4b0136a334888244afdb7e9cbc",
     "src/engine/strategies/long_tail_volatility.py":
         "51b50560a1240df3fc6085da7253438605079d7d453ff3e77a806e814473be25",
     "src/engine/strategies/momentum.py":
-        "4d7fac9abab4d5fca55509a8682633d31c4bb9868f5bb4cc77d4771ecda68894",
+        "50d5c0b9a232d6110f6b85fc524569853f2b8edffe2fd44adc24289800b95ae2",
     "src/engine/strategies/vcp_breakout.py":
-        "09c7e1aa02493d678844c06f5850200dcb93f1e08d062d11468c220e5450d727",
+        "bbebddd45780a9e19f8bb3c69557d4db50fffc61e8e9da20564476a1be9598a0",
     "src/engine/strategies/volatility_breakout.py":
         "d13efaa4a9424e2822b5476ce159987d2a5192a4bca30af3f1a0cae9c3ffcabc",
     # 파라미터 축 — 킬스위치는 `system_config` 다(§8-B). 전략 파라미터로 새지 않는다.
     "src/engine/param_catalog.py":
-        "a923bce5b12a2b4a686a8b88dcc0655bfd573f66dbf9f6661b0798ef1759c05f",
+        "81a7685b32f689b101db88f26d22d2f102859e29be770a201b26b52cfe8a350a",
     "src/engine/param_validation.py":
         "b4c5c029800191523bcc511919d6de3774e9ab49ca2fc0a0558ee3907868ee17",
     # 시각·거래소 표의 유일 정본 — 리졸버는 **속성축**이라 이 표를 읽지 않는다.

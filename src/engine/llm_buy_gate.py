@@ -168,9 +168,9 @@ _client_singleton = None
 
 
 def reset_llm_buy_gate_state() -> None:
-    """래치·cap·일봉 캐시 일괄 초기화(테스트·운영 훅 — cycle264/268 선례)."""
+    """래치·cap·일봉 캐시·전략별 prompt_version 캐시 일괄 초기화(테스트·운영 훅 — cycle264/268 선례)."""
     global _latch, _daily_cap_warned, _config_canary_latch, _bars_cache
-    global _call_count_day, _call_count, _tasks
+    global _call_count_day, _call_count, _tasks, _prompt_version_cache
     _latch = KstDailyEmitCap()
     _daily_cap_warned = KstDailyEmitCap()
     _config_canary_latch = KstDailyEmitCap()
@@ -178,6 +178,7 @@ def reset_llm_buy_gate_state() -> None:
     _call_count_day = ""
     _call_count = {}
     _tasks = set()
+    _prompt_version_cache = {}
 
 
 # ---------------------------------------------------------------------------
@@ -278,17 +279,113 @@ def _cost_usd(model: str, tokens_in: int, tokens_out: int) -> float:
 
 
 def _read_stop_loss_pct(strategy_id, params) -> float:
+    """§3.3 — 관측 시점(ATR 재해석 **전**) 손절폭. 7전략 전부 `< 0`(cycle297 §1.2 F6 —
+    0.0 은 SYSTEM_PROMPT 판단 기준 4 를 항상 발동시키는 거짓말이다)."""
     try:
         if strategy_id == "volatility_breakout":
             return float(params.get("stop_loss_rate", -3.0) or 0)
         if strategy_id == "long_tail_volatility":
             return float(params.get("intraday_stop_loss", -3.0) or 0)
+        if strategy_id == "momentum":
+            return float(params.get("stop_loss_rate", -7.5) or 0)
+        if strategy_id == "donchian_swing":
+            return float(params.get("stop_loss_rate", -7.0) or 0)
+        if strategy_id == "bull_flag_breakout":
+            return float(params.get("stop_loss_rate", -5.0) or 0)
+        if strategy_id == "vcp_breakout":
+            return float(params.get("stop_loss_rate", -7.0) or 0)
+        if strategy_id == "kojiro":
+            return float(params.get("hard_stop_pct", -8.0) or 0)
     except Exception:
         pass
     return 0.0
 
 
+# cycle297 검증 — `_resolve_stop_loss_pct` 가 `_evaluate_core` 에서 재해석을 하려면
+# 그 시점에 **원시 params** 가 필요하다. `payload` 는 `observe_order` 가 만든 task 전용
+# 값 복사본이므로 여기에 최소 키만 실어 보낸다(전략 객체·`config.params` 원본 참조 금지,
+# C23 — 값 복사만). 목록을 좁게 둔 이유 = 넓히면 그만큼 payload 표면이 커지고, 이 dict 는
+# `_PAYLOAD_EXCLUDED_KEYS` 로 `input_payload` 에서 떨어지므로 감사 가치도 없다(재해석
+# 결과 `stop_loss_pct` 와 `tech.atr14_pct` 가 이미 `input_payload` 에 남아 검산된다).
+_STOP_PARAM_KEYS = (
+    "sizing_mode", "stop_atr", "turtle_backstop_pct", "turtle_min_stop_pct",
+    "hard_stop_pct", "stop_loss_rate", "intraday_stop_loss",
+)
+
+
+def _read_stop_params(params) -> dict:
+    """`_resolve_stop_loss_pct` 가 쓸 최소 키만 값 복사. never-raise."""
+    try:
+        p = params if isinstance(params, dict) else {}
+        return {k: p.get(k) for k in _STOP_PARAM_KEYS if k in p}
+    except Exception:
+        return {}
+
+
+def _resolve_stop_loss_pct(strategy_id, params, tech) -> float:
+    """§3.3 — ATR 손절 전략의 재해석. `_read_stop_loss_pct` 관측값을 그 시점 `atr14_pct`
+    로 다시 읽는다. **항상 음수**(0.0/양수 위장 금지 — G1-9c).
+
+    - kojiro: sizing_mode 무관, 항상 `max(hard_stop_pct, -(stop_atr×atr))`.
+    - donchian_swing: `sizing_mode=="turtle"` 일 때만 `max(-(stop_atr×atr), turtle_backstop_pct)`
+      (타이트한 쪽 — 느슨한 쪽을 고르면 "손절이 잡음보다 넓다" 는 거짓을 모델에 먹인다).
+    - bull_flag_breakout/vcp_breakout: `sizing_mode=="turtle"` 일 때만
+      `clamp(-(stop_atr×atr), turtle_backstop_pct, turtle_min_stop_pct)`.
+    - 그 밖(momentum/VB/LTV, 비-터틀) — 고정 `_read_stop_loss_pct` 값 그대로.
+    - `atr14_pct` 결측/비수치는 고정값으로 fail-open(0.0 위장 금지).
+    """
+    p = params if isinstance(params, dict) else {}
+    t = tech if isinstance(tech, dict) else {}
+    fixed = _read_stop_loss_pct(strategy_id, p)
+    if not (fixed < 0.0):
+        fixed = -0.01
+
+    try:
+        raw_atr = t.get("atr14_pct")
+        atr = (
+            float(raw_atr)
+            if isinstance(raw_atr, (int, float)) and not isinstance(raw_atr, bool)
+            else None
+        )
+    except Exception:
+        atr = None
+
+    try:
+        if strategy_id == "kojiro":
+            hard = float(p.get("hard_stop_pct", -8.0) or -8.0)
+            if not (hard < 0.0):
+                hard = -0.01
+            if atr is None:
+                return hard
+            stop_atr = float(p.get("stop_atr", 2.0) or 2.0)
+            got = max(hard, -(stop_atr * atr))
+            return got if got < 0.0 else -0.01
+
+        if strategy_id == "donchian_swing" and p.get("sizing_mode") == "turtle" and atr is not None:
+            stop_atr = float(p.get("stop_atr", 2.0) or 2.0)
+            backstop = float(p.get("turtle_backstop_pct", -9.0) or -9.0)
+            got = max(-(stop_atr * atr), backstop)
+            return got if got < 0.0 else -0.01
+
+        if (
+            strategy_id in ("bull_flag_breakout", "vcp_breakout")
+            and p.get("sizing_mode") == "turtle"
+            and atr is not None
+        ):
+            stop_atr = float(p.get("stop_atr", 2.0) or 2.0)
+            backstop = float(p.get("turtle_backstop_pct", -9.0) or -9.0)
+            min_stop = float(p.get("turtle_min_stop_pct", -4.0) or -4.0)
+            got = max(backstop, min(-(stop_atr * atr), min_stop))
+            return got if got < 0.0 else -0.01
+    except Exception:
+        return fixed
+
+    return fixed
+
+
 def _read_exit_rule(strategy_id, params) -> str:
+    """§3.3 — 라이브 params 값을 인용하는 청산 규약 문구. 하드코딩 금지(test_f3_10 답습) —
+    값이 바뀌면 문구도 따라 변해야 한다(G1-8c)."""
     try:
         if strategy_id == "volatility_breakout":
             sl = params.get("stop_loss_rate", -3.0)
@@ -307,6 +404,54 @@ def _read_exit_rule(strategy_id, params) -> str:
                 f"상한가 도달 = 익일 청산 모드(오버나잇 {overnight}%, "
                 f"갭업 +{gap_up}% 청산, 트레일 {trailing}%)"
             )
+        if strategy_id == "momentum":
+            sl = params.get("stop_loss_rate", -7.5)
+            gap = params.get("gap_up_threshold", 10.0)
+            trail = params.get("trailing_stop_rate", -2.0)
+            return (
+                f"손절 {sl}%. 상한가를 못 잠그면 익일 시가 청산 — "
+                f"갭 +{gap}% 이상이면 트레일링 {trail}%, 아니면 즉시 매도."
+            )
+        if strategy_id == "donchian_swing":
+            mult = params.get("atr_trail_mult", 2.0)
+            stop_atr = params.get("stop_atr", 2.0)
+            backstop = params.get("turtle_backstop_pct", -9.0)
+            fail_n = params.get("breakout_fail_n_days", 5)
+            ch_period = params.get("channel_exit_period", 10)
+            return (
+                f"ATR×{mult} 샹들리에 트레일링. 하드손절 = 진입ATR×{stop_atr} 또는 "
+                f"{backstop}% 백스톱(터틀 모드, 타이트한 쪽) / 비율 모드는 고정 손절. "
+                f"{fail_n}영업일 돌파 실패 청산, {ch_period}일 저가 채널 이탈 청산. "
+                "시간·15:20 청산 없음(멀티데이 보유). "
+                "입력의 stop_loss_pct 는 ATR(14) 기준 근사다(실제는 진입 시점 ATR)."
+            )
+        if strategy_id == "bull_flag_breakout":
+            sl = params.get("stop_loss_rate", -5.0)
+            mult = params.get("atr_trail_mult", 2.0)
+            hold = params.get("max_hold_days", 5)
+            return (
+                f"손절 {sl}%. flag_low 이탈 또는 측정 이동(flag_high+폴 높이) 도달 시 "
+                f"청산. ATR×{mult} 트레일링, {hold}영업일 시간 청산. "
+                "입력의 stop_loss_pct 는 ATR(14) 기준 근사다."
+            )
+        if strategy_id == "vcp_breakout":
+            sl = params.get("stop_loss_rate", -7.0)
+            mult = params.get("atr_trail_mult", 2.0)
+            return (
+                f"손절 {sl}%. base_low 이탈 또는 50일 EMA 이탈 시 청산. "
+                f"ATR×{mult} 트레일링. 시간 청산 없음(멀티데이). "
+                "입력의 stop_loss_pct 는 ATR(14) 기준 근사다."
+            )
+        if strategy_id == "kojiro":
+            hard = params.get("hard_stop_pct", -8.0)
+            stop_atr = params.get("stop_atr", 2.0)
+            trail_atr = params.get("trail_atr", 2.5)
+            return (
+                f"고정 {hard}% 백스톱 → 진입가-{stop_atr}×ATR(20) 하드손절(tighten-only) "
+                f"→ 스테이지3 진입 → 고점-{trail_atr}×ATR 샹들리에 트레일링. "
+                "시간 청산 없음(추세 끝까지 보유). "
+                "입력의 stop_loss_pct 는 ATR(14) 기준 근사다(실제 하드손절은 ATR(20))."
+            )
     except Exception:
         pass
     return ""
@@ -318,6 +463,46 @@ def _mins_from_open(now_kst) -> int:
         return int((now_kst - anchor).total_seconds() // 60)
     except Exception:
         return 0
+
+
+# cycle297 검증 — 전략별 **돌파선**(모델이 "판단 기준 1 = 돌파의 질" 로 읽는 기준선) 키.
+#
+# 🔴 `buy_signals` 의 `target_price` 는 전략마다 뜻이 다르다. VB·LTV 의 `target_price` 는
+# `보드시가 + K×전일레인지` = **돌파선**이지만, BFB 의 `target_price` 는
+# `flag_high + (pole_high - pole_start)` = **측정 이동 목표가**(청산 목표)이고 돌파선은
+# 별도 키 `flag_high` 다(`bull_flag_breakout.py` `buy_signals.append`). 그래서 전 전략에
+# `target_price` 를 읽으면 BFB 의 `breakout_excess_bp` 가 항상 큰 음수로 나가고, VB 에서
+# "+bp = 추격" 이던 잣대가 BFB 에서는 뒤집힌다 — 이 사이클이 없애려던 잣대 오염이다.
+#
+# donchian(`donchian_high`)·VCP(`base_high`)도 돌파선을 이미 `buy_signals` 에 싣고 있다.
+# 전략 파일은 byte 동일로 두고 **읽는 쪽**에서 키를 고른다. 키 부재로 우연히 맞는 폴백
+# 순서(`or` 체인)를 쓰지 않는 이유 = 나중에 어느 전략이 같은 이름의 키를 추가하면 조용히
+# 뜻이 바뀐다. 전략별 명시 매핑만이 그 경로를 원천 차단한다.
+_BREAKOUT_LINE_KEYS: "dict[str, tuple[str, ...]]" = {
+    "volatility_breakout": ("target_price",),
+    "long_tail_volatility": ("target_price",),
+    "bull_flag_breakout": ("flag_high",),
+    "donchian_swing": ("donchian_high",),
+    "vcp_breakout": ("base_high",),
+    # momentum·kojiro 는 돌파선 개념이 없다(`prev_close`/`stage` 뿐) — 빈 튜플 =
+    # `target_won` 이 `None` 이고 `_SNAPSHOT_NA_KEYS` 가 그 키를 아예 뺀다.
+    "momentum": (),
+    "kojiro": (),
+}
+
+
+def _read_breakout_line(strategy_id, sig) -> "int | None":
+    """그 전략의 돌파선 값(원). 미등록 전략은 `target_price` 로 폴백한다(신규 전략이
+    추가돼도 종전 동작을 유지). never-raise."""
+    try:
+        keys = _BREAKOUT_LINE_KEYS.get(str(strategy_id), ("target_price",))
+        for key in keys:
+            got = _opt_int(sig.get(key))
+            if got:
+                return got
+    except Exception:
+        return None
+    return None
 
 
 def _excess_bp(price_won, target_won) -> float:
@@ -534,37 +719,42 @@ def _json_safe(obj, _depth: int = 0):
         return None
 
 
-_prompt_version_cache: "str | None" = None
+_prompt_version_cache: "dict[str, str]" = {}
 _feature_version_cache: "str | None" = None
 
 
-def _prompt_version() -> str:
-    """SYSTEM 프롬프트 + user 템플릿 + **user payload 스키마**의 sha256 앞 12자 (§7-1, C30).
+def _prompt_version(strategy_id) -> str:
+    """SYSTEM 프롬프트 + user 템플릿 + **전략별 user payload 스키마**의 sha256 앞 12자
+    (§7-1, C30 → cycle297 §3.4 전략별 확대).
 
-    프롬프트가 바뀐 뒤의 행과 그 전의 행을 **섞어서 회귀하면 안 된다**. 모듈 로드 후
-    1회 계산해 캐시하고, 계산 실패는 `""` (fail-open — 버전 문자열 하나 때문에
-    평가가 멈추면 관측이 관측을 막는 셈이다).
+    프롬프트가 바뀐 뒤의 행과 그 전의 행을 **섞어서 회귀하면 안 된다**. 사용자가 원하는
+    재귀 개선의 단위가 전략이므로(명세 §3.4) 버전 축도 **전략별**이다 — kojiro 컨텍스트를
+    고쳐도 donchian 표본까지 버전이 갈리면 회고가 매주 리셋된다. 전략별로 1회 계산해
+    캐시하고, 계산 실패는 `""` (fail-open — 버전 문자열 하나 때문에 평가가 멈추면 관측이
+    관측을 막는 셈이다).
 
-    해시 blob 에 `_SNAPSHOT_KEYS` 를 포함하는 이유(검증 라운드 3 #4) — 모델이 실제로
-    읽는 것은 SYSTEM 문장만이 아니라 **user 메시지 payload 의 키 집합**이다. 두 문자열만
-    해싱하면 스냅샷 키만 바꾼 사이클이 *같은* `prompt_version` 으로 다른 스키마의 행을
-    만들어, §7-1 이 금지한 "프롬프트 바뀐 전후 행을 섞은 회귀" 가 조용히 가능해진다.
+    해시 blob 에 `snapshot_keys_for(sid)`(구 `_SNAPSHOT_KEYS` 전체 — 검증 라운드 3 #4)와
+    `_STRATEGY_META.get(sid)`(cycle297 신규)를 포함하는 이유 — 모델이 실제로 읽는 것은
+    SYSTEM 문장만이 아니라 **user 메시지 payload 의 키 집합·전략 컨텍스트 문구**다. 이를
+    빼면 스냅샷 키/META 문구만 바꾼 사이클이 *같은* `prompt_version` 으로 다른 내용의
+    행을 만들어, §7-1 이 금지한 "프롬프트 바뀐 전후 행을 섞은 회귀" 가 조용히 가능해진다.
     지표 키 집합은 `_feature_version` 이 따로 잰다(둘은 서로 다른 축이다).
     """
-    global _prompt_version_cache
-    if _prompt_version_cache is not None:
-        return _prompt_version_cache
+    sid = str(strategy_id)
+    if sid in _prompt_version_cache:
+        return _prompt_version_cache[sid]
     try:
         from src.engine import llm_features as _lf
         blob = (
             str(_lf.SYSTEM_PROMPT)
             + str(_lf._USER_PREAMBLE)
-            + "|".join(_lf._SNAPSHOT_KEYS)
+            + "|".join(_lf.snapshot_keys_for(sid))
+            + json.dumps(_lf._STRATEGY_META.get(sid, {}), sort_keys=True, ensure_ascii=False)
         ).encode("utf-8")
-        _prompt_version_cache = hashlib.sha256(blob).hexdigest()[:12]
+        _prompt_version_cache[sid] = hashlib.sha256(blob).hexdigest()[:12]
     except Exception:
-        _prompt_version_cache = ""
-    return _prompt_version_cache
+        _prompt_version_cache[sid] = ""
+    return _prompt_version_cache[sid]
 
 
 def _feature_version() -> str:
@@ -689,7 +879,7 @@ def observe_order(
             signal_price_won = _opt_int(sig.get("price"))
             signal_time_local = sig.get("time")
             strategy_board = sig.get("board")
-            target_won = _opt_int(sig.get("target_price"))
+            target_won = _read_breakout_line(strategy_id, sig)
             k_val = _opt_float(sig.get("k"))
             excess_bp = _excess_bp(order_price_i, target_won) if target_won else None
 
@@ -731,8 +921,13 @@ def observe_order(
             "budget_remaining_after_won": _opt_int(budget_remaining_after_won),
             "open_positions_n": _opt_int(open_positions_n),
             "position_ratio": _read_position_ratio(params),
+            # 관측 시점(ATR 재해석 **전**) 값. `_evaluate_core` 가 일봉에서
+            # `atr14_pct` 를 얻은 뒤 `_resolve_stop_loss_pct` 로 덮는다(§3.3).
             "stop_loss_pct": _read_stop_loss_pct(strategy_id, params),
             "exit_rule": _read_exit_rule(strategy_id, params),
+            # §3.3 배선용 — 모델에는 실리지 않고(`snapshot_keys_for` 화이트리스트)
+            # `input_payload` 에도 남지 않는다(`_PAYLOAD_EXCLUDED_KEYS`).
+            "_stop_params": _read_stop_params(params),
             "min_score": min_score,
             "daily_cap": daily_cap,
             "timeout_s": timeout_s,
@@ -1140,6 +1335,20 @@ async def _evaluate_core(payload: dict, t_start: float):
             payload["vol_ratio_vs_avg20"] = None
             payload["vol_ratio_time_norm"] = None
 
+        # §3.3 — ATR 손절 전략(donchian/BFB/VCP 터틀 · kojiro)의 `stop_loss_pct` 를
+        # **이 시점의 `atr14_pct`** 로 다시 읽는다. 여기가 유일한 배선 지점이다 —
+        # `observe_order` 시점에는 일봉이 없어 ATR 을 모른다. 덮는 대상은 task 전용
+        # 값 복사본이라 read-only 계약과 무관하다(`vol_ratio_*` 와 같은 자리).
+        # 배선이 빠지면 turtle 라이브인 donchian·kojiro 가 실제 손절과 다른 고정값으로
+        # 채점되고 SYSTEM_PROMPT 판단 기준 4(손절폭 vs `atr14_pct`)가 틀린 수치로
+        # 발동한다 — 이 사이클이 없애려던 「잣대 오류」 그 자체다.
+        try:
+            payload["stop_loss_pct"] = _resolve_stop_loss_pct(
+                payload.get("strategy_id"), payload.get("_stop_params") or {}, tech,
+            )
+        except Exception:
+            pass  # 관측값(`_read_stop_loss_pct`) 그대로 — 0.0 위장 금지
+
         bars30 = bars[:_PROMPT_BAR_COUNT]
         try:
             messages = build_messages(payload, tech, bars30)
@@ -1236,7 +1445,10 @@ async def _evaluate_core(payload: dict, t_start: float):
 
 # `input_payload` 에서 제외하는 키 — 계좌번호는 PK 열로 충분하고, 리포터 스코프 키가
 # GET/HEAD 를 경로 무관 통과시키므로 응답 표면에 원문이 실릴 경로를 원천 차단한다(C40).
-_PAYLOAD_EXCLUDED_KEYS = frozenset({"account_no", "account_product"})
+# `_stop_params`(cycle297 §3.3 배선용 원시 params)도 뺀다 — 재해석 **결과**인
+# `stop_loss_pct` 와 `tech.atr14_pct` 가 이미 담겨 검산이 되고, 넣으면 VB·LTV 의
+# `input_payload` 키 집합이 배포 전후로 갈려 §7 D+1 대조가 무너진다.
+_PAYLOAD_EXCLUDED_KEYS = frozenset({"account_no", "account_product", "_stop_params"})
 
 
 async def _persist_evaluation(payload: dict, outcome: dict) -> None:
@@ -1313,7 +1525,7 @@ async def _persist_evaluation(payload: dict, outcome: dict) -> None:
             budget_total_won=payload.get("budget_total_won"),
             budget_remaining_after_won=payload.get("budget_remaining_after_won"),
             open_positions_n=payload.get("open_positions_n"),
-            prompt_version=_prompt_version(),
+            prompt_version=_prompt_version(payload.get("strategy_id", "")),
             feature_version=_feature_version(),
             bars_count=outcome.get("bars_count"),
             input_payload=input_payload,

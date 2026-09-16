@@ -32,6 +32,32 @@ import pytest
 pytestmark = pytest.mark.unit
 
 
+# cycle296 — 회차 요약이 3키 → 5키(`elapsed_s`·`window_issues_total`)로 늘었다.
+# 등식 단언을 5키로 통째로 옮기면 실행 시간 의존(`elapsed_s`)이 들어오므로, 핵심 3키만
+# 등식으로 재고 관측 2키는 성질로 잰다.
+_SUMMARY_KEYS_296 = ("accounts", "issued", "failed", "elapsed_s", "window_issues_total")
+
+
+def _core(summary: dict) -> dict:
+    """cycle296 관측 2키를 검사한 뒤 떼어 내고 핵심 3키만 돌려준다.
+
+    - `elapsed_s` — `%d` 포맷이라 **정수**여야 하고 음수일 수 없다.
+    - `window_issues_total` — 이 파일의 더블(`_DummyMgr`)은 `issue_history` 가 없다.
+      관측 배관이 더블에 대해 never-raise 인지(폴백 `getattr(..., ())`)의 증거다.
+    """
+    assert set(summary) == set(_SUMMARY_KEYS_296), (
+        f"cycle296 회차 요약은 5키다 — 실측 {sorted(summary)}"
+    )
+    assert isinstance(summary["elapsed_s"], int) and not isinstance(
+        summary["elapsed_s"], bool
+    ), f"elapsed_s 타입 실측 {type(summary['elapsed_s'])}"
+    assert summary["elapsed_s"] >= 0
+    assert summary["window_issues_total"] == 0, (
+        "`issue_history` 없는 더블인데 창 집계가 0 이 아니다 — 폴백이 깨졌다"
+    )
+    return {k: summary[k] for k in ("accounts", "issued", "failed")}
+
+
 def _make_account(label: str):
     from src.models.kis_quote_account import KisQuoteAccount
 
@@ -114,7 +140,7 @@ async def test_c1_issues_all_active_quote_accounts_in_order(monkeypatch):
     summary = await mod.refresh_quote_tokens_once()
 
     assert issue_calls == ["fire", "gold", "isa"]
-    assert summary == {"accounts": 3, "issued": 3, "failed": 0}
+    assert _core(summary) == {"accounts": 3, "issued": 3, "failed": 0}
 
 
 @pytest.mark.asyncio
@@ -171,7 +197,7 @@ async def test_c3b_blank_label_is_skipped_not_resolved_to_main(monkeypatch):
 
     assert manager_labels == ["fire", "isa"], "빈 label 은 매니저 조회조차 하지 않는다"
     assert issue_calls == ["fire", "isa"]
-    assert summary == {"accounts": 3, "issued": 2, "failed": 1}
+    assert _core(summary) == {"accounts": 3, "issued": 2, "failed": 1}
 
 
 @pytest.mark.asyncio
@@ -185,7 +211,7 @@ async def test_c4_single_account_failure_absorbed(monkeypatch):
     summary = await mod.refresh_quote_tokens_once()
 
     assert issue_calls == ["fire", "isa"]
-    assert summary == {"accounts": 3, "issued": 2, "failed": 1}
+    assert _core(summary) == {"accounts": 3, "issued": 2, "failed": 1}
 
 
 @pytest.mark.asyncio
@@ -197,7 +223,7 @@ async def test_c5_list_accounts_failure_skips_round(monkeypatch):
 
     summary = await mod.refresh_quote_tokens_once()
 
-    assert summary == {"accounts": 0, "issued": 0, "failed": 0}
+    assert _core(summary) == {"accounts": 0, "issued": 0, "failed": 0}
     assert issue_calls == []
 
 
@@ -210,7 +236,7 @@ async def test_c6_empty_account_list_issues_nothing(monkeypatch):
 
     summary = await mod.refresh_quote_tokens_once()
 
-    assert summary == {"accounts": 0, "issued": 0, "failed": 0}
+    assert _core(summary) == {"accounts": 0, "issued": 0, "failed": 0}
     assert issue_calls == [] and manager_labels == []
 
 
@@ -243,7 +269,7 @@ async def test_c7_emit_failure_does_not_break_cascade(monkeypatch):
     summary = await mod.refresh_quote_tokens_once()
 
     assert issue_calls == ["fire", "gold"]
-    assert summary == {"accounts": 2, "issued": 2, "failed": 0}
+    assert _core(summary) == {"accounts": 2, "issued": 2, "failed": 0}
     assert boom_calls["n"] >= 2
 
 
@@ -264,13 +290,13 @@ async def test_c8_task_loop_delegates_with_expected_contract(monkeypatch):
 
     await mod.task_loop(_Sched())
 
-    assert captured["wait_time"] == mod.TIME_QUOTE_TOKEN_REFRESH == time(19, 0)
+    assert captured["wait_time"] == mod.TIME_QUOTE_TOKEN_REFRESH == time(20, 45)
     assert captured["once_callable"] is mod.refresh_quote_tokens_once
     assert captured["immediate_first_run"] is False, (
         "부팅 즉시 실행하면 부팅 시각이 새 앵커가 되어 '고정 장외 시각' 설계가 무너진다"
     )
     assert captured["task_label"] == "quote_token_refresh"
-    assert captured["summary_keys"] == ("accounts", "issued", "failed")
+    assert captured["summary_keys"] == _SUMMARY_KEYS_296
     assert captured["summary_log_format"].startswith("[quote_token_refresh]")
     # metrics collector 가 없는 task — no-op 이어야 하고 예외를 내면 안 된다
     assert captured["record_fn"]({"accounts": 1}) is None
@@ -278,41 +304,70 @@ async def test_c8_task_loop_delegates_with_expected_contract(monkeypatch):
 
 
 def test_c9_schedule_time_invariants():
-    """C9 — T 와 자연 재발급 문턱(T−10분)이 **모두** 장외여야 한다.
+    """C9 — T 와 자연 재발급 문턱(T−10분)이 **모두** 조용한 창이어야 한다.
 
-    `TokenManager._is_valid()` 의 선제 갱신 마진이 10분이므로 정상 상태의 자연
-    재발급 문턱은 T−10분에 온다. 사용자의 요구("장마감 후에 받았으면")를 지키려면
-    그 문턱도 KRX 마감(15:30) 뒤여야 한다 — 팀장 제안 15:35 는 문턱이 15:25 =
-    장중이라 이 단언에 걸린다.
+    🔁 **cycle296 재표현 (2026-09-17) — 19:00 이 왜 틀렸나.**
+    종전 이 단언은 "문턱이 KRX 마감(15:30) 뒤인가" 만 물었다. 그건 **필요조건이었지
+    충분조건이 아니었다** — 보조 시세 계정은 장외에도 종일 REST 를 쓴다(5분 주기 stale
+    가드 · 15:40 NXT 애프터 등). 그래서 19:00 앵커의 다음 날 문턱 18:50 창에 `get_token()`
+    이 들어와 자연 재발급이 **항상 강제보다 먼저** 났다(09-16 실측 7/7 산술 일치 — ISA
+    문턱 18:51:25 → 실발화 18:55:03). 하루 발급이 설계 7건 대신 14~21건이었다.
+
+    ⇒ T−10 창의 요건은 "장외" 가 아니라 **"보조 풀 REST 가 없는 창"** 이다. 09-16 실측:
+    20:2x~21:0x 보조 풀 REST 14행 균일(5분 주기 로그뿐) · `quote_pool` 마커 0건 ·
+    20:30 일봉 적재는 20:31:50 종료(메인 계정). ⇒ 20:35~20:55 가 비어 있다.
+
+    새 단언 (iv)(v) 가 M9/M10 뮤테이션을 잡는다:
+    - (iv) `T + 15분 ≤ TIME_SETTLEMENT` — 체인이 09-15 처럼 14분 40초로 밀려도 정산 전 종료
+    - (v)  `T − 10분 ≥ 일봉 적재 + 5분` — **19:00 으로 되돌리는 뮤테이션이 여기서 죽는다**
+      (18:50 < 20:35). 문턱이 일봉 적재가 끝난 뒤에 와야 그 창이 조용하다.
+
+    **삭제**: `(T + 8분) < TIME_RECOMMENDATION`. 그 단언의 의도("20:00 REST 집중 창
+    침범 금지")를 **정확히** 재는 것은 아래 `collisions` 전수 스캔이고, 부등식은 "T 가
+    20:00 앞" 을 강제하던 프록시였다 — 20:00 블록이 끝난 **뒤**의 시각도 기각한다.
+
+    확정값 자체의 핀은 `test_cycle296_quote_token_refresh_observe.py::test_l0` 가 든다.
     """
     from src.engine.quote_token_refresh import TIME_QUOTE_TOKEN_REFRESH as T
     from src.engine.scheduler import (
         TIME_KRX_MAIN_CLOSE,
-        TIME_RECOMMENDATION,
         TIME_SETTLEMENT,
         TIME_STOCK_MASTER_DAILY_LOAD,
     )
 
-    base = datetime(2026, 9, 8)
+    base = datetime(2026, 9, 17)
     t_dt = base.replace(hour=T.hour, minute=T.minute)
     threshold = t_dt - timedelta(minutes=10)
     close_dt = base.replace(
         hour=TIME_KRX_MAIN_CLOSE.hour, minute=TIME_KRX_MAIN_CLOSE.minute
     )
 
+    # (i)(ii) — 장중 침범 0 (종전 계약 유지)
     assert t_dt > close_dt, "강제 재발급 자체가 장중이면 요구 위반"
     assert threshold > close_dt, (
         f"T−10분 문턱({threshold.time()})이 KRX 마감 이전이면 자연 재발급이 장중에 난다"
     )
-    # cycle270-C(2026-09-10): T 는 **스케줄러 루프 생존 창 안**이어야 한다 —
-    # scheduler.start() 는 TIME_SETTLEMENT(20:10) 정산 뒤 finally 에서 백그라운드
-    # task 를 전부 cancel 하므로 그 뒤 시각은 매일 0회 발화한다(cycle270-B 21:30 실패 원인).
-    # 종전 단언 `threshold > 20:15` 는 T 를 루프 사망 뒤로 밀어내도록 강제하던 결함이라 삭제.
-    assert T < TIME_SETTLEMENT, "루프 사망(20:10) 뒤 시각은 매일 0회 발화한다"
-    # T+8분(7계정 × 61초 직렬화)이 20:00 자문/유니버스/NXT 종료 REST 집중 창 앞에 끝나야 한다
-    assert (t_dt + timedelta(minutes=8)).time() < TIME_RECOMMENDATION, (
-        "직렬화 창이 20:00 REST 집중 창을 침범한다"
+
+    # (iii) — 루프 생존 창 (cycle270-C: start() 의 finally 가 정산 뒤 task 를 cancel 한다)
+    assert T < TIME_SETTLEMENT, "루프 사망(정산) 뒤 시각은 매일 0회 발화한다"
+
+    # (iv) — 체인 지연 마진. 09-15 실측 최악 14분 40초.
+    assert (t_dt + timedelta(minutes=15)).time() <= TIME_SETTLEMENT, (
+        f"T({T}) + 15분이 정산({TIME_SETTLEMENT})을 넘는다 — 체인이 밀리면 도중에 cancel 된다"
     )
+
+    # (v) — 문턱이 일봉 적재가 끝난 뒤에 온다(= 문턱 창이 조용하다는 구조적 근거).
+    load_end = base.replace(
+        hour=TIME_STOCK_MASTER_DAILY_LOAD.hour,
+        minute=TIME_STOCK_MASTER_DAILY_LOAD.minute,
+    ) + timedelta(minutes=5)
+    assert threshold >= load_end, (
+        f"자연 재발급 문턱({threshold.time()})이 일봉 적재 종료 추정({load_end.time()}) "
+        "이전이다 — 그 창에 REST 가 있으면 자연 재발급이 강제보다 먼저 나서 하루 "
+        "발급이 두 배가 된다(19:00 이 정확히 이 이유로 실패했다)"
+    )
+
+    # (vi) — 직렬화 창 [T−10, T+8] 전수 충돌 스캔 (T 를 옮기는 사이클은 이 창을 다시 계산한다)
     import src.engine.scheduler as _sched
     window_lo, window_hi = threshold.time(), (t_dt + timedelta(minutes=8)).time()
     collisions = sorted(
@@ -320,24 +375,30 @@ def test_c9_schedule_time_invariants():
         if name.startswith("TIME_") and isinstance(val, time) and window_lo <= val <= window_hi
     )
     assert collisions == [], f"강제 재발급 창 {window_lo}~{window_hi} 와 겹치는 예정 작업: {collisions}"
-    # 🔁 cycle283 재표현 — 종전 단언 `TIME_STOCK_MASTER_DAILY_LOAD < T` 삭제.
-    #   원 의도 = "강제 재발급의 직렬화 창이 일봉 적재를 침범하지 않는다".
-    #   그 의도를 **정확히** 재는 것은 바로 위 `collisions` 창 검사이고(그 검사는
-    #   `vars(_sched)` 의 `TIME_*` 전수를 훑으므로 `TIME_STOCK_MASTER_DAILY_LOAD` 도
-    #   이미 포함한다), 부등식은 그보다 넓게 잡힌 **프록시**였다 — 적재가 창 *뒤*
-    #   (20:30)로 옮겨져도 침범은 0인데 부등식만 기각한다.
-    #   ⇒ 부등식은 창 검사에 흡수하고, 침범 0 을 **양방향**으로 명시한다.
+
+    # 양성 대조군 — 창 검사가 공허하지 않다(스캔 대상이 실제로 존재한다).
+    all_times = [
+        v for n, v in vars(_sched).items()
+        if n.startswith("TIME_") and isinstance(v, time)
+    ]
+    assert len(all_times) >= 20, (
+        f"`vars(scheduler)` 의 TIME_* 가 {len(all_times)}개뿐 — 충돌 스캔이 공허하다"
+    )
+
     assert TIME_STOCK_MASTER_DAILY_LOAD not in (
         v for n, v in vars(_sched).items()
         if n.startswith("TIME_") and isinstance(v, time) and window_lo <= v <= window_hi
     ), "일봉 적재가 강제 재발급 직렬화 창 안이다 — 두 KIS 집중 작업이 겹친다"
+
+    # (vii) — 두 KIS 집중 작업의 간격. cycle296 에서 10분 → **15분**(적재 실측 ~121초 +
+    # 마진, 그리고 (v) 의 5분 여유와 정합).
     _load_min = (
         TIME_STOCK_MASTER_DAILY_LOAD.hour * 60 + TIME_STOCK_MASTER_DAILY_LOAD.minute
     )
     _t_min = t_dt.hour * 60 + t_dt.minute
-    assert abs(_load_min - _t_min) >= 10, (
+    assert abs(_load_min - _t_min) >= 15, (
         f"토큰 강제 재발급(T={T})과 일봉 적재({TIME_STOCK_MASTER_DAILY_LOAD})가 "
-        f"10분 이내다 — 어느 쪽이 앞이든 KIS 호출이 겹친다"
+        f"15분 이내다 — 어느 쪽이 앞이든 KIS 호출이 겹친다"
     )
 
 

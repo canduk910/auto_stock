@@ -412,11 +412,14 @@ def test_c283_5c_snapshot_call_is_graceful():
 
 
 def test_c283_5d_snapshot_avoids_the_token_refresh_window_and_all_timeslots():
-    """C5 제약 ① — 토큰 재발급 직렬화 창 `[18:50, 19:08]` 밖 + `TIME_*` 충돌 0.
+    """C5 제약 ① — 토큰 재발급 직렬화 창 밖 + `TIME_*` 충돌 0.
+
+    창은 상수에서 계산하므로 T 이동에 자동으로 따라온다 — cycle296 이 T 를 19:00 →
+    **20:45** 로 옮겨 이 창은 이제 `[20:35, 20:53]` 이다(구 표기 [18:50, 19:08]).
 
     신규 상수 2개가 `TIME_` 접두라 `vars(sched)` 를 훑는 기존 충돌 가드 2곳
-    (`test_cycle269::test_c9` 창 [18:50,19:08] · `test_cycle273::test_g273f_2`
-    창 [20:30,20:40])에 **자동 편입**된다 — 20:00·20:05 는 두 창 어디에도 없다.
+    (`test_cycle269::test_c9` · `test_cycle273::test_g273f_2` 창 [20:30,20:40])에
+    **자동 편입**된다 — 20:00·20:05 는 두 창 어디에도 없다.
     """
     from src.engine.quote_token_refresh import TIME_QUOTE_TOKEN_REFRESH as T
 

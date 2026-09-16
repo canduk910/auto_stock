@@ -442,11 +442,26 @@ def test_c10_2_recommendation_engine_source_has_no_key_literal(key: str) -> None
     assert not hits, f"`recommendation_engine.py` 에 `{key}` 리터럴(lines {hits})"
 
 
+#: cycle297(2026-09-17) — 5전략 LLM 매수평가 shadow 확대(사용자 결정 "결정 2 진행")로
+#: 소유 축이 {VB, LTV} → **7전략 전부**로 뒤집혔다. 이 가드는 삭제·skip 되지 않고
+#: 기대값만 반전된다(cycle297 명세 §5.2 — cycle297 자체 가드 `test_g2_1b` 가 이 함수의
+#: 존재와 무회피 마커를 별도로 잠근다).
+_ALL_SEVEN_STRATEGY_RELS = frozenset(
+    f"src/engine/strategies/{name}.py"
+    for name in (
+        "momentum", "volatility_breakout", "long_tail_volatility",
+        "donchian_swing", "bull_flag_breakout", "vcp_breakout", "kojiro",
+    )
+)
+
+
 @pytest.mark.parametrize("key", _KEYS)
 def test_c10_3_key_lives_in_exactly_vb_and_ltv_default_params(key: str) -> None:
-    """C10/§6.2 — 전략 glob 전수에서 이 키를 `DEFAULT_PARAMS` 에 가진 파일 = 정확히 {VB, LTV}.
+    """C10/§6.2 — 전략 glob 전수에서 이 키를 `DEFAULT_PARAMS` 에 가진 파일 = **7전략 전부**.
 
-    나머지 5전략에 새면 그 전략이 조용히 LLM 비용을 쓰기 시작한다(§11 Q8 = VB·LTV 확정).
+    🔁 cycle297(2026-09-17) 반전 — 원래 이 가드는 소유를 {VB, LTV} 로 잠갔다(§11 Q8).
+    사용자 결정 "결정 2 진행" 으로 5전략이 추가됐고, 그 소유 축 가드는 지우지 않고
+    **기대값만** 7전략으로 뒤집는다(cycle297 명세 §5.2 — 함수명은 유지, 삭제·skip 금지).
     """
     owners: dict[str, object] = {}
     for path in _STRATEGY_DIR.rglob("*.py"):
@@ -462,8 +477,8 @@ def test_c10_3_key_lives_in_exactly_vb_and_ltv_default_params(key: str) -> None:
             for k, v in zip(node.value.keys, node.value.values):
                 if isinstance(k, ast.Constant) and k.value == key:
                     owners[path.relative_to(_ROOT).as_posix()] = getattr(v, "value", v)
-    assert set(owners) == {_VB_REL, _LTV_REL}, (
-        f"`{key}` 소유 전략이 {{VB, LTV}} 가 아니다 — 실측 {sorted(owners)}"
+    assert set(owners) == _ALL_SEVEN_STRATEGY_RELS, (
+        f"`{key}` 소유 전략이 7전략 전부가 아니다 — 실측 {sorted(owners)}"
     )
 
 
@@ -578,8 +593,9 @@ _BASE_SHA = {
     "src/engine/scheduler.py": "9bf05ccae11bd0c12d5275f36be70863decd83f1f34d77352f505bc15e549d8a",
     "src/engine/strategy_base.py":
         "869dc20ca561adc561a9ebe9fdb5fe5a3e097f7ec176fdf274d577d509de9252",
+    # 🔁 cycle296(2026-09-17) 재핀 — 사용자 승인 `issue()` 매니저 단위 in-flight 합류(`src/auth/**`). 같은 값을 10곳 동시 갱신했다.
     "src/auth/token.py":
-        "049341c7286b57a06337b6bc73ff4b0269efffad8f4554d97f275e7b8ec30a54",
+        "bfbdcfbe2bd595055bcc38f5e094e2815ef67854f2153aa20c40629c9e4e6764",
     "src/auth/hashkey.py":
         "7c2aacc703839bdc274b463ee48777006504d70e4d59a1e57120ac5b612396d2",
     "src/realtime/handler.py":
@@ -591,15 +607,15 @@ _BASE_SHA = {
     # 🔁 cycle290(킬스위치 등재, 2026-09-13) 재핀 — `DEFAULT_PARAMS` 말미에 키 2개
     #    추가뿐, 그 외는 불변(세그먼트 sha 는 `test_cycle290_ast_scope.py` 가 잠근다).
     "src/engine/strategies/momentum.py":
-        "4d7fac9abab4d5fca55509a8682633d31c4bb9868f5bb4cc77d4771ecda68894",
+        "50d5c0b9a232d6110f6b85fc524569853f2b8edffe2fd44adc24289800b95ae2",
     "src/engine/strategies/donchian_swing.py":
-        "1db81a3966985fc23baf64996134af07ac81c90e56b90d8405c46f5b1efce880",
+        "cc57e5673f9982aca97f61677084e040171fff307483fedf10459b567a4679e3",
     "src/engine/strategies/kojiro.py":
-        "eb8057d44c86cfe73088aa65d2036b715ce1a979aab08c47b7a7fb3363f58c65",
+        "9477790e9d20eb6d17f36fc7586ada77ac5e2e4b0136a334888244afdb7e9cbc",
     "src/engine/strategies/vcp_breakout.py":
-        "09c7e1aa02493d678844c06f5850200dcb93f1e08d062d11468c220e5450d727",
+        "bbebddd45780a9e19f8bb3c69557d4db50fffc61e8e9da20564476a1be9598a0",
     "src/engine/strategies/bull_flag_breakout.py":
-        "f63ee57cd169e4472f24fa76b26ca9ca63e69a1a170da8e57c822fd0028f2ebe",
+        "0feb3b629bab5ad08ad589315ca12e76b57a73950b948570a78dfe84ba792595",
 }
 
 

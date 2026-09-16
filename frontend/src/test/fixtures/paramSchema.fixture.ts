@@ -2588,8 +2588,13 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         }
       ],
       "applies_to": [
+        "momentum",
         "volatility_breakout",
-        "long_tail_volatility"
+        "long_tail_volatility",
+        "donchian_swing",
+        "bull_flag_breakout",
+        "vcp_breakout",
+        "kojiro"
       ],
       "help": "`shadow` 는 판단을 기록만 하고 매수를 막지 않는다. 알 수 없는 값은 `off` 로 해석한다 — **돈을 쓰는 기능은 설정이 불확실하면 하지 않는다**(`open_price_scope_mode` 와 정반대 규약)."
     },
@@ -2613,8 +2618,13 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
       "forbidden_choices": [],
       "choices": [],
       "applies_to": [
+        "momentum",
         "volatility_breakout",
-        "long_tail_volatility"
+        "long_tail_volatility",
+        "donchian_swing",
+        "bull_flag_breakout",
+        "vcp_breakout",
+        "kojiro"
       ],
       "help": "이 점수 이상이면 통과로 기록한다(shadow 모드에서는 기록만). 범위 밖이면 읽는 쪽이 기본값 70 으로 되돌린다."
     },
@@ -2638,8 +2648,13 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
       "forbidden_choices": [],
       "choices": [],
       "applies_to": [
+        "momentum",
         "volatility_breakout",
-        "long_tail_volatility"
+        "long_tail_volatility",
+        "donchian_swing",
+        "bull_flag_breakout",
+        "vcp_breakout",
+        "kojiro"
       ],
       "help": "하루 호출 횟수 상한. **0 = 호출 안 함**이고, 키가 없어도 0 이다(비용이 드는 기능의 기본은 '안 함')."
     },
@@ -2663,8 +2678,13 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
       "forbidden_choices": [],
       "choices": [],
       "applies_to": [
+        "momentum",
         "volatility_breakout",
-        "long_tail_volatility"
+        "long_tail_volatility",
+        "donchian_swing",
+        "bull_flag_breakout",
+        "vcp_breakout",
+        "kojiro"
       ],
       "help": "응답을 기다리는 최대 초. 초과하면 게이트를 건너뛴다(매수를 막지 않는다)."
     },
@@ -2878,7 +2898,11 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "tradable_boards",
         "exchange",
         "order_exchange_clock_mode",
-        "after_market_exit_division"
+        "after_market_exit_division",
+        "llm_gate_mode",
+        "llm_gate_min_score",
+        "llm_gate_daily_call_cap",
+        "llm_gate_timeout_secs"
       ],
       "params": {
         "buy_threshold": 27.0,
@@ -2895,7 +2919,11 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         ],
         "exchange": "KRX",
         "order_exchange_clock_mode": "enforce",
-        "after_market_exit_division": "44"
+        "after_market_exit_division": "44",
+        "llm_gate_mode": "shadow",
+        "llm_gate_min_score": 70,
+        "llm_gate_daily_call_cap": 20,
+        "llm_gate_timeout_secs": 20
       },
       "defaults": {
         "buy_threshold": 29.0,
@@ -2912,7 +2940,11 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         ],
         "exchange": "KRX",
         "order_exchange_clock_mode": "enforce",
-        "after_market_exit_division": "44"
+        "after_market_exit_division": "44",
+        "llm_gate_mode": "shadow",
+        "llm_gate_min_score": 70,
+        "llm_gate_daily_call_cap": 20,
+        "llm_gate_timeout_secs": 20
       },
       "deprecated_for_keys": []
     },
@@ -3173,7 +3205,11 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "tradable_boards",
         "exchange",
         "order_exchange_clock_mode",
-        "after_market_exit_division"
+        "after_market_exit_division",
+        "llm_gate_mode",
+        "llm_gate_min_score",
+        "llm_gate_daily_call_cap",
+        "llm_gate_timeout_secs"
       ],
       "params": {
         "donchian_period": 20,
@@ -3208,7 +3244,11 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         ],
         "exchange": "KRX",
         "order_exchange_clock_mode": "enforce",
-        "after_market_exit_division": "44"
+        "after_market_exit_division": "44",
+        "llm_gate_mode": "shadow",
+        "llm_gate_min_score": 70,
+        "llm_gate_daily_call_cap": 20,
+        "llm_gate_timeout_secs": 20
       },
       "defaults": {
         "donchian_period": 20,
@@ -3243,7 +3283,11 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         ],
         "exchange": "KRX",
         "order_exchange_clock_mode": "enforce",
-        "after_market_exit_division": "44"
+        "after_market_exit_division": "44",
+        "llm_gate_mode": "shadow",
+        "llm_gate_min_score": 70,
+        "llm_gate_daily_call_cap": 20,
+        "llm_gate_timeout_secs": 20
       },
       "deprecated_for_keys": []
     },
@@ -3288,7 +3332,11 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "entry_start",
         "entry_end",
         "order_exchange_clock_mode",
-        "after_market_exit_division"
+        "after_market_exit_division",
+        "llm_gate_mode",
+        "llm_gate_min_score",
+        "llm_gate_daily_call_cap",
+        "llm_gate_timeout_secs"
       ],
       "params": {
         "breakout_volume_mult": 2.0,
@@ -3329,7 +3377,11 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "entry_start": "09:05",
         "entry_end": "13:00",
         "order_exchange_clock_mode": "enforce",
-        "after_market_exit_division": "44"
+        "after_market_exit_division": "44",
+        "llm_gate_mode": "shadow",
+        "llm_gate_min_score": 70,
+        "llm_gate_daily_call_cap": 20,
+        "llm_gate_timeout_secs": 20
       },
       "defaults": {
         "breakout_volume_mult": 2.0,
@@ -3370,7 +3422,11 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "entry_start": "09:05",
         "entry_end": "13:00",
         "order_exchange_clock_mode": "enforce",
-        "after_market_exit_division": "44"
+        "after_market_exit_division": "44",
+        "llm_gate_mode": "shadow",
+        "llm_gate_min_score": 70,
+        "llm_gate_daily_call_cap": 20,
+        "llm_gate_timeout_secs": 20
       },
       "deprecated_for_keys": []
     },
@@ -3417,7 +3473,11 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "entry_start",
         "entry_end",
         "order_exchange_clock_mode",
-        "after_market_exit_division"
+        "after_market_exit_division",
+        "llm_gate_mode",
+        "llm_gate_min_score",
+        "llm_gate_daily_call_cap",
+        "llm_gate_timeout_secs"
       ],
       "params": {
         "ema_short": 50,
@@ -3460,7 +3520,11 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "entry_start": "09:05",
         "entry_end": "14:30",
         "order_exchange_clock_mode": "enforce",
-        "after_market_exit_division": "44"
+        "after_market_exit_division": "44",
+        "llm_gate_mode": "shadow",
+        "llm_gate_min_score": 70,
+        "llm_gate_daily_call_cap": 20,
+        "llm_gate_timeout_secs": 20
       },
       "defaults": {
         "ema_short": 50,
@@ -3503,7 +3567,11 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "entry_start": "09:05",
         "entry_end": "14:30",
         "order_exchange_clock_mode": "enforce",
-        "after_market_exit_division": "44"
+        "after_market_exit_division": "44",
+        "llm_gate_mode": "shadow",
+        "llm_gate_min_score": 70,
+        "llm_gate_daily_call_cap": 20,
+        "llm_gate_timeout_secs": 20
       },
       "deprecated_for_keys": []
     },
@@ -3549,6 +3617,10 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "exchange",
         "order_exchange_clock_mode",
         "after_market_exit_division",
+        "llm_gate_mode",
+        "llm_gate_min_score",
+        "llm_gate_daily_call_cap",
+        "llm_gate_timeout_secs",
         "max_units_per_stock",
         "max_units_total"
       ],
@@ -3592,6 +3664,10 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "exchange": "KRX",
         "order_exchange_clock_mode": "enforce",
         "after_market_exit_division": "44",
+        "llm_gate_mode": "shadow",
+        "llm_gate_min_score": 70,
+        "llm_gate_daily_call_cap": 20,
+        "llm_gate_timeout_secs": 20,
         "max_units_per_stock": 2,
         "max_units_total": 10
       },
@@ -3635,6 +3711,10 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "exchange": "KRX",
         "order_exchange_clock_mode": "enforce",
         "after_market_exit_division": "44",
+        "llm_gate_mode": "shadow",
+        "llm_gate_min_score": 70,
+        "llm_gate_daily_call_cap": 20,
+        "llm_gate_timeout_secs": 20,
         "max_units_per_stock": 2,
         "max_units_total": 10
       },

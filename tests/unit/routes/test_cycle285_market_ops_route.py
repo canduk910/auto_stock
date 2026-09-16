@@ -396,6 +396,9 @@ def test_g7b_cloud_routine_done_when_ext_created_at_present(client, mo, monkeypa
 #: 값을 그대로 유지한다. "이미 증명된 사실은 휴장 여부와 무관하게 보존한다" 는
 #: 원칙이 "증거가 아예 없다는 사실" 에도 똑같이 적용된다 — 마커·산출물이 아예 없는
 #: 작업이라는 사실은 휴장이라고 사라지지 않는다.
+#: cycle296 — 토큰 강제 재발급 시각은 `quote_token_refresh` 정본에서만 읽는다(리터럴 금지).
+from src.engine.quote_token_refresh import TIME_QUOTE_TOKEN_REFRESH as _QUOTE_T
+
 _HOLIDAY_EXEMPT = {
     "cloud_report_routine": "unknown",
     "stock_master_daily_purge": "unknown",
@@ -409,14 +412,44 @@ def test_g8_holiday_overrides_every_task(client, mo, monkeypatch):
     바뀐다(cycle285 검증 honest 렌즈 MEDIUM #2 시정) — 이미 증명된 사실(그리고 "증거
     자체가 없다" 는 사실)은 휴장 여부와 무관하게 보존한다."""
     monkeypatch.setattr(mo, "_resolve_trading_day", AsyncMock(return_value=(False, "kis")))
-    data = _at(client, datetime(2026, 9, 13, 20, 30, tzinfo=_KST))
+    # ⚠️ cycle296 (2026-09-17) — `quote_token_refresh` 기대값은 **T 에 따라 달라진다**.
+    #   `_HOLIDAY_EXEMPT` 의 `unknown` 세 행은 "마커가 아예 없다" 가 아니라 **"예정 시각이
+    #   이미 지났는데 증거가 없다"**(`_no_evidence_status`)일 때만 unknown 이다. 예정 시각
+    #   **전**이면 `scheduled` 이고, 그건 §4-4 설계상 휴장 치환 대상이 맞다.
+    #   토큰 강제 재발급 T 가 19:00 → 20:45 로 옮겨지면서 이 조회 시각(20:30)이 T 앞이 된다.
+    #   조회 시각을 전부 뒤(23:00)로 미는 방법은 `metrics_snapshot` 의 판정을 함께 흔들어
+    #   이 가드의 다른 행을 망가뜨린다(실측) — 그래서 **그 한 행만 T 로 계산**한다.
+    at = datetime(2026, 9, 13, 20, 30, tzinfo=_KST)
+    expected = dict(_HOLIDAY_EXEMPT)
+    if at.timetz() < _QUOTE_T.replace(tzinfo=_KST):
+        expected["quote_token_refresh"] = "holiday"
+    data = _at(client, at)
     assert data["is_trading_day"] is False
     by_id = {t["id"]: t for t in data["tasks"]}
     for tid, t in by_id.items():
-        if tid in _HOLIDAY_EXEMPT:
-            assert t["status"] == _HOLIDAY_EXEMPT[tid], t
+        if tid in expected:
+            assert t["status"] == expected[tid], t
         else:
             assert t["status"] == "holiday", t
+
+
+def test_g8a_status_of_a_markerless_task_flips_at_its_scheduled_time(client, mo):
+    """G8-a(cycle296 신설) — 마커 없는 행의 상태는 **예정 시각을 경계로** 갈린다.
+
+    `scheduled`(시각 전) → `unknown`(시각 후). 위 G8 의 `_HOLIDAY_EXEMPT` 가 "이 행은
+    언제 물어도 unknown" 이라는 뜻으로 오독되지 않도록 경계 자체를 잰다 — T 를 옮기는
+    사이클은 이 경계도 함께 옮긴다(cycle296 이 19:00 → 20:45).
+
+    양성 대조군 = 두 상태가 **실제로 다르다**(둘 다 같은 값이면 경계가 사라진 것).
+    """
+    base = datetime(2026, 9, 14, tzinfo=_KST)
+    t_dt = base.replace(hour=_QUOTE_T.hour, minute=_QUOTE_T.minute)
+    before = {t["id"]: t for t in _at(client, t_dt - timedelta(minutes=15))["tasks"]}
+    after = {t["id"]: t for t in _at(client, t_dt + timedelta(minutes=30))["tasks"]}
+
+    assert before["quote_token_refresh"]["status"] == "scheduled"
+    assert after["quote_token_refresh"]["status"] == "unknown"
+    assert before["quote_token_refresh"]["status"] != after["quote_token_refresh"]["status"]
 
 
 def test_g8b_holiday_even_with_leftover_evidence(client, mo, monkeypatch):

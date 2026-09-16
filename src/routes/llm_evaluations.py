@@ -32,12 +32,15 @@
 from __future__ import annotations
 
 import logging
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from decimal import Decimal
 
 from fastapi import APIRouter, HTTPException, Query
 
 from src.db import llm_buy_evaluations as llm_eval_db
+from src.db import trade_history as trade_history_db
+from src.db._kst import now_kst_iso, today_kst
+from src.engine import llm_retrospective
 from src.models.response import ApiResponse
 
 logger = logging.getLogger(__name__)
@@ -229,6 +232,156 @@ def _parse_order_nos(raw: str) -> list[str]:
             detail=f"order_nos {len(out)}개 — 최대 {_MAX_ORDER_NOS}개",
         )
     return out
+
+
+# ===========================================================================
+# cycle297 — 주간 회고 조회 (읽기 전용, `/{order_no}` **보다 먼저** 등록)
+# ===========================================================================
+# FastAPI 는 등록 순서대로 경로를 매칭한다 — 이 라우트가 `/{order_no}` 뒤에
+# 있으면 `GET /api/llm-evaluations/retrospective` 가 `order_no="retrospective"`
+# 로 잡혀 상세 핸들러(404/500)에 먹힌다(명세 §5.1 G2-10 · G4-6a).
+_RETRO_ORDER_NO_CHUNK = 500
+
+# §3.4 — VB·LTV `prompt_version` 1회 단절(전략별 META 가 해시 blob 에 새로 들어가며
+# 배포 전후 값이 갈린다)의 등가表. 키 = 배포 **전** 키(`"<sid>|<X>"`), 값 = 배포 **후**
+# 키(`"<sid>|<Y>"`). 두 키의 표본은 user payload 가 byte 동일하므로(G1-6 sha 핀) 합산해도
+# 된다 — 목요일 루틴이 `by_prompt_version` 을 읽을 때 이 표로 합친다.
+#
+# X 는 실측이 아니라 **결정적 재현**이다 — 배포 중인 커밋(`5421a90`)의 `llm_features.py`
+# 가 HEAD 와 byte 동일이고, 구 `_prompt_version()` 은 인자가 없어
+# `SYSTEM_PROMPT + _USER_PREAMBLE + "|".join(_SNAPSHOT_KEYS)` 하나로 전 전략 공통이었다.
+# 그 blob 을 구 소스로 재계산한 값이 `4162dc5fcea0` 이다. 배포 후 운영 DB 에서
+# `SELECT DISTINCT prompt_version FROM llm_buy_evaluations WHERE trade_date < '<배포일>'`
+# 로 1회 대조한다(다르면 이 표가 틀린 것이니 지운다 — 틀린 합산이 빈 표보다 나쁘다).
+#
+# 🔴 합산은 **소비자(목요일 루틴)** 가 한다 — `aggregate` 안에서 조용히 접지 않는다.
+# 여기 값이 틀렸을 때 집계가 두 모집단을 말없이 섞으면 그 오류를 볼 방법이 없다.
+_PROMPT_VERSION_ALIASES: dict[str, str] = {
+    "volatility_breakout|4162dc5fcea0": "volatility_breakout|9c45283a49c1",
+    "long_tail_volatility|4162dc5fcea0": "long_tail_volatility|7a9c45983c0d",
+}
+
+
+def _parse_retro_strategy(raw: str | None) -> str | None:
+    if raw is None:
+        return None
+    text = str(raw).strip()
+    return text or None
+
+
+async def _list_evaluations_chunked(order_nos: list[str]) -> list[dict]:
+    """500개 단위로 나눠 `list_by_order_nos` 를 호출한다(§3.5-2 — 라우트 200 상한과 무관,
+    DB 함수엔 상한이 없다)."""
+    if not order_nos:
+        return []
+    out: list[dict] = []
+    for i in range(0, len(order_nos), _RETRO_ORDER_NO_CHUNK):
+        chunk = order_nos[i : i + _RETRO_ORDER_NO_CHUNK]
+        rows = await llm_eval_db.list_by_order_nos(chunk)
+        out.extend(rows or [])
+    return out
+
+
+def _project_retro_row(row: dict) -> dict:
+    """`Decimal` → `float` 사영(기존 `_num` 재사용) + `evaluations` 내부도 사영한다."""
+    out = dict(row)
+    for key in ("buy_price", "sell_price", "profit_loss", "profit_rate"):
+        if key in out:
+            out[key] = _num(out[key])
+    out["evaluations"] = [
+        {k: _num(v) for k, v in ev.items()} for ev in (out.get("evaluations") or [])
+    ]
+    primary = out.get("primary")
+    if isinstance(primary, dict):
+        out["primary"] = {k: _num(v) for k, v in primary.items()}
+    return out
+
+
+@router.get("/retrospective", response_model=ApiResponse)
+async def llm_evaluation_retrospective(
+    days: int = Query(7, ge=1, le=90, description="조회 창(일). 1~90"),
+    cost_pct: float = Query(0.25, ge=0.0, le=5.0, description="손실 정의 임계(%). 0~5"),
+    strategy: str | None = Query(None, description="특정 전략만 좁힌다(선택)"),
+):
+    """§3.5 — 주간 회고: 매수 시점 LLM 점수 ↔ 청산 손익 조인·집계. **쓰기 0.**
+
+    페어 0건은 200 + 빈 집계다(404 아님 — "이번 주 청산 없음" 은 오류가 아니다).
+    DB 예외는 어느 쪽이 터져도 500 + `[llm_eval_route_error]`(주문 상세 핸들러의
+    `order_no=` 문면과 겹치지 않도록 이 로그에는 그 문면을 쓰지 않는다 — G4-4b).
+    """
+    sid_filter = _parse_retro_strategy(strategy)
+
+    try:
+        until_date = today_kst()
+    except Exception:
+        until_date = datetime.now().date()
+    # `days` 일 **포함** 창 = `[today-(days-1), today]`. 주간 루틴이 매주 목요일에
+    # 돌므로 `days=7` 이 정확히 7일이어야 창이 겹치지 않는다(`today-days` 면 8일 창이
+    # 되어 매주 하루가 두 번 집계된다). `test_g4_1d` 가 이 경계를 고정한다.
+    since_date = until_date - timedelta(days=days - 1)
+    since_s, until_s = since_date.isoformat(), until_date.isoformat()
+
+    try:
+        pairs = await trade_history_db.get_trade_pairs(strategy=sid_filter)
+    except Exception:
+        logger.exception(
+            "%s retrospective days=%d cost_pct=%.2f strategy=%s stage=pairs",
+            _MARKER_ERROR, days, cost_pct, sid_filter or "-",
+        )
+        raise HTTPException(status_code=500, detail="AI 매수평가 회고 조회 실패")
+
+    try:
+        pairs = [p for p in (pairs or []) if not sid_filter or p.get("strategy") == sid_filter]
+    except Exception:
+        pairs = list(pairs or [])
+
+    # 창·상태 필터를 **주문번호 수집 앞**에 둔다 — leaf 가 같은 조건으로 다시 거르지만,
+    # 여기서 안 거르면 전 기간(open 포함) 페어의 주문번호를 전부 모아 500개 단위로
+    # `list_by_order_nos` 를 돌린 뒤 대부분을 버린다. 거래가 쌓일수록 왕복이 단조 증가한다.
+    # leaf 쪽 필터는 그대로 둔다(순수 함수의 계약이고, 라우트만 믿으면 다른 호출자가
+    # 창 밖 페어를 넣었을 때 조용히 새어 들어온다).
+    try:
+        pairs = [
+            p for p in pairs
+            if str(p.get("status") or "") == "closed"
+            and since_s <= str(p.get("sell_date") or "") <= until_s
+        ]
+    except Exception:
+        pass  # 필터 실패는 현행(전량) 유지 — 조회 범위만 넓어지고 결과는 leaf 가 맞춘다
+
+    order_nos: list[str] = []
+    seen: set[str] = set()
+    for p in pairs:
+        for ono in p.get("buy_order_nos") or []:
+            s = str(ono or "")
+            if s and s not in seen:
+                seen.add(s)
+                order_nos.append(s)
+
+    try:
+        eval_rows = await _list_evaluations_chunked(order_nos)
+    except Exception:
+        logger.exception(
+            "%s retrospective days=%d cost_pct=%.2f strategy=%s stage=evals",
+            _MARKER_ERROR, days, cost_pct, sid_filter or "-",
+        )
+        raise HTTPException(status_code=500, detail="AI 매수평가 회고 조회 실패")
+
+    rows = llm_retrospective.join_pairs_with_evaluations(
+        pairs, eval_rows, since_date=since_s, until_date=until_s, cost_pct=cost_pct,
+    )
+    agg = llm_retrospective.aggregate(rows, cost_pct=cost_pct)
+    projected_rows = [_project_retro_row(r) for r in rows]
+
+    data = {
+        "window": {"since": since_s, "until": until_s, "days": days},
+        "cost_pct": cost_pct,
+        "pairs": projected_rows,
+        "aggregate": agg,
+        "prompt_version_aliases": dict(_PROMPT_VERSION_ALIASES),
+        "generated_at": now_kst_iso(),
+    }
+    return ApiResponse(success=True, data=data)
 
 
 def summary_key(trade_date, order_no) -> str:

@@ -71,6 +71,17 @@ class MomentumStrategy(StrategyBase):
         # `_workspace/00_leader_trading_rules.md` 「거래소 라우팅」 절.
         "order_exchange_clock_mode": "enforce",
         "after_market_exit_division": "44",
+        # cycle297 (2026-09-17) — 5전략 LLM 매수평가 shadow 확대(사용자 결정 "결정 2
+        # 진행"). **기록만** 한다 — `enforce` 는 미구현이라 `shadow` 외 전부 `off` 로
+        # 낙하한다(leaf `llm_buy_gate._read_mode`). 돈을 쓰는 기능이라 `llm_gate_mode`/
+        # `llm_gate_daily_call_cap` 키 부재는 **off/0**(cycle245 `max_lot_ratio_mult`
+        # 관례와 같은 방향, cycle272 `open_price_scope_mode` 부재=enforce 와는 반대).
+        # PARAM_RANGES/INT_PARAMS 편입 금지(4키 전부, AST 런타임+소스 이중 가드).
+        # 장중 롤백 = `PUT /api/strategies/{id}/params {"llm_gate_mode":"off"}`.
+        "llm_gate_mode": "shadow",
+        "llm_gate_min_score": 70,
+        "llm_gate_daily_call_cap": 20,
+        "llm_gate_timeout_secs": 20,
     }
 
     def __init__(self, config: StrategyConfig):

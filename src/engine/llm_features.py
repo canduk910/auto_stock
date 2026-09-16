@@ -481,8 +481,15 @@ _USER_PREAMBLE = (
     "system 의 점수 정의와 규칙에 따라 JSON 하나만 출력하라.\n\n"
 )
 
-# §4.2 — 전략별 컨텍스트 2종. `exit_rule` 은 절대 여기 값을 쓰지 않는다 — 호출자가
-# payload 로 넘긴 **라이브 값**을 그대로 싣는다(하드코딩 금지, test_f3_10).
+# §4.2 — 전략별 컨텍스트 7종(cycle274 VB·LTV 2종 → cycle297 5전략 확대). `exit_rule` 은
+# 절대 여기 값을 쓰지 않는다 — 호출자가 payload 로 넘긴 **라이브 값**을 그대로 싣는다
+# (하드코딩 금지, test_f3_10). 문구는 명세 §3.1 의 표·각 전략 파일 docstring·
+# `strategies/CLAUDE.md` 카탈로그 표에서만 끌어온다(추측 금지) — 수치 토큰은
+# `tests/unit/engine/test_cycle297_llm_strategy_context.py::_NUMERIC_TOKENS` 가 대조한다.
+# 멀티데이 4전략(donchian_swing·bull_flag_breakout·vcp_breakout·kojiro — BFB 도
+# `max_hold_days` 영업일 시간 청산이라 15:20 규약이 없다, 명세 §5.3 M3 보강)은
+# "당일 15:20 청산" 문구를 **절대 넣지 않는다** — VB 잣대(§4.1 잣대 오염, cycle297 §1.2 F5)를
+# 데이트레이딩 전제 없는 전략에 그대로 얹으면 그 표본은 전략이 아니라 잣대를 잰다.
 _STRATEGY_META = {
     "volatility_breakout": {
         "name": "변동성 돌파(래리 윌리엄스)",
@@ -500,6 +507,112 @@ _STRATEGY_META = {
         ),
         "matters": "오른쪽 꼬리(연속 상한가)를 잡으러 가는 전략이라 작은 이익 확정은 목적이 아니다.",
     },
+    # ── cycle297 — 5전략 신규(§3.1) ─────────────────────────────────────────
+    "momentum": {
+        "name": "상한가 모멘텀",
+        "entry_rule": (
+            "전일 종가 대비 +29% 상향 돌파 순간 진입한다(이미 +30%로 상한가가 잠긴 "
+            "종목은 제외). KRX 시가단일가·정규장에서만 매수하고, 15:20 이후에는 "
+            "매수하지 않는다."
+        ),
+        "matters": (
+            "상한가를 잠그는가가 핵심이다 — 못 잠그면 −7.5% 손절 또는 익일 시가 "
+            "청산(갭 +10% 이상이면 트레일링 −2%, 아니면 즉시 매도)이 뒤따른다. "
+            "이익은 사실상 익일 시가 갭 하나에 달려 있고, 15:20 이후의 +29% 돌파는 "
+            "잠글 시간이 없는 잠금 실패 표본이다."
+        ),
+    },
+    "donchian_swing": {
+        "name": "20일 신고가 스윙 돌파(Donchian)",
+        "entry_rule": (
+            "전일 종가가 20일 최고가를 돌파하고 60일 EMA가 우상향하며 종가가 EMA60 "
+            "위에 있고 거래대금이 20일 평균의 1.5배 이상인 종목을, 다음 영업일 "
+            "09:05~09:30 사이 시장가로 진입한다. 시가 갭이 +3% 이상이면 스킵하고, "
+            "기준가 대비 +4% 초과 추격은 하지 않는다."
+        ),
+        "matters": (
+            "평균 5~15영업일 보유하는 멀티데이 전략이다. 청산은 ATR(14)×2 샹들리에 "
+            "트레일링과 하드손절(터틀 모드는 진입 ATR×2와 −9% 백스톱 중 타이트한 쪽, "
+            "비율 모드는 −7%)에 더해 5영업일 돌파 실패 청산과 10일 저가 채널 이탈로 "
+            "이뤄진다. 신고가 위에서 안착했는가·거래량이 뒷받침되는가·확장폭과 "
+            "손절폭 대비 ATR이 핵심이다."
+        ),
+    },
+    "bull_flag_breakout": {
+        "name": "눌림목 돌파(Bull Flag)",
+        "entry_rule": (
+            "직전 3~10영업일 동안 +15% 이상 오른 폴(음봉 비율 45% 이하) 뒤 "
+            "2~10영업일의 플래그(조정폭이 폴 폭의 50% 이하, 거래량이 폴 평균의 "
+            "60% 미만)를 만들고, 플래그 상단(flag_high)을 09:05~13:00 사이 돌파하며 "
+            "당일 거래량이 플래그 평균의 2배 이상일 때 진입한다. 돌파선 대비 +5% "
+            "초과 추격은 하지 않는다."
+        ),
+        "matters": (
+            "목표는 측정된 이동폭(flag_high + 폴 높이) 도달이다. 청산은 −5% 손절, "
+            "flag_low 이탈, ATR×2 트레일링, 5영업일 시간 청산 중 먼저 오는 것을 "
+            "따른다. 5영업일 안에 2차 상승이 나와야 하므로 돌파 거래량과 플래그의 "
+            "질(얕고 조용한 조정)이 핵심이고, 폴이 이미 소진된 늦은 돌파는 낮게 본다."
+        ),
+    },
+    "vcp_breakout": {
+        "name": "변동성 수축 돌파(VCP)",
+        "entry_rule": (
+            "50/60/120 EMA가 정배열이고 장기 EMA가 1개월 우상향인 종목이, 5~15주 "
+            "베이스(깊이 30% 이하) 안에서 2~4회 점진적으로 수축하는 조정(마지막 "
+            "조정 12% 이하)과 거래량 수축(마지막 5일 거래량이 직전 20일 평균의 "
+            "70% 미만)을 거친 뒤, 09:05~14:30 사이 base_high를 돌파하고 거래량이 "
+            "20일 평균의 1.5배 이상일 때 진입한다. 돌파선 대비 +7.5% 초과 추격은 "
+            "하지 않는다."
+        ),
+        "matters": (
+            "멀티데이 전략이고 시간 청산은 없다. 청산은 −7% 손절, base_low 이탈, "
+            "ATR×2 트레일링, 50일 EMA 이탈로 이뤄진다. 진입 시점의 ATR은 수축 "
+            "구간이라 원래 작다 — 손절폭이 그 ATR보다 넓어 정상 잡음에 맞는가를 "
+            "비교하는 것이 핵심이다. 수축의 질(가격과 거래량이 함께 마르는가)과 "
+            "돌파 거래량으로 좋은 진입과 나쁜 진입을 가른다."
+        ),
+    },
+    "kojiro": {
+        "name": "고지로 대순환 스윙(EMA 5/20/40)",
+        "entry_rule": (
+            "EMA 5>20>40 스테이지1이 최근 5영업일 안에 6→1로 막 전환됐고 세 EMA가 "
+            "모두 우상향하며 전일 종가가 EMA5 위에 있고 ATR/종가 비율이 1.0~6.0%인 "
+            "종목을, 다음 영업일 09:05~09:30 사이 시장가로 진입한다. 갭업 5% 이상, "
+            "갭다운 −4% 이하, 장중 붕괴(현재가<시가)는 스킵한다."
+        ),
+        "matters": (
+            "추세가 끝날 때까지 보유하며 시간 기준 강제청산은 없다. 청산 우선순위는 "
+            "고정 −8% 백스톱 → 진입가−2×ATR(20) 하드손절(tighten-only) → 스테이지3 "
+            "진입 → 고점−2.5×ATR 샹들리에 순이다. 갓 정렬된 추세의 신선도와 ATR "
+            "밴드(1.0~6.0%) 안의 질서정연함으로 좋은 진입과 나쁜 진입을 가른다 — "
+            "당일 남은 시간은 점수와 무관하다."
+        ),
+    },
+}
+
+# cycle297 §3.2 — 「해당 없음」 설명(5전략만, `not_applicable` 키로 strategy 블록에 싣는다).
+# VB·LTV 는 대상이 아니다(byte 동일 유지, test_g1_7b).
+_NOT_APPLICABLE_NOTE_TARGET = (
+    "이 전략에는 돌파선(target_won)·k·breakout_excess_bp 개념이 없다 — 결측이 아니라 "
+    "해당 없음이다. 판단 기준 1(돌파의 질)은 pos_in_ch20_pct(20일 채널 내 위치)와 "
+    "prdy_ctrt_pct·거래량으로 대신 본다."
+)
+_NOT_APPLICABLE_NOTE_K_ONLY = (
+    "이 전략은 돌파선(target_won·breakout_excess_bp)이 있지만 변동성 돌파식 k 값 개념은 "
+    "없다 — 결측이 아니라 해당 없음이다. 판단 기준 1(돌파의 질)은 돌파선 초과폭·채널 "
+    "위치·거래량으로 본다."
+)
+# cycle297 검증 — donchian(`donchian_high`)·VCP(`base_high`)도 돌파선을 `buy_signals` 에
+# 이미 싣는다. 종전 분류("목표가 개념이 없다")는 같은 프롬프트 안의 `entry_rule`(donchian
+# "기준가 대비 +4% 초과 추격은 하지 않는다" · VCP "돌파선 대비 +7.5%")과 정면으로 모순됐고,
+# 모델에게 "대신 확장폭으로 보라" 고 하면서 그 확장폭을 payload 에 싣지 않았다.
+# `llm_buy_gate._BREAKOUT_LINE_KEYS` 가 그 값을 실제로 읽어 오므로 여기서도 `k` 만 NA 다.
+_NOT_APPLICABLE_NOTES: dict[str, str] = {
+    "momentum": _NOT_APPLICABLE_NOTE_TARGET,
+    "kojiro": _NOT_APPLICABLE_NOTE_TARGET,
+    "donchian_swing": _NOT_APPLICABLE_NOTE_K_ONLY,
+    "vcp_breakout": _NOT_APPLICABLE_NOTE_K_ONLY,
+    "bull_flag_breakout": _NOT_APPLICABLE_NOTE_K_ONLY,
 }
 
 _ABSENT_FIELDS = ["호가잔량", "분봉", "뉴스/공시", "외국인·기관 수급", "업종 상대강도", "지수 방향"]
@@ -541,6 +654,34 @@ _SNAPSHOT_KEYS = (
     "stop_loss_pct", "budget_won", "position_ratio",
 )
 
+# cycle297 §3.2 — 목표가(돌파선) 개념이 없는 전략의 스냅샷 키. 결측(`null`)과
+# 「해당 없음」은 다르다 — 이 키들은 그 전략의 `buy_signals` 에 애초에 실리지 않으므로
+# 영구 `null` 이 되고, SYSTEM_PROMPT 의 "결측 3개 이상이면 score ≤ 50"(§4.1)이 구조적으로
+# 발동한다(cycle297 §1.2 F7). 없는 개념은 null 로 싣지 않고 **키 자체를 뺀다**. VB·LTV 는
+# 여기 없으므로 `snapshot_keys_for` 결과가 `_SNAPSHOT_KEYS` 그대로다(byte 동일 유지).
+_SNAPSHOT_NA_KEYS: dict[str, tuple[str, ...]] = {
+    # momentum(`prev_close`)·kojiro(`stage`)만 돌파선을 `buy_signals` 에 싣지 않는다.
+    "momentum": ("target_won", "k", "breakout_excess_bp"),
+    "kojiro": ("target_won", "k", "breakout_excess_bp"),
+    # 아래 셋은 돌파선을 싣는다 — donchian `donchian_high` · VCP `base_high` ·
+    # BFB `flag_high`(BFB 의 `target_price` 는 돌파선이 아니라 측정 이동 목표가라
+    # `llm_buy_gate._BREAKOUT_LINE_KEYS` 가 `flag_high` 를 읽는다). 변동성 돌파식
+    # k 값만 해당 없음이다.
+    "donchian_swing": ("k",),
+    "vcp_breakout": ("k",),
+    "bull_flag_breakout": ("k",),
+}
+
+
+def snapshot_keys_for(sid) -> tuple[str, ...]:
+    """전략별 유효 스냅샷 키 — `_SNAPSHOT_KEYS` **순서 그대로**, NA 키는 제거한다.
+
+    `None` 으로 채우는 것이 아니라 키 자체를 뺀다(cycle297 §3.2) — SYSTEM_PROMPT 의
+    결측 카운트가 「해당 없음」을 결측으로 오판하지 않게 한다.
+    """
+    na = set(_SNAPSHOT_NA_KEYS.get(sid, ()))
+    return tuple(k for k in _SNAPSHOT_KEYS if k not in na)
+
 
 def _bar_row(b) -> list:
     try:
@@ -573,13 +714,18 @@ def build_messages(payload: dict, tech: dict, bars30: list) -> list[dict]:
         "exit_rule": payload.get("exit_rule", ""),
         "matters": meta_tpl["matters"],
     }
+    # cycle297 §3.2 — 5전략에만 「해당 없음」 설명을 싣는다. VB·LTV 는 `_NOT_APPLICABLE_NOTES`
+    # 에 없으므로 `.get(sid)` 가 None 이고 키가 붙지 않는다(byte 동일 유지, test_g1_7b).
+    _na_note = _NOT_APPLICABLE_NOTES.get(sid)
+    if _na_note:
+        strategy_block["not_applicable"] = _na_note
     symbol_block = {
         "ticker": payload.get("ticker", ""),
         "name": sanitize_text(payload.get("name")),
         "market_cap_eok": payload.get("market_cap_eok"),
         "trade_amount_eok": payload.get("trade_amount_eok"),
     }
-    snapshot = {k: payload.get(k) for k in _SNAPSHOT_KEYS}
+    snapshot = {k: payload.get(k) for k in snapshot_keys_for(sid)}
     if board == "pre_nxt":
         snapshot["board_note"] = _BOARD_NOTE_PRE_NXT
 

@@ -172,25 +172,53 @@ def test_g290_12_default_value_equals_order_engine_constant(
     )
 
 
+#: cycle297(2026-09-17) — 5전략 LLM 매수평가 shadow 확대(사용자 결정 "결정 2 진행")로
+#: momentum/donchian_swing/bull_flag_breakout/vcp_breakout/kojiro 에 4키가 새로
+#: 추가됐다. `_NEW_KEYS`(cycle290 전용, 2키)와는 **다른 축**이라 섞지 않는다 — 섞으면
+#: "cycle290 은 등재 2키뿐" 이라는 이 파일의 원래 명제가 흐려진다.
+_CYCLE297_NEW_KEYS: tuple[str, ...] = (
+    "llm_gate_mode", "llm_gate_min_score", "llm_gate_daily_call_cap", "llm_gate_timeout_secs",
+)
+_CYCLE297_AFFECTED_SIDS: frozenset[str] = frozenset({
+    "momentum", "donchian_swing", "bull_flag_breakout", "vcp_breakout", "kojiro",
+})
+
+
+def _expected_new_keys(sid: str) -> set[str]:
+    expected = set(_NEW_KEYS)
+    if sid in _CYCLE297_AFFECTED_SIDS:
+        expected |= set(_CYCLE297_NEW_KEYS)
+    return expected
+
+
 @pytest.mark.parametrize("sid", _STRATEGY_IDS)
 def test_g290_13_key_set_delta_is_exactly_the_two_new_keys(sid: str) -> None:
-    """RED — `DEFAULT_PARAMS` 키 집합의 변화가 **정확히 +2**, 삭제 0."""
+    """RED — `DEFAULT_PARAMS` 키 집합의 변화가 **정확히 +2**, 삭제 0.
+
+    🔁 cycle297 — VB·LTV 는 여전히 +2 뿐이지만, 5전략(momentum/donchian_swing/
+    bull_flag_breakout/vcp_breakout/kojiro)은 사용자 승인 하에 +4 가 더해져 총 +6 이다
+    (`_expected_new_keys` 가 그 차이를 sid 별로 표현한다 — `_NEW_KEYS` 자체는 cycle290
+    전용 2키로 불변).
+    """
     pre = set(_PRE_CYCLE290_DEFAULTS[sid])
     now = set(_defaults(sid))
-    assert now - pre == set(_NEW_KEYS), f"예상 밖 신규 키: {sorted(now - pre - set(_NEW_KEYS))}"
+    expected_new = _expected_new_keys(sid)
+    assert now - pre == expected_new, f"예상 밖 신규 키: {sorted(now - pre - expected_new)}"
     assert pre - now == set(), f"키가 사라졌다: {sorted(pre - now)}"
 
 
 @pytest.mark.parametrize("sid", _STRATEGY_IDS)
 def test_g290_14_all_other_default_values_are_untouched(sid: str) -> None:
-    """행위 불변 — 두 키를 뺀 나머지 **값 전부**가 착수 시점과 같다.
+    """행위 불변 — 신규 키를 뺀 나머지 **값 전부**가 착수 시점과 같다.
 
     sha 핀 재산출은 "기존 값도 같이 바뀌었을 수 있다" 는 구멍을 남긴다(자문 A2). 여기서는
-    dict 를 직접 비교하므로 실패 시 무엇이 바뀌었는지 그대로 읽힌다.
+    dict 를 직접 비교하므로 실패 시 무엇이 바뀌었는지 그대로 읽힌다. 🔁 cycle297 —
+    제외 집합이 sid 별로 `_expected_new_keys` 를 쓴다(위 test_g290_13 과 동일 축).
     """
-    now = {k: v for k, v in _defaults(sid).items() if k not in _NEW_KEYS}
+    excluded = _expected_new_keys(sid)
+    now = {k: v for k, v in _defaults(sid).items() if k not in excluded}
     assert now == _PRE_CYCLE290_DEFAULTS[sid], (
-        "두 키 외의 `DEFAULT_PARAMS` 값이 바뀌었다 — cycle290 의 범위는 등재뿐이다"
+        "신규 키 외의 `DEFAULT_PARAMS` 값이 바뀌었다 — cycle290/297 의 범위는 등재뿐이다"
     )
 
 

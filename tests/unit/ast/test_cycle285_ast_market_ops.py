@@ -100,7 +100,11 @@ def test_a4_imports_at_least_eight_scheduler_time_constants():
 
 
 def test_a5_imports_quote_token_refresh_time_constant():
-    """A5 — 19:00 토큰 재발급 시각은 scheduler 밖 정본(`quote_token_refresh`)에서."""
+    """A5 — 토큰 재발급 시각은 scheduler 밖 정본(`quote_token_refresh`)에서.
+
+    값은 19:00(cycle270-C) → **20:45**(cycle296, 2026-09-17) 로 옮겼다. 이 가드가
+    재는 것은 값이 아니라 **출처**다 — 시각 리터럴이 라우트로 새지 않는 것.
+    """
     tree = _tree()
     for node in ast.walk(tree):
         if (

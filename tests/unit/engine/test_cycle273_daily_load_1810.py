@@ -34,10 +34,13 @@
   "장중 침범 0 · 정산 전 완료" 였고 19:50 은 그 시절의 *매매 종료 프록시*였다.
   매매는 이제 20:00(`TIME_NXT_POST_CLOSE`)에 끝나므로 20:30 은 침범이 아니다.
   ⇒ `TIME_NXT_POST_CLOSE <= DAILY_LOAD < TIME_SETTLEMENT` 로 재표현한다.
-- `test_g273f_3` 의 `DAILY_LOAD < TIME_QUOTE_TOKEN_REFRESH(19:00)` — 원 의도는
+- `test_g273f_3` 의 `DAILY_LOAD < TIME_QUOTE_TOKEN_REFRESH` — 원 의도는
   "토큰 재발급 직렬화 창과 겹치지 않는다" 이고, 그것을 **정확히** 재는 것은 바로
-  아래 줄의 창 검사(`not (18:50 <= DAILY_LOAD <= 19:08)`)다. 부등식은 그 의도보다
+  아래 줄의 창 검사(`not (T−10분 <= DAILY_LOAD <= T+8분)`)다. 부등식은 그 의도보다
   넓게 잡힌 프록시였을 뿐이라 창 검사에 **흡수**한다(삭제 사유 = 중복 프록시).
+  🔁 cycle296(2026-09-17) 이 T 를 19:00 → **20:45** 로 옮겨 그 창은 `[20:35, 20:53]`
+  이 됐다 — 적재 20:30 은 창 **앞**이라 여전히 침범 0 이고, 부등식이 남아 있었다면
+  (20:30 < 20:45) 우연히 통과했을 뿐 의도를 재지 못했을 것이다.
 """
 from __future__ import annotations
 
@@ -165,7 +168,8 @@ def test_g273f_3_quote_token_refresh_window_still_clear():
 
     `test_cycle269_quote_token_refresh.py::test_c9_schedule_time_invariants` 가
     `scheduler.TIME_*` 전수를 `[T−10분, T+8분]` 창으로 훑는다 — **T 를 옮기는 후속
-    사이클은 반드시 이 창을 다시 계산해야 한다.**
+    사이클은 반드시 이 창을 다시 계산해야 한다.** cycle296 이 그렇게 했다
+    (19:00 → 20:45 ⇒ 창 [20:35, 20:53]; 적재 20:30 은 창 앞 5분).
     """
     from src.engine.quote_token_refresh import TIME_QUOTE_TOKEN_REFRESH as T
 

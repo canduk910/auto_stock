@@ -478,6 +478,13 @@ _PREEXISTING_CONTENT_SHA: dict[str, str] = {
     #    영향은 8영역 밖 4파일 — `_APPROVED_CONTENT_SHA` 대상이 아니다).
     "src/realtime/CLAUDE.md":
         "061c5c5c68fd586722d4139d19f15e30e2ba036af6f3d4ce7906f84a93714f5b",
+    # ✅ 2026-09-17 (cycle296) — `TokenManager.issue()` 매니저 단위 in-flight
+    #    합류. 사용자 명시 8영역 승인(`src/auth/**`), 범위 = `src/auth/token.py`
+    #    `issue()` + `__init__` 신규 필드뿐(`get_token`/`revoke`/`_is_valid` 무접촉).
+    #    자매 가드 네 곳 전부 같은 값(`test_g3_9b`/`test_g223f_9`/`test_g223_10` 계약).
+    #    TODO(cycle296 커밋 후): 아래 항목을 **삭제**한다.
+    "src/auth/token.py":
+        "bfbdcfbe2bd595055bcc38f5e094e2815ef67854f2153aa20c40629c9e4e6764",
 }
 
 
@@ -613,13 +620,13 @@ _CYCLE228_STRATEGY_CONTENT_SHA: dict[str, str] = {
     "src/engine/strategies/long_tail_volatility.py":
         "51b50560a1240df3fc6085da7253438605079d7d453ff3e77a806e814473be25",
     "src/engine/strategies/kojiro.py":
-        "eb8057d44c86cfe73088aa65d2036b715ce1a979aab08c47b7a7fb3363f58c65",
+        "9477790e9d20eb6d17f36fc7586ada77ac5e2e4b0136a334888244afdb7e9cbc",
     "src/engine/strategies/momentum.py":
-        "4d7fac9abab4d5fca55509a8682633d31c4bb9868f5bb4cc77d4771ecda68894",
+        "50d5c0b9a232d6110f6b85fc524569853f2b8edffe2fd44adc24289800b95ae2",
     "src/engine/strategies/vcp_breakout.py":
-        "09c7e1aa02493d678844c06f5850200dcb93f1e08d062d11468c220e5450d727",
+        "bbebddd45780a9e19f8bb3c69557d4db50fffc61e8e9da20564476a1be9598a0",
     "src/engine/strategies/bull_flag_breakout.py":
-        "f63ee57cd169e4472f24fa76b26ca9ca63e69a1a170da8e57c822fd0028f2ebe",
+        "0feb3b629bab5ad08ad589315ca12e76b57a73950b948570a78dfe84ba792595",
 }
 
 

@@ -389,6 +389,13 @@ _PREEXISTING_CONTENT_SHA: dict[str, str] = {
     #    영향은 8영역 밖 4파일 — `_APPROVED_CONTENT_SHA` 대상이 아니다).
     "src/realtime/CLAUDE.md":
         "061c5c5c68fd586722d4139d19f15e30e2ba036af6f3d4ce7906f84a93714f5b",
+    # ✅ 2026-09-17 (cycle296) — `TokenManager.issue()` 매니저 단위 in-flight
+    #    합류. 사용자 명시 8영역 승인(`src/auth/**`), 범위 = `src/auth/token.py`
+    #    `issue()` + `__init__` 신규 필드뿐(`get_token`/`revoke`/`_is_valid` 무접촉).
+    #    자매 가드 네 곳 전부 같은 값(`test_g3_9b`/`test_g223f_9`/`test_g223_10` 계약).
+    #    TODO(cycle296 커밋 후): 아래 항목을 **삭제**한다.
+    "src/auth/token.py":
+        "bfbdcfbe2bd595055bcc38f5e094e2815ef67854f2153aa20c40629c9e4e6764",
 }
 
 

@@ -60,6 +60,29 @@ _REFRESH_AT = datetime(2026, 9, 10, 15, 45, 0)
 _NEW_EXPIRY = _REFRESH_AT + timedelta(hours=24)
 
 
+# cycle296 (2026-09-17) — C5 의 "회차 요약 3필드 불변" 은 **이 사이클로 해제됐다**.
+# C5-b 가 예고한 "별도 사이클" 이 바로 cycle296 이다(합류 배포 뒤 '정말 줄었는지' 를
+# 로그로 읽으려면 강제분만 세는 `issued` 로는 부족하다 — §3-3).
+_SUMMARY_KEYS_296 = ("accounts", "issued", "failed", "elapsed_s", "window_issues_total")
+
+
+def _core(summary: dict) -> dict:
+    """cycle296 관측 2키를 성질로 검사한 뒤 떼어 내고 핵심 3키만 돌려준다.
+
+    `_KisLikeMgr` 는 `issue_history` 를 갖지 않으므로 창 집계는 항상 0 이어야 한다
+    (관측 배관의 `getattr(..., ())` 폴백이 never-raise 인지의 증거).
+    """
+    assert set(summary) == set(_SUMMARY_KEYS_296), (
+        f"cycle296 회차 요약은 5키다 — 실측 {sorted(summary)}"
+    )
+    assert isinstance(summary["elapsed_s"], int) and not isinstance(
+        summary["elapsed_s"], bool
+    )
+    assert summary["elapsed_s"] >= 0
+    assert summary["window_issues_total"] == 0
+    return {k: summary[k] for k in ("accounts", "issued", "failed")}
+
+
 def _make_account(label: str):
     from src.models.kis_quote_account import KisQuoteAccount
 
@@ -247,7 +270,7 @@ async def test_c3_revoke_failure_still_attempts_issue(monkeypatch):
 
     assert ("issue", "gold") in calls, "revoke 실패 계정을 건너뛰면 토큰 없는 채로 남는다"
     assert calls.index(("revoke", "gold")) < calls.index(("issue", "gold"))
-    assert summary == {"accounts": 3, "issued": 3, "failed": 0}
+    assert _core(summary) == {"accounts": 3, "issued": 3, "failed": 0}
     # revoke 가 죽었으니 그 계정만 앵커가 그대로다 — 이것이 관측돼야 하는 사실이다.
     assert managers["gold"].token_expired == _NATURAL_EXPIRY
     assert managers["fire"].token_expired == _NEW_EXPIRY
@@ -284,7 +307,7 @@ async def test_c3c_issue_failure_absorbed_per_account(monkeypatch):
 
     summary = await mod.refresh_quote_tokens_once()
 
-    assert summary == {"accounts": 3, "issued": 2, "failed": 1}
+    assert _core(summary) == {"accounts": 3, "issued": 2, "failed": 1}
     assert ("revoke", "isa") in calls and ("issue", "isa") in calls
     assert managers["isa"].token_expired == _NEW_EXPIRY
     # 폐기는 됐는데 발급이 죽은 계정 = 토큰 없음. 다음 시세 요청의 `get_token()` 이
@@ -311,7 +334,7 @@ async def test_c4_main_account_never_revoked_or_issued(monkeypatch):
     assert manager_labels == ["fire", "isa"]
     assert None not in manager_labels
     assert [c for c in calls if c[1] == ""] == []
-    assert summary == {"accounts": 3, "issued": 2, "failed": 1}
+    assert _core(summary) == {"accounts": 3, "issued": 2, "failed": 1}
 
 
 # ===========================================================================
@@ -340,31 +363,51 @@ async def test_c5_per_account_log_appends_revoked_field(monkeypatch, caplog):
     ], f"실측 {issued_lines}"
 
 
-def test_c5b_round_summary_contract_unchanged():
-    """C5-b — 회차 요약 3필드는 **불변**이다.
+def test_c5b_round_summary_contract_is_now_five_fields():
+    """C5-b — 🔁 **cycle296 의미 전환**: 요약이 3필드 → **5필드**가 됐다.
 
-    `revoked` 를 요약에 더하면 cycle269 c1/c4/c5/c6 의 `summary == {...}` 등식
-    4건이 동시에 깨진다. revoke 성패는 이미 계정별 행(` revoked=`)과 WARNING 으로
-    관측되므로 요약에 넣을 새 정보가 없다 — 넣고 싶다면 그 4건의 의미 전환을
-    동반하는 **별도 사이클**이다.
+    cycle270 은 "`revoked` 를 요약에 넣지 않는다 — 넣고 싶다면 별도 사이클" 이라고
+    적었다. 그 별도 사이클이 cycle296 이고, 넣은 것은 `revoked` 가 아니라 **관측 2키**다:
+
+    - `elapsed_s` — 체인 총 소요(정상 ≈420s, 09-15 실측 최악 14분 40초)
+    - `window_issues_total` — 체인 시작 −15분부터 종료까지 그 라벨들의 **모든** 발급 수
+
+    `issued=7 failed=0` 은 09-15 의 실제 21건, 09-16 의 14건 앞에서도 참이었다.
+    합류가 배포된 뒤 "정말 줄었는지" 를 읽으려면 강제분 밖도 세야 한다.
+
+    `revoked` 는 여전히 요약에 없다 — 계정별 행(` revoked=`)과 WARNING 이 이미 잰다.
     """
     from src.engine import quote_token_refresh as mod
 
-    assert mod._SUMMARY_KEYS == ("accounts", "issued", "failed")
+    assert mod._SUMMARY_KEYS == _SUMMARY_KEYS_296, f"실측 {mod._SUMMARY_KEYS}"
     assert mod._SUMMARY_LOG_FORMAT == (
-        f"{MARKER} accounts=%d issued=%d failed=%d"
+        f"{MARKER} accounts=%d issued=%d failed=%d "
+        "elapsed_s=%d window_issues_total=%d"
+    ), f"실측 {mod._SUMMARY_LOG_FORMAT!r}"
+    # 양성 대조군 — cycle269/270 의 3필드는 **그대로 살아 있다**(교체가 아니라 추가).
+    assert mod._SUMMARY_KEYS[:3] == ("accounts", "issued", "failed")
+    assert "revoked" not in mod._SUMMARY_KEYS, (
+        "revoke 성패는 계정별 행이 잰다 — 요약에 넣으면 같은 사실이 두 곳으로 갈린다"
     )
+    assert mod._SUMMARY_LOG_FORMAT.count("%d") == len(mod._SUMMARY_KEYS)
 
 
 @pytest.mark.asyncio
 async def test_c5c_summary_dict_keys_unchanged(monkeypatch):
-    """C5-c — 반환 dict 키도 3개 그대로(cycle269 등식 단언 4건의 전제)."""
+    """C5-c — 반환 dict 키도 cycle296 의 5개로 따라간다.
+
+    `_SUMMARY_KEYS` 와 반환 dict 가 갈리면 `run_periodic_task_loop._build_log_args` 의
+    `summary.get(key, 0)` 폴백이 **조용히 0** 을 찍는다 — "측정했더니 0" 과 "측정조차
+    안 함" 이 구별되지 않는다.
+    """
     from src.engine import quote_token_refresh as mod
 
     _install(monkeypatch, [_make_account("fire")])
     summary = await mod.refresh_quote_tokens_once()
 
-    assert set(summary) == {"accounts", "issued", "failed"}
+    assert set(summary) == set(mod._SUMMARY_KEYS) == set(_SUMMARY_KEYS_296), (
+        f"실측 {sorted(summary)}"
+    )
 
 
 # ===========================================================================

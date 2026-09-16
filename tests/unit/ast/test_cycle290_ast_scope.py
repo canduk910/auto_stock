@@ -125,8 +125,9 @@ _BASE_SHA: dict[str, str] = {
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "src/auth/hashkey.py":
         "7c2aacc703839bdc274b463ee48777006504d70e4d59a1e57120ac5b612396d2",
+    # 🔁 cycle296(2026-09-17) 재핀 — 사용자 승인 `issue()` 매니저 단위 in-flight 합류(`src/auth/**`). 같은 값을 10곳 동시 갱신했다.
     "src/auth/token.py":
-        "049341c7286b57a06337b6bc73ff4b0269efffad8f4554d97f275e7b8ec30a54",
+        "bfbdcfbe2bd595055bcc38f5e094e2815ef67854f2153aa20c40629c9e4e6764",
     # ⚠️ cycle292(2026-09-14) 재핀 — `_subscribe_market_operation_tickers` 176줄을
     # 신규 leaf `src/engine/market_op_subscribe.py` 로 추출(행위 변경 0 · 5줄 위임
     # wrapper · 3,897→3,726L, 사용자 승인). 여섯 자매 핀(cycle274/276/278/282/290/291)
@@ -292,6 +293,9 @@ _ENGINE_PY_FILES: dict[str, tuple[str, ...]] = {
         "boot_manager.py", "daily_emit_cap.py", "daily_metrics_snapshot.py",
         "data_load_tasks.py", "kojiro_band_observe.py", "kojiro_gap_observe.py",
         "kojiro_indicators.py", "llm_buy_gate.py", "llm_features.py",
+        # cycle297 — 주간 회고 조인·집계 순수 leaf(`src.*` import 0). 이름을 등재해도
+        # "다음 신규 파일" 은 여전히 붉어진다(이름 축 가드는 변경 없음).
+        "llm_retrospective.py",
         "log_analysis_engine.py", "log_metrics_collector.py",
         # cycle292 — `scheduler._subscribe_market_operation_tickers` 본체 leaf.
         # 형제 `market_operation_monitor.py`(H0UNMKO0 수신·상태 추적) 와 역할이 반대다

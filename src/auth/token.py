@@ -12,11 +12,41 @@
 - `issue()` 진입 시 lock 획득 + gap 미달이면 sleep. 캐시 hit 시 `_is_valid()`→`issue()` skip → sleep 0.
 - 캐시 영속화: `_TOKEN_CACHE_DIR=.token_cache/` 디렉토리 단위 (Docker 볼륨 마운트 친화).
   구 경로 `.token_cache.json` / `.token_cache_quote_<label>.json` 자동 마이그레이션 + 호환 fallback.
+
+사이클 296 (2026-09-17) — `issue()` 매니저 단위 in-flight 합류 (사용자 결정 "결정 1 진행"):
+- 09-15/09-16 조사 = 설계 7건/일(보조 계정)인데 실제 21건/14건. `asyncio.Lock` 은
+  **직렬화만 하고 합류시키지 않는다** — 같은 매니저의 토큰을 원하는 두 코루틴이 각자
+  KIS 를 친다. 두 경로: (A) `_is_valid()` 10분 마진의 자연 문턱에 REST 여러 개가
+  동시에 `issue()` 로 떨어짐 (B) `quote_token_refresh.py` 의 `revoke()`→`issue()`
+  사이 61초 공백에 REST 가 들어와 락 대기 후 또 발급.
+- 시정 = `self._inflight`(진행 중 Future) + `self._inflight_token_snapshot`(리더 진입
+  시점 `access_token`) + `self.issue_history`(공개 deque, 리더 성공만 기록 — leaf
+  `quote_token_refresh.py` 의 `window_issues_total` 관측 원천). 합류 판단은 **첫
+  `await` 앞**(동기 원자적) — 진행 중 Future 가 있고 스냅샷이 현재 `access_token` 과
+  같으면 대기자는 KIS 를 치지 않고 그 Future 를 기다린다. 스냅샷 비교가 있는 이유 —
+  `revoke()` 가 `access_token=""` 을 만든 뒤 들어온 새 리더는 옛 리더(스냅샷=구 토큰)에
+  합류하면 안 된다(폐기된 토큰을 들고 앵커도 안 옮겨진다 = cycle270 회귀).
+- 전역 61초 직렬화(`_GLOBAL_ISSUE_LOCK`/`_ISSUE_GAP_SECS`)는 **그대로**다 — 합류는 락
+  바깥의 판단이고 리더만 락에 들어간다. 다른 라벨끼리는 여전히 합류하지 않는다(KIS
+  분당 1개는 전역 한도라 매니저별로 락을 쪼개면 403 이 재발한다, 사이클 20 재현).
+- 실패·취소는 대기자에게 전파된다(무음 401 방지) — 단 리더 **취소**는 `RuntimeError`
+  로 바꿔 건넨다(`CancelledError` 를 그대로 심으면 대기자 자신이 취소된 것처럼
+  보여 `base.py::_request` 재시도 루프가 끊긴다). 합류 대기는 `asyncio.shield` 로
+  감싼다(한 대기자의 취소·타임아웃이 공유 Future 를 죽이면 전원이 실패한다) +
+  `_ISSUE_JOIN_TIMEOUT_SECS` 상한(교착 방지, 리스크 다이얼 아님).
+- `_inflight` 는 `finally` 에서 **반드시** `self._inflight is fut` 일 때만 비운다 —
+  그새 새 리더가 등록했다면(스냅샷 불일치로 합류 거부된 경우) 옛 리더가 새 리더의
+  등록을 지우면 안 된다.
+- 합류는 "진행 중"에만 성립한다 — 순차 `issue()` 두 번은 여전히 KIS 두 번이다
+  (`quote_token_refresh.py` 의 `revoke()`→`issue()` 가 이 성질에 기댄다).
+- 명세 `_workspace/red/cycle296_token_refresh_coalesce_spec.md`. 접촉 범위는
+  `issue()` 와 `__init__` 신규 필드뿐 — `get_token`/`revoke`/`_is_valid` 는 무접촉.
 """
 
 from __future__ import annotations
 
 import asyncio
+import collections
 import json
 import logging
 import time
@@ -50,6 +80,12 @@ _LEGACY_QUOTE_CACHE_PREFIX = ".token_cache_quote_"
 _GLOBAL_ISSUE_LOCK: asyncio.Lock | None = None
 _LAST_ISSUE_AT: float = 0.0  # time.monotonic()
 _ISSUE_GAP_SECS: float = 61.0  # 분당 1개 보장 (1초 마진)
+
+# 사이클 296 (2026-09-17) — 매니저 단위 in-flight 합류 대기자의 상한.
+# 리더의 최악 대기 = 다른 7매니저의 락 점유(각 61s sleep + ~10s POST) + 자기
+# 61s + 10s ≈ 570s 근사. 교착 방지 상한이지 리스크 다이얼이 아니라 system_config
+# 편입 없음 — 상수 하나로 고정한다.
+_ISSUE_JOIN_TIMEOUT_SECS: float = 600.0
 
 
 def _get_global_issue_lock() -> asyncio.Lock:
@@ -94,6 +130,16 @@ class TokenManager:
 
         self.access_token: str = ""
         self.token_expired: datetime | None = None
+        # 사이클 296 — 매니저 단위 in-flight 합류 상태. `_inflight` 는 진행 중인
+        # `issue()` 호출의 Future(없으면 None), `_inflight_token_snapshot` 은 그
+        # 리더가 등록될 때의 `access_token`(revoke() 로 비워진 뒤의 새 리더가 옛
+        # 리더에 합류하지 않도록 하는 비교 키). `issue_history` 는 **공개** 속성 —
+        # 리더가 실제로 KIS 를 쳐서 성공한 시각(`time.monotonic()`)만 기록하고,
+        # `src/engine/quote_token_refresh.py` 의 `window_issues_total` 관측이
+        # `getattr(manager, "issue_history", ())` 로 읽는다.
+        self._inflight: "asyncio.Future[None] | None" = None
+        self._inflight_token_snapshot: str = ""
+        self.issue_history: "collections.deque[float]" = collections.deque(maxlen=64)
         self._load_cache()
 
     # -- 자격증명 접근 (메인 기본값 / 보조 override 통합) ----------------
@@ -128,38 +174,95 @@ class TokenManager:
         사이클 20 (2026-05-20) — 모듈 전역 직렬화 + 60s gap (KIS 분당 1개 한도).
         Lock 안에서 sleep 이므로 다음 매니저는 자연 대기. KIS 부담 0.
         `_LAST_ISSUE_AT` 는 HTTP POST 성공 *후* 갱신 — 실패 시 재발급 시도 가능.
+
+        사이클 296 (2026-09-17) — 매니저 단위 in-flight 합류. `asyncio.Lock` 은
+        직렬화만 하고 합류시키지 않아, 같은 매니저의 토큰을 원하는 두 코루틴이
+        각자 KIS 를 치던 결함(설계 7건/일 vs 실측 14~21건/일)을 시정한다.
+
+        1) 첫 `await` **앞**(동기·원자적)에서 진행 중 Future 가 있고 그 리더의
+           스냅샷이 지금 `access_token` 과 같으면 합류 — KIS 를 치지 않고 그
+           Future 를 기다린 뒤 return 한다. 스냅샷 비교는 `revoke()` 로 토큰이
+           비워진 뒤 들어온 새 리더가 옛 리더(스냅샷=구 토큰)에 합류하는 것을
+           막는다(합류하면 그 계정은 폐기된 토큰을 들고 앵커도 안 옮겨진다).
+        2) 합류하지 않으면 이 호출이 **리더**다 — 락 획득 *전*에 `_inflight`/
+           스냅샷을 등록한다(락 대기 중에도 뒤에 온 호출자가 합류할 수 있어야
+           (B) 유형 결함이 닫힌다). 본체(gap 대기 → POST → 필드 대입 → 캐시
+           저장 → 앵커 갱신 → `issue_history` 기록)는 락 안에서 실행된다.
+        3) 성공하면 대기자에게 `fut.set_result(None)`. 실패·취소는 대기자에게
+           **전파**된다(예외 삼킴 금지 — 삼키면 대기자가 빈 토큰으로 REST 를
+           쏜다). 리더 취소는 `RuntimeError` 로 바꿔 전달한다 — `CancelledError`
+           를 그대로 심으면 대기자 자신이 취소된 것처럼 보여 `base.py::_request`
+           의 재시도 루프가 끊긴다.
+        4) `finally` 에서 `self._inflight is fut` 일 때만 `None` 으로 비운다 —
+           그새 새 리더가 등록했다면(스냅샷 불일치) 그 등록을 지우면 안 된다.
+
+        합류는 "진행 중"에만 성립한다 — 순차 `issue()` 두 번은 여전히 KIS 두
+        번이다(끝난 Future 는 매번 새로 리더를 만든다).
         """
         global _LAST_ISSUE_AT
-        async with _get_global_issue_lock():
-            elapsed = time.monotonic() - _LAST_ISSUE_AT
-            if _LAST_ISSUE_AT > 0 and elapsed < _ISSUE_GAP_SECS:
-                wait_secs = _ISSUE_GAP_SECS - elapsed
-                logger.info(
-                    "[token] 분당 한도 대기: label=%s wait=%.1fs",
-                    self._label or "main", wait_secs,
+
+        # 1) 합류 판단 — 첫 await 앞, 동기적으로 끝나야 원자적이다.
+        fut = self._inflight
+        if (
+            fut is not None
+            and not fut.done()
+            and self._inflight_token_snapshot == self.access_token
+        ):
+            await asyncio.wait_for(
+                asyncio.shield(fut), timeout=_ISSUE_JOIN_TIMEOUT_SECS
+            )
+            return
+
+        # 2) 리더 등록 — 락 획득 *전*(락 대기 중인 리더에도 합류가 가능해야 한다).
+        loop = asyncio.get_running_loop()
+        fut = loop.create_future()
+        self._inflight = fut
+        self._inflight_token_snapshot = self.access_token
+        try:
+            async with _get_global_issue_lock():
+                elapsed = time.monotonic() - _LAST_ISSUE_AT
+                if _LAST_ISSUE_AT > 0 and elapsed < _ISSUE_GAP_SECS:
+                    wait_secs = _ISSUE_GAP_SECS - elapsed
+                    logger.info(
+                        "[token] 분당 한도 대기: label=%s wait=%.1fs",
+                        self._label or "main", wait_secs,
+                    )
+                    await asyncio.sleep(wait_secs)
+
+                url = f"{self.base_url}/oauth2/tokenP"
+                body = {
+                    "grant_type": "client_credentials",
+                    "appkey": self.app_key,
+                    "appsecret": self.app_secret,
+                }
+                async with httpx.AsyncClient() as client:
+                    resp = await client.post(url, json=body, timeout=10)
+                    resp.raise_for_status()
+                    data = resp.json()
+
+                self.access_token = data["access_token"]
+                self.token_expired = datetime.strptime(
+                    data["access_token_token_expired"], "%Y-%m-%d %H:%M:%S"
                 )
-                await asyncio.sleep(wait_secs)
-
-            url = f"{self.base_url}/oauth2/tokenP"
-            body = {
-                "grant_type": "client_credentials",
-                "appkey": self.app_key,
-                "appsecret": self.app_secret,
-            }
-            async with httpx.AsyncClient() as client:
-                resp = await client.post(url, json=body, timeout=10)
-                resp.raise_for_status()
-                data = resp.json()
-
-            self.access_token = data["access_token"]
-            self.token_expired = datetime.strptime(
-                data["access_token_token_expired"], "%Y-%m-%d %H:%M:%S"
-            )
-            self._save_cache()
-            _LAST_ISSUE_AT = time.monotonic()
-            logger.info(
-                "토큰 발급 완료(label=%s), 만료: %s", self._label or "main", self.token_expired
-            )
+                self._save_cache()
+                _LAST_ISSUE_AT = time.monotonic()
+                self.issue_history.append(time.monotonic())
+                logger.info(
+                    "토큰 발급 완료(label=%s), 만료: %s",
+                    self._label or "main", self.token_expired,
+                )
+            fut.set_result(None)
+        except asyncio.CancelledError:
+            if not fut.done():
+                fut.set_exception(RuntimeError("token issue aborted: leader cancelled"))
+            raise
+        except BaseException as exc:
+            if not fut.done():
+                fut.set_exception(exc)
+            raise
+        finally:
+            if self._inflight is fut:
+                self._inflight = None
 
     async def revoke(self) -> None:
         """POST /oauth2/revokeP 로 접근토큰을 폐기한다."""

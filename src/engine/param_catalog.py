@@ -1273,7 +1273,7 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         key="llm_gate_mode", label_ko="LLM 매수 게이트 모드", group="observe_gate",
         type="enum", min=None, max=None, step=None, unit="",
         editable=True, risk="identity", auto_tunable=False, deprecated=False,
-        applies_to=_VBLTV, range_src="enum",
+        applies_to=_ALL7, range_src="enum",
         choices=(
             Choice("shadow", "관측 전용 (매수를 막지 않음)"),
             Choice("off", "끄기 (호출 안 함)"),
@@ -1286,7 +1286,7 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         key="llm_gate_min_score", label_ko="LLM 게이트 통과 점수", group="observe_gate",
         type="int", min=1, max=100, step=1, unit="점",
         editable=True, risk="identity", auto_tunable=False, deprecated=False,
-        applies_to=_VBLTV, range_src="clamp",
+        applies_to=_ALL7, range_src="clamp",
         help="이 점수 이상이면 통과로 기록한다(shadow 모드에서는 기록만)."
              " 범위 밖이면 읽는 쪽이 기본값 70 으로 되돌린다.",
     ),
@@ -1294,7 +1294,7 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         key="llm_gate_daily_call_cap", label_ko="LLM 일일 호출 상한", group="observe_gate",
         type="int", min=0, max=200, step=1, unit="회",
         editable=True, risk="identity", auto_tunable=False, deprecated=False,
-        applies_to=_VBLTV, range_src="clamp",
+        applies_to=_ALL7, range_src="clamp",
         help="하루 호출 횟수 상한. **0 = 호출 안 함**이고, 키가 없어도 0 이다"
              "(비용이 드는 기능의 기본은 '안 함').",
     ),
@@ -1302,7 +1302,7 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         key="llm_gate_timeout_secs", label_ko="LLM 게이트 타임아웃", group="observe_gate",
         type="int", min=1, max=60, step=1, unit="초",
         editable=True, risk="identity", auto_tunable=False, deprecated=False,
-        applies_to=_VBLTV, range_src="clamp",
+        applies_to=_ALL7, range_src="clamp",
         help="응답을 기다리는 최대 초. 초과하면 게이트를 건너뛴다(매수를 막지 않는다).",
     ),
 
