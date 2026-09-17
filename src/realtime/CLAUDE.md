@@ -254,8 +254,13 @@ enum 에 태우지 않았다 — 사고 중에 쓸 카드가 `off` 하나뿐이�
 `GET /api/realtime/tick-channel-mode` 는 그날 `switch_windows`(창 하나, `pre_to_krx`)를 함께
 돌려준다 — 운영자가 화면 없이 "오늘 전환이 몇 시로 잡혔는가" 를 확인하는 유일한 채널이다.
 
-**판독 기준** — `[tick_channel_config]` 는 `clock_krx=`/`clock_nxt=`/`cohort_no_feed=` 3라벨이 붙고
-`resolved_unified=0` 이 정상 · `[tick_coverage] stale` 은 분모 불변 + `fresh` 증가가 성공 서명 ·
+**판독 기준** — `[tick_channel_config]` 의 성공 서명은 **`clock_krx + clock_nxt == provenance_ok`**
+(시각축이 전 종목을 전용 채널로 판정) 와 **`applied=H0UNCNT0` 0건**이다. ⚠️ `resolved_*` 는
+**속성축(2단계) 집계**라 `resolved_unified` 는 `nxt_true` 코호트 크기이며 **0 이 되지 않는다**
+(속성축은 `nxt_false` 만 확정하고 `nxt_true` 에는 현행 유지를 돌려준다). 실측 2026-09-17 07:59 =
+`clock_krx=69 clock_nxt=77 resolved_unified=77 provenance_ok=146` · 09:30 = `clock_krx=149 clock_nxt=0
+resolved_unified=80 provenance_ok=149`. `scanner.py::emit_tick_channel_config` 의 주석도 같은 오류를
+갖고 있다(8영역이라 별건) · `[tick_coverage] stale` 은 분모 불변 + `fresh` 증가가 성공 서명 ·
 `[no_feed_held]` 와 `[stale_watcher_summary] no_feed_skipped=` 는 **0 에 수렴** ·
 `[tick_channel_dual_detected]` 0 이 정상.
 

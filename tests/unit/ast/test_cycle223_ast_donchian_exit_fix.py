@@ -480,7 +480,7 @@ _PREEXISTING_CONTENT_SHA: dict[str, str] = {
     #    `docs/history/src-realtime-CLAUDE.history.md` 로 verbatim 이관하고 정본엔
     #    현재 계약만 남겼다. 프로덕션 코드 영향 0.
     "src/realtime/CLAUDE.md":
-        "47af70ed794968f450b930055ae567e10d7d5cb318d85861e582ec863942f794",
+        "871b5e21531e346c016ae9514b2c1c27d511097e17d9464d8701289215f52eac",
     # ✅ 2026-09-17 (cycle296) — `TokenManager.issue()` 매니저 단위 in-flight
     #    합류. 사용자 명시 8영역 승인(`src/auth/**`), 범위 = `src/auth/token.py`
     #    `issue()` + `__init__` 신규 필드뿐(`get_token`/`revoke`/`_is_valid` 무접촉).
