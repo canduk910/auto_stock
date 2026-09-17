@@ -110,7 +110,7 @@
 ### 임계
 
 - BFB 폴·플래그 = `pole_min_return=15.0` · `pole_max_red_ratio=0.45` · `flag_retracement_max=0.5`(플래그 조정폭 ≤ 폴폭 50%) · `flag_volume_ratio=0.60`(거래량 수축 안전장치 — **절대 불변**, 급락 되돌림 오판 봉쇄).
-- VCP 추세 필터 = `ema_long=120` · `ema_mid=60` · `last_pullback_max=0.12`. `effective_ema_long = min(ema_long, available_len - uptrend_days - 5)` 자동 축소 가드 + `_check_trend_filter(candles, effective_ema_long=)` 시그니처는 안전망으로 유지한다(KIS 100일 한도 안에서 50/60/120 이 안정 계산된다).
+- VCP 추세 필터 = `ema_long=120` · `ema_mid=60` · `last_pullback_max=0.12`. `effective_ema_long = min(ema_long, available_len - uptrend_days - 5)` 자동 축소 가드 + `_check_trend_filter(candles, effective_ema_long=)` 시그니처는 안전망으로 유지한다(prepare 가 읽는 100일 안에서 50/60/120 이 안정 계산된다). ⚠️ **100일은 KIS 한도가 아니다** — 읽기를 묶는 것은 `db/stock_master_daily.get_recent_daily` 의 `min(days, 100)` 클램프와 `vcp_breakout.py` 의 `KIS_DAILY_CANDLES_MAX = 100` 두 상수다(KIS `FHKST03010100` 의 100일은 **호출당** 한도이고 총량은 날짜 윈도우 분할로 늘린다 — `src/api/CLAUDE.md`). 일봉은 cycle299 부터 225영업일을 적재한다(그 깊이에서 `effective_ema_long` 이 정확히 200 이 된다 — cap 두 겹을 여는 것은 별도 사이클이다).
 - VCP pullback 검출(`_check_pullback_sequence`) = **ATR threshold ZigZag**(`min_swing_atr_mult=0.5` — 베이스 ATR 의 0.5배 미만 변동은 무시) + state machine(`undefined`/`up`/`down`)으로 마지막 미완성 swing 을 포함한다. `False` 를 반환할 때도 `last_pullback_pct` 를 **항상 기록**한다(funnel 사유 정확성 — 미설정이면 화면에 "0.0%" 로 나와 운영자가 오인한다).
 - **DB `strategy_config.params` 값이 코드 기본값보다 우선**한다 — 코드 기본값을 바꿀 때 DB 도 함께 UPDATE 한다.
 

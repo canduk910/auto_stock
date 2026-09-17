@@ -8,9 +8,9 @@ overshoot → 실제 fetch 범위가 목표보다 큼 (total_days=220 시 3번�
 시정 (P2): `start_offset = min((i + 1) * window, total_days)` 로 목표 초과 fetch 차단.
 
 Group A 회귀 가드 (condition.py):
-- A-1 (핵심): total_days=120 — 마지막 윈도우 start_offset ≤ 120 (≈178cal 도달, 290cal 아님)
-- A-2 (regression): total_days=220 — 3 윈도우 유지 + 마지막 start_offset=220 (318cal 도달, 430 아님)
-- A-3 (불변식): total_days=100 — 1 윈도우 start_offset=min(100,100)=100 불변 (150cal)
+- A-1 (핵심): total_days=120 — 마지막 윈도우 start_offset ≤ 120 (190cal 도달, 310cal 아님)
+- A-2 (regression): total_days=220 — 3 윈도우 유지 + 마지막 start_offset=220 (340cal 도달, 무클램프 아님)
+- A-3 (불변식): total_days=100 — 1 윈도우 start_offset=min(100,100)=100 불변 (160cal)
 - A-4 (AST/불변): 함수 본체에 `min(..., total_days)` 클램프 존재 (목표 초과 fetch 재도입 영구 차단)
 
 Red 유효성 (production 미변경 = clamp 부재):
@@ -45,11 +45,28 @@ def _parse(yyyymmdd: str):
 
 
 def _clamp_boundary_cal(total_days: int) -> int:
-    """source win_start 오프셋 상한 (달력일) = int(total_days*7/5)+10.
+    """source win_start 오프셋 상한 (달력일).
 
     클램프 적용 시 마지막 윈도우 start_offset == total_days → start_cal 이 이 값에 정확 수렴.
+
+    ⚠️ **cycle299 의미 전환** — 종래에는 `int(total_days*7/5)+10` 을 여기에 복제했다.
+    cycle299 가 깊이 환산에 휴일 보정(비례)을 더하면서 그 리터럴이 프로덕션과 갈라졌다.
+    이 가드가 재는 것은 **계수가 얼마인가**가 아니라 **마지막 윈도우가 `total_days` 를
+    넘지 않는가**(= 클램프 존재)이므로, 계수는 프로덕션 상수에서 그대로 가져오고
+    단언은 그대로 둔다. 클램프를 지우면 start_offset 이 `(i+1)*window` 로 커져 이 값과
+    어긋나므로 여전히 붉어진다(예: total_days=120 → 클램프 190cal vs 무클램프 310cal).
     """
-    return int(total_days * 7 / 5) + 10
+    from src.api.condition import (
+        _DAILY_BACKFILL_BASE_MARGIN_CAL,
+        _DAILY_BACKFILL_HOLIDAY_MARGIN_RATIO,
+        _WEEKEND_CAL_PER_TRADING_DAY,
+    )
+
+    return (
+        int(total_days * _WEEKEND_CAL_PER_TRADING_DAY)
+        + int(total_days * _DAILY_BACKFILL_HOLIDAY_MARGIN_RATIO)
+        + _DAILY_BACKFILL_BASE_MARGIN_CAL
+    )
 
 
 def _has_min_clamp_with_total_days(func_node: ast.AST) -> bool:
@@ -88,10 +105,10 @@ async def _capture_windows(monkeypatch, total_days: int, window: int = 100):
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_a1_total_120_last_window_clamped(monkeypatch):
-    """total_days=120 — 모든 윈도우 start_offset ≤ 120 (마지막 ≈178cal, 290cal 아님).
+    """total_days=120 — 모든 윈도우 start_offset ≤ 120 (마지막 190cal, 310cal 아님).
 
-    Red (clamp 부재): 윈도우 1 start_offset=200 → 290cal > 178 경계 → FAIL.
-    Green (clamp): 윈도우 1 start_offset=min(200,120)=120 → 178cal = 경계 → PASS.
+    Red (clamp 부재): 윈도우 1 start_offset=200 → 310cal > 190 경계 → FAIL.
+    Green (clamp): 윈도우 1 start_offset=min(200,120)=120 → 190cal = 경계 → PASS.
     """
     calls = await _capture_windows(monkeypatch, total_days=120, window=100)
 
@@ -100,7 +117,7 @@ async def test_a1_total_120_last_window_clamped(monkeypatch):
 
     # 윈도우 0 end_offset=0 → win_end == today (함수 내부 today 정확 복원, 시계 의존 0)
     today = _parse(calls[0][1])
-    boundary_cal = _clamp_boundary_cal(120)  # = 178
+    boundary_cal = _clamp_boundary_cal(120)  # = 190
 
     for start, _end in calls:
         offset = (today - _parse(start)).days
@@ -113,7 +130,7 @@ async def test_a1_total_120_last_window_clamped(monkeypatch):
     last_offset = (today - _parse(calls[-1][0])).days
     assert last_offset == boundary_cal, (
         f"마지막 윈도우 start_offset=min(200,120)=120 → {boundary_cal}cal 도달 의무 "
-        f"(clamp 부재 시 200 → 290cal): 실제 {last_offset}cal"
+        f"(clamp 부재 시 200 → 310cal): 실제 {last_offset}cal"
     )
 
 
@@ -122,17 +139,17 @@ async def test_a1_total_120_last_window_clamped(monkeypatch):
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_a2_total_220_three_windows_clamped(monkeypatch):
-    """total_days=220 — 3 윈도우 유지, 마지막 start_offset=220 (318cal, 430 아님).
+    """total_days=220 — 3 윈도우 유지, 마지막 start_offset=220 (340cal, 무클램프 아님).
 
-    Red (clamp 부재): 윈도우 2 start_offset=300 → 430cal > 318 경계 → FAIL.
-    Green (clamp): 윈도우 2 start_offset=min(300,220)=220 → 318cal = 경계 → PASS.
+    Red (clamp 부재): 윈도우 2 start_offset=300 → 경계 초과 → FAIL.
+    Green (clamp): 윈도우 2 start_offset=min(300,220)=220 → 340cal = 경계 → PASS.
     """
     calls = await _capture_windows(monkeypatch, total_days=220, window=100)
 
     assert len(calls) == 3, "ceil(220/100) = 3 윈도우 유지 (사이클 172 회귀 보존)"
 
     today = _parse(calls[0][1])
-    boundary_cal = _clamp_boundary_cal(220)  # = 318
+    boundary_cal = _clamp_boundary_cal(220)  # = 340
 
     for start, _end in calls:
         offset = (today - _parse(start)).days
@@ -143,7 +160,7 @@ async def test_a2_total_220_three_windows_clamped(monkeypatch):
     last_offset = (today - _parse(calls[-1][0])).days
     assert last_offset == boundary_cal, (
         f"마지막 윈도우 start_offset=min(300,220)=220 → {boundary_cal}cal 도달 의무 "
-        f"(clamp 부재 시 300 → 430cal): 실제 {last_offset}cal"
+        f"(clamp 부재 시 300): 실제 {last_offset}cal"
     )
 
 
@@ -152,7 +169,7 @@ async def test_a2_total_220_three_windows_clamped(monkeypatch):
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_a3_total_100_single_window_invariant(monkeypatch):
-    """total_days=100 — 단일 윈도우 start_offset=min(100,100)=100 불변 (150cal).
+    """total_days=100 — 단일 윈도우 start_offset=min(100,100)=100 불변 (160cal).
 
     클램프 no-op 불변식 — Red/Green 모두 PASS ((0+1)*100 == 100 == min(100,100)).
     """
@@ -161,7 +178,7 @@ async def test_a3_total_100_single_window_invariant(monkeypatch):
     assert len(calls) == 1, "ceil(100/100) = 1 윈도우"
 
     today = _parse(calls[0][1])
-    boundary_cal = _clamp_boundary_cal(100)  # = 150
+    boundary_cal = _clamp_boundary_cal(100)  # = 160
 
     last_offset = (today - _parse(calls[0][0])).days
     assert last_offset == boundary_cal, (

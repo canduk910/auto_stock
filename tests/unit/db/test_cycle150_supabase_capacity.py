@@ -150,16 +150,23 @@ class TestG150DailyPurgeFunction:
 class TestG150DailyRetentionDays:
     """G-150-DAILY-2 (HIGH): retention cutoff 상수 가드.
 
-    사이클 172 (2026-06-22) 의미 전환 (사이클 66 K-2 패턴) — 150 → 230.
-    사유: 사이클 173 prepare DB일봉 전환 시 VCP 220일 lookback DB 충족 보장.
-    150 (VCP T-120일 + 30일 마진) → 230 (VCP 220일 + 10일 마진) 확장.
+    무엇을 재던 테스트인가: retention cutoff 가 **상수 하나**로 표현되고 그 값이 정본과
+    일치한다는 것 (사이클 150 용량초과 시정 이래 purge 로직은 불변, 상수만 움직인다).
+
+    의미 전환 계보 (사이클 66 K-2 패턴):
+      150 (VCP T-120일 + 30일 마진)
+       → 230 (사이클 172 — VCP 220일 + 10일 마진)
+       → 390 (cycle299 — VCP backfill target 225 영업일 + 36 영업일 마진)
+    cycle299 로 옮기는 이유: retention 230cal 는 약 154 영업일만 보유해 target 225 를
+    담지 못한다(= 영구 churn). 390cal ≈ 261 영업일로 36 영업일 마진을 확보한다.
+    정본 가드 = `tests/unit/db/test_cycle299_retention_expansion.py::G-299-1`.
     purge_old_rows 로직 불변 (상수만 변경, "N일 지난 것만 삭제").
     """
 
     def test_g150_daily_2_retention_days_constant(self) -> None:
         from src.db.stock_master_daily import DAILY_RETENTION_DAYS
-        assert DAILY_RETENTION_DAYS == 230, \
-            "DAILY_RETENTION_DAYS = 230 (사이클 172 — VCP 220일 + 10일 안전 마진)"
+        assert DAILY_RETENTION_DAYS == 390, \
+            "DAILY_RETENTION_DAYS = 390 (cycle299 — VCP 225 영업일 + 36 영업일 마진)"
 
 
 class TestG150DailyProtectedTickers:

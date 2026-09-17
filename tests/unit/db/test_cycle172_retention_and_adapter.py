@@ -1,10 +1,11 @@
-"""사이클 172 (2026-06-22) — DAILY_RETENTION_DAYS 230 + get_recent_daily_normalized 어댑터.
+"""사이클 172 (2026-06-22) — DAILY_RETENTION_DAYS + get_recent_daily_normalized 어댑터.
 
-retention 150 → 230 (220 + 10 마진, VCP 220일 보존) + DB raw JSONB 어댑터.
+retention 확장 + DB raw JSONB 어댑터. 상수 값은 cycle299 에서 390 으로 옮겼다
+(의미 전환 근거는 RET-1 docstring).
 
 회귀 가드 매트릭스:
-- RET-1: DAILY_RETENTION_DAYS == 230 상수
-- RET-2: purge_old_rows 로직 불변 (cutoff = today - 230, 상수만 변경)
+- RET-1: DAILY_RETENTION_DAYS == 390 상수 (사이클 172 시점 230 → cycle299 의미 전환)
+- RET-2: purge_old_rows 로직 불변 (cutoff = today - retention, 상수만 변경)
 - ADAPT-1: get_recent_daily_normalized DB 충분 → raw JSONB 반환 (KIS 키 stck_clpr 보존)
 - ADAPT-2: DB miss (< min_required) → KIS fetch_daily_candles 폴백
 - ADAPT-3: min_required=None 기본값 (위임 정합)
@@ -29,14 +30,27 @@ pytestmark = pytest.mark.unit
 
 
 # ---------------------------------------------------------------------------
-# RET-1 — DAILY_RETENTION_DAYS == 230
+# RET-1 — DAILY_RETENTION_DAYS == 390 (사이클 172 시점 230 → cycle299 의미 전환)
 # ---------------------------------------------------------------------------
-def test_ret1_retention_days_230():
-    """DAILY_RETENTION_DAYS = 230 (220 + 10 마진, VCP 220일 보존)."""
+def test_ret1_retention_days():
+    """DAILY_RETENTION_DAYS = 390 달력일 (VCP backfill target 225 영업일 보존).
+
+    무엇을 재던 테스트인가: 사이클 172 의 "VCP 가 필요로 하는 lookback 을 retention 이
+    실제로 담는다" 는 부등식. 사이클 172 는 그것을 `220 + 10 달력일 = 230` 으로 적었는데
+    **220 을 영업일로, 10 을 달력일로 섞어 센 오독**이었고(230 달력일의 실보유는 154
+    영업일), 사이클 196 이 target 을 120 으로 낮춰 우회했다.
+
+    왜 390 으로 옮기는가: cycle299 가 target 을 **실효 장기선이 정확히 200 이 되는**
+    225 영업일로 잡으면서 retention 도 같은 단위로 다시 계산했다 — 225 영업일 ×
+    (230/154) ≈ 336 달력일에 사이클 196 의 34 영업일 이상 마진을 얹어 390.
+    실보유 ≈261 영업일이라 마진은 36 이다.
+    두 상수의 커플링 부등식 정본 =
+    `tests/unit/db/test_cycle299_retention_expansion.py::G-299-3a/3b/3c`.
+    """
     from src.db.stock_master_daily import DAILY_RETENTION_DAYS
 
-    assert DAILY_RETENTION_DAYS == 230, \
-        "DAILY_RETENTION_DAYS = 230 (VCP 220일 + 10일 안전 마진)"
+    assert DAILY_RETENTION_DAYS == 390, \
+        "DAILY_RETENTION_DAYS = 390 달력일 (VCP 225 영업일 + 36 영업일 마진)"
 
 
 # ---------------------------------------------------------------------------

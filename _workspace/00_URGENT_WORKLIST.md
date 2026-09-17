@@ -15,13 +15,15 @@
 
 ## 오늘 판독
 
-| 시각 | 무엇 | 성공 서명 |
+| 시각 | 무엇 | 실측 |
 |---|---|---|
-| 07:57~08:03 | `tick_channel_resolver_mode` 가 부팅 후 `enforce` 로 | 감시 창 A `~/watch/d1_20260917.log` |
-| 15:25~16:06 | 🔴 **cycle295 컷 첫 실측** | `[market_rest_window]` 1행 ∧ 주문 0 ∧ `[tick_channel_switch]` 0 · `manual-sell` 면제 |
-| 16:00~16:17 | **push·배포 완료** — 8커밋, full 모드 | 마커 `19bf744`=HEAD · 보유 11/11 복구 · 구독 148(보유 전부 포함) |
-| 18:50~20:55 | cycle296 **첫날 예외** | 발급 14건(자연 7 + 강제 7) · 요약 `window_issues_total=7` — 결함 아님. 익일부터 7 |
-| 20:30 | **주간 자문 루틴 실행**(목요일) — 이번 주부터 §9 AI 매수평가 회고 + §10 쉬운 말 검토 포함 | PR·Notion 에 회고 절 등장 · 마지막 메시지 (f)(g) |
+| 07:57~08:03 | `tick_channel_resolver_mode` 가 부팅 후 `enforce` 로 | ✅ 7/7 회차 `enforce` · `switch_windows=['pre_to_krx']` |
+| 15:25~16:06 | cycle295 컷 첫 실측 | ✅ 주문 0 · `[tick_channel_switch]` 0 · `[market_rest_blocked]` 0. **단 그 창에 청산 신호가 없어 컷은 한 번도 발동하지 않았다(N=0)** — 발동 실증은 그 시각대에 손절이 걸리는 날로 미뤄진다. `[market_rest_window]` 는 1회/일이라 60분 창 grep 으로는 안 잡힌다(감시 스크립트 한계) |
+| 16:00~16:17 | push·배포 완료 — 8커밋, full 모드 | ✅ 마커 `19bf744`=HEAD · 보유 11/11 복구 · 구독 148. **`[tick_blind_boot] downtime_secs=56` ↔ 실제 시세 공백 5분 16초** = cycle298 의 출발점 |
+| 18:50~20:51 | cycle296 **첫날 예외** | ✅ 발급 14건(자연 7 = 18:50:43~19:00:57 · 강제 7 = 20:45:00~20:51:07) · 요약 `accounts=7 issued=7 failed=0 elapsed_s=367 window_issues_total=7` · `revoked=True` 7/7 · 토큰 WARNING/ERROR 0. 주계정은 16:11 재기동 1회뿐(무접촉 계약 유지). 익일부터 7건. ⚠️ `elapsed_s` 기대치를 420~450 으로 적었던 것은 **오산** — 7계정은 gap 이 6개라 `6×61=366s` 가 정상이다 |
+| 20:00~20:32 | 저녁 블록 | ✅ 20:00 자문 7/7 전략 INSERT · 20:05 metrics `pass=1 saved=1` · 20:30 일봉 `total=965 fetched=965 upserted_rows=7867 failed=0 mode=mixed` · 20:00~21:00 ERROR/CRITICAL 0 |
+| 20:30~20:58 | **주간 자문 루틴 실행**(목요일) | ✅ PR #23 `claude/weekly-advice-2026-09-17`. 신규 2항목 모두 반영 — **§4 「AI 매수평가 회고 (이번 주 신규)」** · **쉬운 말은 별도 절이 아니라 §3 전략별 7곳에 `**쉬운 말.**` 문단으로 삽입**(계획의 §9·§10 이 §4 + §3 내재로 착지). D7 자격은 루틴이 API 를 실제로 읽은 것으로 교차 확인됨. ⚠️ **이 PR 을 그대로 머지하지 않는다** — 브랜치 기점이 cycle298 커밋(`ccbe730`) 앞이라 diff 가 `tests/unit/{ast,engine}/test_cycle298_*` 2파일을 **삭제**로 잡는다. 문서 1파일(`_workspace/domain_consult/weekly_advice_2026-09-17.md`)만 발췌한다 |
+| 21:30 | 정산·일일 로그 분석 | ⏳ 판독 시점(21:0x) 기준 미도래 |
 
 ## 🔴 재기동 시 시세 구독 공백 — 프로세스 부재 시간과 다르다 (2026-09-17 확정)
 
@@ -117,6 +119,9 @@ cycle298 이 그 첫 회차 지연을 호출부 인자 `first_delay` 로 열어,
 
 - cycle296 후속: `finally` `is fut` 가드 봉인 테스트(M16 — 실패한 옛 리더가 새 리더 등록을 지워 KIS 재호출, 프로브 실증) · `_ISSUE_JOIN_TIMEOUT_SECS` 크기 부등식 핀(M28b) · `fut.exception()` 소음 제거(선택)
 - cycle297 후속: enforce 정량 기준 숫자 `domain-consult` · N≥30 후 첫 enforce 후보 1전략
+- **cycle299 후속 ① VCP 100일 cap 두 겹 해제** — cycle299 는 데이터 계층만 열었다(일봉 225영업일 적재 — 그 깊이에서 `effective_ema_long` 이 정확히 200 이 된다). 전략이 실제로 200일 EMA 를 읽으려면 `src/db/stock_master_daily.py::get_recent_daily` 의 `max(1, min(days, 100))` 클램프와 `src/engine/strategies/vcp_breakout.py:262` 의 `KIS_DAILY_CANDLES_MAX = 100` 을 함께 열어야 한다. **매매 행위를 바꾸는 변경이라 승인 + `domain-consult` 선행.** 지금 그 둘이 있어서 cycle299 의 행위 변화가 0 이다(가드 `test_g299_7a`/`7b`). 원인 서술은 cycle299 가 이미 4곳에서 바로잡았다(`src/engine/strategies/CLAUDE.md` · `_workspace/00_leader_trading_rules.md` 3곳 · `README.md`) — 100일을 만드는 것은 KIS 가 아니라 위 두 상수다. cap 을 여는 사이클은 그 네 곳의 **결과 서술**(전략이 100일만 읽는다 · `effective_ema_long ≈ 75`)을 새 값으로 덮어쓴다
+- **cycle299 후속 ② 달력 환산 비율 — 이 사이클에서 처리 완료(후속 아님)**(사용자 "데이터 지금 바로 채울 수는 없어?", 2026-09-18). 깊이 환산에 휴일 보정을 비례로 얹어 `total_days=225` 실도달이 347cal ≈ 232 영업일이 됐다(잉여 7 = 한 밤에 채운다). 🔴 stride(7/5)는 건드리지 않았다 — 키우면 윈도우 사이에 구멍이 생긴다. 가드 `test_g299_9_one_pass_reaches_target`
+- **cycle299 후속 ③ 배포 후 D+1 실측** — 20:30 일봉 적재 뒤 ⓐ VCP 유니버스(KOSPI200∪KOSDAQ150) 종목당 `count_by_ticker` 가 100 대에서 200 대로 자라는가 ⓑ 3윈도우 backfill 이 도는 동안 일봉 task 소요 시간과 KIS 호출량 ⓒ `existing_count` 가 **첫 밤에** 225 를 넘어 다음 날부터 증분 7일로 도는가(환산 수정으로 전이 기간이 사라졌다 — 안 넘으면 환산이 되돌아간 것이다) ⓓ 수렴 후 실효 장기선이 실제로 200 으로 잡히는가(cap 을 여는 후속 ① 의 전제)
 - 문서 개편 2차(커밋 3~6): src 문서 5 · `src/realtime/CLAUDE.md`(8영역, sha 핀 4곳 lockstep) · frontend · 가드 5건 반전 + 덧칠 검사 pytest
 - dkstock.cloud 자격 회전(git 이력 잔존) — 사용자 판단
 - cycle272 REST 시가 게이트 재평가 — D+2·D+3 `[main_rest_basis_confirmed]` `delta_bp` 확인 후

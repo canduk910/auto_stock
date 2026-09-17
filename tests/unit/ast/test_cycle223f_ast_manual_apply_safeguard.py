@@ -350,8 +350,17 @@ def _content_sha(path: str) -> str:
 #    `src/engine/order_engine.py` 단독. 자매 가드 네 곳 전부 같은 값.
 # TODO(cycle286 커밋 후): 아래 항목을 **삭제**한다.
 _PREEXISTING_CONTENT_SHA: dict[str, str] = {
+    # ✅ 2026-09-17 (cycle299) 재핀 — 일봉 보유·backfill 창 확대. 사용자 명시 8영역
+    #    승인, 범위 = `src/engine/scanner.py` **단독**
+    #    (`_DAILY_LOAD_VCP_BACKFILL_DAYS` 120 → 225 상수 1줄 + 근거 주석 4줄).
+    #    나머지 7영역과 `scheduler.py` 는 diff 0 이다. 같은 사이클의 나머지
+    #    프로덕션 변경 2파일(`src/db/stock_master_daily.py` 의
+    #    `DAILY_RETENTION_DAYS` 230 → 390 · `src/api/condition.py` docstring)은
+    #    8영역 **밖**이라 이 dict 대상이 아니다.
+    #    자매 가드 **네 곳 전부** 같은 값(`test_g3_9b` 계약).
+    #    TODO(cycle299 커밋 후): 이 항목을 **삭제**한다.
     "src/engine/scanner.py":
-        "079272e7c4907c6ecc5fdf9b73de70021a9dc2435c7a568538183a7ead98804f",
+        "3b7366cc77c3f41f1e839454193f45fa405cfeab3eff59c6c446a9470dcb6c8f",
     # 등록은 승인된 사이클의 Green 이, 비우기는 병합 후속 커밋이 한다.
     # (cycle273 그룹 1·2 + cycle274 항목은 병합 뒤 2026-09-11 정리했고, 아래 1건은
     #  cycle276 이 사용자 명시 승인 하에 등록했고 cycle286 이 같은 승인 하에 재핀했다.)

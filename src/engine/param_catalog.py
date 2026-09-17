@@ -450,16 +450,19 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         editable=True, risk="high", auto_tunable=False, deprecated=False,
         applies_to=("donchian_swing",), range_src="structural",
         help="N일 신고가 돌파 판정의 N. 일봉 fetch 일수(`max(long_ma+5, donchian+5)`)도"
-             " 이 값이 정한다 — 보유 일봉이 retention 230일(≈154 영업일)뿐이라 그보다"
-             " 크면 후보가 조용히 0 이 된다(상한 150 의 근거). 사이클 212 에서"
-             " '진입 정체성'으로 PARAM_RANGES 에서 제외됐다.",
+             " 이 값이 정한다 — 🔴 상한의 진짜 근거는 보유 기간이 아니라 **읽기 클램프**다."
+             " `db/stock_master_daily.get_recent_daily` 가 `max(1, min(days, 100))` 로 자르므로"
+             " 95 를 넘으면 더 요청해도 100봉만 온다. 보유 자체는 retention 390일"
+             " (≈261 영업일, cycle299)이라 넉넉하니 '보관 기간이 늘었으니 상한을 올려도 된다'는"
+             " 판단은 틀린다. 사이클 212 에서 '진입 정체성'으로 PARAM_RANGES 에서 제외됐다.",
     ),
     _s(
         key="volume_period", label_ko="거래량 평균 기간", group="entry",
         type="int", min=1, max=150, step=1, unit="일",
         editable=True, risk="normal", auto_tunable=False, deprecated=False,
         applies_to=("donchian_swing",), range_src="structural",
-        help="돌파일 거래량을 비교할 이동평균 기간. 상한은 일봉 retention(≈154 영업일).",
+        help="돌파일 거래량을 비교할 이동평균 기간. 🔴 상한을 정하는 것은 보유 기간이 아니라"
+             " `get_recent_daily` 의 100행 읽기 클램프다(보유는 retention 390일 ≈261 영업일)."
     ),
     _s(
         key="volume_multiplier", label_ko="거래량 증가 배수", group="entry",

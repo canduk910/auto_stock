@@ -652,14 +652,14 @@ donchian_swing 의 정공법(신고가 직진 추격)을 보강하는 추세추�
 - 최대 4000종목 (`max_scan_stocks`, 200→확대 — 전체 filtered 커버, `refreshed_at DESC` 임의 절단 소멸)
 
 ### 데이터 준비 (`_boot()` prepare)
-- 종목별 일봉 **100일** — `get_recent_daily_normalized(ticker, days=fetch_days, min_required=100)` (DB 우선 어댑터, 사이클 173). `fetch_days = min(ema_long + base_max + 10, 100)` — KIS 단일 호출 100일 한도 cap 이라 원설계 220일은 **미실현**이고 `effective_ema_long ≈ 75` 가 유지된다(사이클 196). `fetch_daily_candles` 는 재시작 복구 경로 전용
+- 종목별 일봉 **100일** — `get_recent_daily_normalized(ticker, days=fetch_days, min_required=100)` (DB 우선 어댑터, 사이클 173). `fetch_days = min(ema_long + base_max + 10, 100)` — 읽기를 100일로 묶는 것은 `vcp_breakout.py` 의 `KIS_DAILY_CANDLES_MAX = 100` 과 `db/stock_master_daily.get_recent_daily` 의 `min(days, 100)` 클램프 **두 상수**이지 KIS 한도가 아니다(KIS 의 100일은 **호출당** 한도다). 그래서 원설계 220일은 **미실현**이고 `effective_ema_long ≈ 75` 가 유지된다. 일봉 적재 깊이 자체는 cycle299 가 225영업일로 열어 두었다 — 그 깊이에서 `effective_ema_long` 이 정확히 200 이 된다. `fetch_daily_candles` 는 재시작 복구 경로 전용
 - `candles[0]==오늘`이면 `candles[1]`을 전일로 사용 (부분봉 가드)
 
 ### 추세 필터 (Stage 2 confirmation, prepare 시 단계별 검사)
 1. **종가 > 단기 EMA > 중기 EMA > 장기 EMA** (`ema_short=50`, `ema_mid=60`, `ema_long=120`)
 2. **장기 EMA 우상향 1개월 이상** — 현재 장기 EMA > 1개월 전(20영업일 전) 장기 EMA (`long_ema_uptrend_days=20`)
 3. 통과 종목만 다음 단계 검사
-4. **EMA 기본값은 KIS 단일 호출 100일 한도 안에서 계산 가능한 값이어야 한다** — `ema_long=120` / `ema_mid=60`. 미네르비니 원전은 200EMA 지만 100일 fetch 로는 계산할 수 없고, `effective_ema_long = min(ema_long, available_len - 25)` 자동 축소가 형식만 남은 200 을 ~75 로 만들어 정배열 요구가 구조적으로 불가능해진다. 자동 축소 가드는 fetch 부족 시 안전망으로 유지한다.
+4. **EMA 기본값은 prepare 가 실제로 읽는 100일 안에서 계산 가능한 값이어야 한다** — `ema_long=120` / `ema_mid=60`. 그 100일은 KIS 한도가 아니라 `KIS_DAILY_CANDLES_MAX = 100` 과 `get_recent_daily` 의 `min(days, 100)` 두 상수가 만든다(둘을 여는 것은 매매 행위를 바꾸므로 승인 + `domain-consult` 선행 대상이다). 미네르비니 원전은 200EMA 지만 100일 fetch 로는 계산할 수 없고, `effective_ema_long = min(ema_long, available_len - 25)` 자동 축소가 형식만 남은 200 을 ~75 로 만들어 정배열 요구가 구조적으로 불가능해진다. 자동 축소 가드는 fetch 부족 시 안전망으로 유지한다.
 
 ### 베이스 정의 (`base_lookback_weeks=5~15` → 일봉 25~75영업일)
 1. 베이스 시작·종료 자동 검출: `base_max_days`(75)부터 `base_min_days`(25)까지 길이를 줄여 가며 첫 매칭(=가장 긴) 구간을 베이스로 인식. 판정식은 2번과 동일한 **고가/저가 기준** `(max(high) - min(low)) / max(high) ≤ base_depth_pct(0.30)` 하나뿐이다 — `base_depth_max=0.25` 같은 별도 상수·종가 기준 산식은 존재하지 않는다
@@ -722,7 +722,7 @@ donchian_swing 의 정공법(신고가 직진 추격)을 보강하는 추세추�
 DEFAULT_PARAMS = {
     "tradable_boards": ["main"],
     "exchange": "KRX",
-    # 추세 필터 — KIS 100일 한도 안에서 계산 가능한 값
+    # 추세 필터 — prepare 가 읽는 100일 안에서 계산 가능한 값
     "ema_short": 50,
     "ema_mid": 60,
     "ema_long": 120,

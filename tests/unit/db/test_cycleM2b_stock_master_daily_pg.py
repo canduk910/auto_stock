@@ -321,10 +321,18 @@ async def test_purge_not_via_with_retry():
 
 @pytest.mark.asyncio
 async def test_purge_retention_days_constant_unchanged():
-    """DAILY_RETENTION_DAYS=230 불변 (사이클 172/196, purge 로직 상수만)."""
+    """DAILY_RETENTION_DAYS=390 불변 (purge 로직은 상수만 바뀐다 — asyncpg 전환 무관).
+
+    무엇을 재던 테스트인가: M2b asyncpg 전환이 purge **로직**만 바꾸고 retention **상수**는
+    건드리지 않았다는 증거. 재는 대상은 "값이 얼마냐"가 아니라 "전환이 값을 흔들지
+    않았느냐"이므로, 정본 값이 바뀌면 여기 값도 따라 옮긴다.
+
+    왜 390 으로 옮기는가: cycle299 가 230 → 390 (실효 장기선 200 = 보유 225 영업일).
+    정본 가드는 `tests/unit/db/test_cycle299_retention_expansion.py::G-299-1`.
+    """
     from src.db import stock_master_daily as smd
 
-    assert smd.DAILY_RETENTION_DAYS == 230, "retention 230 불변 (전환 무관)."
+    assert smd.DAILY_RETENTION_DAYS == 390, "retention 390 불변 (asyncpg 전환 무관)."
 
 
 # ===========================================================================

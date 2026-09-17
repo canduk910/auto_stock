@@ -696,18 +696,20 @@ async def get_recent_daily_normalized(
 
 
 # ---------------------------------------------------------------------------
-# 사이클 150 — T-150일 retention (SUPABASE 용량초과 시정)
-# 사이클 172/196 — 150 → 230 (retention 230달력일 ≈ 154영업일, 상수만 변경)
+# 일봉 retention — 오래된 행을 날짜 단위로 잘라낸다.
 # ---------------------------------------------------------------------------
 
 import time as _time  # 사이클 150 — elapsed_ms 측정
 
 
-# 사이클 172/196 — 150 → 230 (retention 230달력일 ≈ 154영업일 보유).
-# VCP backfill target 120 (사이클 196) · prepare cap 100 — 220 미사용(EMA 원설계 미실현).
-# purge_old_rows 로직 불변 (상수만, "230일 지난 것만 삭제").
-# 사이클 150 영역 (사이클 48 VCP EMA effective_long T-120일 + 30일 마진) → 사이클 172 확장.
-DAILY_RETENTION_DAYS = 230
+# 사이클 299 — 230 → 390 (retention 390달력일 ≈ 261영업일 보유,
+# 환산 앵커 = 사이클196 실측 230cal ⇄ 154영업일).
+# VCP backfill target 225 (사이클 299) · prepare 실사용은 여전히 100일.
+# 🔴 target 과 이 값은 함께 움직인다 — target > 보유 영업일이면 매일 밤
+# 전량 재backfill churn(사이클 196 이 시정한 결함). 회귀 가드 =
+# tests/unit/db/test_cycle299_retention_expansion.py
+# purge_old_rows 로직 불변 (상수만, "390일 지난 것만 삭제").
+DAILY_RETENTION_DAYS = 390
 
 # 사이클 192 (2026-07-04) — 날짜 슬라이스 루프 런어웨이 가드.
 # 잔여 backlog 는 다음 실행이 드레인 (일 1회 16:15 KST task).
@@ -719,9 +721,10 @@ async def purge_old_rows(
     *,
     protected_tickers: set[str] | None = None,
 ) -> dict[str, int]:
-    """T-230일 retention. cutoff_date 이전 row DELETE.
+    """T-390일 retention. cutoff_date 이전 row DELETE.
 
-    사용자 결정 Q3=C — VCP T-120일 + 30일 안전 마진 영구 영속.
+    보유 기간의 근거는 `DAILY_RETENTION_DAYS` 정의부 주석이다 — VCP backfill
+    target(225 영업일) 위로 마진을 남기는 값이고, 그 둘은 함께 움직인다.
 
     사이클 192 (2026-07-04) — PostgREST returning=representation 응답 비대로
     매 실행 실패 (6/16 도입 이래 515건 누적, 47,924행 × raw JSONB 응답 시도).

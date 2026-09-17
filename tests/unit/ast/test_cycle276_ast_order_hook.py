@@ -339,8 +339,12 @@ _BASE_SHA = {
         "e8614235cc0bea638f8c349b2f6910c94f5f9a5b849f5d65bef0583f959d81c9",
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
+    # 🔁 cycle299(2026-09-17) 재핀 — 사용자 승인 일봉 backfill 창 확대
+    #    (`_DAILY_LOAD_VCP_BACKFILL_DAYS` 120 → 225 상수 1줄 + 근거 주석 4줄).
+    #    값만 옮긴다 — 단언은 그대로다. 구 값은 cycle283 기준선(079272e7…)이고, 사이클 안에서 목표를 220 → 225 로
+    #    다시 올리며 한 번 더 옮겼다.
     "src/engine/scanner.py":
-        "079272e7c4907c6ecc5fdf9b73de70021a9dc2435c7a568538183a7ead98804f",
+        "3b7366cc77c3f41f1e839454193f45fa405cfeab3eff59c6c446a9470dcb6c8f",
     "src/engine/strategy_registry.py":
         "d794696e54ffdc36efa6df917879d780e86bc1f373bb3b5d8dcbc0beac8cef8b",
     "src/api/order.py":
@@ -922,7 +926,10 @@ def test_c6_4b_cycle223_sibling_content_pin_matches_current_source() -> None:
 #: `_APPROVED_CONTENT_SHA`(= `test_cycle222a3_ast_followup_fixes.py`)에 등록돼도 좋은
 #: 8영역 파일 — **사용자 승인을 받은 사이클만** 여기 한 줄을 더한다.
 #:   · `order_engine.py` = cycle276(AI 매수평가 주문 발화 시점 이동) → cycle287 재핀
-#:   · `scanner.py`      = cycle283(오늘봉 커트오프 15:40 → 20:00)
+#:   · `scanner.py`      = cycle283(오늘봉 커트오프 15:40 → 20:00) → **cycle299 재핀**
+#:     (일봉 backfill 창 `_DAILY_LOAD_VCP_BACKFILL_DAYS` 120 → 220, 사용자 명시
+#:     8영역 승인 2026-09-17). 등록 **집합은 그대로**이고 그 파일의 sha 만 옮겼다 —
+#:     승인 목록이 늘어난 것이 아니므로 이 집합에 새 줄이 생기지 않는다.
 #:   · `api/order.py`    = cycle287(시각이 거래소·호가유형을 정한다, docstring 만)
 #:   · `websocket.py` / `websocket_pool.py` = cycle293(시세 채널 리졸버 2단계 —
 #:     등가 비교 → 집합 멤버십 + 병행 dict `_ticker_to_tr_id`, 사용자 승인 2026-09-14)
@@ -950,8 +957,17 @@ _APPROVED_EIGHT_AREA_PINS = {
 }
 
 
-def test_c6_4c_cycle222a3_approves_only_order_engine() -> None:
+def test_c6_4c_cycle222a3_approvals_match_the_explicit_list() -> None:
     """C14 (HIGH) — 8영역 diff 가드의 승인 등록이 **명시 목록과 정확히 일치**한다.
+
+    ⚠️ 구 이름 `test_c6_4c_cycle222a3_approves_only_order_engine`
+    (2026-09-17 cycle299 에서 개명). 그 이름은 cycle283 이 기대 집합을
+    `_APPROVED_EIGHT_AREA_PINS` 로 올린 순간부터 사실과 어긋나 있었다 — 집합은
+    이미 9항목이고 `order_engine.py` 는 그중 하나다. 이름이 단언보다 좁게
+    읽히면 다음 사람이 "승인이 하나뿐이어야 한다" 로 오독해 정당한 등록을
+    되돌린다(cycle263 계열 오도). 단언 자체는 한 글자도 약해지지 않았다.
+    2026-09-14 실측 로그(`_workspace/00_URGENT_WORKLIST.md`)가 구 이름으로
+    이 테스트를 부른다.
 
     승인 sha 핀은 "이 사이클이 이 파일을 바꾼다" 는 명시 선언이자 자기소멸 기전이다
     (내용이 1 byte 라도 더 바뀌면 FAIL, 커밋되면 diff 에서 사라져 죽은 값이 된다).

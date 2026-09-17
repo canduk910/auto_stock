@@ -266,7 +266,7 @@ list_paged_by_filter(*, market=None, min_market_cap=0, min_trade_amount=0,
 - CRUD:
   - `upsert_daily(ticker, bas_dd, ohlcv)` — KIS row 단건 정규화 후 upsert
   - `upsert_batch(ticker, candles) -> int` — `_BATCH_SIZE = 100` 건 chunk 배치 upsert
-  - `get_recent_daily(ticker, days=20)` — 최근 N일(DESC). donchian/VCP 입력
+  - `get_recent_daily(ticker, days=20)` — 최근 N일(DESC). donchian/VCP 입력. 🔴 **`days` 를 `max(1, min(days, 100))` 로 하드 클램프**한다 — 행을 돌려주는 읽기 4함수(`get_donchian_high`·`get_atr`·`get_recent_daily_with_fallback`·`get_recent_daily_normalized`)가 전부 이 함수를 경유하므로, retention 을 늘려도 **어느 소비처도 100행 넘게 못 읽는다**(구조적 보장). 나머지 소비처는 스칼라 집계뿐이다(`max_bas_dd`·`count_all`·`count_by_ticker`·`routes/market_ops.py`). 가드 `tests/unit/db/test_cycle299_retention_expansion.py::test_g299_7a_get_recent_daily_keeps_100_clamp`
   - `get_donchian_high(ticker, days=20)` — 직전 N일 최고가(당일 제외)
   - `get_atr(ticker, days=14)` — 14일 ATR. True Range 는 웰스 와일더 3-way `max(고−저, |고−전종|, |저−전종|)` 이고 평활은 **단순평균(SMA) baseline** 이다 — Wilder 지수평활은 호출자 책임이고, 실제 Wilder ATR 은 `kojiro_indicators.atr`(ewm α=1/N) 뿐이다
   - `count_all()` / `count_by_ticker(ticker)` — 적재 진단
@@ -280,7 +280,7 @@ list_paged_by_filter(*, market=None, min_market_cap=0, min_trade_amount=0,
   3. **min_required 게이트** — `len < min_required`(기본 `max(days // 2, 10)`)이면 폴백
   - 폴백 자체가 실패하면 DB 값을 그대로 쓴다(graceful). 헬퍼 3 = `_row_has_lock` / `_extract_raw`(raw 추출 DRY) / `_kis_fallback`(락·신선도·부족 공통 + 실패 시 DB graceful)
   - 상수 `DAILY_STALENESS_DAYS = 4`(주말 2일 + 공휴일 마진 — 거짓 폴백 차단). 전략별 `days`/`min_required` = VB/LTV 22 · donchian 63 · BFB 35 · VCP 100
-- **retention `DAILY_RETENTION_DAYS = 230`(달력일 ≈ 154 영업일)**. VCP backfill target 120 · prepare 실사용 100일이라 충분하다. ⚠️ **VCP 220 EMA 원설계를 복원하려면 retention 도 ~320 달력일로 함께 올려야 한다**(220 영업일 ≈ 308 달력일).
+- **retention `DAILY_RETENTION_DAYS = 390`(달력일 ≈ 261 영업일, cycle299)**. 실효 장기선이 정확히 200 이 되려면 일봉이 225 영업일 필요하고(`effective_ema_long = min(ema_long, 보유 − uptrend_days(20) − 5)`), 그 깊이를 담아 둘 자리가 이 값이다. VCP backfill target 225 위로 **36 영업일 마진**이 남는다(환산 앵커 = 사이클196 실측 230cal ⇄ 154영업일). 🔴 **이 값과 target 은 함께 움직인다** — target 이 보유 영업일을 넘으면 `existing_count` 가 영원히 target 에 못 닿아 매일 밤 전량 재backfill(churn)이 된다(사이클 196 이 시정한 결함). 읽는 쪽은 무접촉이다 — 위 `get_recent_daily` 의 100행 클램프가 소비처 전부를 덮는다. 가드 `tests/unit/db/test_cycle299_retention_expansion.py`.
 - **`purge_old_rows` 는 날짜 슬라이스 루프다** — `PURGE_MAX_DATE_ITERATIONS = 500` cap 안에서 ① cutoff 이전의 가장 오래된 `bas_dd` 를 **protected 를 뺀 채** SELECT(없으면 drained break) ② 그 날짜 전체를 **protected 를 뺀 채** DELETE ③ deleted 누적. 🔴 **SELECT 쪽 protected 제외를 빼지 않는다** — 빼면 protected 만 남은 날짜를 무한히 다시 고르는 never-drain 이 된다. 예외는 부분 누적 deleted 를 반환하고 `logger.exception` 에 `type(exc).__name__: str(exc)[:150]` 를 남긴다
 - DB 호출은 `pg.fetch`/`pg.execute`/`pg.executemany` 다. read 는 `_with_retry` 를 내장하고 쓰기 3함수(`upsert_daily`/`upsert_batch`/`purge_old_rows`)는 경유하지 않는다(AST G-187-A2 영구 불변식)
 - 영속 의무: KST timestamp `_kst.now_kst_iso()` · raw JSONB 덮어쓰기 금지(G-AST1) · DATE 바인딩 `_kst.to_date()` 강제

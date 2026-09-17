@@ -1,14 +1,20 @@
 """사이클 172 (2026-06-22) — _stock_master_daily_load_once VCP universe 220일 backfill 분기.
 사이클 196 (2026-07-07) — 임계 220 → 120 수렴 (retention 154영업일 실측 기반).
+cycle299 (2026-09-17) — 임계 120 → 225 확장 (retention 390cal ≈ 261영업일 동반 확장).
 
-VCP universe (KOSPI200 ∪ KOSDAQ150) 종목 중 DB 깊이 < 120 → 120일 backfill (분할 fetch).
+이 파일이 재는 것은 **분기의 존재와 방향**이지 임계값 자체가 아니다 (임계값 정본 가드 =
+`test_cycle196_vcp_backfill_convergence.py::B-1` + `test_cycle299_backfill_target_expansion.py::G-299-2`).
+아래 케이스들은 임계가 120 이든 225 든 같은 쪽으로 떨어지도록 골라져 있어 값 변경에
+무접촉이다 (count 100/50 은 어느 임계에서도 미달, 230 은 어느 임계에서도 충족).
+
+VCP universe (KOSPI200 ∪ KOSDAQ150) 종목 중 DB 깊이 < 임계 → 분할 fetch backfill.
 나머지 종목 = 현행 T-100 유지 (회귀 0).
 
 회귀 가드 매트릭스:
-- SCAN-1 (HIGH): VCP universe (is_kospi200) DB < 120 → fetch_daily_candles_backfill 분기
+- SCAN-1 (HIGH): VCP universe (is_kospi200) DB < 임계 → fetch_daily_candles_backfill 분기
 - SCAN-2 (HIGH): VCP universe (is_kosdaq150) 동일 분기
 - SCAN-3 (HIGH): 비 VCP universe → 현행 100일 fetch_daily_candles 유지 (회귀)
-- SCAN-4: VCP universe DB >= 120 → 증분 유지 (재 backfill 금지)
+- SCAN-4: VCP universe DB >= 임계 → 증분 유지 (재 backfill 금지)
 - SCAN-5: graceful (backfill 실패 → 다음 ticker 진행)
 - SAFETY-1 (HIGH): 매매 무관 — risk/order_engine/realtime/auth import 0
 
@@ -34,7 +40,9 @@ from src.engine import scanner
 pytestmark = pytest.mark.unit
 
 
-_VCP_BACKFILL_THRESHOLD = 220
+# 문서용 상수 — 이 파일의 어떤 테스트도 참조하지 않는다(케이스가 임계 무접촉이라 그렇다,
+# 위 모듈 docstring). cycle299 가 프로덕션 임계를 225 로 올려 값을 다시 맞췄다.
+_VCP_BACKFILL_THRESHOLD = 225  # noqa: F841 — 의도적 문서 상수
 
 
 def _vcp_candle(bas_dd: str = "20260620") -> dict:
@@ -46,11 +54,11 @@ def _vcp_candle(bas_dd: str = "20260620") -> dict:
 
 
 # ---------------------------------------------------------------------------
-# SCAN-1 (HIGH) — VCP universe (is_kospi200) DB < 220 → backfill 분기
+# SCAN-1 (HIGH) — VCP universe (is_kospi200) DB < 225 → backfill 분기
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
-async def test_scan1_kospi200_under_220_triggers_backfill():
-    """is_kospi200=True + DB < 220 → fetch_daily_candles_backfill 호출."""
+async def test_scan1_kospi200_under_target_triggers_backfill():
+    """is_kospi200=True + DB < 225 → fetch_daily_candles_backfill 호출."""
     stock_master_rows = [
         {"ticker": "005930", "is_kospi200": True, "is_kosdaq150": False},
     ]
@@ -66,7 +74,7 @@ async def test_scan1_kospi200_under_220_triggers_backfill():
         new=AsyncMock(return_value=None),
     ), patch(
         "src.db.stock_master_daily.count_by_ticker",
-        new=AsyncMock(return_value=100),  # < 220 → VCP backfill
+        new=AsyncMock(return_value=100),  # < 225 → VCP backfill
     ), patch(
         "src.api.condition.fetch_daily_candles_backfill",
         new=backfill_mock,
@@ -80,7 +88,7 @@ async def test_scan1_kospi200_under_220_triggers_backfill():
         summary = await scanner._stock_master_daily_load_once()
 
     assert backfill_mock.await_count == 1, \
-        "VCP universe (is_kospi200) DB < 220 → fetch_daily_candles_backfill 분기"
+        "VCP universe (is_kospi200) DB < 225 → fetch_daily_candles_backfill 분기"
     assert ranged_kis_mock.await_count == 0, "VCP universe 는 100일 fetch 미사용"
     assert summary["fetched"] == 1
 
@@ -89,8 +97,8 @@ async def test_scan1_kospi200_under_220_triggers_backfill():
 # SCAN-2 (HIGH) — VCP universe (is_kosdaq150) 동일 분기
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
-async def test_scan2_kosdaq150_under_220_triggers_backfill():
-    """is_kosdaq150=True + DB < 220 → fetch_daily_candles_backfill 호출."""
+async def test_scan2_kosdaq150_under_target_triggers_backfill():
+    """is_kosdaq150=True + DB < 225 → fetch_daily_candles_backfill 호출."""
     stock_master_rows = [
         {"ticker": "247540", "is_kospi200": False, "is_kosdaq150": True},
     ]
@@ -106,7 +114,7 @@ async def test_scan2_kosdaq150_under_220_triggers_backfill():
         new=AsyncMock(return_value=None),
     ), patch(
         "src.db.stock_master_daily.count_by_ticker",
-        new=AsyncMock(return_value=50),  # < 220 → VCP backfill
+        new=AsyncMock(return_value=50),  # < 225 → VCP backfill
     ), patch(
         "src.api.condition.fetch_daily_candles_backfill",
         new=backfill_mock,
@@ -120,7 +128,7 @@ async def test_scan2_kosdaq150_under_220_triggers_backfill():
         summary = await scanner._stock_master_daily_load_once()
 
     assert backfill_mock.await_count == 1, \
-        "VCP universe (is_kosdaq150) DB < 220 → backfill 분기"
+        "VCP universe (is_kosdaq150) DB < 225 → backfill 분기"
     assert ranged_kis_mock.await_count == 0
     assert summary["fetched"] == 1
 
@@ -208,11 +216,11 @@ async def test_scan3b_missing_flag_keys_treated_non_vcp():
 
 
 # ---------------------------------------------------------------------------
-# SCAN-4 — VCP universe DB >= 220 → 증분 유지 (재 backfill 금지)
+# SCAN-4 — VCP universe DB >= 225 → 증분 유지 (재 backfill 금지)
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
-async def test_scan4_vcp_over_220_incremental():
-    """VCP universe DB >= 220 → 증분 모드 (재 backfill 금지)."""
+async def test_scan4_vcp_over_target_incremental():
+    """VCP universe DB >= 225 → 증분 모드 (재 backfill 금지)."""
     stock_master_rows = [
         {"ticker": "005930", "is_kospi200": True, "is_kosdaq150": False},
     ]
@@ -232,7 +240,7 @@ async def test_scan4_vcp_over_220_incremental():
         new=AsyncMock(return_value=date(2026, 6, 1)),  # 미래 아님 → 적재 진행
     ), patch(
         "src.db.stock_master_daily.count_by_ticker",
-        new=AsyncMock(return_value=230),  # >= 220 → 증분
+        new=AsyncMock(return_value=230),  # >= 225 → 증분
     ), patch(
         "src.api.condition.fetch_daily_candles_backfill",
         new=backfill_mock,
@@ -245,7 +253,7 @@ async def test_scan4_vcp_over_220_incremental():
     ), patch("asyncio.sleep", new=AsyncMock()):
         summary = await scanner._stock_master_daily_load_once()
 
-    assert backfill_mock.await_count == 0, "DB >= 220 → 재 backfill 금지"
+    assert backfill_mock.await_count == 0, "DB >= 225 → 재 backfill 금지"
     assert 7 in captured_days, "증분 모드 (T-7일) 유지"
     assert summary["fetched"] == 1
 
@@ -273,7 +281,7 @@ async def test_scan5_backfill_failure_graceful():
         new=AsyncMock(return_value=None),
     ), patch(
         "src.db.stock_master_daily.count_by_ticker",
-        new=AsyncMock(return_value=100),  # VCP < 220 / 비VCP < 50 모두 백필
+        new=AsyncMock(return_value=100),  # VCP < 225 / 비VCP < 50 모두 백필
     ), patch(
         "src.api.condition.fetch_daily_candles_backfill",
         new=AsyncMock(side_effect=backfill_fail),

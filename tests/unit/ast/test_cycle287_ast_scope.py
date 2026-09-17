@@ -92,8 +92,12 @@ _BASE_SHA = {
         "e8614235cc0bea638f8c349b2f6910c94f5f9a5b849f5d65bef0583f959d81c9",
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
+    # 🔁 cycle299(2026-09-17) 재핀 — 사용자 승인 일봉 backfill 창 확대
+    #    (`_DAILY_LOAD_VCP_BACKFILL_DAYS` 120 → 225 상수 1줄 + 근거 주석 4줄).
+    #    값만 옮긴다 — 단언은 그대로다. 구 값은 cycle283 기준선(079272e7…)이고, 사이클 안에서 목표를 220 → 225 로
+    #    다시 올리며 한 번 더 옮겼다.
     "src/engine/scanner.py":
-        "079272e7c4907c6ecc5fdf9b73de70021a9dc2435c7a568538183a7ead98804f",
+        "3b7366cc77c3f41f1e839454193f45fa405cfeab3eff59c6c446a9470dcb6c8f",
     "src/engine/strategy_registry.py":
         "d794696e54ffdc36efa6df917879d780e86bc1f373bb3b5d8dcbc0beac8cef8b",
     # 8영역 — realtime 전부
@@ -263,8 +267,30 @@ _SRC_TREE_FILES = 153
 #: ⚠️ **cycle298 후속(2026-09-17) — `first_delay` 상한 결손 Green 1건으로 재갱신.**
 #: `_scan_loop` 의 `min(SCAN_INTERVAL, max(0.0, float(first_delay)))` 한 줄 치환뿐
 #: (라인 수 불변 3,757). 파일 수 **153 불변**(신규 파일 0).
+#: ⚠️ **cycle299(일봉 보유·backfill 창 확대, 2026-09-17) 기준선으로 갱신.**
+#: 움직인 파일 3 = `engine/scanner.py`(`_DAILY_LOAD_VCP_BACKFILL_DAYS` 120 → 220,
+#: **8영역 · 사용자 명시 승인** — 위 `_BASE_SHA` 의 재핀 주석과 자매 4곳이 같은 값을
+#: 든다) · `db/stock_master_daily.py`(`DAILY_RETENTION_DAYS` 230 → 390) ·
+#: `api/condition.py`(`fetch_daily_candles_backfill` docstring — 기본값 120 이
+#: 호출되지 않는 폴백임과 1회 backfill 부족분을 명시, **AST 불변**).
+#: ③ 사용자 요청("데이터 지금 바로 채울 수는 없어?")으로 `api/condition.py` 의 깊이 환산에
+#: 휴일 보정을 비례로 얹어 1회 backfill 이 target 을 넘게 했다(225 영업일 목표 → 실도달
+#: 232). 🔴 stride(윈도우 간격)는 7/5 그대로다 — 키우면 윈도우 사이에 구멍이 생긴다.
+#: `engine/scanner.py` 는 ③ 에서 무접촉이라 8영역 sha 핀 13곳은 ② 의 값을 유지한다. 두 상수는 함께 움직인다 —
+#: target > 보유 영업일이면 매일 밤 전량 재backfill churn 이다(cycle196 이 시정한 결함).
+#: 파일 수는 **153 으로 불변**(신규 파일 0 — 이 사이클의 신규는 테스트뿐이다).
+#: cycle298 후속 착지(= cycle299 착수) 값은
+#: `12d793b51d82228e755ded6748177dcb7ba2ae64a2246d528900bc808965b9b9` 였다.
+#: cycle299 안에서 두 번 더 움직였다 — ① `db/stock_master_daily.py` 의 낡은 이력 주석 2건
+#: (retention 절 머리말의 "150 → 230" 계보 · `purge_old_rows` docstring 의 "VCP T-120일 +
+#: 30일 안전 마진")을 현재 규칙으로 덮어썼다 ② 사용자 결정으로 목표를 220 → 225,
+#: 보존을 380 → 390 으로 다시 올렸다(실효 장기선이 정확히 200 이 되는 깊이가 225 다).
+#: ③ 사용자 요청("데이터 지금 바로 채울 수는 없어?")으로 `api/condition.py` 의 깊이 환산에
+#: 휴일 보정을 비례로 얹어 1회 backfill 이 target 을 넘게 했다(225 영업일 목표 → 실도달
+#: 232). 🔴 stride(윈도우 간격)는 7/5 그대로다 — 키우면 윈도우 사이에 구멍이 생긴다.
+#: `engine/scanner.py` 는 ③ 에서 무접촉이라 8영역 sha 핀 13곳은 ② 의 값을 유지한다.
 _SRC_TREE_DIGEST = (
-    "12d793b51d82228e755ded6748177dcb7ba2ae64a2246d528900bc808965b9b9"
+    "55e65450f691eaa7d5d81b92b468a0f488407da20b5bf0b2ac025cf81392498e"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

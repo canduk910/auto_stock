@@ -2799,9 +2799,10 @@ def _emit_stock_master_age_warning(ticker: str, age_days: int) -> None:
 _DAILY_LOAD_FETCH_DAYS = 100   # KIS 1회 호출 한도 (Q2=C, 사이클 33 KIS_DAILY_CANDLES_MAX)
 _DAILY_LOAD_RATE_LIMIT_SLEEP_SECS = 0.05  # 50ms (사이클 83/91/97/107 답습)
 _DAILY_LOAD_INCREMENTAL_THRESHOLD = 50  # 50일 이상 적재된 ticker 는 증분 적재 (Q3=B)
-# 사이클 196 — retention 230cal=154영업일 실측 → 120 안전 수렴(34일 마진) + VCP prepare 100일 위 20일 버퍼.
-# VCP 전략 실제 사용 100일 (vcp_breakout.py:162-164). DB 깊이 < 120 이면 분할 backfill.
-_DAILY_LOAD_VCP_BACKFILL_DAYS = 120
+# 사이클 299 — retention 390cal≈261영업일 보유 → target 225(36영업일 마진). 225 인 이유 =
+# 실효 장기선이 정확히 200 이 되는 깊이다(effective_ema_long = min(ema_long, 보유 − 20 − 5)).
+# VCP 전략 실제 사용 100일 (vcp_breakout.py:162-164). DB 깊이 < 225 이면 분할 backfill.
+_DAILY_LOAD_VCP_BACKFILL_DAYS = 225
 
 # 사이클 206 — 일봉 적재를 유니버스(index ∪ 시총/거래대금 자격) 로 한정 (당시 Supabase 용량).
 # 2026-07 — kojiro 전체 상장 전환(지수 제거, 시총500억/거래10억)에 맞춰 trade 임계 20억→10억.
@@ -3044,7 +3045,7 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
         except Exception:
             existing_count = 0
 
-        # 사이클 172 — VCP universe (KOSPI200 ∪ KOSDAQ150) DB < 220 → 220일 backfill 분기.
+        # 사이클 299 — VCP universe (KOSPI200 ∪ KOSDAQ150) DB < 225 → 225일 backfill 분기.
         # 분할 fetch (날짜 윈도우 ×3). 나머지 종목은 현행 100일/증분 유지 (회귀 0).
         is_vcp_universe = ticker in vcp_universe_tickers
         use_vcp_backfill = (
@@ -3052,7 +3053,7 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
         )
 
         if use_vcp_backfill:
-            fetch_days = _DAILY_LOAD_VCP_BACKFILL_DAYS  # VCP 220일 backfill
+            fetch_days = _DAILY_LOAD_VCP_BACKFILL_DAYS  # VCP 225일 backfill
             backfill_count += 1
         elif existing_count < _DAILY_LOAD_INCREMENTAL_THRESHOLD:
             fetch_days = _DAILY_LOAD_FETCH_DAYS  # 백필 모드 (T-100일)

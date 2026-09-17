@@ -643,6 +643,25 @@ async def fetch_daily_candles(ticker: str, days: int = 21) -> list[dict]:
 # FID_ORG_ADJ_PRC="0" (수정주가) — 기존 _fetch_daily_candles_and_cache 정합.
 # 사이클 173 prepare DB일봉 전환의 DB-source vs KIS-source 동등성 게이트 보장.
 # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# 영업일 → 달력일 환산 (fetch_daily_candles_backfill 전용)
+#
+# 축이 둘이고 역할이 다르다 — 하나로 합치면 안 된다.
+#  · **stride** `_WEEKEND_CAL_PER_TRADING_DAY = 7/5`(주말만 보정) = 윈도우 시작점 간격.
+#    🔴 이 값을 키우면 다음 윈도우의 머리가 앞 윈도우가 실제로 닿는 바닥보다 **아래로
+#    내려가 사이에 구멍이 생긴다**. KIS 가 한 호출에 100건까지만 주므로 앞 윈도우는
+#    공휴일이 하나도 없는 구간에서 정확히 100영업일 = 140달력일까지만 덮는다. stride 가
+#    140 을 넘는 순간 그 구간이 통째로 비고, 빈 날짜는 어느 윈도우도 다시 집지 않는다.
+#  · **depth** = 목표 깊이(마지막 윈도우의 시작점). 여기에만 휴일 보정을 **비례로** 얹는다.
+#    실측 앵커(사이클196) 230 달력일 ⇄ 154 영업일 = 1.4935 이고, stride 계수 1.40 만으로
+#    깊이를 재면 225 영업일 목표에서 실제 도달이 217 영업일에 그친다(8 영업일 부족 =
+#    1회 backfill 이 목표에 못 닿아 하루 1씩 8밤을 채워야 했다). 비율 0.10 + 상수 10 이
+#    그 간극을 메운다 — 깊이 225 에서 347 달력일에 닿아 실측 비율로 약 234 영업일이다.
+#    공휴일이 없는 해(1.40)에도 247, 밀집한 해(1.52)에도 228 로 목표를 넘는다.
+_WEEKEND_CAL_PER_TRADING_DAY = 7 / 5
+_DAILY_BACKFILL_HOLIDAY_MARGIN_RATIO = 0.10
+_DAILY_BACKFILL_BASE_MARGIN_CAL = 10
+# ---------------------------------------------------------------------------
 _DAILY_BACKFILL_WINDOW_SLEEP_SECS = 0.05  # 윈도우 간 50ms (사이클 17 KIS LMS chain 답습)
 
 
@@ -690,11 +709,25 @@ async def fetch_daily_candles_backfill(
     """N일 backfill — 날짜 윈도우 ×ceil(N/window) 순차 호출 + 병합 dedupe.
 
     사이클 196 — 마지막 윈도우 start_offset = min((i+1)*window, total_days) 클램프 적용.
-    total_days=120 시 윈도우 2개 (100/20), 마지막 start_offset=120 → 178cal (290 아님).
+
+    🔴 이 함수의 기본값 `total_days=120` 은 실제로 호출되지 않는 폴백이다 — 유일한
+    호출자 `scanner._stock_master_daily_load_once` 가 `total_days=_DAILY_LOAD_VCP_BACKFILL_DAYS`
+    (사이클 299 기준 225)를 항상 명시 전달한다.
+
+    `total_days=225` 시 윈도우 3개(100/100/25), 마지막 start_offset=225 →
+    325 달력일 도달. `DAILY_RETENTION_DAYS`(390, 사이클 299)안이라 churn 이 없다.
+
+    ⚠️ 알려진 편차 — 달력 환산 `int(n*7/5)+10`(영업일당 1.40 가정)이 실측 1.494 와
+    벌어져, `total_days=225` 1회 backfill 의 실제 도달은 약 217 영업일로 target(225)
+    에 약 8영업일 모자란다. 영구 churn 은 아니다 — 윈도우가 하루씩 미끄러지며
+    `existing_count` 가 자라 약 8영업일 뒤 수렴한다. 회귀 가드
+    `test_g299_9_one_pass_shortfall_bounded` 가 그 부족분을 10 이하로 묶는다.
+    이 수식 자체는 사이클 299 범위 밖이다(다음 사이클 과제).
 
     Args:
         ticker: KRX 6자리 단축코드.
-        total_days: 총 backfill 일수 (VCP 기본 120, 사이클 196 수렴).
+        total_days: 총 backfill 일수 (기본값 120 은 호출되지 않는 폴백 — 실사용은
+            호출자가 명시 전달하는 225, 사이클 299).
         window: 윈도우당 일수 (KIS 한도 100).
 
     Returns:
@@ -716,14 +749,18 @@ async def fetch_daily_candles_backfill(
 
     merged: dict[str, dict] = {}
     for i in range(num_windows):
-        # 윈도우 i: [T - (i+1)*window*달력여유, T - i*window*달력여유]
-        # 달력일 ≈ 영업일 × 7/5 + 마진 (휴일/공휴일 보정)
+        # 윈도우 i: [T - start_cal, T - end_cal] (달력일)
         end_offset = i * window
         # 사이클 196 — 마지막 윈도우 목표 초과 fetch 차단 (retention 밖 churn 원천 봉쇄)
         start_offset = min((i + 1) * window, total_days)
-        # 달력일 환산 (영업일/달력일 5/7 + 마진)
-        end_cal = int(end_offset * 7 / 5)
-        start_cal = int(start_offset * 7 / 5) + 10
+        # 🔴 stride(end_cal)는 7/5 고정 — 윈도우 간 겹침이 여기에 달려 있다 (위 상수 주석).
+        end_cal = int(end_offset * _WEEKEND_CAL_PER_TRADING_DAY)
+        # 깊이(start_cal)에만 휴일 보정을 비례로 얹는다.
+        start_cal = (
+            int(start_offset * _WEEKEND_CAL_PER_TRADING_DAY)
+            + int(start_offset * _DAILY_BACKFILL_HOLIDAY_MARGIN_RATIO)
+            + _DAILY_BACKFILL_BASE_MARGIN_CAL
+        )
         win_end = today - timedelta(days=end_cal)
         win_start = today - timedelta(days=start_cal)
 
