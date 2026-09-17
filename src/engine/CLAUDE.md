@@ -155,9 +155,10 @@ run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, recor
 - VCP ∧ `existing_count < _DAILY_LOAD_VCP_BACKFILL_DAYS(=225, cycle299)` → `condition.fetch_daily_candles_backfill(ticker, total_days=225)`(분할 fetch, 마지막 윈도우 클램프). VCP ∧ `>=225` → 증분 7일(재 backfill 금지). 비 VCP 는 `<50` 백필 100일 / `>=50` 증분 7일.
 - 🔴 225 인 이유 = `effective_ema_long = min(ema_long, 보유 − uptrend_days(20) − 5)` 라 보유 **225 영업일에서 실효 장기선이 정확히 200** 이 된다(220 이면 195 에 그친다). retention `DAILY_RETENTION_DAYS=390`cal ≈ 261영업일이 그 아래로 **36 영업일 마진**을 남긴다. 🔴 **target 과 retention 은 함께 움직인다** — target 이 보유 영업일을 넘으면 `existing_count` 가 영원히 target 에 못 닿아 매 load 전량 재backfill(churn)이 된다. VCP `prepare` 실사용은 여전히 100일이다.
 - **1회 backfill 이 target 을 넘는다 — 한 밤에 채운다.** `condition.fetch_daily_candles_backfill` 의 깊이 환산이 `total_days=225` 에서 347 달력일에 닿고, 실측 비율(1.479)로 약 **232 영업일**이다(잉여 7). 전이 기간이 없다. 🔴 그 환산의 **stride 는 7/5 고정**이다 — 키우면 윈도우 사이에 구멍이 생긴다(상세 = `src/api/CLAUDE.md`). 가드 = `tests/unit/engine/test_cycle299_backfill_target_expansion.py::test_g299_9_one_pass_reaches_target`.
+- VCP `prepare` 가 그 깊이를 실제로 읽는 것은 `daily_fetch_depth_mode="full"` 일 때뿐이다(기본 `"cap100"` = 100봉).
 - graceful — backfill 실패는 `failed++` 후 다음 ticker.
 - 🔴 장중 자동 실행 없음 — 20:30 daily task + 수동 trigger 뿐이다.
-- ⚠️ 데이터 깊이는 열렸지만 **전략이 아직 100일을 넘어 읽지 못한다** — cap 이 두 겹 남아 있다: `db/stock_master_daily.get_recent_daily` 의 `min(days, 100)` · `strategies/vcp_breakout.py` 의 `KIS_DAILY_CANDLES_MAX = 100`. 200일 EMA 실사용은 그 둘을 여는 별도 사이클 소관이다.
+- **읽기 두 겹은 cycle300 이 열었다** — `db/stock_master_daily.get_recent_daily` 의 상한은 `_MAX_DAILY_ROWS`(400)이고, VCP 는 전략 파라미터 `daily_fetch_depth_mode` 로 요청 깊이를 정한다(기본 `"cap100"` = 100봉 = 현행, `"full"` = `ema_long + base_max_days + 10`). **기본값에서는 배포 전후 행위가 byte 동일**하고, 200일 EMA 를 실제로 쓰려면 `PUT /api/strategies/vcp_breakout/params {"daily_fetch_depth_mode":"full"}` 로 켠다. 상세 = `strategies/CLAUDE.md` VCP 절.
 
 ### 확정 전 오늘봉 시각 필터 (`_drop_today_bars`)
 

@@ -241,7 +241,7 @@ _SEGMENT_SHA: dict[tuple[str, str], str] = {
     ("vcp_breakout", "calc_buy_quantity"):
         "2678212b154c25f00d8cb3a14ad819ad9e92a12787ff42b3635ac32399685e56",
     ("vcp_breakout", "prepare"):
-        "7f2e5681f5fec0833d9adee9b7e51d2bdc567bfaa695cafaf1734a000e3cbaf8",
+        "b8468a3694b8b4fff9bdfc6b2114464bad349dadab15730d174768c71aed2e53",
     ("kojiro", "check_buy_signal"):
         "dda6c6fc318afec8db576826f4cfc16d03fdc6dbdd544e7accc3f8a41de9e74f",
     ("kojiro", "check_exit_signal"):

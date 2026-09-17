@@ -196,24 +196,28 @@ async def test_g_db2_upsert_batch_empty_returns_zero():
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_g_db3_get_recent_daily_desc_with_clamp():
-    """bas_dd DESC + days clamp (1~100) + KIS 호출 한도 정합.
+    """bas_dd DESC + days clamp (1~`_MAX_DAILY_ROWS`).
 
     사이클 M2b — pg.fetch("... ORDER BY bas_dd DESC LIMIT $2", ticker, clamped).
-    days=200 → clamp 100 이 바인딩.
+    cycle300 — 상한이 100 → `_MAX_DAILY_ROWS`(400) 로 올랐다. 여기서 재는 것은 그 숫자가
+    아니라 **클램프가 살아 있다는 사실**이라, 상한을 넘는 요청이 상한으로 잘리는지만 본다
+    (숫자 자체는 `test_cycle300_daily_depth_switch.py` 가 근거와 함께 잰다).
     """
     mock_rows = [_db_row(bas_dd=f"2026-06-{i:02d}") for i in range(12, 7, -1)]
+    over = stock_master_daily._MAX_DAILY_ROWS + 100
 
     with patch.object(stock_master_daily, "pg", create=True) as pg_mod:
         pg_mod.fetch = AsyncMock(return_value=mock_rows)
-        # days=200 → 100 으로 clamp (KIS 호출 한도)
-        result = await stock_master_daily.get_recent_daily("005930", days=200)
+        result = await stock_master_daily.get_recent_daily("005930", days=over)
 
     sql = pg_mod.fetch.await_args.args[0].upper()
     assert "ORDER BY BAS_DD DESC" in sql, "bas_dd DESC 정렬 누락"
     assert "LIMIT" in sql, "limit 절 누락"
     args = pg_mod.fetch.await_args.args[1:]
     assert "005930" in args, "ticker 바인딩 누락"
-    assert 100 in args, "days=200 → clamp 100 바인딩 누락"
+    assert stock_master_daily._MAX_DAILY_ROWS in args, (
+        f"days={over} → 상한 {stock_master_daily._MAX_DAILY_ROWS} 클램프 바인딩 누락"
+    )
     assert len(result) == 5  # mock 응답 길이
 
 

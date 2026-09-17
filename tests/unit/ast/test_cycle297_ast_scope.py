@@ -201,9 +201,13 @@ _BASELINE_KEYS: dict[str, tuple[str, ...]] = {
         "breakout_retention_minutes", "max_lot_ratio_mult", "order_exchange_clock_mode",
         "after_market_exit_division",
     ),
+    # cycle300 — `daily_fetch_depth_mode` 1키 추가(일봉 읽기 깊이 스위치, 기본 `cap100`).
+    # 말미가 아니라 `long_ema_uptrend_days` **바로 뒤**에 둔 것은 의도다 — 이 키는 추세
+    # 필터 3선이 몇 봉으로 계산되는지를 정하므로 EMA 키들과 한 덩어리로 읽혀야 한다.
     "vcp_breakout": (
         "tradable_boards", "exchange", "ema_short", "ema_mid", "ema_long",
-        "long_ema_uptrend_days", "base_min_days", "base_max_days", "base_depth_pct",
+        "long_ema_uptrend_days", "daily_fetch_depth_mode",
+        "base_min_days", "base_max_days", "base_depth_pct",
         "pullback_count_min", "pullback_count_max", "last_pullback_max", "min_swing_atr_mult",
         "volume_contraction_ratio", "breakout_volume_mult", "entry_start", "entry_end",
         "max_breakout_extension_pct", "position_ratio", "max_positions", "stop_loss_rate",

@@ -184,12 +184,12 @@ _BASE_SHA: dict[str, str] = {
     "src/engine/strategies/momentum.py":
         "50d5c0b9a232d6110f6b85fc524569853f2b8edffe2fd44adc24289800b95ae2",
     "src/engine/strategies/vcp_breakout.py":
-        "bbebddd45780a9e19f8bb3c69557d4db50fffc61e8e9da20564476a1be9598a0",
+        "edffcc226d3c60412d2b95fa2202a9401d09934050f0aa3100ee8146f6e07b85",
     "src/engine/strategies/volatility_breakout.py":
         "d13efaa4a9424e2822b5476ce159987d2a5192a4bca30af3f1a0cae9c3ffcabc",
     # 파라미터 축 — 킬스위치는 `system_config` 다(§8-B). 전략 파라미터로 새지 않는다.
     "src/engine/param_catalog.py":
-        "81a7685b32f689b101db88f26d22d2f102859e29be770a201b26b52cfe8a350a",
+        "3f71152cc5ff5bcf8d753d6aeab20121a594d54adac477ba2408d1ec83e691c8",
     "src/engine/param_validation.py":
         "b4c5c029800191523bcc511919d6de3774e9ab49ca2fc0a0558ee3907868ee17",
     # 시각·거래소 표의 유일 정본 — 리졸버는 **속성축**이라 이 표를 읽지 않는다.

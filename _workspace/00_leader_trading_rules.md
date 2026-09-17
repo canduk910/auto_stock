@@ -652,14 +652,21 @@ donchian_swing 의 정공법(신고가 직진 추격)을 보강하는 추세추�
 - 최대 4000종목 (`max_scan_stocks`, 200→확대 — 전체 filtered 커버, `refreshed_at DESC` 임의 절단 소멸)
 
 ### 데이터 준비 (`_boot()` prepare)
-- 종목별 일봉 **100일** — `get_recent_daily_normalized(ticker, days=fetch_days, min_required=100)` (DB 우선 어댑터, 사이클 173). `fetch_days = min(ema_long + base_max + 10, 100)` — 읽기를 100일로 묶는 것은 `vcp_breakout.py` 의 `KIS_DAILY_CANDLES_MAX = 100` 과 `db/stock_master_daily.get_recent_daily` 의 `min(days, 100)` 클램프 **두 상수**이지 KIS 한도가 아니다(KIS 의 100일은 **호출당** 한도다). 그래서 원설계 220일은 **미실현**이고 `effective_ema_long ≈ 75` 가 유지된다. 일봉 적재 깊이 자체는 cycle299 가 225영업일로 열어 두었다 — 그 깊이에서 `effective_ema_long` 이 정확히 200 이 된다. `fetch_daily_candles` 는 재시작 복구 경로 전용
+- 종목별 일봉 — `get_recent_daily_normalized(ticker, days=fetch_days, min_required=100)` (DB 우선 어댑터, 사이클 173). **읽기 깊이는 전략 파라미터 `daily_fetch_depth_mode` 가 정한다**(cycle300):
+  - `"cap100"`(기본) → `fetch_days = min(ema_long + base_max + 10, KIS_DAILY_CANDLES_MAX=100)` = **100봉**. 배포 시점 행위는 이 값에서 byte 동일하다.
+  - `"full"` → `fetch_days = ema_long + base_max + 10`(운영 DB 값이면 285). DB 에 있는 만큼만 오므로 얕은 종목은 자동으로 줄어들고 `effective_ema_long` 가드가 그대로 받아 낸다.
+  - 켜고 끄는 수단 = `PUT /api/strategies/vcp_breakout/params {"daily_fetch_depth_mode":"full"}` — **즉시 반영 + 영속**. 롤백은 같은 PUT 에 `"cap100"`. `strategy_config` SQL UPDATE 는 다음 백엔드 재시작에서만 반영되므로 장중 실효 수단은 PUT 뿐이다(cycle232 D6).
+  - `PARAM_RANGES`/`INT_PARAMS` **편입 금지**(진입 정체성 축). 미지 값·결측·비문자열은 전부 `"cap100"` 으로 낙하한다.
+  - `min_required` 는 두 모드 다 **100** 이다 — KIS 폴백은 한 호출 100봉이 상한이라 문턱을 올리면 DB 가 100~224봉인 구간에서 더 얕은 KIS 응답으로 바뀐다.
+  - 읽기 관문 `db/stock_master_daily.get_recent_daily` 의 상한은 `_MAX_DAILY_ROWS = 400` 이다(cycle300 이 100 에서 올렸다). 100 은 애초에 KIS 한도가 아니었다 — KIS 의 100일은 **호출당** 한도다. 적재 깊이는 cycle299 가 225영업일로 열어 두었다.
+  - `fetch_daily_candles` 는 재시작 복구 경로 전용
 - `candles[0]==오늘`이면 `candles[1]`을 전일로 사용 (부분봉 가드)
 
 ### 추세 필터 (Stage 2 confirmation, prepare 시 단계별 검사)
 1. **종가 > 단기 EMA > 중기 EMA > 장기 EMA** (`ema_short=50`, `ema_mid=60`, `ema_long=120`)
 2. **장기 EMA 우상향 1개월 이상** — 현재 장기 EMA > 1개월 전(20영업일 전) 장기 EMA (`long_ema_uptrend_days=20`)
 3. 통과 종목만 다음 단계 검사
-4. **EMA 기본값은 prepare 가 실제로 읽는 100일 안에서 계산 가능한 값이어야 한다** — `ema_long=120` / `ema_mid=60`. 그 100일은 KIS 한도가 아니라 `KIS_DAILY_CANDLES_MAX = 100` 과 `get_recent_daily` 의 `min(days, 100)` 두 상수가 만든다(둘을 여는 것은 매매 행위를 바꾸므로 승인 + `domain-consult` 선행 대상이다). 미네르비니 원전은 200EMA 지만 100일 fetch 로는 계산할 수 없고, `effective_ema_long = min(ema_long, available_len - 25)` 자동 축소가 형식만 남은 200 을 ~75 로 만들어 정배열 요구가 구조적으로 불가능해진다. 자동 축소 가드는 fetch 부족 시 안전망으로 유지한다.
+4. **EMA 값과 읽기 깊이는 짝이다.** `effective_ema_long = min(ema_long, available_len - long_ema_uptrend_days - 5)` 이고, 그 뒤 `ema_mid >= ema_long` 이면 `ema_mid = max(ema_short+1, ema_long-10)` 로 중기선이 한 번 더 줄어든다. 운영 DB 값 50/150/200 기준 실효 정렬은 이렇게 갈린다 — **보유 100봉 → 50/65/75**(중기↔장기 간격 10 = 정배열이 동전던지기) · **보유 225봉 → 50/150/200**(간격 50). 코드 기본값 `ema_long=120`/`ema_mid=60` 은 100봉 세계에서 중기선 재축소를 피하려던 임시 회피값이고, 지금 정본은 **운영 DB 의 150/200** 이다. 200EMA 를 실제로 쓰려면 위 `daily_fetch_depth_mode="full"` 을 켠다. 자동 축소 가드는 fetch 부족 시 안전망으로 유지한다.
 
 ### 베이스 정의 (`base_lookback_weeks=5~15` → 일봉 25~75영업일)
 1. 베이스 시작·종료 자동 검출: `base_max_days`(75)부터 `base_min_days`(25)까지 길이를 줄여 가며 첫 매칭(=가장 긴) 구간을 베이스로 인식. 판정식은 2번과 동일한 **고가/저가 기준** `(max(high) - min(low)) / max(high) ≤ base_depth_pct(0.30)` 하나뿐이다 — `base_depth_max=0.25` 같은 별도 상수·종가 기준 산식은 존재하지 않는다

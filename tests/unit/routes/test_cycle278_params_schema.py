@@ -144,7 +144,7 @@ async def test_schema_when_requested_then_200_with_101_params(schema_env):
     assert data["catalog_version"] == pc.CATALOG_VERSION
     keys = [p["key"] for p in data["params"]]
     assert keys == list(pc.all_keys()), "params 순서/집합이 카탈로그 정의 순서와 다르다"
-    assert len(keys) == 101, f"{len(keys)}개 — 101 전수여야 한다"
+    assert len(keys) == 102, f"{len(keys)}개 — 102 전수여야 한다"
 
 
 async def test_schema_when_read_then_each_param_has_all_fields(schema_env):

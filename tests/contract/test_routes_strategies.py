@@ -162,7 +162,8 @@ def test_get_params_schema_returns_catalog_and_strategy_rows(contract_env):
     body = r.json()
     assert body["success"] is True
     data = body["data"]
-    assert len(data["params"]) == 101  # cycle290 — 킬스위치 2키 등재로 99→101
+    # cycle290 — 킬스위치 2키 등재로 99→101 · cycle300 — 일봉 깊이 스위치로 101→102
+    assert len(data["params"]) == 102
     assert {s["strategy_id"] for s in data["strategies"]} >= {"momentum", "kojiro"}
     momentum = next(s for s in data["strategies"] if s["strategy_id"] == "momentum")
     assert momentum["keys"] and set(momentum["params"]) == set(momentum["keys"])

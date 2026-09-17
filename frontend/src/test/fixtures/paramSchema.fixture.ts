@@ -1,7 +1,7 @@
 /**
  * cycle278 Red — `GET /api/strategies/params-schema` 응답 **골든 픽스처**.
  *
- * ⚠️ 손으로 쓰지 않는다. `src/engine/param_catalog.py` 의 101 스펙과 7 전략
+ * ⚠️ 손으로 쓰지 않는다. `src/engine/param_catalog.py` 의 102 스펙과 7 전략
  * `DEFAULT_PARAMS` 에서 **기계 생성**했다 (생성기:
  * `_workspace/red/cycle278_param_catalog_ui_spec.md` §7.4 · 생성 스크립트는 사이클 산출물).
  *
@@ -101,7 +101,7 @@ export interface ParamSchemaData {
 }
 
 export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
-  "catalog_version": "cycle290.1",
+  "catalog_version": "cycle300.1",
   "groups": [
     {
       "id": "entry",
@@ -214,7 +214,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
       "applies_to": [
         "donchian_swing"
       ],
-      "help": "N일 신고가 돌파 판정의 N. 일봉 fetch 일수(`max(long_ma+5, donchian+5)`)도 이 값이 정한다 — 보유 일봉이 retention 230일(≈154 영업일)뿐이라 그보다 크면 후보가 조용히 0 이 된다(상한 150 의 근거). 사이클 212 에서 '진입 정체성'으로 PARAM_RANGES 에서 제외됐다."
+      "help": "N일 신고가 돌파 판정의 N. 일봉 요청 일수도 이 값이 정한다 (`donchian_swing.prepare` 의 `max(long_ma_period+5, donchian_period+5) + 1`). 실제로 천장을 정하는 것은 둘이다 — ① `db/stock_master_daily.get_recent_daily` 의 읽기 클램프 `max(1, min(days, _MAX_DAILY_ROWS))`(400행) ② DB 가 실제로 들고 있는 깊이(retention 390일 ≈261 영업일). 둘 중 작은 쪽이 천장이라 지금은 ②가 먼저 걸리고, 상한 150 은 그 아래라 안전하다. 요청이 DB 보유를 넘으면 있는 만큼만 오고, 보유가 `min_required` (63) 미만이면 KIS 폴백(한 호출 100봉)으로 내려간다. 사이클 212 에서 '진입 정체성'으로 PARAM_RANGES 에서 제외됐다."
     },
     {
       "key": "volume_period",
@@ -238,7 +238,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
       "applies_to": [
         "donchian_swing"
       ],
-      "help": "돌파일 거래량을 비교할 이동평균 기간. 상한은 일봉 retention(≈154 영업일)."
+      "help": "돌파일 거래량을 비교할 이동평균 기간. 천장은 `get_recent_daily` 의 읽기 클램프(400행)와 DB 보유 깊이(retention 390일 ≈261 영업일) 중 작은 쪽이고 지금은 후자가 먼저 걸린다. 일봉 요청 일수 자체는 `donchian_period` 와 함께 `max(long_ma_period+5, donchian_period+5) + 1` 로 정해진다."
     },
     {
       "key": "volume_multiplier",
@@ -410,6 +410,43 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "vcp_breakout"
       ],
       "help": "장기 EMA 가 며칠 연속 우상향이어야 추세로 인정하는가."
+    },
+    {
+      "key": "daily_fetch_depth_mode",
+      "label_ko": "일봉 읽기 깊이",
+      "group": "entry",
+      "type": "enum",
+      "min": null,
+      "max": null,
+      "step": null,
+      "unit": "",
+      "editable": true,
+      "risk": "identity",
+      "auto_tunable": false,
+      "deprecated": false,
+      "deprecated_for": [],
+      "range_src": "enum",
+      "pattern": null,
+      "min_items": 0,
+      "forbidden_choices": [],
+      "choices": [
+        {
+          "value": "cap100",
+          "label_ko": "100봉 (현행)",
+          "deprecated": false,
+          "help": ""
+        },
+        {
+          "value": "full",
+          "label_ko": "전체 (장기EMA + 베이스 + 10)",
+          "deprecated": false,
+          "help": ""
+        }
+      ],
+      "applies_to": [
+        "vcp_breakout"
+      ],
+      "help": "추세 필터가 몇 봉을 읽는가. `cap100` 은 100봉이고, 그 깊이에서는 실효 장기선이 `min(장기EMA, 100 − 상승지속일 − 5)` 로 잘린다 — 운영 설정 50/150/200 이면 실제로는 50/65/75 로 계산돼 중기↔장기 간격이 10 밖에 안 된다(정배열 판정이 사실상 동전던지기). `full` 은 `장기EMA + 베이스 최대 길이 + 10` 봉을 요청해 보유 225영업일에서 설정값 200 이 그대로 산다. 없는 봉은 오지 않으므로 얕은 종목은 자동으로 줄어든다. 알 수 없는 값·비움은 전부 `cap100`(현행 보존)으로 해석한다."
     },
     {
       "key": "base_min_days",
@@ -3439,6 +3476,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "ema_mid",
         "ema_long",
         "long_ema_uptrend_days",
+        "daily_fetch_depth_mode",
         "base_min_days",
         "base_max_days",
         "base_depth_pct",
@@ -3484,6 +3522,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "ema_mid": 60,
         "ema_long": 120,
         "long_ema_uptrend_days": 20,
+        "daily_fetch_depth_mode": "cap100",
         "base_min_days": 25,
         "base_max_days": 75,
         "base_depth_pct": 0.3,
@@ -3531,6 +3570,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "ema_mid": 60,
         "ema_long": 120,
         "long_ema_uptrend_days": 20,
+        "daily_fetch_depth_mode": "cap100",
         "base_min_days": 25,
         "base_max_days": 75,
         "base_depth_pct": 0.3,

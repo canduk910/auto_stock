@@ -14,15 +14,20 @@ ticker, total_days, *, window=100)` 이 이미 날짜 윈도우를 `ceil(total_d
 `existing_count` 가 영원히 target 에 못 닿아 매일 밤 전량 재backfill(churn) 이 된다 —
 사이클 196 이 시정한 바로 그 결함이다. 이 파일의 G-299-3 계열이 그 커플링을 잰다.
 
-⚠️ **이 사이클은 매매 행위를 바꾸지 않는다.** VCP `prepare()` 는 여전히 100일만 읽는다:
-  - `stock_master_daily.get_recent_daily` 가 `max(1, min(days, 100))` 로 하드 클램프하고,
-    행을 돌려주는 모든 읽기(`get_donchian_high` · `get_atr` ·
-    `get_recent_daily_with_fallback` · `get_recent_daily_normalized`)가 이 함수를 경유한다.
-    → retention 을 늘려도 **어느 소비처도 100행 넘게 못 읽는다**(구조적 보장).
+⚠️ **cycle299 자신은 매매 행위를 바꾸지 않았다.** 적재만 넓히고 읽기는 100봉에 두었다:
+  - `stock_master_daily.get_recent_daily` 의 `min(days, 상한)` 하드 클램프를 행을 돌려주는
+    모든 읽기(`get_donchian_high` · `get_atr` · `get_recent_daily_with_fallback` ·
+    `get_recent_daily_normalized`)가 경유한다 → 소비처가 상한을 넘겨 읽을 수 없다.
   - `vcp_breakout.py` 의 `KIS_DAILY_CANDLES_MAX = 100` 이 `fetch_days` 를 cap 한다.
   - 나머지 소비처(`max_bas_dd`·`count_all`·`count_by_ticker`·`routes/market_ops.py` 의
     max/min/count)는 전부 스칼라 집계라 행 수 무관.
-  G-299-7 이 이 둘의 존재를 봉인한다 = "cycle299 는 100일 cap 을 건드리지 않았다" 의 증거.
+  G-299-7 이 그 두 겹의 존재를 봉인한다.
+
+🔁 **cycle300 이 그 두 겹을 열었다**(사용자 명시 승인). 클램프 상한은 `_MAX_DAILY_ROWS`(400)
+로 올랐고, VCP 는 `daily_fetch_depth_mode` 스위치로 `full` 일 때만 깊이를 요청한다
+(기본 `cap100` = 행위 byte 동일). 그래서 G-299-7a 는 **상한 숫자가 아니라 클램프 구조**를
+재고, G-299-7b 는 기본 분기의 cap 표현이 그대로 남아 있는지를 잰다. 숫자의 근거는
+`tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py` 가 잰다.
 
 가드 매트릭스 (이 파일)
 ======================
@@ -30,7 +35,7 @@ ticker, total_days, *, window=100)` 이 이미 날짜 윈도우를 `ceil(total_d
 - G-299-3a 실측 윈도우 도달 달력일 < DAILY_RETENTION_DAYS (커플링)         → 불변식
 - G-299-3b 실측 도달 + 30 달력일 ≤ DAILY_RETENTION_DAYS (마진)            → 불변식
 - G-299-3c 정상상태 churn 자유 — retained_trading(retention) ≥ target + 30 → 불변식
-- G-299-7a get_recent_daily 본체에 min(days, 100) 클램프 존재 (+self-test) → 불변식
+- G-299-7a get_recent_daily 본체에 min(days, 상한) 클램프 구조 존재 (+self-test) → 불변식
 - G-299-7b vcp_breakout 소스에 KIS_DAILY_CANDLES_MAX = 100 리터럴 존재     → 불변식
 
 "불변식" 은 Red(230/120)·Green(390/225) 양쪽에서 PASS 한다는 뜻이다. 이들의 일은 값을
@@ -250,11 +255,11 @@ def test_g299_3c_retained_trading_days_cover_target():
 # ---------------------------------------------------------------------------
 # G-299-7a (행위 무변경 봉인) — get_recent_daily 본체 min(days, 100) 클램프 존재
 # ---------------------------------------------------------------------------
-def _has_min_clamp_with_days_and_100(func_node: ast.AST) -> bool:
-    """함수 서브트리에 `min(days, 100)` 형태(인자 순서 무관) 호출 존재 여부.
+def _has_min_clamp_on_days(func_node: ast.AST) -> bool:
+    """함수 서브트리에 `min(days, <상한>)` 형태(인자 순서 무관) 호출 존재 여부.
 
-    `days` 라는 이름의 변수/인자와 정수 리터럴 100 을 **같은 min() 호출**의 인자로
-    갖는 노드를 찾는다. `max(1, min(days, 100))` 처럼 감싸여 있어도 잡힌다.
+    `days` 라는 이름의 변수/인자를 인자로 갖는 `min()` 호출을 찾는다.
+    `max(1, min(days, _MAX_DAILY_ROWS))` 처럼 감싸여 있어도 잡힌다.
     """
     for sub in ast.walk(func_node):
         if not (
@@ -263,41 +268,37 @@ def _has_min_clamp_with_days_and_100(func_node: ast.AST) -> bool:
             and sub.func.id == "min"
         ):
             continue
-        has_days = False
-        has_100 = False
         for arg in sub.args:
             for inner in ast.walk(arg):
                 if isinstance(inner, ast.Name) and inner.id == "days":
-                    has_days = True
-                if isinstance(inner, ast.Constant) and inner.value == 100:
-                    has_100 = True
-        if has_days and has_100:
-            return True
+                    return True
     return False
 
 
-def test_g299_7a_get_recent_daily_keeps_100_clamp():
-    """`get_recent_daily` 본체의 `min(days, 100)` 하드 클램프 존재 의무.
+def test_g299_7a_get_recent_daily_keeps_days_clamp():
+    """`get_recent_daily` 본체의 `min(days, …)` 하드 클램프 **구조** 존속 의무.
 
-    무엇을 재는 테스트인가: **cycle299 가 매매 행위를 바꾸지 않았다는 봉인.**
-    행을 돌려주는 모든 읽기 — `get_donchian_high` · `get_atr` ·
+    무엇을 재는 테스트인가: 행을 돌려주는 모든 읽기 — `get_donchian_high` · `get_atr` ·
     `get_recent_daily_with_fallback` · `get_recent_daily_normalized` — 가 이 함수를
-    경유하므로, 이 클램프가 있는 한 retention 을 390 으로 늘려도 **어느 소비처도
-    100행 넘게 못 읽는다**. 즉 행위 변화 0 이 구조적으로 보장된다.
+    경유하므로, **어느 소비처도 상한을 넘겨 읽을 수 없다**는 구조적 보장이다.
 
-    이 클램프를 지우는 변경은 cycle299 의 범위를 넘는 별개 사이클이다
-    (모든 전략의 lookback 길이가 한꺼번에 바뀐다).
+    ⚠️ cycle299 시점에는 그 상한이 리터럴 100 이었고, 이 가드가 "cycle299 는 읽기 깊이를
+    건드리지 않았다" 를 봉인했다. cycle300 이 사용자 명시 승인 하에 그 상한을 명명 상수
+    `_MAX_DAILY_ROWS`(=400) 로 올렸다 — **올린 것은 상한이고 클램프 자체는 남는다**
+    (없애면 오염된 값이 그대로 `LIMIT` 에 실려 폭주한다). 그래서 이 가드는 숫자가 아니라
+    구조를 재는 쪽으로 옮겼고, 숫자의 근거는
+    `tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py` 가 잰다.
 
-    불변식 — Red/Green 양쪽 PASS. 이 사이클에 딸려 클램프가 사라지면 FAIL.
+    불변식 — 클램프가 통째로 사라지면 FAIL.
     """
     src_path = _REPO_ROOT / "src" / "db" / "stock_master_daily.py"
     source = read_module_source(src_path)
     node = find_function_def(source, "get_recent_daily")
     assert node is not None, "get_recent_daily 함수 정의 존재 의무"
 
-    assert _has_min_clamp_with_days_and_100(node), (
-        "get_recent_daily 본체에 min(days, 100) 클램프 존재 의무 — "
-        "cycle299 는 retention 만 넓히고 읽기 깊이(100행)는 건드리지 않는다"
+    assert _has_min_clamp_on_days(node), (
+        "get_recent_daily 본체에 min(days, 상한) 클램프 존재 의무 — "
+        "상한 값은 사이클마다 바뀔 수 있어도 클램프 구조는 폭주 방어선이라 지우지 않는다"
     )
 
 
@@ -307,6 +308,10 @@ def test_g299_7a_selftest_detector():
         "def f(days):\n"
         "    clamped = max(1, min(days, 100))\n"
     )
+    yes_named = ast.parse(
+        "def f(days):\n"
+        "    clamped = max(1, min(days, _MAX_DAILY_ROWS))\n"
+    )
     yes_swapped = ast.parse(
         "def f(days):\n"
         "    clamped = min(100, days)\n"
@@ -315,20 +320,14 @@ def test_g299_7a_selftest_detector():
         "def f(days):\n"
         "    clamped = max(1, days)\n"
     )
-    no_other_literal = ast.parse(
-        "def f(days):\n"
-        "    clamped = min(days, 390)\n"
-    )
 
     def _fn(tree):
         return next(n for n in ast.walk(tree) if isinstance(n, ast.FunctionDef))
 
-    assert _has_min_clamp_with_days_and_100(_fn(yes_tree)) is True, "클램프 존재 → True"
-    assert _has_min_clamp_with_days_and_100(_fn(yes_swapped)) is True, "인자 순서 무관 → True"
-    assert _has_min_clamp_with_days_and_100(_fn(no_tree)) is False, "클램프 부재 → False"
-    assert _has_min_clamp_with_days_and_100(_fn(no_other_literal)) is False, (
-        "100 이 아닌 상한 → False (retention 값으로 바꿔치기한 회귀를 잡는다)"
-    )
+    assert _has_min_clamp_on_days(_fn(yes_tree)) is True, "리터럴 상한 → True"
+    assert _has_min_clamp_on_days(_fn(yes_named)) is True, "명명 상수 상한 → True"
+    assert _has_min_clamp_on_days(_fn(yes_swapped)) is True, "인자 순서 무관 → True"
+    assert _has_min_clamp_on_days(_fn(no_tree)) is False, "클램프 부재 → False"
 
 
 # ---------------------------------------------------------------------------

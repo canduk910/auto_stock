@@ -704,3 +704,36 @@ cycle287 배포 시점에 두 키가 어디에도 없어 `PUT /api/strategies/{i
 ---
 
 → CHANGELOG: cycle287 · cycle290 행
+
+## 2026-09-18 — cycle300 · VCP 일봉 읽기 깊이 스위치 `daily_fetch_depth_mode`
+
+- 사용자 명시 승인. **매매 행위는 스위치를 켜야 바뀐다** — 기본값 `"cap100"` 에서
+  `fetch_days` 는 **정확히 100** 이고 배포 전후가 byte 동일하다(G-300-3 이 운영 DB 값
+  `ema_long=200` 을 넣고도 100 이 나오는지로 잰다).
+- **왜 했나 — 실효 EMA.** `effective_ema_long = min(ema_long, 보유 − long_ema_uptrend_days(20) − 5)`
+  뒤에 `_check_trend_filter` 의 `ema_mid >= ema_long → ema_mid = max(ema_short+1, ema_long−10)`
+  가 한 번 더 걸린다. 운영 DB 50/150/200 기준 실효 정렬은
+  **보유 100봉 → 50/65/75**(중기↔장기 간격 10) · **보유 225봉 → 50/150/200**(간격 50).
+  간격 10 에서는 정배열 판정이 사실상 동전던지기다 — `vcp_breakout.py` 주석이 그 상태를
+  「추세필터 0건 결함」이라 이름 붙여 두고 있었고 운영이 넉 달을 그대로 돌았다.
+  G-300-7/7b 가 이 표를 **실제 계산**(prepare 가 넘긴 `effective_ema_long` 캡처 +
+  `_check_trend_filter` 가 `_ema` 에 넘긴 period 캡처)으로 봉인한다.
+- **`ema_mid`/`ema_long` 값은 건드리지 않았다.** 코드 기본값 60/120 은 100봉 세계에서 중기선
+  재축소를 피하려던 임시 회피값이고(코드 주석이 그렇게 인정한다), 클램프가 풀린 지금 정본은
+  운영 DB 의 150/200 이다. 값 변경은 별도 결정 대상이다.
+- **`min_required` 는 100 유지.** 올리면 DB 가 100~224봉인 구간에서 KIS 폴백이 잦아지는데,
+  KIS 폴백은 한 호출 100봉이 상한이라 **더 얕은 데이터로 바뀐다**(개선이 아니라 퇴보).
+- **키 부재 의미는 "현행 보존"** 이다 — 미지 값·`None`·비문자열·판정 예외가 전부 `"cap100"`
+  으로 낙하한다. `open_price_scope_mode`(부재=enforce)와 반대 방향인데, 그쪽은 오염 차단이
+  안전이고 이쪽은 행위 무변경이 안전이기 때문이다.
+- `PARAM_RANGES`/`INT_PARAMS` 편입 금지(G-300-5, 런타임 dict + 소스 리터럴 이중). 읽기 깊이는
+  추세 필터의 실효 EMA 를 통째로 바꾸므로 AI 야간 튜닝 대상이 아니다.
+- PUT 이 통하려면 `DEFAULT_PARAMS` 와 `param_catalog` **양쪽** 등재가 필요하다
+  (`param_validation` 의 미지 키 판정 = `key not in current_params or spec is None`).
+  카탈로그 101→102, `risk="identity"` 15→16, `CATALOG_VERSION` `cycle290.1`→`cycle300.1`,
+  골든 픽스처 2종 재생성.
+- funnel `step_conditions` 라벨 2줄의 기준을 `KIS_DAILY_CANDLES_MAX` 리터럴에서 그날 실제
+  `fetch_days` 로 옮겼다 — 안 그러면 `"full"` 에서 화면만 100봉 세계에 남아 거짓말을 한다.
+- ⚠️ 이 사이클 중 다른 에이전트의 동시 편집으로 `vcp_breakout.py` 가 04:52 에 HEAD 로 한 번
+  되돌아갔다(내 편집과 상대 편집이 함께 사라졌다). 재적용 후 sha 핀 12파일을 cycle300 이
+  몰아서 다시 박았다. 같은 파일을 두 사이클이 동시에 열면 핀이 서로를 덮는다.

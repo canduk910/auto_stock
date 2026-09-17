@@ -59,6 +59,20 @@ _KIS_KEY_PRTT_RATE = "prtt_rate"
 # Batch upsert 단위 — Supabase HTTP/2 stale connection 회피 (사이클 26 답습)
 _BATCH_SIZE = 100
 
+# cycle300 — `get_recent_daily` 읽기 상한(행). 이 수가 정하는 것은 "한 번에 몇 행까지
+# 돌려주는가" 이고, 행을 돌려주는 읽기 4함수(`get_donchian_high`·`get_atr`·
+# `get_recent_daily_with_fallback`·`get_recent_daily_normalized`)가 전부 이 관문을 지난다.
+#
+# 400 인 근거는 위아래 두 경계다.
+#   위 — retention `DAILY_RETENTION_DAYS=390` 달력일이 보유할 수 있는 영업일은 약 261 이고
+#        (환산 앵커 = 사이클196 실측 230cal ⇄ 154영업일), VCP 의 full 요청은
+#        `ema_long(200) + base_max_days(75) + 10 = 285` 다. 둘 다 400 아래라 관문이
+#        DB 가 실제로 들고 있는 행이나 전략의 요청을 **조용히 자르지 않는다**.
+#   아래 — 무한대로 두지 않는다. 오염된 파라미터나 호출 버그가 그대로 `LIMIT` 에 실려
+#        한 종목 조회가 테이블 전체 스캔이 되는 것을 막는 폭주 방어선이다.
+# 🔴 `min()` 구조 자체를 지우지 않는다 — 지우면 이 방어선이 함께 사라진다.
+_MAX_DAILY_ROWS = 400
+
 
 def _safe_int(value, default: int = 0) -> int:
     """문자열/숫자 → int 변환. 빈 값/예외 시 default 반환 (graceful)."""
@@ -260,15 +274,15 @@ async def get_recent_daily(ticker: str, days: int = 20) -> list[dict]:
 
     Args:
         ticker: KRX 6자리 단축코드.
-        days: 조회 일수 (1~100, KIS 호출 한도와 정합).
+        days: 조회 일수 (1~`_MAX_DAILY_ROWS`). 상한을 넘으면 상한으로, 0 이하는 1 로 자른다.
 
     Returns:
         list[dict] — raw row 그대로. 미존재 시 빈 list (graceful).
         [{"ticker", "bas_dd", "open_price", "high_price", "low_price",
           "close_price", "volume", "trade_value", "change_rate", "raw"}, ...]
     """
-    # KIS 호출 한도 100일과 정합 + 최소 1일 가드
-    clamped = max(1, min(days, 100))
+    # 폭주 방어 상한(`_MAX_DAILY_ROWS`) + 최소 1행 가드.
+    clamped = max(1, min(days, _MAX_DAILY_ROWS))
 
     try:
         rows = await pg.fetch(

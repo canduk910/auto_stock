@@ -153,7 +153,7 @@ _BASE_SHA = {
     "src/engine/strategies/momentum.py":
         "50d5c0b9a232d6110f6b85fc524569853f2b8edffe2fd44adc24289800b95ae2",
     "src/engine/strategies/vcp_breakout.py":
-        "bbebddd45780a9e19f8bb3c69557d4db50fffc61e8e9da20564476a1be9598a0",
+        "edffcc226d3c60412d2b95fa2202a9401d09934050f0aa3100ee8146f6e07b85",
     "src/engine/strategies/volatility_breakout.py":
         "d13efaa4a9424e2822b5476ce159987d2a5192a4bca30af3f1a0cae9c3ffcabc",
 }
@@ -276,7 +276,11 @@ _SRC_TREE_FILES = 153
 #: ③ 사용자 요청("데이터 지금 바로 채울 수는 없어?")으로 `api/condition.py` 의 깊이 환산에
 #: 휴일 보정을 비례로 얹어 1회 backfill 이 target 을 넘게 했다(225 영업일 목표 → 실도달
 #: 232). 🔴 stride(윈도우 간격)는 7/5 그대로다 — 키우면 윈도우 사이에 구멍이 생긴다.
-#: `engine/scanner.py` 는 ③ 에서 무접촉이라 8영역 sha 핀 13곳은 ② 의 값을 유지한다. 두 상수는 함께 움직인다 —
+#: `engine/scanner.py` 는 ③ 에서 무접촉이라 8영역 sha 핀 13곳은 ② 의 값을 유지한다.
+#: ④ 커밋 전 감사에서 운영자에게 보이는 낡은 인과 2건을 고쳤다 — `engine/param_catalog.py` 의
+#: `donchian_period`·`volume_period` help(상한의 근거는 retention 이 아니라 100행 읽기 클램프다) ·
+#: `engine/strategies/vcp_breakout.py` 의 100일 cap 근거 주석(적재 깊이는 이제 225영업일이다).
+#: 둘 다 문자열·주석뿐이고 `VcpBreakoutStrategy.prepare` 는 **AST dump 동일**을 확인했다. 두 상수는 함께 움직인다 —
 #: target > 보유 영업일이면 매일 밤 전량 재backfill churn 이다(cycle196 이 시정한 결함).
 #: 파일 수는 **153 으로 불변**(신규 파일 0 — 이 사이클의 신규는 테스트뿐이다).
 #: cycle298 후속 착지(= cycle299 착수) 값은
@@ -289,8 +293,20 @@ _SRC_TREE_FILES = 153
 #: 휴일 보정을 비례로 얹어 1회 backfill 이 target 을 넘게 했다(225 영업일 목표 → 실도달
 #: 232). 🔴 stride(윈도우 간격)는 7/5 그대로다 — 키우면 윈도우 사이에 구멍이 생긴다.
 #: `engine/scanner.py` 는 ③ 에서 무접촉이라 8영역 sha 핀 13곳은 ② 의 값을 유지한다.
+#: ④ 커밋 전 감사로 `engine/param_catalog.py` help 2건과 `engine/strategies/vcp_breakout.py`
+#: 주석을 고쳤으나, **그 두 변경은 핀을 동반하지 않아 CI 를 붉혔고 핫픽스 2건
+#: (`08a2138`·`96e46ce`)이 되돌렸다.** 그래서 cycle299 가 최종적으로 남긴 것은 ①~③ 뿐이다.
+#: ⑤ cycle300 — 읽기 100행 클램프 해제. `db/stock_master_daily.py` 에 `_MAX_DAILY_ROWS=400`
+#: (`min()` 구조 유지 = 폭주 방어 존속) · `engine/strategies/vcp_breakout.py` 에 VCP 전용
+#: 스위치 `daily_fetch_depth_mode`(기본 `cap100` = 행위 byte 동일) · `engine/param_catalog.py`
+#: 에 그 키 스펙 1건(101→102). ④ 가 되돌려진 help·주석도 이 사이클이 **다시 썼다** —
+#: 클램프가 400 이 되면 "100봉만 온다" 는 인과 자체가 틀리므로 두 번 고치지 않고 한 번에
+#: 썼다. 매매 행위는 스위치를 `full` 로 PUT 해야 비로소 바뀐다.
+#: 🔴 이 사이클의 교훈 = **이 파일을 포함한 핀 5종을 파일 확정 뒤 한 값으로 동시에 옮긴다**
+#: (`vcp_breakout.py` 전체 7곳 · `param_catalog.py` 전체 3곳 · `DEFAULT_PARAMS` 세그먼트 ·
+#: `prepare` 세그먼트 2곳 · 이 digest). 하나라도 빠지면 CI 가 붉는다.
 _SRC_TREE_DIGEST = (
-    "55e65450f691eaa7d5d81b92b468a0f488407da20b5bf0b2ac025cf81392498e"
+    "47261de8e294002f5984745a204fb5a8bda556a267284c696319891dfe707d69"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

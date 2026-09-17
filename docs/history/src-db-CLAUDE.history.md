@@ -807,3 +807,26 @@ target 220 → 마진 34 영업일(사이클196 의 34 와 같다). `fetch_daily
   움직인 것은 `test_cycle287::_SRC_TREE_DIGEST` 하나다.
 - **호출자** — `fetch_daily_candles_backfill` 의 프로덕션 호출자는 `scanner._stock_master_daily_load_once`
   **하나뿐**임을 `grep` 으로 재확인했다. 별도 함수 `fetch_daily_candles` 는 무접촉이다.
+
+## 2026-09-18 — cycle300 · 읽기 100행 클램프 해제 (`_MAX_DAILY_ROWS = 400`)
+
+- 사용자 명시 승인("100행 클램프도 해결하자" · "(오늘 켜는가) 응 켜야지").
+- `get_recent_daily` 의 `clamped = max(1, min(days, 100))` 을 `max(1, min(days, _MAX_DAILY_ROWS))`
+  로 바꿨다. **구조는 그대로 둔 채 상한만 올렸다** — `min()` 을 지우면 오염된 파라미터나 호출
+  버그가 그대로 `LIMIT` 에 실려 한 종목 조회가 전체 스캔이 된다.
+- **400 의 근거는 위아래 두 경계다.** 위 = retention 390 달력일이 보유하는 약 261 영업일과
+  VCP full 요청 `ema_long(200) + base_max_days(75) + 10 = 285` 가 둘 다 400 아래라 관문이
+  실데이터도 요청도 자르지 않는다. 아래 = 무한대로 두지 않는다(폭주 방어).
+  두 부등식을 `test_cycle300_daily_depth_switch.py::test_g300_2/2b` 가 프로덕션 상수끼리
+  비교해 잰다 — 테스트에 숫자를 박지 않았다.
+- **다른 소비처는 1행도 바뀌지 않는다.** 클램프가 `min()` 이라 100 이하 요청은 요청값이
+  그대로 실린다 — donchian 20 · `get_atr(14)`→15 · 매크로 ETF 90 · LLM 60 · kojiro 100 ·
+  UI 라우트(`Query(30, ge=1, le=100)`) 전부 상향 전후 동일(G-300-6, pg.fetch 인자 캡처로 실측).
+  실제로 더 읽는 것은 VCP 가 `daily_fetch_depth_mode="full"` 일 때뿐이다.
+- **cycle299 의 G-299-7a 를 의미 전환했다.** 그 가드는 "리터럴 100 이 min() 안에 있는가" 를
+  쟀는데, 그것이 봉인하던 명제("cycle299 는 읽기 깊이를 건드리지 않았다")는 cycle299 에 대한
+  것이고 cycle300 은 바로 그 상한을 올리라는 승인을 받았다. 그래서 **클램프 구조 존재**로
+  대상을 옮기고 숫자의 근거는 cycle300 가드가 맡는다. detector self-test 도 명명 상수 케이스를
+  추가했다 — 리터럴만 잡던 탐지기는 상수화 직후 공허해진다.
+- 되돌리기 = `_MAX_DAILY_ROWS` 를 100 으로 되돌리는 한 줄. 단 그 순간 VCP `"full"` 모드도
+  함께 100 으로 잘린다(두 겹 중 한 겹만 닫는 것이라 무매매는 되지 않는다).

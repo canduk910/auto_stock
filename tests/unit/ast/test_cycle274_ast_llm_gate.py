@@ -617,7 +617,7 @@ _BASE_SHA = {
     "src/engine/strategies/kojiro.py":
         "9477790e9d20eb6d17f36fc7586ada77ac5e2e4b0136a334888244afdb7e9cbc",
     "src/engine/strategies/vcp_breakout.py":
-        "bbebddd45780a9e19f8bb3c69557d4db50fffc61e8e9da20564476a1be9598a0",
+        "edffcc226d3c60412d2b95fa2202a9401d09934050f0aa3100ee8146f6e07b85",
     "src/engine/strategies/bull_flag_breakout.py":
         "0feb3b629bab5ad08ad589315ca12e76b57a73950b948570a78dfe84ba792595",
 }

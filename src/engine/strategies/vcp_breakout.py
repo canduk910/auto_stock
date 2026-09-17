@@ -42,6 +42,36 @@ KST = timezone(timedelta(hours=9))
 logger = logging.getLogger(__name__)
 
 
+# ---------------------------------------------------------------------------
+# cycle300 — 일봉 읽기 깊이 스위치 `daily_fetch_depth_mode`
+# ---------------------------------------------------------------------------
+# `"cap100"`(기본) = 현행. `prepare` 가 100봉만 요청하므로 이 값에서는 배포 전후 행위가
+#   byte 동일하다.
+# `"full"`          = `ema_long + base_max_days + 10` 봉을 요청한다. DB 에 있는 만큼만
+#   오므로 `effective_ema_long = min(ema_long, 보유 − uptrend_days − 5)` 가 실제 보유
+#   깊이를 따라간다. 운영 DB(50/150/200)에서 보유 100봉이면 실효 정렬이 50/65/75 로
+#   잘리고(중기↔장기 간격 10 = 정배열이 동전던지기), 225봉에서 비로소 50/150/200 이 산다.
+#
+# 🔴 `PARAM_RANGES`/`INT_PARAMS` 편입 금지 — 읽기 깊이는 추세 필터의 실효 EMA 를 통째로
+#    바꾸는 진입 정체성 축이라 AI 야간 튜닝 대상이 아니다(가드 G-300-5).
+# 판정은 대소문자·공백 무시 정확 일치이고, 미지 값·결측·비문자열·예외는 전부 기본값으로
+# 낙하한다 — 이 스위치의 안전 방향은 '현행 보존' 이다.
+DAILY_DEPTH_MODE_CAP100 = "cap100"
+DAILY_DEPTH_MODE_FULL = "full"
+_DAILY_DEPTH_MODE_DEFAULT = DAILY_DEPTH_MODE_CAP100
+
+
+def resolve_daily_depth_mode(params) -> str:
+    """`daily_fetch_depth_mode` 해석 — `"full"` 정확 일치만 열고 나머지는 전부 기본값."""
+    try:
+        raw = params.get("daily_fetch_depth_mode", _DAILY_DEPTH_MODE_DEFAULT)
+        if isinstance(raw, str) and raw.strip().lower() == DAILY_DEPTH_MODE_FULL:
+            return DAILY_DEPTH_MODE_FULL
+    except Exception:
+        return _DAILY_DEPTH_MODE_DEFAULT
+    return _DAILY_DEPTH_MODE_DEFAULT
+
+
 # 사이클 47 (2026-05-22, refactor-review 카드 #3) — Funnel 단계 정의 모듈 상수.
 FUNNEL_STAGES: tuple[FunnelStage, ...] = (
     FunnelStage(1, "전체 상장 유니버스 (시총/거래대금 컷 전)"),
@@ -116,6 +146,11 @@ class VcpBreakoutStrategy(StrategyBase):
         "ema_mid": 60,
         "ema_long": 120,
         "long_ema_uptrend_days": 20,
+        # cycle300 — 일봉 읽기 깊이 스위치. 기본 "cap100" = 현행 100봉(행위 byte 동일).
+        # "full" 이면 ema_long + base_max_days + 10 봉을 요청해 실효 장기선이 보유 깊이를
+        # 따라간다. 장중 전환·롤백 = `PUT /api/strategies/vcp_breakout/params`(즉시 반영,
+        # SQL UPDATE 는 다음 재시작에서만 — cycle232 D6). PARAM_RANGES/INT_PARAMS 편입 금지.
+        "daily_fetch_depth_mode": "cap100",
         # 베이스
         "base_min_days": 25,
         "base_max_days": 75,
@@ -243,9 +278,11 @@ class VcpBreakoutStrategy(StrategyBase):
         import asyncio
 
         # 사이클 173 (2026-06-22) — 일봉 source KIS → DB 어댑터 전환 (행위 보존).
-        # ★ VCP days=100 cap 절대 유지 (원설계 220 미실현, 사이클 196) — effective_ema_long ≈75 불변.
-        #   DB 100+ 적재(backfill 120·retention ~154영업일)라도 어댑터 get_recent_daily(days=100) 가 최신 100 DESC 만 반환.
-        #   220 혜택 (EMA 원설계 복원) 은 별도 backtest 사이클 인계.
+        # cycle300 — 읽기를 막던 클램프 두 겹 중 DB 쪽(`get_recent_daily` 의 100행)은
+        #   열렸고, 여기 남은 겹은 `daily_fetch_depth_mode` 스위치가 연다. 적재 깊이는
+        #   cycle299 가 이미 확보했다(backfill target 225영업일 · retention 390달력일
+        #   ≈261영업일). 기본값 "cap100" 이라 배포 시점 행위는 byte 동일하고, "full" 로
+        #   켜야 그 깊이가 실효 장기선에 닿는다.
         from src.db.stock_master_daily import get_recent_daily_normalized
 
         p = self.config.params
@@ -259,8 +296,20 @@ class VcpBreakoutStrategy(StrategyBase):
         # 항상 True → 113→0 candle_fetch_ok 결함 (5/21 운영 사고).
         # 시정: KIS 한도 인식 cap + 가용 길이 기반 effective ema_long 자동 조정.
         # ema_long 파라미터 DB 값 (200) 변경 없음 — 런타임 가드만 추가.
+        #
+        # cycle300 — 그 100봉 cap 을 `daily_fetch_depth_mode` 가 연다. 사이클 33 의 사고
+        # (285 요청 → KIS 가 100 만 반환 → 길이 게이트 전건 탈락)는 **KIS 단일 호출** 한도
+        # 이야기였다. 지금 일봉의 정본은 DB(`get_recent_daily_normalized`)이고 DB 는
+        # cycle299 로 225영업일 이상을 들고 있으므로, full 요청은 "있는 만큼" 을 돌려받고
+        # 모자라면 아래 `effective_ema_long` 가드가 그대로 받아 낸다. KIS 폴백 경로는
+        # 여전히 한 호출 100봉이 상한이라 `min_required` 는 100 으로 둔다(올리면 DB 가
+        # 100~224봉인 구간에서 더 얕은 KIS 응답으로 바뀐다 = 퇴보).
         KIS_DAILY_CANDLES_MAX = 100
-        fetch_days = min(ema_long + base_max + 10, KIS_DAILY_CANDLES_MAX)
+        full_depth = resolve_daily_depth_mode(p) == DAILY_DEPTH_MODE_FULL
+        if full_depth:
+            fetch_days = ema_long + base_max + 10
+        else:
+            fetch_days = min(ema_long + base_max + 10, KIS_DAILY_CANDLES_MAX)
 
         self._candidates = {}
         stats = _empty_scan_stats()
@@ -326,9 +375,11 @@ class VcpBreakoutStrategy(StrategyBase):
 
         today_str = datetime.now(KST).strftime("%Y%m%d")
 
-        # 사이클 173 — DB 우선 어댑터. days=fetch_days(=100 cap) + min_required=100.
-        # 어댑터 get_recent_daily 가 min(100,100)=100 만 반환 → DB 100+ 있어도 100 만 사용
-        # → effective_ema_long ≈75 불변 (행위 보존, G-VCP-1).
+        # 사이클 173 — DB 우선 어댑터. days=fetch_days + min_required=100.
+        # cycle300 — `daily_fetch_depth_mode` 가 `fetch_days` 를 정한다: 기본 "cap100" 이면
+        # 100(행위 보존, G-VCP-1), "full" 이면 ema_long + base_max + 10. `min_required` 는
+        # 두 모드 다 100 이다 — KIS 폴백은 한 호출 100봉이 상한이라 문턱을 올리면 DB 가
+        # 100~224봉인 구간에서 더 얕은 응답으로 바뀐다.
         async def _fetch_one(ticker: str):
             try:
                 return ticker, await get_recent_daily_normalized(
@@ -531,23 +582,26 @@ class VcpBreakoutStrategy(StrategyBase):
             FUNNEL_STAGES[3],
             survived=candle_fetch_ok_tickers, excluded=candle_fetch_excluded,
             step_conditions=(
-                f"KIS 일봉 ≥ effective_ema_long"
-                f"(config {ema_long}, KIS 100일 한도로 ~{min(ema_long, KIS_DAILY_CANDLES_MAX - uptrend_days - 5)} 캡) "
+                f"일봉 ≥ effective_ema_long"
+                f"(config {ema_long}, 읽기 {fetch_days}봉 기준 ~{min(ema_long, fetch_days - uptrend_days - 5)} 캡) "
                 f"+ 우상향 {uptrend_days}일 + 5"
             ),
         )
-        # PR #15 (사이클 48) copilot 재리뷰 ① — 표기 정직화. config ema_long=120 은 KIS
-        # 100일 한도 가드로 런타임 effective ~75 로 캡됨 (예: 100일 응답 → min(120,100-20-5)=75).
-        # funnel/step_conditions 가 "120EMA" 만 박으면 실제(~75)와 불일치 → 캡을 명시.
+        # PR #15 (사이클 48) copilot 재리뷰 ① — 표기 정직화. config ema_long 은 읽기 깊이
+        # 가드로 런타임 effective 가 캡된다 (예: 100봉 응답 → min(120,100-20-5)=75).
+        # funnel/step_conditions 가 config 값만 박으면 실제와 불일치 → 캡을 명시.
+        # cycle300 — 기준을 `KIS_DAILY_CANDLES_MAX` 리터럴이 아니라 그날 실제 요청한
+        # `fetch_days` 로 잡는다. 안 그러면 `daily_fetch_depth_mode="full"` 에서 라벨만
+        # 100봉 세계에 남아 화면이 거짓말을 한다.
         _eff_long_label = min(
-            ema_long, KIS_DAILY_CANDLES_MAX - uptrend_days - 5
+            ema_long, fetch_days - uptrend_days - 5
         )
         self._record_funnel_pipeline_step(
             FUNNEL_STAGES[4],
             survived=trend_filter_pass_tickers, excluded=trend_filter_excluded,
             step_conditions=(
                 f"종가 > {p['ema_short']}EMA > {p['ema_mid']}EMA > "
-                f"장기EMA(config {ema_long}, KIS 100일 한도로 effective ~{_eff_long_label}) + "
+                f"장기EMA(config {ema_long}, 읽기 {fetch_days}봉 기준 effective ~{_eff_long_label}) + "
                 f"effective 장기EMA {uptrend_days}일 우상향"
             ),
         )

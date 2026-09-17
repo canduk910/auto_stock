@@ -184,10 +184,18 @@ _CYCLE297_AFFECTED_SIDS: frozenset[str] = frozenset({
 })
 
 
+#: cycle300(2026-09-18) — VCP 전용 일봉 읽기 깊이 스위치. 또 **다른 축**이라 위 둘과
+#: 섞지 않는다(사용자 명시 승인 "100행 클램프도 해결하자"). VCP 한 전략에만 붙는다.
+_CYCLE300_NEW_KEYS: tuple[str, ...] = ("daily_fetch_depth_mode",)
+_CYCLE300_AFFECTED_SIDS: frozenset[str] = frozenset({"vcp_breakout"})
+
+
 def _expected_new_keys(sid: str) -> set[str]:
     expected = set(_NEW_KEYS)
     if sid in _CYCLE297_AFFECTED_SIDS:
         expected |= set(_CYCLE297_NEW_KEYS)
+    if sid in _CYCLE300_AFFECTED_SIDS:
+        expected |= set(_CYCLE300_NEW_KEYS)
     return expected
 
 
@@ -711,18 +719,18 @@ def test_g290_37_help_names_the_side_effects(key: str, phrase: str) -> None:
     assert phrase in spec.help, f"`{key}` help 에 {phrase!r} 언급 없음: {spec.help[:120]}"
 
 
-def test_g290_38_catalog_spec_count_is_101() -> None:
-    """RED — 카탈로그 스펙 수 99 → **101** (중복 없음).
+def test_g290_38_catalog_spec_count_is_102() -> None:
+    """카탈로그 스펙 수 99 → **101**(cycle290) → **102**(cycle300 깊이 스위치). 중복 없음.
 
     cycle278 계열 가드 4곳(`test_cycle278_param_catalog`·`test_cycle278_params_schema`·
     `test_routes_strategies`·프론트 `_ast_param_key_hardcode`)이 같은 숫자를 세므로
-    Green 은 그 넷을 함께 옮긴다.
+    키를 늘리는 사이클은 그 넷을 함께 옮긴다.
     """
     from src.engine import param_catalog as pc
 
-    assert len(pc.PARAM_SPECS) == 101, len(pc.PARAM_SPECS)
-    assert len(pc.SPEC_BY_KEY) == 101, len(pc.SPEC_BY_KEY)
-    assert len({s.key for s in pc.PARAM_SPECS}) == 101, "키 중복"
+    assert len(pc.PARAM_SPECS) == 102, len(pc.PARAM_SPECS)
+    assert len(pc.SPEC_BY_KEY) == 102, len(pc.SPEC_BY_KEY)
+    assert len({s.key for s in pc.PARAM_SPECS}) == 102, "키 중복"
 
 
 # ===========================================================================
