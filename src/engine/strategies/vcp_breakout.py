@@ -243,13 +243,9 @@ class VcpBreakoutStrategy(StrategyBase):
         import asyncio
 
         # 사이클 173 (2026-06-22) — 일봉 source KIS → DB 어댑터 전환 (행위 보존).
-        # ★ VCP days=100 cap 유지 — effective_ema_long ≈75 불변(원설계 미실현).
-        #   🔴 데이터는 더 이상 부족하지 않다 — cycle299 가 backfill target 225영업일 ·
-        #   retention 390달력일(≈261영업일)로 열어 두었고 1회 backfill 이 목표를 넘는다.
-        #   지금 100봉으로 자르는 것은 적재 깊이가 아니라 **읽기 클램프 두 겹**이다:
-        #   `db/stock_master_daily.get_recent_daily` 의 max(1, min(days, 100)) 와 아래
-        #   KIS_DAILY_CANDLES_MAX=100. 보유 225영업일에서 실효 장기선이 정확히 200 이 되므로
-        #   그 둘을 여는 것이 원설계 복원이다 — 매매 행위를 바꾸므로 승인 + domain-consult 선행.
+        # ★ VCP days=100 cap 절대 유지 (원설계 220 미실현, 사이클 196) — effective_ema_long ≈75 불변.
+        #   DB 100+ 적재(backfill 120·retention ~154영업일)라도 어댑터 get_recent_daily(days=100) 가 최신 100 DESC 만 반환.
+        #   220 혜택 (EMA 원설계 복원) 은 별도 backtest 사이클 인계.
         from src.db.stock_master_daily import get_recent_daily_normalized
 
         p = self.config.params
