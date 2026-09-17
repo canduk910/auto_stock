@@ -258,3 +258,20 @@ stamp 우선 복원(첫 체결이 밟을 청산 경로의 P1 계약 위반 선�
 **남은 절차 = `tools/ops/rotate_basic_auth.sh` 로 Basic 자격 회전**(미실행) — 301 은
 ```
 
+
+### 2026-09-17 cycle298 이관 — `07:55` 시각 꼬리표 2곳
+
+`TIME_BOOT`(07:55) 은 런타임 참조가 0건이고 `_boot()` 는 `scheduler.start()` 안에서 즉시 돈다
+(`scheduler.py:600`, 2026-09-17 grep 전수). 아래가 그 전까지 정본에 있던 구절이다.
+
+```
+(`_load_strategy_config` 의 `_config_loaded` 가 프로세스당 1회이고 07:55 `_boot` 재호출은 no-op)
+
+`[daily_head_stale]` WARNING 이 다음 아침 07:55 에 일봉 결손을 알리고,
+```
+
+같은 꼬리표를 `src/db/CLAUDE.md:92` · `src/routes/CLAUDE.md:38` · `src/engine/strategies/CLAUDE.md:73` ·
+`README.md` 에서도 걷어냈다(구절 교체뿐이라 옮길 내용이 따로 없다). 경위 정본 =
+[`src-engine-CLAUDE.history.md`](src-engine-CLAUDE.history.md) 의 같은 날짜 항목.
+
+→ CHANGELOG: cycle298 행

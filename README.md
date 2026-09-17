@@ -256,7 +256,7 @@ cd .. && npx playwright install && npx playwright test --config=e2e/playwright.c
 1. `.env`에서 `KIS_ENV=vts` 확인
 2. 백엔드 + 프론트엔드 실행 — 「3. Docker Compose」(권장) 또는 「3-1. 로컬 직접 실행」 중 하나. 어느 쪽이든 브라우저로 `http://localhost:3000` 을 연다
 3. 대시보드에서 [시작] 버튼 클릭 → 확인 모달에서 승인
-4. 스케줄에 따라 자동매매 진행 — 07:45 자동 시작 → 07:55 부팅 → 08:00 NXT 프리 진입 → 09:00~15:30 KRX 정규장(15:20 신규 매수 중단 + 강제 청산) → 15:40 NXT 애프터 보드(`post_nxt`) 진입 → 16:00 부터 주문·시세 거래소가 KRX 애프터마켓으로 전환(16:00~20:00 실시간 체결. 보드는 20:00 까지 `post_nxt` 그대로다) → 19:50 신규 매수 중단 → 20:00 매매 종료 → 21:30 정산 + 일일 로그 분석
+4. 스케줄에 따라 자동매매 진행 — 07:45 자동 시작 + 부팅(`_boot()`) → 08:00 NXT 프리 진입 → 09:00~15:30 KRX 정규장(15:20 신규 매수 중단 + 강제 청산) → 15:40 NXT 애프터 보드(`post_nxt`) 진입 → 16:00 부터 주문·시세 거래소가 KRX 애프터마켓으로 전환(16:00~20:00 실시간 체결. 보드는 20:00 까지 `post_nxt` 그대로다) → 19:50 신규 매수 중단 → 20:00 매매 종료 → 21:30 정산 + 일일 로그 분석
 5. [정지] 버튼으로 수동 중지 가능
 
 ### 대시보드 화면
@@ -836,7 +836,7 @@ bash tools/deploy/compose_up_changed.sh   # 자동 배포와 같은 판정 · �
  ──────────────────┼──────────────────┼──────────────────┼──────────────────┼──────────────────
  07:45~07:59       │08:00~09:00       │09:00~15:40       │15:40~20:00       │20:00~21:30
  07:45 자동 시작   │08:00 익일 청산   │09:00:05 시가 확정│15:40 NXT 애프터  │20:00 애프터 종료
- 07:55 _boot       │08:00 PRE_NXT 매수│09:30 모멘텀 스캔 │      (매수 LTV)  │20:00 AI자문+적용
+       _boot 즉시  │08:00 PRE_NXT 매수│09:30 모멘텀 스캔 │      (매수 LTV)  │20:00 AI자문+적용
  07:59 사전 구독   │      (LTV)       │15:20 매수 중단   │16:00 KRX 애프터  │20:05 metrics
                    │                  │      + 강제 청산 │      마켓 개시   │20:30 일봉 적재
                    │                  │15:30 KRX 마감    │19:50 매수 중단   │21:30 정산+로그
@@ -846,7 +846,7 @@ bash tools/deploy/compose_up_changed.sh   # 자동 배포와 같은 판정 · �
 | 시각 | 동작 |
 |------|------|
 | 07:45 | 자동 매매 시작 (AUTO_START 활성 시, 주말+공휴일 자동 건너뜀 — KIS chk-holiday API) |
-| 07:55 | `_boot()` — 토큰 사전 순차 발급 (cycle20: 메인+보조 N 분당 1개 한도 직렬화) → DB 포지션 복구 → KIS 잔고 교차 검증 → 미체결 복구 → `stock_master` eager 갱신 (보유+익일청산) → 매크로 fetch + `market_regime_snapshots` INSERT → `cash_usage_ratio` 자동 조정 → 전략 prepare |
+| 07:45 직후 | `_boot()` — `start()` 안에서 즉시 돈다(자동 기동이면 07:45 직후, 수동 재기동이면 그 시각). 토큰 사전 순차 발급 (cycle20: 메인+보조 N 분당 1개 한도 직렬화) → DB 포지션 복구 → KIS 잔고 교차 검증 → 미체결 복구 → `stock_master` eager 갱신 (보유+익일청산) → 매크로 fetch + `market_regime_snapshots` INSERT → `cash_usage_ratio` 자동 조정 → 전략 prepare |
 | 07:59 | 사전 구독 — 돌파(VB/LTV) + 스윙(donchian) 스캔 종목 + 보유 포지션. WebSocket 연결 + 체결통보 + (실전) `H0UNMKO0` 구독. 유니버스 비어있으면 prepare 재실행 |
 | 08:00 | NXT 프리 진입 — 익일 청산 백그라운드 (`NEXT_DAY_STABILIZE_SECS=30s` 안정화 후 NXT 시가 청산) + `_confirm_breakout_open_prices(board="pre_nxt")` 로 NXT 프리 시가 확정(후보가 있으면 phase `pre_nxt_trading`). 프리장에서 신규 매수하는 전략은 **LTV 하나**다(`tradable_boards=("pre_nxt","main","post_nxt")`) |
 | 09:00:05 | KRX 메인 시가 확정 — `_confirm_breakout_open_prices(board="main")` VB/LTV target_price 계산 (KRX 09:00 시가 + 전일Range × `k_value_krx_main`). 직후 `_drain_pending_next_day_clear()` — 08:00 보류 종목 KRX 시장가 일괄 청산 |

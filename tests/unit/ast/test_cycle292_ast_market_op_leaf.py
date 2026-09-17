@@ -89,7 +89,7 @@ _MARKERS = (
 _LOGGER_NAME = "src.engine.scheduler"
 
 #: `scheduler.py` 정확 라인 수 + cycle257 이 세운 영구 상한.
-_SCHEDULER_LINES = 3726
+_SCHEDULER_LINES = 3757
 _SCHEDULER_LINE_CAP = 3_900
 
 #: cycle292 가 만진 **전부**인 프로덕션 3파일의 내용 sha. 붉어지면 핀을 갱신하기 전에
@@ -99,7 +99,7 @@ _SCHEDULER_LINE_CAP = 3_900
 #: 확인했다(프로덕션 호출자 0건 · 델타는 `scheduler._market_op_subs` 로 잰다).
 _BASE_SHA = {
     "src/engine/scheduler.py":
-        "9bf05ccae11bd0c12d5275f36be70863decd83f1f34d77352f505bc15e549d8a",
+        "8bc235d460d26f8da4aba9c4af5132c49347138f6d428d9ba78321c77b7cfafe",
     "src/engine/market_op_subscribe.py":
         "7d58f9464c1ed35e4fa8706d801beb5a6b5c062d5a2941f0db6482d028d3d4ac",
     "src/engine/market_operation_monitor.py":

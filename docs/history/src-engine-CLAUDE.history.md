@@ -1160,3 +1160,27 @@ enum 값은 DB 파라미터 호환 때문에 남겼다 — `session.py::MarketBo
 ```
 
 → CHANGELOG: 사이클 55 행 · 사이클 I 행 · cycle273e 행
+
+### 2026-09-17 cycle298 이관 — `TIME_BOOT` · `TIME_POST_NXT_OPEN` 이 런타임 미사용이라는 실측
+
+팀장이 `grep -rn "TIME_BOOT\|TIME_POST_NXT_OPEN" src/` 로 전수 확인한 결과, 두 상수 모두
+**런타임 참조가 0건**이었다. `_boot()` 는 `scheduler.start()` 안에서 즉시 불리고(`scheduler.py:600`),
+POST_NXT 전환과 `_confirm_breakout_open_prices(board="post_nxt")` 는 `TIME_KRX_MAIN_CLOSE`(15:30)
+대기 직후에 일어난다(`scheduler.py:865-874`). 아래가 그 전까지 정본에 있던 원문이다.
+
+```
+| `TIME_BOOT` | 07:55 | `_boot()` — 본체는 `src/engine/boot_manager.py::boot(scheduler)` 위임(2줄 wrapper). `_preissue_all_tokens()`(메인+보조 N 매니저를 분당 1개 한도로 직렬화 사전 발급) → DB positions 복구 → KIS 잔고 교차 검증 → 미체결 복구 → `_eager_refresh_stock_master_for_held_positions()`(보유 + 익일청산 후보 ticker 를 `stock_master` eager 갱신) → 매크로 fetch + `market_regime_snapshots` INSERT → `cash_usage_ratio` 자동 조정 → **`portfolio_risk.check_budget_invariant`**(`position_ratio × max_positions > 1.0` 위반 시 `[budget_invariant_violation]` WARNING, **차단 아닌 관찰**) → `allocate_funds(net_asset × ratio)` |
+
+| `TIME_POST_NXT_OPEN` | 15:40 | NXT 애프터 진입. `_confirm_breakout_open_prices(board="post_nxt")` |
+
+- `_confirm_breakout_open_prices` 보드 경계 정각 호출은 `board=...` 명시 의무 — 08:00 `pre_nxt` / 09:00:05 `main` / 15:40 `post_nxt`(`TIME_POST_NXT_OPEN` 뒤). SessionTracker 30초 race 차단
+```
+
+상수는 지우지 않았다 — 테스트 6파일이 두 상수를 참조하고, 그중
+`tests/unit/engine/scheduler/test_post_nxt_open_time.py::test_time_post_nxt_open_is_15_40` 와
+`tests/unit/engine/test_cycle92_time_boot_moved.py` 는 값 자체를 핀한다. 상수 정리는 별도 카드다.
+
+`session._BOARD_SCHEDULE` 의 보드 경계(`main` ~15:39:59 · `post_nxt` 15:40~20:00)는 **별개 축이고
+여전히 사실**이라 손대지 않았다. 고친 것은 "스케줄러가 15:40 에 무엇을 한다" 는 서술뿐이다.
+
+→ CHANGELOG: cycle298 행

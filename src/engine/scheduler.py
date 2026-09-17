@@ -870,8 +870,10 @@ class TradingScheduler:
             await self._confirm_breakout_open_prices(board="post_nxt")
 
             # NXT 애프터에서도 _scan_loop 유지 (재구독은 보드별 화이트리스트로 결정 — Phase 8)
+            # cycle298 — 이 경로엔 선행 구독이 없다. first_delay=0 으로 즉시 첫 구독해
+            # 15:30~19:50 기동의 최대 5분 시세 공백(손절/트레일링 평가 0회)을 없앤다.
             if self._scan_task is None or self._scan_task.done():
-                self._scan_task = asyncio.create_task(self._scan_loop())
+                self._scan_task = asyncio.create_task(self._scan_loop(first_delay=0))
 
             # 19:50 NXT 애프터 신규 매수 중단 (자문 호출은 20:00 으로 이동 — Phase 0, 2026-05-15)
             await self._wait_until(TIME_NXT_POST_BUY_STOP)
@@ -2356,11 +2358,28 @@ class TradingScheduler:
         if synced > 0:
             logger.info("DB 동기화 완료: %d건 주문체결 내역 추가", synced)
 
-    async def _scan_loop(self) -> None:
-        """주기적으로 종목을 스캔하고 구독을 업데이트한다."""
+    async def _scan_loop(self, *, first_delay: float | None = None) -> None:
+        """주기적으로 종목을 스캔하고 구독을 업데이트한다.
+
+        cycle298 — `first_delay` 는 호출부가 첫 회차 진입 지연을 정한다(키워드 전용).
+        `None`(기본값) 이면 현행(SCAN_INTERVAL) 과 byte 동일. 비수치·음수는 [0, SCAN_INTERVAL]
+        안의 안전값으로 폴백한다(예외로 루프를 죽이지 않는다). 2회차부터는 항상 SCAN_INTERVAL.
+        상세 = `_workspace/red/cycle298_scan_loop_subscribe_first_spec.md`.
+        """
         sync_counter = 0
+        _loop_entered_mono = _time_mod.monotonic()
+        _first_round = True
+        if first_delay is None:
+            delay = SCAN_INTERVAL
+        else:
+            try:
+                delay = min(float(SCAN_INTERVAL), max(0.0, float(first_delay)))
+            except (TypeError, ValueError):
+                delay = SCAN_INTERVAL
+        _first_delay_value = delay
         while self._running:
-            await asyncio.sleep(SCAN_INTERVAL)
+            await asyncio.sleep(delay)
+            delay = SCAN_INTERVAL
             if not self._running:
                 break
             try:
@@ -2383,6 +2402,18 @@ class TradingScheduler:
                     tickers, extra_tickers=extra, source_counts=source_counts,
                     priority_groups=priority_groups,
                 )
+
+                # cycle298 §6 — 첫 회차 구독 직후 관측 1행 (never-raise, 첫 회차에만).
+                if _first_round:
+                    try:
+                        _elapsed_s = _time_mod.monotonic() - _loop_entered_mono
+                        logger.info(
+                            "[scan_loop_first_subscribe] first_delay=%s elapsed_s=%.3f n=%d",
+                            _first_delay_value, _elapsed_s, len(new_set),
+                        )
+                    except Exception:
+                        pass
+                    _first_round = False
 
                 # VB/LTV 빈 _targets 자동 재 prepare 가드 (KIS 5xx 회복)
                 # 07:50 _boot / 09:00:05 재 prepare 가 일시장애로 실패해 _scanned_tickers 가

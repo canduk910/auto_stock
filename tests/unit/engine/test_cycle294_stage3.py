@@ -1455,7 +1455,7 @@ async def test_h1_off_is_indistinguishable_from_the_pre_deploy_world(
 # 스코프 (G-294-12) — 행위 파일에서도 한 번 더 못박는다
 # ===========================================================================
 def test_scope_scheduler_and_strategies_are_untouched() -> None:
-    """스코프 — `scheduler.py` 3,726L · 전략 7파일 무접촉.
+    """스코프 — `scheduler.py` 3,757L(cycle298 재핀) · 전략 7파일 무접촉.
 
     상세 sha 핀은 AST 자매 파일(A1/A2)에 있다. 여기 한 줄을 둔 이유는 행위 파일만
     돌린 사람도 스코프 위반을 즉시 보게 하기 위해서다.
@@ -1464,6 +1464,6 @@ def test_scope_scheduler_and_strategies_are_untouched() -> None:
 
     root = pathlib.Path(__file__).resolve().parents[3]
     lines = len((root / "src/engine/scheduler.py").read_text(encoding="utf-8").splitlines())
-    assert lines == 3726, (
-        f"scheduler.py = {lines}L (착수 시점 3,726L) — 무접촉 계약 위반(절대 규칙 7)"
+    assert lines == 3757, (
+        f"scheduler.py = {lines}L (착수 시점 3,726L → cycle298 재핀 3,757L) — 무접촉 계약 위반(절대 규칙 7)"
     )

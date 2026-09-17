@@ -255,7 +255,8 @@ TradingScheduler (scheduler.py)
 ─────────────────────────────────────────────────────────────────────────
 07:45  run_daily() 기상       (TIME_AUTO_START)
        │
-07:55  _boot()                 (TIME_BOOT)
+       _boot()                 (start() 안에서 즉시 — 07:45 자동 기동이면 그 직후.
+       │                        TIME_BOOT(07:55) 는 런타임 미사용 상수다)
        ├─ get_token() ──────────────────────────────────────→ POST /oauth2/tokenP
        ├─ _load_strategy_config() ←── DB strategy_config
        │   (tradable_boards / k_value_* / exchange 포함)
@@ -335,8 +336,10 @@ TradingScheduler (scheduler.py)
        │  실제 활성 보드의 정본은 DB `strategy_config.params.tradable_boards` 다
        │  손절·트레일링·익일청산 평가는 보드와 무관하게 계속 돈다
        │
-15:40  POST_NXT 보드 진입                     (TIME_POST_NXT_OPEN)
+15:40  POST_NXT 보드 진입                     (session._BOARD_SCHEDULE)
        │  SessionTracker 보드 = post_nxt  (15:30~15:40 은 MAIN 유지 = 종가 흡수 마진)
+       │  보드 경계의 정본은 `_BOARD_SCHEDULE` 이다. TIME_POST_NXT_OPEN(15:40) 은
+       │  같은 값이지만 런타임 미사용 상수이고, 스케줄러의 전환·시가 확정은 위 15:30 이다
        │  시장 구간 정본 = `market_state.MARKET_TABLE`
        │     KRX 15:30~16:00 장후 시간외 종가(K5) · 16:00~20:00 애프터마켓(K6)
        │     NXT 15:30~15:40 애프터 단일가(N5) · 15:40~20:00 애프터마켓(N6)
@@ -358,7 +361,7 @@ TradingScheduler (scheduler.py)
        │  ※ 같은 20:00 이 기동 거부 경계   (TIME_SESSION_START_CUTOFF, cycle283 D4)
        │    — 이 시각 이후 `start()` 는 거부된다. 20:00~21:30 재기동은 그날 20:30
        │      일봉 적재를 통째로 잃는다(다음 영업일 아침 immediate 가 보정하지만
-       │      07:55 prepare 보다 늦다 → `[daily_head_stale]` WARNING)
+       │      `_boot()` 의 prepare 보다 늦다 → `[daily_head_stale]` WARNING)
        │
 20:05  run_daily_metrics_snapshot()           (TIME_METRICS_SNAPSHOT, cycle283 D5)
        │  ├─ collect_daily_log_metrics() ─────→ DB system_logs / trade_history
@@ -1462,7 +1465,7 @@ import 하는 **공통 라이브러리**(`market_state` 처럼 순수) ② "오�
 | 소유 | 시각 작업 · 루프 (예시) |
 |------|--------------------------|
 | W | `TIME_PRESUBSCRIBE`(07:59) · `_stale_watcher_loop`(120s) · `_detect_silent_inactive_sessions` · `_evaluate_universe_guard` · `_report_tick_coverage` · `_session_health_loop` |
-| R | `TIME_BOOT` 토큰 선발급 · `TIME_STOCK_MASTER_*`(16:10/16:30/16:40) · 일봉 적재(20:30) · 유니버스 적재(20:00:05) |
+| R | `_boot()` 토큰 선발급(기동 직후) · `TIME_STOCK_MASTER_*`(16:10/16:30/16:40) · 일봉 적재(20:30) · 유니버스 적재(20:00:05) |
 | 1 | `_scan_loop`(9:30~) · `_confirm_breakout_open_prices`(9:00:05) · `_swing_buy_poll_loop` · `_swing_rest_poll_loop` · 퍼널 캡처(16:20) |
 | 2 | 익일청산 8:00 · 15:20 `_force_clear_main_only` · 19:50 NXT 매수 중단 |
 | 3 | `_sync_orders_to_db` · `_sync_positions_from_balance` (KIS 진실과 장부 재대조) |

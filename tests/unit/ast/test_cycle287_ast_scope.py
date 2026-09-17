@@ -254,8 +254,17 @@ _SRC_TREE_FILES = 153
 #: 태우지 않았고 그래서 이 결함을 못 잡았다).
 #: cycle296/297 착지 값은
 #: `c1df70acc5c048cb23330cc337095b21bd7e3270063b3772481f2412d7ae7f3e` 였다.
+#: ⚠️ **cycle298(재기동 시 시세 구독 공백 시정, 2026-09-17) 기준선으로 갱신.**
+#: 움직인 파일 1 = `engine/scheduler.py`(`_scan_loop` 첫 회차 지연을 호출부가
+#: 정하도록 시그니처 확장 + 15:30 POST_NXT 전환 호출부 `first_delay=0` 배정 +
+#: 관측 마커 1행). 파일 수는 **153 으로 불변**(신규 파일 0). NUMERIC 직렬화
+#: 시정 착지 값은 `06fef48ad7b3094b4a1041b23a6a627b191931bd0fd72b74a76d0b6413261e16`
+#: 였다.
+#: ⚠️ **cycle298 후속(2026-09-17) — `first_delay` 상한 결손 Green 1건으로 재갱신.**
+#: `_scan_loop` 의 `min(SCAN_INTERVAL, max(0.0, float(first_delay)))` 한 줄 치환뿐
+#: (라인 수 불변 3,757). 파일 수 **153 불변**(신규 파일 0).
 _SRC_TREE_DIGEST = (
-    "06fef48ad7b3094b4a1041b23a6a627b191931bd0fd72b74a76d0b6413261e16"
+    "12d793b51d82228e755ded6748177dcb7ba2ae64a2246d528900bc808965b9b9"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
@@ -268,7 +277,7 @@ _PINNED_DIRS = ("src/realtime", "src/auth", "src/engine/strategies", "src/engine
 #: 신규 leaf `src/engine/market_op_subscribe.py` 로 추출해(행위 변경 0 · 5줄
 #: 위임 wrapper) 3,897 → 3,726 이 됐다. 값만 옮긴다 — 정확 핀을 상한 핀으로
 #: 완화하면 cycle287 의 무접촉 대리 지표가 사라진다.
-_SCHEDULER_LINES = 3726
+_SCHEDULER_LINES = 3757
 _SCHEDULER_LINE_CAP = 3900
 
 #: 손대지 않기로 한 **원문 구간**의 sha256 (base `a42f519`).

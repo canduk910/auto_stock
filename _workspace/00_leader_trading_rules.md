@@ -222,7 +222,7 @@ KIS MCP 4질의 결과(2026-05-11) **CTPF1002R(주식기본조회) 응답의 두
 
 **Primary 판별**: `stock_master` 테이블(24h TTL 캐시) → `inquire_stock_basics(ticker)` (CTPF1002R)
 - Lazy: 매수 진입/익일 청산 직전 조회 → miss/stale 시 KIS 호출 후 upsert
-- Eager(향후): `_boot()`(07:55, `scheduler.TIME_BOOT`)에서 후보 일괄 갱신 (1차에서는 Lazy만)
+- Eager(향후): `_boot()`(기동 직후)에서 후보 일괄 갱신 (1차에서는 Lazy만)
 
 **Fallback**: stock_master 조회 실패 또는 미보강 종목 → 기존 WebSocket 시가 수신 휴리스틱 유지
 - `ticker_prices[ticker]["open_price"] > 0` (또는 `_resolve_open_price` 폴링) → NXT 거래 가능 추정
@@ -309,7 +309,7 @@ KIS MCP 4질의 결과(2026-05-11) **CTPF1002R(주식기본조회) 응답의 두
 - ETF/ETN 제외
 - 최대 100종목
 
-### 데이터 준비 (07:55 `_boot()` 시점)
+### 데이터 준비 (`_boot()` 시점 = 기동 직후)
 - 각 종목의 최근 22일 일봉 데이터(시/고/저/종) 조회 (KIS FHKST03010100, 100일 응답)
 - candles[0]이 오늘이면 candles[1]을 "전일"로 사용 (장 시작 전 빈/부분봉 방어)
 - 종목별 K값 계산 + 전일 Range로 `target_offset_base` 산출
@@ -443,7 +443,7 @@ VB와 동일.
 - 시가총액 컷 `min_market_cap` 기본 **500억**(Q2=D 임시 완화, 원본 3,000억), 스캔 상한 `max_scan_stocks=400`
 - 스캔 단계 거래대금 컷 `min_trade_amount` 기본 **10억**(원본 50억)이 별도로 적용되며, prepare() 의 `volume_multiplier`(기본 1.5×)는 그와 별개의 20일 평균 대비 조건
 
-### 진입 조건 (07:55 prepare)
+### 진입 조건 (`_boot()` prepare)
 1. 어제 종가가 최근 20일 신고가 돌파 (`donchian_period`)
 2. 어제 종가가 60일 EMA 위 + EMA 우상향 (`long_ma_period`)
 3. 어제 거래대금 ≥ 20일 평균 × `volume_multiplier`(1.5)
@@ -474,7 +474,7 @@ VB와 동일.
 #### high_since_buy 일봉 폴백
 - **`recompute_held_atr()` 직후 또는 함께 `high_since_buy` 일봉 보정** — 매수일 다음 영업일~전영업일까지의 KIS 일봉 high max로 복구. 시세 미수신 누적으로 chandelier 트레일링 손절선이 매수가 부근에 동결되는 결함 차단 (2026-05-12 이마트 사례)
 - 대상: **donchian_swing · vcp_breakout · kojiro**. 헬퍼 `_apply_high_since_buy_from_candles` 는 `StrategyBase` **단일 진실원**(전략별 복사본 금지 — AST 재발 가드). kojiro 는 `recompute_held_atr` 이 **이미 fetch 한 일봉 응답을 재사용**해 호출하므로 KIS 추가 호출이 0이다
-- ⚠️ **영속이 없으면 트레일링은 매일 아침 죽는다** — `risk.on_tick` 은 메모리만 올리고 `_boot()`(매 영업일 07:55)은 DB row 로 Position 을 재생성한다. 복구가 없으면 보유 종목의 DB `high_since_buy` 가 `buy_price` 에 머물러 2.5ATR 샹들리에가 `buy − 2.5×ATR` 로 주저앉고 하드손절과 구분되지 않는다(2026-08-06 보유 7종목 전부 실측). **신규 보유형 전략은 이 복구를 반드시 배선한다.**
+- ⚠️ **영속이 없으면 트레일링은 매일 아침 죽는다** — `risk.on_tick` 은 메모리만 올리고 `_boot()`(매 영업일 기동 직후)은 DB row 로 Position 을 재생성한다. 복구가 없으면 보유 종목의 DB `high_since_buy` 가 `buy_price` 에 머물러 2.5ATR 샹들리에가 `buy − 2.5×ATR` 로 주저앉고 하드손절과 구분되지 않는다(2026-08-06 보유 7종목 전부 실측). **신규 보유형 전략은 이 복구를 반드시 배선한다.**
 - 보정 조건: `pos.buy_date < today_kst` 인 보유 포지션만. 매수일 당일/미래일은 skip (당일은 `buy_price`가 진실, 미래일은 비정상 → WARNING)
 - 보정값: `max(pos.high_since_buy, max(eligible_daily_highs))` — 일봉 응답 후 매수일 < bsop_date < today 범위 필터 → 일별 `stck_hgpr` max
 - DB 영속화: 보정값이 기존 high_since_buy 초과 시 `update_high(ticker, new_high)` (또는 `save_position`)로 UPDATE + `system_logs` `[high_since_buy_recover]` prefix 1행
@@ -510,13 +510,13 @@ donchian_swing 은 멀티데이 보유 + ATR×2 Chandelier + 하드 손절 전�
 
 ### 종목군
 - KOSPI + KOSDAQ 전체에서 사후 필터.
-- **유니버스 소스 = `stock_master.list_by_filter`(사전 적재 DB)** — 스캔 시점에 KIS 를 직접 호출하지 않는다. 거래대금 컷은 **전일 확정치**여야 한다(당일 누적 거래량으로 재면 07:55 prepare 에서 항상 0이 되어 유니버스가 매일 0종목이 된다).
+- **유니버스 소스 = `stock_master.list_by_filter`(사전 적재 DB)** — 스캔 시점에 KIS 를 직접 호출하지 않는다. 거래대금 컷은 **전일 확정치**여야 한다(당일 누적 거래량으로 재면 `_boot()` prepare 에서 항상 0이 되어 유니버스가 매일 0종목이 된다).
 - **시가총액 ≥ 100억** (`min_market_cap`, 기본 10_000_000_000 — 사용자 결정: kojiro 500억보다 낮게 유지해 소형주 포함, 라이브 DB 값 정합)
 - **거래대금 ≥ 15억** (`min_trade_amount`, 기본 1_500_000_000 — 2026-08-08 확대 20억→15억. 도메인 B2: BFB 는 장중 돌파 추격이라 전 전략 중 슬리피지 최대 노출 → kojiro 10억까지 내리지 않고 완만한 15억으로 유동성 바닥 보존. 추격도 BFB>VCP>kojiro 에 비례한 차등)
 - ETF/ETN 제외 (기존 키워드 컨벤션 재사용 — KODEX/TIGER/RISE/KoAct/PLUS/TIMEFOLIO/WOORI/FOCUS/인버스/레버리지)
 - 최대 4000종목 (`max_scan_stocks`, 100→확대 — 전체 filtered 커버, `refreshed_at DESC` 임의 절단 소멸. BFB 는 이미 지수 무제약이라 실질 확대의 핵심 레버)
 
-### 데이터 준비 (07:55 prepare)
+### 데이터 준비 (`_boot()` prepare)
 - 종목별 일봉 **44일치**(폴 10 + 플래그 10 + ATR 14 + 여유 10) — `get_recent_daily_normalized(ticker, days=44, min_required=35)` (DB 우선 어댑터, 사이클 173). `fetch_daily_candles` 는 재시작 복구 경로 전용
 - `candles[0]==오늘`이면 `candles[1]`을 전일로 사용 (부분봉 가드, VB/LTV/donchian 컨벤션 재사용)
 
@@ -651,7 +651,7 @@ donchian_swing 의 정공법(신고가 직진 추격)을 보강하는 추세추�
 - ETF/ETN 제외
 - 최대 4000종목 (`max_scan_stocks`, 200→확대 — 전체 filtered 커버, `refreshed_at DESC` 임의 절단 소멸)
 
-### 데이터 준비 (07:55 prepare)
+### 데이터 준비 (`_boot()` prepare)
 - 종목별 일봉 **100일** — `get_recent_daily_normalized(ticker, days=fetch_days, min_required=100)` (DB 우선 어댑터, 사이클 173). `fetch_days = min(ema_long + base_max + 10, 100)` — KIS 단일 호출 100일 한도 cap 이라 원설계 220일은 **미실현**이고 `effective_ema_long ≈ 75` 가 유지된다(사이클 196). `fetch_daily_candles` 는 재시작 복구 경로 전용
 - `candles[0]==오늘`이면 `candles[1]`을 전일로 사용 (부분봉 가드)
 
@@ -823,15 +823,15 @@ BFB/VCP 매수 신호는 (donchian 의 폴링 루프와 달리) `risk.on_tick`(W
 | 시각 | 동작 |
 |------|------|
 | 07:45 | 자동 매매 시작 (`AUTO_START` + DB 재확인. 주말+공휴일 KIS chk-holiday로 자동 건너뜀) |
-| 07:55 | 프로세스 기동, OAuth 토큰 갱신, DB 포지션/설정 복구, 전략별 자금 분배, 전략 prepare(일봉/K값/전일종가/도치안 단계별 통계) — 사이클 92 (2026-06-10): 07:50 → 07:55 (KIS 07:50 강제 중단 후 5분 마진) |
-| 07:59 | WebSocket 연결, **체결통보(H0STCNI0/9) 구독** + **통합 장운영정보(H0UNMKO0/005930) 구독** + 사전 구독(돌파+스윙+보유 합집합) — 사이클 92: 07:55 → 07:59 (_boot 완료 후 4분 마진, race 회피) |
+| 07:45 직후 | `_boot()` — 프로세스 기동, OAuth 토큰 갱신, DB 포지션/설정 복구, 전략별 자금 분배, 전략 prepare(일봉/K값/전일종가/도치안 단계별 통계). `start()` 안에서 **즉시** 돌기 때문에 자동 기동이면 07:45 직후이고, 수동 재기동이면 그 시각이다 |
+| 07:59 | WebSocket 연결, **체결통보(H0STCNI0/9) 구독** + **통합 장운영정보(H0UNMKO0/005930) 구독** + 사전 구독(돌파+스윙+보유 합집합). `_boot()` 완료 뒤로 띄워 race 를 피한다 |
 | 08:00 | NXT 프리 진입 — 익일 청산 백그라운드(30초 안정화 후 NXT 시가 청산) + 돌파 시가 확정(`board="pre_nxt"`) + LTV PRE_NXT 매수 시작(VB 는 MAIN 전용 — 프리장은 보유 매도만) |
 | 09:00:05 | KRX 메인 시가 확정 — VB/LTV `board="main"` 별도 시가 + KRX 09:00 시가 + (전일Range × `k_value_krx_main`) Target_Price 계산 → MAIN 매매 진입 |
 | 09:05~09:30 | donchian_swing 진입창 — 시장가 1주문/종목, 갭 +3%↑ 스킵 |
 | 09:30 | 모멘텀 종목 스캔 시작. 5분 주기 `_scan_loop` 시작(돌파+스윙+보유 합집합 재구독) |
 | 15:20 | KRX 메인 신규 매수 중단 + KRX 메인 강제 청산(`_force_clear_main_only`) — 청산 목록은 각 전략 `check_force_clear()` 가 정한다(VB 전량 · LTV 는 `_limit_up_reached` 상한가 모드만 제외) |
-| 15:30 | KRX 메인 마감 (종가 흡수 마진 시작, `_force_clear_main_only` 가드 기준) |
-| 15:40 | NXT 애프터 진입 — LTV 는 POST_NXT 신규 매수, VB 는 보유 매도만 (15:39:10 사전 구독) |
+| 15:30 | KRX 메인 마감 (종가 흡수 마진 시작, `_force_clear_main_only` 가드 기준). 스케줄러는 여기서 `post_nxt_trading` 으로 넘어가고 `_confirm_breakout_open_prices(board="post_nxt")` 를 부른다 — `post_nxt` **보드**가 열리는 15:40 보다 10분 앞선다 |
+| 15:40 | NXT 애프터 진입 — LTV 는 POST_NXT 신규 매수, VB 는 보유 매도만 |
 | 16:10 | KIS CTPF1002R 종목 basics 매스 보강 |
 | 16:15 | 일봉 retention purge (`DAILY_RETENTION_DAYS`) |
 | 16:20 | 저녁 잠정 funnel 캡처 (운영자 밤 후보 확인) |
@@ -870,14 +870,14 @@ BFB/VCP 매수 신호는 (donchian 의 폴링 루프와 달리) `risk.on_tick`(W
 | 상수 | 값 | 의미 |
 |---|---|---|
 | `TIME_AUTO_START` | 07:45 | 자동 매매 시작 |
-| `TIME_BOOT` | 07:55 | 프로세스 부트 (KIS 07:50 강제 중단 후 5분 마진) |
+| `TIME_BOOT` | 07:55 | **런타임 미사용** — `_boot()` 는 `start()` 안에서 즉시 돈다(07:45 자동 기동이면 그 직후). 값만 테스트가 핀한다 |
 | `TIME_PRESUBSCRIBE` | 07:59 | 사전 구독 (_boot 완료 후 4분 마진, race 회피) |
 | `TIME_PRE_NXT_OPEN` | 08:00 | NXT 프리 진입 (익일 청산 + LTV PRE_NXT) |
 | `TIME_KRX_OPEN_CONFIRM` | 09:00:05 | KRX 메인 시가 확정 |
 | `TIME_SCAN_START` | 09:30 | 모멘텀 스캔 |
 | `TIME_KRX_MAIN_BUY_STOP` | 15:20 | KRX 메인 매수 중단 + 강제 청산 |
 | `TIME_KRX_MAIN_CLOSE` | 15:30 | KRX 메인 마감 (종가 흡수 마진 시작, `_force_clear_main_only` 가드 기준) |
-| `TIME_POST_NXT_OPEN` | 15:40 | NXT 애프터 진입 |
+| `TIME_POST_NXT_OPEN` | 15:40 | **런타임 미사용** — 스케줄러의 POST_NXT 전환과 `post_nxt` 시가 확정은 `TIME_KRX_MAIN_CLOSE`(15:30) 직후다. 보드 경계 15:40 의 정본은 `session._BOARD_SCHEDULE` 이다 |
 | `TIME_STOCK_MASTER_BASICS_REFRESH` | 16:10 | KIS CTPF1002R 매스 보강 |
 | `TIME_STOCK_MASTER_DAILY_PURGE` | 16:15 | `stock_master_daily` retention purge |
 | `TIME_EVENING_FUNNEL_CAPTURE` | 16:20 | 저녁 잠정 funnel 캡처 |
@@ -923,7 +923,7 @@ BFB/VCP 매수 신호는 (donchian 의 폴링 루프와 달리) `risk.on_tick`(W
   - 이 라우트는 `ApiResponse` 래퍼라 **4xx 를 내지 않는다** — 클라이언트는 status code 가 아니라 `success` 플래그로 분기한다. `apply_weight=true` 인데 `recommended_weight` 가 null 이면 200 + `success=false`.
   - **증액 Σ 가드**: `apply_weight=true` 이고 **증액**일 때만, 나머지 전략 현재 비중 합 + 신규값 > `1.0 + 1e-3` 이면 `success=false` + `[weight_sum_violation]` WARNING. 위치는 params/weight/DB 어떤 변경도 일어나기 **전** early return 이다. **감액은 Σ 검사 없이 항상 통과** — Σ>1 로 오염된 상태의 유일한 복구 수단이기 때문이다.
   - 적용은 `save_weights({strategy_id: w})` + `strategy.config.weight` **직접 대입**이다. `registry.update_weights()` 는 부르지 않는다(`config.enabled = weight > 0` 자동 토글 부작용 차단).
-  - **`allocate_funds()` 즉시 재호출 금지** — 다음 `_boot()`(다음 영업일 07:55)에서 자연 반영된다.
+  - **`allocate_funds()` 즉시 재호출 금지** — 다음 `_boot()`(다음 영업일 기동 직후)에서 자연 반영된다.
 - **자동 적용 `auto_apply_recommendations(target_date)`** — 20:00 자문 INSERT 직후 스케줄러가 부른다.
   - `system_config.auto_apply_enabled` 가 False/None 이면 즉시 `{applied:0, skipped:0, reason:"disabled"}`. **기본 False.**
   - `recommended_weight` 가 None 이거나 **현재 weight 이상(증액)**이면 SKIP + `[auto_apply_skip_increase]`.
@@ -1006,7 +1006,7 @@ BFB/VCP 매수 신호는 (donchian 의 폴링 루프와 달리) `risk.on_tick`(W
 - **fast window**: `FAST_WINDOW_SECS=60` / `FAST_MIN_CALLS=10` / `FAST_MAX_FAILURE_RATE=0.8` — 라벨 선택 직후 이 비율을 넘으면 재시도 backoff 없이 **즉시 메인 fallback** 한다(`get_recent_5xx_ratio(label)`).
 - **기록 대상**: 성공(`rt_cd=="0"`, 보조 라벨) → `record_success` / 5xx → `record_failure(reason=f"http_{status}")` / 보조 토큰 발급 실패 → `record_failure(reason="token_issue_fail")`. **KIS 비즈니스 거부(`rt_cd!=0`)와 네트워크 에러는 기록하지 않는다**(세션 건강과 무관하다).
 - **5xx 로그 dedupe**: 동일 `(path, label, status)` 를 `_QUOTE_5XX_DEDUPE_WINDOW=60.0`초 창으로 묶어 WARNING 1행 + 60초 주기 summary 1행(`count >= 2` 인 키만). 메인 요청 dedupe state 와 분리돼 있다.
-- **복귀 절차**: Settings UI 에서 `active=true` 토글 → **다음 영업일 `_boot()`(07:55)부터** 풀에 재참여한다. 당일 즉시 재참여는 미지원이다(동일 토큰 패턴 차단 + 운영자 진단 시간 확보). 긴급하면 컨테이너 재기동 시점에 반영된다.
+- **복귀 절차**: Settings UI 에서 `active=true` 토글 → **다음 영업일 `_boot()`(기동 직후)부터** 풀에 재참여한다. 당일 즉시 재참여는 미지원이다(동일 토큰 패턴 차단 + 운영자 진단 시간 확보). 긴급하면 컨테이너 재기동 시점에 반영된다.
 
 ### 8-10. WebSocket stale watcher 임계
 

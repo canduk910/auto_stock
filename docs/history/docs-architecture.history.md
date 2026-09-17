@@ -307,3 +307,24 @@ GitHub Secrets: `EC2_HOST`, `EC2_USERNAME`, `EC2_SSH_KEY`
 1. **문서 구조** — 15.4(3단계)를 "4단계 설계로 대체 검토 중" 으로 다시 쓸 것인가, 지금처럼
    병존시킬 것인가. 지금 문서만 읽으면 "3단계를 먼저 해야 4단계" 로 읽힐 여지가 있다.
 ```
+
+### 2026-09-17 cycle298 이관 — 5장 시퀀스의 `TIME_BOOT` · `TIME_POST_NXT_OPEN` 시각 주석
+
+두 상수는 런타임 참조가 0건이다(2026-09-17 grep 전수). 아래가 그 전까지 정본에 있던 원문이다.
+
+```
+07:55  _boot()                 (TIME_BOOT)
+
+15:40  POST_NXT 보드 진입                     (TIME_POST_NXT_OPEN)
+       │  SessionTracker 보드 = post_nxt  (15:30~15:40 은 MAIN 유지 = 종가 흡수 마진)
+
+       │      07:55 prepare 보다 늦다 → `[daily_head_stale]` WARNING)
+
+| R | `TIME_BOOT` 토큰 선발급 · `TIME_STOCK_MASTER_*`(16:10/16:30/16:40) · 일봉 적재(20:30) · 유니버스 적재(20:00:05) |
+```
+
+`15:40 POST_NXT 보드 진입` 줄 자체는 `session._BOARD_SCHEDULE` 기준으로 사실이라 남기고,
+근거 주석만 상수에서 `_BOARD_SCHEDULE` 로 바꿨다. 스케줄러의 전환·시가 확정은 같은 시퀀스의
+15:30 블록에 이미 바르게 적혀 있다.
+
+→ CHANGELOG: cycle298 행

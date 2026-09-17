@@ -89,7 +89,7 @@ AWS RDS PostgreSQL CRUD 모듈. DB 클라이언트 정본 = **`pg.py` (asyncpg �
 | `save_params(strategy_id, params)` | `params` JSONB 만 갱신 |
 
 ⚠️ **이 테이블에 쓴 값은 다음 백엔드 재시작에서만 전략 객체에 반영된다** —
-`_load_strategy_config` 의 `_config_loaded` 가 프로세스당 1회이고 07:55 `_boot` 재호출은 no-op 이다.
+`_load_strategy_config` 의 `_config_loaded` 가 프로세스당 1회이고 `_boot` 재호출은 no-op 이다.
 장중 즉시 반영이 필요하면 `PUT /api/strategies/{id}/params`(라우트가 in-memory `config.params` 를 덮는다)를
 쓴다. cycle232 D6 가 보유 중 장중 재시작을 금지하므로 **장중 실효 수단은 PUT 뿐**이다.
 
