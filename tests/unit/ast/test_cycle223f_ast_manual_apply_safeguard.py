@@ -387,8 +387,11 @@ _PREEXISTING_CONTENT_SHA: dict[str, str] = {
     #    철회 서술로 재작성됐고(§6-4 — 삭제 아님), 다이얼 표·런북 curl·전환 창
     #    라벨이 「전환 1회」로 되돌아갔다. 프로덕션 코드 영향 0(이 사이클의 코드
     #    영향은 8영역 밖 4파일 — `_APPROVED_CONTENT_SHA` 대상이 아니다).
+    # 📄 2026-09-17 — **문서 전용 변경**(덧칠 정리). 경위·실측 수치·폐기 값은
+    #    `docs/history/src-realtime-CLAUDE.history.md` 로 verbatim 이관하고 정본엔
+    #    현재 계약만 남겼다. 프로덕션 코드 영향 0.
     "src/realtime/CLAUDE.md":
-        "061c5c5c68fd586722d4139d19f15e30e2ba036af6f3d4ce7906f84a93714f5b",
+        "47af70ed794968f450b930055ae567e10d7d5cb318d85861e582ec863942f794",
     # ✅ 2026-09-17 (cycle296) — `TokenManager.issue()` 매니저 단위 in-flight
     #    합류. 사용자 명시 8영역 승인(`src/auth/**`), 범위 = `src/auth/token.py`
     #    `issue()` + `__init__` 신규 필드뿐(`get_token`/`revoke`/`_is_valid` 무접촉).
@@ -396,6 +399,14 @@ _PREEXISTING_CONTENT_SHA: dict[str, str] = {
     #    TODO(cycle296 커밋 후): 아래 항목을 **삭제**한다.
     "src/auth/token.py":
         "bfbdcfbe2bd595055bcc38f5e094e2815ef67854f2153aa20c40629c9e4e6764",
+    # 📄 2026-09-17 — **문서 전용 변경**(`src/auth/**` 이 8영역 디렉터리라 `.md` 도
+    #    이 가드에 잡힌다 — `src/realtime/CLAUDE.md` 와 같은 계열). 소제목의 사이클
+    #    번호를 규칙 이름으로 바꾸고, 걷어낸 경위를 `docs/history/src-auth-CLAUDE.history.md`
+    #    로 옮겼다(정본 규약 = 루트 `CLAUDE.md` 「문서 규약」 절). 프로덕션 코드 영향 0.
+    #    자매 가드 네 곳 전부 같은 값(`test_g3_9b` 계약).
+    #    TODO(커밋 후): 아래 항목을 **삭제**한다.
+    "src/auth/CLAUDE.md":
+        "da4e55db8182d76f20d4388e8c433ad5cf3110dd0801c65af870e84653c66fb5",
 }
 
 
