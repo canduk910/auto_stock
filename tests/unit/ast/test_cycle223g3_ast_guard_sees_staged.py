@@ -280,6 +280,10 @@ _PIN_GUARD_FILES = (
     "tests/unit/ast/test_cycle223f_ast_manual_apply_safeguard.py",
     "tests/unit/engine/strategies/test_cycle226_zero_breakout_defense.py",
 )
+# ⚠️ 이 목록은 **8영역 한시 승인 핀**만 담는다. 파일 내용을 재는 다른 sha 핀
+# (예: cycle297 의 프롬프트 불변 증거)은 이름에 `_CONTENT_SHA` 를 쓰지 않아
+# `_discover_pin_guard_files` 에서 자연히 빠진다 — 섞으면 8영역 변경마다
+# 무관한 가드에까지 한시 등록을 요구하게 된다(2026-09-17).
 _PIN_DECL_RE = re.compile(r"^_[A-Z0-9_]+_CONTENT_SHA\s*(?::[^=]+)?=\s*\{", re.M)
 
 

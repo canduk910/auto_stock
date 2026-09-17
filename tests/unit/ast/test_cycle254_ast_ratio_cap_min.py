@@ -217,20 +217,53 @@ _STRATEGIES_MD = _ROOT / "src" / "engine" / "strategies" / "CLAUDE.md"
 
 
 def test_g254_4a_engine_claude_md_has_no_exclusive_cap_claim():
-    """하위 CLAUDE.md(진실의 원천)가 구 결정 ⑦ 을 현행 계약으로 서술하면
-    다음 사이클이 뮤테이션 M1(조기탈출 복원) 형태로 회귀할 수 있다.
+    """하위 CLAUDE.md(진실의 원천)가 구 결정 ⑦ 을 서술하면 다음 사이클이 뮤테이션
+    M1(조기탈출 복원) 형태로 회귀할 수 있다.
 
-    `cycle254` 토큰이 같은 줄에 있으면 "폐기됐다"는 이력 서술로 간주해 허용한다
-    (예: strategy_base.py docstring "구 결정 ⑦ '상호배타' 폐기(cycle254)").
+    🔄 **2026-09-17 반전** — 종전 계약은 "`cycle254` 토큰이 같은 줄에 있으면
+    「폐기됐다」는 이력 서술로 간주해 허용" 이었다. 그 허용이 곧 신·구 병존(덧칠)
+    통로다 — 폐기된 계약은 정본에 이력 꼬리표를 달고 남는 것이 아니라
+    `docs/history/src-engine-CLAUDE.history.md` 로 간다(루트 `CLAUDE.md`
+    「문서 규약」 절, 2026-09-17 사용자 결정). 그래서 `min` 동반 조건과 `cycle254`
+    면제를 걷고 **「상호배타」 부재**로 뒤집었다. 어휘 자체가 사라지면 "현행 계약으로
+    읽힐 위험" 도 함께 사라진다.
+
+    🔵 양성 대조군 — 파일이 실제로 읽혔는지 먼저 확인한다(cycle292 교훈). 어휘가
+    실재 문자열임은 `test_g254_4e` 가 history 에서 증명한다.
     """
     text = _ENGINE_MD.read_text(encoding="utf-8")
+    assert len(text) > 500, "🔵 양성 대조군 실패 — src/engine/CLAUDE.md 이 비었다"
     stale = [
-        i for i, line in enumerate(text.splitlines(), 1)
-        if "상호배타" in line and "min" in line and "cycle254" not in line
+        (i, line.strip()[:120])
+        for i, line in enumerate(text.splitlines(), 1)
+        if "상호배타" in line
     ]
     assert not stale, (
-        f"src/engine/CLAUDE.md {stale} 줄이 '두 캡 상호배타' 를 현행 계약으로 "
-        "서술합니다 — cycle254 이후 K축 심사 랏도 ρ축이 `min` 으로 후심사하도록 개정하세요"
+        "src/engine/CLAUDE.md 이 구 결정 ⑦ 「상호배타」 를 여전히 서술합니다 — "
+        "cycle254 이후 K축 심사 랏도 ρ축이 `min` 으로 후심사하고, 폐기된 그 계약은 "
+        "`docs/history/src-engine-CLAUDE.history.md` 의 몫입니다:\n  "
+        + "\n  ".join(f"L{i} {s}" for i, s in stale)
+    )
+
+
+def test_g254_4e_history_keeps_the_retired_exclusive_cap_decision():
+    """🔵 양성 대조군 — 구 결정 ⑦ 이 **지워진 것이 아니라 옮겨졌음**을 증명한다.
+
+    부재 단언만 두면 (a) 어휘를 오타 냈을 때 (b) 이력이 유실됐을 때 둘 다 조용히
+    초록이다. 같은 문자열로 `docs/history/**` 를 긁어 검사기가 실제로 잡는다는 것과
+    폐기 경위가 보존됐음을 함께 보인다.
+    """
+    hist = _ROOT / "docs" / "history"
+    assert hist.is_dir(), "docs/history/ 가 없다 — 이관 대상지가 사라졌다"
+    found = sorted(
+        p.name for p in hist.glob("*.history.md")
+        if "상호배타" in p.read_text(encoding="utf-8")
+    )
+    assert found, (
+        "🔵 양성 대조군 실패 — 「상호배타」(구 결정 ⑦) 서술이 "
+        "`docs/history/*.history.md` 어디에도 없다. 정본에서 걷어낸 폐기 경위가 "
+        "이관되지 않았거나 이 가드의 어휘가 낡았다 — 어느 쪽이든 위의 부재 단언은 "
+        "공허하다"
     )
 
 

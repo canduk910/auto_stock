@@ -19,9 +19,11 @@ cycle292 실측 교훈: 본체가 떠나면 "…가 0건" 부정 단언이 **전
 
 ## 스코프 — `src/**/*.py` 만
 
-`docs/HARNESS_CHANGELOG.md`·`_workspace/**` 는 **verbatim 역사**라 스캔 대상이
-아니다(cycle257 `_LIVE_DOCS` 관례). `src/**/*.md`(각 디렉터리 CLAUDE.md)의 갭 서술은
-`/sync-docs` 단계에서 §6-4 대로 **재서술**한다 — 지우지 않는다.
+`docs/HARNESS_CHANGELOG.md`·`_workspace/**`·`docs/history/**` 는 **verbatim 역사**라
+스캔 대상이 아니다(cycle257 `_LIVE_DOCS` 관례). 정본 `.md`(각 디렉터리 CLAUDE.md ·
+`README.md`)의 갭 서술은 **걷어내고** `docs/history/<정본 이름>.history.md` 로 옮긴다 —
+정본은 지금 동작하는 규칙만 적는다(루트 `CLAUDE.md` 「문서 규약」 절). 아래 G-D3h 가
+그 부재를 잰다.
 
 ## docstring 은 판정에서 제외한다
 
@@ -34,6 +36,7 @@ from __future__ import annotations
 
 import ast
 import pathlib
+import re
 
 import pytest
 
@@ -341,7 +344,7 @@ def test_gd3g_switch_leaf_never_knew_about_the_gap():
 
 
 # ===========================================================================
-# G-D3h — 🔴 문서 축: 폐기된 다이얼을 「쓰라」고 지시하는 런북이 남지 않는다
+# G-D3h — 🔴 문서 축: 폐기된 다이얼은 **정본에서 사라진다**
 # ===========================================================================
 #: 운영자가 사고 중에 실제로 여는 문서들. G-D3 계열의 식별자 스캔은 `src/**/*.py`
 #: 만 보므로 `.md` 가 통째로 밖이었고, 그래서 cycle294 런북 4곳(`README.md` 2 ·
@@ -350,6 +353,28 @@ def test_gd3g_switch_leaf_never_knew_about_the_gap():
 #: (되살리기)** 다 — `PUT {"mode":"enforce","gap_hold_enabled":true}` 는
 #: `200`·`success:true`·`message:""` 를 돌려주며 **아무 일도 하지 않는다**
 #: (pydantic `extra=ignore`). 운영자는 "복구했다" 고 믿는다.
+#:
+#: 🔄 **2026-09-17 반전** — 종전 계약은 "언급했다면 같은 파일에 `cycle295` 도 있어야
+#: 한다" 는 **동반 조건**이었다(= 식별자를 남기고 철회 표시를 달아라). 그 관례가
+#: 문서 규약으로 폐기됐다: 정본은 **지금 동작하는 규칙만** 적고 경위·폐기값은
+#: `docs/history/<정본 이름>.history.md` 가 받는다(루트 `CLAUDE.md` 「문서 규약」 절,
+#: 2026-09-17 사용자 결정). 동반 조건을 그대로 두면 그것이 곧 덧칠 통로가 되어
+#: `/sync-docs` 「덧칠 패턴 검사」(0 이어야 통과)와 정면으로 부딪친다. 그래서 단언을
+#: **부재**로 뒤집었다. 운영자 보호는 약해지지 않는다 — 폐기 다이얼이 정본 어디에도
+#: 없으면 옛 런북을 따라갈 경로 자체가 없고, 이름을 찾는 사람은 history 에서 만난다.
+#:
+#: 🔧 **2026-09-17 좁은 면제 (최종 검증)** — 같은 규약이 정본에 **남기라고** 한 것이
+#: 하나 있다: "금기와 그 이유 한 문장"(루트 `CLAUDE.md` 「문서 규약」 3번째 항목). 폐기
+#: 키의 **이름 재사용 금지**(같은 이름을 반대 의미로 되살리면 운영 DB 에 남은 `false`
+#: 행이 조용히 적용된다)와 **옛 필드를 보내면 422 가 아니라 조용히 무시된다**는 함정은
+#: 지금 동작하는 금기이고, 이름이 빠지면 `grep` 으로 금기를 찾을 수 없어 금기 자체가
+#: 죽는다. 그래서 토큰에서 **200자 안**(같은 줄 + 줄바꿈된 다음 줄)에
+#: `_RETIRED_DIAL_ALLOWED_CONTEXT` 중 하나가 있을 때만 통과시킨다 — 줄 단위 면제는
+#: 2,000자짜리 모듈 맵 bullet 에서 엉뚱한 "재사용"(`SUBSCRIBE_GRACE_SECS` 재사용)에
+#: 걸려 뮤테이션이 ESCAPE 했다(실측: 진짜 금기 최대 162자 · 엉뚱한 문맥 896자).
+#: 되살리기 방향(`gap_hold_enabled … true`)은 어떤 문맥에서도 면제되지 않는다
+#: (`_RETIRED_DIAL_REVIVE_RE`). 면제의 좁음은 `test_gd3h_exemption_is_narrow` 가
+#: 합성 문자열로 못박는다.
 _DOC_FILES = (
     "README.md",
     "src/routes/CLAUDE.md",
@@ -358,33 +383,118 @@ _DOC_FILES = (
     "src/realtime/CLAUDE.md",
 )
 
+#: cycle295 가 코드·라우트·DB 헬퍼에서 제거한 갭 홀드 축의 어휘.
+_RETIRED_DIAL_TOKENS = ("gap_hold_enabled", "nxt_gap")
+
+#: 정본에 남아도 되는 유일한 문맥 = 금기 문장. "재사용" (이름 재사용 금지) ·
+#: "조용히 무시" (옛 필드를 보내면 422 가 아니라 무음 = 되살렸다고 믿게 하는 함정).
+_RETIRED_DIAL_ALLOWED_CONTEXT = ("재사용", "조용히 무시")
+
+#: 어떤 문맥에서도 면제되지 않는 형태 — 다이얼을 **켜는** 서술(옛 런북의 위험 방향).
+_RETIRED_DIAL_REVIVE_RE = re.compile(r"gap_hold_enabled[\"'\s:=]*true", re.IGNORECASE)
+
+#: 금기 문맥이 토큰에서 이만큼 안에 있어야 면제다(문자 수). 실측 최대 162자(`src/db/CLAUDE.md`).
+_RETIRED_DIAL_CONTEXT_RADIUS = 200
+
+_HISTORY_DIR = _ROOT / "docs" / "history"
+
+
+def _retired_dial_hits(text: str) -> list[tuple[int, str, str]]:
+    """토큰 언급 중 금기 문맥(토큰 200자 안, 같은 줄 + 다음 줄)이 아닌 것만 돌려준다."""
+    lines = text.splitlines()
+    hits: list[tuple[int, str, str]] = []
+    for i, line in enumerate(lines):
+        nxt = lines[i + 1] if i + 1 < len(lines) else ""
+        joined = line + " " + nxt
+        for tok in _RETIRED_DIAL_TOKENS:
+            for m in re.finditer(re.escape(tok), line):
+                near = False
+                for ctx in _RETIRED_DIAL_ALLOWED_CONTEXT:
+                    for c in re.finditer(re.escape(ctx), joined):
+                        gap = max(c.start() - m.end(), m.start() - c.end(), 0)
+                        if gap <= _RETIRED_DIAL_CONTEXT_RADIUS:
+                            near = True
+                            break
+                    if near:
+                        break
+                exempt = near and not _RETIRED_DIAL_REVIVE_RE.search(line)
+                if not exempt:
+                    hits.append((i + 1, tok, line.strip()[:110]))
+                    break
+    return hits
+
 
 @pytest.mark.parametrize("rel", _DOC_FILES)
-def test_gd3h_docs_that_name_the_retired_dial_also_say_it_is_retired(rel: str):
-    """🔴 G-D3h — 폐기 다이얼을 언급하는 문서는 **폐기 사실도** 적어야 한다.
-
-    식별자를 문서에서 **지우라는 가드가 아니다** — 이 리포의 관례는 이력을
-    지우지 않고 철회 표시를 다는 것이다(같은 사고의 재발 방지: 다음 사람이 옛
-    사실만 읽고 승인 없이 되살리는 경로 차단). 그래서 단언은 "언급했다면 같은
-    파일에 `cycle295` 도 있어야 한다" 는 **동반 조건**이다. 부분 문자열 금지
-    가드로 만들면 지금의 폐기 각주들이 스스로를 붉히고, 다음 사람이 각주를
-    지우는 쪽으로 움직인다.
+def test_gd3h_live_docs_do_not_name_the_retired_dial(rel: str):
+    """🔴 G-D3h — 정본은 폐기된 갭 홀드 다이얼을 **언급하지 않는다**.
 
     🔵 양성 대조군 — 파일이 실제로 읽히고 비어 있지 않음을 먼저 확인한다
-    (cycle292 교훈: 스캐너가 파일을 못 읽으면 동반 조건이 공짜로 참이 된다).
+    (cycle292 교훈: 스캐너가 파일을 못 읽으면 부재 단언이 공짜로 참이 된다).
+    어휘 자체가 실재하는 문자열임은 자매 케이스
+    `test_gd3h_history_keeps_the_retired_dial` 이 history 에서 증명한다.
     """
     path = _ROOT / rel
     assert path.is_file(), f"{rel} 가 없다 — 스캐너가 겨눌 대상을 잃었다"
     text = path.read_text(encoding="utf-8")
     assert len(text) > 500, f"🔵 양성 대조군 실패 — {rel} 이 비었다"
 
-    if "gap_hold_enabled" not in text and "nxt_gap" not in text:
-        return  # 언급이 없으면 볼 것도 없다
+    hits = _retired_dial_hits(text)
+    assert not hits, (
+        f"{rel} 이 폐기된 갭 홀드 다이얼을 금기 문맥 밖에서 언급한다 — 정본은 지금 "
+        "동작하는 규칙만 적는다(루트 `CLAUDE.md` 「문서 규약」 절). 허용은 이름 재사용 "
+        "금지 · 조용히 무시 함정 두 금기 문장뿐이다. 그 줄을 "
+        f"`docs/history/` 의 해당 history 파일로 옮겨라:\n  "
+        + "\n  ".join(f"L{i} [{tok}] {s}" for i, tok, s in hits)
+    )
 
-    assert "cycle295" in text, (
-        f"{rel} 이 폐기된 갭 홀드 다이얼을 언급하는데 `cycle295`(철회 사이클) "
-        "표기가 없다 — 운영자가 사고 중에 그 런북을 그대로 따라 "
-        '`PUT {"mode":"enforce","gap_hold_enabled":true}` 를 보내면 '
-        "`200`·`success:true` 를 받고 **아무 일도 일어나지 않는다**(`extra=ignore` "
-        "가 키를 버린다). 식별자를 지우지 말고 철회 표시를 달아라(§6-4)"
+
+@pytest.mark.parametrize(
+    "text, expect_hit",
+    [
+        # 금기 문장 — 통과
+        ("`tick_channel_gap_hold_enabled` 는 폐기 키다 — 그 키 이름을 재사용하지 않는다", False),
+        ("폐기된 `gap_hold_enabled` 필드를 보내면 422 가 아니라 조용히 무시된다", False),
+        # 금기 문장이 다음 줄에 이어지는 형태(±1줄 창) — 통과
+        ("폐기 키 `tick_channel_gap_hold_enabled` 의 이름을\n재사용하지 마라 — 저장된 `false` 가 적용된다", False),
+        # 맨 언급(런북·설명) — 적발
+        ("`gap_hold_enabled` 로 15:40~16:00 보유 종목을 NXT 에 붙든다", True),
+        ("`nxt_gap` 창에서 HIGH 를 NXT 로 옮긴다", True),
+        # 되살리기 방향은 금기 문맥이 붙어 있어도 적발
+        ('`PUT {"mode":"enforce","gap_hold_enabled":true}` — 조용히 무시된다', True),
+        # 창 밖(빈 줄 건너 문맥)은 면제되지 않는다
+        ("`gap_hold_enabled` 를 켠다\n\n(참고) 재사용하지 않는다", True),
+        # 같은 줄이라도 200자 밖의 엉뚱한 "재사용" 은 면제가 아니다(engine 모듈 맵 뮤테이션 재현)
+        ("`gap_hold_enabled` 로 붙든다. " + "x" * 400 + " `SUBSCRIBE_GRACE_SECS` 재사용", True),
+        # 200자 안이면 통과(db 정본 실측 162자 형태)
+        ("`tick_channel_gap_hold_enabled` 는 폐기 키다. " + "y" * 120 + " 이 키 이름을 재사용하지 않는다", False),
+    ],
+)
+def test_gd3h_exemption_is_narrow(text: str, expect_hit: bool):
+    """🔵 면제가 덧칠 통로가 되지 않음의 증명 — 합성 문자열 9종.
+
+    금기 두 형태만 통과하고, 맨 언급·런북·되살리기(`true`)는 문맥과 무관하게
+    적발된다. 이 케이스가 초록인 동안 `_RETIRED_DIAL_ALLOWED_CONTEXT` 를 넓히는
+    변경은 곧바로 붉어진다.
+    """
+    assert bool(_retired_dial_hits(text)) is expect_hit, text
+
+
+@pytest.mark.parametrize("tok", _RETIRED_DIAL_TOKENS)
+def test_gd3h_history_keeps_the_retired_dial(tok: str):
+    """🔵 양성 대조군 — 검사기가 살아 있음의 증명 + 이력이 보존됐음의 증명.
+
+    부재 단언만 두면 (a) 어휘를 오타 냈을 때 (b) 이력이 통째로 사라졌을 때 둘 다
+    조용히 초록이다. `docs/history/**` 는 verbatim 이관본이라 그 어휘가 **있어야**
+    하므로, 같은 문자열로 그쪽을 긁어 검사기가 실제로 잡는다는 것을 보인다.
+    """
+    assert _HISTORY_DIR.is_dir(), "docs/history/ 가 없다 — 이관 대상지가 사라졌다"
+    found = sorted(
+        p.relative_to(_ROOT).as_posix()
+        for p in _HISTORY_DIR.glob("*.history.md")
+        if tok in p.read_text(encoding="utf-8")
+    )
+    assert found, (
+        f"🔵 양성 대조군 실패 — `{tok}` 이 `docs/history/*.history.md` 어디에도 없다. "
+        "정본에서 걷어낸 서술이 history 로 가지 않았거나(이력 소실) 이 가드의 어휘가 "
+        "낡았다. 어느 쪽이든 위의 부재 단언은 공허하다"
     )

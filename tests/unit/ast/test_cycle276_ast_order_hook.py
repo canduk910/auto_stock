@@ -938,10 +938,15 @@ def test_c6_4b_cycle223_sibling_content_pin_matches_current_source() -> None:
 #:   · `src/auth/token.py` = cycle296(`TokenManager.issue()` 매니저 단위 in-flight
 #:     합류, 사용자 결정 "결정 1 진행" 2026-09-17). 범위 = `issue()` + `__init__`
 #:     신규 필드뿐 — `get_token`/`revoke`/`_is_valid` 는 세그먼트 sha 로 무접촉 증명.
+#:   · `src/auth/CLAUDE.md` = **문서 전용**(2026-09-17 문서 개편). `src/auth/**` 이
+#:     8영역 디렉터리라 `.md` 도 diff 가드에 잡힌다 — `src/realtime/CLAUDE.md` 와 같은
+#:     계열이고 프로덕션 코드 영향 0. 소제목의 사이클 번호를 규칙 이름으로 바꾸고
+#:     걷어낸 경위를 `docs/history/src-auth-CLAUDE.history.md` 로 옮겼다.
 _APPROVED_EIGHT_AREA_PINS = {
     _ORDER_ENGINE_REL, "src/engine/scanner.py", "src/api/order.py",
     "src/realtime/websocket.py", "src/realtime/websocket_pool.py",
     "src/engine/risk.py", "src/realtime/CLAUDE.md", "src/auth/token.py",
+    "src/auth/CLAUDE.md",
 }
 
 

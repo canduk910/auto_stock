@@ -543,9 +543,10 @@ def test_c283_10_harness_changelog_has_a_cycle283_row():
     assert "cycle283" in text, "`docs/HARNESS_CHANGELOG.md` 에 cycle283 행이 없다"
 
 
-def test_c283_10b_root_claude_md_table_has_cycle283():
-    text = (_REPO_ROOT / "CLAUDE.md").read_text(encoding="utf-8")
-    assert "cycle283" in text, "루트 `CLAUDE.md` 하네스 표에 cycle283 행이 없다"
+# ⚠️ `test_c283_10b`(루트 `CLAUDE.md` 하네스 이력표에 cycle283 행) 는 2026-09-17 에
+# 삭제됐다 — 그 이력표 자체가 폐지됐고(정본 안에 이력 표를 두지 않는다, 루트
+# `CLAUDE.md` 「문서 규약」 절) 사이클 이력의 유일한 정본은
+# `docs/HARNESS_CHANGELOG.md` 다. 그 파일은 바로 위 `test_c283_10` 이 잰다.
 
 
 def test_c283_11_engine_claude_md_states_new_times():
@@ -560,22 +561,55 @@ def test_c283_11_engine_claude_md_states_new_times():
     assert "TIME_METRICS_SNAPSHOT" in text, "신규 1차 스냅샷 상수 서술이 없다"
 
 
-def test_c283_11c_engine_claude_md_has_no_present_tense_1810():
-    """C11 — 옛 적재 시각 `18:10` 이 **현재형 서술**로 남아 있으면 안 된다.
+def test_c283_11c_engine_claude_md_does_not_mention_1810_at_all():
+    """C11 — 옛 적재 시각 `18:10` 이 정본에 **아예 없다**.
 
     이 프로젝트는 문서를 정본으로 쓴다. 시각 리터럴이 두 벌이면 다음 사람이 옛 값을
-    되돌린다(cycle273f 주석 사건 · cycle270-B 21:30 사건이 같은 계열). 다만 역사
-    인용(`종전 16:00 → 18:10 → 20:30`)은 정당한 잔존이므로, **같은 줄에 `종전` 이
-    있는 경우만** 예외로 허용한다 — 예외를 쓰려면 역사임을 글로 밝혀야 한다.
+    되돌린다(cycle273f 주석 사건 · cycle270-B 21:30 사건이 같은 계열).
+
+    🔄 **2026-09-17 반전** — 종전 계약은 "역사 인용(`종전 16:00 → 18:10 → 20:30`)은
+    정당한 잔존이므로 **같은 줄에 `종전` 이 있는 경우만** 예외로 허용" 이었다. 그
+    예외가 곧 시점 꼬리표(덧칠) 통로이고, `/sync-docs` 「덧칠 패턴 검사」의 1번 패턴이
+    바로 `종전` 이다 — 두 규칙이 정면으로 부딪쳤다. 시각 이동 기록은 정본이 아니라
+    `docs/history/src-engine-CLAUDE.history.md` 의 몫이므로(루트 `CLAUDE.md`
+    「문서 규약」 절, 2026-09-17 사용자 결정) 예외를 걷고 **부재**로 뒤집었다.
+
+    현행 값의 정본 서술은 `test_c283_11` 이 잰다(`TIME_STOCK_MASTER_DAILY_LOAD =
+    time(20, 30)` · 커트오프 `time(20, 0)` · `TIME_SETTLEMENT` 21:30).
+
+    🔵 양성 대조군 — 파일이 실제로 읽혔는지 먼저 확인한다. `18:10` 이 실재 문자열임은
+    `test_c283_11e` 가 history 에서 증명한다.
     """
     text = (_REPO_ROOT / "src" / "engine" / "CLAUDE.md").read_text(encoding="utf-8")
+    assert len(text) > 500, "🔵 양성 대조군 실패 — src/engine/CLAUDE.md 이 비었다"
     bad = [
-        ln.strip()[:120] for ln in text.splitlines()
-        if "18:10" in ln and "종전" not in ln
+        (i, ln.strip()[:120]) for i, ln in enumerate(text.splitlines(), 1)
+        if "18:10" in ln
     ]
     assert not bad, (
-        "`src/engine/CLAUDE.md` 가 옛 일봉 적재 시각 18:10 을 현재형으로 말한다 "
-        f"(역사 인용이면 같은 줄에 '종전' 을 적어라):\n  " + "\n  ".join(bad)
+        "`src/engine/CLAUDE.md` 가 옛 일봉 적재 시각 18:10 을 말한다 — 현행은 "
+        "`TIME_STOCK_MASTER_DAILY_LOAD = time(20, 30)` 이고 이동 기록은 "
+        "`docs/history/src-engine-CLAUDE.history.md` 의 몫이다:\n  "
+        + "\n  ".join(f"L{i} {s}" for i, s in bad)
+    )
+
+
+def test_c283_11e_history_keeps_the_old_load_time():
+    """🔵 양성 대조군 — 옛 적재 시각이 **지워진 것이 아니라 옮겨졌음**을 증명한다.
+
+    부재 단언만 두면 이력이 유실돼도 초록이다. 같은 문자열로 `docs/history/**` 를
+    긁어 검사기가 실제로 잡는다는 것과 시각 이동 기록이 보존됐음을 함께 보인다.
+    """
+    hist = _REPO_ROOT / "docs" / "history"
+    assert hist.is_dir(), "docs/history/ 가 없다 — 이관 대상지가 사라졌다"
+    found = sorted(
+        p.name for p in hist.glob("*.history.md")
+        if "18:10" in p.read_text(encoding="utf-8")
+    )
+    assert found, (
+        "🔵 양성 대조군 실패 — 옛 적재 시각 `18:10` 이 `docs/history/*.history.md` "
+        "어디에도 없다. 정본에서 걷어낸 시각 이동 기록이 이관되지 않았거나 이 가드의 "
+        "어휘가 낡았다 — 어느 쪽이든 위의 부재 단언은 공허하다"
     )
 
 

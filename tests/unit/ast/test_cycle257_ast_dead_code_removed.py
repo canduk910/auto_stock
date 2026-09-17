@@ -360,10 +360,22 @@ class TestA6DocsCorrected:
         assert found == [], f"README.md 이 삭제된 심볼을 여전히 서술: {found}"
 
     def test_realtime_claude_md_records_removal(self):
-        """삭제로 문단이 비는 게 아니라 '미배선·삭제 + P1-7 B' 로 대체돼야 한다."""
+        """삭제로 문단이 그냥 비면 다음 포렌식이 같은 질문을 다시 판다.
+
+        단언(`cycle257` 존재)은 그대로 유지한다 — 남아야 하는 것은 **삭제됐다는
+        사실 한 줄**이고 그건 값의 출처 사이클 번호 표기(`K=2.0(cycle242)` 계열)라
+        정본에 허용된다(루트 `CLAUDE.md` 「문서 규약」 절).
+
+        🔄 **2026-09-17 반전** — 종전에는 이 단언을 "문단을 대체하라"(= 삭제 경위를
+        정본에 풀어 쓰라)로 읽었다. 그 경위는 이제
+        `docs/history/src-realtime-CLAUDE.history.md` 로 간다. 정본에는 시간대별
+        전환이 미배선·삭제(cycle257)라는 사실과 속성 기반 리졸버가 그 자리를 맡는다는
+        **현재 규칙**만 남기고, "왜 그 판단이었나" 는 history 링크로 줄인다.
+        """
         text = _read("src/realtime/CLAUDE.md")
         assert "cycle257" in text, (
-            "src/realtime/CLAUDE.md 에 cycle257 대체 서술 부재 — "
-            "'시간대별 전환은 미배선·삭제(cycle257), 속성 기반 리졸버 = P1-7 B' 로 "
-            "대체한다(문단을 그냥 지우면 다음 포렌식이 같은 질문을 다시 판다)."
+            "src/realtime/CLAUDE.md 에 cycle257 표기 부재 — 시간대별 전환이 "
+            "미배선·삭제(cycle257)라는 **사실 한 줄**은 정본에 남긴다. 경위는 "
+            "`docs/history/src-realtime-CLAUDE.history.md` 로 옮기되 "
+            "사실까지 지우면 다음 포렌식이 같은 질문을 다시 판다."
         )

@@ -302,13 +302,17 @@ def test_g1_5b_na_keys_are_absent_not_null(sid: str, na: tuple[str, ...]) -> Non
 #: cycle297 착수 시점(HEAD `a4580b6`) `build_messages(_payload(sid), _TECH, _BARS30)[1]["content"]`
 #: 의 sha256 앞 16자. 🔴 **이 값을 갱신하지 마라** — 갱신해야 할 것 같으면 VB·LTV 프롬프트를
 #: 바꾼 것이고, 그건 이 사이클의 범위 밖이다(09-11~09-16 표본과의 연속성이 끊긴다).
-_VBLTV_USER_CONTENT_SHA: dict[str, str] = {
+# ⚠️ 이름에 `_CONTENT_SHA` 를 쓰지 않는다 — `test_cycle223g3::_discover_pin_guard_files`
+# 가 그 토큰으로 **8영역 한시 승인 핀**을 찾는다. 이 핀은 8영역과 무관한
+# 프롬프트 byte 불변 증거이므로 그 목록에 섞이면 8영역 변경마다 여기에도
+# 한시 등록을 요구하게 된다(2026-09-17 실측: `src/auth/CLAUDE.md` 변경에서 발화).
+_VBLTV_USER_PROMPT_SHA: dict[str, str] = {
     "volatility_breakout": "cb6f843cdb1d1d9e",
     "long_tail_volatility": "b095a46c416ba13e",
 }
 
 
-@pytest.mark.parametrize("sid", sorted(_VBLTV_USER_CONTENT_SHA))
+@pytest.mark.parametrize("sid", sorted(_VBLTV_USER_PROMPT_SHA))
 def test_g1_6_vb_ltv_user_payload_is_byte_identical(sid: str) -> None:
     """G1-6 — 5전략 확대가 VB·LTV 프롬프트를 **한 글자도** 바꾸지 않았다는 기계 증거.
 
@@ -323,7 +327,7 @@ def test_g1_6_vb_ltv_user_payload_is_byte_identical(sid: str) -> None:
     assert obj["strategy"]["id"] == sid and obj["snapshot"], f"{sid}: 렌더 결과가 비정상"
 
     got = hashlib.sha256(content.encode("utf-8")).hexdigest()[:16]
-    assert got == _VBLTV_USER_CONTENT_SHA[sid], (
+    assert got == _VBLTV_USER_PROMPT_SHA[sid], (
         f"{sid}: user payload 가 바뀌었다 — cycle297 은 VB·LTV 프롬프트를 건드리지 않는다. "
         f"🔴 핀을 갱신하지 말고 코드를 되돌려라. 현재 sha={got}"
     )

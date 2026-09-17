@@ -438,27 +438,61 @@ def test_g290_5_docs_declare_the_two_keys(rel: str, key: str) -> None:
 
 
 def test_g290_5b_engine_doc_no_longer_claims_the_killswitch_is_absent() -> None:
-    """S5 (RED) — `src/engine/CLAUDE.md` 의 「장중 킬스위치 없음」 주장이 사라졌다.
+    """S5 (RED) — `src/engine/CLAUDE.md` 가 두 키의 **미등재**를 말하지 않는다.
 
-    cycle287 이 정직하게 적어 둔 그 문장은 cycle290 으로 **거짓**이 된다. 지우지 말고
-    "cycle290 이 등재로 열었다 + 그 전까지 왜 없었는지" 로 전환하라(자문 §S3-2).
+    cycle287 이 정직하게 적어 둔 「장중 킬스위치 없음」 은 cycle290 으로 **거짓**이
+    됐다. 거짓 서술 자체는 그때도 지금도 금지다.
+
+    🔄 **2026-09-17 반전** — 종전 계약은 "지우지 말고 「cycle290 이 등재로 열었다 +
+    그 전까지 왜 없었는지」 로 전환하라" 였고, 그래서 **「미등재」 가 나오는 줄마다
+    `cycle290` 동반**을 요구했다. 그 동반 조건이 곧 신·구 병존(덧칠) 통로다 —
+    정본은 지금 동작하는 규칙만 적고 "그 전까지 왜 없었는지" 는
+    `docs/history/src-engine-CLAUDE.history.md` 가 받는다(루트 `CLAUDE.md`
+    「문서 규약」 절, 2026-09-17 사용자 결정). 그래서 단언을 **「미등재」 부재**로
+    뒤집었다.
+
+    공허 가드 방지 — 종전 우려("`cycle290` 전수 검사는 이 사이클 자신의 다른 언급
+    때문에 항상 참" · 검증 발견 LOW-5)는 부재 단언에서 사라진다. 대신 파일이 실제로
+    읽혔는지를 `_src` 반환 길이로, 어휘가 실재 문자열인지를 history 쪽 자매 케이스로
+    확인한다.
     """
     doc = _src("src/engine/CLAUDE.md")
+    assert len(doc) > 500, "🔵 양성 대조군 실패 — src/engine/CLAUDE.md 이 비었다"
     assert "장중 킬스위치 없음" not in doc, (
         "cycle287 의 「장중 킬스위치 없음」 표제가 그대로 남아 있다 — cycle290 이후 "
-        "거짓이다. 이력으로 전환하라"
+        "거짓이다. 그 서술은 `docs/history/src-engine-CLAUDE.history.md` 로 보내라"
     )
-    # ⚠️ 문서 전체에 대한 `"cycle290" in doc` 전수 검사는 공허하다 — 이 사이클 자신이
-    # 다른 문맥에서 "cycle290" 을 여러 번 언급하므로 OR 의 오른쪽이 항상 참이 되어
-    # 미래에 「미등재」가 되살아나도 이 단언이 영원히 통과한다(검증 발견 LOW-5).
-    # 그래서 **"미등재" 가 나오는 그 줄 자체**에 이력 표시가 있는지를 잰다.
-    for line in doc.splitlines():
-        if "미등재" not in line:
-            continue
-        assert "cycle290" in line, (
-            f"「미등재」 문구가 있는 줄에 cycle290 이력 표시가 없다 — 문서가 코드와 "
-            f"갈렸다: {line[:120]!r}"
-        )
+    stale = [
+        (i, line.strip()[:120])
+        for i, line in enumerate(doc.splitlines(), 1)
+        if "미등재" in line
+    ]
+    assert not stale, (
+        "`src/engine/CLAUDE.md` 이 두 킬스위치 키의 「미등재」를 말한다 — cycle290 "
+        "등재 이후 거짓이고, 등재 전 상태의 서술은 정본이 아니라 "
+        "`docs/history/src-engine-CLAUDE.history.md` 의 몫이다:\n  "
+        + "\n  ".join(f"L{i} {s}" for i, s in stale)
+    )
+
+
+def test_g290_5c_history_keeps_the_pre_registration_story() -> None:
+    """🔵 양성 대조군 — 「미등재」 서술이 **사라진 것이 아니라 옮겨졌음**을 증명한다.
+
+    부재 단언만 두면 이력이 통째로 유실돼도 초록이다. 같은 어휘로 `docs/history/**`
+    를 긁어 (a) 검사기가 실제로 그 문자열을 잡고 (b) 등재 전 경위가 보존됐음을
+    함께 보인다.
+    """
+    hist = _ROOT / "docs" / "history"
+    assert hist.is_dir(), "docs/history/ 가 없다 — 이관 대상지가 사라졌다"
+    found = sorted(
+        p.name for p in hist.glob("*.history.md")
+        if "미등재" in p.read_text(encoding="utf-8")
+    )
+    assert found, (
+        "🔵 양성 대조군 실패 — 「미등재」 서술이 `docs/history/*.history.md` 어디에도 "
+        "없다. 정본에서 걷어낸 등재 전 경위가 이관되지 않았거나(이력 소실) 이 가드의 "
+        "어휘가 낡았다. 어느 쪽이든 위의 부재 단언은 공허하다"
+    )
 
 
 # ===========================================================================
