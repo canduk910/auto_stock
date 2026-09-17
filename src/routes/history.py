@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from decimal import Decimal
+
 from fastapi import APIRouter, Query
 
 from src.db.trade_history import get_trade_pairs, get_trades
@@ -26,6 +28,14 @@ async def trade_history(
     for trade in trades:
         if not trade.get("ticker_name"):
             trade["ticker_name"] = ticker_names.get(trade.get("ticker", ""), "")
+        # NUMERIC → float 사영. `get_trades` 는 `SELECT t.*` raw 행을 돌려주므로
+        # `price`·`profit_loss` 가 asyncpg Decimal 이고, pydantic v2 는 JSON 에서
+        # Decimal 을 **문자열**로 직렬화한다. 프론트 계약은 숫자(`Trade.price: number`)라
+        # 문자열이 가면 그리드가 그 열을 통째로 `-` 로 떨군다. 컬럼명을 박지 않고
+        # Decimal 전체를 사영해 향후 `ALTER TABLE` 에도 계약이 유지되게 한다.
+        # 형제 경로 `/api/history/pnl` 은 `get_trade_pairs` 가 `float()` 로 캐스트해 이미 숫자다.
+        for key in [k for k, v in trade.items() if isinstance(v, Decimal)]:
+            trade[key] = float(trade[key])
 
     return ApiResponse(
         success=True,

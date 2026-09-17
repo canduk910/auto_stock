@@ -2,18 +2,54 @@
 
 from __future__ import annotations
 
+from decimal import Decimal
+
 import pytest
 
 pytestmark = pytest.mark.contract
 
 
 def _make_trade(i, *, ticker="005930", strategy="momentum"):
+    """`price`/`profit_loss` 는 **Decimal** 이다 — 프로덕션을 재현한다.
+
+    `trade_history.price`·`profit_loss` 는 PG NUMERIC 이고 `src/db/pg.py` 에 numeric
+    코덱이 없어 asyncpg 가 `Decimal` 을 준다. 종전 스텁은 python int 를 먹여 라우트가
+    Decimal 을 한 번도 태우지 않았고, 그래서 pydantic v2 가 Decimal 을 JSON **문자열**로
+    내보내 거래내역 화면의 '가격'·'매매손익' 열이 전 행 `-` 로 보이던 결함
+    (2026-07-16 RDS 이전 이후)을 이 계약 테스트가 한 번도 잡지 못했다.
+    """
     return {
         "id": i, "ticker": ticker, "ticker_name": "삼성전자",
-        "trade_type": "BUY", "price": 70000 + i, "quantity": 1,
-        "profit_loss": 0, "status": "COMPLETED", "strategy": strategy,
+        "trade_type": "BUY", "price": Decimal(f"{70000 + i}.00"), "quantity": 1,
+        "profit_loss": Decimal("0"), "status": "COMPLETED", "strategy": strategy,
         "order_no": f"O-{i}", "timestamp": "2026-05-08T15:00:00+09:00",
     }
+
+
+def test_history_numeric_fields_are_json_numbers(contract_env):
+    """NUMERIC 컬럼은 JSON **숫자**로 나간다 — 프론트 계약 `TradeRecord.price: number`.
+
+    문자열로 새면 `TradeHistoryGrid` 가 그 열을 `-` 로 떨군다. 라우트의 Decimal 사영을
+    되돌리면 이 단언이 붉어진다.
+    """
+    contract_env.state.trades = [
+        _make_trade(0) | {"profit_loss": Decimal("-4600.00")},
+    ]
+    r = contract_env.client.get("/api/history")
+    assert r.status_code == 200
+    row = r.json()["data"]["trades"][0]
+
+    assert isinstance(row["price"], (int, float)) and not isinstance(row["price"], bool), (
+        f"price 가 {type(row['price']).__name__} 다 — Decimal 사영이 빠졌다: {row['price']!r}"
+    )
+    assert isinstance(row["profit_loss"], (int, float)), (
+        f"profit_loss 가 {type(row['profit_loss']).__name__} 다: {row['profit_loss']!r}"
+    )
+    assert row["price"] == 70000.0
+    assert row["profit_loss"] == -4600.0
+    # 비수치 컬럼은 사영 대상이 아니다 — 문자열 그대로 유지.
+    assert row["ticker"] == "005930"
+    assert row["quantity"] == 1
 
 
 def test_history_default_pagination(contract_env):

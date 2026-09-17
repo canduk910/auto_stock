@@ -5,8 +5,16 @@ import { useTradingStatus } from '../contexts/TradingStatusContext'
 import type { TeRrMetrics } from '../types/strategy'
 import { pnlColorClass as profitColor } from '../utils/pnlColor'
 
-function formatKRW(value: number): string {
-  return value.toLocaleString('ko-KR') + '원'
+/**
+ * 백엔드 계약은 숫자(`PerformanceSummary.latest_asset: number`)이고 `src/routes/performance.py`
+ * 가 `float()` 로 그 계약을 지킨다. 다만 그 값의 출처가 NUMERIC 컬럼이라 사영이 빠지면
+ * 문자열이 오는데, `String` 에는 자체 `toLocaleString` 이 없어 `Object.prototype` 쪽으로
+ * 떨어져 **예외 없이 천단위 구분만 조용히 사라진다**(`'10720000.00'` 그대로). 숫자로 강제해
+ * 그 무증상 열화를 막는다.
+ */
+function formatKRW(value: number | string): string {
+  const n = Number(value)
+  return Number.isFinite(n) ? n.toLocaleString('ko-KR') + '원' : '-'
 }
 
 function formatKRWSigned(value: number): string {

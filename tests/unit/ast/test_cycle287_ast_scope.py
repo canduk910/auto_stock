@@ -239,8 +239,23 @@ _SRC_TREE_FILES = 153
 #: 8영역 중 움직인 것은 `auth/token.py` **하나뿐**이다(사용자 승인).
 #: cycle295 착지(= cycle296/297 착수) 값은
 #: `d4d6622a112829230c2d342b70a99b99153fa465527a38d1e9cd78ddd056c685` 였다.
+#: ⚠️ **NUMERIC 직렬화 시정 기준선으로 갱신, 2026-09-17.** 움직인 파일 2 =
+#: `routes/history.py`(`get_trades` 의 `SELECT t.*` raw 행에서 `Decimal` → `float`
+#: 사영) + `routes/performance.py`(`latest_asset` 에 빠져 있던 `float()`).
+#: 고친 것 = PG NUMERIC 을 asyncpg 가 `Decimal` 로 주고 pydantic v2 가 JSON
+#: **문자열**로 직렬화해, 거래내역의 '가격'·'매매손익' 두 열이 전 행 `-` 로
+#: 보이고(사용자 신고) 대시보드 '최근 자산' 이 천단위 구분 없이 렌더되던 결함이다
+#: (2026-07-16 RDS 이전 `2c44b44` 이후 상시). **8영역 무접촉 · 매매 행위 변경 0**
+#: — 두 라우트 모두 읽기 전용이고 값의 *타입*만 계약(`number`)에 맞춘다.
+#: 회귀 가드 = `tests/contract/test_routes_history.py::
+#: test_history_numeric_fields_are_json_numbers` + `test_routes_balance_perf.py::
+#: test_performance_summary_latest_asset_is_json_number`(둘 다 스텁을 `Decimal` 로
+#: 바꿔 프로덕션을 재현한다 — 종전 스텁은 python int 라 Decimal 을 한 번도
+#: 태우지 않았고 그래서 이 결함을 못 잡았다).
+#: cycle296/297 착지 값은
+#: `c1df70acc5c048cb23330cc337095b21bd7e3270063b3772481f2412d7ae7f3e` 였다.
 _SRC_TREE_DIGEST = (
-    "c1df70acc5c048cb23330cc337095b21bd7e3270063b3772481f2412d7ae7f3e"
+    "06fef48ad7b3094b4a1041b23a6a627b191931bd0fd72b74a76d0b6413261e16"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

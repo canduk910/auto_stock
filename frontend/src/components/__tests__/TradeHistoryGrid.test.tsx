@@ -377,3 +377,94 @@ describe("cycle276 — TradeHistoryGrid AI 자문 열 (Red)", () => {
     expect(batchCalls).toHaveLength(1);
   }, 20000);
 });
+
+/**
+ * 수치 열 방어 변환 — `/api/history` 가 숫자를 **문자열**로 보내도 값을 지우지 않는다.
+ *
+ * 배경: `trade_history.price`·`profit_loss` 는 PG NUMERIC 이고 asyncpg 가 `Decimal` 로
+ * 준다. 라우트가 그 값을 사영하지 않으면 pydantic v2 가 JSON 문자열로 내보내고,
+ * 종전 셀 판정 `typeof v === 'number' ? … : '-'` 가 그 열을 통째로 `-` 로 지웠다.
+ * 2026-07-16 RDS 이전부터 거래내역의 '가격'·'매매손익' 두 열이 그렇게 비어 있었고,
+ * 목 픽스처(`makeTrade`)가 숫자를 먹여 어떤 테스트도 붉어지지 않았다.
+ *
+ * 백엔드는 `src/routes/history.py` 가 float 로 사영해 계약(`TradeRecord.price: number`)을
+ * 지킨다. 이 테스트는 **그 계약이 다시 깨졌을 때 화면이 조용히 비지 않는지**를 고정한다.
+ */
+describe("TradeHistoryGrid — 수치 열 문자열 내성", () => {
+  it("price/profit_loss 가 문자열로 와도 포맷해서 보여준다", async () => {
+    server.use(
+      http.get("/api/history", () =>
+        HttpResponse.json(
+          wrap({
+            trades: [
+              {
+                id: 1,
+                timestamp: "2026-09-16T01:54:54Z",
+                ticker: "014620",
+                ticker_name: "성광벤드",
+                trade_type: "SELL",
+                // 프로덕션이 실제로 보내던 모양 — Decimal 이 JSON 문자열로 나간 값.
+                price: "32200",
+                quantity: 2,
+                profit_loss: "-4600",
+                status: "COMPLETED",
+                strategy: "bull_flag_breakout",
+                order_no: "0000640200",
+              },
+            ],
+            total: 1,
+            total_pages: 1,
+            page: 1,
+            size: 20,
+          }),
+        ),
+      ),
+    );
+
+    render(
+      <TestProviders>
+        <TradeHistoryGrid />
+      </TestProviders>,
+    );
+
+    const row = await screen.findByText("성광벤드", {}, { timeout: 5000 });
+    const tr = row.closest("tr") as HTMLElement;
+
+    // 핵심: '-' 가 아니라 실제 값이 보인다.
+    expect(within(tr).getByText("32,200원")).toBeTruthy();
+    expect(within(tr).getByText("-4,600원")).toBeTruthy();
+    expect(within(tr).getByText("2주")).toBeTruthy();
+  }, 20000);
+
+  it("빈 문자열·null 은 결측이므로 '-' 를 유지한다", async () => {
+    server.use(
+      http.get("/api/history", () =>
+        HttpResponse.json(
+          wrap({
+            trades: [
+              {
+                ...makeTrade({ ticker_name: "결측종목", order_no: "0000999999" }),
+                price: "",
+                profit_loss: null,
+              },
+            ],
+            total: 1,
+            total_pages: 1,
+            page: 1,
+            size: 20,
+          }),
+        ),
+      ),
+    );
+
+    render(
+      <TestProviders>
+        <TradeHistoryGrid />
+      </TestProviders>,
+    );
+
+    const row = await screen.findByText("결측종목", {}, { timeout: 5000 });
+    const tr = row.closest("tr") as HTMLElement;
+    expect(within(tr).getAllByText("-").length).toBeGreaterThanOrEqual(2);
+  }, 20000);
+});

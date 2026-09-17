@@ -19,6 +19,24 @@ import LlmEvaluationModal from './LlmEvaluationModal'
 
 const columnHelper = createColumnHelper<TradeRecord>()
 
+/**
+ * 수치 열 방어 변환 — 숫자와 **숫자 문자열**을 모두 받는다.
+ *
+ * 백엔드 계약은 숫자(`TradeRecord.price: number`)이고 `src/routes/history.py` 가 그 계약을
+ * 지킨다. 그런데 그 라우트는 `SELECT t.*` raw 행을 싣는 구조라, NUMERIC 컬럼이 늘거나
+ * 사영이 빠지면 pydantic v2 가 Decimal 을 다시 문자열로 내보낸다. `typeof v === 'number'`
+ * 단독 판정은 그때 값을 통째로 `-` 로 지워 **화면이 조용히 비고**, 그 침묵이 결함을
+ * 2026-07-16 RDS 이전부터 덮었다. 여기서는 값을 살리고, 진짜 결측만 `-` 로 남긴다.
+ */
+function toNum(v: unknown): number | null {
+  if (typeof v === 'number') return Number.isFinite(v) ? v : null
+  if (typeof v === 'string' && v.trim() !== '') {
+    const n = Number(v)
+    return Number.isFinite(n) ? n : null
+  }
+  return null
+}
+
 // KST(Asia/Seoul) 강제 — 백엔드 `_to_kst` 와 동일 컨벤션.
 // 함수명만 KST 라고 붙이고 실제론 브라우저 로컬타임을 추출하던 결함 차단.
 // `Intl.DateTimeFormat` 의 ko-KR 출력은 `2026. 05. 12.` / `08:05:47` 형태로 안정.
@@ -145,25 +163,25 @@ function makeColumns(
     columnHelper.accessor('price', {
       header: '가격',
       cell: (info) => {
-        const v = info.getValue()
-        return typeof v === 'number' ? v.toLocaleString() + '원' : '-'
+        const n = toNum(info.getValue())
+        return n === null ? '-' : n.toLocaleString() + '원'
       },
     }),
     columnHelper.accessor('quantity', {
       header: '수량',
       cell: (info) => {
-        const v = info.getValue()
-        return typeof v === 'number' ? v.toLocaleString() + '주' : '-'
+        const n = toNum(info.getValue())
+        return n === null ? '-' : n.toLocaleString() + '주'
       },
     }),
     columnHelper.accessor('profit_loss', {
       header: '매매손익',
       cell: (info) => {
-        const v = info.getValue()
-        if (typeof v !== 'number' || v === 0) return '-'
-        const cls = v > 0 ? 'text-red-600' : 'text-blue-600'
-        const sign = v > 0 ? '+' : ''
-        return <span className={cls}>{sign}{v.toLocaleString()}원</span>
+        const n = toNum(info.getValue())
+        if (n === null || n === 0) return '-'
+        const cls = n > 0 ? 'text-red-600' : 'text-blue-600'
+        const sign = n > 0 ? '+' : ''
+        return <span className={cls}>{sign}{n.toLocaleString()}원</span>
       },
     }),
     columnHelper.accessor('status', {

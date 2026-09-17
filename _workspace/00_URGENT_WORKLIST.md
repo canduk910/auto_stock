@@ -1,4 +1,4 @@
-# ✅ 2026-09-17(수) — cycle295 D+1 · cycle296/297 착지 · 문서 history 분리 1차
+# ✅ 2026-09-17(목) — cycle295 D+1 · cycle296/297 착지 · 문서 history 분리 1차
 
 > **이 절이 현재 상태다.** 아래 09-15 절은 지난 판독이다.
 
@@ -10,7 +10,7 @@
 | `a4580b6` | 주간 자문 루틴 요일 오인(화↔목) 원인 분석 | push |
 | `141f857` `eeb94fc` | 문서 개편 계획서 · dkstock 평문 자격 제거 | push |
 | `b28d389` `36c5dbe` | **문서 개편 1/6·2/6** — 규약 명문화 + 루트 CLAUDE.md 122→62KB + rules 279→125KB + history 4파일 | push (배포 없음) |
-| (로컬) | **cycle296 + cycle297** 한 커밋 — `token.py` 8영역 | **15:30~16:00 창 push 대기** (full 배포) |
+| (로컬 7커밋) | **cycle296 + cycle297** + 문서 개편 3~6/6 | **16:00 이후 push 대기**(사용자 결정 — full 배포, 보유 11종목) |
 
 ## 오늘 판독
 
@@ -18,14 +18,14 @@
 |---|---|---|
 | 07:57~08:03 | `tick_channel_resolver_mode` 가 부팅 후 `enforce` 로 | 감시 창 A `~/watch/d1_20260917.log` |
 | 15:25~16:06 | 🔴 **cycle295 컷 첫 실측** | `[market_rest_window]` 1행 ∧ 주문 0 ∧ `[tick_channel_switch]` 0 · `manual-sell` 면제 |
-| 15:30~16:00 | **push 창** — cycle296/297 + 문서 2차(src 5·realtime·frontend·가드) | 재시작 1회 |
+| 16:00 이후 | **push 창**(사용자 결정) — cycle296/297 + 문서 2차(src 5·realtime·frontend·가드) | 재시작 1회 · `gh run list` 확인 |
 | 18:50~20:55 | cycle296 **첫날 예외** | 발급 14건(자연 7 + 강제 7) · 요약 `window_issues_total=7` — 결함 아님. 익일부터 7 |
-| 20:30 | 주간 자문 루틴 실행 없음(목요일) | — |
+| 20:30 | **주간 자문 루틴 실행**(목요일) — 이번 주부터 §9 AI 매수평가 회고 + §10 쉬운 말 검토 포함 | PR·Notion 에 회고 절 등장 · 마지막 메시지 (f)(g) |
 
 ## 후속 카드
 
 - cycle296 후속: `finally` `is fut` 가드 봉인 테스트(M16 — 실패한 옛 리더가 새 리더 등록을 지워 KIS 재호출, 프로브 실증) · `_ISSUE_JOIN_TIMEOUT_SECS` 크기 부등식 핀(M28b) · `fut.exception()` 소음 제거(선택)
-- cycle297 후속: enforce 정량 기준 숫자 `domain-consult` · 목요일 루틴 프롬프트에 회고 조회 붙이기(외부 조치, 승인) · N≥30 후 첫 enforce 후보 1전략
+- cycle297 후속: enforce 정량 기준 숫자 `domain-consult` · N≥30 후 첫 enforce 후보 1전략
 - 문서 개편 2차(커밋 3~6): src 문서 5 · `src/realtime/CLAUDE.md`(8영역, sha 핀 4곳 lockstep) · frontend · 가드 5건 반전 + 덧칠 검사 pytest
 - dkstock.cloud 자격 회전(git 이력 잔존) — 사용자 판단
 - cycle272 REST 시가 게이트 재평가 — D+2·D+3 `[main_rest_basis_confirmed]` `delta_bp` 확인 후
@@ -34,7 +34,7 @@
 
 # 🗄️ 2026-09-15(화) 아침 판독 — 시세 채널 2채널 분리 D+1 (지난 판독)
 
-> **이 절이 현재 상태다.** 아래 09-14 판독 계획은 어제 것이고, 그 결과가 여기에 있다.
+> 지난 판독이다. 09-14 계획의 결과가 여기에 있다.
 
 ## 어제 배포·가동한 것
 

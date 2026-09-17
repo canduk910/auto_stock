@@ -35,7 +35,12 @@ async def summary(strategy: str = "total"):
             "total_days": len(records),
             "total_profit_rate": round(cum_rate, 2),
             "avg_daily_profit_rate": round(avg_rate, 2),
-            "latest_asset": records[-1]["total_asset"] if records else 0,
+            # `float()` 필수 — `daily_performance.total_asset` 은 NUMERIC 이라 asyncpg 가
+            # Decimal 로 주고, pydantic v2 는 JSON 에서 Decimal 을 **문자열**로 직렬화한다.
+            # 프론트 계약은 `latest_asset: number`(`types/trading.ts`)이고 `PerformanceCard`
+            # 가 `.toLocaleString('ko-KR')` 를 직접 걸어, 문자열이면 `Object.prototype` 쪽으로
+            # 떨어져 천단위 구분이 사라진다. 같은 dict 의 다른 두 수치는 위에서 이미 float 다.
+            "latest_asset": float(records[-1]["total_asset"] or 0) if records else 0,
             "strategy": strategy,
         },
     )

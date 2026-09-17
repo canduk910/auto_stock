@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from decimal import Decimal
+
 import pytest
 
 pytestmark = pytest.mark.contract
@@ -155,6 +157,28 @@ def test_performance_summary_with_records_aggregates(contract_env):
     # cumulative 는 latest 의 cumulative_return_rate
     assert data["total_profit_rate"] == 2.0
     assert data["latest_asset"] == 10_600_000
+
+
+def test_performance_summary_latest_asset_is_json_number(contract_env):
+    """`latest_asset` 은 JSON **숫자**로 나간다 — 프론트 계약 `latest_asset: number`.
+
+    `daily_performance.total_asset` 은 NUMERIC 이라 asyncpg 가 `Decimal` 을 주고, 라우트가
+    `float()` 를 빠뜨리면 pydantic v2 가 문자열로 직렬화한다. 그러면 `PerformanceCard` 의
+    `toLocaleString('ko-KR')` 이 `Object.prototype` 쪽으로 떨어져 **예외 없이** 천단위
+    구분만 사라진다(`10720000.00원`). 같은 dict 의 다른 두 수치는 이미 float 라 한 카드
+    줄에서 한 칸만 어긋나 눈에 잘 띄지 않는다 — 그래서 단언으로 고정한다.
+    """
+    contract_env.state.performance = [
+        {"date": "2026-05-01", "daily_profit_rate": Decimal("0.5"),
+         "cumulative_return_rate": Decimal("1.0"), "total_asset": Decimal("10720000.00")},
+    ]
+    r = contract_env.client.get("/api/performance/summary")
+    assert r.status_code == 200
+    data = r.json()["data"]
+    assert isinstance(data["latest_asset"], (int, float)) and not isinstance(
+        data["latest_asset"], bool
+    ), f"latest_asset 가 {type(data['latest_asset']).__name__} 다: {data['latest_asset']!r}"
+    assert data["latest_asset"] == 10_720_000.0
 
 
 def test_performance_summary_strategy_filter_passes_through(contract_env):

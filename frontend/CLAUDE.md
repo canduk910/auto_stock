@@ -108,7 +108,11 @@ Dashboard 만 즉시 import. 나머지 9 페이지(History · Recommendations ·
    ```
 
    `/api/strategies` e2e mock 은 **플랫 형식 하나만** 등록한다(내포 형식을 함께 두면 LIFO 로 그쪽이 이겨 `name = undefined` 가 된다).
-5. 🔴 **목은 *의도한 계약* 이 아니라 *실제 응답* 을 담는다.** 목을 만들 때는 응답을 한 번 실제로 받아(curl·운영 로그) **그 모양 그대로 리터럴로** 박는다 — 생성기로 "그럴듯한" 값을 합성하지 않는다. 종목마스터 일봉 탭은 MSW·Playwright·컴포넌트 목 셋이 `change_rate` 를 전부 진짜 number 로 만들어(실제 응답은 pydantic v2 가 `Decimal` 을 **문자열**로 직렬화) 흰 화면 결함이 3개월 넘게 세 목 전부 초록인 채로 살아 있었다. 목 동기화 대상은 `frontend/src/test/handlers.ts`(MSW) · `frontend/src/test/factories.ts` · `e2e/fixtures/api-mocks.ts`(LIFO 정합) 셋이다.
+5. 🔴 **목은 *의도한 계약* 이 아니라 *실제 응답* 을 담는다.** 목을 만들 때는 응답을 한 번 실제로 받아(curl·운영 로그) **그 모양 그대로 리터럴로** 박는다 — 생성기로 "그럴듯한" 값을 합성하지 않는다. 목 동기화 대상은 `frontend/src/test/handlers.ts`(MSW) · `frontend/src/test/factories.ts` · `e2e/fixtures/api-mocks.ts`(LIFO 정합) 셋이고, **백엔드 계약 테스트의 DB 스텁도 같은 규칙을 받는다**(`tests/contract/`).
+
+   같은 원인(PG NUMERIC → asyncpg `Decimal` → pydantic v2 가 JSON **문자열**로 직렬화)으로 세 화면이 각각 오래 망가져 있었고, 매번 **모든 층의 목이 숫자를 먹여** 전 스위트가 초록이었다: 종목마스터 일봉 탭(`change_rate`, 흰 화면) · 거래내역 '가격'·'매매손익'(전 행 `-`) · 대시보드 '최근 자산'(천단위 구분 소실). 뒤의 둘은 예외조차 나지 않아 **화면만 조용히 빈다** — 로그에 아무것도 안 남으므로 목이 유일한 방어선이다.
+
+   그래서 수치 렌더는 **방어 변환을 거친 값에만** 건다(`toNum`/`toSafeNumber` 계열이 숫자와 숫자 문자열을 모두 받고 진짜 결측만 `-` 로 남긴다). `typeof v === 'number'` 단독 판정과 미검증 값에 `toLocaleString`/`toFixed` 직접 호출은 금지다.
 6. **골든 픽스처는 손으로 고치지 않는다.** `GET /api/strategies/params-schema` 목 2개(`frontend/src/test/fixtures/paramSchema.fixture.ts` · `e2e/fixtures/param-schema.fixture.ts`)는 `src/engine/param_catalog.py` 와 7 전략 `DEFAULT_PARAMS` 에서 **기계 생성**한다. 카탈로그나 `DEFAULT_PARAMS` 가 바뀌면 생성기를 다시 돌린다:
 
    ```bash
