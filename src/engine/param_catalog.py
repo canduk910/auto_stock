@@ -506,14 +506,14 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         type="int", min=1, max=300, step=1, unit="봉",
         editable=True, risk="normal", auto_tunable=False, deprecated=False,
         applies_to=("vcp_breakout", "kojiro"), range_src="structural",
-        help="VCP 60 / 고지로 20. `ema_short < ema_mid < ema_long` 전제.",
+        help="VCP 150 / 고지로 20. `ema_short < ema_mid < ema_long` 전제.",
     ),
     _s(
         key="ema_long", label_ko="장기 EMA 기간", group="entry",
         type="int", min=1, max=300, step=1, unit="봉",
         editable=True, risk="normal", auto_tunable=False, deprecated=False,
         applies_to=("vcp_breakout", "kojiro"), range_src="structural",
-        help="VCP 120 / 고지로 40. `ema_short < ema_mid < ema_long` 전제.",
+        help="VCP 200 / 고지로 40. `ema_short < ema_mid < ema_long` 전제.",
     ),
     _s(
         key="long_ema_uptrend_days", label_ko="장기 EMA 상승 지속일", group="entry",

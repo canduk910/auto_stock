@@ -131,6 +131,10 @@ _SEGMENT_SHA: dict[tuple[str, str, str | None], str] = {
 #: 수단을 만드는 사이클이지만, 이 두 키는 카탈로그 등재와 짝을 이루는 등재 자체다),
 #: 아래 docstring "값 변경은 이 사이클의 범위 밖" 은 **cycle278 한정**이고
 #: cycle290 에는 적용되지 않는다 — cycle290 은 이 세그먼트를 정당하게 갱신했다.
+#: 🔁 cycle301(2026-09-18, 사용자 승인 D3·D4) 재핀 — `vcp_breakout` 만 대상.
+#: `ema_mid` 60→150 · `ema_long` 120→200 · `min_swing_atr_mult` 0.5→1.0 (운영 DB
+#: 실측 정합, 미너비니 원설계 복귀). 값 변경이 이 사이클의 **정당한 목적**이라
+#: 재핀했다 — 나머지 6전략 핀은 불변이다.
 _DEFAULT_PARAMS_SHA: dict[str, tuple[str, str, str]] = {
     # 전략 id: (파일, 클래스, cycle290 기준 세그먼트 sha256 — 구 base 34ba9e6 값은 git 이력)
     "momentum": (
@@ -150,7 +154,7 @@ _DEFAULT_PARAMS_SHA: dict[str, tuple[str, str, str]] = {
         "93866d299eebc76149e3d713ce4d00afc00812a9e8c270f442a8b6df79caa3a8"),
     "vcp_breakout": (
         "src/engine/strategies/vcp_breakout.py", "VcpBreakoutStrategy",
-        "504e4c53a0f0e2ef3d2acc7f0be8313a37d459e58b52c048a2fbbe0f889159c1"),
+        "902ef6ce31a8c744296c88cba73cdadcfaec36bc1f6dd0dfe7ef6074113e9439"),
     "kojiro": (
         "src/engine/strategies/kojiro.py", "KojiroStrategy",
         "cabe7c99e834d4a27689de905216a13d81b5fded1722a03d607c62c4bdc0312b"),
@@ -246,7 +250,7 @@ _BASE_SHA = {
     "src/engine/strategies/bull_flag_breakout.py":
         "0feb3b629bab5ad08ad589315ca12e76b57a73950b948570a78dfe84ba792595",
     "src/engine/strategies/vcp_breakout.py":
-        "edffcc226d3c60412d2b95fa2202a9401d09934050f0aa3100ee8146f6e07b85",
+        "5b324b34335f922f82b848ae2313e08660bde75c02d12432867ed224e9709228",
     "src/engine/strategies/kojiro.py":
         "9477790e9d20eb6d17f36fc7586ada77ac5e2e4b0136a334888244afdb7e9cbc",
 }

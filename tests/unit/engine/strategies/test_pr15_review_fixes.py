@@ -8,6 +8,8 @@
   → team-leader 도메인 판단: 방향 (c) 채택 — 매매 동작 무변경, 표기만 정직화.
     docstring/FUNNEL_STAGES/step_conditions 에 "가드로 ~75 캡됨" 명시. 키 이름(ema150/ema200)
     rename 보류(funnel UI/테스트 호환). config 값 120 유지(진입 빈도 영향 0).
+    (cycle301(2026-09-18)이 config 값을 120→200 미너비니 원설계로 되돌렸다 — 100봉 읽기
+    에서는 ~75 캡 산식이 그대로 적용된다.)
 
 지적 ② (관찰성) — BFB `_scan_universe` 가 빈 유니버스 시 조용히 `[]` 반환.
   컨벤션(strategies/CLAUDE.md "0종목 확정 시 ERROR 로그 + system_logs 기록") 위반.
@@ -22,6 +24,12 @@ import inspect
 from unittest.mock import AsyncMock, patch
 
 import pytest
+
+from tests.unit.engine.strategies.test_cycle300_daily_depth_switch import (
+    _capture_prepare_fetch,
+    _kis_candles,
+    _make_vcp,
+)
 
 pytestmark = pytest.mark.unit
 
@@ -164,24 +172,53 @@ async def test_bfb_non_empty_universe_no_error_log(monkeypatch, caplog):
 # ===========================================================================
 # 지적 ① — VCP ema_long=120 → 런타임 ~75 캡 표기 정직성 (방향 c)
 # ===========================================================================
-def test_vcp_effective_ema_long_capped_at_kis_limit():
-    """회귀 가드: config ema_long=120 이지만 100일 응답 시 effective 가 ~75 로 캡됨.
+@pytest.mark.asyncio
+async def test_vcp_effective_ema_long_capped_in_default_cap100_mode():
+    """VCP 실효 장기선 캡 — cycle301(2026-09-18, 사용자 승인 D3·D4)이 뒤집은 세계.
 
-    available_len=100, uptrend_days=20 → effective = min(120, 100-20-5) = 75.
-    이 캡 동작은 copilot 지적의 근거이자 의도된 안전 가드. 동작 자체는 유지.
+    **옛 전제(폐기)**: "`ema_long` 이 120 이어야 KIS 100일 한도 안에서 계산 가능하다."
+    KIS `FHKST03010100` 의 100일 한도는 **호출당** 한도였을 뿐이고, cycle299(윈도우
+    분할 backfill 로 일봉 적재를 225영업일까지 확장)와 cycle300(DB 읽기 클램프를
+    100→400 으로 올리고 `daily_fetch_depth_mode` 스위치를 신설)이 그 한도를 걷어냈다.
+    지금 `ema_long` 은 200(미너비니 원설계)이고, ~75 캡은 "KIS 한도" 가 아니라 **VCP
+    전략이 그날 실제로 요청·수신한 보유 봉 수**(`daily_fetch_depth_mode` 가 그 요청
+    깊이를 정한다)에서 나온다는 것이 새 명제다.
+
+    **cycle301 신규 가드와의 중복 확인** — `test_cycle301_vcp_default_alignment.py`
+    의 `test_g301_3_effective_ema_long_follows_available_rows` 가 이미 실제
+    `_check_trend_filter` 인자 경로로 "보유 행수가 캡을 정한다" 는 산식 자체를 100행
+    →75 · 225행→200 두 값 모두 봉인하지만, 그쪽은 **`daily_fetch_depth_mode="full"`
+    을 명시**해서 잰다. 이 테스트는 그 파일이 안 재는 각도 — **오늘 운영이 실제로
+    쓰는 기본값 `"cap100"`**(전환 안 한 다크런치 상태, `strategies/CLAUDE.md` VCP
+    절)에서 같은 산식이 그대로 적용됨 — 을 잰다. `ema_long==200`/`ema_mid==150`
+    값 자체의 정적 단언은 cycle301 G-301-2 가 이미 더 강하게 재고 있어 여기서
+    다시 하지 않는다.
+
+    산식(`prepare()`) = `effective_ema_long = min(ema_long, available_len -
+    uptrend_days(20) - 5)`. cap100 기본값은 `fetch_days=100` 을 요청하고,
+    DB 가 정확히 100행을 돌려주면 `available_len=100` → `min(200, 100-20-5)=75`.
+    측정은 `_check_trend_filter` 를 스파이로 감싸 **실제로 넘어온 인자**를 읽는다
+    (산식을 테스트에 복제하지 않는다).
     """
-    from src.engine.strategies.vcp_breakout import VcpBreakoutStrategy
+    seen_eff: list[int | None] = []
+    strat = _make_vcp(base_max_days=75, max_scan_stocks=10)  # daily_fetch_depth_mode 기본값(cap100)
+    real_filter = type(strat)._check_trend_filter
 
-    p = VcpBreakoutStrategy.DEFAULT_PARAMS
-    ema_long = p["ema_long"]
-    uptrend_days = p["long_ema_uptrend_days"]
-    available_len = 100  # KIS 단일호출 한도
-    effective = min(ema_long, available_len - uptrend_days - 5)
-    assert effective == 75, (
-        f"100일 한도에서 ema_long=120 은 effective 75 로 캡됨. 실제={effective}"
+    def _spy(self, candles, *, effective_ema_long=None):
+        seen_eff.append(effective_ema_long)
+        return real_filter(self, candles, effective_ema_long=effective_ema_long)
+
+    with patch.object(type(strat), "_check_trend_filter", new=_spy):
+        seen_fetch = await _capture_prepare_fetch(strat, _kis_candles(100))
+
+    assert seen_fetch["days"] == 100, (
+        f"cap100 기본값에서 fetch_days={seen_fetch['days']} (기대 100 — 배포 전후 byte 동일)"
     )
-    # config 값 120 은 유지 (방향 c — 매매 동작 무변경)
-    assert ema_long == 120
+    assert seen_eff and seen_eff[0] == 75, (
+        f"cap100 기본값 100행 응답에서 effective_ema_long={seen_eff[0] if seen_eff else None} "
+        "(기대 75 = min(200, 100-20-5)) — 캡의 출처가 KIS 한도가 아니라 보유 행수임을 "
+        "실제 코드 경로로 확인"
+    )
 
 
 def test_vcp_trend_filter_docstring_documents_kis_cap():
@@ -220,7 +257,8 @@ def test_vcp_step_conditions_trend_filter_documents_cap():
     """추세필터 단계 step_conditions(FUNNEL_STAGES[3] 위임)가 런타임 effective EMA 를 표기.
 
     기존: f"종가 > {ema_short}EMA > {ema_mid}EMA > {ema_long}EMA + {ema_long}EMA {uptrend}일 우상향"
-    → ema_long=120 이 하드 표기되어 실제 ~75 와 불일치. effective 표기로 정직화.
+    → config `ema_long`(PR15 당시 120, cycle301 이후 200)이 하드 표기되면 100봉 읽기의
+    실제 effective ~75 와 불일치한다. effective 표기로 정직화.
     """
     src = inspect.getsource(
         __import__("src.engine.strategies.vcp_breakout", fromlist=["vcp_breakout"])

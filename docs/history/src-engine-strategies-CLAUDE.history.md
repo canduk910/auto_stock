@@ -737,3 +737,58 @@ cycle287 배포 시점에 두 키가 어디에도 없어 `PUT /api/strategies/{i
 - ⚠️ 이 사이클 중 다른 에이전트의 동시 편집으로 `vcp_breakout.py` 가 04:52 에 HEAD 로 한 번
   되돌아갔다(내 편집과 상대 편집이 함께 사라졌다). 재적용 후 sha 핀 12파일을 cycle300 이
   몰아서 다시 박았다. 같은 파일을 두 사이클이 동시에 열면 핀이 서로를 덮는다.
+
+→ CHANGELOG: cycle300 행
+
+## 2026-09-18 — cycle301 · VCP 코드 기본값을 원설계 50/150/200 · 자(ruler) 1.0 으로 맞춤
+
+- 사용자 승인 2026-09-18(보고서 결정 카드 D3·D4 회신 — "D3 코드기본값 운영에 맞춰 수정 /
+  D4 일단 1.0에 맞추고 지켜보자"). **바뀐 것은 코드 쪽이다** — 운영 DB 는 건드리지 않았다.
+- 값 3개: `ema_mid` 60→150 · `ema_long` 120→200 · `min_swing_atr_mult` 0.5→1.0. 세 값 모두
+  운영 DB `strategy_config.vcp_breakout.params` 실측값과 **같아졌다**.
+- **오늘 운영의 매매 행위는 0 만큼 바뀐다.** `StrategyBase` 초기화가
+  `merged = {**self.DEFAULT_PARAMS, **config.params}` 이고 운영 DB 에 세 키가 전부 있어
+  코드 기본값이 완전히 가려져 있다. 실제로 달라지는 곳은 DB 에 그 키가 없는 환경
+  (신규 배포·테스트 픽스처)뿐이고, 그것이 이 사이클의 목적이다.
+- **왜 완화가 아니라 결함 시정인가 ①(EMA)** — `50/150/200` 이 미너비니 Trend Template
+  원설계다. `50/60/120` 은 일봉을 100행까지만 읽던 시절의 임시 회피책이었고 코드 주석이 이미
+  그렇게 인정하고 있었다("config 120 은 분할 fetch 로 진짜 120 을 계산하게 될 때의 목표값
+  의미로 보존"). cycle299(적재 깊이 retention 230→390 · backfill target 120→225)·
+  cycle300(읽기 클램프 400 + `daily_fetch_depth_mode` 스위치)이 깊이를 열어, 지금은
+  운영값이 맞고 코드가 낡은 쪽이었다.
+- **왜 완화가 아니라 결함 시정인가 ②(자 ruler)** — `min_swing_atr_mult` 는 **0.5 쪽이 결함**이다.
+  임계를 낮추면 ZigZag 반전 회수가 2~4배로 불어나 상한 `pullback_count_max=4` 를 넘기고,
+  점진 수축 strict 단조(통과율 1/n!)가 붕괴해 Pullback 단계가 사실상 막힌다. 운영 1.0 이 옳고,
+  신규 환경에 0.5 로 배포하면 그 환경의 VCP 가 Pullback 에서 죽는다.
+- **실효 정렬은 여전히 읽기 깊이가 정한다**(기본 모드 `"cap100"`, 보유 100봉 기준).
+  `effective_ema_long = min(ema_long, 보유 − uptrend_days(20) − 5)` 뒤에 `ema_mid >= ema_long`
+  이면 `ema_mid = max(ema_short+1, ema_long−10)` 이 한 번 더 걸린다.
+  - 옛 코드 기본값 60/120 → `effective=75`, `ema_mid=60 < 75` 라 재축소 없음 → **50/60/75**
+  - 새 코드 기본값 150/200 → `effective=75`, `ema_mid=150 ≥ 75` 라 재축소 →
+    `max(51, 65)=65` → **50/65/75**
+  - 보유 225봉 + `daily_fetch_depth_mode="full"` → `effective=200`, 재축소 없음 →
+    **50/150/200**(원설계)
+- 즉 **원설계 정렬은 `daily_fetch_depth_mode="full"` + 충분한 보유 봉에서만 성립한다** —
+  이 사이클은 기본값을 정합시켰을 뿐 깊이 스위치를 켜지 않았다. 다만 **운영은 그보다 앞선
+  2026-09-18 06:00 에 이미 `full` 로 켜져 있어**(사용자 결정 D1, 라이브 실측 `fetch_days=285`
+  · VCP 유니버스 348종목 전부 232봉) **오늘 운영이 실제로 계산하는 정렬은 50/150/200 이다.**
+  위 `"cap100"` 표는 코드 기본 모드의 산식을 보이는 것이지 현재 운영 상태가 아니다.
+- 정본에서 걷어낸 것 = 코드값·운영값을 나란히 적던 병기와 "운영 DB … 기준" 단서다. 둘이
+  같아져 단서가 가리킬 대상이 없어졌다.
+
+원문(`src/engine/strategies/CLAUDE.md:19·113·114·125`, 2026-09-18 이관):
+
+---
+
+→ **추세 필터**(50/60/120 EMA 정렬 + 장기 EMA 1개월 우상향) →
+
+**pullback 점진 수축**(ATR threshold ZigZag `min_swing_atr_mult=0.5`, 2~4회, 직전 대비 폭 감소, 마지막 ≤ 12%)
+
+- VCP 추세 필터 = 코드 기본값 `ema_short=50` · `ema_mid=60` · `ema_long=120`(운영 DB 는 50/150/200) · `last_pullback_max=0.12`. `effective_ema_long = min(ema_long, available_len - uptrend_days - 5)` 자동 축소 가드 + `_check_trend_filter(candles, effective_ema_long=)` 시그니처가 **읽은 봉 수만큼만** 장기선을 세운다. 중기선은 그 뒤 `ema_mid >= ema_long` 이면 `max(ema_short+1, ema_long-10)` 으로 한 번 더 줄어든다.
+  - **읽기 깊이 스위치 `daily_fetch_depth_mode`(cycle300)** — `"cap100"`(기본) = `fetch_days` 100봉 = 현행 · `"full"` = `ema_long + base_max_days + 10`. 실효 정렬이 이렇게 갈린다(운영 DB 50/150/200 기준):
+
+- VCP pullback 검출(`_check_pullback_sequence`) = **ATR threshold ZigZag**(`min_swing_atr_mult=0.5` — 베이스 ATR 의 0.5배 미만 변동은 무시) + state machine(`undefined`/`up`/`down`)으로 마지막 미완성 swing 을 포함한다.
+
+---
+
+→ CHANGELOG: cycle301 행

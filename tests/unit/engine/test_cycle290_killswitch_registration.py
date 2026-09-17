@@ -199,6 +199,35 @@ def _expected_new_keys(sid: str) -> set[str]:
     return expected
 
 
+#: cycle301(2026-09-18, 사용자 승인 D3·D4) — VCP `ema_mid`/`ema_long`/`min_swing_atr_mult`
+#: 3키의 **값**을 운영 DB 실측(150/200/1.0)에 맞춰 올렸다. `_CYCLE297_NEW_KEYS`/
+#: `_CYCLE300_NEW_KEYS`(신규 키 추가)와는 다른 축이다 — 이 3키는 cycle290 착수
+#: 시점에도 이미 `DEFAULT_PARAMS` 에 있던 키라 `test_g290_13`(키 **집합**의 델타,
+#: `_expected_new_keys` 소관)에는 영향이 없어야 한다. 그래서 `_expected_new_keys()`
+#: 에 섞지 않는다 — 섞으면 `now - pre`(실제로는 비어 있다, 두 스냅샷 모두 이 키를
+#: 갖고 있으므로)와 `expected_new`(3키가 추가돼 부풀려진다)가 어긋나 `test_g290_13`
+#: 이 붉어진다. 대신 `test_g290_14`(키별 **값** 비교) 에서만 이 3키를 뺀다 — 역사
+#: 스냅샷(`_PRE_CYCLE290_DEFAULTS`)은 cycle290 착수 시점 값(ema_mid=60/ema_long=120/
+#: min_swing_atr_mult=0.5)을 그대로 보존하고, cycle301 이 정당하게 바꾼 이 3키만
+#: 비교에서 뺀다. VCP 한 전략에만 붙는다(kojiro 의 `ema_long=40`/`ema_mid=20` 은
+#: 다른 전략의 다른 키라 무접촉).
+_CYCLE301_CHANGED_KEYS: tuple[str, ...] = ("ema_mid", "ema_long", "min_swing_atr_mult")
+_CYCLE301_AFFECTED_SIDS: frozenset[str] = frozenset({"vcp_breakout"})
+
+
+def _excluded_from_value_comparison(sid: str) -> set[str]:
+    """`test_g290_14` 값 비교에서 뺄 키 = 신규 키(`_expected_new_keys`) + cycle301 값 변경분.
+
+    `_expected_new_keys(sid)` 는 `test_g290_13` 의 키 집합 델타(`now - pre`)와 등식
+    비교되므로 값만 바뀐 기존 키를 거기 섞으면 그 등식이 깨진다(위 주석 참조). 이 함수는
+    값 비교 전용이라 안전하게 합칠 수 있다.
+    """
+    excluded = _expected_new_keys(sid)
+    if sid in _CYCLE301_AFFECTED_SIDS:
+        excluded |= set(_CYCLE301_CHANGED_KEYS)
+    return excluded
+
+
 @pytest.mark.parametrize("sid", _STRATEGY_IDS)
 def test_g290_13_key_set_delta_is_exactly_the_two_new_keys(sid: str) -> None:
     """RED — `DEFAULT_PARAMS` 키 집합의 변화가 **정확히 +2**, 삭제 0.
@@ -222,11 +251,19 @@ def test_g290_14_all_other_default_values_are_untouched(sid: str) -> None:
     sha 핀 재산출은 "기존 값도 같이 바뀌었을 수 있다" 는 구멍을 남긴다(자문 A2). 여기서는
     dict 를 직접 비교하므로 실패 시 무엇이 바뀌었는지 그대로 읽힌다. 🔁 cycle297 —
     제외 집합이 sid 별로 `_expected_new_keys` 를 쓴다(위 test_g290_13 과 동일 축).
+    🔁 cycle301 — VCP 는 여기에 `_CYCLE301_CHANGED_KEYS`(값만 바뀐 기존 키 3개)가
+    추가로 빠진다(`_excluded_from_value_comparison` 참조. `test_g290_13` 의 키 집합
+    델타에는 섞지 않는다 — 위 정의부 주석).
     """
-    excluded = _expected_new_keys(sid)
+    excluded = _excluded_from_value_comparison(sid)
     now = {k: v for k, v in _defaults(sid).items() if k not in excluded}
-    assert now == _PRE_CYCLE290_DEFAULTS[sid], (
-        "신규 키 외의 `DEFAULT_PARAMS` 값이 바뀌었다 — cycle290/297 의 범위는 등재뿐이다"
+    # cycle301 — `_CYCLE301_CHANGED_KEYS` 는 역사 스냅샷에도 값이 존재하는 **기존** 키라
+    # (신규 키와 달리) 양쪽에서 똑같이 제외해야 항목 수가 맞는다. 신규 키(`_expected_new_keys`
+    # 소관)는 애초에 스냅샷 쪽에 없으므로 이 필터가 스냅샷 쪽에서는 no-op 이다.
+    baseline = {k: v for k, v in _PRE_CYCLE290_DEFAULTS[sid].items() if k not in excluded}
+    assert now == baseline, (
+        "신규 키·cycle301 값 변경분 외의 `DEFAULT_PARAMS` 값이 바뀌었다 — "
+        "cycle290/297/300/301 의 범위는 등재·승인된 값 변경뿐이다"
     )
 
 
@@ -1035,6 +1072,12 @@ _PRE_CYCLE290_DEFAULTS: dict[str, dict] = {
         "breakeven_promote_atr": 0.0,
         "breakout_volume_mult": 1.5,
         "daily_loss_limit": -8.0,
+        # ⚠️ ema_long/ema_mid/min_swing_atr_mult — 이 스냅샷은 **cycle290 착수 시점**
+        # (2026-09-13, HEAD `b985938`) 값(120/60/0.5)을 그대로 보존한다. cycle301
+        # (2026-09-18, 사용자 승인 D3·D4)이 이 3키의 코드 값을 150/200/1.0 으로 올렸지만
+        # 여기서 값을 함께 옮기면 이 dict 가 "cycle290 착수 시점" 이라는 원래 의미를
+        # 잃는다 — 값을 덮지 않고, `_CYCLE301_CHANGED_KEYS` 로 `test_g290_14` 비교에서만
+        # 뺀다(아래 정의부 참조).
         "ema_long": 120,
         "ema_mid": 60,
         "ema_short": 50,

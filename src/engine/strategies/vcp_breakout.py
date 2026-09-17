@@ -6,7 +6,8 @@ donchian_swing 의 정공법(신고가 직진 추격)을 보강하는 추세추�
 
 진입:
 - 추세 필터: 종가 > 단기EMA > 중기EMA > 장기EMA, 장기EMA 1개월 우상향
-  (사이클 48 — KIS 100일 한도 내 계산 가능하도록 50/60/120 으로 하향. 기존 50/150/200)
+  (미너비니 Trend Template 원설계 50/150/200. `daily_fetch_depth_mode` 기본값
+  "cap100" 에서는 `effective_ema_long` 가드로 장기선이 축소된다 — VCP 절 참조)
 - 베이스: 5~15주(25~75영업일), 깊이 ≤ 25%, 최대 30%
 - 조정 시퀀스: 2~4회 pullback 점진 수축, 마지막 ≤ 8%
 - 거래량 수축: 마지막 5일 평균 < 베이스 직전 20일 평균 × 70%
@@ -133,18 +134,18 @@ class VcpBreakoutStrategy(StrategyBase):
     DEFAULT_PARAMS = {
         "tradable_boards": list(DEFAULT_TRADABLE_BOARDS),
         "exchange": "KRX",
-        # 추세 필터 (사이클 48, 2026-05-27 — KIS 100일 한도로 계산 가능한 값으로 하향)
-        # 기존 50/150/200 은 KIS 단일호출 100일 한도 → effective ~75 축소 + ema_mid 재축소
-        # → 50/65/75 정배열 항상 0 (추세필터 0건 결함). 50/60/120 으로 ema_mid 재축소 회피.
-        #
-        # PR #15 (copilot 재리뷰 ①) 실측 주의: ema_long=120 은 `prepare()` 의 effective 가드
-        # (min(120, 100-uptrend-5)=~75) 로 런타임에는 ~75EMA 로 계산된다 — 진짜 120EMA 가
-        # 아니다. ema_mid=60 < 75 라 중기선 재축소는 발동 안 함 → 실효 정렬 50/60/~75.
-        # config 120 은 "분할 fetch 로 진짜 120 을 계산하게 될 때의 목표값" 의미로 보존
-        # (분할 fetch 인프라는 운영 1주 후 별도 검토, 사용자 승인 대기 — 범위 밖).
+        # 추세 필터 (cycle301, 2026-09-18 — 사용자 승인 D3·D4 + 운영 DB 실측 정합)
+        # 50/150/200 이 미너비니 Trend Template 원설계다. cycle299(일봉 적재 깊이
+        # 225영업일)·cycle300(읽기 클램프 400 + daily_fetch_depth_mode)이 KIS 단일호출
+        # 100일 한도를 걷어냈으므로 코드 기본값을 원설계 값으로 되돌린다 — 지금까지는
+        # 운영 DB(150/200)가 맞고 코드(60/120)가 낡아 있었다. `daily_fetch_depth_mode`
+        # 기본값 "cap100"(100봉)에서는 `_check_trend_filter` 가 받는
+        # `effective_ema_long = min(ema_long, 보유행수-uptrend_days-5)` 가드(`prepare()`
+        # 참조)로 장기선이 여전히 축소된다 — 원설계 50/150/200 정렬을 실제로 쓰려면
+        # `daily_fetch_depth_mode="full"` 로 전환한다(`strategies/CLAUDE.md` VCP 절).
         "ema_short": 50,
-        "ema_mid": 60,
-        "ema_long": 120,
+        "ema_mid": 150,
+        "ema_long": 200,
         "long_ema_uptrend_days": 20,
         # cycle300 — 일봉 읽기 깊이 스위치. 기본 "cap100" = 현행 100봉(행위 byte 동일).
         # "full" 이면 ema_long + base_max_days + 10 봉을 요청해 실효 장기선이 보유 깊이를
@@ -159,11 +160,12 @@ class VcpBreakoutStrategy(StrategyBase):
         "pullback_count_min": 2,
         "pullback_count_max": 4,
         "last_pullback_max": 0.12,  # 사이클 48 — 0.08→0.12. 한국 중소형주 변동성 현실화
-        # 사이클 49 (2026-05-31) — Pullback "마지막 폭 0.0%" 결함 시정
         # ATR threshold swing 검출. 베이스 ATR × min_swing_atr_mult 미만 변동은 노이즈로 무시.
-        # 한국 KRX 우량주 평탄 구간(SK텔레콤/삼성전자우 등)의 1원 단위 미세 진동으로
-        # 회수 2~4회 범위 위반 빈발하던 결함 차단. 0.5×ATR 은 ZigZag indicator 표준 임계.
-        "min_swing_atr_mult": 0.5,
+        # cycle301(2026-09-18, 사용자 승인 D3·D4 + 운영 DB 실측 정합) — 0.5 는 임계가 너무
+        # 낮아 ZigZag 반전 회수가 2~4배로 불어나 상한 pullback_count_max=4 를 넘기고
+        # 점진 수축 strict 단조(통과율 1/n!)가 무너져 Pullback 단계가 사실상 막히는
+        # 결함이었다. 1.0 으로 올려 노이즈성 반전을 더 넓게 걸러낸다.
+        "min_swing_atr_mult": 1.0,
         # 거래량 수축
         "volume_contraction_ratio": 0.70,
         # 매수

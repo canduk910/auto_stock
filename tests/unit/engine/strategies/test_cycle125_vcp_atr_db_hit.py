@@ -244,7 +244,8 @@ async def test_g_atr_wilder_mismatch_uses_kis_fallback(monkeypatch, caplog):
 def test_g_cycle49_pullback_sequence_unaffected():
     """ATR 산정 영역 변경이 _check_pullback_sequence 로직에 영향을 주지 않는다.
 
-    사이클 49 핵심 파라미터 min_swing_atr_mult=0.5 가 DEFAULT_PARAMS 에 여전히 존재.
+    사이클 49 핵심 파라미터 min_swing_atr_mult 가 DEFAULT_PARAMS 에 여전히 존재
+    (값은 cycle301(2026-09-18, 사용자 승인 D3·D4)이 0.5→1.0 으로 상향).
     _check_pullback_sequence, _atr 메서드 존재 확인 (KIS fallback 경로 영속).
     """
     from src.engine.strategies.vcp_breakout import VcpBreakoutStrategy
@@ -254,8 +255,8 @@ def test_g_cycle49_pullback_sequence_unaffected():
     assert "min_swing_atr_mult" in default_params, (
         "DEFAULT_PARAMS 에 min_swing_atr_mult 누락 (사이클 49 영속 위반)"
     )
-    assert default_params["min_swing_atr_mult"] == 0.5, (
-        f"min_swing_atr_mult 기본값 변경됨: {default_params['min_swing_atr_mult']} (사이클 49: 0.5)"
+    assert default_params["min_swing_atr_mult"] == 1.0, (
+        f"min_swing_atr_mult 기본값 변경됨: {default_params['min_swing_atr_mult']} (cycle301: 1.0)"
     )
 
     # _check_pullback_sequence 메서드 존재 확인

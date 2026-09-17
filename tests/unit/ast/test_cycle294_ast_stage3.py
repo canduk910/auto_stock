@@ -253,12 +253,12 @@ _BASE_SHA: dict[str, str] = {
     "src/engine/strategies/momentum.py":
         "50d5c0b9a232d6110f6b85fc524569853f2b8edffe2fd44adc24289800b95ae2",
     "src/engine/strategies/vcp_breakout.py":
-        "edffcc226d3c60412d2b95fa2202a9401d09934050f0aa3100ee8146f6e07b85",
+        "5b324b34335f922f82b848ae2313e08660bde75c02d12432867ed224e9709228",
     "src/engine/strategies/volatility_breakout.py":
         "d13efaa4a9424e2822b5476ce159987d2a5192a4bca30af3f1a0cae9c3ffcabc",
     # 파라미터 축 — 리졸버 5키는 `system_config` 다(§9-E). 전략 축으로 새지 않는다.
     "src/engine/param_catalog.py":
-        "3f71152cc5ff5bcf8d753d6aeab20121a594d54adac477ba2408d1ec83e691c8",
+        "babaf208053331a9a8487b7b1f79b0d8b569225d0e694370510ce7633cf318c1",
     "src/engine/param_validation.py":
         "b4c5c029800191523bcc511919d6de3774e9ab49ca2fc0a0558ee3907868ee17",
     # 🔴 시각·거래소 표의 유일 정본 — 3단계는 이 표를 **읽기만** 한다(§1-A).

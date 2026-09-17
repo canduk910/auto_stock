@@ -120,9 +120,18 @@ cycle298 이 그 첫 회차 지연을 호출부 인자 `first_delay` 로 열어,
 - cycle296 후속: `finally` `is fut` 가드 봉인 테스트(M16 — 실패한 옛 리더가 새 리더 등록을 지워 KIS 재호출, 프로브 실증) · `_ISSUE_JOIN_TIMEOUT_SECS` 크기 부등식 핀(M28b) · `fut.exception()` 소음 제거(선택)
 - cycle297 후속: enforce 정량 기준 숫자 `domain-consult` · N≥30 후 첫 enforce 후보 1전략
 - **cycle299 후속 ① VCP 100일 cap 두 겹 해제 — cycle300 이 처리(코드 착지, 켜는 것은 별도 조작)**. 읽기 관문 상한은 `_MAX_DAILY_ROWS = 400` 이 됐고 VCP 는 전략 파라미터 `daily_fetch_depth_mode` 로 깊이를 고른다. **기본값 `"cap100"` 이라 배포만으로는 매매가 바뀌지 않는다** — 200일 EMA 를 실제로 쓰려면 `PUT /api/strategies/vcp_breakout/params {"daily_fetch_depth_mode":"full"}` 를 쳐야 한다. 그 PUT 이 남은 결정 항목이고, 아래 후속 ③ ⓓ(실효 장기선 200 확인)가 그 전제다. 롤백은 같은 PUT 에 `"cap100"`
-- **cycle300 후속 ① `full` 을 켠 뒤 D+1 실측** — ⓐ funnel `trend_filter_pass` 가 켜기 전후로 어떻게 움직이는가(EMA 정렬 90% 탈락이 완화되는가, 아니면 200EMA 가 더 빡빡해 오히려 줄어드는가 — **둘 다 가능한 결과이고 줄어드는 것이 곧 실패는 아니다**) ⓑ `candle_fetch_ok` 가 급감하지 않는가(보유 봉이 얕은 종목은 `effective_ema_long < 30` 으로 탈락한다 — 유니버스가 통째로 줄면 되돌린다) ⓒ `prepare` 소요 시간·DB 부하(종목당 100→285행) ⓓ `[daily_raw_missing]` 이 늘지 않는가
+- **cycle300 후속 ① `full` 을 켠 뒤 D+1 실측** — ✅ **켰다: 2026-09-18 06:00 PUT, 라이브 실측 `mode=full` · `fetch_days=285` · `ema=50/150/200` · VCP 유니버스 348종목 전부 232봉.** 남은 것은 아래 실측뿐이다(09:37 예약). ⓐ funnel `trend_filter_pass` 가 켜기 전후로 어떻게 움직이는가(EMA 정렬 90% 탈락이 완화되는가, 아니면 200EMA 가 더 빡빡해 오히려 줄어드는가 — **둘 다 가능한 결과이고 줄어드는 것이 곧 실패는 아니다**) ⓑ `candle_fetch_ok` 가 급감하지 않는가(보유 봉이 얕은 종목은 `effective_ema_long < 30` 으로 탈락한다 — 유니버스가 통째로 줄면 되돌린다) ⓒ `prepare` 소요 시간·DB 부하(종목당 100→285행) ⓓ `[daily_raw_missing]` 이 늘지 않는가
+- 🔴 **테스트군이 벽시계에 의존한다 — CI 를 특정 시각에 돌리면 무관한 이유로 붉어진다(cycle301 실측, 기준선에서도 재현)**.
+  `order_engine` 계열 **45건**이 **KST 08:00~08:20**(NXT 프리마켓 개장 · KRX 시가단일가 08:20 미개장)에 실행하면
+  `[market_rest_blocked] reason=market_rest` 로 실패한다 — cycle295 의 휴식 게이트 `_market_rest_now` 가
+  `market_state` 를 **실시각**으로 읽기 때문이다. GitHub CI 는 UTC 라 그 창 = **23:00~23:20 UTC** 다.
+  시정 = 그 테스트들을 `freezegun` 으로 창 안·밖 두 시각 고정(메모리 규칙 [[feedback-time-window-gate-tests]] 의 재발).
+  별도 사이클이고, 그 전까지는 **08:00~08:20 KST 에 전체 스위트를 돌려 나온 실패를 신뢰하지 않는다**.
+- 🔴 **테스트가 실 KIS `/oauth2/tokenP` 를 호출한다** — `test_market_op_subscribe_socket_guard.py::test_mid_loop_connection_closed_breaks_with_warning`
+  이 `tests/unit/ast` + `tests/unit/engine` 조합에서만 실제 네트워크로 나가 403 을 받는다(순서 오염, 기준선에서도 재현).
+  토큰 발급은 분당 1건 한도라 운영 토큰 체인과 경합할 수 있다. respx 로 봉인 필요.
 - **cycle300 후속 ② `scanner.py:2804` 인용 줄번호 정정** — 그 주석이 `vcp_breakout.py:162-164` 를 가리키는데 실제 위치는 `:307-312`(`KIS_DAILY_CANDLES_MAX` + `full_depth` 분기)다. `scanner.py` 는 8영역이라 이 한 줄 때문에 승인·재핀 13곳을 쓰지 않는다 — **다음에 `scanner.py` 를 승인받아 만질 때 함께 고친다**
-- **cycle300 후속 ③ `ema_mid`/`ema_long` 코드 기본값 정리** — 코드는 60/120, 운영 DB 는 150/200 이다. 코드 기본값은 100봉 세계의 임시 회피값이라 `full` 이 상용이 되면 150/200 으로 맞추는 것이 정직하다. **매매 행위를 바꾸는 값 변경이라 승인 + `domain-consult` 선행**
+- **cycle300 후속 ③ `ema_mid`/`ema_long` 코드 기본값 정리 — cycle301 이 처리(2026-09-18 사용자 승인 D3·D4)**. 코드 기본값이 `ema_mid=150`/`ema_long=200`/`min_swing_atr_mult=1.0` 이 되어 운영 DB 값과 같아졌다. **오늘 운영의 매매 행위는 0 만큼 바뀐다** — `merged = {**DEFAULT_PARAMS, **config.params}` 이고 운영 DB `strategy_config` 에 세 키가 전부 있어 코드 기본값이 완전히 가려진다. 실제로 달라지는 곳은 DB 에 그 키가 없는 환경(신규 배포·테스트 픽스처)뿐이다. 실효 정렬은 **읽기 깊이**가 정한다 — 코드 기본 모드 `"cap100"`(100봉)이면 새 기본값에서도 50/65/75 다. ✅ **운영은 2026-09-18 06:00 에 `daily_fetch_depth_mode="full"` 로 켰고(사용자 결정 D1, 유지 확정) 보유 232봉이라 실효 정렬이 이미 50/150/200 이다** — 이 항목에 남은 PUT 은 없다
 - **cycle299 후속 ② 달력 환산 비율 — 이 사이클에서 처리 완료(후속 아님)**(사용자 "데이터 지금 바로 채울 수는 없어?", 2026-09-18). 깊이 환산에 휴일 보정을 비례로 얹어 `total_days=225` 실도달이 347cal ≈ 232 영업일이 됐다(잉여 7 = 한 밤에 채운다). 🔴 stride(7/5)는 건드리지 않았다 — 키우면 윈도우 사이에 구멍이 생긴다. 가드 `test_g299_9_one_pass_reaches_target`
 - **cycle299 후속 ③ 배포 후 D+1 실측** — 20:30 일봉 적재 뒤 ⓐ VCP 유니버스(KOSPI200∪KOSDAQ150) 종목당 `count_by_ticker` 가 100 대에서 200 대로 자라는가 ⓑ 3윈도우 backfill 이 도는 동안 일봉 task 소요 시간과 KIS 호출량 ⓒ `existing_count` 가 **첫 밤에** 225 를 넘어 다음 날부터 증분 7일로 도는가(환산 수정으로 전이 기간이 사라졌다 — 안 넘으면 환산이 되돌아간 것이다) ⓓ 수렴 후 실효 장기선이 실제로 200 으로 잡히는가(cap 을 여는 후속 ① 의 전제)
 - 문서 개편 2차(커밋 3~6): src 문서 5 · `src/realtime/CLAUDE.md`(8영역, sha 핀 4곳 lockstep) · frontend · 가드 5건 반전 + 덧칠 검사 pytest

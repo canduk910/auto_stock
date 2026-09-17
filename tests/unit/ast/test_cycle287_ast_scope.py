@@ -153,7 +153,7 @@ _BASE_SHA = {
     "src/engine/strategies/momentum.py":
         "50d5c0b9a232d6110f6b85fc524569853f2b8edffe2fd44adc24289800b95ae2",
     "src/engine/strategies/vcp_breakout.py":
-        "edffcc226d3c60412d2b95fa2202a9401d09934050f0aa3100ee8146f6e07b85",
+        "5b324b34335f922f82b848ae2313e08660bde75c02d12432867ed224e9709228",
     "src/engine/strategies/volatility_breakout.py":
         "d13efaa4a9424e2822b5476ce159987d2a5192a4bca30af3f1a0cae9c3ffcabc",
 }
@@ -305,8 +305,17 @@ _SRC_TREE_FILES = 153
 #: 🔴 이 사이클의 교훈 = **이 파일을 포함한 핀 5종을 파일 확정 뒤 한 값으로 동시에 옮긴다**
 #: (`vcp_breakout.py` 전체 7곳 · `param_catalog.py` 전체 3곳 · `DEFAULT_PARAMS` 세그먼트 ·
 #: `prepare` 세그먼트 2곳 · 이 digest). 하나라도 빠지면 CI 가 붉는다.
+#: 🔁 cycle301(2026-09-18, 사용자 승인 D3·D4) 재핀 — `vcp_breakout.py` `DEFAULT_PARAMS`
+#: 3값(ema_mid 60→150 · ema_long 120→200 · min_swing_atr_mult 0.5→1.0, 운영 DB 실측
+#: 정합) + 주석 갱신. 파일 수(`_SRC_TREE_FILES`)는 불변 — 신규/삭제 0.
+#: 🔁 cycle301 **보강**(2026-09-18) — `engine/param_catalog.py` 의 `ema_mid`/`ema_long`
+#: help 문구를 배포된 새 기본값(VCP 150/200)에 맞춰 고쳤다("VCP 60"·"VCP 120" 은
+#: 배포 즉시 거짓이었다). `vcp_breakout.py` 는 이 보강에서 무접촉 — sha 는
+#: `5b324b34335f922f82b848ae2313e08660bde75c02d12432867ed224e9709228` 로 그대로다.
+#: cycle301 착지(= 이 보강 착수) 값은
+#: `2a7302c214888b79661a660419bcbaadfb71d2ae2d82eebefb788e04e58a54a1` 였다.
 _SRC_TREE_DIGEST = (
-    "47261de8e294002f5984745a204fb5a8bda556a267284c696319891dfe707d69"
+    "b25ba89bbbca1953be417f8d899f312c62f59c46cf80a96f7b4f400d50b6fe11"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

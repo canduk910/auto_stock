@@ -139,8 +139,8 @@ def test_g211_scope_4_vcp_representative_keys_unchanged():
     params = _extract_default_params(_VCP_PY)
     expected = {
         "ema_short": 50,
-        "ema_mid": 60,
-        "ema_long": 120,
+        "ema_mid": 150,  # cycle301(2026-09-18, 사용자 승인 D3·D4) — 운영 DB 실측 정합
+        "ema_long": 200,  # cycle301(2026-09-18, 사용자 승인 D3·D4) — 운영 DB 실측 정합
         "base_min_days": 25,
         "base_max_days": 75,
         "last_pullback_max": 0.12,

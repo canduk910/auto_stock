@@ -654,7 +654,7 @@ donchian_swing 의 정공법(신고가 직진 추격)을 보강하는 추세추�
 ### 데이터 준비 (`_boot()` prepare)
 - 종목별 일봉 — `get_recent_daily_normalized(ticker, days=fetch_days, min_required=100)` (DB 우선 어댑터, 사이클 173). **읽기 깊이는 전략 파라미터 `daily_fetch_depth_mode` 가 정한다**(cycle300):
   - `"cap100"`(기본) → `fetch_days = min(ema_long + base_max + 10, KIS_DAILY_CANDLES_MAX=100)` = **100봉**. 배포 시점 행위는 이 값에서 byte 동일하다.
-  - `"full"` → `fetch_days = ema_long + base_max + 10`(운영 DB 값이면 285). DB 에 있는 만큼만 오므로 얕은 종목은 자동으로 줄어들고 `effective_ema_long` 가드가 그대로 받아 낸다.
+  - `"full"` → `fetch_days = ema_long + base_max + 10`(기본값이면 200+75+10 = 285). DB 에 있는 만큼만 오므로 얕은 종목은 자동으로 줄어들고 `effective_ema_long` 가드가 그대로 받아 낸다.
   - 켜고 끄는 수단 = `PUT /api/strategies/vcp_breakout/params {"daily_fetch_depth_mode":"full"}` — **즉시 반영 + 영속**. 롤백은 같은 PUT 에 `"cap100"`. `strategy_config` SQL UPDATE 는 다음 백엔드 재시작에서만 반영되므로 장중 실효 수단은 PUT 뿐이다(cycle232 D6).
   - `PARAM_RANGES`/`INT_PARAMS` **편입 금지**(진입 정체성 축). 미지 값·결측·비문자열은 전부 `"cap100"` 으로 낙하한다.
   - `min_required` 는 두 모드 다 **100** 이다 — KIS 폴백은 한 호출 100봉이 상한이라 문턱을 올리면 DB 가 100~224봉인 구간에서 더 얕은 KIS 응답으로 바뀐다.
@@ -663,10 +663,10 @@ donchian_swing 의 정공법(신고가 직진 추격)을 보강하는 추세추�
 - `candles[0]==오늘`이면 `candles[1]`을 전일로 사용 (부분봉 가드)
 
 ### 추세 필터 (Stage 2 confirmation, prepare 시 단계별 검사)
-1. **종가 > 단기 EMA > 중기 EMA > 장기 EMA** (`ema_short=50`, `ema_mid=60`, `ema_long=120`)
+1. **종가 > 단기 EMA > 중기 EMA > 장기 EMA** (`ema_short=50`, `ema_mid=150`, `ema_long=200` — 미너비니 Trend Template 원설계)
 2. **장기 EMA 우상향 1개월 이상** — 현재 장기 EMA > 1개월 전(20영업일 전) 장기 EMA (`long_ema_uptrend_days=20`)
 3. 통과 종목만 다음 단계 검사
-4. **EMA 값과 읽기 깊이는 짝이다.** `effective_ema_long = min(ema_long, available_len - long_ema_uptrend_days - 5)` 이고, 그 뒤 `ema_mid >= ema_long` 이면 `ema_mid = max(ema_short+1, ema_long-10)` 로 중기선이 한 번 더 줄어든다. 운영 DB 값 50/150/200 기준 실효 정렬은 이렇게 갈린다 — **보유 100봉 → 50/65/75**(중기↔장기 간격 10 = 정배열이 동전던지기) · **보유 225봉 → 50/150/200**(간격 50). 코드 기본값 `ema_long=120`/`ema_mid=60` 은 100봉 세계에서 중기선 재축소를 피하려던 임시 회피값이고, 지금 정본은 **운영 DB 의 150/200** 이다. 200EMA 를 실제로 쓰려면 위 `daily_fetch_depth_mode="full"` 을 켠다. 자동 축소 가드는 fetch 부족 시 안전망으로 유지한다.
+4. **EMA 값과 읽기 깊이는 짝이다.** `effective_ema_long = min(ema_long, available_len - long_ema_uptrend_days - 5)` 이고, 그 뒤 `ema_mid >= ema_long` 이면 `ema_mid = max(ema_short+1, ema_long-10)` 로 중기선이 한 번 더 줄어든다. 설정 50/150/200 의 실효 정렬은 이렇게 갈린다 — **보유 100봉 → 50/65/75**(중기↔장기 간격 10 = 정배열이 동전던지기) · **보유 225봉 → 50/150/200**(간격 50). 즉 기본 모드 `"cap100"` 에서는 설정이 50/150/200 이어도 실제로 계산되는 정렬은 50/65/75 다. 원설계 정렬을 실제로 쓰려면 위 `daily_fetch_depth_mode="full"` 을 켠다. 자동 축소 가드는 fetch 부족 시 안전망으로 유지한다.
 
 ### 베이스 정의 (`base_lookback_weeks=5~15` → 일봉 25~75영업일)
 1. 베이스 시작·종료 자동 검출: `base_max_days`(75)부터 `base_min_days`(25)까지 길이를 줄여 가며 첫 매칭(=가장 긴) 구간을 베이스로 인식. 판정식은 2번과 동일한 **고가/저가 기준** `(max(high) - min(low)) / max(high) ≤ base_depth_pct(0.30)` 하나뿐이다 — `base_depth_max=0.25` 같은 별도 상수·종가 기준 산식은 존재하지 않는다
@@ -678,7 +678,7 @@ donchian_swing 의 정공법(신고가 직진 추격)을 보강하는 추세추�
 2. 각 pullback 폭 = `(swing_high - swing_low) / swing_high` (%)
 3. **각 pullback 폭이 직전 pullback 보다 작아야 함** (점진 수축, 변동성 contraction. strict — 동일 폭 거부)
 4. **마지막 pullback ≤ 12%** (`last_pullback_max=0.12` — 사이클 48 완화, 기존 0.08. 한국 중소형주 변동성에 8% 는 빡셈. 점진 수축 조건은 유지)
-5. **노이즈 swing 필터 `min_swing_atr_mult=0.5`** — 베이스 구간 평균 일중 변동폭(`sum(high-low) / N`, ATR 근사) × 0.5 미만 변동은 swing 으로 인정하지 않는다(ATR 산출 실패 시 종가 평균의 0.3% 폴백). 등호 포함 swing 검출은 평탄 우량주의 1원 단위 변동까지 swing 으로 세어 회수 2~4회 범위를 상시 위반시킨다. running_max / running_min 추적 + threshold 이상 반전에서만 swing 을 확정한다(ZigZag 표준).
+5. **노이즈 swing 필터 `min_swing_atr_mult=1.0`** — 베이스 구간 평균 일중 변동폭(`sum(high-low) / N`, ATR 근사) × 1.0 미만 변동은 swing 으로 인정하지 않는다(ATR 산출 실패 시 종가 평균의 0.3% 폴백). 🔴 **이 임계를 낮추지 않는다** — 낮추면 ZigZag 반전 회수가 2~4배로 불어난다. 그러면 상한 `pullback_count_max=4` 를 넘기고 점진 수축 strict 단조(통과율 1/n!)가 무너져 Pullback 단계가 사실상 막힌다. 등호 포함 swing 검출은 평탄 우량주의 1원 단위 변동까지 swing 으로 세어 회수 2~4회 범위를 상시 위반시킨다. running_max / running_min 추적 + threshold 이상 반전에서만 swing 을 확정한다(ZigZag 표준).
 6. **마지막 swing 이 미완성이어도 포함한다** — state machine('undefined'/'up'/'down')으로 끝까지 진행해 `state=='down'` 중 데이터가 끝나면 마지막 pivot_high → running_min 의 진행 중 pullback 을 "마지막 pullback" 으로 센다. 누락하면 `base["last_pullback_pct"]` 가 비어 funnel 이 "마지막 폭 0.0%" 로 오표시된다 — **False 반환 경로에서도 실제 마지막 swing 폭(또는 swing 0개면 명시적 0.0)을 기록한다.**
 
 ### 거래량 수축
@@ -729,10 +729,10 @@ donchian_swing 의 정공법(신고가 직진 추격)을 보강하는 추세추�
 DEFAULT_PARAMS = {
     "tradable_boards": ["main"],
     "exchange": "KRX",
-    # 추세 필터 — prepare 가 읽는 100일 안에서 계산 가능한 값
+    # 추세 필터 — 미너비니 원설계 50/150/200(실효 장기선은 daily_fetch_depth_mode 가 정한다)
     "ema_short": 50,
-    "ema_mid": 60,
-    "ema_long": 120,
+    "ema_mid": 150,
+    "ema_long": 200,
     "long_ema_uptrend_days": 20,
     # 베이스
     "base_min_days": 25,
@@ -742,7 +742,7 @@ DEFAULT_PARAMS = {
     "pullback_count_min": 2,
     "pullback_count_max": 4,
     "last_pullback_max": 0.12,
-    "min_swing_atr_mult": 0.5,  # 노이즈 swing 필터 (베이스 ATR × 0.5)
+    "min_swing_atr_mult": 1.0,  # 노이즈 swing 필터 (베이스 ATR × 1.0)
     # 거래량 수축
     "volume_contraction_ratio": 0.70,
     # 매수

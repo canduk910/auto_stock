@@ -348,7 +348,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "vcp_breakout",
         "kojiro"
       ],
-      "help": "VCP 60 / 고지로 20. `ema_short < ema_mid < ema_long` 전제."
+      "help": "VCP 150 / 고지로 20. `ema_short < ema_mid < ema_long` 전제."
     },
     {
       "key": "ema_long",
@@ -373,7 +373,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "vcp_breakout",
         "kojiro"
       ],
-      "help": "VCP 120 / 고지로 40. `ema_short < ema_mid < ema_long` 전제."
+      "help": "VCP 200 / 고지로 40. `ema_short < ema_mid < ema_long` 전제."
     },
     {
       "key": "long_ema_uptrend_days",
@@ -3507,8 +3507,8 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
       ],
       "params": {
         "ema_short": 50,
-        "ema_mid": 60,
-        "ema_long": 120,
+        "ema_mid": 150,
+        "ema_long": 200,
         "long_ema_uptrend_days": 20,
         "daily_fetch_depth_mode": "cap100",
         "base_min_days": 25,
@@ -3517,7 +3517,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "pullback_count_min": 2,
         "pullback_count_max": 4,
         "last_pullback_max": 0.12,
-        "min_swing_atr_mult": 0.5,
+        "min_swing_atr_mult": 1.0,
         "volume_contraction_ratio": 0.7,
         "breakout_volume_mult": 1.5,
         "reentry_cooldown_days": 7,
@@ -3555,8 +3555,8 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
       },
       "defaults": {
         "ema_short": 50,
-        "ema_mid": 60,
-        "ema_long": 120,
+        "ema_mid": 150,
+        "ema_long": 200,
         "long_ema_uptrend_days": 20,
         "daily_fetch_depth_mode": "cap100",
         "base_min_days": 25,
@@ -3565,7 +3565,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "pullback_count_min": 2,
         "pullback_count_max": 4,
         "last_pullback_max": 0.12,
-        "min_swing_atr_mult": 0.5,
+        "min_swing_atr_mult": 1.0,
         "volume_contraction_ratio": 0.7,
         "breakout_volume_mult": 1.5,
         "reentry_cooldown_days": 7,

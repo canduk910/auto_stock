@@ -14,7 +14,8 @@
    회수 2~4회 위반 빈발 (한국 우량주 평탄 구간).
 
 [시정 — ATR threshold swing + 마지막 swing 포함]
-- `min_swing_atr_mult` 파라미터 (기본 0.5) 신규 — `base_atr × min_swing_atr_mult` 미만 변동은
+- `min_swing_atr_mult` 파라미터 (cycle301(2026-09-18, 사용자 승인 D3·D4) 이후 기본 1.0,
+  도입 당시 기본 0.5) 신규 — `base_atr × min_swing_atr_mult` 미만 변동은
   swing 으로 인정 안 함 (노이즈 필터)
 - ZigZag 변형: running_max/running_min 추적 + threshold 이상 반전 시에만 swing 확정
 - 마지막 swing 미완성도 "마지막 pullback" 으로 포함 (running_max 이후 현재까지 진행 중 하락 폭)
@@ -112,7 +113,9 @@ def test_quiet_blue_chip_noise_swings_should_not_explode_pullback_count(strat):
     assert "min_swing_atr_mult" in p, (
         "시정 — 신규 파라미터 `min_swing_atr_mult` 가 DEFAULT_PARAMS 에 추가되어야 함"
     )
-    assert p["min_swing_atr_mult"] == 0.5, "기본값 0.5 (베이스 ATR × 0.5 이상만 swing)"
+    # cycle301(2026-09-18, 사용자 승인 D3·D4) — 0.5 는 ZigZag 반전 회수 폭증으로
+    # Pullback 단계가 사실상 막히는 결함이라 1.0 으로 상향.
+    assert p["min_swing_atr_mult"] == 1.0, "기본값 1.0 (베이스 ATR × 1.0 이상만 swing)"
 
 
 # ---------------------------------------------------------------------------
@@ -191,13 +194,14 @@ def test_real_world_pullback_never_reports_exact_zero_percent(strat):
 # RED 5 — DEFAULT_PARAMS 에 신규 파라미터 명시 (회귀 가드)
 # ---------------------------------------------------------------------------
 def test_default_params_has_min_swing_atr_mult():
-    """시정 후 `DEFAULT_PARAMS` 에 `min_swing_atr_mult=0.5` 신규 추가 검증.
+    """`DEFAULT_PARAMS` 에 `min_swing_atr_mult` 신규 추가 검증.
 
     명세: `_workspace/00_leader_trading_rules.md` 6-F 사이클 49.
+    값은 cycle301(2026-09-18, 사용자 승인 D3·D4)이 0.5→1.0 으로 올렸다(운영 DB 실측 정합).
     """
     p = VcpBreakoutStrategy.DEFAULT_PARAMS
     assert "min_swing_atr_mult" in p
-    assert p["min_swing_atr_mult"] == 0.5
+    assert p["min_swing_atr_mult"] == 1.0
 
 
 # ---------------------------------------------------------------------------

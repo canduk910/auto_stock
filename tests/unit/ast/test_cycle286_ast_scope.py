@@ -118,7 +118,7 @@ _BASE_SHA = {
     "src/engine/strategies/momentum.py":
         "50d5c0b9a232d6110f6b85fc524569853f2b8edffe2fd44adc24289800b95ae2",
     "src/engine/strategies/vcp_breakout.py":
-        "edffcc226d3c60412d2b95fa2202a9401d09934050f0aa3100ee8146f6e07b85",
+        "5b324b34335f922f82b848ae2313e08660bde75c02d12432867ed224e9709228",
     "src/engine/strategies/volatility_breakout.py":
         "d13efaa4a9424e2822b5476ce159987d2a5192a4bca30af3f1a0cae9c3ffcabc",
 }

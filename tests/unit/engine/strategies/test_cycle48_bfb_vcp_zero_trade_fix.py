@@ -9,7 +9,8 @@
   (FHPST01710000) prdy_vol 기반으로 시간무관화.
 - BFB-2 Pole: pole_min_return 20→15, pole_max_red_ratio 0.30→0.45.
 - VCP 추세필터: ema_long 200→120 / ema_mid 150→60 (KIS 100일 한도 내 계산 가능),
-  last_pullback_max 0.08→0.12.
+  last_pullback_max 0.08→0.12. (cycle301(2026-09-18)이 cycle299/300 의 일봉 적재 깊이
+  확장으로 이 100일 한도 전제가 사라져 50/150/200 미너비니 원설계로 되돌렸다.)
 - 보조: scheduler._reprepare_breakout_if_empty 에 BFB/VCP 추가.
 
 회귀 가드:
@@ -216,19 +217,40 @@ def test_bfb_detect_pole_passes_realistic_korean_setup():
 # ===========================================================================
 # VCP: 추세필터 임계 (DEFAULT_PARAMS) + 신호 평가 도달
 # ===========================================================================
-def test_vcp_ema_thresholds_within_kis_limit():
-    """VCP EMA 임계가 KIS 100일 한도 내 계산 가능 — ema_long 120 / ema_mid 60."""
+def test_vcp_last_pullback_max_relaxation_persists_after_cycle301():
+    """`last_pullback_max` 완화(사이클 48, 0.08→0.12)가 cycle301 이후에도 살아 있다.
+
+    이 함수는 원래 `test_vcp_ema_thresholds_within_kis_limit` 라는 이름으로
+    사이클 48 시정 세트(EMA 임계 하향 + pullback 폭 완화)를 한 테스트에 묶어 재고
+    있었다. 그 이름과 원래 단언(`ema_long==120`)이 깔던 전제 — "`ema_long`/`ema_mid`
+    가 120/60 이어야 KIS 100일 한도 안에서 계산 가능하다" — 는 이제 **폐기된 명제**다.
+    KIS `FHKST03010100` 의 100일 한도는 **호출당** 한도일 뿐이었고, cycle299(윈도우
+    분할 backfill 로 일봉 적재를 225영업일까지 연다) + cycle300(DB 읽기 클램프를
+    100→400 으로 올리고 `daily_fetch_depth_mode` 스위치를 신설한다)이 그 한도를
+    걷어냈다. 그래서 cycle301(2026-09-18, 사용자 승인 D3·D4)이 `ema_mid`/`ema_long`
+    을 미너비니 원설계 150/200 으로 되돌렸다 — 지금 실효 장기선을 정하는 것은
+    "KIS 한도" 가 아니라 **그날 실제로 읽은 보유 봉 수**다.
+
+    `ema_long==200`/`ema_mid==150` 이라는 사실과 "캡은 KIS 한도가 아니라 보유
+    행수에서 온다" 는 새 명제는 이제
+    `tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py` 의
+    `test_g301_2_default_params_are_minervini_aligned`(DEFAULT_PARAMS 정적값) ·
+    `test_g301_3_effective_ema_long_follows_available_rows`(실제
+    `_check_trend_filter` 인자 경로, 보유 100행→75 · 225행→200) ·
+    `test_g301_4_alignment_triplet_at_new_defaults` 가 이 파일보다 강하게 재고
+    있다 — 같은 값을 여기서 다시 단언하지 않는다(중복 방지).
+
+    이 테스트가 살려 두는 것은 원래 세트의 **다른 절반**이다 — `last_pullback_max`
+    완화는 KIS 한도와 무관한 별개 결함 시정(한국 중소형주 pullback 변동성 현실화)
+    이라 cycle299/300/301 어느 쪽도 이 키를 건드리지 않았고, 다른 어떤 파일도 이
+    값을 단언하지 않는다.
+    """
     from src.engine.strategies.vcp_breakout import VcpBreakoutStrategy
 
     p = VcpBreakoutStrategy.DEFAULT_PARAMS
-    assert p["ema_long"] == 120, (
-        f"ema_long 200→120 (KIS 100일 한도 계산 가능) 필요. 실제={p['ema_long']}"
-    )
-    assert p["ema_mid"] == 60, (
-        f"ema_mid 150→60 필요. 실제={p['ema_mid']}"
-    )
     assert p["last_pullback_max"] == 0.12, (
-        f"last_pullback_max 0.08→0.12 완화 필요. 실제={p['last_pullback_max']}"
+        f"last_pullback_max 0.08→0.12 완화(사이클 48, KIS 한도와 무관)가 유지돼야 한다. "
+        f"실제={p['last_pullback_max']}"
     )
 
 

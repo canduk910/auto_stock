@@ -2420,3 +2420,56 @@ L477 트레일링 영속 · L513 거래대금 컷 · L926 `allocate_funds` 재�
 ```
 
 → CHANGELOG: cycle298 행
+
+## 6-F. 전략 F: 변동성 수축 돌파 (vcp_breakout) 상세
+
+### 2026-09-18 cycle301 — VCP 코드 기본값을 원설계 50/150/200 · 자(ruler) 1.0 으로 맞춤
+
+- 사용자 승인 2026-09-18(보고서 결정 카드 D3·D4 회신 — "D3 코드기본값 운영에 맞춰 수정 /
+  D4 일단 1.0에 맞추고 지켜보자"). **바뀐 것은 코드 쪽이고 운영 DB 는 건드리지 않았다.**
+  `ema_mid` 60→150 · `ema_long` 120→200 · `min_swing_atr_mult` 0.5→1.0 으로, 세 값 모두
+  운영 DB `strategy_config.vcp_breakout.params` 실측값과 같아졌다.
+- **오늘 운영의 매매 행위는 0 만큼 바뀐다** — `merged = {**self.DEFAULT_PARAMS, **config.params}`
+  이고 운영 DB 에 세 키가 전부 있어 코드 기본값이 완전히 가려진다. 달라지는 곳은 DB 에 그 키가
+  없는 환경(신규 배포·테스트 픽스처)뿐이다.
+- **EMA 는 코드가 낡았던 것이다.** `50/150/200` 이 미너비니 Trend Template 원설계이고,
+  `50/60/120` 은 일봉을 100행까지만 읽던 시절의 임시 회피책이었다(코드 주석이 "config 120 은
+  분할 fetch 로 진짜 120 을 계산하게 될 때의 목표값 의미로 보존" 이라고 스스로 인정했다).
+  cycle299(retention 230→390 · backfill target 120→225)·cycle300(읽기 클램프 400 +
+  `daily_fetch_depth_mode`)이 깊이를 열면서 그 회피책의 전제가 사라졌다.
+- **`min_swing_atr_mult` 는 0.5 쪽이 결함이다.** 임계를 낮추면 ZigZag 반전 회수가 2~4배로
+  불어나 상한 `pullback_count_max=4` 를 넘기고, 점진 수축 strict 단조(통과율 1/n!)가 붕괴해
+  Pullback 단계가 사실상 막힌다. 그래서 정본에 "이 임계를 낮추지 않는다" 를 조건과 함께 적었다.
+- **실효 정렬 3종**(`effective_ema_long = min(ema_long, 보유 − long_ema_uptrend_days(20) − 5)`
+  뒤에 `ema_mid >= ema_long` 이면 `ema_mid = max(ema_short+1, ema_long−10)`):
+  옛 기본값 60/120 + 보유 100봉 → `effective=75`, 재축소 없음 → **50/60/75** ·
+  새 기본값 150/200 + 보유 100봉 → `effective=75`, 재축소 → `max(51,65)=65` → **50/65/75**
+  · 보유 225봉 + `daily_fetch_depth_mode="full"` → `effective=200` → **50/150/200**(원설계).
+- 그래서 **원설계 정렬은 `daily_fetch_depth_mode="full"` + 충분한 보유 봉에서만 성립한다.**
+  이 사이클은 기본값을 정합시켰을 뿐 깊이 스위치를 켜지 않았다. 다만 **운영은 그보다 앞선
+  2026-09-18 06:00 에 이미 `full` 로 켜져 있다**(사용자 결정 D1, 라이브 실측 `fetch_days=285`
+  · VCP 유니버스 348종목 전부 232봉) — 따라서 **오늘 운영이 실제로 계산하는 정렬은
+  50/150/200 이고**, 위 `100봉` 줄은 코드 기본 모드의 산식이지 현재 운영 상태가 아니다.
+
+원문(`_workspace/00_leader_trading_rules.md:657·666·669·681·732-735·745`, 2026-09-18 이관):
+
+---
+
+  - `"full"` → `fetch_days = ema_long + base_max + 10`(운영 DB 값이면 285). DB 에 있는 만큼만 오므로 얕은 종목은 자동으로 줄어들고 `effective_ema_long` 가드가 그대로 받아 낸다.
+
+1. **종가 > 단기 EMA > 중기 EMA > 장기 EMA** (`ema_short=50`, `ema_mid=60`, `ema_long=120`)
+
+4. **EMA 값과 읽기 깊이는 짝이다.** `effective_ema_long = min(ema_long, available_len - long_ema_uptrend_days - 5)` 이고, 그 뒤 `ema_mid >= ema_long` 이면 `ema_mid = max(ema_short+1, ema_long-10)` 로 중기선이 한 번 더 줄어든다. 운영 DB 값 50/150/200 기준 실효 정렬은 이렇게 갈린다 — **보유 100봉 → 50/65/75**(중기↔장기 간격 10 = 정배열이 동전던지기) · **보유 225봉 → 50/150/200**(간격 50). 코드 기본값 `ema_long=120`/`ema_mid=60` 은 100봉 세계에서 중기선 재축소를 피하려던 임시 회피값이고, 지금 정본은 **운영 DB 의 150/200** 이다. 200EMA 를 실제로 쓰려면 위 `daily_fetch_depth_mode="full"` 을 켠다. 자동 축소 가드는 fetch 부족 시 안전망으로 유지한다.
+
+5. **노이즈 swing 필터 `min_swing_atr_mult=0.5`** — 베이스 구간 평균 일중 변동폭(`sum(high-low) / N`, ATR 근사) × 0.5 미만 변동은 swing 으로 인정하지 않는다(ATR 산출 실패 시 종가 평균의 0.3% 폴백).
+
+    # 추세 필터 — prepare 가 읽는 100일 안에서 계산 가능한 값
+    "ema_short": 50,
+    "ema_mid": 60,
+    "ema_long": 120,
+
+    "min_swing_atr_mult": 0.5,  # 노이즈 swing 필터 (베이스 ATR × 0.5)
+
+---
+
+→ CHANGELOG: cycle301 행

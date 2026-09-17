@@ -187,7 +187,7 @@ def test_g300_1b_get_recent_daily_keeps_min_max_clamp_shape():
     "ema_long,base_max,label",
     [
         (_LIVE_EMA_LONG, 75, "운영 DB(ema_long=200)"),
-        (120, 75, "코드 기본값(ema_long=120)"),
+        (120, 75, "얕은 깊이 대조군(ema_long=120, cycle301 이전 코드 기본값)"),
     ],
 )
 def test_g300_2_clamp_covers_vcp_full_request(ema_long: int, base_max: int, label: str):
