@@ -81,6 +81,20 @@ set -euo pipefail
 # 마커·compose 경로는 저장소 루트 기준이다 — 하위 디렉터리에서 손으로 실행해도 같은 마커를 본다.
 cd "$(git rev-parse --show-toplevel)"
 
+# 🔴 cycle305 — **이미지는 한 번에 하나씩 굽는다.** 2026-09-18 19:17 운영 사고:
+# cycle303 이 macro 서비스를 추가하자 `up --build` 가 frontend(npm build)와 macro
+# (pandas·numpy·yfinance 설치)를 **동시에** 빌드했고, t4g.small **2GB** 박스의 메모리가
+# 말라 sshd·nginx 까지 굶었다 — 배포는 SSH 10분 타임아웃으로 죽고(`Run Command Timeout`)
+# 박스는 그 뒤 15분간 SSH·HTTPS 모두 무응답이었다(인스턴스 상태검사는 내내 `ok` 였다.
+# OS 는 살아 있고 사용자 프로세스만 굶은 것이다). 복구는 EC2 재부팅이었고 그 사이
+# 보유 11종목이 손절 감시를 받지 못했다.
+#   - `COMPOSE_PARALLEL_LIMIT=1` = compose 의 컨테이너/빌드 작업 동시성 상한
+#   - `COMPOSE_BAKE=0` = bake 경로(여러 타깃을 한 번에 굽는다)를 끄고 서비스별 순차 빌드
+# 서비스가 둘뿐일 때는 무해했다 — **세 번째 이미지가 생긴 순간 임계를 넘었다.**
+# 넷째 이미지(예: `llm_worker`)를 추가하기 전에 이 값을 다시 확인하라.
+export COMPOSE_PARALLEL_LIMIT=1
+export COMPOSE_BAKE=0
+
 COMPOSE_FILE="${COMPOSE_FILE_PATH:-docker-compose.prod.yml}"
 MARKER="${DEPLOY_MARKER:-.deployed_sha}"
 # 시도 마커 — compose 호출 **직전**에 쓰고 성공 마커를 쓴 뒤 지운다. 남아 있으면 직전 배포가 중간에
