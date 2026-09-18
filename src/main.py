@@ -99,9 +99,9 @@ root_logger.setLevel(logging.DEBUG)
 # 🔴 **로그를 압축하지 않는다** (2026-09-19 사용자 결정 — "압축 안 하고 바로 지우기").
 # `TimedRotatingFileHandler` 는 자기가 만든 이름 규칙(`auto_stock.log.YYYY-MM-DD`)의 파일만
 # 세어서 지운다. 손으로 `.gz` 로 압축하면 그 규칙에서 벗어나 **자동 삭제 대상에서 영구히
-# 빠지고**, 아무도 안 지우면 계속 쌓인다(2026-09-18 실측: 37개 1.9GB 가 그렇게 남았다).
-# 디스크가 모자라면 압축이 아니라 **보관 일수를 줄이는 것**이 답이다 — 그래야 자동 삭제가
-# 계속 일한다. `handler.rotator`/`handler.namer` 로 압축을 붙이는 것도 같은 이유로 하지 않는다.
+# 빠지고**, 아무도 안 지우면 계속 쌓인다(2026-09-18 압축분 37개가 그렇게 남아 09-19 에 손으로
+# 지웠다). 디스크가 모자라면 압축이 아니라 **보관 일수를 줄이는 것**이 답이다 — 그래야 자동
+# 삭제가 계속 일한다. `handler.rotator`/`handler.namer` 로 압축을 붙이는 것도 같은 이유로 하지 않는다.
 _LOG_BACKUP_DAYS = 20
 
 console_handler = logging.StreamHandler()

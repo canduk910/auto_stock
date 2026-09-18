@@ -345,7 +345,7 @@ _SRC_TREE_FILES = 153
 #: 파일 수 **153 불변**. cycle309 착지(= 이 재핀 착수) 값은
 #: `e1344ee4ef5d1e78ae81023fd27ba0ef21615f776051bbd9a38e8423573b3e20` 였다.
 _SRC_TREE_DIGEST = (
-    "f7f26ed6bc64ed4ddc0a6284291683229b44e4a0005274536594a21b56aa0c14"
+    "7408c8fd1555b1c08e28db4aac650d7fef3b980a6aa7d39d0bdf4623f3f6748c"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
