@@ -5,6 +5,7 @@ import {
   fetchCreditSpread,
   fetchCurrencies,
   fetchMacroCycle,
+  fetchSp500,
   fetchYieldCurve,
 } from "../../api/macro"
 import type {
@@ -12,6 +13,7 @@ import type {
   CreditSpreadResponse,
   CurrenciesResponse,
   MacroCycleResponse,
+  Sp500Response,
   YieldCurveResponse,
 } from "../../types/macro"
 
@@ -45,5 +47,12 @@ export function useCurrencies() {
 export function useCommodities() {
   const { data, loading, error, run } = useAsyncState<CommoditiesResponse>()
   const load = useCallback(() => run(() => fetchCommodities()).catch(() => {}), [run])
+  return { data, loading, error, load }
+}
+
+/** S&P500 주간 종가 (cycle310). 실패해도 화면 본선은 살아 있어야 하므로 조용히 삼킨다. */
+export function useSp500() {
+  const { data, loading, error, run } = useAsyncState<Sp500Response>()
+  const load = useCallback(() => run(() => fetchSp500()).catch(() => {}), [run])
   return { data, loading, error, load }
 }

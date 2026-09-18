@@ -16,11 +16,25 @@ nginx 한 겹에 위임한다(원본 패키지의 설계 의도와 동일: "None
 from __future__ import annotations
 
 from fastapi import FastAPI
+from fastapi.concurrency import run_in_threadpool
 
 from macro_lite.router import router as macro_router
 
+from sp500 import get_sp500
+
 app = FastAPI(title="macro-api", docs_url=None, redoc_url=None, openapi_url=None)
 app.include_router(macro_router)  # prefix "/api/macro" 는 라우터 내장
+
+
+@app.get("/api/macro/sp500")
+async def sp500():
+    """S&P500 주간 종가 — 금리차·하이일드 차트에 겹쳐 그릴 붉은 선의 원천(cycle310).
+
+    `macro_lite/` 밖(`sp500.py`)에 두어 vendor 재이식에 휩쓸리지 않게 한다.
+    yfinance 호출이 동기 블로킹이라 스레드풀로 내보낸다 — 이벤트 루프를 잡으면
+    같은 프로세스의 다른 매크로 요청이 함께 멈춘다.
+    """
+    return await run_in_threadpool(get_sp500)
 
 
 @app.get("/health")

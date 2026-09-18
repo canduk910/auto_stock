@@ -779,6 +779,10 @@ export const handlers = [
           dollar: { score: 0.0375, weight: 0.15, signal: "보합" },
         },
         leader_sectors: ["XLK", "XLY"],
+        // cycle308/310 — 원 패키지가 2026-09-19 에 반환에 얹은 4국면 총점.
+        // 불변식: phase == argmax(final_scores) · confidence == round((1위−2위)×200).
+        // 여기 62 = round((0.345 − 0.035) × 200) = 62 로 실제 계약과 맞춘 값이다.
+        final_scores: { recovery: 0.06, expansion: 0.345, overheating: 0.035, contraction: 0.21 },
       },
       regime: {
         regime: "cautious",
@@ -791,6 +795,29 @@ export const handlers = [
         fg_level: "neutral",
         credit_adjustment: null,
         credit_override: null,
+      },
+      updated_at: "2026-09-18T09:00:00+09:00",
+      errors: [],
+    })
+  ),
+
+  // cycle310 — S&P500 주간 종가. `macro_lite/` vendor 가 아니라 우리 `macro/sp500.py` 가
+  // 돌려준다. 실측 모양(2026-09-18 로컬 `get_sp500()` 호출): 주간 5,151포인트,
+  // 1927-12-26 ~ 2026-09-14. 여기서는 금리차·하이일드 목의 날짜 범위에 맞춰 잘라 넣는다.
+  http.get(`${base}/macro/sp500`, () =>
+    HttpResponse.json({
+      sp500: {
+        history: [
+          { date: "2026-08-24", close: 7521.3 },
+          { date: "2026-08-31", close: 7588.4 },
+          { date: "2026-09-07", close: 7656.98 },
+          { date: "2026-09-14", close: 7637.76 },
+        ],
+        symbol: "^GSPC",
+        interval: "1wk",
+        first: "2026-08-24",
+        last: "2026-09-14",
+        count: 4,
       },
       updated_at: "2026-09-18T09:00:00+09:00",
       errors: [],

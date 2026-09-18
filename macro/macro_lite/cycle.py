@@ -270,4 +270,7 @@ def determine_cycle_phase(inputs: dict) -> dict:
         "confidence": confidence,
         "scores": scores,
         "leader_sectors": LEADER_SECTORS[top_phase],
+        # 4국면 가중합산 점수 전체 (2026-09-19 추가, 판정 로직 무변경 — 이미 계산하던 값을 노출).
+        # 화면에서 1·2위 점수차와 2위 국면 이름을 표시하기 위함. confidence 는 이 값의 1·2위 차 × 200.
+        "final_scores": final_scores,
     }

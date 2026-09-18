@@ -13,9 +13,16 @@ import {
   YAxis,
 } from "recharts"
 import LoadingSpinner from "./LoadingSpinner"
+import { attachSp500, hasSp500 } from "../sp500Overlay"
 import ErrorAlert from "./ErrorAlert"
 import { computeEventRows, makeLabelRenderer } from "./EventLabelsOverlay"
-import type { YieldCurveCurrent, YieldCurveData, YieldCurveHistoryRow, YieldCurveResponse } from "../../types/macro"
+import type {
+  Sp500Point,
+  YieldCurveCurrent,
+  YieldCurveData,
+  YieldCurveHistoryRow,
+  YieldCurveResponse,
+} from "../../types/macro"
 
 // 원본 `macro_lite/components/YieldCurveSection.jsx` 이식.
 // 색 hex 리터럴 → CSS 변수 치환 매핑(frontend/CLAUDE.md 「새 hex 리터럴 금지」):
@@ -180,11 +187,29 @@ function _eventsForChart(
 function SpreadHistoryChart({
   history,
   events,
+  sp500,
 }: {
   history: YieldCurveHistoryRow[]
   events?: { recessions: ChartEvent[]; bear_markets: ChartEvent[] }
+  /** cycle310 — S&P500 주간 종가. 없거나 빈 배열이면 붉은 선을 그리지 않는다. */
+  sp500?: Sp500Point[] | null
 }) {
   if (!history?.length) return null
+
+  // cycle310 — S&P500 붉은 선 겹치기. as-of 조인이라 날짜가 어긋나도 선이 끊기지 않는다.
+  const rows = attachSp500(history, sp500)
+  const showSp = hasSp500(rows)
+  // 🔴 이 차트는 1962년부터라 S&P 가 17 → 7,600(약 450배)이다. **선형축이면 1990년
+  // 이전이 통째로 바닥에 깔려** 붉은 선이 오른쪽 20% 구간에만 보인다. 100년짜리 가격
+  // 시계열은 로그축이 표준이다. Recharts 의 log 축은 `domain="auto"` 를 제대로 못 잡고
+  // 0·음수를 만나면 축이 깨지므로 **양수만으로 도메인을 직접 계산**해 넘긴다.
+  const spDomain = (() => {
+    const vals = rows
+      .map((r) => r.sp500)
+      .filter((v): v is number => typeof v === "number" && Number.isFinite(v) && v > 0)
+    if (!vals.length) return undefined
+    return [Math.min(...vals), Math.max(...vals)] as [number, number]
+  })()
 
   const ev = _eventsForChart(events, history)
   const rowMap = computeEventRows([
@@ -200,15 +225,25 @@ function SpreadHistoryChart({
       </div>
       <div className="h-80">
         <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={history}>
+          <ComposedChart data={rows}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
             <XAxis dataKey="date" tick={{ fontSize: 11 }} interval="preserveStartEnd" allowDuplicatedCategory={false} />
             {/* 좌축: 스프레드 (Area) */}
             <YAxis yAxisId="spread" tick={{ fontSize: 12 }} domain={["auto", "auto"]} tickFormatter={(v) => `${v}%`} />
             {/* 우축: 10Y 금리 (Line) — 별도 스케일로 음의 스프레드와 시각적 충돌 방지 */}
             <YAxis yAxisId="y10y" orientation="right" tick={{ fontSize: 12 }} domain={["auto", "auto"]} tickFormatter={(v) => `${v}%`} />
+            {/* cycle310 — S&P500 전용 3번째 축. 단위가 %가 아니라 지수라 앞의 두 축과
+                절대 섞지 않는다(섞으면 금리 1~5% 가 7,000 옆에서 직선이 된다).
+                `hide` 로 눈금은 감추고 스케일만 쓴다 — 축이 셋이면 차트가 좁아진다. */}
+            {showSp && spDomain && (
+              <YAxis yAxisId="sp500" orientation="right" hide scale="log" domain={spDomain} allowDataOverflow />
+            )}
             <Tooltip
-              formatter={(v, name) => [`${fmt(Number(v))}%`, String(name)]}
+              formatter={(v, name) =>
+                String(name) === "S&P 500"
+                  ? [Number(v).toLocaleString("ko-KR", { maximumFractionDigits: 0 }), String(name)]
+                  : [`${fmt(Number(v))}%`, String(name)]
+              }
               labelFormatter={(l) => l}
               contentStyle={{ fontSize: 12, borderRadius: 8 }}
             />
@@ -281,6 +316,19 @@ function SpreadHistoryChart({
               dot={false}
               isAnimationActive={false}
             />
+            {showSp && spDomain && (
+              <Line
+                yAxisId="sp500"
+                type="monotone"
+                dataKey="sp500"
+                name="S&P 500"
+                stroke="var(--color-red-500)"
+                strokeWidth={1.5}
+                dot={false}
+                connectNulls={false}
+                isAnimationActive={false}
+              />
+            )}
           </ComposedChart>
         </ResponsiveContainer>
       </div>
@@ -292,9 +340,11 @@ interface YieldCurveSectionProps {
   data: YieldCurveResponse | null
   loading: boolean
   error: string | null
+  /** cycle310 — 별도 엔드포인트라 실패 도메인이 다르다. 없으면 붉은 선만 빠진다. */
+  sp500?: Sp500Point[] | null
 }
 
-export default function YieldCurveSection({ data, loading, error }: YieldCurveSectionProps) {
+export default function YieldCurveSection({ data, loading, error, sp500 }: YieldCurveSectionProps) {
   if (loading) return <LoadingSpinner message="금리 데이터 로딩 중..." />
   if (error) return <ErrorAlert message={error} />
   if (!data) return null
@@ -313,7 +363,7 @@ export default function YieldCurveSection({ data, loading, error }: YieldCurveSe
         <CurveShapeChart current={yc.current} />
       </div>
       {/* 3행: 장단기 금리차 시계열 (전체 폭) */}
-      <SpreadHistoryChart history={yc.history} events={yc.events} />
+      <SpreadHistoryChart history={yc.history} events={yc.events} sp500={sp500} />
     </section>
   )
 }

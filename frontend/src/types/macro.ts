@@ -204,3 +204,27 @@ export interface MacroCycleResponse {
   updated_at: string
   errors: string[]
 }
+
+// ── S&P 500 (cycle310) ──────────────────────────────────────────────────────
+// 우리가 더한 엔드포인트 `GET /api/macro/sp500` 의 응답. `macro_lite/` vendor 가 아니라
+// `macro/sp500.py` 가 돌려주므로, 패키지 재이식이 이 계약을 건드리지 않는다.
+
+export interface Sp500Point {
+  date: string   // YYYY-MM-DD (주간 종가)
+  close: number
+}
+
+export interface Sp500Data {
+  history: Sp500Point[]
+  symbol: string
+  interval: string
+  first: string | null
+  last: string | null
+  count: number
+}
+
+export interface Sp500Response {
+  sp500: Sp500Data
+  updated_at: string
+  errors: string[]
+}

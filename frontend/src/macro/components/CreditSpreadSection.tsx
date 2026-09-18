@@ -23,8 +23,9 @@
 import { useMemo } from "react"
 import {
   Area,
-  AreaChart,
   CartesianGrid,
+  ComposedChart,
+  Line,
   ReferenceArea,
   ReferenceLine,
   ResponsiveContainer,
@@ -35,7 +36,8 @@ import {
 import LoadingSpinner from "./LoadingSpinner"
 import ErrorAlert from "./ErrorAlert"
 import { computeEventRows, makeLabelRenderer } from "./EventLabelsOverlay"
-import type { CreditSpreadData, CreditSpreadResponse, OasHistoryRow, OasSentiment, OasStats } from "../../types/macro"
+import { attachSp500, hasSp500 } from "../sp500Overlay"
+import type { CreditSpreadData, CreditSpreadResponse, OasHistoryRow, OasSentiment, OasStats, Sp500Point } from "../../types/macro"
 
 const fmt = (v: number | null | undefined, d = 2) =>
   v != null
@@ -143,9 +145,11 @@ interface CreditSpreadSectionProps {
   data: CreditSpreadResponse | null
   loading: boolean
   error: string | null
+  /** cycle310 — S&P500 주간 종가. 별도 엔드포인트라 실패해도 본선은 그린다. */
+  sp500?: Sp500Point[] | null
 }
 
-export default function CreditSpreadSection({ data, loading, error }: CreditSpreadSectionProps) {
+export default function CreditSpreadSection({ data, loading, error, sp500 }: CreditSpreadSectionProps) {
   // Hooks 는 항상 최상단에서 무조건 호출(early return 보다 앞) — 원본 로직은 early return
   // 이 먼저였지만, 원본은 클래스 컴포넌트가 아니라 각 useMemo 가 로딩/에러 시 호출되지
   // 않는 구조였다(원본 JS 는 Hook 규칙 경고를 감수했다). 여기서는 cs 를 optional 로 다뤄
@@ -159,6 +163,11 @@ export default function CreditSpreadSection({ data, loading, error }: CreditSpre
     const step = Math.max(1, Math.floor(src.length / 520))
     return src.filter((_, i) => i % step === 0 || i === src.length - 1)
   }, [cs])
+
+  // cycle310 — S&P500 붉은 선. as-of 조인이라 OAS(영업일)와 S&P(주간)의 날짜가 어긋나도
+  // 선이 끊기지 않는다. S&P 를 못 받으면 `showSp` 가 false 라 Line 자체를 렌더하지 않는다.
+  const oasRows = useMemo(() => attachSp500(oasChartData, sp500), [oasChartData, sp500])
+  const showSp = useMemo(() => hasSp500(oasRows), [oasRows])
 
   const refLines = useMemo(() => {
     const oasStats: OasStats | undefined = cs?.oas_stats
@@ -314,12 +323,20 @@ export default function CreditSpreadSection({ data, loading, error }: CreditSpre
           </div>
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={oasChartData}>
+              <ComposedChart data={oasRows}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="date" tick={{ fontSize: 11 }} interval="preserveStartEnd" />
-                <YAxis tick={{ fontSize: 12 }} domain={["auto", "auto"]} tickFormatter={(v) => `${v}%`} />
+                <YAxis yAxisId="oas" tick={{ fontSize: 12 }} domain={["auto", "auto"]} tickFormatter={(v) => `${v}%`} />
+                {/* cycle310 — S&P500 전용 축. 단위가 %가 아니라 지수라 OAS 축과 절대 섞지
+                    않는다(섞으면 2~8% 인 OAS 가 7,000 옆에서 바닥에 붙는다).
+                    `hide` 로 눈금은 감추고 스케일만 빌려 쓴다. */}
+                {showSp && <YAxis yAxisId="sp500" orientation="right" hide domain={["auto", "auto"]} />}
                 <Tooltip
-                  formatter={(v) => [`${Number(v).toFixed(2)}%`, "HY OAS"]}
+                  formatter={(v, name) =>
+                    String(name) === "S&P 500"
+                      ? [Number(v).toLocaleString("ko-KR", { maximumFractionDigits: 0 }), "S&P 500"]
+                      : [`${Number(v).toFixed(2)}%`, "HY OAS"]
+                  }
                   labelFormatter={(l) => l}
                   contentStyle={{ fontSize: 12, borderRadius: 8 }}
                 />
@@ -330,6 +347,7 @@ export default function CreditSpreadSection({ data, loading, error }: CreditSpre
                   const { row, displayLabel } = csRowMap.rowDisplayFor("bear", b.x1, b.x2)
                   return (
                     <ReferenceArea
+                      yAxisId="oas"
                       key={`bear-${i}`}
                       x1={b.x1}
                       x2={b.x2}
@@ -345,6 +363,7 @@ export default function CreditSpreadSection({ data, loading, error }: CreditSpre
                   const { row, displayLabel } = csRowMap.rowDisplayFor("rec", r.x1, r.x2)
                   return (
                     <ReferenceArea
+                      yAxisId="oas"
                       key={`rec-${i}`}
                       x1={r.x1}
                       x2={r.x2}
@@ -360,6 +379,7 @@ export default function CreditSpreadSection({ data, loading, error }: CreditSpre
                 })}
                 {refLines.map((rl, i) => (
                   <ReferenceLine
+                    yAxisId="oas"
                     key={i}
                     y={rl.y}
                     stroke={rl.color}
@@ -374,6 +394,7 @@ export default function CreditSpreadSection({ data, loading, error }: CreditSpre
                   </linearGradient>
                 </defs>
                 <Area
+                  yAxisId="oas"
                   type="monotone"
                   dataKey="oas"
                   stroke="var(--color-navy-500)"
@@ -382,7 +403,20 @@ export default function CreditSpreadSection({ data, loading, error }: CreditSpre
                   dot={false}
                   isAnimationActive={false}
                 />
-              </AreaChart>
+                {showSp && (
+                  <Line
+                    yAxisId="sp500"
+                    type="monotone"
+                    dataKey="sp500"
+                    name="S&P 500"
+                    stroke="var(--color-red-500)"
+                    strokeWidth={1.5}
+                    dot={false}
+                    connectNulls={false}
+                    isAnimationActive={false}
+                  />
+                )}
+              </ComposedChart>
             </ResponsiveContainer>
           </div>
           <div className="text-xs text-gray-400 mt-1">

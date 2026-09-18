@@ -22,6 +22,7 @@ import type {
   CreditSpreadResponse,
   CurrenciesResponse,
   MacroCycleResponse,
+  Sp500Response,
   YieldCurveResponse,
 } from "../types/macro"
 
@@ -57,6 +58,20 @@ export async function fetchCommodities(): Promise<CommoditiesResponse> {
 
 export async function fetchMacroCycle(): Promise<MacroCycleResponse> {
   const res = await apiClient.get<MacroCycleResponse>("/macro/macro-cycle", {
+    timeout: MACRO_TIMEOUT_MS,
+  })
+  return res.data
+}
+
+/**
+ * S&P500 주간 종가 (cycle310) — 금리차·하이일드 차트에 겹쳐 그릴 붉은 선.
+ *
+ * 다른 5개와 달리 `macro_lite/` vendor 가 아니라 우리 `macro/sp500.py` 가 돌려준다.
+ * 실패해도 예외를 던지지 않고 `history: []` + `errors` 로 오므로, 화면은 붉은 선만 빼고
+ * 본선(금리차·하이일드)은 그대로 그린다.
+ */
+export async function fetchSp500(): Promise<Sp500Response> {
+  const res = await apiClient.get<Sp500Response>("/macro/sp500", {
     timeout: MACRO_TIMEOUT_MS,
   })
   return res.data

@@ -12,7 +12,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY macro_lite/ ./macro_lite/
 COPY data/ ./data/
+# 🔴 우리가 더한 모듈은 **한 줄씩 명시**한다. 빠뜨리면 `docker build` 는 exit 0 이고
+# 컨테이너 기동에서만 `ModuleNotFoundError` 로 죽는다 — `uvicorn` 누락(2026-09-18)과
+# 같은 계열이라 두 번째로 밟은 함정이다. `main.py` 가 import 하는 파일을 늘릴 때마다
+# 여기도 같이 늘린다(`macro_lite/` 는 vendor 라 디렉터리째 들어간다).
 COPY main.py .
+COPY sp500.py .
 
 # ── 캐시 볼륨 권한 (cycle303) ────────────────────────────────────────────────
 # `MACRO_LITE_CACHE_DIR=/var/lib/macro-lite` 는 compose 가 호스트 `./macro-cache` 를
