@@ -142,21 +142,43 @@ def test_frontend_regex_when_probed_then_anchored_to_frontend_dir():
 
 
 def test_script_when_modes_then_flags_match_contract():
-    """G-248-5 — 모드별 compose 플래그: frontend 는 `--no-deps … frontend` 로 끝나고 `--build`,
-    none 은 `--build`·`--no-deps` 없음, full 은 `--build` 있고 서비스 지정 없음."""
-    code = _code_lines(_read(_SCRIPT))
+    """G-248-5 (cycle303 갱신) — 모드별 compose 플래그 계약.
+
+    cycle248 당시엔 frontend 전용 모드가 리터럴 `--no-deps … frontend` 로 끝나는 한 줄이었다.
+    cycle303 이 macro 서비스를 추가하며 frontend/macro/frontend+macro 세 모드가 **같은 코드
+    라인**(`--no-deps "${SERVICES[@]}"`)을 공유하도록 일반화했다 — "up" 총수는 여전히
+    full·none·서비스목록 **3줄**이라 이 가드의 뼈대(정확히 3개, 각 1개씩)는 그대로 두고,
+    "서비스목록 줄이 리터럴 `frontend` 로 끝난다"는 단언만 "SERVICES 배열을 그대로 확장하고
+    backend 리터럴이 없다"는 단언으로 바꿨다. 이빨은 그대로다 — backend 가 이 배열에 들어갈
+    코드 경로가 없다는 것(SERVICES 는 FRONTEND_HITS/MACRO_HITS 로만 채워진다)까지 텍스트로
+    확인한다.
+    """
+    text = _read(_SCRIPT)
+    code = _code_lines(text)
     ups = [ln.strip() for ln in code if "docker compose" in ln and " up " in ln]
     assert len(ups) == 3, ups
     for u in ups:  # 공통 계약(뮤테이션 M14/M22 escape 봉인)
         assert " -d " in f" {u} " or u.endswith(" -d"), f"`-d` 누락: {u}"
         assert "--remove-orphans" in u, f"`--remove-orphans` 누락: {u}"
     full = [u for u in ups if "--no-deps" not in u and "--build" in u]
-    fe = [u for u in ups if "--no-deps" in u]
+    svc = [u for u in ups if "--no-deps" in u]
     none = [u for u in ups if "--build" not in u]
-    assert len(full) == 1 and len(fe) == 1 and len(none) == 1, ups
-    assert fe[0].split()[-1] == "frontend" and "--build" in fe[0], fe
-    assert not full[0].split()[-1] in {"frontend", "backend"}, full
+    assert len(full) == 1 and len(svc) == 1 and len(none) == 1, ups
+
+    # 서비스목록 줄 — SERVICES 배열을 그대로 확장하고(`"${SERVICES[@]}"`), backend 리터럴이 없다.
+    assert '"${SERVICES[@]}"' in svc[0] and "--build" in svc[0], svc
+    assert "backend" not in svc[0], svc
+
+    # full 줄은 어떤 서비스도 지정하지 않는다(전 서비스 재생성이 계약).
+    assert not any(tok in full[0].split() for tok in ("frontend", "macro", "backend")), full
     assert "--no-deps" not in none[0], none
+
+    # SERVICES 는 오직 FRONTEND_HITS/MACRO_HITS 로만 채워진다 — `SERVICES+=(backend)` 형태의
+    # append 가 스크립트 어디에도 없어야 "backend 가 --no-deps 목록에 들어갈 길이 없다"는
+    # 주장이 텍스트로도 성립한다.
+    assert not re.search(r"SERVICES\+=\(\s*backend\s*\)", text), "backend 가 SERVICES 에 append 되는 경로가 생겼다"
+    assert re.search(r"SERVICES\+=\(\s*frontend\s*\)", text), "FRONTEND_HITS → SERVICES append 가 없다"
+    assert re.search(r"SERVICES\+=\(\s*macro\s*\)", text), "MACRO_HITS → SERVICES append 가 없다"
 
 
 def test_script_when_written_then_strict_mode_and_marker_after_compose():

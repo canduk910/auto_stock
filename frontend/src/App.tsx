@@ -21,6 +21,8 @@ const RealtimeHealth = lazy(() => import('./pages/RealtimeHealth'))
 const Strategies = lazy(() => import('./pages/Strategies'))
 // cycle282 (2026-09-11) — 장운영상태(거래소 실제 장 운영 상태 + 주문유형 카탈로그) 신규 페이지
 const MarketState = lazy(() => import('./pages/MarketState'))
+// cycle303 (2026-09-18) — macro_lite 이식 1단계: 경기사이클/금리차/신용스프레드/환율/원자재 5섹션
+const MacroPage = lazy(() => import('./macro/MacroPage'))
 
 // cycle288 (2026-09-12) — 나브 항목 구조(그룹 묶음 포함)는 components/NavBar.tsx 로 이전.
 // 여기 남는 것은 라우트·레이아웃뿐이다. 화면 폭 슬라이더 상태(useContentWidth)는 나브(슬라이더)와
@@ -80,6 +82,8 @@ function AppShell() {
               path="/log-reports"
               element={<Navigate to="/logs?tab=daily-report" replace />}
             />
+            {/* cycle303 (2026-09-18) — 매크로 분석 (전략 그룹과 설정 사이) */}
+            <Route path="/macro" element={<MacroPage />} />
             <Route path="/settings" element={<Settings />} />
             {/* 사이클 103 (2026-06-11) — 실시간 건강 + 전략 현황 */}
             <Route path="/realtime-health" element={<RealtimeHealth />} />

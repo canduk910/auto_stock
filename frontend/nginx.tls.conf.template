@@ -57,6 +57,25 @@ server {
     location = /favicon.svg { return 204; }
     location ~ ^/apple-touch-icon(-[0-9]+x[0-9]+)?(-precomposed)?\.png$ { return 204; }
 
+    # 매크로 API 리버스 프록시 — cycle303, HTTP 템플릿(`frontend/nginx.conf.template`)과
+    # byte 동일 규약(변수+resolver·auth_basic 명시·60s 타임아웃·X-API-Key 미전달). 이
+    # 파일엔 `map` 을 새로 두지 않는다(아래 설명, G-255-2f) — 이 location 은 애초에
+    # `$api_key_for_user` 를 쓰지 않으므로 map 유무와 무관하다.
+    location /api/macro/ {
+        resolver 127.0.0.11 valid=10s ipv6=off;
+        set $macro_upstream http://macro:8000;
+
+        auth_basic           "auto_stock";
+        auth_basic_user_file /etc/nginx/secrets/.htpasswd;
+
+        proxy_pass $macro_upstream$request_uri;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 60s;
+    }
+
     # API 리버스 프록시 — HTTP 템플릿과 동일 헤더 4종. `$api_key_for_user` 는 위에서
     # 설명한 대로 HTTP 템플릿의 `map` 을 그대로 공유해서 쓴다(이 파일엔 map 이 없다).
     # ACME 챌린지 location 은 여기 없다 — HTTP-01 은 80 에서만 처리한다(갱신도 동일).

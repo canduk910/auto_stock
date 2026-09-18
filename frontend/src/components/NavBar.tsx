@@ -11,6 +11,7 @@ import { CONTENT_WIDTH_DEFAULT_LEVEL, contentMaxWidth } from '../utils/contentWi
 // cycle288 — 메뉴바 2단 카테고리화. 사용자 지정 묶음(원문) =
 // "대시보드 // 거래내역 // 로그 // 조건검색 추적, 종목마스터 // 전략현황, 전략수정 AI자문 //
 //  설정 // 장운영상태, 실시간상태" — 묶음·순서는 바꾸지 않는다. 라우트 경로도 불변.
+// cycle303 — 매크로(단독 leaf, `/macro`)를 전략 그룹과 설정 사이에 추가(경로 10→11개).
 
 interface NavLeaf {
   to: string
@@ -47,6 +48,8 @@ const NAV_STRUCTURE: NavEntry[] = [
       { to: '/recommendations', label: '전략수정 AI자문' },
     ],
   },
+  // cycle303 (2026-09-18) — 매크로 분석. 전략 그룹과 설정 사이(팀장 명세 §6).
+  { kind: 'leaf', to: '/macro', label: '매크로' },
   { kind: 'leaf', to: '/settings', label: '설정' },
   {
     kind: 'group',

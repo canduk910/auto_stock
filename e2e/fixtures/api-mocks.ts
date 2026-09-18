@@ -826,4 +826,132 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
       }),
     });
   });
+
+  // ── cycle303 (2026-09-18) — macro_lite 이식 1단계 5 엔드포인트 ──────────────
+  // 🔴 이 5개는 envelope() 를 쓰지 않는다 — macro 서비스는 독립 FastAPI 프로세스라
+  // 원본 계약(`{ <section>, updated_at, errors }`)을 그대로 반환한다(우리 ApiResponse
+  // 래퍼 밖). `frontend/src/test/handlers.ts` 의 MSW 목과 동일 값(실측 근거 =
+  // `packaging/macro_lite/backend/macro_lite/{fetcher,cycle,regime}.py` 반환문 +
+  // `packaging/macro_lite/backend/tests/test_service_router.py` mock 기본값).
+  //
+  // 사이클 80 hotfix #3 LIFO 정합: wildcard `**/api/macro/**` 를 먼저(fallback) 등록하고
+  // 5개 구체 라우트를 그 후 등록한다. 구체 경로가 전부 trailing wildcard 없이 끝나
+  // (`/yield-curve` 처럼) vite 모듈 요청 `/src/api/macro.ts` 와 겹치지 않는다 — resourceType
+  // 가드가 불요하다(`**/api/logs*`/`**/api/market-state*` 와 다른 계열, "/" 로 끝나지 않는
+  // segment 뒤에 바로 ".ts" 가 오지 않으면 glob 이 매칭하지 않는다).
+  await page.route("**/api/macro/**", (route) =>
+    route.fulfill({ json: { errors: ["mock not registered"] } }),
+  );
+  await page.route("**/api/macro/yield-curve", (route) =>
+    route.fulfill({
+      json: {
+        yield_curve: {
+          current: { "3m": 5.0, "5y": 4.0, "10y": 4.2, "30y": 4.5 },
+          spread_10y_3m: -0.8,
+          history: [
+            { date: "2020-01-01", y3m: 1.5, y10y: 1.8, spread: 0.3 },
+            { date: "2020-06-01", y3m: 1.4, y10y: 1.6, spread: 0.2 },
+          ],
+          inverted: true,
+          events: { recessions: [], bear_markets: [] },
+        },
+        updated_at: "2026-09-18T09:00:00+09:00",
+        errors: [],
+      },
+    }),
+  );
+  await page.route("**/api/macro/credit-spread", (route) =>
+    route.fulfill({
+      json: {
+        credit_spread: {
+          oas_current: 3.5,
+          oas_history_10y: [{ date: "2020-01-01", oas: 3.5 }],
+          oas_history_5y: [{ date: "2020-01-01", oas: 3.5 }],
+          oas_history: [{ date: "2020-01-01", oas: 3.5 }],
+          oas_stats: { p10: 2.5, p25: 3.0, p75: 5.0, p90: 6.5, mean: 4.0, max: 10.0, max_date: "2020-03-23" },
+          oas_percentile: 40.0,
+          oas_zscore: -0.2,
+          oas_sentiment: "normal",
+          ig_current: 1.2,
+          hy_ig_spread: 2.3,
+          partial_failure: [],
+          events: { recessions: [], bear_markets: [] },
+        },
+        updated_at: "2026-09-18T09:00:00+09:00",
+        errors: [],
+      },
+    }),
+  );
+  await page.route("**/api/macro/currencies", (route) =>
+    route.fulfill({
+      json: {
+        currencies: [
+          {
+            symbol: "USDKRW=X",
+            name: "USD/KRW",
+            price: 1300.0,
+            prev_close: 1290.0,
+            change: 10.0,
+            change_pct: 0.7,
+            sparkline: [],
+          },
+        ],
+        updated_at: "2026-09-18T09:00:00+09:00",
+        errors: [],
+      },
+    }),
+  );
+  await page.route("**/api/macro/commodities", (route) =>
+    route.fulfill({
+      json: {
+        commodities: [
+          {
+            symbol: "GC=F",
+            name: "금",
+            price: 2000.0,
+            prev_close: 1990.0,
+            change: 10.0,
+            change_pct: 0.5,
+            sparkline: [],
+          },
+        ],
+        updated_at: "2026-09-18T09:00:00+09:00",
+        errors: [],
+      },
+    }),
+  );
+  await page.route("**/api/macro/macro-cycle", (route) =>
+    route.fulfill({
+      json: {
+        cycle: {
+          phase: "expansion",
+          phase_label: "확장기",
+          phase_desc: "양의 수익률곡선, 낮은 VIX, 좁은 스프레드",
+          confidence: 62,
+          scores: {
+            yield_curve: { score: 0.15, weight: 0.3, signal: "스프레드 +1.00%" },
+            credit_spread: { score: 0.06, weight: 0.2, signal: "안정" },
+            vix: { score: 0.06, weight: 0.2, signal: "18.0 (보통)" },
+            sector_rotation: { score: 0.0375, weight: 0.15, signal: "혼합" },
+            dollar: { score: 0.0375, weight: 0.15, signal: "보합" },
+          },
+          leader_sectors: ["XLK", "XLY"],
+        },
+        regime: {
+          regime: "cautious",
+          regime_desc: "신중 (방어 선별)",
+          params: {},
+          vix: 18.0,
+          buffett_ratio: 1.5,
+          fear_greed_score: 50,
+          buffett_level: "high",
+          fg_level: "neutral",
+          credit_adjustment: null,
+          credit_override: null,
+        },
+        updated_at: "2026-09-18T09:00:00+09:00",
+        errors: [],
+      },
+    }),
+  );
 }

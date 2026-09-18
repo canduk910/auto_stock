@@ -1,0 +1,11 @@
+# macro_lite 런타임 의존성 — 버전 핀은 원 프로젝트(stock-manager) 루트 requirements.txt 와 동일(무핀).
+fastapi
+requests
+numpy<2
+pandas
+yfinance
+
+# ── dev / test (패키지 단독 pytest 실행 시에만 필요) ─────────────────────────
+# pytest
+# pytest-timeout
+# httpx>=0.27.0        # fastapi.testclient.TestClient

@@ -412,4 +412,55 @@ describe('사이클 75 카드 #19\' — e2e api-mocks 7 endpoint group 영구 �
       },
     )
   })
+
+  // cycle303 (2026-09-18) — macro_lite 이식 1단계. `/macro` 페이지 마운트 시 5 엔드포인트가
+  // 동시에 발화한다(useEffect 안에서 5개 load() 순차 호출). 미등록이면 vite proxy →
+  // ECONNREFUSED → 5섹션이 전부 error 상태로 굳는다. 사이클 77 G-AST5 (영역 확장) 패턴 답습.
+  describe('G-AST12 (cycle303): macro_lite 5 엔드포인트 등록', () => {
+    const REQUIRED_MACRO_ENDPOINTS = [
+      '/api/macro/yield-curve',
+      '/api/macro/credit-spread',
+      '/api/macro/currencies',
+      '/api/macro/commodities',
+      '/api/macro/macro-cycle',
+    ]
+
+    it.each(REQUIRED_MACRO_ENDPOINTS)(
+      'api-mocks.ts 에 %s 라우트 등록 의무 (MacroPage 마운트 차단 방지)',
+      (endpoint) => {
+        const macroApiSource = readFileSync(path.join(FRONTEND_API_DIR, 'macro.ts'), 'utf-8')
+        const apiPath = endpoint.replace('/api', '') // /macro/...
+        expect(
+          macroApiSource.includes(`"${apiPath}"`) || macroApiSource.includes(`'${apiPath}'`),
+          `방어 가드: api/macro.ts 가 ${apiPath} 를 더 이상 호출하지 않음 — 본 가드 갱신 의무.`,
+        ).toBe(true)
+
+        const source = loadApiMocksSource()
+        expect(
+          isRouteRegistered(source, endpoint),
+          `e2e api-mocks.ts 에 ${endpoint} 라우트 누락 — cycle303 MacroPage 마운트 시 ` +
+            'ECONNREFUSED 위험. 사이클 77 G-AST5 (영역 확장) 패턴 답습 의무.',
+        ).toBe(true)
+      },
+    )
+
+    it('api-mocks.ts 의 macro 구체 라우트가 wildcard `**/api/macro/**` 보다 후 등록된다 (LIFO)', () => {
+      const source = loadApiMocksSource()
+      const wildcardPos = source.indexOf('"**/api/macro/**"')
+      expect(wildcardPos, 'wildcard `**/api/macro/**` 라우트 누락').toBeGreaterThan(-1)
+
+      for (const endpoint of REQUIRED_MACRO_ENDPOINTS) {
+        const specificPos = source.indexOf(`"**${endpoint}"`)
+        expect(
+          specificPos,
+          `${endpoint} 구체 라우트 누락 — LIFO 정합 검사 불가`,
+        ).toBeGreaterThan(-1)
+        expect(
+          specificPos > wildcardPos,
+          `${endpoint} 구체 라우트가 wildcard *전* 등록 — Playwright LIFO 위반 ` +
+            '(wildcard 가 우선 매칭되어 구체 라우트 무효화). 사이클 80 hotfix #3 시정 의도 위반.',
+        ).toBe(true)
+      }
+    })
+  })
 })

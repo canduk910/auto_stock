@@ -9,12 +9,14 @@
 #   backend 입력이 안 바뀐 배포에서 backend 컨테이너를 건드리지 않는다.
 #
 # ■ 판정 (마지막 **성공** 배포 SHA 마커 ↔ HEAD 의 누적 diff)
-#   full     — backend 이미지·구성 입력 또는 배포 로직 자체가 바뀜 → `up --build -d --remove-orphans`
-#              (현행 동일: 양 서비스 재생성)
-#   frontend — frontend/ 만 바뀜 → `up --build -d --no-deps frontend` (backend 무접촉 — 실측.
-#              의도적으로 정지된 backend 도 기동하지 않는다 — 필요하면 수동 `up -d backend`)
-#   none     — 어느 입력도 아님(docs/tests/_workspace/…) 또는 마커==HEAD(이미 성공 배포된 SHA 의
-#              재실행) → `up -d --remove-orphans` (빌드 없음 = Running, 재생성 0 — 실측)
+#   full          — backend 이미지·구성 입력 또는 배포 로직 자체가 바뀜 → `up --build -d --remove-orphans`
+#                   (현행 동일: 전 서비스 재생성)
+#   frontend      — frontend/ 만 바뀜 → `up --build -d --no-deps frontend` (backend 무접촉 — 실측.
+#                   의도적으로 정지된 backend 도 기동하지 않는다 — 필요하면 수동 `up -d backend`)
+#   macro         — macro/ 만 바뀜(cycle303) → `up --build -d --no-deps macro` (backend·frontend 무접촉)
+#   frontend+macro — frontend/ 와 macro/ 만 바뀜(cycle303) → `up --build -d --no-deps frontend macro`
+#   none          — 어느 입력도 아님(docs/tests/_workspace/…) 또는 마커==HEAD(이미 성공 배포된 SHA 의
+#                   재실행) → `up -d --remove-orphans` (빌드 없음 = Running, 재생성 0 — 실측)
 #   판정 불가(마커 없음 · 마커 SHA 미지 · diff 실패) → **full** (fail-safe = 현행 동작)
 #
 # ■ 분류 규칙의 근거 = 이미지 입력의 **구성적** 정의
@@ -23,11 +25,23 @@
 #              + 배포 로직(`.github/workflows/deploy.yml` · `tools/deploy/`) — 로직이 바뀐 배포는
 #              한 번 보수적으로 전체를 돈다.
 #   frontend : `frontend/` 전체(frontend/Dockerfile 이 `COPY . .`)
+#   macro    : `macro/` 전체(cycle303 — 독립 이미지, 빌드 컨텍스트 `./macro`. `macro/Dockerfile`
+#              이 `COPY macro_lite/ data/ main.py` 이므로 그 밖의 리포 파일은 이 이미지에
+#              실리지 않는다)
 #   `.env` 은 git 밖이라 여기서 못 본다 — `.env` 를 손댄 운영자는 스스로 재시작을 안다(cycle243 Phase 2 규약).
 #   ⚠️ 오분류의 실패 방향은 비대칭이다: backend 변경을 none 으로 놓치면 **stale backend 가 조용히
 #   돈다**(fail-dangerous). 그래서 backend 목록은 "명시적 입력의 합집합"이 아니라 위 구성적 정의를
 #   그대로 옮긴 것이고, 가드 `tests/unit/ast/test_cycle248_deploy_pipeline.py` 가 Dockerfile COPY
 #   소스 ↔ 이 정규식의 정합을 강제한다.
+#
+# ■ cycle303 — 서비스 목록 일반화 (왜 frontend 전용 모드를 없애지 않고 넓혔는가)
+#   macro 서비스가 추가되며 "frontend 만/backend 나머지 전부" 2분류로는 부족해졌다.
+#   frontend·macro 두 축을 각자 판정(FRONTEND_RE/MACRO_RE)한 뒤 SERVICES 배열에 모아
+#   **하나의 `--no-deps` 라인을 공유**하는 형태로 일반화했다 — backend 축(BACKEND_RE)과
+#   그 우선순위(backend 히트 → 무조건 full)는 cycle248 과 완전히 동일하게 **보존**한다.
+#   SERVICES 는 FRONTEND_HITS/MACRO_HITS 로만 채워지므로 backend 가 이 배열에 들어갈
+#   길이 구조적으로 없다(정합 가드 = `tests/unit/ast/test_cycle248_deploy_pipeline.py`
+#   G-248-5, 행위 가드 = `tests/unit/deploy/test_cycle303_macro_deploy_classification.py`).
 #
 # ■ 환경변수
 #   DEPLOY_MARKER      마커 파일 경로 (기본 .deployed_sha — .gitignore 등재). `<마커>.attempt` 는 시도 마커.
@@ -91,6 +105,13 @@ BACKEND_RE='^(src/|requirements\.txt$|Dockerfile$|docker-compose\.prod\.yml$|doc
 # 재생성)를 타도록 frontend 축에 추가한다. backend 이미지 입력이 아니므로 BACKEND_RE 에는
 # 넣지 않는다(넣으면 헤더 한 글자 고칠 때마다 backend 가 재시작돼 cycle232 D6 이 발동한다).
 FRONTEND_RE='^(frontend/|tools/ops/tls_stage2/)'
+# cycle303 — macro_lite 이식 1단계. `macro/` 는 독립 이미지(빌드 컨텍스트 `./macro`)라
+# backend 이미지 입력이 아니다(BACKEND_RE 에 넣지 않는다 — 넣으면 매크로 화면 문구
+# 하나 고칠 때마다 매매 backend 가 재시작돼 cycle232 D6 이 발동한다). FRONTEND_RE 와
+# 합치지 않고 별도 축으로 두는 이유는 "macro 만 바뀜" 과 "frontend 만 바뀜" 을
+# 구분해 `--no-deps` 대상 서비스 목록을 정확히 고르기 위해서다(아래 서비스 목록
+# 일반화 참조).
+MACRO_RE='^macro/'
 
 # cycle255 — TLS 오버레이 마커. **모드 판정에는 관여하지 않는다** — 여기서 읽어 두는 것은
 # compose 호출에 붙일 `-f` 목록뿐이다. 마커는 존재만 본다(내용 파싱 금지 — `touch` 로 만든
@@ -157,15 +178,37 @@ else
     fi
 fi
 
+# cycle303 — 서비스 목록 일반화. backend 축(BACKEND_RE)은 cycle248 과 완전히 동일하게
+# "하나라도 있으면 full" 이다. backend 가 아닌 나머지는 SERVICES 배열로 모아 하나의
+# `--no-deps` 라인을 공유한다(frontend/macro/frontend+macro 3가지 조합).
+# ⚠️ `set -e` 아래서 `[ -n "$X" ] && ARR+=(x)` 는 조건이 거짓일 때(= 히트 없음) 그 라인의
+# 종료코드가 1 이 되어 스크립트 전체가 죽는다(`&&` 단축평가 실패가 `set -e` 트리거) —
+# 그래서 반드시 `if … then … fi` 로 쓴다.
+SERVICES=()
 if [ -z "$MODE" ]; then
     BACKEND_HITS="$(printf '%s\n' "$CHANGED" | grep -E "$BACKEND_RE" || true)"
     FRONTEND_HITS="$(printf '%s\n' "$CHANGED" | grep -E "$FRONTEND_RE" || true)"
+    MACRO_HITS="$(printf '%s\n' "$CHANGED" | grep -E "$MACRO_RE" || true)"
     if [ -n "$BACKEND_HITS" ]; then
         MODE="full"; REASON="backend_inputs_changed"
-    elif [ -n "$FRONTEND_HITS" ]; then
-        MODE="frontend"; REASON="frontend_only"
     else
-        MODE="none"; REASON="no_image_inputs_changed"
+        if [ -n "$FRONTEND_HITS" ]; then
+            SERVICES+=(frontend)
+        fi
+        if [ -n "$MACRO_HITS" ]; then
+            SERVICES+=(macro)
+        fi
+        case "${#SERVICES[@]}" in
+            0)
+                MODE="none"; REASON="no_image_inputs_changed"
+                ;;
+            1)
+                MODE="${SERVICES[0]}"; REASON="${SERVICES[0]}_only"
+                ;;
+            *)
+                MODE="frontend+macro"; REASON="frontend_and_macro_only"
+                ;;
+        esac
     fi
 fi
 
@@ -185,17 +228,25 @@ if [ "$DRY_RUN" != "1" ]; then
     printf '%s\n' "$HEAD_SHA" > "$ATTEMPT"
 fi
 
+# cycle303 — G-248-5(정합 가드) 갱신 사유: macro 서비스 추가 전엔 frontend 전용 모드가
+# 리터럴 `--no-deps frontend` 한 줄이었다. 이제 frontend/macro/frontend+macro 세 모드가
+# 같은 코드 라인(SERVICES 배열 확장)을 공유한다 — "up" 라인 총수는 3(full·none·
+# 서비스목록)으로 cycle248 당시와 **동일**하게 유지된다(가드가 그 수를 그대로 잰다).
 case "$MODE" in
     full)
         run docker compose "${COMPOSE_FILE_ARGS[@]}" up --build -d --remove-orphans
         ;;
-    frontend)
-        # --no-deps 가 계약이다: 빼면 depends_on(backend) 까지 --build 대상이 돼 backend 가 재생성된다(실측).
-        run docker compose "${COMPOSE_FILE_ARGS[@]}" up --build -d --remove-orphans --no-deps frontend
-        ;;
     none)
         # 빌드 없는 up = 구성 일치 시 Running(재생성 0), 죽어 있던 컨테이너만 기동.
         run docker compose "${COMPOSE_FILE_ARGS[@]}" up -d --remove-orphans
+        ;;
+    frontend|macro|"frontend+macro")
+        # --no-deps 가 계약이다: 빼면 depends_on(backend/macro) 까지 --build 대상이 돼
+        # backend 가 재생성된다(실측, cycle248). SERVICES 는 FRONTEND_HITS/MACRO_HITS
+        # 로만 채워진다(위 분류 블록) — backend 가 이 목록에 들어갈 길이 **구조적으로
+        # 없다**: backend 히트가 하나라도 있으면 그 즉시 MODE=full 로 확정되어 이
+        # 분기 자체에 도달하지 않는다.
+        run docker compose "${COMPOSE_FILE_ARGS[@]}" up --build -d --remove-orphans --no-deps "${SERVICES[@]}"
         ;;
     *)
         log "internal error: unknown mode '$MODE'"; exit 2

@@ -4,6 +4,8 @@
 # 사이클 20 (2026-05-20) — 디렉토리 단위 토큰 캐시 (Docker 볼륨 마운트)
 .token_cache/
 .token_cache_quote_*.json
+# cycle303 — macro_lite 영속 캐시 (Docker 볼륨 마운트, `docs/macro-lite.md` 참조)
+macro-cache/
 
 # 로그
 logs/

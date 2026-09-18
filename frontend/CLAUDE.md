@@ -55,7 +55,7 @@ Dashboard 만 즉시 import. 나머지 9 페이지(History · Recommendations ·
 
 나브는 **`src/components/NavBar.tsx`** 다(`App.tsx` 에는 라우트·레이아웃·`useContentWidth` 소유만 남는다). 공유 상수·훅(`CONTENT_WIDTH_*`·`contentMaxWidth`·`useContentWidth`)은 **`src/utils/contentWidth.ts`** 가 단일 출처다.
 
-메뉴는 leaf 10개를 **상위 7개**로 묶는다(사용자 지정 묶음·순서 — 바꾸지 마라):
+메뉴는 leaf 11개를 **상위 8개**로 묶는다(사용자 지정 묶음·순서 — 바꾸지 마라):
 
 | 상위 | 세부 | 경로 |
 |---|---|---|
@@ -64,6 +64,7 @@ Dashboard 만 즉시 import. 나머지 9 페이지(History · Recommendations ·
 | 로그 | (단독) | `/logs` |
 | **종목** | 조건검색 추적 · 종목마스터 | `/strategy-funnel` · `/stock-master` |
 | **전략** | 전략 현황 · 전략수정 AI자문 | `/strategies` · `/recommendations` |
+| 매크로 | (단독) | `/macro` |
 | 설정 | (단독) | `/settings` |
 | **운영상태** | 장운영상태 · 실시간 상태 | `/market-state` · `/realtime-health` |
 
@@ -72,8 +73,8 @@ Dashboard 만 즉시 import. 나머지 9 페이지(History · Recommendations ·
 - **disclosure 패턴**(`aria-expanded` 만, `aria-haspopup` 없음) — `role=menu`/`menuitem` 을 두지 않았으므로 `aria-haspopup="true"` 로 메뉴를 약속하면 스크린리더에 거짓이 된다.
 - 키보드: Enter/Space 열기 · ArrowDown/Up 이동 · Escape 로 닫고 트리거 포커스 복귀 · 항목 선택 후에도 트리거로 포커스 복원(패널 언마운트로 `<body>` 로 떨어지는 회귀 차단). 포커스 트랩은 두지 않는다.
 - 닫힘 조건 3: 바깥 클릭 · 포커스 이탈(`onBlur`/focusout) · 라우트 이동(뒤로가기 포함). `openGroup` 단일 상태라 한 번에 하나만 열린다.
-- 모바일 드로어는 **접지 않는다** — "그룹 제목(링크 아님) + 들여쓴 하위" 로 10개 leaf 를 항상 보여준다.
-- 🔴 **경로 10/10 이 메뉴에서 도달 가능해야 한다.** 그룹 안에 묻혀 사라진 메뉴는 URL 을 직접 치지 않으면 영영 못 본다 — `AppShell.test.tsx` 가 href 10개 집합의 불변을 단언한다. (`/log-reports` 는 `/logs?tab=daily-report` 로 가는 **구 북마크 리다이렉트**라 메뉴 항목이 아니다.)
+- 모바일 드로어는 **접지 않는다** — "그룹 제목(링크 아님) + 들여쓴 하위" 로 11개 leaf 를 항상 보여준다.
+- 🔴 **경로 11/11 이 메뉴에서 도달 가능해야 한다.** 그룹 안에 묻혀 사라진 메뉴는 URL 을 직접 치지 않으면 영영 못 본다 — `AppShell.test.tsx` 가 href 11개 집합의 불변을 단언한다. (`/log-reports` 는 `/logs?tab=daily-report` 로 가는 **구 북마크 리다이렉트**라 메뉴 항목이 아니다.)
 - 보존 testid 4: `nav-sticky-wrapper` · `content-width-slider` · `mobile-menu-button` · `mobile-menu-drawer`. 그룹용 = `nav-inner` · `nav-mobile-group-{id}` 등.
 - ⚠️ e2e 에서 그룹 하위 라벨은 **접힌 상태에 DOM 에 없다.** 페이지 제목을 검증할 때 `getByText(...)` 를 쓰면 모바일 헤더의 숨은 현재-메뉴 span 을 집는다. 본문 제목은 `getByRole("heading", {name})` 로 고정하고, 그룹 트리거 클릭은 `getByRole("button", {name, exact: true})` 로 부분 일치를 막는다.
 
@@ -444,6 +445,32 @@ Dashboard 환경 배너 직하, 전략 탭 위 (`<ControlPanel />` 직후).
 - (3) 주문유형 카탈로그 `market-state-catalog` — 행 `market-state-catalog-row-{code}`(`data-confidence`), 거래소별 셀 `market-state-catalog-cell-{code}-{exchange}`(`data-support`). **● 지원 · ? 확인 필요 · 빈칸 미지원** 3상태다 — 🔴 **확인하지 못한 칸을 미지원으로 접지 않는다**("모른다" 와 "안 된다" 는 다른 말이다). `confidence !== 'confirmed'` 이면 이름 옆에 "확인 필요". 표가 드러낸 것은 `market-state-finding-{i}`
 - (4) 바닥: `market-state-board-note`(보드와 장 상태는 다른 것이다) · `market-state-unconfirmed-note`
 - 실패 분기: 404 → `market-state-notice`(안내) / 그 외 → `market-state-error` + `market-state-failure-detail` + `market-state-retry`
+
+## Macro (`/macro`) — cycle303 매크로 분석
+
+`stock-manager` 의 `macro_lite` 패키지(`packaging/macro_lite/`)를 이식했다 — 백엔드는 독립 `macro`
+컨테이너(포트 미노출, nginx `/api/macro/` 프록시), 프론트는 `frontend/src/macro/` 아래 `.tsx` 로 이식했다.
+매매 판단과 무접촉(`src/engine/market_regime.py`·`dkstock_client.py` 무수정) — 관찰 전용 화면이다.
+
+- **5섹션**(원본 순서 고정): 경기사이클+투자체제(`MacroCycleSection`) → 장단기 금리차(`YieldCurveSection`)
+  → 하이일드 스프레드(`CreditSpreadSection`) → 환율(`CurrencySection`) → 원자재(`CommoditySection`).
+  각 섹션 루트에 `data-testid="macro-section-{cycle|yield-curve|credit-spread|currency|commodity}"`.
+- **경기사이클 보존 7항목**(구조 재설계 금지) — 국면 4칸(`macro-cycle-phase-{phase}`) · 체제 4칸
+  (`macro-cycle-regime-{regime}`, `RegimeDetail` 안 보조 스트립) · 두 카드가 `grid-cols-2` 로 나란히
+  · 판단 근거 지표 카드 5종(`macro-cycle-indicator-{key}`) · `DivergenceNote`(국면·체제 엇갈릴 때만,
+  `macro-cycle-divergence-note`) · 체제 상세(공포탐욕/버핏지수/VIX) · `InfoTooltip` 해설 2종.
+- **타입 계약 2가지**(`types/macro.ts`) — `MacroCycleResponse.cycle` 은 optional(`data.cycle || data`
+  폴백), `RegimeData` 접근은 `regime?.regime` optional chaining. 응답 shape 계약 자체라 지우지 않는다.
+- `api/macro.ts` 는 우리 `api/client.ts`(axios, `baseURL:'/api'`) 를 쓴다 — `X-API-Key` 는 붙이지 않는다
+  (nginx 가 주입·치환). macro 콜드 캐시가 기본 10초 타임아웃보다 길어질 수 있어(yfinance 약 27건)
+  요청마다 `{ timeout: 60000 }` 오버라이드를 준다.
+- 이 5개 응답은 **우리 `ApiResponse<T>` 래퍼를 쓰지 않는다** — macro 서비스가 독립 FastAPI 프로세스라
+  원본 계약(`{ <section>, updated_at, errors }`)을 그대로 반환한다.
+- 훅은 TanStack Query 로 갈아엎지 않고 원본 `useAsyncState` 계열을 그대로 썼다(이식 사이클이라
+  구조 변경 없음) — `retry:1` 테스트 규약은 `useQuery` 를 쓸 때만 해당해 이 화면엔 적용되지 않는다.
+- `EventLabelsOverlay` 의 침체/약세장 음영 alpha 는 원본 소스 값(약세장 0.10 · 침체 0.18)을 그대로
+  이식했다 — 색 hex 리터럴은 전부 `var(--color-...)` CSS 변수로 치환했다(신규 hex 금지).
+- 회귀 가드 `frontend/src/macro/__tests__/MacroPage.test.tsx`.
 
 ## 주문 안전성
 

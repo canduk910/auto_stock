@@ -61,4 +61,32 @@ services:
       - TZ=Asia/Seoul
     depends_on:
       - backend
+      - macro
+    restart: unless-stopped
+
+  macro:
+    # cycle303 — macro_lite 이식 1단계. 매매와 무관한 매크로 대시보드(경기사이클·금리차·
+    # 하이일드·환율·원자재) 전용 API. **매매 판단에 값을 연결하지 않는다**
+    # (`src/engine/market_regime.py`·`src/services/dkstock_client.py` 무접촉 — 전환은
+    # 별도 승인 사이클). 자체 이미지(`./macro/Dockerfile`)로 매매 이미지와 완전 분리.
+    build:
+      context: ./macro
+    # 🔴 `ports:` 를 절대 넣지 않는다 — compose 내부 네트워크(`frontend`→`macro:8000`)
+    # 전용이다. 호스트에 게시하면 nginx Basic Auth 를 우회해 그대로 인증 없이 열린다
+    # (이 컨테이너는 `AUTH_DEPENDENCY=None` — 보호는 nginx 한 겹뿐이다).
+    volumes:
+      # 영속 bind mount 필수(tmpfs 금지) — FRED 가 OAS 시리즈를 최근 3년치만 주므로
+      # 누적 캐시가 사라지면 하이일드 스프레드 baseline 이 영구 퇴행한다
+      # (`docs/macro-lite.md` 참조). 호스트 `./macro-cache` 는 **사람이 먼저 mkdir** —
+      # compose 가 먼저 만들면 root:root 가 되어 컨테이너가 못 쓴다(`.token_cache` 사고와
+      # 같은 계열, `macro/Dockerfile` 주석 참조).
+      - ./macro-cache:/var/lib/macro-lite
+    environment:
+      - MACRO_LITE_CACHE_DIR=/var/lib/macro-lite
+      # FRED JSON API 폴백 키(선택, 없어도 CSV 무키 경로 + 7일 stale 캐시로 동작).
+      - FRED_API_KEY=${FRED_API_KEY:-}
+      - TZ=Asia/Seoul
+    # 🔴 `env_file: .env` 금지 — KIS·OPENAI 등 비밀 33개를 이 컨테이너에 밀어 넣는다
+    # (frontend 블록과 같은 이유, 위 주석 참조). macro_lite 는 그 비밀 중 어느 것도
+    # 쓰지 않는다 — 필요한 값은 `FRED_API_KEY` 하나뿐이고 그것만 명시 전달한다.
     restart: unless-stopped

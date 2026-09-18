@@ -109,6 +109,39 @@ server {
     location = /favicon.svg { return 204; }
     location ~ ^/apple-touch-icon(-[0-9]+x[0-9]+)?(-precomposed)?\.png$ { return 204; }
 
+    # 매크로 API 리버스 프록시 — cycle303 (macro_lite 이식 1단계). `/api/` 보다 **앞**에
+    # 둔다(prefix 최장일치라 순서 자체는 무관하지만 가독성 계약, 팀 명세 §4).
+    #
+    # 🔴 `proxy_pass` 를 리터럴(`http://macro:8000`)로 쓰지 않는다 — nginx 는 리터럴
+    # upstream 이름을 **기동 시점**에 DNS 로 풀려고 시도하는데, macro 컨테이너가 죽어
+    # 있거나 아직 뜨지 않은 순간이면 그 한 줄 때문에 nginx 자체가 기동을 거부해
+    # **대시보드 전체**가 내려간다(매매 API 는 macro 와 무관한데도 동반 장애). 변수 +
+    # `resolver`(compose 내장 DNS `127.0.0.11`) 형식은 **요청 시점**에 이름을 풀어
+    # macro 가 죽어 있어도 nginx 는 정상 기동하고 그 경로만 502 로 끝난다.
+    # `$request_uri` 는 변수 형식에서 URI 가 자동 전달되지 않아 명시가 필수다.
+    location /api/macro/ {
+        resolver 127.0.0.11 valid=10s ipv6=off;
+        set $macro_upstream http://macro:8000;
+
+        # 방어 심층화 — 상속으로도 걸리지만 명시한다(location 추가 시 누락 방지 규약,
+        # 기존 `/api/` 와 동일). 🔴 `auth_basic off;` 는 여기도 절대 쓰지 않는다(D-1-b).
+        auth_basic           "auto_stock";
+        auth_basic_user_file /etc/nginx/secrets/.htpasswd;
+
+        proxy_pass $macro_upstream$request_uri;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        # 콜드 캐시 1회 전체 갱신이 yfinance 약 27건이라 기본 60s 로는 빠듯하다
+        # (`docs/macro-lite.md` 참조).
+        proxy_read_timeout 60s;
+        # macro 컨테이너는 `X-API-Key` 인증 미들웨어가 없다(`AUTH_DEPENDENCY=None` —
+        # `macro/main.py` 주석). 보호는 이 Basic Auth 한 겹뿐이라 **의도적으로** 그 헤더를
+        # 보내지 않는다 — 보낸다고 macro 가 검사하지도 않으므로 위험은 없지만, 불필요한
+        # 헤더를 얹지 않는 쪽이 "이 백엔드는 그 키를 안 쓴다"는 사실을 코드로도 드러낸다.
+    }
+
     # API 리버스 프록시
     location /api/ {
         # 방어 심층화 — 상속으로도 걸리지만 명시한다(location 추가 시 누락 방지).

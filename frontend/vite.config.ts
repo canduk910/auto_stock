@@ -10,6 +10,17 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 3000,
       proxy: {
+        // cycle303 — macro_lite 이식 1단계. vite 의 프록시 매칭은 **키 등록 순서대로**
+        // prefix 를 검사하므로(첫 매치 채택) `/api/macro` 를 `/api` **앞**에 둔다 — 뒤에
+        // 두면 모든 `/api/macro/*` 요청이 먼저 `/api` 에 걸려 backend(8001/8002)로 가버린다.
+        // `X-API-Key` 헤더는 **넣지 않는다** — macro 컨테이너는 그 인증 미들웨어가 없다
+        // (`macro/main.py` 의 `AUTH_DEPENDENCY=None`, 보호는 nginx Basic Auth 한 겹뿐이고
+        // dev 에서는 그것도 없다). `VITE_MACRO_API_URL` 미설정 시 기본값은 dev compose 가
+        // 여는 macro 서비스의 루프백 게시 포트(`docker-compose.yml` 참조).
+        '/api/macro': {
+          target: process.env.VITE_MACRO_API_URL || 'http://localhost:8010',
+          changeOrigin: true,
+        },
         '/api': {
           target: apiTarget,
           changeOrigin: true,
