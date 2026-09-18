@@ -1256,3 +1256,82 @@ POST_NXT 전환과 `_confirm_breakout_open_prices(board="post_nxt")` 는 `TIME_K
   움직인 것은 `test_cycle287::_SRC_TREE_DIGEST` 하나다.
 - **호출자** — `fetch_daily_candles_backfill` 의 프로덕션 호출자는 `scanner._stock_master_daily_load_once`
   **하나뿐**임을 `grep` 으로 재확인했다. 별도 함수 `fetch_daily_candles` 는 무접촉이다.
+
+## 분할 backfill 분기 — 대상 확대 (cycle302, 2026-09-18)
+
+정본이 이 사이클 전까지 적던 문장 둘을 덮어썼다.
+
+- 「유니버스 선정」의 `🔴 vcp_universe_tickers 에는 넣지 않는다(분할 backfill 은 index 전용이고
+  보호 목적은 "오늘 봉 결손 방지" 로 국한한다)`(cycle273 D5, C1)
+- 「VCP universe backfill 분기」 절 머리 두 줄 — `vcp_universe_tickers: set[str]` = `is_kospi200 OR
+  is_kosdaq150` 정의와 `VCP ∧ <225 → backfill / 비 VCP 는 <50 백필 100일 / >=50 증분 7일` 분기표
+
+### 왜 뒤집었나 — 2026-09-18 09:37 실측
+
+| 집합 | 종목 | 225행 이상 | 평균 행수 |
+|---|---|---|---|
+| 지수(KOSPI200 ∪ KOSDAQ150) | 348 | 348 (100%) | 232 |
+| 비지수 | 1,526 | **0** | 125 |
+
+cycle299 가 target 을 225 로, cycle300 이 읽기 클램프를 400 으로 열었는데 **대상이 지수뿐**이라
+비지수는 한 종목도 깊이를 못 받았다. VCP 는 628 종목을 평가하므로 그중 약 280(45%)이
+`effective_ema_long = min(ema_long, 보유 − uptrend_days(20) − 5)` = **74·114·121** 로 잡혀
+중기↔장기 간격이 10 안팎이 됐다. 그날 5단계 탈락 사유 로그에 `50EMA / 150EMA / 121EMA` 가
+그대로 찍혔다 — 정배열 판정이 동전던지기인 상태가 그 종목들에 남아 있었다.
+
+### 무엇을 바꿨나 — 조건식 한 줄
+
+```
+- is_vcp_universe = ticker in vcp_universe_tickers
+- use_vcp_backfill = (is_vcp_universe and existing_count < _DAILY_LOAD_VCP_BACKFILL_DAYS)
++ use_deep_backfill = existing_count < _DAILY_LOAD_VCP_BACKFILL_DAYS
+```
+
+`vcp_universe_tickers` 집합(선언·`add`)과 `is_vcp_universe` 지역변수는 이 분기가 **유일 소비처**라
+(`grep` 전수) 함께 지웠다. 예외 로그의 `vcp=%s` 필드는 값의 뜻이 바뀌었으므로 `deep=%s` 로 고쳤다
+(소비처 0 — 테스트·운영 grep 어디에도 없었다).
+
+### 비용 — 1회성이라는 것이 이 설계의 안전 근거다
+
+| | KIS 호출 | 소요 | 20:30 적재 종료 |
+|---|---|---|---|
+| 첫 채움(1회) | ≈2,886 | ≈345초 | ≈20:36 |
+| 정상 운영(매일) | 962 | ≈120초 | 20:32 |
+
+`existing_count >= 225` 가 되면 증분(7일·1콜)으로 내려오고 retention 390 달력일(≈261 영업일)이
+225 아래로 떨어뜨리지 않는다. 그 사실을 `test_g302_3_converged_universe_costs_one_call_per_ticker`
+가 봉인한다(전 종목 수렴 → backfill 0건 · `fetch_days` 전량 7).
+
+첫 채움을 20:30 스케줄이 떠안으면 `quote_token_refresh.TIME_QUOTE_TOKEN_REFRESH`(20:45) 불변식
+창(20:35~)을 **1분 침범**한다. 그래서 첫 채움은 배포 후 21:35 이후에 수동 trigger
+(`POST /api/stock-master/daily/refresh?force=1`)로 한 번만 돌린다 — 코드에 특별 분기를 두지 않았다.
+
+### 판단 2건
+
+1. **`vcp_universe_tickers` 는 지웠다.** 남기면 write-only 집합이 되어 소스가 "지수만 깊이를
+   받는다" 는 거짓을 계속 말한다. 프로덕션 파일에서는 오히려 **줄어드는** diff 다.
+2. **상수 이름 `_DAILY_LOAD_VCP_BACKFILL_DAYS` 는 유지했다.** 정정하려면 `src/api/condition.py`
+   의 호출자 주석이 딸려 움직여 "프로덕션 변경은 `scanner.py` 한 파일" 제약을 깬다. 대신 정의
+   자리에 "이 상수는 VCP 전용이 아니다 — 적재 대상 전부의 목표 깊이다" 를 못 박았다.
+
+### 알려진 귀결 둘 (숨기지 않는다)
+
+- `existing_count < _DAILY_LOAD_INCREMENTAL_THRESHOLD(50) → 100일 단발` 분기는 225 > 50 인 한
+  **도달 불가**다. 신규 상장도 첫 밤에 225일 분할 backfill 을 탄다. 그 사실을 계약으로 드러낸
+  핀이 `test_g302_8b_deep_target_dominates_incremental_threshold` 다 — 다음 사람이 "100일 분기가
+  신규상장을 처리한다" 고 읽고 그 위에 무언가를 얹는 것을 막는다.
+- **상장 이력이 225 영업일보다 짧은 종목은 수렴하지 않는다.** 매일 밤 3콜을 쓰고 목표에 못 닿는다
+  (최근 상장 코호트 한정, 종목당 하루 2콜 초과분). 자본 위험 0 이고 관측 채널은
+  `[stock_master_daily_load_summary] elapsed_ms` 다. 구조적 시정(시도 마커 등)은 하지 않았다.
+
+### 의미 전환한 기존 가드 (값만 덮지 않았다)
+
+- `test_cycle172_vcp_universe_backfill.py` SCAN-3/3b(비지수 → 100일) · SCAN-5(두 종목 모두
+  backfill 로 변해 공허해질 뻔한 graceful 시나리오에 수렴 종목을 붙였다)
+- `test_cycle196_vcp_backfill_convergence.py` B-5a/B-5b("非VCP 불변")
+- `test_cycle206_daily_load_universe.py` UNIVERSE-5("vcp_universe = index 만")
+- `test_cycle273_daily_load_protected.py` C1("보호 종목은 backfill 밖") · G-273D-4(소스 봉인) +
+  적재 대상 집합을 재는 보조 단언 3건을 **분기 무관 종목 수**(`backfill + fetch`)로 바꿨다
+- `test_cycle263_daily_load_stub_filter.py` — 대역 기본 깊이를 수렴 상태로 올리고
+  `fetch_daily_candles_backfill` 격리 패치를 심었다. 종전에는 분기가 새면 **실 KIS 로 나가**
+  스위트가 157초 걸렸다(네트워크 hang). 이제 단언이 터진다.

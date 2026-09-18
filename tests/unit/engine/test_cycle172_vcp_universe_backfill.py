@@ -7,14 +7,17 @@ cycle299 (2026-09-17) — 임계 120 → 225 확장 (retention 390cal ≈ 261영
 아래 케이스들은 임계가 120 이든 225 든 같은 쪽으로 떨어지도록 골라져 있어 값 변경에
 무접촉이다 (count 100/50 은 어느 임계에서도 미달, 230 은 어느 임계에서도 충족).
 
-VCP universe (KOSPI200 ∪ KOSDAQ150) 종목 중 DB 깊이 < 임계 → 분할 fetch backfill.
-나머지 종목 = 현행 T-100 유지 (회귀 0).
+cycle302 (2026-09-18) — **backfill 대상이 지수에서 「적재 대상 전부」로 넓어졌다.**
+DB 깊이 < 임계인 적재 대상(index ∪ 시총·거래대금 자격 ∪ 보유·익일청산 보호)은
+지수 소속과 무관하게 분할 fetch backfill 을 탄다. 지수 종목의 행위는 불변이고
+(SCAN-1/2/4), 바뀐 것은 **비지수 종목이 더는 100일에 묶이지 않는다**는 것이다
+(SCAN-3/3b 의미 전환). 계약 정본 = `test_cycle302_backfill_scope_expansion.py`.
 
 회귀 가드 매트릭스:
-- SCAN-1 (HIGH): VCP universe (is_kospi200) DB < 임계 → fetch_daily_candles_backfill 분기
-- SCAN-2 (HIGH): VCP universe (is_kosdaq150) 동일 분기
-- SCAN-3 (HIGH): 비 VCP universe → 현행 100일 fetch_daily_candles 유지 (회귀)
-- SCAN-4: VCP universe DB >= 임계 → 증분 유지 (재 backfill 금지)
+- SCAN-1 (HIGH): 지수(is_kospi200) DB < 임계 → fetch_daily_candles_backfill 분기
+- SCAN-2 (HIGH): 지수(is_kosdaq150) 동일 분기
+- SCAN-3 (HIGH): 비지수 자격 종목도 DB < 임계면 같은 분기 (cycle302 의미 전환)
+- SCAN-4: DB >= 임계 → 증분 유지 (재 backfill 금지)
 - SCAN-5: graceful (backfill 실패 → 다음 ticker 진행)
 - SAFETY-1 (HIGH): 매매 무관 — risk/order_engine/realtime/auth import 0
 
@@ -134,11 +137,17 @@ async def test_scan2_kosdaq150_under_target_triggers_backfill():
 
 
 # ---------------------------------------------------------------------------
-# SCAN-3 (HIGH) — 비 VCP universe → 현행 100일 fetch_daily_candles 유지 (회귀)
+# SCAN-3 (HIGH) — 비지수 자격 종목도 같은 분기 (cycle302 의미 전환)
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
-async def test_scan3_non_vcp_keeps_100day():
-    """비 VCP universe (is_kospi200=False, is_kosdaq150=False) → 현행 100일 유지."""
+async def test_scan3_non_index_qualifier_takes_backfill():
+    """비지수(is_kospi200=False, is_kosdaq150=False) 자격 종목 → 같은 분할 backfill.
+
+    ⚠️ cycle302 **의미 전환**. 종전 단언은 "비 VCP 는 현행 100일 유지" 였고, 그
+    제한이 비지수 1,526 종목을 125행 안팎에 묶어 VCP 정배열 판정을 동전던지기로
+    만들었다(2026-09-18 실측). 단언을 약화한 것이 아니라 **반대 방향으로 강하게**
+    다시 걸었다 — 이제 100일 fetch 가 불리면 붉어진다.
+    """
     stock_master_rows = [
         {"ticker": "999999", "is_kospi200": False, "is_kosdaq150": False,
          "raw": {"hts_avls": "1000", "acml_tr_pbmn": "5000000000"}},  # 사이클 206 자격
@@ -172,17 +181,28 @@ async def test_scan3_non_vcp_keeps_100day():
     ), patch("asyncio.sleep", new=AsyncMock()):
         summary = await scanner._stock_master_daily_load_once()
 
-    assert backfill_mock.await_count == 0, "비 VCP universe 는 backfill 미사용"
-    assert 100 in captured_days, "비 VCP universe 현행 100일 fetch 유지 (회귀)"
+    assert backfill_mock.await_count == 1, (
+        "비지수 자격 종목도 DB < 임계면 분할 backfill 이다(cycle302). "
+        f"실측 backfill={backfill_mock.await_count} fetch_days={captured_days}"
+    )
+    assert 100 not in captured_days, (
+        "100일 단발 fetch 로 떨어지면 목표 깊이에 영영 못 닿는다. "
+        f"실측 fetch_days={captured_days}"
+    )
     assert summary["fetched"] == 1
 
 
 # ---------------------------------------------------------------------------
-# SCAN-3b — is_kospi200 키 부재 (기존 사이클 122 mock) → 비 VCP 취급 (회귀 0)
+# SCAN-3b — 지수 플래그 키 부재 row 도 자격만 통과하면 같은 깊이 (cycle302)
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
-async def test_scan3b_missing_flag_keys_treated_non_vcp():
-    """is_kospi200/is_kosdaq150 키 부재 row → 비 VCP 취급 (기존 테스트 회귀 0)."""
+async def test_scan3b_missing_flag_keys_still_take_backfill():
+    """is_kospi200/is_kosdaq150 키 부재 row → 비지수 취급이지만 깊이는 같다.
+
+    플래그 부재가 여전히 **비지수 취급**(falsy)이라는 사실은 불변이고, cycle302 는
+    그 사실이 backfill 깊이를 가르지 않게 만들었다. 적재 대상 판정은 자격
+    (`_is_daily_load_universe`)이 여전히 담당한다.
+    """
     stock_master_rows = [
         {"ticker": "005930",
          "raw": {"hts_avls": "1000", "acml_tr_pbmn": "5000000000"}},  # 사이클 206 자격
@@ -211,7 +231,10 @@ async def test_scan3b_missing_flag_keys_treated_non_vcp():
     ), patch("asyncio.sleep", new=AsyncMock()):
         summary = await scanner._stock_master_daily_load_once()
 
-    assert backfill_mock.await_count == 0, "플래그 키 부재 → 비 VCP 취급 (회귀 0)"
+    assert backfill_mock.await_count == 1, (
+        "플래그 키 부재 row 도 적재 대상이면 목표 깊이를 받는다(cycle302). "
+        f"실측 backfill={backfill_mock.await_count}"
+    )
     assert summary["fetched"] == 1
 
 
@@ -263,7 +286,12 @@ async def test_scan4_vcp_over_target_incremental():
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_scan5_backfill_failure_graceful():
-    """VCP backfill 실패 → 사이클 88 G-REJECT graceful (다음 ticker 진행)."""
+    """backfill 실패 → 사이클 88 G-REJECT graceful (다음 ticker 진행).
+
+    ⚠️ cycle302 로 backfill 대상이 넓어져, 두 번째 종목을 **수렴 상태**(DB >= 임계)로
+    둬야 증분 분기가 실제로 돈다. 그래야 이 테스트가 재려는 것("한 종목의 실패가
+    루프를 끊지 않는다")이 공허해지지 않는다.
+    """
     stock_master_rows = [
         {"ticker": "005930", "is_kospi200": True, "is_kosdaq150": False},
         {"ticker": "000660", "is_kospi200": False, "is_kosdaq150": False,
@@ -281,7 +309,7 @@ async def test_scan5_backfill_failure_graceful():
         new=AsyncMock(return_value=None),
     ), patch(
         "src.db.stock_master_daily.count_by_ticker",
-        new=AsyncMock(return_value=100),  # VCP < 225 / 비VCP < 50 모두 백필
+        new=AsyncMock(side_effect=[100, 230]),  # 005930 backfill / 000660 증분
     ), patch(
         "src.api.condition.fetch_daily_candles_backfill",
         new=AsyncMock(side_effect=backfill_fail),
@@ -294,9 +322,9 @@ async def test_scan5_backfill_failure_graceful():
     ), patch("asyncio.sleep", new=AsyncMock()):
         summary = await scanner._stock_master_daily_load_once()
 
-    # 005930 VCP backfill 실패 → failed++, 000660 비VCP 정상 진행
-    assert summary["failed"] >= 1, "VCP backfill 실패 → failed++ graceful"
-    assert summary["fetched"] >= 1, "다음 ticker (비VCP) 정상 진행"
+    # 005930 backfill 실패 → failed++, 000660(수렴 상태) 증분으로 정상 진행
+    assert summary["failed"] >= 1, "backfill 실패 → failed++ graceful"
+    assert summary["fetched"] >= 1, "다음 ticker 정상 진행"
 
 
 # ---------------------------------------------------------------------------

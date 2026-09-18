@@ -19,7 +19,9 @@ mcap500억&trade20억(BFB 자격 최저) 만 append.
       AND int(raw.get("acml_tr_pbmn") or 0) >= _DAILY_LOAD_MIN_TRADE_WON
     (비숫자 try/except → False, list_by_filter 답습)
 - 수집 루프: is_index or is_qualifier 게이트 → append.
-  is_index 만 vcp_universe_tickers.add (사이클 172/196 backfill 분기 정합).
+  (⚠️ 당시에는 `is_index` 만 `vcp_universe_tickers.add` 했다 — cycle302 가 그 집합을
+   없애고 backfill 깊이를 적재 대상 전부에 준다. 이 파일이 지키는 것은 **적재 대상
+   집합**이지 깊이가 아니다.)
 
 회귀 가드 매트릭스:
 - UNIVERSE-1 (HIGH): 비유니버스 제외 — index 2 + 자격 2 + 비유니버스 3 → total=4 (현재 7 → RED)
@@ -27,7 +29,7 @@ mcap500억&trade20억(BFB 자격 최저) 만 append.
 - UNIVERSE-3a: 자격 경계 (mcap=500억&trade=20억 포함)
 - UNIVERSE-3b: 자격 경계 하회 (mcap=499억 or trade=19.9억 제외)
 - UNIVERSE-4: 헬퍼 graceful (raw 부재/비숫자 → is_qualifier=False, but index 면 포함)
-- UNIVERSE-5 (HIGH): VCP backfill 불변 (vcp_universe_tickers = index 종목만)
+- UNIVERSE-5 (HIGH): 적재 대상 전부가 같은 backfill 깊이 (cycle302 의미 전환)
 - UNIVERSE-6 (AST): 수집 루프에 is_index or is_qualifier 게이트 (미래 전량 append 재발 차단)
 
 매매 안전성:
@@ -38,7 +40,7 @@ mcap500억&trade20억(BFB 자격 최저) 만 append.
 
 영속 의무:
 - 사이클 122 백필/증분 분기 영속 (비유니버스 제외 후에도 index/자격 종목은 현행 유지)
-- 사이클 172/196 VCP backfill 분기 영속 (is_index 만 vcp_universe)
+- 사이클 172/196 분할 backfill 분기 영속 (대상은 cycle302 가 적재 대상 전부로 넓혔다)
 - 사이클 88 G-REJECT graceful
 """
 
@@ -262,17 +264,20 @@ async def test_universe4_helper_graceful():
 
 
 # ---------------------------------------------------------------------------
-# UNIVERSE-5 (HIGH) — VCP backfill 불변 (vcp_universe = index 종목만)
+# UNIVERSE-5 (HIGH) — 적재 대상이면 지수·자격 가리지 않고 같은 깊이 (cycle302)
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
-async def test_universe5_vcp_backfill_index_only():
-    """자격(비-index) 종목은 VCP backfill 미사용 (fetch_daily_candles 100일),
-    index 종목만 DB<120 시 fetch_daily_candles_backfill (사이클 172/196 정합).
+async def test_universe5_backfill_covers_whole_load_target():
+    """적재 대상 전부가 DB<225 시 fetch_daily_candles_backfill 을 탄다.
+
+    ⚠️ cycle302 **의미 전환**. 종전 계약은 "index 종목만 backfill, 자격 종목은 100일"
+    이었다. 이 파일이 지키는 진짜 불변식은 **적재 대상 집합**(index ∪ 자격 ∪ 보호)
+    이고 그건 UNIVERSE-1~4·6 이 계속 잰다 — 깊이 축은 cycle302 가 분리해 넓혔다.
     """
     rows = [
-        # index — VCP backfill 대상 (DB < 120)
+        # index — 종전에도 backfill 대상
         _row("005930", is_kospi200=True),
-        # 자격(비-index) — 현행 100일 백필 (DB < 50)
+        # 자격(비-index) — cycle302 로 같은 분기에 편입
         _row("000660", hts_avls=str(_MCAP_EOK_MIN + 100),
              acml_tr_pbmn=str(_TRADE_WON_MIN + 5_000_000_000)),
     ]
@@ -291,14 +296,13 @@ async def test_universe5_vcp_backfill_index_only():
     with p1, p2, p3, sleep_p:
         summary = await scanner._stock_master_daily_load_once()
 
-    # index 종목 → fetch_daily_candles_backfill 1회 (VCP)
-    assert backfill_mock.await_count == 1, (
-        "index 종목만 VCP backfill (fetch_daily_candles_backfill). "
+    # 적재 대상 2종목 전부 → fetch_daily_candles_backfill
+    assert backfill_mock.await_count == 2, (
+        "적재 대상이면 지수·자격 가리지 않고 분할 backfill 이다(cycle302). "
         f"실제 backfill 호출={backfill_mock.await_count}"
     )
-    # 자격(비-index) 종목 → 현행 100일 fetch (VCP backfill 아님)
-    assert 100 in captured_days, (
-        "자격(비-index) 종목은 현행 100일 fetch (사이클 122 영속). "
+    assert captured_days == [], (
+        "단발 fetch 로 새는 종목이 있으면 그 종목은 목표 깊이에 못 닿는다. "
         f"실제 captured_days={captured_days}"
     )
     assert summary["total"] == 2

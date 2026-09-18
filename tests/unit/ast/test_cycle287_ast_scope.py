@@ -92,12 +92,12 @@ _BASE_SHA = {
         "e8614235cc0bea638f8c349b2f6910c94f5f9a5b849f5d65bef0583f959d81c9",
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
-    # 🔁 cycle299(2026-09-17) 재핀 — 사용자 승인 일봉 backfill 창 확대
-    #    (`_DAILY_LOAD_VCP_BACKFILL_DAYS` 120 → 225 상수 1줄 + 근거 주석 4줄).
-    #    값만 옮긴다 — 단언은 그대로다. 구 값은 cycle283 기준선(079272e7…)이고, 사이클 안에서 목표를 220 → 225 로
-    #    다시 올리며 한 번 더 옮겼다.
+    # 🔁 cycle302(2026-09-18) 재핀 — 사용자 승인 일봉 backfill **대상** 확대
+    #    (분기에서 지수 소속 판정 제거 · `vcp_universe_tickers` 집합 소멸.
+    #    목표 깊이 상수는 불변). 값만 옮긴다 — 단언은 그대로다.
+    #    구 값은 cycle299 기준선(3b7366cc…)이다.
     "src/engine/scanner.py":
-        "3b7366cc77c3f41f1e839454193f45fa405cfeab3eff59c6c446a9470dcb6c8f",
+        "95cbb103a38821bb3b68d267a3662094b192fa55ad6071fa8dc4a63726e1c942",
     "src/engine/strategy_registry.py":
         "d794696e54ffdc36efa6df917879d780e86bc1f373bb3b5d8dcbc0beac8cef8b",
     # 8영역 — realtime 전부
@@ -314,8 +314,21 @@ _SRC_TREE_FILES = 153
 #: `5b324b34335f922f82b848ae2313e08660bde75c02d12432867ed224e9709228` 로 그대로다.
 #: cycle301 착지(= 이 보강 착수) 값은
 #: `2a7302c214888b79661a660419bcbaadfb71d2ae2d82eebefb788e04e58a54a1` 였다.
+#: 🔁 **cycle302(2026-09-18, 사용자 명시 승인) 재핀 — 일봉 backfill 대상 확대.**
+#: 움직인 파일 **1** = `engine/scanner.py`(8영역). backfill 분기에서 지수 소속 판정을
+#: 빼 적재 대상(index ∪ 시총·거래대금 자격 ∪ 보유·익일청산 보호) 전부가 같은 목표
+#: 깊이를 받게 했고, 그 판정에만 쓰이던 `vcp_universe_tickers` 집합을 지웠다.
+#: 목표 깊이 상수(225)·retention(390cal)·적재 대상 집합 구성은 **불변**이다.
+#: 같은 주석 블록에서 워크리스트에 파킹돼 있던 cycle300 후속 ②(인용 줄번호
+#: `vcp_breakout.py:162-164` → `:309-314` + "VCP 실사용 100일" 이 `daily_fetch_depth_mode`
+#: 로 바뀐 사실)도 함께 처리했다 — "다음에 `scanner.py` 를 승인받아 만질 때" 가 그 카드의
+#: 착지 조건이었다. 주석 3줄이고 AST 는 불변이다.
+#: 파일 수 **153 불변**(신규 파일 0 — 이 사이클의 신규는 테스트 1파일뿐).
+#: 8영역 sha 핀 13곳과 이 digest 를 **한 값으로 동시에** 옮겼다.
+#: cycle301 보강 착지(= cycle302 착수) 값은
+#: `b25ba89bbbca1953be417f8d899f312c62f59c46cf80a96f7b4f400d50b6fe11` 였다.
 _SRC_TREE_DIGEST = (
-    "b25ba89bbbca1953be417f8d899f312c62f59c46cf80a96f7b4f400d50b6fe11"
+    "2b5d2a9936f7edd36ae360f851ce6856386a22341e07a5ca5dab71f650a72419"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

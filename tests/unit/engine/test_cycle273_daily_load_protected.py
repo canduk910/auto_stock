@@ -20,7 +20,11 @@
 
 ## 계약 (spec §3)
 
-C1 `vcp_universe_tickers` 에 보호 종목을 넣지 않는다(120일 분할 backfill 금지)
+C1 ⚠️ **cycle302 에서 의미가 전환됐다.** 원문은 "`vcp_universe_tickers` 에 보호
+   종목을 넣지 않는다(분할 backfill 금지)" 였다. 이제 분할 backfill 은 지수 전용이
+   아니라 **적재 대상 전부**의 목표 깊이라, 보호 종목도 같은 깊이를 받는다.
+   이 파일이 계속 지키는 것은 "보호 종목이 적재 대상에 든다" 이고, 깊이 축의
+   계약은 `test_cycle302_backfill_scope_expansion.py` 가 정본이다.
 C2 판정 실패 = **fail-open**(현행 집합 유지)
 C3 `latest >= today` 신선도 skip 은 **우회하지 않는다**
 C4 6자리 숫자 ticker 만 통과
@@ -139,7 +143,8 @@ async def test_g273d_1_held_non_qualifier_is_loaded(held):
         "보유 종목은 유니버스 자격과 무관하게 적재 후보에 든다. "
         f"실측 total={summary['total']} (현행 1 = RED)"
     )
-    assert fetch.await_count == 2
+    # cycle302 — 분기가 아니라 **종목 수**를 잰다(적재 대상이면 분할 backfill 을 탄다).
+    assert backfill.await_count + fetch.await_count == 2
 
 
 async def test_g273d_1b_pending_next_day_clear_is_loaded(held):
@@ -156,10 +161,17 @@ async def test_g273d_1b_pending_next_day_clear_is_loaded(held):
 # C1 — VCP backfill 오염 금지
 # ===========================================================================
 
-async def test_c1_protected_never_enters_vcp_universe(held):
-    """보호 종목은 **120일 분할 backfill** 대상이 아니다.
+async def test_c1_protected_takes_same_backfill_depth(held):
+    """보호 종목도 적재 대상이므로 **같은 목표 깊이**를 받는다.
 
-    보호의 목적은 '오늘 봉' 이지 '220일 이력' 이 아니다 — 넣으면 KIS 3회가 샌다.
+    ⚠️ cycle302 **의미 전환**. 종전 C1 은 "보호의 목적은 오늘 봉이지 이력이 아니다 —
+    넣으면 KIS 3회가 샌다" 였고, 그건 분할 backfill 이 지수 전용이던 시절의 비용
+    논증이었다. 이제 적재 대상 전부가 같은 깊이를 갖고, 보유 종목은 오히려 멀티데이
+    손절·트레일링 복구(`_apply_high_since_buy_from_candles`)가 일봉을 읽는 쪽이라
+    얕을 이유가 없다. 비용은 **1회성**이다 — 깊이에 닿으면 증분 1콜로 내려온다
+    (가드 `test_cycle302_backfill_scope_expansion.py::G-302-3`).
+
+    🔴 이 테스트가 계속 지키는 것 = **보호 종목이 적재 대상에 든다**(`total == 1`).
     """
     held(positions=["004690"])
     rows = [_non_qualifier("004690")]
@@ -169,10 +181,10 @@ async def test_c1_protected_never_enters_vcp_universe(held):
         summary = await scanner._stock_master_daily_load_once()
 
     assert summary["total"] == 1
-    assert backfill.await_count == 0, (
-        f"보호 종목이 VCP backfill 로 샜다 — 호출 {backfill.await_count}회"
+    assert backfill.await_count == 1, (
+        f"보호 종목이 목표 깊이를 못 받았다 — backfill 호출 {backfill.await_count}회"
     )
-    assert fetch.await_count == 1
+    assert fetch.await_count == 0
 
 
 # ===========================================================================
@@ -259,7 +271,8 @@ async def test_c5b_protected_already_in_universe_is_not_duplicated(held):
     with p1, p2, p3, sl:
         summary = await scanner._stock_master_daily_load_once()
     assert summary["total"] == 1, f"중복 append — 실측 {summary['total']}"
-    assert fetch.await_count == 1
+    # cycle302 — 분기 무관 종목 수 단언(중복 호출 금지가 이 테스트의 주제다).
+    assert backfill.await_count + fetch.await_count == 1
 
 
 # ===========================================================================
@@ -280,7 +293,7 @@ async def test_g273d_2_protected_survives_list_all_failure(held):
     assert summary["total"] == 1, (
         f"list_all 실패 시 보호 종목이 사라졌다 — 실측 {summary['total']}"
     )
-    assert fetch.await_count == 1
+    assert backfill.await_count + fetch.await_count == 1
 
 
 # ===========================================================================
@@ -353,6 +366,11 @@ def test_g273d_4_ast_gate_has_three_branches():
     assert "_collect_protected_tickers_for_scanner" in body, (
         "보호 집합 헬퍼를 쓰지 않는다 — 새 판정을 발명하지 말고 사이클 32 R4 헬퍼를 재사용한다"
     )
-    assert "vcp_universe_tickers.add" in body
-    # VCP 편입은 여전히 `is_index` 조건 아래에서만 (C1 의 소스 레벨 봉인)
-    assert body.count("vcp_universe_tickers.add") == 1
+    # cycle302 — 지수 전용 backfill 집합(`vcp_universe_tickers`)은 소멸했다.
+    # 깊이 축의 소스 레벨 봉인은 `test_cycle302_backfill_scope_expansion.py::G-302-6`
+    # 으로 옮겼다(그쪽이 "집합이 남아 있으면 붉어진다" 를 잰다). 여기서는 이 사이클의
+    # 주제인 **적재 대상 게이트 3갈래**만 계속 지킨다.
+    assert "vcp_universe_tickers" not in body, (
+        "지수 전용 backfill 집합은 cycle302 에서 사라졌다 — 되살리면 "
+        "'지수만 깊이를 받는다' 는 거짓이 소스로 돌아온다"
+    )

@@ -227,12 +227,18 @@ async def _run_daily_facade(
 class _LoadHarness:
     """`_stock_master_daily_load_once` 통합 구동 대역 (KIS/DB 전량 격리)."""
 
-    def __init__(self, *, tickers=("005930",), candles_fn=None, latest=None, count=100,
+    def __init__(self, *, tickers=("005930",), candles_fn=None, latest=None, count=None,
                  index_universe=False, backfill_fn=None, force=False):
         self.tickers = tuple(tickers)
         self.candles_fn = candles_fn
         self.latest = latest
-        self.count = count
+        # cycle302 — 기본 깊이는 **수렴 상태**(목표 이상)다. backfill 대상이 적재 대상
+        # 전부로 넓어져, 종전 기본값 100 은 이제 분할 backfill 분기로 샌다. 이 클래스의
+        # 주제는 오늘봉 필터이지 fetch 분기가 아니므로 기본은 증분 경로로 두고,
+        # backfill 축은 아래 `backfill_fn` 으로 **명시 진입**한다(M29 의 설계 그대로).
+        self.count = (
+            scanner._DAILY_LOAD_VCP_BACKFILL_DAYS + 10 if count is None else count
+        )
         # 사이클 263 검증(M29) — VCP 220일 backfill 분기(`fetch_daily_candles_backfill`)
         # 도 필터의 **합류점 아래**인지 재는 축. `backfill_fn` 을 주면 증분 분기
         # (`fetch_daily_candles`) 호출은 즉시 AssertionError = 분기 오인 검출.
@@ -719,8 +725,11 @@ async def test_C6_cutoff_read_before_universe_paging(caplog):
                                       new=AsyncMock(side_effect=_slow_list_all)))
             stack.enter_context(patch("src.db.stock_master_daily.max_bas_dd",
                                       new=AsyncMock(return_value=_D1)))
-            stack.enter_context(patch("src.db.stock_master_daily.count_by_ticker",
-                                      new=AsyncMock(return_value=100)))
+            # cycle302 — 수렴 상태로 둬 증분 분기를 탄다(이 테스트의 주제는 판정 시각이다).
+            stack.enter_context(patch(
+                "src.db.stock_master_daily.count_by_ticker",
+                new=AsyncMock(
+                    return_value=scanner._DAILY_LOAD_VCP_BACKFILL_DAYS + 10)))
             stack.enter_context(patch("src.api.condition.fetch_daily_candles",
                                       new=AsyncMock(side_effect=_fetch)))
             stack.enter_context(patch("src.db.stock_master_daily.upsert_batch", new=up))
@@ -929,8 +938,8 @@ async def test_E3_vcp_backfill_branch_is_filtered_too():
     h = _LoadHarness(
         tickers=("005930",),
         latest=_D1,
-        count=10,                # < 120 → VCP backfill 분기
-        index_universe=True,     # is_kospi200=True → VCP universe
+        count=10,                # < 225 → 분할 backfill 분기 (cycle302: 대상 무관)
+        index_universe=True,     # 지수 편입 (cycle302 이후 분기에는 영향 없다)
         backfill_fn=_backfill,   # 증분 fetch 가 불리면 AssertionError (분기 오인 검출)
     )
     summary = await h.run()
@@ -1201,6 +1210,19 @@ def _sim_partial(d: date) -> dict:
     return _bar(d, close=_sim_close(d), vol=partial_vol)
 
 
+def _converged_base(n: int = 240) -> list[dict]:
+    """**수렴 상태**(목표 깊이 이상)를 만드는 과거 채움 봉 — 전부 `_SESSIONS` 이전.
+
+    cycle302 — 분할 backfill 대상이 적재 대상 전부로 넓어져, 얕은 대역은
+    `existing_count < 225` 로 backfill 분기에 들어간다. 아래 G1/G2 시뮬의 주제는
+    오늘봉 필터와 **증분 7일 보정 창**이라 그 분기가 전제이지 대상이 아니다.
+    (`_FakeDailyStore.count_by_ticker` 는 행 수이므로 여기서 깊이를 준다.)
+    """
+    first = date(2026, 9, 1) - timedelta(days=260)   # 2025-12-15
+    return [_bar(first + timedelta(days=i), close=9_000 + i, vol=500_000 + i)
+            for i in range(n)]
+
+
 def _sim_kis_response(days: int) -> list[dict]:
     """KIS 대역 (cycle283 모델) — 하루를 **세 구간**으로 나눈다.
 
@@ -1242,6 +1264,7 @@ async def test_G1_intraday_redeploy_hole_is_closed():
     구멍을 못 만든다)는 불변이며, 오히려 이제 **거래량 축까지** 검사한다.
     """
     store = _FakeDailyStore()
+    store.seed("005930", _converged_base())   # cycle302 — 증분 분기 전제
     store.seed("005930", [_sim_real(d) for d in _SESSIONS if d <= date(2026, 9, 7)])
     ticker = "005930"
     fetch_log: list[str] = []
@@ -1261,6 +1284,12 @@ async def test_G1_intraday_redeploy_hole_is_closed():
                                   new=AsyncMock(side_effect=store.count_by_ticker)))
         stack.enter_context(patch("src.api.condition.fetch_daily_candles",
                                   new=AsyncMock(side_effect=_fetch)))
+        # cycle302 — 대역 격리. 분기가 backfill 로 새면 **네트워크가 아니라 단언**이
+        # 터져야 한다(패치가 없으면 실 KIS 로 나가 스위트가 157초 hang 했다).
+        stack.enter_context(patch(
+            "src.api.condition.fetch_daily_candles_backfill",
+            new=AsyncMock(side_effect=AssertionError(
+                "증분 분기를 기대했는데 분할 backfill 이 불렸다 — 대역 깊이 전제 확인"))))
         stack.enter_context(patch("src.db.stock_master_daily.upsert_batch",
                                   new=AsyncMock(side_effect=store.upsert_batch)))
         stack.enter_context(patch("asyncio.sleep", new=AsyncMock()))
@@ -1307,13 +1336,11 @@ async def test_G2_three_day_convergence_simulation():
 
     ticker = "005930"
     store = _FakeDailyStore()
-    # 과거 확정봉 55행 — `count_by_ticker >= _DAILY_LOAD_INCREMENTAL_THRESHOLD(50)` 을
-    # 만족시켜 **증분 분기**(`fetch_days=7`)로 돌게 한다. 프로덕션의 평시 상태이고,
+    # 과거 확정봉 240행 — `count_by_ticker >= _DAILY_LOAD_VCP_BACKFILL_DAYS(225)` 를
+    # 만족시켜 **증분 분기**(`fetch_days=7`)로 돌게 한다. 프로덕션의 수렴 상태이고,
     # 아래 "보정 창 존치" 단언이 재려는 대상이 바로 그 7일 창이다.
-    store.seed(ticker, [
-        _bar(date(2026, 6, 1) + timedelta(days=i), close=9_000 + i, vol=500_000 + i)
-        for i in range(55)
-    ])
+    # (cycle302 이전에는 55행으로 `>= 50` 만 넘기면 됐다 — 이제 목표 깊이가 경계다.)
+    store.seed(ticker, _converged_base())
     # 배포 직전 상태 = 09-04 껍데기가 헤드 (09-04 아침 immediate 가 쓴 것)
     store.seed(ticker, [_sim_real(d) for d in (date(2026, 9, 2), date(2026, 9, 3))])
     store.seed(ticker, [_stub_bar(date(2026, 9, 4), _sim_close(date(2026, 9, 3)))])
@@ -1338,6 +1365,12 @@ async def test_G2_three_day_convergence_simulation():
                                   new=AsyncMock(side_effect=store.count_by_ticker)))
         stack.enter_context(patch("src.api.condition.fetch_daily_candles",
                                   new=AsyncMock(side_effect=_fetch)))
+        # cycle302 — 대역 격리. 분기가 backfill 로 새면 **네트워크가 아니라 단언**이
+        # 터져야 한다(패치가 없으면 실 KIS 로 나가 스위트가 157초 hang 했다).
+        stack.enter_context(patch(
+            "src.api.condition.fetch_daily_candles_backfill",
+            new=AsyncMock(side_effect=AssertionError(
+                "증분 분기를 기대했는데 분할 backfill 이 불렸다 — 대역 깊이 전제 확인"))))
         stack.enter_context(patch("src.db.stock_master_daily.upsert_batch",
                                   new=AsyncMock(side_effect=store.upsert_batch)))
         stack.enter_context(patch("asyncio.sleep", new=AsyncMock()))

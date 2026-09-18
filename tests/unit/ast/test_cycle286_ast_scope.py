@@ -74,12 +74,12 @@ _BASE_SHA = {
         "e8614235cc0bea638f8c349b2f6910c94f5f9a5b849f5d65bef0583f959d81c9",
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
-    # 🔁 cycle299(2026-09-17) 재핀 — 사용자 승인 일봉 backfill 창 확대
-    #    (`_DAILY_LOAD_VCP_BACKFILL_DAYS` 120 → 225 상수 1줄 + 근거 주석 4줄).
-    #    값만 옮긴다 — 단언은 그대로다. 구 값은 cycle283 기준선(079272e7…)이고, 사이클 안에서 목표를 220 → 225 로
-    #    다시 올리며 한 번 더 옮겼다.
+    # 🔁 cycle302(2026-09-18) 재핀 — 사용자 승인 일봉 backfill **대상** 확대
+    #    (분기에서 지수 소속 판정 제거 · `vcp_universe_tickers` 집합 소멸.
+    #    목표 깊이 상수는 불변). 값만 옮긴다 — 단언은 그대로다.
+    #    구 값은 cycle299 기준선(3b7366cc…)이다.
     "src/engine/scanner.py":
-        "3b7366cc77c3f41f1e839454193f45fa405cfeab3eff59c6c446a9470dcb6c8f",
+        "95cbb103a38821bb3b68d267a3662094b192fa55ad6071fa8dc4a63726e1c942",
     "src/engine/strategy_registry.py":
         "d794696e54ffdc36efa6df917879d780e86bc1f373bb3b5d8dcbc0beac8cef8b",
     # 8영역 — 주문 API

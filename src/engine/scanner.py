@@ -2801,7 +2801,14 @@ _DAILY_LOAD_RATE_LIMIT_SLEEP_SECS = 0.05  # 50ms (사이클 83/91/97/107 답습)
 _DAILY_LOAD_INCREMENTAL_THRESHOLD = 50  # 50일 이상 적재된 ticker 는 증분 적재 (Q3=B)
 # 사이클 299 — retention 390cal≈261영업일 보유 → target 225(36영업일 마진). 225 인 이유 =
 # 실효 장기선이 정확히 200 이 되는 깊이다(effective_ema_long = min(ema_long, 보유 − 20 − 5)).
-# VCP 전략 실제 사용 100일 (vcp_breakout.py:162-164). DB 깊이 < 225 이면 분할 backfill.
+# DB 깊이 < 225 이면 분할 backfill. VCP 가 실제로 읽는 깊이는 전략 파라미터
+# `daily_fetch_depth_mode` 가 정한다(`vcp_breakout.py:309-314` — `"cap100"`=100봉 /
+# `"full"`=`ema_long + base_max + 10`, cycle300). 운영은 `"full"` 이다.
+#
+# 🔴 사이클 302 — **이 상수는 VCP 전용이 아니다.** 일봉 적재 대상(index ∪ 시총·거래대금
+# 자격 ∪ 보유·익일청산 보호) **전부**의 목표 깊이다. 이름의 `VCP` 는 이 깊이를 처음 요구한
+# 전략의 흔적일 뿐이고, 읽는 쪽은 "적재 대상이면 누구나 이 깊이까지 채운다" 로 읽는다.
+# (이름 정정은 `src/api/condition.py` 의 호출자 주석까지 같이 움직여야 해서 후속으로 둔다.)
 _DAILY_LOAD_VCP_BACKFILL_DAYS = 225
 
 # 사이클 206 — 일봉 적재를 유니버스(index ∪ 시총/거래대금 자격) 로 한정 (당시 Supabase 용량).
@@ -2918,9 +2925,6 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
     # stock_master 전체 ticker 조회 (사이클 106 lifecycle 의존성)
     # offset 페이징 — limit=1000 단위 (Supabase 기본 한도)
     all_tickers: list[str] = []
-    # 사이클 172 — VCP universe (KOSPI200 ∪ KOSDAQ150) ticker set (220일 backfill 분기용).
-    # list_all 의 .select("*") 가 is_kospi200/is_kosdaq150 컬럼 포함 (사이클 153) → 별도 쿼리 0건.
-    vcp_universe_tickers: set[str] = set()
 
     # 사이클 273 D5 — 보유/익일청산 종목 강제 포함 (spec §3). "지우는 쪽(16:15 purge)은
     # 보호하는데 채우는 쪽(16:00 load)은 보호하지 않는다" 비대칭 시정 — 자격을 못 넘긴
@@ -2957,21 +2961,20 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
             ticker = row.get("ticker", "")
             if not (ticker and len(ticker) == 6 and ticker.isdigit()):
                 continue
-            # 사이클 172 — VCP universe = is_kospi200 OR is_kosdaq150
-            # (플래그 키 부재 mock/legacy row 는 falsy → 비 VCP 취급, 회귀 0)
+            # 지수 편입 = is_kospi200 OR is_kosdaq150 (플래그 키 부재 mock/legacy row 는
+            # falsy → 비지수 취급). 사이클 153 의 list_all `.select("*")` 가 두 컬럼을
+            # 이미 실어 오므로 별도 쿼리 0건이다. 🔴 사이클 302 이후 이 판정은 **적재
+            # 대상 여부**에만 쓴다 — backfill 깊이는 지수 소속과 무관하다.
             is_index = bool(row.get("is_kospi200") or row.get("is_kosdaq150"))
             # 사이클 206 — 유니버스 한정 적재: index(donchian/VCP) ∪
             # mcap500억&trade20억(VB/LTV/BFB 자격, BFB 최저 정합). 비유니버스는
             # 전략 스캔 대상이 아니므로 일봉 캐시 불요 (Supabase 용량 낭비 차단).
             # 재진입(유니버스 편입) 시 다음 load 가 backfill 로 자동 채움.
             is_qualifier = _is_daily_load_universe(row)
-            # 사이클 273 D5 — 보호 종목은 자격과 무관하게 강제 포함(C1: vcp_universe_tickers
-            # 에는 넣지 않는다 — 120일 분할 backfill 은 index 전용, 보호 목적은 '오늘 봉').
+            # 사이클 273 D5 — 보호 종목은 자격과 무관하게 강제 포함.
             is_protected = ticker in protected_tickers
             if is_index or is_qualifier or is_protected:
                 all_tickers.append(ticker)
-                if is_index:
-                    vcp_universe_tickers.add(ticker)
                 if is_protected and not (is_index or is_qualifier):
                     forced_in_universe_count += 1
         if len(rows) < PAGE_SIZE:
@@ -3045,15 +3048,26 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
         except Exception:
             existing_count = 0
 
-        # 사이클 299 — VCP universe (KOSPI200 ∪ KOSDAQ150) DB < 225 → 225일 backfill 분기.
-        # 분할 fetch (날짜 윈도우 ×3). 나머지 종목은 현행 100일/증분 유지 (회귀 0).
-        is_vcp_universe = ticker in vcp_universe_tickers
-        use_vcp_backfill = (
-            is_vcp_universe and existing_count < _DAILY_LOAD_VCP_BACKFILL_DAYS
-        )
+        # 사이클 302 — **적재 대상이면 누구나** DB < 225 일 때 225일 분할 backfill(날짜
+        # 윈도우 ×3)을 탄다. 종전에는 지수(KOSPI200 ∪ KOSDAQ150) 종목만 이 분기에 들어
+        # 비지수 1,526 종목이 전부 125행 안팎에 머물렀고, 그 깊이에서는
+        # `effective_ema_long = min(ema_long, 보유 − 20 − 5)` 가 74~121 로 잡혀 VCP 의
+        # 중기↔장기 간격이 10 안팎이 된다(정배열 판정이 동전던지기, 2026-09-18 실측).
+        #
+        # 🔴 **비용은 1회성이다.** `existing_count >= 225` 가 되면 아래 증분(7일·1콜)
+        # 분기로 넘어가고 retention 390 달력일(≈261 영업일)이 225 아래로 떨어뜨리지
+        # 않으므로 수렴 상태가 유지된다 — 정상 운영의 KIS 호출량은 종목당 1콜 그대로다
+        # (가드 `test_cycle302_backfill_scope_expansion.py::G-302-3`). 첫 채움만
+        # 종목당 3콜이라 20:30 정기 실행이 아니라 수동 trigger 로 돌린다
+        # (`TIME_QUOTE_TOKEN_REFRESH`(20:45) 불변식 창이 20:35 부터다).
+        #
+        # ⚠️ 아래 `< _DAILY_LOAD_INCREMENTAL_THRESHOLD(50)` 분기는 225 > 50 인 한
+        # **도달 불가**한 구조적 폴백이다(신규 상장도 첫 밤에 225일을 탄다). 목표 깊이를
+        # 50 아래로 되돌리면 되살아난다 — 가드 G-302-8b 가 그 관계를 핀한다.
+        use_deep_backfill = existing_count < _DAILY_LOAD_VCP_BACKFILL_DAYS
 
-        if use_vcp_backfill:
-            fetch_days = _DAILY_LOAD_VCP_BACKFILL_DAYS  # VCP 225일 backfill
+        if use_deep_backfill:
+            fetch_days = _DAILY_LOAD_VCP_BACKFILL_DAYS  # 목표 깊이 225일 분할 backfill
             backfill_count += 1
         elif existing_count < _DAILY_LOAD_INCREMENTAL_THRESHOLD:
             fetch_days = _DAILY_LOAD_FETCH_DAYS  # 백필 모드 (T-100일)
@@ -3062,10 +3076,11 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
             fetch_days = 7  # 증분 모드 (T-7일, 영업일 마진)
             incremental_count += 1
 
-        # 3) KIS 호출 — VCP backfill 은 분할 fetch (사이클 172), 그 외 fetch_daily_candles (사이클 14)
+        # 3) KIS 호출 — 목표 깊이 backfill 은 분할 fetch (사이클 172),
+        #    그 외 fetch_daily_candles (사이클 14)
         try:
             from src.api import condition as _cond
-            if use_vcp_backfill:
+            if use_deep_backfill:
                 candles = await _cond.fetch_daily_candles_backfill(
                     ticker, total_days=_DAILY_LOAD_VCP_BACKFILL_DAYS
                 )
@@ -3074,8 +3089,8 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
         except Exception:
             # 사이클 88 G-REJECT graceful — 다음 ticker 진행
             logger.exception(
-                "[stock_master_daily_load] KIS 일봉 호출 실패 graceful ticker=%s vcp=%s",
-                ticker, use_vcp_backfill,
+                "[stock_master_daily_load] KIS 일봉 호출 실패 graceful ticker=%s deep=%s",
+                ticker, use_deep_backfill,
             )
             summary["failed"] += 1
             # Rate Limit sleep 보장 (실패 시도 자체로 KIS 호출 발생)

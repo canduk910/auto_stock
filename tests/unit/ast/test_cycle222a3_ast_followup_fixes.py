@@ -468,17 +468,17 @@ _ALLOWED = {"src/engine/risk.py", "src/realtime/handler.py"}
 #    `src/engine/order_engine.py` + `src/api/order.py`(docstring 만, 본문 byte
 #    동일). 자매 가드 네 곳 전부 같은 값. TODO(cycle287 커밋 후): 아래 항목을 **삭제**한다.
 _APPROVED_CONTENT_SHA: dict[str, str] = {
-    # ✅ 2026-09-17 (cycle299) 재핀 — 일봉 보유·backfill 창 확대. 사용자 명시 8영역
-    #    승인, 범위 = `src/engine/scanner.py` **단독**
-    #    (`_DAILY_LOAD_VCP_BACKFILL_DAYS` 120 → 225 상수 1줄 + 근거 주석 4줄).
-    #    나머지 7영역과 `scheduler.py` 는 diff 0 이다. 같은 사이클의 나머지
-    #    프로덕션 변경 2파일(`src/db/stock_master_daily.py` 의
-    #    `DAILY_RETENTION_DAYS` 230 → 390 · `src/api/condition.py` docstring)은
-    #    8영역 **밖**이라 이 dict 대상이 아니다.
+    # ✅ 2026-09-18 (cycle302) 재핀 — 일봉 backfill 의 **대상**을 지수에서 적재 대상
+    #    전부로 확대. 사용자 명시 8영역 승인("전부 담는게 좋을듯한데? VCP평가대상이
+    #    어떻게 바뀔지 모르잖아"), 범위 = `src/engine/scanner.py` **단독**이고 이
+    #    사이클의 프로덕션 변경은 이 한 파일뿐이다. 바뀐 것 = backfill 분기에서 지수
+    #    소속 판정 제거 + 그 판정에만 쓰이던 `vcp_universe_tickers` 집합 소멸.
+    #    목표 깊이 상수(`_DAILY_LOAD_VCP_BACKFILL_DAYS`=225)는 그대로다.
+    #    나머지 7영역과 `scheduler.py` 는 diff 0.
     #    자매 가드 **네 곳 전부** 같은 값(`test_g3_9b` 계약).
-    #    TODO(cycle299 커밋 후): 이 항목을 **삭제**한다.
+    #    TODO(cycle302 커밋 후): 이 항목을 **삭제**한다.
     "src/engine/scanner.py":
-        "3b7366cc77c3f41f1e839454193f45fa405cfeab3eff59c6c446a9470dcb6c8f",
+        "95cbb103a38821bb3b68d267a3662094b192fa55ad6071fa8dc4a63726e1c942",
     "src/engine/order_engine.py":
         "f13519d6429c5b79698fe2607f5eb76262f803a16fb8d58addd1558cfcf264c7",
     "src/api/order.py":

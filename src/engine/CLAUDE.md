@@ -145,20 +145,24 @@ run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, recor
 - `is_protected` = 공통 헬퍼 `_collect_protected_tickers_for_scanner()` 가 돌려준 보유·익일청산 종목 중 **6자리 숫자 ticker 만**(진입 게이트 비대칭 규약과 동일 — ETF·신주인수권·오염 문자열 제외). 헬퍼 예외는 **fail-open**(`protected_tickers = set()` 로 index/qualifier 만 진행).
 - 🔴 근거 = purge(`_evaluate_universe_guard` 계열)는 보유·익일청산 종목을 절대 보호하는데 load 가 자격 미달 종목을 건너뛰면 "지우는 쪽은 보호, 채우는 쪽은 방치" 가 되어 그날 봉이 영구 결손된다(004690 삼천리 실사례).
 - 페이징 루프가 끝난 뒤 `protected_tickers - set(all_tickers)` 차집합을 `all_tickers` 에 append 한다(어느 페이지에도 안 실린 보호 종목까지 커버).
-- 🔴 `vcp_universe_tickers` 에는 넣지 않는다(분할 backfill 은 index 전용이고 보호 목적은 "오늘 봉 결손 방지" 로 국한한다).
+- 보호 종목도 분할 backfill 대상이다 — 깊이 축은 이 게이트를 통과한 **적재 대상 전부**에 똑같이 적용된다(아래 절).
 - 관측 `[daily_load_protected_forced] protected=%d forced_in_universe=%d forced_extra=%d tickers=%s` — **실행당 1행**(종목당 emit 금지). 페이징 루프 밖 · `summary["total"]` 대입 앞에서 무조건 emit 하므로 조기 return 경로에서도 1행이 남는다.
 - 가드 `tests/unit/engine/test_cycle273_daily_load_protected.py`.
 
-### VCP universe backfill 분기
+### 분할 backfill 분기 — 대상은 적재 대상 전부
 
-- `vcp_universe_tickers: set[str]` = `list_all` row 의 `is_kospi200 OR is_kosdaq150`(별도 쿼리 0건). 플래그 키가 없는 row 는 falsy → 비 VCP 취급.
-- VCP ∧ `existing_count < _DAILY_LOAD_VCP_BACKFILL_DAYS(=225, cycle299)` → `condition.fetch_daily_candles_backfill(ticker, total_days=225)`(분할 fetch, 마지막 윈도우 클램프). VCP ∧ `>=225` → 증분 7일(재 backfill 금지). 비 VCP 는 `<50` 백필 100일 / `>=50` 증분 7일.
-- 🔴 225 인 이유 = `effective_ema_long = min(ema_long, 보유 − uptrend_days(20) − 5)` 라 보유 **225 영업일에서 실효 장기선이 정확히 200** 이 된다(220 이면 195 에 그친다). retention `DAILY_RETENTION_DAYS=390`cal ≈ 261영업일이 그 아래로 **36 영업일 마진**을 남긴다. 🔴 **target 과 retention 은 함께 움직인다** — target 이 보유 영업일을 넘으면 `existing_count` 가 영원히 target 에 못 닿아 매 load 전량 재backfill(churn)이 된다. VCP `prepare` 실사용은 여전히 100일이다.
+- 분기 조건은 **깊이 하나**다: `existing_count < _DAILY_LOAD_VCP_BACKFILL_DAYS(=225)` → `condition.fetch_daily_candles_backfill(ticker, total_days=225)`(분할 fetch, 마지막 윈도우 클램프) / `>=225` → 증분 7일(재 backfill 금지). 지수 소속·자격·보호 어느 것도 깊이를 가르지 않는다(cycle302).
+- 🔴 **`_DAILY_LOAD_VCP_BACKFILL_DAYS` 는 VCP 전용이 아니다.** 이름의 `VCP` 는 이 깊이를 처음 요구한 전략의 흔적이고, 값은 적재 대상(index ∪ 시총·거래대금 자격 ∪ 보유·익일청산 보호) 전부의 목표 깊이다. 이름 정정은 `src/api/condition.py` 호출자 주석 동반 이동이라 후속 과제로 둔다.
+- 🔴 깊이를 가르면 안 되는 이유 = 보유 행수가 얕은 종목은 `effective_ema_long = min(ema_long, 보유 − 20 − 5)` 가 74~121 로 잡혀 VCP 의 중기↔장기 간격이 10 안팎이 되고 정배열 판정이 동전던지기가 된다. 근거 실측은 [`docs/history/src-engine-CLAUDE.history.md`](../../docs/history/src-engine-CLAUDE.history.md) 「분할 backfill 분기 — 대상 확대」.
+- 🔴 **비용은 1회성이다.** 깊이에 닿으면 증분(7일·1콜)으로 내려오고 retention 390cal(≈261 영업일)이 225 아래로 떨어뜨리지 않는다 — 수렴 상태의 매일 밤 호출량은 종목당 1콜 그대로다(가드 `tests/unit/engine/test_cycle302_backfill_scope_expansion.py::test_g302_3_converged_universe_costs_one_call_per_ticker`). 첫 채움만 종목당 3콜(962종목 ≈ 2,886 호출 ≈ 345초)이라 20:30 정기 실행이 아니라 **수동 trigger**(`POST /api/stock-master/daily/refresh?force=1`)로 장 종료 후에 돌린다 — 20:30 에 얹으면 `quote_token_refresh.TIME_QUOTE_TOKEN_REFRESH`(20:45) 불변식 창(20:35~)을 1분 침범한다.
+- ⚠️ `existing_count < _DAILY_LOAD_INCREMENTAL_THRESHOLD(=50)` → 100일 단발 분기는 **225 > 50 인 한 도달 불가**한 구조적 폴백이다(신규 상장도 첫 밤에 225일을 탄다). 목표 깊이를 50 아래로 되돌리면 되살아난다 — 관계 핀 `test_cycle302...::test_g302_8b_deep_target_dominates_incremental_threshold`.
+- ⚠️ **상장 이력이 225 영업일보다 짧은 종목은 수렴하지 않는다** — 매일 밤 3콜을 쓰고 목표에 못 닿는다(최근 상장 코호트 한정, 종목당 하루 2콜 초과분). 자본 위험 0 · 관측 채널 = `[stock_master_daily_load_summary]` 의 `mode=`(수렴하면 `incremental`, 미수렴 종목이 남으면 `mixed`)와 `elapsed_ms`.
+- 🔴 225 인 이유 = `effective_ema_long = min(ema_long, 보유 − uptrend_days(20) − 5)` 라 보유 **225 영업일에서 실효 장기선이 정확히 200** 이 된다(220 이면 195 에 그친다). retention `DAILY_RETENTION_DAYS=390`cal ≈ 261영업일이 그 아래로 **36 영업일 마진**을 남긴다. 🔴 **target 과 retention 은 함께 움직인다** — target 이 보유 영업일을 넘으면 `existing_count` 가 영원히 target 에 못 닿아 매 load 전량 재backfill(churn)이 된다.
 - **1회 backfill 이 target 을 넘는다 — 한 밤에 채운다.** `condition.fetch_daily_candles_backfill` 의 깊이 환산이 `total_days=225` 에서 347 달력일에 닿고, 실측 비율(1.479)로 약 **232 영업일**이다(잉여 7). 전이 기간이 없다. 🔴 그 환산의 **stride 는 7/5 고정**이다 — 키우면 윈도우 사이에 구멍이 생긴다(상세 = `src/api/CLAUDE.md`). 가드 = `tests/unit/engine/test_cycle299_backfill_target_expansion.py::test_g299_9_one_pass_reaches_target`.
-- VCP `prepare` 가 그 깊이를 실제로 읽는 것은 `daily_fetch_depth_mode="full"` 일 때뿐이다(기본 `"cap100"` = 100봉).
+- VCP `prepare` 가 그 깊이를 실제로 읽는 것은 `daily_fetch_depth_mode="full"` 일 때뿐이다(코드 기본값은 `"cap100"` = 100봉이고 **운영 DB 는 `"full"`** — 상세 = `strategies/CLAUDE.md` VCP 절).
 - graceful — backfill 실패는 `failed++` 후 다음 ticker.
 - 🔴 장중 자동 실행 없음 — 20:30 daily task + 수동 trigger 뿐이다.
-- **읽기 두 겹은 cycle300 이 열었다** — `db/stock_master_daily.get_recent_daily` 의 상한은 `_MAX_DAILY_ROWS`(400)이고, VCP 는 전략 파라미터 `daily_fetch_depth_mode` 로 요청 깊이를 정한다(기본 `"cap100"` = 100봉 = 현행, `"full"` = `ema_long + base_max_days + 10`). **기본값에서는 배포 전후 행위가 byte 동일**하고, 200일 EMA 를 실제로 쓰려면 `PUT /api/strategies/vcp_breakout/params {"daily_fetch_depth_mode":"full"}` 로 켠다. 상세 = `strategies/CLAUDE.md` VCP 절.
+- **읽기 두 겹은 cycle300 이 열었다** — `db/stock_master_daily.get_recent_daily` 의 상한은 `_MAX_DAILY_ROWS`(400)이고, VCP 는 전략 파라미터 `daily_fetch_depth_mode` 로 요청 깊이를 정한다(코드 기본값 `"cap100"` = 100봉, `"full"` = `ema_long + base_max_days + 10`). **코드 기본값에서는 행위가 cycle300 이전과 byte 동일**하고, 200일 EMA 를 실제로 쓰려면 `PUT /api/strategies/vcp_breakout/params {"daily_fetch_depth_mode":"full"}` 로 켠다(운영 DB 는 켜져 있다). 상세 = `strategies/CLAUDE.md` VCP 절.
 
 ### 확정 전 오늘봉 시각 필터 (`_drop_today_bars`)
 

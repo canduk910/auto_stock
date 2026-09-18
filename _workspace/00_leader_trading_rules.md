@@ -658,7 +658,7 @@ donchian_swing 의 정공법(신고가 직진 추격)을 보강하는 추세추�
   - 켜고 끄는 수단 = `PUT /api/strategies/vcp_breakout/params {"daily_fetch_depth_mode":"full"}` — **즉시 반영 + 영속**. 롤백은 같은 PUT 에 `"cap100"`. `strategy_config` SQL UPDATE 는 다음 백엔드 재시작에서만 반영되므로 장중 실효 수단은 PUT 뿐이다(cycle232 D6).
   - `PARAM_RANGES`/`INT_PARAMS` **편입 금지**(진입 정체성 축). 미지 값·결측·비문자열은 전부 `"cap100"` 으로 낙하한다.
   - `min_required` 는 두 모드 다 **100** 이다 — KIS 폴백은 한 호출 100봉이 상한이라 문턱을 올리면 DB 가 100~224봉인 구간에서 더 얕은 KIS 응답으로 바뀐다.
-  - 읽기 관문 `db/stock_master_daily.get_recent_daily` 의 상한은 `_MAX_DAILY_ROWS = 400` 이다(cycle300 이 100 에서 올렸다). 100 은 애초에 KIS 한도가 아니었다 — KIS 의 100일은 **호출당** 한도다. 적재 깊이는 cycle299 가 225영업일로 열어 두었다.
+  - 읽기 관문 `db/stock_master_daily.get_recent_daily` 의 상한은 `_MAX_DAILY_ROWS = 400` 이다(cycle300 이 100 에서 올렸다). 100 은 애초에 KIS 한도가 아니었다 — KIS 의 100일은 **호출당** 한도다. 적재 깊이 target 은 225영업일이고, **그 깊이를 받는 대상은 일봉 적재 대상 전부**다(index ∪ 시총·거래대금 자격 ∪ 보유·익일청산 보호 — cycle302 가 지수 전용에서 넓혔다). 즉 `"full"` 을 켠 전략이 얕은 봉을 만나는 구간은 상장 이력 자체가 짧은 종목뿐이다.
   - `fetch_daily_candles` 는 재시작 복구 경로 전용
 - `candles[0]==오늘`이면 `candles[1]`을 전일로 사용 (부분봉 가드)
 

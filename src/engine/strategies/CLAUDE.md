@@ -111,7 +111,7 @@
 
 - BFB 폴·플래그 = `pole_min_return=15.0` · `pole_max_red_ratio=0.45` · `flag_retracement_max=0.5`(플래그 조정폭 ≤ 폴폭 50%) · `flag_volume_ratio=0.60`(거래량 수축 안전장치 — **절대 불변**, 급락 되돌림 오판 봉쇄).
 - VCP 추세 필터 = `ema_short=50` · `ema_mid=150` · `ema_long=200`(미너비니 Trend Template 원설계) · `last_pullback_max=0.12`. `effective_ema_long = min(ema_long, available_len - uptrend_days - 5)` 자동 축소 가드 + `_check_trend_filter(candles, effective_ema_long=)` 시그니처가 **읽은 봉 수만큼만** 장기선을 세운다. 중기선은 그 뒤 `ema_mid >= ema_long` 이면 `max(ema_short+1, ema_long-10)` 으로 한 번 더 줄어든다.
-  - **읽기 깊이 스위치 `daily_fetch_depth_mode`(cycle300)** — `"cap100"`(기본) = `fetch_days` 100봉 = 현행 · `"full"` = `ema_long + base_max_days + 10`. 설정 50/150/200 의 실효 정렬이 이렇게 갈린다:
+  - **읽기 깊이 스위치 `daily_fetch_depth_mode`(cycle300)** — `"cap100"`(코드 기본값) = `fetch_days` 100봉 · `"full"` = `ema_long + base_max_days + 10`. 🔴 **운영 DB 는 2026-09-18 06:00 부터 `"full"` 이다**(사용자 결정 D1, 라이브 실측 `fetch_days=285` · VCP 유니버스 348종목 전부 232봉) — 따라서 **운영의 실효 정렬은 50/150/200** 이고, 아래 표의 `cap100` 행은 코드 기본값의 산식이지 운영 상태가 아니다. 설정 50/150/200 의 실효 정렬이 이렇게 갈린다:
 
     | 보유 영업일 | `effective_ema_long` | 실효 정렬 | 중기↔장기 간격 |
     |---|---|---|---|

@@ -19,7 +19,12 @@ Group B 회귀 가드 (scanner.py `_stock_master_daily_load_once`):
 - B-2 (핵심 수렴): VCP + count=261(retained 최대치) → backfill 미호출 + days=7 증분
 - B-3: VCP + count=224 (<225) → fetch_daily_candles_backfill(total_days=225) 호출
 - B-4 (경계, 불변식): count == threshold → strict-< False → 재backfill 금지 (incremental)
-- B-5 (regression, 불변식): 非VCP 불변 (154→증분 days=7 / 30→100일 backfill)
+- B-5 (cycle302 의미 전환): 비지수도 **같은 임계**를 쓴다 (154·30 모두 → 분할 backfill)
+
+⚠️ cycle302 (2026-09-18) 의미 전환 — B-5 가 재던 "非VCP 불변" 은 backfill 대상이
+지수 전용이던 시절의 계약이다. 이제 적재 대상(index ∪ 자격 ∪ 보호)이면 누구나 같은
+임계를 쓴다. **수렴 불변식(B-2/B-4)은 그대로다** — 오히려 대상이 늘어난 만큼 churn
+금지가 더 중요해졌다. 계약 정본 = `test_cycle302_backfill_scope_expansion.py`.
 
 Group C:
 - C-1 (SAFETY, AST, 불변식): scanner 변경 = 상수값만 — daily_load 본체 매매 hot path 참조 0
@@ -241,13 +246,16 @@ async def test_b4_boundary_count_equals_threshold_incremental():
 
 
 # ---------------------------------------------------------------------------
-# B-5a (regression, 불변식) — 非VCP + existing=154 → 증분 (days=7)
+# B-5a (cycle302 의미 전환) — 비지수 + existing=154 → 분할 backfill
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
-async def test_b5a_non_vcp_154_incremental_unchanged():
-    """非VCP (is_kospi200=False, is_kosdaq150=False) + existing=154 → 증분 (days=7).
+async def test_b5a_non_index_154_takes_backfill():
+    """비지수(is_kospi200=False, is_kosdaq150=False) + existing=154 → 분할 backfill.
 
-    VCP 분기 미진입 → threshold 무관 불변식 (Red/Green 모두 PASS).
+    ⚠️ cycle302 의미 전환. 154 는 오늘 실측 비지수 평균 깊이(125)보다도 깊은데,
+    종전에는 `>= 50` 이라는 이유만으로 증분 7일에 갇혀 목표 깊이 225 에 **영영**
+    닿지 못했다(증분은 새 봉만 얹지 과거를 파지 않는다). 그게 비지수 1,526 종목의
+    225행 도달률이 0% 였던 이유다.
     """
     stock_master_rows = [
         {"ticker": "999999", "is_kospi200": False, "is_kosdaq150": False,
@@ -268,7 +276,7 @@ async def test_b5a_non_vcp_154_incremental_unchanged():
         new=AsyncMock(return_value=None),
     ), patch(
         "src.db.stock_master_daily.count_by_ticker",
-        new=AsyncMock(return_value=154),  # >= 50 → 증분
+        new=AsyncMock(return_value=154),  # < 225 → 분할 backfill (cycle302)
     ), patch(
         "src.api.condition.fetch_daily_candles_backfill",
         new=backfill_mock,
@@ -281,19 +289,27 @@ async def test_b5a_non_vcp_154_incremental_unchanged():
     ), patch("asyncio.sleep", new=AsyncMock()):
         summary = await scanner._stock_master_daily_load_once()
 
-    assert backfill_mock.await_count == 0, "非VCP = VCP backfill 분기 미진입 (불변)"
-    assert 7 in captured_days, "非VCP 154 >= 50 → 증분 (days=7) 불변"
+    assert backfill_mock.await_count == 1, (
+        "비지수도 DB < 225 면 같은 임계를 쓴다(cycle302). "
+        f"실측 backfill={backfill_mock.await_count} fetch_days={captured_days}"
+    )
+    assert 7 not in captured_days, (
+        "증분 7일로 빠지면 과거 깊이를 영영 못 판다. "
+        f"실측 fetch_days={captured_days}"
+    )
     assert summary["fetched"] == 1
 
 
 # ---------------------------------------------------------------------------
-# B-5b (regression, 불변식) — 非VCP + existing=30 → 100일 backfill (days=100)
+# B-5b (cycle302 의미 전환) — 비지수 + existing=30 → 분할 backfill
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
-async def test_b5b_non_vcp_30_hundred_day_unchanged():
-    """非VCP + existing=30 (<50) → 현행 100일 fetch_daily_candles(days=100) (VCP 분기 미진입).
+async def test_b5b_non_index_30_takes_backfill():
+    """비지수 + existing=30 (<50) → 100일 단발이 아니라 분할 backfill.
 
-    사이클 122 현행 유지 불변식 (Red/Green 모두 PASS).
+    ⚠️ cycle302 의미 전환. 225 > 50 이라 `< 50 → 100일` 분기는 **도달 불가**가 됐다
+    (구조적 폴백으로만 잔존). 신규 상장도 첫 밤에 목표 깊이를 탄다 —
+    관계 핀 = `test_cycle302_backfill_scope_expansion.py::G-302-8b`.
     """
     stock_master_rows = [
         {"ticker": "999999", "is_kospi200": False, "is_kosdaq150": False,
@@ -314,7 +330,7 @@ async def test_b5b_non_vcp_30_hundred_day_unchanged():
         new=AsyncMock(return_value=None),
     ), patch(
         "src.db.stock_master_daily.count_by_ticker",
-        new=AsyncMock(return_value=30),  # < 50 → 백필 100일
+        new=AsyncMock(return_value=30),  # < 225 → 분할 backfill (cycle302)
     ), patch(
         "src.api.condition.fetch_daily_candles_backfill",
         new=backfill_mock,
@@ -327,8 +343,14 @@ async def test_b5b_non_vcp_30_hundred_day_unchanged():
     ), patch("asyncio.sleep", new=AsyncMock()):
         summary = await scanner._stock_master_daily_load_once()
 
-    assert backfill_mock.await_count == 0, "非VCP = VCP backfill 미사용 (불변)"
-    assert 100 in captured_days, "非VCP 30 < 50 → 현행 100일 fetch_daily_candles(days=100) 불변"
+    assert backfill_mock.await_count == 1, (
+        "얕은 비지수 종목도 첫 밤에 목표 깊이를 탄다(cycle302). "
+        f"실측 backfill={backfill_mock.await_count} fetch_days={captured_days}"
+    )
+    assert 100 not in captured_days, (
+        "100일 단발로 떨어지면 다음 밤에 또 파야 한다. "
+        f"실측 fetch_days={captured_days}"
+    )
     assert summary["fetched"] == 1
 
 

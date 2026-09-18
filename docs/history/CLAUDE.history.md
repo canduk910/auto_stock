@@ -336,3 +336,22 @@ VCP universe(KOSPI200∪KOSDAQ150) backfill target **120일** · retention `DAIL
   움직인 것은 `test_cycle287::_SRC_TREE_DIGEST` 하나다.
 - **호출자** — `fetch_daily_candles_backfill` 의 프로덕션 호출자는 `scanner._stock_master_daily_load_once`
   **하나뿐**임을 `grep` 으로 재확인했다. 별도 함수 `fetch_daily_candles` 는 무접촉이다.
+
+## DB 스키마 — `stock_master_daily` 행 (cycle302, 2026-09-18)
+
+`backfill target 225일` 의 **대상** 표기를 덮어썼다. 종전 정본은
+`VCP universe(KOSPI200∪KOSDAQ150) backfill target 225일` 이었다.
+
+바뀐 사실 = backfill 분기 조건에서 지수 소속 판정이 빠져, 일봉 적재 대상
+(index ∪ 시총·거래대금 자격 ∪ 보유·익일청산 보호 = 2026-09-18 실측 962종목) 전부가
+`existing_count < 225` 일 때 같은 분할 backfill 을 탄다.
+
+근거 실측(2026-09-18 09:37) = 지수 348종목은 225행 이상 100%(평균 232)인데 **비지수 1,526종목은
+0%**(평균 125)였다. VCP 평가 대상 628 중 약 280(45%)이 `effective_ema_long` 74~121 에 묶여
+중기↔장기 간격 10 안팎, 곧 정배열 판정이 동전던지기였다.
+
+정상 운영 비용은 불변이다 — 깊이에 닿으면 증분 1콜로 내려오고 retention 390cal(≈261 영업일)이
+225 아래로 떨어뜨리지 않는다. 첫 채움(962종목 × 3콜 ≈ 2,886 호출 ≈ 345초)만 20:30 스케줄이 아니라
+장 종료 후 수동 trigger 로 돌린다(`TIME_QUOTE_TOKEN_REFRESH`(20:45) 불변식 창 20:35~ 를 1분 침범).
+
+상세 = `docs/history/src-engine-CLAUDE.history.md` 「분할 backfill 분기 — 대상 확대」.
