@@ -3,11 +3,25 @@
 회귀 가드 매트릭스:
 - G-SCAN1 (HIGH) — _stock_master_daily_load_once stock_master 전체 ticker 적재
 - G-SCAN2 (HIGH) — 점진 적재 idempotency (max_bas_dd >= today → skip)
-- G-SCAN3 (HIGH) — 백필 vs 증분 자동 분기 (count < 50 백필 / >= 50 증분)
+- G-SCAN3 (HIGH) — 백필 vs 증분 자동 분기 (count < 225 백필 / >= 225 증분)
 - G-SCAN4 (MEDIUM) — Rate Limit 50ms sleep (사이클 83/91/97/107 답습)
 - G-SCAN5 (MEDIUM) — graceful (KIS fetch 실패 시 다음 ticker 진행)
 - G-SCHED1 (HIGH) — TIME_STOCK_MASTER_DAILY_LOAD = 16:00 KST
 - G-SCHED2 (HIGH) — task cancel 목록에 _stock_master_daily_load_task 포함
+
+⚠️ **cycle302 의미 전환 — 분기가 지나가는 *함수* 가 바뀌었다(명제는 그대로).**
+종전 분기는 `count < 50 → fetch_daily_candles(days=100)` / `>= 50 → days=7` 이었다.
+cycle302 가 backfill 대상을 적재 대상 전부로 넓히면서 게이트가
+`existing_count < _DAILY_LOAD_VCP_BACKFILL_DAYS(225)` 하나가 됐고, 그 분기는
+**`condition.fetch_daily_candles_backfill`**(분할 3콜)을 부른다. 100일 단발 분기
+(`_DAILY_LOAD_INCREMENTAL_THRESHOLD=50`)는 `225 > 50` 인 한 **도달 불가**한 구조적
+폴백이다(그 관계는 `test_cycle302_backfill_scope_expansion.py::G-302-8b` 가 핀한다).
+그래서 이 파일은 같은 명제("얕으면 백필 · 깊으면 증분 · 실패는 graceful")를 **새
+경로 기준으로** 다시 잰다 — 단언을 지우거나 약화시키지 않는다.
+
+🔴 `no_real_kis` opt-in — 이 파일은 backfill 분기를 의도적으로 탄다. 두 fetch 중
+하나라도 모킹을 빠뜨리면 실 KIS 를 때리므로(2026-09-18 CI red 의 기전) 공통 관문
+`condition.kis_get_quote` 를 막아 그 누락이 네트워크가 아니라 즉시 실패가 되게 한다.
 
 영속 의무:
 - 사이클 14 fetch_daily_candles 재사용
@@ -28,7 +42,11 @@ import pytest
 
 from src.engine import scanner, scheduler, data_load_tasks
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, pytest.mark.usefixtures("no_real_kis")]
+
+#: 수렴 상태(목표 깊이 이상) — 증분 분기를 타는 `count_by_ticker` 값.
+#: 리터럴 대신 상수 파생이라 목표 깊이가 바뀌어도 의도가 따라 움직인다.
+_CONVERGED_COUNT = scanner._DAILY_LOAD_VCP_BACKFILL_DAYS + 10
 
 
 # ---------------------------------------------------------------------------
@@ -36,7 +54,12 @@ pytestmark = pytest.mark.unit
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_g_scan1_load_once_iterates_stock_master():
-    """stock_master 전체 ticker → 각 ticker 별 fetch_daily_candles + upsert_batch."""
+    """stock_master 전체 ticker → 각 ticker 별 KIS fetch + upsert_batch.
+
+    cycle302 의미 전환 — `count_by_ticker=0`(신규 적재)은 이제 분할 backfill 분기다.
+    재는 명제("적재 대상 전 종목이 빠짐없이 fetch 를 탄다")는 그대로이고, 세는 목만
+    `fetch_daily_candles` → `fetch_daily_candles_backfill` 로 옮겼다.
+    """
     stock_master_rows = [
         {"ticker": "005930", "raw": {"hts_avls": "1000", "acml_tr_pbmn": "5000000000"}},
         {"ticker": "000660", "raw": {"hts_avls": "1000", "acml_tr_pbmn": "5000000000"}},
@@ -58,6 +81,9 @@ async def test_g_scan1_load_once_iterates_stock_master():
         "src.db.stock_master_daily.count_by_ticker",
         new=AsyncMock(return_value=0),  # 백필 모드
     ), patch(
+        "src.api.condition.fetch_daily_candles_backfill",
+        new=AsyncMock(return_value=mock_candles),
+    ) as mock_backfill, patch(
         "src.api.condition.fetch_daily_candles",
         new=AsyncMock(return_value=mock_candles),
     ) as mock_kis, patch(
@@ -72,7 +98,14 @@ async def test_g_scan1_load_once_iterates_stock_master():
     assert summary["fetched"] == 3
     assert summary["upserted_rows"] == 3
     assert summary["failed"] == 0
-    assert mock_kis.call_count == 3
+    assert mock_backfill.call_count == 3, (
+        "신규 적재(count=0) 3종목은 전부 분할 backfill 분기다 (cycle302). "
+        f"실제 backfill 호출={mock_backfill.call_count}"
+    )
+    assert mock_kis.call_count == 0, (
+        "얕은 종목이 단발 fetch 로 새면 목표 깊이에 영원히 못 닿는다. "
+        f"실제 단발 fetch 호출={mock_kis.call_count}"
+    )
     assert mock_upsert.call_count == 3
 
 
@@ -111,13 +144,23 @@ async def test_g_scan2_skip_when_already_loaded_today():
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_g_scan3_backfill_when_count_below_threshold():
-    """count < 50 → 백필 모드 (T-100일 호출)."""
+    """count < 225 → 백필 모드 (목표 깊이 분할 backfill).
+
+    cycle302 의미 전환 — 종전에는 `count < 50 → fetch_daily_candles(days=100)` 였다.
+    지금은 얕은 종목이 **전부** `fetch_daily_candles_backfill(total_days=225)` 를 탄다.
+    `count=10` 은 그대로 둔다(그 값이 재려던 것은 "얕다" 이고, 10 은 두 임계 아래다).
+    """
     stock_master_rows = [{"ticker": "005930", "raw": {"hts_avls": "1000", "acml_tr_pbmn": "5000000000"}}]
 
     captured_days: list[int] = []
+    captured_total_days: list[int] = []
 
     async def capture_kis_call(ticker, days):
         captured_days.append(days)
+        return [{"stck_bsop_date": "20260612", "stck_clpr": "71000"}]
+
+    async def capture_backfill_call(ticker, total_days=None):
+        captured_total_days.append(total_days)
         return [{"stck_bsop_date": "20260612", "stck_clpr": "71000"}]
 
     with patch(
@@ -128,7 +171,10 @@ async def test_g_scan3_backfill_when_count_below_threshold():
         new=AsyncMock(return_value=date(2026, 6, 1)),  # 11일 전
     ), patch(
         "src.db.stock_master_daily.count_by_ticker",
-        new=AsyncMock(return_value=10),  # 10건 < 50 = 백필
+        new=AsyncMock(return_value=10),  # 10건 < 225 = 백필
+    ), patch(
+        "src.api.condition.fetch_daily_candles_backfill",
+        new=AsyncMock(side_effect=capture_backfill_call),
     ), patch(
         "src.api.condition.fetch_daily_candles",
         new=AsyncMock(side_effect=capture_kis_call),
@@ -140,12 +186,24 @@ async def test_g_scan3_backfill_when_count_below_threshold():
     ):
         await scanner._stock_master_daily_load_once()
 
-    assert captured_days == [100]  # 백필 = T-100일
+    assert captured_total_days == [scanner._DAILY_LOAD_VCP_BACKFILL_DAYS], (
+        "얕은 종목은 목표 깊이 분할 backfill 이다 (cycle302). "
+        f"실제 total_days={captured_total_days}"
+    )
+    assert captured_days == [], (
+        "단발 fetch 로 새면 그 종목은 목표 깊이에 못 닿는다. "
+        f"실제 captured_days={captured_days}"
+    )
 
 
 @pytest.mark.asyncio
 async def test_g_scan3_incremental_when_count_above_threshold():
-    """count >= 50 → 증분 모드 (T-7일 호출)."""
+    """count >= 225 → 증분 모드 (T-7일 호출).
+
+    cycle302 의미 전환 — 종전 값 `100` 은 당시 임계(50) 위였지만 지금은 목표
+    깊이(225) 아래라 **backfill 로 샌다**. 이 테스트가 재려던 것은 "수렴한 종목은
+    증분 1콜" 이므로 값을 수렴 상태로 올린다.
+    """
     stock_master_rows = [{"ticker": "005930", "raw": {"hts_avls": "1000", "acml_tr_pbmn": "5000000000"}}]
 
     captured_days: list[int] = []
@@ -162,8 +220,11 @@ async def test_g_scan3_incremental_when_count_above_threshold():
         new=AsyncMock(return_value=date(2026, 6, 10)),
     ), patch(
         "src.db.stock_master_daily.count_by_ticker",
-        new=AsyncMock(return_value=100),  # 100건 >= 50 = 증분
+        new=AsyncMock(return_value=_CONVERGED_COUNT),  # >= 225 = 증분
     ), patch(
+        "src.api.condition.fetch_daily_candles_backfill",
+        new=AsyncMock(side_effect=AssertionError("수렴한 종목이 재 backfill 을 탔다")),
+    ) as mock_backfill, patch(
         "src.api.condition.fetch_daily_candles",
         new=AsyncMock(side_effect=capture_kis_call),
     ), patch(
@@ -175,6 +236,10 @@ async def test_g_scan3_incremental_when_count_above_threshold():
         await scanner._stock_master_daily_load_once()
 
     assert captured_days == [7]  # 증분 = T-7일
+    assert mock_backfill.await_count == 0, (
+        "수렴 상태(count >= 225)에서 재 backfill 이 돌면 매일 밤 KIS 호출이 3배다 "
+        "(cycle302 의 무비용 근거 = G-302-3)"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -199,6 +264,11 @@ async def test_g_scan4_rate_limit_50ms_per_ticker():
         "src.db.stock_master_daily.count_by_ticker",
         new=AsyncMock(return_value=0),
     ), patch(
+        # cycle302 — count=0 은 backfill 분기다. 분기가 어디로 가든 ticker 당 50ms 는
+        # 지켜져야 하므로 두 fetch 를 **둘 다** 모킹해 실 KIS 를 원천 차단한다.
+        "src.api.condition.fetch_daily_candles_backfill",
+        new=AsyncMock(return_value=[{"stck_bsop_date": "20260612", "stck_clpr": "71000"}]),
+    ), patch(
         "src.api.condition.fetch_daily_candles",
         new=AsyncMock(return_value=[{"stck_bsop_date": "20260612", "stck_clpr": "71000"}]),
     ), patch(
@@ -219,10 +289,15 @@ async def test_g_scan4_rate_limit_50ms_per_ticker():
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_g_scan5_graceful_on_kis_failure():
-    """KIS fetch_daily_candles 실패 시 다음 ticker 진행 — 사이클 88 G-REJECT."""
+    """KIS 일봉 fetch 실패 시 다음 ticker 진행 — 사이클 88 G-REJECT.
+
+    cycle302 의미 전환 — `count=0` 은 backfill 분기라 실패를 주입할 목도
+    `fetch_daily_candles_backfill` 이다. 재는 명제(한 종목의 KIS 실패가 나머지
+    적재를 멈추지 않는다)는 그대로다.
+    """
     stock_master_rows = [{"ticker": "005930", "raw": {"hts_avls": "1000", "acml_tr_pbmn": "5000000000"}}, {"ticker": "000660", "raw": {"hts_avls": "1000", "acml_tr_pbmn": "5000000000"}}]
 
-    async def kis_side_effect(ticker, days):
+    async def kis_side_effect(ticker, total_days=None):
         if ticker == "005930":
             raise RuntimeError("KIS rate limit")
         return [{"stck_bsop_date": "20260612", "stck_clpr": "71000"}]
@@ -237,8 +312,11 @@ async def test_g_scan5_graceful_on_kis_failure():
         "src.db.stock_master_daily.count_by_ticker",
         new=AsyncMock(return_value=0),
     ), patch(
-        "src.api.condition.fetch_daily_candles",
+        "src.api.condition.fetch_daily_candles_backfill",
         side_effect=kis_side_effect,
+    ), patch(
+        "src.api.condition.fetch_daily_candles",
+        new=AsyncMock(side_effect=AssertionError("신규 적재가 단발 fetch 로 샜다")),
     ), patch(
         "src.db.stock_master_daily.upsert_batch",
         new=AsyncMock(return_value=1),

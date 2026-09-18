@@ -42,7 +42,15 @@ from freezegun import freeze_time
 import src.engine.scanner as scanner
 from src.engine.scanner import KST_TZ as KST
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, pytest.mark.usefixtures("no_real_kis")]
+
+#: 이 파일의 시뮬레이션은 전부 **평시 프로덕션 = 증분 분기**(`fetch_days=7`)를 전제한다
+#: — 재는 것이 fetch 분기가 아니라 오늘봉 컷오프이기 때문이다. cycle302 가 backfill
+#: 게이트를 `existing_count < _DAILY_LOAD_VCP_BACKFILL_DAYS(225)` 하나로 넓혔으므로
+#: 시드 깊이도 그 목표 위여야 한다(종전 59행이면 분할 backfill 분기로 새고, 그 분기는
+#: `fetch_daily_candles` 모킹을 빠져나가 **실 KIS** 를 때린다 = 2026-09-18 CI red).
+#: `no_real_kis` 가 그 누출을 즉시 실패로 드러낸다.
+_CONVERGED_ROWS = scanner._DAILY_LOAD_VCP_BACKFILL_DAYS + 10
 
 _TICKER = "005380"          # 현대차 — 09-11 최대 오염(+13.97%) 표본
 _SESSIONS = [date(2026, 9, 8), date(2026, 9, 9), date(2026, 9, 10),
@@ -180,11 +188,13 @@ def _patch(stack: ExitStack, store: _Store, fetch_log: list[str]):
 
 def _seeded_store() -> _Store:
     store = _Store()
-    store.seed(_TICKER, [_final_bar(d) for d in _SESSIONS if d < _TODAY])
-    # 증분 분기(`fetch_days=7`)로 돌게 과거 55행 확보 — 평시 프로덕션 상태
+    prior = [d for d in _SESSIONS if d < _TODAY]
+    store.seed(_TICKER, [_final_bar(d) for d in prior])
+    # 증분 분기(`fetch_days=7`)로 돌게 과거 행 확보 — 평시 프로덕션 = **수렴 상태**다.
+    # 총 행수가 `_CONVERGED_ROWS`(목표 깊이 + 10) 가 되도록 패딩한다.
     store.seed(_TICKER, [
         _bar(_SESSIONS[0] - timedelta(days=i + 1), vol=900_000 + i)
-        for i in range(55)
+        for i in range(_CONVERGED_ROWS - len(prior))
     ])
     return store
 
