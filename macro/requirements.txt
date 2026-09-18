@@ -1,9 +1,6 @@
 # macro_lite 런타임 의존성 — 버전 핀은 원 프로젝트(stock-manager) 루트 requirements.txt 와 동일(무핀).
 fastapi
-# cycle303 후속 — Dockerfile 의 `CMD ["uvicorn", ...]` 가 요구한다. 빠지면 이미지 빌드는
-# 성공하고 **컨테이너 기동만 실패**한다(`exec: "uvicorn": executable file not found in $PATH`).
-# `docker build` 성공은 기동 성공을 뜻하지 않는다 — 2026-09-18 로컬 실측으로 드러났다.
-uvicorn[standard]
+uvicorn[standard]   # 컨테이너/단독 실행 시 필요 (TestClient 스모크만으로는 누락이 드러나지 않음)
 requests
 numpy<2
 pandas

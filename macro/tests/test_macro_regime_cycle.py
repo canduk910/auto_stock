@@ -99,3 +99,21 @@ def test_existing_determine_regime_unchanged():
     assert "regime" in result
     assert "regime_desc" in result
     assert "params" in result
+
+
+# ── final_scores 노출 (2026-09-18, 응답 추가 필드 — 판정 로직 무변경) ────────
+
+def test_cycle_final_scores_exposed_and_consistent():
+    from macro_lite.cycle import determine_cycle_phase
+    result = determine_cycle_phase({
+        "yield_spread": 1.2, "yield_direction": "steepening",
+        "credit_direction": "narrowing", "vix_value": 15.5, "vix_level": "normal",
+        "sector_rotation": "cyclical", "dollar_strength": "weakening",
+    })
+    fs = result["final_scores"]
+    assert set(fs.keys()) == {"recovery", "expansion", "overheating", "contraction"}
+    assert all(isinstance(v, float) for v in fs.values())
+    # 1위 국면 = phase, confidence = (1위-2위)*200 (최대 100) 과 정합
+    ranked = sorted(fs.items(), key=lambda x: x[1], reverse=True)
+    assert ranked[0][0] == result["phase"]
+    assert result["confidence"] == min(100, round((ranked[0][1] - ranked[1][1]) * 200))
