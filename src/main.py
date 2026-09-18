@@ -92,17 +92,25 @@ root_logger = logging.getLogger()
 root_logger.setLevel(logging.DEBUG)
 
 # 콘솔 핸들러 (INFO 이상)
+# 로그 파일 보관 일수 (2026-09-18 사용자 결정 — "로그는 20일치만 저장하면 될듯해").
+# 🔴 30 일이던 값을 줄인 이유는 용량이다 — 하루 약 300MB 라 30일이면 9GB 이고,
+# EC2 루트가 19GB 뿐이라 이미지 3개를 굽는 배포에서 디스크가 마른다(2026-09-18 실측:
+# `logs/` 6.4GB, 루트 여유 3.4GB 로 배포 기준 5GB 미달). 두 핸들러가 같은 값을 쓴다.
+# ⚠️ 손으로 `.gz` 압축한 파일은 `TimedRotatingFileHandler` 가 자기 회전 파일로 인식하지
+# 못해 이 보관 일수의 자동 삭제 대상에서 빠진다 — 압축본은 사람이 따로 지운다.
+_LOG_BACKUP_DAYS = 20
+
 console_handler = logging.StreamHandler()
 console_handler.setLevel(logging.INFO)
 console_handler.setFormatter(_formatter)
 root_logger.addHandler(console_handler)
 
-# 파일 핸들러 — 일별 로테이션, 30일 보관
+# 파일 핸들러 — 일별 로테이션, `_LOG_BACKUP_DAYS` 일 보관
 file_handler = logging.handlers.TimedRotatingFileHandler(
     filename=os.path.join(LOG_DIR, "auto_stock.log"),
     when="midnight",
     interval=1,
-    backupCount=30,
+    backupCount=_LOG_BACKUP_DAYS,
     encoding="utf-8",
     atTime=datetime.strptime("00:00", "%H:%M").time(),  # KST 자정 기준
 )
@@ -116,7 +124,7 @@ error_handler = logging.handlers.TimedRotatingFileHandler(
     filename=os.path.join(LOG_DIR, "error.log"),
     when="midnight",
     interval=1,
-    backupCount=30,
+    backupCount=_LOG_BACKUP_DAYS,
     encoding="utf-8",
 )
 error_handler.setLevel(logging.WARNING)
