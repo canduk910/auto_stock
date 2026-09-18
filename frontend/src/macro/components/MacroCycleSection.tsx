@@ -13,6 +13,18 @@
  *   6. 체제 상세(RegimeDetail 안의 공포탐욕/버핏지수/VIX)
  *   7. InfoTooltip(CYCLE_TOOLTIP/REGIME_TOOLTIP)
  *
+ * 🔴 두 단계이동 스트립은 **각자의 카드 안 같은 자리**에 있다(cycle306, 사용자 지시).
+ * 국면 4칸은 원래 카드 **밖 맨 위**에 있어 카드 **안**에 있는 체제 4칸과 위치가 어긋났다.
+ * 지금은 둘 다 「제목 → 큰 배지 → 부제 → 4칸 스트립 → 상세」 순서를 공유한다 — 한쪽만
+ * 옮기면 그 어긋남이 되살아나므로, 한쪽 순서를 바꿀 땐 다른 쪽도 같이 바꾼다.
+ * 스트립 마크업도 `grid-cols-4 gap-1.5 mb-3` 로 동일하다. 국면 쪽에 있던 화살표(→)는
+ * 뺐다 — 반쪽 폭 카드에서 화살표가 자리를 60px 먹어 4칸 라벨이 찌그러진다.
+ *
+ * 🔴 **새 testid 에 `macro-cycle-phase-` · `macro-cycle-indicator-` 접두사를 쓰지 않는다.**
+ * 위 보존 가드가 그 두 접두사를 정규식으로 세기 때문에, 접두사를 물려받는 순간 "국면 4칸" 이
+ * 11칸이 되고 "지표 카드 5종" 이 10종이 된다. 점수차 블록은 `macro-cycle-gap*`,
+ * 기여 줄은 `macro-cycle-contrib-{key}` 를 쓴다(cycle306 에서 실제로 밟고 고쳤다).
+ *
  * 타입 계약 1(팀장 명세 §6) — `data.cycle || data` 폴백, `regime?.regime` optional chaining
  * 은 응답 shape 계약 자체이므로 "불필요한 방어"로 지우지 않는다(`types/macro.ts` 참고).
  */
@@ -195,11 +207,79 @@ function RegimeStripCard({ regime, isActive }: { regime: InvestmentRegime; isAct
   )
 }
 
-function IndicatorCard({ label, signal, testId }: { label: string; signal?: string; testId: string }) {
+/**
+ * 숫자 방어 변환 — 숫자·숫자 문자열만 유한수로 통과시키고 나머지는 `null`.
+ * 이 리포는 미검증 값에 `toFixed`/`toLocaleString` 을 직접 불러 화면이 조용히 빈 사고를
+ * 세 번 겪었다(`frontend/CLAUDE.md` 「테스트 규약」 5). 렌더는 이 함수를 지난 값에만 건다.
+ */
+function toNum(v: unknown): number | null {
+  if (typeof v === "number") return Number.isFinite(v) ? v : null
+  if (typeof v === "string" && v.trim() !== "") {
+    const n = Number(v)
+    return Number.isFinite(n) ? n : null
+  }
+  return null
+}
+
+/**
+ * 지표 카드 — 신호 + **당선 국면에 보탠 점수**.
+ *
+ * 🔴 보여 주는 것은 `score`(당선 국면 기여)뿐이고 `score / weight`(지지율)는 **쓰지 않는다**.
+ * 지표마다 한 국면에 줄 수 있는 상한이 다르기 때문이다 — 과열기 기준 상한이 금리차 0.80 ·
+ * 나머지 넷 0.30 이라, 지지율을 나란히 세우면 "VIX 가 약하게 밀었다" 로 읽히지만 실은
+ * VIX 가 과열기에 줄 수 있는 최대치가 원래 0.30 이다. 반면 `score` 는 전부 같은 국면에 보탠
+ * 가중 기여라 서로 비교되고 **다 더하면 그 국면 총점**이 된다(실측: 0.34).
+ */
+function IndicatorCard({
+  label,
+  signal,
+  testId,
+  score,
+  maxScore,
+  phaseLabel,
+}: {
+  label: string
+  signal?: string
+  testId: string
+  score: number | null
+  maxScore: number | null
+  phaseLabel?: string
+}) {
+  // 프론트가 볼 수 있는 결측 증거는 `signal === "-"` 하나뿐이고, 그나마 금리차·VIX 에만
+  // 나타난다 — 크레딧·섹터·달러는 백엔드가 기본값 문자열("안정"/"혼합"/"보합")로 떨어뜨려
+  // 결측을 구분할 수 없다. 없는 구분을 있는 척하지 않는다.
+  const missing = !signal || signal.trim() === "-"
+  const barPct = score !== null && maxScore !== null && maxScore > 0 ? Math.max(0, Math.min(100, (score / maxScore) * 100)) : null
+  // 🔴 `${testId}-contrib` 로 만들면 보존 규약의 `macro-cycle-indicator-` 접두사에 걸려
+  // "지표 카드 5종" 가드가 10개를 센다. 접두사를 공유하지 않는 이름을 따로 쓴다.
+  const contribTestId = `macro-cycle-contrib-${testId.replace("macro-cycle-indicator-", "")}`
+
   return (
-    <div data-testid={testId} className="rounded-lg border bg-gray-50 px-3 py-2">
+    <div data-testid={testId} data-missing={missing ? "true" : "false"} className="rounded-lg border bg-gray-50 px-3 py-2">
       <div className="text-xs text-gray-500 mb-0.5">{label}</div>
       <div className="text-sm font-semibold text-gray-900 truncate">{signal || "-"}</div>
+
+      {missing ? (
+        <div data-testid={contribTestId} className="mt-1.5 text-[11px] text-gray-400">
+          값 없음 — 집계에서 빠졌습니다
+        </div>
+      ) : score === null ? null : score === 0 ? (
+        <div data-testid={contribTestId} className="mt-1.5 text-[11px] text-gray-500">
+          다른 국면 쪽
+        </div>
+      ) : (
+        <div data-testid={contribTestId} className="mt-1.5">
+          <div className="flex items-baseline justify-between text-[11px] text-gray-500 mb-0.5">
+            <span className="truncate">{phaseLabel ? `${phaseLabel}에 보탬` : "보탬"}</span>
+            <span className="font-semibold text-gray-700 tabular-nums">+{score.toFixed(3)}</span>
+          </div>
+          {barPct !== null && (
+            <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+              <div className="h-full rounded-full bg-gray-500" style={{ width: `${barPct}%` }} />
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
@@ -287,6 +367,124 @@ function RegimeDetail({ regime }: { regime?: RegimeData | null }) {
   )
 }
 
+/**
+ * 1·2위 점수차 블록 — 원본의 「신뢰도 N%」 막대를 대체한다.
+ *
+ * 🔴 이 값은 **맞을 가능성이 아니다.** `cycle.py:222` 의 `(1위 총점 − 2위 총점) × 200` 이고
+ * 과거 적중률로 교정한 적이 없다. "신뢰도 14%" 라는 표기가 "14% 확률로 맞다" 로 읽히던 것이
+ * 이 블록을 만든 이유다(사용자: "신뢰도가 잘 와닿지가 않아"). 그래서 셋을 함께 바꾼다 —
+ * 이름을 뺄셈 결과(`1·2위 점수차`)로, 단위를 `%` 에서 `점` 으로, 눈금을 0~100% 차오르는
+ * 게이지에서 **1위를 100% 로 잡은 상대 막대**로.
+ *
+ * 🔴 **0~1.00 공통 눈금을 쓰지 않는다.** 국면마다 도달 가능한 최대 총점이 다르기 때문이다 —
+ * 입력 전수 탐색 실측으로 회복기 0.61 · 확장기 0.60 · **과열기 0.45** · 수축기 0.97 이다.
+ * 1.00 을 만점으로 그리면 과열기가 1위인 날은 무슨 수를 써도 막대가 절반을 못 넘어,
+ * "왜 낮은가" 를 설명하려던 화면이 "이 판정은 늘 부실하다" 를 그림으로 주장하게 된다.
+ *
+ * 구간 낱말(팽팽/보통/뚜렷)에 **고정 컷을 두지 않는다.** 그날의 실제 기여값에서 끌어낸다 —
+ * 한 지표가 1위에서 2위로 돌아서면 격차는 그 기여의 **2배**만큼 줄므로, `2 × 기여 > 격차` 인
+ * 지표가 곧 "혼자서 순위를 뒤집을 수 있는 지표" 다.
+ */
+const GAP_BANDS = {
+  tight: { label: "팽팽", cls: "bg-amber-100 text-amber-800" },
+  mid: { label: "보통", cls: "bg-gray-200 text-gray-700" },
+  clear: { label: "뚜렷", cls: "bg-blue-100 text-blue-800" },
+} as const
+
+function PhaseGapBlock({
+  confidence,
+  scores,
+  phase,
+  phaseLabel,
+}: {
+  confidence?: number | null
+  scores?: Record<string, CycleScoreItem> | null
+  phase: CyclePhase
+  phaseLabel?: string
+}) {
+  const conf = toNum(confidence)
+  if (conf === null) return null
+
+  const contributions = Object.values(scores ?? {})
+    .map((item) => toNum(item?.score))
+    .filter((v): v is number => v !== null)
+  const positive = contributions.filter((v) => v > 0)
+
+  const gap = conf / 200
+  // `min(100, ...)` 상한이라 100 이면 실제 격차는 0.50 **이상**이다. 모르는 값을 아는 척 그리지 않는다.
+  const atCap = conf >= 100
+  const topTotal = contributions.length ? contributions.reduce((a, b) => a + b, 0) : null
+  const secondTotal = topTotal !== null ? Math.max(0, topTotal - gap) : null
+  const secondPct = topTotal !== null && topTotal > 0 && secondTotal !== null ? Math.min(100, (secondTotal / topTotal) * 100) : null
+
+  // 혼자 돌아서면 순위를 뒤집는 지표 수
+  const flippable = positive.filter((v) => 2 * v > gap).length
+  const band = !positive.length ? "mid" : flippable === positive.length ? "tight" : flippable === 0 ? "clear" : "mid"
+  const bandMeta = GAP_BANDS[band]
+
+  const note = !positive.length
+    ? null
+    : flippable === 0
+      ? "어느 지표 하나가 다른 국면 쪽으로 돌아서도 순위는 유지됩니다."
+      : flippable === positive.length
+        ? `지표 ${positive.length}개 중 **어느 하나**가 다른 국면 쪽으로 돌아서도 순위가 뒤집힙니다.`
+        : `지표 ${positive.length}개 중 ${flippable}개는 혼자 돌아서면 순위를 뒤집습니다.`
+
+  const phaseColors = PHASE_COLORS[phase] || PHASE_COLORS.recovery
+
+  return (
+    <div data-testid="macro-cycle-gap" className="rounded-lg border bg-gray-50 p-3">
+      <div className="flex items-center justify-between mb-2.5">
+        <span className="text-sm font-medium text-gray-600">1·2위 점수차</span>
+        <div className="flex items-center gap-2">
+          <span data-testid="macro-cycle-gap-band" className={`px-2 py-0.5 rounded-full text-xs font-semibold ${bandMeta.cls}`}>
+            {bandMeta.label}
+          </span>
+          <span data-testid="macro-cycle-gap-value" className="text-lg font-bold text-gray-900 tabular-nums">
+            {gap.toFixed(2)}
+            <span className="text-xs font-medium text-gray-500 ml-0.5">{atCap ? "점 이상" : "점"}</span>
+          </span>
+        </div>
+      </div>
+
+      {topTotal !== null && topTotal > 0 && (
+        <div className="space-y-1.5 mb-2.5">
+          <div className="flex items-center gap-2" data-testid="macro-cycle-gap-top">
+            <span className="w-24 shrink-0 text-xs text-gray-600 truncate">1위 {phaseLabel}</span>
+            <div className="flex-1 h-2.5 bg-gray-200 rounded-full overflow-hidden">
+              <div className={`h-full rounded-full ${phaseColors.active}`} style={{ width: "100%" }} />
+            </div>
+            <span className="w-12 shrink-0 text-right text-xs font-semibold text-gray-700 tabular-nums">{topTotal.toFixed(2)}</span>
+          </div>
+          <div className="flex items-center gap-2" data-testid="macro-cycle-gap-second">
+            {/* 2위 국면의 **이름은 응답에 없다**(`cycle.py` 가 `final_scores` 를 반환하지 않는다).
+                점수만 알고 이름은 모르는 상태를 감추지 않고 그대로 적는다. */}
+            <span className="w-24 shrink-0 text-xs text-gray-500 truncate">2위 (이름 없음)</span>
+            <div className="flex-1 h-2.5 bg-gray-200 rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full bg-gray-400 ${atCap ? "opacity-60" : ""}`}
+                style={{ width: `${secondPct ?? 0}%` }}
+              />
+            </div>
+            <span className="w-12 shrink-0 text-right text-xs font-medium text-gray-500 tabular-nums">
+              {secondTotal !== null ? `${atCap ? "≤" : ""}${secondTotal.toFixed(2)}` : "—"}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {note && (
+        <p data-testid="macro-cycle-gap-note" className="text-xs text-gray-700 mb-1">
+          {note.split("**").map((part, i) => (i % 2 ? <strong key={i}>{part}</strong> : part))}
+        </p>
+      )}
+      <p data-testid="macro-cycle-gap-caveat" className="text-[11px] text-gray-400">
+        1위와 2위가 벌어진 정도입니다 — 맞고 틀림과는 무관합니다. (내부값 {conf})
+      </p>
+    </div>
+  )
+}
+
 function DivergenceNote({ phase, regime }: { phase?: CyclePhase | null; regime?: InvestmentRegime | null }) {
   if (!phase || !regime) return null
   const isExpansive = phase === "recovery" || phase === "expansion"
@@ -336,22 +534,16 @@ export default function MacroCycleSection({ data, loading, error }: MacroCycleSe
 
   const phaseColors = PHASE_COLORS[phase] || PHASE_COLORS.recovery
 
+  // 지표 카드 막대의 기준자 — 다섯 기여 중 최대값. 하드코딩하지 않고 그날 값에서 뽑는다.
+  const contribValues = Object.values(scores ?? {})
+    .map((item) => toNum(item?.score))
+    .filter((v): v is number => v !== null && v > 0)
+  const maxContribution = contribValues.length ? Math.max(...contribValues) : null
+
   return (
     <section data-testid="macro-section-cycle">
       <h2 className="text-lg font-semibold text-gray-900 mb-3">경기 사이클</h2>
       <div className="rounded-lg border bg-white p-5 shadow-sm space-y-5">
-        {/* 보존 목록 §1 — 국면 4칸 가로 배열(회복기→확장기→과열기→수축기) */}
-        <div className="grid grid-cols-4 gap-2 items-center">
-          {PHASES.map((p, i) => (
-            <div key={p} className="flex items-center">
-              <div className="flex-1">
-                <PhaseCard phase={p} isActive={phase === p} />
-              </div>
-              {i < PHASES.length - 1 && <div className="text-gray-300 text-lg font-bold mx-1 shrink-0">&rarr;</div>}
-            </div>
-          ))}
-        </div>
-
         {/* 보존 목록 §3 — 경기 국면 + 투자 체제가 나란히(grid-cols-2) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4" data-testid="macro-cycle-side-by-side">
           {/* 경기 국면 */}
@@ -373,6 +565,15 @@ export default function MacroCycleSection({ data, loading, error }: MacroCycleSe
               </span>
             </div>
             <p className="text-xs text-gray-500 text-center mb-3">경기 흐름 기반 (5개 지표)</p>
+
+            {/* 보존 목록 §1 — 국면 4칸 가로 배열(회복기→확장기→과열기→수축기), 현재 진한 색 + 확대.
+                체제 4칸 스트립과 같은 자리·같은 마크업이다(파일 상단 주석 참고) */}
+            <div className="grid grid-cols-4 gap-1.5 mb-3">
+              {PHASES.map((p) => (
+                <PhaseCard key={p} phase={p} isActive={phase === p} />
+              ))}
+            </div>
+
             {phase_desc && <p className="text-xs text-gray-600 text-center">{phase_desc}</p>}
           </div>
 
@@ -383,18 +584,8 @@ export default function MacroCycleSection({ data, loading, error }: MacroCycleSe
         {/* 보존 목록 §5 — 괴리 설명 */}
         <DivergenceNote phase={phase} regime={regime?.regime} />
 
-        {/* 신뢰도 바 */}
-        {confidence != null && (
-          <div>
-            <div className="flex justify-between text-xs text-gray-500 mb-1">
-              <span>신뢰도</span>
-              <span>{confidence}%</span>
-            </div>
-            <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
-              <div className="h-full rounded-full bg-blue-500 transition-all" style={{ width: `${Math.min(confidence, 100)}%` }} />
-            </div>
-          </div>
-        )}
+        {/* 1·2위 점수차 (원본의 「신뢰도 N%」 막대를 대체) */}
+        <PhaseGapBlock confidence={confidence} scores={scores} phase={phase} phaseLabel={phase_label} />
 
         {/* 보존 목록 §4 — 판단 근거 지표 카드 5종 */}
         {scores && (
@@ -405,6 +596,9 @@ export default function MacroCycleSection({ data, loading, error }: MacroCycleSe
                 testId={`macro-cycle-indicator-${key}`}
                 label={SCORE_LABELS[key] || key}
                 signal={item?.signal}
+                score={toNum(item?.score)}
+                maxScore={maxContribution}
+                phaseLabel={phase_label}
               />
             ))}
           </div>

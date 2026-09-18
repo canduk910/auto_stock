@@ -459,6 +459,29 @@ Dashboard 환경 배너 직하, 전략 탭 위 (`<ControlPanel />` 직후).
   (`macro-cycle-regime-{regime}`, `RegimeDetail` 안 보조 스트립) · 두 카드가 `grid-cols-2` 로 나란히
   · 판단 근거 지표 카드 5종(`macro-cycle-indicator-{key}`) · `DivergenceNote`(국면·체제 엇갈릴 때만,
   `macro-cycle-divergence-note`) · 체제 상세(공포탐욕/버핏지수/VIX) · `InfoTooltip` 해설 2종.
+- 🔴 **두 단계이동 스트립은 각자의 카드 안 같은 자리에 있다** — 국면·체제 카드 모두
+  「제목 → 큰 배지 → 부제 → 4칸 스트립(`grid-cols-4 gap-1.5`) → 상세」 순서를 공유한다.
+  한쪽만 옮기면 위치가 어긋나므로 순서를 바꿀 땐 두 카드를 같이 바꾼다. 국면 쪽 화살표(→)는
+  두지 않는다(반쪽 폭 카드에서 60px 를 먹어 4칸 라벨이 찌그러진다). 가드 = `MacroPage.test.tsx`
+  의 「각자의 카드 안 같은 자리」 케이스(두 스트립의 카드 내 자식 인덱스가 같은지까지 잰다).
+- 🔴 **`confidence` 는 「1·2위 점수차」로 보여 준다 — 확률이 아니다.** 값은
+  `cycle.py` 의 `(1위 총점 − 2위 총점) × 200` 이고 과거 적중률로 교정한 적이 없다.
+  블록 `macro-cycle-gap` 이 지키는 것 넷: (a) 라벨에 「신뢰」를 쓰지 않는다 (b) 단위는 `%` 가
+  아니라 `점` (c) 눈금은 **1위를 100% 로 잡은 상대 막대** — 0~1.00 공통 눈금 금지(국면별
+  도달 가능 최대 총점이 회복기 0.61 · 확장기 0.60 · 과열기 0.45 · 수축기 0.97 로 달라
+  1.00 은 거짓 분모다) (d) 2위 국면의 **이름은 응답에 없으므로**(`final_scores` 미반환)
+  지어내지 않고 「이름 없음」으로 둔다. 구간 배지(팽팽/보통/뚜렷)는 고정 컷이 아니라
+  `2 × 기여 > 격차`(한 지표가 1·2위를 갈아타면 격차가 기여의 2배만큼 움직인다)에서 끌어낸다.
+- 🔴 **지표 카드는 `score`(당선 국면 기여)만 쓰고 `score / weight`(지지율)는 쓰지 않는다** —
+  지표마다 한 국면에 줄 수 있는 상한이 달라서(과열기 기준 금리차 0.80 · 나머지 넷 0.30)
+  지지율을 나란히 세우면 거짓 비교가 된다. 기여는 같은 국면에 보탠 가중값이라 비교되고
+  **다 더하면 그 국면 총점**이다. testid = `macro-cycle-contrib-{key}`.
+- ⚠️ **새 testid 에 `macro-cycle-phase-` · `macro-cycle-indicator-` 접두사를 물려주지 않는다** —
+  보존 가드가 그 두 접두사를 정규식으로 세어 「국면 4칸」·「지표 카드 5종」을 단언하므로,
+  물려받는 순간 4칸이 11칸이 되고 5종이 10종이 된다(cycle306 실측).
+- 확률 오독 복귀는 `MacroPage.test.tsx` 가 막는다 — 금지어 6종(신뢰·정확·확률·가능성·적중·맞을)
+  검사 스코프는 **`macro-cycle-gap` 서브트리**다. 파일·섹션 단위로 넓히면 보존 대상인
+  `REGIME_TOOLTIP`(「신규 매수 금지」)과 `DivergenceNote`(「매수 기회일 수 있습니다」)가 걸린다.
 - **타입 계약 2가지**(`types/macro.ts`) — `MacroCycleResponse.cycle` 은 optional(`data.cycle || data`
   폴백), `RegimeData` 접근은 `regime?.regime` optional chaining. 응답 shape 계약 자체라 지우지 않는다.
 - `api/macro.ts` 는 우리 `api/client.ts`(axios, `baseURL:'/api'`) 를 쓴다 — `X-API-Key` 는 붙이지 않는다
