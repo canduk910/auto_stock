@@ -177,7 +177,7 @@ const REGIME_TOOLTIP = (
 
 // ── 서브 컴포넌트 ─────────────────────────────────────────────
 
-function PhaseCard({ phase, isActive }: { phase: CyclePhase; isActive: boolean }) {
+function PhaseCard({ phase, isActive, score }: { phase: CyclePhase; isActive: boolean; score?: number | null }) {
   const colors = PHASE_COLORS[phase] || PHASE_COLORS.recovery
   return (
     <div
@@ -188,6 +188,13 @@ function PhaseCard({ phase, isActive }: { phase: CyclePhase; isActive: boolean }
       }`}
     >
       {PHASE_LABELS[phase] || phase}
+      {/* 4국면 점수는 `final_scores` 가 왔을 때만 뜬다 — 없으면 이 줄이 없고 나머지는 byte 동일.
+          이게 "5개 지표가 어느 국면 쪽으로 엎치락뒤치락했나" 를 보여 주는 유일한 자리다. */}
+      {score != null && (
+        <div className={`mt-0.5 text-[11px] font-medium tabular-nums ${isActive ? "text-white/80" : "opacity-80"}`}>
+          {score.toFixed(2)}
+        </div>
+      )}
     </div>
   )
 }
@@ -396,11 +403,13 @@ function PhaseGapBlock({
   scores,
   phase,
   phaseLabel,
+  finalScores,
 }: {
   confidence?: number | null
   scores?: Record<string, CycleScoreItem> | null
   phase: CyclePhase
   phaseLabel?: string
+  finalScores?: Record<string, number> | null
 }) {
   const conf = toNum(confidence)
   if (conf === null) return null
@@ -410,11 +419,25 @@ function PhaseGapBlock({
     .filter((v): v is number => v !== null)
   const positive = contributions.filter((v) => v > 0)
 
-  const gap = conf / 200
-  // `min(100, ...)` 상한이라 100 이면 실제 격차는 0.50 **이상**이다. 모르는 값을 아는 척 그리지 않는다.
-  const atCap = conf >= 100
-  const topTotal = contributions.length ? contributions.reduce((a, b) => a + b, 0) : null
-  const secondTotal = topTotal !== null ? Math.max(0, topTotal - gap) : null
+  // `final_scores` 가 오면 2위의 **이름과 점수를 그대로** 쓴다. 없으면 `Σscore − confidence/200`
+  // 으로 역산하는데, `confidence` 가 정수 반올림이라 ±0.0075 오차를 안고 이름은 알 수 없다.
+  const ranked = Object.entries(finalScores ?? {})
+    .map(([k, v]) => [k, toNum(v)] as const)
+    .filter((e): e is readonly [string, number] => e[1] !== null)
+    .sort((a, b) => b[1] - a[1])
+  const hasRanking = ranked.length >= 2
+  const secondKey = hasRanking ? (ranked[1][0] as CyclePhase) : null
+  const secondName = secondKey ? PHASE_LABELS[secondKey] || secondKey : null
+
+  // 상한(100)에 걸렸는지는 역산 경로에서만 의미가 있다 — 실제 점수가 오면 격차도 실제값이다.
+  const gap = hasRanking ? ranked[0][1] - ranked[1][1] : conf / 200
+  const atCap = !hasRanking && conf >= 100
+  const topTotal = hasRanking
+    ? ranked[0][1]
+    : contributions.length
+      ? contributions.reduce((a, b) => a + b, 0)
+      : null
+  const secondTotal = hasRanking ? ranked[1][1] : topTotal !== null ? Math.max(0, topTotal - gap) : null
   const secondPct = topTotal !== null && topTotal > 0 && secondTotal !== null ? Math.min(100, (secondTotal / topTotal) * 100) : null
 
   // 혼자 돌아서면 순위를 뒤집는 지표 수
@@ -457,9 +480,11 @@ function PhaseGapBlock({
             <span className="w-12 shrink-0 text-right text-xs font-semibold text-gray-700 tabular-nums">{topTotal.toFixed(2)}</span>
           </div>
           <div className="flex items-center gap-2" data-testid="macro-cycle-gap-second">
-            {/* 2위 국면의 **이름은 응답에 없다**(`cycle.py` 가 `final_scores` 를 반환하지 않는다).
-                점수만 알고 이름은 모르는 상태를 감추지 않고 그대로 적는다. */}
-            <span className="w-24 shrink-0 text-xs text-gray-500 truncate">2위 (이름 없음)</span>
+            {/* `final_scores` 가 오면 2위 국면 이름을 그대로 적고, 없으면 이름을 **지어내지 않는다**
+                — 점수만 알고 이름은 모르는 상태를 감추는 것이 더 나쁘다. */}
+            <span className="w-24 shrink-0 text-xs text-gray-500 truncate">
+              {secondName ? `2위 ${secondName}` : "2위 (이름 없음)"}
+            </span>
             <div className="flex-1 h-2.5 bg-gray-200 rounded-full overflow-hidden">
               <div
                 className={`h-full rounded-full bg-gray-400 ${atCap ? "opacity-60" : ""}`}
@@ -530,7 +555,7 @@ export default function MacroCycleSection({ data, loading, error }: MacroCycleSe
   const cycle: MacroCycleData | undefined = data.cycle || (data as unknown as MacroCycleData)
   const regime = data.regime || null
   if (!cycle) return null
-  const { phase, phase_label, phase_desc, confidence, scores, leader_sectors } = cycle
+  const { phase, phase_label, phase_desc, confidence, scores, leader_sectors, final_scores } = cycle
 
   const phaseColors = PHASE_COLORS[phase] || PHASE_COLORS.recovery
 
@@ -570,7 +595,7 @@ export default function MacroCycleSection({ data, loading, error }: MacroCycleSe
                 체제 4칸 스트립과 같은 자리·같은 마크업이다(파일 상단 주석 참고) */}
             <div className="grid grid-cols-4 gap-1.5 mb-3">
               {PHASES.map((p) => (
-                <PhaseCard key={p} phase={p} isActive={phase === p} />
+                <PhaseCard key={p} phase={p} isActive={phase === p} score={toNum(final_scores?.[p])} />
               ))}
             </div>
 
@@ -585,7 +610,7 @@ export default function MacroCycleSection({ data, loading, error }: MacroCycleSe
         <DivergenceNote phase={phase} regime={regime?.regime} />
 
         {/* 1·2위 점수차 (원본의 「신뢰도 N%」 막대를 대체) */}
-        <PhaseGapBlock confidence={confidence} scores={scores} phase={phase} phaseLabel={phase_label} />
+        <PhaseGapBlock confidence={confidence} scores={scores} phase={phase} phaseLabel={phase_label} finalScores={final_scores} />
 
         {/* 보존 목록 §4 — 판단 근거 지표 카드 5종 */}
         {scores && (

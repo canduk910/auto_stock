@@ -239,6 +239,50 @@ describe("MacroPage — /macro 화면 회귀 가드 (cycle303)", () => {
     expect(screen.getByTestId("macro-cycle-gap-caveat").textContent).toMatch(/1위와 2위가 벌어진 정도/)
   })
 
+  it("final_scores 가 오면 2위 국면 이름과 4국면 점수를 보여 준다 (cycle306)", async () => {
+    // `cycle.py` 가 이미 계산해 두고 반환에서 버리던 값이라 원 패키지에 추가를 요청했다.
+    // 그 필드가 오는 날 화면이 저절로 좋아지도록 **선택 필드**로 미리 받아 둔다.
+    // ⚠️ `baseCycleData` 의 overrides 는 **최상위**(cycle/regime 형제)에 얹힌다 —
+    //    `final_scores` 는 `cycle` **안**에 들어가야 하므로 만든 뒤에 심는다.
+    const payload = baseCycleData()
+    ;(payload.cycle as Record<string, unknown>).final_scores = {
+      recovery: 0.06,
+      expansion: 0.35,
+      overheating: 0.04,
+      contraction: 0.2,
+    }
+    mockAll({ cycle: payload })
+    render(<MacroPage />)
+    await screen.findByTestId("macro-section-cycle")
+
+    // 2위(수축기 0.20)의 이름을 실제로 적는다 — 「이름 없음」이 사라진다.
+    const second = await screen.findByTestId("macro-cycle-gap-second")
+    expect(second.textContent).toContain("수축기")
+    expect(second.textContent).not.toMatch(/이름 없음/)
+
+    // 격차는 역산(confidence/200 = 0.31)이 아니라 **실제 차** 0.35 − 0.20 = 0.15 다.
+    expect(screen.getByTestId("macro-cycle-gap-value").textContent).toContain("0.15")
+
+    // 국면 4칸 전부에 점수가 붙어 "엎치락뒤치락" 이 보인다.
+    for (const [p, v] of [
+      ["recovery", "0.06"],
+      ["expansion", "0.35"],
+      ["overheating", "0.04"],
+      ["contraction", "0.20"],
+    ] as const) {
+      expect(screen.getByTestId(`macro-cycle-phase-${p}`).textContent).toContain(v)
+    }
+  })
+
+  it("final_scores 가 없으면 이름을 지어내지 않는다 (cycle306 — 폴백 경로)", async () => {
+    render(<MacroPage />) // 기본 픽스처 = final_scores 없음
+    await screen.findByTestId("macro-section-cycle")
+
+    expect(screen.getByTestId("macro-cycle-gap-second").textContent).toContain("이름 없음")
+    // 점수 줄도 없다 — 없는 값을 0 으로 그리지 않는다.
+    expect(screen.getByTestId("macro-cycle-phase-recovery").textContent).toBe("회복기")
+  })
+
   it("지표 카드는 지지율이 아니라 당선 국면 기여를 보여 준다 (cycle306)", async () => {
     render(<MacroPage />)
     await screen.findByTestId("macro-section-cycle")

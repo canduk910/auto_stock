@@ -164,6 +164,16 @@ export interface MacroCycleData {
   confidence: number
   scores: Record<string, CycleScoreItem>
   leader_sectors: string[]
+  /**
+   * 국면 4종의 가중합산 총점. `cycle.py` 가 **이미 계산해 두고 반환에서 버리던** 값이라
+   * 원 패키지에 한 키 추가를 요청해 둔 상태다 — 그래서 **선택 필드**다.
+   *
+   * 없으면 화면은 1위 총점(= Σscore)과 `confidence` 로 2위를 역산해 「2위 (이름 없음)」을
+   * 그리고, 오면 국면 4칸에 점수를 직접 얹어 「어느 국면이 2위인가」를 보여 준다.
+   * 역산은 `confidence` 가 정수 반올림이라 ±0.0075 오차를 안고 있으므로, 이 값이 오면
+   * 역산 경로를 쓰지 않는다.
+   */
+  final_scores?: Record<string, number> | null
 }
 
 export type InvestmentRegime = "accumulation" | "selective" | "cautious" | "defensive"
