@@ -27,7 +27,8 @@
 | 23:00 | **cycle305~309 배포**(full) | ✅ 23:00:10 컨테이너 3개(macro 포함) · 마커 `908f8f5a` · `.deployed_sha.attempt` 소거. **이미지 3개 순차 빌드 성공** — 스왑 최대 456M 흡수, 가용 메모리 825M 이하로 안 떨어짐(cycle305 의 첫 실증) |
 | 23:05~23:14 | **일봉 첫 전체 채움** | ✅ 316초 · `total=1053 fetched=1053 upserted_rows=164229 failed=0`. 225행 도달 **348 → 1,030개**(18.4%→54.5%, 적재 대상 기준 **97.8%**) · 평균 145→179행 |
 | 23:2x | 매크로 5섹션 콜드 캐시 | ⚠️ yield-curve 14.2s · **credit-spread 52.4s**(한도 60s 안, cycle307 효과) · **macro-cycle 107.0s**(한도 초과) · currencies 0.8s · commodities 1.2s. macro-cycle 은 FRED 가 아니라 **yfinance**(섹터 ETF 11종·버핏·공포탐욕)가 대부분 — 결정 항목 ②로 올림 |
-| 23:5x | **cycle310~312 배포** | ✅ **56초** 완료(frontend+macro 선택 배포) · 마커 `7c6fe165`. 🔴 **backend 무접촉 실증** — frontend·macro 만 재시작되고 backend 는 53분째 그대로. cycle248 의 선택 배포가 macro 축까지 제대로 동작한 첫 사례다. 운영 실측 `GET /api/macro/sp500` **200 / 0.7초** · `final_scores` 1위 과열기 0.34 / 2위 확장기 0.27 / confidence 14 |
+| 23:45 | **cycle310 배포** | ✅ **56초** 완료(frontend+macro 선택 배포, Deploy run 35358170782) · 마커 `7c6fe165`. 🔴 **backend 무접촉 실증** — frontend·macro 만 재시작되고 backend 는 그대로. cycle248 의 선택 배포가 macro 축까지 동작한 첫 사례다. 운영 실측 `GET /api/macro/sp500` **200 / 0.7초** · `final_scores` 1위 과열기 0.34 / 2위 확장기 0.27 / confidence 14 |
+| 09-19 00:00 | **cycle311·312 배포** | ✅ **53초**(Deploy run 35359750102 · CI run 35358805829 9m17s success) · 마커 `758d5d32`=HEAD · attempt 마커 소거. macro 축 단독이라 backend 무접촉. 운영 확인 `_FRED_TIMEOUT=8.0` · `_env_timeout` 존재 · `final_scores` 정상. ⚠️ 마지막 커밋 `758d5d3`(`_workspace/**` 단독)은 `paths-ignore` 로 CI/Deploy 자체가 안 떴다(설계대로) |
 
 ## 🔴 2026-09-18 23:1x VCP 야간 실측 — 일봉은 해결됐고, **병목은 돌파선이다**
 
