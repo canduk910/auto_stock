@@ -73,7 +73,14 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_read_timeout 60s;
+        # 🔴 **120s** — 콜드 캐시 첫 호출 실측이 근거다(2026-09-18 운영):
+        #   yield-curve 14.2s · credit-spread 52.4s · **macro-cycle 107.0s** · 환율/원자재 1s 내외.
+        # `macro-cycle` 은 5지표를 다 모으느라 60s 로는 **첫 호출이 504** 였다. 그 107초의
+        # 대부분은 FRED 가 아니라 **yfinance**(섹터 ETF 11종·버핏지수·공포탐욕)라
+        # `MACRO_LITE_FRED_TIMEOUT` 을 더 낮춰도 들어오지 않는다.
+        # 같은 날 00:05 KST prewarm(`tools/ops/macro_prewarm.sh`)을 함께 넣어 **사용자가
+        # 이 한도에 닿는 일 자체를 없앴고**, 이 값은 그 prewarm 이 실패한 날의 안전망이다.
+        proxy_read_timeout 120s;
     }
 
     # API 리버스 프록시 — HTTP 템플릿과 동일 헤더 4종. `$api_key_for_user` 는 위에서

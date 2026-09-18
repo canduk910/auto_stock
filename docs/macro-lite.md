@@ -146,7 +146,37 @@ compose 가 이미 호스트 bind mount 로 고정해 뒀으므로 기본 설정
 
 ---
 
-## 5. 장애 복구
+## 5. 첫 호출이 느린 이유와 미리 데우기
+
+캐시가 빈 상태에서 `/macro` 를 처음 열면 실측(2026-09-18 운영)이 이렇다.
+
+| 엔드포인트 | 콜드 | 캐시 후 |
+|---|---|---|
+| yield-curve | 14.2s | 1초 미만 |
+| credit-spread | 52.4s | 1초 미만 |
+| **macro-cycle** | **107.0s** | 3초대 |
+| currencies / commodities / sp500 | 1초 내외 | 1초 미만 |
+
+🔴 **107초의 대부분은 FRED 가 아니라 yfinance** 다(섹터 ETF 11종·버핏지수·공포탐욕).
+그래서 `MACRO_LITE_FRED_TIMEOUT` 을 더 낮춰도 이 값은 줄지 않는다. 두 가지로 막는다.
+
+1. **nginx 읽기 예산 `120s`** — `frontend/nginx.conf.template` · `nginx.tls.conf.template` 의
+   `location /api/macro/` `proxy_read_timeout`. 60초였을 때 `macro-cycle` 첫 호출이 **504** 였다.
+   가드 = `tests/unit/deploy/test_cycle310_macro_timeout_budget.py`(실측 107초를 직접 기준으로 둔다 —
+   「CSV 최악 32초 < 60초」 산수만으로는 이 결함을 못 잡았다).
+2. **매일 00:05 KST 미리 데우기** — `tools/ops/macro_prewarm.sh` 를 EC2 crontab 에 건다.
+   ```
+   # EC2 는 UTC 다 — 00:05 KST = 15:05 UTC
+   5 15 * * * /home/ubuntu/auto_stock/tools/ops/macro_prewarm.sh >> /home/ubuntu/auto_stock/logs/macro_prewarm.log 2>&1
+   ```
+   스크립트의 두 가지 설계는 바꾸지 않는다 — **credit-spread 를 먼저** 친다(그 캐시를
+   `macro-cycle` 이 재사용한다. 뒤집으면 같은 FRED 왕복을 두 번 한다) · **nginx 를 우회**한다
+   (사이트 전체가 Basic Auth 뒤에 있는데 그 자격을 cron 파일에 두면 비밀값이 파일로 샌다.
+   도커 네트워크 안에서 macro 컨테이너를 직접 쳐도 **같은 캐시**가 찬다).
+
+---
+
+## 6. 장애 복구
 
 ### FRED_API_KEY 교체 후 즉시 반영하고 싶을 때
 
@@ -174,7 +204,7 @@ PY
 
 ---
 
-## 6. 로컬에서 화면 띄우기
+## 7. 로컬에서 화면 띄우기
 
 ```bash
 docker compose up --build  # macro 서비스 포함 — 개발: 프론트 :3000 · 백엔드 :8002 · macro :8010(루프백)

@@ -96,8 +96,12 @@ root_logger.setLevel(logging.DEBUG)
 # 🔴 30 일이던 값을 줄인 이유는 용량이다 — 하루 약 300MB 라 30일이면 9GB 이고,
 # EC2 루트가 19GB 뿐이라 이미지 3개를 굽는 배포에서 디스크가 마른다(2026-09-18 실측:
 # `logs/` 6.4GB, 루트 여유 3.4GB 로 배포 기준 5GB 미달). 두 핸들러가 같은 값을 쓴다.
-# ⚠️ 손으로 `.gz` 압축한 파일은 `TimedRotatingFileHandler` 가 자기 회전 파일로 인식하지
-# 못해 이 보관 일수의 자동 삭제 대상에서 빠진다 — 압축본은 사람이 따로 지운다.
+# 🔴 **로그를 압축하지 않는다** (2026-09-19 사용자 결정 — "압축 안 하고 바로 지우기").
+# `TimedRotatingFileHandler` 는 자기가 만든 이름 규칙(`auto_stock.log.YYYY-MM-DD`)의 파일만
+# 세어서 지운다. 손으로 `.gz` 로 압축하면 그 규칙에서 벗어나 **자동 삭제 대상에서 영구히
+# 빠지고**, 아무도 안 지우면 계속 쌓인다(2026-09-18 실측: 37개 1.9GB 가 그렇게 남았다).
+# 디스크가 모자라면 압축이 아니라 **보관 일수를 줄이는 것**이 답이다 — 그래야 자동 삭제가
+# 계속 일한다. `handler.rotator`/`handler.namer` 로 압축을 붙이는 것도 같은 이유로 하지 않는다.
 _LOG_BACKUP_DAYS = 20
 
 console_handler = logging.StreamHandler()

@@ -77,12 +77,38 @@ def test_csv_worst_case_fits_nginx_budget(tpl: str) -> None:
     )
 
 
+#: `macro-cycle` 콜드 캐시 첫 호출 실측(2026-09-18 운영, 초). 이 엔드포인트가 5지표를
+#: 다 모으느라 가장 오래 걸리고, **그 대부분이 FRED 가 아니라 yfinance** 다 —
+#: `MACRO_LITE_FRED_TIMEOUT` 을 낮춰도 이 값은 줄지 않는다.
+_MACRO_CYCLE_COLD_SECS = 107.0
+
+
+def test_budget_covers_measured_cold_call() -> None:
+    """nginx 예산이 **실측된 최악 콜드 호출**보다 커야 한다.
+
+    cycle310 초판은 「CSV 최악 32초 < 60초」만 봤는데, 그 산수가 통과하는데도 운영에서
+    `macro-cycle` 이 107초로 **504** 가 났다. CSV 왕복은 전체의 일부일 뿐이라
+    그것만으로는 예산을 판정할 수 없다 — 실측값을 직접 기준으로 둔다.
+    """
+    for tpl in _NGINX_TEMPLATES:
+        budget = _macro_proxy_read_timeout(_read(tpl))
+        if budget is None:
+            continue
+        assert budget > _MACRO_CYCLE_COLD_SECS, (
+            f"{tpl} 의 nginx 예산 {budget:g}초가 실측 콜드 호출 "
+            f"{_MACRO_CYCLE_COLD_SECS:g}초보다 작다 — 첫 호출이 504 가 된다"
+        )
+
+
 def test_guard_is_not_vacuous() -> None:
-    """가드가 공허하지 않은지 — 값을 25로 되돌리면 실제로 붉어지는 관계인지 산수로 확인."""
+    """가드가 공허하지 않은지 — 원 패키지 기본값(25초)이면 실제로 붉어지는지 산수로 확인."""
     budget = _macro_proxy_read_timeout(_read("frontend/nginx.conf.template"))
     if budget is None:
         pytest.skip("nginx 템플릿에 macro 블록이 없다")
-    # 원 패키지 기본값 25 를 쓰면 100초라 어떤 합리적 nginx 예산도 넘는다.
-    assert 25 * _CSV_ATTEMPTS * _CSV_SERIES > budget, (
-        "nginx 예산이 100초를 넘게 커졌다면 이 가드의 전제가 바뀐 것이다 — 주석을 갱신하라"
+    # 기본값 25 면 CSV 왕복만 100초다. 거기에 yfinance 몫이 더 붙으므로
+    # (실측 107초는 타임아웃 8초일 때의 값이다) 어떤 합리적 예산도 넘긴다.
+    worst_with_default = 25 * _CSV_ATTEMPTS * _CSV_SERIES + (_MACRO_CYCLE_COLD_SECS - 8 * _CSV_ATTEMPTS * _CSV_SERIES)
+    assert worst_with_default > budget, (
+        f"기본값 25 일 때 추정 최악 {worst_with_default:g}초가 예산 {budget:g}초 아래라면 "
+        "이 가드의 전제가 바뀐 것이다 — 주석과 실측값을 갱신하라"
     )
