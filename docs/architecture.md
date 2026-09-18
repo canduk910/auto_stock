@@ -791,10 +791,16 @@ GitHub Secrets: `EC2_HOST`, `EC2_USERNAME`, `EC2_SSH_KEY`, `SUPABASE_DB_URL`(값
 ```
 ~/auto_stock/                  # git clone (전체 소스)
 ├── .env                       # 환경변수 (chmod 600, git 미추적)
-├── logs/                      # 로그 볼륨 마운트
+├── logs/                      # 로그 볼륨 마운트 (20일 보관 · 🔴 압축 금지)
 ├── docker-compose.prod.yml    # 프로덕션 Compose
 └── (나머지 소스 파일)
 ```
+
+🔴 **`logs/` 의 회전 파일을 손으로 압축하지 않는다.** `TimedRotatingFileHandler` 는 자기가 만든
+이름 규칙(`auto_stock.log.YYYY-MM-DD`)의 파일만 세어서 지운다 — `.gz` 로 바꾸면 그 규칙에서
+벗어나 **자동 삭제 대상에서 영구히 빠진다**(2026-09-18 실측: 37개 1.9GB 가 그렇게 남아 루트
+여유가 배포 문턱 아래로 떨어졌다). 디스크가 모자라면 압축이 아니라 `src/main.py` 의
+`_LOG_BACKUP_DAYS`(현재 **20**)를 줄인다.
 
 ---
 
