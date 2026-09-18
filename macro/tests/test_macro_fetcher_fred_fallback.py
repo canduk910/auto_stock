@@ -33,9 +33,45 @@ def test_uses_browser_ua():
     with patch("requests.get", side_effect=fake_get):
         macro_fetcher._http_get_fred_csv("https://example.com/x.csv")
 
-    assert captured["timeout"] == 25
+    # 값 리터럴이 아니라 상수와 대조한다 — 타임아웃은 `MACRO_LITE_FRED_TIMEOUT` 로
+    # 환경마다 달라지므로(운영 8초), 25 를 박아 두면 운영 설정에서 이 테스트가 붉어진다.
+    assert captured["timeout"] == macro_fetcher._FRED_TIMEOUT
     ua = captured["headers"]["User-Agent"]
     assert "Mozilla" in ua and "Chrome" in ua
+
+
+def test_fred_timeout_env_override(monkeypatch):
+    """`MACRO_LITE_FRED_TIMEOUT` 이 CSV 타임아웃을 정한다 — 잘못된 값은 기본값으로 살린다.
+
+    0·음수·빈 문자열·비정수가 그대로 들어가면 requests 가 즉시 끊거나 무한 대기로
+    해석해, 설정 오타 하나가 하이일드 섹션을 통째로 죽인다.
+    """
+    monkeypatch.setenv("MACRO_LITE_FRED_TIMEOUT", "8")
+    assert macro_fetcher._env_int("MACRO_LITE_FRED_TIMEOUT", 25) == 8
+
+    for bad in ("", "0", "-3", "abc", "8.5"):
+        monkeypatch.setenv("MACRO_LITE_FRED_TIMEOUT", bad)
+        assert macro_fetcher._env_int("MACRO_LITE_FRED_TIMEOUT", 25) == 25, bad
+
+    monkeypatch.delenv("MACRO_LITE_FRED_TIMEOUT", raising=False)
+    assert macro_fetcher._env_int("MACRO_LITE_FRED_TIMEOUT", 25) == 25
+
+
+def test_fred_csv_worst_case_fits_nginx_read_timeout():
+    """CSV 최악 소요가 nginx `/api/macro/` 의 `proxy_read_timeout 60s` 안에 들어야 한다.
+
+    하이일드·경기사이클은 시리즈 2개(HY·IG)를 각각 2회(1회 재시도) 친다 —
+    `timeout x 2회 x 2시리즈` 가 60초를 넘으면 화면이 504 를 받는다(2026-09-18 실측 104초).
+    """
+    import os
+
+    effective = macro_fetcher._env_int("MACRO_LITE_FRED_TIMEOUT", macro_fetcher._FRED_TIMEOUT)
+    worst = effective * 2 * 2
+    if os.getenv("MACRO_LITE_FRED_TIMEOUT"):
+        assert worst < 60, f"CSV 최악 {worst}초 — nginx 60s 를 넘는다"
+    else:
+        # 환경변수 미설정(패키지 기본 25)은 원본 그대로라 여기서 강제하지 않는다.
+        assert effective == macro_fetcher._FRED_TIMEOUT
 
 
 def test_content_type_html_treated_as_failure():

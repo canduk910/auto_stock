@@ -493,11 +493,34 @@ def _classify_oas_sentiment(current: float, stats: dict) -> dict:
 #  2) timeout 25초 + 1회 재시도(2초 간격)
 #  3) Content-Type 검증 (text/csv 또는 text/plain만 허용)
 #  4) 7일 stale 캐시 fallback — 신선 fetch 실패 시 마지막 성공 응답 재활용
+def _env_int(name: str, default: int) -> int:
+    """정수 환경변수를 안전하게 읽는다 — 빈 값·비정수·0 이하는 기본값으로 되돌린다.
+
+    타임아웃에 0 이나 음수가 들어가면 requests 가 즉시 끊거나 무한 대기로 해석해,
+    설정 오타 하나가 하이일드 섹션을 통째로 죽인다. 조용히 기본값으로 살린다.
+    """
+    try:
+        v = int(os.getenv(name, "") or default)
+    except (TypeError, ValueError):
+        return default
+    return v if v > 0 else default
+
+
 _FRED_BROWSER_UA = (
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 )
-_FRED_TIMEOUT = 25
+#
+# ⚠️ 이 상수만 환경변수로 뺀 것은 **원 패키지(stock-manager)가 같은 이름·같은 기본값으로
+# 같은 변경을 했기 때문**이다(2026-09-18 상대 세션 합의) — vendor 사본을 우리 쪽으로
+# 흩뜨리는 게 아니라 패키지와 같은 모양으로 맞추는 것이다. 25 라는 값에는 실측 근거가
+# 없고(2026-05-04 CSV 차단 핫픽스 때 UA·재시도와 함께 얹힌 값), 정상 CSV 응답은 1초
+# 미만이다. 25 를 그대로 두면 CSV 가 막힌 날 `credit_spread`+`macro_cycle` 이
+# 25초 x 2회 x 2시리즈 = 약 100초가 되어 **nginx `/api/macro/` 의 `proxy_read_timeout 60s`
+# 를 넘겨 504** 가 된다(2026-09-18 로컬 실측 104초). 8초면 최악이 32초 + JSON 폴백이라
+# 그 안에 든다. 🔴 CSV↔JSON **시도 순서는 바꾸지 않는다** — 백분위·z점수 baseline 이
+# 「그 호출이 돌려준 rows」 자체라, 두 소스의 날짜 집합이 다르면 심리 판정이 갈린다.
+_FRED_TIMEOUT = _env_int("MACRO_LITE_FRED_TIMEOUT", 25)
 _FRED_STALE_TTL_HOURS = 24 * 7  # 7일
 
 

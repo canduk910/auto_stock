@@ -193,11 +193,15 @@ cycle298 이 그 첫 회차 지연을 호출부 인자 `first_delay` 로 열어,
 
 - 🔴 **cycle303(매크로 이식 1단계) 후속 — EC2 첫 배포 전에 사람이 해야 할 일 2건.** 절차 원문 = [`docs/macro-lite.md`](../docs/macro-lite.md).
   ⓐ **`mkdir -p ~/auto_stock/macro-cache`** 를 **compose 보다 먼저** 친다 — bind mount 를 Docker 가 먼저 만들면 root:root 가 되어 컨테이너가 캐시를 못 쓴다(`.token_cache` 사고와 같은 계열, `secrets/`·`certbot-www/` 와 같은 규약).
-  ⓑ **seed 1회 적재**(`python -m macro_lite.seed`, 멱등) — 안 하면 하이일드 백분위 baseline 이 FRED 가 주는 최근 3년치로 퇴행한다(초과분은 영구 재취득 불가).
+  ⓑ **seed 1회 적재**(`python -m macro_lite.seed`, 멱등) — 안 하면 하이일드 **차트**의 10년·5년 구간이 FRED 가 주는 최근 3년치로 줄어든다(초과분은 영구 재취득 불가). 백분위·5단계 심리는 매 호출 신선 fetch 로 계산되므로 seed 와 무관하다.
   ⓒ `FRED_API_KEY` 는 선택이지만 권장. ⚠️ **`.env` 편집은 `env_file: .env` 인 backend 를 재생성**하므로 장외 창(15:30~16:00 · 21:35~07:45)에서만.
   ⓓ 첫 배포는 `tools/deploy/` 가 바뀌어 **full 모드**다 — 보유 0 인 장외 창에서 push 한다.
 - **cycle303 후속 ② 매크로 값 비교(2단계 착수 전제)** — `macro/data/macro_regime_history_seed.json`(147행, 2026-04-25~09-18)은 **macro_lite 가 읽지 않는다**(무상태 판정 계약 — 이 파일을 판정 입력으로 연결하면 원본과 결과가 갈린다). 용도는 우리 산출값 ↔ 원 프로젝트 산출값 **대조**뿐이다. dkstock.cloud 전환(3단계) 승인 전에 두 값이 같은 국면·체제를 내는지 며칠 관찰한다.
-- **cycle303 후속 ③ macro 패키지 테스트(193건)를 CI 에 편입할지** — 지금은 `pyproject.toml` 의 `testpaths=["tests"]` 가 우리 스위트와 분리하고 CI 도 안 돈다(`macro/requirements.txt` 설치 시간 + pandas/numpy 가 매매 CI 잡에 들어온다). 별도 job 으로 뗄지, 그대로 둘지 미결.
+- **cycle307 후속 ① 원 패키지(stock-manager)로 넘길 항목 2건** — 우리가 고칠 자리가 아니다(`macro/macro_lite/` 는 무수정 vendor).
+  ⓐ **백분위 baseline 이 누적 store 가 아니라 「그 호출의 신선 rows」다.** CSV 성공일은 881행·JSON 폴백일은 787행 기준이라 **날마다 잣대가 약 4개월 어긋난다**. 상대 세션이 "baseline 을 누적 store 로 통일" 을 개선 후보로 접수했고, macro-sentinel 자문 뒤 별도 진행한다. 그 전까지 우리는 **CSV↔JSON 순서를 바꾸지 않는다**(바꾸면 매일 짧은 창으로 판정한다).
+  ⓑ `fetcher.py::_fetch_fred_oas` docstring 이 "전 기간 baseline (1996-12-31 ~ 현재, 약 28년) 사용" 이라고 적혀 있는데, ICE BofA 라이선스로 FRED 가 약 3년치만 준다(같은 파일 아래 주석이 그 사실을 적고 있어 서로 어긋난다). 이 문장이 "누적 store = 백분위 baseline" 오독의 진원지였다.
+- **cycle307 후속 ② `docs/macro-lite.md` 를 정본 목록에 넣을지** — cycle303 에서 생겼는데 루트 `CLAUDE.md` 「문서 규약」 의 정본 열거에도, `.claude/commands/sync-docs.md` 의 `for f in …` 루프에도, 같은 파일 「대상 문서 정본 목록」 표에도 없다. 성격은 등재된 `docs/backtest-monitoring.md` 와 같은 운영 가이드다. ⚠️ **넣으려면 그 세 곳을 한 커밋에 같이 고쳐야 한다** — 하나라도 빠지면 `test_doc_overpaint_zero.py::test_sync_docs_bash_loop_covers_every_canonical_doc` 가 즉시 RED 다(루트 CLAUDE.md 파생 집합 == sync-docs 루프 집합을 강제한다).
+- **cycle303 후속 ③ macro 패키지 테스트(195건)를 CI 에 편입할지** — 지금은 `pyproject.toml` 의 `testpaths=["tests"]` 가 우리 스위트와 분리하고 CI 도 안 돈다(`macro/requirements.txt` 설치 시간 + pandas/numpy 가 매매 CI 잡에 들어온다). 별도 job 으로 뗄지, 그대로 둘지 미결.
 - cycle296 후속: `finally` `is fut` 가드 봉인 테스트(M16 — 실패한 옛 리더가 새 리더 등록을 지워 KIS 재호출, 프로브 실증) · `_ISSUE_JOIN_TIMEOUT_SECS` 크기 부등식 핀(M28b) · `fut.exception()` 소음 제거(선택)
 - cycle297 후속: enforce 정량 기준 숫자 `domain-consult` · N≥30 후 첫 enforce 후보 1전략
 - **cycle299 후속 ① VCP 100일 cap 두 겹 해제 — cycle300 이 처리(코드 착지, 켜는 것은 별도 조작)**. 읽기 관문 상한은 `_MAX_DAILY_ROWS = 400` 이 됐고 VCP 는 전략 파라미터 `daily_fetch_depth_mode` 로 깊이를 고른다. **기본값 `"cap100"` 이라 배포만으로는 매매가 바뀌지 않는다** — 200일 EMA 를 실제로 쓰려면 `PUT /api/strategies/vcp_breakout/params {"daily_fetch_depth_mode":"full"}` 를 쳐야 한다. 그 PUT 이 남은 결정 항목이고, 아래 후속 ③ ⓓ(실효 장기선 200 확인)가 그 전제다. 롤백은 같은 PUT 에 `"cap100"`

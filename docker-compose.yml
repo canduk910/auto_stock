@@ -59,4 +59,6 @@ services:
     environment:
       - MACRO_LITE_CACHE_DIR=/var/lib/macro-lite
       - FRED_API_KEY=${FRED_API_KEY:-}
+      # prod 와 같은 값 — 여기만 기본 25 로 두면 로컬에서 느린 경로를 재현하지 못한다.
+      - MACRO_LITE_FRED_TIMEOUT=8
       - TZ=Asia/Seoul

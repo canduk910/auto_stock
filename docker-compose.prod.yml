@@ -85,6 +85,10 @@ services:
       - MACRO_LITE_CACHE_DIR=/var/lib/macro-lite
       # FRED JSON API 폴백 키(선택, 없어도 CSV 무키 경로 + 7일 stale 캐시로 동작).
       - FRED_API_KEY=${FRED_API_KEY:-}
+      # FRED CSV 요청 타임아웃(초). 기본 25 를 그대로 두면 CSV 가 막힌 날
+      # 25 x 2회 x 2시리즈 = 약 100초라 아래 nginx `proxy_read_timeout 60s` 를 넘겨
+      # 하이일드·경기사이클이 504 가 된다. 8 이면 최악 32초 + JSON 폴백.
+      - MACRO_LITE_FRED_TIMEOUT=8
       - TZ=Asia/Seoul
     # 🔴 `env_file: .env` 금지 — KIS·OPENAI 등 비밀 33개를 이 컨테이너에 밀어 넣는다
     # (frontend 블록과 같은 이유, 위 주석 참조). macro_lite 는 그 비밀 중 어느 것도
