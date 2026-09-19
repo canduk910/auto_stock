@@ -73,6 +73,21 @@
 (`totalW <= 1.01 ? w*100 : w`) 둘 다 정확히 붉어졌다. 잔존 0건.
 
 
+## 후속 B 해소 — 프론트 영향 인덱스가 여러 줄 import 를 놓치던 것
+
+`tools/test_impact/build_index_frontend.mjs` 의 `IMPORT_RE` 가 `.+?`(개행 불포함)라
+여러 줄로 쓴 import 를 통째로 놓쳤다. **실측 39파일 46건.** `[\s\S]+?` 로 고쳤다.
+
+🔴 **놓친 의존은 인덱스에서 사라지고, 그러면 그 모듈만 고치는 PR 에서
+`affected.py --target=frontend` 가 빈 목록을 돌려줘 회귀 테스트가 조용히 건너뛰어진다** —
+테스트가 붉어지는 것보다 나쁘다. cycle315 에서 신규 `utils/marketRegime.ts` 가 인덱스에
+안 잡혀 import 를 한 줄로 바꿔 우회했던 그 근본이다.
+
+재생성 결과 **frontend modules 104 → 118**. 가드 = `tests/unit/deploy/test_cycle316_frontend_impact_index.py`
+(정규식이 개행을 넘는가 · 도구 정규식을 꺼내 여러 줄 샘플에 직접 돌리기 · 인덱스 반영 · 도구 실행).
+⚠️ 「소스에 여러 줄 import 가 있으면 실패」로 짰다가 **그 자체는 금지가 아니라서** 설계를 고쳤다 —
+재는 것은 소스의 형태가 아니라 **도구의 파싱 능력**이다. 뮤테이션(정규식 원복)으로 2건 붉어짐 확인.
+
 ## 검증
 
 AST 1,782 passed · 프론트 **860 passed** · deploy 232 passed · `tsc -b` 0.

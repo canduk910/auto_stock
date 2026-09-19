@@ -16,7 +16,12 @@ const ROOT = resolve(__dirname, "..", "..");
 const FRONT_SRC = join(ROOT, "frontend", "src");
 const INDEX_PATH = join(ROOT, "_workspace", "test_index.yaml");
 
-const IMPORT_RE = /^\s*import\s+(?:.+?\s+from\s+)?["']([^"']+)["']/gm;
+// 🔴 `[\s\S]` 로 **개행을 넘는다**. `.` 는 개행에 안 걸려서 여러 줄로 쓴 import 를
+// 통째로 놓쳤다(2026-09-19 실측: 39파일 46건). 놓친 의존은 인덱스에서 사라지고,
+// 그러면 그 모듈만 고치는 PR 에서 `affected.py --target=frontend` 가 빈 목록을 돌려줘
+// 회귀 테스트가 **조용히 건너뛰어진다** — 붉어지는 것보다 나쁘다.
+// 가드 = `tests/unit/deploy/test_cycle316_frontend_impact_index.py`.
+const IMPORT_RE = /^\s*import\s+(?:[\s\S]+?\s+from\s+)?["']([^"']+)["']/gm;
 
 function listFiles(dir, predicate) {
   // tracked + untracked(--exclude-standard로 .gitignore 제외) 모두 포함.

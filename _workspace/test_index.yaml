@@ -128353,14 +128353,21 @@ frontend:
       - frontend/src/api/__tests__/history.test.ts
       - frontend/src/api/__tests__/log_reports.test.ts
       - frontend/src/api/__tests__/performance.test.ts
+      - frontend/src/api/__tests__/recommendations.test.ts
+      - frontend/src/api/__tests__/stock-master.test.ts
       - frontend/src/api/__tests__/trading.params.test.ts
+      - frontend/src/api/__tests__/trading.test.ts
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - frontend/src/components/__tests__/BalanceTable.test.tsx
       - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
       - frontend/src/components/__tests__/DailyReportTab.ext.test.tsx
       - >-
+        frontend/src/components/__tests__/IntegrationToggleCard.auto_apply.test.tsx
+      - frontend/src/components/__tests__/IntegrationToggleCard.test.tsx
+      - >-
         frontend/src/components/__tests__/KisAccountPoolCard.stale_integration.test.tsx
       - frontend/src/components/__tests__/KisAccountPoolCard.test.tsx
+      - frontend/src/components/__tests__/KisQuoteAccountsCard.test.tsx
       - frontend/src/components/__tests__/KrxOpenApiCard.test.tsx
       - frontend/src/components/__tests__/MarketRegimeCard.test.tsx
       - frontend/src/components/__tests__/PerformanceCard.test.tsx
@@ -128375,9 +128382,13 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
       - frontend/src/components/__tests__/StrategyParamsEditor.test.tsx
       - frontend/src/components/__tests__/SystemLogsTab.test.tsx
+      - frontend/src/components/__tests__/TradeAmountFilterCard.test.tsx
       - frontend/src/components/__tests__/TradeHistoryGrid.test.tsx
       - frontend/src/components/__tests__/TradePnLGrid.test.tsx
+      - frontend/src/components/__tests__/llmEvalKey.cycle276.test.ts
       - frontend/src/components/__tests__/marketRegimeMocks.cycle315.test.tsx
+      - frontend/src/contexts/__tests__/TradingStatusContext.test.tsx
+      - frontend/src/macro/__tests__/MacroPage.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
@@ -128406,10 +128417,20 @@ frontend:
       - frontend/src/components/__tests__/TradePnLGrid.test.tsx
   frontend/src/api/integrations.ts:
     direct_tests: []
-    transitive_tests: []
+    transitive_tests:
+      - >-
+        frontend/src/components/__tests__/IntegrationToggleCard.auto_apply.test.tsx
+      - frontend/src/components/__tests__/IntegrationToggleCard.test.tsx
+      - >-
+        frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
+      - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
   frontend/src/api/kis-quote-accounts.ts:
     direct_tests: []
-    transitive_tests: []
+    transitive_tests:
+      - frontend/src/components/__tests__/KisQuoteAccountsCard.test.tsx
+      - >-
+        frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
+      - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
   frontend/src/api/krx-open-api.ts:
     direct_tests: []
     transitive_tests:
@@ -128418,7 +128439,8 @@ frontend:
         frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
       - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
   frontend/src/api/llm-evaluations.ts:
-    direct_tests: []
+    direct_tests:
+      - frontend/src/components/__tests__/llmEvalKey.cycle276.test.ts
     transitive_tests:
       - frontend/src/components/__tests__/TradeHistoryGrid.test.tsx
       - frontend/src/components/__tests__/TradePnLGrid.test.tsx
@@ -128437,7 +128459,8 @@ frontend:
       - frontend/src/pages/__tests__/RealtimeHealth.test.tsx
   frontend/src/api/macro.ts:
     direct_tests: []
-    transitive_tests: []
+    transitive_tests:
+      - frontend/src/macro/__tests__/MacroPage.test.tsx
   frontend/src/api/market-operation.ts:
     direct_tests: []
     transitive_tests:
@@ -128501,14 +128524,16 @@ frontend:
       - frontend/src/components/__tests__/KisAccountPoolCard.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/api/recommendations.ts:
-    direct_tests: []
+    direct_tests:
+      - frontend/src/api/__tests__/recommendations.test.ts
     transitive_tests:
       - frontend/src/pages/__tests__/Recommendations.backtest.test.tsx
       - frontend/src/pages/__tests__/Recommendations.cardOrder.test.tsx
       - frontend/src/pages/__tests__/Recommendations.test.tsx
       - frontend/src/pages/__tests__/Recommendations.weightReasoning.test.tsx
   frontend/src/api/stock-master.ts:
-    direct_tests: []
+    direct_tests:
+      - frontend/src/api/__tests__/stock-master.test.ts
     transitive_tests:
       - frontend/src/pages/__tests__/StockMaster.cycle128.test.tsx
       - frontend/src/pages/__tests__/StockMaster.cycle166.test.tsx
@@ -128534,11 +128559,16 @@ frontend:
     transitive_tests: []
   frontend/src/api/trade-amount-filter.ts:
     direct_tests: []
-    transitive_tests: []
+    transitive_tests:
+      - frontend/src/components/__tests__/TradeAmountFilterCard.test.tsx
+      - >-
+        frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
+      - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
   frontend/src/api/trading.ts:
     direct_tests:
       - frontend/src/api/__tests__/cash_usage_ratio.test.ts
       - frontend/src/api/__tests__/trading.params.test.ts
+      - frontend/src/api/__tests__/trading.test.ts
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
@@ -128553,6 +128583,7 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
       - frontend/src/components/__tests__/StrategyParamsEditor.test.tsx
+      - frontend/src/contexts/__tests__/TradingStatusContext.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
       - frontend/src/pages/__tests__/Recommendations.backtest.test.tsx
       - frontend/src/pages/__tests__/Recommendations.cardOrder.test.tsx
@@ -128820,6 +128851,7 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
+      - frontend/src/contexts/__tests__/TradingStatusContext.test.tsx
       - >-
         frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
       - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
@@ -128929,7 +128961,8 @@ frontend:
       - frontend/src/pages/__tests__/StrategiesTeRr.test.tsx
     transitive_tests: []
   frontend/src/pages/StrategyFunnel.tsx:
-    direct_tests: []
+    direct_tests:
+      - frontend/src/pages/__tests__/StrategyFunnel.bottleneckTrend.test.tsx
     transitive_tests: []
   frontend/src/test/factories.ts:
     direct_tests:
@@ -128971,6 +129004,8 @@ frontend:
       - frontend/src/components/__tests__/StrategyParamsEditor.test.tsx
       - frontend/src/components/__tests__/SystemLogsTab.test.tsx
       - frontend/src/components/__tests__/TradeAmountFilterCard.test.tsx
+      - frontend/src/components/__tests__/TradeHistoryGrid.test.tsx
+      - frontend/src/components/__tests__/TradePnLGrid.test.tsx
       - frontend/src/components/__tests__/llmEvalKey.cycle276.test.ts
       - frontend/src/contexts/__tests__/TradingStatusContext.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
@@ -128989,9 +129024,19 @@ frontend:
       - frontend/src/pages/__tests__/StockMaster.test.tsx
       - frontend/src/pages/__tests__/StrategyFunnel.bottleneckTrend.test.tsx
       - frontend/src/test/sample.test.ts
-    transitive_tests: []
+    transitive_tests:
+      - frontend/src/api/__tests__/trading.params.test.ts
+      - frontend/src/components/__tests__/handlers.honesty.cycle276.test.ts
+      - frontend/src/macro/__tests__/MacroPage.test.tsx
+      - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
+      - frontend/src/pages/__tests__/RealtimeHealth.cycle186.test.tsx
+      - frontend/src/pages/__tests__/RealtimeHealth.test.tsx
+      - frontend/src/pages/__tests__/Strategies.test.tsx
+      - frontend/src/pages/__tests__/StrategiesParams.test.tsx
+      - frontend/src/pages/__tests__/StrategiesTeRr.test.tsx
   frontend/src/test/fixtures/marketState.fixture.ts:
     direct_tests:
+      - frontend/src/pages/__tests__/MarketState.test.tsx
       - frontend/src/pages/__tests__/_ast_market_state_hardcode.test.ts
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
@@ -129040,7 +129085,6 @@ frontend:
       - frontend/src/macro/__tests__/MacroPage.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
-      - frontend/src/pages/__tests__/MarketState.test.tsx
       - frontend/src/pages/__tests__/RealtimeHealth.cycle186.test.tsx
       - frontend/src/pages/__tests__/RealtimeHealth.test.tsx
       - frontend/src/pages/__tests__/Recommendations.backtest.test.tsx
@@ -129315,6 +129359,7 @@ frontend:
       - >-
         frontend/src/components/recommendations/__tests__/BacktestComparisonCard.test.tsx
     transitive_tests:
+      - frontend/src/api/__tests__/recommendations.test.ts
       - frontend/src/pages/__tests__/Recommendations.backtest.test.tsx
       - frontend/src/pages/__tests__/Recommendations.cardOrder.test.tsx
       - frontend/src/pages/__tests__/Recommendations.format.test.tsx
@@ -129339,14 +129384,21 @@ frontend:
       - frontend/src/api/__tests__/history.test.ts
       - frontend/src/api/__tests__/log_reports.test.ts
       - frontend/src/api/__tests__/performance.test.ts
+      - frontend/src/api/__tests__/recommendations.test.ts
+      - frontend/src/api/__tests__/stock-master.test.ts
       - frontend/src/api/__tests__/trading.params.test.ts
+      - frontend/src/api/__tests__/trading.test.ts
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - frontend/src/components/__tests__/BalanceTable.test.tsx
       - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
       - frontend/src/components/__tests__/DailyReportTab.ext.test.tsx
       - >-
+        frontend/src/components/__tests__/IntegrationToggleCard.auto_apply.test.tsx
+      - frontend/src/components/__tests__/IntegrationToggleCard.test.tsx
+      - >-
         frontend/src/components/__tests__/KisAccountPoolCard.stale_integration.test.tsx
       - frontend/src/components/__tests__/KisAccountPoolCard.test.tsx
+      - frontend/src/components/__tests__/KisQuoteAccountsCard.test.tsx
       - frontend/src/components/__tests__/KrxOpenApiCard.test.tsx
       - frontend/src/components/__tests__/MarketRegimeCard.test.tsx
       - frontend/src/components/__tests__/PerformanceCard.test.tsx
@@ -129361,9 +129413,12 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
       - frontend/src/components/__tests__/StrategyParamsEditor.test.tsx
       - frontend/src/components/__tests__/SystemLogsTab.test.tsx
+      - frontend/src/components/__tests__/TradeAmountFilterCard.test.tsx
       - frontend/src/components/__tests__/TradeHistoryGrid.test.tsx
       - frontend/src/components/__tests__/TradePnLGrid.test.tsx
+      - frontend/src/components/__tests__/llmEvalKey.cycle276.test.ts
       - frontend/src/components/__tests__/marketRegimeMocks.cycle315.test.tsx
+      - frontend/src/contexts/__tests__/TradingStatusContext.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
@@ -129386,20 +129441,97 @@ frontend:
       - frontend/src/pages/__tests__/StrategyFunnel.bottleneckTrend.test.tsx
   frontend/src/types/integrations.ts:
     direct_tests: []
-    transitive_tests: []
+    transitive_tests:
+      - >-
+        frontend/src/components/__tests__/IntegrationToggleCard.auto_apply.test.tsx
+      - frontend/src/components/__tests__/IntegrationToggleCard.test.tsx
+      - >-
+        frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
+      - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
   frontend/src/types/kis-quote-accounts.ts:
     direct_tests: []
-    transitive_tests: []
+    transitive_tests:
+      - frontend/src/components/__tests__/KisQuoteAccountsCard.test.tsx
+      - >-
+        frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
+      - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
   frontend/src/types/krx-open-api.ts:
     direct_tests: []
-    transitive_tests: []
+    transitive_tests:
+      - frontend/src/components/__tests__/KrxOpenApiCard.test.tsx
+      - >-
+        frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
+      - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
   frontend/src/types/llm-evaluation.ts:
     direct_tests:
       - frontend/src/components/__tests__/LlmEvaluationModal.test.tsx
       - frontend/src/components/__tests__/llmEvalKey.cycle276.test.ts
     transitive_tests:
+      - frontend/src/__tests__/AppShell.test.tsx
+      - frontend/src/__tests__/ContentWidthSlider.test.tsx
+      - frontend/src/api/__tests__/balance.test.ts
+      - frontend/src/api/__tests__/cash_usage_ratio.test.ts
+      - frontend/src/api/__tests__/history.test.ts
+      - frontend/src/api/__tests__/log_reports.test.ts
+      - frontend/src/api/__tests__/performance.test.ts
+      - frontend/src/api/__tests__/recommendations.test.ts
+      - frontend/src/api/__tests__/stock-master.test.ts
+      - frontend/src/api/__tests__/trading.params.test.ts
+      - frontend/src/api/__tests__/trading.test.ts
+      - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
+      - frontend/src/components/__tests__/BalanceTable.test.tsx
+      - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
+      - frontend/src/components/__tests__/DailyReportTab.ext.test.tsx
+      - frontend/src/components/__tests__/DailyReportTab.format.test.tsx
+      - >-
+        frontend/src/components/__tests__/IntegrationToggleCard.auto_apply.test.tsx
+      - frontend/src/components/__tests__/IntegrationToggleCard.test.tsx
+      - >-
+        frontend/src/components/__tests__/KisAccountPoolCard.stale_integration.test.tsx
+      - frontend/src/components/__tests__/KisAccountPoolCard.test.tsx
+      - frontend/src/components/__tests__/KisQuoteAccountsCard.test.tsx
+      - frontend/src/components/__tests__/KrxOpenApiCard.test.tsx
+      - frontend/src/components/__tests__/MarketRegimeCard.test.tsx
+      - frontend/src/components/__tests__/PerformanceCard.test.tsx
+      - frontend/src/components/__tests__/PortfolioRiskCard.accountGate.test.tsx
+      - frontend/src/components/__tests__/PortfolioRiskCard.test.tsx
+      - frontend/src/components/__tests__/PriceFilterCard.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.activeBoard.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.bfb_vcp.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
+      - frontend/src/components/__tests__/StrategyParamsEditor.test.tsx
+      - frontend/src/components/__tests__/SystemLogsTab.test.tsx
+      - frontend/src/components/__tests__/TradeAmountFilterCard.test.tsx
       - frontend/src/components/__tests__/TradeHistoryGrid.test.tsx
       - frontend/src/components/__tests__/TradePnLGrid.test.tsx
+      - frontend/src/components/__tests__/handlers.honesty.cycle276.test.ts
+      - frontend/src/contexts/__tests__/TradingStatusContext.test.tsx
+      - frontend/src/macro/__tests__/MacroPage.test.tsx
+      - frontend/src/pages/__tests__/Logs.test.tsx
+      - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
+      - frontend/src/pages/__tests__/MarketState.test.tsx
+      - frontend/src/pages/__tests__/RealtimeHealth.cycle186.test.tsx
+      - frontend/src/pages/__tests__/RealtimeHealth.test.tsx
+      - frontend/src/pages/__tests__/Recommendations.backtest.test.tsx
+      - frontend/src/pages/__tests__/Recommendations.cardOrder.test.tsx
+      - frontend/src/pages/__tests__/Recommendations.format.test.tsx
+      - frontend/src/pages/__tests__/Recommendations.test.tsx
+      - frontend/src/pages/__tests__/Recommendations.weightReasoning.test.tsx
+      - >-
+        frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
+      - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
+      - frontend/src/pages/__tests__/StockMaster.cycle128.test.tsx
+      - frontend/src/pages/__tests__/StockMaster.cycle166.test.tsx
+      - frontend/src/pages/__tests__/StockMaster.dailyTab.cycle266.test.tsx
+      - frontend/src/pages/__tests__/StockMaster.test.tsx
+      - frontend/src/pages/__tests__/Strategies.test.tsx
+      - frontend/src/pages/__tests__/StrategiesParams.test.tsx
+      - frontend/src/pages/__tests__/StrategiesTeRr.test.tsx
+      - frontend/src/pages/__tests__/StrategyFunnel.bottleneckTrend.test.tsx
+      - frontend/src/test/sample.test.ts
   frontend/src/types/log_reports.ts:
     direct_tests:
       - frontend/src/components/__tests__/DailyReportTab.ext.test.tsx
@@ -129462,13 +129594,19 @@ frontend:
     direct_tests:
       - frontend/src/pages/__tests__/Recommendations.format.test.tsx
     transitive_tests:
+      - frontend/src/api/__tests__/recommendations.test.ts
       - frontend/src/pages/__tests__/Recommendations.backtest.test.tsx
       - frontend/src/pages/__tests__/Recommendations.cardOrder.test.tsx
       - frontend/src/pages/__tests__/Recommendations.test.tsx
       - frontend/src/pages/__tests__/Recommendations.weightReasoning.test.tsx
   frontend/src/types/stock-master.ts:
     direct_tests: []
-    transitive_tests: []
+    transitive_tests:
+      - frontend/src/api/__tests__/stock-master.test.ts
+      - frontend/src/pages/__tests__/StockMaster.cycle128.test.tsx
+      - frontend/src/pages/__tests__/StockMaster.cycle166.test.tsx
+      - frontend/src/pages/__tests__/StockMaster.dailyTab.cycle266.test.tsx
+      - frontend/src/pages/__tests__/StockMaster.test.tsx
   frontend/src/types/strategy-params.ts:
     direct_tests:
       - frontend/src/components/__tests__/StrategyParamsEditor.test.tsx
@@ -129516,7 +129654,11 @@ frontend:
       - frontend/src/pages/__tests__/StrategiesParams.test.tsx
   frontend/src/types/trade-amount-filter.ts:
     direct_tests: []
-    transitive_tests: []
+    transitive_tests:
+      - frontend/src/components/__tests__/TradeAmountFilterCard.test.tsx
+      - >-
+        frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
+      - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
   frontend/src/types/trading.ts:
     direct_tests:
       - frontend/src/components/__tests__/BreakoutCandidateMonitor.test.tsx
@@ -129563,10 +129705,15 @@ frontend:
       - frontend/src/components/__tests__/TradeAmountFilterCard.test.tsx
       - frontend/src/components/__tests__/TradeHistoryGrid.test.tsx
       - frontend/src/components/__tests__/TradePnLGrid.test.tsx
+      - frontend/src/components/__tests__/handlers.honesty.cycle276.test.ts
       - frontend/src/components/__tests__/llmEvalKey.cycle276.test.ts
       - frontend/src/contexts/__tests__/TradingStatusContext.test.tsx
+      - frontend/src/macro/__tests__/MacroPage.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
+      - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
+      - frontend/src/pages/__tests__/RealtimeHealth.cycle186.test.tsx
+      - frontend/src/pages/__tests__/RealtimeHealth.test.tsx
       - frontend/src/pages/__tests__/Recommendations.backtest.test.tsx
       - frontend/src/pages/__tests__/Recommendations.cardOrder.test.tsx
       - frontend/src/pages/__tests__/Recommendations.format.test.tsx
@@ -129616,7 +129763,12 @@ frontend:
     direct_tests:
       - frontend/src/components/__tests__/MarketRegimeCard.test.tsx
       - frontend/src/utils/__tests__/marketRegime.test.ts
-    transitive_tests: []
+    transitive_tests:
+      - frontend/src/__tests__/AppShell.test.tsx
+      - frontend/src/__tests__/ContentWidthSlider.test.tsx
+      - frontend/src/components/__tests__/marketRegimeMocks.cycle315.test.tsx
+      - frontend/src/macro/__tests__/MacroPage.test.tsx
+      - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/utils/paramLabels.ts:
     direct_tests: []
     transitive_tests:
@@ -129653,6 +129805,7 @@ frontend:
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
+      - frontend/src/components/__tests__/KisAccountPoolCard.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.activeBoard.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.bfb_vcp.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
@@ -129669,41 +129822,106 @@ frontend:
       - >-
         frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
       - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
-generated_at: '2026-09-19T00:15:26.801Z'
+generated_at: '2026-09-19T06:48:00.768Z'
 stats:
   backend_modules: 156
   backend_tests: 1051
   frontend_modules: 118
-  frontend_tests: 94
+  frontend_tests: 95
   unmapped_modules:
     - frontend/src/api/backtest.ts
     - frontend/src/api/backtest.ts
+    - frontend/src/api/backtest.ts
+    - frontend/src/api/backtest.ts
+    - frontend/src/api/backtest.ts
+    - frontend/src/api/backtest.ts
+    - frontend/src/api/backtest.ts
+    - frontend/src/api/backtest.ts
+    - frontend/src/api/backtest.ts
+    - frontend/src/api/integrations.ts
+    - frontend/src/api/integrations.ts
+    - frontend/src/api/integrations.ts
     - frontend/src/api/integrations.ts
     - frontend/src/api/integrations.ts
     - frontend/src/api/kis-quote-accounts.ts
     - frontend/src/api/kis-quote-accounts.ts
+    - frontend/src/api/kis-quote-accounts.ts
+    - frontend/src/api/kis-quote-accounts.ts
+    - frontend/src/api/kis-quote-accounts.ts
+    - frontend/src/api/macro.ts
+    - frontend/src/api/macro.ts
+    - frontend/src/api/macro.ts
     - frontend/src/api/macro.ts
     - frontend/src/api/macro.ts
     - frontend/src/api/trade-amount-filter.ts
     - frontend/src/api/trade-amount-filter.ts
+    - frontend/src/api/trade-amount-filter.ts
+    - frontend/src/api/trade-amount-filter.ts
+    - frontend/src/api/trade-amount-filter.ts
+    - frontend/src/components/LogViewer.tsx
+    - frontend/src/components/LogViewer.tsx
+    - frontend/src/components/LogViewer.tsx
+    - frontend/src/components/LogViewer.tsx
+    - frontend/src/components/LogViewer.tsx
+    - frontend/src/components/LogViewer.tsx
+    - frontend/src/components/LogViewer.tsx
     - frontend/src/components/LogViewer.tsx
     - frontend/src/components/LogViewer.tsx
     - frontend/src/main.tsx
     - frontend/src/main.tsx
+    - frontend/src/main.tsx
+    - frontend/src/main.tsx
+    - frontend/src/main.tsx
+    - frontend/src/main.tsx
+    - frontend/src/main.tsx
+    - frontend/src/main.tsx
+    - frontend/src/main.tsx
+    - frontend/src/pages/History.tsx
+    - frontend/src/pages/History.tsx
+    - frontend/src/pages/History.tsx
+    - frontend/src/pages/History.tsx
+    - frontend/src/pages/History.tsx
+    - frontend/src/pages/History.tsx
+    - frontend/src/pages/History.tsx
     - frontend/src/pages/History.tsx
     - frontend/src/pages/History.tsx
     - frontend/src/pages/StrategyFunnel.tsx
     - frontend/src/pages/StrategyFunnel.tsx
+    - frontend/src/pages/StrategyFunnel.tsx
+    - frontend/src/pages/StrategyFunnel.tsx
+    - frontend/src/pages/StrategyFunnel.tsx
+    - frontend/src/test/setup.ts
+    - frontend/src/test/setup.ts
+    - frontend/src/test/setup.ts
+    - frontend/src/test/setup.ts
+    - frontend/src/test/setup.ts
+    - frontend/src/test/setup.ts
+    - frontend/src/test/setup.ts
     - frontend/src/test/setup.ts
     - frontend/src/test/setup.ts
     - frontend/src/types/integrations.ts
     - frontend/src/types/integrations.ts
+    - frontend/src/types/integrations.ts
+    - frontend/src/types/integrations.ts
+    - frontend/src/types/integrations.ts
+    - frontend/src/types/kis-quote-accounts.ts
+    - frontend/src/types/kis-quote-accounts.ts
+    - frontend/src/types/kis-quote-accounts.ts
     - frontend/src/types/kis-quote-accounts.ts
     - frontend/src/types/kis-quote-accounts.ts
     - frontend/src/types/krx-open-api.ts
     - frontend/src/types/krx-open-api.ts
+    - frontend/src/types/krx-open-api.ts
+    - frontend/src/types/krx-open-api.ts
+    - frontend/src/types/krx-open-api.ts
     - frontend/src/types/stock-master.ts
     - frontend/src/types/stock-master.ts
+    - frontend/src/types/stock-master.ts
+    - frontend/src/types/stock-master.ts
+    - frontend/src/types/stock-master.ts
+    - frontend/src/types/trade-amount-filter.ts
+    - frontend/src/types/trade-amount-filter.ts
+    - frontend/src/types/trade-amount-filter.ts
     - frontend/src/types/trade-amount-filter.ts
     - frontend/src/types/trade-amount-filter.ts
     - src/engine/strategy.py
