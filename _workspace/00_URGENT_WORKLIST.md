@@ -114,6 +114,25 @@ macro 컨테이너를 재빌드한다 — 그래서 좁히자는 후보였다. *
 
 즉 현 상태가 구조적으로 더 단순하고 안전하다. 낭비가 실제로 관측되면 그때 가드와 함께 좁힌다.
 
+## ✅ 후속 C 해소 — 매크로 값 대조 **139행 100% 일치** (이관 2단계 완료)
+
+dkstock 철거로 「두 출처 값 비교」가 불가능해진 것의 **대체 경로**다.
+`macro/data/macro_regime_history_seed.json` 은 원 프로젝트 `macro_regime_history` 추출본이고
+날짜마다 **입력 3종**(buffett_ratio·vix·fear_greed_score)과 **그 입력으로 원 프로젝트가 낸 regime** 을
+함께 담는다 — 즉 정답지다.
+
+| 항목 | 결과 |
+|---|---|
+| 대조 | **139행 전부 일치 (100%)** · 불일치 0 |
+| 건너뜀 | 8행 — **원본 데이터 자체에 `fear_greed_score` 가 없다**(우리 코드 문제 아님) |
+| 재현 | `python3 tools/ops/compare_regime_history.py` (일치율 100% 가 정상, 불일치 시 exit 1) |
+
+⚠️ **한계** — seed 에 신용 스프레드(HY OAS)가 없어 `determine_regime` 의 Phase 1·2 보정은
+검증되지 않았다. 판정의 대부분인 기본 경로만 확인한 것이다.
+
+🔴 **이관 2단계가 이로써 끝났다.** 3단계(주소 전환)는 cycle315 가 이미 했으므로
+`project-macro-lite-migration` 의 3단계가 전부 닫혔다.
+
 ## 검증
 
 AST 1,782 passed · 프론트 **860 passed** · deploy 232 passed · `tsc -b` 0.
