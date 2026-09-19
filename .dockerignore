@@ -12,4 +12,11 @@ _workspace/
 docs/
 supabase/
 *.md
+# cycle322 — 중첩 `.md` 도 뺀다. 도커 패턴은 `/` 를 넘지 않아 위의 `*.md` 는 루트만 잡고
+# `src/db/CLAUDE.md` 는 못 잡는다(실측: 운영 이미지 `/app/src` 아래 `.md` 9개).
+# 🔴 이 줄을 지우면 `tools/deploy/compose_up_changed.sh` 의 `IMAGE_EXCLUDED_RE` 가 거짓말이 된다
+# — 배포가 "이미지 입력 안 바뀜" 이라 말하면서 이미지는 바뀌어 stale backend 가 조용히 돈다.
+# 그 둘이 갈라지지 않게 `tests/unit/ast/test_cycle322_image_excluded_paths.py` 가 묶어 둔다.
+# 런타임 소비처 0건 확인 — 그 9개를 읽는 코드는 없다(전부 docstring 안 언급).
+**/*.md
 img.png

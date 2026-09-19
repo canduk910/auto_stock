@@ -8,7 +8,7 @@ KIS WebSocket 구독은 됐으나 시세가 silent 하게 안 들어오는 종�
 bypass_limit=True) 강제 재등록 (KIS 정상 "신규 등록" 패턴, 재SEND 0건).
 6회 이상 stale → skip (영구 stale 의심, 다음 `_scan_loop` 위임).
 
-F1(재연결 1회) + `_scan_loop`(5분) + K(120s) 3중 안전망.
+F1(1회) + `_scan_loop`(5분) + `_resubscribe_stale_priority`(5분) + K(120s) 4중 안전망.
 
 2026-05-12 결함 증거 (운영 로그):
 - 11:48 [tick_coverage] subscribed=27 fresh=1 stale=26 (96% silent inactive)

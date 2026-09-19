@@ -127,6 +127,18 @@ FRONTEND_RE='^(frontend/|tools/ops/tls_stage2/)'
 # 일반화 참조).
 MACRO_RE='^macro/'
 
+# cycle322 (사용자 결정 D2) — backend 축에 걸리지만 **이미지에는 안 들어가는** 경로.
+# `src/**` 는 확장자 무관 이미지 입력이라 `src/db/CLAUDE.md` 한 줄이 full 을 불러 매매
+# 백엔드를 재생성했다(2026-09-19 실측 `4b862d9`: 그 커밋이 바꾼 건 테스트 1개뿐이었다).
+# 평일이면 cycle232 D6 위반이고, 실질 비용은 `/sync-docs` 가 필수인 문서 동기화가
+# 장외 창에만 묶이는 것이다.
+# 🔴 정규식만 좁히지 않았다 — 그 파일들이 **실제로 이미지 안에 있었기** 때문이다.
+# `.dockerignore` 의 `**/*.md` 가 먼저 빼고, 그 다음에 여기서 분류를 맞춘다. 한쪽만 고치면
+# "안 바뀌었다" 고 말하면서 이미지가 바뀌는, 지금보다 나쁜 상태가 된다.
+# 두 파일이 갈라지지 않게 `tests/unit/ast/test_cycle322_image_excluded_paths.py` 가 묶는다.
+# ⚠️ `src/` 안 `.md` 로만 한정한다 — `.*\.md$` 처럼 넓히면 `tools/deploy/` 축이 흔들린다.
+IMAGE_EXCLUDED_RE='^src/.*\.md$'
+
 # cycle255 — TLS 오버레이 마커. **모드 판정에는 관여하지 않는다** — 여기서 읽어 두는 것은
 # compose 호출에 붙일 `-f` 목록뿐이다. 마커는 존재만 본다(내용 파싱 금지 — `touch` 로 만든
 # 빈 파일도 켜짐이다).
@@ -200,7 +212,9 @@ fi
 # 그래서 반드시 `if … then … fi` 로 쓴다.
 SERVICES=()
 if [ -z "$MODE" ]; then
-    BACKEND_HITS="$(printf '%s\n' "$CHANGED" | grep -E "$BACKEND_RE" || true)"
+    # cycle322 — backend 축에 걸린 뒤 **이미지에 안 들어가는 경로만** 덜어낸다(`grep -vE`).
+    # ERE 에는 부정 전방탐색이 없어 BACKEND_RE 안에 negation 을 넣을 수 없다 — 그래서 2단이다.
+    BACKEND_HITS="$(printf '%s\n' "$CHANGED" | grep -E "$BACKEND_RE" | grep -vE "$IMAGE_EXCLUDED_RE" || true)"
     FRONTEND_HITS="$(printf '%s\n' "$CHANGED" | grep -E "$FRONTEND_RE" || true)"
     MACRO_HITS="$(printf '%s\n' "$CHANGED" | grep -E "$MACRO_RE" || true)"
     if [ -n "$BACKEND_HITS" ]; then

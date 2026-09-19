@@ -272,6 +272,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -803,6 +804,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -1337,6 +1339,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -1875,6 +1878,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -2427,6 +2431,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -2956,6 +2961,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -3497,6 +3503,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -4033,6 +4040,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -4561,6 +4569,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -5108,6 +5117,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -5640,6 +5650,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -6186,6 +6197,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -6719,6 +6731,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -7264,6 +7277,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -7801,6 +7815,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -8344,6 +8359,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -8876,6 +8892,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -9420,6 +9437,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -9956,6 +9974,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -10501,6 +10520,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -11047,6 +11067,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -11594,6 +11615,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -12133,6 +12155,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -12672,6 +12695,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -13216,6 +13240,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -13756,6 +13781,7 @@ backend:
       - tests/unit/engine/test_cycle304_no_real_kis_guard.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -14170,6 +14196,7 @@ backend:
       - tests/unit/engine/test_cycle273_kojiro_band_observe.py
       - tests/unit/engine/test_cycle296_quote_token_refresh_observe.py
       - tests/unit/engine/test_cycle315_regime_source_switch.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle83_r6_frequency_regression.py
       - tests/unit/engine/test_cycle83_sk_square_fixture.py
@@ -14409,6 +14436,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -15373,6 +15401,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -15908,6 +15937,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -16440,6 +16470,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -16984,6 +17015,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -17517,6 +17549,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -18062,6 +18095,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -18603,6 +18637,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -19140,6 +19175,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -19672,6 +19708,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -20218,6 +20255,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -20755,6 +20793,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -21297,6 +21336,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -21831,6 +21871,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -22374,6 +22415,7 @@ backend:
       - tests/unit/engine/test_cycle304_no_real_kis_guard.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -22911,6 +22953,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -23452,6 +23495,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -23986,6 +24030,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -24530,6 +24575,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -25068,6 +25114,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -25608,6 +25655,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -26156,6 +26204,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -26688,6 +26737,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -27264,6 +27314,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -27769,6 +27820,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -28315,6 +28367,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -28843,6 +28896,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -29376,6 +29430,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -29920,6 +29975,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -30454,6 +30510,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -31000,6 +31057,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -31538,6 +31596,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -32077,6 +32136,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -32443,6 +32503,7 @@ backend:
       - tests/unit/engine/test_cycle234_uptime_monitor.py
       - tests/unit/engine/test_cycle293_channel_resolver.py
       - tests/unit/engine/test_cycle315_regime_source_switch.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle64_price_filter_scanner_apply.py
       - tests/unit/engine/test_cycle64_price_filter_scanner_cache.py
       - tests/unit/engine/test_cycle64_price_filter_scanner_daily_summary.py
@@ -32668,6 +32729,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -33701,6 +33763,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -34238,6 +34301,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -34781,6 +34845,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -35317,6 +35382,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -35845,6 +35911,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -36392,6 +36459,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -36925,6 +36993,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -37471,6 +37540,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -38012,6 +38082,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -38550,6 +38621,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -39086,6 +39158,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -39628,6 +39701,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -40161,6 +40235,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -40706,6 +40781,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -41238,6 +41314,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -41783,6 +41860,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -42321,6 +42399,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -42861,6 +42940,7 @@ backend:
       - tests/unit/engine/test_cycle304_no_real_kis_guard.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -43406,6 +43486,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -43943,6 +44024,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -44471,6 +44553,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -45017,6 +45100,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -45551,6 +45635,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -46095,6 +46180,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -46627,6 +46713,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -47173,6 +47260,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -47708,6 +47796,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -48251,6 +48340,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -48783,6 +48873,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -49330,6 +49421,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -49861,6 +49953,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -50408,6 +50501,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -50939,6 +51033,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -51485,6 +51580,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -52091,6 +52187,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -52631,6 +52728,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -53166,6 +53264,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -53707,6 +53806,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -54234,6 +54334,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -54781,6 +54882,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -55315,6 +55417,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -55860,6 +55963,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -56155,6 +56259,7 @@ backend:
       - tests/integration/test_recommendation_with_market_regime.py
       - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
       - tests/unit/engine/test_cycle315_regime_source_switch.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycleD_regime_inert.py
       - tests/unit/engine/test_cycleE_etf_regime.py
       - tests/unit/engine/test_market_regime.py
@@ -56403,6 +56508,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -57476,6 +57582,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -58014,6 +58121,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -58546,6 +58654,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -59092,6 +59201,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -59629,6 +59739,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -60170,6 +60281,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -60705,6 +60817,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -61248,6 +61361,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -61781,6 +61895,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -62326,6 +62441,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -62860,6 +62976,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -63404,6 +63521,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -63934,6 +64052,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -64481,6 +64600,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -65162,6 +65282,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -65706,6 +65827,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -66237,6 +66359,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -66784,6 +66907,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -67320,6 +67444,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -67862,6 +67987,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -68427,6 +68553,7 @@ backend:
       - tests/unit/ast/test_cycle296_ast_token_coalesce.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -68950,6 +69077,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -69473,6 +69601,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -70020,6 +70149,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -70553,6 +70683,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -71099,6 +71230,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -71625,6 +71757,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -72172,6 +72305,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -72943,6 +73077,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -73322,6 +73457,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -73695,6 +73831,7 @@ backend:
       - tests/unit/engine/test_cycle293_channel_resolver.py
       - tests/unit/engine/test_cycle298_scan_loop_first_delay.py
       - tests/unit/engine/test_cycle302_backfill_scope_expansion.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -73930,6 +74067,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -74864,6 +75002,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -75409,6 +75548,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -75941,6 +76081,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -76487,6 +76628,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -77016,6 +77158,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -77563,6 +77706,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -78093,6 +78237,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -78640,6 +78785,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -79179,6 +79325,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -79720,6 +79867,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -80286,6 +80434,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -80818,6 +80967,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -81332,6 +81482,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -81875,6 +82026,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -82435,6 +82587,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -82972,6 +83125,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -83487,6 +83641,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -84032,6 +84187,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -84574,6 +84730,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -85112,6 +85269,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -85641,6 +85799,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -86187,6 +86346,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -86719,6 +86879,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -87265,6 +87426,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -87797,6 +87959,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -88343,6 +88506,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -88883,6 +89047,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -89425,6 +89590,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -90023,6 +90189,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -90533,6 +90700,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -91112,6 +91280,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -91613,6 +91782,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -92171,6 +92341,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -92689,6 +92860,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -93250,6 +93422,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -93766,6 +93939,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -94316,6 +94490,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -94844,6 +95019,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -95411,6 +95587,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -95924,6 +96101,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -96490,6 +96668,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -97002,6 +97181,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -97717,6 +97897,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -98111,6 +98292,7 @@ backend:
       - tests/unit/engine/test_cycle304_no_real_kis_guard.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -98665,6 +98847,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -99175,6 +99358,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -99688,6 +99872,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -100235,6 +100420,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -100771,6 +100957,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -101312,6 +101499,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -101914,6 +102102,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -102459,6 +102648,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -102995,6 +103185,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -103538,6 +103729,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -104068,6 +104260,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -104614,6 +104807,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -105159,6 +105353,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -105694,6 +105889,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -106225,6 +106421,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -106771,6 +106968,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -107302,6 +107500,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -107848,6 +108047,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -108391,6 +108591,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -108933,6 +109134,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -109520,6 +109722,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -110067,6 +110270,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -110598,6 +110802,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -111145,6 +111350,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -111682,6 +111888,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -112227,6 +112434,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -112761,6 +112969,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -113306,6 +113515,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -113840,6 +114050,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -114383,6 +114594,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -114916,6 +115128,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -115462,6 +115675,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -116063,6 +116277,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -116602,6 +116817,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -117305,6 +117521,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -117829,6 +118046,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -118430,6 +118648,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -118966,6 +119185,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -119531,6 +119751,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -120073,6 +120294,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -120588,6 +120810,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -121133,6 +121356,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -121687,6 +121911,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -122230,6 +122455,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -122770,6 +122996,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -123306,6 +123533,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -125206,6 +125434,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -125749,6 +125978,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -126278,6 +126508,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -126824,6 +127055,7 @@ backend:
       - tests/unit/engine/test_cycle304_no_real_kis_guard.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -127360,6 +127592,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -127905,6 +128138,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -128433,6 +128667,7 @@ backend:
       - tests/unit/ast/test_cycle297_ast_scope.py
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
+      - tests/unit/ast/test_cycle322_image_excluded_paths.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -128980,6 +129215,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle317_market_rest_clock_pin.py
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
+      - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -130766,10 +131002,10 @@ frontend:
       - >-
         frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
       - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
-generated_at: '2026-09-19T08:10:11.557Z'
+generated_at: '2026-09-19T15:26:47.862Z'
 stats:
   backend_modules: 156
-  backend_tests: 1059
+  backend_tests: 1061
   frontend_modules: 118
   frontend_tests: 95
   unmapped_modules:

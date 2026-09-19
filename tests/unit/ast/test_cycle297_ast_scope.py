@@ -515,7 +515,7 @@ _BASE_SHA: dict[str, str] = {
     "src/realtime/websocket_pool.py":
         "8b02442bcf5f558d6f7095b47d2016f004e3746e07ddc91dae8768b1dd46a10d",
     "src/engine/scheduler.py":
-        "8bc235d460d26f8da4aba9c4af5132c49347138f6d428d9ba78321c77b7cfafe",
+        "088d54efc4927899c1048d01ea7c15265ce87858da25447ac28a1ffaa56f3c23",
     "src/engine/strategy_base.py":
         "869dc20ca561adc561a9ebe9fdb5fe5a3e097f7ec176fdf274d577d509de9252",
     "src/engine/strategies/volatility_breakout.py":
@@ -548,7 +548,7 @@ def test_g2_9b_scheduler_line_budget_and_auth_exclusion_is_explicit() -> None:
     """
     sched = _ROOT / "src/engine/scheduler.py"
     n = len(_read(sched).splitlines())
-    assert n == 3757, f"`scheduler.py` {n}L (착수 시점 3,726L → cycle298 재핀 3,757L)"
+    assert n == 3785, f"`scheduler.py` {n}L (착수 시점 3,726L → cycle298 재핀 3,785L)"
     assert n < 3900, f"`scheduler.py` 라인 상한 3,900 초과 — {n}L"
 
     assert not any(r.startswith("src/auth/") for r in _BASE_SHA), (

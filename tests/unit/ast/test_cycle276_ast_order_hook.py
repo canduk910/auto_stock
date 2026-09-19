@@ -356,7 +356,7 @@ _BASE_SHA = {
     # 붉어져 승인된 변경을 되돌리도록 오도한다. 직전 값 =
     # `50658e06062a0d38afecab1baa08871b89212e295cc95f2a3af62a2ae076115d`.
     "src/engine/scheduler.py":
-        "8bc235d460d26f8da4aba9c4af5132c49347138f6d428d9ba78321c77b7cfafe",
+        "088d54efc4927899c1048d01ea7c15265ce87858da25447ac28a1ffaa56f3c23",
     "src/engine/strategy_base.py":
         "869dc20ca561adc561a9ebe9fdb5fe5a3e097f7ec176fdf274d577d509de9252",
     # 🔁 cycle296(2026-09-17) 재핀 — 사용자 승인 `issue()` 매니저 단위 in-flight 합류(`src/auth/**`). 같은 값을 10곳 동시 갱신했다.
@@ -745,7 +745,7 @@ def test_c5_2_scheduler_line_count_is_pinned() -> None:
     그러면 확보한 174줄 예산의 무단 증식을 아무도 못 잡는다.
     """
     lines = len(_read(_SCHEDULER).splitlines())
-    assert lines == 3757, f"scheduler.py {lines}L (기대 3,757 — cycle283 뒤 3,897 → cycle292 leaf 추출 → cycle298 재핀)"
+    assert lines == 3785, f"scheduler.py {lines}L (기대 3,785 — cycle283 뒤 3,897 → cycle292 leaf 추출 → cycle298 재핀)"
 
 
 def test_c5_3_scheduler_line_cap_is_not_looser_than_cycle257() -> None:

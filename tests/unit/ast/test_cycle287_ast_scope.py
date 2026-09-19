@@ -266,7 +266,7 @@ _SRC_TREE_FILES = 153
 #: 였다.
 #: ⚠️ **cycle298 후속(2026-09-17) — `first_delay` 상한 결손 Green 1건으로 재갱신.**
 #: `_scan_loop` 의 `min(SCAN_INTERVAL, max(0.0, float(first_delay)))` 한 줄 치환뿐
-#: (라인 수 불변 3,757). 파일 수 **153 불변**(신규 파일 0).
+#: (라인 수 불변 3,785). 파일 수 **153 불변**(신규 파일 0).
 #: ⚠️ **cycle299(일봉 보유·backfill 창 확대, 2026-09-17) 기준선으로 갱신.**
 #: 움직인 파일 3 = `engine/scanner.py`(`_DAILY_LOAD_VCP_BACKFILL_DAYS` 120 → 220,
 #: **8영역 · 사용자 명시 승인** — 위 `_BASE_SHA` 의 재핀 주석과 자매 4곳이 같은 값을
@@ -372,7 +372,7 @@ _SRC_TREE_FILES = 153
 #: cycle315 착지(= 이 재핀 착수) 값은
 #: `fc11588e2b689496f2d3133e6c252e5d649eb7a6811ca60d3107abc79c9937ab` 였다.
 _SRC_TREE_DIGEST = (
-    "be129130175480e3ccb6bb553362455fce8f2ea56953a9b69d164a06d9329fb4"
+    "6f45113f6c057f1ed46662a73ae574120bb7c6898bbb6cf6a2a68e644be2cbf2"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
@@ -401,7 +401,7 @@ _PINNED_DIR_FILE_COUNTS = {
 #: 신규 leaf `src/engine/market_op_subscribe.py` 로 추출해(행위 변경 0 · 5줄
 #: 위임 wrapper) 3,897 → 3,726 이 됐다. 값만 옮긴다 — 정확 핀을 상한 핀으로
 #: 완화하면 cycle287 의 무접촉 대리 지표가 사라진다.
-_SCHEDULER_LINES = 3757
+_SCHEDULER_LINES = 3785
 _SCHEDULER_LINE_CAP = 3900
 
 #: 손대지 않기로 한 **원문 구간**의 sha256 (base `a42f519`).

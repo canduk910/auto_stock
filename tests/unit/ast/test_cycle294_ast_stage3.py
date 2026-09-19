@@ -234,7 +234,7 @@ _BASE_SHA: dict[str, str] = {
     # 🔴 `scheduler.py` 무접촉 (절대 규칙 7). `:1382`/`:2728` 두 줄은 §7-B
     #    레거시 재라우팅이 흡수한다. 근본 시정(2줄 치환)은 결정 카드 D-4.
     "src/engine/scheduler.py":
-        "8bc235d460d26f8da4aba9c4af5132c49347138f6d428d9ba78321c77b7cfafe",
+        "088d54efc4927899c1048d01ea7c15265ce87858da25447ac28a1ffaa56f3c23",
     "src/engine/market_op_subscribe.py":
         "7d58f9464c1ed35e4fa8706d801beb5a6b5c062d5a2941f0db6482d028d3d4ac",
     # 전략 7파일 + 베이스 — 매매 행위 변경 0 의 구조적 증거
@@ -296,7 +296,7 @@ _CLASSIFY_CHANNEL_SEGMENT_SHA = (
     "9e36c8a54ce695c73f104dcd3342477fe9d9b3593f63c1916a3acdc08538be99"
 )
 
-_SCHEDULER_LINES = 3757
+_SCHEDULER_LINES = 3785
 _SCHEDULER_LINE_CAP = 3900
 
 

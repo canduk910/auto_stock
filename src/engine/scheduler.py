@@ -120,7 +120,7 @@ from src.engine.stale_manager import (  # noqa: E402
 
 # 사이클 24 (2026-05-20) — 세션 단위 silent inactive 감지 + 강제 reconnect
 # K stale watcher 가 종목별 재등록 외에 세션 자체 결함도 5분 지속 후 _ws.close() 발화.
-# 3중 가드: fresh=0 + subscribed>=5 (위양성 차단) + 5분 지속 (단발 끊김 즉시 close 차단)
+# 3중 가드: fresh_ratio<0.2 + subscribed>=5 (위양성 차단) + 5분 지속 (단발 끊김 즉시 close 차단)
 # 시간당 2회 cap — KIS LMS / 앱정보 이용중지 위험 사전 차단.
 # 2026-05-20 14:58 운영 결함: 메인 세션 sub=11 ack=11 fresh=0 stale=11 대응.
 # SILENT_INACTIVE_MIN_SUBSCRIBED / PERSIST_SECS / CAP_PER_HOUR / WINDOW_SECS:
@@ -644,8 +644,8 @@ class TradingScheduler:
             # 세션 트래커 background task — 1분 주기 보드 전환 감시
             self._session_task = asyncio.create_task(self._session_loop())
 
-            # K (2026-05-12) — WebSocket silent inactive 30s 자동 복구 watcher
-            # F1(재연결 1회) + `_scan_loop`(5분) + K(30s) 3중 안전망. lifecycle: finally cancel
+            # K (2026-05-12) — WebSocket silent inactive 자동 복구 watcher (120s, 사이클 9)
+            # F1(1회)+`_scan_loop`(5분)+`_resubscribe_stale_priority`(5분)+K(120s) 4중. finally cancel
             self._stale_watcher_task = asyncio.create_task(self._stale_watcher_loop())
 
             # 사이클 46 (2026-05-22, refactor-review 카드 #6) — 세션 헬스 통합 5분 주기 task.
@@ -2161,24 +2161,50 @@ class TradingScheduler:
             - 산출 가능 → 자동 갱신 (`set_cash_usage_ratio` 호출, DB 저장).
             - 산출 불가 (empty regime / cash_min=None) → 수동값 폴백.
         """
-        from src.db.system_config import get_auto_regime_adjust, set_cash_usage_ratio
-        from src.engine.market_regime import get_current_regime
+        from src.db import system_config as _sc
+        from src.engine import market_regime as _mr
+
+        get_auto_regime_adjust = _sc.get_auto_regime_adjust
+        set_cash_usage_ratio = _sc.set_cash_usage_ratio
+        get_current_regime = _mr.get_current_regime
 
         manual_ratio = await get_cash_usage_ratio()
+
+        # cycle321 (D1 항목 I) — 네 반환 경로가 **각각 자기 이름을 남긴다**.
+        # 이 함수는 성공 경로에 로그가 0줄이라 "오늘 자금 사용률이 왜 이 값인가" 를
+        # 로그로 답할 수 없었다. 계산값은 0.25 가 실재하므로(우리 macro 의 cash_min=75)
+        # 예산이 1/4 로 접히면 터틀 유닛·ρ축·K축 캡이 함께 접히는데, 로그에는
+        # "매수 수량 0 → 900s cooldown" 으로만 남아 **투자금 부족으로 오귀인**된다.
+        # 🔴 마커를 새로 판 이유 = `[cash_usage_ratio]` 는 boot_manager 결과 줄과
+        # system_config 경보가 이미 쓴다. 값 필드는 `applied=` — `ratio=` 로 쓰면
+        # `[cash_usage_ratio] ratio=` 를 세는 운영 grep 이 한 줄을 두 줄로 센다.
+        def _emit(source: str, reason: str, applied: float) -> None:
+            try:
+                logger.info(
+                    "[cash_usage_ratio_source] source=%s reason=%s applied=%.2f manual=%.2f",
+                    source, reason, applied, manual_ratio,
+                )
+            except Exception:  # 관측이 행위를 바꾸면 안 된다
+                pass
 
         try:
             auto_enabled = await get_auto_regime_adjust()
         except Exception:
             logger.exception("[auto_regime_adjust] 조회 실패 — 수동 모드 폴백")
+            _emit("manual", "probe_error", manual_ratio)
             return manual_ratio
 
         if not auto_enabled:
+            # 운영 DB 가 auto_regime_adjust=false 이므로 **이 경로가 평상시 경로**다.
+            _emit("manual", "auto_disabled", manual_ratio)
             return manual_ratio
 
         regime = get_current_regime()
         computed = regime.computed_cash_usage_ratio()
         if computed is None:
-            # 외부 fetch 실패 / empty regime → 운영자 수동값 보존
+            # 외부 fetch 실패 / empty regime → 운영자 수동값 보존.
+            # auto_disabled 와 갈라 적는다 — 그쪽은 설정대로고 이쪽은 고칠 것이 있다.
+            _emit("manual", "regime_unavailable", manual_ratio)
             return manual_ratio
 
         # 5% step 자동 보정은 set_cash_usage_ratio 가 책임. 음수/1초과 입력은
@@ -2192,6 +2218,8 @@ class TradingScheduler:
             )
         # 산출값 자체를 반환 (5% 보정값보다 의도 명확)
         # set 직후 다시 get 하면 round-trip 비용 증가 — 호출자가 직접 사용.
+        # 버려진 수동값을 함께 남긴다 — "내가 1.00 으로 둔 것이 덮였다" 를 한 줄로 알린다.
+        _emit("regime", "computed", computed)
         return computed
 
     async def _eager_refresh_stock_master_for_held_positions(self) -> None:
@@ -2954,7 +2982,7 @@ class TradingScheduler:
         """120s 주기 stale 감지 + 자동 재구독 + 세션 단위 silent inactive 감지 (K, 2026-05-12).
 
         KIS WebSocket silent inactive(구독은 됐는데 시세 송신 없음) 즉시 복구.
-        F1(재연결 직후 1회) + `_scan_loop`(5분 주기) + K(120s) 3중 안전망.
+        F1(1회) + `_scan_loop`(5분) + `_resubscribe_stale_priority`(5분) + K(120s) 4중 안전망.
 
         사이클 24 (2026-05-20) — 세션 단위 silent inactive 감지 + 강제 reconnect 추가:
         종목별 unsubscribe+subscribe 재등록으로 회복 안 되는 세션 자체 결함을 5분 지속 후
