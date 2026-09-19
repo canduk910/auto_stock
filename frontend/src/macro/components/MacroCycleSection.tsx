@@ -32,6 +32,7 @@ import { useState, type ReactNode } from "react"
 import LoadingSpinner from "./LoadingSpinner"
 import ErrorAlert from "./ErrorAlert"
 import type { CycleScoreItem, CyclePhase, InvestmentRegime, MacroCycleData, MacroCycleResponse, RegimeData } from "../../types/macro"
+import { formatBuffettRatio } from '../../utils/marketRegime'
 
 const PHASES: CyclePhase[] = ["recovery", "expansion", "overheating", "contraction"]
 const PHASE_LABELS: Record<CyclePhase, string> = {
@@ -358,7 +359,7 @@ function RegimeDetail({ regime }: { regime?: RegimeData | null }) {
           <div className="flex justify-between">
             <span className="text-gray-500">버핏지수</span>
             <span className="font-medium text-gray-700">
-              {regime.buffett_ratio > 10 ? `${Math.round(regime.buffett_ratio)}%` : `${Math.round(regime.buffett_ratio * 100)}%`} (
+              {formatBuffettRatio(regime.buffett_ratio)} (
               {BUFFETT_LABELS[regime.buffett_level ?? ""] || regime.buffett_level})
             </span>
           </div>

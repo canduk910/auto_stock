@@ -332,6 +332,31 @@ describe("MacroPage — /macro 화면 회귀 가드 (cycle303)", () => {
     expect(await screen.findByTestId("macro-cycle-divergence-note")).toBeTruthy()
   })
 
+  // ── cycle316 후속 A — 버핏지수 단위 계약 ─────────────────────────────
+  // 🔴 종전 구현은 `v > 10 ? v : v*100` 크기 추론 분기였다. 이 프로젝트가 명시적으로
+  // 금지한 패턴이고(루트 CLAUDE.md 「비중 단위 추론 변환 금지」), 오염된 값을 조용히
+  // 그럴듯하게 만들어 결함을 은폐한다. 단위는 계약으로 고정하고 위반은 드러낸다.
+  it("버핏지수 — 계약(비율)대로 ×100 해서 퍼센트로 쓴다", async () => {
+    const data = baseCycleData()
+    ;(data.regime as Record<string, unknown>).buffett_ratio = 2.626
+    mockAll({ cycle: data })
+    render(<MacroPage />)
+    await screen.findByTestId("macro-section-cycle")
+    expect(screen.getByText(/263%/)).toBeTruthy()
+  })
+
+  it("버핏지수 — 계약을 어긴 값은 변환하지 않고 드러낸다", async () => {
+    // 시총이 GDP 의 10배가 되는 세계는 없다 — 이 값이 왔다는 것은 단위가 어긋난 것이고
+    // 그 사실이 화면에 보여야 고칠 수 있다. 종전 분기는 이것을 1250% 로 그럴듯하게 만들었다.
+    const data = baseCycleData()
+    ;(data.regime as Record<string, unknown>).buffett_ratio = 12.5
+    mockAll({ cycle: data })
+    render(<MacroPage />)
+    await screen.findByTestId("macro-section-cycle")
+    expect(screen.getByText(/⚠단위/)).toBeTruthy()
+    expect(screen.queryByText(/1250%/)).toBeNull()
+  })
+
   it("DivergenceNote — 국면(확장)과 체제(선별 매수)가 일치하면 경고가 뜨지 않는다", async () => {
     // baseCycleData 기본값 = phase 'expansion' + regime 'selective' → 확장 국면에 매수
     // 체제라 엇갈림이 아니다(둘 다 '팽창적' 방향 — DivergenceNote 두 분기 모두 해당 없음).
