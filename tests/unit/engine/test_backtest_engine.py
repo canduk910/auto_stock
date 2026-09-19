@@ -190,7 +190,7 @@ async def test_run_for_strategy_local_fallback_strategies_raise_not_supported(
     """(b) 로컬 폴백 전략 — BacktestNotSupportedError propagate.
 
     호출자(recommendation_engine) 가 본 에러를 잡아 backtest_runs.status=skipped
-    또는 fallback_local 분기로 보내야 한다. Phase 4-bis 에서 로컬 어댑터 구현.
+    또는 fallback_local 분기로 보내야 한다. 로컬 실행기는 미구현이다(외부 서버 철거로 전제가 바뀌었다).
     """
     from src.services.exceptions import BacktestNotSupportedError
 

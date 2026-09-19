@@ -358,8 +358,21 @@ _SRC_TREE_FILES = 153
 #: 🔴 매수·손절 경로에 레짐이 닿는 코드는 여전히 **0건**이다 — 레짐은 관찰 지표다.
 #: cycle313 착지(= 이 재핀 착수) 값은
 #: `7408c8fd1555b1c08e28db4aac650d7fef3b980a6aa7d39d0bdf4623f3f6748c` 였다.
+#:
+#: 🔁 **cycle316(2026-09-19, `domain-consult` + 사용자 승인) 재핀 — 자금 자동조정 판정을
+#: 「판독 불가면 수동」으로 뒤집고 관측 2종을 세웠다.** 움직인 파일 **1** =
+#: `db/system_config.py`(8영역 아님). `_AUTO_REGIME_ADJUST_DEFAULT` True→**False** +
+#: `[auto_regime_adjust] default_used reason=` WARNING + `set_cash_usage_ratio` 의 대폭 축소 경보.
+#: 🔴 **현행 운영 행위는 한 바이트도 안 바뀐다** — 운영 DB 가 이미 `auto_regime_adjust=false` 다.
+#: 달라지는 것은 키가 사라지거나 읽기가 실패한 순간뿐이고, 그때 원하는 행위가 운영자 값 보존이다.
+#: 같은 사이클이 **백테스트 낡은 문구**도 정정했다 — 외부 MCP 서버가 2026-08-18 철거됐으므로
+#: `Phase 4-bis 로컬 어댑터 대기` 는 착수된 계획이 있다는 오해를 만든다.
+#: 움직인 파일 **4** = `engine/backtest_orchestration.py` · `engine/backtest_yaml.py` ·
+#: `engine/backtest_engine.py` · `services/exceptions.py`(전부 문자열·주석, 행위 diff 0).
+#: cycle315 착지(= 이 재핀 착수) 값은
+#: `fc11588e2b689496f2d3133e6c252e5d649eb7a6811ca60d3107abc79c9937ab` 였다.
 _SRC_TREE_DIGEST = (
-    "fc11588e2b689496f2d3133e6c252e5d649eb7a6811ca60d3107abc79c9937ab"
+    "be129130175480e3ccb6bb553362455fce8f2ea56953a9b69d164a06d9329fb4"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

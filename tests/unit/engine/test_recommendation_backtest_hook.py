@@ -10,7 +10,7 @@ generate_recommendations() 마지막 단계에서 ``_enqueue_backtest_jobs(targe
        → backtest_runs INSERT (status=queued) → BacktestEngine.run_for_strategy 호출
        → mcp_job_id 부여 + status=running 전이.
 - (b) 폴백 전략(long_tail_volatility, bull_flag_breakout, vcp_breakout) 은
-       INSERT 직후 즉시 ``status='skipped'`` + ``error_message='YAML DSL 미지원 (Phase 4-bis 대기)'``.
+       INSERT 직후 즉시 ``status='skipped'`` + ``error_message='로컬 백테스트 실행기 없음'``.
 - KIS_MCP_ENABLED=false 시 (a) 도 즉시 ``status='skipped'`` + ``error_message='MCP 비활성'``.
 - BacktestEngine 호출 실패 시 자문 INSERT 보존(이미 끝난 상태), 해당 row 만 ``status='failed'``.
 - ``asyncio.create_task`` 로 ``_backtest_poll_loop(target_date)`` 발화 (fire-and-forget) —
@@ -281,7 +281,7 @@ async def test_enqueue_skips_fallback_strategies(
     # skipped 에 error_message 가 포함되어야 한다 (사후 진단용)
     for u in skipped:
         assert u.get("error_message"), f"skipped row 에 error_message 필수: {u}"
-        assert "YAML" in u["error_message"] or "지원" in u["error_message"]
+        assert "실행기" in u["error_message"]
 
 
 # ---------------------------------------------------------------------------
@@ -401,7 +401,7 @@ async def test_enqueue_skips_when_mcp_disabled(
 
     # 12 row INSERT 는 그대로 (영속화 자체는 보존 — 차후 토글 시 history 조회 가능)
     assert insert_count["n"] == 12
-    # 모두 skipped (그러나 사유는 서로 다름: (a) 는 'MCP 비활성', (b) 는 'YAML DSL 미지원')
+    # 모두 skipped (그러나 사유는 서로 다름: (a) 는 'MCP 비활성', (b) 는 '로컬 백테스트 실행기 없음')
     skipped = [u for u in update_records if u["status"] == "skipped"]
     assert len(skipped) == 12
 
@@ -416,7 +416,7 @@ async def test_enqueue_skips_when_mcp_disabled(
     for u in mcp_disabled:
         assert "비활성" in u["error_message"], f"(a) 전략 skipped 사유: {u}"
 
-    # (b) 전략 3 × 2 kind = 6 row 는 'YAML DSL 미지원' 사유
+    # (b) 전략 3 × 2 kind = 6 row 는 '로컬 백테스트 실행기 없음' 사유
     fallback_ids = {
         f"run-{s}-{k}"
         for s in ("long_tail_volatility", "bull_flag_breakout", "vcp_breakout")
@@ -425,7 +425,7 @@ async def test_enqueue_skips_when_mcp_disabled(
     fallback = [u for u in skipped if u["run_id"] in fallback_ids]
     assert len(fallback) == 6
     for u in fallback:
-        assert "YAML" in u["error_message"] or "지원" in u["error_message"]
+        assert "실행기" in u["error_message"]
 
     # BacktestEngine.run_for_strategy 호출 0건
     assert submit_count["n"] == 0

@@ -202,7 +202,7 @@ Dashboard 만 즉시 import. 나머지 9 페이지(History · Recommendations ·
 
 ### `CashUsageRatioCard`
 
-비중 슬라이더 하단. range 0~100, step 5 슬라이더 + `data-testid="cash-usage-ratio-percent"` % 표시. GET `/api/strategies/system/cash-usage-ratio` 초기 로드, 저장 버튼 클릭 시 PUT (debounce 없음 — 명시 commit). 응답 ratio(서버 5% 보정) 동기화. 안내 "다음 영업일부터 반영" (text-amber-700). queryKey `['cashUsageRatio']`.
+비중 슬라이더 하단. range **0~100**, step 5 슬라이더 + `data-testid="cash-usage-ratio-percent"` % 표시. 🔴 **하한 0 은 백엔드 수용 범위(`_CASH_USAGE_RATIO_MIN = 0.0`)와 맞춘 값이다** — 화면 하한이 백엔드보다 높으면 자동 조정이나 curl 이 저장한 값을 화면이 표현하지 못해 **UI 로 되돌릴 수 없는 상태**가 생긴다(레짐 defensive 가 만드는 0.25 가 그 사례). 0% 선택 시 `data-testid="cash-usage-ratio-zero-warning"` 인라인 경고 — 0% 는 신규 매수 전면 중단이라 실수와 의도를 구분해야 한다. GET `/api/strategies/system/cash-usage-ratio` 초기 로드, 저장 버튼 클릭 시 PUT (debounce 없음 — 명시 commit). 응답 ratio(서버 5% 보정) 동기화. 안내 "다음 영업일부터 반영" (text-amber-700). queryKey `['cashUsageRatio']`.
 
 ### `KisQuoteAccountsCard`
 

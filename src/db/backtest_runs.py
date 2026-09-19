@@ -146,7 +146,7 @@ async def update_status(
     - ``running``: mcp_job_id 부여 (MCP 제출 직후).
     - ``completed``: metrics 첨부 + completed_at.
     - ``failed``: error_message + completed_at.
-    - ``skipped``: YAML DSL 미지원 전략. completed_at 기록.
+    - ``skipped``: 로컬 백테스트 실행기 없음(외부 MCP 서버 철거 2026-08-18). completed_at 기록.
     """
     if status not in ("queued", "running", "completed", "failed", "skipped"):
         raise ValueError(f"unknown status: {status!r}")

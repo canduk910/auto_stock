@@ -1,6 +1,74 @@
-# 🔴 2026-09-19(토) 09:2x — cycle315 매크로 레짐 전환 (미커밋)
+# 🔴 2026-09-19(토) 14:xx — cycle316 후속 1~5 집행
 
 > **이 절이 현재 상태다.**
+
+사용자 승인 **"1~5 권고대로 진행"**. 조사가 **권고 2건을 뒤집었고**(3·4번) 그 판단을 따랐다.
+
+## 1·2 — 자금 자동조정 fail-open 을 뒤집었다
+
+`domain-consult` 판정 = **flip_to_false**. 상세 논거는 메모리 `project_cash_ratio_failopen` 이 정본.
+
+| 무엇 | 전 | 후 |
+|---|---|---|
+| `_AUTO_REGIME_ADJUST_DEFAULT` | `True`(자동조정) | **`False`(수동)** |
+| 기본값 사용 시 | 무음 | `[auto_regime_adjust] default_used reason=` WARNING (`key_missing`/`value_null`/`unexpected_type=…`/`exception`) |
+| 자금 대폭 축소 | 무음 | 직전 대비 **30% 넘게 줄면** WARNING (`_CASH_USAGE_RATIO_DROP_ALERT_RATIO=0.7`) |
+| 슬라이더 하한 | `min=50` | **`min=0`** + 0% 인라인 경고 |
+
+🔴 **현행 운영 행위는 한 바이트도 안 바뀐다** — 운영 DB 가 이미 `auto_regime_adjust=false` 다.
+달라지는 것은 **키가 사라지거나 읽기가 실패한 순간**뿐이고, 그때 원하는 행위가 운영자 값 보존이다.
+
+⚠️ **남은 것** — `scheduler.py:2156-2194` 는 성공 경로 로그가 **한 줄도 없다**(유일한 로그가 예외 경로).
+수동값이 이겼는지 계산값이 이겼는지 알 방법이 없다. 그 파일은 **승인 대상**이고, 기본값이 False 가 된
+지금은 평시 발화하지 않아 급하지 않다 — 다음에 `scheduler.py` 를 정당하게 여는 사이클에 묶는다.
+
+## 3 — 백테스트: 「어댑터냐 정지냐」가 잘못된 질문이었다
+
+조사 결과 **우리 쪽에 백테스트 실행기가 한 줄도 없다.** `backtest_engine.py` 는 외부 도구 호출
+래퍼이고 DSL 파서도 인터프리터도 없다 — YAML 은 외부 서버가 해석하던 것이라 그 서버가 없으면
+**실행 불가능한 텍스트**다. 게다가 `momentum` 은 유니버스가 KIS 실시간 등락률 순위라
+**과거 시점 복원 자체가 불가능**하고, VB·LTV 는 장중 손절·15:20 청산이 본질이다.
+
+→ **유지 + 낡은 문구 정정.** `Phase 4-bis 로컬 어댑터 대기` 는 착수된 계획이 있다는 오해를 만든다
+→ `로컬 백테스트 실행기 없음 (외부 MCP 서버 철거 2026-08-18)`. 코드 4파일 + 테스트 7파일.
+
+**로컬 실행기를 만든다면** 일봉 네이티브 4전략(`donchian_swing`·`kojiro`·`vcp_breakout`·`bull_flag_breakout`)
+으로 좁힌 별건이고, 착수 **전에 선행 계산**이 하나 있다 — 데이터 창 261 영업일에서 VCP 의 200일 EMA
+워밍업을 빼면 유효 구간이 **60 영업일대**다. 그 창으로 결론이 나오는지 먼저 계산한다.
+
+## 4 — macro CI: vendor 테스트로는 우리가 원하는 걸 못 잡는다
+
+🔴 재이식 드리프트를 잡아 줄 **유일한** 검사(`macro/tests/test_isolation.py` 바이트 동일성 3건)가
+원본 경로 전제 때문에 **이 리포에서 항상 skip** 된다. 반면 우리가 **두 번 밟은 함정**
+(`uvicorn` 미설치 · `COPY sp500.py` 누락)은 **빌드 성공·기동 실패** 종류라 vendor 테스트가 전혀 안 본다.
+그리고 CI 의 docker-build 잡이 **macro 이미지를 한 번도 빌드한 적이 없다**.
+
+| 무엇 | 어디 | 배포를 막는가 |
+|---|---|---|
+| macro 이미지 빌드 + `/health` 스모크 | `ci.yml` docker-build 잡 | **막는다 — 막아야 한다** (여기서 붉어지는 건 우리가 만든 결함이고 그대로 나가면 EC2 에서 컨테이너가 죽는다) |
+| vendor 테스트 195건 | **신규** `.github/workflows/macro-vendor.yml` | **막지 않는다** (`deploy.yml` 은 「CI — Build & Test」 conclusion 만 본다. 우리 손 밖 실패가 매매 배포를 멈추면 안 된다) |
+| 이미지 계약 가드 5건 | `tests/unit/deploy/test_cycle316_macro_image_contract.py` | 막는다 |
+
+🔴 계약 가드를 `macro/tests/` 에 넣지 않았다 — 그 영역은 재이식에 덮인다(09-18 실측).
+뮤테이션 2건(`COPY sp500.py` 제거 · `/health` 제거)으로 실효를 확인했다.
+⚠️ `macro-vendor.yml` 을 브랜치 보호의 required check 로 **지정하지 않는다** — macro 무변경 PR 이 영원히 pending 이 된다.
+
+## 5 — `docs/macro-lite.md` 정본 등재
+
+3지점(루트 `CLAUDE.md` 열거 · sync-docs bash 루프 · 정본 목록 표)을 한 커밋에 고쳤다.
+덧칠 패턴 검사 **0건**이라 본문 수정은 필요 없었고, history 파일도 만들지 않았다(걷어낸 줄이 없다).
+
+## 검증
+
+AST 1,782 passed · 프론트 **860 passed** · deploy 232 passed · `tsc -b` 0.
+⚠️ `tests/unit/db/test_cycle64_…::test_A1` 은 전체 실행에서만 붉고 단독·`tests/unit/db` 단독은 통과한다
+— **기존 순서 의존 flake** 이고 이번 변경과 무관하다(앞선 트랙도 같은 판정).
+
+---
+
+# ✅ 2026-09-19(토) 09:2x — cycle315 매크로 레짐 전환 (배포 완료)
+
+> 지난 판독이다. 현재 상태는 위 14:xx 절.
 
 사용자 지시 — **"매크로레짐은 외부를 보던 걸 이제 우리 컨테이너에서 확인하는걸로 전면 수정. (백엔드 및 프론트엔드)"** → "조사 끝나면 바로 구현 진행해"
 

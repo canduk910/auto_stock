@@ -45,7 +45,12 @@ KST = timezone(timedelta(hours=9))
 _SUPPORTED_STRATEGIES: frozenset[str] = frozenset(
     {"momentum", "volatility_breakout", "donchian_swing"}
 )
-# (b) 폴백 전략 — 즉시 skipped 마킹 (백테스트 DSL 미지원)
+# (b) 폴백 전략 — 즉시 skipped 마킹.
+# 🔴 이 넷은 외부 MCP 의 YAML DSL 로 표현되지 않는다. 그런데 그 DSL 을 해석하던 서버가
+# 2026-08-18 철거됐으므로 지금은 (a) 3 전략도 함께 돌지 않는다 — 차이는 사유뿐이다.
+# 로컬 실행기를 붙인다면 **이 넷이 우선**이다(진입·청산이 일봉 기반이라 재현이 성립한다).
+# momentum·volatility_breakout 은 유니버스와 청산이 장중 경로라 일봉으로는 재현이 아니라
+# 다른 전략을 만드는 일이 된다 — 그 판단은 `src/engine/strategies/CLAUDE.md` 가 정본이다.
 _FALLBACK_STRATEGIES: frozenset[str] = frozenset(
     {"long_tail_volatility", "bull_flag_breakout", "vcp_breakout", "kojiro"}
 )
@@ -98,13 +103,20 @@ async def _enqueue_backtest_jobs(
     target_date: date,
     inserted_recs: list[dict],
 ) -> None:
-    """6 전략 × 2 kind = 12 backtest_runs row INSERT + (a) 전략은 BacktestEngine submit.
+    """활성 전략 × 2 kind 만큼 backtest_runs row INSERT + (a) 전략은 BacktestEngine submit.
+
+    현재 활성 7 전략 × 2 = **14 row** 다(`_SUPPORTED_STRATEGIES` 3 + `_FALLBACK_STRATEGIES` 4).
+
+    🔴 **외부 백테스트 서버는 2026-08-18 철거됐고 재구축하지 않기로 했다**(사용자 결정 2026-09-19).
+    그래서 `KIS_MCP_ENABLED` 는 DB·env 둘 다 false 이고, 지금 14 row 는 전부 `skipped` 로 적재된다.
+    적재를 걷어내지 않는 이유 = 외부 호출이 0건이라 비용이 사실상 없고, `params_snapshot` 이
+    그날 어떤 파라미터로 돌고 있었는지의 기록이며, 나중에 로컬 실행기를 붙일 자리이기 때문이다.
 
     매 row 의 lifecycle:
-        queued → (a) running (submit 성공) | (b) skipped (YAML DSL 미지원) | failed (외부 오류)
+        queued → (a) running (submit 성공) | (b) skipped (로컬 실행기 없음) | failed (외부 오류)
 
     호출 순서:
-    1. 모든 12 row INSERT (status=queued, params_snapshot 영속화).
+    1. 모든 row INSERT (status=queued, params_snapshot 영속화).
     2. (b) 폴백 전략은 status='skipped' + 사유 영속화.
     3. KIS_MCP_ENABLED=false 면 (a) 도 즉시 'skipped' + '비활성' 사유.
     4. (a) 전략은 BacktestEngine.run_for_strategy 호출 → mcp_job_id 받아 'running' 전이.
@@ -159,7 +171,7 @@ async def _enqueue_backtest_jobs(
                 try:
                     await _db_update_status(
                         run_id, "skipped",
-                        error_message="YAML DSL 미지원 (Phase 4-bis 로컬 어댑터 대기)",
+                        error_message="로컬 백테스트 실행기 없음 (외부 MCP 서버 철거 2026-08-18)",
                     )
                 except Exception:
                     logger.exception(

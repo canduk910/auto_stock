@@ -114,6 +114,7 @@ git diff 를 보지 말고 **지정 영역의 코드를 직접 읽는다**.
 | `docs/architecture.md` | 흐름 도식 (실제로 변했을 때만) |
 | `docs/HARNESS_CHANGELOG.md` | verbatim 누적 (행 추가만) |
 | `docs/backtest-monitoring.md` | 외부 통합(백테스트 MCP·매크로 레짐) 운영 가이드 |
+| `docs/macro-lite.md` | 매크로 컨테이너 운영 가이드 (설치·seed·캐시 영속·첫 호출 예산·장애 복구) |
 | `_workspace/00_URGENT_WORKLIST.md` | 열린 과제 정본 |
 | `_workspace/00_leader_trading_rules.md` | 매매 규칙 정본 (`DEFAULT_PARAMS` 변경 시 동기화 의무) |
 | `.claude/agents/*.md` · `.claude/skills/**/SKILL.md` · `.claude/commands/*.md` | 하네스 구성 |
@@ -169,6 +170,7 @@ leaf 이고 나머지 **선재 8건**(engine 1 · db 4 · api 1 · routes 2)은 
 ```bash
 PAT='종전|~~[^~]+~~|\(구\)|\(신\)|구 서술|구 결정|시점 값|시점 기록|→ 완료|→ 폐기|이제 더 이상| PASS|0 failed|diff 0'
 for f in CLAUDE.md README.md docs/architecture.md docs/backtest-monitoring.md \
+         docs/macro-lite.md \
          src/CLAUDE.md src/engine/CLAUDE.md src/engine/strategies/CLAUDE.md \
          src/api/CLAUDE.md src/realtime/CLAUDE.md src/db/CLAUDE.md src/routes/CLAUDE.md \
          src/auth/CLAUDE.md src/models/CLAUDE.md frontend/CLAUDE.md _workspace/00_leader_trading_rules.md; do

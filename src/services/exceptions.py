@@ -32,5 +32,5 @@ class BacktestNotSupportedError(Exception):
     - 보드별 K값·시간 청산 (volatility_breakout 일부 — 근사 처리)
 
     호출자(recommendation_engine) 가 본 에러를 잡아 ``backtest_runs.status=skipped``
-    또는 로컬 어댑터 분기로 라우팅한다 (Phase 4-bis 에서 구체화).
+    로컬 실행기가 생기면 그쪽으로 라우팅한다 — 아직 없다(외부 MCP 서버는 2026-08-18 철거됐다).
     """

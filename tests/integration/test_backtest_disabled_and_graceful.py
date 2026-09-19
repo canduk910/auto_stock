@@ -157,7 +157,7 @@ async def test_kis_mcp_disabled_marks_all_runs_skipped(
     - parameter_recommendations: 6 row INSERT 성공
     - backtest_runs: 12 row INSERT 후 모두 status=skipped
     - (a) 전략(momentum/VB/donchian) 사유는 'MCP 비활성'
-    - (b) 전략(LTV/bull_flag/vcp) 사유는 'YAML DSL 미지원'
+    - (b) 전략(LTV/bull_flag/vcp) 사유는 '로컬 백테스트 실행기 없음'
     - 폴 루프 task 발화 0회 (submit_success=0)
 
     Phase 5b 후 사용자가 .env 토글 → 다음 영업일부터 자연 활성화.
@@ -202,7 +202,7 @@ async def test_kis_mcp_disabled_marks_all_runs_skipped(
     statuses = {r["status"] for r in runs_store.values()}
     assert statuses == {"skipped"}, f"모든 row skipped 기대, 실제: {statuses}"
 
-    # 사유 분포 확인 — (a) 는 MCP 비활성 / (b) 는 YAML DSL 미지원
+    # 사유 분포 확인 — (a) 는 MCP 비활성 / (b) 는 로컬 백테스트 실행기 없음
     a_strategies = {"momentum", "volatility_breakout", "donchian_swing"}
     b_strategies = {"long_tail_volatility", "bull_flag_breakout", "vcp_breakout"}
 
@@ -218,7 +218,7 @@ async def test_kis_mcp_disabled_marks_all_runs_skipped(
     assert len(a_msgs) == 6  # 3 strategies × 2 kind
     assert len(b_msgs) == 6
     assert all("MCP 비활성" in m for m in a_msgs), a_msgs
-    assert all("YAML DSL 미지원" in m for m in b_msgs), b_msgs
+    assert all("로컬 백테스트 실행기 없음" in m for m in b_msgs), b_msgs
 
     # 폴 루프 task 발화 0회 (submit_success=0 → spawn skip)
     assert spawn_called["n"] == 0, "submit 0건이면 폴 루프 발화 금지"
@@ -292,14 +292,14 @@ async def test_external_server_down_marks_runs_failed_recommendation_preserved(
     ]
     assert all("ExternalAPIError" in (r["error_message"] or "") for r in a_rows)
 
-    # (b) 전략 6 row 는 기존대로 skipped (Phase 4-bis 대기)
+    # (b) 전략 6 row 는 기존대로 skipped (로컬 실행기 미구현)
     b_rows = [
         r for r in runs_store.values()
         if r["strategy_id"] in ("long_tail_volatility", "bull_flag_breakout", "vcp_breakout")
     ]
     assert len(b_rows) == 6
     assert all(r["status"] == "skipped" for r in b_rows)
-    assert all("YAML DSL 미지원" in (r["error_message"] or "") for r in b_rows)
+    assert all("로컬 백테스트 실행기 없음" in (r["error_message"] or "") for r in b_rows)
 
     # 폴 루프 발화 0회 — submit_success=0
     assert spawn_called["n"] == 0, "모든 submit 실패면 폴 루프 발화 skip"

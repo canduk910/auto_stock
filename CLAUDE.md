@@ -25,7 +25,7 @@ KIS OpenAPI 기반 주식 자동매매시스템. FastAPI(백엔드) + React(프�
 
 ### 문서 규약 — 정본은 현재 상태만, 이력은 history 파일
 
-- 정본(`CLAUDE.md` 전부 · `README.md` · `docs/architecture.md` · `docs/backtest-monitoring.md` · `_workspace/00_leader_trading_rules.md`)에는 **지금 동작하는 규칙만** 현재형으로 적는다. 전에는 어땠는지, 어느 사이클이 무엇을 바꿨는지, 취소선, 신·구 병기, 시점 꼬리표는 쓰지 않는다.
+- 정본(`CLAUDE.md` 전부 · `README.md` · `docs/architecture.md` · `docs/backtest-monitoring.md` · `docs/macro-lite.md` · `_workspace/00_leader_trading_rules.md`)에는 **지금 동작하는 규칙만** 현재형으로 적는다. 전에는 어땠는지, 어느 사이클이 무엇을 바꿨는지, 취소선, 신·구 병기, 시점 꼬리표는 쓰지 않는다.
 - 바뀐 경위·실측 수치·결정 근거가 필요하면 **`docs/history/<정본 이름>.history.md`** 에 append 하고 정본은 새 값으로 **덮어쓴다**. history 는 고치지 않는다(append-only · 규약 = [`docs/history/README.md`](docs/history/README.md)).
 - 정본에 남기는 것 = 값의 출처 사이클 번호(`K=2.0(cycle242)`) · 금기와 그 이유 **한 문장**(`X 금지 — 2026-08-08 KRX OpenAPI 3,577→60 사고`). 이유가 한 문단을 넘으면 history 링크로 줄인다.
 - 사이클별 보고 원문은 [`docs/HARNESS_CHANGELOG.md`](docs/HARNESS_CHANGELOG.md) 하나에만 둔다 — **이력의 유일한 정본**이다. 정본 안에 이력 표를 두지 않는다.

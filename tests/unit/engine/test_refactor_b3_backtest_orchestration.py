@@ -247,7 +247,7 @@ async def test_enqueue_behavior_preserved_enabled(monkeypatch: pytest.MonkeyPatc
 @pytest.mark.asyncio
 async def test_enqueue_behavior_preserved_disabled(monkeypatch: pytest.MonkeyPatch):
     """is_enabled_async()=False 면 지원 3종 'MCP 비활성' skipped + run_for_strategy 미호출 +
-    poll 미발화. 폴백 4종은 항상 'YAML DSL 미지원' skipped."""
+    poll 미발화. 폴백 4종은 항상 '로컬 백테스트 실행기 없음' skipped."""
     orch = _import_orchestration()
     target = date(2026, 7, 24)
     recs = _make_inserted_rows(target)

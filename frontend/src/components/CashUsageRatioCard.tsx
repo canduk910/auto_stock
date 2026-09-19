@@ -5,11 +5,17 @@ import { getCashUsageRatio, updateCashUsageRatio } from '../api/trading'
 /**
  * 매매 가용 자금 비율 카드 (J3, 2026-05-12).
  *
- * `system_config.cash_usage_ratio` 키. 범위 [0.5, 1.0], 5% 단위. 기본 1.0.
+ * `system_config.cash_usage_ratio` 키. 범위 [0.0, 1.0], 5% 단위. 기본 1.0.
  * scheduler `_boot()` 가 `summary.net_asset × ratio` 로 `allocate_funds()` 호출.
  * 변경 즉시 적용 안 됨 — 다음 영업일 부터 반영.
  *
  * 옵셔널 `netAsset` 가 주어지면 예상 가용액(`netAsset × ratio`) 을 함께 표시.
+ *
+ * 하한 0% 확장 (2026-09-19) — 백엔드 `src/db/system_config.py` 의
+ * `_CASH_USAGE_RATIO_MIN` 이 이미 0.0 이라 슬라이더 하한 50 은 화면 쪽 제약이었다.
+ * 매크로 레짐 자동조정이 0.5 미만 값을 저장할 수 있어, 하한을 막아두면 그 값을
+ * 화면에서 보거나 되돌릴 방법이 없었다(복구 경로가 curl/DB 직접 UPDATE 뿐이었다).
+ * 0% 는 "매수 전면 중단" 을 뜻하므로 실수 방지 인라인 경고를 동반한다.
  */
 interface Props {
   netAsset?: number
@@ -78,12 +84,12 @@ export default function CashUsageRatioCard({ netAsset }: Props) {
         </span>
       </div>
       <p className="text-sm text-gray-500 mb-4">
-        순자산 중 매매에 사용할 비율 (50% ~ 100%, 5% 단위). 나머지는 현금으로 유지됩니다.
+        순자산 중 매매에 사용할 비율 (0% ~ 100%, 5% 단위). 나머지는 현금으로 유지됩니다.
       </p>
 
       <input
         type="range"
-        min={50}
+        min={0}
         max={100}
         step={5}
         value={percent}
@@ -94,10 +100,19 @@ export default function CashUsageRatioCard({ netAsset }: Props) {
       />
 
       <div className="flex justify-between text-xs text-gray-400 mt-1">
+        <span>0%</span>
         <span>50%</span>
-        <span>75%</span>
         <span>100%</span>
       </div>
+
+      {percent === 0 && (
+        <div
+          data-testid="cash-usage-ratio-zero-warning"
+          className="mt-3 px-3 py-2 bg-red-50 border border-red-300 rounded text-sm text-red-700"
+        >
+          0% 는 신규 매수를 전면 중단한다는 뜻입니다. 의도한 값이 맞는지 확인 후 저장하세요.
+        </div>
+      )}
 
       {expectedAvailable !== null && (
         <div className="mt-3 text-sm text-gray-700">

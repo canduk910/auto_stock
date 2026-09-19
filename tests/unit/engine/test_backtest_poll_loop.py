@@ -60,7 +60,7 @@ def _make_rows_store(target_date: date) -> dict[str, dict]:
                 "status": "skipped",
                 "mcp_job_id": None,
                 "metrics": None,
-                "error_message": "YAML DSL 미지원",
+                "error_message": "로컬 백테스트 실행기 없음",
             }
     return store
 

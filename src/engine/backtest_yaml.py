@@ -33,7 +33,7 @@ roc, maximum, minimum, donchian, atr, rsi, macd, bb, ...
 - **(b) 표현 불가 (BacktestNotSupportedError)** — long_tail_volatility, bull_flag_breakout, vcp_breakout
   - 상한가 모드 전환, 폴/플래그 자동 검출, 베이스 수축, swing high/low 검출 미지원
 
-Phase 4-bis 에서 (b) 전략은 stock-manager `services/local_backtest/strategies/` 패턴
+로컬 실행기를 만든다면 (b) 전략은 stock-manager `services/local_backtest/strategies/` 패턴
 어댑터를 우리 코드에 이식하여 폴백 처리할 계획. 본 Phase 는 raise 까지만.
 
 회귀 안전:
@@ -109,7 +109,7 @@ def build_yaml(strategy_id: str, params: dict[str, Any]) -> str:
     # (b) 폴백 전략 + 알 수 없는 ID — 명시 raise
     if strategy_id in ("long_tail_volatility", "bull_flag_breakout", "vcp_breakout"):
         raise BacktestNotSupportedError(
-            f"{strategy_id}: 외부 MCP YAML DSL 표현 불가능. Phase 4-bis 로컬 어댑터에서 처리 예정."
+            f"{strategy_id}: 외부 MCP YAML DSL 로 표현되지 않는다. 로컬 실행기 미구현."
         )
     raise BacktestNotSupportedError(
         f"unknown strategy_id: {strategy_id!r}. 지원 ID: momentum, volatility_breakout, donchian_swing"

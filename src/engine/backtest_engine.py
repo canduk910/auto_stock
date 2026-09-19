@@ -119,7 +119,7 @@ class BacktestEngine:
 
         Raises:
             ConfigError: KIS_MCP_ENABLED=false (graceful degrade — 자문 흐름은 backtest_summary=null).
-            BacktestNotSupportedError: 외부 YAML 표현 불가 전략 (Phase 4-bis 로컬 어댑터 위임).
+            BacktestNotSupportedError: 외부 YAML 로 표현되지 않는 전략. 로컬 실행기는 미구현이다.
             ExternalAPIError: MCP 통신 오류 / validate_yaml 실패 / job_id 누락.
         """
         # 사이클 5 (2026-05-17): DB 우선 분기로 비활성 가드 (ctor _enabled 만 보지 않음).

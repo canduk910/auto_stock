@@ -323,7 +323,7 @@ list_paged_by_filter(*, market=None, min_market_cap=0, min_trade_amount=0,
 |---|---|
 | `insert_run(target_date, strategy_id, params_kind, params_snapshot) -> dict \| None` | `status="queued"` 로 1행. `params_kind` 는 `"current"`/`"recommended"` 둘뿐이고 그 밖은 **`ValueError`**(조용한 흡수 금지). 🔴 **UNIQUE `(target_date, strategy_id, params_kind)` 충돌은 예외가 아니라 `None`** — 자문 사이클이 재진입해도 멱등하게 넘어가라는 계약이다 |
 | `get_by_id(run_id)` · `list_by_date(target_date)` | 조회 |
-| `update_status(run_id, status, *, mcp_job_id=None, error_message=None, metrics=None)` | `running`=mcp_job_id 부여 / `completed`=metrics + `completed_at` / `failed`=error_message + `completed_at` / `skipped`=YAML DSL 미지원 전략, `completed_at` 기록 |
+| `update_status(run_id, status, *, mcp_job_id=None, error_message=None, metrics=None)` | `running`=mcp_job_id 부여 / `completed`=metrics + `completed_at` / `failed`=error_message + `completed_at` / `skipped`=로컬 실행기 없음(외부 MCP 서버 철거 2026-08-18), `completed_at` 기록 |
 
 `target_date` 는 DATE 라 `_kst.to_date()` 로 강제 변환한다(str 입력도 받는다).
 

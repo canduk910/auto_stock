@@ -97,15 +97,19 @@ async def test_get_auto_regime_adjust_jsonb_dict_bool():
 
 
 @pytest.mark.asyncio
-async def test_get_auto_regime_adjust_missing_default_true():
-    """키 부재 → 기본 True."""
+async def test_get_auto_regime_adjust_missing_default_false():
+    """키 부재 → 기본 **False**(수동 모드).
+
+    cycle316 이 뒤집었다 — 설정을 못 읽었다는 이유로 자금 사용률이 100%→25% 가 되면 안 된다.
+    근거는 `src/db/system_config.py` 의 `_AUTO_REGIME_ADJUST_DEFAULT` 주석.
+    """
     from src.db import system_config
 
     with patch.object(system_config, "pg", create=True) as pg_mod:
         pg_mod.fetch = AsyncMock(return_value=[])
         out = await system_config.get_auto_regime_adjust()
 
-    assert out is True, "키 부재 → 기본 True."
+    assert out is False, "키 부재 → 기본 False(수동). 자동 조정은 사람이 켠다."
 
 
 # ---------------------------------------------------------------------------

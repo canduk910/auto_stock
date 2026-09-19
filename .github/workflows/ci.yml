@@ -146,3 +146,29 @@ jobs:
 
       - name: Build frontend image
         run: docker build --target prod -t auto_stock-frontend:test ./frontend
+
+      # 🔴 macro 이미지는 여기서 처음 빌드된다(cycle316).
+      # 빌드만으로는 부족해서 기동까지 확인한다 — 우리가 이 이미지에서 두 번 밟은 함정
+      # (`uvicorn` 미설치 · `COPY sp500.py` 누락)이 **둘 다 빌드는 성공하고 기동에서 죽는** 종류라,
+      # `docker build` 의 exit 0 은 아무것도 보장하지 않는다. 그대로 나가면 EC2 에서 컨테이너가 죽는다.
+      - name: Build macro image
+        run: docker build -t auto_stock-macro:test ./macro
+
+      - name: Smoke — macro 컨테이너가 실제로 뜨고 /health 가 응답하는가
+        run: |
+          set -euo pipefail
+          # 캐시 디렉터리는 이미지 안에 있고(MACRO_LITE_CACHE_DIR), 외부 네트워크 없이도
+          # /health 는 응답해야 한다 — 지표 fetch 는 그 경로를 타지 않는다.
+          docker run -d --name macro_smoke -p 18010:8000 auto_stock-macro:test
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:18010/health >/dev/null 2>&1; then
+              echo "macro /health OK ($i초)"
+              docker rm -f macro_smoke >/dev/null
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "::error::macro 컨테이너가 30초 안에 /health 를 응답하지 못했다"
+          docker logs macro_smoke || true
+          docker rm -f macro_smoke >/dev/null || true
+          exit 1

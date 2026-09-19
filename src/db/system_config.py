@@ -57,9 +57,24 @@ _CASH_USAGE_RATIO_DEFAULT = 1.0
 _CASH_USAGE_RATIO_MIN = 0.0
 _CASH_USAGE_RATIO_MAX = 1.0
 _CASH_USAGE_RATIO_STEP = 0.05
+#: 직전 값 대비 이 비율 이하로 떨어지면 WARNING 1행 (cycle316, 관측 전용).
+#: 0.7 인 이유 = 레짐 사다리의 한 칸 이동(1.00→0.75·0.75→0.65·0.65→0.50)은 조용히 두고,
+#: 두 칸 이상 건너뛰는 축소(1.00→0.50·1.00→0.25)만 잡는다. 운영자가 슬라이더를 한두 칸
+#: 움직이는 것은 소음이 아니다.
+_CASH_USAGE_RATIO_DROP_ALERT_RATIO = 0.7
 
 _AUTO_REGIME_ADJUST_KEY = "auto_regime_adjust"
-_AUTO_REGIME_ADJUST_DEFAULT = True
+#: 🔴 **판독 불가면 수동 모드다** (cycle316, 2026-09-19 `domain-consult` + 사용자 승인).
+#: 이 값이 True 이면 레짐의 `cash_min` 이 그대로 `cash_usage_ratio` 로 **DB 에 영속**된다.
+#: 우리 macro 는 `defensive`(`cash_min=75`)를 내므로 그 값이 **0.25** 이고, 예산이 4분의 1이 되면
+#: 터틀 유닛·ρ축 cutoff·K축 cap 이 함께 접혀 고가 종목은 1주 폴백까지 막힌다. 그런데 로그에는
+#: `매수 수량 0 → 900s cooldown` 으로만 남아 일일 리포트에서 「투자금 부족」으로 오귀인된다.
+#: **설정을 못 읽었다는 이유로 매수 자금의 4분의 3이 사라지면 안 된다.**
+#: ⚠️ `max_lot_units` 의 「fail-closed 금지」 선례는 여기 적용되지 않는다 — 그 사고는 결측이 곧
+#: **매매 정지**였지만, 여기서 False 는 매매를 멈추는 것이 아니라 운영자가 명시로 저장해 둔
+#: 마지막 값을 쓰는 것이다. 오히려 그 선례의 원칙(결측이 조용히 매매를 줄이면 안 된다)이
+#: True 쪽을 겨냥한다. 자동 조정은 **사람이 켜는 기능**이다.
+_AUTO_REGIME_ADJUST_DEFAULT = False
 
 
 async def _select_value(key: str) -> object:
@@ -140,6 +155,22 @@ async def set_cash_usage_ratio(ratio: float) -> None:
     # 부동소수 표현 안정화 (5% 단위라 소수 둘째 자리까지 충분)
     adjusted = round(adjusted, 2)
 
+    # 🔴 자금이 크게 줄면 소리를 낸다 (cycle316). 이 값이 조용히 접히면 운영자는
+    # 예산 축소를 `매수 수량 0 → 900s cooldown` WARNING 으로만 만나 「투자금 부족」으로 오해한다.
+    # 관측이 저장을 막지 않는다 — 조회 실패·예외는 전부 흡수하고 그대로 저장한다.
+    try:
+        prev_raw = await _select_value(_CASH_USAGE_RATIO_KEY)
+        prev = prev_raw.get("value") if isinstance(prev_raw, dict) else None
+        if isinstance(prev, (int, float)) and prev > 0:
+            if adjusted <= float(prev) * _CASH_USAGE_RATIO_DROP_ALERT_RATIO:
+                logger.warning(
+                    "[cash_usage_ratio] 자금 비율이 크게 줄었다 %s → %s "
+                    "(전략 예산·터틀 유닛·랏 상한이 함께 접힌다)",
+                    prev, adjusted,
+                )
+    except Exception:
+        logger.debug("[cash_usage_ratio] 직전 값 조회 실패 — 저장은 계속한다", exc_info=True)
+
     await _upsert_value(_CASH_USAGE_RATIO_KEY, {"value": adjusted})
 
 
@@ -184,23 +215,38 @@ async def get_account_risk_block_pct() -> float | None:
 async def get_auto_regime_adjust() -> bool:
     """매크로 레짐 기반 cash_usage_ratio 자동 조정 활성 여부.
 
-    사이클 2 (2026-05-17). 키 부재 시 기본 True. False 면 운영자 수동 설정 보존.
+    🔴 **판독 불가는 전부 수동 모드(False)** 다 — 키 부재·value None·bool 아닌 타입·예외.
+    근거는 `_AUTO_REGIME_ADJUST_DEFAULT` 주석. 자동 조정은 사람이 켜는 기능이다.
+
+    기본값으로 떨어진 사유는 `[auto_regime_adjust] default_used reason=…` 으로 남긴다 —
+    이게 없으면 「운영자가 껐다」와 「못 읽어서 꺼진 것처럼 보인다」가 구별되지 않는다.
     """
+    reason = ""
     try:
         raw = await _select_value(_AUTO_REGIME_ADJUST_KEY)
         if raw is _MISSING:
-            return _AUTO_REGIME_ADJUST_DEFAULT
-        if isinstance(raw, dict):
+            reason = "key_missing"
+        elif isinstance(raw, dict):
             v = raw.get("value")
             if v is None:
-                return _AUTO_REGIME_ADJUST_DEFAULT
-            return bool(v)
-        if isinstance(raw, bool):
+                reason = "value_null"
+            else:
+                return bool(v)
+        elif isinstance(raw, bool):
             return raw
-        return _AUTO_REGIME_ADJUST_DEFAULT
+        else:
+            # JSONB codec 회귀 등으로 dict 가 아니라 str 이 오는 경로.
+            reason = f"unexpected_type={type(raw).__name__}"
     except Exception:
-        logger.exception("[auto_regime_adjust] get 실패 — 기본 True 사용")
-        return _AUTO_REGIME_ADJUST_DEFAULT
+        logger.exception("[auto_regime_adjust] 조회 실패 — 수동 모드로 간다")
+        reason = "exception"
+
+    if reason:
+        logger.warning(
+            "[auto_regime_adjust] default_used reason=%s value=%s — 자동 조정을 켜지 않는다",
+            reason, _AUTO_REGIME_ADJUST_DEFAULT,
+        )
+    return _AUTO_REGIME_ADJUST_DEFAULT
 
 
 async def set_auto_regime_adjust(value: bool) -> None:

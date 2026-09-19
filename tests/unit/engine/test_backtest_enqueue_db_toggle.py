@@ -19,7 +19,7 @@ test_backtest_engine_db_toggle.py mock 패턴 답습:
   skip 되지 않고 submit. 현행(정적 False 읽음)에선 skip → **Red**.
 - T2 (회귀): is_enabled_async()=False → 지원 3종 'MCP 비활성' skipped + submit 0.
 - T3 (회귀): _FALLBACK_STRATEGIES(kojiro/LTV/BFB/VCP) 는 enabled 무관 항상
-  'YAML DSL 미지원' skipped.
+  '로컬 백테스트 실행기 없음' skipped.
 - T4 (회귀): DB 조회 예외 시 is_enabled_async 의 .env fallback 이 게이트에서도
   graceful — 예외 전파 없음.
 
@@ -216,13 +216,13 @@ async def test_enqueue_skips_supported_when_db_toggle_false(
 
 
 # ---------------------------------------------------------------------------
-# T3 (회귀): 폴백 4종은 enabled 무관 항상 'YAML DSL 미지원' skipped
+# T3 (회귀): 폴백 4종은 enabled 무관 항상 '로컬 백테스트 실행기 없음' skipped
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_enqueue_fallback_always_skipped_regardless_of_toggle(
     monkeypatch: pytest.MonkeyPatch,
 ):
-    """T3: _FALLBACK_STRATEGIES(kojiro/LTV/BFB/VCP) 는 토글 ON 이어도 'YAML DSL 미지원' skipped.
+    """T3: _FALLBACK_STRATEGIES(kojiro/LTV/BFB/VCP) 는 토글 ON 이어도 '로컬 백테스트 실행기 없음' skipped.
 
     (게이트 *전* 분기이므로 enabled 무관 — kojiro 포함 4종 검증.)
     """
@@ -250,7 +250,7 @@ async def test_enqueue_fallback_always_skipped_regardless_of_toggle(
 
     await rec_mod._enqueue_backtest_jobs(target, recs)
 
-    # 폴백 4종 × 2 kind = 8 row 가 skipped + 사유 = YAML DSL 미지원
+    # 폴백 4종 × 2 kind = 8 row 가 skipped + 사유 = 로컬 백테스트 실행기 없음
     fallback_skipped = [
         u
         for u in update_records
@@ -259,7 +259,7 @@ async def test_enqueue_fallback_always_skipped_regardless_of_toggle(
     assert {u["run_id"] for u in fallback_skipped} == _FALLBACK_RUN_IDS
     for u in fallback_skipped:
         msg = u.get("error_message", "")
-        assert "YAML" in msg or "미지원" in msg, f"폴백 skipped 사유: {u}"
+        assert "실행기" in msg, f"폴백 skipped 사유: {u}"
 
     # 폴백 전략은 BacktestEngine.run_for_strategy 호출 0 (kojiro 포함)
     assert not (set(submit_calls) & set(FALLBACK)), (

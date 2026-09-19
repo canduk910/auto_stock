@@ -1,0 +1,57 @@
+# macro 패키지(vendor)의 자체 테스트 — 배포 게이트 **밖**이다.
+#
+# 🔴 왜 `ci.yml` 이 아니라 별도 워크플로인가
+# `deploy.yml` 은 「CI — Build & Test」 워크플로의 conclusion 하나만 보고 배포 여부를 정한다.
+# 그래서 이 테스트를 거기 넣으면 **우리 손 밖의 실패가 매매 backend 배포를 멈춘다.**
+# `macro/macro_lite/` 는 stock-manager 에서 무수정으로 가져오는 vendor 라 붉어져도 우리가 고칠
+# 자리가 아니다 — 고칠 곳은 원 패키지이고, 우리가 할 일은 재이식 시점에 그 사실을 아는 것뿐이다.
+#
+# 🔴 브랜치 보호의 required check 로 지정하지 않는다.
+# macro 를 안 건드린 PR 에서는 이 워크플로가 아예 뜨지 않아 영원히 pending 이 된다.
+#
+# ⚠️ 이 워크플로가 **재이식 드리프트를 잡아 주지는 않는다.**
+# `macro/tests/test_isolation.py` 의 바이트 동일성 검사 3건은 원본 경로가 stock-manager 트리를
+# 가리켜 이 리포에서 항상 skip 된다. 드리프트를 실제로 잡은 것은 사람이 원 커밋과 대조한
+# 2026-09-18 작업이었다. 여기서 도는 것은 원 패키지의 내부 로직(레짐 매트릭스·사이클 점수·
+# FRED 폴백·캐시 TTL)이고, 우리에게 주는 값은 「재이식한 사본이 스스로 일관적인가」 하나다.
+# 우리 배포 구성의 불변식은 `tests/unit/deploy/` 에 우리 것으로 따로 세운다.
+
+name: macro vendor tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'macro/**'
+      - '.github/workflows/macro-vendor.yml'
+  pull_request:
+    paths:
+      - 'macro/**'
+      - '.github/workflows/macro-vendor.yml'
+  workflow_dispatch:
+
+jobs:
+  vendor-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: macro/requirements.txt
+
+      - name: Install macro deps
+        working-directory: macro
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-timeout
+
+      - name: Run vendor tests
+        working-directory: macro
+        # 🔴 네트워크를 타는 테스트가 섞이면 CI 가 외부 사정으로 붉어진다.
+        # 지금은 vendor 가 스스로 목을 쓰지만, 그 전제가 깨지면 여기서 먼저 드러난다.
+        run: python -m pytest tests -q --timeout=120

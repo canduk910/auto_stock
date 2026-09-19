@@ -388,19 +388,24 @@ async def test_g2_boot_timeout_default_is_shorter_than_read_budget():
 
 
 # ---------------------------------------------------------------------------
-# 🔴 알려진 위험 — 자동 조정 판정이 예외 시 "켜짐" 쪽으로 열린다
+# 자동 조정 판정은 "못 읽으면 수동" 이다 (cycle316, domain-consult + 사용자 승인)
 # ---------------------------------------------------------------------------
-async def test_known_risk_auto_adjust_defaults_open_on_error(monkeypatch):
-    """`get_auto_regime_adjust` 는 키 부재·조회 예외에 **True** 를 돌려준다.
+async def test_auto_adjust_defaults_to_manual_on_error(monkeypatch):
+    """`get_auto_regime_adjust` 는 **판독 불가면 False**(수동 모드)를 돌려준다.
 
-    지금까지 무해했던 이유는 레짐 소스가 죽어 있어 `computed_cash_usage_ratio()` 가
-    항상 None 이었기 때문이다. cycle315 가 소스를 살리면서 그 전제가 사라졌다 —
-    우리 macro 는 `cash_min=75`(defensive)를 돌려주므로 계산값이 **0.25** 로 실재한다.
-    즉 DB 조회가 한 번 실패하면 자금 사용률이 100% → 25% 로 떨어질 수 있다.
+    🔴 **뒤집기 전에는 True 였다.** 그때 무해했던 이유는 레짐 소스가 죽어 있어
+    `computed_cash_usage_ratio()` 가 항상 None 이었기 때문이고, cycle315 가 그 전제를 없앴다 —
+    우리 macro 는 `cash_min=75`(defensive)를 내므로 계산값 **0.25** 가 실재한다.
 
-    🔴 이 테스트는 **현재 계약을 기록**하는 것이지 옳다고 말하는 것이 아니다.
-    기본값을 뒤집는 것은 매매 행위(전략 예산)를 바꾸는 변경이라
-    사용자 승인 + `domain-consult` 선행 대상이다. 승인되면 이 테스트를 뒤집는다.
+    True 였다면 DB 조회가 한 번 실패하는 것만으로 자금 사용률이 100% → 25% 가 되고,
+    그 값이 `scheduler` 를 통해 **DB 에 영속**돼 토글을 되돌려도 승계된다.
+    예산이 4분의 1이면 터틀 유닛·ρ축 cutoff·K축 cap 이 함께 접혀 고가 종목은 1주 폴백까지
+    막히는데, 로그에는 `매수 수량 0 → 900s cooldown` 으로만 남아 오귀인된다.
+
+    🔴 **이 방향을 되돌리지 마라.** 「fail-open 이라 안전하다」는 방향 논리는 여기서 성립하지 않는다 —
+    안전의 반대는 손실이 아니라 **운영자가 모르는 상태**다. False 는 매매를 멈추는 것이 아니라
+    운영자가 명시로 저장해 둔 마지막 값을 쓰는 것이고, 손절·트레일링·익일청산·15:20 강제청산은
+    예산과 무관하게 전부 살아 있다.
     """
     from src.db import system_config
 
@@ -410,7 +415,19 @@ async def test_known_risk_auto_adjust_defaults_open_on_error(monkeypatch):
     monkeypatch.setattr(system_config, "_select_value", lambda *a, **k: _boom())
 
     got = await system_config.get_auto_regime_adjust()
-    assert got is True, (
-        "기본값이 False 로 바뀌었다면 매매 행위 변경 승인이 있었는지 확인하고 "
-        "이 테스트를 그 결정에 맞춰 뒤집어라"
+    assert got is False, (
+        "자동 조정 판정이 다시 fail-open(True) 으로 돌아갔다 — "
+        "설정을 못 읽었다는 이유로 매수 자금의 4분의 3이 사라지면 안 된다"
     )
+
+
+async def test_auto_adjust_missing_key_is_manual(monkeypatch):
+    """키 자체가 없을 때도 수동이다 — 새 환경이 조용히 자동 조정으로 뜨지 않는다."""
+    from src.db import system_config
+
+    async def _missing(*a, **k):
+        return system_config._MISSING
+
+    monkeypatch.setattr(system_config, "_select_value", _missing)
+
+    assert await system_config.get_auto_regime_adjust() is False
