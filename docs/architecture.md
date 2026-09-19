@@ -993,7 +993,7 @@ tick blind — 루트 `CLAUDE.md` 운영 가이드 D6 = cycle232. cycle248 이 �
   |  frontend        |   /api   |  backend  (uvicorn 단일 워커)             |
   |  nginx:alpine    |--------->|  scheduler / session / scanner            |
   |  SPA + BasicAuth |          |  strategies(7) -> risk -> order_engine    |     KIS WebSocket
-  +------------------+          |  llm_buy_gate (AI 매수평가 — VB·LTV 만)   |<--> (시세 · 체결통보)
+  +------------------+          |  llm_buy_gate (AI 매수평가 — 7전략 shadow) |<--> (시세 · 체결통보)
                                 |  recommendation_engine  (20:00 자문)      |
                                 |  log_analysis_engine    (21:30 분석)      |     KIS REST
                                 |  api/base.py  _semaphore = Semaphore(20)  |<--> (주문 · 잔고 · 일봉)
@@ -1011,9 +1011,11 @@ tick blind — 루트 `CLAUDE.md` 운영 가이드 D6 = cycle232. cycle248 이 �
 ### 15.2 1단계 — AI 매수평가 분리 (진행 중 · cycle279 = llm_worker 컨테이너 신설)
 
 여기서 "AI 매수평가"는 cycle274 가 배선하고 cycle276 이 주문 시점으로 옮긴 **관찰 기능**이다 —
-VB·LTV 두 전략의 매수 주문 직후에 LLM 이 점수를 매겨 **기록만** 하고 매수 여부는 바꾸지 않는다
-(shadow). 켜져 있는 전략은 그 둘뿐이다(`volatility_breakout.py:155` · `long_tail_volatility.py:138`
-의 `"llm_gate_mode": "shadow"`, 나머지 5 전략은 키 부재 = off).
+매수 주문 직후에 LLM 이 점수를 매겨 **기록만** 하고 매수 여부는 바꾸지 않는다(shadow).
+**7전략 전부** 켜져 있다 — cycle297(2026-09-17 `a61ded9`)이 나머지 5전략에 `"llm_gate_mode": "shadow"`
+4키를 넣어 넓혔다(사용자 결정 = "모든 전략에 걸어 데이터를 쌓고 전략별로 하나씩 enforce").
+배선 자체는 전략 무관이다 — `order_engine` 의 호출부 2곳(주 경로 · 지정가 폴백 경로)이 모든 전략을
+같은 코드로 태우고, 갈리는 것은 `llm_gate_mode` 값 하나뿐이다(`llm_buy_gate._read_mode`).
 
 1단계는 이 평가를 별도 컨테이너 `llm_worker` 로 뺀다. 엔진은 평가 **요청 행**만 DB 에 적고,
 워커가 그 행을 선점해 일봉 조회·지표·프롬프트·모델 호출을 하고 결과를 같은 행에 채운다.

@@ -349,7 +349,7 @@ KIS_HTS_ID_REAL=실전용_HTS_ID
 | 매매 가능 보드 | **MAIN 단독**(09:00~15:39:59). 코드 기본값 `("krx_open","main")` 의 `krx_open` 은 옛 값이 호환용으로 남은 것이고, `_BOARD_SCHEDULE` 이 그 보드를 내보내지 않는다. 매수는 모듈 상수 `BUY_CUTOFF_KST = 15:20`(DB 설정으로 못 바꾼다)에서 끊긴다. 상한가 +29%는 KRX 기준이라 NXT 보드 제외 |
 | 진입 조건 | 전일종가 대비 +29%(상한가) 돌파 |
 | 매수 | 돌파 순간, 할당 자금 25% 비중 |
-| AI 매수평가 | 해당 없음 — `llm_buy_gate` 배선은 VB·LTV 두 전략뿐이다 |
+| AI 매수평가 | **적용** — 매수 주문 접수 직후 `llm_buy_gate.observe_order` 가 점수를 `llm_buy_evaluations` 에 남긴다(주문 1건 = 1행, 실패도 1행). `llm_gate_mode` 기본 `"shadow"` = 기록만, 매수 차단 없음. cycle297(2026-09-17)이 **7전략 전부**로 넓혔다 |
 | 손절 | 매수가 대비 -7.5% |
 | 청산 | **익일 청산** — 다음 영업일 NXT 프리(08:00) 시가 + 30초 안정화 후 갭상승 +10% → 트레일링 스탑 -2% / 그 외 즉시 매도. 전체 조건은 「NXT/KRX 통합 운영」의 「익일 청산 시점」 행에 있다 |
 | 보유 기간 | 1영업일 (당일 매수 → 다음 영업일 NXT 프리 청산) |
@@ -387,7 +387,7 @@ KIS_HTS_ID_REAL=실전용_HTS_ID
 | 매매 가능 보드 | MAIN 단독 — 추세추종은 일중 변동성 필요. NXT 프리/애프터 비활성. 보드 구간은 09:00~15:39:59, 실제 매수 창은 09:05~09:30(아래 매수 행) |
 | 진입 조건 | 어제 종가가 20일 신고가 돌파 + 60일 EMA 우상향 + 종가>EMA + 거래대금 ≥ 20일평균×1.5 |
 | 매수 | 다음 영업일 09:05~09:30 시장가, 1종목당 1회. **시가 갭상승 +3%↑ 시 스킵** (추격 방지) |
-| AI 매수평가 | 해당 없음 — `llm_buy_gate` 배선은 VB·LTV 두 전략뿐이다 |
+| AI 매수평가 | **적용** — 매수 주문 접수 직후 `llm_buy_gate.observe_order` 가 점수를 `llm_buy_evaluations` 에 남긴다(주문 1건 = 1행, 실패도 1행). `llm_gate_mode` 기본 `"shadow"` = 기록만, 매수 차단 없음. cycle297(2026-09-17)이 **7전략 전부**로 넓혔다 |
 | 손절 | 매수가 대비 -7% 하드 손절. 터틀 매수(`_entry_atr` 스탬프가 있는 랏)는 대신 **2×ATR 하드손절 + -9% backstop**을 타고, 고점이 `매수가 + 1.5×entry_atr` 에 닿으면 손절선이 매수가로 승격된다(`breakeven_promote_atr`, 좁히는 방향만) |
 | 청산 | 코드 평가 순서대로 ① **시간 청산** — `breakout_fail_n_days`(기본 5 **영업일**) 이상 보유 + 현재가 < 돌파고점 → STOP_LOSS ② **채널 이탈** — 최근 `channel_exit_period`(기본 10)일 저가 하회 → TRAILING_STOP ③ **ATR(14)×2 Chandelier 트레일링**(`high_since_buy − ATR×2`) → TRAILING_STOP |
 | 보유 기간 | 멀티데이 (평균 5~15 영업일). DB `positions` 영속화로 일자 넘어 유지 |
@@ -400,7 +400,7 @@ KIS_HTS_ID_REAL=실전용_HTS_ID
 | 매매 가능 보드 | MAIN(09:05~13:00) |
 | 진입 조건 | **폴 자동 검출**(직전 3~10영업일 누적 +15%↑, 음봉 비율 ≤ 45%) + **플래그 자동 검출**(2~10영업일 횡보, 조정 폭 ≤ 폴 폭의 50%, 거래량 < 폴 평균의 60%) → 플래그 상단(`flag_high`) 돌파 + 당일 거래량 ≥ `flag_avg_volume × 2`. 거래량은 **실시간 틱 누적(`tick_volume`) 단일 출처**이고 미관측은 매수 거부다(fail-closed). 거래량을 채워도 **추격 상한 `max_breakout_extension_pct` = 5.0%**(돌파선 대비 현재가)를 넘으면 매수하지 않는다 |
 | 매수 | 종목당 1회 + 3영업일 쿨다운. 부분봉 가드(`candles[0]==오늘`이면 [1]부터) |
-| AI 매수평가 | 해당 없음 — `llm_buy_gate` 배선은 VB·LTV 두 전략뿐이다 |
+| AI 매수평가 | **적용** — 매수 주문 접수 직후 `llm_buy_gate.observe_order` 가 점수를 `llm_buy_evaluations` 에 남긴다(주문 1건 = 1행, 실패도 1행). `llm_gate_mode` 기본 `"shadow"` = 기록만, 매수 차단 없음. cycle297(2026-09-17)이 **7전략 전부**로 넓혔다 |
 | 손절 | 매수가 대비 -5% / 플래그 하단(`flag_low`) 이탈 → STOP_LOSS |
 | 청산 | 측정된 이동(`flag_high + (pole_high - pole_start)`) 도달 → 1차 절반 청산(`_partial_exit` 마킹, 1차 구현은 전량) → 잔여 `high_since_buy − ATR×2` 트레일링 / 5영업일 시간 청산 (캘린더일 +2 보정) |
 | 보유 기간 | 단기 (평균 1~5 영업일) |
@@ -412,7 +412,7 @@ KIS_HTS_ID_REAL=실전용_HTS_ID
 | 매매 가능 보드 | MAIN(09:05~14:30) |
 | 진입 조건 | **추세 필터**(종가 > 50EMA > 150EMA > 200EMA + 장기 EMA 1개월(20영업일) 우상향 — 런타임 장기선은 읽은 봉 수가 정한다 — `effective_ema_long = min(장기EMA 설정값, 가용길이 − 25)` 이고 그 값이 30 미만이면 후보에서 탈락한다. `daily_fetch_depth_mode="cap100"`(기본, 100봉)에서 설정 50/150/200 은 실효 **50/65/75** 로 계산되고, `"full"` + 보유 225봉이면 설정 그대로 **50/150/200** 이다) → **베이스 자동 검출**(25~75영업일, 깊이 ≤ 30%) → **pullback 점진 수축**(ATR threshold ZigZag 검출 `min_swing_atr_mult=1.0`, 2~4회, 직전 대비 폭 감소, 마지막 ≤ 12%) → **거래량 수축**(마지막 5일 평균 < 베이스 직전 20일 평균 × 70%) → 베이스 상단(`base_high`) 돌파 + 당일 거래량 ≥ 20일 평균 × 1.5. 거래량은 **실시간 틱 누적(`tick_volume`) 단일 출처**이고 미관측은 매수 거부다(fail-closed). 거래량을 채워도 **추격 상한 `max_breakout_extension_pct` = 7.5%** 를 넘으면 매수하지 않는다 |
 | 매수 | 종목당 1회 + 7영업일 쿨다운 |
-| AI 매수평가 | 해당 없음 — `llm_buy_gate` 배선은 VB·LTV 두 전략뿐이다 |
+| AI 매수평가 | **적용** — 매수 주문 접수 직후 `llm_buy_gate.observe_order` 가 점수를 `llm_buy_evaluations` 에 남긴다(주문 1건 = 1행, 실패도 1행). `llm_gate_mode` 기본 `"shadow"` = 기록만, 매수 차단 없음. cycle297(2026-09-17)이 **7전략 전부**로 넓혔다 |
 | 손절 | 매수가 대비 -7% / 베이스 하단(`base_low`) 이탈 → STOP_LOSS |
 | 청산 | `high_since_buy − ATR×2` 트레일링 / 50일 EMA 이탈 → TRAILING_STOP. **시간·15:20 청산 없음** — 멀티데이 보유 (`Position._MULTIDAY_STRATEGIES` 멤버) |
 | 보유 기간 | 멀티데이 (VCP 통상 2~6주) |
@@ -424,7 +424,7 @@ KIS_HTS_ID_REAL=실전용_HTS_ID
 | 매매 가능 보드 | MAIN(09:05~09:30) |
 | 진입 조건 | **strict entry(4조건 AND)**: ① 현재 스테이지1(EMA 단기>중기>장기) ② 최근 5영업일 내 6→1 전환 인접(신선도 `stage1_freshness=5`) ③ EMA 5/20/40 모두 우상향 ④ 전일 종가 > EMA5. 갭업 ≥5% / 갭다운 ≤-4% / 장중 붕괴(현재가<시가) 스킵 |
 | 매수 | 종목당 1회. **터틀 유닛 sizing 은 배선까지 완료된 opt-in** — DB `sizing_mode = "turtle"` 이면 `compute_unit_qty_guarded`(유닛 리스크 `risk_pct` 0.5%)가 수량을 정하고, 코드 기본값은 `position_ratio` 다. Phase 2 로 연기된 것은 조기진입·피라미딩뿐이며, `max_units_per_stock`/`max_units_total` 은 소비처 0건(미배선)이라 리스크 한도로 오인하면 안 된다 |
-| AI 매수평가 | 해당 없음 — `llm_buy_gate` 배선은 VB·LTV 두 전략뿐이다 |
+| AI 매수평가 | **적용** — 매수 주문 접수 직후 `llm_buy_gate.observe_order` 가 점수를 `llm_buy_evaluations` 에 남긴다(주문 1건 = 1행, 실패도 1행). `llm_gate_mode` 기본 `"shadow"` = 기록만, 매수 차단 없음. cycle297(2026-09-17)이 **7전략 전부**로 넓혔다 |
 | 손절 | 고정 % -8%(ATR 독립 backstop) / 2ATR 하드손절(tighten-only) → STOP_LOSS |
 | 청산 | 스테이지3 진입(추세 종료, 익일 아침 발화) / `high_since_buy − 2.5×ATR` 트레일링 → TRAILING_STOP. **시간·15:20 청산 없음** — 멀티데이 |
 | 보유 기간 | 멀티데이 (`_MULTIDAY_STRATEGIES` 멤버). 지표 순수모듈 `kojiro_indicators.py`(Wilder ATR ewm(1/20)) |
