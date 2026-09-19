@@ -380,6 +380,22 @@ _SRC_TREE_DIGEST = (
 #: 브리프 제약("세 파일뿐")이 그것을 막는다 — 라우터는 `order_engine.py` 안에 둔다.
 _PINNED_DIRS = ("src/realtime", "src/auth", "src/engine/strategies", "src/engine")
 
+#: 잠근 디렉터리의 **파일 수 핀**(cycle316 시정).
+#: 🔴 이 dict 가 없으면 `test_s1d` 는 **구조적으로 공허**하다 — 종전 구현은 비교 양변
+#: (`rglob` 결과와 `_tree_digest()` 의 `glob` 결과)이 **둘 다 라이브 디스크**에서 만들어져
+#: 신규 파일이 양쪽에 동시에 들어갔고, 그래서 어긋날 수가 없었다.
+#: 실제 탐지는 `test_s1b` 의 `_SRC_TREE_FILES`/`_SRC_TREE_DIGEST` 가 했다.
+#: 그 둘은 "뭔가 바뀌었다" 만 말하고 **어디인지는 말하지 않는다** — 이 핀이 그 자리를 메운다.
+#: ⚠️ 유지 규약 = `_SRC_TREE_FILES` 를 옮기는 사이클이 여기도 같이 옮긴다. 신규 파일이
+#: 생긴 디렉터리만 +1 이므로 어느 줄을 고칠지는 실패 메시지가 알려 준다.
+#: `src/engine` 은 하위 디렉터리(`strategies`·`util`)를 포함한 재귀 집계다.
+_PINNED_DIR_FILE_COUNTS = {
+    "src/realtime": 4,
+    "src/auth": 3,
+    "src/engine/strategies": 8,
+    "src/engine": 75,
+}
+
 #: `scheduler.py` 정확 라인 수 + cycle257 영구 상한.
 #: ⚠️ cycle292(2026-09-14) 가 `_subscribe_market_operation_tickers` 176줄을
 #: 신규 leaf `src/engine/market_op_subscribe.py` 로 추출해(행위 변경 0 · 5줄
@@ -541,18 +557,25 @@ def test_s1c_scheduler_line_count_is_exact_and_under_cap() -> None:
 def test_s1d_no_new_files_slip_into_pinned_dirs(rel_dir: str) -> None:
     """S1 — 잠근 디렉터리에 **새 .py 가 생기는 것**도 접촉이다.
 
-    ⚠️ `src/engine` 도 잠겄다 — 자문 §9-B 는 신규 leaf 를 허용했지만 브리프 제약이
-    "세 파일뿐" 이다. 라우터·봉인·애프터 변환은 전부 `order_engine.py` 안에 둔다.
+    비교 기준은 **하드코딩 핀**(`_PINNED_DIR_FILE_COUNTS`)이다. 라이브 디스크끼리 비교하면
+    신규 파일이 양변에 동시에 들어가 영원히 통과한다 — cycle316 이전 구현이 그랬다.
+
+    `test_s1b`(트리 digest)와 역할이 다르다. 그쪽은 **무엇이든 바뀌면** 붉어지지만
+    어느 디렉터리인지 말하지 않는다. 이 테스트는 **어디에 몇 개가 들고 났는지**를 짚는다.
+
+    ⚠️ `src/engine` 도 잠근다 — 신규 leaf 를 만들 때 그 사실이 조용히 지나가면 안 된다.
+    정당한 추가라면 이 핀을 같이 옮긴다.
     """
-    found = {
+    found = sorted(
         str(p.relative_to(_ROOT)).replace(os.sep, "/")
         for p in (_ROOT / rel_dir).rglob("*.py")
-    }
-    _count, _digest, all_rels = _tree_digest()
-    pinned = {rel for rel in all_rels if rel.startswith(rel_dir + "/")}
-    pinned |= {rel for rel in _CHANGED if rel.startswith(rel_dir + "/")}
-    assert found == pinned, (
-        f"{rel_dir}: 신규 {sorted(found - pinned)} / 삭제 {sorted(pinned - found)}"
+    )
+    expected = _PINNED_DIR_FILE_COUNTS[rel_dir]
+    assert len(found) == expected, (
+        f"{rel_dir}: 파일 수가 {expected} → {len(found)} 로 바뀌었다.\n"
+        f"  현재 목록: {found}\n"
+        f"  정당한 변경이면 `_PINNED_DIR_FILE_COUNTS[\"{rel_dir}\"]` 를 {len(found)} 로 옮기고 "
+        f"`_SRC_TREE_FILES`/`_SRC_TREE_DIGEST` 도 함께 재핀한다."
     )
 
 

@@ -1312,11 +1312,12 @@ tick blind) 재발 방지가 소리 없이 사라진다. 그래서 AST 가드 4�
 
 ### 열린 후속 (등재만 — 이번 사이클 범위 밖)
 
-- **F-292-1** `tests/unit/ast/test_cycle287_ast_scope.py::test_s1d` 는 **구조적으로 공허**하다 —
-  `found` 도 `pinned` 도 둘 다 라이브 FS 에서 만들어져 신규 파일에 대해 어긋날 수가 없다. 실제 탐지는
-  같은 파일 `test_s1b` 의 하드코딩 `_SRC_TREE_FILES`/`_SRC_TREE_DIGEST` 가 한다(cycle292 신규 leaf 에
-  붉어진 것도 `test_s1b`·`test_g290_3`·`test_a8` 셋뿐이었다). ⚠️ 그 파일은 cycle292 **무접촉 증거**라
-  이번엔 손대지 않았다 — 별도 사이클에서 고친다.
+- ✅ **F-292-1 해소(cycle316)** — `test_s1d` 가 구조적으로 공허하던 것을 고쳤다. 종전에는 비교 양변
+  (`rglob` ↔ `_tree_digest()` 의 `glob`)이 **둘 다 라이브 디스크**라 신규 파일이 양쪽에 동시에 들어가
+  어긋날 수가 없었다. 이제 하드코딩 핀 `_PINNED_DIR_FILE_COUNTS` 와 비교한다.
+  `test_s1b`(트리 digest)와 역할이 갈린다 — 그쪽은 「무엇이든 바뀌면」 붉어지지만 어디인지 말하지 않고,
+  `test_s1d` 는 **어느 디렉터리에 몇 개가 들고 났는지**를 짚는다. 뮤테이션(임시 leaf 생성)으로 확인했다.
+  유지 규약 = `_SRC_TREE_FILES` 를 옮기는 사이클이 이 dict 도 같이 옮긴다.
 - **F-292-2** `/sync-docs` 모듈 누락 자가 점검을 조이자 드러난 **선재 8건** — `src/engine/daily_metrics_snapshot.py`
   (cycle283) · `src/db/{backtest_runs,market_regime_snapshots,positions,strategy_config}.py` ·
   `src/api/market_operation.py` · `src/routes/{market_regime,portfolio}.py`. 각 디렉터리 `CLAUDE.md` 에 항목 추가.
