@@ -327,7 +327,7 @@ list_paged_by_filter(*, market=None, min_market_cap=0, min_trade_amount=0,
 
 `target_date` 는 DATE 라 `_kst.to_date()` 로 강제 변환한다(str 입력도 받는다).
 
-## market_regime_snapshots.py — dkstock.cloud 매크로 일일 스냅샷
+## market_regime_snapshots.py — 매크로 레짐 일일 스냅샷 (출처 = 자체 `macro` 컨테이너)
 
 `_boot()` 시점에 1행. 매크로 레짐은 **관찰 지표**이고 매수를 차단하지 않는다(사이클 I) —
 `buy_blocked` 컬럼은 그날의 판정을 남기는 기록이지 게이트가 아니다.

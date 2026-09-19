@@ -88,6 +88,18 @@
 ⚠️ 「소스에 여러 줄 import 가 있으면 실패」로 짰다가 **그 자체는 금지가 아니라서** 설계를 고쳤다 —
 재는 것은 소스의 형태가 아니라 **도구의 파싱 능력**이다. 뮤테이션(정규식 원복)으로 2건 붉어짐 확인.
 
+## 후속 G 해소 — `_observation_dumps` 무한 증가
+
+하루 19개 JSON + 로그 1개가 **정리 주기 없이** 쌓이고 있었다(실측 197파일 8.3M).
+`dump_daily_observations.sh` 끝에 **20일 보관** 규칙을 넣었다 — 서버 로그와 같은 규칙이고,
+🔴 **압축하지 않고 기간이 지나면 바로 지운다**(압축하면 이름 규칙에서 벗어나 자동 삭제 대상에서
+영구히 빠진다 — 2026-09-18 사고 계열).
+
+대상은 `*.json` 과 `daily_dump_*.log` 뿐이고 스크립트 자신·crontab 백업은 보존한다.
+⚠️ 지금 당장 지워진 것은 **0건**이다(가장 오래된 파일이 09-08 이라 아직 20일이 안 됐다) —
+이제부터 자동으로 정리된다. 스크립트 1회 실행으로 동작 확인(`retention: 20일 초과 파일 정리 완료`).
+파일이 git 밖이라 EC2 에서 직접 고쳤고 백업을 남겼다.
+
 ## 검증
 
 AST 1,782 passed · 프론트 **860 passed** · deploy 232 passed · `tsc -b` 0.
@@ -1348,9 +1360,12 @@ tick blind) 재발 방지가 소리 없이 사라진다. 그래서 AST 가드 4�
   `test_s1b`(트리 digest)와 역할이 갈린다 — 그쪽은 「무엇이든 바뀌면」 붉어지지만 어디인지 말하지 않고,
   `test_s1d` 는 **어느 디렉터리에 몇 개가 들고 났는지**를 짚는다. 뮤테이션(임시 leaf 생성)으로 확인했다.
   유지 규약 = `_SRC_TREE_FILES` 를 옮기는 사이클이 이 dict 도 같이 옮긴다.
-- **F-292-2** `/sync-docs` 모듈 누락 자가 점검을 조이자 드러난 **선재 8건** — `src/engine/daily_metrics_snapshot.py`
-  (cycle283) · `src/db/{backtest_runs,market_regime_snapshots,positions,strategy_config}.py` ·
-  `src/api/market_operation.py` · `src/routes/{market_regime,portfolio}.py`. 각 디렉터리 `CLAUDE.md` 에 항목 추가.
+- ✅ **F-292-2 해소 확인(cycle316 후속 D)** — 8건을 전수 재확인한 결과 **이미 전부 등재돼 있다**.
+  그 사이 다른 사이클이 채웠고 이 항목만 남아 있었다. 등재 형태는 디렉터리마다 다르다 —
+  `src/db/CLAUDE.md` 는 `## 파일명` 절, `src/engine/CLAUDE.md` 는 모듈 맵 불릿,
+  `src/routes/CLAUDE.md` 는 엔드포인트 표 행이다(점검 스크립트를 쓸 때 셋을 다 봐야 한다).
+  ⚠️ 확인 중 `src/db/CLAUDE.md:330` 의 절 제목이 아직 「dkstock.cloud 매크로 일일 스냅샷」이었다 —
+  cycle315 전환에서 놓친 곳이라 같이 고쳤다.
 - **F-292-3** `market_operation_monitor.get_market_op_active_tickers()` 는 프로덕션 호출자 **0건**이다.
   이번엔 docstring 만 정직화했다 — 삭제는 "비활성화 시 심층 검증 의무" 대상이라 별건.
 - **F-292-4** cycle221 AST 가드의 "메인 0건" 은 G-292-9(별칭·수집 금지 + 구독 owner 출처 증명)로 조였지만
