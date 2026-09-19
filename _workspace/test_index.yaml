@@ -129822,7 +129822,7 @@ frontend:
       - >-
         frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
       - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
-generated_at: '2026-09-19T07:18:06.240Z'
+generated_at: '2026-09-19T07:46:09.515Z'
 stats:
   backend_modules: 156
   backend_tests: 1051
@@ -129842,6 +129842,8 @@ stats:
     - frontend/src/api/backtest.ts
     - frontend/src/api/backtest.ts
     - frontend/src/api/backtest.ts
+    - frontend/src/api/backtest.ts
+    - frontend/src/api/backtest.ts
     - frontend/src/api/integrations.ts
     - frontend/src/api/integrations.ts
     - frontend/src/api/integrations.ts
@@ -129875,6 +129877,8 @@ stats:
     - frontend/src/components/LogViewer.tsx
     - frontend/src/components/LogViewer.tsx
     - frontend/src/components/LogViewer.tsx
+    - frontend/src/components/LogViewer.tsx
+    - frontend/src/components/LogViewer.tsx
     - frontend/src/main.tsx
     - frontend/src/main.tsx
     - frontend/src/main.tsx
@@ -129888,6 +129892,10 @@ stats:
     - frontend/src/main.tsx
     - frontend/src/main.tsx
     - frontend/src/main.tsx
+    - frontend/src/main.tsx
+    - frontend/src/main.tsx
+    - frontend/src/pages/History.tsx
+    - frontend/src/pages/History.tsx
     - frontend/src/pages/History.tsx
     - frontend/src/pages/History.tsx
     - frontend/src/pages/History.tsx
@@ -129906,6 +129914,8 @@ stats:
     - frontend/src/pages/StrategyFunnel.tsx
     - frontend/src/pages/StrategyFunnel.tsx
     - frontend/src/pages/StrategyFunnel.tsx
+    - frontend/src/test/setup.ts
+    - frontend/src/test/setup.ts
     - frontend/src/test/setup.ts
     - frontend/src/test/setup.ts
     - frontend/src/test/setup.ts
