@@ -3,7 +3,7 @@
 테이블: ``market_regime_snapshots`` (supabase/migrations/022).
 PK: ``id`` (uuid 자동). UNIQUE: ``snapshot_date``.
 
-용도: _boot (07:50) 시점 dkstock.cloud 매크로 응답 1행 영구 저장.
+용도: _boot 시점 macro 컨테이너 매크로 응답 1행 영구 저장.
 운영자가 사후 회고/디버깅/Grafana 분석에 사용.
 
 사이클 M1-2 (Supabase→RDS 이전 단계1 증분2): supabase-py → `src.db.pg`(asyncpg) 전환.

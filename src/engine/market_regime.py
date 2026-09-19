@@ -1,22 +1,28 @@
-"""시장 레짐 필터 + 매수 가드 (사이클 2, 2026-05-17).
+"""시장 레짐 관찰 + ``cash_usage_ratio`` 자동 산출.
 
-dkstock.cloud 매크로 데이터를 기반으로:
-1. **복합 임계 매수 가드** (1b): regime=defensive OR vix>25 OR fear_greed>85 OR fear_greed<15
-2. **cash_usage_ratio 자동 산출** (2b): clamp((100 - cash_min) / 100, 0.0, 1.0)
+출처는 **우리 ``macro`` 컨테이너**(`GET /api/macro/macro-cycle`)다. 같은 박스 안에서 돌고
+도커 네트워크로 부른다 — 외부 인증도, 외부 의존도 없다.
 
-매도/손절은 영향 없음 — 보유 종목 청산은 정상 작동 (risk.on_tick exit 분기 무관).
+하는 일 둘:
+1. 레짐 관찰 — regime / vix / fear&greed / 버핏지수 / 경기국면을 읽어 대시보드·AI 자문에 싣는다.
+2. ``cash_usage_ratio`` 자동 산출 — ``clamp((100 - cash_min) / 100, 0.0, 1.0)``.
+   실제 적용은 ``system_config.auto_regime_adjust`` 가 켜져 있을 때만이다.
 
-graceful fallback:
-- 외부 fetch 실패/timeout/토큰 만료 시 ``MarketRegime.empty()`` 반환 → 매수 가드 비활성
-  (기존 동작 유지). ``is_buy_allowed()`` 는 항상 True.
-- ``DKSTOCK_REGIME_ENABLED=false`` 면 refresh() 가 즉시 empty 반환.
+🔴 **레짐은 매수를 차단하지 않는다.** ``get_buy_block_state`` · ``buy_blocked`` ·
+``soft_multiplier`` 는 전부 **표시·자문 payload 전용**이고 매매 경로가 읽지 않는다.
+``risk.on_tick`` 과 swing 폴에 레짐 게이트가 없다 — 복원하지 마라.
 
-**사이클 8 (2026-05-18)** — 4 모드(OFF/WARN/SOFT/HARD) + 4 임계값 운영자 조정:
-- ``get_buy_block_state()`` async 메서드가 DB 모드+임계 조회 후 BuyBlockState 반환
-- ``is_buy_allowed()`` 동기 API 는 보존 — 하드코딩 임계로 평가 (회귀 가드)
+🔴 **매도·손절은 어떤 경우에도 영향받지 않는다.**
+
+graceful — fetch 실패·타임아웃·비활성은 전부 ``MarketRegime.empty()`` 다.
+실패 사유는 ``reason=disabled|timeout|fetch_failed|exception`` 으로 구분해 남긴다.
+
+활성 판정은 ``system_config.dkstock_regime_enabled`` 가 **DB 우선**이고 ``.env`` 는 fallback 이다
+(판정 자체는 ``services/macro_client.py`` 안에 있다).
 """
 from __future__ import annotations
 
+import asyncio
 import logging
 import time
 from dataclasses import dataclass, field
@@ -525,35 +531,51 @@ def set_current_regime(regime: MarketRegime) -> None:
     _current_regime = regime
 
 
-async def refresh_from_dkstock() -> MarketRegime:
-    """dkstock.cloud 매크로 fetch → MarketRegime 생성.
+async def refresh_from_dkstock(timeout: float | None = None) -> MarketRegime:
+    """우리 ``macro`` 컨테이너에서 매크로를 받아 ``MarketRegime`` 을 만든다.
 
-    외부 호출 실패 / 비활성 / 토큰 만료 시 ``MarketRegime.empty()`` 반환.
-    호출자(scheduler._boot)는 결과 무관 graceful 진행.
+    실패·비활성은 전부 ``MarketRegime.empty()`` 다. 호출자(``boot_manager.boot``)는
+    결과와 무관하게 graceful 하게 진행한다 — 레짐은 관찰 지표이지 매매 게이트가 아니다.
 
     동작:
-    1. ``DKSTOCK_REGIME_ENABLED=false`` → empty
-    2. dkstock_client.get_macro_cycle() → from_macro_cycle 로 파싱
-    3. 예외 (ExternalAPIError/ConfigError 등) → empty + WARNING 로그
+    1. ``macro_client.get_macro_cycle()`` → ``from_macro_cycle`` 파싱
+    2. 활성 판정은 **client 안**에 있다(``system_config.dkstock_regime_enabled`` DB 우선 /
+       ``.env`` fallback). 비활성이면 ``ConfigError`` 가 나고 아래에서 흡수한다.
+    3. 실패는 ``reason=`` 라벨로 구분해 WARNING 1행 — ``disabled`` / ``timeout`` /
+       ``fetch_failed`` / ``exception``.
+
+    🔴 **여기에 ``.env`` 단독 veto 를 두지 않는다.** 그 게이트가 client 보다 앞에 있으면
+    DB 우선 판정이 영구 도달 불가가 되어 운영 토글이 죽은 스위치가 된다.
+
+    🔴 **함수명은 계약이다** — ``scheduler`` 가 이 이름으로 부르고 그 파일은 8영역 승인 대상이라
+    개명하면 무관한 승인 절차가 딸려 온다.
+
+    Args:
+        timeout: 이 호출의 상한(초). ``None`` 이면 ``settings.macro_api_read_timeout_secs``.
+            부팅 경로는 더 짧은 값을 넘겨 재시작 tick blind 창을 늘리지 않는다.
     """
     from src.config import settings
-    from src.services.dkstock_client import get_dkstock_client
     from src.services.exceptions import ConfigError, ExternalAPIError
+    from src.services.macro_client import get_macro_client
 
-    if not settings.dkstock_regime_enabled:
-        logger.debug("[market_regime] DKSTOCK_REGIME_ENABLED=false → empty")
-        return MarketRegime.empty()
+    budget = timeout if timeout is not None else settings.macro_api_read_timeout_secs
 
     try:
-        client = get_dkstock_client()
-        macro = await client.get_macro_cycle()
-    except (ConfigError, ExternalAPIError) as e:
+        client = get_macro_client()
+        macro = await asyncio.wait_for(client.get_macro_cycle(), timeout=budget)
+    except ConfigError as e:
+        logger.warning("[market_regime] macro fetch 실패 reason=disabled — %s", e)
+        return MarketRegime.empty()
+    except asyncio.TimeoutError:
         logger.warning(
-            "[market_regime] dkstock.cloud fetch 실패 — 매수 가드 비활성: %s", e
+            "[market_regime] macro fetch 실패 reason=timeout — %.1fs 안에 응답 없음", budget
         )
         return MarketRegime.empty()
+    except ExternalAPIError as e:
+        logger.warning("[market_regime] macro fetch 실패 reason=fetch_failed — %s", e)
+        return MarketRegime.empty()
     except Exception:
-        logger.exception("[market_regime] 매크로 fetch 예외 — 매수 가드 비활성")
+        logger.exception("[market_regime] macro fetch 실패 reason=exception")
         return MarketRegime.empty()
 
     regime = MarketRegime.from_macro_cycle(macro)

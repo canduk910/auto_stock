@@ -5,7 +5,9 @@
  * 사이클 I (2026-08-03) 확장: 지수ETF 레짐(관찰) 계산 토글 (5번째 토글).
  *
  * 5 토글 통합 (운영자 시야 집중을 위해 단일 카드 + 분리 행):
- * - dkstock-regime: 매크로 레짐 fetch (활성화 시 백그라운드 fetch trigger)
+ * - dkstock-regime: 매크로 레짐 수집 (활성화 시 백그라운드 수집 trigger).
+ *   ⚠️ key·env 이름만 옛 외부 서비스(dkstock.cloud)를 물려받았을 뿐, 실제 출처는
+ *   cycle315 부터 **우리 macro 컨테이너**다 (외부 서비스는 2026-08-18 철거).
  * - kis-mcp: 외부 백테스트 서버 (자문 시점에만 사용)
  * - auto-regime-adjust: 매크로 레짐 → cash_usage_ratio 자동 갱신
  * - auto-apply: AI 자문 자동 적용 (전략 비중 감액만 + 50% cap, 기본 OFF — 매매 파라미터는 자동 적용 안 함)
@@ -18,12 +20,12 @@
  *
  * 핵심 안전 원칙:
  * - DB 값 != null → DB 사용 (source='db'), null → .env fallback (source='env')
- * - ConfirmModal 이중 확인 (특히 dkstock-regime 활성화는 매수 가드 영향)
+ * - ConfirmModal 이중 확인 (레짐은 관찰 지표다 — 매수를 차단·축소하지 않는다)
  * - 매수 가드 모드 변경 시 ConfirmModal 이중 확인 (매매 흐름 직접 영향)
  * - 임계값 변경은 ConfirmModal 없이 즉시 (덜 위험, 사이클 8 결정)
  * - 활성화 즉시 fetch 는 백그라운드 — API 응답은 즉시 반환
  */
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import {
@@ -61,15 +63,19 @@ interface ToggleMeta {
 
 const TOGGLES: ToggleMeta[] = [
   {
+    // cycle315 (2026-09-19) — 출처가 철거된 dkstock.cloud 에서 우리 macro 컨테이너로 옮겨졌다.
+    // 🔴 key `dkstock-regime` 과 env `DKSTOCK_REGIME_ENABLED` 는 **유지**한다(사용자 결정) —
+    //    개명하면 운영 DB 의 기존 행이 고아가 되고 프론트·E2E·가드가 한 커밋에 묶인다.
+    //    바뀌는 것은 운영자가 읽는 문장뿐이다. 레짐은 **관찰 지표**라 매수를 막지 않는다.
     key: 'dkstock-regime',
-    label: '매크로 레짐 (dkstock.cloud)',
+    label: '매크로 레짐 (자체 macro 컨테이너)',
     description:
-      '외부 매크로 데이터(VIX/Fear&Greed/cycle) 를 fetch 해 매수 가드 + cash_usage_ratio 자동 조정에 사용합니다.',
+      '우리 macro 컨테이너에서 매크로 지표(VIX/Fear&Greed/버핏지수/경기사이클) 를 받아 시장 레짐 카드에 관찰용으로 표시합니다. 매수를 차단하거나 줄이지 않습니다.',
     confirmOnMessage:
-      '매크로 레짐을 활성화합니다. defensive/극단치 시 매수 가드가 발동되고 cash_usage_ratio 가 자동 조정될 수 있습니다 (auto_regime_adjust=ON 시). 활성화 직후 백그라운드로 fetch 가 진행됩니다. 진행하시겠습니까?',
+      '매크로 레짐 수집을 활성화합니다. 자체 macro 컨테이너에서 지표를 받아 시장 레짐 카드에 표시하고, 자동 조정이 ON 인 경우에만 cash_usage_ratio 가 다음 영업일부터 갱신됩니다. 진행하시겠습니까?',
     confirmOffMessage:
-      '매크로 레짐을 비활성화합니다. 매수 가드가 즉시 해제되고 cash_usage_ratio 는 운영자 수동값 그대로 유지됩니다. 진행하시겠습니까?',
-    enableHint: '활성화 직후 백그라운드 fetch 진행 — 잠시 후 대시보드에서 결과 확인',
+      '매크로 레짐 수집을 비활성화합니다. 시장 레짐 카드가 "비활성" 으로 표시되고 cash_usage_ratio 는 운영자 수동값 그대로 유지됩니다. 진행하시겠습니까?',
+    enableHint: '활성화 직후 백그라운드 수집 진행 — 잠시 후 대시보드 시장 레짐 카드에서 확인',
     envVarName: 'DKSTOCK_REGIME_ENABLED',
   },
   {
@@ -86,8 +92,10 @@ const TOGGLES: ToggleMeta[] = [
   {
     key: 'auto-regime-adjust',
     label: '레짐 기반 cash_usage_ratio 자동 조정',
+    // 사다리는 macro_lite `REGIME_PARAMS` 의 cash_min 정본값 — 자금 사용률 = (100 − cash_min)%.
+    // 종전 문구의 neutral/aggressive 는 어느 경로에서도 나오지 않는 죽은 레짐이었다.
     description:
-      '매크로 레짐 cash_min 기반으로 cash_usage_ratio 를 자동 갱신합니다 (defensive=0.25 / neutral=0.50 / aggressive=0.80).',
+      '매크로 레짐 cash_min 기반으로 cash_usage_ratio 를 자동 갱신합니다 (적극 매수=0.75 / 선별 매수=0.65 / 신중=0.50 / 방어=0.25).',
     confirmOnMessage:
       '자동 조정을 활성화합니다. 매크로 레짐 변동 시 cash_usage_ratio 가 자동 갱신됩니다 (다음 영업일 _boot 부터 반영). 진행하시겠습니까?',
     confirmOffMessage:
@@ -485,11 +493,31 @@ interface ToggleRowProps {
   meta: ToggleMeta
 }
 
+/**
+ * cycle315 — 매크로 레짐 활성화 직후 재조회 스케줄(ms).
+ *
+ * 종전에는 3초 뒤 한 번만 `marketRegime` 을 invalidate 했다. 그 숫자는 외부 dkstock.cloud
+ * 가 이미 계산해 둔 값을 받아오던 시절의 것이고, 우리 macro 컨테이너는 캐시가 비어 있으면
+ * 원천(yfinance/FRED 등)을 직접 긁어 **최대 2분**까지 걸린다(2026-09-18 실측 첫 호출 107초).
+ * 3초 뒤 한 번만 보면 항상 빈 값을 보고 끝나므로, 값이 들어올 시간까지 몇 번 더 본다.
+ */
+const MACRO_REFETCH_DELAYS_MS = [3_000, 15_000, 30_000, 60_000, 120_000]
+
 function ToggleRow({ meta }: ToggleRowProps) {
   const queryClient = useQueryClient()
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [pendingValue, setPendingValue] = useState<boolean | null>(null)
   const [fetchProgress, setFetchProgress] = useState(false)
+  const refetchTimersRef = useRef<number[]>([])
+
+  // 언마운트 시 대기 중인 재조회 타이머 정리 (Settings 이탈 후 setState 경고 차단)
+  useEffect(
+    () => () => {
+      refetchTimersRef.current.forEach((id) => clearTimeout(id))
+      refetchTimersRef.current = []
+    },
+    [],
+  )
 
   const queryKey = ['integration', meta.key] as const
 
@@ -507,14 +535,16 @@ function ToggleRow({ meta }: ToggleRowProps) {
       queryClient.invalidateQueries({ queryKey })
       setConfirmOpen(false)
       setPendingValue(null)
-      // dkstock-regime 활성화 시 백그라운드 fetch 진행 UI 표시
+      // 매크로 레짐 활성화 시 백그라운드 수집 진행 UI 표시 + 단계적 재조회
       if (meta.key === 'dkstock-regime' && saved.enabled) {
         setFetchProgress(true)
-        // 3초 후 marketRegime 재조회 invalidate + progress 해제
-        setTimeout(() => {
-          queryClient.invalidateQueries({ queryKey: ['marketRegime'] })
-          setFetchProgress(false)
-        }, 3000)
+        refetchTimersRef.current.forEach((id) => clearTimeout(id))
+        refetchTimersRef.current = MACRO_REFETCH_DELAYS_MS.map((ms, i) =>
+          window.setTimeout(() => {
+            queryClient.invalidateQueries({ queryKey: ['marketRegime'] })
+            if (i === MACRO_REFETCH_DELAYS_MS.length - 1) setFetchProgress(false)
+          }, ms),
+        )
       }
     },
     onError: () => {
@@ -568,11 +598,13 @@ function ToggleRow({ meta }: ToggleRowProps) {
     : 'bg-gray-100 text-gray-600 border border-gray-300'
 
   return (
-    <div className="border border-gray-200 rounded p-3">
+    <div className="border border-gray-200 rounded p-3" data-testid={`toggle-row-${meta.key}`}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm font-medium text-gray-900">{meta.label}</span>
+            <span className="text-sm font-medium text-gray-900" data-testid={`toggle-label-${meta.key}`}>
+              {meta.label}
+            </span>
             <span
               data-testid={`source-badge-${meta.key}`}
               className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${sourceBadgeClass}`}
@@ -585,7 +617,9 @@ function ToggleRow({ meta }: ToggleRowProps) {
               {data.source === 'db' ? 'DB' : 'env'}
             </span>
           </div>
-          <p className="text-xs text-gray-500 mt-1">{meta.description}</p>
+          <p className="text-xs text-gray-500 mt-1" data-testid={`toggle-desc-${meta.key}`}>
+            {meta.description}
+          </p>
           {data.source === 'env' && (
             <p className="text-[11px] text-gray-400 mt-1">
               현재 출처: 환경변수 <code>{meta.envVarName}</code> = {String(data.env_value)}
@@ -596,7 +630,8 @@ function ToggleRow({ meta }: ToggleRowProps) {
               data-testid={`fetch-progress-${meta.key}`}
               className="text-[11px] text-amber-700 mt-1"
             >
-              백그라운드 fetch 진행 중... (3초 후 시장 레짐 카드 자동 갱신)
+              백그라운드 수집 진행 중... 캐시가 비어 있으면 첫 수집에 최대 2분 걸립니다 —
+              값이 들어올 때까지 시장 레짐 카드를 자동으로 다시 조회합니다.
             </p>
           )}
           {meta.enableHint && data.enabled && (

@@ -220,7 +220,7 @@ Dashboard 만 즉시 import. 나머지 9 페이지(History · Recommendations ·
 `CashUsageRatioCard` 직하. 4 토글 + 매수 가드 영역.
 
 **토글 4종** (`ConfirmModal` 이중 확인):
-- `data-testid="toggle-dkstock-regime"`: 외부 매크로 서버 (dkstock.cloud) 활성. 활성화 후 3s `data-testid="fetch-progress-dkstock-regime"` 진행 표시 + marketRegime invalidate
+- `data-testid="toggle-dkstock-regime"`: 매크로 레짐 활성(출처 = 자체 `macro` 컨테이너. testid·키는 DB 행과 짝이라 유지). 활성화 후 3s `data-testid="fetch-progress-dkstock-regime"` 진행 표시 + marketRegime invalidate
 - `data-testid="toggle-kis-mcp"`: 외부 백테스트 서버 활성 (자문 시점만 사용)
 - `data-testid="toggle-auto-regime-adjust"`: 매크로 레짐 → cash_usage_ratio 자동 갱신
 - **`data-testid="toggle-auto-apply"`**: AI 자문 자동 적용. 기본 OFF. ON 시 20:00 자문 직후 weight 감액(50% cap) + 보수적 파라미터 자동 적용. DB-only (`auto_apply_enabled` 키). API: `getAutoApply/setAutoApply` — `/api/integrations/auto-apply`
@@ -450,7 +450,7 @@ Dashboard 환경 배너 직하, 전략 탭 위 (`<ControlPanel />` 직후).
 
 `stock-manager` 의 `macro_lite` 패키지(`packaging/macro_lite/`)를 이식했다 — 백엔드는 독립 `macro`
 컨테이너(포트 미노출, nginx `/api/macro/` 프록시), 프론트는 `frontend/src/macro/` 아래 `.tsx` 로 이식했다.
-매매 판단과 무접촉(`src/engine/market_regime.py`·`dkstock_client.py` 무수정) — 관찰 전용 화면이다.
+🔴 cycle315 부터 `src/engine/market_regime.py` 가 이 컨테이너를 본다 — 그래도 레짐은 **관찰 지표**라 매수를 차단·축소하지 않는다.
 
 - **5섹션**(원본 순서 고정): 경기사이클+투자체제(`MacroCycleSection`) → 장단기 금리차(`YieldCurveSection`)
   → 하이일드 스프레드(`CreditSpreadSection`) → 환율(`CurrencySection`) → 원자재(`CommoditySection`).

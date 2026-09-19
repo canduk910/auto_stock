@@ -1,7 +1,8 @@
 """사이클 5 (2026-05-17): 외부 통합 토글 라우트 (`/api/integrations/*`).
 
 3 토글:
-- `dkstock-regime` — 외부 매크로 서버 (dkstock.cloud) 활성 여부.
+- `dkstock-regime` — 매크로 레짐(우리 `macro` 컨테이너) 활성 여부.
+  🔴 슬러그·DB 키 이름은 유지한다 — 운영 DB 행·프론트·E2E 가 이 이름을 공유한다.
 - `kis-mcp` — 외부 백테스트 서버 활성 여부.
 - `auto-regime-adjust` — 매크로 레짐 기반 cash_usage_ratio 자동 갱신 (사이클 2 이미 존재 키, 통합 위치 이동).
 
@@ -50,7 +51,7 @@ router = APIRouter(prefix="/api/integrations", tags=["integrations"])
 # 백그라운드 fetch trigger (dkstock-regime 활성화 직후)
 # ---------------------------------------------------------------------------
 async def _refresh_market_regime_and_persist_safely() -> None:
-    """dkstock.cloud 매크로 fetch + 메모리 + DB snapshot. 모든 예외 graceful 흡수.
+    """macro 컨테이너 매크로 fetch + 메모리 + DB snapshot. 모든 예외 graceful 흡수.
 
     PUT /api/integrations/dkstock-regime enabled=true 직후 백그라운드 task 발화.
     toggle 자체는 성공 응답 후 즉시 반환 — fetch 결과는 GET /api/market-regime/current
@@ -60,6 +61,16 @@ async def _refresh_market_regime_and_persist_safely() -> None:
         from datetime import datetime, timezone, timedelta
 
         from src.engine import market_regime as mr_mod
+
+        # 🔴 캐시를 먼저 비운다. 클라이언트가 24시간 메모리 캐시를 들고 있어서,
+        #    운영자가 토글을 껐다 켜도 그대로 두면 하루 묵은 값이 다시 저장되고 화면에 실린다.
+        #    "지금 다시 받아 봐" 가 이 경로의 존재 이유라 캐시 hit 은 그 계약을 깬다.
+        try:
+            from src.services.macro_client import get_macro_client
+
+            get_macro_client().clear_cache()
+        except Exception:  # 캐시 비우기 실패가 fetch 를 막지는 않는다
+            logger.debug("[market_regime] macro 캐시 비우기 실패 — fetch 는 계속", exc_info=True)
 
         regime = await mr_mod.refresh_from_dkstock()
         mr_mod.set_current_regime(regime)
@@ -113,7 +124,7 @@ async def _build_status(
 # ---------------------------------------------------------------------------
 @router.get("/dkstock-regime", response_model=ApiResponse)
 async def get_dkstock_regime():
-    """외부 매크로 서버 활성 여부 조회."""
+    """매크로 레짐(우리 `macro` 컨테이너) 활성 여부 조회 — DB 우선 / .env fallback."""
     status = await _build_status(
         sc.get_dkstock_regime_enabled, settings.dkstock_regime_enabled,
     )

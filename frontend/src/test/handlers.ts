@@ -823,4 +823,39 @@ export const handlers = [
       errors: [],
     })
   ),
+
+  // ── cycle315 (2026-09-19) — 시장 레짐 (MarketRegimeCard) ────────────────────
+  // 종전에는 MSW 기본 핸들러가 아예 없어서 Dashboard 를 렌더하는 테스트마다 카드가
+  // unhandled request → 에러 폴백으로 떨어졌다. 값은 **실측**이다 — 우리 macro 컨테이너
+  // `GET /api/macro/macro-cycle` (2026-09-19 07:30 KST) 의 `regime` 블록 + `cycle.phase`
+  // 를 백엔드 `/api/market-regime/current` 가 그대로 실어 보낸다.
+  // ⚠️ buffett_ratio 는 **비율**(2.626 = 262.6%) 이다. 퍼센트 스케일 숫자를 넣지 마라 —
+  //    화면이 ×100 해서 그리므로 목이 스케일을 틀리면 26,260% 가 초록으로 통과한다.
+  http.get(`${base}/market-regime/current`, () =>
+    HttpResponse.json(
+      wrap({
+        regime: "defensive",
+        regime_desc: "방어 (공포 현금)",
+        cycle_phase: "expansion",
+        vix: 14.81,
+        fear_greed_score: 69.0,
+        buffett_ratio: 2.626,
+        cash_min: 75,
+        // 레짐은 매수에 개입하지 않는다 — buy_blocked 는 항상 false
+        buy_blocked: false,
+        block_reason: "regime=defensive (방어 (공포 현금))",
+        auto_regime_adjust: false,
+        cash_usage_ratio: 1.0,
+        enabled: true,
+        etf_kospi_stage: null,
+        etf_kosdaq_stage: null,
+        etf_defensive: null,
+        etf_enabled: false,
+      })
+    )
+  ),
+  http.get(`${base}/market-regime/history`, () => HttpResponse.json(wrap([]))),
+  http.put(`${base}/market-regime/auto-adjust`, () =>
+    HttpResponse.json(wrap({ auto_regime_adjust: false }, "수동 모드"))
+  ),
 ];

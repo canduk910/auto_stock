@@ -19,8 +19,10 @@ API 컨테이너를 운영자가 직접 켜고 점검하는 절차. `docs/backte
 데이터를 주는 **읽기 전용 조회 API** 다. yfinance·FRED 에서 시세를 받아와 캐시하고 판정 결과를
 보여줄 뿐, 실제 매매 판단에는 **연결돼 있지 않다**.
 
-- 매매가 실제로 보는 매크로 레짐은 여전히 `dkstock.cloud`(`src/engine/market_regime.py` ·
-  `src/services/dkstock_client.py`)다. 이 컨테이너는 그 경로를 대체하지 않는다.
+- 🔴 **매매가 보는 매크로 레짐의 출처가 바로 이 컨테이너다**(cycle315) —
+  `src/engine/market_regime.py` 가 `src/services/macro_client.py` 로 `GET /api/macro/macro-cycle` 을 부른다.
+  인증은 없다(같은 도커 네트워크 안). 외부 `dkstock.cloud` 는 2026-08-18 철거됐고 의존은 끝났다.
+  다만 레짐은 여전히 **관찰 지표**라 매수를 차단·축소하지 않는다.
 - `macro` 컨테이너가 죽어 있어도 매매 엔진·주문·손절·익일청산은 전부 정상 동작한다.
   대시보드의 「매크로」 메뉴 한 화면만 못 뜬다(502).
 - 인증도 별도다 — `macro` 프로세스 자체에는 `X-API-Key` 같은 미들웨어가 없다
@@ -94,7 +96,7 @@ seed: /app/data/oas_history_seed.json
 `macro/data/macro_regime_history_seed.json`(147행, 원 프로젝트 `macro_regime_history`
 테이블 추출본)도 이미지 안에 함께 들어 있지만, 이 컨테이너의 어떤 API 도 이 파일을 읽지 않는다.
 체제 판정(`macro_lite.regime.determine_regime`)은 **무상태**이고 직전 체제를 전달받지 않는다.
-이 파일은 2단계(dkstock.cloud 전환 검토 시 원 프로젝트 산출값과 로컬 산출값을 비교하는 용도)를
+이 파일은 값 대조(옛 dkstock 산출값과 우리 산출값을 날짜별로 맞춰 보는 용도)를
 위한 참고 자료일 뿐이다 — 매매 판단에도, macro_lite 자신의 판정에도 연결하지 않는다.
 
 ---

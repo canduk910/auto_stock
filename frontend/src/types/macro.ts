@@ -188,8 +188,12 @@ export interface RegimeData {
   fear_greed_score?: number | null
   buffett_level?: string | null
   fg_level?: string | null
-  credit_adjustment?: number | null
-  credit_override?: boolean | null
+  // cycle315 정정 — 둘 다 `Optional[str]` 이다(`macro/macro_lite/regime.py::determine_regime`
+  // 반환문). 실측값 예: credit_adjustment="greed_one_step" / credit_override=
+  // "extreme_fear_selective". number·boolean 으로 적어 두면 값을 화면에 붙이는 순간
+  // 타입이 거짓말을 한다.
+  credit_adjustment?: string | null
+  credit_override?: string | null
 }
 
 /**

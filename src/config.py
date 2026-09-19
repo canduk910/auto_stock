@@ -80,12 +80,21 @@ class Settings(BaseSettings):
     kis_mcp_enabled: bool = False
     backtest_timeout_secs: int = 300
 
-    # 외부 매크로 데이터 (dkstock.cloud) — 사이클 2 (시장 레짐 필터)
-    # JWT Bearer 인증. DKSTOCK_REGIME_ENABLED=true 일 때만 _boot 매크로 fetch + 매수 가드 활성.
-    # false (기본) 면 외부 호출 0건, 매수 가드 비활성 (graceful degrade).
-    dkstock_api_url: str = "https://dkstock.cloud"
-    dkstock_username: str = "autostock"
-    dkstock_password: str = "AUTOSTOCK1"
+    # 매크로 레짐 — 우리 `macro` 컨테이너 (`macro_lite`, 인증 없음)
+    # DKSTOCK_REGIME_ENABLED=true 일 때만 _boot 매크로 fetch + 레짐 관찰 활성.
+    # false (기본) 면 외부 호출 0건 (graceful degrade). 레짐은 매수를 차단하지 않는다.
+    # 🔴 토글 키 이름은 유지한다 — 운영 DB `system_config.dkstock_regime_enabled` 행과 짝이다.
+    macro_api_url: str = "http://macro:8000"
+    # macro-cycle 은 지표를 다 모으는 첫 호출이 오래 걸린다. 캐시가 차면 3초대다.
+    # 🔴 이 값은 상한이지 목표가 아니다 — 한 번의 콜드 호출이 이 상한을 넘을 수 있고,
+    #    그때는 00:05 KST prewarm(`tools/ops/macro_prewarm.sh`)이 채운 다음 날 값으로 복구된다.
+    #    상한을 실측 최악값까지 올리면 그만큼 부팅·토글 응답이 길어지므로 올리지 않는다.
+    macro_api_read_timeout_secs: float = 90.0
+    # 🔴 부팅 경로는 따로 조인다. `boot_manager.boot` 이 이 fetch 를 인라인으로 기다리고
+    #    그 앞뒤로 자금 배분·포지션 복구가 이어지므로, 여기서 오래 붙잡으면 재시작 직후
+    #    시세가 안 들어오는 창(tick blind)이 그만큼 길어진다. 레짐은 관찰 지표라
+    #    부팅을 붙잡을 값어치가 없다 — 못 받으면 그날은 empty 로 간다.
+    macro_api_boot_timeout_secs: float = 25.0
     dkstock_regime_enabled: bool = False
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "extra": "ignore"}

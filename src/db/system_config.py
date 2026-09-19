@@ -10,9 +10,10 @@
   0.5 미만 값이 정상 입력될 수 있어 범위 확장.
 - `auto_regime_adjust` (사이클 2, 2026-05-17): `{"value": bool}` — 매크로 레짐 기반
   cash_usage_ratio 자동 조정 활성 여부. 기본 True. False 면 운영자 수동 설정 보존.
-- `dkstock_regime_enabled` (사이클 5, 2026-05-17): `{"value": bool}` — 외부 매크로
-  서버(dkstock.cloud) 활성 여부. **키 부재 시 `None` 반환** — 호출자가 settings.* 환경
-  변수로 fallback. .env 의존도 최소화 + 운영자 즉시 ON/OFF 보장.
+- `dkstock_regime_enabled` (사이클 5, 2026-05-17): `{"value": bool}` — 매크로 레짐
+  (우리 `macro` 컨테이너) 활성 여부. 🔴 키 이름은 유지한다 — 운영 DB 에 이미 행이 있다.
+  **키 부재 시 `None` 반환** — 호출자가 settings.* 환경 변수로 fallback.
+  .env 의존도 최소화 + 운영자 즉시 ON/OFF 보장.
 - `kis_mcp_enabled` (사이클 5, 2026-05-17): `{"value": bool}` — 외부 백테스트 서버
   활성 여부. dkstock_regime_enabled 와 동일 패턴(DB 우선, .env fallback).
 - **사이클 8 (2026-05-18) 매수 가드 4 모드 + 4 임계값**:
@@ -231,7 +232,7 @@ def _normalize_bool_value(v: object) -> bool | None:
     ⚠️ **방향 전환 1건(적대 검증 기록)** — 비-bool dict 값이 종전 `bool(v)`
     (대개 `False`: `""`·`[]`·`{}`)에서 **`None`** 으로 바뀐다.
     `dkstock_regime_enabled`·`kis_mcp_enabled` 는 `None` 이 「DB 에 답이 없다 →
-    `.env` 를 보라」는 신호이므로(`services/dkstock_client.py` ·
+    `.env` 를 보라」는 신호이므로(`services/macro_client.py` ·
     `services/mcp_client.py` · `engine/backtest_engine.py` ·
     `routes/system_integrations.py`), 오염된 행이 있으면 판정 주체가 DB 에서
     환경변수로 옮겨간다. 세 키 모두 setter 가 `_set_bool` 이라 그런 값을 쓸

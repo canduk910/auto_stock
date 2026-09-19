@@ -344,8 +344,22 @@ _SRC_TREE_FILES = 153
 #: 아니라 보관 일수를 줄이는 것이 답이라는 금기를 상수 옆에 붙였다.
 #: 파일 수 **153 불변**. cycle309 착지(= 이 재핀 착수) 값은
 #: `e1344ee4ef5d1e78ae81023fd27ba0ef21615f776051bbd9a38e8423573b3e20` 였다.
+#:
+#: 🔁 **cycle315(2026-09-19, 사용자 지시 "매크로레짐은 외부를 보던 걸 이제 우리 컨테이너에서
+#: 확인하는걸로 전면 수정") 재핀 — 매크로 레짐 출처를 외부 `dkstock.cloud` 에서 우리 `macro`
+#: 컨테이너로 전환.** 그 외부 서버는 2026-08-18 terraform destroy 로 철거됐고 되살릴 계획이 없다.
+#: 움직인 파일 **9** = `config.py` · `engine/market_regime.py` · `engine/boot_manager.py` ·
+#: `engine/recommendation_engine.py`(프롬프트 문구) · `routes/market_regime.py` ·
+#: `routes/system_integrations.py` · `models/market_regime.py` · `db/system_config.py`(주석) ·
+#: `db/market_regime_snapshots.py`(주석). **신규 1** `services/macro_client.py`,
+#: **삭제 1** `services/dkstock_client.py` → 파일 수 **153 불변**(1 삭제 1 추가 상쇄).
+#: 🔴 **8영역과 `scheduler.py` 는 diff 0** — 함수명 `refresh_from_dkstock` 을 유지해
+#: `scheduler.py` 의 import·호출을 byte 동일로 두었다(개명은 그 파일의 승인 절차를 부른다).
+#: 🔴 매수·손절 경로에 레짐이 닿는 코드는 여전히 **0건**이다 — 레짐은 관찰 지표다.
+#: cycle313 착지(= 이 재핀 착수) 값은
+#: `7408c8fd1555b1c08e28db4aac650d7fef3b980a6aa7d39d0bdf4623f3f6748c` 였다.
 _SRC_TREE_DIGEST = (
-    "7408c8fd1555b1c08e28db4aac650d7fef3b980a6aa7d39d0bdf4623f3f6748c"
+    "fc11588e2b689496f2d3133e6c252e5d649eb7a6811ca60d3107abc79c9937ab"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

@@ -54,7 +54,7 @@
 | Backend | Python 3.11+, FastAPI, httpx, websockets, pydantic, asyncpg, pandas, openai |
 | Frontend | React 19, TypeScript, Vite, React Router 7, TanStack Query/Table, axios, Recharts, Tailwind CSS 4 |
 | Database | AWS RDS PostgreSQL (asyncpg 직접 드라이버) |
-| 외부 API | 한국투자증권 OpenAPI (REST + WebSocket) · OpenAI (전략수정 AI자문 · 일일 로그 분석 · AI 매수평가) · 백테스트 MCP · dkstock.cloud 매크로 레짐 (뒤 둘은 `KIS_MCP_ENABLED`/`DKSTOCK_REGIME_ENABLED` 토글, 기본 off) |
+| 외부 API | 한국투자증권 OpenAPI (REST + WebSocket) · OpenAI (전략수정 AI자문 · 일일 로그 분석 · AI 매수평가) · 백테스트 MCP (`KIS_MCP_ENABLED`, 기본 off) — 매크로 레짐은 외부가 아니라 **자체 `macro` 컨테이너**다(`DKSTOCK_REGIME_ENABLED`, 변수명만 유지) |
 
 ## 사전 준비
 
@@ -152,10 +152,10 @@ done
 019_backtest_runs.sql                 # 외부 MCP 백테스트 실행 영속화 (Phase 2)
 020_parameter_recommendations_backtest.sql  # parameter_recommendations.backtest_summary JSONB (Phase 3)
 021_weight_reasoning.sql              # parameter_recommendations.weight_reasoning 별도 사유 (cycle1)
-022_market_regime_snapshots.sql       # dkstock.cloud 매크로 일일 스냅샷 (cycle2)
+022_market_regime_snapshots.sql       # 매크로 레짐 일일 스냅샷 (cycle2, 출처는 cycle315 부터 자체 macro 컨테이너)
 023_cash_usage_ratio_range.sql        # cash_usage_ratio 범위 [0.5, 1.0] → [0.0, 1.0] 확장 (cycle2)
 024_vb_board_stop_loss_defaults.sql   # VB 보드별 손절 디폴트 자동 복사 (cycle3)
-025_external_integration_toggles.sql  # dkstock-regime / kis-mcp 외부 통합 DB-only 토글 (cycle5)
+025_external_integration_toggles.sql  # dkstock-regime(= 매크로 레짐) / kis-mcp 통합 DB-only 토글 (cycle5)
 026_kis_quote_accounts.sql            # 보조 KIS 시세 수신 계좌 (cycle7-A, 풀 슬롯 41 × (1 + N) 확장)
 027_buy_block_mode.sql                # 매수 가드 4 모드 (OFF/WARN/SOFT/HARD) + 4 임계값 (cycle8)
 028_auto_apply_status.sql             # parameter_recommendations.status 에 'applied_auto' 분리 (cycle23 P3, AI 자문 자동 적용)
@@ -564,7 +564,7 @@ KIS OpenAPI 가 NXT(넥스트레이드 ATS) 주문·시세를 정식 지원하�
 | GET | `/api/strategy-funnel?strategy_id=&target_date=` | cycle34: 전략별 조건검색 단계별 후보/탈락 종목 (`survived_tickers` cap 200 / `excluded_sample` cap 20) |
 | GET | `/api/strategy-funnel/recent?strategy_id=&days=7` | 최근 N영업일 추이 |
 | POST | `/api/strategy-funnel/snapshot` | 수동 trigger — `scheduler.capture_funnel_snapshots(registry, is_provisional=False)` 로 09:30 자동 hook 과 같은 단계별 + `step_no=99` 캡처. prepare 는 재실행하지 않고 최근 결과(`_funnel_steps`)만 담는다. 응답 `{target_date, saved_count, count}` |
-| GET·PUT | `/api/integrations/dkstock-regime` | 외부 매크로 서버(dkstock.cloud) 활성 토글. DB 우선 / `.env` fallback. 활성화 시 백그라운드 fetch 발화, 비활성화 시 메모리 레짐 리셋. 매크로 fetch 실패는 graceful(토글 자체는 성공) |
+| GET·PUT | `/api/integrations/dkstock-regime` | 매크로 레짐 활성 토글(출처 = 자체 `macro` 컨테이너. 슬러그·변수명은 DB 행과 짝이라 유지). DB 우선 / `.env` fallback. 활성화 시 백그라운드 fetch 발화, 비활성화 시 메모리 레짐 리셋. 매크로 fetch 실패는 graceful(토글 자체는 성공) |
 | GET·PUT | `/api/integrations/kis-mcp` | 외부 백테스트 MCP 서버 활성 토글. 즉시 fetch 없음 — 백테스트는 20:00 자문 시점에 발화한다 |
 | GET·PUT | `/api/integrations/auto-regime-adjust` | 매크로 레짐에 따라 `cash_usage_ratio` 를 자동 갱신할지 토글. 다음 영업일 `_boot` 부터 반영. **새로 쓰는 코드는 이 경로를 쓴다**(Settings 화면도 이쪽). 별칭 `PUT /api/market-regime/auto-adjust` 는 같은 키·같은 동작으로 남아 있다 |
 | GET·PUT | `/api/integrations/etf-regime` | 지수ETF 고지로 스테이지 레짐 **관찰** 토글 (기본 false, `.env` fallback 없음). 매수에 개입하지 않는다 |

@@ -315,14 +315,25 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
   );
 
   // IntegrationToggleCard 4 토글
+  // cycle315 후속(적대 검토) — dkstock-regime 과 market-regime/current 의 `enabled` 는
+  // 이제 **같은 DB 우선 값**을 읽는다(`routes/market_regime.py::get_current` 가
+  // `system_integrations._build_status` 와 같은 규약을 쓴다, cycle315). auto-regime-adjust
+  // 도 `market-regime/current.auto_regime_adjust` 와 같은 system_config 키를 공유한다.
+  // 이 셋을 따로 값을 주면 실제 백엔드가 절대 만들 수 없는 조합(레짐은 켜져 있는데
+  // 토글은 꺼진 것으로 보이는 등)이 목에만 존재하게 된다 — 아래 `**/api/market-regime/current`
+  // 의 실측(enabled:true · auto_regime_adjust:false)과 동치로 맞춘다.
   await page.route("**/api/integrations/dkstock-regime", (route) =>
-    route.fulfill({ json: envelope({ enabled: false, source: "env" }) }),
+    route.fulfill({
+      json: envelope({ enabled: true, source: "db", env_value: false, db_value: true }),
+    }),
   );
   await page.route("**/api/integrations/kis-mcp", (route) =>
     route.fulfill({ json: envelope({ enabled: false, source: "env" }) }),
   );
   await page.route("**/api/integrations/auto-regime-adjust", (route) =>
-    route.fulfill({ json: envelope({ enabled: true, source: "db" }) }),
+    route.fulfill({
+      json: envelope({ enabled: false, source: "db", env_value: true, db_value: false }),
+    }),
   );
   await page.route("**/api/integrations/auto-apply", (route) =>
     route.fulfill({ json: envelope({ enabled: false, source: "db" }) }),
@@ -389,21 +400,27 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
   // 5 필수 필드 (buy_blocked / block_reason / auto_regime_adjust / cash_usage_ratio / enabled) 추가
   // 사이클 I (2026-08-03) — 지수ETF 레짐 4 필드 추가 (etf_kospi_stage/etf_kosdaq_stage/
   // etf_defensive/etf_enabled). buy_blocked 는 항상 false (레짐 매수 게이트 제거).
+  //
+  // cycle315 (2026-09-19) — 값을 **실측**으로 갈아끼웠다. 종전 목은 `regime:"neutral"`
+  // (어느 경로에서도 나오지 않는 죽은 값) + `enabled:false` 라, 카드가 죽은 키를 지운 뒤에는
+  // 폴백 "비활성" 배지만 그렸다. 실측 출처 = 우리 macro 컨테이너 `GET /api/macro/macro-cycle`
+  // (2026-09-19 07:30 KST) 의 `regime` 블록 + `cycle.phase`.
   await page.route("**/api/market-regime/current", (route) =>
     route.fulfill({
       json: envelope({
-        regime: "neutral",
-        regime_desc: "중립",
-        cycle_phase: null,
-        vix: 18.0,
-        fear_greed_score: 50,
-        buffett_ratio: 100.0,
-        cash_min: 30,
+        regime: "defensive",
+        regime_desc: "방어 (공포 현금)",
+        cycle_phase: "expansion",
+        vix: 14.81,
+        fear_greed_score: 69.0,
+        buffett_ratio: 2.626,
+        cash_min: 75,
         buy_blocked: false,
-        block_reason: null,
-        auto_regime_adjust: true,
+        block_reason: "regime=defensive (방어 (공포 현금))",
+        // 운영 실측 — 자동 조정은 OFF 다 (레짐은 관찰 전용)
+        auto_regime_adjust: false,
         cash_usage_ratio: 1.0,
-        enabled: false,
+        enabled: true,
         etf_kospi_stage: null,
         etf_kosdaq_stage: null,
         etf_defensive: null,

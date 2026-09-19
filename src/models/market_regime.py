@@ -20,7 +20,9 @@ class MarketRegimeCurrent(BaseModel):
     block_reason: Optional[str] = None
     auto_regime_adjust: bool = True
     cash_usage_ratio: float = 1.0
-    enabled: bool = False  # DKSTOCK_REGIME_ENABLED 값
+    # 레짐 수집 활성 여부 — DB(`system_config.dkstock_regime_enabled`) 우선 / `.env` fallback.
+    # 🔴 `.env` 값 그대로가 아니다. 운영자가 Settings 에서 끈 것이 곧바로 이 값에 반영돼야 한다.
+    enabled: bool = False
     # 사이클 I (2026-08-03) — 지수ETF 고지로 스테이지 레짐 관찰 (E-1). 매수 미개입.
     etf_kospi_stage: Optional[int] = None
     etf_kosdaq_stage: Optional[int] = None

@@ -4,9 +4,13 @@
 - `GET /history?days=30` — 최근 N 영업일 snapshot 추세 (Dashboard sparkline)
 - `PUT /auto-adjust` — auto_regime_adjust 토글 (Settings UI)
 
-graceful 정책: dkstock.cloud fetch 실패 시 empty regime + 가드 비활성.
-운영 활성화 (DKSTOCK_REGIME_ENABLED=true) 전에도 본 라우트는 정상 200 응답
-(empty 상태 표시).
+graceful 정책: 매크로 fetch(우리 `macro` 컨테이너) 실패 시 empty regime.
+레짐이 꺼져 있어도 본 라우트는 정상 200 응답(empty 상태 표시).
+
+`enabled` 는 **DB 우선 / `.env` fallback** 이다 — `system_config.dkstock_regime_enabled`
+가 True/False 면 그 값을, 키가 없거나 조회가 실패하면 `settings.dkstock_regime_enabled`
+를 쓴다(`routes/system_integrations.py::_build_status` 와 같은 규약). Settings UI 토글이
+DB 를 쓰므로 env 만 보면 운영자가 켠 상태가 화면에 영원히 꺼짐으로 보인다.
 """
 from __future__ import annotations
 
@@ -37,6 +41,17 @@ async def get_current():
     except Exception:
         ratio = 1.0
 
+    # cycle315 — enabled 는 DB 우선 / .env fallback (system_integrations._build_status 규약).
+    # DB 조회 실패는 graceful — env 값으로 낙하한다.
+    try:
+        db_enabled = await sc.get_dkstock_regime_enabled()
+    except Exception:
+        db_enabled = None
+    enabled = (
+        bool(db_enabled) if db_enabled is not None
+        else bool(settings.dkstock_regime_enabled)
+    )
+
     # 사이클 I — 지수ETF 레짐 관찰 (E-1). boot 부착 싱글톤 (재계산 X) + 토글.
     etf_sig = mr_mod.get_current_etf_signal()
     try:
@@ -60,7 +75,7 @@ async def get_current():
         block_reason=regime.block_reason,
         auto_regime_adjust=auto,
         cash_usage_ratio=ratio,
-        enabled=settings.dkstock_regime_enabled,
+        enabled=enabled,
         etf_kospi_stage=etf_sig.kospi_stage if etf_sig is not None else None,
         etf_kosdaq_stage=etf_sig.kosdaq_stage if etf_sig is not None else None,
         etf_defensive=etf_sig.etf_defensive if etf_sig is not None else None,

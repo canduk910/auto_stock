@@ -157,7 +157,7 @@ SYSTEM_PROMPT = (
     "- regime=neutral: 기존 파라미터 유지 또는 미세 조정\n"
     "- regime=aggressive (확장기, 낮은 VIX, 적정 fear_greed): 진입 임계 완화 또는 position_ratio 확대 가능"
     " (단, 변동성 큰 모멘텀류는 신중)\n"
-    "- ⚠️ 레짐은 매매에 직접 개입하지 않는다(관찰 전용). buy_blocked 는 항상 false — 레짐이 defensive 여도 실제 매수는 차단되지 않으므로 매수 임계 튜닝은 유효하다. block_reason 은 dkstock 의 방어 '권고' 사유일 뿐이니, defensive 면 매수 파라미터를 보수적으로 권고하는 참고 신호로만 쓰고 매수 튜닝 자체를 스킵하지 마라\n"
+    "- ⚠️ 레짐은 매매에 직접 개입하지 않는다(관찰 전용). buy_blocked 는 항상 false — 레짐이 defensive 여도 실제 매수는 차단되지 않으므로 매수 임계 튜닝은 유효하다. block_reason 은 우리 macro 컨테이너 레짐의 방어 '권고' 사유일 뿐이니, defensive 면 매수 파라미터를 보수적으로 권고하는 참고 신호로만 쓰고 매수 튜닝 자체를 스킵하지 마라\n"
     "- weight_reasoning 에 매크로 영향 (예: \"defensive 레짐 + buffett 1.45 → 보수적 비중\") 명시 권장\n"
     "- code_review_notes 에 매크로 의존 로직 도입 제안 가능 (예: VIX 25↑ 시 자동 매수 중단)"
 )

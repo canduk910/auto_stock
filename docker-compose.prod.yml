@@ -67,7 +67,7 @@ services:
   macro:
     # cycle303 — macro_lite 이식 1단계. 매매와 무관한 매크로 대시보드(경기사이클·금리차·
     # 하이일드·환율·원자재) 전용 API. **매매 판단에 값을 연결하지 않는다**
-    # (`src/engine/market_regime.py`·`src/services/dkstock_client.py` 무접촉 — 전환은
+    # (cycle315 부터 `src/engine/market_regime.py` 가 이 컨테이너를 본다 — 전환은
     # 별도 승인 사이클). 자체 이미지(`./macro/Dockerfile`)로 매매 이미지와 완전 분리.
     build:
       context: ./macro

@@ -1,33 +1,41 @@
 /**
  * 사이클 2 (2026-05-17): 시장 레짐 카드 (Dashboard 환경 배너 직하).
+ * cycle315 (2026-09-19): 레짐 출처가 외부 dkstock.cloud 에서 **우리 macro 컨테이너**로
+ *   바뀌면서, 화면이 들고 있던 값이 실재와 어긋나 있던 것을 함께 시정한다.
  *
  * 노출 정보:
- * - regime + label + desc (defensive=red / neutral=gray / aggressive=blue)
- * - VIX 값 + level
- * - Fear & Greed Score + label
- * - Buffett Ratio
- * - cycle.phase (확장기/수축기)
+ * - regime + label + desc — 실재 레짐은 `macro/macro_lite/regime.py::REGIME_MATRIX` 가 내는
+ *   accumulation / selective / cautious / defensive **4종뿐**이다. 종전 3키(defensive/
+ *   neutral/aggressive)는 뒤의 둘이 어느 경로에서도 나올 수 없는 죽은 키였고, 그래서
+ *   실제로 오는 accumulation·selective·cautious 가 전부 "비활성" 회색 폴백으로 떨어졌다.
+ * - VIX 값 / Fear & Greed Score / Buffett Ratio(비율 계약) / cycle.phase(4국면)
+ * - 자금 사다리 표 — regime → cash_min → 자금 사용률(= 100 − cash_min)
  * - 자동 cash_usage_ratio + auto_regime_adjust 토글 (ConfirmModal 이중 확인)
  * - block_reason 이 있으면 "레짐 경보" 관찰 배너 (사이클 I 표시 정직화 —
  *   `buy_blocked` 는 이제 항상 false 이므로 더 이상 매수 차단 의미로 사용하지 않음)
  * - 지수ETF 레짐(관찰) 소섹션 — 코스피200/코스닥150 stage + 방어 여부 (사이클 I)
- * - DKSTOCK_REGIME_ENABLED=false / empty regime 시 graceful "비활성" 표시
+ * - 레짐 수집 비활성 / empty regime 시 graceful "비활성" 표시
+ *
+ * 🔴 이 카드는 **부팅 시점 스냅샷**이다 — `_boot()`(매일 07:45 KST)이 한 번 받아 둔 값을
+ *    보여 준다. 지금 이 순간의 값은 라이브 화면 `/macro` 가 따로 있다. 두 화면의 숫자가
+ *    다르면 그것은 결함이 아니라 **다른 시점**이다.
  */
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getMarketRegimeCurrent, setAutoRegimeAdjust } from '../api/market_regime'
 import ConfirmModal from './ConfirmModal'
 
-const REGIME_STYLE: Record<string, { bg: string; text: string; label: string }> = {
-  defensive: { bg: 'bg-red-100', text: 'text-red-800', label: '방어' },
-  neutral: { bg: 'bg-gray-100', text: 'text-gray-800', label: '중립' },
-  aggressive: { bg: 'bg-blue-100', text: 'text-blue-800', label: '공격' },
-}
-
-const CYCLE_LABEL: Record<string, string> = {
-  expansion: '확장기',
-  contraction: '수축기',
-}
+// 표시 상수(레짐 4종 스타일·4국면 라벨·자금 사다리·버핏지수 포매터)는
+// `utils/marketRegime.ts` 가 단일 진실원이다 — 컴포넌트 파일에서 함께 export 하면
+// vite fast-refresh 가 깨진다(`utils/contentWidth.ts` 선례).
+import {
+  CYCLE_LABEL,
+  REGIME_CASH_LADDER,
+  REGIME_STYLE,
+  formatBuffettRatio,
+  usagePctFromCashMin,
+} from '../utils/marketRegime'
 
 export default function MarketRegimeCard() {
   const queryClient = useQueryClient()
@@ -69,6 +77,11 @@ export default function MarketRegimeCard() {
   const regimeKey = data.regime ?? 'unknown'
   const style = REGIME_STYLE[regimeKey] ?? { bg: 'bg-gray-50', text: 'text-gray-500', label: '비활성' }
 
+  // 자동 조정이 켜졌을 때 실제로 적용될 값 — 모달이 "지금 이 레짐이면 얼마가 되는가" 를
+  // 예시 상수가 아니라 현재 cash_min 으로 말하게 한다.
+  const autoUsagePct = data.cash_min != null ? usagePctFromCashMin(data.cash_min) : null
+  const currentUsagePct = Math.round(data.cash_usage_ratio * 100)
+
   const onToggleClick = () => {
     setPendingValue(!data.auto_regime_adjust)
     setConfirmOpen(true)
@@ -80,6 +93,13 @@ export default function MarketRegimeCard() {
     setConfirmOpen(false)
     setPendingValue(null)
   }
+
+  const confirmOnMessage =
+    autoUsagePct != null
+      ? `시장 레짐의 현금 최소 비중(cash_min)으로 cash_usage_ratio 가 자동 갱신됩니다. ` +
+        `지금 레짐(${style.label}, cash_min=${data.cash_min}) 기준이면 ` +
+        `${currentUsagePct}% → ${autoUsagePct}% 로 바뀝니다. 다음 영업일부터 반영됩니다.`
+      : '시장 레짐의 현금 최소 비중(cash_min)으로 cash_usage_ratio 가 자동 갱신됩니다. 다음 영업일부터 반영됩니다.'
 
   return (
     <div className="bg-white rounded-lg shadow p-4 mb-4" data-testid="market-regime-card">
@@ -98,9 +118,28 @@ export default function MarketRegimeCard() {
             data-testid="market-regime-badge"
             className="inline-block px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-500"
           >
-            비활성 (DKSTOCK_REGIME_ENABLED=false)
+            비활성 (레짐 수집 꺼짐)
           </span>
         )}
+      </div>
+
+      {/* 🔴 성격 명시 (cycle315) — 이 카드의 값은 _boot() 이 한 번 받아 둔 스냅샷이고
+          `/macro` 는 요청할 때마다 새로 계산하는 라이브 화면이다. 두 숫자가 다른 이유가
+          "어느 쪽이 틀렸나" 가 아니라 "시점이 다르다" 임을 화면이 스스로 말하게 한다. */}
+      <div
+        data-testid="market-regime-snapshot-note"
+        className="mb-3 px-3 py-2 bg-gray-50 border border-gray-200 rounded text-xs text-gray-600"
+      >
+        이 카드는 매일 아침 <strong>07:45 KST</strong> 부팅(<code>_boot()</code>) 시점에 받아 둔{' '}
+        <strong>스냅샷</strong>입니다 — 그 뒤로는 자동 갱신되지 않습니다. 지금 이 순간의 라이브 값은{' '}
+        <Link
+          data-testid="market-regime-macro-link"
+          to="/macro"
+          className="text-blue-700 underline underline-offset-2"
+        >
+          매크로 화면(/macro)
+        </Link>
+        에서 봅니다.
       </div>
 
       {/* 관찰 전용 안내 (2026-08-07) — 자동 조정 OFF 이면 레짐은 실제 매매에
@@ -112,8 +151,8 @@ export default function MarketRegimeCard() {
           className="mb-3 px-3 py-2 bg-slate-50 border border-slate-200 rounded text-xs text-slate-600"
         >
           레짐은 <strong>관찰 전용</strong>입니다 — 실제 매매에 반영되지 않습니다
-          (현재 cash_usage_ratio {(data.cash_usage_ratio * 100).toFixed(0)}% 수동).
-          아래 배지·경보는 dkstock 의 <strong>권고</strong>이며, 자동 조정은 OFF 입니다.
+          (현재 cash_usage_ratio {currentUsagePct}% 수동).
+          아래 배지·경보는 우리 매크로 컨테이너의 <strong>권고</strong>이며, 자동 조정은 OFF 입니다.
         </div>
       )}
 
@@ -135,7 +174,7 @@ export default function MarketRegimeCard() {
         />
         <Metric
           label="Buffett Ratio"
-          value={data.buffett_ratio?.toFixed(1) ?? '—'}
+          value={formatBuffettRatio(data.buffett_ratio)}
           testId="metric-buffett"
         />
         <Metric
@@ -143,6 +182,32 @@ export default function MarketRegimeCard() {
           value={data.cycle_phase ? CYCLE_LABEL[data.cycle_phase] ?? data.cycle_phase : '—'}
           testId="metric-cycle"
         />
+      </div>
+
+      {/* 자금 사다리 — 레짐이 바뀌면 자동 조정이 어디로 가는지 미리 보여 준다.
+          값은 macro_lite REGIME_PARAMS 정본(cash_min) 이고 사용률은 100 − cash_min 이다. */}
+      <div className="border-t pt-3 mt-3" data-testid="market-regime-cash-ladder">
+        <h3 className="text-sm font-medium text-gray-700 mb-2">자금 사다리 (레짐별 권고)</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {REGIME_CASH_LADDER.map(({ regime, cashMin }) => {
+            const s = REGIME_STYLE[regime]
+            const active = regimeKey === regime
+            return (
+              <div
+                key={regime}
+                data-testid={`market-regime-cash-ladder-${regime}`}
+                data-active={active ? 'true' : 'false'}
+                className={`rounded px-2 py-2 text-xs border ${
+                  active ? `${s.bg} ${s.text} border-current font-semibold` : 'bg-gray-50 text-gray-600 border-gray-200'
+                }`}
+              >
+                <div>{s.label}</div>
+                <div className="font-mono">현금 최소 {cashMin}</div>
+                <div className="font-mono">자금 사용률 {usagePctFromCashMin(cashMin)}%</div>
+              </div>
+            )
+          })}
+        </div>
       </div>
 
       {/* 사이클 E-1 → 사이클 I (2026-08-03): 지수ETF 레짐(관찰) 소섹션 */}
@@ -181,7 +246,7 @@ export default function MarketRegimeCard() {
         <div className="flex items-center justify-between">
           <div className="text-sm text-gray-700">
             <strong data-testid="metric-cash-ratio">
-              cash_usage_ratio: {(data.cash_usage_ratio * 100).toFixed(0)}%
+              cash_usage_ratio: {currentUsagePct}%
             </strong>
             {data.cash_min !== null && data.auto_regime_adjust && data.enabled && (
               <span className="ml-2 text-xs text-gray-500">
@@ -216,7 +281,7 @@ export default function MarketRegimeCard() {
         title={pendingValue ? '자동 조정 ON' : '자동 조정 OFF'}
         message={
           pendingValue
-            ? '시장 레짐 cash_min 기반으로 cash_usage_ratio 가 자동 갱신됩니다 (defensive=0.25 / neutral=0.5 / aggressive=0.8). 다음 영업일부터 반영됩니다.'
+            ? confirmOnMessage
             : '운영자 수동 cash_usage_ratio 가 보존됩니다. 레짐 변동과 무관하게 현 비율 그대로 분배됩니다. 다음 영업일부터 반영됩니다.'
         }
         onConfirm={onConfirm}

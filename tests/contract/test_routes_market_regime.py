@@ -100,3 +100,90 @@ def test_put_auto_adjust_toggle(client):
     body = resp.json()
     assert body["success"] is True
     assert body["data"]["auto_regime_adjust"] is False
+
+
+# ---------------------------------------------------------------------------
+# cycle315 — `enabled` 는 DB 우선 / env fallback (`system_integrations._build_status` 규약)
+# ---------------------------------------------------------------------------
+def _patch_db_toggle(monkeypatch, value):
+    from src.db import system_config as sc
+
+    async def _get():
+        return value
+
+    monkeypatch.setattr(sc, "get_dkstock_regime_enabled", _get)
+
+
+def test_current_enabled_prefers_db_over_env(client, monkeypatch):
+    """env=False + DB=True → enabled 는 True.
+
+    Settings UI 토글은 DB 를 쓴다. 라우트가 env 만 보면 운영자가 켠 상태가 화면에
+    영원히 꺼짐으로 보인다.
+    """
+    from src.config import settings
+
+    monkeypatch.setattr(settings, "dkstock_regime_enabled", False, raising=False)
+    _patch_db_toggle(monkeypatch, True)
+
+    data = client.get("/api/market-regime/current").json()["data"]
+    assert data["enabled"] is True
+
+
+def test_current_enabled_db_false_overrides_env_true(client, monkeypatch):
+    from src.config import settings
+
+    monkeypatch.setattr(settings, "dkstock_regime_enabled", True, raising=False)
+    _patch_db_toggle(monkeypatch, False)
+
+    data = client.get("/api/market-regime/current").json()["data"]
+    assert data["enabled"] is False
+
+
+def test_current_enabled_db_none_falls_back_to_env(client, monkeypatch):
+    from src.config import settings
+
+    monkeypatch.setattr(settings, "dkstock_regime_enabled", True, raising=False)
+    _patch_db_toggle(monkeypatch, None)
+
+    data = client.get("/api/market-regime/current").json()["data"]
+    assert data["enabled"] is True
+
+
+def test_current_enabled_db_error_falls_back_to_env(client, monkeypatch):
+    """DB 조회 예외는 graceful — 200 + env 값."""
+    from src.config import settings
+    from src.db import system_config as sc
+
+    monkeypatch.setattr(settings, "dkstock_regime_enabled", True, raising=False)
+
+    async def _boom():
+        raise RuntimeError("db down")
+
+    monkeypatch.setattr(sc, "get_dkstock_regime_enabled", _boom)
+
+    resp = client.get("/api/market-regime/current")
+    assert resp.status_code == 200
+    assert resp.json()["data"]["enabled"] is True
+
+
+def test_current_buy_blocked_is_always_false_regression(client, monkeypatch):
+    """🔴 레짐은 매수를 차단하지 않는다 — DB 토글이 켜져도 buy_blocked 는 상수 False."""
+    from src.config import settings
+    from src.engine import market_regime as mr_mod
+
+    monkeypatch.setattr(settings, "dkstock_regime_enabled", False, raising=False)
+    _patch_db_toggle(monkeypatch, True)
+    monkeypatch.setattr(
+        mr_mod, "get_current_regime",
+        lambda: mr_mod.MarketRegime(
+            regime="defensive", regime_desc="방어 (공포 현금)",
+            cycle_phase="expansion", vix=14.81, fear_greed_score=69.0,
+            buffett_ratio=2.626, cash_min=75,
+        ),
+    )
+
+    data = client.get("/api/market-regime/current").json()["data"]
+    assert data["enabled"] is True
+    assert data["regime"] == "defensive"
+    assert data["buy_blocked"] is False
+    assert data["cash_min"] == 75

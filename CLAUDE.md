@@ -121,7 +121,7 @@ cd frontend && npm install && npm run dev
 - `API_AUTH_KEY` (cycle243): 백엔드 `X-API-Key` 인증 키. **미설정이면 fail-closed** — `/health` 를 뺀 전 경로 401 + 기동 시 `[api_auth_key_missing]` CRITICAL. 조용히 끄지 않는다(fail-open 은 "키가 없으면 인증이 사라진다" = 이 결함의 재현). 생성 `python3 -c "import secrets;print(secrets.token_urlsafe(32))"`. 운영에서는 nginx 가 프록시 요청에 주입해 브라우저에 노출되지 않는다. 키 회전은 frontend·backend **동시 재시작**이 필요하므로 장 종료 후에만
 - `API_ALLOWED_ORIGINS` (cycle243, 기본 빈 값): 교차 출처 허용 목록(CSV). CORS `allow_origins` 와 상태변경(POST/PUT/PATCH/DELETE) Origin 검사가 이 값 하나를 공유한다. 빈 값 = same-origin 전용(prod). dev 는 vite `changeOrigin` 때문에 `http://localhost:3000` 명시
 - `API_REPORTER_KEY` (cycle249, 기본 빈 값 = 리포터 역할 비활성): 리포터 스코프 키 — 허용 범위는 **GET/HEAD 전체 + `POST /api/log-reports/{date}/external` 단 한 경로**뿐이다(20:20 KST 클라우드 루틴이 로그 번들을 읽고 분석 결과를 쓰는 유일한 창구). nginx `map $remote_user` 가 Basic 사용자 `reporter` 에게만 이 값을 주입한다(운영 키를 보내는 `default` 사용자와 다른 값이어야 판정이 성립). 미설정이면 어떤 요청도 리포터로 통과하지 못한다(fail-closed)
-- `DKSTOCK_REGIME_ENABLED` (기본 false): dkstock.cloud 매크로 레짐 수신 + cash_usage_ratio 자동 조정 활성화 (레짐은 관찰 전용 — 매수를 차단하지 않는다)
+- `DKSTOCK_REGIME_ENABLED` (기본 false): 매크로 레짐 수신 + cash_usage_ratio 자동 조정 활성화 (레짐은 관찰 전용 — 매수를 차단하지 않는다). 출처는 **우리 `macro` 컨테이너**(`MACRO_API_URL`, 기본 `http://macro:8000`)다. 🔴 **변수명은 유지한다** — 운영 DB `system_config.dkstock_regime_enabled` 행과 짝이고, 개명하면 그 행이 고아가 된다. 판정은 **DB 우선 / `.env` fallback** 이다(`services/macro_client.py`). 상한 = `MACRO_API_READ_TIMEOUT_SECS`(90초) · 부팅 전용 `MACRO_API_BOOT_TIMEOUT_SECS`(25초)
 - `KIS_MCP_ENABLED` (기본 false): 외부 백테스트 MCP 서버 활성화. 자문 직후 활성 전략마다 2 job(`params_kind` = current|recommended) fire-and-forget
 
 ## 다중 전략 (요약)
@@ -149,7 +149,7 @@ cd frontend && npm install && npm run dev
 
 ### 외부 통합 (백테스트 + 매크로 레짐)
 - 20:00 AI 자문 INSERT 직후 외부 MCP 백테스트 (`http://43.202.187.5:3846/mcp`) — 활성 전략마다 2 job(`params_kind` = current|recommended) fire-and-forget → `parameter_recommendations.backtest_summary` JSONB
-- 매크로 레짐 (`dkstock.cloud`) — `regime/vix/fear_greed` 관찰 + `cash_usage_ratio` 자동 조정 (`auto_regime_adjust`, `clamp((100-cash_min)/100)`). **레짐은 관찰 지표다 — 매수를 차단·축소하지 않는다**(`buy_block_mode` 는 표시 전용, `get_buy_block_state` 는 대시보드/자문 payload 만 소비). ETF 레짐·포트폴리오 리스크 관찰 활성
+- 매크로 레짐 (**우리 `macro` 컨테이너**, cycle315) — `regime/vix/fear_greed` 관찰 + `cash_usage_ratio` 자동 조정 (`auto_regime_adjust`, `clamp((100-cash_min)/100)`). **레짐은 관찰 지표다 — 매수를 차단·축소하지 않는다**(`buy_block_mode` 는 표시 전용, `get_buy_block_state` 는 대시보드/자문 payload 만 소비). ETF 레짐·포트폴리오 리스크 관찰 활성
 - 활성화 토글: `KIS_MCP_ENABLED` / `DKSTOCK_REGIME_ENABLED` / `etf_regime_enabled` (Settings UI 즉시 토글). 외부 다운 시 graceful — 자문 INSERT 보존, summary=null, 레짐 관찰 비활성
 - 운영 가이드: [`docs/backtest-monitoring.md`](docs/backtest-monitoring.md)
 
@@ -213,7 +213,7 @@ cd frontend && npm install && npm run dev
 | `stock_master_financial` | KIS 재무 5 TR 정규화 (migration 041, 사이클 C1). PK `(ticker, stac_yymm, div_cls)` (div_cls 0=년/1=분기) + 18 NUMERIC 컬럼(손익 5/대차 7/수익성 2/안정성 2/기타 2) + raw JSONB + refreshed_at. 마법공식(EV/EBITDA·ROC) + F-Score-7 원천 데이터. 주1회 16:40 적재. 매매 hot path 무관 |
 | `llm_buy_evaluations` | **cycle276** AI 매수평가(LLM shadow)를 주문 발화 시점에 기록 (migration 043). PK `(trade_date, account_no, ticker, order_no)` + 53열 — 점수/임계/`would_block`·사유·핵심위험·무효화조건 · 주문 스냅샷(주문가·수량·구분·경로·거래소·보드) · 모델/토큰/비용/지연 3종 · 회고 층화 `prompt_version`/`feature_version` · 주문 시점 제약 `budget_total_won`/`budget_remaining_after_won`/`open_positions_n` · `input_payload` JSONB(`build_messages` 3인자 전체 = 오프라인 재채점의 다리) · `raw_response` JSONB(파싱 전 원문). **주문 1건 = 1행(성공·실패 모두)**, 실패 행도 payload 를 담고 `score=NULL`. 조인 = `order_no`→`trade_history` 체결(`(trade_date, ticker, order_no)` 3축) · `buy_order_nos`→`get_trade_pairs` 실현손익. 인덱스 4 |
 | `backtest_runs` | 외부 MCP 백테스트 영속화 (`(target_date, strategy_id, params_kind)` UNIQUE. 활성 전략마다 2 row/자문(`params_kind` = current|recommended)) |
-| `market_regime_snapshots` | dkstock.cloud 매크로 일일 스냅샷. `_boot()` 시점 1행. `buy_blocked`/`computed_cash_usage_ratio`/`raw_response JSONB` 영구 기록 |
+| `market_regime_snapshots` | 매크로 레짐 일일 스냅샷(출처 = 우리 `macro` 컨테이너). `_boot()` 시점 1행. `buy_blocked`/`computed_cash_usage_ratio`/`raw_response JSONB` 영구 기록 |
 | `kis_quote_accounts` | 보조 KIS 시세 수신 계좌 (UUID PK, label UNIQUE, active=true 부분 인덱스). `list_accounts()` 60s TTL 메모리 캐시 |
 | `strategy_funnel_snapshots` | 전략별 조건검색 단계별 후보/탈락 종목 영구 추적. `(target_date, strategy_id, step_no, snapshot_at)` UNIQUE. `survived_tickers` JSONB cap 200 / `excluded_sample` JSONB cap 20. 09:30 자동 캡처(`scheduler._auto_capture_funnel_snapshots`, 단계별 + `step_no=99`) + 수동 trigger `POST /api/strategy-funnel/snapshot`(`capture_funnel_snapshots(registry, is_provisional=False)`) |
 
@@ -248,11 +248,11 @@ cd frontend && npm install && npm run dev
 - `src/realtime/` — KIS WebSocket (시세·체결통보·H0NXMKO0) + WebsocketPool 멀티 세션 분배
 - `src/engine/` — 매매 핵심 (전략·레지스트리·주문·리스크·스케줄러). `recommendation_engine.py` 20:00 AI자문 / `log_analysis_engine.py` 21:30 일일 분석(cycle283 D3) / `daily_metrics_snapshot.py` 20:05 metrics 1차 스냅샷 / `backtest_engine.py` + `backtest_yaml.py` / `market_regime.py`
 - `src/engine/strategies/` — 7 전략 명세 (전용 CLAUDE.md)
-- `src/services/` — 외부 서비스 클라이언트 (`mcp_client.py` 백테스트 MCP / `dkstock_client.py` 매크로 / `quote_session_health.py` 보조 세션 health monitor)
+- `src/services/` — 서비스 클라이언트 (`mcp_client.py` 백테스트 MCP / `macro_client.py` 매크로 레짐 — 우리 `macro` 컨테이너를 평문 GET 으로 부른다, 인증 없음 / `quote_session_health.py` 보조 세션 health monitor)
 - `src/db/` — PostgreSQL(asyncpg) CRUD. 전 모듈이 `src/db/pg.py` 풀을 쓴다 (`supabase.py` 는 롤백용 병존, 런타임 미참조)
 - `src/middleware/` — API 인증(`X-API-Key`)·리포터 스코프 최외곽 미들웨어 (전용 CLAUDE.md 없음)
 - `src/routes/` — FastAPI 엔드포인트
 - `src/models/` — Pydantic 모델
 - `src/workers/` — 워커 진입점이 들어올 자리. **아직 없다.** 계획 = [`docs/architecture.md`](docs/architecture.md) 15.2 · 15.5
 - `frontend/` — React 대시보드
-- `macro/` — **매크로 API 별도 컨테이너** (경기사이클·투자체제·금리차·하이일드·환율·원자재 5섹션 = `GET /api/macro/*`). 자체 `Dockerfile`·`requirements.txt`(pandas/numpy/yfinance)·`main.py` 를 갖고 매매 이미지와 완전 분리된다 — **`src/` 아래로 옮기지 않는다**(옮기면 macro 변경마다 매매 backend 가 재시작된다). `macro/macro_lite/` 는 stock-manager 추출 패키지의 **무수정 vendor** 라 재이식 시 통째로 덮어쓴다. 캐시는 `MACRO_LITE_CACHE_DIR` 영속 bind mount 필수(FRED 가 OAS 를 3년치만 주므로 누적 store 가 유실되면 하이일드 **차트**의 10년·5년 구간이 3년으로 영구 퇴행). **매매 판단과 무관** — `src/engine/market_regime.py` 의 dkstock.cloud 경로는 그대로다. 운영 가이드 = [`docs/macro-lite.md`](docs/macro-lite.md)
+- `macro/` — **매크로 API 별도 컨테이너** (경기사이클·투자체제·금리차·하이일드·환율·원자재 5섹션 = `GET /api/macro/*`). 자체 `Dockerfile`·`requirements.txt`(pandas/numpy/yfinance)·`main.py` 를 갖고 매매 이미지와 완전 분리된다 — **`src/` 아래로 옮기지 않는다**(옮기면 macro 변경마다 매매 backend 가 재시작된다). `macro/macro_lite/` 는 stock-manager 추출 패키지의 **무수정 vendor** 라 재이식 시 통째로 덮어쓴다. 캐시는 `MACRO_LITE_CACHE_DIR` 영속 bind mount 필수(FRED 가 OAS 를 3년치만 주므로 누적 store 가 유실되면 하이일드 **차트**의 10년·5년 구간이 3년으로 영구 퇴행). **매매 레짐의 출처이기도 하다**(cycle315) — `src/engine/market_regime.py` 가 `src/services/macro_client.py` 로 이 컨테이너를 부른다. 다만 레짐은 여전히 **관찰 지표**라 매수를 차단·축소하지 않는다. 운영 가이드 = [`docs/macro-lite.md`](docs/macro-lite.md)

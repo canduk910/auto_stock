@@ -1,6 +1,110 @@
+# 🔴 2026-09-19(토) 09:2x — cycle315 매크로 레짐 전환 (미커밋)
+
+> **이 절이 현재 상태다.**
+
+사용자 지시 — **"매크로레짐은 외부를 보던 걸 이제 우리 컨테이너에서 확인하는걸로 전면 수정. (백엔드 및 프론트엔드)"** → "조사 끝나면 바로 구현 진행해"
+
+외부 `dkstock.cloud` 는 2026-08-18 철거됐고(→ `market_regime_snapshots` 한 달 0행),
+우리 `macro/` 컨테이너가 **같은 코드(macro_lite)** 라 응답 shape 가 같다. 그래서 파서는 한 글자도 안 고쳤다.
+
+## 무엇을 바꿨나
+
+| 축 | 내용 |
+|---|---|
+| 신규 | `src/services/macro_client.py`(인증 없는 평문 GET, DB 우선 토글, 24h 캐시) · `frontend/src/utils/marketRegime.ts` |
+| 삭제 | `src/services/dkstock_client.py` + 그 테스트 2파일 · `config.py` 의 `dkstock_api_url`/`username`/`password` **3필드**(평문 자격이 코드에 있던 것) |
+| 핵심 | `market_regime.py` 의 **`.env` 단독 veto 제거** — 그게 client 보다 앞에 있어 DB 우선 판정이 영구 도달 불가였다. 운영 토글이 죽은 스위치였다 |
+| 상한 | `asyncio.wait_for` + `macro_api_read_timeout_secs`(90s) / **부팅 전용 `macro_api_boot_timeout_secs`(25s)** — 부팅 fetch 는 `boot_manager` 인라인 await 이고 바로 다음 줄이 자금 배분이라 차가운 macro 가 재시작 tick blind 를 늘린다 |
+| 로그 | `macro fetch 실패 reason=disabled\|timeout\|fetch_failed\|exception` 4종 구분 |
+| 프론트 | 죽은 레짐 키 `neutral`/`aggressive` → 실재 4종(accumulation 25 / selective 35 / cautious 50 / defensive 75) · 4국면 한글화 · 버핏지수 비율→% · 자금 사다리 4단 · **카드는 부팅 스냅샷, `/macro` 는 라이브**임을 화면에 명시 |
+
+🔴 **8영역·`scheduler.py`·`macro/` diff 0건** — 함수명 `refresh_from_dkstock` 을 유지해
+`scheduler.py` 의 import·호출을 byte 동일로 두었다(개명하면 그 파일 승인 절차가 딸려 온다).
+🔴 **env 키 `DKSTOCK_REGIME_ENABLED` · DB 키 `dkstock_regime_enabled` · 슬러그 `/api/integrations/dkstock-regime` 은 유지**
+— 개명하면 운영 DB 의 `true` 행이 고아가 되고 프론트·E2E·가드 8곳이 한 커밋에 묶인다.
+
+## 검증
+
+백엔드 6,876 passed · AST 78 passed(digest 재핀 `fc11588e…`) · 프론트 **857 passed**(94파일) ·
+`tsc -b` 0 · E2E 43 passed · `tests/unit/e2e_mocks` 36 passed.
+적대적 검토 3렌즈(매매 안전성·계약 정합·테스트 실효) 지적 **HIGH 2 + MEDIUM 5 + LOW 6** 전부 반영,
+프론트 공허 테스트 3건은 **뮤테이션으로 붉어지는 것까지 확인**했다.
+
+## ⚠️ 작업 중 사고 — `market_regime.py` 750줄 유실·복구
+
+병렬 트랙이 같은 워킹트리를 공유하던 중 `src/engine/market_regime.py` 가
+`src/routes/market_regime.py` 내용으로 **통째로 덮어써졌다**(두 파일 md5 동일). 워크플로를 멈추고
+`git show HEAD` + 남아 있던 테스트 명세로 재적용해 복구했다(30 passed).
+교훈 = 병렬 착수 전 `git add` 스냅샷 + **이름 겹치는 파일쌍은 같은 배치에 넣지 않는다**.
+
+## 🔴 남은 결정 (사용자 승인 대기)
+
+**`get_auto_regime_adjust` 가 예외 시 True 로 fail-open 한다**(`src/db/system_config.py`).
+지금까지 무해했던 이유는 레짐 소스가 죽어 있어 계산값이 항상 None 이었기 때문이다 —
+이번 전환이 그 전제를 없앤다. 우리 macro 는 `cash_min=75`(defensive)를 돌려주므로
+계산값 **0.25** 가 실재하고, **DB 조회가 한 번 실패하면 자금 사용률이 100% → 25%** 가 될 수 있다.
+게다가 `scheduler` 가 그 값을 DB 에 써 버려 토글을 되돌려도 승계되고,
+프론트 슬라이더는 `min=50` 이라 25% 를 화면에 표현조차 못 한다.
+
+- 코드는 **안 고쳤다**(매매 행위 변경 = 승인 + `domain-consult` 선행 대상).
+  대신 현재 동작을 기록하는 테스트 `test_known_risk_auto_adjust_defaults_open_on_error` 를 남겼다.
+- 운영 DB 는 `auto_regime_adjust = false` 라 **지금 당장 위험은 없다**.
+
+## 배포 (미실행)
+
+`src/**` 변경이라 **full 모드**(backend 재시작). 장외 창 = 15:30~16:00 · 21:35~07:45 · 주말.
+오늘은 토요일이라 종일 안전하다. `.env` 는 git 밖이라 배포 스크립트가 못 본다 —
+`MACRO_API_URL`/`MACRO_API_BOOT_TIMEOUT_SECS` 는 기본값이 배포 경로와 맞아 **손대지 않아도 된다**.
+`KIS_MCP_ENABLED=true` 잔존 줄은 이 배포 때 `false` 로 함께 내린다(정합용, DB 는 이미 false).
+
+---
+
+# ✅ 2026-09-19(토) 07:2x — 결정 E1~E3 집행 + 매크로 레짐 전환 착수
+
+> 지난 판독이다. 현재 상태는 위 09:2x 절.
+
+사용자 지시 2026-09-19 07:1x — "권고대로 진행" → 직후 방향 수정
+**"매크로레짐은 외부를 보던 걸 이제 우리 컨테이너에서 확인하는걸로 전면 수정. (백엔드 및 프론트엔드)"**
+
+| 결정 | 권고 | 집행 |
+|---|---|---|
+| **E1** 백테스트 서버 | 포기 | ✅ **MCP 만** 껐다. `PUT /api/integrations/kis-mcp {"enabled": false}` → `{"enabled": false, "source": "db", "env_value": true, "db_value": false}`. **재시작 불필요** |
+| **E1′** 매크로 레짐 | (포기에 포함이었음) | 🔄 **사용자가 뒤집었다 — 끄지 않고 우리 `macro/` 컨테이너로 전환.** `dkstock_regime_enabled` 는 `true` 유지. 설계 조사 진행 중 |
+| **E2** VCP 관찰 | 월~수 3영업일 | ⏳ 09-21~23 관찰. 오늘은 토요일이라 장이 없다 |
+| **E3** 만료 cron | 6개 모두 제거 | ⚠️ **5개만 제거.** 나머지 1개 `dump_daily_observations.sh` 는 만료가 아니라 **현역**이다(매일 19개 관측 마커 덤프, 어제 자 `kojiro_band_observe` 16KB). 관측을 지우면 나중에 다른 결함을 못 본다. 나머지 5개는 `8 9`·`9 9` 지정이라 **내년 9월에 재발화**하므로 지웠다. 백업 `_observation_dumps/crontab.bak.20260919_071837` |
+
+### 🔴 심층 검증이 잡은 계획 결함 — `.env` 만 내리면 MCP 는 안 꺼진다
+
+`backtest_orchestration.py:120` → `backtest_engine.py:98-100` 이 `db_value is not None` 이면
+**즉시 DB 값을 반환**한다. `.env` 는 DB 가 None 일 때만 닿는다(`:106`). 캐시도 없다
+(`system_config.py:72` 가 호출마다 `pg.fetch`). **그래서 DB 를 먼저 내렸고, 그것만으로 실효다.**
+
+반대로 dkstock 은 `market_regime.py:543-545` 의 **env 단독 veto** 가 DB 게이트보다 앞이라
+`.env` 만으로 꺼진다 — 같은 조작에 두 토글이 **정반대로** 반응한다. 이 비대칭을 기억한다.
+
+### 기준선 (끄기 전 실측, 2026-09-19 07:2x)
+
+`kis_mcp_enabled=true` · `dkstock_regime_enabled=true` · **`cash_usage_ratio=1.0`** ·
+`auto_regime_adjust=false` · `buy_block_mode="OFF"`
+
+### 월요일 09-21 실측 목록 (E1 확인)
+
+| 언제 | 무엇 | 기대 |
+|---|---|---|
+| 20:05 이후 | `SELECT strategy_id, params_kind, status, error_message FROM backtest_runs WHERE target_date = CURRENT_DATE` | 14행 **전부 `skipped`**. 지원 3전략(momentum·VB·donchian) 6행의 `error_message` = `'MCP 비활성 (KIS_MCP_ENABLED=false)'`(`backtest_orchestration.py:174`), 나머지 8행 'YAML DSL 미지원'. 🔴 `failed` 가 한 행이라도 있으면 DB 토글이 안 내려간 것 |
+| 같은 날 | `parameter_recommendations` | 7행 INSERT · `has_params=true` · `backtest_summary IS NULL`. 자문 본문은 무손상이어야 한다(`recommendation_engine.py:495-509`) |
+| 07:45 기동 후 | `[cash_usage_ratio]` INFO | `ratio=1.00` · `available == net_asset`(`boot_manager.py:169-173`). 아니면 예산이 조용히 묶인 것 |
+| 07:45 기동 후 | `[etf_regime]` INFO | 1행 그대로. 이 블록은 `stock_master_daily` 만 읽는 독립 try 라 dkstock 성패와 무관하다(`scheduler.py:2116`) — 사라지면 가설이 틀린 것 |
+
+🔴 **`.env` 의 `KIS_MCP_ENABLED=true` 는 아직 그대로다** — 정합용이라 매크로 전환 배포 때 함께 내린다.
+그때까지 `GET /api/backtest/mcp/health`(env 단독, `routes/backtest.py:31`)는 계속 '활성'이라 답하므로
+**확인 근거로 쓰지 않는다**. 정본은 `GET /api/integrations/kis-mcp` 의 `db_value`/`env_value` 분리 필드다.
+
+---
+
 # 🔴 2026-09-19(토) 새벽 — 사용자 결정 D1~D5 집행 결과
 
-> **이 절이 현재 상태다.** 아래 09-17 절부터는 지난 판독이다.
+> 지난 판독이다. 현재 상태는 위 07:2x 절.
 
 사용자 지시 2026-09-19 "모두 권고대로 진행하자. D4는 복구요청. D5는 압축로그 이번에 전부
 제거하고 앞으로 로그는 압축 안 하고 바로 지우기."

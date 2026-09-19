@@ -23,6 +23,7 @@ from typing import TYPE_CHECKING
 
 from src.api.balance import get_balance, get_daily_orders
 from src.auth.token import token_manager
+from src.config import settings
 from src.db._kst import to_date
 from src.db.system_logs import write_log
 
@@ -157,11 +158,30 @@ async def boot(scheduler: "TradingScheduler") -> None:
 
     holdings, summary = await get_balance()
 
-    # 사이클 2 (2026-05-17): 시장 레짐 fetch + snapshot INSERT + cash_usage_ratio 자동 조정.
-    # `DKSTOCK_REGIME_ENABLED=false` 면 empty regime (graceful, 외부 호출 0건).
-    # 외부 fetch 실패 시에도 empty regime → 매수 가드 비활성 + 운영자 수동 cash_usage_ratio 보존.
+    # 시장 레짐 fetch + snapshot INSERT + cash_usage_ratio 자동 조정.
+    # 출처는 우리 `macro` 컨테이너다. 토글이 꺼져 있거나 fetch 가 실패하면 empty regime 이고
+    # 그때는 운영자가 정한 `cash_usage_ratio` 가 그대로 쓰인다.
     # `auto_regime_adjust=true` 면 레짐 cash_min 기반 자동 갱신, false 면 수동값 그대로.
-    await scheduler._refresh_market_regime_and_persist()
+    #
+    # 🔴 **부팅 상한을 따로 건다.** 이 호출은 인라인 await 이고 바로 다음 줄이 자금 배분이다 —
+    # macro 가 차가우면 첫 macro-cycle 이 100초를 넘긴 실측이 있어, 상한이 없으면 재시작 직후
+    # 시세가 안 들어오는 창이 그만큼 길어진다. 레짐은 관찰 지표라 부팅을 붙잡을 값어치가 없다.
+    # 상한에 걸리면 그날 레짐은 empty 로 가고 다음 갱신 기회(Settings 토글·다음 부팅)에 다시 받는다.
+    # ⚠️ `_refresh_market_regime_and_persist` 는 `scheduler.py`(8영역 인접, 승인 대상)에 있어
+    #    인자를 더하지 않고 호출 쪽에서 감싼다.
+    try:
+        await asyncio.wait_for(
+            scheduler._refresh_market_regime_and_persist(),
+            timeout=settings.macro_api_boot_timeout_secs,
+        )
+    except asyncio.TimeoutError:
+        logger.warning(
+            "[market_regime] 부팅 상한 %.1fs 초과 — 이번 부팅은 레짐 없이 진행한다",
+            settings.macro_api_boot_timeout_secs,
+        )
+    except Exception:
+        logger.exception("[market_regime] 부팅 중 레짐 갱신 실패 — 부팅은 계속한다")
+
     ratio = await scheduler._resolve_cash_usage_ratio()
 
     # J3 (2026-05-12): 매매 가용 자금 비율 적용 — `system_config.cash_usage_ratio`.
