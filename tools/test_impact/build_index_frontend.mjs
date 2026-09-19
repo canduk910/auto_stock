@@ -148,6 +148,16 @@ function main() {
     existing = yaml.load(readFileSync(INDEX_PATH, "utf-8")) || {};
   }
 
+  // 🔴 미매핑 목록은 **양쪽이 나눠 쓴다** — 우리는 `frontend/` 밑만 책임지고 나머지는 보존한다.
+  // 단순 이어붙이기는 이 도구를 두 번 돌리면 우리 항목이 **중복 누적**된다(정렬이 그것을 숨긴다).
+  const priorUnmapped = existing?.stats?.unmapped_modules || [];
+  const mergedUnmapped = [
+    ...new Set([
+      ...priorUnmapped.filter((m) => !m.startsWith("frontend/")),
+      ...unmapped,
+    ]),
+  ].sort();
+
   const payload = {
     version: 1,
     generated_at: new Date().toISOString(),
@@ -158,7 +168,7 @@ function main() {
       backend_tests: existing?.stats?.backend_tests ?? 0,
       frontend_modules: srcFiles.length,
       frontend_tests: testFiles.length,
-      unmapped_modules: [...(existing?.stats?.unmapped_modules || []), ...unmapped].sort(),
+      unmapped_modules: mergedUnmapped,
     },
   };
 

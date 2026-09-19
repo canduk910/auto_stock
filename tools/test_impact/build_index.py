@@ -160,6 +160,14 @@ def build() -> dict:
     if INDEX_PATH.exists():
         existing = yaml.safe_load(INDEX_PATH.read_text(encoding="utf-8")) or {}
 
+    # 🔴 미매핑 목록은 **양쪽이 나눠 쓴다** — 우리는 `src/` 밑만 책임지고 나머지는 보존한다.
+    # 그냥 덮어쓰면 프론트 도구가 적어 둔 항목이 사라져, 커밋된 값이 「마지막에 어느 도구를
+    # 돌렸는가」에 달리게 된다(frontend 섹션을 보존하는 바로 위 코드와 같은 이유다).
+    prior_unmapped = (existing.get("stats") or {}).get("unmapped_modules") or []
+    merged_unmapped = sorted(
+        {m for m in prior_unmapped if not m.startswith("src/")} | set(unmapped)
+    )
+
     payload = {
         "version": 1,
         "generated_at": datetime.now(KST).isoformat(),
@@ -170,7 +178,7 @@ def build() -> dict:
             "backend_tests": len(test_files),
             "frontend_modules": len(existing.get("frontend", {})),
             "frontend_tests": existing.get("stats", {}).get("frontend_tests", 0),
-            "unmapped_modules": unmapped,
+            "unmapped_modules": merged_unmapped,
         },
     }
     return payload
