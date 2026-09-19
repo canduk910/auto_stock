@@ -142,7 +142,16 @@ def test_index_covers_a_known_multiline_importer() -> None:
 
 
 def test_tool_runs_and_is_deterministic() -> None:
-    """도구가 실제로 돌고, 두 번 돌려도 같은 결과인가."""
+    """도구가 실제로 돌고, 두 번 돌려도 같은 결과인가.
+
+    ⚠️ 이 도구는 `js-yaml` 을 쓰고 그것은 `frontend/node_modules` 에 있다.
+    CI 의 `backend-test` 잡은 npm install 을 하지 않으므로(그럴 이유도 없다) 거기서는 skip 한다 —
+    정규식 계약은 위 두 테스트가 **의존 없이** 이미 지킨다. 여기서 재는 것은 「실제로 돌아가는가」이고
+    그건 node 의존이 갖춰진 환경(로컬·frontend 잡)에서만 의미가 있다.
+    """
+    if not (ROOT / "frontend/node_modules/js-yaml").exists():
+        pytest.skip("frontend/node_modules 가 없다 — node 의존이 갖춰진 환경에서만 의미 있다")
+
     r = subprocess.run(
         ["node", str(TOOL)], cwd=ROOT, capture_output=True, text=True, timeout=180
     )
