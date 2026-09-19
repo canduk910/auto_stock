@@ -45,10 +45,17 @@ jobs:
 
       - name: Install macro deps
         working-directory: macro
+        # 🔴 `httpx` 는 테스트 전용 의존성이다 — `fastapi.testclient` 가 내부적으로 요구한다.
+        # `macro/requirements.txt` 에 넣지 않는 이유 = 그 파일은 원 패키지와 byte 동일로
+        # 맞추는 vendor 동기화 대상이라(cycle311) 우리가 줄을 더하면 재이식에서 덮인다.
+        # 런타임에는 필요 없다 — macro 컨테이너는 httpx 없이 정상 기동한다.
+        # 이 줄이 없으면 `tests/test_service_router.py` 가 collection 단계에서 죽는다
+        # (2026-09-19 이 워크플로의 첫 실행이 실제로 그렇게 실패했다 — 로컬은 우연히
+        #  다른 패키지가 끌어온 httpx 가 있어서 195건이 통과했고 CI 에만 없었다).
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest pytest-timeout
+          pip install pytest pytest-timeout httpx
 
       - name: Run vendor tests
         working-directory: macro
