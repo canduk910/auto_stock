@@ -434,6 +434,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -1502,6 +1503,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -2594,6 +2596,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -3664,6 +3667,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -4732,6 +4736,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -5813,6 +5818,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -6894,6 +6900,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -7978,6 +7985,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -9055,6 +9063,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -10137,6 +10146,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -11230,6 +11240,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -12314,6 +12325,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -13402,6 +13414,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -14518,6 +14531,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -15561,6 +15575,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -16630,6 +16645,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -17710,6 +17726,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -18794,6 +18811,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -19871,6 +19889,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -20951,6 +20970,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -22031,6 +22051,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -23110,6 +23131,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -24190,6 +24212,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -25270,6 +25293,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -26365,6 +26389,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -27449,6 +27474,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -28519,6 +28545,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -29590,6 +29617,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -30672,6 +30700,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -31754,6 +31783,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -32876,6 +32906,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -33917,6 +33948,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -34998,6 +35030,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -36074,6 +36107,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -37156,6 +37190,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -38245,6 +38280,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -39321,6 +39357,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -40398,6 +40435,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -41477,6 +41515,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -42562,6 +42601,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -43649,6 +43689,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -44715,6 +44756,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -45798,6 +45840,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -46876,6 +46919,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -47959,6 +48003,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -49036,6 +49081,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -50116,6 +50162,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -51196,6 +51243,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -52349,6 +52397,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -53427,6 +53476,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -54497,6 +54547,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -55580,6 +55631,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -56671,6 +56723,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -57745,6 +57798,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -58817,6 +58871,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -59902,6 +59957,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -60980,6 +61036,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -62058,6 +62115,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -63139,6 +63197,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -64215,6 +64274,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -65445,6 +65505,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -66522,6 +66583,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -67607,6 +67669,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -68716,6 +68779,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -69764,6 +69828,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -70846,6 +70911,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -71920,6 +71986,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -73231,6 +73298,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -74229,6 +74297,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -75165,6 +75234,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -76244,6 +76314,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -77321,6 +77392,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -78400,6 +78472,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -79488,6 +79561,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -80597,6 +80671,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -81645,6 +81720,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -82750,6 +82826,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -83804,6 +83881,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -84893,6 +84971,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -85962,6 +86041,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -87042,6 +87122,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -88122,6 +88203,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -89210,6 +89292,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -90352,6 +90435,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -91442,6 +91526,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -92503,6 +92588,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -93585,6 +93671,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -94653,6 +94740,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -95750,6 +95838,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -96831,6 +96920,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -98059,6 +98149,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -99010,6 +99101,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -100035,6 +100127,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -101120,6 +101213,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -102265,6 +102359,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -103348,6 +103443,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -104423,6 +104519,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -105516,6 +105613,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -106584,6 +106682,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -107663,6 +107762,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -108754,6 +108854,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -109885,6 +109986,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -110965,6 +111067,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -112050,6 +112153,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -113132,6 +113236,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -114213,6 +114318,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -115290,6 +115396,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -116440,6 +116547,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -117681,6 +117789,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -118805,6 +118914,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -119914,6 +120024,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -120973,6 +121084,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -122074,6 +122186,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -123159,6 +123272,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -125597,6 +125711,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -126671,6 +126786,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -127755,6 +127871,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -128830,6 +128947,7 @@ backend:
       - tests/unit/deploy/test_cycle318_impact_index_freshness.py
       - tests/unit/deploy/test_cycle319_no_clobbered_module.py
       - tests/unit/deploy/test_cycle320_impact_index_stats_ownership.py
+      - tests/unit/deploy/test_cycle323_tests_leave_repo_clean.py
       - tests/unit/docs/test_doc_overpaint_zero.py
       - tests/unit/e2e_mocks/test_api_mocks_routes_registered.py
       - tests/unit/e2e_mocks/test_cycle103_api_mocks_routes_registered.py
@@ -131002,10 +131120,10 @@ frontend:
       - >-
         frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
       - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
-generated_at: '2026-09-19T15:26:47.862Z'
+generated_at: '2026-09-19T16:15:27.884Z'
 stats:
   backend_modules: 156
-  backend_tests: 1061
+  backend_tests: 1062
   frontend_modules: 118
   frontend_tests: 95
   unmapped_modules:

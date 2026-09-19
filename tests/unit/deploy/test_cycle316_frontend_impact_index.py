@@ -152,7 +152,19 @@ def test_tool_runs_and_is_deterministic() -> None:
     if not (ROOT / "frontend/node_modules/js-yaml").exists():
         pytest.skip("frontend/node_modules 가 없다 — node 의존이 갖춰진 환경에서만 의미 있다")
 
-    r = subprocess.run(
-        ["node", str(TOOL)], cwd=ROOT, capture_output=True, text=True, timeout=180
-    )
-    assert r.returncode == 0, f"build_index_frontend.mjs 실패:\n{r.stderr[-2000:]}"
+    # 🔴 **원본을 되돌린다** (cycle323) — 이 도구는 리포에 추적되는
+    # `_workspace/test_index.yaml` 을 **제자리에서 덮어쓴다**. 내용이 같아도
+    # `generated_at` 이 매번 바뀌므로, 복원하지 않으면 테스트를 돌린 것만으로
+    # 작업 트리가 더러워진다. 그 상태로 `git add -A` 를 하면 내가 하지 않은 변경이
+    # 커밋에 실린다 — 2026-09-19 에 원본 PDF 5권이 그 경로로 커밋될 뻔했다.
+    # 다른 인덱스 가드(cycle318·320)는 처음부터 이 백업·복원을 하고 있었다.
+    index = ROOT / "_workspace/test_index.yaml"
+    before = index.read_text(encoding="utf-8") if index.exists() else None
+    try:
+        r = subprocess.run(
+            ["node", str(TOOL)], cwd=ROOT, capture_output=True, text=True, timeout=180
+        )
+        assert r.returncode == 0, f"build_index_frontend.mjs 실패:\n{r.stderr[-2000:]}"
+    finally:
+        if before is not None:
+            index.write_text(before, encoding="utf-8")
