@@ -466,6 +466,45 @@ def _pin_pre_market_clock(
 
 
 # ---------------------------------------------------------------------------
+# cycle317 — 15:30~16:00 완전 휴식 컷 중립화
+#
+# cycle295 가 그 30분을 「완전 휴식」으로 만들었고(그 창의 주문 0건) 판정은
+# `order_engine._market_rest_now(now)` 가 **벽시계**로 한다. 그래서 `execute_buy`/
+# `execute_sell` 을 타는 모든 테스트가 그 시각에 돌면 컷된다 — 2026-09-19 실측으로
+# 로컬 15:53 과 CI(UTC 06:46 = KST 15:46) 둘 다 **59건**이 붉었다. 컨테이너가
+# `TZ=Asia/Seoul` 이라 CI 도 KST 로 돈다. 즉 **매일 30분간 CI 가 붉어지는 상태**였다.
+#
+# 🔴 **왜 시계가 아니라 판정 함수를 갈아끼우는가** — `src/engine/order_engine.py` 는
+# 8영역이라 승인 없이 못 고치는데 그 파일에는 `_now_kst()` 같은 시계 seam 이 없다
+# (`datetime.now(_KST_TZ)` 직접 호출). 프로덕션에 seam 을 새로 파려면 승인이 필요하다.
+# 다행히 `_market_rest_now` 는 **모듈 전역 이름으로** 불리므로(`order_engine.py:620`)
+# 그 이름 하나만 바꾸면 된다 — 프로덕션 코드 무접촉이고 `_neutralize_api_auth` 와 같은 구조다.
+#
+# 컷 자체를 검증하는 테스트는 `@pytest.mark.real_market_rest` 로 옵트아웃한다.
+# 🔴 그 규약이 없으면 이 픽스처가 cycle295 의 회귀 가드를 통째로 무력화한다 —
+# 「15:30~16:00 에 주문이 안 나간다」를 검증하는 테스트가 영원히 통과해 버린다.
+# `raising=False` — 함수가 사라져도 전체 스위트가 픽스처 때문에 죽지 않는다.
+# ---------------------------------------------------------------------------
+@pytest.fixture(autouse=True)
+def _neutralize_market_rest(
+    request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch
+):
+    if request.node.get_closest_marker("real_market_rest"):
+        return  # 컷 자체를 검증하는 테스트 — 중립화 금지
+    try:
+        from src.engine import order_engine as _oe_mod
+
+        monkeypatch.setattr(
+            _oe_mod,
+            "_market_rest_now",
+            lambda _now: (False, ""),
+            raising=False,
+        )
+    except Exception:
+        pass
+
+
+# ---------------------------------------------------------------------------
 # cycle243 — API 인증(X-API-Key) 중립화
 #
 # 인증을 켜면 `src.main.app` 을 TestClient 로 두드리는 기존 40파일·수집 201케이스가

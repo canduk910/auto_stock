@@ -89,7 +89,12 @@ from src.engine.strategy_base import (
 from src.engine.strategy_registry import StrategyRegistry
 from src.models.order import OrderDivision
 
-pytestmark = pytest.mark.unit
+pytestmark = [
+    pytest.mark.unit,
+    # 🔴 cycle317 의 휴식 컷 중립화 픽스처를 **옵트아웃**한다.
+    # 이 파일의 `test_r6` 이 15:45(= cycle295 컷 구간)에 주문이 나가지 않는 것을 단언한다.
+    pytest.mark.real_market_rest,
+]
 
 KST_TZ = timezone(timedelta(hours=9))
 _OE_LOGGER = "src.engine.order_engine"

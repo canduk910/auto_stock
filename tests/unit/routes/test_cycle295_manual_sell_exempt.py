@@ -23,7 +23,12 @@ from __future__ import annotations
 import pytest
 from freezegun import freeze_time
 
-pytestmark = pytest.mark.unit
+pytestmark = [
+    pytest.mark.unit,
+    # 🔴 cycle317 의 휴식 컷 중립화 픽스처를 **옵트아웃**한다.
+    # 이 파일이 검증하는 것이 바로 그 컷이라, 중립화되면 전부 공허하게 통과한다.
+    pytest.mark.real_market_rest,
+]
 
 # freezegun 은 naive 문자열을 UTC 로 동결한다. KST = UTC + 9h.
 _F_1545 = "2026-09-15 06:45:00"  # KST 15:45 — 컷 한가운데

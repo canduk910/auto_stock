@@ -23,6 +23,7 @@ markers = [
     # `filterwarnings = error` 라 미등록 마커는 즉시 스위트 실패 — Red 와 같은
     # 커밋에 등재하는 것이 계약(명세 §9.1).
     "real_api_auth: API 인증 중립화 픽스처 옵트아웃 (실제 인증 판정 검증)",
+    "real_market_rest: 15:30~16:00 완전 휴식 컷 중립화 픽스처 옵트아웃 (컷 자체 검증)",
 ]
 filterwarnings = [
     "error",

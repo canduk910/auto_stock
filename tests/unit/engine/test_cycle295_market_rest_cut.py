@@ -103,7 +103,12 @@ from src.engine.strategy_base import (
 )
 from src.engine.strategy_registry import StrategyRegistry
 
-pytestmark = pytest.mark.unit
+pytestmark = [
+    pytest.mark.unit,
+    # 🔴 cycle317 의 휴식 컷 중립화 픽스처를 **옵트아웃**한다.
+    # 이 파일이 검증하는 것이 바로 그 컷이라, 중립화되면 전부 공허하게 통과한다.
+    pytest.mark.real_market_rest,
+]
 
 KST_TZ = timezone(timedelta(hours=9))
 _OE_LOGGER = "src.engine.order_engine"

@@ -54,7 +54,12 @@ import re
 
 import pytest
 
-pytestmark = pytest.mark.unit
+pytestmark = [
+    pytest.mark.unit,
+    # cycle317 중립화 픽스처 옵트아웃. 이 파일은 **소스 텍스트**만 읽으므로 런타임 중립화와
+    # 무관하지만, 휴식 컷을 다루는 파일이라는 표시를 일관되게 남긴다(메타 가드 정합).
+    pytest.mark.real_market_rest,
+]
 
 _ROOT = pathlib.Path(__file__).resolve().parents[3]
 _OE_REL = "src/engine/order_engine.py"

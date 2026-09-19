@@ -77,7 +77,12 @@ from src.engine.strategy_registry import StrategyRegistry
 from src.engine.util.tick_size import step_down
 from src.models.order import OrderDivision, OrderSide
 
-pytestmark = pytest.mark.unit
+pytestmark = [
+    pytest.mark.unit,
+    # 🔴 cycle317 의 휴식 컷 중립화 픽스처를 **옵트아웃**한다.
+    # 이 파일은 15:30~16:00 구간의 실제 동작을 검증하므로 중립화되면 공허해진다.
+    pytest.mark.real_market_rest,
+]
 
 KST_TZ = timezone(timedelta(hours=9))
 _OE_LOGGER = "src.engine.order_engine"
