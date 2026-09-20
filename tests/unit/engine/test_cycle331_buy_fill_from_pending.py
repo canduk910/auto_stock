@@ -286,7 +286,7 @@ async def test_partial_fill_via_pending_does_not_schedule_cancel(monkeypatch, ca
         quantity=3, price=PRICE, ordered_qty_payload=10,
     )
 
-    assert TICKER not in env.engine._pending_cancel_tasks, (
+    assert (TICKER, "buy") not in env.engine._pending_cancel_tasks, (
         "pending 단으로 건진 랏에 취소 타이머가 걸렸다 — "
         "30초 뒤 포지션 확인 없이 잔량 취소가 나간다"
     )

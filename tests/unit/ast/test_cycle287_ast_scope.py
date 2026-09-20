@@ -372,7 +372,7 @@ _SRC_TREE_FILES = 154
 #: cycle315 착지(= 이 재핀 착수) 값은
 #: `fc11588e2b689496f2d3133e6c252e5d649eb7a6811ca60d3107abc79c9937ab` 였다.
 _SRC_TREE_DIGEST = (
-    "fbd24e95791985ac1887228447f09a77824d4deb08f7a70ae016795bc3b93924"
+    "6649a398cc0e18f0b618bc582439518faa210337f6942a7fc1181a2a46813ab9"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
@@ -401,7 +401,7 @@ _PINNED_DIR_FILE_COUNTS = {
 #: 신규 leaf `src/engine/market_op_subscribe.py` 로 추출해(행위 변경 0 · 5줄
 #: 위임 wrapper) 3,897 → 3,726 이 됐다. 값만 옮긴다 — 정확 핀을 상한 핀으로
 #: 완화하면 cycle287 의 무접촉 대리 지표가 사라진다.
-_SCHEDULER_LINES = 3791
+_SCHEDULER_LINES = 3795
 _SCHEDULER_LINE_CAP = 3900
 
 #: 손대지 않기로 한 **원문 구간**의 sha256 (base `a42f519`).

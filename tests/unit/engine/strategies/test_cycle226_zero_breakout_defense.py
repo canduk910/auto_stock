@@ -1164,7 +1164,7 @@ _ALLOWED_CONTENT_SHA: dict[str, str] = {
         "95cbb103a38821bb3b68d267a3662094b192fa55ad6071fa8dc4a63726e1c942",
     # (비어 있음 — cycle273 그룹 1·2, cycle274 병합 뒤 2026-09-11 정리. 등록은 승인된 사이클의 Green 이, 비우기는 병합 후속 커밋이 한다)
     "src/engine/order_engine.py":
-        "2ef217bcef9f2c795f6ba260b6613d49fa2c402c272de7b0d9648376303382c6",
+        "e1beeb1fffab6ca5193d6954e9164e75f1d0d16eaaaedbcbb7d3fef1328dfa2e",
     # ✅ 2026-09-12 (cycle287) — 시각이 거래소·호가유형을 정한다. docstring 만
     # (본문 byte 동일). 자매 가드 네 곳 전부 같은 값.
     "src/api/order.py":

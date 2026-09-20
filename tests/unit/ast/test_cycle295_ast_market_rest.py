@@ -72,7 +72,10 @@ _CLOCK_LITERAL_ALLOWLIST: tuple[str, ...] = ("_compute_next_market_open_kst",)
 _BYTE_IDENTICAL_PINS: dict[str, str] = {
     "_route_exchange_by_clock": "d403317f602318acade625b0540f839c706669aae92b86f13909a5d478512450",
     "_apply_clock": "5b9f0a10cf5291b90b2107a575ef8d7a9e110463d51a1d45fae865820f942c39",
-    "_cancel_after_wait": "43c9e2bbb43760dea6674840b4f1d693f4db68fbfec3dcf491fc06ea1f747141",
+    # cycle332 — `finally` 의 pop 키가 `(ticker, 축)` 복합으로 바뀌어 재산정했다.
+    # 🔴 cycle295 가 이 함수에 대해 선언한 것은 **휴식 컷을 넣지 않는다**이고,
+    # 그 계약은 그대로다 — 이 함수에는 `_market_rest_now` 참조가 여전히 0건이다.
+    "_cancel_after_wait": "707316b866d1bc4d7a8f82b28a351dd3652e1fe36619aac10c4f41eb59117eb0",
     "cancel_remaining": "c9a2216d15ece58e212402a6edde10c8a9fcf1133cff44814950041bfe879162",
 }
 

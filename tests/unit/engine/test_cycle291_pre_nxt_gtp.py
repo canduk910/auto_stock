@@ -1153,7 +1153,7 @@ async def test_c8_cancel_marker_carries_orig_dvsn_from_the_mapping(
         _pin_boards(monkeypatch)
         await _buy(engine, strat)
         engine._schedule_cancel(_TICKER, "ORD-1", 5, _SID)
-        await engine._pending_cancel_tasks[_TICKER]
+        await engine._pending_cancel_tasks[(_TICKER, "buy")]
     lines = _marker_lines(caplog, _M_CANCEL)
     assert len(lines) == 1, f"{len(lines)}행: {lines}"
     assert "ord_dvsn=00" in lines[0], (
@@ -1183,7 +1183,7 @@ async def test_c8b_cancel_marker_says_absent_when_the_mapping_is_gone(
         engine._order_strategy["ORD-Z"] = _SID
         engine._order_ticker["ORD-Z"] = _TICKER
         engine._schedule_cancel(_TICKER, "ORD-Z", 5, _SID)
-        await engine._pending_cancel_tasks[_TICKER]
+        await engine._pending_cancel_tasks[(_TICKER, "buy")]
     lines = _marker_lines(caplog, _M_CANCEL)
     assert len(lines) == 1, f"{len(lines)}행: {lines}"
     assert "orig_dvsn=-" in lines[0], f"부재 표기가 없다 — {lines[0]!r}"
@@ -1211,7 +1211,7 @@ async def test_c9_cancel_callers_do_not_pass_order_division_yet(
         _pin_boards(monkeypatch)
         await _buy(engine, strat)
         engine._schedule_cancel(_TICKER, "ORD-1", 5, _SID)
-        await engine._pending_cancel_tasks[_TICKER]
+        await engine._pending_cancel_tasks[(_TICKER, "buy")]
     kw = mock_cancel_order.await_args.kwargs
     assert "order_division" not in kw, (
         f"Stage A 인데 취소가 호가유형을 전송했다: {kw.get('order_division')!r}. "
@@ -1302,7 +1302,7 @@ async def test_c6b_handle_sell_fill_pops_division_even_when_cancel_gate_is_false
     engine._order_division["ORD-1"] = "27"
     engine._order_strategy["ORD-1"] = _SID
     # 게이트가 반드시 false 이도록 다른 order_no 를 심는다(현실의 대다수 경우).
-    engine._pending_cancel_order_no[_TICKER] = "OTHER-ORDER"
+    engine._pending_cancel_order_no[(_TICKER, "buy")] = "OTHER-ORDER"
     monkeypatch.setattr(
         "src.engine.order_engine.update_trade_status", AsyncMock(return_value=1)
     )

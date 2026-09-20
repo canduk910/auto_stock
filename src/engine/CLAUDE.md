@@ -224,6 +224,19 @@ run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, recor
 - `is_provisional` 컬럼 = migration 040.
 - 관찰성 한정 — `check_exit`/`check_buy` funnel hook 0건 + risk/order_engine/realtime/auth 참조 0(SAFETY 가드).
 
+## 취소 타이머 키 — `(ticker, 축)` (cycle332)
+
+`_pending_cancel_tasks` / `_pending_cancel_order_no` 의 키는 **`(ticker, side)`** 다(`side ∈ {"buy","sell"}`, 리터럴은 모듈 상수 `CANCEL_AXIS_BUY`/`CANCEL_AXIS_SELL` 한 곳에만 둔다). 매수 잔량 취소(`_schedule_cancel`)와 매도 손절 잔여 재주문(`_schedule_cancel_and_reorder`)이 **각자 자기 축만** 교체하므로 두 타이머가 공존한다.
+
+🔴 **ticker 단독 키에서는 나중에 걸린 쪽이 앞선 쪽을 `order_no` 검사 없이 죽였다.** 해제는 cycle273a 가 `order_no` 게이트로 좁혀 두었는데 **등록만 안 좁혀져 있던** 것이고, 이 키가 그 미완성 규약을 완성한다.
+
+- **S1(매수 타이머가 손절 타이머를 죽인다)이 심각하다** — `_cancel_and_reorder` 는 취소 3경로 중 **유일한 `cancel_order → place_order` atomic replace** 다. 그게 죽으면 원 매도 주문이 호가에 남고 시장가가 아니면(프리장 `step_down` 변환·KRX 애프터 `41` 지정가·NXT 잔존) **안 팔린다**. 게다가 매도 **부분**체결 분기는 `_selling` 을 discard 하지 않으므로 `risk.on_tick` 의 `_selling` 가드가 `check_exit_signal` 을 건너뛰고, `selling_reconcile`(180초)도 원 주문이 **열린 채**라 `open_order` = **유지** 분기다. 즉 **급락장에서 손절 잔여가 체결도·재주문도·재평가도 못 받은 채 21:30 까지 간다**.
+- **S2(매도 타이머가 매수 타이머를 죽인다)** — 미취소 매수 잔여가 남아 (a) 손절 중인 종목을 계속 사들이고 (b) `pending_buys`/`pending_buy_amounts` 는 첫 부분체결에서 이미 풀리므로 그 잔여가 나중에 체결되면 **설계 랏을 넘는다**. K축·ρ축 캡은 **진입 시점 통제**라 못 막는다.
+- 🔴 **해제의 `order_no` 일치 게이트는 그대로다**(cycle273a 계약) — 이 사이클이 좁힌 것은 **등록 축**뿐이다. 같은 축 재스케줄은 여전히 교체한다(부분체결 연속은 정상이고, 안 그러면 타이머가 쌓인다).
+- **UI 계약 보존** — `GET /api/trading/status` 의 `pending_cancels` 는 여전히 **ticker 배열**이다(`frontend/src/types/trading.ts` · `OrderMonitor.tsx`). `order_engine.pending_cancel_tickers(engine)` 한 줄 파생이 담당하고, 한 종목에 두 축 타이머가 걸려 있어도 **한 번만** 나온다. 🔴 `order_no` 단독 키를 쓰지 않는 이유가 이것이다(그쪽이 더 정확하지만 UI 의미가 바뀌고 cycle273a·cycle291 가드 다수가 재작성 대상이 된다).
+- `scheduler._reset_daily_state` 의 일괄 clear 는 `.values()`/`.clear()` 라 **키 모양과 무관 = 무접촉**.
+- 자문 = `_workspace/domain_consult/cycle332_buy_cancel_timer.md` · 회귀 = `tests/unit/engine/test_cycle332_cancel_timer_key.py`(5케이스)
+
 ## 발사 창 귀속 — `pending_buys` 단 (cycle331)
 
 `await place_order` 가 걸려 있는 동안 주문번호 매핑 5종이 **전부 비어 있고** `pending_buys` 는 **이미 차 있다**(`execute_buy` 가 `place_order` **앞**에서 넣는다). 그 창에 착지한 **우리 자신의** 매수 체결통보는 `_order_strategy` miss → `trade_history` miss(PENDING INSERT 도 `place_order` 뒤라 그 `order_no` 행이 원리상 없다) → `is_ticker_held_by_any` **참** 으로 흘러 P1-B(B-2) 조기 return 에 걸렸다. `is_ticker_held_by_any` 는 `_strategies.values()` **전수**를 보고 `has_position OR is_buy_pending` 이므로(`strategy_registry.py`) **매수 당사자 자신이 그 조건을 세운다** — 확률이 아니라 창에 들어오면 예외 없이 걸린다.

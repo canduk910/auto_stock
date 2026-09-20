@@ -113,10 +113,10 @@ async def test_reset_cancels_pending_cancel_tasks(scheduler_env):
         await asyncio.sleep(60)
 
     real_task = asyncio.create_task(long_running())
-    eng._pending_cancel_tasks["005930"] = real_task
+    eng._pending_cancel_tasks[("005930", "buy")] = real_task
     # cycle273a (D2-가-a) — 짝 dict(order_no 그림자)도 같은 자리에서 함께 검증한다
     # (직전 검증 LOW#4 — S1 의 동행 clear 를 잡는 가드가 이 파일에 0건이었다).
-    eng._pending_cancel_order_no["005930"] = "BUY-001"
+    eng._pending_cancel_order_no[("005930", "buy")] = "BUY-001"
 
     sched._reset_daily_state()
 

@@ -280,11 +280,11 @@ async def test_partial_in_window_does_not_schedule_cancel_and_reorder(monkeypatc
 
     await env.engine.execute_sell(TICKER, Signal.STOP_LOSS, "momentum")
 
-    assert TICKER not in env.engine._pending_cancel_tasks, (
+    assert (TICKER, "sell") not in env.engine._pending_cancel_tasks, (
         "매핑 확정 전 통보인데 취소·재주문 타이머가 걸렸다 — "
         "30초 뒤 포지션 확인 없이 신규 매도가 발사된다"
     )
-    assert TICKER not in env.engine._pending_cancel_order_no
+    assert (TICKER, "sell") not in env.engine._pending_cancel_order_no
 
     hits = [r.getMessage() for r in caplog.records
             if "[fill_partial_no_reorder]" in r.getMessage()]

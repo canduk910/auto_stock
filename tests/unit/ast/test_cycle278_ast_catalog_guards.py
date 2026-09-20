@@ -206,7 +206,7 @@ def test_seven_strategy_default_params_source_sha_unchanged(strategy_id: str):
 _BASE_SHA = {
     "src/engine/risk.py":
         "e8614235cc0bea638f8c349b2f6910c94f5f9a5b849f5d65bef0583f959d81c9",
-    "src/engine/order_engine.py": "2ef217bcef9f2c795f6ba260b6613d49fa2c402c272de7b0d9648376303382c6",
+    "src/engine/order_engine.py": "e1beeb1fffab6ca5193d6954e9164e75f1d0d16eaaaedbcbb7d3fef1328dfa2e",
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
     # 🔁 cycle302(2026-09-18) 재핀 — 사용자 승인 일봉 backfill **대상** 확대
@@ -237,7 +237,7 @@ _BASE_SHA = {
     # 붉어져 승인된 변경을 되돌리도록 오도한다. 직전 값 =
     # `50658e06062a0d38afecab1baa08871b89212e295cc95f2a3af62a2ae076115d`.
     "src/engine/scheduler.py":
-        "49dd1a36f68f3256dd83d58088651c81a3af2972f41bb95ad7995845827b3d09",
+        "4b9c8ac94706ae622d3404fa10bfa805a69a4b36485787c388dff3aa6e76763d",
     "src/engine/strategy_base.py":
         "869dc20ca561adc561a9ebe9fdb5fe5a3e097f7ec176fdf274d577d509de9252",
     # 🔁 cycle290(킬스위치 등재, 2026-09-13) 재핀 — `DEFAULT_PARAMS` 말미 2키 추가뿐.

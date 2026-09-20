@@ -284,6 +284,26 @@ def _compute_next_market_open_kst(now: datetime) -> datetime:
 
 
 PARTIAL_FILL_WAIT = 30  # 부분 체결 후 잔여 취소 대기(초)
+
+#: cycle332 — 취소 타이머 축. 매수·매도가 `_pending_cancel_tasks` 를 공유하되
+#: **서로를 죽이지 않도록** 키에 실린다. 리터럴을 두 등록 함수에 흩어 두면
+#: 한쪽 오타가 조용히 옛 충돌을 되살리므로 여기 한 곳에만 둔다.
+CANCEL_AXIS_BUY = "buy"
+CANCEL_AXIS_SELL = "sell"
+
+
+def pending_cancel_tickers(engine) -> list[str]:
+    """`_pending_cancel_tasks` 를 **ticker 배열**로 편다 (UI 계약 보존, cycle332).
+
+    키가 `(ticker, side)` 복합으로 바뀌어도 `GET /api/trading/status` 의
+    `pending_cancels` 는 여전히 종목코드 배열이다 —
+    `frontend/src/types/trading.ts` 와 `OrderMonitor.tsx` 가 그렇게 그린다.
+    한 종목에 두 축 타이머가 동시에 걸려 있어도 **한 번만** 나온다.
+    """
+    try:
+        return sorted({tk for tk, _ in engine._pending_cancel_tasks.keys()})
+    except Exception:
+        return []
 SELL_MAX_RETRIES = 3     # 매도 실패 시 최대 재시도 횟수
 SELL_RETRY_DELAY = 1.0   # 재시도 간격(초)
 BUYABLE_CACHE_TTL = 60.0  # get_buyable 캐시 유효시간(초)
@@ -296,12 +316,19 @@ class OrderEngine:
 
     def __init__(self, registry: StrategyRegistry) -> None:
         self.registry = registry
-        self._pending_cancel_tasks: dict[str, asyncio.Task] = {}  # ticker -> 취소 대기 태스크
+        # cycle332 — 키가 `(ticker, side)` 복합이다. 종전 ticker 단독 키에서는
+        # 매수 잔량 취소(`_schedule_cancel`)와 매도 손절 잔여 재주문
+        # (`_schedule_cancel_and_reorder`)이 같은 슬롯을 다퉈 **나중에 걸린 쪽이
+        # 앞선 쪽을 order_no 검사 없이 죽였다**. 해제는 cycle273a 가 order_no 게이트로
+        # 좁혀 두었는데 등록만 안 좁혀져 있던 것이고, 이 키가 그 미완성 규약을 완성한다.
+        # 🔴 잃는 것 = 급락장에서 손절 잔여가 **체결도·재주문도·재평가도** 못 받는다
+        # (원 매도 주문이 호가에 남고 `_selling` 이 안 풀려 `risk.on_tick` 이 건너뛴다).
+        self._pending_cancel_tasks: dict[tuple[str, str], asyncio.Task] = {}  # (ticker, side) -> 취소 대기 태스크
         # cycle273a (D2-가-a) — 위 dict 와 항상 짝으로 갱신되는 order_no 그림자.
         # 키가 ticker 이고 매수(`_schedule_cancel`)·매도(`_schedule_cancel_and_reorder`)가
         # 같은 dict 를 공유하므로, 전량 체결 시 "이 order_no 의 타이머일 때만" 해제하기
         # 위한 게이트 값이다(§1.4 — pop(ticker) 단독은 남의 타이머를 실종시킨다).
-        self._pending_cancel_order_no: dict[str, str] = {}  # ticker -> 그 타이머가 지키는 order_no
+        self._pending_cancel_order_no: dict[tuple[str, str], str] = {}  # (ticker, side) -> 그 타이머가 지키는 order_no
         self._filled_qty: dict[str, int] = {}  # order_no -> 누적 체결 수량
         self._order_qty: dict[str, int] = {}   # order_no -> 원래 주문 수량
         self._pending_buy_orders: dict[str, dict] = {}  # order_no -> {ticker, price, quantity, strategy_id}
@@ -2639,11 +2666,13 @@ class OrderEngine:
             state.cached_buyable_at = 0.0
             logger.info("매수 전량 체결: %s %d주 @ %d (전략: %s)", t(ticker), total_filled, price, strategy_id)
             # cycle273a (D2-가-a) — 자기 order_no 의 잔여취소 타이머 해제.
-            # `_pending_cancel_tasks` 키는 ticker 이고 매수·매도가 같은 dict 를 공유하므로
             # order_no 가 일치할 때만 지운다(§1.4 — 004990 09-10 09:05 APBK0927 재현 차단).
-            if self._pending_cancel_order_no.get(ticker) == order_no:
-                _cancel_task = self._pending_cancel_tasks.pop(ticker, None)
-                self._pending_cancel_order_no.pop(ticker, None)
+            # cycle332 — 키가 `(ticker, 축)` 이라 **매수 축만** 본다. 해제의 order_no
+            # 게이트는 그대로다 — 이 사이클이 좁힌 것은 등록 축뿐이다.
+            _ck = (ticker, CANCEL_AXIS_BUY)
+            if self._pending_cancel_order_no.get(_ck) == order_no:
+                _cancel_task = self._pending_cancel_tasks.pop(_ck, None)
+                self._pending_cancel_order_no.pop(_ck, None)
                 if _cancel_task is not None and not _cancel_task.done():
                     _cancel_task.cancel()
                 logger.info("[partial_cancel_timer_cleared] ticker=%s order_no=%s", t(ticker), order_no)
@@ -2808,9 +2837,11 @@ class OrderEngine:
             # 동일 게이트, §1.4). 해제하지 않으면 `_cancel_and_reorder` 가 30초 뒤 잔량 0 인
             # 주문을 취소하려다 APBK0927 로 거부되거나, 더 나쁘면 낡은 `remaining` 으로
             # 중복 매도 재주문을 낸다(§1.3).
-            if self._pending_cancel_order_no.get(ticker) == order_no:
-                _cancel_task = self._pending_cancel_tasks.pop(ticker, None)
-                self._pending_cancel_order_no.pop(ticker, None)
+            # cycle332 — 매도 축만 본다(등록 축 분리). order_no 게이트는 불변.
+            _ck = (ticker, CANCEL_AXIS_SELL)
+            if self._pending_cancel_order_no.get(_ck) == order_no:
+                _cancel_task = self._pending_cancel_tasks.pop(_ck, None)
+                self._pending_cancel_order_no.pop(_ck, None)
                 if _cancel_task is not None and not _cancel_task.done():
                     _cancel_task.cancel()
                 logger.info("[partial_cancel_timer_cleared] ticker=%s order_no=%s", t(ticker), order_no)
@@ -2841,13 +2872,16 @@ class OrderEngine:
 
     def _schedule_cancel(self, ticker: str, order_no: str, original_qty: int, strategy_id: str = "momentum") -> None:
         """30초 후 미체결 잔량을 취소하는 태스크를 등록한다."""
-        if ticker in self._pending_cancel_tasks:
-            self._pending_cancel_tasks[ticker].cancel()
+        # cycle332 — 키에 **매수 축**을 싣는다. 같은 축 재스케줄만 교체하고
+        # 반대 축(매도 손절 잔여 재주문) 타이머는 다른 키라 건드리지 않는다.
+        _key = (ticker, CANCEL_AXIS_BUY)
+        if _key in self._pending_cancel_tasks:
+            self._pending_cancel_tasks[_key].cancel()
 
-        self._pending_cancel_tasks[ticker] = asyncio.create_task(
+        self._pending_cancel_tasks[_key] = asyncio.create_task(
             self._cancel_after_wait(ticker, order_no, strategy_id)
         )
-        self._pending_cancel_order_no[ticker] = order_no
+        self._pending_cancel_order_no[_key] = order_no
 
     async def _cancel_after_wait(self, ticker: str, order_no: str, strategy_id: str) -> None:
         """`_schedule_cancel` 태스크 본체 — 30초 후 미체결 잔량 취소.
@@ -2900,21 +2934,24 @@ class OrderEngine:
             logger.exception("부분 체결 잔여 취소 실패: %s", ticker)
         finally:
             # cancel-replace race 방어 — 본인이 dict에 있을 때만 pop
-            if self._pending_cancel_tasks.get(ticker) is asyncio.current_task():
-                self._pending_cancel_tasks.pop(ticker, None)
-                self._pending_cancel_order_no.pop(ticker, None)
+            _k = (ticker, CANCEL_AXIS_BUY)
+            if self._pending_cancel_tasks.get(_k) is asyncio.current_task():
+                self._pending_cancel_tasks.pop(_k, None)
+                self._pending_cancel_order_no.pop(_k, None)
 
     def _schedule_cancel_and_reorder(
         self, ticker: str, order_no: str, remaining: int, *, is_stop_loss: bool
     ) -> None:
         """30초 후 미체결 잔량을 취소하고, 손절인 경우 잔여 재주문한다."""
-        if ticker in self._pending_cancel_tasks:
-            self._pending_cancel_tasks[ticker].cancel()
+        # cycle332 — 키에 **매도 축**을 싣는다. 매수 잔량 취소 타이머와 공존한다.
+        _key = (ticker, CANCEL_AXIS_SELL)
+        if _key in self._pending_cancel_tasks:
+            self._pending_cancel_tasks[_key].cancel()
 
-        self._pending_cancel_tasks[ticker] = asyncio.create_task(
+        self._pending_cancel_tasks[_key] = asyncio.create_task(
             self._cancel_and_reorder(ticker, order_no, remaining, is_stop_loss=is_stop_loss)
         )
-        self._pending_cancel_order_no[ticker] = order_no
+        self._pending_cancel_order_no[_key] = order_no
 
     async def _cancel_and_reorder(
         self, ticker: str, order_no: str, remaining: int, *, is_stop_loss: bool
@@ -3041,9 +3078,10 @@ class OrderEngine:
             logger.exception("매도 잔여 취소/재주문 실패: %s", ticker)
         finally:
             # cancel-replace race 방어 — 본인이 dict에 있을 때만 pop
-            if self._pending_cancel_tasks.get(ticker) is asyncio.current_task():
-                self._pending_cancel_tasks.pop(ticker, None)
-                self._pending_cancel_order_no.pop(ticker, None)
+            _k = (ticker, CANCEL_AXIS_SELL)
+            if self._pending_cancel_tasks.get(_k) is asyncio.current_task():
+                self._pending_cancel_tasks.pop(_k, None)
+                self._pending_cancel_order_no.pop(_k, None)
 
     def reset_daily_state(self) -> None:
         """일일 차단 게이트 상태 초기화 (scheduler `_reset_daily_state` 가 위임 호출).

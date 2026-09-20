@@ -24,7 +24,7 @@ from src.auth.token import token_manager
 from src.db.daily_performance import get_latest_performance, recompute_from_trades, upsert_daily_performance
 from src.db.system_config import get_cash_usage_ratio
 from src.db.system_logs import write_log
-from src.engine.order_engine import OrderEngine
+from src.engine.order_engine import OrderEngine, pending_cancel_tickers
 from src.engine.risk import RiskManager
 from src.engine.scanner import scan_stocks, subscribe_filtered_stocks, unsubscribe_all
 from src.engine.session import MarketBoard, session_tracker
@@ -1324,7 +1324,11 @@ class TradingScheduler:
                     for no, info in self.order_engine._pending_buy_orders.items()
                 },
                 "fills": order_fills,
-                "pending_cancels": list(self.order_engine._pending_cancel_tasks.keys()),
+                # cycle332 — 키가 `(ticker, 축)` 복합으로 바뀌었다. UI 계약은
+                # **ticker 배열**이므로(`frontend/src/types/trading.ts` ·
+                # `OrderMonitor.tsx`) 한 줄 파생으로 편다. 한 종목에 두 축 타이머가
+                # 동시에 걸려 있어도 한 번만 나온다.
+                "pending_cancels": pending_cancel_tickers(self.order_engine),
             },
             "strategy": {
                 "buy_disabled": any_buy_disabled,

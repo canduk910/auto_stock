@@ -150,7 +150,7 @@ async def test_a1_full_fill_cancels_pending_timer_for_same_order(
     engine._order_ticker[order_no] = TICKER
 
     await _buy_notice(engine, order_no, 3)          # 3/5 → PARTIAL + 타이머 등록
-    assert TICKER in engine._pending_cancel_tasks, "전제 실패 — 부분체결이 타이머를 만들지 않았다"
+    assert (TICKER, "buy") in engine._pending_cancel_tasks, "전제 실패 — 부분체결이 타이머를 만들지 않았다"
 
     await _buy_notice(engine, order_no, 2)          # 5/5 → 전량 체결
 
@@ -194,7 +194,7 @@ async def test_a1b_sell_full_fill_cancels_pending_timer(
     engine._order_ticker[order_no] = TICKER
 
     await _sell_notice(engine, order_no, 3)
-    assert TICKER in engine._pending_cancel_tasks, "전제 실패 — 매도 부분체결이 타이머를 만들지 않았다"
+    assert (TICKER, "sell") in engine._pending_cancel_tasks, "전제 실패 — 매도 부분체결이 타이머를 만들지 않았다"
 
     await _sell_notice(engine, order_no, 2)
 
@@ -229,7 +229,7 @@ async def test_a2_other_order_timer_survives_full_fill(
     engine._order_strategy[order_a] = "kojiro"
     engine._order_ticker[order_a] = TICKER
     await _buy_notice(engine, order_a, 3)
-    task_a = engine._pending_cancel_tasks[TICKER]
+    task_a = engine._pending_cancel_tasks[(TICKER, "buy")]
 
     order_b = "0000305199"
     engine._order_qty[order_b] = 2
@@ -237,7 +237,7 @@ async def test_a2_other_order_timer_survives_full_fill(
     engine._order_ticker[order_b] = TICKER
     await _buy_notice(engine, order_b, 2)           # B 전량 체결
 
-    assert engine._pending_cancel_tasks.get(TICKER) is task_a, (
+    assert engine._pending_cancel_tasks.get((TICKER, "buy")) is task_a, (
         "다른 주문의 전량 체결이 주문 A 의 잔여취소 타이머를 지웠다 — "
         "매수 잔량이 장 마감까지 미체결로 남는다(§1.4)"
     )
@@ -260,7 +260,7 @@ async def test_a3_buy_timer_survives_sell_full_fill_on_same_ticker(
     engine._order_strategy[buy_order] = "kojiro"
     engine._order_ticker[buy_order] = TICKER
     await _buy_notice(engine, buy_order, 3)
-    buy_task = engine._pending_cancel_tasks[TICKER]
+    buy_task = engine._pending_cancel_tasks[(TICKER, "buy")]
 
     strategy = registry.get("kojiro")
     strategy.state.positions[TICKER] = Position(
@@ -273,7 +273,7 @@ async def test_a3_buy_timer_survives_sell_full_fill_on_same_ticker(
     engine._order_ticker[sell_order] = TICKER
     await _sell_notice(engine, sell_order, 2)       # 매도 전량 체결
 
-    assert engine._pending_cancel_tasks.get(TICKER) is buy_task, (
+    assert engine._pending_cancel_tasks.get((TICKER, "buy")) is buy_task, (
         "매도 전량 체결이 매수 잔여취소 타이머를 실종시켰다 (같은 dict 공유, §1.4)"
     )
 
@@ -302,7 +302,7 @@ async def test_a4_cancelled_timer_task_terminates_without_leaking(
     engine._order_ticker[order_no] = TICKER
 
     await _buy_notice(engine, order_no, 3)
-    task = engine._pending_cancel_tasks[TICKER]
+    task = engine._pending_cancel_tasks[(TICKER, "buy")]
 
     await _buy_notice(engine, order_no, 2)          # 전량 체결
 
@@ -328,9 +328,15 @@ async def test_a4_cancelled_timer_task_terminates_without_leaking(
 async def test_a5_cancel_replace_then_full_fill_releases_new_timer(
     engine: OrderEngine, registry: StrategyRegistry, mock_db, monkeypatch: pytest.MonkeyPatch,
 ):
-    """매수 타이머가 살아 있는 도중 같은 ticker 매도 부분체결이 그 타이머를
-    cancel-replace 한 뒤, **새** 타이머(매도)의 order_no shadow 가 죽은 매수
-    task 의 `finally` 에 지워지지 않아야 한다.
+    """타이머가 살아 있는 도중 **같은 축**의 다른 주문 부분체결이 그 타이머를
+    cancel-replace 한 뒤, **새** 타이머의 order_no shadow 가 죽은 task 의
+    `finally` 에 지워지지 않아야 한다.
+
+    ⚠️ cycle332 이전에는 이 상황을 **매수 타이머 → 매도 부분체결**로 만들었다.
+    지금은 키가 `(ticker, 축)` 이라 두 축이 공존하므로 축 간에는 cancel-replace 가
+    **일어나지 않는다**(그것이 cycle332 가 고친 결함이다). 이 가드가 지키는 것은
+    축 간 교체가 아니라 **짝 dict 불변식**이므로, 같은 축 두 주문으로 같은 상황을
+    만들어 계약을 그대로 보존한다.
 
     `_pending_cancel_tasks`/`_pending_cancel_order_no` 는 항상 짝으로 갱신되는
     두 dict 다(§1.4). `finally` 의 identity 가드(`... is asyncio.current_task()`)가
@@ -345,37 +351,33 @@ async def test_a5_cancel_replace_then_full_fill_releases_new_timer(
     engine._order_strategy[buy_order] = "kojiro"
     engine._order_ticker[buy_order] = TICKER
     await _buy_notice(engine, buy_order, 3)          # 3/5 → task_a(매수) 등록
-    task_a = engine._pending_cancel_tasks[TICKER]
+    task_a = engine._pending_cancel_tasks[(TICKER, "buy")]
 
     # A 를 sleep 지점(body)까지 한 스텝 진행시킨다 — 이 줄이 없으면 A 는 첫 스텝
     # 전에 취소돼 `finally` 자체가 실행되지 않아 이 테스트가 공허해진다(실측 확인).
     await asyncio.sleep(0)
     assert not task_a.done(), "전제 실패 — task_a 가 body 진입 전에 이미 끝났다"
 
-    strategy = registry.get("kojiro")
-    strategy.state.positions[TICKER] = Position(
-        ticker=TICKER, buy_price=24_000, quantity=3, order_no=buy_order, strategy_id="kojiro",
-    )
+    # 같은 축(매수) 두 번째 주문의 부분체결 → task_a cancel-replace → task_b 등록
+    buy_order2 = "BUY-Y"
+    engine._order_qty[buy_order2] = 5
+    engine._order_strategy[buy_order2] = "kojiro"
+    engine._order_ticker[buy_order2] = TICKER
+    await _buy_notice(engine, buy_order2, 3)
 
-    sell_order = "SELL-Y"
-    engine._order_qty[sell_order] = 5
-    engine._order_strategy[sell_order] = "kojiro"
-    engine._order_ticker[sell_order] = TICKER
-    await _sell_notice(engine, sell_order, 3)        # 3/5 → task_a cancel-replace → task_b(매도) 등록
-
-    task_b = engine._pending_cancel_tasks[TICKER]
+    task_b = engine._pending_cancel_tasks[(TICKER, "buy")]
     assert task_b is not task_a
 
     # task_a 의 finally 를 소진시킨다(취소 스케줄 → 실제 실행까지 두 스텝 필요).
     await asyncio.sleep(0)
     await asyncio.sleep(0)
 
-    assert engine._pending_cancel_order_no[TICKER] == sell_order, (
-        "죽은 매수 task 의 finally 가 새(매도) 타이머의 shadow 를 지웠다 — "
+    assert engine._pending_cancel_order_no[(TICKER, "buy")] == buy_order2, (
+        "죽은 task 의 finally 가 새 타이머의 shadow 를 지웠다 — "
         "다음 전량 체결이 order_no 게이트를 통과하지 못해 30초 뒤 cancel_order 가 나간다"
     )
 
-    await _sell_notice(engine, sell_order, 2)        # 5/5 → 매도 전량 체결
+    await _buy_notice(engine, buy_order2, 2)         # 5/5 → 전량 체결
 
     assert engine._pending_cancel_tasks == {}, "짝 dict 가 어긋나 새 타이머가 해제되지 않았다"
 
@@ -485,9 +487,9 @@ async def test_a7_natural_expiry_clears_both_dicts(
     engine._order_ticker[order_no] = TICKER
 
     await _buy_notice(engine, order_no, 3)           # 3/5 → 타이머 등록
-    assert engine._pending_cancel_order_no.get(TICKER) == order_no
+    assert engine._pending_cancel_order_no.get((TICKER, "buy")) == order_no
 
-    task = engine._pending_cancel_tasks[TICKER]
+    task = engine._pending_cancel_tasks[(TICKER, "buy")]
     for _ in range(20):
         if task.done():
             break

@@ -99,7 +99,7 @@ def _sha(text: str) -> str:
 _BASE_SHA: dict[str, str] = {
     # 8영역 — 엔진 5파일 전부 (order_engine 포함! cycle290 은 무접촉)
     "src/engine/order_engine.py":
-        "2ef217bcef9f2c795f6ba260b6613d49fa2c402c272de7b0d9648376303382c6",
+        "e1beeb1fffab6ca5193d6954e9164e75f1d0d16eaaaedbcbb7d3fef1328dfa2e",
     "src/engine/risk.py":
         "e8614235cc0bea638f8c349b2f6910c94f5f9a5b849f5d65bef0583f959d81c9",
     "src/engine/session.py":
@@ -140,7 +140,7 @@ _BASE_SHA: dict[str, str] = {
     # `50658e06062a0d38afecab1baa08871b89212e295cc95f2a3af62a2ae076115d`.
     # 8영역은 아니지만 이 사이클이 무접촉을 약속한 파일
     "src/engine/scheduler.py":
-        "49dd1a36f68f3256dd83d58088651c81a3af2972f41bb95ad7995845827b3d09",
+        "4b9c8ac94706ae622d3404fa10bfa805a69a4b36485787c388dff3aa6e76763d",
     "src/engine/strategy_base.py":
         "869dc20ca561adc561a9ebe9fdb5fe5a3e097f7ec176fdf274d577d509de9252",
     # 🔴 등재만으로 판정이 통해야 한다 — 검증 로직을 고쳐 통과시키면 안 된다.
@@ -157,7 +157,7 @@ _SCHEDULER_LINE_CAP = 3900
 #: 신규 leaf `src/engine/market_op_subscribe.py` 로 추출해(행위 변경 0 · 5줄
 #: 위임 wrapper) 3,897 → 3,726 이 됐다. 값만 옮긴다 — 정확 핀을 상한 핀으로
 #: 완화하면 cycle290 의 무접촉 대리 지표가 사라진다.
-_SCHEDULER_LINES = 3791
+_SCHEDULER_LINES = 3795
 
 
 @pytest.mark.parametrize("rel", sorted(_BASE_SHA))

@@ -1122,7 +1122,7 @@ async def test_k11_cancel_uses_the_exchange_the_order_was_sent_to(
             "원주문이 KRX 로 안 나갔다 — 이 테스트의 전제가 성립하지 않는다"
         )
         engine._schedule_cancel(_TICKER, order_no, 5, _SID)
-        await engine._pending_cancel_tasks[_TICKER]
+        await engine._pending_cancel_tasks[(_TICKER, "buy")]
     assert mock_cancel_order.await_count == 1
     assert mock_cancel_order.await_args.kwargs["exchange"] == "KRX", (
         f"원주문은 KRX 인데 취소가 {mock_cancel_order.await_args.kwargs.get('exchange')!r} "
@@ -1152,7 +1152,7 @@ async def test_k11b_stop_remainder_reorder_is_not_a_market_order_in_the_after_wi
     with freeze_time(_F_1605):
         _pin_boards(monkeypatch)
         engine._schedule_cancel_and_reorder(_TICKER, "ORD-P", 2, is_stop_loss=True)
-        await engine._pending_cancel_tasks[_TICKER]
+        await engine._pending_cancel_tasks[(_TICKER, "sell")]
     assert mock_place_order.await_count == 1, "잔여 재주문이 발사되지 않았다"
     kw = mock_place_order.await_args.kwargs
     assert kw.get("order_division") is OrderDivision.KRX_AFTER_BEST, (
@@ -1180,7 +1180,7 @@ async def test_k11c_main_session_cancel_and_reorder_is_unchanged(
     with freeze_time(_F_1100):
         _pin_boards(monkeypatch)
         engine._schedule_cancel_and_reorder(_TICKER, "ORD-P", 2, is_stop_loss=True)
-        await engine._pending_cancel_tasks[_TICKER]
+        await engine._pending_cancel_tasks[(_TICKER, "sell")]
     kw = mock_place_order.await_args.kwargs
     assert kw.get("order_division", OrderDivision.MARKET) is OrderDivision.MARKET
     assert kw["price"] == 0
@@ -1223,7 +1223,7 @@ async def test_k11d_cancel_survives_a_clock_boundary_crossed_during_the_wait(
     with freeze_time(_F_0905):  # 09:05 — 그 사이 정규장이 열려 라우터라면 KRX 를 준다
         _pin_boards(monkeypatch)
         engine._schedule_cancel_and_reorder(_TICKER, order_no, 2, is_stop_loss=False)
-        await engine._pending_cancel_tasks[_TICKER]
+        await engine._pending_cancel_tasks[(_TICKER, "sell")]
     assert mock_cancel_order.await_args.kwargs["exchange"] == recorded, (
         f"취소가 원주문 거래소({recorded!r}) 가 아니라 "
         f"{mock_cancel_order.await_args.kwargs.get('exchange')!r} 로 나갔다 — "
@@ -1252,7 +1252,7 @@ async def test_k11e_after_cancel_result_marker(
         await _sell(engine)
         order_no = "ORD-1"
         engine._schedule_cancel(_TICKER, order_no, 5, _SID)
-        await engine._pending_cancel_tasks[_TICKER]
+        await engine._pending_cancel_tasks[(_TICKER, "buy")]
     lines = _marker_lines(caplog, "[after_cancel_result]")
     assert len(lines) == 1, f"{len(lines)}행: {lines}"
     assert f"ticker={_TICKER}" in lines[0]
@@ -1280,7 +1280,7 @@ async def test_k11f_after_cancel_result_marker_on_failure(
         await _sell(engine)
         order_no = "ORD-1"
         engine._schedule_cancel(_TICKER, order_no, 5, _SID)
-        await engine._pending_cancel_tasks[_TICKER]
+        await engine._pending_cancel_tasks[(_TICKER, "buy")]
     lines = _marker_lines(caplog, "[after_cancel_result]")
     assert len(lines) == 1, f"{len(lines)}행: {lines}"
     assert "result=error" in lines[0]

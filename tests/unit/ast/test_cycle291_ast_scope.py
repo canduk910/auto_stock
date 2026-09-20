@@ -110,7 +110,7 @@ _BASE_SHA: dict[str, str] = {
     # 🔴 cycle291 시점: 라인 상한 3,900 에 3줄 남아 한 줄도 금지였다. cycle292 가
     # 예고대로 리팩터해 3,726L 이 됐다(아래 핀 = 그 결과).
     "src/engine/scheduler.py":
-        "49dd1a36f68f3256dd83d58088651c81a3af2972f41bb95ad7995845827b3d09",
+        "4b9c8ac94706ae622d3404fa10bfa805a69a4b36485787c388dff3aa6e76763d",
     # 🔴 cycle290 이 방금 `DEFAULT_PARAMS` 를 건드렸다 — 또 건드리면 그 증명이 무너진다.
     "src/engine/strategy_base.py":
         "869dc20ca561adc561a9ebe9fdb5fe5a3e097f7ec176fdf274d577d509de9252",
@@ -144,7 +144,7 @@ _BASE_SHA: dict[str, str] = {
 #: 신규 leaf `src/engine/market_op_subscribe.py` 로 추출해(행위 변경 0 · 5줄
 #: 위임 wrapper) 3,897 → 3,726 이 됐다. 값만 옮긴다 — 정확 핀을 상한 핀으로
 #: 완화하면 cycle291 의 무접촉 대리 지표가 사라진다.
-_SCHEDULER_LINES = 3791
+_SCHEDULER_LINES = 3795
 _SCHEDULER_LINE_CAP = 3900
 
 

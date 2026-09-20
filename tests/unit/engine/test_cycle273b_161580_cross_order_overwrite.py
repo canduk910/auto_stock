@@ -226,7 +226,7 @@ async def test_f1_cancel_after_wait_updates_only_its_own_order_row(engine, db, m
     monkeypatch.setattr(_oe, "cancel_order", AsyncMock(return_value=None))
 
     engine._schedule_cancel(TICKER, ORDER_A, 5, STRATEGY)
-    task = engine._pending_cancel_tasks[TICKER]
+    task = engine._pending_cancel_tasks[(TICKER, "buy")]
     await task
 
     assert db.row(ORDER_A)["status"] == TradeStatus.CANCELLED.value

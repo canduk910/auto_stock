@@ -165,7 +165,7 @@ _BASE_SHA: dict[str, str] = {
     # 🔴 `scheduler.py` 무접촉 (절대 규칙 3). cycle292 가 3,897→3,726L 로 만든
     #    여유 174줄은 이 사이클의 예산이 아니다. §4-C 풀 우회 2곳은 관측만.
     "src/engine/scheduler.py":
-        "49dd1a36f68f3256dd83d58088651c81a3af2972f41bb95ad7995845827b3d09",
+        "4b9c8ac94706ae622d3404fa10bfa805a69a4b36485787c388dff3aa6e76763d",
     "src/engine/market_op_subscribe.py":
         "7d58f9464c1ed35e4fa8706d801beb5a6b5c062d5a2941f0db6482d028d3d4ac",
     # 전략 7파일 + 베이스 (절대 규칙 5)
@@ -213,7 +213,7 @@ _PIN_PENDING_APPROVAL: dict[str, str] = {
         "e8614235cc0bea638f8c349b2f6910c94f5f9a5b849f5d65bef0583f959d81c9",
 }
 
-_SCHEDULER_LINES = 3791
+_SCHEDULER_LINES = 3795
 _SCHEDULER_LINE_CAP = 3900
 
 
