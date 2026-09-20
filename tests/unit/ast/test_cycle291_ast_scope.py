@@ -324,6 +324,12 @@ def test_a8_no_new_leaf_in_src_engine() -> None:
     여전히 붉어진다. 이름 축 가드는
     `test_cycle290_ast_scope.py::test_g290_3_no_new_module_under_src_engine` 다.
 
+    ⚠️ cycle326(2026-09-20)이 관측 leaf `param_drift.py` 를 **사용자 승인 하에** 신설해
+    65 → 66 이 됐다. 운영 DB 값이 코드 기본값과 **39개 키**나 다른데 알리는 것이 없어
+    LTV 상한가 손절을 코드값으로 읽고 「느슨해진다」고 보고한 오판이 실제로 났다
+    (DB 는 반대로 조여진다). 관찰 전용·never-raise 이고 `scheduler.py` 는 무접촉이다
+    (그 파일은 라인 상한 3,900 에 여유 115줄뿐이라 일부러 피했다).
+
     ⚠️ cycle293(2026-09-14)이 킬스위치 leaf `tick_channel_mode.py` 를 **승인 하에**
     신설해 61 → 62 가 됐다. 리졸버 모드를 전략 `DEFAULT_PARAMS` 가 아니라 인프라 축
     (`system_config` 한 키)에 두기로 한 결정의 산물이고(cycle287 이 킬스위치를
@@ -344,7 +350,7 @@ def test_a8_no_new_leaf_in_src_engine() -> None:
     무접촉.
     """
     got = len(list((_ROOT / "src" / "engine").glob("*.py")))
-    assert got == 65, f"`src/engine/*.py` 파일 수 {got} (cycle297 기준선 65)"
+    assert got == 66, f"`src/engine/*.py` 파일 수 {got} (cycle326 기준선 66)"
 
 
 # ===========================================================================

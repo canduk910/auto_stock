@@ -309,7 +309,7 @@ _ENGINE_PY_FILES: dict[str, tuple[str, ...]] = {
         "market_operation_monitor.py", "market_regime.py", "market_state.py",
         "metrics_collector.py", "no_feed_registry.py", "observer_trace.py",
         "open_price_observe.py", "open_price_rest.py", "order_engine.py",
-        "param_catalog.py", "param_validation.py", "portfolio_risk.py",
+        "param_catalog.py", "param_drift.py", "param_validation.py", "portfolio_risk.py",
         "quant_score.py", "quote_token_refresh.py", "recommendation_engine.py",
         "recommendation_metrics.py", "refresh_progress.py", "risk.py", "scanner.py",
         "scheduler.py", "sector_naming.py", "sell_rejection.py",

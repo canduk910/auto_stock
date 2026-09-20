@@ -183,7 +183,7 @@ _BASE_SHA = {
 #: 신규 leaf 1 = `src/engine/llm_retrospective.py`(cycle297 — 회고 조인·집계 순수
 #: 함수, `src.*` import 0). cycle296 은 신규 파일 **0** — 기존 `auth/token.py`·
 #: `engine/quote_token_refresh.py` 편집만이다.
-_SRC_TREE_FILES = 153
+_SRC_TREE_FILES = 154
 #: ⚠️ 값은 **cycle285 적대 검증 반영** 기준선이다. 그 직전(초판 cycle285 배포)
 #: digest 는 `97483c5114a1d00dc8f7ca7c1ed08e1b3dc1d0b585065b14176dc227da9bed8c` 였다.
 #: cycle287b 배포분의 digest 는
@@ -372,7 +372,7 @@ _SRC_TREE_FILES = 153
 #: cycle315 착지(= 이 재핀 착수) 값은
 #: `fc11588e2b689496f2d3133e6c252e5d649eb7a6811ca60d3107abc79c9937ab` 였다.
 _SRC_TREE_DIGEST = (
-    "6f45113f6c057f1ed46662a73ae574120bb7c6898bbb6cf6a2a68e644be2cbf2"
+    "74b6a02ba3260f7353b737488a0f29294f146bf9b2e443168bd527b61ca91131"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
@@ -393,7 +393,7 @@ _PINNED_DIR_FILE_COUNTS = {
     "src/realtime": 4,
     "src/auth": 3,
     "src/engine/strategies": 8,
-    "src/engine": 75,
+    "src/engine": 76,
 }
 
 #: `scheduler.py` 정확 라인 수 + cycle257 영구 상한.

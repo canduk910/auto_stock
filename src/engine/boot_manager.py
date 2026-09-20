@@ -145,6 +145,29 @@ async def boot(scheduler: "TradingScheduler") -> None:
     # 불변식 런타임 가드 (2026-08-08) — 실행 params 로 position_ratio × max_positions
     # ≤ 1.0 검증. 운영자 수동 DB apply 가 불변식을 우회하는 사각 차단(kojiro 1.2
     # 위반이 그 경로). 관찰 WARNING 만 — 매수/청산 미개입, fail-open.
+    # cycle326 — 운영 DB ↔ 코드 기본값 드리프트 관측(값 변경 0 · never-raise).
+    # `_load_strategy_config` 가 DB params 를 키별로 덮으므로 한 번 박힌 값은 계속 살고,
+    # 그 차이를 알리는 것이 없었다(2026-09-20 전수 실측 39키). 그 무지가 실제 오판을
+    # 만들었다 — LTV 상한가 손절을 코드값으로 읽어 「느슨해진다」고 보고했는데 DB 는 반대였다.
+    # 🔴 차이를 고치지 않는다. 대부분 운영자가 의도로 넣은 값이고 되돌리는 것이 곧 사고다.
+    try:
+        from src.engine.param_drift import collect_param_drift
+        _drift = collect_param_drift(scheduler.registry.all())
+        if _drift:
+            _sample = " · ".join(
+                f"{d['strategy_id']}.{d['key']}={d['live']}(코드 {d['code']})"
+                for d in _drift[:5]
+            )
+            logger.warning(
+                "[param_drift] count=%d — 운영 DB 가 코드 기본값과 다르다(DB 가 정본). "
+                "예: %s%s",
+                len(_drift), _sample, " …" if len(_drift) > 5 else "",
+            )
+        else:
+            logger.info("[param_drift] count=0 — 운영 DB 와 코드 기본값이 일치한다")
+    except Exception:
+        logger.exception("[param_drift] 관측 실패 — 부팅은 계속한다")
+
     try:
         from src.engine.portfolio_risk import check_budget_invariant
         for v in check_budget_invariant(scheduler.registry.all()):

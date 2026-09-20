@@ -221,11 +221,43 @@ async def get_strategies_te(months: int = 3):
     return ApiResponse(success=True, data=data)
 
 
+async def _held_tickers_from_db(strategy_id: str) -> list[str]:
+    """그 전략이 **DB 에** 들고 있는 종목 (cycle325).
+
+    🔴 메모리(`state.positions`)가 아니라 DB 를 보는 이유 = 부팅 전에는 메모리가 비어 있다.
+    주말 대기 중 실측(2026-09-20)으로 `Σ total_investment = 0` 이라 아래 하한선 검증이
+    통째로 건너뛰어지는 것을 확인했다 — 그 창에서 메모리를 보면 똑같이 뚫린다.
+    """
+    from src.db import positions as _positions
+
+    try:
+        rows = await _positions.load_all()
+    except Exception:
+        # DB 를 못 읽는 상황(풀 미초기화 등)은 프로덕션에서는 이미 매매가 못 도는 상태다.
+        # 여기서 무조건 거부하면 DB 없는 맥락(계약 테스트 등)까지 막으므로,
+        # **메모리로 물러서되 그 사실을 남긴다.** 잔여 사각 = DB 불가 + 부팅 전 + 비중 0
+        # 요청이 겹치는 창(메모리가 비어 통과한다). 그 창은 `[weight_zero_probe_degraded]` 로 보인다.
+        logger.warning(
+            "[weight_zero_probe_degraded] sid=%s — DB 보유 조회 불가, 메모리로 판정", strategy_id,
+        )
+        return []
+    return [
+        str(r.get("ticker"))
+        for r in rows
+        if str(r.get("strategy_id") or "") == strategy_id
+    ]
+
+
 @router.put("/weights", response_model=ApiResponse)
 async def update_weights(req: WeightsRequest):
     """전략별 비중을 업데이트하고 즉시 자금을 재분배한다.
 
     이미 매수된 금액이 있는 전략은 해당 금액 비율 이하로 비중을 낮출 수 없다.
+
+    🔴 **비중 0 은 「매수만 멈추기」가 아니다** — `registry.update_weights` 가
+    `config.enabled = weight > 0` 을 자동 토글하고, `risk.on_tick` 은 `enabled()` 만
+    순회하므로 그 전략의 보유 종목은 **손절·트레일링·익일청산·15:20 청산이 전부 멈춘다.**
+    그래서 보유가 있으면 비중 0 을 거부한다(루트 `CLAUDE.md` 「절대 깨지 말 것」).
     """
     registry = trading_scheduler.registry
     # 단위 = 비율(0~1). 값 크기 기반 추론 변환 금지 (2026-08-18 결함 — 1%가 100%로 저장됨)
@@ -245,6 +277,36 @@ async def update_weights(req: WeightsRequest):
                 "비중은 비율(0.0~1.0)로 전송해야 하며 합이 1.0 을 넘을 수 없습니다."
             ),
         )
+
+    # 🔴 비중 0 가드 (cycle325) — **아래 `if total_asset > 0` 게이트보다 앞**이다.
+    # 그 게이트 안에 넣으면 부팅 전(예산 합 0)에 통째로 건너뛰어져 고친 것이 아무 일도
+    # 하지 않는다. 비중 0 = 비활성화 = 손절 정지이므로 예산과 무관하게 판정해야 한다.
+    for sid, new_weight in weights.items():
+        if new_weight > 0:
+            continue
+        strat = registry.get(sid)
+        if not strat:
+            continue
+        # DB(부팅 전에도 유효) ∪ 메모리(DB 불가 시 폴백) — 둘 중 하나라도 보유면 막는다.
+        held = set(await _held_tickers_from_db(sid))
+        try:
+            held |= {str(t) for t in (strat.state.positions or {})}
+        except Exception:
+            pass
+        if held:
+            logger.warning(
+                "[weight_zero_guard] sid=%s held=%d — 비중 0 거부(손절 정지 차단)",
+                sid, len(held),
+            )
+            return ApiResponse(
+                success=False,
+                message=(
+                    f"{sid} 에 보유 종목 {len(held)}건이 있어 비중을 0 으로 내릴 수 없습니다. "
+                    "비중 0 은 전략을 비활성화하고 그 순간 보유 종목의 손절·트레일링·"
+                    "익일청산이 멈춥니다. 먼저 보유를 청산한 뒤 내려 주세요. "
+                    "매수만 줄이려면 position_ratio / max_positions 를 쓰세요."
+                ),
+            )
 
     # 매수금액 하한선 검증
     total_asset = sum(s.state.total_investment for s in registry.all())
