@@ -1335,3 +1335,17 @@ cycle299 가 target 을 225 로, cycle300 이 읽기 클램프를 400 으로 열
 - `test_cycle263_daily_load_stub_filter.py` — 대역 기본 깊이를 수렴 상태로 올리고
   `fetch_daily_candles_backfill` 격리 패치를 심었다. 종전에는 분기가 새면 **실 KIS 로 나가**
   스위트가 157초 걸렸다(네트워크 hang). 이제 단언이 터진다.
+
+## 2026-09-21 (cycle331) — B-2 ERROR 문구 정정
+
+`[buy_fill_fallback_held_conflict]` 의 종전 문구는 `"이미 타 전략 보유 중"` 이었다.
+**실측상 거짓이다** — 운영 DB 의 2건(078930 08-26 14:44 · 161890 08-31 08:13)은 둘 다
+*타 전략*이 아니라 **자기 전략**(LTV)이었고 *보유*가 아니라 **주문 중**이었다.
+`is_ticker_held_by_any` 가 `_strategies.values()` 전수를 보고 `has_position OR
+is_buy_pending` 이기 때문이다.
+
+운영자가 그 ERROR 를 읽고 "다른 전략이 들고 있어서 중복을 막았구나" 로 이해하면
+정확히 반대다. `"타 전략 보유/주문중"` 으로 고쳤다.
+
+⚠️ 21:30 리포트의 `_normalize_message` 가 메시지 전문을 패턴 키로 쓰므로
+**2026-09-21 전후의 `top_patterns` 문자열을 비교하지 않는다**(cycle328 폴백 문구 통일과 같은 주의).

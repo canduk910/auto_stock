@@ -224,6 +224,21 @@ run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, recor
 - `is_provisional` 컬럼 = migration 040.
 - 관찰성 한정 — `check_exit`/`check_buy` funnel hook 0건 + risk/order_engine/realtime/auth 참조 0(SAFETY 가드).
 
+## 발사 창 귀속 — `pending_buys` 단 (cycle331)
+
+`await place_order` 가 걸려 있는 동안 주문번호 매핑 5종이 **전부 비어 있고** `pending_buys` 는 **이미 차 있다**(`execute_buy` 가 `place_order` **앞**에서 넣는다). 그 창에 착지한 **우리 자신의** 매수 체결통보는 `_order_strategy` miss → `trade_history` miss(PENDING INSERT 도 `place_order` 뒤라 그 `order_no` 행이 원리상 없다) → `is_ticker_held_by_any` **참** 으로 흘러 P1-B(B-2) 조기 return 에 걸렸다. `is_ticker_held_by_any` 는 `_strategies.values()` **전수**를 보고 `has_position OR is_buy_pending` 이므로(`strategy_registry.py`) **매수 당사자 자신이 그 조건을 세운다** — 확률이 아니라 창에 들어오면 예외 없이 걸린다.
+
+🔴 **그러면 Position 이 아예 등록되지 않아 그날 하루 손절·트레일링·15:20 일괄청산이 성립하지 않는다**(`risk.on_tick` 은 `state.positions` 를 본다). 익일청산만 다음 날 `_boot` 의 KIS 잔고 복구가 되살린다. `trade_history` 는 `mark_pending_buys_completed` 가 장부만 뒤늦게 맞추므로 **대시보드·DB 어느 쪽을 봐도 정상으로 보인다** — 이것이 이 결함이 조용한 이유다.
+
+- **시정** = 폴백 체인에 `_resolve_pending_buy_owner(ticker)` 단을 `trade_history` **뒤**, B-2 가드 **앞**에 끼운다. 채택은 `ticker in state.pending_buys` 인 전략이 **정확히 1개**이고 그 전략이 **미보유**일 때만. 0개·2개 이상·판정 예외는 `None` 으로 물러선다(fail-open, **결과 집합 ⊆ 현행**). 전부 in-memory, `await` 0, never-raise — 체결통보 콜백의 예외는 `realtime/handler.py` 규약상 **WS 재연결**을 부른다.
+- 🔴 **B-2 가드를 없애지 않는다** — 그것이 막는 것은 **출처를 모르는 매수가 `momentum` 을 우겨 남의 포지션을 덮는 것**(377450 사고)이고 수동 매매·외부 주문에서 여전히 유효하다. 좁히는 것이지 없애는 것이 아니다. **수동/외부 매수는 우리 `pending_buys` 에 없으므로 한 글자도 바뀌지 않는다.**
+- 🔴 **잔량 취소 타이머는 `qty_src == "map"` ∧ 귀속이 `pending` 단이 **아닐** 때만 건다** — 이 시정이 창의 통보를 **처음으로** 부분 체결 분기에 도달시키는데, 귀속이 틀린 랏에서 `_cancel_after_wait` 가 30초 뒤 **사람이 낸 주문의 잔량을 취소**한다(cycle327·cycle329 와 같은 계열). 잃는 것은 없다 — 우리 주문이면 매핑이 곧 서고 잔여 통보가 `src=map` 으로 와서 정상적으로 건다. 보류는 `[buy_partial_no_cancel_timer]` WARNING.
+- **관측** = `[buy_fill_strategy_from_pending] order_no= ticker= strategy= qty_src= incr= filled_total= ordered=` **무cap WARNING** = 시정의 성공 서명. cap 을 `(ticker,strategy)` 로 묶으면 같은 날 두 번째 사건이 사라지는데, 실측 빈도가 **BUY COMPLETED 96건 중 2건(2.1%)** 이라 **한 건 한 건이 조사 단위**다. 형제 마커 `[buy_fill_fallback_held_conflict]` 도 무cap ERROR 이고, 시정 뒤에는 **진짜 미지 출처만 남아 0 에 수렴**이 정상이다.
+- ⚠️ **1주 랏에 집중된다** — 단일 통보로 전량 체결되면 **두 번째 통보가 없어 자기 치유 경로가 구조적으로 없다**. 다주 랏은 잔여 통보가 `src=map` 으로 와서 포지션을 만들어 준다. 우리 매수의 상당수가 1주라 노출이 크다.
+- ⚠️ B-2 ERROR 문구는 `"타 전략 보유/주문중"` 이다 — 그 판정이 `has_position OR is_buy_pending` 이라 **보유가 아니라 주문 중**일 수 있다. 21:30 리포트 `top_patterns` 는 메시지 전문을 키로 쓰므로 **2026-09-21 전후 패턴 문자열을 비교하지 않는다**(경위 = history).
+- **별건 권고(이번 사이클 밖)** = `scheduler._sync_positions_from_balance` 의 `is_ticker_held_by_any` 를 **보유 축만** 보는 헬퍼로 바꾸면 블라인드 창이 17~24시간 → ≤15분이 된다. 다만 그 함수 소비처가 5곳이라 광역 회귀이고, 이 시정이 들어가면 실익이 급감한다.
+- 자문 = `_workspace/domain_consult/cycle331_buy_fill_dropped.md` · 회귀 = `tests/unit/engine/test_cycle331_buy_fill_from_pending.py`(6케이스)
+
 ## 체결통보 주문수량 — 출처 3단 (cycle329)
 
 `handle_execution_notice` 는 「이 주문의 **주문수량**이 몇 주인가」를 세 출처에서 이 순서로 얻는다.

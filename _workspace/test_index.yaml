@@ -812,6 +812,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -1894,6 +1895,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -2985,6 +2987,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -4072,6 +4075,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -5157,6 +5161,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -6245,6 +6250,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -7333,6 +7339,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -8423,6 +8430,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -9509,6 +9517,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -10600,6 +10609,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -11703,6 +11713,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -12791,6 +12802,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -13885,6 +13897,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -14987,6 +15000,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -16057,6 +16071,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -17143,6 +17158,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -18231,6 +18247,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -19319,6 +19336,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -20407,6 +20425,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -21496,6 +21515,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -22583,6 +22603,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -23671,6 +23692,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -24759,6 +24781,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -25847,6 +25870,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -26214,6 +26238,7 @@ backend:
       - tests/unit/engine/test_cycle291_pre_nxt_gtp.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
       - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     transitive_tests:
@@ -28028,6 +28053,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -29112,6 +29138,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -30199,6 +30226,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -31289,6 +31317,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -32376,6 +32405,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -33488,6 +33518,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -34557,6 +34588,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -35646,6 +35678,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -36731,6 +36764,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -37820,6 +37854,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -38909,6 +38944,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -39997,6 +40033,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -41085,6 +41122,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -42172,6 +42210,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -43260,6 +43299,7 @@ backend:
       - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -44352,6 +44392,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -45436,6 +45477,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -46524,6 +46566,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -47612,6 +47655,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -48700,6 +48744,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -49789,6 +49834,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -50877,6 +50923,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -51964,6 +52011,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -53120,6 +53168,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -54206,6 +54255,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -55290,6 +55340,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -56379,6 +56430,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -57477,6 +57529,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -58553,6 +58606,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -59641,6 +59695,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -60729,6 +60784,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -61817,6 +61873,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -62905,6 +62962,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -63993,6 +64051,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -65080,6 +65139,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -66245,6 +66305,7 @@ backend:
       - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -67403,6 +67464,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -68491,6 +68553,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -69579,6 +69642,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -70677,6 +70741,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -71757,6 +71822,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -72846,6 +72912,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -73929,6 +73996,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -74485,6 +74553,7 @@ backend:
       - tests/unit/engine/test_cycle304_no_real_kis_guard.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -76195,6 +76264,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -77196,6 +77266,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -78284,6 +78355,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -79370,6 +79442,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -80457,6 +80530,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -81547,6 +81621,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -82655,6 +82730,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -83722,6 +83798,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -84829,6 +84906,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -85899,6 +85977,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -86989,6 +87068,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -88074,6 +88154,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -89162,6 +89243,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -90250,6 +90332,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -91342,6 +91425,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -92460,6 +92544,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -93550,6 +93635,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -94636,6 +94722,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -95016,6 +95103,7 @@ backend:
       - tests/unit/engine/test_cycle290_killswitch_registration.py
       - tests/unit/engine/test_cycle297_gate_wiring.py
       - tests/unit/engine/test_cycle297_llm_strategy_context.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_strategy_fallback_budget.py
       - tests/unit/routes/test_cycle278_params_validation.py
       - tests/unit/routes/test_cycle290_killswitch_put.py
@@ -96092,6 +96180,7 @@ backend:
       - tests/unit/engine/test_cycle297_llm_strategy_context.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_strategy_fallback_budget.py
       - tests/unit/routes/test_cycle278_params_validation.py
       - tests/unit/routes/test_cycle290_killswitch_put.py
@@ -97901,6 +97990,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -98989,6 +99079,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -99498,6 +99589,7 @@ backend:
       - tests/unit/engine/test_cycle315_regime_source_switch.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -100464,6 +100556,7 @@ backend:
       - tests/unit/engine/test_cycle298_scan_loop_first_delay.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
       - tests/unit/engine/test_kojiro_wiring.py
       - tests/unit/engine/test_observability_logs.py
@@ -102252,6 +102345,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -103339,6 +103433,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -104496,6 +104591,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -105585,6 +105681,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -106671,6 +106768,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -107761,6 +107859,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -108848,6 +108947,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -109935,6 +110035,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -111030,6 +111131,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -112174,6 +112276,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -113262,6 +113365,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -114354,6 +114458,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -115443,6 +115548,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -116530,6 +116636,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -117619,6 +117726,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -118769,6 +118877,7 @@ backend:
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
       - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -120006,6 +120115,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -121154,6 +121264,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -122270,6 +122381,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -123340,6 +123452,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -124447,6 +124560,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -125533,6 +125647,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -127986,6 +128101,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -129071,6 +129187,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -130162,6 +130279,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -131247,6 +131365,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
+      - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -133034,10 +133153,10 @@ frontend:
       - >-
         frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
       - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
-generated_at: '2026-09-20T14:50:50.588Z'
+generated_at: '2026-09-20T15:15:38.514Z'
 stats:
   backend_modules: 157
-  backend_tests: 1069
+  backend_tests: 1070
   frontend_modules: 118
   frontend_tests: 95
   unmapped_modules:

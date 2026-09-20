@@ -2356,6 +2356,41 @@ class OrderEngine:
         except Exception:
             logger.exception("[sell_unsubscribe] %s 실패", ticker)
 
+    def _resolve_pending_buy_owner(self, ticker: str) -> str | None:
+        """그 종목의 매수 주문을 **방금 낸** 전략이 유일하게 하나인가 (cycle331).
+
+        `await place_order` 가 걸린 동안은 주문번호 매핑이 전부 비어 있어 귀속을
+        알 길이 없다. 그 창에서 이미 참인 유일한 사실이 `pending_buys` 다 —
+        `execute_buy` 가 `place_order` **앞**에서 넣는다.
+
+        채택 조건(전부 in-memory · `await` 0 · never-raise):
+        - `ticker in state.pending_buys` 인 전략이 **정확히 1개**
+        - 그 전략이 그 ticker 를 **보유하고 있지 않다**(신규 등록만 담당 —
+          보유 중이면 추가 매수라 병합 규약이 따로 필요하다)
+
+        0개·2개 이상·판정 예외는 **`None`**(현행 경로로 낙하 = fail-open).
+        결과 집합이 현행의 부분집합이어야 이 단이 「좁히는 것」이지 「넓히는 것」이 아니다.
+
+        🔴 `handle_execution_notice` 는 체결통보 콜백이고 그 예외는
+        `realtime/handler.py` 규약상 **WS 재연결**을 부른다 — 이 판정이 무슨 일이 있어도
+        밖으로 예외를 내보내면 안 된다.
+        """
+        try:
+            owners = [
+                s.strategy_id for s in self.registry.all()
+                if ticker in getattr(s.state, "pending_buys", ())
+            ]
+            if len(owners) != 1:
+                return None
+            owner = owners[0]
+            strat = self.registry.get(owner)
+            if strat is None or ticker in strat.state.positions:
+                return None
+            return owner
+        except Exception:
+            logger.debug("[buy_fill_strategy_from_pending] 판정 실패", exc_info=True)
+            return None
+
     async def _handle_buy_fill(
         self, ticker: str, order_no: str, price: int,
         quantity: int, total_filled: int, ordered_qty: int,
@@ -2403,6 +2438,7 @@ class OrderEngine:
             return
 
         orphan_momentum_fallback = False
+        strategy_from_pending = False
         strategy_id = self._order_strategy.get(order_no)
         if strategy_id is None:
             # 매핑 dict miss — boot/reboot race. trade_history PENDING row 영역 strategy 복구.
@@ -2410,21 +2446,51 @@ class OrderEngine:
                 ticker, order_no, TradeType.BUY,
             )
             if strategy_id is None:
+                # cycle331 — **발사 창 귀속 단**. `order_no` 는 KIS 응답 전까진 존재하지
+                # 않으므로 주문번호 축으로는 원리상 가를 수 없다. 창 안에서 이미 참인
+                # 유일한 사실은 "그 전략이 그 종목의 매수 주문을 방금 냈다" = `pending_buys` 다.
+                #
+                # 🔴 고치는 것 = `await place_order` 가 걸린 동안 착지한 **우리 자신의**
+                # 매수 체결이 아래 P1-B(B-2) 가드에 걸려 **Position 이 아예 등록되지
+                # 않던 것**. 매수 당사자가 `execute_buy` 에서 스스로 `pending_buys` 에
+                # 넣고 그 뒤에 `await` 로 양보하므로, `is_ticker_held_by_any`
+                # (= `has_position OR is_buy_pending`, 자기 자신 포함)가 **예외 없이** 참이 된다.
+                # 그러면 그날 하루 손절·트레일링·15:20 청산이 성립하지 않는다
+                # (`risk.on_tick` 은 `state.positions` 를 본다). 실측 96건 중 2건(2.1%),
+                # **1주 랏에 집중**된다 — 두 번째 통보가 없어 자기 치유 경로가 구조적으로 없다.
+                #
+                # 채택은 **정확히 1개 전략만 pending 이고 그 전략이 미보유**일 때뿐이다.
+                # 0개·2개 이상은 물러선다(fail-open, 결과 집합 ⊆ 현행). 수동 매매·외부
+                # 주문은 우리 `pending_buys` 에 없으므로 **한 글자도 바뀌지 않는다**.
+                pending_owner = self._resolve_pending_buy_owner(ticker)
+                if pending_owner is not None:
+                    strategy_id = pending_owner
+                    strategy_from_pending = True
+                    logger.warning(
+                        "[buy_fill_strategy_from_pending] order_no=%s ticker=%s strategy=%s "
+                        "qty_src=%s incr=%d filled_total=%d ordered=%d — 발사 창 귀속",
+                        order_no, t(ticker), strategy_id, qty_src,
+                        quantity, total_filled, ordered_qty,
+                    )
                 # P1-B (B-2) — momentum 하드코딩 폴백 직전, ticker 가 이미 어느 전략이든
-                # 보유 중이면 덮어쓰기 대신 skip (기존 포지션 보존, 377450 실사고 재현 차단).
-                if self.registry.is_ticker_held_by_any(ticker):
+                # 보유/주문중이면 덮어쓰기 대신 skip (기존 포지션 보존, 377450 실사고 재현 차단).
+                # ⚠️ 문구 정정(cycle331) — 종전 "이미 타 전략 보유 중" 은 **거짓이었다**.
+                # 실측 2건 모두 *타 전략*이 아니라 **자기 전략**이었고 *보유*가 아니라
+                # **주문 중**이었다. 운영자가 그 ERROR 를 읽고 정확히 반대로 이해했다.
+                elif self.registry.is_ticker_held_by_any(ticker):
                     logger.error(
                         "[buy_fill_fallback_held_conflict] order_no=%s ticker=%s — 매핑 dict/"
-                        "trade_history 모두 miss + 이미 타 전략 보유 중 → momentum 폴백 skip",
+                        "trade_history 모두 miss + 타 전략 보유/주문중 → momentum 폴백 skip",
                         order_no, ticker,
                     )
                     return
-                logger.warning(
-                    "[buy_fill_strategy_lookup_fallback] order_no=%s ticker=%s — 매핑 dict miss + trade_history miss → momentum 폴백",
-                    order_no, ticker,
-                )
-                strategy_id = "momentum"
-                orphan_momentum_fallback = True
+                else:
+                    logger.warning(
+                        "[buy_fill_strategy_lookup_fallback] order_no=%s ticker=%s — 매핑 dict miss + trade_history miss → momentum 폴백",
+                        order_no, ticker,
+                    )
+                    strategy_id = "momentum"
+                    orphan_momentum_fallback = True
             else:
                 logger.info(
                     "[buy_fill_strategy_lookup_recovered] order_no=%s ticker=%s strategy=%s — 매핑 dict miss + trade_history 복구",
@@ -2588,7 +2654,23 @@ class OrderEngine:
                 ticker, TradeType.BUY, TradeStatus.PARTIAL,
                 strategy=strategy_id, price=price, order_no=order_no,
             )
-            self._schedule_cancel(ticker, order_no, ordered_qty, strategy_id)
+            # 🔴 cycle331 필수 동반 조항 — **귀속이 확정된 랏에만** 잔량 취소 타이머를 건다.
+            # cycle331 이 `pending` 귀속 단을 열면서 발사 창의 통보가 **처음으로** 이
+            # 분기에 도달한다. `_cancel_after_wait` 는 30초 뒤 잔량을 취소하는데,
+            # 귀속이 틀린 랏(특히 `boot_manager` 가 KIS 미체결로 seed 한 `pending_buys`
+            # 잔존)에서 걸리면 **사람이 낸 주문을 우리가 취소한다** —
+            # cycle327(주문 나간 뒤 재발사 금지)·cycle329(재주문 타이머는 map 한정)와
+            # 같은 계열의 사고다. 잃는 것은 없다 — 우리 주문이면 매핑이 곧 서고 잔여
+            # 통보가 `src=map` 으로 와서 정상적으로 타이머를 건다.
+            if qty_src == "map" and not strategy_from_pending:
+                self._schedule_cancel(ticker, order_no, ordered_qty, strategy_id)
+            else:
+                logger.warning(
+                    "[buy_partial_no_cancel_timer] order_no=%s ticker=%s strategy=%s "
+                    "src=%s from_pending=%d remaining=%d — 귀속 확정 전이라 취소 타이머 보류",
+                    order_no, t(ticker), strategy_id, qty_src,
+                    int(strategy_from_pending), max(0, ordered_qty - total_filled),
+                )
             logger.info("매수 부분 체결: %s %d/%d주 @ %d (전략: %s)", t(ticker), total_filled, ordered_qty, price, strategy_id)
 
     async def _handle_sell_fill(
