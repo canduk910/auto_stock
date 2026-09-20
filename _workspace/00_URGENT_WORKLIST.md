@@ -36,6 +36,7 @@
 | C7 | `[buy_partial_no_cancel_timer]` · `[fill_partial_no_reorder]` | 0 또는 소수 | 잦으면 귀속 판정이 자주 물러선다는 뜻 |
 | C8 | 21:30 일일 분석의 `top_patterns` | — | ⚠️ cycle334 가 **매수 폴백 skip WARNING** 에 ` (주문번호: %s)` 를 붙였다. 그 줄은 메시지 전문이 패턴 키라 **09-21 전후 문자열 비교 금지**(다른 패턴으로 집계된다) |
 | C9 | `[buy_post_send_error]`(cycle335 신설, ERROR·무cap) | **0건** | 1~4건이면 그 `order_no` 를 KIS 주문내역과 대조(예산을 점유한 채 장부가 없는 주문 목록이다). 🔴 **하루 5건 이상이면 RDS 를 본다** — 이 마커가 느는 것은 경계의 결함이 아니라 DB 가 아픈 것이고, revert 는 경계를 없애 로그만 지운다 |
+| C10 | **161890 실손실 확정** — `trade_history` 에서 매수·매도 체결가와 수수료·세금을 직접 본다 | — | 두 값이 떠돈다: **−11,200(−6.52%)** (cycle331 자문) vs **−11,500(−6.70%)** (체결가 단순 차). 둘 다 내부적으로는 정합해서 차이의 원인(수수료·세금 vs 실제 체결가)을 모른다. 🔴 보고서·문서에는 그때까지 **「약 −1만 1천 원(−6.5% 안팎)」** 으로만 쓴다 — 실측 전에 소수점을 확정하지 않는다 |
 
 ### 다음 작업 (워크플로가 39건에서 추림, 사용자 승인 = B2·B3·B5·A)
 
@@ -46,7 +47,8 @@
   - **C** 🔴 `_sync_orders_to_db` 의 `strategy` 폴백에 `order_engine._order_strategy` 한 단 추가 — `scheduler.py:2357-2358` 의 `"momentum"` 폴백이 **성과 귀인을 붕괴**시킨다(메모리 「1순위 위험」과 정면). 매핑은 살아 있어 한 줄
   - **D** `PARTIAL`(`:2695`)·`CANCELLED`(`:2942`) UPDATE 의 `affected==0` 무관측 — 장부 행이 없으면 부분체결·취소가 한 글자도 안 남는다. 관측만 추가
   - **E** 🔴 `pending_buy_amounts` 키를 `(ticker, order_no)` 로 — **피라미딩 선결.** 지금은 `ticker` 단일 키라 같은 종목 두 번째 주문이 첫 번째를 덮고, 첫 **부분**체결이 전체를 해제한다. `strategy_base.py`+`order_engine.py`(8영역)
-- **남은 것** = A~E · B4 3~7단계 · B6(LTV 상한가 당일 트레일링 부재) · B7(`_handle_sell_fill` 전량 판정이 `ordered_qty` 기준) · F3/F4(자문 `cycle329`·`cycle332` 의 별건 카드 J-1~J-4) · D1(F1 배분 재조정 — **월 07:45 부팅 후**)
+- **F(작음, 테스트 전용)** = `[sell_post_send_error]` 에도 `rec.exc_info is not None` 단언이 없다(cycle335 관문 G3 가 매수 축을 닫으면서 "매도 축에도 같은 구멍" 이라고 남겼다). `logger.exception` → `logger.error` 로 바뀌면 **레벨도 메시지도 같고 traceback 만 사라져** 「RDS 가 아픈가」 판정 근거가 없어진다. 한 줄이고 `none` 모드(재시작 없음)
+- **남은 것** = A~F · B4 3~7단계 · B6(LTV 상한가 당일 트레일링 부재) · B7(`_handle_sell_fill` 전량 판정이 `ordered_qty` 기준) · F3/F4(자문 `cycle329`·`cycle332` 의 별건 카드 J-1~J-4) · D1(F1 배분 재조정 — **월 07:45 부팅 후**)
 
 ---
 
