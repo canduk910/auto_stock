@@ -1013,10 +1013,11 @@ class OrderEngine:
         (흡수기가 매수 2곳에만 있었다). 이제 그 규칙은 한 곳에서만 고친다.
 
         🔴 **이 함수는 경계를 닫지 않는다 — 예외를 그대로 전파한다.**
-        접수 후 경계(cycle327 ⓑ)는 **호출자 층**의 책임이다. 매도는
-        `_persist_sell_pending_after_send` 래퍼가 닫고, **매수는 아직 닫지 않는다**
-        (그 부재는 결함이고 별도 승인 사이클 소관이다 — 설계 카드 §2B).
-        여기에 `try` 를 들이면 매수 두 경로의 예외 전파가 **조용히 바뀐다**.
+        접수 후 경계(cycle327 ⓑ)는 **호출자 층**의 책임이고, 축마다 래퍼가 하나씩
+        닫는다 — `_persist_buy_pending_after_send`(cycle335) ·
+        `_persist_sell_pending_after_send`(cycle328). 여기에 `try` 를 들이면 두 래퍼의
+        `except` 가 영영 도달 불가가 되어 **경계가 어느 축에 있는지 알 수 없게 된다**
+        (좁히기·지우기 같은 회귀가 무증상이 된다).
 
         🔴 **본문 앞부분에 `await` 를 추가하지 않는다.** 최초 양보점이
         `_insert_pending_or_absorb_race` 안의 `await insert_trade` 라는 사실이
@@ -1044,6 +1045,65 @@ class OrderEngine:
             await self._insert_pending_or_absorb_race(
                 record, side=side, ticker=ticker, order_no=order_no,
                 strategy_id=strategy_id, path=path,
+            )
+
+    async def _persist_buy_pending_after_send(
+        self,
+        *,
+        ticker: str,
+        order_no: str,
+        strategy_id: str,
+        record_price: int,
+        quantity: int,
+        path: str,
+    ) -> None:
+        """🔴 cycle335 — 호출 시점에 **주문은 이미 나갔다**(매수 축 경계).
+
+        매도 래퍼(`_persist_sell_pending_after_send`)와 같은 계약이고, 막는 피해만
+        다르다. 여기서 예외가 새면 `execute_buy` 의 실패 정리 코드가 **발사 성공 뒤에**
+        실행된다:
+
+        - 주 경로 → `except Exception:` 이 `pending_buys.discard` +
+          `pending_buy_amounts.pop` 후 `raise`. 그러면 ⓐ `is_ticker_blocked_for_buy`
+          가 False 가 되어 **같은 종목을 또 사고**(래치 없는 momentum·VB·LTV)
+          ⓑ `_calc_used_funds` 가 그 금액을 잊어 **전략 예산이 이중으로 쓰이고**(7전략)
+          ⓒ `raise` 가 `risk.on_tick`(try 없음)을 관통해 **그 틱의 뒤 전략들이 청산
+          평가를 잃고** ⓓ `cached_buyable_at = 0.0` 이 실행되지 않아 최대 60초 stale 인
+          가용액으로 낸 다음 주문이 잔고부족 거부 → `block_buy(+900s)` = **그 전략
+          15분 전면 매수 정지**.
+        - 폴백 경로 → 핸들러가 `except KisApiError` **하나뿐**이라 non-`KisApiError` 는
+          형제 핸들러(`except Exception:`)가 받지 못하고(파이썬: `except` 블록 안에서
+          난 예외는 같은 `try` 의 다른 `except` 로 가지 않는다) `execute_buy` 를
+          통째로 관통한다.
+
+        🔴 **`pending_buys` 를 풀지 않는다.** 접수된 매수는 「예약된 자금」이 아니라
+        **이미 묶인 자금**이다(KIS 가 접수 시점에 주문가능금액에서 뺀다). 여기서
+        푸는 것은 자금이 풀린 것이 아니라 **우리가 묶인 사실을 잊는 것**이고, 계좌
+        레벨 방어(`get_buyable`)는 통과하므로 전략 예산 관문만 조용히 무력화된다.
+        최악의 비용은 그 슬롯·금액이 21:30 `_reset_daily_state` 까지 노는 것뿐이다.
+
+        🔴 **그 `except Exception` 을 좁히지 않는다**(매도 `test_g328_3b` 와 같은 이유).
+        타입을 열거하면 빠진 타입 하나가 위 ⓐ~ⓓ 를 **무증상으로** 되살린다.
+
+        🔴 **본문 앞부분에 `await` 를 추가하지 않는다.** 최초 양보점이
+        `_insert_pending_or_absorb_race` 안의 `await insert_trade` 라는 사실이
+        「주문번호 매핑은 `place_order` 응답 직후 동기 영역」 금기의 전제다.
+        """
+        try:
+            await self._persist_pending_after_send(
+                trade_type=TradeType.BUY, ticker=ticker, order_no=order_no,
+                strategy_id=strategy_id, record_price=record_price,
+                quantity=quantity, path=path,
+            )
+        except Exception:
+            # 🔴 `qty`/`price` 를 싣는다 — 매도는 포지션이 남아 사후에 규모를 알 수
+            # 있지만 **매수는 포지션도 장부도 없다**. 이 줄이 그 주문의 규모를 아는
+            # 유일한 채널이다(그 밖에는 KIS 주문내역뿐).
+            logger.exception(
+                "[buy_post_send_error] ticker=%s order_no=%s strategy=%s path=%s "
+                "qty=%d price=%d — 주문은 접수됐다. pending 을 풀지 않고 "
+                "체결통보·동기화에 맡긴다.",
+                ticker, order_no, strategy_id, path, quantity, record_price,
             )
 
     async def _persist_sell_pending_after_send(
@@ -1390,12 +1450,10 @@ class OrderEngine:
             except Exception:
                 logger.debug("[llm_buy_gate_call] 주문 시점 관측 호출 실패", exc_info=True)
 
-            # 체결통보 선행 체크 + PENDING INSERT — 4경로 공용 코어에 위임(cycle334).
-            # 🔴 이 호출은 **경계를 닫지 않는다** — 매수 축의 접수 후 경계 부재는
-            # 결함이고 별도 승인 사이클 소관이다(설계 카드 §2B). 여기에 try 를 들이면
-            # 이 단계가 행위 보존이 아니게 된다.
-            await self._persist_pending_after_send(
-                trade_type=TradeType.BUY,
+            # 체결통보 선행 체크 + PENDING INSERT — 4경로 공용 코어(cycle334)를
+            # 매수 경계 래퍼(cycle335)를 통해 부른다. 🔴 래퍼가 예외를 닫으므로
+            # 아래 `except` 두 개는 **발사 실패에만** 닿는다 — 그것이 이 호출의 요점이다.
+            await self._persist_buy_pending_after_send(
                 ticker=ticker,
                 order_no=result.order_no,
                 strategy_id=strategy.strategy_id,
@@ -1494,9 +1552,11 @@ class OrderEngine:
                     except Exception:
                         logger.debug("[llm_buy_gate_call] 폴백 주문 시점 관측 호출 실패", exc_info=True)
 
-                    # 체결통보 선행 체크 + PENDING INSERT — 4경로 공용 코어(cycle334).
-                    await self._persist_pending_after_send(
-                        trade_type=TradeType.BUY,
+                    # 체결통보 선행 체크 + PENDING INSERT — 4경로 공용 코어(cycle334)를
+                    # 매수 경계 래퍼(cycle335)를 통해 부른다. 🔴 이 자리는 `except
+                    # KisApiError` 핸들러 **안**이라 형제 핸들러가 non-`KisApiError` 를
+                    # 받지 못한다 — 래퍼가 없으면 `execute_buy` 를 통째로 관통한다.
+                    await self._persist_buy_pending_after_send(
                         ticker=ticker,
                         order_no=result.order_no,
                         strategy_id=strategy.strategy_id,

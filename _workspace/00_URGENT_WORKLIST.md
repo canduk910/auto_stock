@@ -16,8 +16,10 @@
 | cycle329 | 발사 창의 **부분 체결이 전량으로 오판**되던 결함. 주문수량 출처 3단 | ✅ `297d335` |
 | cycle330 | 합류자 없는 토큰 발급 실패의 **고아 Future**(CI 를 막고 있었다) | ✅ `b1263c7` |
 | cycle331 | 발사 창의 **매수** 체결이 **Position 을 남기지 않던** 결함 | ✅ `dc0c651` |
-| cycle332 | 매수·매도 **취소 타이머가 서로를 죽이던** 결함 | `73f0337` (CI 중) |
-| cycle333 | AI 자문 적용 경로의 **비중 0 뒷문** | 진행 중 |
+| cycle332 | 매수·매도 **취소 타이머가 서로를 죽이던** 결함 | ✅ `73f0337` |
+| cycle333 | AI 자문 적용 경로의 **비중 0 뒷문** | ✅ `42644e0` |
+| cycle334 | `execute_sell` 리팩토링 2단계(접수 후 PENDING 영속화 **4곳 → 1코어**). 관문 통과 | ✅ `a3f4841` |
+| cycle335 | **매수 축 「접수 후 경계」 부재**(2B). 자문 선행 + 돌연변이 5종 | 진행 중 |
 
 🔴 **오늘 09:00 이 cycle329 아래 맞는 첫 거래일이다.** 그 창이 열리는 것은 처음이다.
 
@@ -32,11 +34,19 @@
 | C5 | `[sell_fill_during_insert]`·`[sell_position_gone]` | 0 또는 소수 | 🔴 **INFO 라 `system_logs` 보존 2일** — 월·화 안에 안 보면 영구 소실 |
 | C6 | `[cash_usage_ratio_source]` · `[param_drift] count=39` | `reason=auto_disabled applied=1.00` | `reason=computed` 면 예산이 1/4 — 즉시 정지 |
 | C7 | `[buy_partial_no_cancel_timer]` · `[fill_partial_no_reorder]` | 0 또는 소수 | 잦으면 귀속 판정이 자주 물러선다는 뜻 |
+| C8 | 21:30 일일 분석의 `top_patterns` | — | ⚠️ cycle334 가 **매수 폴백 skip WARNING** 에 ` (주문번호: %s)` 를 붙였다. 그 줄은 메시지 전문이 패턴 키라 **09-21 전후 문자열 비교 금지**(다른 패턴으로 집계된다) |
+| C9 | `[buy_post_send_error]`(cycle335 신설, ERROR·무cap) | **0건** | 1~4건이면 그 `order_no` 를 KIS 주문내역과 대조(예산을 점유한 채 장부가 없는 주문 목록이다). 🔴 **하루 5건 이상이면 RDS 를 본다** — 이 마커가 느는 것은 경계의 결함이 아니라 DB 가 아픈 것이고, revert 는 경계를 없애 로그만 지운다 |
 
 ### 다음 작업 (워크플로가 39건에서 추림, 사용자 승인 = B2·B3·B5·A)
 
-- ✅ B2 = cycle331 · ✅ B3 = cycle332 · ✅ B5 = cycle333 · ✅ A1~A3
-- **남은 것** = B4(`execute_sell` 리팩토링 2단계 — 선행: 매수 축 대칭 단언) · B6(LTV 상한가 당일 트레일링 부재) · B7(`_handle_sell_fill` 전량 판정이 `ordered_qty` 기준) · F3/F4(자문 `cycle329`·`cycle332` 의 별건 카드 J-1~J-4) · D1(F1 배분 재조정 — **월 07:45 부팅 후**)
+- ✅ B2 = cycle331 · ✅ B3 = cycle332 · ✅ B5 = cycle333 · ✅ A1~A3 · ✅ B4 2단계 = cycle334 · ✅ 2B = cycle335
+- **cycle335 자문이 낸 별건 카드 5** (`_workspace/domain_consult/cycle335_buy_post_send_boundary.md` §5)
+  - **A** `buying_reconcile` — `selling_reconcile` 대칭. 미체결 주문의 `pending` 회수(3중 가드 필요). 신규 leaf + `scheduler.py`
+  - **B** 거래소 자동취소 통보 처리(GTP 08:50 · KRX 마감 미체결) — 「pending 유지」 판정이 틀리는 **유일한** 경우를 닫는다. 선결 = 취소 프레임 판별 필드 실측. `handler.py`+`order_engine.py` **둘 다 8영역**
+  - **C** 🔴 `_sync_orders_to_db` 의 `strategy` 폴백에 `order_engine._order_strategy` 한 단 추가 — `scheduler.py:2357-2358` 의 `"momentum"` 폴백이 **성과 귀인을 붕괴**시킨다(메모리 「1순위 위험」과 정면). 매핑은 살아 있어 한 줄
+  - **D** `PARTIAL`(`:2695`)·`CANCELLED`(`:2942`) UPDATE 의 `affected==0` 무관측 — 장부 행이 없으면 부분체결·취소가 한 글자도 안 남는다. 관측만 추가
+  - **E** 🔴 `pending_buy_amounts` 키를 `(ticker, order_no)` 로 — **피라미딩 선결.** 지금은 `ticker` 단일 키라 같은 종목 두 번째 주문이 첫 번째를 덮고, 첫 **부분**체결이 전체를 해제한다. `strategy_base.py`+`order_engine.py`(8영역)
+- **남은 것** = A~E · B4 3~7단계 · B6(LTV 상한가 당일 트레일링 부재) · B7(`_handle_sell_fill` 전량 판정이 `ordered_qty` 기준) · F3/F4(자문 `cycle329`·`cycle332` 의 별건 카드 J-1~J-4) · D1(F1 배분 재조정 — **월 07:45 부팅 후**)
 
 ---
 

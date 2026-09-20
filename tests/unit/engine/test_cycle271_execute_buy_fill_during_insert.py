@@ -321,6 +321,20 @@ def _marker_records(caplog) -> list[str]:
     ]
 
 
+def _post_send_error_records(caplog) -> list[str]:
+    """cycle335 접수 후 경계 마커 — WARNING 이상 + 접두 토큰.
+
+    `_marker_records` 와 **짝을 이룬다**: 코어가 예외를 성공으로 흡수하면 이쪽이 0행이
+    되고, 흡수하지 않고 경계가 받으면 이쪽이 1행 · 저쪽이 0행이다. 두 마커의
+    배타성이 「흡수했는가 / 받았는가」를 가르는 판별자다.
+    """
+    return [
+        r.getMessage() for r in caplog.records
+        if r.levelno >= logging.WARNING
+        and r.getMessage().startswith("[buy_post_send_error]")
+    ]
+
+
 # ---------------------------------------------------------------------------
 # C1 — 예외 없이 성공한다
 # ---------------------------------------------------------------------------
@@ -338,8 +352,13 @@ async def test_c1_2_fallback_path_when_full_fill_lands_during_insert_then_no_exc
     """지정가 5호가 폴백 경로도 동일 계약 (C4). [RED]
 
     시장가 거부(APBK1943) → 폴백 place_order → 그 PENDING INSERT 도중 전량 체결 착지.
-    ⚠️ 폴백 INSERT(`order_engine.py:471`)는 `except KisApiError as e:` **핸들러 안**이라
-    바깥 `except Exception:` (`:489`) 이 잡지 못한다 — 예외가 호출자로 직행한다.
+    ⚠️ 폴백 INSERT 는 `except KisApiError as e:` **핸들러 안**이라 형제 핸들러
+    `except Exception:` 이 잡지 못한다(파이썬: `except` 블록 안에서 난 예외는 같은
+    `try` 의 다른 `except` 로 가지 않는다). cycle335 **전**에는 그래서 예외가
+    `execute_buy` 를 통째로 관통해 `risk.on_tick` 을 죽였고, 지금은 접수 후 경계
+    `_persist_buy_pending_after_send` 가 그 자리에서 받는다. **이 케이스가 재는 것은
+    그 race 가 애초에 예외를 만들지 않는다는 것**(코어의 흡수기)이고, 경계는 그 뒤의
+    안전망이다.
     """
     env.state.place_order_error = KisApiError("1", "APBK1943", "시장가매매불가 종목입니다")
     env.injector.armed = True
@@ -531,7 +550,18 @@ async def test_c5_1_when_full_fill_during_insert_then_marker_emitted_once(env, c
 
 @pytest.mark.asyncio
 async def test_c5_2_fallback_when_full_fill_during_insert_then_marker_emitted_once(env, caplog):
-    """폴백 경로도 같은 마커를 남긴다. [RED]"""
+    """폴백 경로도 같은 마커를 남기고, **`path=fallback` 으로 구별된다**. [RED]
+
+    🔴 `path=` 단언은 cycle334 관문이 MT-B 로 올린 자리의 **매수 축 절반**이다
+    (매도 축은 `test_cycle327_sell_fill_during_insert.py` 가 이미 닫았다).
+    `path` 는 호출부 → 경계 래퍼 → 코어 → 흡수기 **3홉**을 지나는데, 끝의 두 홉만
+    막혀 있고 가운데 홉(래퍼 → 코어 전달 한 줄)은 무방비였다 — 그 한 줄을
+    `path="market"` 으로 고정해도 리포 전체가 초록이었다(관문 2026-09-21 실측).
+
+    피해는 관측 한정이지만 **조용히 갈라진다** — `path` 는 "INSERT 도중 체결이 주
+    주문에 착지했나 폴백 주문에 착지했나" 를 읽는 유일한 채널인데, skip WARNING 의
+    접두 수식어는 계속 올바르므로 로그만 보면 모순이 안 보인다.
+    """
     caplog.set_level(logging.INFO, logger="src.engine.order_engine")
     env.state.place_order_error = KisApiError("1", "APBK1943", "시장가매매불가 종목입니다")
     env.injector.armed = True
@@ -544,6 +574,10 @@ async def test_c5_2_fallback_when_full_fill_during_insert_then_marker_emitted_on
 
     msgs = _marker_records(caplog)
     assert len(msgs) == 1, f"마커 {MARKER} 가 {len(msgs)}행 (기대 1행): {msgs}"
+    assert "path=fallback" in msgs[0], (
+        f"폴백 체결이 `path=market` 으로 기록됐다 — 래퍼→코어 `path` 전달이 "
+        f"고정됐을 수 있다(두 폴백 경로를 동시에 오염시키는 단일 실패점): {msgs[0]}"
+    )
 
 
 @pytest.mark.asyncio
@@ -561,12 +595,24 @@ async def test_c5_3_when_no_race_then_marker_not_emitted(env, caplog):
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
 async def test_c7_1_when_unique_violation_without_fill_then_still_raises(env, caplog):
-    """체결통보가 없었는데 난 UniqueViolation 은 **그대로 전파**한다. [GREEN — 시정 후에도 유지]
+    """체결통보 증거가 없는 UniqueViolation 은 **성공으로 흡수되지 않는다**. [GREEN]
 
     Green 후보 (a) "insert_trade 를 통째로 try/except UniqueViolationError 로 감싸
     성공 경로로 합류" 는 이 테스트를 깨뜨린다. 판별자는 `_completed_orders` 에 그
     order_no 가 실제로 등록됐는지다 — 즉 "체결통보가 먼저 INSERT 했다"는 **증거**가
     있을 때만 복구해야 한다.
+
+    ⚠️ **cycle335 에서 관측 수단이 바뀌었다(계약은 그대로).** 전에는 예외가
+    `execute_buy` 밖으로 나오는 것을 `pytest.raises` 로 쟀다. 이제 매수 축에도 접수 후
+    경계(`_persist_buy_pending_after_send`)가 있어 예외가 거기서 멎는다 — **주문이 이미
+    거래소에 있는데 발사 실패 정리 코드를 돌리지 않기 위해서다.** 그래서 같은 계약을
+    `[buy_post_send_error]` 1행으로 잰다.
+
+    🔴 **본 계약은 `_marker_records(caplog) == []` 다** — 그것이 "성공으로 흡수하지
+    않았다"를 증명한다. `pytest.raises` 는 옛 관측 수단이었을 뿐이다. 코어에
+    `try/except` 를 들여 조용히 흡수하는 회귀는 **예외가 없어져** 경계 마커가 안 나오므로
+    새 단언이 붉어진다. 예외 **타입** 충실도는 `test_cycle335_buy_post_send_boundary.py`
+    의 코어 층 케이스가 별도로 봉인한다.
     """
     caplog.set_level(logging.INFO, logger="src.engine.order_engine")
     # 체결통보 주입 없이, DB 에 같은 키의 행을 미리 심어 둔다 (다른 원인의 위반).
@@ -576,10 +622,16 @@ async def test_c7_1_when_unique_violation_without_fill_then_still_raises(env, ca
         "quantity": 1, "strategy": "momentum",
     })
 
-    with pytest.raises(UniqueViolationError):
-        await env.engine.execute_buy(TICKER, current_price=PRICE, strategy=env.momentum)
+    await env.engine.execute_buy(TICKER, current_price=PRICE, strategy=env.momentum)
 
     assert _marker_records(caplog) == [], "체결통보 증거 없이 복구 마커가 찍혔다"
+    assert len(_post_send_error_records(caplog)) == 1, (
+        "증거 없는 UniqueViolation 이 접수 후 경계에 도달하지 않았다 — "
+        "코어가 조용히 흡수했거나 경계가 사라졌다"
+    )
+    assert TICKER in env.momentum.state.pending_buys, (
+        "접수된 주문의 pending 이 풀렸다(cycle335 계약)"
+    )
 
 
 @pytest.mark.asyncio
@@ -612,9 +664,15 @@ async def test_c7_2_when_non_unique_violation_with_fill_evidence_then_still_rais
     env.injector.armed = True
     env.injector.fill_ratio = 1.0
 
-    with pytest.raises(ConnectionResetError, match="connection reset by peer"):
-        await env.engine.execute_buy(TICKER, current_price=PRICE, strategy=env.momentum)
+    # ⚠️ cycle335 — 관측 수단이 `pytest.raises` → 경계 마커로 바뀌었다(계약 불변).
+    # 사유·판별력은 `test_c7_1` docstring 참조. 타입 충실도는 코어 층 케이스가 맡는다.
+    await env.engine.execute_buy(TICKER, current_price=PRICE, strategy=env.momentum)
 
+    assert len(_post_send_error_records(caplog)) == 1, (
+        "non-UniqueViolation DB 실패가 접수 후 경계에 도달하지 않았다 — "
+        "m7 뮤테이션(`except UniqueViolationError:` → `except Exception:`)이 "
+        "그것을 '체결통보 선행' 으로 오독해 흡수했을 수 있다"
+    )
     assert env.injector.fired_order_no in env.engine._completed_orders, (
         "픽스처 결함 — 체결통보 증거(_completed_orders 등록)가 실제로 발생하지 않았다"
     )

@@ -224,17 +224,19 @@ run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, recor
 - `is_provisional` 컬럼 = migration 040.
 - 관찰성 한정 — `check_exit`/`check_buy` funnel hook 0건 + risk/order_engine/realtime/auth 참조 0(SAFETY 가드).
 
-## 접수 후 PENDING 영속화 — 4경로 1코어 + 경계는 호출자 층 (cycle334)
+## 접수 후 PENDING 영속화 — 1코어 + 축별 경계 래퍼 2
 
-「선행 체결통보 체크 → skip 로그 → `TradeRecord` 조립 → race 흡수 INSERT」는 **코어 하나**가 한다 — `_persist_pending_after_send(*, trade_type, ticker, order_no, strategy_id, record_price, quantity, path)`. 매수 주·폴백이 **직접**, 매도 두 경로는 **경계 래퍼** `_persist_sell_pending_after_send` 를 거쳐 부른다(코어 호출 = 매수 2 + 래퍼 1 = **정확히 3곳**).
+「선행 체결통보 체크 → skip 로그 → `TradeRecord` 조립 → race 흡수 INSERT」는 **코어 하나**가 한다 — `_persist_pending_after_send(*, trade_type, ticker, order_no, strategy_id, record_price, quantity, path)`. 4 경로(매수 주·폴백 · 매도 주·폴백)는 전부 **축별 경계 래퍼**를 거친다 — `_persist_buy_pending_after_send` · `_persist_sell_pending_after_send`. 코어 직접 호출은 **그 두 래퍼뿐**이고 `execute_buy`/`execute_sell` 안에는 **0건**이다(가드 `test_g328_0c`).
 
-🔴 **경계(cycle327 ⓑ)는 코어에 없다 — 호출자 층의 책임이다.** 코어는 예외를 **그대로 전파**한다. 매도는 래퍼가 닫고 **매수는 아직 닫지 않는다**. 코어에 `try` 를 들이면 매수 두 경로의 예외 전파가 **조용히 바뀐다**(가드 `test_g328_0d`).
+🔴 **경계(cycle327 ⓑ)는 코어에 없다 — 호출자 층의 책임이다.** 코어는 예외를 **그대로 전파**하고, 축별 래퍼가 자기 `except Exception` 으로 받는다. 코어에 `try` 를 들이면 두 래퍼의 `except` 가 **영영 도달 불가**가 되어 좁히기·지우기 회귀가 무증상이 된다(가드 `test_g328_0d`).
 
-- ⚠️ **매수 축의 접수 후 경계 부재는 결함이다**(별도 승인 사이클). 지금 매수는 접수 후 실패가 `:1512` 의 `pending_buys.discard` + `pending_buy_amounts.pop` 으로 흘러 — 그것은 **발사 실패의 정리**인데 발사 **성공** 뒤에도 실행된다 — `is_ticker_blocked_for_buy=False`(같은 종목 재매수) + `_calc_used_funds` 과소계상(**예산 이중 사용**, 미체결 LIMIT 은 하루 종일 안 채워질 수 있다) + `raise` 가 `risk.on_tick`(try 없음) 관통 + `cached_buyable_at` 미무효화(최대 60초 stale). 폴백은 중첩 `try` 의 핸들러가 `except KisApiError` 하나뿐이라 non-`KisApiError` 가 `execute_buy` 를 관통한다. **그 시정은 호출자 층에 세운다**(코어가 아니라).
+- 🔴 **래퍼의 `except Exception` 을 좁히지 않는다 — 구조 가드가 유일한 방어다.** 두 축에서 실측으로 확인했다: 매도는 좁히면 기존 회귀 13건이 **전부 초록**인 채로 접수 성공 주문을 「거부」로 적고 익일청산 큐에 넣고(cycle328), 매수는 회귀 14건 중 **`UniqueViolationError` 케이스가 통과**한다(cycle335 — 좁히기가 「가장 많이 테스트된 타입」을 그대로 잡는다). 타입 표본을 늘려도 같은 종류의 누락에 노출되므로 행위 테스트로는 못 막는다. 가드 = `test_g328_3`/`test_g328_3b`(두 축 parametrize).
+- **접수된 자금은 묶어 둔다** — 접수 후 실패에서 `pending_buys`/`pending_buy_amounts` 를 **풀지 않는다**. 접수된 매수는 KIS 가 주문가능금액에서 이미 뺀 「묶인 자금」이라 푸는 것은 **우리가 묶인 사실을 잊는 것**이고, 계좌 방어(`get_buyable`)는 통과하므로 **전략 예산 관문만 조용히 무력화**된다. 유지의 비용은 **체결 0건인 주문 한정**으로 그 슬롯·금액이 21:30 `_reset_daily_state` 까지 노는 것뿐이다 — 첫 **부분**체결만 나도 `_handle_buy_fill` 이 해제한다(그 블록은 전량 분기 **앞**이다).
+- **마커 2종** — `[buy_post_send_error] ticker= order_no= strategy= path= qty= price=` · `[sell_post_send_error] ticker= order_no= strategy= path=`. 둘 다 **ERROR · 무cap**(21:30 `top_patterns` 편입). 🔴 매수만 `qty=`·`price=` 를 싣는 이유 = 매도는 포지션이 남아 사후에 규모를 알 수 있지만 **매수는 포지션도 장부도 없어** 그 줄이 규모를 아는 유일한 채널이다. 🔴 cap 을 걸지 않는 이유 = 이 마커가 **「예산을 점유한 채 장부가 없는 주문」의 유일한 목록**이라 건별로 KIS 주문내역과 대조해야 한다. **판독** = 하루 5건 이상이면 이 시정의 결함이 아니라 **RDS 가 아픈 것**이다(revert 는 경계를 없애 로그만 지운다).
 - 🔴 **축 파생 방향이 계약이다** — `_PENDING_SIDE_BY_TRADE_TYPE` 가 **행위값(`trade_type`)에서 관측값(`side`)을 파생**시킨다. 반대로 하면 `side` 오타 하나가 `trade_history` 의 매수/매도를 뒤집는다.
 - **수식어 표** `_PENDING_SKIP_PREFIX[(side, path)]` 는 `.get(key, "")` **총함수**다(관측이 행위를 바꾸면 안 된다). ⚠️ `("buy","fallback")` 만 `"매수 폴백 "` 이 아닌 것은 **현행 문구 보존**이다.
-- ⚠️ **의도된 문구 변경 1건** — 매수 폴백 skip WARNING 에 ` (주문번호: %s)` 가 붙는다(정보가 느는 방향). 21:30 `top_patterns` 는 메시지 전문이 키라 **2026-09-21 전후 패턴 문자열을 비교하지 않는다**.
-- 설계 카드 = `_workspace/refactor/2026-09-21_step2_card.md` · 가드 = `tests/unit/ast/test_cycle328_sell_pending_helper.py`(9케이스, 1단계 것을 재조준)
+- ⚠️ **21:30 `top_patterns` 는 메시지 전문이 키다** — 매수 폴백 skip WARNING 에 ` (주문번호: %s)` 가 붙었으므로 **2026-09-21 전후 패턴 문자열을 비교하지 않는다**.
+- 자문 = `_workspace/domain_consult/cycle335_buy_post_send_boundary.md` · 설계 카드 = `_workspace/refactor/2026-09-21_step2_card.md` · 가드 = `tests/unit/ast/test_cycle328_sell_pending_helper.py`(11케이스) · 회귀 = `tests/unit/engine/test_cycle335_buy_post_send_boundary.py`(14케이스) · `test_cycle327_sell_fill_during_insert.py`(6) · `test_cycle271_execute_buy_fill_during_insert.py`(17)
 
 ## 취소 타이머 키 — `(ticker, 축)` (cycle332)
 

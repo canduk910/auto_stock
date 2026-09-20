@@ -163,38 +163,49 @@ def _mapping_assign_lines(fn) -> list[int]:
     return sorted(out)
 
 
+#: 접수 후 PENDING 영속화의 **진입점 계보**. 개명·층 추가가 있을 때마다 여기에
+#: 더하고, 가드 본문은 손대지 않는다 — 이 가드가 보는 계약은 이름이 아니라
+#: 「`execute_buy` 안에서 훅이 그것보다 앞인가」 이고 그 계약은 한 번도 안 바뀌었다.
+#:
+#: cycle271 `_insert_pending_buy_or_absorb_race`
+#:   → cycle327 매수·매도 공용 `_insert_pending_or_absorb_race`
+#:   → cycle334 4경로 공용 코어 `_persist_pending_after_send`
+#:   → cycle335 매수 경계 래퍼 `_persist_buy_pending_after_send`
+#:      (`execute_buy` 는 이제 코어를 직접 부르지 않고 이 래퍼를 부른다)
+_PERSIST_ENTRYPOINTS = frozenset({
+    "_persist_pending_after_send",
+    "_persist_buy_pending_after_send",
+})
+
+
 def _completed_check_lines(fn) -> list[int]:
     """체결통보 선행 **판정에 도달하는 지점**의 lineno (오름차순).
 
     ⚠️ cycle334 에서 그 판정이 `execute_buy` 본문에서 **코어 헬퍼**
-    `_persist_pending_after_send` 안으로 옮겨갔다(4경로 공용화). 계약은 그대로다 —
-    「훅은 그 판정보다 **앞**」. 그래서 판정 그 자체(`ast.Compare`)가 아니라
-    **그 판정에 들어가는 문**(코어 헬퍼 호출)의 lineno 를 본다.
+    `_persist_pending_after_send` 안으로 옮겨갔고, cycle335 가 그 앞에 매수 경계
+    래퍼를 한 층 더 끼웠다. 계약은 그대로다 — 「훅은 그 판정보다 **앞**」.
+    그래서 판정 그 자체(`ast.Compare`)가 아니라 **그 판정으로 들어가는 문**
+    (= `_PERSIST_ENTRYPOINTS` 호출)의 lineno 를 본다.
 
     🔴 `ast.Compare` 로 되돌리면 `execute_buy` 안에 0건이라 **가드가 공허해진다**
-    (훅을 아무 데나 옮겨도 초록이 된다).
+    (훅을 아무 데나 옮겨도 초록이 된다). 이름 하나로 고정하는 것도 같은 결과다 —
+    다음 층이 생기는 순간 0건이 된다. `len(checks) >= 2` 가 그 방어다.
     """
-    out = []
-    for n in ast.walk(fn):
-        if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) \
-                and n.func.attr == "_persist_pending_after_send":
-            out.append(n.lineno)
-    return sorted(out)
+    return _insert_helper_lines(fn)
 
 
 def _insert_helper_lines(fn) -> list[int]:
     """접수 후 PENDING 영속화 호출의 lineno (오름차순).
 
-    계보 — cycle271 `_insert_pending_buy_or_absorb_race` → cycle327 매수·매도 공용
-    `_insert_pending_or_absorb_race` → **cycle334 코어 헬퍼 `_persist_pending_after_send`**
-    (선행 체크·레코드 조립·흡수 INSERT 를 4경로 공용으로 묶었다).
-    이 가드가 보는 것은 `execute_buy` 안에서 **훅이 그것보다 앞인가** 이고, 그 계약은
-    세 번의 개명을 통틀어 한 번도 바뀌지 않았다.
+    🔴 이름 집합(`_PERSIST_ENTRYPOINTS`)으로 찾는 이유 = 이 계보는 사이클마다 한 층씩
+    바뀌는데 **계약은 안 바뀌기** 때문이다. 이름 하나로 고정하면 다음 개명에서
+    `inserts == []` 가 되고, `len(inserts) >= 2` 양성 대조군이 없으면 그 순간
+    가드가 **공허하게 초록**이 된다(호출부 2곳 단언이 그 방어다).
     """
     out = []
     for n in ast.walk(fn):
         if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) \
-                and n.func.attr == "_persist_pending_after_send":
+                and n.func.attr in _PERSIST_ENTRYPOINTS:
             out.append(n.lineno)
     return sorted(out)
 
