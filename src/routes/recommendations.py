@@ -19,7 +19,10 @@ from src.engine.recommendation_engine import PARAM_RANGES
 from src.engine.scheduler import trading_scheduler
 from src.models.recommendation import ApplyRequest
 from src.models.response import ApiResponse
-from src.routes.strategies import _WEIGHT_SUM_TOLERANCE
+from src.routes.strategies import (
+    _WEIGHT_SUM_TOLERANCE,
+    _held_tickers_from_db as _weight_zero_blocked_by_holdings,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +43,51 @@ async def get_rec(rec_id: str):
     if not row:
         return ApiResponse(success=False, message="추천 레코드를 찾을 수 없습니다")
     return ApiResponse(success=True, data=row)
+
+
+
+async def _reject_zero_weight_if_held(strategy_id: str, new_weight: float) -> bool:
+    """비중 0 적용을 보유 중인 전략에 대해 막는다 (cycle333). `True` = 거부.
+
+    🔴 고치는 것 = cycle325 가 `PUT /api/strategies/weights` **한 문**에만 세운 가드의
+    뒷문. 이 라우트는 `save_weights()` 를 가드 없이 불렀다.
+
+    왜 위험한가 — `registry.update_weights` 가 `config.enabled = weight > 0` 을
+    **자동 토글**하고 `risk.on_tick` 은 `registry.enabled()` 만 순회하므로
+    **비중 0 = 비활성화 = 그 전략 보유분의 손절·트레일링·익일청산 전면 정지**다.
+    게다가 이 경로는 메모리 `config.weight` 만 바꾸고 `enabled` 는 안 건드려서
+    **당일은 화면·로그가 정상**이고, 다음 재시작에서 `_load_strategy_config` 가
+    DB 의 `enabled=False` 를 읽는 순간 발현한다 — 사고와 증상 사이에 재시작이 끼어
+    원인 추적이 끊긴다.
+
+    - 양수 비중은 **판정 자체를 하지 않는다**(보유 조회는 DB 왕복이고, 그 조회가
+      실패하는 날 정상 비중 적용까지 막히면 안 된다).
+    - 보유 조회 실패는 **fail-open**(cycle325 초판이 여기서 틀렸다 — 무조건 거부는
+      DB 없는 맥락까지 막는다). 이 가드는 사고를 줄이는 보조 장치이지 관문이 아니다.
+    - 거부해도 **파라미터 적용은 그대로 진행**한다 — 자문의 나머지 권고까지 버릴
+      이유가 없다.
+    """
+    try:
+        if new_weight > 0:
+            return False
+    except (TypeError, ValueError):
+        return False
+    try:
+        held = await _weight_zero_blocked_by_holdings(strategy_id)
+    except Exception:
+        logger.warning(
+            "[weight_zero_guard_degraded] sid=%s — 보유 조회 실패, 비중 0 적용을 막지 않는다",
+            strategy_id,
+        )
+        return False
+    if held:
+        logger.warning(
+            "[weight_zero_guard] sid=%s held=%d route=recommendations — "
+            "비중 0 적용 거부(다음 재시작에서 손절 정지)",
+            strategy_id, len(held),
+        )
+        return True
+    return False
 
 
 @router.post("/{rec_id}/apply", response_model=ApiResponse)
@@ -191,17 +239,28 @@ async def apply_rec(rec_id: str, req: ApplyRequest):
 
     # Phase J4 — weight 적용
     applied_weight: float | None = None
+    weight_rejected_reason: str | None = None
     if req.apply_weight and recommended_weight is not None:
         try:
             new_weight = float(recommended_weight)
-            await save_weights({strategy_id: new_weight})
-            # 메모리 registry 반영 (다음 _boot 까지 일관성)
-            strategy.config.weight = new_weight
-            applied_weight = new_weight
-            logger.info(
-                "추천 weight 적용: %s (%s) %.4f → 다음 _boot 에서 자금 재배분",
-                rec_id, strategy_id, new_weight,
-            )
+            if await _reject_zero_weight_if_held(strategy_id, new_weight):
+                # 🔴 비중 0 + 보유 중 = 다음 재시작에서 그 전략 손절이 멈춘다(cycle333).
+                # **비중만 거부하고 파라미터 적용은 그대로 진행한다** —
+                # 자문의 나머지 권고까지 버릴 이유가 없다. 조용히 넘어가지 않도록
+                # 응답 message 에도 싣는다.
+                weight_rejected_reason = (
+                    f"{strategy_id} 은 보유 종목이 있어 비중 0 을 적용하지 않았습니다"
+                    " (비중 0 = 비활성화 = 손절 정지). 보유를 먼저 비우세요."
+                )
+            else:
+                await save_weights({strategy_id: new_weight})
+                # 메모리 registry 반영 (다음 _boot 까지 일관성)
+                strategy.config.weight = new_weight
+                applied_weight = new_weight
+                logger.info(
+                    "추천 weight 적용: %s (%s) %.4f → 다음 _boot 에서 자금 재배분",
+                    rec_id, strategy_id, new_weight,
+                )
         except (TypeError, ValueError):
             logger.warning(
                 "추천 weight 변환 실패: rec_id=%s val=%r — 적용 건너뜀",
@@ -232,6 +291,9 @@ async def apply_rec(rec_id: str, req: ApplyRequest):
         msg_parts.append(f"{applied_count}개 파라미터 적용")
     if applied_weight is not None:
         msg_parts.append(f"weight={applied_weight:.2f} 적용")
+    if weight_rejected_reason:
+        # cycle333 — 조용한 skip 금지. 운영자가 화면에서 바로 알아야 한다.
+        msg_parts.append(f"⚠️ {weight_rejected_reason}")
     if blocked_keys:
         # 사이클 223 F2 — 부분 성공이어도 차단 사실을 숨기지 않는다.
         msg_parts.append(f"{len(blocked_keys)}개 키 안전 가드 차단({', '.join(blocked_keys)})")

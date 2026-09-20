@@ -1,3 +1,45 @@
+# 🔴 2026-09-21(월) — 최신 상태
+
+> 이 문서는 **다른 작업 전에 먼저 읽는다**(루트 `CLAUDE.md`). 아래 「지금 상태」가 정본이고,
+> 그 아래 옛 절들은 **배경**이다 — 날짜 표제를 보고 최신 여부를 판단하라.
+
+## 지금 상태 (2026-09-21 01:xx, 자율 구간 진행 중)
+
+사용자 지시 = **내일(09-21) 07:00까지 쉼없이 진행, 승인은 권고대로. 끝에 아티팩트 보고서.**
+
+### 이 구간에 착지한 것
+
+| 사이클 | 무엇 | 배포 |
+|---|---|---|
+| cycle327 | `execute_sell` 이 주문 **접수 후** 실패를 발사 실패로 오인해 **이미 판 것을 다시 팔던** 결함 | ✅ `4779683` |
+| cycle328 | `execute_sell` 리팩토링 1단계(매도 접수 후 구간을 헬퍼 하나로). 관문 3/3 | ✅ `ae21a10` |
+| cycle329 | 발사 창의 **부분 체결이 전량으로 오판**되던 결함. 주문수량 출처 3단 | ✅ `297d335` |
+| cycle330 | 합류자 없는 토큰 발급 실패의 **고아 Future**(CI 를 막고 있었다) | ✅ `b1263c7` |
+| cycle331 | 발사 창의 **매수** 체결이 **Position 을 남기지 않던** 결함 | ✅ `dc0c651` |
+| cycle332 | 매수·매도 **취소 타이머가 서로를 죽이던** 결함 | `73f0337` (CI 중) |
+| cycle333 | AI 자문 적용 경로의 **비중 0 뒷문** | 진행 중 |
+
+🔴 **오늘 09:00 이 cycle329 아래 맞는 첫 거래일이다.** 그 창이 열리는 것은 처음이다.
+
+### 🔴 월요일 실측 목록 (장 시작 후)
+
+| # | 확인할 것 | 정상값 | 벗어나면 |
+|---|---|---|---|
+| C1 | `[ordered_qty_mismatch]` | **0건** | 1건이라도 뜨면 `fields[16]` 배선 롤백이 최우선 |
+| C2 | `[fill_qty_src_summary] map= payload= increment=` (`_settle` 직전 1행, **리포트에 안 뜬다 — `system_logs` 직접 조회**) | `payload>0` = 성공 서명 | `increment>0` 인데 수동 매매 0 이면 payload 미수신 조사 |
+| C3 | `[buy_fill_strategy_from_pending]` | 있으면 **시정이 실제로 막았다** | 그 ticker 의 `positions` 가 같은 날 안에 있는지 대조 |
+| C4 | `[buy_fill_fallback_held_conflict]` | **0 에 수렴** | 남으면 그 `order_no` 를 KIS 주문내역과 대조(수동/외부인지) |
+| C5 | `[sell_fill_during_insert]`·`[sell_position_gone]` | 0 또는 소수 | 🔴 **INFO 라 `system_logs` 보존 2일** — 월·화 안에 안 보면 영구 소실 |
+| C6 | `[cash_usage_ratio_source]` · `[param_drift] count=39` | `reason=auto_disabled applied=1.00` | `reason=computed` 면 예산이 1/4 — 즉시 정지 |
+| C7 | `[buy_partial_no_cancel_timer]` · `[fill_partial_no_reorder]` | 0 또는 소수 | 잦으면 귀속 판정이 자주 물러선다는 뜻 |
+
+### 다음 작업 (워크플로가 39건에서 추림, 사용자 승인 = B2·B3·B5·A)
+
+- ✅ B2 = cycle331 · ✅ B3 = cycle332 · ✅ B5 = cycle333 · ✅ A1~A3
+- **남은 것** = B4(`execute_sell` 리팩토링 2단계 — 선행: 매수 축 대칭 단언) · B6(LTV 상한가 당일 트레일링 부재) · B7(`_handle_sell_fill` 전량 판정이 `ordered_qty` 기준) · F3/F4(자문 `cycle329`·`cycle332` 의 별건 카드 J-1~J-4) · D1(F1 배분 재조정 — **월 07:45 부팅 후**)
+
+---
+
 # 🔴 2026-09-20(일) 새벽 — 사용자 결정 D1~D4 집행
 
 사용자 결정 (2026-09-19 밤) —

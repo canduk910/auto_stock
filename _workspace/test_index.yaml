@@ -1068,6 +1068,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -2158,6 +2159,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -3248,6 +3250,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -4338,6 +4341,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -5428,6 +5432,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -6518,6 +6523,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -7608,6 +7614,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -8698,6 +8705,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -9788,6 +9796,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -10878,6 +10887,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -11986,6 +11996,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -13076,6 +13087,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -14168,6 +14180,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -15266,6 +15279,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle90_concurrent_lock.py
       - tests/unit/routes/test_cycle90_emit_persistence.py
       - tests/unit/routes/test_cycle90_fetch_top_500_call.py
@@ -16346,6 +16360,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -17436,6 +17451,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -18526,6 +18542,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -19616,6 +19633,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -20706,6 +20724,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -21796,6 +21815,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -22886,6 +22906,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -23976,6 +23997,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -25066,6 +25088,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -26156,6 +26179,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -27246,6 +27270,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -28340,6 +28365,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle90_concurrent_lock.py
       - tests/unit/routes/test_cycle90_emit_persistence.py
@@ -29426,6 +29452,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -30516,6 +30543,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -31606,6 +31634,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -32696,6 +32725,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -33797,6 +33827,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
       - tests/unit/routes/test_cycle84_route_invalid_limit.py
@@ -34881,6 +34912,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -35971,6 +36003,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -37060,6 +37093,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -38151,6 +38185,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -39241,6 +39276,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -40331,6 +40367,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -41421,6 +41458,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -42511,6 +42549,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -43601,6 +43640,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -44691,6 +44731,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -45781,6 +45822,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -46871,6 +46913,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -47961,6 +48004,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -49051,6 +49095,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -50141,6 +50186,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -51231,6 +51277,7 @@ backend:
       - tests/unit/routes/test_cycle295_gap_route_surface.py
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -52321,6 +52368,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -53472,6 +53520,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -54562,6 +54611,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -55652,6 +55702,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -56742,6 +56793,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -57834,6 +57886,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -58922,6 +58975,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -60012,6 +60066,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -61102,6 +61157,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -62192,6 +62248,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -63282,6 +63339,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -64372,6 +64430,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -65461,6 +65520,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -65551,6 +65611,7 @@ backend:
       - tests/unit/routes/test_cycle253_channel_probe.py
       - tests/unit/routes/test_cycle282_market_state_route.py
       - tests/unit/routes/test_cycle285_market_ops_route.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -66628,6 +66689,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -66710,6 +66772,7 @@ backend:
       - tests/unit/routes/test_cycle282_market_state_route.py
       - tests/unit/routes/test_cycle285_market_ops_route.py
       - tests/unit/routes/test_cycle290_killswitch_put.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -67787,6 +67850,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -68877,6 +68941,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -69967,6 +70032,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -71057,6 +71123,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -72147,6 +72214,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -73237,6 +73305,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -74326,6 +74395,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -75425,6 +75495,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -76507,6 +76578,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -77598,6 +77670,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -78687,6 +78760,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -79777,6 +79851,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -80866,6 +80941,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -81957,6 +82033,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -83047,6 +83124,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -84137,6 +84215,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -85227,6 +85306,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -86317,6 +86397,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -87407,6 +87488,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -88497,6 +88579,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -89587,6 +89670,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -90677,6 +90761,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -91767,6 +91852,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -92887,6 +92973,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -93977,6 +94064,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -95067,6 +95155,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -96157,6 +96246,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -97247,6 +97337,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -98337,6 +98428,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -99427,6 +99519,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -100521,6 +100614,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -101610,6 +101704,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -102700,6 +102795,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -103790,6 +103886,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -103872,6 +103969,7 @@ backend:
       - tests/unit/routes/test_cycle282_market_state_route.py
       - tests/unit/routes/test_cycle285_market_ops_route.py
       - tests/unit/routes/test_cycle290_killswitch_put.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -104948,6 +105046,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -106038,6 +106137,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -107128,6 +107228,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -108218,6 +108319,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -109308,6 +109410,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -110398,6 +110501,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -111491,6 +111595,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -112641,6 +112746,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -113731,6 +113837,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -114825,6 +114932,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -115915,6 +116023,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -117005,6 +117114,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -118095,6 +118205,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -119246,6 +119357,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -119322,6 +119434,7 @@ backend:
       - tests/unit/routes/test_cycle253_channel_probe.py
       - tests/unit/routes/test_cycle282_market_state_route.py
       - tests/unit/routes/test_cycle285_market_ops_route.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -119401,6 +119514,7 @@ backend:
       - tests/unit/routes/test_cycle293_kill_switch_route.py
       - tests/unit/routes/test_cycle295_gap_route_surface.py
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -120483,6 +120597,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_route_404.py
       - tests/unit/routes/test_cycle84_route_invalid_limit.py
@@ -120591,6 +120706,7 @@ backend:
       - tests/unit/engine/test_cycle271_execute_buy_fill_during_insert.py
       - tests/unit/engine/test_cycle273a_partial_row_full_fill_no_correction.py
       - tests/unit/engine/test_cycle273b_161580_cross_order_overwrite.py
+      - tests/unit/engine/test_order_engine_buy.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
       - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     transitive_tests:
@@ -121483,7 +121599,6 @@ backend:
       - tests/unit/engine/test_market_regime_buy_block_state.py
       - tests/unit/engine/test_multiday_strategies_registry.py
       - tests/unit/engine/test_observability_logs.py
-      - tests/unit/engine/test_order_engine_buy.py
       - tests/unit/engine/test_order_engine_sell_pre_nxt_preconvert.py
       - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
       - tests/unit/engine/test_param_ranges_vcp.py
@@ -121635,6 +121750,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -122725,6 +122841,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -123815,6 +123932,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -124905,6 +125023,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -125995,6 +126114,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -126040,6 +126160,7 @@ backend:
       - tests/unit/routes/test_cycle278_params_validation.py
       - tests/unit/routes/test_cycle290_killswitch_put.py
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle90_concurrent_lock.py
       - tests/unit/routes/test_cycle90_lock_release.py
       - tests/unit/routes/test_cycleF_te_endpoint.py
@@ -126905,6 +127026,7 @@ backend:
   src/routes/recommendations.py:
     direct_tests:
       - tests/contract/test_routes_recommendations.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -127082,6 +127204,7 @@ backend:
       - tests/unit/routes/test_cycle253_channel_probe.py
       - tests/unit/routes/test_cycle282_market_state_route.py
       - tests/unit/routes/test_cycle285_market_ops_route.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -128478,6 +128601,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -129566,6 +129690,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -130659,6 +130784,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -131746,6 +131872,7 @@ backend:
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
       - tests/unit/routes/test_cycle297_llm_retrospective_route.py
       - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
+      - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -133272,10 +133399,10 @@ frontend:
       - >-
         frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
       - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
-generated_at: '2026-09-20T15:37:33.813Z'
+generated_at: '2026-09-20T15:49:45.058Z'
 stats:
   backend_modules: 157
-  backend_tests: 1071
+  backend_tests: 1072
   frontend_modules: 118
   frontend_tests: 95
   unmapped_modules:

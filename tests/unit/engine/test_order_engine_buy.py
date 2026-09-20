@@ -35,6 +35,7 @@ from src.engine.strategy_base import (
 from src.engine.strategy_registry import StrategyRegistry
 from src.models.balance import BuyableInfo
 from src.models.order import OrderDivision, OrderResult, OrderSide
+from src.models.trade import TradeStatus, TradeType
 
 pytestmark = pytest.mark.unit
 
@@ -640,3 +641,86 @@ async def test_execute_buy_post_fallback_still_works_for_apbk1943(
     second_call = mock_place_order.await_args_list[1]
     assert second_call.kwargs["price"] == expected_fallback
     assert second_call.kwargs.get("order_division") == OrderDivision.LIMIT
+
+
+# ---------------------------------------------------------------------------
+# cycle333 (A3) — 매수 PENDING record 의 **값**을 봉인한다
+# ---------------------------------------------------------------------------
+#
+# cycle328 관문 리뷰에서 tester·tdd-engineer 가 **독립적으로** 같은 구멍을 찾았다 —
+# 매도 PENDING 행의 `price`/`quantity` 를 단언하는 테스트가 리포 전체에 **0건**이라
+# 값 맞바꿈이 광역 스위트를 전부 초록 통과했다. cycle328 이 매도 축(시나리오 J)을
+# 닫았고, 이것이 **매수 축의 대칭**이다.
+#
+# 🔴 왜 지금인가 = `execute_sell` 리팩토링 **2단계**가 매수 2곳을 같은 헬퍼로 올린다.
+# 그러면 값이 **이름 있는 인자 네 개**로 넘어가 실수로 뒤바꾸기 쉬워지는데, 지금
+# 매수 축은 `record_arg.price` 하나(폴백 경로)만 보고 `quantity`/`strategy`/`ticker`/
+# `trade_type`/`status` 는 주·폴백 어느 쪽도 안 본다. **그 상태로 2단계에 들어가면
+# 방금 매도에서 닫은 구멍이 매수 쪽에 열린 채로 인자가 추가된다.**
+#
+# 판별력 전제 = `price=4500` · `quantity=10` 이 자릿수까지 달라 어느 쌍을 맞바꿔도 깨진다.
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_buy_pending_record_carries_order_price_and_quantity(
+    engine: OrderEngine,
+    strategy: StrategyBase,
+    mock_get_buyable: AsyncMock,
+    mock_insert_trade: AsyncMock,
+    mock_place_order: AsyncMock,
+):
+    """🔴 **주 경로** PENDING 행 6필드 — 지금은 `await_count` 만 보고 값은 안 본다."""
+    mock_place_order.return_value = _success_result("ORDER-Z-1")
+
+    await engine.execute_buy("012200", 4500, strategy)
+
+    assert mock_insert_trade.await_count == 1
+    record = mock_insert_trade.await_args.args[0]
+    assert record.order_no == "ORDER-Z-1"
+    assert record.ticker == "012200"
+    assert record.trade_type == TradeType.BUY
+    assert record.status == TradeStatus.PENDING
+    assert record.strategy == "momentum"
+    assert record.price == 4500, (
+        f"PENDING 가격 {record.price} (기대 4500 = 주문가). "
+        "가격·수량 인자가 뒤바뀌었을 수 있다"
+    )
+    assert record.quantity == 10, f"PENDING 수량 {record.quantity} (기대 10)"
+
+
+@pytest.mark.asyncio
+async def test_buy_fallback_pending_record_carries_fallback_price_symmetrically(
+    engine: OrderEngine,
+    strategy: StrategyBase,
+    mock_get_buyable: AsyncMock,
+    mock_insert_trade: AsyncMock,
+    mock_place_order: AsyncMock,
+):
+    """🔴 **폴백 경로**도 주 경로와 **대칭 6필드**.
+
+    이 결함이 실제로 나는 방식은 「주 경로 블록을 폴백에 복붙하고 두 줄만 고치는 것」이라,
+    폴백에 단언이 하나뿐이면 고치지 않은 나머지가 무방비다. 비대칭이 뿌리였다.
+    """
+    from src.engine.util.tick_size import step_up
+
+    mock_place_order.side_effect = [
+        KisApiError(rt_cd="1", msg_cd="APBK1943", msg1="시장가매매불가 종목입니다."),
+        _success_result("ORDER-Z-2"),
+    ]
+    expected_fallback = step_up(4500, steps=5)
+    assert expected_fallback != 4500, "폴백가와 주문가가 같으면 판별력이 0 이다"
+    assert expected_fallback != 10, "폴백가와 수량이 같으면 맞바꿈을 판별할 수 없다"
+
+    await engine.execute_buy("012200", 4500, strategy)
+
+    assert mock_insert_trade.await_count == 1
+    record = mock_insert_trade.await_args.args[0]
+    assert record.price == expected_fallback, (
+        f"폴백 PENDING 가격 {record.price} (기대 {expected_fallback}) — "
+        "주문가 4500 이 들어갔다면 폴백가가 기록에서 사라진다"
+    )
+    assert record.quantity == 10
+    assert record.order_no == "ORDER-Z-2"
+    assert record.ticker == "012200"
+    assert record.trade_type == TradeType.BUY
+    assert record.status == TradeStatus.PENDING
+    assert record.strategy == "momentum"
