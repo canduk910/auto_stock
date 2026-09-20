@@ -224,6 +224,26 @@ run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, recor
 - `is_provisional` 컬럼 = migration 040.
 - 관찰성 한정 — `check_exit`/`check_buy` funnel hook 0건 + risk/order_engine/realtime/auth 참조 0(SAFETY 가드).
 
+## 체결통보 주문수량 — 출처 3단 (cycle329)
+
+`handle_execution_notice` 는 「이 주문의 **주문수량**이 몇 주인가」를 세 출처에서 이 순서로 얻는다.
+
+| `qty_src` | 출처 | 뜻 |
+|---|---|---|
+| `map` | `_order_qty[order_no]` | 우리 주문이고 매핑이 이미 섰다(정상, 하루 수천 건) |
+| `payload` | 체결통보 `fields[16] ODER_QTY` | **매핑 부재 창**에서 주문수량을 아는 유일한 경로 |
+| `increment` | 이번 통보의 증분 체결량 | 둘 다 없을 때의 **현행 폴백 그대로** |
+
+🔴 **고치는 것** — `order_no` 는 KIS 응답이 와야 알 수 있어 `await place_order` 가 걸린 동안 매핑 5종이 **전부 비어 있다**. 그 창에 착지한 통보는 `ordered_qty` 가 증분 체결량으로 폴백돼 `total_filled >= ordered_qty` 가 **항상 참**이 되고 **부분 체결이 전량으로 읽힌다**. 매도는 `del positions[ticker]` 로 **미체결 잔량이 손절 감시 밖으로 사라지고**(15분 sync 까지 무방비), 매수는 `_completed_buy_orders` 가 무장해 잔여 통보가 `[buy_fill_duplicate_ignored]` 로 **조용히 버려진 채** `_sync_positions_from_balance` 가 `is_ticker_held_by_any → continue` 라 **기보유 수량을 영원히 고치지 않는다**(10주를 갖고 3주로 믿는 상태가 익일 `_boot` 까지 간다).
+
+- 🔴 **전량 판정에 출처 게이트를 걸지 않는다** — `qty_src != "increment"` 조건을 붙이면 payload 가 없는 퇴화 상황에서 **수동 전량 매도가 유보**되어 포지션 유령 잔존 + `_selling` 좀비(= 손절 마비)가 된다(`selling_reconcile` 의 `held_zero` 는 해제가 아니라 **유지** 분기다). 자문이 B′안을 배제한 이유다. payload 가 있으면 수동 주문도 정확해지므로 게이트 자체가 불필요하다.
+- 🔴 **재주문 타이머는 `qty_src == "map"` 일 때만 건다** — 이 시정으로 매핑 부재 창의 통보가 처음으로 **부분 분기에 도달**하는데 `_cancel_and_reorder` 에는 포지션 재조회가 **한 줄도 없다**(실측). `payload` 에는 수동 매매 주문도 포함되므로 게이트가 없으면 **사람이 낸 주문을 우리가 30초 뒤 취소하고 다시 낸다** — cycle327 이 봉한 「주문이 나간 뒤의 재발사」와 같은 계열이다. 우리 주문의 잔여는 ms 뒤 다음 통보가 `src=map` 으로 와서 정상적으로 건다(잃는 것 0). 보류는 `[fill_partial_no_reorder]` WARNING 이 남긴다.
+- **overrun 클램프 게이트가 `known_ordered` → `qty_src != "increment"` 로 넓어졌다** — payload 는 KIS 가 준 주문수량이라 매핑과 같은 신뢰도이고, 배제하면 이번에 고치는 그 창에서 클램프만 꺼진다.
+- 🔴 **`fields[16]` 은 cycle235 가 오독해 사고(257720)를 낸 자리다** — 체결수량 소스 `fields[9]` 는 무접촉이고 `test_cycle235_ast_execution_qty.py` 가 그대로 봉인한다. 그리고 매핑이 선 **정상 통보마다** `[ordered_qty_mismatch]` 로 payload 를 대조한다(불일치해도 판정은 `map` 값을 쓴다) — 그 사고는 부분/분할 체결에서만 드러나 오래 잠복했는데, 이 대조는 창을 기다리지 않는다.
+- **관측** = `[fill_qty_src] order_no= ticker= side= src= ordered= filled_total= incr=` — `src=map` 은 **DEBUG**(정상·대량), 나머지 둘은 **WARNING**(`KstDailyEmitCap[(src,ticker,side)]` 1회/일). WARNING 이상만 21:30 `top_patterns` 에 오르므로 **비정상만 리포트에 뜬다**(ρ축 마커가 INFO 라 리포트에 한 글자도 안 들어가 오귀인을 낳은 선례의 반대). `_settle()` 직전 `[fill_qty_src_summary] window=day map= payload= increment=` 1행 — 🔴 **호출부를 try/except 로 감싸지 않는다**(scanner 일일 summary 2종과 같은 이유). **판독** = `payload > 0` 이면 그 창이 실제로 열렸고 **우리가 막았다**(성공 서명) / `increment > 0` 인데 그날 수동 매매를 한 적이 없으면 **조사 신호**(payload 가 안 실려 온다 = 그 창의 결함이 아직 남는 경로).
+- ⚠️ **남는 사각** — payload 가 없으면 매핑 부재 창에서 주문수량을 알 길이 없어 결함이 그대로다. 그 빈도는 `increment` 카운터가 센다.
+- 자문 = `_workspace/domain_consult/cycle329_mapping_absent_full_fill.md` · 회귀 = `tests/unit/engine/test_cycle329_mapping_absent_full_fill.py`(5케이스)
+
 ## 체결단가 정합 (`_handle_buy_fill` / `_handle_sell_fill`)
 
 - `update_trade_status` 호출은 항상 **`price=`** 를 넘긴다 — 체결단가는 체결통보 `CNTG_UNPR`(`handler.py` 의 `fields[10]`)이고, 주문 응답(TTTC0011U/TTTC0012U)에는 `KRX_FWDG_ORD_ORGNO`·`ODNO`·`ORD_TMD` 3키뿐 **체결가가 없다**. 안 넘기면 PENDING INSERT 시점의 `record_price`(LIMIT 주문가 / MARKET 은 scanner `current_price`)가 그대로 남는다.

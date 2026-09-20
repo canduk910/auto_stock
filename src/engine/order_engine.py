@@ -358,6 +358,11 @@ class OrderEngine:
         self._market_rest_blocked_cap: "_KstDailyEmitCap[tuple[str, str]]" = _KstDailyEmitCap()
         # `[market_rest_window]` 카나리아 — 1회/일(단일 키, 차단 여부 무관).
         self._market_rest_window_cap: "_KstDailyEmitCap[str]" = _KstDailyEmitCap()
+        # cycle329 — 주문수량 출처 관측. `map` 은 DEBUG 라 cap 밖이고,
+        # `payload`/`increment` 만 1회/(출처,종목,방향)/일로 WARNING 을 낸다.
+        self._fill_qty_src_logged: "_KstDailyEmitCap[str]" = _KstDailyEmitCap()
+        self._ordered_qty_mismatch_logged: "_KstDailyEmitCap[str]" = _KstDailyEmitCap()
+        self._fill_qty_src_count: dict[str, int] = {}
 
     # ──────────────────────────── 사이클 52 호환 layer (사이클 55 R-1)
 
@@ -874,6 +879,83 @@ class OrderEngine:
                 )
             else:
                 raise
+
+    def _emit_fill_qty_src(
+        self, order_no: str, ticker: str, side: str, qty_src: str,
+        ordered_qty: int, total_filled: int, incr: int,
+    ) -> None:
+        """`[fill_qty_src]` — 주문수량을 **어디서 얻었는지** 남긴다 (cycle329).
+
+        `src=map` 은 정상이고 하루 수천 건이라 **DEBUG**, 나머지 둘은 **WARNING** 이다.
+        `log_analysis_engine._aggregate_log_patterns` 가 WARNING 이상만 `top_patterns`
+        에 넣으므로 **비정상만 21:30 리포트에 오른다** — ρ축 마커가 INFO 라 리포트에
+        한 글자도 안 들어가 오귀인을 낳은 선례의 반대를 택한 것이다.
+
+        판독 = `src=payload` 가 그날 1건이라도 있으면 **그 창이 실제로 열렸고 우리가
+        막았다**(성공 서명). `src=increment` 는 수동·외부 주문이라 그날 수동 매매를
+        했다면 정상이고, **안 했는데 있으면 그것이 조사 신호다**.
+
+        🔴 **행위는 cap 밖** — 이 함수가 무엇을 하든 판정은 이미 끝나 있다. never-raise.
+        """
+        try:
+            self._fill_qty_src_count[qty_src] = self._fill_qty_src_count.get(qty_src, 0) + 1
+        except Exception:
+            pass
+        try:
+            msg_args = (order_no, t(ticker), side, qty_src, ordered_qty, total_filled, incr)
+            fmt = ("[fill_qty_src] order_no=%s ticker=%s side=%s src=%s "
+                   "ordered=%d filled_total=%d incr=%d")
+            if qty_src == "map":
+                logger.debug(fmt, *msg_args)
+                return
+            # 1회/(출처, 종목, 방향)/일 — `order_no` 를 키에 넣으면 cap 이 무력해진다.
+            self._fill_qty_src_logged.emit_once(
+                f"{qty_src}|{ticker}|{side}", logger.warning, fmt, *msg_args,
+            )
+        except Exception:
+            # lazy import — `order_engine` 최상단 `src.*` 의존 표면은 동결돼 있다
+            # (`test_cycle286_ast_scope.py::test_g4_3`). 관측기 실패 경로라 hot path 무관.
+            from src.engine.observer_trace import trace_observer_failure
+            trace_observer_failure(
+                "[fill_qty_src]", f"{qty_src}|{ticker}|{side}", self._fill_qty_src_logged,
+            )
+
+    def _emit_ordered_qty_mismatch(
+        self, order_no: str, ticker: str, side: str, mapped: int, payload: int,
+    ) -> None:
+        """🔴 `[ordered_qty_mismatch]` — payload ODER_QTY 가 우리 기록과 다르다.
+
+        `fields[16]` 배정이 틀리면 cycle235 의 257720 실사고가 재현된다. 그 사고는
+        **부분/분할 체결에서만 드러나** 오래 잠복했다. 이 마커는 매핑이 선 **정상
+        통보마다** 대조하므로 그 창을 기다리지 않고 즉시 드러난다.
+
+        불일치가 있어도 판정은 `map` 값을 쓴다 — payload 는 매핑 부재 창에서만 쓰인다.
+        """
+        try:
+            self._ordered_qty_mismatch_logged.emit_once(
+                f"{ticker}|{side}", logger.warning,
+                "[ordered_qty_mismatch] order_no=%s ticker=%s side=%s mapped=%d payload=%d "
+                "— KIS ODER_QTY 가 우리 주문수량과 다르다 (fields[16] 배정 재확인 요망)",
+                order_no, t(ticker), side, mapped, payload,
+            )
+        except Exception:
+            from src.engine.observer_trace import trace_observer_failure
+            trace_observer_failure(
+                "[ordered_qty_mismatch]", f"{ticker}|{side}",
+                self._ordered_qty_mismatch_logged,
+            )
+
+    def emit_fill_qty_src_daily_summary(self) -> None:
+        """`_settle()` 직전 1행. 🔴 호출부를 try/except 로 감싸지 않는다.
+
+        감싸면 폐기 메서드 잔존 같은 결함이 AttributeError graceful skip 으로 조용히
+        먹혀 운영 가시화가 무력화된다(`scanner` 일일 summary 2종과 같은 이유).
+        """
+        c = self._fill_qty_src_count
+        logger.info(
+            "[fill_qty_src_summary] window=day map=%d payload=%d increment=%d",
+            c.get("map", 0), c.get("payload", 0), c.get("increment", 0),
+        )
 
     #: `path` → 선행 체결통보 로그의 경로 수식어. **관측 전용**이라 조회가 실패해
     #: 행위를 바꿀 수 없어야 한다 — `.get(path, "")` 는 어떤 값에도 raise 하지 않고,
@@ -2116,6 +2198,8 @@ class OrderEngine:
         side: str,
         price: int,
         quantity: int,
+        *,
+        ordered_qty_payload: int = 0,
     ) -> None:
         """체결통보를 처리한다.
 
@@ -2154,9 +2238,36 @@ class OrderEngine:
             )
             return
 
-        # 원래 주문 수량 조회
+        # 원래 주문 수량 조회 — 우선순위 3단 (cycle329)
+        #
+        # 🔴 고치는 것 = `await place_order` 가 걸려 있는 동안 착지한 통보는
+        # `order_no` 매핑이 **아직 비어 있어** `ordered_qty` 가 증분 체결량으로
+        # 폴백되고, 그러면 `total_filled >= ordered_qty` 가 **항상 참**이 되어
+        # 첫 부분 체결이 전량으로 읽힌다. 매도는 미체결 잔량이 손절 감시 밖으로
+        # 사라지고, 매수는 `_completed_buy_orders` 가 무장해 잔여 통보가 조용히
+        # 버려진 채 **영원히 적은 수량으로 믿는다**(15분 sync 도 기보유는 안 고친다).
+        #
+        # `map` = 우리 주문이고 매핑이 이미 섰다(정상, 하루 수천 건)
+        # `payload` = KIS 가 실어 준 ODER_QTY. 매핑 부재 창에서 주문수량을 아는 유일한 길
+        # `increment` = 둘 다 없다 → **현행 폴백 그대로**(행위 변경 0)
         known_ordered = order_no in self._order_qty
-        ordered_qty = self._order_qty.get(order_no, quantity)
+        payload_qty = ordered_qty_payload if ordered_qty_payload > 0 else 0
+        if known_ordered:
+            ordered_qty = self._order_qty[order_no]
+            qty_src = "map"
+            # 🔴 교차검증 — 정상 통보마다 payload 를 대조한다. `fields[16]` 배정이
+            # 틀리면(cycle235 가 한 번 겪었다) 이 마커가 **매핑 부재 창을 기다리지 않고**
+            # 즉시 드러낸다. 관측 전용이고 판정은 `map` 값을 쓴다.
+            if payload_qty and payload_qty != ordered_qty:
+                self._emit_ordered_qty_mismatch(
+                    order_no, ticker, side, ordered_qty, payload_qty,
+                )
+        elif payload_qty:
+            ordered_qty = payload_qty
+            qty_src = "payload"
+        else:
+            ordered_qty = quantity
+            qty_src = "increment"
 
         # 누적 체결 수량 추적
         prev_total = self._filled_qty.get(order_no, 0)
@@ -2166,14 +2277,17 @@ class OrderEngine:
         # cycle235 — overrun 클램프 (BUY·SELL 공통 최후 방어망). 주문수량 초과 체결은
         # 물리적으로 불가하므로 누적 > 주문수량 = 파싱 오독/중복 통보 이상 신호다
         # (257720 실사고: fields[16] ODER_QTY 오독 유입 (1,2) → 합 3 → positions 3주
-        # → 익일 3주 매도 전량 APBK0400). 클램프는 `_order_qty` **매핑이 있을 때만** —
-        # 매핑 부재(수동/외부 주문)의 ordered=quantity 폴백은 신뢰 불가 값이라
-        # 다중 통보를 오캡하면 안 된다 (P1-B 멱등 가드가 기존 계약대로 담당).
+        # → 익일 3주 매도 전량 APBK0400). 클램프는 **주문수량을 실제로 아는 경우만** —
+        # `qty_src == "increment"`(= 매핑도 payload 도 없는 수동/외부 주문)의
+        # ordered=quantity 폴백은 신뢰 불가 값이라 다중 통보를 오캡하면 안 된다
+        # (P1-B 멱등 가드가 기존 계약대로 담당). cycle329 가 `known_ordered` →
+        # `qty_src != "increment"` 로 넓혔다 — payload ODER_QTY 는 KIS 가 준 주문수량이라
+        # 매핑과 같은 신뢰도이고, 그것을 배제하면 이번에 고치는 그 창에서 클램프만 꺼진다.
         # ⚠️ 증분 `quantity` 도 동반 캡 (적대 검증 C235-R1) — `_handle_sell_fill` 이
         # `(price − buy) × quantity` 로 실현손익을 누적하므로, 누적만 캡하고 증분을
         # 원시값으로 흘리면 daily_realized_pnl(일일손실 게이트 소비)이 초과분만큼
         # 왜곡된다. 유효 증분 = ordered − 클램프 전 누적.
-        if known_ordered and ordered_qty > 0 and total_filled > ordered_qty:
+        if qty_src != "increment" and ordered_qty > 0 and total_filled > ordered_qty:
             logger.warning(
                 "[fill_qty_overrun] order_no=%s ticker=%s side=%s total_filled=%d > "
                 "ordered=%d — 주문수량으로 클램프 (파싱/중복 이상 신호, 관측 요망)",
@@ -2183,10 +2297,15 @@ class OrderEngine:
             total_filled = ordered_qty
             quantity = max(0, ordered_qty - prev_total)
 
+        self._emit_fill_qty_src(order_no, ticker, side, qty_src,
+                                ordered_qty, total_filled, quantity)
+
         if side == "BUY":
-            await self._handle_buy_fill(ticker, order_no, price, quantity, total_filled, ordered_qty)
+            await self._handle_buy_fill(ticker, order_no, price, quantity, total_filled,
+                                        ordered_qty, qty_src=qty_src)
         elif side == "SELL":
-            await self._handle_sell_fill(ticker, order_no, price, quantity, total_filled, ordered_qty)
+            await self._handle_sell_fill(ticker, order_no, price, quantity, total_filled,
+                                         ordered_qty, qty_src=qty_src)
 
     async def _unsubscribe_if_no_other_strategy(self, ticker: str) -> None:
         """매도 전량 체결 후 WS 구독 정리 (사이클 15-A, 2026-05-19).
@@ -2240,6 +2359,7 @@ class OrderEngine:
     async def _handle_buy_fill(
         self, ticker: str, order_no: str, price: int,
         quantity: int, total_filled: int, ordered_qty: int,
+        *, qty_src: str = "map",
     ) -> None:
         """매수 체결 처리 — 체결통보 수신 시 올바른 전략에 포지션 등록.
 
@@ -2474,6 +2594,7 @@ class OrderEngine:
     async def _handle_sell_fill(
         self, ticker: str, order_no: str, price: int,
         quantity: int, total_filled: int, ordered_qty: int,
+        *, qty_src: str = "map",
     ) -> None:
         """매도 체결 처리 — 올바른 전략에서 포지션 제거.
 
@@ -2618,7 +2739,22 @@ class OrderEngine:
             # 부분 체결 → PARTIAL, 30초 후 잔여 취소 + 손절 시 재주문
             await update_trade_status(ticker, TradeType.SELL, TradeStatus.PARTIAL, strategy=strategy_id, price=price, profit_loss=profit_loss, order_no=order_no)
             remaining = ordered_qty - total_filled
-            self._schedule_cancel_and_reorder(ticker, order_no, remaining, is_stop_loss=True)
+            # 🔴 cycle329 필수 동반 조항 — **매핑이 확정된 주문에만** 취소·재주문 타이머를 건다.
+            # 이 시정으로 매핑 부재 창의 통보가 처음으로 **부분 분기에 도달**하는데,
+            # `_cancel_and_reorder` 에는 포지션 재조회가 **한 줄도 없어**(실측) 30초 뒤
+            # `place_order(quantity=remaining)` 를 그대로 발사한다. `qty_src="payload"` 는
+            # 수동 매매(MTS/HTS) 주문도 포함하므로, 그대로 두면 **사람이 낸 주문을 우리가
+            # 30초 뒤 취소하고 다시 낸다** — cycle327 이 봉한 「주문이 나간 뒤의 재발사」와
+            # 같은 계열의 사고다. 우리 주문의 잔여는 ms 뒤 다음 통보가 `src=map` 으로 와서
+            # 정상적으로 타이머를 건다(잃는 것이 없다).
+            if qty_src == "map":
+                self._schedule_cancel_and_reorder(ticker, order_no, remaining, is_stop_loss=True)
+            else:
+                logger.warning(
+                    "[fill_partial_no_reorder] ticker=%s order_no=%s side=SELL src=%s "
+                    "remaining=%d — 매핑 확정 전 통보라 재주문 보류",
+                    t(ticker), order_no, qty_src, remaining,
+                )
             logger.info("매도 부분 체결: %s %d/%d주 @ %d (전략: %s)", t(ticker), total_filled, ordered_qty, price, strategy_id)
 
     def _schedule_cancel(self, ticker: str, order_no: str, original_qty: int, strategy_id: str = "momentum") -> None:
@@ -2841,6 +2977,9 @@ class OrderEngine:
         self._nxt_downgrade_logged_today.clear()  # 사이클 54 유지 (사이클 56-C 통합 완료)
         self._completed_buy_orders.clear()  # P1-B (B-1) 멱등 마커 일일 정리
         self._order_channel_logged.clear()  # cycle287 규칙 1 관측 cap 일일 정리
+        self._fill_qty_src_logged.reset_daily()  # cycle329 주문수량 출처 cap
+        self._ordered_qty_mismatch_logged.reset_daily()
+        self._fill_qty_src_count.clear()
         self._order_channel_config_logged.clear()
         self._after_exit_fails.clear()  # cycle287 K9 봉인2 일일 정리
         self._order_exchange.clear()  # cycle287 적대 검증 시정 — order_no 는 하루 단위로만 유일

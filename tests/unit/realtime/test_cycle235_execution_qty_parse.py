@@ -34,9 +34,14 @@ def _payload(*, order_no="0000411400", side="02", ticker="257720",
 @pytest.fixture
 def captured(monkeypatch):
     calls: list[tuple] = []
+    calls_kw: list[dict] = []
 
-    async def _cb(ticker, order_no, side, price, quantity):
+    async def _cb(ticker, order_no, side, price, quantity, **kwargs):
+        # cycle329 — handler 가 `ordered_qty_payload`(fields[16] ODER_QTY)를 함께 넘긴다.
+        # 이 픽스처는 **체결수량 소스**(fields[9])를 보는 것이 목적이라 kwargs 로 받아
+        # 기존 단언을 그대로 둔다. 주문수량 축은 `test_cycle329_*` 가 본다.
         calls.append((ticker, order_no, side, price, quantity))
+        calls_kw.append(kwargs)
 
     monkeypatch.setattr(handler_mod, "_on_execution", _cb)
     # 계좌 필터 비활성 (빈 target → skip)

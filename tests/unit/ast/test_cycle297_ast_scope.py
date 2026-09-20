@@ -495,7 +495,7 @@ _BASE_SHA: dict[str, str] = {
     "src/engine/risk.py":
         "e8614235cc0bea638f8c349b2f6910c94f5f9a5b849f5d65bef0583f959d81c9",
     "src/engine/order_engine.py":
-        "f970c625a33b4e63065eb3b27445e6b61b8f23a392c58c6fa017f519c5afb8ca",
+        "45b77984edd7e11c196da3ade4eb70f0003d8bbc4e175c6666cec72a0e0a7ebc",
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
     # 🔁 cycle302(2026-09-18) 재핀 — 사용자 승인 일봉 backfill **대상** 확대
@@ -509,13 +509,13 @@ _BASE_SHA: dict[str, str] = {
     "src/api/order.py":
         "08c5cafd7b8678ec0d0fa85f856fdea3cce38ad92488c6d74c03cd13faa415bb",
     "src/realtime/handler.py":
-        "23768e6d89ed54b626cce2645a07cc5472ce10120c0b1c81f5d6436ff521ed47",
+        "37b1755210c83cdb2a462e6a37f919b326f8b48bee73d924adcc277d770a8d17",
     "src/realtime/websocket.py":
         "d4c443bde2ed7aeafba3e9471db0ca4efc15a654610555435145a9b305150c5b",
     "src/realtime/websocket_pool.py":
         "8b02442bcf5f558d6f7095b47d2016f004e3746e07ddc91dae8768b1dd46a10d",
     "src/engine/scheduler.py":
-        "088d54efc4927899c1048d01ea7c15265ce87858da25447ac28a1ffaa56f3c23",
+        "49dd1a36f68f3256dd83d58088651c81a3af2972f41bb95ad7995845827b3d09",
     "src/engine/strategy_base.py":
         "869dc20ca561adc561a9ebe9fdb5fe5a3e097f7ec176fdf274d577d509de9252",
     "src/engine/strategies/volatility_breakout.py":
@@ -548,7 +548,7 @@ def test_g2_9b_scheduler_line_budget_and_auth_exclusion_is_explicit() -> None:
     """
     sched = _ROOT / "src/engine/scheduler.py"
     n = len(_read(sched).splitlines())
-    assert n == 3785, f"`scheduler.py` {n}L (착수 시점 3,726L → cycle298 재핀 3,785L)"
+    assert n == 3791, f"`scheduler.py` {n}L (착수 시점 3,726L → cycle298 재핀 3,785L)"
     assert n < 3900, f"`scheduler.py` 라인 상한 3,900 초과 — {n}L"
 
     assert not any(r.startswith("src/auth/") for r in _BASE_SHA), (

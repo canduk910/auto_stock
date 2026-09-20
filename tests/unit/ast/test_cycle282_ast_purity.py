@@ -377,7 +377,7 @@ _BASE_SHA = {
     "src/engine/risk.py":
         "e8614235cc0bea638f8c349b2f6910c94f5f9a5b849f5d65bef0583f959d81c9",
     "src/engine/order_engine.py":
-        "f970c625a33b4e63065eb3b27445e6b61b8f23a392c58c6fa017f519c5afb8ca",
+        "45b77984edd7e11c196da3ade4eb70f0003d8bbc4e175c6666cec72a0e0a7ebc",
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
     # 🔁 cycle302(2026-09-18) 재핀 — 사용자 승인 일봉 backfill **대상** 확대
@@ -395,7 +395,7 @@ _BASE_SHA = {
     "src/realtime/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "src/realtime/handler.py":
-        "23768e6d89ed54b626cce2645a07cc5472ce10120c0b1c81f5d6436ff521ed47",
+        "37b1755210c83cdb2a462e6a37f919b326f8b48bee73d924adcc277d770a8d17",
     "src/realtime/websocket.py":
         "d4c443bde2ed7aeafba3e9471db0ca4efc15a654610555435145a9b305150c5b",
     "src/realtime/websocket_pool.py":
@@ -416,7 +416,7 @@ _BASE_SHA = {
     # `50658e06062a0d38afecab1baa08871b89212e295cc95f2a3af62a2ae076115d`.
     # 8영역은 아니지만 이 사이클이 무접촉을 약속한 파일
     "src/engine/scheduler.py":
-        "088d54efc4927899c1048d01ea7c15265ce87858da25447ac28a1ffaa56f3c23",
+        "49dd1a36f68f3256dd83d58088651c81a3af2972f41bb95ad7995845827b3d09",
     "src/engine/strategy_base.py":
         "869dc20ca561adc561a9ebe9fdb5fe5a3e097f7ec176fdf274d577d509de9252",
     # 전략 7파일 — 🔁 cycle290(킬스위치 등재, 2026-09-13) 재핀. `DEFAULT_PARAMS`

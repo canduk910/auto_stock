@@ -1164,7 +1164,7 @@ _ALLOWED_CONTENT_SHA: dict[str, str] = {
         "95cbb103a38821bb3b68d267a3662094b192fa55ad6071fa8dc4a63726e1c942",
     # (비어 있음 — cycle273 그룹 1·2, cycle274 병합 뒤 2026-09-11 정리. 등록은 승인된 사이클의 Green 이, 비우기는 병합 후속 커밋이 한다)
     "src/engine/order_engine.py":
-        "f970c625a33b4e63065eb3b27445e6b61b8f23a392c58c6fa017f519c5afb8ca",
+        "45b77984edd7e11c196da3ade4eb70f0003d8bbc4e175c6666cec72a0e0a7ebc",
     # ✅ 2026-09-12 (cycle287) — 시각이 거래소·호가유형을 정한다. docstring 만
     # (본문 byte 동일). 자매 가드 네 곳 전부 같은 값.
     "src/api/order.py":
@@ -1209,6 +1209,15 @@ _ALLOWED_CONTENT_SHA: dict[str, str] = {
     #    TODO(커밋 후): 아래 항목을 **삭제**한다.
     "src/auth/CLAUDE.md":
         "da4e55db8182d76f20d4388e8c433ad5cf3110dd0801c65af870e84653c66fb5",
+    # ✅ 2026-09-20 (cycle329) — 체결통보 **주문수량**(`fields[16] ODER_QTY`) 배선.
+    #    사용자 결정("체결통보 주문수량 쓰자") + `domain-consult` 선행. `await place_order`
+    #    도중 착지한 통보는 `order_no` 매핑이 비어 `ordered_qty` 가 **증분 체결량으로
+    #    폴백**되고, `total_filled >= ordered_qty` 가 항상 참이 되어 **부분 체결이 전량으로
+    #    오판**된다. `handler.py` 변경은 파싱 1블록 + 콜백 인자 1개뿐이고 체결수량 소스
+    #    `fields[9]` 는 무접촉이다. 자매 가드 **네 곳 전부** 같은 값.
+    #    TODO(cycle329 커밋 후): 이 항목을 **삭제**한다.
+    "src/realtime/handler.py":
+        "37b1755210c83cdb2a462e6a37f919b326f8b48bee73d924adcc277d770a8d17",
 }
 
 

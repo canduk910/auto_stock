@@ -88,7 +88,7 @@ _BASE_SHA: dict[str, str] = {
     "src/realtime/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "src/realtime/handler.py":
-        "23768e6d89ed54b626cce2645a07cc5472ce10120c0b1c81f5d6436ff521ed47",
+        "37b1755210c83cdb2a462e6a37f919b326f8b48bee73d924adcc277d770a8d17",
     "src/realtime/websocket.py":
         "d4c443bde2ed7aeafba3e9471db0ca4efc15a654610555435145a9b305150c5b",
     "src/realtime/websocket_pool.py":
@@ -110,7 +110,7 @@ _BASE_SHA: dict[str, str] = {
     # 🔴 cycle291 시점: 라인 상한 3,900 에 3줄 남아 한 줄도 금지였다. cycle292 가
     # 예고대로 리팩터해 3,726L 이 됐다(아래 핀 = 그 결과).
     "src/engine/scheduler.py":
-        "088d54efc4927899c1048d01ea7c15265ce87858da25447ac28a1ffaa56f3c23",
+        "49dd1a36f68f3256dd83d58088651c81a3af2972f41bb95ad7995845827b3d09",
     # 🔴 cycle290 이 방금 `DEFAULT_PARAMS` 를 건드렸다 — 또 건드리면 그 증명이 무너진다.
     "src/engine/strategy_base.py":
         "869dc20ca561adc561a9ebe9fdb5fe5a3e097f7ec176fdf274d577d509de9252",
@@ -144,7 +144,7 @@ _BASE_SHA: dict[str, str] = {
 #: 신규 leaf `src/engine/market_op_subscribe.py` 로 추출해(행위 변경 0 · 5줄
 #: 위임 wrapper) 3,897 → 3,726 이 됐다. 값만 옮긴다 — 정확 핀을 상한 핀으로
 #: 완화하면 cycle291 의 무접촉 대리 지표가 사라진다.
-_SCHEDULER_LINES = 3785
+_SCHEDULER_LINES = 3791
 _SCHEDULER_LINE_CAP = 3900
 
 

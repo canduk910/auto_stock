@@ -462,7 +462,7 @@ _PREEXISTING_CONTENT_SHA: dict[str, str] = {
     "src/engine/scanner.py":
         "95cbb103a38821bb3b68d267a3662094b192fa55ad6071fa8dc4a63726e1c942",
     "src/engine/order_engine.py":
-        "f970c625a33b4e63065eb3b27445e6b61b8f23a392c58c6fa017f519c5afb8ca",
+        "45b77984edd7e11c196da3ade4eb70f0003d8bbc4e175c6666cec72a0e0a7ebc",
     "src/api/order.py":
         "08c5cafd7b8678ec0d0fa85f856fdea3cce38ad92488c6d74c03cd13faa415bb",
     # ✅ 2026-09-14 (cycle293) — 시세 채널 리졸버 2단계(속성축 배관). 사용자 승인
@@ -505,6 +505,19 @@ _PREEXISTING_CONTENT_SHA: dict[str, str] = {
     #    TODO(커밋 후): 아래 항목을 **삭제**한다.
     "src/auth/CLAUDE.md":
         "da4e55db8182d76f20d4388e8c433ad5cf3110dd0801c65af870e84653c66fb5",
+    # ✅ 2026-09-20 (cycle329) — 체결통보 **주문수량**(`fields[16] ODER_QTY`) 배선.
+    #    사용자 결정("체결통보 주문수량 쓰자") + `domain-consult` 선행. 고치는 것 =
+    #    `await place_order` 가 걸려 있는 동안 착지한 통보는 `order_no` 매핑이 아직
+    #    비어 `ordered_qty` 가 **증분 체결량으로 폴백**되고, 그러면
+    #    `total_filled >= ordered_qty` 가 항상 참이 되어 **부분 체결이 전량으로 오판**된다.
+    #    매도는 미체결 잔량이 손절 감시 밖으로 사라지고, 매수는 `_completed_buy_orders`
+    #    가 무장해 잔여 통보가 조용히 버려진 채 영원히 적은 수량으로 믿는다.
+    #    `handler.py` 변경은 **파싱 1블록 + 콜백 인자 1개**뿐이다 — 체결수량 소스
+    #    `fields[9]` 는 무접촉이고 `test_cycle235_ast_execution_qty.py` 가 그대로 봉인한다.
+    #    자매 가드 **세 곳 전부** 같은 값(`test_g3_9b` 계약).
+    #    TODO(cycle329 커밋 후): 이 항목을 **삭제**한다.
+    "src/realtime/handler.py":
+        "37b1755210c83cdb2a462e6a37f919b326f8b48bee73d924adcc277d770a8d17",
 }
 
 

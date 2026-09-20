@@ -228,13 +228,13 @@ _BASE_SHA: dict[str, str] = {
     # 🔴 `handler.py` = N-4. tr_id 를 `_handle_tick` 에 넘기는 근본 시정은
     #    미승인 8영역이라 이 사이클 밖이다(이중 채널 **금지**로만 닫는다).
     "src/realtime/handler.py":
-        "23768e6d89ed54b626cce2645a07cc5472ce10120c0b1c81f5d6436ff521ed47",
+        "37b1755210c83cdb2a462e6a37f919b326f8b48bee73d924adcc277d770a8d17",
     "src/realtime/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     # 🔴 `scheduler.py` 무접촉 (절대 규칙 7). `:1382`/`:2728` 두 줄은 §7-B
     #    레거시 재라우팅이 흡수한다. 근본 시정(2줄 치환)은 결정 카드 D-4.
     "src/engine/scheduler.py":
-        "088d54efc4927899c1048d01ea7c15265ce87858da25447ac28a1ffaa56f3c23",
+        "49dd1a36f68f3256dd83d58088651c81a3af2972f41bb95ad7995845827b3d09",
     "src/engine/market_op_subscribe.py":
         "7d58f9464c1ed35e4fa8706d801beb5a6b5c062d5a2941f0db6482d028d3d4ac",
     # 전략 7파일 + 베이스 — 매매 행위 변경 0 의 구조적 증거
@@ -275,7 +275,7 @@ _BASE_SHA: dict[str, str] = {
 #: 먼저 적고 나서 핀을 옮겨라.
 _PIN_APPROVED_BUT_UNUSED: dict[str, str] = {
     "src/engine/order_engine.py":
-        "f970c625a33b4e63065eb3b27445e6b61b8f23a392c58c6fa017f519c5afb8ca",
+        "45b77984edd7e11c196da3ade4eb70f0003d8bbc4e175c6666cec72a0e0a7ebc",
 }
 
 #: cycle293 착지 값(= cycle294 **착수 시점**) — 기록용이다. 이 두 파일은 이 사이클의
@@ -296,7 +296,7 @@ _CLASSIFY_CHANNEL_SEGMENT_SHA = (
     "9e36c8a54ce695c73f104dcd3342477fe9d9b3593f63c1916a3acdc08538be99"
 )
 
-_SCHEDULER_LINES = 3785
+_SCHEDULER_LINES = 3791
 _SCHEDULER_LINE_CAP = 3900
 
 

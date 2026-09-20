@@ -686,6 +686,17 @@ async def _handle_execution(payload: str, *, encrypted: bool = False) -> None:
     price = int(fields[10]) if fields[10] else 0       # 체결단가
     quantity = int(fields[9]) if fields[9] else 0      # CNTG_QTY 체결수량 (정본, cycle235)
 
+    # cycle329 — [16] ODER_QTY **주문수량**. 🔴 체결수량으로 쓰지 않는다
+    # (그 오독이 257720 실사고이고 `test_cycle235_ast_execution_qty.py` 가 봉인한다).
+    # 이 값이 필요한 이유 = `await place_order` 가 걸려 있는 동안 착지한 통보에는
+    # `order_no` 매핑이 아직 없어 주문수량을 알 길이 **이 필드뿐**이다. 없으면
+    # `ordered_qty` 가 증분 체결량으로 폴백돼 부분 체결이 전량으로 읽힌다.
+    # 파싱 실패·필드 부재는 0(= 미제공)으로 두고 소비처가 현행 폴백을 탄다.
+    try:
+        ordered_qty_payload = int(fields[16]) if len(fields) > 16 and fields[16] else 0
+    except (TypeError, ValueError):
+        ordered_qty_payload = 0
+
     # 접수 통보(1)는 무시, 체결 통보(2)만 처리
     if exec_type != "2":
         logger.debug("체결통보 접수(미체결): order_no=%s, ticker=%s", order_no, ticker)
@@ -697,7 +708,10 @@ async def _handle_execution(payload: str, *, encrypted: bool = False) -> None:
 
     if _on_execution:
         try:
-            await _on_execution(ticker, order_no, side, price, quantity)
+            await _on_execution(
+                ticker, order_no, side, price, quantity,
+                ordered_qty_payload=ordered_qty_payload,
+            )
         except Exception:
             logger.exception(
                 "[callback_exception] handler=_on_execution ticker=%s order_no=%s",

@@ -159,13 +159,13 @@ _BASE_SHA: dict[str, str] = {
     # 🔴 `handler.py:400` 의 3채널 **튜플**은 이 사이클이 집합화하지 않는다 —
     #    파싱 경로 byte 동일이 계약이라 A4 가 이 파일을 면제한다.
     "src/realtime/handler.py":
-        "23768e6d89ed54b626cce2645a07cc5472ce10120c0b1c81f5d6436ff521ed47",
+        "37b1755210c83cdb2a462e6a37f919b326f8b48bee73d924adcc277d770a8d17",
     "src/realtime/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     # 🔴 `scheduler.py` 무접촉 (절대 규칙 3). cycle292 가 3,897→3,726L 로 만든
     #    여유 174줄은 이 사이클의 예산이 아니다. §4-C 풀 우회 2곳은 관측만.
     "src/engine/scheduler.py":
-        "088d54efc4927899c1048d01ea7c15265ce87858da25447ac28a1ffaa56f3c23",
+        "49dd1a36f68f3256dd83d58088651c81a3af2972f41bb95ad7995845827b3d09",
     "src/engine/market_op_subscribe.py":
         "7d58f9464c1ed35e4fa8706d801beb5a6b5c062d5a2941f0db6482d028d3d4ac",
     # 전략 7파일 + 베이스 (절대 규칙 5)
@@ -213,7 +213,7 @@ _PIN_PENDING_APPROVAL: dict[str, str] = {
         "e8614235cc0bea638f8c349b2f6910c94f5f9a5b849f5d65bef0583f959d81c9",
 }
 
-_SCHEDULER_LINES = 3785
+_SCHEDULER_LINES = 3791
 _SCHEDULER_LINE_CAP = 3900
 
 

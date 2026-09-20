@@ -104,7 +104,7 @@ _BASE_SHA = {
     "src/realtime/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "src/realtime/handler.py":
-        "23768e6d89ed54b626cce2645a07cc5472ce10120c0b1c81f5d6436ff521ed47",
+        "37b1755210c83cdb2a462e6a37f919b326f8b48bee73d924adcc277d770a8d17",
     "src/realtime/websocket.py":
         "d4c443bde2ed7aeafba3e9471db0ca4efc15a654610555435145a9b305150c5b",
     "src/realtime/websocket_pool.py":
@@ -372,7 +372,7 @@ _SRC_TREE_FILES = 154
 #: cycle315 착지(= 이 재핀 착수) 값은
 #: `fc11588e2b689496f2d3133e6c252e5d649eb7a6811ca60d3107abc79c9937ab` 였다.
 _SRC_TREE_DIGEST = (
-    "74b6a02ba3260f7353b737488a0f29294f146bf9b2e443168bd527b61ca91131"
+    "33f758edc7eb51e8ba7bfe3f3e604f76cd8e2a34e174983231d2f21a2d51e3b8"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
@@ -401,7 +401,7 @@ _PINNED_DIR_FILE_COUNTS = {
 #: 신규 leaf `src/engine/market_op_subscribe.py` 로 추출해(행위 변경 0 · 5줄
 #: 위임 wrapper) 3,897 → 3,726 이 됐다. 값만 옮긴다 — 정확 핀을 상한 핀으로
 #: 완화하면 cycle287 의 무접촉 대리 지표가 사라진다.
-_SCHEDULER_LINES = 3785
+_SCHEDULER_LINES = 3791
 _SCHEDULER_LINE_CAP = 3900
 
 #: 손대지 않기로 한 **원문 구간**의 sha256 (base `a42f519`).

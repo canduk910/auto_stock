@@ -3586,6 +3586,12 @@ class TradingScheduler:
         from src.engine import scanner as _scanner_settle_mod
         await _scanner_settle_mod.emit_trade_amount_filter_scanner_daily_summary()
 
+        # cycle329 — 주문수량 출처 일일 요약. ★ 같은 이유로 try/except 금지.
+        # 판독 = `payload > 0` 이면 매핑 부재 창이 그날 실제로 열렸고 **우리가 막았다**.
+        # `increment > 0` 인데 그날 수동 매매를 한 적이 없으면 그것이 조사 신호다
+        # (payload ODER_QTY 가 안 실려 온다는 뜻 = 그 창의 결함이 아직 남는 경로).
+        self.order_engine.emit_fill_qty_src_daily_summary()
+
         # 일간 상태 초기화는 _settle 호출자(run loop)에서 log_analysis 후 별도 호출 — funnel 카운터 보존을 위해
 
     def _reset_daily_state(self) -> None:

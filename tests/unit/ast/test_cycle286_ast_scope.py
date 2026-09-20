@@ -89,7 +89,7 @@ _BASE_SHA = {
     "src/realtime/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "src/realtime/handler.py":
-        "23768e6d89ed54b626cce2645a07cc5472ce10120c0b1c81f5d6436ff521ed47",
+        "37b1755210c83cdb2a462e6a37f919b326f8b48bee73d924adcc277d770a8d17",
     "src/realtime/websocket.py":
         "d4c443bde2ed7aeafba3e9471db0ca4efc15a654610555435145a9b305150c5b",
     "src/realtime/websocket_pool.py":
@@ -131,7 +131,7 @@ _PINNED_DIRS = ("src/realtime", "src/auth", "src/engine/strategies")
 #: 신규 leaf `src/engine/market_op_subscribe.py` 로 추출해(행위 변경 0 · 5줄
 #: 위임 wrapper) 3,897 → 3,726 이 됐다. 값만 옮긴다 — 정확 핀을 상한 핀으로
 #: 완화하면 cycle286 의 무접촉 대리 지표가 사라진다.
-_SCHEDULER_LINES = 3785
+_SCHEDULER_LINES = 3791
 #: cycle257 이 세운 영구 상한 (종전 표기 4,000 은 느슨한 쪽이라 폐기 — 두 수가 갈라지면
 #: 항상 **더 조인 쪽**이 정본이다).
 _SCHEDULER_LINE_CAP = 3900

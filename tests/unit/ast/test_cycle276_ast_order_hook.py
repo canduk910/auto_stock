@@ -361,7 +361,7 @@ _BASE_SHA = {
     # 붉어져 승인된 변경을 되돌리도록 오도한다. 직전 값 =
     # `50658e06062a0d38afecab1baa08871b89212e295cc95f2a3af62a2ae076115d`.
     "src/engine/scheduler.py":
-        "088d54efc4927899c1048d01ea7c15265ce87858da25447ac28a1ffaa56f3c23",
+        "49dd1a36f68f3256dd83d58088651c81a3af2972f41bb95ad7995845827b3d09",
     "src/engine/strategy_base.py":
         "869dc20ca561adc561a9ebe9fdb5fe5a3e097f7ec176fdf274d577d509de9252",
     # 🔁 cycle296(2026-09-17) 재핀 — 사용자 승인 `issue()` 매니저 단위 in-flight 합류(`src/auth/**`). 같은 값을 10곳 동시 갱신했다.
@@ -370,7 +370,7 @@ _BASE_SHA = {
     "src/auth/hashkey.py":
         "7c2aacc703839bdc274b463ee48777006504d70e4d59a1e57120ac5b612396d2",
     "src/realtime/handler.py":
-        "23768e6d89ed54b626cce2645a07cc5472ce10120c0b1c81f5d6436ff521ed47",
+        "37b1755210c83cdb2a462e6a37f919b326f8b48bee73d924adcc277d770a8d17",
     "src/realtime/websocket.py":
         "d4c443bde2ed7aeafba3e9471db0ca4efc15a654610555435145a9b305150c5b",
     "src/realtime/websocket_pool.py":
@@ -750,7 +750,7 @@ def test_c5_2_scheduler_line_count_is_pinned() -> None:
     그러면 확보한 174줄 예산의 무단 증식을 아무도 못 잡는다.
     """
     lines = len(_read(_SCHEDULER).splitlines())
-    assert lines == 3785, f"scheduler.py {lines}L (기대 3,785 — cycle283 뒤 3,897 → cycle292 leaf 추출 → cycle298 재핀)"
+    assert lines == 3791, f"scheduler.py {lines}L (기대 3,785 — cycle283 뒤 3,897 → cycle292 leaf 추출 → cycle298 재핀)"
 
 
 def test_c5_3_scheduler_line_cap_is_not_looser_than_cycle257() -> None:
@@ -959,6 +959,9 @@ _APPROVED_EIGHT_AREA_PINS = {
     "src/realtime/websocket.py", "src/realtime/websocket_pool.py",
     "src/engine/risk.py", "src/realtime/CLAUDE.md", "src/auth/token.py",
     "src/auth/CLAUDE.md",
+    # cycle329 (2026-09-20, 사용자 승인 + `domain-consult` 선행) — 체결통보
+    # 주문수량(`fields[16] ODER_QTY`) 배선. 파싱 1블록 + 콜백 인자 1개.
+    "src/realtime/handler.py",
 }
 
 
