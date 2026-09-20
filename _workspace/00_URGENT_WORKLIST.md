@@ -568,12 +568,14 @@ src/db/CLAUDE.md      ← 후속 D 가 고친 「dkstock.cloud 매크로 일일 
 
 | 언제 | 무엇 | 기대 |
 |---|---|---|
-| 20:05 이후 | `SELECT strategy_id, params_kind, status, error_message FROM backtest_runs WHERE target_date = CURRENT_DATE` | 14행 **전부 `skipped`**. 지원 3전략(momentum·VB·donchian) 6행의 `error_message` = `'MCP 비활성 (KIS_MCP_ENABLED=false)'`(`backtest_orchestration.py:174`), 나머지 8행 'YAML DSL 미지원'. 🔴 `failed` 가 한 행이라도 있으면 DB 토글이 안 내려간 것 |
+| 20:05 이후 | `SELECT strategy_id, params_kind, status, error_message FROM backtest_runs WHERE target_date = CURRENT_DATE` | 14행 **전부 `skipped`**. 지원 3전략(momentum·VB·donchian) 6행의 `error_message` = `'MCP 비활성 (KIS_MCP_ENABLED=false)'`(`backtest_orchestration.py:174`), 나머지 8행 **`로컬 백테스트 실행기 없음 (외부 MCP 서버 철거 2026-08-18)`**(커밋 `b29231c` 이후 신 문구 — 구 문구 'YAML DSL 미지원' 이 보이면 옛 이미지를 타는 것이다). 🔴 `failed` 가 한 행이라도 있으면 DB 토글이 안 내려간 것 |
 | 같은 날 | `parameter_recommendations` | 7행 INSERT · `has_params=true` · `backtest_summary IS NULL`. 자문 본문은 무손상이어야 한다(`recommendation_engine.py:495-509`) |
 | 07:45 기동 후 | `[cash_usage_ratio]` INFO | `ratio=1.00` · `available == net_asset`(`boot_manager.py:169-173`). 아니면 예산이 조용히 묶인 것 |
 | 07:45 기동 후 | `[etf_regime]` INFO | 1행 그대로. 이 블록은 `stock_master_daily` 만 읽는 독립 try 라 dkstock 성패와 무관하다(`scheduler.py:2116`) — 사라지면 가설이 틀린 것 |
 
-🔴 **`.env` 의 `KIS_MCP_ENABLED=true` 는 아직 그대로다** — 정합용이라 매크로 전환 배포 때 함께 내린다.
+✅ **`.env` 도 내려갔다**(2026-09-21 07:3x 실측) — `~/auto_stock/.env:31` = `KIS_MCP_ENABLED=false`,
+`docker inspect auto_stock-backend-1` 의 컨테이너 env 도 `false`. DB `updated_at` = **KST 2026-09-19 07:29:54**.
+**세 축이 전부 false 라 더 할 조작이 없다.**
 그때까지 `GET /api/backtest/mcp/health`(env 단독, `routes/backtest.py:31`)는 계속 '활성'이라 답하므로
 **확인 근거로 쓰지 않는다**. 정본은 `GET /api/integrations/kis-mcp` 의 `db_value`/`env_value` 분리 필드다.
 
