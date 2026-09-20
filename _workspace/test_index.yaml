@@ -307,6 +307,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -1381,6 +1382,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -2480,6 +2482,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -3559,6 +3562,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -4632,6 +4636,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -5720,6 +5725,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -6808,6 +6814,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -7899,6 +7906,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -8983,6 +8991,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -10072,6 +10081,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -11172,6 +11182,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -11993,6 +12004,7 @@ backend:
       - tests/unit/api/test_quote_pool_label_skip.py
       - tests/unit/ast/test_cycle296_ast_token_coalesce.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -13359,6 +13371,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -14562,6 +14575,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/db/test_cycle108_list_by_filter.py
@@ -15534,6 +15548,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -16610,6 +16625,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -17696,6 +17712,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -18791,6 +18808,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/db/test_backtest_runs.py
@@ -19869,6 +19887,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -20961,6 +20980,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -22046,6 +22066,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -23135,6 +23156,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -24219,6 +24241,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -25309,6 +25332,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -26409,6 +26433,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -27524,6 +27549,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -28584,6 +28610,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -29654,6 +29681,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -30741,6 +30769,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -31834,6 +31863,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -32974,6 +33004,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -34015,6 +34046,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -35104,6 +35136,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -36177,6 +36210,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -37266,6 +37300,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -38362,6 +38397,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -39445,6 +39481,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -40529,6 +40566,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -41615,6 +41653,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -42708,6 +42747,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -43801,6 +43841,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -44875,6 +44916,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -45964,6 +46006,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -47049,6 +47092,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -48139,6 +48183,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -49223,6 +49268,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -50310,6 +50356,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -51397,6 +51444,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -52558,6 +52606,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -53642,6 +53691,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -54719,6 +54769,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -55809,6 +55860,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -56907,6 +56959,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -57988,6 +58041,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -59067,6 +59121,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -60159,6 +60214,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -61244,6 +61300,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -62329,6 +62386,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -63417,6 +63475,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -64500,6 +64559,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -65665,6 +65725,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -66824,6 +66885,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -67908,6 +67970,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -69000,6 +69063,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -70116,6 +70180,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -71171,6 +71236,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -72260,6 +72326,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -73341,6 +73408,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -74662,6 +74730,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -75665,6 +75734,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -76607,6 +76677,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -77693,6 +77764,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -78777,6 +78849,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -79863,6 +79936,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -80958,6 +81032,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -82074,6 +82149,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -83129,6 +83205,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -84241,6 +84318,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -85302,6 +85380,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -86398,6 +86477,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -87474,6 +87554,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -88561,6 +88642,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -89648,6 +89730,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -90743,6 +90826,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -91892,6 +91976,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -92990,6 +93075,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -94057,6 +94143,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -95146,6 +95233,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -96223,6 +96311,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -97325,6 +97414,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -98413,6 +98503,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -99651,6 +99742,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -100608,6 +100700,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -101638,6 +101731,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -102730,6 +102824,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -103882,6 +103977,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -104972,6 +105068,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -106054,6 +106151,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -107154,6 +107252,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -108229,6 +108328,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -109315,6 +109415,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -110413,6 +110514,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -111551,6 +111653,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -112638,6 +112741,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -113731,6 +113835,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -114819,6 +114924,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -115907,6 +116013,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -116992,6 +117099,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -118150,6 +118258,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -119399,6 +119508,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -120534,6 +120644,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -121643,6 +121754,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -122709,6 +122821,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -123817,6 +123930,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -124909,6 +125023,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -127354,6 +127469,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -128435,6 +128551,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -129526,6 +129643,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -130608,6 +130726,7 @@ backend:
       - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
       - tests/unit/ast/test_realtime_callable_surface_pin.py
       - tests/unit/auth/test_cycle296_token_issue_coalesce.py
+      - tests/unit/auth/test_cycle330_orphan_token_future.py
       - tests/unit/auth/test_token.py
       - tests/unit/auth/test_token_global_serialization.py
       - tests/unit/auth/test_token_manager_multi.py
@@ -132915,10 +133034,10 @@ frontend:
       - >-
         frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
       - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
-generated_at: '2026-09-20T06:44:32.198Z'
+generated_at: '2026-09-20T14:50:50.588Z'
 stats:
   backend_modules: 157
-  backend_tests: 1068
+  backend_tests: 1069
   frontend_modules: 118
   frontend_tests: 95
   unmapped_modules:

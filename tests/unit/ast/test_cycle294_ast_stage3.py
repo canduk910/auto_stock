@@ -224,7 +224,7 @@ _BASE_SHA: dict[str, str] = {
         "7c2aacc703839bdc274b463ee48777006504d70e4d59a1e57120ac5b612396d2",
     # 🔁 cycle296(2026-09-17) 재핀 — 사용자 승인 `issue()` 매니저 단위 in-flight 합류(`src/auth/**`). 같은 값을 10곳 동시 갱신했다.
     "src/auth/token.py":
-        "bfbdcfbe2bd595055bcc38f5e094e2815ef67854f2153aa20c40629c9e4e6764",
+        "4125c271b4147e59922f4f000e523429fb4bbef37058dc754fd92b9475ec58f1",
     # 🔴 `handler.py` = N-4. tr_id 를 `_handle_tick` 에 넘기는 근본 시정은
     #    미승인 8영역이라 이 사이클 밖이다(이중 채널 **금지**로만 닫는다).
     "src/realtime/handler.py":

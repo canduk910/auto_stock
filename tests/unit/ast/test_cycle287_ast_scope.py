@@ -116,7 +116,7 @@ _BASE_SHA = {
         "7c2aacc703839bdc274b463ee48777006504d70e4d59a1e57120ac5b612396d2",
     # 🔁 cycle296(2026-09-17) 재핀 — 사용자 승인 `issue()` 매니저 단위 in-flight 합류(`src/auth/**`). 같은 값을 10곳 동시 갱신했다.
     "src/auth/token.py":
-        "bfbdcfbe2bd595055bcc38f5e094e2815ef67854f2153aa20c40629c9e4e6764",
+        "4125c271b4147e59922f4f000e523429fb4bbef37058dc754fd92b9475ec58f1",
     # 8영역은 아니지만 이 사이클이 무접촉을 약속한 파일
     "src/engine/strategy_base.py":
         "869dc20ca561adc561a9ebe9fdb5fe5a3e097f7ec176fdf274d577d509de9252",
@@ -372,7 +372,7 @@ _SRC_TREE_FILES = 154
 #: cycle315 착지(= 이 재핀 착수) 값은
 #: `fc11588e2b689496f2d3133e6c252e5d649eb7a6811ca60d3107abc79c9937ab` 였다.
 _SRC_TREE_DIGEST = (
-    "33f758edc7eb51e8ba7bfe3f3e604f76cd8e2a34e174983231d2f21a2d51e3b8"
+    "fbd24e95791985ac1887228447f09a77824d4deb08f7a70ae016795bc3b93924"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

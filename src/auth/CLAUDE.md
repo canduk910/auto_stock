@@ -82,3 +82,31 @@ KIS OpenAPI OAuth 인증 및 보안 관련 모듈.
 - 토큰 유효기간: 24시간
 - WebSocket 접속키는 별도 발급 (`/oauth2/Approval`) — realtime/websocket.py에서 처리
 - **`build_headers()` 는 메인 매니저 경로에서만 호출** — 보조 매니저는 시세 수신 한정이라 매매 헤더 구성에 사용 금지
+
+## 공유 Future 의 실패는 반드시 회수한다 (cycle330)
+
+`issue()` 의 단일 발급 Future(`self._inflight`, cycle296)는 실패 시
+`_mark_inflight_failed(fut, exc)` 로 예외를 싣는다. 그 헬퍼는 예외를 담은 **직후
+`fut.exception()` 을 한 번 조회**해 회수 표시를 남긴다.
+
+🔴 **회수하지 않으면 합류자가 0명일 때 고아 Future 가 된다** — 리더는 `raise` 로 자기
+호출자에게 오류를 올리지만 상자에 담긴 사본은 아무도 읽지 않고, 파이썬이 그것을 회수할 때
+asyncio 가 `Future exception was never retrieved` **ERROR** 를 찍는다. 토큰 발급이
+실패하는 날(KIS 점검 · 분당 한도 초과 · 네트워크 순단)마다 원인 불명 ERROR 가 쌓이고,
+`log_analysis_engine` 이 WARNING 이상만 `top_patterns` 에 넣으므로 **21:30 리포트가
+오염돼 진짜 사고를 가린다**. 실측 2026-09-20 — CI 에서 이 고아 Future 가 무관한 테스트
+(`tests/unit/api/test_condition_cache.py` 의 `gc.collect()` + `caplog` 단언)를 붉혀
+cycle329 의 Deploy 가 **두 번 skip** 됐다.
+
+- **대기자 동작은 불변** — 나중에 합류한 대기자가 `await fut` 하면 여전히 같은 예외를 받는다.
+  읽었다는 표시만 남긴다. 예외를 **삼키면 안 된다**(합류자가 발급 실패를 모른 채 진행한다).
+- never-raise · 이미 완료·취소된 Future 에 불려도 무해하다(`CancelledError`·`BaseException`
+  두 분기에서 불린다).
+- ⚠️ **CI 에 KIS 자격을 심는 것은 해법이 아니다** — 403 이 사라져 증상은 가려지지만 고아
+  Future 는 그대로다. 게다가 그 키는 **주문을 낼 수 있고**, `/oauth2/tokenP` 분당 1개 한도를
+  EC2 운영과 공유하며, `revoke()` 를 부르는 테스트가 있으면 **운영 토큰을 죽인다**.
+- 🔴 **회귀는 `gc.collect()` 로 세우지 않는다** — 예외의 traceback 이 프레임을 통해 Future 를
+  계속 참조해 테스트 안에서는 수집되지 않는다(실측: 회수 표시를 떼어내도 gc 기반 단언은
+  초록이었다). `asyncio.Future.__del__` 이 보는 `_log_traceback` 플래그를 직접 단언하고
+  **양성 대조군**(맨 `set_exception` 은 True)을 함께 둔다.
+  회귀 = `tests/unit/auth/test_cycle330_orphan_token_future.py`(4케이스)

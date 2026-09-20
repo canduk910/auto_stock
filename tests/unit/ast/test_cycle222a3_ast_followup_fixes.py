@@ -514,7 +514,7 @@ _APPROVED_CONTENT_SHA: dict[str, str] = {
     #    자매 가드 네 곳 전부 같은 값(`test_g3_9b`/`test_g223f_9`/`test_g223_10` 계약).
     #    TODO(cycle296 커밋 후): 아래 항목을 **삭제**한다.
     "src/auth/token.py":
-        "bfbdcfbe2bd595055bcc38f5e094e2815ef67854f2153aa20c40629c9e4e6764",
+        "4125c271b4147e59922f4f000e523429fb4bbef37058dc754fd92b9475ec58f1",
     # 📄 2026-09-17 — **문서 전용 변경**(`src/auth/**` 이 8영역 디렉터리라 `.md` 도
     #    이 가드에 잡힌다 — `src/realtime/CLAUDE.md` 와 같은 계열). 소제목의 사이클
     #    번호를 규칙 이름으로 바꾸고, 걷어낸 경위를 `docs/history/src-auth-CLAUDE.history.md`
@@ -522,7 +522,7 @@ _APPROVED_CONTENT_SHA: dict[str, str] = {
     #    자매 가드 네 곳 전부 같은 값(`test_g3_9b` 계약).
     #    TODO(커밋 후): 아래 항목을 **삭제**한다.
     "src/auth/CLAUDE.md":
-        "da4e55db8182d76f20d4388e8c433ad5cf3110dd0801c65af870e84653c66fb5",
+        "1d155e95d386b3ecb19f138e966464490ac4912b055f1f8f9da2a154d14ea363",
     # ✅ 2026-09-20 (cycle329) — 체결통보 **주문수량**(`fields[16] ODER_QTY`) 배선.
     #    사용자 결정("체결통보 주문수량 쓰자") + `domain-consult` 선행. 고치는 것 =
     #    `await place_order` 도중 착지한 통보는 `order_no` 매핑이 비어 `ordered_qty` 가

@@ -253,16 +253,45 @@ class TokenManager:
                 )
             fut.set_result(None)
         except asyncio.CancelledError:
-            if not fut.done():
-                fut.set_exception(RuntimeError("token issue aborted: leader cancelled"))
+            self._mark_inflight_failed(
+                fut, RuntimeError("token issue aborted: leader cancelled")
+            )
             raise
         except BaseException as exc:
-            if not fut.done():
-                fut.set_exception(exc)
+            self._mark_inflight_failed(fut, exc)
             raise
         finally:
             if self._inflight is fut:
                 self._inflight = None
+
+    @staticmethod
+    def _mark_inflight_failed(
+        fut: "asyncio.Future[None]", exc: BaseException
+    ) -> None:
+        """공유 Future 에 실패를 싣고 **회수 표시까지 남긴다** (cycle330).
+
+        🔴 고치는 것 = 합류자가 0명일 때의 **고아 Future**. 리더는 `raise` 로 자기
+        호출자에게 오류를 올리지만, 그 순간 토큰을 원한 곳이 리더뿐이면 공유 상자에
+        담긴 오류 사본을 아무도 읽지 않는다. 파이썬이 그 Future 를 회수할 때
+        asyncio 가 `Future exception was never retrieved` **ERROR** 를 찍고,
+        그것이 21:30 리포트 `top_patterns` 까지 올라가 진짜 사고를 가린다
+        (실측 2026-09-20: CI 에서 이 고아 Future 가 무관한 테스트를 붉혀 Deploy 2회 skip).
+
+        `fut.exception()` 한 번이 `__log_traceback` 을 내려 경고를 막는다.
+
+        🔴 **대기자 동작은 한 글자도 바뀌지 않는다** — 나중에 합류한 대기자가
+        `await fut` 하면 여전히 같은 예외를 받는다. 읽었다는 표시만 남긴다.
+
+        never-raise — 이미 완료·취소된 Future 에 불려도 발급 경로를 깨뜨리지 않는다
+        (`issue()` 가 `CancelledError`·`BaseException` 두 분기에서 부른다).
+        """
+        try:
+            if fut.done():
+                return
+            fut.set_exception(exc)
+            fut.exception()   # 회수 표시 — 합류자 0명이어도 고아 경고가 나지 않는다
+        except Exception:
+            logger.debug("[token] inflight 실패 표시 실패", exc_info=True)
 
     async def revoke(self) -> None:
         """POST /oauth2/revokeP 로 접근토큰을 폐기한다."""
