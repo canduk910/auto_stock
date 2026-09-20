@@ -164,29 +164,37 @@ def _mapping_assign_lines(fn) -> list[int]:
 
 
 def _completed_check_lines(fn) -> list[int]:
-    """`result.order_no in self._completed_orders` 판정문 lineno (오름차순)."""
-    out = []
-    for n in ast.walk(fn):
-        if not isinstance(n, ast.Compare):
-            continue
-        for op, cmp_ in zip(n.ops, n.comparators):
-            if isinstance(op, ast.In) and isinstance(cmp_, ast.Attribute) \
-                    and cmp_.attr == "_completed_orders":
-                out.append(n.lineno)
-    return sorted(out)
+    """체결통보 선행 **판정에 도달하는 지점**의 lineno (오름차순).
 
+    ⚠️ cycle334 에서 그 판정이 `execute_buy` 본문에서 **코어 헬퍼**
+    `_persist_pending_after_send` 안으로 옮겨갔다(4경로 공용화). 계약은 그대로다 —
+    「훅은 그 판정보다 **앞**」. 그래서 판정 그 자체(`ast.Compare`)가 아니라
+    **그 판정에 들어가는 문**(코어 헬퍼 호출)의 lineno 를 본다.
 
-def _insert_helper_lines(fn) -> list[int]:
-    """`_insert_pending_or_absorb_race(...)` 호출 lineno (오름차순).
-
-    cycle327 에서 이 흡수기가 매수·매도 공용으로 일반화되며 이름이 바뀌었다
-    (`_insert_pending_buy_or_absorb_race` → `_insert_pending_or_absorb_race`).
-    이 가드가 보는 것은 execute_buy 안의 호출이라 대상은 그대로다.
+    🔴 `ast.Compare` 로 되돌리면 `execute_buy` 안에 0건이라 **가드가 공허해진다**
+    (훅을 아무 데나 옮겨도 초록이 된다).
     """
     out = []
     for n in ast.walk(fn):
         if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) \
-                and n.func.attr == "_insert_pending_or_absorb_race":
+                and n.func.attr == "_persist_pending_after_send":
+            out.append(n.lineno)
+    return sorted(out)
+
+
+def _insert_helper_lines(fn) -> list[int]:
+    """접수 후 PENDING 영속화 호출의 lineno (오름차순).
+
+    계보 — cycle271 `_insert_pending_buy_or_absorb_race` → cycle327 매수·매도 공용
+    `_insert_pending_or_absorb_race` → **cycle334 코어 헬퍼 `_persist_pending_after_send`**
+    (선행 체크·레코드 조립·흡수 INSERT 를 4경로 공용으로 묶었다).
+    이 가드가 보는 것은 `execute_buy` 안에서 **훅이 그것보다 앞인가** 이고, 그 계약은
+    세 번의 개명을 통틀어 한 번도 바뀌지 않았다.
+    """
+    out = []
+    for n in ast.walk(fn):
+        if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) \
+                and n.func.attr == "_persist_pending_after_send":
             out.append(n.lineno)
     return sorted(out)
 

@@ -224,6 +224,18 @@ run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, recor
 - `is_provisional` 컬럼 = migration 040.
 - 관찰성 한정 — `check_exit`/`check_buy` funnel hook 0건 + risk/order_engine/realtime/auth 참조 0(SAFETY 가드).
 
+## 접수 후 PENDING 영속화 — 4경로 1코어 + 경계는 호출자 층 (cycle334)
+
+「선행 체결통보 체크 → skip 로그 → `TradeRecord` 조립 → race 흡수 INSERT」는 **코어 하나**가 한다 — `_persist_pending_after_send(*, trade_type, ticker, order_no, strategy_id, record_price, quantity, path)`. 매수 주·폴백이 **직접**, 매도 두 경로는 **경계 래퍼** `_persist_sell_pending_after_send` 를 거쳐 부른다(코어 호출 = 매수 2 + 래퍼 1 = **정확히 3곳**).
+
+🔴 **경계(cycle327 ⓑ)는 코어에 없다 — 호출자 층의 책임이다.** 코어는 예외를 **그대로 전파**한다. 매도는 래퍼가 닫고 **매수는 아직 닫지 않는다**. 코어에 `try` 를 들이면 매수 두 경로의 예외 전파가 **조용히 바뀐다**(가드 `test_g328_0d`).
+
+- ⚠️ **매수 축의 접수 후 경계 부재는 결함이다**(별도 승인 사이클). 지금 매수는 접수 후 실패가 `:1512` 의 `pending_buys.discard` + `pending_buy_amounts.pop` 으로 흘러 — 그것은 **발사 실패의 정리**인데 발사 **성공** 뒤에도 실행된다 — `is_ticker_blocked_for_buy=False`(같은 종목 재매수) + `_calc_used_funds` 과소계상(**예산 이중 사용**, 미체결 LIMIT 은 하루 종일 안 채워질 수 있다) + `raise` 가 `risk.on_tick`(try 없음) 관통 + `cached_buyable_at` 미무효화(최대 60초 stale). 폴백은 중첩 `try` 의 핸들러가 `except KisApiError` 하나뿐이라 non-`KisApiError` 가 `execute_buy` 를 관통한다. **그 시정은 호출자 층에 세운다**(코어가 아니라).
+- 🔴 **축 파생 방향이 계약이다** — `_PENDING_SIDE_BY_TRADE_TYPE` 가 **행위값(`trade_type`)에서 관측값(`side`)을 파생**시킨다. 반대로 하면 `side` 오타 하나가 `trade_history` 의 매수/매도를 뒤집는다.
+- **수식어 표** `_PENDING_SKIP_PREFIX[(side, path)]` 는 `.get(key, "")` **총함수**다(관측이 행위를 바꾸면 안 된다). ⚠️ `("buy","fallback")` 만 `"매수 폴백 "` 이 아닌 것은 **현행 문구 보존**이다.
+- ⚠️ **의도된 문구 변경 1건** — 매수 폴백 skip WARNING 에 ` (주문번호: %s)` 가 붙는다(정보가 느는 방향). 21:30 `top_patterns` 는 메시지 전문이 키라 **2026-09-21 전후 패턴 문자열을 비교하지 않는다**.
+- 설계 카드 = `_workspace/refactor/2026-09-21_step2_card.md` · 가드 = `tests/unit/ast/test_cycle328_sell_pending_helper.py`(9케이스, 1단계 것을 재조준)
+
 ## 취소 타이머 키 — `(ticker, 축)` (cycle332)
 
 `_pending_cancel_tasks` / `_pending_cancel_order_no` 의 키는 **`(ticker, side)`** 다(`side ∈ {"buy","sell"}`, 리터럴은 모듈 상수 `CANCEL_AXIS_BUY`/`CANCEL_AXIS_SELL` 한 곳에만 둔다). 매수 잔량 취소(`_schedule_cancel`)와 매도 손절 잔여 재주문(`_schedule_cancel_and_reorder`)이 **각자 자기 축만** 교체하므로 두 타이머가 공존한다.

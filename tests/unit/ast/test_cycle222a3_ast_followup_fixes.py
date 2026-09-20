@@ -480,7 +480,7 @@ _APPROVED_CONTENT_SHA: dict[str, str] = {
     "src/engine/scanner.py":
         "95cbb103a38821bb3b68d267a3662094b192fa55ad6071fa8dc4a63726e1c942",
     "src/engine/order_engine.py":
-        "e1beeb1fffab6ca5193d6954e9164e75f1d0d16eaaaedbcbb7d3fef1328dfa2e",
+        "1aa8d1b6c93eae6dd27182fefc4d485056cb4175aff7166789222df613db6285",
     "src/api/order.py":
         "08c5cafd7b8678ec0d0fa85f856fdea3cce38ad92488c6d74c03cd13faa415bb",
     # ✅ 2026-09-14 (cycle293) — 시세 채널 리졸버 2단계(속성축 배관). 사용자 승인

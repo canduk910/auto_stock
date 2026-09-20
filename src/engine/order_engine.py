@@ -984,12 +984,67 @@ class OrderEngine:
             c.get("map", 0), c.get("payload", 0), c.get("increment", 0),
         )
 
-    #: `path` → 선행 체결통보 로그의 경로 수식어. **관측 전용**이라 조회가 실패해
-    #: 행위를 바꿀 수 없어야 한다 — `.get(path, "")` 는 어떤 값에도 raise 하지 않고,
-    #: 빈 수식어는 주 경로 문구를 그대로 낸다(틀린 문장이 아니라 덜 구체적인 문장).
-    #: 미지 `path` 자체는 `[sell_fill_during_insert]`/`[sell_post_send_error]` 의
-    #: `path=%s` 에 원문으로 실려 별도 채널 없이 드러난다.
-    _SELL_PENDING_SKIP_PATH_LABEL = {"market": "", "fallback": "폴백 "}
+    #: `(side, path)` → 선행 체결통보 skip 로그의 **접두 수식어** (cycle334 — 4경로 공용).
+    #: **관측 전용**이라 조회가 실패해 행위를 바꿀 수 없어야 한다 — `.get(key, "")` 는
+    #: 어떤 값에도 raise 하지 않고, 빈 수식어는 덜 구체적인 문장을 낼 뿐 틀린 문장이 아니다.
+    #: 미지 키 자체는 `[*_fill_during_insert]`/`[sell_post_send_error]` 의 `path=%s` 에
+    #: 원문으로 실려 별도 채널 없이 드러난다.
+    #: ⚠️ `("buy","fallback")` 만 `"매수 폴백 "` 이 아닌 것은 **현행 문구 보존**이다.
+    _PENDING_SKIP_PREFIX = {
+        ("buy", "market"): "매수 ",
+        ("buy", "fallback"): "폴백 ",
+        ("sell", "market"): "매도 ",
+        ("sell", "fallback"): "매도 폴백 ",
+    }
+
+    #: `trade_type` → 마커 축. 🔴 **방향이 계약이다** — 행위값(`trade_type`)에서
+    #: 관측값(`side`)을 파생시킨다. 반대로 하면 `side` 오타 하나가 `trade_history` 의
+    #: 매수/매도를 뒤집는다.
+    _PENDING_SIDE_BY_TRADE_TYPE = {TradeType.BUY: "buy", TradeType.SELL: "sell"}
+
+    async def _persist_pending_after_send(
+        self, *, trade_type: TradeType, ticker: str, order_no: str,
+        strategy_id: str, record_price: int, quantity: int, path: str,
+    ) -> None:
+        """접수 후 PENDING 영속화 — **매수·매도 4 경로 공용 코어** (cycle334).
+
+        「선행 체결통보 체크 → skip 로그 → `TradeRecord` 조립 → race 흡수 INSERT」가
+        네 곳에 손으로 복제돼 있었고, **그 흩어짐이 cycle327 실사고의 원인**이었다
+        (흡수기가 매수 2곳에만 있었다). 이제 그 규칙은 한 곳에서만 고친다.
+
+        🔴 **이 함수는 경계를 닫지 않는다 — 예외를 그대로 전파한다.**
+        접수 후 경계(cycle327 ⓑ)는 **호출자 층**의 책임이다. 매도는
+        `_persist_sell_pending_after_send` 래퍼가 닫고, **매수는 아직 닫지 않는다**
+        (그 부재는 결함이고 별도 승인 사이클 소관이다 — 설계 카드 §2B).
+        여기에 `try` 를 들이면 매수 두 경로의 예외 전파가 **조용히 바뀐다**.
+
+        🔴 **본문 앞부분에 `await` 를 추가하지 않는다.** 최초 양보점이
+        `_insert_pending_or_absorb_race` 안의 `await insert_trade` 라는 사실이
+        「주문번호 매핑은 `place_order` 응답 직후 동기 영역」 금기의 전제다.
+        """
+        side = self._PENDING_SIDE_BY_TRADE_TYPE.get(trade_type, "")
+        if order_no in self._completed_orders:
+            self._completed_orders.discard(order_no)
+            logger.warning(
+                "%s응답보다 체결통보 선행 — PENDING INSERT 생략: %s (주문번호: %s)",
+                self._PENDING_SKIP_PREFIX.get((side, path), ""), t(ticker), order_no,
+            )
+        else:
+            record = TradeRecord(
+                ticker=ticker,
+                ticker_name=t(ticker).split("(")[0] if "(" in t(ticker) else "",
+                trade_type=trade_type,
+                price=record_price,
+                quantity=quantity,
+                profit_loss=0,  # 체결 확정 시 계산
+                status=TradeStatus.PENDING,
+                strategy=strategy_id,
+                order_no=order_no,
+            )
+            await self._insert_pending_or_absorb_race(
+                record, side=side, ticker=ticker, order_no=order_no,
+                strategy_id=strategy_id, path=path,
+            )
 
     async def _persist_sell_pending_after_send(
         self,
@@ -1016,29 +1071,11 @@ class OrderEngine:
         「주문번호 매핑은 `place_order` 응답 직후 동기 영역」 금기의 전제다.
         """
         try:
-            if order_no in self._completed_orders:
-                self._completed_orders.discard(order_no)
-                logger.warning(
-                    "매도 %s응답보다 체결통보 선행 — PENDING INSERT 생략: %s (주문번호: %s)",
-                    self._SELL_PENDING_SKIP_PATH_LABEL.get(path, ""),
-                    t(ticker), order_no,
-                )
-            else:
-                record = TradeRecord(
-                    ticker=ticker,
-                    ticker_name=t(ticker).split("(")[0] if "(" in t(ticker) else "",
-                    trade_type=TradeType.SELL,
-                    price=record_price,
-                    quantity=quantity,
-                    profit_loss=0,  # 체결 확정 시 계산
-                    status=TradeStatus.PENDING,
-                    strategy=strategy_id,
-                    order_no=order_no,
-                )
-                await self._insert_pending_or_absorb_race(
-                    record, side="sell", ticker=ticker, order_no=order_no,
-                    strategy_id=strategy_id, path=path,
-                )
+            await self._persist_pending_after_send(
+                trade_type=TradeType.SELL, ticker=ticker, order_no=order_no,
+                strategy_id=strategy_id, record_price=record_price,
+                quantity=quantity, path=path,
+            )
         except Exception:
             logger.exception(
                 "[sell_post_send_error] ticker=%s order_no=%s strategy=%s path=%s "
@@ -1353,30 +1390,19 @@ class OrderEngine:
             except Exception:
                 logger.debug("[llm_buy_gate_call] 주문 시점 관측 호출 실패", exc_info=True)
 
-            # 체결통보가 응답보다 먼저 도착해 COMPLETED row가 이미 INSERT됐다면 PENDING INSERT 생략
-            already_completed = result.order_no in self._completed_orders
-            if already_completed:
-                self._completed_orders.discard(result.order_no)
-                logger.warning(
-                    "매수 응답보다 체결통보 선행 — PENDING INSERT 생략: %s (주문번호: %s)",
-                    t(ticker), result.order_no,
-                )
-            else:
-                # trade_history 기록 (PENDING — 체결 전)
-                record = TradeRecord(
-                    ticker=ticker,
-                    ticker_name=t(ticker).split("(")[0] if "(" in t(ticker) else "",
-                    trade_type=TradeType.BUY,
-                    price=record_price,
-                    quantity=quantity,
-                    status=TradeStatus.PENDING,
-                    strategy=strategy.strategy_id,
-                    order_no=result.order_no,
-                )
-                await self._insert_pending_or_absorb_race(
-                    record, side="buy", ticker=ticker, order_no=result.order_no,
-                    strategy_id=strategy.strategy_id, path="market",
-                )
+            # 체결통보 선행 체크 + PENDING INSERT — 4경로 공용 코어에 위임(cycle334).
+            # 🔴 이 호출은 **경계를 닫지 않는다** — 매수 축의 접수 후 경계 부재는
+            # 결함이고 별도 승인 사이클 소관이다(설계 카드 §2B). 여기에 try 를 들이면
+            # 이 단계가 행위 보존이 아니게 된다.
+            await self._persist_pending_after_send(
+                trade_type=TradeType.BUY,
+                ticker=ticker,
+                order_no=result.order_no,
+                strategy_id=strategy.strategy_id,
+                record_price=record_price,
+                quantity=quantity,
+                path="market",
+            )
 
             logger.info("매수 주문 접수: %s %d주 @ %d (주문번호: %s, 전략: %s)",
                          t(ticker), quantity, record_price, result.order_no, strategy.strategy_id)
@@ -1468,29 +1494,16 @@ class OrderEngine:
                     except Exception:
                         logger.debug("[llm_buy_gate_call] 폴백 주문 시점 관측 호출 실패", exc_info=True)
 
-                    # 체결통보 선행 race 가드 (기존 시장가 경로 동일)
-                    if result.order_no in self._completed_orders:
-                        self._completed_orders.discard(result.order_no)
-                        logger.warning(
-                            "폴백 응답보다 체결통보 선행 — PENDING INSERT 생략: %s",
-                            t(ticker),
-                        )
-                    else:
-                        ticker_name = t(ticker).split("(")[0] if "(" in t(ticker) else ""
-                        record = TradeRecord(
-                            ticker=ticker,
-                            ticker_name=ticker_name,
-                            trade_type=TradeType.BUY,
-                            price=fallback_price,
-                            quantity=quantity,
-                            status=TradeStatus.PENDING,
-                            strategy=strategy.strategy_id,
-                            order_no=result.order_no,
-                        )
-                        await self._insert_pending_or_absorb_race(
-                            record, side="buy", ticker=ticker, order_no=result.order_no,
-                            strategy_id=strategy.strategy_id, path="fallback",
-                        )
+                    # 체결통보 선행 체크 + PENDING INSERT — 4경로 공용 코어(cycle334).
+                    await self._persist_pending_after_send(
+                        trade_type=TradeType.BUY,
+                        ticker=ticker,
+                        order_no=result.order_no,
+                        strategy_id=strategy.strategy_id,
+                        record_price=fallback_price,
+                        quantity=quantity,
+                        path="fallback",
+                    )
 
                     logger.warning(
                         "시장가 거부 → 지정가 5호가 폴백: %s @ %d (원인 [%s] %s)",

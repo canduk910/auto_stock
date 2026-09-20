@@ -301,3 +301,56 @@ async def test_sell_does_not_refire_when_position_vanished_between_retries(
     assert any("[sell_position_gone]" in r.getMessage() for r in caplog.records), (
         "재발사는 막았지만 관측 마커가 없다."
     )
+
+
+@pytest.mark.asyncio
+async def test_fallback_path_is_reported_as_fallback_not_market(monkeypatch, caplog):
+    """🔴 폴백 경로의 흡수 마커가 `path=fallback` 으로 나온다 (cycle334 MT-B).
+
+    2단계가 4경로의 PENDING 영속화를 코어 하나로 모으면서 **`path` 를 흡수기로
+    전달하는 한 줄**이 매수·매도 두 폴백을 동시에 결정하게 됐다. 그 줄을
+    `path="market"` 리터럴로 고정해도 **행위 258건이 전부 초록**이었다(관문 실측 MT-B).
+
+    추출 전에는 네 호출부가 각자 리터럴을 흡수기에 넘겨서 한 곳을 깨면 한 경로만
+    오염됐고 1단계 관문의 T-2 가 잡았다. 지금은 **한 줄이 두 폴백을 결정하는
+    단일 실패점**이고, 이 테스트가 그 자리를 지킨다.
+
+    ⚠️ 피해는 **관측 한정**(매매 행위 0)이다. 그런데 `path` 는 「INSERT 도중 체결이
+    주 주문에 착지했나, 5호가 지정가 폴백 주문에 착지했나」를 읽는 **유일한 채널**이고,
+    더 나쁜 것은 **skip WARNING 의 수식어는 계속 올바르다**는 점이다(같은 `path` 를
+    쓰지만 다른 표를 탄다) — 두 관측 채널이 **조용히 갈라져** 로그만 보면 모순이 안 보인다.
+    """
+    import logging
+
+    from src.api.base import KisApiError
+
+    from src.engine import scanner as _scanner
+    from src.models.order import OrderResult
+
+    env = _make_sell_env(monkeypatch)
+    _seed_position(env.strategy)
+    # 폴백 가격 산출에 dict 형식 현재가가 필요하다(이 파일의 기본 픽스처는 정수다).
+    monkeypatch.setattr(_scanner, "ticker_prices", {TICKER: {"current_price": PRICE}},
+                        raising=False)
+    caplog.set_level(logging.INFO, logger="src.engine.order_engine")
+
+    calls = {"n": 0}
+
+    async def market_rejected_then_fallback(ticker, side, quantity, price=0, **kwargs):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            raise KisApiError(rt_cd="1", msg_cd="APBK1943",
+                              msg1="시장가호가불가로 주문이 불가합니다.")
+        # 폴백 주문 — 이 INSERT 의 await 창에 체결이 착지한다
+        return OrderResult(order_no="SELL-FB-1", order_time="090501", krx_org_no="00950")
+
+    monkeypatch.setattr("src.engine.order_engine.place_order", market_rejected_then_fallback)
+    await env.engine.execute_sell(TICKER, Signal.STOP_LOSS, "momentum")
+
+    hits = [r.getMessage() for r in caplog.records
+            if "[sell_fill_during_insert]" in r.getMessage()]
+    assert len(hits) == 1, f"흡수 마커가 {len(hits)}행 (기대 1행): {hits}"
+    assert "path=fallback" in hits[0], (
+        f"폴백 경로인데 마커가 `path=fallback` 이 아니다: {hits[0]}\n"
+        "  코어가 받은 path 를 흡수기로 전달하지 않고 고정값을 넘겼을 수 있다."
+    )

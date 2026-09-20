@@ -48,7 +48,8 @@ import pytest
 pytestmark = pytest.mark.unit
 
 _SRC = Path(__file__).resolve().parents[3] / "src" / "engine" / "order_engine.py"
-_HELPER = "_persist_sell_pending_after_send"
+_HELPER = "_persist_sell_pending_after_send"   # 경계 래퍼(매도 전용)
+_CORE = "_persist_pending_after_send"          # 4경로 공용 코어(cycle334)
 _MAPPING_TARGETS = ("_order_qty", "_order_strategy", "_order_ticker")
 
 
@@ -68,6 +69,16 @@ def _helper_call_linenos(fn: ast.AST) -> list[int]:
     for n in ast.walk(fn):
         if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) \
                 and n.func.attr == _HELPER:
+            out.append(n.lineno)
+    return sorted(out)
+
+
+def _core_call_linenos(fn: ast.AST) -> list[int]:
+    """4경로 공용 코어 `_persist_pending_after_send` 호출 lineno."""
+    out = []
+    for n in ast.walk(fn):
+        if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) \
+                and n.func.attr == _CORE:
             out.append(n.lineno)
     return sorted(out)
 
@@ -109,21 +120,53 @@ def test_g328_0b_helper_is_called_exactly_twice_from_execute_sell():
     assert len(calls) == 2, f"호출부 {len(calls)}곳 (기대 2곳): {calls}"
 
 
-def test_g328_0c_helper_is_not_called_from_execute_buy():
-    """1단계는 **매도 축만** 모은다 — 매수 승격은 2단계 소관이다.
+def test_g328_0c_core_is_shared_by_all_four_paths():
+    """🔴 **4경로가 같은 코어를 쓴다** (cycle334 가 1단계 가드를 뒤집은 자리).
 
-    매수 쪽에는 `llm_buy_gate.observe_order` 훅 순서 계약(cycle276 C7/C8)과
-    `_pending_buy_orders` 등록이 얹혀 있어 같은 헬퍼로 바로 올리면 의도가 둘이 된다.
+    ⚠️ 1단계에서 이 케이스는 「헬퍼가 `execute_buy` 에서 **안** 불린다」였다.
+    그때는 매도 축만 모았고 매수 승격이 2단계 소관이었기 때문이다. 2단계가 그것을
+    뒤집었으므로 **단언을 그냥 지우지 않고 대체한다** — 지우면 "매수가 승격됐는지" 를
+    아무도 안 보게 되고, 나중에 누가 매수 2곳을 다시 인라인으로 풀어도 조용히 통과한다.
 
-    ⚠️ **이 케이스만 대조군이 자기 자신이 아니라 형제다**(관문 리뷰 실측).
-    헬퍼가 통째로 개명·삭제되면 이 단언은 `[] == []` 로 **초록이 된다** — 같은 조건에서
-    `test_g328_0a`·`0b` 가 붉어지므로 파일 단위로는 공허하지 않지만, 이 한 줄만
-    떼어 인용하면 안 된다.
+    계약 = 접수 후 PENDING 영속화는 **코어 하나**가 하고, 그 코어를
+    매도 래퍼 1 + 매수 2 = **정확히 3곳**이 부른다(매도 2 경로는 래퍼가 대표한다).
 
-    🔴 **2단계(매수 승격)에서 이 가드는 반드시 뒤집히거나 삭제된다.** 그때 위 사실이
-    필요하다 — 무심코 지우면 "매수가 승격됐는지" 를 아무도 안 보게 된다.
+    🔴 이 숫자가 `4곳 → 1곳` 이라는 이 단계의 성과 그 자체다.
     """
-    assert _helper_call_linenos(_func("execute_buy")) == []
+    buy_calls = _core_call_linenos(_func("execute_buy"))
+    assert len(buy_calls) == 2, (
+        f"`execute_buy` 의 코어 호출이 {len(buy_calls)}곳 (기대 2곳 = 주·폴백): {buy_calls}. "
+        "매수 축이 승격되지 않았거나 다시 인라인으로 풀렸다"
+    )
+
+    wrapper = _func(_HELPER)
+    assert len(_core_call_linenos(wrapper)) == 1, (
+        "매도 경계 래퍼가 코어를 정확히 한 번 부르지 않는다"
+    )
+
+    # `execute_sell` 은 래퍼를 부르고 코어를 **직접** 부르지 않는다 —
+    # 직접 부르면 그 경로만 경계 없이 돌아 cycle327 결함이 되살아난다.
+    assert _core_call_linenos(_func("execute_sell")) == [], (
+        "`execute_sell` 이 코어를 직접 부른다 — 그 경로는 접수 후 경계가 없다"
+    )
+
+
+def test_g328_0d_core_does_not_close_the_boundary():
+    """🔴 코어는 **경계를 닫지 않는다** — 예외를 그대로 전파한다.
+
+    경계는 호출자 층의 책임이다. 매도는 래퍼가 닫고, **매수는 아직 닫지 않는다**
+    (그 부재는 결함이고 별도 승인 사이클 소관이다 — 설계 카드 §2B).
+
+    🔴 코어에 `try` 를 들이면 **매수 두 경로의 예외 전파가 조용히 바뀐다** —
+    그러면 이 단계가 행위 보존이 아니게 되고, 승인 근거가 사실과 어긋난다.
+    나중에 2B 가 매수 경계를 세울 때는 **호출자 층**에 세워야 한다.
+    """
+    fn = _func(_CORE)
+    tries = [n for n in ast.walk(fn) if isinstance(n, ast.Try)]
+    assert not tries, (
+        f"코어에 `try` 가 {len(tries)}개 있다 — 경계를 코어로 내리면 매수 두 경로의 "
+        "예외 전파가 바뀐다(행위 보존이 깨진다)"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -174,7 +217,9 @@ def test_g328_2_helper_has_no_await_before_completed_orders_probe():
     맨 위에 비동기 관측 한 줄이 들어가면 양보점이 앞당겨져
     「매핑은 동기 영역」 금기가 **조용히** 깨진다.
     """
-    fn = _func(_HELPER)
+    # ⚠️ cycle334 — 선행 체크는 **코어 헬퍼**로 옮겨갔고 `_HELPER` 는 경계 래퍼가 됐다.
+    # 「최초 양보점이 `await insert_trade` 다」라는 계약은 **코어**에 대해 성립해야 한다.
+    fn = _func(_CORE)
 
     probe_linenos = [
         n.lineno for n in ast.walk(fn)
@@ -270,15 +315,17 @@ def test_g328_4_skip_label_lookup_cannot_raise():
     삼켜 **PENDING INSERT 가 통째로 건너뛰어진다** — 주문은 나갔는데 `trade_history`
     행이 없는 상태다. 관측이 행위를 바꾸면 안 된다.
     """
-    fn = _func(_HELPER)
+    # cycle334 — 수식어 표가 `_PENDING_SKIP_PREFIX`(4경로 공용)로 바뀌고
+    # 조회 자리는 **코어 헬퍼** 안이다. 계약(조회가 raise 할 수 없다)은 불변.
+    fn = _func(_CORE)
     bad = [
         n.lineno for n in ast.walk(fn)
         if isinstance(n, ast.Subscript)
         and isinstance(n.value, ast.Attribute)
-        and n.value.attr == "_SELL_PENDING_SKIP_PATH_LABEL"
+        and n.value.attr in ("_SELL_PENDING_SKIP_PATH_LABEL", "_PENDING_SKIP_PREFIX")
     ]
     assert not bad, (
-        f"`_SELL_PENDING_SKIP_PATH_LABEL[...]` 인덱싱이 있다: line {bad}. "
+        f"수식어 표 `[...]` 인덱싱이 있다: line {bad}. "
         "`.get(path, \"\")` 로 두어야 어떤 `path` 값에도 raise 하지 않는다"
     )
 
@@ -286,7 +333,7 @@ def test_g328_4_skip_label_lookup_cannot_raise():
         isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
         and n.func.attr == "get"
         and isinstance(n.func.value, ast.Attribute)
-        and n.func.value.attr == "_SELL_PENDING_SKIP_PATH_LABEL"
+        and n.func.value.attr in ("_SELL_PENDING_SKIP_PATH_LABEL", "_PENDING_SKIP_PREFIX")
         for n in ast.walk(fn)
     )
     assert has_get, "수식어 표를 `.get()` 으로 읽는 자리가 없다 — 대상이 사라졌다"

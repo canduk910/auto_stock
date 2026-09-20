@@ -2290,6 +2290,7 @@ backend:
       - tests/unit/engine/test_cycle287_krx_after_exit.py
       - tests/unit/engine/test_cycle291_pre_nxt_gtp.py
       - tests/unit/engine/test_cycle295_market_rest_cut.py
+      - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_log_analysis_metrics.py
       - tests/unit/engine/test_order_engine_buy.py
@@ -2989,7 +2990,6 @@ backend:
       - tests/unit/engine/test_cycle317b_rest_window_smoke.py
       - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
-      - tests/unit/engine/test_cycle327_sell_fill_during_insert.py
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
@@ -133399,7 +133399,7 @@ frontend:
       - >-
         frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
       - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
-generated_at: '2026-09-20T15:49:45.058Z'
+generated_at: '2026-09-20T16:40:31.371Z'
 stats:
   backend_modules: 157
   backend_tests: 1072
