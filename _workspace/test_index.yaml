@@ -273,6 +273,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -1345,6 +1346,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -2442,6 +2444,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -3519,6 +3522,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -4590,6 +4594,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -5676,6 +5681,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -6762,6 +6768,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -7851,6 +7858,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -8933,6 +8941,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -10020,6 +10029,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -11118,6 +11128,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -12211,6 +12222,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -13301,6 +13313,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -14502,6 +14515,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -15472,6 +15486,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -16546,6 +16561,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -17630,6 +17646,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -18723,6 +18740,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -19799,6 +19817,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -20889,6 +20908,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -21972,6 +21992,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -23059,6 +23080,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -24141,6 +24163,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -25230,6 +25253,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -26326,6 +26350,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -27440,6 +27465,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -28498,6 +28524,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -29566,6 +29593,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -30651,6 +30679,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -31742,6 +31771,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -32880,6 +32910,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -33919,6 +33950,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -35006,6 +35038,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -36077,6 +36110,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -37164,6 +37198,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -38258,6 +38293,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -39339,6 +39375,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -40421,6 +40458,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -41505,6 +41543,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -42596,6 +42635,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -43687,6 +43727,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -44759,6 +44800,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -45846,6 +45888,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -46929,6 +46972,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -48017,6 +48061,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -49099,6 +49144,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -50184,6 +50230,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -51269,6 +51316,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -52428,6 +52476,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -53510,6 +53559,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -54585,6 +54635,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -55673,6 +55724,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -56769,6 +56821,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -57848,6 +57901,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -58925,6 +58979,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -60015,6 +60070,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -61098,6 +61154,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -62181,6 +62238,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -63267,6 +63325,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -64348,6 +64407,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -65511,6 +65571,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -66668,6 +66729,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -67750,6 +67812,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -68840,6 +68903,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -69954,6 +70018,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -71007,6 +71072,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -72094,6 +72160,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -73173,6 +73240,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -74499,6 +74567,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -75493,6 +75562,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -76433,6 +76503,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -77517,6 +77588,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -78599,6 +78671,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -79683,6 +79756,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -80776,6 +80850,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -81890,6 +81965,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -82943,6 +83019,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -84053,6 +84130,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -85112,6 +85190,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -86206,6 +86285,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -87280,6 +87360,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -88365,6 +88446,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -89450,6 +89532,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -90543,6 +90626,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -91690,6 +91774,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -92786,6 +92871,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -93852,6 +93938,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -94938,6 +95025,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -96012,6 +96100,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -97113,6 +97202,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -98199,6 +98289,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -99434,6 +99525,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -100389,6 +100481,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -101418,6 +101511,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -102508,6 +102602,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -103658,6 +103753,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -104746,6 +104842,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -105826,6 +105923,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -106924,6 +107022,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -107997,6 +108096,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -109081,6 +109181,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -110177,6 +110278,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -111313,6 +111415,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -112398,6 +112501,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -113489,6 +113593,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -114575,6 +114680,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -115661,6 +115767,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -116744,6 +116851,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -117899,6 +118007,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -119147,6 +119256,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -120041,6 +120151,7 @@ backend:
       - tests/unit/engine/test_cycle271_execute_buy_fill_during_insert.py
       - tests/unit/engine/test_cycle273a_partial_row_full_fill_no_correction.py
       - tests/unit/engine/test_cycle273b_161580_cross_order_overwrite.py
+      - tests/unit/engine/test_order_engine_sell_fallback.py
       - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
@@ -120279,6 +120390,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -120928,7 +121040,6 @@ backend:
       - tests/unit/engine/test_multiday_strategies_registry.py
       - tests/unit/engine/test_observability_logs.py
       - tests/unit/engine/test_order_engine_buy.py
-      - tests/unit/engine/test_order_engine_sell_fallback.py
       - tests/unit/engine/test_order_engine_sell_pre_nxt_preconvert.py
       - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
       - tests/unit/engine/test_param_ranges_vcp.py
@@ -121387,6 +121498,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -122451,6 +122563,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -123557,6 +123670,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -124647,6 +124761,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -127090,6 +127205,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -128169,6 +128285,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -129258,6 +129375,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -130338,6 +130456,7 @@ backend:
       - tests/unit/ast/test_cycle298_ast_scan_loop_callsites.py
       - tests/unit/ast/test_cycle303_macro_isolation.py
       - tests/unit/ast/test_cycle322_image_excluded_paths.py
+      - tests/unit/ast/test_cycle328_sell_pending_helper.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -132677,10 +132796,10 @@ frontend:
       - >-
         frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
       - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
-generated_at: '2026-09-20T02:43:34.729Z'
+generated_at: '2026-09-20T05:18:29.078Z'
 stats:
   backend_modules: 157
-  backend_tests: 1066
+  backend_tests: 1067
   frontend_modules: 118
   frontend_tests: 95
   unmapped_modules:

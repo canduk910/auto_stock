@@ -56,6 +56,7 @@ from src.engine.strategy_base import (
 from src.engine.strategy_registry import StrategyRegistry
 from src.engine.util.tick_size import step_down
 from src.models.order import OrderDivision, OrderResult, OrderSide
+from src.models.trade import TradeStatus, TradeType
 
 pytestmark = pytest.mark.unit
 
@@ -504,3 +505,258 @@ async def test_execute_sell_when_apbk3013_aftermarket_then_limit_fallback_at_5_t
 
     # positions 보존 (체결 전)
     assert "012200" in strategy.state.positions
+
+
+# ---------------------------------------------------------------------------
+# 시나리오 I — cycle327 ⓑ 폴백 축: 접수 후 INSERT 가 실패해도 예외가 새지 않는다
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_execute_sell_when_fallback_insert_fails_then_no_raise_and_marked(
+    engine: OrderEngine,
+    strategy: StrategyBase,
+    mock_insert_trade: AsyncMock,
+    mock_place_order: AsyncMock,
+    mock_write_log: AsyncMock,
+    mock_strategy_exchange,
+    caplog,
+):
+    """🔴 폴백 주문이 **나간 뒤** INSERT 가 일반 예외로 실패해도 예외가 밖으로 새지 않는다.
+
+    cycle327 ⓑ 의 **폴백 축**이다. 주 경로는
+    `test_cycle327_sell_fill_during_insert.py::test_sell_does_not_refire_on_generic_insert_error`
+    가 덮지만, 폴백 경로의 같은 경계(`order_engine.py` 의 `path=fallback` 분기)는
+    커버리지 0 이었다 — **바로 앞 커밋이 넣은 코드에 회귀가 없던 자리**다.
+
+    주 경로와 실패 모양이 다르다. 폴백 블록은 `except KisApiError` **안**에 있어서,
+    경계가 없으면 예외가 그 핸들러를 뚫고 재시도 루프와 `execute_sell` 을 통째로
+    빠져나가 **호출자(`risk.on_tick`)로 전파**된다. 재발사가 아니라 **틱 처리 중단**이
+    피해다 — 그 코루틴이 죽으면 그 순간의 다른 종목 손절 평가도 함께 사라진다.
+
+    돌연변이 = `except Exception:` 블록을 지우면 이 `await` 가 `TimeoutError` 로 터진다.
+    """
+    import logging
+
+    from src.engine import scanner as _scanner
+
+    _scanner.ticker_prices["012200"] = {"current_price": 4500}
+
+    # 1차 시장가 거부 → 2차 지정가 폴백은 **접수 성공**. 그 뒤 INSERT 만 실패시킨다.
+    mock_place_order.side_effect = [
+        _market_disallow_error(),
+        _success_result("ORDER-I-1"),
+    ]
+    mock_insert_trade.side_effect = TimeoutError("DB 응답 없음 — 폴백 주문은 이미 나갔다")
+
+    caplog.set_level(logging.ERROR, logger="src.engine.order_engine")
+    try:
+        await engine.execute_sell("012200", Signal.STOP_LOSS, "momentum")
+    finally:
+        _scanner.ticker_prices.pop("012200", None)
+
+    # 폴백까지 정확히 2회 — INSERT 실패가 추가 발사를 부르지 않는다.
+    assert mock_place_order.await_count == 2, (
+        f"발사 {mock_place_order.await_count}회 — 접수 후 실패가 재발사를 불렀다"
+    )
+
+    # 조용한 흡수 금지 — 마커가 유일한 관측 채널이다.
+    hits = [
+        r.getMessage() for r in caplog.records
+        if "[sell_post_send_error]" in r.getMessage() and "path=fallback" in r.getMessage()
+    ]
+    assert hits, "예외는 막았지만 아무 말도 남기지 않았다 — 조용한 흡수는 은폐다"
+    assert "ORDER-I-1" in hits[0]
+
+    # 포지션은 보존 — 주문은 접수됐고 체결통보가 정리한다.
+    assert "012200" in strategy.state.positions
+
+
+# ---------------------------------------------------------------------------
+# 시나리오 J — cycle328: 호출부가 헬퍼로 넘기는 **값**을 봉인한다
+# ---------------------------------------------------------------------------
+#
+# 관문 리뷰(2026-09-20)에서 tester·tdd-engineer 가 **독립적으로 같은 구멍**을 찾았다.
+# 매도 PENDING 행의 `price`/`quantity` 를 단언하는 테스트가 리포 전체에 **없었다**
+# (`record.price` 단언은 매수 축 `test_cycle291_pre_nxt_gtp.py:663` 이 유일).
+# 위 시나리오 A 의 주석은 "폴백 주문번호 + 폴백 가격" 이라 적어 놓고 실제로는
+# `record.order_no` 하나만 본다 — **주석을 단언으로 읽은 설계 카드가 틀렸다.**
+#
+# 실측된 돌연변이 3종이 전부 **행위 테스트 0건**으로 통과했다:
+#   M5  폴백 `record_price=fallback_price` → `pos.buy_price`
+#   M12 `_SELL_PENDING_SKIP_PATH_LABEL` 의 `"폴백 "` → `""`
+#   M13 폴백 `quantity=pos.quantity` → `1`
+#
+# 이 구멍은 cycle328 리팩토링이 만든 것이 아니라 **원래 있던 것**이다. 다만 값이
+# 이름 있는 인자 네 개로 헬퍼에 넘어가면서 **실수로 뒤바꾸기가 쉬워졌으므로**
+# 그 단계의 산출물로 닫는다.
+#
+# 🔴 판별력의 전제 = 비교하는 두 값이 서로 달라야 한다.
+#    `buy_price=4500` · `quantity=10` · `fallback_price=step_down(4500,5)=4475`
+#    셋이 전부 다르므로 어느 쌍을 맞바꿔도 단언이 깨진다.
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_sell_pending_record_carries_buy_price_and_position_qty(
+    engine: OrderEngine,
+    strategy: StrategyBase,
+    mock_insert_trade: AsyncMock,
+    mock_place_order: AsyncMock,
+    mock_write_log: AsyncMock,
+    mock_strategy_exchange,
+):
+    """🔴 **주 경로** PENDING 행 = `price=pos.buy_price` · `quantity=pos.quantity`.
+
+    맞바꿈(M5 계열)을 잡는 유일한 축이다. `price` 4500 ↔ `quantity` 10 은
+    자릿수가 달라 어느 방향으로 바꿔도 붉어진다.
+    """
+    mock_place_order.side_effect = [_success_result("ORDER-J-1")]
+
+    await engine.execute_sell("012200", Signal.STOP_LOSS, "momentum")
+
+    assert mock_insert_trade.await_count == 1
+    record = mock_insert_trade.await_args.args[0]
+    assert record.order_no == "ORDER-J-1"
+    assert record.ticker == "012200"
+    assert record.trade_type == TradeType.SELL
+    assert record.status == TradeStatus.PENDING
+    assert record.strategy == "momentum"
+    assert record.price == 4500, (
+        f"PENDING 가격 {record.price} (기대 4500 = pos.buy_price). "
+        "가격·수량 인자가 뒤바뀌었을 수 있다"
+    )
+    assert record.quantity == 10, (
+        f"PENDING 수량 {record.quantity} (기대 10 = pos.quantity)"
+    )
+    assert record.profit_loss == 0
+
+
+@pytest.mark.asyncio
+async def test_sell_fallback_pending_record_carries_fallback_price_not_buy_price(
+    engine: OrderEngine,
+    strategy: StrategyBase,
+    mock_insert_trade: AsyncMock,
+    mock_place_order: AsyncMock,
+    mock_write_log: AsyncMock,
+    mock_strategy_exchange,
+):
+    """🔴 **폴백 경로** PENDING 행 = `price=fallback_price`(≠ `pos.buy_price`).
+
+    `step_down(4500, 5) = 4475` 이므로 `pos.buy_price`(4500)와 다르다 —
+    그 차이가 M5 를 판별하는 전부다. 위 시나리오 A 는 이 값을 보지 않는다.
+    """
+    from src.engine import scanner as _scanner
+
+    _scanner.ticker_prices["012200"] = {"current_price": 4500}
+    expected_fallback = step_down(4500, steps=5)
+
+    # 🔴 전제 봉인 — 리터럴이 아니라 **실제 포지션 값**과 대조한다.
+    # 누가 현재가를 바꾸거나 호가단위 구간 경계를 건드려 둘이 우연히 같아지면
+    # 아래 price 단언이 **초록인 채로 아무것도 재지 않게** 된다.
+    pos_buy_price = strategy.state.positions["012200"].buy_price
+    pos_qty = strategy.state.positions["012200"].quantity
+    assert expected_fallback != pos_buy_price, (
+        f"픽스처 전제 붕괴 — 폴백가({expected_fallback})와 매수가({pos_buy_price})가 같아지면 "
+        "아래 price 단언이 공허하다"
+    )
+    assert expected_fallback != pos_qty, "폴백가와 수량이 같으면 맞바꿈을 판별할 수 없다"
+
+    mock_place_order.side_effect = [
+        _market_disallow_error(),
+        _success_result("ORDER-J-2"),
+    ]
+    try:
+        await engine.execute_sell("012200", Signal.STOP_LOSS, "momentum")
+    finally:
+        _scanner.ticker_prices.pop("012200", None)
+
+    assert mock_insert_trade.await_count == 1
+    record = mock_insert_trade.await_args.args[0]
+    assert record.price == expected_fallback, (
+        f"폴백 PENDING 가격 {record.price} (기대 {expected_fallback}). "
+        f"`pos.buy_price`({pos_buy_price}) 가 들어갔다면 폴백가가 기록에서 사라진다"
+    )
+    assert record.quantity == pos_qty, (
+        f"폴백 PENDING 수량 {record.quantity} (기대 {pos_qty} = pos.quantity)"
+    )
+    # 🔴 나머지 4필드도 주 경로와 **대칭**으로 단언한다.
+    # 이 결함이 실제로 나는 방식은 「주 경로 블록을 폴백에 복붙하고 두 줄만 고치는 것」이라,
+    # 폴백 단언이 둘뿐이면 고치지 않은 나머지가 무방비다. 비대칭이 이 결함의 뿌리였다.
+    assert record.order_no == "ORDER-J-2"
+    assert record.ticker == "012200"
+    assert record.trade_type == TradeType.SELL
+    assert record.status == TradeStatus.PENDING
+    assert record.strategy == "momentum"
+    assert record.profit_loss == 0
+
+
+@pytest.mark.asyncio
+async def test_sell_pending_skip_warning_distinguishes_market_and_fallback(
+    engine: OrderEngine,
+    strategy: StrategyBase,
+    mock_insert_trade: AsyncMock,
+    mock_place_order: AsyncMock,
+    mock_write_log: AsyncMock,
+    mock_strategy_exchange,
+    caplog,
+):
+    """🔴 선행 체결통보 WARNING 이 두 경로를 **문구로 구분**한다.
+
+    이 로그에는 `path=` 필드가 없어 **문구가 유일한 구분자**다. 경로 수식어
+    표(`_SELL_PENDING_SKIP_PATH_LABEL`)의 값이 뭉개지면(M12: `"폴백 "` → `""`)
+    운영자가 로그만 보고 주 경로 거부인지 폴백 거부인지 가릴 수 없게 된다.
+    그런데 그 돌연변이를 잡는 행위 테스트가 **0건**이었다.
+    """
+    import logging
+
+    from src.engine import scanner as _scanner
+
+    caplog.set_level(logging.WARNING, logger="src.engine.order_engine")
+
+    # ── 주 경로: 체결통보가 응답보다 먼저 도착한 상태를 만든다
+    async def _main_then_completed(ticker, side, quantity, price=0, **kwargs):
+        engine._completed_orders.add("ORDER-J-3")
+        return _success_result("ORDER-J-3")
+
+    # 🔴 CI 루트 로거가 DEBUG 라 `caplog.records` 에 무관한 행이 섞인다.
+    # 레벨 ≥ WARNING **과** `"매도 "` 접두로 한정한다(이 메시지엔 `[marker]` 접두가 없다).
+    def _skip_warnings() -> list[str]:
+        return [
+            r.getMessage() for r in caplog.records
+            if r.levelno >= logging.WARNING
+            and r.getMessage().startswith("매도 ")
+            and "PENDING INSERT 생략" in r.getMessage()
+        ]
+
+    mock_place_order.side_effect = _main_then_completed
+    await engine.execute_sell("012200", Signal.STOP_LOSS, "momentum")
+
+    main_msgs = _skip_warnings()
+    assert len(main_msgs) == 1, f"주 경로 생략 WARNING 이 {len(main_msgs)}행: {main_msgs}"
+    assert "폴백" not in main_msgs[0], (
+        f"주 경로인데 '폴백' 이 붙었다: {main_msgs[0]}"
+    )
+
+    # ── 폴백 경로: 시장가 거부 후 폴백 주문의 체결통보가 선행한 상태
+    caplog.clear()
+    engine._selling.discard("012200")
+    _scanner.ticker_prices["012200"] = {"current_price": 4500}
+
+    calls = {"n": 0}
+
+    async def _fallback_then_completed(ticker, side, quantity, price=0, **kwargs):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            raise _market_disallow_error()
+        engine._completed_orders.add("ORDER-J-4")
+        return _success_result("ORDER-J-4")
+
+    mock_place_order.side_effect = _fallback_then_completed
+    try:
+        await engine.execute_sell("012200", Signal.STOP_LOSS, "momentum")
+    finally:
+        _scanner.ticker_prices.pop("012200", None)
+
+    fb_msgs = _skip_warnings()
+    assert len(fb_msgs) == 1, f"폴백 생략 WARNING 이 {len(fb_msgs)}행: {fb_msgs}"
+    assert "폴백" in fb_msgs[0], (
+        f"폴백 경로인데 '폴백' 수식어가 없다: {fb_msgs[0]}. "
+        "이 로그에는 path= 필드가 없어 문구가 유일한 구분자다"
+    )
