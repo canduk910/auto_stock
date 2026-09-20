@@ -34,9 +34,31 @@ execute_sell:1557       insert_trade → UniqueViolationError   (migration 029 �
 
 ## 🔴 이 파일은 행위 보존 테스트가 아니다
 
-고치면 행위가 **바뀐다**(지금 = 재시도 / 뒤 = 흡수 + return).
+고치면 행위가 **바뀐다**(전 = 재시도 / 후 = 흡수 + return).
 그래서 `execute_sell` 리팩토링 커밋과 **섞지 않는다** — 별도 승인 대상이다.
-이 파일은 우선 **결함이 실재함을 증명**한다.
+
+## 수정 (도메인 자문 2026-09-20 · 셋을 한 커밋으로)
+
+자문의 진단 = **진짜 위반은 UNIQUE 가 아니라 「주문이 나간 뒤의 실패를
+발사 실패로 오인해 재시도한다」** 이다. UNIQUE 는 그 창의 한 사례일 뿐이고,
+DB 타임아웃·페일오버가 **더 위험하다** — 그때는 체결통보가 아직 안 와서
+포지션이 살아 있으므로 수량 재확인마저 통과한다.
+
+| | 조치 | 막는 것 |
+|---|---|---|
+| ⓐ | 흡수기 일반화 `_insert_pending_or_absorb_race(side=...)` | INSERT-중 체결 착지(증거 있음) |
+| ⓑ | 재시도 경계를 `place_order` **성공**에서 닫는다 | 접수 후의 **모든** 실패로 인한 재발사 |
+| ⓒ | 발사 직전 `state.positions.get(ticker)` 재조회 | 재시도 사이에 사라진 포지션 |
+
+**판별기** = 일반 예외 주입(`test_sell_does_not_refire_on_generic_insert_error`).
+ⓐ만 넣고 ⓑ를 빼면 그 테스트가 붉어진다.
+
+### 부분 체결에 대한 정정 (실측)
+
+매도 **부분 체결** 분기는 보정 INSERT 를 하지 않는다(`grep -c insert_trade` = 0).
+따라서 이 race 로 UNIQUE 위반이 나는 것은 **전량 체결 분기뿐**이고,
+초기 기록에 있던 "부분 체결이 더 위험" 은 이 race 에 한해 틀렸다.
+다만 ⓑ가 막는 **일반 예외** 축에서는 부분 체결 상태가 여전히 위험하다.
 """
 from __future__ import annotations
 
@@ -179,3 +201,103 @@ async def test_sell_absorbs_only_with_evidence(monkeypatch):
     await env.engine.execute_sell(TICKER, Signal.STOP_LOSS, "momentum")
     sells = [c for c in env.calls.place_order if str(c["side"]).endswith("SELL")]
     assert len(sells) >= 1, "증거 없는 위반인데 주문 자체가 안 나갔다 — 전제가 깨졌다"
+
+
+@pytest.mark.asyncio
+async def test_sell_emits_fill_during_insert_marker(caplog):
+    """🔴 흡수했으면 **말없이 넘어가지 않는다** — `[sell_fill_during_insert]` 1행.
+
+    매수 축의 `[buy_fill_during_insert]`(cycle271 C5)와 같은 규약이다.
+    흡수는 정상 동작이지만 **관측은 남는다** — 이 창이 실제로 얼마나
+    열리는지 운영 로그에서 세려면 마커가 있어야 한다.
+    """
+    import logging
+
+    with pytest.MonkeyPatch.context() as mp:
+        env = _make_sell_env(mp)
+        _seed_position(env.strategy)
+        caplog.set_level(logging.INFO, logger="src.engine.order_engine")
+
+        await env.engine.execute_sell(TICKER, Signal.STOP_LOSS, "momentum")
+
+    hits = [
+        r.getMessage() for r in caplog.records
+        if "[sell_fill_during_insert]" in r.getMessage()
+    ]
+    assert len(hits) == 1, f"마커가 {len(hits)}행 (기대 1행): {hits}"
+    assert TICKER in hits[0]
+    assert "path=market" in hits[0]
+
+
+@pytest.mark.asyncio
+async def test_sell_does_not_refire_on_generic_insert_error(monkeypatch, caplog):
+    """🔴 **판별기** — INSERT 가 일반 예외로 실패해도 매도를 다시 내지 않는다.
+
+    자문의 핵심 지적이다. 흡수기(ⓐ)만 넣으면 이 테스트는 붉다 —
+    `UniqueViolationError` 가 아닌 예외는 흡수기를 그냥 통과하고
+    바깥 `except Exception` 이 재시도 루프를 돌리기 때문이다.
+
+    그리고 이쪽이 **더 위험하다**: DB 타임아웃·페일오버는 체결통보가
+    아직 안 왔을 수 있어 포지션이 살아 있고, 그래서 ⓒ 재확인도 통과한다.
+    남는 방어선은 ⓑ(접수 후 경계를 닫는 것) 하나뿐이다.
+    """
+    import logging
+
+    env = _make_sell_env(monkeypatch)
+    _seed_position(env.strategy)
+
+    async def timeout_insert(record):
+        raise TimeoutError("DB 응답 없음 — 주문은 이미 KIS 로 나갔다")
+
+    monkeypatch.setattr("src.engine.order_engine.insert_trade", timeout_insert)
+    caplog.set_level(logging.INFO, logger="src.engine.order_engine")
+
+    await env.engine.execute_sell(TICKER, Signal.STOP_LOSS, "momentum")
+
+    sells = [c for c in env.calls.place_order if str(c["side"]).endswith("SELL")]
+    assert len(sells) == 1, (
+        f"매도 주문이 {len(sells)}회 나갔다 — INSERT 가 일반 예외로 실패하자 재발사했다.\n"
+        f"  발사 내역: {env.calls.place_order}\n"
+        "  → 재시도 경계가 `place_order` 성공에서 닫히지 않았다."
+    )
+    assert any("[sell_post_send_error]" in r.getMessage() for r in caplog.records), (
+        "재발사는 막았지만 **아무 말도 남기지 않았다** — 조용한 흡수는 은폐다."
+    )
+
+
+@pytest.mark.asyncio
+async def test_sell_does_not_refire_when_position_vanished_between_retries(
+    monkeypatch, caplog
+):
+    """🔴 재시도 사이에 포지션이 사라지면 **그 시도를 내지 않는다**.
+
+    `pos` 는 루프 밖에서 잡은 지역 참조였다. 체결통보가 재시도 대기 중에
+    완주해 포지션을 지워도 옛 수량으로 발사했다.
+
+    피라미딩이 들어오면 이 재조회는 **수량의 유일한 진실**이 된다 —
+    사다리로 나눠 사고 파는 구조에서 옛 참조의 수량은 사실이 아니다.
+    """
+    import logging
+
+    env = _make_sell_env(monkeypatch)
+    _seed_position(env.strategy)
+
+    async def fail_then_record(ticker, side, quantity, price=0, **kwargs):
+        env.calls.place_order.append({"side": side, "quantity": quantity})
+        # 첫 발사는 전송 자체가 실패한다(=주문 안 나감 → 재시도가 정당하다).
+        # 그 사이에 체결통보가 완주해 포지션을 지운 상황을 만든다.
+        env.strategy.state.positions.pop(TICKER, None)
+        raise TimeoutError("전송 실패 — 주문 미접수")
+
+    monkeypatch.setattr("src.engine.order_engine.place_order", fail_then_record)
+    caplog.set_level(logging.INFO, logger="src.engine.order_engine")
+
+    await env.engine.execute_sell(TICKER, Signal.STOP_LOSS, "momentum")
+
+    assert len(env.calls.place_order) == 1, (
+        f"발사가 {len(env.calls.place_order)}회 — 포지션이 사라졌는데 재시도했다.\n"
+        f"  내역: {env.calls.place_order}"
+    )
+    assert any("[sell_position_gone]" in r.getMessage() for r in caplog.records), (
+        "재발사는 막았지만 관측 마커가 없다."
+    )

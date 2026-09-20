@@ -275,7 +275,7 @@ _BASE_SHA: dict[str, str] = {
 #: 먼저 적고 나서 핀을 옮겨라.
 _PIN_APPROVED_BUT_UNUSED: dict[str, str] = {
     "src/engine/order_engine.py":
-        "f13519d6429c5b79698fe2607f5eb76262f803a16fb8d58addd1558cfcf264c7",
+        "2e10df625e9857b2a6b939f64f5e22849cba1890445a80481d1e889ac002d23a",
 }
 
 #: cycle293 착지 값(= cycle294 **착수 시점**) — 기록용이다. 이 두 파일은 이 사이클의

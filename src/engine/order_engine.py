@@ -828,10 +828,18 @@ class OrderEngine:
 
         return routed
 
-    async def _insert_pending_buy_or_absorb_race(
+    # cycle327 — 흡수 마커는 축별 **리터럴**로 둔다(로그 grep 의 대상이다).
+    # `side` 는 이 표의 키일 뿐이고, 표에 없는 값이면 흡수하지 않고 전파한다.
+    _FILL_DURING_INSERT_MARKER = {
+        "buy": "[buy_fill_during_insert]",
+        "sell": "[sell_fill_during_insert]",
+    }
+
+    async def _insert_pending_or_absorb_race(
         self,
         record: TradeRecord,
         *,
+        side: str,
         ticker: str,
         order_no: str,
         strategy_id: str,
@@ -840,24 +848,29 @@ class OrderEngine:
         """PENDING INSERT — 체결통보가 그 `await` 도중 착지하는 race(cycle271) 흡수.
 
         `await insert_trade` 는 이벤트 루프에 제어를 넘긴다. 그 사이 체결통보
-        (`_handle_buy_fill`) 가 먼저 완주하면 보정 INSERT 로 같은
-        `(ticker, order_no, trade_type)` COMPLETED 행을 먼저 넣어 두므로, 재개된
-        이 PENDING INSERT 는 migration 029 부분 UNIQUE 인덱스를 위반한다.
+        (`_handle_buy_fill` / `_handle_sell_fill`) 가 먼저 완주하면 보정 INSERT 로
+        같은 `(ticker, order_no, trade_type)` COMPLETED 행을 먼저 넣어 두므로,
+        재개된 이 PENDING INSERT 는 migration 029 부분 UNIQUE 인덱스를 위반한다.
 
         `_completed_orders` 에 이 `order_no` 가 있다는 것이 "체결통보가 먼저
         INSERT 했다"는 유일한 증거다 — 그때만 성공 경로로 합류하고
         (누수 방지를 위해 그 order_no 를 소비/discard), 증거 없는
         UniqueViolationError(예: 같은 키의 CANCELLED 잔존 등 다른 원인)는
         그대로 전파한다.
+
+        cycle327 — **매수·매도 공용**이다. 매도에 이 흡수기가 없던 동안
+        `UniqueViolationError` 가 `except Exception` 으로 흘러 재시도 루프를
+        돌았고, **이미 팔린 수량을 다시 발사**했다.
         """
         try:
             await insert_trade(record)
         except UniqueViolationError:
-            if order_no in self._completed_orders:
+            marker = self._FILL_DURING_INSERT_MARKER.get(side)
+            if marker and order_no in self._completed_orders:
                 self._completed_orders.discard(order_no)
                 logger.info(
-                    "[buy_fill_during_insert] ticker=%s order_no=%s strategy=%s path=%s",
-                    ticker, order_no, strategy_id, path,
+                    "%s ticker=%s order_no=%s strategy=%s path=%s",
+                    marker, ticker, order_no, strategy_id, path,
                 )
             else:
                 raise
@@ -1189,8 +1202,8 @@ class OrderEngine:
                     strategy=strategy.strategy_id,
                     order_no=result.order_no,
                 )
-                await self._insert_pending_buy_or_absorb_race(
-                    record, ticker=ticker, order_no=result.order_no,
+                await self._insert_pending_or_absorb_race(
+                    record, side="buy", ticker=ticker, order_no=result.order_no,
                     strategy_id=strategy.strategy_id, path="market",
                 )
 
@@ -1303,8 +1316,8 @@ class OrderEngine:
                             strategy=strategy.strategy_id,
                             order_no=result.order_no,
                         )
-                        await self._insert_pending_buy_or_absorb_race(
-                            record, ticker=ticker, order_no=result.order_no,
+                        await self._insert_pending_or_absorb_race(
+                            record, side="buy", ticker=ticker, order_no=result.order_no,
                             strategy_id=strategy.strategy_id, path="fallback",
                         )
 
@@ -1514,6 +1527,21 @@ class OrderEngine:
             )
 
         for attempt in range(1, SELL_MAX_RETRIES + 1):
+            # cycle327 ⓒ — 발사 직전 포지션 재확인. `pos` 는 `:1376` 에서 잡은
+            # **지역 참조**라, 재시도 사이에 체결통보가 완주해 포지션이 사라져도
+            # 옛 수량을 그대로 들고 있다. 매 시도마다 현재 상태를 다시 읽어,
+            # 없어졌으면 발사하지 않고 끝낸다(이미 팔린 것을 다시 팔지 않는다).
+            # 수량도 이 재조회 값에서 가져온다 — 피라미딩으로 한 종목의 수량이
+            # 사다리로 변하게 되면 옛 참조의 수량은 더 이상 사실이 아니다.
+            pos = strategy.state.positions.get(ticker)
+            if not pos:
+                logger.info(
+                    "[sell_position_gone] ticker=%s strategy=%s attempt=%d — "
+                    "재시도 전 포지션 소멸(체결 완료 추정) → 재발사 중단",
+                    ticker, strategy_id, attempt,
+                )
+                self._selling.discard(ticker)
+                return
             try:
                 result = await place_order(
                     ticker=ticker,
@@ -1534,27 +1562,44 @@ class OrderEngine:
                 # 애프터 `41`/`44`, 지정가 매도 `00`)을 그대로 기록한다.
                 self._order_division[result.order_no] = order_division.value
 
-                # 체결통보가 응답보다 먼저 도착해 COMPLETED row가 이미 INSERT됐다면 PENDING INSERT 생략
-                if result.order_no in self._completed_orders:
-                    self._completed_orders.discard(result.order_no)
-                    logger.warning(
-                        "매도 응답보다 체결통보 선행 — PENDING INSERT 생략: %s (주문번호: %s)",
-                        t(ticker), result.order_no,
+                # 🔴 cycle327 ⓑ — 여기서부터 **주문은 이미 나갔다**.
+                # 이 아래의 어떤 실패도 「발사 실패」가 아니므로 재시도 루프로
+                # 되돌리지 않는다. 되돌리면 이미 팔린 것을 다시 판다.
+                # (DB 타임아웃·페일오버처럼 체결통보가 아직 안 온 경우가 더 위험하다 —
+                #  그때는 포지션이 살아 있어 ⓒ 재확인도 통과하기 때문이다.)
+                try:
+                    # 체결통보가 응답보다 먼저 도착해 COMPLETED row가 이미 INSERT됐다면 PENDING INSERT 생략
+                    if result.order_no in self._completed_orders:
+                        self._completed_orders.discard(result.order_no)
+                        logger.warning(
+                            "매도 응답보다 체결통보 선행 — PENDING INSERT 생략: %s (주문번호: %s)",
+                            t(ticker), result.order_no,
+                        )
+                    else:
+                        # trade_history 기록
+                        record = TradeRecord(
+                            ticker=ticker,
+                            ticker_name=t(ticker).split("(")[0] if "(" in t(ticker) else "",
+                            trade_type=TradeType.SELL,
+                            price=pos.buy_price,
+                            quantity=pos.quantity,
+                            profit_loss=0,  # 체결 확정 시 계산
+                            status=TradeStatus.PENDING,
+                            strategy=strategy_id,
+                            order_no=result.order_no,
+                        )
+                        # cycle327 ⓐ — 매수와 같은 흡수기. INSERT 의 `await` 도중
+                        # 체결통보가 착지해 COMPLETED 행을 선점하면 조용히 합류한다.
+                        await self._insert_pending_or_absorb_race(
+                            record, side="sell", ticker=ticker, order_no=result.order_no,
+                            strategy_id=strategy_id, path="market",
+                        )
+                except Exception:
+                    logger.exception(
+                        "[sell_post_send_error] ticker=%s order_no=%s strategy=%s path=market "
+                        "— 주문은 접수됐다. 재발사하지 않고 체결통보·동기화에 맡긴다.",
+                        ticker, result.order_no, strategy_id,
                     )
-                else:
-                    # trade_history 기록
-                    record = TradeRecord(
-                        ticker=ticker,
-                        ticker_name=t(ticker).split("(")[0] if "(" in t(ticker) else "",
-                        trade_type=TradeType.SELL,
-                        price=pos.buy_price,
-                        quantity=pos.quantity,
-                        profit_loss=0,  # 체결 확정 시 계산
-                        status=TradeStatus.PENDING,
-                        strategy=strategy_id,
-                        order_no=result.order_no,
-                    )
-                    await insert_trade(record)
 
                 logger.info(
                     "%s 매도 주문 접수: %s %d주 (주문번호: %s, 전략: %s)",
@@ -1873,27 +1918,42 @@ class OrderEngine:
                             # 프리장 `00`, 애프터 `41`)의 실제 전송값을 기록한다.
                             self._order_division[fb_result.order_no] = fallback_div.value
 
-                            # 체결통보 선행 race 가드 (매수 폴백·시장가 경로 동일 규약)
-                            if fb_result.order_no in self._completed_orders:
-                                self._completed_orders.discard(fb_result.order_no)
-                                logger.warning(
-                                    "매도 폴백 응답보다 체결통보 선행 — PENDING INSERT 생략: %s "
-                                    "(주문번호: %s)",
-                                    t(ticker), fb_result.order_no,
+                            # 🔴 cycle327 ⓑ — 폴백 주문도 이미 나갔다. 아래의 실패는
+                            # 「발사 실패」가 아니므로 바깥 핸들러로 흘려보내지 않는다.
+                            try:
+                                # 체결통보 선행 race 가드 (매수 폴백·시장가 경로 동일 규약)
+                                if fb_result.order_no in self._completed_orders:
+                                    self._completed_orders.discard(fb_result.order_no)
+                                    logger.warning(
+                                        "매도 폴백 응답보다 체결통보 선행 — PENDING INSERT 생략: %s "
+                                        "(주문번호: %s)",
+                                        t(ticker), fb_result.order_no,
+                                    )
+                                else:
+                                    record = TradeRecord(
+                                        ticker=ticker,
+                                        ticker_name=(
+                                            t(ticker).split("(")[0] if "(" in t(ticker) else ""
+                                        ),
+                                        trade_type=TradeType.SELL,
+                                        price=fallback_price,
+                                        quantity=pos.quantity,
+                                        profit_loss=0,
+                                        status=TradeStatus.PENDING,
+                                        strategy=strategy_id,
+                                        order_no=fb_result.order_no,
+                                    )
+                                    await self._insert_pending_or_absorb_race(
+                                        record, side="sell", ticker=ticker,
+                                        order_no=fb_result.order_no,
+                                        strategy_id=strategy_id, path="fallback",
+                                    )
+                            except Exception:
+                                logger.exception(
+                                    "[sell_post_send_error] ticker=%s order_no=%s strategy=%s "
+                                    "path=fallback — 주문은 접수됐다. 재발사하지 않는다.",
+                                    ticker, fb_result.order_no, strategy_id,
                                 )
-                            else:
-                                record = TradeRecord(
-                                    ticker=ticker,
-                                    ticker_name=t(ticker).split("(")[0] if "(" in t(ticker) else "",
-                                    trade_type=TradeType.SELL,
-                                    price=fallback_price,
-                                    quantity=pos.quantity,
-                                    profit_loss=0,
-                                    status=TradeStatus.PENDING,
-                                    strategy=strategy_id,
-                                    order_no=fb_result.order_no,
-                                )
-                                await insert_trade(record)
 
                             logger.warning(
                                 "매도 시장가 거부 → 지정가 5호가 폴백: %s @ %d "

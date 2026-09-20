@@ -177,11 +177,16 @@ def _completed_check_lines(fn) -> list[int]:
 
 
 def _insert_helper_lines(fn) -> list[int]:
-    """`_insert_pending_buy_or_absorb_race(...)` 호출 lineno (오름차순)."""
+    """`_insert_pending_or_absorb_race(...)` 호출 lineno (오름차순).
+
+    cycle327 에서 이 흡수기가 매수·매도 공용으로 일반화되며 이름이 바뀌었다
+    (`_insert_pending_buy_or_absorb_race` → `_insert_pending_or_absorb_race`).
+    이 가드가 보는 것은 execute_buy 안의 호출이라 대상은 그대로다.
+    """
     out = []
     for n in ast.walk(fn):
         if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) \
-                and n.func.attr == "_insert_pending_buy_or_absorb_race":
+                and n.func.attr == "_insert_pending_or_absorb_race":
             out.append(n.lineno)
     return sorted(out)
 
@@ -488,7 +493,7 @@ def test_c1_7_hook_precedes_completed_orders_check() -> None:
 
 
 def test_c1_8_hook_precedes_insert_helper() -> None:
-    """C7 (HIGH) — 훅은 PENDING INSERT(`_insert_pending_buy_or_absorb_race`) **앞**이다.
+    """C7 (HIGH) — 훅은 PENDING INSERT(`_insert_pending_or_absorb_race`) **앞**이다.
 
     INSERT 뒤로 옮기면 체결통보 선행 코호트(가장 빨리 체결되는 진입)가 기록에서 통째로
     빠진다 — 09-09 034020 · 09-10 004990 실측(뮤테이션 M2).

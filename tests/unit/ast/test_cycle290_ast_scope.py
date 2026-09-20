@@ -99,7 +99,7 @@ def _sha(text: str) -> str:
 _BASE_SHA: dict[str, str] = {
     # 8영역 — 엔진 5파일 전부 (order_engine 포함! cycle290 은 무접촉)
     "src/engine/order_engine.py":
-        "f13519d6429c5b79698fe2607f5eb76262f803a16fb8d58addd1558cfcf264c7",
+        "2e10df625e9857b2a6b939f64f5e22849cba1890445a80481d1e889ac002d23a",
     "src/engine/risk.py":
         "e8614235cc0bea638f8c349b2f6910c94f5f9a5b849f5d65bef0583f959d81c9",
     "src/engine/session.py":

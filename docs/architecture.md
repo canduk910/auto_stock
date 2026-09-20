@@ -1420,7 +1420,7 @@ KIS PINGPONG echo 까지 같은 막힌 루프 안에 있다.
 아니라 **설계된 창**이다 — 루트 `CLAUDE.md` 금기 "매핑 등록은 `place_order` 응답 직후 동기 영역,
 `await insert_trade` 진입 전" 의 이유가 정확히 "체결통보가 REST 응답보다 먼저 온다" 이고, 그
 race 를 흡수하는 장치가 셋이나 있다(`_completed_orders` 선행 가드 ·
-`_insert_pending_buy_or_absorb_race`(`:644`, 증거가 있을 때만 UniqueViolation 흡수 `:669-670`) ·
+`_insert_pending_or_absorb_race`(매수·매도 공용, 증거가 있을 때만 UniqueViolation 흡수) ·
 보정 INSERT).
 
 **4단계는 이 창을 정상 경로로 만든다.** 체결통보는 W→3 의 1홉이고 주문 응답은 2→R→KIS→R→2

@@ -423,7 +423,7 @@ async def test_c2_4_fallback_when_full_fill_during_insert_then_position_and_pend
 
     `test_c2_2` 는 시장가 경로만 검증해 커버리지가 비대칭이었다(검증 NO-GO #2, LOW/비차단
     — order_engine.py:518 `state.cached_buyable_at = 0.0` 에 대응 가드 부재, 뮤테이션 m11
-    ESCAPED). 시정 지점(`_insert_pending_buy_or_absorb_race`)은 두 경로가 공유하므로
+    ESCAPED). 시정 지점(`_insert_pending_or_absorb_race`)은 두 경로가 공유하므로
     시장가에서 검증된 포지션/pending/캐시 무효화 성질이 폴백에서도 성립함을 실증한다.
     순수 테스트 전용 추가 — `order_engine.py` 는 1 byte 도 바뀌지 않는다.
     """

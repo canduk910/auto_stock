@@ -371,7 +371,7 @@ _PREEXISTING_CONTENT_SHA: dict[str, str] = {
     # `test_cycle274_ast_llm_gate.py` 는 dict 이름이 `_BASE_SHA` 라 그 4곳 목록 밖이지만
     # 같은 파일을 핀하므로 함께 갱신한다(자기 가드가 따로 검사한다).
     "src/engine/order_engine.py":
-        "f13519d6429c5b79698fe2607f5eb76262f803a16fb8d58addd1558cfcf264c7",
+        "2e10df625e9857b2a6b939f64f5e22849cba1890445a80481d1e889ac002d23a",
     # ✅ 2026-09-12 (cycle287) — 시각이 거래소·호가유형을 정한다. docstring 만
     # (본문 byte 동일). 자매 가드 네 곳 전부 같은 값.
     "src/api/order.py":
