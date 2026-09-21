@@ -16,6 +16,7 @@ import { getStrategyColor } from '../types/strategy'
 import type { TradeRecord } from '../types/trading'
 import type { LlmEvaluationSummaryMap } from '../types/llm-evaluation'
 import LlmEvaluationModal from './LlmEvaluationModal'
+import LlmScoreBadge from './LlmScoreBadge'
 
 const columnHelper = createColumnHelper<TradeRecord>()
 
@@ -266,20 +267,29 @@ function makeColumns(
                   ? `다른 날짜(${otherDates.join(', ')})의 평가 기록 — 이 행에서 열 수 없음`
                   : '평가 기록 없음'
         return (
-          <button
-            type="button"
-            data-testid={testId}
-            disabled={!enabled}
-            title={title}
-            onClick={() => onOpen(orderNo, rowKstDate)}
-            className={`px-2 py-1 text-xs rounded border ${
-              enabled
-                ? 'border-blue-300 text-blue-700 hover:bg-blue-50'
-                : 'border-gray-200 text-gray-400 cursor-not-allowed'
-            }`}
-          >
-            AI 자문
-          </button>
+          // cycle337 — 점수를 버튼 **왼쪽**에 함께 그린다. 팝업을 열지 않아도 행끼리
+          // 비교할 수 있어야 한다는 것이 이 열의 요구다. 점수는 이미 `summary` 에
+          // 실려 있으므로 추가 조회가 없다.
+          <div className="flex items-center gap-1.5">
+            <LlmScoreBadge
+              summary={summary}
+              testId={orderNo ? `llm-score-${orderNo}` : `llm-score-none-${info.row.index}`}
+            />
+            <button
+              type="button"
+              data-testid={testId}
+              disabled={!enabled}
+              title={title}
+              onClick={() => onOpen(orderNo, rowKstDate)}
+              className={`px-2 py-1 text-xs rounded border ${
+                enabled
+                  ? 'border-blue-300 text-blue-700 hover:bg-blue-50'
+                  : 'border-gray-200 text-gray-400 cursor-not-allowed'
+              }`}
+            >
+              AI 자문
+            </button>
+          </div>
         )
       },
     }),

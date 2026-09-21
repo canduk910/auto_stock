@@ -16,6 +16,7 @@ import { getStrategyColor } from '../types/strategy'
 import type { TradePair } from '../types/trading'
 import type { LlmEvaluationSummaryMap } from '../types/llm-evaluation'
 import LlmEvaluationModal from './LlmEvaluationModal'
+import LlmScoreBadge from './LlmScoreBadge'
 
 const STRATEGY_NAMES: Record<string, string> = {
   momentum: '모멘텀',
@@ -187,23 +188,39 @@ function makeColumns(
             : otherDateOnly
               ? '다른 날짜의 평가 기록 — 이 행에서 열 수 없음'
               : '평가 기록 없음'
+      // cycle337 — 점수를 버튼 **왼쪽**에 그린다(추가 조회 0 — 이미 받은 요약이다).
+      // 🔴 한 페어에 평가가 여럿이면 **첫 매수** 기준이다. 회고 정본
+      // (`llm_retrospective.join_pairs_with_evaluations`)이 `buy_order_nos[0]` 의 평가를
+      // `primary` 로 삼으므로 화면도 같은 것을 보여야 한다 — 다른 것을 고르면 화면과
+      // 회고 통계가 조용히 갈린다. `matchedOrderNos` 는 `buyOrderNos` 순서(시간순)를
+      // 보존한 filter 결과라 그 첫 원소가 곧 「가장 이른 평가」다.
+      const primarySummary = hasEval
+        ? findLlmSummary(summaries, buyDate, matchedOrderNos[0])
+        : null
       return (
-        <button
-          type="button"
-          data-testid={testId}
-          disabled={!hasEval}
-          title={title}
-          // 날짜(`buyDate`)를 **반드시** 함께 넘긴다 — 빼면 라우트가 "가장 최근 1건" 을
-          // 골라 같은 번호가 재사용된 **다른 거래의 평가**를 띄운다(회귀 가드 F25b).
-          onClick={() => onOpen(buyOrderNos, buyDate)}
-          className={`px-2 py-1 text-xs rounded border ${
-            hasEval
-              ? 'border-blue-300 text-blue-700 hover:bg-blue-50'
-              : 'border-gray-200 text-gray-400 cursor-not-allowed'
-          }`}
-        >
-          AI 자문{buyOrderNos.length > 1 ? ` (${buyOrderNos.length})` : ''}
-        </button>
+        <div className="flex items-center gap-1.5">
+          <LlmScoreBadge
+            summary={primarySummary}
+            matchedCount={matchedOrderNos.length}
+            testId={pairKey ? `llm-score-pair-${pairKey}` : `llm-score-pair-none-${info.row.index}`}
+          />
+          <button
+            type="button"
+            data-testid={testId}
+            disabled={!hasEval}
+            title={title}
+            // 날짜(`buyDate`)를 **반드시** 함께 넘긴다 — 빼면 라우트가 "가장 최근 1건" 을
+            // 골라 같은 번호가 재사용된 **다른 거래의 평가**를 띄운다(회귀 가드 F25b).
+            onClick={() => onOpen(buyOrderNos, buyDate)}
+            className={`px-2 py-1 text-xs rounded border ${
+              hasEval
+                ? 'border-blue-300 text-blue-700 hover:bg-blue-50'
+                : 'border-gray-200 text-gray-400 cursor-not-allowed'
+            }`}
+          >
+            AI 자문{buyOrderNos.length > 1 ? ` (${buyOrderNos.length})` : ''}
+          </button>
+        </div>
       )
     },
   }),
