@@ -1322,6 +1322,46 @@ class BullFlagBreakoutStrategy(StrategyBase):
 
         return Signal.NONE
 
+    def get_effective_target_price(self, ticker: str) -> tuple[int | None, bool]:
+        """측정 목표가 read-only 미러 — `(target, already_hit)` (cycle342).
+
+        🔴 **`get_targets_status()` 를 쓰면 안 된다.** 그쪽은 `self._candidates` 를
+        순회하는데(`:798`) `_candidates` 는 `prepare()` 마다 와이프되고 **보유 종목은
+        셋업이 무너져 후보 자격을 잃는 것이 정상**이다. 실측(funnel `step_no=99`
+        6영업일) — 보유 2종목이 **하루도** 후보에 없었다. 그래서 그 경로로 목표가를
+        읽으면 화면이 **영구히 빈 칸**이다. 같은 파일 안에서 손절 미러는
+        `_effective_setup` 으로 stamp 폴백을 타는데 목표가만 안 타던 **비대칭**을
+        이 함수가 없앤다.
+
+        산식은 `check_exit_signal` §3 과 **동일**하다 — `flag_high + (pole_high −
+        pole_start)`, 키 결손이면 **미발화**(`None`)가 계약이다(임의 기본값으로
+        익절을 쏘면 과잉 청산).
+
+        🔴 `observe=False` 필수 — `True` 면 5분 watcher 의 `[setup_structure_conflict]`
+        cap 을 10초 폴링이 **선소비**해 그 마커의 D+1 귀인이 무너진다.
+
+        둘째 원소 `already_hit` 은 `_partial_exit` 래치다(**읽기만**). 이미 발화한
+        목표를 숫자만 보여 주면 "아직 안 닿았다" 로 읽힌다.
+        """
+        pos = self.state.positions.get(ticker)
+        if not pos or pos.buy_price <= 0:
+            return None, False
+        try:
+            info = self._effective_setup(ticker, observe=False)
+            if not info:
+                return None, False
+            pole_high = info.get("pole_high", 0) or 0
+            pole_start = info.get("pole_start", 0) or 0
+            flag_high = info.get("flag_high", 0) or 0
+            pole_width = pole_high - pole_start
+            if pole_width <= 0 or flag_high <= 0:
+                return None, False
+            target = int(flag_high + pole_width)
+            return (target if target > 0 else None,
+                    bool(self._partial_exit.get(ticker, False)))
+        except Exception:
+            return None, False  # fail-open — 화면은 `—`
+
     def get_effective_stop_price(self, ticker: str) -> int | None:
         """실효 손절선 read-only 미러 (cycle233 척도 병기).
 

@@ -37,19 +37,31 @@ class _Strategy:
         positions: dict,
         params: dict | None = None,
         effective_stop=None,
-        targets: dict | None = None,
+        target=None,
+        target_hit: bool = False,
+        candidate_targets: dict | None = None,
         raise_on_stop: bool = False,
     ):
         self.strategy_id = strategy_id
         self.state = _State(positions)
         self.config = _Config(params or {})
         self._effective_stop = effective_stop
-        self._targets = targets
+        self._target = target
+        self._target_hit = target_hit
         self._raise_on_stop = raise_on_stop
         if effective_stop is not None or raise_on_stop:
             self.get_effective_stop_price = self._stop  # type: ignore[assignment]
-        if targets is not None:
-            self.get_targets_status = lambda: self._targets  # type: ignore[assignment]
+        if target is not None:
+            self.get_effective_target_price = (  # type: ignore[assignment]
+                lambda t: (self._target, self._target_hit)
+            )
+        # 🔴 `candidate_targets` 는 **후보 전용** 표면이다(`_candidates` 순회 결과).
+        #    프로덕션 BFB 는 **보유 종목을 절대 여기 넣지 않는다** — 보유는 셋업이
+        #    무너져 후보 자격을 잃는 것이 정상이기 때문이다. 이 스텁이 보유 ticker 를
+        #    여기 심을 수 있게 둔 이유는 오직 **leaf 가 이쪽을 읽지 않음을 증명**하기
+        #    위해서다(양성 대조군 `test_target_never_reads_candidate_surface`).
+        if candidate_targets is not None:
+            self.get_targets_status = lambda: candidate_targets  # type: ignore[assignment]
 
     def _stop(self, ticker: str):
         if self._raise_on_stop:
@@ -81,7 +93,7 @@ def test_hard_pct_fallback_computes_from_buy_price():
 
 def test_hard_pct_picks_most_conservative_of_several_keys():
     """후보 키가 여럿이면 **가장 보수적인**(가장 높은 손절선) 값이다."""
-    s = _Strategy("long_tail_volatility", {"005930": _Pos(100_000)},
+    s = _Strategy("momentum", {"005930": _Pos(100_000)},
                   params={"intraday_stop_loss": -3.5, "overnight_stop_loss": -9.0})
     out = resolve_exit_lines([s], "005930")
     # min(-3.5, -9.0) = -9.0 → 91,000
@@ -127,8 +139,7 @@ def test_non_positive_effective_stop_is_not_adopted(bad):
 
 
 def test_measured_target_only_for_bull_flag():
-    s = _Strategy("bull_flag_breakout", {"005930": _Pos(70_000)},
-                  targets={"005930": {"measured_target": 84_000}})
+    s = _Strategy("bull_flag_breakout", {"005930": _Pos(70_000)}, target=84_000)
     out = resolve_exit_lines([s], "005930")
     assert out["target_price"] == 84_000
     assert out["target_source"] == "measured_move"
@@ -140,8 +151,8 @@ def test_other_strategies_have_no_target_even_with_target_price():
     이미 산 종목의 「목표가」 칸에 그 값을 넣으면 완전한 거짓 정보다.
     """
     s = _Strategy("volatility_breakout", {"005930": _Pos(70_000)},
-                  params={"stop_loss_rate": -5.0},
-                  targets={"005930": {"target_price": 73_000, "measured_target": 99_000}})
+                  params={"stop_loss_rate": -5.0}, target=99_000,
+                  candidate_targets={"005930": {"target_price": 73_000}})
     out = resolve_exit_lines([s], "005930")
     assert out["target_price"] is None
     assert out["target_source"] is None
@@ -150,8 +161,7 @@ def test_other_strategies_have_no_target_even_with_target_price():
 
 
 def test_bull_flag_without_measured_target_is_none():
-    s = _Strategy("bull_flag_breakout", {"005930": _Pos(70_000)},
-                  targets={"005930": {"measured_target": 0}})
+    s = _Strategy("bull_flag_breakout", {"005930": _Pos(70_000)}, target=0)
     assert resolve_exit_lines([s], "005930")["target_price"] is None
 
 
@@ -240,3 +250,88 @@ def test_engine_idle_does_not_overwrite_a_real_stop():
 def test_engine_running_defaults_to_true():
     """기존 호출부 호환 — 인자를 안 주면 현행 행위다."""
     assert build_exit_line_map([], ["005930"])["005930"]["stop_source"] is None
+
+
+# ── cycle342 — 목표가가 「후보 표면」을 읽지 않는다 ────────────────────────
+
+
+def test_target_never_reads_candidate_surface():
+    """🔴 **이 케이스가 초판의 결함을 잡는다.**
+
+    초판은 `get_targets_status()` 를 읽었는데 그 함수는 `_candidates` 를 순회한다.
+    `_candidates` 는 `prepare()` 마다 와이프되고 **보유 종목은 셋업이 무너져 후보
+    자격을 잃는 것이 정상**이라, 그 경로로는 화면이 **영구히 빈 칸**이었다
+    (funnel `step_no=99` 6영업일 실측 — 보유 2종목이 하루도 후보에 없었다).
+
+    그런데 초판 테스트의 스텁이 **보유 ticker 를 후보 표면에 직접 심어** 그 사실을
+    초록으로 덮었다. 프로덕션에서는 불가능한 상태였다 = 공허 통과.
+
+    그래서 여기서는 **후보 표면에만** 값을 두고 미러에는 두지 않는다 — leaf 가
+    후보 표면을 읽으면 이 단언이 붉어진다.
+    """
+    s = _Strategy(
+        "bull_flag_breakout", {"005930": _Pos(70_000)},
+        candidate_targets={"005930": {"measured_target": 84_000}},   # 후보 표면에만
+    )
+    assert not hasattr(s, "get_effective_target_price")
+    out = resolve_exit_lines([s], "005930")
+    assert out["target_price"] is None, (
+        "leaf 가 `get_targets_status`(후보 표면)를 읽고 있다 — 보유 종목은 거기 없어서 "
+        "운영에서는 항상 빈 칸이 된다"
+    )
+
+
+def test_target_comes_from_the_mirror_even_when_candidates_are_empty():
+    """양성 대조군 — 후보가 비어도 미러가 값을 내면 화면에 뜬다(정상 운영 상태)."""
+    s = _Strategy("bull_flag_breakout", {"005930": _Pos(70_000)},
+                  target=84_000, candidate_targets={})
+    assert resolve_exit_lines([s], "005930")["target_price"] == 84_000
+
+
+def test_already_hit_target_is_labeled_differently():
+    """🔴 이미 발화한 목표를 숫자만 보이면 「아직 안 닿았다」로 읽힌다."""
+    s = _Strategy("bull_flag_breakout", {"005930": _Pos(70_000)},
+                  target=84_000, target_hit=True)
+    out = resolve_exit_lines([s], "005930")
+    assert out["target_price"] == 84_000
+    assert out["target_source"] == "measured_move_hit"
+
+
+def test_not_yet_hit_target_keeps_the_plain_label():
+    s = _Strategy("bull_flag_breakout", {"005930": _Pos(70_000)},
+                  target=84_000, target_hit=False)
+    assert resolve_exit_lines([s], "005930")["target_source"] == "measured_move"
+
+
+# ── cycle342 — 모드 의존 전략은 근사를 내지 않는다 ────────────────────────
+
+
+def test_mode_dependent_strategy_gets_no_hard_pct_approximation():
+    """🔴 LTV 는 보유 중 **모드가 갈려** 하나의 고정%로 접을 수 없다.
+
+    운영 DB = `intraday -5` · `overnight -3.5`. `extract_hard_stop_pct` 는 음수 min
+    이라 항상 **−5** 를 내는데, 상한가 모드의 실제 임계는 **−3.5**(더 조인다).
+    −5 를 보여 주면 운영자가 **1.5%p 여유가 더 있다고 오판**한다.
+    """
+    s = _Strategy("long_tail_volatility", {"005930": _Pos(100_000)},
+                  params={"intraday_stop_loss": -5.0, "overnight_stop_loss": -3.5})
+    out = resolve_exit_lines([s], "005930")
+    assert out["stop_price"] is None, "LTV 에 고정% 근사를 내면 상한가 모드에서 틀린다"
+    assert out["stop_source"] == "mode_dependent"
+
+
+def test_mode_dependent_strategy_still_shows_a_real_mirror_if_it_gets_one():
+    """미러가 생기면 그쪽이 이긴다 — 제외는 **근사에 한정**이다."""
+    s = _Strategy("long_tail_volatility", {"005930": _Pos(100_000)},
+                  params={"intraday_stop_loss": -5.0}, effective_stop=96_500)
+    out = resolve_exit_lines([s], "005930")
+    assert out["stop_price"] == 96_500
+    assert out["stop_source"] == "effective"
+
+
+def test_engine_idle_does_not_overwrite_mode_dependent():
+    """야간 라벨이 「모드 의존」 사유를 덮으면 그 사실이 사라진다."""
+    s = _Strategy("long_tail_volatility", {"005930": _Pos(100_000)},
+                  params={"intraday_stop_loss": -5.0})
+    m = build_exit_line_map([s], ["005930"], engine_running=False)
+    assert m["005930"]["stop_source"] == "mode_dependent"

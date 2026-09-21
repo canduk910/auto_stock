@@ -57,6 +57,23 @@ __all__ = ["ExitLines", "resolve_exit_lines", "build_exit_line_map"]
 #: 목표가를 실제로 갖는 전략과 그 값의 성격.
 _MEASURED_MOVE_STRATEGIES = frozenset({"bull_flag_breakout"})
 
+#: 🔴 **하나의 고정% 로 접을 수 없는 전략** — `hard_pct` 근사를 쓰지 않는다.
+#:
+#: `long_tail_volatility` 는 보유 중 **모드가 갈린다** — 당일 모드는
+#: `intraday_stop_loss`, 상한가 모드(`_limit_up_reached`)는 `overnight_stop_loss` 다.
+#: 운영 DB 실측 = `intraday -5` · `overnight -3.5` 이고 `extract_hard_stop_pct` 는
+#: **음수 min** 을 취하므로 항상 **−5** 를 낸다. 그런데 상한가 모드의 실제 임계는
+#: **−3.5**(더 조인다) — 화면이 −5 를 가리키면 운영자가 **1.5%p 여유가 더 있다고
+#: 오판**한다. 🔴 이 함정은 메모리에 이미 박제돼 있다(「LTV 상한가 전환은 −5→−3.5 로
+#: **조여진다** — 코드만 보면 느슨해지는 것으로 읽혀 그렇게 보고했다가 틀렸다」).
+#:
+#: 모드는 `_limit_up_reached`(메모리 전용)라 leaf 가 밖에서 판정할 수 없다. 그래서
+#: 근사를 내지 않고 **`—`(`stop_source="mode_dependent"`)** 로 둔다 — 틀린 손절가는
+#: 없는 것보다 나쁘다. 정확히 내려면 그 전략에 `get_effective_stop_price` 미러를
+#: 붙여야 하는데, 그러면 `account_risk_watcher` 의 계좌 SOFT 게이트 입력값이 바뀌어
+#: **`domain-consult` 선행**이 필요하다(별건).
+_MODE_DEPENDENT_STOP_STRATEGIES = frozenset({"long_tail_volatility"})
+
 
 class ExitLines(dict):
     """`{strategy_id, stop_price, stop_source, target_price, target_source}` dict.
@@ -133,24 +150,28 @@ def _hard_pct_stop(strategy: Any, ticker: str) -> int | None:
         return None
 
 
-def _measured_target(strategy: Any, strategy_id: str, ticker: str) -> int | None:
-    """BFB 의 측정 목표가(부분 익절 트리거). 그 밖 전략은 None."""
+def _measured_target(strategy: Any, strategy_id: str, ticker: str) -> tuple[int | None, bool]:
+    """BFB 의 측정 목표가(부분 익절 트리거) `(target, already_hit)`. 그 밖은 `(None, False)`.
+
+    🔴 **`get_targets_status()` 를 쓰지 않는다.** 그쪽은 `_candidates` 를 순회하는데
+    `_candidates` 는 `prepare()` 마다 와이프되고 **보유 종목은 후보 자격을 잃는 것이
+    정상**이라, 그 경로로는 화면이 **영구히 빈 칸**이다(funnel `step_no=99` 6영업일
+    실측 — 보유 2종목이 하루도 후보에 없었다). 전략의 read-only 미러
+    `get_effective_target_price` 가 `_effective_setup` stamp 폴백을 타므로 그것만 쓴다.
+    """
     if strategy_id not in _MEASURED_MOVE_STRATEGIES:
-        return None
-    fn = getattr(strategy, "get_targets_status", None)
+        return None, False
+    fn = getattr(strategy, "get_effective_target_price", None)
     if not callable(fn):
-        return None
+        return None, False
     try:
-        targets = fn()
-        if not isinstance(targets, dict):
-            return None
-        row = targets.get(ticker)
-        if not isinstance(row, dict):
-            return None
-        return _positive_int(row.get("measured_target"))
+        result = fn(ticker)
+        if isinstance(result, tuple) and len(result) == 2:
+            return _positive_int(result[0]), bool(result[1])
+        return _positive_int(result), False
     except Exception:
         logger.debug("[exit_lines] measured_target 실패 ticker=%s", ticker, exc_info=True)
-        return None
+        return None, False
 
 
 def resolve_exit_lines(strategies: Iterable[Any], ticker: str) -> ExitLines:
@@ -176,17 +197,21 @@ def resolve_exit_lines(strategies: Iterable[Any], ticker: str) -> ExitLines:
 
             stop = _effective_stop(s, ticker)
             source = "effective" if stop is not None else None
-            if stop is None:
+            if stop is None and sid in _MODE_DEPENDENT_STOP_STRATEGIES:
+                # 🔴 근사를 내지 않는다 — 위 `_MODE_DEPENDENT_STOP_STRATEGIES` 주석.
+                source = "mode_dependent"
+            elif stop is None:
                 stop = _hard_pct_stop(s, ticker)
                 source = "hard_pct" if stop is not None else None
 
-            target = _measured_target(s, sid or "", ticker)
+            target, target_hit = _measured_target(s, sid or "", ticker)
             return ExitLines(
                 strategy_id=sid,
                 stop_price=stop,
                 stop_source=source,
                 target_price=target,
-                target_source="measured_move" if target is not None else None,
+                target_source=("measured_move_hit" if target_hit else "measured_move")
+                if target is not None else None,
             )
     except Exception:
         logger.debug("[exit_lines] 전략 순회 실패 ticker=%s", ticker, exc_info=True)
@@ -221,7 +246,9 @@ def build_exit_line_map(
             lines = resolve_exit_lines(strategy_list, t)
         except Exception:
             lines = _empty()
-        if not engine_running and lines.get("stop_price") is None:
+        if (not engine_running
+                and lines.get("stop_price") is None
+                and lines.get("stop_source") is None):
             lines["stop_source"] = "engine_idle"
         out[t] = lines
     return out

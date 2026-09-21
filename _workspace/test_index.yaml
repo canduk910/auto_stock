@@ -598,6 +598,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -1669,6 +1670,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -2759,6 +2761,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -3826,6 +3829,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
@@ -4896,6 +4900,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -5976,6 +5981,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -7054,6 +7060,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -8139,6 +8146,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -9215,6 +9223,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -10296,6 +10305,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -11388,6 +11398,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -12471,6 +12482,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -13558,6 +13570,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -14664,6 +14677,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle274_shadow_behavior_zero.py
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -15711,6 +15725,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -16783,6 +16798,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -17862,6 +17878,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -18945,6 +18962,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -20021,6 +20039,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -21100,6 +21119,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -22179,6 +22199,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -23257,6 +23278,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -24336,6 +24358,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -25415,6 +25438,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -26512,6 +26536,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -27591,6 +27616,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -28656,6 +28682,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle274_shadow_behavior_zero.py
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -29731,6 +29758,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -30812,6 +30840,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -31893,6 +31922,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -33003,6 +33033,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -34054,6 +34085,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -35134,6 +35166,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -36209,6 +36242,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -37290,6 +37324,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -38376,6 +38411,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle274_shadow_behavior_zero.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -39453,6 +39489,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -40529,6 +40566,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -41607,6 +41645,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -42691,6 +42730,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -43773,6 +43813,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle274_shadow_behavior_zero.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -44842,6 +44883,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -45924,6 +45966,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -47002,6 +47045,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -48082,6 +48126,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -49159,6 +49204,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -50238,6 +50284,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -51317,6 +51364,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -52469,6 +52517,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -53546,6 +53595,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -54615,6 +54665,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -55697,6 +55748,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -56787,6 +56839,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -57860,6 +57913,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -58931,6 +58985,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -60015,6 +60070,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -61089,6 +61145,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -62169,6 +62226,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -63248,6 +63306,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -64324,6 +64383,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -65482,6 +65542,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -66634,6 +66695,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -67772,6 +67834,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -68856,6 +68919,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -69956,6 +70020,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle273_kojiro_rank_restore.py
     - tests/unit/engine/strategies/test_cycle274_shadow_behavior_zero.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -71011,6 +71076,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -72092,6 +72158,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -73165,6 +73232,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -74390,6 +74458,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle273_kojiro_rank_restore.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -75458,6 +75527,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -76407,6 +76477,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -77485,6 +77556,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -78561,6 +78633,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -79639,6 +79712,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -80724,6 +80798,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -81820,6 +81895,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -82879,6 +82955,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -83975,6 +84052,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -85038,6 +85116,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -86122,6 +86201,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -87194,6 +87274,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -88273,6 +88354,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -89352,6 +89434,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -90436,6 +90519,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -90985,6 +91069,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle228_log_cap_counters.py
     - tests/unit/engine/strategies/test_cycle228b_setup_resolver.py
     - tests/unit/engine/strategies/test_cycle233_effective_stop_mirrors.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -92644,6 +92729,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -93722,6 +93808,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -94796,6 +94883,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle273_kojiro_rank_restore.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -95873,6 +95961,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -96959,6 +97048,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle273_kojiro_rank_restore.py
     - tests/unit/engine/strategies/test_cycle274_shadow_behavior_zero.py
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
@@ -98036,6 +98126,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -98645,6 +98736,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle274_shadow_behavior_zero.py
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -100230,6 +100322,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -101252,6 +101345,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -102336,6 +102430,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -103481,6 +103576,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -104563,6 +104659,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -105637,6 +105734,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -106723,6 +106821,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -107796,6 +107895,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -108874,6 +108974,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -109964,6 +110065,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -111094,6 +111196,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -112173,6 +112276,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -113257,6 +113361,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -114338,6 +114443,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -115418,6 +115524,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -116494,6 +116601,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -117645,6 +117753,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -118869,6 +118978,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -120011,6 +120121,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -121116,6 +121227,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -122174,6 +122286,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -123274,6 +123387,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -124354,6 +124468,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -126798,6 +126913,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -127871,6 +127987,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -128954,6 +129071,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -130028,6 +130146,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -132029,10 +132148,10 @@ frontend:
     - frontend/src/pages/__tests__/MarketState.test.tsx
     - frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
     - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
-generated_at: '2026-09-22T00:31:00.460449+09:00'
+generated_at: '2026-09-22T01:00:51.959999+09:00'
 stats:
   backend_modules: 158
-  backend_tests: 1076
+  backend_tests: 1077
   frontend_modules: 120
   frontend_tests: 98
   unmapped_modules:

@@ -36,6 +36,11 @@ const MARKET_BADGE_BASE = 'inline-block px-1.5 py-0.5 rounded text-xs font-mediu
  * 것이 아니므로 그 사실을 툴팁이 말한다.
  */
 function stopTitle(h: Holding): string {
+  if (h.stop_source === 'mode_dependent') {
+    // 🔴 하나의 고정%로 접으면 상한가 모드에서 틀린다(-5 로 보이는데 실제 -3.5).
+    //    틀린 손절가는 없는 것보다 나쁘므로 숫자를 내지 않는다.
+    return '이 전략은 보유 중 손절 기준이 바뀐다 (당일 모드 / 상한가 모드) — 하나의 값으로 보여 주면 한쪽이 틀린다.'
+  }
   if (h.stop_source === 'engine_idle') {
     // 🔴 「손절선이 없다」가 아니라 「지금은 모른다」다. 엔진은 21:30 에 메모리
     // 포지션을 비우고 07:45 에 DB 에서 되살린다 — 그 사이에는 알 길이 없다.
@@ -47,12 +52,22 @@ function stopTitle(h: Holding): string {
   const base =
     h.stop_source === 'effective'
       ? '전략이 실제로 쓰는 실효 손절선 (청산 판정과 같은 산식)'
-      : '고정% 손절 근사 — 매입가 × (1 + 하드손절%). 트레일링·시간 청산은 담기지 않는다'
-  return `${base}. ⚠️ 가격과 무관한 청산(15:20 일괄매도 · 스테이지 종료 · 익일청산)은 이 값에 담기지 않는다.`
+      : '고정% 손절 근사 — 매입가 × (1 + 하드손절%). 트레일링은 담기지 않는다'
+  // 🔴 가격과 무관한 청산은 6종이다. 이 숫자에 닿기 **전에** 팔릴 수 있다.
+  //    특히 「보유일수 초과」는 20일 신고가 스윙이 2영업일이라 자주 먼저 터진다.
+  return (
+    `${base}. ⚠️ 가격과 무관한 청산은 이 값에 담기지 않는다 — ` +
+    '보유일수 초과(20일 신고가 스윙 2영업일 · 눌림목 돌파 5영업일) · ' +
+    '15:20 일괄매도 · 대순환 스테이지 종료 · 익일청산. 이 가격에 닿기 전에 팔릴 수 있다.'
+  )
 }
 
 /** 목표가 칸의 설명 — 대부분의 전략에 목표가가 **없다**는 사실을 말한다. */
 function targetTitle(h: Holding): string {
+  if (h.target_source === 'measured_move_hit') {
+    // 🔴 이미 발화한 목표를 숫자만 보이면 「아직 안 닿았다」로 읽힌다.
+    return '측정 목표가 (깃대폭 + 깃발고점) — **이미 도달해 익절 신호가 나갔다**. 잔여는 트레일링이 맡는다.'
+  }
   if (h.target_source === 'measured_move') {
     return '측정 목표가 (깃대폭 + 깃발고점) — 눌림목 돌파 전략의 부분 익절 트리거다. 전량 청산선이 아니다.'
   }
@@ -281,6 +296,9 @@ export default function BalanceTable({ selectedStrategy }: Props) {
                       {h.stop_price
                         ? formatKRW(h.stop_price)
                         : h.stop_source === 'engine_idle' ? '⏸' : '—'}
+                      {h.stop_source === 'mode_dependent' ? (
+                        <span className="ml-1 text-[10px] text-gray-400">모드별</span>
+                      ) : null}
                       {h.stop_source === 'hard_pct' && h.stop_price ? (
                         <span className="ml-1 text-[10px] text-gray-400">근사</span>
                       ) : null}
@@ -291,6 +309,9 @@ export default function BalanceTable({ selectedStrategy }: Props) {
                       className="px-4 py-3 text-right text-gray-700"
                     >
                       {h.target_price ? formatKRW(h.target_price) : '—'}
+                      {h.target_source === 'measured_move_hit' ? (
+                        <span className="ml-1 text-[10px] text-gray-400">도달</span>
+                      ) : null}
                     </td>
                     <td className="px-4 py-3 text-right text-gray-700">{formatKRW(h.eval_amount)}원</td>
                     <td className={`px-4 py-3 text-right font-medium ${profitColor(h.eval_profit_loss)}`}>

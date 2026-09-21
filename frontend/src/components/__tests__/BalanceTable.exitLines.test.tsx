@@ -147,6 +147,11 @@ describe("BalanceTable — 손절가 · 목표가", () => {
     await screen.findByText("삼성전자");
     const title = screen.getByTestId("stop-price-005930").getAttribute("title") ?? "";
     expect(title).toContain("익일청산");
+    // 🔴 보유일수 초과는 지금 보유 9건 중 3건(20일 신고가 스윙)에 직접 걸리고,
+    //    운영값이 2영업일이라 표시 손절가보다 훨씬 먼저 터진다.
+    expect(title).toContain("보유일수 초과");
+    expect(title).toContain("2영업일");
+    expect(title).toContain("이 가격에 닿기 전에 팔릴 수 있다");
   });
 
   it("목표가가 없는 전략은 설명이 그 사실을 말한다", async () => {
@@ -184,6 +189,36 @@ describe("BalanceTable — 손절가 · 목표가", () => {
     const title = screen.getByTestId("stop-price-005930").getAttribute("title") ?? "";
     expect(title).toContain("판정할 수 없다");
     expect(title).not.toContain("엔진 정지");
+  });
+
+  it("🔴 모드가 갈리는 전략은 숫자를 지어내지 않는다", async () => {
+    // 롱테일은 당일/상한가 모드에서 손절 기준이 다르다(-5 / -3.5). 하나로 접으면
+    // 한쪽이 틀리고, 운영자가 1.5%p 여유를 더 있다고 오판한다.
+    setup([makeHolding({ stop_price: null, stop_source: "mode_dependent" })]);
+    await screen.findByText("삼성전자");
+    const cell = screen.getByTestId("stop-price-005930");
+    expect(cell).toHaveTextContent("—");
+    expect(cell).toHaveTextContent("모드별");
+    expect(cell).not.toHaveTextContent("⏸");
+    const title = cell.getAttribute("title") ?? "";
+    expect(title).toContain("보유 중 손절 기준이 바뀐다");
+  });
+
+  it("🔴 이미 도달한 목표가는 그 사실을 표시한다", async () => {
+    setup([makeHolding({ target_price: 84000, target_source: "measured_move_hit" })]);
+    await screen.findByText("삼성전자");
+    const cell = screen.getByTestId("target-price-005930");
+    expect(cell).toHaveTextContent("84,000");
+    expect(cell).toHaveTextContent("도달");
+    expect(cell.getAttribute("title") ?? "").toContain("이미 도달");
+  });
+
+  it("아직 도달하지 않은 목표가에는 「도달」을 붙이지 않는다", async () => {
+    setup([makeHolding({ target_price: 84000, target_source: "measured_move" })]);
+    await screen.findByText("삼성전자");
+    const cell = screen.getByTestId("target-price-005930");
+    expect(cell).toHaveTextContent("84,000");
+    expect(cell).not.toHaveTextContent("도달");
   });
 
   it("보유 0 행의 colSpan 이 컬럼 수와 맞는다", async () => {

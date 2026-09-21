@@ -659,7 +659,7 @@ _CYCLE228_STRATEGY_CONTENT_SHA: dict[str, str] = {
     "src/engine/strategies/vcp_breakout.py":
         "5b324b34335f922f82b848ae2313e08660bde75c02d12432867ed224e9709228",
     "src/engine/strategies/bull_flag_breakout.py":
-        "0feb3b629bab5ad08ad589315ca12e76b57a73950b948570a78dfe84ba792595",
+        "a84368540c5200801a4a220faf0c8b5d0853708b97a9a47c0a51d89f5e840911",
 }
 
 

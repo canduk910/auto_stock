@@ -23,10 +23,11 @@ export interface Holding {
   stop_price?: number | null
   /** `effective` = 전략 실효 손절선(check_exit 와 동일 산식) / `hard_pct` = 고정%손절 근사. */
   /** `engine_idle` = 매매 엔진 정지 중(21:30~07:45) — 「손절선 없음」이 아니라 「지금은 모름」. */
-  stop_source?: 'effective' | 'hard_pct' | 'engine_idle' | null
+  /** `mode_dependent` = 보유 중 모드가 갈려 하나의 고정%로 접을 수 없다(롱테일 상한가 모드). */
+  stop_source?: 'effective' | 'hard_pct' | 'engine_idle' | 'mode_dependent' | null
   target_price?: number | null
-  /** `measured_move` = BFB 측정 목표(부분 익절 트리거). 그 밖 전략은 목표가가 없다. */
-  target_source?: 'measured_move' | null
+  /** `measured_move` = 측정 목표(부분 익절 트리거) · `measured_move_hit` = **이미 도달**. */
+  target_source?: 'measured_move' | 'measured_move_hit' | null
 }
 
 export interface BalanceSummary {
