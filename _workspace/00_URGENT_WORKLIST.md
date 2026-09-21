@@ -28,9 +28,11 @@
 |---|---|---|---|
 | D1 | 07:45 부팅 후 **잔고 손절가** | 보유 9건 전부 값(출처 `effective`) | `⏸` 면 엔진 미기동 / `—` 면 그 전략 `get_effective_stop_price` 조사 |
 | D2 | `nxt_tradable=false` 코호트 **매수 건수** | 과거 60일 **0/97** → 1건만 나와도 cycle336 기전 확인 | 0 이 계속되면 다른 관문이 막는 것 |
-| D3 | 09:30 `[tick_buy_gate]` | `unstamped=0` · `stamped_no_feed` 45~78 | 줄면 코호트 인식이 깨진 것 |
+| D3 | 09:30 `[tick_buy_gate]` | `unstamped=0` · `stamped_no_feed` **48~77**(09-15~09-21 09:30 행 실측 = 67·48·69·53·77) | 줄면 코호트 인식이 깨진 것 |
 | D4 | 🔴 `[tick_channel_pre_krx_frame]` | **09-24 21:30 전에 직접 조회** | INFO 라 리포트에 안 오르고 retention 2일 — 놓치면 영구 소실 |
 | D5 | 하루 매수 건수 | 최근 14일 일 3~7건 | 급증하면 `max_positions`/`position_ratio` PUT 으로 축소(비중 무접촉) |
+
+⚠️ `stamped_no_feed` 는 **넥스트트레이드 비거래(KRX 전용) 종목 수**이지 「시세가 안 오는 종목 수」가 아니다 — 이름이 통합 채널 시절의 잔재다(`scanner.py` 의 `_channel_cohort` 플래그를 센다).
 
 🔴 **09-22 장중 추가 push 금지** — funnel `signals` 는 메모리 전용 유일 출처라 재시작하면
 그날 기준선이 0 으로 리셋된다. cycle336 효과 관측이 그날치를 통째로 잃는다.
