@@ -123,8 +123,21 @@ def _tick_buy_eval_blocked_by_channel(ticker: str) -> bool:
     `scanner` 의 `[tick_buy_gate] ... unstamped=` 가 하루 1행 WARNING 으로
     규모를 남긴다.
 
-    B-2(매수 개방)는 이 함수 호출 1줄을 걷는 것이고 **별도 승인 +
-    `domain-consult` + `ACML_VOL` 스코프 대조 1일**(N-2)이 선행 조건이다.
+    ## 🔴 B-2(매수 개방)는 **끝났다** — 이 값은 더 이상 매수를 막지 않는다 (cycle336)
+
+    `on_tick` 매수 분기의 `if chan_buy_blocked: continue` 는 **걷혔다**(사용자 결정
+    2026-09-21 + `domain-consult`). 그러니 **그 `continue` 를 되살리지 마라** — 되살리면
+    사이클 156 Q0 가 폐기한 기준(「`nxt_tradable` 은 주문 시점 분기용으로만」)을 다시
+    매수 판정에 들이는 것이고, 그것이 정확히 cycle293 이 저지른 일이다.
+
+    선행 조건으로 적혀 있던 `ACML_VOL` 스코프 대조는 **해소됐다** — 이 코호트는
+    `_classify_channel` 이 항상 KRX 를 내므로 08:00~20:00 `H0STCNT0` 고정(하루 전환 0회)
+    이고, 비교 대상 `avg_volume_20` 의 원천도 `api/condition.py` 의 `FID_COND_MRKT_DIV_CODE="J"`
+    = KRX 일봉이다. **KRX↔KRX 정합**이라 걱정이 오히려 뒤집혀 있었다.
+
+    이 함수는 계속 산다 — 호출자가 `:620` 하나로 줄었고 그 값은
+    `_note_pre_window_krx_frame` 게이팅과 `[tick_buy_gate]` 계측에 쓰인다.
+    즉 술어의 역할이 **「매수를 막는 장치」에서 「코호트를 세는 계측기」**로 바뀌었다.
     """
     try:
         from src.engine.scanner import tick_buy_cohort_blocked
@@ -736,13 +749,22 @@ class RiskManager:
             # 분기에서 이미 평가됐다 — 이 skip 은 매수에만 영향, 무접촉.
             if strategy.strategy_id in _TICK_BUY_EVAL_SKIP_STRATEGIES:
                 continue
-            # cycle293 §3-E B-1 — 종목 축 skip. 채널 리졸버가 이 종목을 전용
-            # 채널로 옮겼다면(= 오늘까지 프레임 0 이던 종목에 프레임이 새로 들어
-            # 온다) **매수는 열지 않는다**. 청산(`check_exit_signal`)은 위 분기에서
-            # 이미 평가됐다 — 이 skip 은 매수에만 영향한다. 근거·해제 조건은
-            # `_tick_buy_eval_blocked_by_channel` docstring.
-            if chan_buy_blocked:
-                continue
+            # cycle336 — 🔴 **코호트 매수 게이트를 걷었다**(사용자 결정 2026-09-21).
+            # 여기 있던 `if chan_buy_blocked: continue` 가 `nxt_tradable=False` 코호트의
+            # 매수 평가를 통째로 막았다(실측 구독 158 중 **77, 49%**).
+            #
+            # 걷은 근거 = **이미 폐기된 기준을 되살린 것이었다.** 사이클 156 Q0 가
+            # 「`nxt_tradable` 강제 필터 제거 — **주문 시점 분기용으로만** 활용」을
+            # 정했고(`strategies/volatility_breakout.py:450` · `long_tail_volatility.py:501`
+            # · `bull_flag_breakout.py:709`), 5전략 전부 `list_by_filter(nxt_tradable=None)`
+            # 로 후보를 뽑는다. cycle293 게이트는 그 결정을 **다른 계층에서** 뒤집고 있었다.
+            # 즉 이 변경은 완화가 아니라 **원복**이다 — 품질 관문(거래정지·관리종목·
+            # 정리매매·시장경고·ETF/리츠/SPAC·저유동)은 한 겹도 줄지 않는다.
+            #
+            # 🔴 **판정 자체는 살아 있다**(`chan_buy_blocked`, :620). 역할만
+            # 「매수를 막는 장치」에서 **「코호트를 세는 계측기」**로 바뀌었다 —
+            # `_note_pre_window_krx_frame`(:621~624) 게이팅과 `[tick_buy_gate]` 가
+            # 그 값을 계속 쓴다. 되살리려면 이 자리에 `continue` 를 넣으면 된다(1커밋 revert).
             signal = strategy.check_buy_signal(ticker, current_price, open_price)
             if signal == Signal.BUY:
                 state.signal_count_today += 1

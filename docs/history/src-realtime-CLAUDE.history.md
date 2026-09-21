@@ -8,6 +8,22 @@
 
 ---
 
+## 매수 축 술어는 「코호트」다 (cycle293/294 — cycle336 이 대체)
+
+(정본에서 걷어낸 원문 그대로, 편집 금지)
+
+> 🔴 **매수 축 술어는 「코호트」다.** `scanner._stamp_cohort` 가 **구독 발사 시점에 확신할 때만**
+> 코호트를 심고(하루 단방향 닫힘 래치, 매일 리셋), `risk._tick_buy_eval_blocked_by_channel` 은
+> `scanner.tick_buy_cohort_blocked(ticker)` 하나만 읽으며 **모드를 보지 않는다**(`off` 가 매수를 열 수
+> 없다). **채널 축 술어 금지** — 전 종목이 전용 채널이라 momentum·VB·LTV·BFB·VCP **5전략의 틱 매수가
+> 통째로 죽는다**(그 5전략은 틱이 유일 매수 경로다). **스탬프 부재 = 열어 둔다** — 닫힘 오류는
+> 레지스트리 한 번 실패로 전 종목에 동시에 일어나고(상관 실패) 열림 오류는 종목별 독립이라,
+> 최대 위험은 전자다.
+>
+> | 매수 축 | `risk._tick_buy_eval_blocked_by_channel` 은 `scanner.tick_buy_cohort_blocked(ticker)` **코호트 하나만** 읽는다(모드 무관). 채널 축 술어 금지 |
+
+→ CHANGELOG: cycle293 행 · cycle294 행 · cycle336 행
+
 ## websocket_pool.py — WebsocketPool
 
 ### 2026-09-17 이관 — `resend_subscribe_for_ticker` 폐기 경위와 "운영 도구 후보" 보류 판단

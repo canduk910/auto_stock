@@ -701,13 +701,19 @@ async def test_d2_no_feed_cohort_is_still_blocked_but_exit_is_not(monkeypatch, _
 
 
 async def test_d3_all_dedicated_does_not_kill_all_buys(monkeypatch, _risk_env):
-    """🔴 D3 — **이 사이클 최대 위험의 직접 재현.**
+    """🔴 D3 — **채널 축 회귀와 게이트 부활을 한 케이스로 가른다.**
 
-    100종목 전원 전용 채널(3단계의 정상 상태). `check_buy_signal` 이 불린 종목
-    집합이 `nxt_true` 60종목과 **정확히** 같아야 한다.
+    100종목 전원 전용 채널(3단계의 정상 상태). cycle336 이 코호트 매수 게이트를
+    걷었으므로 `check_buy_signal` 은 **100종목 전부**에 도달해야 한다.
 
-    🔴 뮤테이션: 술어를 cycle293 것(`applied in DEDICATED_TICK_TR_IDS`)으로
-    되돌리면 **0종목** → RED. 이 한 케이스가 회귀를 영구 봉인한다.
+    🔴 이 수가 곧 진단이다:
+      * **100** = 정상(cycle336 이후)
+      * **60** = 코호트 게이트 부활(`nxt_true` 만 남았다 — cycle293 상태로 회귀)
+      * **0**  = 채널 축 회귀(술어가 다시 `applied in DEDICATED_TICK_TR_IDS` 다
+                 = 내일 아침 5전략 매수 0). cycle294 가 봉인한 그 결함이다.
+
+    세 값이 **서로 다른 결함**을 가리키므로 단언을 `> 0` 같은 느슨한 형태로
+    바꾸지 않는다 — 그러면 60(게이트 부활)이 조용히 통과한다.
     """
     import src.engine.scanner as scanner_mod
 
@@ -736,10 +742,10 @@ async def test_d3_all_dedicated_does_not_kill_all_buys(monkeypatch, _risk_env):
         await risk.on_tick(ticker, current_price=11_000, open_price=10_000,
                            change_rate=10.0, acml_vol=5_000_000)
 
-    assert set(spy.buy_calls) == set(nxt_true), (
-        f"🔴 매수 평가를 받은 종목이 {len(set(spy.buy_calls))}개다(기대 60). "
-        "0개면 술어가 아직 **채널**이고(= 내일 아침 5전략 매수 0), 100개면 게이트가 "
-        "통째로 사라진 것이다(= 유니버스 64% 신규 노출, 미승인 행위 변경)"
+    assert set(spy.buy_calls) == set(all_tickers), (
+        f"🔴 매수 평가를 받은 종목이 {len(set(spy.buy_calls))}개다(기대 100). "
+        "60개면 cycle336 이 걷은 코호트 게이트가 되살아난 것이고(`nxt_true` 만 남았다), "
+        "0개면 술어가 다시 **채널**이다(= 내일 아침 5전략 매수 0). 다른 결함이다"
     )
 
 
@@ -803,9 +809,14 @@ async def test_d6_kill_switch_off_does_not_open_the_cohort(monkeypatch, _risk_en
     await risk.on_tick(NO_FEED, current_price=11_000, open_price=10_000,
                        change_rate=10.0, acml_vol=5_000_000)
 
-    assert spy.buy_calls == [], (
-        "🔴 `off` 를 누른 뒤 무송출 코호트의 매수 평가가 열렸다 — 사고 중에 누르는 "
-        "안전 조치가 유니버스 64% 를 5전략 매수에 여는 것이 된다(금기 9)"
+    # cycle336 — 매수 차단은 걷혔다. 이 케이스가 지키는 것은 위 `_cohort_blocked`
+    # 단언(= **스탬프가 모드에 흔들리지 않는다**)이고, 매수는 이제 모드와 무관하게
+    # 열려 있다. 🔴 「`off` 를 눌렀더니 매수가 막혔다」도 결함이다 — 킬스위치는
+    # 채널 축 롤백 수단이지 매수 축 스위치가 아니다(금기 9 의 반대 방향).
+    assert spy.buy_calls == [NO_FEED], (
+        "🔴 `off` 를 누르자 코호트 매수 평가가 **막혔다** — 킬스위치가 매수 축에 "
+        "관여하고 있다. cycle336 이 걷은 게이트가 되살아났거나 모드가 스탬프를 넘어 "
+        "매수 판정에 새고 있다"
     )
 
 

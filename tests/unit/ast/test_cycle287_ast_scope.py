@@ -89,7 +89,7 @@ _CHANGED = (_MODELS_ORDER_REL, _ORDER_ENGINE_REL, _API_ORDER_REL)
 _BASE_SHA = {
     # 8영역 — 엔진 4파일 (order_engine 은 승인된 변경 대상이라 제외)
     "src/engine/risk.py":
-        "e8614235cc0bea638f8c349b2f6910c94f5f9a5b849f5d65bef0583f959d81c9",
+        "ffd67a594d632a358c43712e81f91630b4d68e007ee8195b9e86f0075f208d49",
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
     # 🔁 cycle302(2026-09-18) 재핀 — 사용자 승인 일봉 backfill **대상** 확대
@@ -371,8 +371,22 @@ _SRC_TREE_FILES = 154
 #: `engine/backtest_engine.py` · `services/exceptions.py`(전부 문자열·주석, 행위 diff 0).
 #: cycle315 착지(= 이 재핀 착수) 값은
 #: `fc11588e2b689496f2d3133e6c252e5d649eb7a6811ca60d3107abc79c9937ab` 였다.
+#: 🔁 **cycle336(2026-09-21, 사용자 결정 + `domain-consult`) 재핀 — 코호트 매수 게이트를
+#: 걷었다.** 움직인 파일 **1** = `engine/risk.py`(**8영역**). `on_tick` 매수 분기의
+#: `if chan_buy_blocked: continue` **두 줄 삭제** + `_tick_buy_eval_blocked_by_channel`
+#: docstring 의 「B-2 선행 조건」 문단 교체.
+#: 🔴 **행위가 바뀐다** — `nxt_tradable=False` 코호트(실측 구독 158 중 **77, 49%**)가
+#: momentum·VB·LTV·BFB·VCP **5전략**의 매수 평가에 다시 들어온다. 걷은 근거 = 사이클 156 Q0
+#: 가 이미 「`nxt_tradable` 은 **주문 시점 분기용으로만**」을 정했고(전략 3파일 주석),
+#: cycle293 게이트는 그 폐기된 기준을 다른 계층에서 되살린 것이었다 = **완화가 아니라 원복**.
+#: `ACML_VOL` 스코프 우려는 해소 — 이 코호트는 08:00~20:00 `H0STCNT0` 고정이고 비교 대상
+#: `avg_volume_20` 도 KRX 일봉이라 **KRX↔KRX 정합**이다.
+#: ⚠️ 매수 **상한**은 1원도 안 바뀐다(예산 관문·`max_positions` 가 정한다) — 바뀌는 것은
+#: 후보 밀도와 슬롯 회전 속도다. 판정(`chan_buy_blocked`)은 **계측기로 남는다**.
+#: cycle335 착지(= 이 재핀 착수) 값은
+#: `71f5fa7ae79e74ae2a09495103b01542d5dff32abda680b3d1d4345e2b72af2b` 였다.
 _SRC_TREE_DIGEST = (
-    "71f5fa7ae79e74ae2a09495103b01542d5dff32abda680b3d1d4345e2b72af2b"
+    "8683883246f994eea5bbe45bf646c347f8a552435518b76e22573a0305d7c0f8"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

@@ -493,7 +493,7 @@ def test_g2_8c_retrospective_leaf_has_no_io_and_no_await() -> None:
 #: `test_g2_9b` 가 명시적으로 문서화한다(조용한 구멍 금지).
 _BASE_SHA: dict[str, str] = {
     "src/engine/risk.py":
-        "e8614235cc0bea638f8c349b2f6910c94f5f9a5b849f5d65bef0583f959d81c9",
+        "ffd67a594d632a358c43712e81f91630b4d68e007ee8195b9e86f0075f208d49",
     "src/engine/order_engine.py":
         "fe9886c8e2e3cccd03370f3470cc73449bf3a7c615c177c8ea87bd399949a8b2",
     "src/engine/session.py":

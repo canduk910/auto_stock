@@ -490,7 +490,7 @@ _APPROVED_CONTENT_SHA: dict[str, str] = {
     #    자매 가드 **네 곳 전부** 같은 값이어야 한다(`_PIN_GUARD_FILES` 정본).
     #    등록은 승인된 사이클의 Green 이, 비우기는 병합 후속 커밋이 한다.
     "src/engine/risk.py":
-        "e8614235cc0bea638f8c349b2f6910c94f5f9a5b849f5d65bef0583f959d81c9",
+        "ffd67a594d632a358c43712e81f91630b4d68e007ee8195b9e86f0075f208d49",
     "src/realtime/websocket.py":
         "d4c443bde2ed7aeafba3e9471db0ca4efc15a654610555435145a9b305150c5b",
     "src/realtime/websocket_pool.py":
@@ -507,7 +507,7 @@ _APPROVED_CONTENT_SHA: dict[str, str] = {
     #    `docs/history/src-realtime-CLAUDE.history.md` 로 verbatim 이관하고 정본엔
     #    현재 계약만 남겼다. 프로덕션 코드 영향 0.
     "src/realtime/CLAUDE.md":
-        "871b5e21531e346c016ae9514b2c1c27d511097e17d9464d8701289215f52eac",
+        "7c3d432254a9f71a8341d371cb14bbc8e58112a16cc536301620c7f1ab62f58d",
     # ✅ 2026-09-17 (cycle296) — `TokenManager.issue()` 매니저 단위 in-flight
     #    합류. 사용자 명시 8영역 승인(`src/auth/**`), 범위 = `src/auth/token.py`
     #    `issue()` + `__init__` 신규 필드뿐(`get_token`/`revoke`/`_is_valid` 무접촉).

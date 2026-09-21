@@ -130490,6 +130490,12 @@ frontend:
     transitive_tests:
     - frontend/src/components/__tests__/TradeHistoryGrid.test.tsx
     - frontend/src/components/__tests__/TradePnLGrid.test.tsx
+  frontend/src/components/LlmScoreBadge.tsx:
+    direct_tests:
+    - frontend/src/components/__tests__/LlmScoreBadge.test.tsx
+    transitive_tests:
+    - frontend/src/components/__tests__/TradeHistoryGrid.test.tsx
+    - frontend/src/components/__tests__/TradePnLGrid.test.tsx
   frontend/src/components/LogViewer.tsx:
     direct_tests: []
     transitive_tests: []
@@ -131202,6 +131208,7 @@ frontend:
   frontend/src/types/llm-evaluation.ts:
     direct_tests:
     - frontend/src/components/__tests__/LlmEvaluationModal.test.tsx
+    - frontend/src/components/__tests__/LlmScoreBadge.test.tsx
     - frontend/src/components/__tests__/llmEvalKey.cycle276.test.ts
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
@@ -131544,12 +131551,12 @@ frontend:
     - frontend/src/pages/__tests__/MarketState.test.tsx
     - frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
     - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
-generated_at: '2026-09-21T03:24:23.576529+09:00'
+generated_at: '2026-09-21T16:55:25.845202+09:00'
 stats:
   backend_modules: 157
   backend_tests: 1073
-  frontend_modules: 118
-  frontend_tests: 95
+  frontend_modules: 119
+  frontend_tests: 96
   unmapped_modules:
   - frontend/src/api/backtest.ts
   - frontend/src/components/LogViewer.tsx

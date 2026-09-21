@@ -109,7 +109,7 @@ KIS WebSocket 실시간 시세 수신 + 체결통보 처리. 메인 + 보조 N �
 | 리졸버 | `scanner.tick_tr_id_for(ticker, *, priority)` — 시각축(L1) 위에 프리 창 속성축(L2) 보정. 첫 구독뿐 아니라 **전환 창 안의 살아 있는 구독**에도 적용된다 |
 | 속성축(L2) 규칙 | 프리 창에서 `no_feed_registry.is_no_feed(t)` ∧ 출처 확인(`raw ? 'cptt_trad_tr_psbl_yn'`) → `H0STCNT0` / 그 밖 → `H0NXCNT0` |
 | 킬스위치 | `system_config.tick_channel_resolver_mode` ∈ `off`/`observe`(기본)/`enforce_low`/`enforce`. **즉시 반영** = `PUT /api/realtime/tick-channel-mode` |
-| 매수 축 | `risk._tick_buy_eval_blocked_by_channel` 은 `scanner.tick_buy_cohort_blocked(ticker)` **코호트 하나만** 읽는다(모드 무관). 채널 축 술어 금지 |
+| 매수 축 | 🔴 **게이트는 걷혔다(cycle336)** — 코호트도 매수 평가를 받는다. `risk._tick_buy_eval_blocked_by_channel` 은 남아 **계측기**로만 쓰인다(`[tick_buy_gate]` 분모 · `_note_pre_window_krx_frame` 게이팅). 채널 축 술어 금지는 그대로 |
 
 **구간표 — 전환은 하루 1회(`pre_to_krx`)다.**
 
@@ -178,19 +178,25 @@ KIS 호출 증가는 **0** 이다.
 - 🔴 **되돌림도 make-before-break 다** — HIGH `bypass_limit=True`, 반환값 집계. 선해제(`make_before_break=False`)를 라이브 구간에 걸면 41-cap·OPSP 백오프에 막힌 종목이 어느 채널에도 없는 채로 종일 남는다
 - 되돌린 상태는 `day_reverted` 래치로 그날 종일 **프리 창 규칙**이다(단순 「전원 NXT」면 `nxt_false` 가 새 blind 가 된다). 되돌린 뒤 그날 재시도는 없다. 래치는 벽시계 날짜로 스스로 풀리고, 시계를 못 읽는 경로에서도 날짜 키가 비지 않는다(영구 좌초 차단)
 
-🔴 **매수 축 술어는 「코호트」다.** `scanner._stamp_cohort` 가 **구독 발사 시점에 확신할 때만**
-코호트를 심고(하루 단방향 닫힘 래치, 매일 리셋), `risk._tick_buy_eval_blocked_by_channel` 은
-`scanner.tick_buy_cohort_blocked(ticker)` 하나만 읽으며 **모드를 보지 않는다**(`off` 가 매수를 열 수
-없다). **채널 축 술어 금지** — 전 종목이 전용 채널이라 momentum·VB·LTV·BFB·VCP **5전략의 틱 매수가
-통째로 죽는다**(그 5전략은 틱이 유일 매수 경로다). **스탬프 부재 = 열어 둔다** — 닫힘 오류는
-레지스트리 한 번 실패로 전 종목에 동시에 일어나고(상관 실패) 열림 오류는 종목별 독립이라,
-최대 위험은 전자다.
+🔴 **코호트는 매수를 막지 않는다 — 세는 일만 한다 (cycle336).** `risk.on_tick` 의 매수 분기에
+코호트 게이트가 **없다**. 근거 = `nxt_tradable` 은 「어느 거래소로 보낼까」 축이지 「살까 말까」
+축이 아니다(사이클 156 Q0 · 전략 3파일 주석, 5전략 전부 `list_by_filter(nxt_tradable=None)`).
+품질 관문(거래정지·관리종목·정리매매·시장경고·ETF/리츠/SPAC·저유동)은 이 축과 **무관하게**
+전부 살아 있다. 🔴 **매수 상한도 이 축과 무관하다** — `_apply_budget_limit` 관문과
+`max_positions` 가 정한다. 이 축이 정하는 것은 **후보 밀도와 슬롯 회전 속도**뿐이다.
+
+`scanner._stamp_cohort` 는 그대로다 — **구독 발사 시점에 확신할 때만** 심고(하루 단방향 닫힘
+래치, 매일 리셋) **모드를 보지 않는다**. **채널 축 술어 금지**도 그대로다 — 전 종목이 전용
+채널이라 술어를 채널로 되돌리면 momentum·VB·LTV·BFB·VCP **5전략의 틱 매수가 통째로 죽는다**
+(그 5전략은 틱이 유일 매수 경로다). **스탬프 부재 = 열어 둔다** — 닫힘 오류는 레지스트리 한 번
+실패로 전 종목에 동시에 일어나고(상관 실패) 열림 오류는 종목별 독립이라 최대 위험은 전자다.
+⚠️ 스탬프가 틀려도 **매수는 안 막히고 계측만 흔들린다** — fail-open 의 대가가 그만큼 작다.
 
 🔴 **스탬프는 재시도된다.** `scanner.restamp_cohorts(tickers)` 를 5분 `subscribe_filtered_stocks` 와
 **120초 `stale_watcher_core`** 둘 다에서 `ensure_fresh` 직후에 부른다 — 후자가 아침 창을 덮는다
 (`_scan_loop` 은 `TIME_SCAN_START` 에야 생기고, 07:59 는 `_full_universe_load_krx_primary` 의 도장이
 마스터의 65.4% 를 덮은 시각이라 1회 스탬프로는 미스탬프가 남는다). 닫힘 우세 단방향이라 재호출이
-매수를 더 열 수 없다.
+계측을 더 열 수 없다(매수와는 무관하다).
 
 규모는 `[tick_buy_gate] stamped_no_feed= stamped_feed= unstamped=` 가 남긴다 — cap 키가 시각
 구간별이라 **하루 두 행**이고 **판단은 정규장 창 행으로 한다**(프리 창 행의 `unstamped` 는 도장

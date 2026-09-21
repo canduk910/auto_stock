@@ -360,7 +360,7 @@ _BASE_PLACE_KWARGS_DICT = ["exchange", "price", "quantity", "side", "ticker"]
 #    승계 때와 같은 절차). 나머지 핀은 불변이다.
 _BASE_SHA = {
     "src/engine/risk.py":
-        "e8614235cc0bea638f8c349b2f6910c94f5f9a5b849f5d65bef0583f959d81c9",
+        "ffd67a594d632a358c43712e81f91630b4d68e007ee8195b9e86f0075f208d49",
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
     # 🔁 cycle302(2026-09-18) 재핀 — 사용자 승인 일봉 backfill **대상** 확대

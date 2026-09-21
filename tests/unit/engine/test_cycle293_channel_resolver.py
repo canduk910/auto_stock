@@ -1093,10 +1093,10 @@ def _risk_manager(strategies):
 
 
 @pytest.mark.parametrize("strategy_id", _TICK_BUY_STRATEGIES)
-async def test_g9_ticker_axis_gate_blocks_buy_eval_for_no_feed(
+async def test_g9_cohort_is_buy_evaluated_after_gate_removal(
     monkeypatch, _risk_env, strategy_id,
 ):
-    """🔴 G9 (§3-E B-1) — 채널이 열려 프레임이 와도 **매수 평가는 0** 이다.
+    """🔴 G9 (cycle336 이 뒤집음) — 코호트도 **매수 평가를 받는다**.
 
     지금 `nxt_false` 종목은 프레임 0 이라 이 5전략의 매수 평가에서 **구조적으로
     배제**돼 있다(30일 실측: 5전략의 `nxt_false` 매수 0건 / donchian 8건 ·
@@ -1111,10 +1111,20 @@ async def test_g9_ticker_axis_gate_blocks_buy_eval_for_no_feed(
     엄격해진다. B-2(매수 개방)는 별도 승인 + `domain-consult` + U-3 대조 1일이
     선행 조건이다.
 
-    ⚠️ 이 테스트를 초록으로 만드는 유일한 자리는 `risk.on_tick` 의 매수 분기
-    앞(`risk.py:653` 부근, 기존 전략 축 skip 의 **종목 축** 형제)이고,
-    오케스트레이션 절대 규칙 2 는 `risk.py` diff 0 을 요구한다. AST 자매
-    파일의 `test_a1b` docstring 이 선택지 둘을 적는다.
+    ## 🔴 계약이 뒤집힌 이유 (cycle336, 사용자 결정 2026-09-21)
+
+    위 서술은 **cycle293 시점의 계약**이고 지금은 거짓이다. 게이트가 막던 것은
+    「`nxt_tradable=False`」 코호트인데, 사이클 156 Q0 가 이미 그 기준을
+    **「주문 시점 분기용으로만」** 으로 폐기했다(`strategies/volatility_breakout.py:450`
+    · `long_tail_volatility.py:501` · `bull_flag_breakout.py:709`). cycle293 게이트는
+    그 폐기된 기준을 **다른 계층에서** 되살린 것이었다.
+
+    `ACML_VOL` 스코프 우려(U-3)도 해소됐다 — 이 코호트는 08:00~20:00 `H0STCNT0`
+    고정(하루 전환 0회)이고 비교 대상 `avg_volume_20` 도 KRX 일봉이라 **KRX↔KRX 정합**이다.
+
+    🔴 **이 단언이 0 이면 게이트가 부활한 것이다.** 이 저장소에서 그 자리는
+    `risk.on_tick` 의 `check_buy_signal` 바로 앞이고, 되살리는 순간 구독 158 중
+    **77(49%)** 의 매수 평가가 다시 사라진다.
     """
     _patch_classification(monkeypatch, no_feed=(NO_FEED,), provenance_ok=(NO_FEED,))
     _set_mode(monkeypatch, "enforce")
@@ -1125,12 +1135,19 @@ async def test_g9_ticker_axis_gate_blocks_buy_eval_for_no_feed(
     await risk.on_tick(NO_FEED, current_price=11_000, open_price=10_000,
                        change_rate=10.0, acml_vol=5_000_000)
 
-    assert spy.buy_calls == [], (
-        f"{strategy_id} 가 `nxt_false` 종목({NO_FEED})의 매수 평가에 도달했다 — "
-        "§3-E B-1 종목 축 skip 게이트 부재. 손절을 고치려던 배포가 그날 밤 "
-        "새 종목을 사기 시작하고, 체결은 취소되지 않는다"
+    assert spy.buy_calls == [NO_FEED], (
+        f"{strategy_id} 가 `nxt_false` 종목({NO_FEED})의 매수 평가에 **도달하지 못했다** — "
+        "cycle336 이 걷은 코호트 게이트가 되살아났거나, 채널 축 회귀로 프레임이 "
+        "끊겼다. 둘은 다른 결함이다: 게이트 부활이면 다른 전략도 함께 0 이고, "
+        "채널 회귀면 이 종목만 0 이다"
     )
-    assert oe.execute_buy.await_count == 0
+    # 🔴 **판정은 살아 있어야 한다** — 게이트를 걷은 것이지 계측기를 지운 것이 아니다.
+    #    이 값이 False 가 되면 `[tick_buy_gate]` 집계와 `_note_pre_window_krx_frame`
+    #    게이팅이 함께 죽어, 개방의 효과를 D+1 에 셀 분모가 사라진다.
+    from src.engine.scanner import tick_buy_cohort_blocked
+    assert tick_buy_cohort_blocked(NO_FEED) is True, (
+        "코호트 판정까지 함께 지워졌다 — 관측 분모가 사라진다"
+    )
 
 
 async def test_g9_exit_axis_still_evaluated_for_no_feed(monkeypatch, _risk_env):
@@ -1191,21 +1208,22 @@ async def test_g9_nxt_true_ticker_buy_eval_unchanged(monkeypatch, _risk_env):
     )
 
 
-async def test_g9b_opening_a_channel_never_opens_the_buy_axis(monkeypatch, _risk_env):
-    """🔴 G9b — 불변식을 **수단과 무관하게** 잠근다: `채널이 열렸다 ⟹ 매수 평가 0`.
+async def test_g9b_opening_a_channel_now_opens_the_buy_axis(monkeypatch, _risk_env):
+    """🔴 G9b (cycle336 이 뒤집음) — `채널이 열렸다 ⟹ 매수 평가도 열린다`.
 
     `test_g9_*` 는 `risk.py` 종목 축 게이트(선택지 가)를 전제하지만, 오케스트레이션
     지시는 `risk.py` diff 0 도 함께 요구한다. 이 테스트는 둘 중 어느 수단을 골라도
     성립하는 형태로 같은 위험을 막는다:
 
-    * 선택지 (가) `risk.py` 게이트 — LOW 가 `H0STCNT0` 로 이동하고 매수 평가가 0 → 통과
-    * 선택지 (나) HIGH 전용 이동 — LOW 채널 불변(프레임 0) → 통과
-      (보유 종목은 `registry.is_ticker_blocked_for_buy` 가 `has_position` 으로
-      전 전략 차단하므로 HIGH 에 프레임이 와도 매수는 안 열린다)
-    * 🔴 위험한 조합 — LOW 가 이동했는데 게이트가 없다 → **실패**
-      (시총 1,000억↑ 유니버스 64% 가 5전략 매수 평가에 새로 노출 = 미승인 행위 변경)
+    cycle293 은 이 자리에서 「채널을 열어도 매수는 닫는다」를 잠갔다. cycle336 이
+    그 게이트를 걷었으므로 계약이 정확히 **반대**가 된다 — 채널이 열려 프레임이
+    오면 매수 평가도 열린다. 🔴 단언을 지우지 않고 **뒤집는** 이유 = 지우면
+    「채널은 열렸는데 매수는 안 열리는」 상태(= 게이트 부활 또는 채널 축 회귀)를
+    아무도 안 보게 된다.
 
-    그래서 이 테스트는 어느 선택지를 골라도 **뒤집을 필요가 없다.**
+    ⚠️ LOW 채널이 통합으로 남는 판본(선택지 나)에서는 프레임이 0 이라 이 단언이
+    성립할 수 없다 — 그 경우는 조기 반환으로 남겨 둔다(통합 채널은 cycle294 가
+    없앴으므로 현행에서는 도달하지 않는다).
     """
     _patch_classification(monkeypatch, no_feed=(NO_FEED,), provenance_ok=(NO_FEED,))
     _set_mode(monkeypatch, "enforce_low")
@@ -1221,12 +1239,10 @@ async def test_g9b_opening_a_channel_never_opens_the_buy_axis(monkeypatch, _risk
     await risk.on_tick(NO_FEED, current_price=11_000, open_price=10_000,
                        change_rate=10.0, acml_vol=5_000_000)
 
-    assert spy.buy_calls == [], (
-        f"LOW 후보 {NO_FEED} 를 {low_channel} 로 열었는데 매수 평가가 살아 있다 — "
-        "§3-E B-1 종목 축 skip 게이트가 없다. 손절을 고치려던 배포가 그날 밤 "
-        "새 종목을 사기 시작하고 체결은 취소되지 않는다"
+    assert spy.buy_calls == [NO_FEED], (
+        f"LOW 후보 {NO_FEED} 를 {low_channel} 로 열었는데 매수 평가가 도달하지 못했다 — "
+        "cycle336 이 걷은 코호트 게이트가 되살아났다"
     )
-    assert oe.execute_buy.await_count == 0
 
 
 # ===========================================================================
@@ -1249,13 +1265,17 @@ async def test_g9b_opening_a_channel_never_opens_the_buy_axis(monkeypatch, _risk
     ],
 )
 async def test_g9c_gate_survives_resolver_divergence(monkeypatch, _risk_env, case, after):
-    """🔴 G9c — 판정이 통합으로 돌아가도 **구독이 전용 채널에 남아 있는 동안** 매수는 닫힌다.
+    """🔴 G9c — **코호트 스탬프**는 판정이 통합으로 돌아가도 그날 내내 살아남는다.
 
-    적대 검증이 찾은 CRITICAL: 게이트 술어가 `tick_tr_id_for()` 재호출이면 위 네
-    경로에서 프레임은 계속 전용 채널로 오는데 게이트만 풀린다. 그중 하나는
-    **사고 중 누르는 킬스위치 `off`** 라 안전 조치가 momentum·VB·LTV·BFB·VCP 의
-    매수를 그 코호트에 열어 준다(BFB/VCP 는 `acml_vol` 실측이 들어오면서
-    `vol_gate_no_data` fail-closed 까지 함께 풀린다). 체결은 취소되지 않는다.
+    cycle336 이 매수 차단을 걷었으므로 이 케이스가 지키는 것은 「매수가 닫힌다」가
+    아니라 **「스탬프가 리졸버 재판정에 흔들리지 않는다」**로 옮겨간다. 그 성질이
+    여전히 필요한 이유 = 스탬프가 `[tick_buy_gate]` 집계와
+    `_note_pre_window_krx_frame` 게이팅의 **분모**이고, 킬스위치를 누르거나
+    `nxt_tradable` 이 장중에 뒤집혔다고 그날 계측이 반으로 갈라지면 D+1 판독이 깨진다.
+
+    적대 검증이 찾았던 CRITICAL(술어가 `tick_tr_id_for()` 재호출이면 네 경로에서
+    조용히 풀린다)은 **그대로 유효하다** — 대상이 「매수 차단」에서 「계측 분모」로
+    바뀌었을 뿐이다. 🔴 스탬프는 **구독 사실**을 따르지 리졸버 재판정을 따르지 않는다.
     """
     _patch_classification(monkeypatch, no_feed=(NO_FEED,), provenance_ok=(NO_FEED,))
     _set_mode(monkeypatch, "enforce")
@@ -1263,17 +1283,21 @@ async def test_g9c_gate_survives_resolver_divergence(monkeypatch, _risk_env, cas
 
     after(monkeypatch, _set_mode, _patch_classification)
 
+    from src.engine.scanner import tick_buy_cohort_blocked
+
+    assert tick_buy_cohort_blocked(NO_FEED) is True, (
+        f"{case}: 판정이 통합으로 돌아갔다고 코호트 스탬프가 풀렸다 — 그러나 그 종목은 "
+        f"아직 {KRX_ONLY} 에 구독돼 있어 프레임이 계속 온다. 스탬프 술어가 "
+        "구독 사실이 아니라 리졸버 재호출이다(적대 검증 CRITICAL). 풀리면 그날 "
+        "`[tick_buy_gate]` 분모가 갈라져 개방 효과를 셀 수 없다"
+    )
+
+    # 매수는 cycle336 이후 **열려 있다** — 스탬프 생존과 매수 개방은 이제 독립이다.
     spy = _SpyStrategy("vcp_breakout")
-    risk, oe = _risk_manager([spy])
+    risk, _oe = _risk_manager([spy])
     await risk.on_tick(NO_FEED, current_price=11_000, open_price=10_000,
                        change_rate=10.0, acml_vol=5_000_000)
-
-    assert spy.buy_calls == [], (
-        f"{case}: 판정이 통합으로 돌아갔다고 매수 축이 열렸다 — 그러나 그 종목은 "
-        f"아직 {KRX_ONLY} 에 구독돼 있어 프레임이 계속 온다. 게이트 술어가 "
-        "구독 사실이 아니라 리졸버 재호출이다(적대 검증 CRITICAL)"
-    )
-    assert oe.execute_buy.await_count == 0
+    assert spy.buy_calls == [NO_FEED], f"{case}: 매수 평가가 막혔다 — 게이트 부활"
 
 
 async def test_g9d_gate_is_pure_no_flip_budget_consumed(monkeypatch, _risk_env):

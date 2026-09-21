@@ -375,7 +375,7 @@ def test_h5b_new_is_trading_day_reuses_same_url_and_tr_id():
 _BASE_SHA = {
     # 8영역 — 엔진 5파일
     "src/engine/risk.py":
-        "e8614235cc0bea638f8c349b2f6910c94f5f9a5b849f5d65bef0583f959d81c9",
+        "ffd67a594d632a358c43712e81f91630b4d68e007ee8195b9e86f0075f208d49",
     "src/engine/order_engine.py":
         "fe9886c8e2e3cccd03370f3470cc73449bf3a7c615c177c8ea87bd399949a8b2",
     "src/engine/session.py":
