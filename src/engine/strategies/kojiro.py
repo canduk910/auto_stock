@@ -29,7 +29,12 @@ from datetime import date, datetime, time, timezone, timedelta
 import pandas as pd
 
 from src.engine.daily_emit_cap import DailyEmitCap
-from src.engine.kojiro_band_observe import absorb_band_call_failure, observe_band
+from src.engine.kojiro_band_observe import (
+    absorb_band_call_failure,
+    absorb_macd_call_failure,
+    observe_band,
+    observe_macd,
+)
 from src.engine.kojiro_gap_observe import absorb_call_failure, observe_gap
 from src.engine.kojiro_indicators import KojiroIndicatorConfig, enrich
 from src.engine.strategy_base import FunnelStage, Signal, StrategyBase, StrategyConfig
@@ -356,6 +361,7 @@ class KojiroStrategy(StrategyBase):
         final_t: list[str] = []
         rank_raw: dict[str, tuple] = {}   # 후보 랭킹 raw 3성분 (2-pass: 루프 stash → 후 정규화)
         band_raw: dict[str, tuple] = {}   # cycle273 shadow 관측 원자료 (leaf 로만 소비, 행위 무영향)
+        macd_raw: dict[str, tuple] = {}   # cycle344 대순환 MACD 관측 원자료 (동일 계약)
         fetch_ex: list[dict] = []
         band_ex: list[dict] = []
         stage_valid_ex: list[dict] = []
@@ -439,6 +445,7 @@ class KojiroStrategy(StrategyBase):
                     band_raw[ticker] = self._band_observe_row(
                         name, bar_date, prev_close, atr_val, enriched, stages_series,
                         int(params["stage1_freshness"]))
+                    macd_raw[ticker] = self._macd_observe_row(enriched, stage)
 
                 # step7: 스테이지1 + 3선 우상향
                 if not (stage == 1 and all_up):
@@ -480,6 +487,7 @@ class KojiroStrategy(StrategyBase):
                 band_raw[ticker] = self._band_observe_row(
                     name, bar_date, prev_close, atr_val, enriched, stages_series,
                     int(params["stage1_freshness"]))
+                macd_raw[ticker] = self._macd_observe_row(enriched, stage)
                 prepared += 1
                 final_t.append(ticker)
             except Exception as e:
@@ -528,6 +536,12 @@ class KojiroStrategy(StrategyBase):
             observe_band(band_raw, ranked_final, held_only, scores=scores)
         except Exception:
             absorb_band_call_failure("prepare")
+        # cycle344 — `[kojiro_macd_observe]` shadow 관측. 별도 try 다: 한 관측기의
+        # 실패가 다른 관측기까지 삼키면 무엇이 죽었는지 D+1 에 가릴 수 없다.
+        try:
+            observe_macd(macd_raw, ranked_final, held_only)
+        except Exception:
+            absorb_macd_call_failure("prepare")
         self._scanned_tickers = ranked_final + held_only
         self._bought_today.clear()
         stats["final_prepared"] = prepared
@@ -1310,6 +1324,57 @@ class KojiroStrategy(StrategyBase):
                     exp1, exp5, slope_raw, slope_pct, dist)
         except Exception:
             return (name, bar, close, atr, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, None)
+
+    def _macd_observe_row(self, enriched, stage) -> tuple:
+        """cycle344 — 대순환 MACD shadow 관측 원자료 stash (12원소, 순서 고정).
+
+        `[kojiro_macd_observe]` leaf 로만 소비된다(`kojiro_band_observe.observe_macd`).
+        행 계약 = `(stage, m1, m2, m3, s1, s2, s3, gc3, bars_since_gc3,
+        m1_up, m2_up, m3_up)`.
+
+        🔴 **`gc3` 는 상태가 아니라 교차 사건(edge)** 이다 — 직전 봉 `macd3 <= sig3`
+        이고 이번 봉 `macd3 > sig3`. 실측(962종목)이 그렇게 셌고 leaf 의
+        `rule6/5/4` 가 이 값을 그대로 쓴다. 상태(`m3 > s3`)로 바꾸면 교차 다음 날부터
+        며칠씩 계속 참이라 규칙 발화가 부풀어, 나중에 이 표본으로 진입 규약을 판단할
+        때 실측과 다른 수를 보게 된다.
+
+        🔴 **never-raise.** 호출부인 `prepare` 의 ticker 루프와 **같은 try 스코프**를
+        공유하므로 여기서 던지면 그 종목의 매수 후보 처리 자체가 스킵된다 = 행위
+        변경이다. 컬럼 부재·비수치는 전부 폴백 튜플로 떨어진다 — `enrich` 가 MACD
+        컬럼을 늘 주지만 그 계약을 관측기가 인질로 잡지 않는다.
+        """
+        fallback = (stage, None, None, None, None, None, None, False, None,
+                    False, False, False)
+        try:
+            cols = {}
+            for i in (1, 2, 3):
+                cols[i] = enriched[f"macd{i}"]
+                cols[f"s{i}"] = enriched[f"macd{i}_sig"]
+            m3, s3 = cols[3], cols["s3"]
+            li = len(m3) - 1
+            if li < 1:
+                return fallback
+
+            def _above(idx: int) -> bool:
+                return float(m3.iloc[idx]) > float(s3.iloc[idx])
+
+            gc3 = (not _above(li - 1)) and _above(li)
+            bars_since = None
+            for j in range(li, 0, -1):
+                if (not _above(j - 1)) and _above(j):
+                    bars_since = li - j
+                    break
+            ups = tuple(
+                float(cols[i].iloc[li]) > float(cols[i].iloc[li - 1]) for i in (1, 2, 3)
+            )
+            return (
+                stage,
+                float(cols[1].iloc[li]), float(cols[2].iloc[li]), float(m3.iloc[li]),
+                float(cols["s1"].iloc[li]), float(cols["s2"].iloc[li]), float(s3.iloc[li]),
+                gc3, bars_since, ups[0], ups[1], ups[2],
+            )
+        except Exception:
+            return fallback
 
     def _score_candidates(self, rank_raw: dict[str, tuple], params: dict) -> dict[str, float]:
         """후보 풀 min-max 정규화 + 가중합 → {ticker: score∈[0,1]}.

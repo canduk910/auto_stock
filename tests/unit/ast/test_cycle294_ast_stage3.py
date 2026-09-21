@@ -247,7 +247,7 @@ _BASE_SHA: dict[str, str] = {
     "src/engine/strategies/donchian_swing.py":
         "cc57e5673f9982aca97f61677084e040171fff307483fedf10459b567a4679e3",
     "src/engine/strategies/kojiro.py":
-        "9477790e9d20eb6d17f36fc7586ada77ac5e2e4b0136a334888244afdb7e9cbc",
+        "89058d0e4ebafc41f2b2aec4801b1a5a4d8c00965379d91c533d802210761571",
     "src/engine/strategies/long_tail_volatility.py":
         "51b50560a1240df3fc6085da7253438605079d7d453ff3e77a806e814473be25",
     "src/engine/strategies/momentum.py":

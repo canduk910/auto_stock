@@ -249,7 +249,7 @@ _SEGMENT_SHA: dict[tuple[str, str], str] = {
     ("kojiro", "calc_buy_quantity"):
         "f3491400f38b3295d37767b008c8821883f8443e76efe6ca26e792bf00e3c17e",
     ("kojiro", "prepare"):
-        "336acbb1d525a0cd8e8303152f046894561995ec2f074198112394a100c9bec7",
+        "f0f01cfe326893c40727211f4ad7aae5a559568068f78617f7e65ae8a3bd3fa4",
 }
 
 

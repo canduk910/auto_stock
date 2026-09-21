@@ -147,7 +147,7 @@ _BASE_SHA = {
     "src/engine/strategies/donchian_swing.py":
         "cc57e5673f9982aca97f61677084e040171fff307483fedf10459b567a4679e3",
     "src/engine/strategies/kojiro.py":
-        "9477790e9d20eb6d17f36fc7586ada77ac5e2e4b0136a334888244afdb7e9cbc",
+        "89058d0e4ebafc41f2b2aec4801b1a5a4d8c00965379d91c533d802210761571",
     "src/engine/strategies/long_tail_volatility.py":
         "51b50560a1240df3fc6085da7253438605079d7d453ff3e77a806e814473be25",
     "src/engine/strategies/momentum.py":
@@ -401,7 +401,7 @@ _SRC_TREE_FILES = 155
 #: 순수·read-only·never-raise)를 더해 154 → 155 가 됐다. 직전 값은
 #: `a3ea85c176429aedb85a99355890a2f2c64f44a17b80c355ae977734c771e5d4` 다.
 _SRC_TREE_DIGEST = (
-    "2e81d6bef0d2ff3e5cb0b3cc438232c89d2bea788ce40fa52f3b410a40888f0f"
+    "a155915874c411b0493fb9798bf06cb61391a89c4fbebc9fa0e9a6bb58f7d5fd"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

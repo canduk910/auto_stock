@@ -134,6 +134,20 @@ MACD_MARKER = "[kojiro_macd_observe]"
 _RULE_STAGES = {"rule6": 6, "rule5": 5, "rule4": 4}
 
 
+def absorb_macd_call_failure(caller) -> None:
+    """`observe_macd` 호출 자체가 터졌을 때의 흔적 — **never-raise**.
+
+    🔴 `absorb_band_call_failure` 를 재사용하지 않는다. 그쪽은 `MARKER`
+    (`[kojiro_band_observe]`)로 흔적을 남기므로, MACD 관측기가 죽은 것을 **밴드
+    관측기가 죽었다고** 기록하게 된다 — D+1 에 무엇이 멈췄는지 가릴 수 없고,
+    그 오귀인이 바로 관측기를 두는 이유를 없앤다.
+    """
+    try:
+        trace_observer_failure(MACD_MARKER, str(caller), _cap)
+    except Exception:  # pragma: no cover — 2차 예외도 흡수(cycle258 J-3 계약)
+        pass
+
+
 def observe_macd(macd_raw, ranked_final, held_only) -> None:
     """`[kojiro_macd_observe]` — 대순환 MACD 상태를 행마다 1건 방출(관측 전용).
 
@@ -149,21 +163,22 @@ def observe_macd(macd_raw, ranked_final, held_only) -> None:
     cap 1회/(ticker,role)/일. **never-raise** — 본체 전체가 단일 `try` 이고
     개별 ticker 실패는 그 ticker 만 건너뛴다.
 
-    ## 🔴 아직 호출되지 않는다 — 우연한 dead code 가 아니라 **의도된 배선 대기**다
+    ## 배선 (cycle344)
 
-    배선 자리는 정해져 있다: `KojiroStrategy.prepare()` 의 `observe_band` 옆
-    (`macd_raw[ticker] = self._macd_observe_row(enriched, stage)` 수집 2곳 + emit 1줄).
-    `enriched` 에 `macd1/2/3`·`macd{i}_sig` 가 이미 있어 추가 계산·I/O 가 0 이다.
+    `KojiroStrategy.prepare()` 가 부른다 — `_macd_observe_row(enriched, stage)` 수집
+    2곳(보유 stamp 직후 · `rank_raw` 확정 직후)과 `observe_band` 다음 emit 1곳이다.
+    `enriched` 에 `macd1/2/3`·`macd{i}_sig` 가 이미 있어 **추가 계산·I/O 가 0**이다.
 
-    배선을 미룬 이유는 기술이 아니라 **범위**다 — `src/engine/strategies/kojiro.py` 는
-    12개 AST 가드가 byte-identical 로 핀하고 있고 그중 둘은 `prepare` 를 **「매매
-    메서드」로** 핀한다. kojiro 는 운영 DB 에서 실매매 중·최대 비중·보유 4종목이다.
-    행위가 안 바뀌더라도 그 파일을 여는 것은 사용자 승인 아래 할 일이다.
+    🔴 **emit 은 `observe_band` 와 별도 `try` 다.** 한 관측기의 실패가 다른 관측기까지
+    삼키면 D+1 에 무엇이 죽었는지 가릴 수 없다. 호출 실패 흡수도 전용
+    `absorb_macd_call_failure` 를 쓴다 — `absorb_band_call_failure` 를 재사용하면
+    MACD 가 죽은 것을 **밴드 관측기가 죽었다고** 기록한다(초판이 그랬고
+    `test_g344_12` 가 그 오귀인을 봉인한다).
 
-    그리고 서두를 이유가 없다 — 962종목 실측
-    (`_workspace/domain_consult/cycle340_kojiro_macd.md`)이 이미 「성급한 적용은
-    수익성을 개선하지 않는다」를 보였고, 이 관측의 가치는 **우리 체결과 조인되는
-    표본이 쌓이는 몇 주**에 걸쳐 생긴다.
+    표본의 가치는 **우리 체결과 조인되는 몇 주**에 걸쳐 생긴다 — 962종목 유니버스
+    실측(`_workspace/domain_consult/cycle340_kojiro_macd.md`)은 「성급한 진입 규약
+    변경은 수익성을 개선하지 않는다」까지만 답했고, 「우리가 실제로 산 종목에서
+    어땠나」는 이 마커만 답할 수 있다.
     """
     try:
         entries = [(t, "candidate") for t in (ranked_final or [])]

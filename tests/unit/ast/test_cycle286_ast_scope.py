@@ -114,7 +114,7 @@ _BASE_SHA = {
     "src/engine/strategies/donchian_swing.py":
         "cc57e5673f9982aca97f61677084e040171fff307483fedf10459b567a4679e3",
     "src/engine/strategies/kojiro.py":
-        "9477790e9d20eb6d17f36fc7586ada77ac5e2e4b0136a334888244afdb7e9cbc",
+        "89058d0e4ebafc41f2b2aec4801b1a5a4d8c00965379d91c533d802210761571",
     "src/engine/strategies/momentum.py":
         "50d5c0b9a232d6110f6b85fc524569853f2b8edffe2fd44adc24289800b95ae2",
     "src/engine/strategies/vcp_breakout.py":
