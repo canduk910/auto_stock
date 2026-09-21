@@ -36,7 +36,22 @@ from pathlib import Path
 
 import pytest
 
-pytestmark = pytest.mark.unit
+#: 🔴 이 파일만 전역 60초 타임아웃(`pyproject.toml`)을 올린다.
+#:
+#: 전역 60초는 **mock 누락으로 외부 호출이 무한 hang 하는 것**을 잡는 안전망이고
+#: 그 뜻은 그대로 둔다. 그런데 이 파일의 테스트는 `build_index.py` 를 **subprocess 로
+#: 실제 실행**해 인덱스를 통째로 재생성한다 — 로컬 11초, 느린 CI 러너에서는 그 몇 배다.
+#: 2026-09-22 실측: 로컬 11.4초인데 CI 에서 60초를 넘겨 `test_backend_index_is_fresh` 가
+#: **Timeout 으로 붉어지고 Deploy 가 skip** 됐다(코드 결함 0). 게다가 이 비용은
+#: **코드베이스가 커질수록 자란다** — 올려 두지 않으면 같은 일이 계속 난다.
+#:
+#: 🔴 안전망은 사라지지 않는다 — `_regenerate_into_copy` 의 `subprocess.run(timeout=180)`
+#: 이 그대로 있어, 빌드 도구가 진짜로 매달리면 **그쪽이 먼저** 잡는다.
+
+# 🔴 **두 마크를 한 대입에 담는다.** `pytestmark` 를 두 번 대입하면 **뒤엣것이
+# 앞엣것을 덮어** 앞의 마크가 조용히 사라진다(2026-09-22 실측 — 타임아웃 마크를
+# 따로 대입했다가 `timeout(2)` 돌연변이가 **통과**해서 드러났다).
+pytestmark = [pytest.mark.unit, pytest.mark.timeout(240)]
 
 ROOT = Path(__file__).resolve().parents[3]
 INDEX = ROOT / "_workspace/test_index.yaml"
