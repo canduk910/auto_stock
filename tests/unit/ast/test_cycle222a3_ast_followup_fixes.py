@@ -490,7 +490,7 @@ _APPROVED_CONTENT_SHA: dict[str, str] = {
     #    자매 가드 **네 곳 전부** 같은 값이어야 한다(`_PIN_GUARD_FILES` 정본).
     #    등록은 승인된 사이클의 Green 이, 비우기는 병합 후속 커밋이 한다.
     "src/engine/risk.py":
-        "ffd67a594d632a358c43712e81f91630b4d68e007ee8195b9e86f0075f208d49",
+        "79fddbec8cf9315c5172fc6634c4f4ea77f525d9ff9a3aba48f321affeb4d3e8",
     "src/realtime/websocket.py":
         "d4c443bde2ed7aeafba3e9471db0ca4efc15a654610555435145a9b305150c5b",
     "src/realtime/websocket_pool.py":

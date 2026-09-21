@@ -205,7 +205,7 @@ def test_seven_strategy_default_params_source_sha_unchanged(strategy_id: str):
 #    현재 워킹트리로 재산출했다.
 _BASE_SHA = {
     "src/engine/risk.py":
-        "ffd67a594d632a358c43712e81f91630b4d68e007ee8195b9e86f0075f208d49",
+        "79fddbec8cf9315c5172fc6634c4f4ea77f525d9ff9a3aba48f321affeb4d3e8",
     "src/engine/order_engine.py": "fe9886c8e2e3cccd03370f3470cc73449bf3a7c615c177c8ea87bd399949a8b2",
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",

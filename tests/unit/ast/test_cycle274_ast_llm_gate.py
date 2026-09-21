@@ -572,7 +572,7 @@ def test_c17_4_leaf_does_not_import_eight_area_modules() -> None:
 #    또 다른 사이클(cycle286)의 사용자 명시 8영역 승인 하에 `order_engine.py` 를
 #    바꿨다. 값만 현재 워킹트리로 재산출한다(같은 승계 절차).
 _BASE_SHA = {
-    "src/engine/risk.py": "ffd67a594d632a358c43712e81f91630b4d68e007ee8195b9e86f0075f208d49",
+    "src/engine/risk.py": "79fddbec8cf9315c5172fc6634c4f4ea77f525d9ff9a3aba48f321affeb4d3e8",
     # 🔁 cycle276 → cycle286 — 사용자 명시 승인 하에 order_engine.py 를 바꾼 두 사이클의
     # 누적 결과값이다. A-ATOMIC 구간은 byte 동일.
     "src/engine/order_engine.py": "fe9886c8e2e3cccd03370f3470cc73449bf3a7c615c177c8ea87bd399949a8b2",

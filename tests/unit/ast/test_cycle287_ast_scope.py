@@ -89,7 +89,7 @@ _CHANGED = (_MODELS_ORDER_REL, _ORDER_ENGINE_REL, _API_ORDER_REL)
 _BASE_SHA = {
     # 8영역 — 엔진 4파일 (order_engine 은 승인된 변경 대상이라 제외)
     "src/engine/risk.py":
-        "ffd67a594d632a358c43712e81f91630b4d68e007ee8195b9e86f0075f208d49",
+        "79fddbec8cf9315c5172fc6634c4f4ea77f525d9ff9a3aba48f321affeb4d3e8",
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
     # 🔁 cycle302(2026-09-18) 재핀 — 사용자 승인 일봉 backfill **대상** 확대
@@ -385,8 +385,17 @@ _SRC_TREE_FILES = 154
 #: 후보 밀도와 슬롯 회전 속도다. 판정(`chan_buy_blocked`)은 **계측기로 남는다**.
 #: cycle335 착지(= 이 재핀 착수) 값은
 #: `71f5fa7ae79e74ae2a09495103b01542d5dff32abda680b3d1d4345e2b72af2b` 였다.
+#: 🔁 **cycle336 후속(같은 날) — `[tick_channel_pre_krx_frame]` 실측 180행이 「기대값 0행」
+#: docstring 을 거짓으로 만들었다.** 움직인 파일 **2** = `engine/tick_channel_clock.py` ·
+#: `engine/risk.py`(**8영역**). **둘 다 docstring 전용, 행위 diff 0.**
+#: 🔴 판별식을 **행 수 → `first_at` 최솟값**으로 바꿨다 — 실측 최솟값이 정확히 `08:30:00` 이고
+#: 08:30 미만은 **0건**이라 원래 추론(K1 에는 체결이 없다)은 **살아 있다**. 프레임이 오는 것은
+#: K1 안에 **의도적으로 중첩**된 K2(장전 시간외 종가 08:30~08:40, `fixed_price`) 뿐이고
+#: `market_state.py` K2 행이 `confidence=_CONFIRMED` 로 이미 적어 두었다 = **범위 오류**였다.
+#: ⚠️ 이 정정을 안 하면 다음 사람이 180행을 보고 또 CRITICAL 로 오판한다(내가 그랬다).
+#: cycle336 착지 값은 `8683883246f994eea5bbe45bf646c347f8a552435518b76e22573a0305d7c0f8` 였다.
 _SRC_TREE_DIGEST = (
-    "8683883246f994eea5bbe45bf646c347f8a552435518b76e22573a0305d7c0f8"
+    "a3ea85c176429aedb85a99355890a2f2c64f44a17b80c355ae977734c771e5d4"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

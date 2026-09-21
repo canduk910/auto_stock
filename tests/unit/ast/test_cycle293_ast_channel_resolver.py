@@ -210,7 +210,7 @@ _BASE_SHA: dict[str, str] = {
 #: 상충하는 유일한 항목). 승인 근거·판단은 `test_a1b` docstring 에 적었다.
 _PIN_PENDING_APPROVAL: dict[str, str] = {
     "src/engine/risk.py":
-        "ffd67a594d632a358c43712e81f91630b4d68e007ee8195b9e86f0075f208d49",
+        "79fddbec8cf9315c5172fc6634c4f4ea77f525d9ff9a3aba48f321affeb4d3e8",
 }
 
 _SCHEDULER_LINES = 3795
