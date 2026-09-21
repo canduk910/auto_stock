@@ -39,6 +39,7 @@ import type {
   MarketStateTableRow,
   OrderDivisionRow,
 } from '../types/market-state'
+import ScrollPane from '../components/ScrollPane'
 
 // ── 표현 어휘 → 스타일 매핑 ────────────────────────────────────────────────
 // 키는 응답 `vocab` 이 정의한 **표현 어휘**다. 표의 값(행 id·코드·시장명)과 달리
@@ -736,7 +737,7 @@ export default function MarketState() {
           그 날짜에 유효한 행만 보인다. 현재 행에 커서가 서고, 지난 행은 흐리게, 동시에 열린
           창은 점선으로 표시한다. 위치 판정은 서버가 한다.
         </p>
-        <div className="mt-3 overflow-x-auto">
+        <ScrollPane className="mt-3">
           <table data-testid="market-state-table" className="min-w-full text-left">
             <thead>
               <tr className="border-b border-gray-200 text-xs font-medium text-gray-500">
@@ -765,7 +766,7 @@ export default function MarketState() {
               </tbody>
             ))}
           </table>
-        </div>
+        </ScrollPane>
       </section>
 
       {/* (3) 주문유형 카탈로그 */}
@@ -775,7 +776,7 @@ export default function MarketState() {
           ● 지원 · ? 확인 필요 · 빈칸 미지원. 확인하지 못한 칸을 미지원으로 접지 않는다 —
           "모른다" 와 "안 된다" 는 다른 말이다.
         </p>
-        <div className="mt-3 overflow-x-auto">
+        <ScrollPane className="mt-3">
           <table data-testid="market-state-catalog" className="min-w-full text-left">
             <thead>
               <tr className="border-b border-gray-200 text-xs font-medium text-gray-500">
@@ -832,7 +833,7 @@ export default function MarketState() {
               ))}
             </tbody>
           </table>
-        </div>
+        </ScrollPane>
 
         {/* 표가 드러낸 것 */}
         <div className="mt-4 space-y-2">

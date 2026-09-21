@@ -4,6 +4,7 @@
 // get_targets_status 진단 필드(손절선/거래량컷/상태)와 구독 커버리지를 전용 패널로 노출.
 import { useMemo } from 'react'
 import type { BreakoutDiagTarget, StrategyInfo, TickerPrice } from '../types/trading'
+import ScrollPane from './ScrollPane'
 
 const STRATEGY_LABEL: Record<'vcp_breakout' | 'bull_flag_breakout', string> = {
   vcp_breakout: 'VCP 변동성 수축',
@@ -197,7 +198,7 @@ export default function BreakoutCandidateMonitor({
             후보 0종목 — 진입 조건에서 전량 탈락. 깔때기 화면에서 병목 단계를 확인하세요.
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <ScrollPane>
             <table className="w-full text-xs">
               <thead>
                 <tr className="text-gray-500 border-b">
@@ -255,7 +256,7 @@ export default function BreakoutCandidateMonitor({
                 })}
               </tbody>
             </table>
-          </div>
+          </ScrollPane>
         )}
       </div>
     </div>

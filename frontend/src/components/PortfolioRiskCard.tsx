@@ -12,6 +12,7 @@ import { useQuery } from '@tanstack/react-query'
 import { getPortfolioRisk } from '../api/portfolio'
 import type { AccountGate, GateLevel, PortfolioRiskBucket } from '../types/portfolio'
 import { formatKstHHMM } from '../utils/kst'
+import ScrollPane from './ScrollPane'
 
 const SECTOR_CONCENTRATION_WARNING_PCT = 40
 
@@ -137,26 +138,28 @@ export default function PortfolioRiskCard() {
             보유 포지션 없음
           </div>
         ) : (
-          <table className="w-full text-xs" data-testid="portfolio-risk-strategy-table">
-            <thead>
-              <tr className="text-left text-gray-500">
-                <th className="font-normal pb-1">전략</th>
-                <th className="font-normal pb-1 text-right">보유</th>
-                <th className="font-normal pb-1 text-right">명목가치</th>
-                <th className="font-normal pb-1 text-right">리스크</th>
-              </tr>
-            </thead>
-            <tbody>
-              {strategyEntries.map(([sid, bucket]) => (
-                <tr key={sid} data-testid={`portfolio-risk-strategy-row-${sid}`}>
-                  <td className="py-0.5 text-gray-700">{sid}</td>
-                  <td className="py-0.5 text-right font-mono">{bucket.positions}</td>
-                  <td className="py-0.5 text-right font-mono">{formatWon(bucket.notional_won)}</td>
-                  <td className="py-0.5 text-right font-mono">{formatWon(bucket.risk_won)}</td>
+          <ScrollPane>
+            <table className="w-full text-xs" data-testid="portfolio-risk-strategy-table">
+              <thead>
+                <tr className="text-left text-gray-500">
+                  <th className="font-normal pb-1">전략</th>
+                  <th className="font-normal pb-1 text-right">보유</th>
+                  <th className="font-normal pb-1 text-right">명목가치</th>
+                  <th className="font-normal pb-1 text-right">리스크</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {strategyEntries.map(([sid, bucket]) => (
+                  <tr key={sid} data-testid={`portfolio-risk-strategy-row-${sid}`}>
+                    <td className="py-0.5 text-gray-700">{sid}</td>
+                    <td className="py-0.5 text-right font-mono">{bucket.positions}</td>
+                    <td className="py-0.5 text-right font-mono">{formatWon(bucket.notional_won)}</td>
+                    <td className="py-0.5 text-right font-mono">{formatWon(bucket.risk_won)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </ScrollPane>
         )}
       </div>
     </div>

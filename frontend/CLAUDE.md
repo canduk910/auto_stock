@@ -78,6 +78,20 @@ Dashboard 만 즉시 import. 나머지 9 페이지(History · Recommendations ·
 - 보존 testid 4: `nav-sticky-wrapper` · `content-width-slider` · `mobile-menu-button` · `mobile-menu-drawer`. 그룹용 = `nav-inner` · `nav-mobile-group-{id}` 등.
 - ⚠️ e2e 에서 그룹 하위 라벨은 **접힌 상태에 DOM 에 없다.** 페이지 제목을 검증할 때 `getByText(...)` 를 쓰면 모바일 헤더의 숨은 현재-메뉴 span 을 집는다. 본문 제목은 `getByRole("heading", {name})` 로 고정하고, 그룹 트리거 클릭은 `getByRole("button", {name, exact: true})` 로 부분 일치를 막는다.
 
+## 표 스크롤 — `ScrollPane` 단일 진실원
+
+표는 **브라우저 창 크기에 맞춰** 가로·세로로 스크롤한다. 담당은 `components/ScrollPane.tsx` 하나다.
+
+- **고치는 것** = 「가로 스크롤바를 보려면 세로로 끝까지 내려가야 하는」 결함이다. `overflow-x-auto` 래퍼에 **높이 상한이 없으면** 래퍼 높이가 표 전체 높이가 되고 브라우저는 가로 스크롤바를 래퍼 **바닥**에 붙인다 — 표가 길면 그 바닥은 화면 밖이다.
+- **`maxHeight` = 창 높이 − 그 요소의 화면상 top − `bottomGutter`(24)**. 고정 픽셀도 고정 `vh` 도 아니라, 위에 무엇이 얼마나 쌓여 있든(나브·배너·필터·요약 바) 남은 공간을 정확히 쓴다. 하한 `minHeight`(220) 아래로는 줄지 않는다.
+- 🔴 **측정은 `resize` 와 `ResizeObserver(document.body)` 만 듣고 `scroll` 은 듣지 않는다** — 스크롤마다 재면 「pane 이 커짐 → 문서가 길어짐 → 다시 잼」 되먹임이 된다. 갱신에 `TOLERANCE_PX`(8) 문턱을 두어 1px 진동이 observer 를 다시 깨우는 무한 루프를 막는다(브라우저가 루프를 끊으면 콘솔에 `ResizeObserver loop` 만 남고 화면은 조용히 떤다).
+- **측정 불가(jsdom·SSR·`ResizeObserver` 부재)는 `70vh` 폴백**이다 — **상한 없는 상태로 돌아가지 않는다**(그러면 고치려는 결함이 그대로 재현된다). `data-measured` 가 `px|vh` 로 어느 쪽인지 드러낸다.
+- 머리글은 기본 고정(`stickyHeader`, Tailwind arbitrary variant `[&_thead_th]:sticky`)이라 표마다 `thead` 를 고쳐 다니지 않는다. 표가 아닌 콘텐츠는 `stickyHeader={false}`.
+- 🔴 `{...rest}` 가 `data-testid` **뒤**에 온다 — 교체 자리가 이미 갖고 있던 `data-testid`(예: `stock-master-daily-table`)가 이겨야 그 자리의 기존 회귀 가드가 살아 있다.
+- **적용 24곳** — 기존 `overflow-x-auto` 표 래퍼 21곳(`TradePnLGrid`·`TradeHistoryGrid`·`BalanceTable`·`StockMaster`×3·`OrderMonitor`×2·`ScanMonitor`×4·`KojiroMonitor`×2·`MarketState`×2·`BreakoutCandidateMonitor`·`KisAccountPoolCard`·`KisQuoteAccountsCard`·`MarketStateOps`·`Strategies`) + 래퍼가 없던 3곳(`StrategyFunnel`·`BacktestComparisonCard`·`PortfolioRiskCard`).
+- ⚠️ **일부러 적용하지 않은 곳 2** — `pages/Recommendations.tsx` 파라미터 표는 **표 안에 `InfoTooltip`** 이 있고 그 툴팁이 `absolute bottom-full` 이라 overflow 컨테이너가 위로 나가는 부분을 **자른다**. `macro/components/MacroCycleSection.tsx` 는 30줄짜리 지표표라 이득이 없는데 클리핑 맥락만 새로 생긴다. 🔴 **표 안에 `InfoTooltip`(또는 다른 `absolute` 팝오버)이 있으면 `ScrollPane` 을 씌우기 전에 잘림을 먼저 확인한다** — 적용 24곳은 툴팁 0건임을 확인했다.
+- 회귀 = `components/__tests__/ScrollPane.test.tsx`(11, **값 검사** — 실제 `maxHeight` 픽셀·최소 높이 floor·창 확대 추종·vh 폴백·두 축 overflow). 돌연변이 실측 = 상한 제거 6 RED · `overflow-x-auto` 회귀 1 RED · floor 제거 1 RED. + `e2e/scroll-pane.spec.ts`(4, **실브라우저** — jsdom 은 `clientHeight`/`scrollHeight` 가 0 이라 「래퍼 바닥이 뷰포트 안인가」를 원리적으로 못 잰다).
+
 ## 시각적 컨벤션
 
 - **DK Stock 디자인시스템 v2 — 가을 팔레트 + Gmarket Sans.** 브랜드명 "DK Stock"(로고타입은 `components/NavBar.tsx`, `font-brand`). 본문 서체 `font-sans` = Gmarket Sans(Light 100–300 / Medium 400–500 / Bold 600–900, `font-display: swap`, `public/fonts/GmarketSans{Light,Medium,Bold}.ttf`). `src/index.css` 의 Tailwind v4 `@theme` 가 `red/blue/gray` 를 가을 톤(rust/slate-blue/warm-gray)으로 재정의하고 `green→sky, amber/yellow→beige, purple/violet/indigo→navy, pink/orange→brown, emerald→blue, cyan→sky, slate→gray` 별칭을 매핑한다 — 기존 `bg-*-*` className 은 무수정으로 새 톤을 받고, 신규 이름 `navy/beige/brown/sky` 도 직접 사용 가능. 단일 진실원은 `src/index.css`(`@theme` 원본)와 `utils/pnlColor.ts`/`types/strategy.ts`(파생 hex) 뿐 — **다른 소스 파일에 색 hex 리터럴을 새로 두지 않는다**(회귀 가드 `src/__tests__/designSystem.v2.test.ts` 가 `#FF3333`/`#3366FF`/`#333333`/`#2563eb` 4종의 전수 부재를 잠근다).

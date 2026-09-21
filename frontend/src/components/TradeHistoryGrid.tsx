@@ -17,6 +17,7 @@ import type { TradeRecord } from '../types/trading'
 import type { LlmEvaluationSummaryMap } from '../types/llm-evaluation'
 import LlmEvaluationModal from './LlmEvaluationModal'
 import LlmScoreBadge from './LlmScoreBadge'
+import ScrollPane from './ScrollPane'
 
 const columnHelper = createColumnHelper<TradeRecord>()
 
@@ -357,7 +358,7 @@ export default function TradeHistoryGrid() {
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
-      <div className="overflow-x-auto">
+      <ScrollPane>
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b">
             {table.getHeaderGroups().map((hg) => (
@@ -393,7 +394,7 @@ export default function TradeHistoryGrid() {
             )}
           </tbody>
         </table>
-      </div>
+      </ScrollPane>
 
       <div className="flex items-center justify-between px-4 py-3 border-t">
         <span className="text-sm text-gray-500">

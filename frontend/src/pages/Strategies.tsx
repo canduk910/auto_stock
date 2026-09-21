@@ -25,6 +25,7 @@ import { getStrategyColor } from '../types/strategy'
 import type { TeRrMetrics } from '../types/strategy'
 import { getStrategyTeRr } from '../api/strategies'
 import { pnlColorClass as profitColorClass } from '../utils/pnlColor'
+import ScrollPane from '../components/ScrollPane'
 
 // 전략 응답 타입 — GET /api/strategies 영역 정합
 interface StrategyStatus {
@@ -307,7 +308,7 @@ function TeRrReferenceFooter() {
     <div className="bg-white rounded-lg shadow p-4 space-y-3">
       <div>
         <h3 className="text-sm font-semibold text-gray-900 mb-2">승률 → 필요RR 참조표</h3>
-        <div className="overflow-x-auto">
+        <ScrollPane>
           <table data-testid="te-reference-table" className="text-xs w-full text-left">
             <thead>
               <tr className="text-gray-500">
@@ -330,7 +331,7 @@ function TeRrReferenceFooter() {
               </tr>
             </tbody>
           </table>
-        </div>
+        </ScrollPane>
       </div>
       <p data-testid="te-education-caption" className="text-xs text-gray-500 leading-relaxed">
         {TE_EDUCATION_CAPTION}

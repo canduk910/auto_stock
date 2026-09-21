@@ -12,6 +12,7 @@
  */
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import ScrollPane from '../components/ScrollPane'
 
 import {
   getFunnel,
@@ -385,173 +386,175 @@ export default function StrategyFunnel() {
               <span className="tabular-nums">{bottleneck.dropRatePct.toFixed(1)}</span>% 탈락)
             </div>
           )}
-          <table className="min-w-full text-sm">
-            <thead>
-              <tr className="text-gray-500 text-left text-xs border-b border-gray-200">
-                <th className="py-2 px-3 font-medium w-12">#</th>
-                <th className="py-2 px-3 font-medium">단계</th>
-                <th className="py-2 px-3 font-medium text-right">통과</th>
-                <th className="py-2 px-3 font-medium text-right">탈락</th>
-                <th className="py-2 px-3 font-medium w-20">상세</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row) => {
-                const expandKey = `${sid}-${row.step_no}-${row.id}`
-                const isOpen = expandedStep === expandKey
-                return (
-                  <>
-                    <tr
-                      key={row.id}
-                      data-testid={`funnel-row-${sid}-${row.step_no}`}
-                      className={`border-b border-gray-100 ${
-                        bottleneck?.stepNo === row.step_no
-                          ? finalCount === 0
-                            ? 'bg-red-50'
-                            : 'bg-amber-50'
-                          : ''
-                      }`}
-                    >
-                      <td className="py-2 px-3 font-mono text-gray-500">
-                        {row.step_no}
-                      </td>
-                      <td className="py-2 px-3 text-gray-800">
-                        {row.step_name}
-                        {/* 사이클 41 — step_conditions 툴팁 (UI 표시 + title hover) */}
-                        {row.step_conditions && (
-                          <span
-                            data-testid={`funnel-step-conditions-${sid}-${row.step_no}`}
-                            title={row.step_conditions}
-                            className="ml-2 inline-block text-[10px] text-blue-600 cursor-help underline decoration-dotted"
-                          >
-                            조건
-                          </span>
-                        )}
-                        {/* 사이클 171 — 잠정(provisional) 배지 (16:20 저녁 캡처, 아침 델타 미반영) */}
-                        {row.is_provisional && (
-                          <span
-                            data-testid={`funnel-provisional-badge-${sid}-${row.step_no}`}
-                            title="16:20 저녁 잠정 캡처 — 익일 아침 마스터 델타 반영 전 (후보가 바뀔 수 있음)"
-                            className="ml-2 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-800"
-                          >
-                            잠정
-                          </span>
-                        )}
-                        {/* team-leader 3d — 단계별 통과 수 비례 막대 (병목 단계는 톤 강조) */}
-                        <div
-                          data-testid={`funnel-bar-${sid}-${row.step_no}`}
-                          className="h-1 bg-gray-100 rounded-full overflow-hidden mt-1 w-32"
-                        >
+          <ScrollPane>
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="text-gray-500 text-left text-xs border-b border-gray-200">
+                  <th className="py-2 px-3 font-medium w-12">#</th>
+                  <th className="py-2 px-3 font-medium">단계</th>
+                  <th className="py-2 px-3 font-medium text-right">통과</th>
+                  <th className="py-2 px-3 font-medium text-right">탈락</th>
+                  <th className="py-2 px-3 font-medium w-20">상세</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((row) => {
+                  const expandKey = `${sid}-${row.step_no}-${row.id}`
+                  const isOpen = expandedStep === expandKey
+                  return (
+                    <>
+                      <tr
+                        key={row.id}
+                        data-testid={`funnel-row-${sid}-${row.step_no}`}
+                        className={`border-b border-gray-100 ${
+                          bottleneck?.stepNo === row.step_no
+                            ? finalCount === 0
+                              ? 'bg-red-50'
+                              : 'bg-amber-50'
+                            : ''
+                        }`}
+                      >
+                        <td className="py-2 px-3 font-mono text-gray-500">
+                          {row.step_no}
+                        </td>
+                        <td className="py-2 px-3 text-gray-800">
+                          {row.step_name}
+                          {/* 사이클 41 — step_conditions 툴팁 (UI 표시 + title hover) */}
+                          {row.step_conditions && (
+                            <span
+                              data-testid={`funnel-step-conditions-${sid}-${row.step_no}`}
+                              title={row.step_conditions}
+                              className="ml-2 inline-block text-[10px] text-blue-600 cursor-help underline decoration-dotted"
+                            >
+                              조건
+                            </span>
+                          )}
+                          {/* 사이클 171 — 잠정(provisional) 배지 (16:20 저녁 캡처, 아침 델타 미반영) */}
+                          {row.is_provisional && (
+                            <span
+                              data-testid={`funnel-provisional-badge-${sid}-${row.step_no}`}
+                              title="16:20 저녁 잠정 캡처 — 익일 아침 마스터 델타 반영 전 (후보가 바뀔 수 있음)"
+                              className="ml-2 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-800"
+                            >
+                              잠정
+                            </span>
+                          )}
+                          {/* team-leader 3d — 단계별 통과 수 비례 막대 (병목 단계는 톤 강조) */}
                           <div
-                            className={`h-full transition-all ${
-                              bottleneck?.stepNo === row.step_no
-                                ? finalCount === 0
-                                  ? 'bg-red-400'
-                                  : 'bg-amber-400'
-                                : 'bg-blue-300'
-                            }`}
-                            style={{
-                              width: `${Math.round((row.survived_count / maxSurvived) * 100)}%`,
-                            }}
-                          />
-                        </div>
-                      </td>
-                      <td className="py-2 px-3 text-right font-mono text-emerald-700 tabular-nums">
-                        {row.survived_count}
-                      </td>
-                      <td className="py-2 px-3 text-right font-mono text-amber-700 tabular-nums">
-                        {row.excluded_count}
-                      </td>
-                      <td className="py-2 px-3">
-                        <button
-                          type="button"
-                          data-testid={`funnel-expand-${sid}-${row.step_no}`}
-                          onClick={() =>
-                            setExpandedStep((cur) =>
-                              cur === expandKey ? null : expandKey,
-                            )
-                          }
-                          className="text-xs text-blue-600 hover:underline"
-                        >
-                          {isOpen ? '접기' : '보기'}
-                        </button>
-                      </td>
-                    </tr>
-                    {isOpen && (
-                      <tr key={`${row.id}-expand`}>
-                        <td colSpan={5} className="py-2 px-3 bg-gray-50">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            {/* 통과 종목 — 사이클 41: dict 형식 (ticker + name) 또는 string 호환 */}
-                            <div>
-                              <div className="text-xs font-medium text-gray-600 mb-1">
-                                통과 ({(row.survived_tickers ?? []).length}건)
-                              </div>
-                              <div className="text-[11px] text-gray-700 max-h-32 overflow-y-auto bg-white border border-gray-100 rounded p-1">
-                                {(row.survived_tickers ?? []).length === 0 ? (
-                                  <span className="text-gray-400">—</span>
-                                ) : (
-                                  (row.survived_tickers ?? []).map((item, idx) => {
-                                    // 사이클 41 — dict | string 둘 다 호환
-                                    const ticker = typeof item === 'string' ? item : item.ticker
-                                    const name = typeof item === 'string' ? '' : (item.name ?? '')
-                                    return (
-                                      <span
-                                        key={`${ticker}-${idx}`}
-                                        data-testid={`funnel-survived-${sid}-${row.step_no}-${ticker}`}
-                                        className="inline-block mr-2 mb-1 px-1.5 py-0.5 bg-emerald-50 text-emerald-800 rounded border border-emerald-200"
-                                      >
-                                        <span className="font-mono">{ticker}</span>
-                                        {name && (
-                                          <span className="ml-1 text-emerald-700">
-                                            {name}
-                                          </span>
-                                        )}
-                                      </span>
-                                    )
-                                  })
-                                )}
-                              </div>
-                            </div>
-                            {/* 탈락 sample — 사이클 41: 종목명 + 수치 포함 사유 */}
-                            <div>
-                              <div className="text-xs font-medium text-gray-600 mb-1">
-                                탈락 sample ({(row.excluded_sample ?? []).length}건)
-                              </div>
-                              <div className="text-[11px] text-gray-700 max-h-32 overflow-y-auto bg-white border border-gray-100 rounded p-1">
-                                {(row.excluded_sample ?? []).length === 0 ? (
-                                  <span className="text-gray-400">—</span>
-                                ) : (
-                                  (row.excluded_sample ?? []).map((ex, idx) => (
-                                    <div
-                                      key={`${ex.ticker}-${idx}`}
-                                      data-testid={`funnel-excluded-${sid}-${row.step_no}-${ex.ticker}`}
-                                      className="flex justify-between border-b border-gray-50 last:border-0 py-0.5 gap-2"
-                                    >
-                                      <span className="flex-shrink-0">
-                                        <span className="font-mono">{ex.ticker}</span>
-                                        {ex.name && (
-                                          <span className="ml-1 text-gray-700">
-                                            {ex.name}
-                                          </span>
-                                        )}
-                                      </span>
-                                      <span className="text-amber-700 text-right">
-                                        {ex.reason}
-                                      </span>
-                                    </div>
-                                  ))
-                                )}
-                              </div>
-                            </div>
+                            data-testid={`funnel-bar-${sid}-${row.step_no}`}
+                            className="h-1 bg-gray-100 rounded-full overflow-hidden mt-1 w-32"
+                          >
+                            <div
+                              className={`h-full transition-all ${
+                                bottleneck?.stepNo === row.step_no
+                                  ? finalCount === 0
+                                    ? 'bg-red-400'
+                                    : 'bg-amber-400'
+                                  : 'bg-blue-300'
+                              }`}
+                              style={{
+                                width: `${Math.round((row.survived_count / maxSurvived) * 100)}%`,
+                              }}
+                            />
                           </div>
                         </td>
+                        <td className="py-2 px-3 text-right font-mono text-emerald-700 tabular-nums">
+                          {row.survived_count}
+                        </td>
+                        <td className="py-2 px-3 text-right font-mono text-amber-700 tabular-nums">
+                          {row.excluded_count}
+                        </td>
+                        <td className="py-2 px-3">
+                          <button
+                            type="button"
+                            data-testid={`funnel-expand-${sid}-${row.step_no}`}
+                            onClick={() =>
+                              setExpandedStep((cur) =>
+                                cur === expandKey ? null : expandKey,
+                              )
+                            }
+                            className="text-xs text-blue-600 hover:underline"
+                          >
+                            {isOpen ? '접기' : '보기'}
+                          </button>
+                        </td>
                       </tr>
-                    )}
-                  </>
-                )
-              })}
-            </tbody>
-          </table>
+                      {isOpen && (
+                        <tr key={`${row.id}-expand`}>
+                          <td colSpan={5} className="py-2 px-3 bg-gray-50">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                              {/* 통과 종목 — 사이클 41: dict 형식 (ticker + name) 또는 string 호환 */}
+                              <div>
+                                <div className="text-xs font-medium text-gray-600 mb-1">
+                                  통과 ({(row.survived_tickers ?? []).length}건)
+                                </div>
+                                <div className="text-[11px] text-gray-700 max-h-32 overflow-y-auto bg-white border border-gray-100 rounded p-1">
+                                  {(row.survived_tickers ?? []).length === 0 ? (
+                                    <span className="text-gray-400">—</span>
+                                  ) : (
+                                    (row.survived_tickers ?? []).map((item, idx) => {
+                                      // 사이클 41 — dict | string 둘 다 호환
+                                      const ticker = typeof item === 'string' ? item : item.ticker
+                                      const name = typeof item === 'string' ? '' : (item.name ?? '')
+                                      return (
+                                        <span
+                                          key={`${ticker}-${idx}`}
+                                          data-testid={`funnel-survived-${sid}-${row.step_no}-${ticker}`}
+                                          className="inline-block mr-2 mb-1 px-1.5 py-0.5 bg-emerald-50 text-emerald-800 rounded border border-emerald-200"
+                                        >
+                                          <span className="font-mono">{ticker}</span>
+                                          {name && (
+                                            <span className="ml-1 text-emerald-700">
+                                              {name}
+                                            </span>
+                                          )}
+                                        </span>
+                                      )
+                                    })
+                                  )}
+                                </div>
+                              </div>
+                              {/* 탈락 sample — 사이클 41: 종목명 + 수치 포함 사유 */}
+                              <div>
+                                <div className="text-xs font-medium text-gray-600 mb-1">
+                                  탈락 sample ({(row.excluded_sample ?? []).length}건)
+                                </div>
+                                <div className="text-[11px] text-gray-700 max-h-32 overflow-y-auto bg-white border border-gray-100 rounded p-1">
+                                  {(row.excluded_sample ?? []).length === 0 ? (
+                                    <span className="text-gray-400">—</span>
+                                  ) : (
+                                    (row.excluded_sample ?? []).map((ex, idx) => (
+                                      <div
+                                        key={`${ex.ticker}-${idx}`}
+                                        data-testid={`funnel-excluded-${sid}-${row.step_no}-${ex.ticker}`}
+                                        className="flex justify-between border-b border-gray-50 last:border-0 py-0.5 gap-2"
+                                      >
+                                        <span className="flex-shrink-0">
+                                          <span className="font-mono">{ex.ticker}</span>
+                                          {ex.name && (
+                                            <span className="ml-1 text-gray-700">
+                                              {ex.name}
+                                            </span>
+                                          )}
+                                        </span>
+                                        <span className="text-amber-700 text-right">
+                                          {ex.reason}
+                                        </span>
+                                      </div>
+                                    ))
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </>
+                  )
+                })}
+              </tbody>
+            </table>
+          </ScrollPane>
         </div>
         )
       })}

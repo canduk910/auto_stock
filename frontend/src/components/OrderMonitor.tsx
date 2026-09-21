@@ -1,6 +1,7 @@
 import { useTradingStatus } from '../contexts/TradingStatusContext'
 import { getStrategyColor } from '../types/strategy'
 import type { TradingStatusData, StrategyInfo, PositionDetail, OrderStatus } from '../types/trading'
+import ScrollPane from './ScrollPane'
 
 interface VBTarget {
   k: number
@@ -296,7 +297,7 @@ function PendingBuyOrdersSection({
   return (
     <div className="mb-4">
       <h4 className="text-sm font-medium text-gray-700 mb-2">매수 대기 (체결 전)</h4>
-      <div className="overflow-x-auto">
+      <ScrollPane>
         <table className="w-full text-xs">
           <thead>
             <tr className="text-left text-gray-500 border-b">
@@ -319,7 +320,7 @@ function PendingBuyOrdersSection({
             ))}
           </tbody>
         </table>
-      </div>
+      </ScrollPane>
     </div>
   )
 }
@@ -343,7 +344,7 @@ function PositionsTable({
   const formatPrice = (n: number) => n.toLocaleString()
 
   return (
-    <div className="overflow-x-auto">
+    <ScrollPane>
       <table className="w-full text-xs">
         <thead>
           <tr className="text-left text-gray-500 border-b">
@@ -425,6 +426,6 @@ function PositionsTable({
           })}
         </tbody>
       </table>
-    </div>
+    </ScrollPane>
   )
 }

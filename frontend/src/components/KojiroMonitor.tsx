@@ -3,6 +3,7 @@
 // 대부분 API 노출값을 렌더하며, ATR 밴드·청산선·스테이지 분포는 클라이언트 계산.
 import { useMemo } from 'react'
 import type { StrategyInfo, KojiroTarget, TickerPrice } from '../types/trading'
+import ScrollPane from './ScrollPane'
 
 // 대순환 6 스테이지 (EMA 5/20/40 배열). 1→2→3→4→5→6→1 순환.
 const STAGE_META: Record<number, { arrange: string; role: string; tone: string }> = {
@@ -211,7 +212,7 @@ export default function KojiroMonitor({
         {candidateEntries.length === 0 ? (
           <div className="text-xs text-gray-400">후보 없음 (조건 통과 종목 0 또는 스캔 전)</div>
         ) : (
-          <div className="overflow-x-auto">
+          <ScrollPane>
             <table className="w-full text-xs">
               <thead>
                 <tr className="text-gray-500 border-b">
@@ -267,7 +268,7 @@ export default function KojiroMonitor({
             <div className="mt-1 text-[10px] text-gray-400">
               밴드 게이지: {(bandMin * 100).toFixed(1)}% ~ {(bandMax * 100).toFixed(1)}% (양 끝 근접 시 amber)
             </div>
-          </div>
+          </ScrollPane>
         )}
       </div>
 
@@ -306,7 +307,7 @@ export default function KojiroMonitor({
         {Object.keys(positions).length === 0 ? (
           <div className="text-xs text-gray-400">보유 종목 없음 · 관찰 모드</div>
         ) : (
-          <div className="overflow-x-auto">
+          <ScrollPane>
             <table className="w-full text-xs">
               <thead>
                 <tr className="text-gray-500 border-b">
@@ -358,7 +359,7 @@ export default function KojiroMonitor({
               </tbody>
             </table>
             <div className="mt-1 text-[10px] text-gray-400">활성 방어선 = 현재가 아래 3선(2ATR/2.5ATR/backstop) 중 가장 높은(먼저 닿는) 값. 스테이지3 = 추세종료 청산.</div>
-          </div>
+          </ScrollPane>
         )}
       </div>
     </div>

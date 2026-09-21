@@ -25,6 +25,7 @@ import {
   STALE_CONTEXT_META,
   formatLastTickKst,
 } from '../utils/stale-context'
+import ScrollPane from './ScrollPane'
 
 function statusBadgeClass(connected: boolean): string {
   return connected
@@ -267,7 +268,7 @@ export default function KisAccountPoolCard() {
           )}
 
           {/* 세션별 표 */}
-          <div className="overflow-x-auto">
+          <ScrollPane>
             <table className="min-w-full text-xs">
               <thead>
                 <tr className="text-gray-500 text-left border-b border-gray-200">
@@ -336,7 +337,7 @@ export default function KisAccountPoolCard() {
                 })}
               </tbody>
             </table>
-          </div>
+          </ScrollPane>
 
           {/* 사이클 35 (2026-05-21) — 세션별 종목 expand */}
           <div className="mt-4">

@@ -7,6 +7,7 @@ import { getStrategyColor } from '../types/strategy'
 import type { Holding } from '../types/balance'
 import ConfirmModal from './ConfirmModal'
 import { pnlColorClass as profitColor } from '../utils/pnlColor'
+import ScrollPane from './ScrollPane'
 
 const STRATEGY_NAMES: Record<string, string> = {
   momentum: '모멘텀',
@@ -175,7 +176,7 @@ export default function BalanceTable({ selectedStrategy }: Props) {
       )}
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="overflow-x-auto">
+        <ScrollPane>
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b">
             <tr>
@@ -263,7 +264,7 @@ export default function BalanceTable({ selectedStrategy }: Props) {
             )}
           </tbody>
         </table>
-        </div>
+        </ScrollPane>
       </div>
 
       {sellTarget && (

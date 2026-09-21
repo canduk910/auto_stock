@@ -30,6 +30,7 @@ import type {
   KisQuoteAccountCreateInput,
 } from '../types/kis-quote-accounts'
 import ConfirmModal from './ConfirmModal'
+import ScrollPane from './ScrollPane'
 
 const KST_FORMATTER = new Intl.DateTimeFormat('ko-KR', {
   timeZone: 'Asia/Seoul',
@@ -243,7 +244,7 @@ export default function KisQuoteAccountsCard() {
             으로 확대됩니다.
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <ScrollPane>
             <table className="min-w-full text-xs">
               <thead>
                 <tr className="text-gray-500 text-left border-b border-gray-200">
@@ -316,7 +317,7 @@ export default function KisQuoteAccountsCard() {
                 ))}
               </tbody>
             </table>
-          </div>
+          </ScrollPane>
         )}
       </div>
 

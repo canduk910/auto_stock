@@ -17,6 +17,7 @@ import type { TradePair } from '../types/trading'
 import type { LlmEvaluationSummaryMap } from '../types/llm-evaluation'
 import LlmEvaluationModal from './LlmEvaluationModal'
 import LlmScoreBadge from './LlmScoreBadge'
+import ScrollPane from './ScrollPane'
 
 const STRATEGY_NAMES: Record<string, string> = {
   momentum: '모멘텀',
@@ -341,7 +342,7 @@ export default function TradePnLGrid() {
         <span className="text-gray-400">전략: {strategyLabel}</span>
       </div>
 
-      <div className="overflow-x-auto">
+      <ScrollPane>
         <table className="w-full text-sm">
           <thead className="bg-gray-50 border-b">
             {table.getHeaderGroups().map((hg) => (
@@ -383,7 +384,7 @@ export default function TradePnLGrid() {
             )}
           </tbody>
         </table>
-      </div>
+      </ScrollPane>
 
       <div className="flex items-center justify-between px-4 py-3 border-t">
         <span className="text-sm text-gray-500">

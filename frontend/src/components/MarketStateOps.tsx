@@ -17,6 +17,7 @@
  */
 import { formatKstDateTime } from '../utils/kst'
 import type { MarketOpsData, MarketOpsTask } from '../types/market-ops'
+import ScrollPane from './ScrollPane'
 
 const STATUS_META: Record<string, { label: string; className: string }> = {
   scheduled: { label: '예정', className: 'bg-gray-200 text-gray-700 border-gray-300' },
@@ -237,7 +238,7 @@ export function MarketStateOps({
           {data.tasks.length === 0 ? (
             <p className="mt-3 text-sm text-gray-400">표시할 작업이 없다.</p>
           ) : (
-            <div className="mt-3 overflow-x-auto">
+            <ScrollPane className="mt-3">
               <table data-testid="market-state-ops-table" className="min-w-full text-left">
                 <thead>
                   <tr className="border-b border-gray-200 text-xs font-medium text-gray-500">
@@ -254,7 +255,7 @@ export function MarketStateOps({
                   ))}
                 </tbody>
               </table>
-            </div>
+            </ScrollPane>
           )}
 
           <p

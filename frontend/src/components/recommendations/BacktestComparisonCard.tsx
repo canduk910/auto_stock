@@ -21,6 +21,7 @@ import type { BacktestMetrics, BacktestSummary } from '../../types/backtest'
 import { BACKTEST_METRIC_KEYS } from '../../types/backtest'
 import { getStrategyColor } from '../../types/strategy'
 import { PROFIT_HEX as PROFIT_COLOR, LOSS_HEX as LOSS_COLOR, NEUTRAL_HEX } from '../../utils/pnlColor'
+import ScrollPane from '../ScrollPane'
 
 const NEUTRAL_COLOR = NEUTRAL_HEX
 
@@ -225,51 +226,53 @@ export default function BacktestComparisonCard({
       </div>
 
       <div className="overflow-hidden border border-gray-200 rounded-md mb-3">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-3 py-2 text-left font-medium text-gray-600">메트릭</th>
-              <th className="px-3 py-2 text-right font-medium text-gray-600">현재</th>
-              <th className="px-3 py-2 text-center font-medium text-gray-400 w-6">→</th>
-              <th className="px-3 py-2 text-right font-medium text-gray-600">추천</th>
-              <th className="px-3 py-2 text-right font-medium text-gray-600">차이</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {BACKTEST_METRIC_KEYS.map((key) => {
-              const spec = METRIC_SPECS[key]
-              const curVal = current ? current[key] : null
-              const recVal = recommended ? recommended[key] : null
-              const diffVal = diff[key]
-              const color = diffColor(diffVal, spec.diffSignInverted)
-              return (
-                <tr key={key}>
-                  <td className="px-3 py-2 text-gray-700">{spec.label}</td>
-                  <td
-                    className="px-3 py-2 text-right font-mono text-gray-700"
-                    data-testid={`metric-current-${key}`}
-                  >
-                    {spec.formatValue(curVal)}
-                  </td>
-                  <td className="px-3 py-2 text-center text-gray-300">→</td>
-                  <td
-                    className="px-3 py-2 text-right font-mono font-medium text-gray-900"
-                    data-testid={`metric-recommended-${key}`}
-                  >
-                    {spec.formatValue(recVal)}
-                  </td>
-                  <td
-                    className="px-3 py-2 text-right font-mono text-xs"
-                    data-testid={`metric-diff-${key}`}
-                    style={{ color }}
-                  >
-                    {spec.formatDiff(diffVal)}
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
+        <ScrollPane>
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-3 py-2 text-left font-medium text-gray-600">메트릭</th>
+                <th className="px-3 py-2 text-right font-medium text-gray-600">현재</th>
+                <th className="px-3 py-2 text-center font-medium text-gray-400 w-6">→</th>
+                <th className="px-3 py-2 text-right font-medium text-gray-600">추천</th>
+                <th className="px-3 py-2 text-right font-medium text-gray-600">차이</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {BACKTEST_METRIC_KEYS.map((key) => {
+                const spec = METRIC_SPECS[key]
+                const curVal = current ? current[key] : null
+                const recVal = recommended ? recommended[key] : null
+                const diffVal = diff[key]
+                const color = diffColor(diffVal, spec.diffSignInverted)
+                return (
+                  <tr key={key}>
+                    <td className="px-3 py-2 text-gray-700">{spec.label}</td>
+                    <td
+                      className="px-3 py-2 text-right font-mono text-gray-700"
+                      data-testid={`metric-current-${key}`}
+                    >
+                      {spec.formatValue(curVal)}
+                    </td>
+                    <td className="px-3 py-2 text-center text-gray-300">→</td>
+                    <td
+                      className="px-3 py-2 text-right font-mono font-medium text-gray-900"
+                      data-testid={`metric-recommended-${key}`}
+                    >
+                      {spec.formatValue(recVal)}
+                    </td>
+                    <td
+                      className="px-3 py-2 text-right font-mono text-xs"
+                      data-testid={`metric-diff-${key}`}
+                      style={{ color }}
+                    >
+                      {spec.formatDiff(diffVal)}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </ScrollPane>
       </div>
 
       {peers.length > 0 && (

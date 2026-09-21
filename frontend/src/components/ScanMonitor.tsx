@@ -5,6 +5,7 @@ import type { BuySignal, ScanStats } from '../types/trading'
 import { getKstMinutes } from '../utils/stale-context'
 import KojiroMonitor from './KojiroMonitor'
 import BreakoutCandidateMonitor from './BreakoutCandidateMonitor'
+import ScrollPane from './ScrollPane'
 
 interface BoardTarget {
   open_price: number
@@ -489,7 +490,7 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
                   {expanded ? '종목 리스트 접기' : `종목 리스트 펼치기 (${scan.filtered_count}개)`}
                 </button>
                 {expanded && (
-                  <div className="mt-2 overflow-x-auto">
+                  <ScrollPane className="mt-2">
                     <table className="w-full text-xs">
                       <thead>
                         <tr className="text-left text-gray-500 border-b">
@@ -536,7 +537,7 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
                           })}
                       </tbody>
                     </table>
-                  </div>
+                  </ScrollPane>
                 )}
               </div>
             )}
@@ -791,7 +792,7 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
                         </button>
                       </div>
                       {swingExpanded && (
-                        <div className="overflow-x-auto">
+                        <ScrollPane>
                           <table className="w-full text-xs">
                             <thead>
                               <tr className="text-left text-gray-500 border-b">
@@ -881,7 +882,7 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
                                 })}
                             </tbody>
                           </table>
-                        </div>
+                        </ScrollPane>
                       )}
                     </div>
                   )}
@@ -963,7 +964,7 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
                       ))}
                     </div>
                   </div>
-                  <div className="overflow-x-auto">
+                  <ScrollPane>
                     <table className="w-full text-xs">
                       <thead>
                         <tr className="text-left text-gray-500 border-b">
@@ -1128,7 +1129,7 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
                           })}
                       </tbody>
                     </table>
-                  </div>
+                  </ScrollPane>
                 </div>
               )
             })()}
@@ -1153,7 +1154,7 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
         {signals.length === 0 ? (
           <p className="text-xs text-gray-400">신호 없음</p>
         ) : (
-          <div className="overflow-x-auto">
+          <ScrollPane>
             <table className="w-full text-xs">
               <thead>
                 <tr className="text-left text-gray-500 border-b">
@@ -1206,7 +1207,7 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
                 })}
               </tbody>
             </table>
-          </div>
+          </ScrollPane>
         )}
       </div>
     </div>

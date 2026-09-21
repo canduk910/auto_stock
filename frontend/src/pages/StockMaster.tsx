@@ -36,6 +36,7 @@ import type {
   StockMasterDailyRow,
 } from '../types/stock-master'
 import { RefreshProgressBanner } from '../components/RefreshProgressBanner'
+import ScrollPane from '../components/ScrollPane'
 
 // ────────────────────────────────────────────────────────────────────────
 // KST 시각 포맷터 (사이클 68 영속 — getHours() 금지)
@@ -439,7 +440,7 @@ function DailyTab({ ticker }: { ticker: string }) {
   }
 
   return (
-    <div className="overflow-x-auto" data-testid="stock-master-daily-table">
+    <ScrollPane data-testid="stock-master-daily-table">
       <table className="min-w-full text-sm">
         <thead>
           <tr className="border-b border-gray-200 text-xs text-gray-500 uppercase">
@@ -471,7 +472,7 @@ function DailyTab({ ticker }: { ticker: string }) {
           })}
         </tbody>
       </table>
-    </div>
+    </ScrollPane>
   )
 }
 
@@ -1318,7 +1319,7 @@ export default function StockMaster() {
         ) : listItems.length === 0 ? (
           <p className="text-sm text-gray-500">종목 데이터가 없습니다.</p>
         ) : (
-          <div className="overflow-x-auto">
+          <ScrollPane>
             <table className="min-w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200 text-xs text-gray-500 uppercase">
@@ -1413,7 +1414,7 @@ export default function StockMaster() {
                 ))}
               </tbody>
             </table>
-          </div>
+          </ScrollPane>
         )}
       </div>
 
@@ -1446,7 +1447,7 @@ export default function StockMaster() {
         ) : historyItems.length === 0 ? (
           <p className="text-sm text-gray-500">변경 이력이 없습니다.</p>
         ) : (
-          <div className="overflow-x-auto mt-4">
+          <ScrollPane className="mt-4">
             <table className="min-w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200 text-xs text-gray-500 uppercase">
@@ -1494,7 +1495,7 @@ export default function StockMaster() {
                 ))}
               </tbody>
             </table>
-          </div>
+          </ScrollPane>
         )}
       </div>
 
