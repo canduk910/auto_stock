@@ -1327,11 +1327,17 @@ class BullFlagBreakoutStrategy(StrategyBase):
 
         🔴 **`get_targets_status()` 를 쓰면 안 된다.** 그쪽은 `self._candidates` 를
         순회하는데(`:798`) `_candidates` 는 `prepare()` 마다 와이프되고 **보유 종목은
-        셋업이 무너져 후보 자격을 잃는 것이 정상**이다. 실측(funnel `step_no=99`
-        6영업일) — 보유 2종목이 **하루도** 후보에 없었다. 그래서 그 경로로 목표가를
-        읽으면 화면이 **영구히 빈 칸**이다. 같은 파일 안에서 손절 미러는
-        `_effective_setup` 으로 stamp 폴백을 타는데 목표가만 안 타던 **비대칭**을
-        이 함수가 없앤다.
+        셋업이 무너져 후보 자격을 잃는 것이 정상**이다.
+
+        ⚠️ 실측(`strategy_funnel_snapshots` `step_no=99`, 09-14~09-21) — **036800 은
+        매수 다음 날부터 5영업일 내내 후보에서 빠져 빈 칸**이었고 003160 은 계속
+        후보에 남아 값이 나왔다. 즉 결함은 **영구가 아니라 간헐**이고, 그래서 더
+        나쁘다 — 어떤 날은 보이고 어떤 날은 안 보인다. 게다가 남아 있는 날의 값은
+        **진입 stamp 가 아니라 live 재검출 구조**로 계산돼 엔진 §3 과 **갈릴 수 있다**
+        (`_effective_setup` docstring 이 그 경로를 명시한다).
+
+        같은 파일 안에서 손절 미러는 `_effective_setup` 으로 stamp 폴백을 타는데
+        목표가만 안 타던 **비대칭**을 이 함수가 없앤다.
 
         산식은 `check_exit_signal` §3 과 **동일**하다 — `flag_high + (pole_high −
         pole_start)`, 키 결손이면 **미발화**(`None`)가 계약이다(임의 기본값으로

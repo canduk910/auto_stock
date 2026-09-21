@@ -147,10 +147,12 @@ describe("BalanceTable — 손절가 · 목표가", () => {
     await screen.findByText("삼성전자");
     const title = screen.getByTestId("stop-price-005930").getAttribute("title") ?? "";
     expect(title).toContain("익일청산");
-    // 🔴 보유일수 초과는 지금 보유 9건 중 3건(20일 신고가 스윙)에 직접 걸리고,
-    //    운영값이 2영업일이라 표시 손절가보다 훨씬 먼저 터진다.
-    expect(title).toContain("보유일수 초과");
-    expect(title).toContain("2영업일");
+    // 🔴 「무조건 팔리는 것」과 「조건이 함께 붙는 것」을 **갈라서** 말해야 한다.
+    //    20일 신고가 스윙의 2영업일 청산은 돌파고점 아래일 때만 발동한다 —
+    //    뭉뚱그려 「가격 무관」이라 적으면 운영자가 위험을 과대평가한다.
+    expect(title).toContain("보유일수만으로 팔리는 것");
+    expect(title).toContain("다른 조건이 함께 붙는 것");
+    expect(title).toContain("돌파고점 아래면");
     expect(title).toContain("이 가격에 닿기 전에 팔릴 수 있다");
   });
 

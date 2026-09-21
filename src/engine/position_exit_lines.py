@@ -155,9 +155,11 @@ def _measured_target(strategy: Any, strategy_id: str, ticker: str) -> tuple[int 
 
     🔴 **`get_targets_status()` 를 쓰지 않는다.** 그쪽은 `_candidates` 를 순회하는데
     `_candidates` 는 `prepare()` 마다 와이프되고 **보유 종목은 후보 자격을 잃는 것이
-    정상**이라, 그 경로로는 화면이 **영구히 빈 칸**이다(funnel `step_no=99` 6영업일
-    실측 — 보유 2종목이 하루도 후보에 없었다). 전략의 read-only 미러
-    `get_effective_target_price` 가 `_effective_setup` stamp 폴백을 타므로 그것만 쓴다.
+    정상**이라, 그 경로로는 목표가가 **간헐적으로 사라진다**(실측 09-14~09-21 —
+    036800 은 매수 다음 날부터 5영업일 내내 빠져 빈 칸, 003160 은 계속 남아 값이 났다).
+    ⚠️ 남아 있는 날에도 값은 **live 재검출 구조** 기준이라 엔진 §3(진입 stamp)과
+    **갈릴 수 있다**. 전략의 read-only 미러 `get_effective_target_price` 가
+    `_effective_setup` stamp 폴백을 타므로 그것만 쓴다.
     """
     if strategy_id not in _MEASURED_MOVE_STRATEGIES:
         return None, False

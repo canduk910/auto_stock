@@ -6,9 +6,11 @@ cycle339 초판은 잔고 화면의 목표가를 `get_targets_status()` 에서 �
 `self._candidates.items()` 를 순회하는데(`bull_flag_breakout.py:798`) `_candidates` 는
 `prepare()` 마다 와이프되고 **보유 종목은 셋업이 무너져 후보 자격을 잃는 것이 정상**이다.
 
-운영 DB 실측(`strategy_funnel_snapshots` `step_no=99`, 6영업일) — 보유 2종목
-(003160 매수 09-17 · 036800 매수 09-14)이 **하루도** 후보에 없었다. 즉 그 경로로는
-화면이 **영구히 빈 칸**이었다.
+⚠️ 실측(`strategy_funnel_snapshots` `step_no=99`, 09-14~09-21) — **036800(매수 09-14)은
+매수 다음 날부터 5영업일 내내 후보에서 빠져 빈 칸**이었고 **003160(매수 09-17)은 계속
+후보에 남아 값이 나왔다.** 즉 결함은 **영구가 아니라 간헐**이다. 그래서 더 나쁘다 —
+어떤 날은 보이고 어떤 날은 안 보이면 운영자가 화면을 못 믿는다. 게다가 남아 있는 날의
+값은 **live 재검출 구조** 기준이라 엔진 §3(진입 stamp)과 **갈릴 수 있다**.
 
 반면 엔진의 `check_exit_signal` §3 은 `_effective_setup(ticker)` 로 **`_position_setup`
 stamp 폴백**을 타서 살아 있다. 같은 파일 안에서 손절가(`flag_low`)는 stamp 를 타는데
