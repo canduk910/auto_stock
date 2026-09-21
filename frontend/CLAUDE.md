@@ -335,11 +335,12 @@ Dashboard 만 즉시 import. 나머지 9 페이지(History · Recommendations ·
 - 주문체결내역: `TradeHistoryGrid` (raw 행)
 - 매매손익: `TradePnLGrid` (`/api/history/pnl` — 매수·매도 페어, closed/open 사이클). 12 컬럼 + 전략 뱃지. open 행은 매도 컬럼 "—" + "(미실현)" 라벨, emerald-50 배경. 시세 미수신 "(미실현 시세 대기)". 전략 select 7종(kojiro `고지로 대순환` 포함). 그리드 상단 실현손익 요약 바(`pnl-summary`) — `data.summary`(슬라이스 전 전체 closed 페어 집계) 기반 실현 합계(`pnl-summary-realized`, 이익 red/손실 blue)·손익율·승/패/보합·승률·현재 전략 필터 라벨. summary 부재 시 0 graceful
 
-### AI 매수평가 버튼 + 상세 팝업
+### AI 매수평가 점수 배지 + 상세 팝업
 
-두 그리드의 각 행 맨 오른쪽에 "AI 자문" 열이 붙는다.
+두 그리드의 각 행 맨 오른쪽에 "AI 자문" 열이 붙고, **버튼 왼쪽에 점수 배지가 선다** — 점수는 팝업을 열지 않고 목록에서 바로 읽는다.
 
-- **파일 3** = `types/llm-evaluation.ts`(`LlmEvaluationSummary` 10키 → `LlmEvaluation` 이 extends 해 상세 53키 · `LlmEvaluationSummaryMap`) · `api/llm-evaluations.ts`(`getLlmEvaluationSummaries(orderNos, tradeDate?)` 배치 · `getLlmEvaluation(orderNo, tradeDate?)` 단건 — **try/catch 금지**: axios 오류를 React Query 로 흘려야 화면이 404(회색 안내)와 500·네트워크(빨강 오류)를 가른다) · `components/LlmEvaluationModal.tsx`(팝업, 신규 의존성 0 · `<pre>` 원문 · `dangerouslySetInnerHTML` 금지).
+- **점수 배지** (`components/LlmScoreBadge.tsx`) — `resolveLlmScoreTone(summary)` 순수 함수가 `{tone, text}` 를 내고 배지가 그것을 `data-tone` 으로 노출한다. 🔴 **판정의 정본은 서버가 그때 기록한 `would_block` 이고 화면이 `score >= min_score` 를 다시 계산하지 않는다** — 임계(`min_score`)는 전략 파라미터라 나중에 바뀌고, 재계산하면 평가 당시엔 통과였던 기록이 오늘 임계로 재판정돼 **과거를 거짓으로** 말한다. `would_block` 이 `null`/부재인 옛 기록만 점수 비교로 폴백한다. 🔴 **세 결측 상태를 접지 않는다** — 기록 없음 `·`(`tone='none'`) / 평가 실패 `–`(`tone='failed'`, `result==='failed'` 또는 `score==null`) / 점수 있음(`pass`|`block`). "평가 안 함" 과 "평가 실패" 를 한 칸으로 접으면 migration 043 이 실패 행을 남기는 이유가 화면에서 사라진다. 🔴 **0점을 결측으로 접지 않는다**(`if (!score)` 로 짜면 0점 = 가장 나쁜 평가가 "기록 없음"이 된다). `title` 에 점수와 기준을 **둘 다** 담는다 — 하나만 담으면 맞바꿈이 드러나지 않는다. `matchedCount > 1` 이면 `+n` 과 "첫 매수 기준" 을 밝힌다(안 밝히면 운영자가 그 숫자를 페어 전체의 대표값으로 읽는다). **네트워크 호출 추가 0** — 이미 배치로 받아 둔 `summary` 를 렌더할 뿐이다.
+- **파일 4** = `components/LlmScoreBadge.tsx`(점수 배지 + `resolveLlmScoreTone`) · `types/llm-evaluation.ts`(`LlmEvaluationSummary` 10키 → `LlmEvaluation` 이 extends 해 상세 53키 · `LlmEvaluationSummaryMap`) · `api/llm-evaluations.ts`(`getLlmEvaluationSummaries(orderNos, tradeDate?)` 배치 · `getLlmEvaluation(orderNo, tradeDate?)` 단건 — **try/catch 금지**: axios 오류를 React Query 로 흘려야 화면이 404(회색 안내)와 500·네트워크(빨강 오류)를 가른다) · `components/LlmEvaluationModal.tsx`(팝업, 신규 의존성 0 · `<pre>` 원문 · `dangerouslySetInnerHTML` 금지).
 - **버튼 활성 판정은 배치 1요청**이다 — 행마다 개별 조회하면 페이지당 20~30 요청이 나간다. 요약 맵의 키는 **`"<trade_date>|<order_no>"` 복합 키**(라우트 `summary_key()` 와 같은 규약)이고 조회는 `findLlmSummary(summaries, tradeDate, orderNo)` 로 한다. 그 조합의 키가 있으면 활성, 없으면 비활성(회색) + 툴팁 — 사유는 `llmSummaryDatesFor(summaries, orderNo)` 로 갈린다("평가 기록 없음" vs "다른 날짜(…)의 평가 기록"). 기록 없는 조합은 응답에 **키 자체가 없다**(`null` 값 아님).
 - 체결 그리드(`TradeHistoryGrid`)는 **BUY 행의 `order_no`** 기준, 손익 그리드(`TradePnLGrid`)는 **`buy_order_nos`** 기준(한 페어가 매수 주문 2건 이상이면 라벨에 `AI 자문 (n)`, 팝업이 주문별 목록으로 n개를 나란히 보여준다). `pair_key`(= `strategy:ticker:첫 매수 order_no`)가 버튼 testid 이고 `null` 이면 비활성.
 - ⚠️ **KIS 주문번호(ODNO)는 하루 단위로만 유일하다** — 활성 근거는 **그 행의 매수일로 조회한 키가 있는가** 하나이고, 상세도 반드시 날짜와 함께 묻는다(빼면 라우트가 "가장 최근 1건" 을 골라 같은 번호가 재사용된 **다른 거래의 평가**를 띄운다 — 회귀 가드 F25b).
