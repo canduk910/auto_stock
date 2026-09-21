@@ -85,7 +85,7 @@
 
 ## 3. 사이클별 상세
 
-정본 = `docs/HARNESS_CHANGELOG.md` **상단 7행**(cycle336~342). 아래는 보고용 요약이다.
+정본 = `docs/HARNESS_CHANGELOG.md` **상단 8행**(cycle336~344). ⚠️ cycle343 은 자기 행이 없다 — 그 사이클이 한 일이 **cycle342 행의 거짓 문장을 고치는 것**이라 그 행을 다시 썼다. 아래는 보고용 요약이다.
 
 ### cycle336 — 넥스트트레이드 여부를 매수 평가에서 걷어냄 (창 밖 착지, 이번 창에서 배포)
 
@@ -559,13 +559,13 @@ cycle339(잔고 손절가·목표가)를 `domain-consult` 에 **검증시킨 결
 
 | 사실 | 출처 | 대조 |
 |---|---|---|
-| 커밋 12개·시각·제목 | `git log --format='%h %ad %s' --date=format:'%m-%d %H:%M' 3267863..578308f` | ✅ 직접 실행 |
+| 커밋 15개·시각·제목 | `git log --format='%h %ad %s' --date=format:'%m-%d %H:%M' 3267863..d9fb1cc` | ✅ 직접 실행 |
 | cycle341 변경 파일(`src/` 무접촉) | `git show --stat 8acbfbc` | ✅ 직접 실행 |
 | cycle342 결함 A·B 내용, BFB 40줄·삭제 0, 보유일수 2·5영업일 | `git show 578308f`(커밋 메시지 + `position_exit_lines.py` diff) | ✅ 직접 조회 |
 | cycle343 이 고친 정본 21곳 | `git show --stat 2ca2321`(21 files changed) | ✅ 직접 조회 |
 | cycle344 배선(커밋 15개 · 신규 회귀 264줄) | `git rev-list --count 3267863..d9fb1cc` = 15 · `git show --stat d9fb1cc` | ✅ 직접 조회 |
 | MACD 자문 정정 수치(0.32건/일 · 10% · +2.20% · 슬롯 8/6/4) | `_workspace/domain_consult/cycle340_kojiro_macd.md` §0 보강 블록 | ✅ 직접 조회 |
-| 사이클 336~342 내용 | `docs/HARNESS_CHANGELOG.md` 상단 7행 | ✅ 직접 조회 |
+| 사이클 336~344 내용 | `docs/HARNESS_CHANGELOG.md` 상단 8행 | ✅ 직접 조회 |
 | donchian 시간청산이 **가격 조건부**라는 사실 | `src/engine/strategies/donchian_swing.py:1151-1161`(`days_held >= n_days` **∧** `current_price < breakout_high`) | ✅ 직접 조회 |
 | 후보 잔류 실측(036800 빈 칸 · 003160 값 나옴) | 운영 DB `strategy_funnel_snapshots` 재조회 | ⚠️ **호출자 실측** — report-writer 는 DB 에 접속하지 않았다 |
 | MACD 실측 전 수치 | `_workspace/domain_consult/cycle340_kojiro_macd.md` §0·2·3·4·5·6 | ✅ 직접 조회 |
