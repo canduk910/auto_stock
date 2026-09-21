@@ -69,7 +69,21 @@ export function useViewportBoundedHeight(
     }
     const viewport = window.innerHeight
     if (!Number.isFinite(viewport) || viewport <= 0) return
-    const available = viewport - top - bottomGutter
+    // 🔴 `top` 을 **화면 안일 때만** 쓴다. 두 바깥 경우는 창 전체를 예산으로 잡는다.
+    //
+    //  - `top < 0` (페이지가 스크롤돼 이 요소가 화면 위로 올라감) — 그대로 빼면
+    //    `available` 이 창보다 커져 pane 이 뷰포트를 넘고, 가로 스크롤바가 다시
+    //    화면 밖으로 밀려나 **고치려던 결함이 그대로 재현된다**. 실측(CI G-E2E-11d):
+    //    창 800px 인데 pane 바닥이 1420.5px 였다(클릭의 자동 스크롤 탓).
+    //  - `top >= viewport` (아직 화면 아래, 대시보드 하단 카드들) — 그대로 빼면
+    //    음수가 되어 `minHeight`(220px) 로 떨어진다. 스크롤해서 그 표에 도달하면
+    //    화면을 다 쓸 수 있는데 220px 에 갇힌다. 실측: 대시보드 잔고표 top=1387.
+    //
+    // 두 경우 모두 「창 높이 − 여백」이 옳은 예산이다. 이렇게 하면 **스크롤을
+    // 듣지 않고도** 화면 밖 표가 제 크기를 갖는다(스크롤 리스너는 pane 이 커지며
+    // 내용이 밀려 내려가는 점프를 만든다 — 그 대가를 치르지 않는다).
+    const inView = top >= 0 && top < viewport
+    const available = viewport - (inView ? top : 0) - bottomGutter
     const next = Math.max(minHeight, Math.round(available))
     setMaxHeight((prev) => (prev !== null && Math.abs(prev - next) < TOLERANCE_PX ? prev : next))
   }, [minHeight, bottomGutter])

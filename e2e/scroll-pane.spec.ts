@@ -6,13 +6,19 @@
  * 내려가야만 보이는데, 창 사이즈에 맞춰서 보기좋게 가로/세로 스크롤이 가능했으면 해."
  *
  * 🔴 **왜 E2E 여야 하는가** — 이 결함은 **레이아웃 결함**이라 jsdom 이 원리적으로 못 잡는다.
- * jsdom 은 `clientHeight`·`scrollHeight` 가 전부 0 이고 스크롤바를 만들지 않는다. 단위
- * 테스트가 재는 것은 "우리가 `maxHeight` 를 걸었는가" 까지이고, "그 결과 가로 스크롤바가
- * 화면 안에 들어왔는가" 는 실브라우저만 안다. cycle266 의 종목마스터 일봉 탭이 **한 번도
- * 동작한 적 없는데 3개월 초록**이던 그 함정과 같은 계열이다.
+ * jsdom 은 `clientHeight`·`scrollHeight` 가 전부 0 이고 스크롤바를 만들지 않는다.
+ * 단위 테스트가 재는 것은 "우리가 `maxHeight` 를 걸었는가" 까지다.
  *
- * 판정 = 표 래퍼의 **바닥이 뷰포트 안에** 있는가. 결함 상태에서는 래퍼 높이가 표 전체
- * 높이라 바닥이 화면 훨씬 아래에 있고, 가로 스크롤바가 거기 붙어 보이지 않는다.
+ * ⚠️ **이 spec 의 초판이 틀렸고 그 덕에 진짜 결함을 찾았다.** 초판은 모든 pane 에
+ * `bottom <= viewport` 를 요구했는데, 대시보드처럼 긴 페이지에서는 표가 화면
+ * **아래**(top=1387)에 있는 것이 정상이라 그 단언이 성립할 수 없다. 대신 그 실측이
+ * 진짜 결함을 드러냈다 — 화면 밖 표가 최소 높이 220px 에 **갇혀** 있었다.
+ * 그래서 불변식을 다시 정의한다:
+ *
+ *   ① 상한이 반드시 걸린다 (`max-height !== none`)
+ *   ② 상한은 **창 높이를 넘지 않는다** (넘으면 가로 스크롤바가 화면 밖으로 밀린다)
+ *   ③ 상한은 **최소 높이에 갇히지 않는다** (화면 밖 표도 제 크기를 갖는다)
+ *   ④ 화면 안에 있는 표는 바닥도 화면 안이다
  *
  * production 코드 변경 0 — spec 만.
  */
@@ -22,26 +28,31 @@ import { installApiMocks } from "./fixtures/api-mocks";
 
 const VIEWPORT = { width: 1280, height: 800 };
 const TIMEOUT = 15_000;
+/** `ScrollPane` 의 `MIN_HEIGHT_PX` 와 같은 값 — 여기 갇히면 결함이다. */
+const MIN_HEIGHT_PX = 220;
 
-/** 그 요소의 바닥이 뷰포트 안에 있는가 + 실제로 세로 스크롤 가능한가. */
-async function paneGeometry(page: Page, testId: string) {
-  return page.evaluate((id) => {
-    const el = document.querySelector(`[data-testid="${id}"]`);
-    if (!el) return null;
-    const rect = el.getBoundingClientRect();
-    return {
-      top: rect.top,
-      bottom: rect.bottom,
-      viewportHeight: window.innerHeight,
-      clientHeight: el.clientHeight,
-      scrollHeight: el.scrollHeight,
-      scrollWidth: el.scrollWidth,
-      clientWidth: el.clientWidth,
-      overflowX: getComputedStyle(el).overflowX,
-      overflowY: getComputedStyle(el).overflowY,
-      maxHeight: getComputedStyle(el).maxHeight,
-    };
-  }, testId);
+type Geometry = {
+  top: number; bottom: number; height: number;
+  vh: number; maxHeightPx: number | null; maxHeightRaw: string;
+  overflowX: string; overflowY: string;
+};
+
+async function panes(page: Page): Promise<Geometry[]> {
+  return page.evaluate(() => {
+    const out: Geometry[] = [];
+    document.querySelectorAll('[data-testid="scroll-pane"]').forEach((el) => {
+      const r = el.getBoundingClientRect();
+      const cs = getComputedStyle(el);
+      const raw = cs.maxHeight;
+      const px = raw.endsWith("px") ? parseFloat(raw) : null;
+      out.push({
+        top: r.top, bottom: r.bottom, height: r.height,
+        vh: window.innerHeight, maxHeightPx: px, maxHeightRaw: raw,
+        overflowX: cs.overflowX, overflowY: cs.overflowY,
+      });
+    });
+    return out;
+  }) as Promise<Geometry[]>;
 }
 
 test.describe("cycle338 — 창 크기에 맞는 표 스크롤", () => {
@@ -50,74 +61,68 @@ test.describe("cycle338 — 창 크기에 맞는 표 스크롤", () => {
     await installApiMocks(page);
   });
 
-  test("G-E2E-11a: 매매손익 표 래퍼의 바닥이 뷰포트 안에 있다", async ({ page }) => {
-    // 사용자가 직접 지목한 화면이다.
+  test("G-E2E-11a: 매매손익 표의 바닥이 화면 안에 있다", async ({ page }) => {
+    // 사용자가 직접 지목한 화면이다. 탭은 `role=tab` 이 아니라 평범한 button 이다.
     await page.goto("/history");
-    await page.getByRole("tab", { name: /매매손익/ }).click().catch(() => {});
-    await page.waitForTimeout(600);
-
-    const pane = page.locator('[data-testid="scroll-pane"]').first();
-    await expect(pane).toBeVisible({ timeout: TIMEOUT });
-
-    const g = await paneGeometry(page, "scroll-pane");
-    expect(g).not.toBeNull();
-    // 🔴 이것이 결함의 판정식이다 — 바닥이 화면 밖이면 가로 스크롤바를 볼 수 없다.
-    expect(g!.bottom).toBeLessThanOrEqual(g!.viewportHeight + 1);
-    // 상한이 실제로 걸려 있다(none 이면 결함 상태 그대로다).
-    expect(g!.maxHeight).not.toBe("none");
-  });
-
-  test("G-E2E-11b: 두 축 모두 스크롤 가능하다 — 가로 전용이 아니다", async ({ page }) => {
-    await page.goto("/history");
-    await page.waitForTimeout(600);
-    const g = await paneGeometry(page, "scroll-pane");
-    expect(g).not.toBeNull();
-    expect(["auto", "scroll"]).toContain(g!.overflowX);
-    expect(["auto", "scroll"]).toContain(g!.overflowY);
-  });
-
-  test("G-E2E-11c: 창을 줄이면 표 영역도 따라 줄어든다", async ({ page }) => {
-    await page.goto("/history");
-    await page.waitForTimeout(600);
-
-    const tall = await paneGeometry(page, "scroll-pane");
-    await page.setViewportSize({ width: 1280, height: 520 });
-    await page.waitForTimeout(500);
-    const short = await paneGeometry(page, "scroll-pane");
-
-    expect(tall).not.toBeNull();
-    expect(short).not.toBeNull();
-    // 창이 280px 줄었으면 표 영역도 줄어야 한다(고정 픽셀이면 안 줄어든다).
-    expect(short!.clientHeight).toBeLessThan(tall!.clientHeight);
-    // 바닥은 여전히 화면 안이다.
-    expect(short!.bottom).toBeLessThanOrEqual(short!.viewportHeight + 1);
-  });
-
-  test("G-E2E-11d: 잔고 표도 같은 규약을 따른다", async ({ page }) => {
-    await page.goto("/");
+    await page.getByRole("button", { name: "매매손익", exact: true }).click();
     await page.waitForTimeout(800);
-    const panes = page.locator('[data-testid="scroll-pane"]');
-    const n = await panes.count();
-    expect(n).toBeGreaterThan(0);
 
-    const all = await page.evaluate(() => {
-      const out: { bottom: number; vh: number; maxHeight: string }[] = [];
-      document.querySelectorAll('[data-testid="scroll-pane"]').forEach((el) => {
-        const r = el.getBoundingClientRect();
-        // 접혀 있어 높이가 0 인 것은 판정 대상이 아니다.
-        if (r.height <= 0) return;
-        out.push({
-          bottom: r.bottom,
-          vh: window.innerHeight,
-          maxHeight: getComputedStyle(el).maxHeight,
-        });
-      });
-      return out;
-    });
+    const [pane] = await panes(page);
+    expect(pane, "매매손익 탭에 scroll-pane 이 없다").toBeTruthy();
+    expect(pane.maxHeightRaw).not.toBe("none");
+    // 🔴 이것이 결함의 판정식이다 — 바닥이 화면 밖이면 가로 스크롤바를 볼 수 없다.
+    expect(pane.top).toBeLessThan(pane.vh);
+    expect(pane.bottom).toBeLessThanOrEqual(pane.vh + 1);
+  });
+
+  test("G-E2E-11b: 두 축 모두 스크롤한다 — 가로 전용이 아니다", async ({ page }) => {
+    await page.goto("/history");
+    await expect(page.locator('[data-testid="scroll-pane"]').first())
+      .toBeVisible({ timeout: TIMEOUT });
+    const [pane] = await panes(page);
+    expect(["auto", "scroll"]).toContain(pane.overflowX);
+    expect(["auto", "scroll"]).toContain(pane.overflowY);
+  });
+
+  test("G-E2E-11c: 창을 줄이면 표의 상한도 따라 줄어든다", async ({ page }) => {
+    await page.goto("/history");
+    await expect(page.locator('[data-testid="scroll-pane"]').first())
+      .toBeVisible({ timeout: TIMEOUT });
+    const [tall] = await panes(page);
+
+    await page.setViewportSize({ width: 1280, height: 520 });
+    await page.waitForTimeout(700);
+    const [short] = await panes(page);
+
+    // ⚠️ 잴 것은 **상한**(`max-height`)이지 실제 높이가 아니다 — 내용이 짧으면
+    // 실제 높이는 상한보다 작아 창을 줄여도 안 변한다(초판이 여기서 틀렸다).
+    expect(tall.maxHeightPx).not.toBeNull();
+    expect(short.maxHeightPx).not.toBeNull();
+    expect(short.maxHeightPx!).toBeLessThan(tall.maxHeightPx!);
+    expect(short.maxHeightPx!).toBeLessThanOrEqual(short.vh);
+  });
+
+  test("G-E2E-11d: 대시보드의 모든 표가 불변식 넷을 지킨다", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator('[data-testid="scroll-pane"]').first())
+      .toBeVisible({ timeout: TIMEOUT });
+    await page.waitForTimeout(800);
+
+    const all = (await panes(page)).filter((g) => g.height > 0);
+    expect(all.length, "대시보드에 scroll-pane 이 없다").toBeGreaterThan(0);
 
     for (const g of all) {
-      expect(g.maxHeight).not.toBe("none");
-      expect(g.bottom).toBeLessThanOrEqual(g.vh + 1);
+      // ① 상한이 반드시 걸린다
+      expect(g.maxHeightRaw).not.toBe("none");
+      expect(g.maxHeightPx).not.toBeNull();
+      // ② 창 높이를 넘지 않는다
+      expect(g.maxHeightPx!).toBeLessThanOrEqual(g.vh);
+      // ③ 🔴 최소 높이에 갇히지 않는다 — 화면 밖 표도 제 크기를 갖는다
+      expect(g.maxHeightPx!).toBeGreaterThan(MIN_HEIGHT_PX);
+      // ④ 화면 안에 있는 표는 바닥도 화면 안이다
+      if (g.top >= 0 && g.top < g.vh) {
+        expect(g.bottom).toBeLessThanOrEqual(g.vh + 1);
+      }
     }
   });
 });

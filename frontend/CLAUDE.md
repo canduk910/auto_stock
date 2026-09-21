@@ -84,13 +84,15 @@ Dashboard 만 즉시 import. 나머지 9 페이지(History · Recommendations ·
 
 - **고치는 것** = 「가로 스크롤바를 보려면 세로로 끝까지 내려가야 하는」 결함이다. `overflow-x-auto` 래퍼에 **높이 상한이 없으면** 래퍼 높이가 표 전체 높이가 되고 브라우저는 가로 스크롤바를 래퍼 **바닥**에 붙인다 — 표가 길면 그 바닥은 화면 밖이다.
 - **`maxHeight` = 창 높이 − 그 요소의 화면상 top − `bottomGutter`(24)**. 고정 픽셀도 고정 `vh` 도 아니라, 위에 무엇이 얼마나 쌓여 있든(나브·배너·필터·요약 바) 남은 공간을 정확히 쓴다. 하한 `minHeight`(220) 아래로는 줄지 않는다.
+- 🔴 **`top` 은 화면 안(`0 ≤ top < viewport`)일 때만 뺀다.** 두 바깥 경우는 **창 전체**가 예산이다 — (a) `top < 0`(페이지가 스크롤돼 요소가 화면 위로 올라감)을 그대로 빼면 예산이 창보다 커져 pane 이 뷰포트를 넘고 **가로 스크롤바가 다시 화면 밖으로 밀린다**(실측: 창 800px 인데 pane 바닥 1420.5px) (b) `top >= viewport`(아직 화면 아래, 대시보드 하단 카드)를 그대로 빼면 음수라 `minHeight` 220px 로 떨어져 **스크롤해서 도달해도 220px 짜리 표만 보인다**(실측: 대시보드 잔고표 top=1387). ⚠️ 이 두 경우는 **스크롤 리스너로 풀지 않는다** — pane 이 커지며 아래 내용이 밀려 내려가는 점프가 생긴다.
 - 🔴 **측정은 `resize` 와 `ResizeObserver(document.body)` 만 듣고 `scroll` 은 듣지 않는다** — 스크롤마다 재면 「pane 이 커짐 → 문서가 길어짐 → 다시 잼」 되먹임이 된다. 갱신에 `TOLERANCE_PX`(8) 문턱을 두어 1px 진동이 observer 를 다시 깨우는 무한 루프를 막는다(브라우저가 루프를 끊으면 콘솔에 `ResizeObserver loop` 만 남고 화면은 조용히 떤다).
 - **측정 불가(jsdom·SSR·`ResizeObserver` 부재)는 `70vh` 폴백**이다 — **상한 없는 상태로 돌아가지 않는다**(그러면 고치려는 결함이 그대로 재현된다). `data-measured` 가 `px|vh` 로 어느 쪽인지 드러낸다.
 - 머리글은 기본 고정(`stickyHeader`, Tailwind arbitrary variant `[&_thead_th]:sticky`)이라 표마다 `thead` 를 고쳐 다니지 않는다. 표가 아닌 콘텐츠는 `stickyHeader={false}`.
 - 🔴 `{...rest}` 가 `data-testid` **뒤**에 온다 — 교체 자리가 이미 갖고 있던 `data-testid`(예: `stock-master-daily-table`)가 이겨야 그 자리의 기존 회귀 가드가 살아 있다.
 - **적용 24곳** — 기존 `overflow-x-auto` 표 래퍼 21곳(`TradePnLGrid`·`TradeHistoryGrid`·`BalanceTable`·`StockMaster`×3·`OrderMonitor`×2·`ScanMonitor`×4·`KojiroMonitor`×2·`MarketState`×2·`BreakoutCandidateMonitor`·`KisAccountPoolCard`·`KisQuoteAccountsCard`·`MarketStateOps`·`Strategies`) + 래퍼가 없던 3곳(`StrategyFunnel`·`BacktestComparisonCard`·`PortfolioRiskCard`).
 - ⚠️ **일부러 적용하지 않은 곳 2** — `pages/Recommendations.tsx` 파라미터 표는 **표 안에 `InfoTooltip`** 이 있고 그 툴팁이 `absolute bottom-full` 이라 overflow 컨테이너가 위로 나가는 부분을 **자른다**. `macro/components/MacroCycleSection.tsx` 는 30줄짜리 지표표라 이득이 없는데 클리핑 맥락만 새로 생긴다. 🔴 **표 안에 `InfoTooltip`(또는 다른 `absolute` 팝오버)이 있으면 `ScrollPane` 을 씌우기 전에 잘림을 먼저 확인한다** — 적용 24곳은 툴팁 0건임을 확인했다.
-- 회귀 = `components/__tests__/ScrollPane.test.tsx`(11, **값 검사** — 실제 `maxHeight` 픽셀·최소 높이 floor·창 확대 추종·vh 폴백·두 축 overflow). 돌연변이 실측 = 상한 제거 6 RED · `overflow-x-auto` 회귀 1 RED · floor 제거 1 RED. + `e2e/scroll-pane.spec.ts`(4, **실브라우저** — jsdom 은 `clientHeight`/`scrollHeight` 가 0 이라 「래퍼 바닥이 뷰포트 안인가」를 원리적으로 못 잰다).
+- 회귀 = `components/__tests__/ScrollPane.test.tsx`(14, **값 검사** — 실제 `maxHeight` 픽셀·floor·창 확대 추종·음수 top·화면 밖 top·vh 폴백·두 축 overflow). 돌연변이 실측 = 상한 제거 6 RED · `overflow-x-auto` 회귀 1 RED · floor 제거 1 RED · 화면 안 판정 제거 1 RED.
+- **E2E `e2e/scroll-pane.spec.ts`(4)가 지키는 불변식 넷** = ① 상한이 반드시 걸린다 ② 상한이 **창 높이를 넘지 않는다** ③ 상한이 **`minHeight` 에 갇히지 않는다** ④ 화면 안 표는 바닥도 화면 안이다. ⚠️ **모든 pane 에 「바닥 ≤ 창높이」를 요구하면 안 된다** — 대시보드처럼 긴 페이지에서는 표가 화면 아래에 있는 것이 정상이다(spec 초판이 그렇게 틀렸고, 그 실패가 위 (b) 결함을 찾아냈다). ⚠️ 창 축소 검증은 **`max-height`** 로 한다 — 내용이 짧으면 실제 높이가 상한보다 작아 창을 줄여도 안 변한다. ⚠️ `/history` 탭은 `role="tab"` 이 아니라 평범한 `<button>` 이다.
 
 ## 시각적 컨벤션
 

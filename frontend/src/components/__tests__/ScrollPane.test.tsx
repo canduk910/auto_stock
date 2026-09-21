@@ -69,10 +69,35 @@ describe('ScrollPane — 높이 상한 (값 검사)', () => {
   })
 
   it('🔴 좁은 자리에서도 최소 높이 아래로 줄지 않는다', () => {
-    // top 이 850 이면 남는 것은 900 − 850 − 24 = 26px — 표가 한 줄도 안 보인다.
-    stubRectTop(850)
+    // top 이 890 이면 화면 안(900)이고 남는 것은 900 − 890 − 24 = −14px.
+    stubRectTop(890)
     render(<ScrollPane><table /></ScrollPane>)
     expect(screen.getByTestId('scroll-pane').style.maxHeight).toBe('220px')
+  })
+
+  it('🔴 아직 화면 아래에 있는 표는 220px 에 갇히지 않는다', () => {
+    // 대시보드 하단 카드 실측 = top 1387 · 창 800. 그대로 빼면 음수라 floor 로
+    // 떨어져, 스크롤해서 도달해도 220px 짜리 표만 보인다.
+    stubRectTop(1387)
+    render(<ScrollPane><table /></ScrollPane>)
+    expect(screen.getByTestId('scroll-pane').style.maxHeight).toBe('876px')
+  })
+
+  it('🔴 페이지가 스크롤돼 top 이 음수여도 창 높이를 넘지 않는다', () => {
+    // 이 케이스가 CI 에서 실제로 터졌다 — 클릭 자동 스크롤로 top 이 −600 이 되자
+    // `900 − (−600) − 24 = 1476` 이 되어 pane 바닥이 화면 밖으로 나갔다.
+    // 그 상태가 바로 이 컴포넌트가 고치려던 결함(가로 스크롤바가 안 보인다)이다.
+    stubRectTop(-600)
+    render(<ScrollPane><table /></ScrollPane>)
+    const pane = screen.getByTestId('scroll-pane')
+    expect(pane.style.maxHeight).toBe('876px')   // 900 − 0 − 24, 1476 이 아니다
+    expect(parseInt(pane.style.maxHeight, 10)).toBeLessThanOrEqual(900)
+  })
+
+  it('top 이 0 이면 창 높이에서 여백만 뺀다', () => {
+    stubRectTop(0)
+    render(<ScrollPane><table /></ScrollPane>)
+    expect(screen.getByTestId('scroll-pane').style.maxHeight).toBe('876px')
   })
 
   it('minHeight·bottomGutter 를 실제로 계산에 쓴다', () => {
