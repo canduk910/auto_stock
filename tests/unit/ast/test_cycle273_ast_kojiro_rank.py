@@ -201,17 +201,25 @@ def test_c12b_leaf_writes_only_its_own_cap():
         n.target.id for n in tree.body
         if isinstance(n, ast.AnnAssign) and isinstance(n.target, ast.Name)
     }
-    assert top_assigned <= {"logger", "MARKER", "MODULE_TOKEN", "_cap"}, (
+    # ⚠️ cycle340 이 형제 관측기 `observe_macd`(대순환 MACD shadow)를 이 leaf 에
+    # 더하며 모듈 상수 2개(`MACD_MARKER`·`_RULE_STAGES`)가 늘었다. 계약의 뜻은
+    # "leaf 가 **가변 공유 상태**를 만들지 않는다" 이고 둘 다 불변 상수라 그 뜻은
+    # 그대로다 — 집합만 넓히고 단언 형태는 유지한다(가변 전역은 여전히 붉어진다).
+    assert top_assigned <= {
+        "logger", "MARKER", "MODULE_TOKEN", "_cap",
+        "MACD_MARKER", "_RULE_STAGES",
+    }, (
         f"모듈 레벨 대입이 계약 밖 — {top_assigned}"
     )
 
 
 def test_c12c_leaf_public_fns_never_raise_and_return_none():
-    """`observe_band`·`absorb_band_call_failure` 는 본체 전체가 `try/except Exception`
+    """`observe_band`·`observe_macd`·`absorb_band_call_failure` 는 본체 전체가 `try/except Exception`
     이고 반환은 `None` 고정이다(값 반환 금지 — 호출부가 그 값에 기대면 관측이 행위가 된다).
     """
     src, tree = _require_leaf()
-    for name in ("observe_band", "absorb_band_call_failure"):
+    # cycle340 — `observe_macd` 도 같은 계약을 진다(형제 관측기).
+    for name in ("observe_band", "observe_macd", "absorb_band_call_failure"):
         fn = _fn(tree, name)
         body = [s for s in fn.body if not (isinstance(s, ast.Expr)
                                            and isinstance(s.value, ast.Constant))]

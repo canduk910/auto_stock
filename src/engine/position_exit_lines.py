@@ -193,16 +193,35 @@ def resolve_exit_lines(strategies: Iterable[Any], ticker: str) -> ExitLines:
     return _empty()
 
 
-def build_exit_line_map(strategies: Iterable[Any], tickers: Iterable[str]) -> dict:
-    """여러 종목을 한 번에 — `{ticker: ExitLines}`. never-raise."""
+def build_exit_line_map(
+    strategies: Iterable[Any],
+    tickers: Iterable[str],
+    *,
+    engine_running: bool = True,
+) -> dict:
+    """여러 종목을 한 번에 — `{ticker: ExitLines}`. never-raise.
+
+    🔴 `engine_running=False` 면 판정 불가를 **`stop_source="engine_idle"`** 로
+    구분한다. 매매 엔진은 21:30 `_reset_daily_state` 가 메모리 포지션을 비우고
+    07:45 `_boot()` 가 DB 에서 되살리므로, 그 사이(하루 ~10시간)에는 보유가 있어도
+    청산선을 알 길이 없다 — **그것은 「손절선이 없다」가 아니라 「지금은 모른다」다.**
+    둘을 같은 `—` 로 접으면 운영자가 아침에 화면을 보고 "손절이 안 걸려 있다" 로
+    읽는다(실측: 2026-09-21 23:57 배포 직후 보유 9건 전부 `—`).
+
+    ⚠️ 판정은 **엔진 상태**로 한다 — "메모리 포지션이 0 이다" 로 추론하면 수동
+    매수분만 들고 있는 정상 상태가 「엔진 정지」로 잘못 찍힌다.
+    """
     out: dict[str, ExitLines] = {}
     try:
         strategy_list = list(strategies)
     except Exception:
-        return out
+        strategy_list = []
     for t in tickers:
         try:
-            out[t] = resolve_exit_lines(strategy_list, t)
+            lines = resolve_exit_lines(strategy_list, t)
         except Exception:
-            out[t] = _empty()
+            lines = _empty()
+        if not engine_running and lines.get("stop_price") is None:
+            lines["stop_source"] = "engine_idle"
+        out[t] = lines
     return out

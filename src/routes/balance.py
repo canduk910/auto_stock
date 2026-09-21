@@ -36,7 +36,9 @@ async def balance():
         from src.engine.scheduler import trading_scheduler
 
         exit_lines = build_exit_line_map(
-            trading_scheduler.registry.all(), [h.ticker for h in holdings]
+            trading_scheduler.registry.all(),
+            [h.ticker for h in holdings],
+            engine_running=bool(trading_scheduler.is_running),
         )
     except Exception:
         logger.debug("[exit_lines] registry 조회 실패 graceful", exc_info=True)

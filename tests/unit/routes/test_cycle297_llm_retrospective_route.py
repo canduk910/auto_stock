@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import ast
 import importlib
+from datetime import date
 import logging
 from decimal import Decimal
 from pathlib import Path
@@ -63,7 +64,8 @@ def _client() -> TestClient:
     return TestClient(app, raise_server_exceptions=False)
 
 
-def _patch(monkeypatch, *, pairs=None, evals=None, pairs_exc=None, evals_exc=None) -> None:
+def _patch(monkeypatch, *, pairs=None, evals=None, pairs_exc=None, evals_exc=None,
+           freeze_today=True) -> None:
     """`get_trade_pairs` / `list_by_order_nos` 를 fake 로.
 
     route 모듈 속성 + db 모듈 속성 **양쪽**을 갈아끼워 import 스타일에 의존하지 않는다
@@ -96,6 +98,22 @@ def _patch(monkeypatch, *, pairs=None, evals=None, pairs_exc=None, evals_exc=Non
             if getattr(attr, "__name__", None) in (_TRADE_DB_MOD, _EVAL_DB_MOD):
                 if hasattr(attr, name):
                     monkeypatch.setattr(attr, name, fn, raising=False)
+
+    # 🔴 **벽시계를 고정한다.** 라우트의 기본 창은 `[today-(days-1), today]` 이고
+    # 아래 픽스처는 `sell_date="2026-09-15"` 라, 실제 오늘이 09-21 을 넘어가는
+    # 순간부터 페어가 창 **밖**으로 밀려 `pairs` 가 빈 배열이 된다 — 테스트가
+    # 어느 날 갑자기, 코드 변경 없이 붉어진다(2026-09-22 00:0x 실측으로 7건이
+    # 그렇게 깨졌다). 이 저장소가 cycle295 에서 같은 계열로 **매일 30분간 CI 를
+    # 붉게** 만든 적이 있다. 조회 창을 쓰는 테스트는 시각을 고정한다.
+    # `freeze_today=False` 는 **창 경계 자체를 재는 테스트** 전용이다 — 그쪽은
+    # freezegun 으로 자기 시각을 고정하므로 여기서 덮으면 그 고정이 무력화된다.
+    if freeze_today:
+        monkeypatch.setattr(route, "today_kst", lambda: _FROZEN_TODAY, raising=False)
+
+
+#: 픽스처가 상정하는 「오늘」. `_pair()` 의 `sell_date`(2026-09-15)가 기본 창
+#: `days=7` = `[today-6, today]` 안에 들도록 잡는다. 픽스처 날짜를 바꾸면 여기도 바꾼다.
+_FROZEN_TODAY = date(2026, 9, 18)
 
 
 def _pair(**over) -> dict:
@@ -458,7 +476,7 @@ def test_g4_10_window_is_a_days_inclusive_range_ending_today(monkeypatch) -> Non
     """
     freezegun = pytest.importorskip("freezegun")
     with freezegun.freeze_time("2026-09-17 10:00:00+09:00"):
-        _patch(monkeypatch, pairs=[], evals=[])
+        _patch(monkeypatch, pairs=[], evals=[], freeze_today=False)
         data = _body(_client().get(f"{_PATH}?days=7"))
     assert data["window"] == {"since": "2026-09-11", "until": "2026-09-17", "days": 7}
 

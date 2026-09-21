@@ -394,11 +394,14 @@ _SRC_TREE_FILES = 155
 #: `market_state.py` K2 행이 `confidence=_CONFIRMED` 로 이미 적어 두었다 = **범위 오류**였다.
 #: ⚠️ 이 정정을 안 하면 다음 사람이 180행을 보고 또 CRITICAL 로 오판한다(내가 그랬다).
 #: cycle336 착지 값은 `8683883246f994eea5bbe45bf646c347f8a552435518b76e22573a0305d7c0f8` 였다.
+#: cycle340 이 `kojiro_band_observe.py` 에 형제 관측기 `observe_macd`(대순환 MACD
+#: shadow, 배선 대기)를 더해 digest 가 움직였다 — 파일 수는 불변(155)이다.
+#: 직전 값은 `645cf2ac3d0eab05302d33d550532a77480d8be00beda37b04fdc5df20dbea7c` 다.
 #: cycle339 가 신규 leaf `src/engine/position_exit_lines.py`(잔고 화면 청산선,
 #: 순수·read-only·never-raise)를 더해 154 → 155 가 됐다. 직전 값은
 #: `a3ea85c176429aedb85a99355890a2f2c64f44a17b80c355ae977734c771e5d4` 다.
 _SRC_TREE_DIGEST = (
-    "645cf2ac3d0eab05302d33d550532a77480d8be00beda37b04fdc5df20dbea7c"
+    "a15bde1ebab4884edc77914d61a2680116cddad190f44841bbb0710ba97f242a"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

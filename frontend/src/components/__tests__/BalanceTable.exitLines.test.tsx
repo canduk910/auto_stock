@@ -164,6 +164,28 @@ describe("BalanceTable — 손절가 · 목표가", () => {
     expect(title).toContain("전량 청산선이 아니다");
   });
 
+  it("🔴 엔진 정지 중은 「값 없음」과 다르게 보인다", async () => {
+    // 엔진은 21:30 에 메모리 포지션을 비우고 07:45 에 되살린다. 그 사이의 `—` 를
+    // 「손절선 없음」과 같은 모양으로 그리면 운영자가 아침에 "손절이 안 걸려 있다"
+    // 로 읽는다 — 2026-09-21 23:57 배포 직후 보유 9건 전부 그렇게 보였다.
+    setup([makeHolding({ stop_price: null, stop_source: "engine_idle" })]);
+    await screen.findByText("삼성전자");
+    const cell = screen.getByTestId("stop-price-005930");
+    expect(cell).toHaveTextContent("⏸");
+    expect(cell).not.toHaveTextContent("근사");
+    const title = cell.getAttribute("title") ?? "";
+    expect(title).toContain("매매 엔진 정지 중");
+    expect(title).toContain("손절선이 없다는 뜻이 아니다");
+  });
+
+  it("엔진 정지와 판정 불가는 설명이 다르다", async () => {
+    setup([makeHolding({ stop_price: null, stop_source: null })]);
+    await screen.findByText("삼성전자");
+    const title = screen.getByTestId("stop-price-005930").getAttribute("title") ?? "";
+    expect(title).toContain("판정할 수 없다");
+    expect(title).not.toContain("엔진 정지");
+  });
+
   it("보유 0 행의 colSpan 이 컬럼 수와 맞는다", async () => {
     setup([]);
     const empty = await screen.findByText("보유 종목이 없습니다.");

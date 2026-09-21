@@ -86,6 +86,32 @@ def _safe_pct(num, den) -> str:
         return "-"
 
 
+def _num(v) -> str:
+    """MACD 값 전용 서식 — **소수 2자리 고정, 비수치는 `-`**.
+
+    🔴 `_fmt` 와 다르다. `_fmt` 는 값을 그대로 문자열화해 `2.5` 와 `2.50` 이 섞이고
+    비수치(`"x"`·`None`)도 흘려보낸다. 이 마커는 **나중에 파싱할 표본**(진입 규약
+    변경 판단의 유일한 근거)이라 필드가 항상 수치이거나 `-` 여야 한다 —
+    섞이면 D+1 집계가 조용히 일부 행을 버린다.
+    """
+    try:
+        f = float(v)
+    except (TypeError, ValueError):
+        return "-"
+    if f != f or f in (float("inf"), float("-inf")):   # NaN·무한
+        return "-"
+    return f"{f:.2f}"
+
+
+def _safe_diff(a, b) -> str:
+    """히스토그램 = MACD1 − 시그널. 원전이 「예측 도구」라 부른 그 값이다."""
+    try:
+        d = float(a) - float(b)
+    except (TypeError, ValueError):
+        return "-"
+    return "-" if d != d else f"{d:.2f}"
+
+
 def _safe_ratio(num, den) -> str:
     """`num/den` 을 소수 2자리 문자열로(×100 없음). 분모 0/None/비수치는 `-`."""
     try:
@@ -94,6 +120,86 @@ def _safe_ratio(num, den) -> str:
         return f"{float(num) / float(den):.2f}"
     except Exception:
         return "-"
+
+
+#: cycle340 — 대순환 MACD shadow 관측 마커.
+#: 🔴 **WARNING 이다** — INFO 는 21:30 리포트 `top_patterns` 에 한 글자도 안 들어가고
+#: `system_logs` retention 이 2일이라, 표본이 쌓이기 전에 지워진다(ρ축 마커가 그
+#: 함정을 밟아 「투자금 부족 급증」 오귀인을 낳았다). 이 마커는 **표본 수집이 목적**이라
+#: 30일 보존이 필요하다.
+MACD_MARKER = "[kojiro_macd_observe]"
+
+#: 원전 `docs/trading_base/이동평균선과MACD.md` §7 의 3단 진입 — 국면만 다르고
+#: 조건은 같다(MACD(하) 골든크로스 ∧ 3 MACD 모두 우상향).
+_RULE_STAGES = {"rule6": 6, "rule5": 5, "rule4": 4}
+
+
+def observe_macd(macd_raw, ranked_final, held_only) -> None:
+    """`[kojiro_macd_observe]` — 대순환 MACD 상태를 행마다 1건 방출(관측 전용).
+
+    🔴 **매매를 한 글자도 바꾸지 않는다.** 재는 것은 「우리가 실제로 후보로 올리거나
+    보유한 종목」의 MACD 상태다 — 유니버스 전수 통계(`_workspace/domain_consult/
+    cycle340_kojiro_macd.md`)가 답하지 못하는 것이 그것이다. 이 표본이 쌓여야
+    `trade_history` 체결·`get_trade_pairs` 실현손익과 조인해 진입 규약 변경을
+    판단할 수 있다.
+
+    행 계약 = 12원소 튜플(순서 고정)
+      `(stage, m1, m2, m3, s1, s2, s3, gc3, bars_since_gc3, m1_up, m2_up, m3_up)`
+
+    cap 1회/(ticker,role)/일. **never-raise** — 본체 전체가 단일 `try` 이고
+    개별 ticker 실패는 그 ticker 만 건너뛴다.
+
+    ## 🔴 아직 호출되지 않는다 — 우연한 dead code 가 아니라 **의도된 배선 대기**다
+
+    배선 자리는 정해져 있다: `KojiroStrategy.prepare()` 의 `observe_band` 옆
+    (`macd_raw[ticker] = self._macd_observe_row(enriched, stage)` 수집 2곳 + emit 1줄).
+    `enriched` 에 `macd1/2/3`·`macd{i}_sig` 가 이미 있어 추가 계산·I/O 가 0 이다.
+
+    배선을 미룬 이유는 기술이 아니라 **범위**다 — `src/engine/strategies/kojiro.py` 는
+    12개 AST 가드가 byte-identical 로 핀하고 있고 그중 둘은 `prepare` 를 **「매매
+    메서드」로** 핀한다. kojiro 는 운영 DB 에서 실매매 중·최대 비중·보유 4종목이다.
+    행위가 안 바뀌더라도 그 파일을 여는 것은 사용자 승인 아래 할 일이다.
+
+    그리고 서두를 이유가 없다 — 962종목 실측
+    (`_workspace/domain_consult/cycle340_kojiro_macd.md`)이 이미 「성급한 적용은
+    수익성을 개선하지 않는다」를 보였고, 이 관측의 가치는 **우리 체결과 조인되는
+    표본이 쌓이는 몇 주**에 걸쳐 생긴다.
+    """
+    try:
+        entries = [(t, "candidate") for t in (ranked_final or [])]
+        entries += [(t, "held") for t in (held_only or [])]
+        for ticker, role in entries:
+            try:
+                key = (str(ticker), "macd:" + role)
+                if not _cap.should_emit(key):
+                    continue
+                row = macd_raw.get(ticker) if isinstance(macd_raw, dict) else None
+                if not (isinstance(row, tuple) and len(row) == 12):
+                    continue
+                (stage, m1, m2, m3, s1, s2, s3,
+                 gc3, bars_since, m1_up, m2_up, m3_up) = row
+                all_up = bool(m1_up) and bool(m2_up) and bool(m3_up)
+                rules = {
+                    name: int(bool(gc3) and all_up and stage == want)
+                    for name, want in _RULE_STAGES.items()
+                }
+                logger.warning(
+                    "%s ticker=%s role=%s stage=%s gc3=%d bars_since_gc3=%s "
+                    "m1=%s m2=%s m3=%s s1=%s s2=%s s3=%s hist3=%s "
+                    "m1_up=%d m2_up=%d m3_up=%d all_macd_up=%d "
+                    "rule6=%d rule5=%d rule4=%d",
+                    MACD_MARKER, ticker, role, _fmt(stage), int(bool(gc3)),
+                    _fmt(bars_since), _num(m1), _num(m2), _num(m3),
+                    _num(s1), _num(s2), _num(s3),
+                    _safe_diff(m3, s3),
+                    int(bool(m1_up)), int(bool(m2_up)), int(bool(m3_up)), int(all_up),
+                    rules["rule6"], rules["rule5"], rules["rule4"],
+                )
+                _cap.mark_emitted(key)
+            except Exception:
+                continue
+    except Exception:
+        trace_observer_failure(MACD_MARKER, "macd_batch", _cap)
 
 
 def observe_band(

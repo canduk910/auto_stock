@@ -22,7 +22,8 @@ export interface Holding {
   strategy_id?: string | null
   stop_price?: number | null
   /** `effective` = 전략 실효 손절선(check_exit 와 동일 산식) / `hard_pct` = 고정%손절 근사. */
-  stop_source?: 'effective' | 'hard_pct' | null
+  /** `engine_idle` = 매매 엔진 정지 중(21:30~07:45) — 「손절선 없음」이 아니라 「지금은 모름」. */
+  stop_source?: 'effective' | 'hard_pct' | 'engine_idle' | null
   target_price?: number | null
   /** `measured_move` = BFB 측정 목표(부분 익절 트리거). 그 밖 전략은 목표가가 없다. */
   target_source?: 'measured_move' | null

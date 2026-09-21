@@ -206,3 +206,37 @@ def test_read_only_does_not_mutate_strategy_state():
     resolve_exit_lines([s], "005930")
     assert positions == before_positions
     assert params == before_params
+
+
+# ── 엔진 정지 구분 (cycle339 후속 — 라이브 실측으로 드러났다) ──────────────
+
+
+def test_engine_idle_is_distinguished_from_unknown():
+    """🔴 「손절선이 없다」와 「지금은 모른다」는 다른 사실이다.
+
+    엔진은 21:30 `_reset_daily_state` 가 메모리 포지션을 비우고 07:45 `_boot()` 가
+    DB 에서 되살린다. 그 사이(하루 ~10시간)에는 보유가 있어도 청산선을 알 길이
+    없는데, 둘을 같은 `—` 로 접으면 운영자가 아침에 "손절이 안 걸려 있다" 로
+    읽는다(2026-09-21 23:57 배포 직후 보유 9건 전부 `—` 로 실측됐다).
+    """
+    m = build_exit_line_map([], ["005930"], engine_running=False)
+    assert m["005930"]["stop_price"] is None
+    assert m["005930"]["stop_source"] == "engine_idle"
+
+
+def test_engine_running_keeps_none_source():
+    m = build_exit_line_map([], ["005930"], engine_running=True)
+    assert m["005930"]["stop_source"] is None
+
+
+def test_engine_idle_does_not_overwrite_a_real_stop():
+    """값이 있으면 그 출처를 덮지 않는다 — 엔진이 막 꺼지는 창의 경합 방어."""
+    s = _Strategy("kojiro", {"005930": _Pos(70_000)}, effective_stop=66_000)
+    m = build_exit_line_map([s], ["005930"], engine_running=False)
+    assert m["005930"]["stop_price"] == 66_000
+    assert m["005930"]["stop_source"] == "effective"
+
+
+def test_engine_running_defaults_to_true():
+    """기존 호출부 호환 — 인자를 안 주면 현행 행위다."""
+    assert build_exit_line_map([], ["005930"])["005930"]["stop_source"] is None

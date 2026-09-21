@@ -36,6 +36,11 @@ const MARKET_BADGE_BASE = 'inline-block px-1.5 py-0.5 rounded text-xs font-mediu
  * 것이 아니므로 그 사실을 툴팁이 말한다.
  */
 function stopTitle(h: Holding): string {
+  if (h.stop_source === 'engine_idle') {
+    // 🔴 「손절선이 없다」가 아니라 「지금은 모른다」다. 엔진은 21:30 에 메모리
+    // 포지션을 비우고 07:45 에 DB 에서 되살린다 — 그 사이에는 알 길이 없다.
+    return '매매 엔진 정지 중 — 장 시작(07:45) 후 표시된다. 손절선이 없다는 뜻이 아니다.'
+  }
   if (!h.stop_price) {
     return '손절선을 판정할 수 없다 (보유 전략 미상 또는 손절 파라미터 없음). 숫자를 지어내지 않는다.'
   }
@@ -273,7 +278,9 @@ export default function BalanceTable({ selectedStrategy }: Props) {
                         h.stop_source === 'hard_pct' ? 'text-gray-400' : 'text-gray-700'
                       }`}
                     >
-                      {h.stop_price ? formatKRW(h.stop_price) : '—'}
+                      {h.stop_price
+                        ? formatKRW(h.stop_price)
+                        : h.stop_source === 'engine_idle' ? '⏸' : '—'}
                       {h.stop_source === 'hard_pct' && h.stop_price ? (
                         <span className="ml-1 text-[10px] text-gray-400">근사</span>
                       ) : null}
