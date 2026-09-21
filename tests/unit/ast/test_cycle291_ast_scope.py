@@ -348,9 +348,16 @@ def test_a8_no_new_leaf_in_src_engine() -> None:
     순수 함수(`src.*` import 0). "매수 시점 점수 ↔ 청산 손익" 조인 정의를 라우트·
     SQL 뷰가 아니라 이 leaf 하나로 둔다(명세 §3.5 기각안 참조). `scheduler.py`
     무접촉.
+
+    ⚠️ cycle339(2026-09-21, 잔고 화면 손절가·목표가)가 leaf 1개
+    `position_exit_lines.py` 를 신설해 66 → **67** 이 됐다 — 보유 종목의 청산선을
+    해석하는 순수 함수(`await`/DB/HTTP 0 · read-only · never-raise). 값 자체는
+    `strategy_registry.positions_detail` 에 한 필드만 더하면 됐지만 그 파일이
+    8영역이라, `routes/portfolio.py` 가 이미 쓰는 registry 패턴을 라우트에서
+    재사용하는 쪽을 택했다. `scheduler.py` 무접촉.
     """
     got = len(list((_ROOT / "src" / "engine").glob("*.py")))
-    assert got == 66, f"`src/engine/*.py` 파일 수 {got} (cycle326 기준선 66)"
+    assert got == 67, f"`src/engine/*.py` 파일 수 {got} (cycle339 기준선 67)"
 
 
 # ===========================================================================

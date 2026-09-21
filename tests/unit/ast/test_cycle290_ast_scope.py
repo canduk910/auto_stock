@@ -310,6 +310,7 @@ _ENGINE_PY_FILES: dict[str, tuple[str, ...]] = {
         "metrics_collector.py", "no_feed_registry.py", "observer_trace.py",
         "open_price_observe.py", "open_price_rest.py", "order_engine.py",
         "param_catalog.py", "param_drift.py", "param_validation.py", "portfolio_risk.py",
+        "position_exit_lines.py",
         "quant_score.py", "quote_token_refresh.py", "recommendation_engine.py",
         "recommendation_metrics.py", "refresh_progress.py", "risk.py", "scanner.py",
         "scheduler.py", "sector_naming.py", "sell_rejection.py",
@@ -343,6 +344,9 @@ def test_g290_3_no_new_module_under_src_engine(rel_dir: str) -> None:
     그대로라 무단 신규 파일은 여전히 붉어진다.
       * cycle292 `market_op_subscribe.py`(장운영 구독 leaf)
       * cycle293 `tick_channel_mode.py`(리졸버 킬스위치 leaf)
+      * cycle339 `position_exit_lines.py`(잔고 화면 청산선 해석 leaf — 순수·read-only·
+        never-raise). `strategy_registry.positions_detail` 에 한 필드만 더하면 됐지만
+        그 파일이 8영역이라 라우트에서 읽는 leaf 로 뺐다.
       * cycle294 `tick_channel_clock.py`(시각축 판정) · `tick_channel_switch.py`
         (살아 있는 구독의 채널 전환 + 자동 원복) — 둘 다 8영역 **밖**이고,
         `scheduler.py` 무접촉 계약 때문에 판정·전환을 기존 주기 루프

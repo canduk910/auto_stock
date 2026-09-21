@@ -397,6 +397,15 @@ Dashboard 만 즉시 import. 나머지 9 페이지(History · Recommendations ·
 
 **섹터 컬럼**: 헤더 순서 `종목명 → 섹터 → 거래시장 → (전략) → …`. `Holding.sector` 표시, 값 없으면 `-`(열 밀림 방지). `data-testid="sector-{ticker}"`. 데이터는 백엔드 `/api/balance` 가 **이미 조회한 stock_master basics 를 재사용**해 산출(추가 DB 호출 0) — `sector_naming` 단일 진실원(`bstp_kor_isnm` → `_kojiro_sector_key(master_raw)` → `미분류-{ticker}`). ⚠️ 컬럼 추가 시 빈 상태 행의 `colSpan`(현재 `isAll ? 11 : 10`) 동반 갱신 의무.
 
+**손절가 · 목표가 컬럼 (cycle339)**: "현재가" 다음, "평가금액" 앞. 데이터는 `/api/balance` Holding 의 `stop_price`/`stop_source`/`target_price`/`target_source` — 백엔드 `position_exit_lines` 단일 진실원(추가 DB 호출 0). testid `stop-price-{ticker}` · `target-price-{ticker}`.
+
+- 🔴 **값이 없으면 `—` 다. 0 이 아니다.** 이 화면은 운영자가 "여기까지는 버틴다" 를 판단하는 곳이라 **틀린 손절가는 없는 것보다 나쁘다** — 판정 불가는 숫자를 지어내지 않는다.
+- `stop_source === 'hard_pct'` 는 회색 + **「근사」** 꼬리표다(고정% 손절 전략의 `매입가 × (1 + 하드손절%)`). `'effective'` 는 그 전략이 실제로 쓰는 선이라 꼬리표가 없다 — **같은 칸에 정확도가 다른 두 값이 섞이는데 화면이 구분 못 하면 둘 다 못 믿는다.**
+- 🔴 툴팁이 **「가격 무관 청산(15:20 일괄매도 · 스테이지 종료 · 익일청산)은 이 값에 담기지 않는다」**를 말한다. 안 밝히면 운영자가 그 가격까지 안 팔린다고 읽는다.
+- **목표가는 거의 다 `—` 가 정상이다** — 7전략 중 `bull_flag_breakout` 만 `measured_target`(깃대폭 + 깃발고점)을 갖고 그마저 **부분 익절 트리거**다. 툴팁이 "전량 청산선이 아니다" 를 밝힌다. ⚠️ **VB·LTV 의 `target_price` 를 이 칸에 넣지 않는다**(매수 트리거 가격이다).
+- ⚠️ 컬럼 2개가 늘었으므로 빈 상태 행 `colSpan` 은 **`isAll ? 13 : 12`** 다. 회귀가 헤더 수와 대조한다.
+- 회귀 = `components/__tests__/BalanceTable.exitLines.test.tsx`(10, **값 검사** — 두 칸 값 맞바꿈·결측 `—`·근사 꼬리표·툴팁 문구·colSpan↔헤더 수).
+
 **거래시장 배지**: 보유 종목 헤더 "종목명" 옆 "거래시장" 컬럼. `Holding.nxt_tradable / krx_halted` 조합 5가지 배지 — `KRX+NXT`(emerald-100/800) / `NXT만`(amber-100/800) / `KRX`(gray-100/700) / `정지`(red-100/800) / `확인중`(gray-50/500). `data-testid="market-badge-{ticker}"`. 베이스 클래스 `inline-block px-1.5 py-0.5 rounded text-xs font-medium`
 
 ## KisAccountPoolCard

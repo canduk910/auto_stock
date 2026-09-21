@@ -8,6 +8,7 @@ from fastapi import APIRouter
 
 from src.api.balance import get_balance, get_buyable
 from src.db.stock_master import get as stock_master_get
+from src.engine.position_exit_lines import build_exit_line_map
 from src.engine.sector_naming import resolve_sector_name
 from src.models.response import ApiResponse
 
@@ -26,6 +27,19 @@ async def balance():
     캐시 miss → None / 조회 예외 → 종목별 흡수 후 None.
     """
     holdings, summary = await get_balance()
+
+    # cycle339 — 종목별 청산선(손절가·목표가). in-memory registry 조회뿐이라
+    # DB·KIS 왕복이 0 이다. 🔴 registry 를 못 읽어도 잔고는 그대로 나가야 하므로
+    # graceful — 그때는 전 종목이 `—` 로 보인다(숫자를 지어내지 않는다).
+    exit_lines: dict = {}
+    try:
+        from src.engine.scheduler import trading_scheduler
+
+        exit_lines = build_exit_line_map(
+            trading_scheduler.registry.all(), [h.ticker for h in holdings]
+        )
+    except Exception:
+        logger.debug("[exit_lines] registry 조회 실패 graceful", exc_info=True)
 
     enriched_holdings: list[dict] = []
     for h in holdings:
@@ -47,6 +61,17 @@ async def balance():
         payload["sector"] = await resolve_sector_name(
             h.ticker,
             basics_raw=(getattr(basics, "raw", None) if basics is not None else None),
+        )
+        # cycle339 — 청산선 4필드. 판정 불가는 전부 None 이고 화면이 `—` 를 그린다.
+        payload.update(
+            exit_lines.get(h.ticker)
+            or {
+                "strategy_id": None,
+                "stop_price": None,
+                "stop_source": None,
+                "target_price": None,
+                "target_source": None,
+            }
         )
         enriched_holdings.append(payload)
 

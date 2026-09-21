@@ -183,7 +183,7 @@ _BASE_SHA = {
 #: 신규 leaf 1 = `src/engine/llm_retrospective.py`(cycle297 — 회고 조인·집계 순수
 #: 함수, `src.*` import 0). cycle296 은 신규 파일 **0** — 기존 `auth/token.py`·
 #: `engine/quote_token_refresh.py` 편집만이다.
-_SRC_TREE_FILES = 154
+_SRC_TREE_FILES = 155
 #: ⚠️ 값은 **cycle285 적대 검증 반영** 기준선이다. 그 직전(초판 cycle285 배포)
 #: digest 는 `97483c5114a1d00dc8f7ca7c1ed08e1b3dc1d0b585065b14176dc227da9bed8c` 였다.
 #: cycle287b 배포분의 digest 는
@@ -394,8 +394,11 @@ _SRC_TREE_FILES = 154
 #: `market_state.py` K2 행이 `confidence=_CONFIRMED` 로 이미 적어 두었다 = **범위 오류**였다.
 #: ⚠️ 이 정정을 안 하면 다음 사람이 180행을 보고 또 CRITICAL 로 오판한다(내가 그랬다).
 #: cycle336 착지 값은 `8683883246f994eea5bbe45bf646c347f8a552435518b76e22573a0305d7c0f8` 였다.
+#: cycle339 가 신규 leaf `src/engine/position_exit_lines.py`(잔고 화면 청산선,
+#: 순수·read-only·never-raise)를 더해 154 → 155 가 됐다. 직전 값은
+#: `a3ea85c176429aedb85a99355890a2f2c64f44a17b80c355ae977734c771e5d4` 다.
 _SRC_TREE_DIGEST = (
-    "a3ea85c176429aedb85a99355890a2f2c64f44a17b80c355ae977734c771e5d4"
+    "645cf2ac3d0eab05302d33d550532a77480d8be00beda37b04fdc5df20dbea7c"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
@@ -416,7 +419,7 @@ _PINNED_DIR_FILE_COUNTS = {
     "src/realtime": 4,
     "src/auth": 3,
     "src/engine/strategies": 8,
-    "src/engine": 76,
+    "src/engine": 77,
 }
 
 #: `scheduler.py` 정확 라인 수 + cycle257 영구 상한.

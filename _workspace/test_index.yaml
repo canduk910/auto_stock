@@ -815,6 +815,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -1901,6 +1902,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -2996,6 +2998,7 @@ backend:
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -4087,6 +4090,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -5176,6 +5180,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -6268,6 +6273,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -7360,6 +7366,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -8454,6 +8461,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -9544,6 +9552,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -10639,6 +10648,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -11746,6 +11756,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -12838,6 +12849,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -13936,6 +13948,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -15042,6 +15055,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -16116,6 +16130,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -17206,6 +17221,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -18298,6 +18314,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -19390,6 +19407,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -20482,6 +20500,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -21575,6 +21594,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -22666,6 +22686,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -23758,6 +23779,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -24850,6 +24872,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -25942,6 +25965,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -27036,6 +27060,7 @@ backend:
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -28131,6 +28156,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -29219,6 +29245,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -30310,6 +30337,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -31404,6 +31432,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -32495,6 +32524,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -33611,6 +33641,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -34684,6 +34715,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -35777,6 +35809,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -36866,6 +36899,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -37959,6 +37993,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -39052,6 +39087,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -40144,6 +40180,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -41236,6 +41273,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -42327,6 +42365,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -43419,6 +43458,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -44515,6 +44555,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -45603,6 +45644,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -46695,6 +46737,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -47787,6 +47830,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -48879,6 +48923,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -49972,6 +50017,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -51064,6 +51110,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -52155,6 +52202,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -53315,6 +53363,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -54405,6 +54454,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -55493,6 +55543,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -56586,6 +56637,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -57688,6 +57740,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -58768,6 +58821,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -59860,6 +59914,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -60952,6 +61007,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -62044,6 +62100,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -63136,6 +63193,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -64228,6 +64286,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -65319,6 +65378,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -66489,6 +66549,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -67652,6 +67713,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -67942,6 +68004,68 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
+  src/engine/position_exit_lines.py:
+    direct_tests:
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
+    transitive_tests:
+      - tests/contract/test_backtest_mcp_health.py
+      - tests/contract/test_cycle171_snapshot_route_steps.py
+      - tests/contract/test_cycle223f2_manual_apply_param_ranges.py
+      - tests/contract/test_cycle243_auth_wiring.py
+      - tests/contract/test_cycle64_routes_price_filter.py
+      - tests/contract/test_quote_session_auto_disable.py
+      - tests/contract/test_routes_backtest.py
+      - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
+      - tests/contract/test_routes_history.py
+      - tests/contract/test_routes_kis_quote_accounts.py
+      - tests/contract/test_routes_log_reports.py
+      - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
+      - tests/contract/test_routes_market_regime.py
+      - tests/contract/test_routes_realtime.py
+      - tests/contract/test_routes_realtime_ccnl_fields.py
+      - tests/contract/test_routes_realtime_session_details.py
+      - tests/contract/test_routes_recommendations.py
+      - tests/contract/test_routes_strategies.py
+      - tests/contract/test_routes_strategies_cash_ratio.py
+      - tests/contract/test_routes_strategy_funnel.py
+      - tests/contract/test_routes_subscriptions_pool.py
+      - tests/contract/test_routes_system_integrations.py
+      - tests/contract/test_routes_trading.py
+      - tests/contract/test_weight_unit_contract.py
+      - tests/integration/test_cycle100_count_eager_refresh_integration.py
+      - tests/integration/test_mcp_client_lifecycle.py
+      - tests/unit/main/test_cycle72_db_log_dedupe.py
+      - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
+      - tests/unit/main/test_cycleM3b_main_seam_pg.py
+      - tests/unit/middleware/test_cycle249_websocket_scope_guard.py
+      - tests/unit/routes/test_cycle110_emit_persistence.py
+      - tests/unit/routes/test_cycle110_exception_graceful.py
+      - tests/unit/routes/test_cycle110_import_fix.py
+      - tests/unit/routes/test_cycle110_lock_persistence.py
+      - tests/unit/routes/test_cycle110_response_format.py
+      - tests/unit/routes/test_cycle112_krx_open_api_routes.py
+      - tests/unit/routes/test_cycle126_basics_daily_routes.py
+      - tests/unit/routes/test_cycle128_list_query_params.py
+      - tests/unit/routes/test_cycle249_log_reports_bundle_external.py
+      - tests/unit/routes/test_cycle253_channel_probe.py
+      - tests/unit/routes/test_cycle282_market_state_route.py
+      - tests/unit/routes/test_cycle285_market_ops_route.py
+      - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
+      - tests/unit/routes/test_cycle84_api_response_envelope.py
+      - tests/unit/routes/test_cycle84_route_404.py
+      - tests/unit/routes/test_cycle84_route_invalid_limit.py
+      - tests/unit/routes/test_cycle84_route_invalid_offset.py
+      - tests/unit/routes/test_cycle90_concurrent_lock.py
+      - tests/unit/routes/test_cycle90_fetch_top_500_call.py
+      - tests/unit/routes/test_cycle90_kst_persistence.py
+      - tests/unit/routes/test_cycle90_lock_release.py
+      - tests/unit/routes/test_cycle90_post_route_envelope.py
+      - tests/unit/routes/test_cycle90_response_timing.py
+      - tests/unit/routes/test_cycle90_route_405_other.py
+      - tests/unit/routes/test_cycle93_route_upsert_chain.py
+      - tests/unit/test_cycle243_auth_fixture.py
   src/engine/quant_score.py:
     direct_tests:
       - tests/unit/engine/test_cycleC2_quant_score.py
@@ -68744,6 +68868,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -69836,6 +69961,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -70938,6 +71064,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -72022,6 +72149,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -73115,6 +73243,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -74202,6 +74331,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -75366,6 +75496,7 @@ backend:
       - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -76476,6 +76607,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -77481,6 +77613,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -78573,6 +78706,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -79663,6 +79797,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -80754,6 +80889,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -81848,6 +81984,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -82960,6 +83097,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -84031,6 +84169,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -85142,6 +85281,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -86216,6 +86356,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -87310,6 +87451,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -88399,6 +88541,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -89491,6 +89634,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -90583,6 +90727,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -91679,6 +91824,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -92801,6 +92947,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -93895,6 +94042,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -94985,6 +95133,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -96076,6 +96225,7 @@ backend:
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -97168,6 +97318,7 @@ backend:
       - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -98262,6 +98413,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -99354,6 +99506,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -100477,6 +100630,7 @@ backend:
       - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -101555,6 +101709,7 @@ backend:
       - tests/unit/engine/test_cycle321_cash_ratio_source.py
       - tests/unit/engine/test_cycle326_param_drift_visibility.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -102629,6 +102784,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -103720,6 +103876,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -104882,6 +105039,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -105975,6 +106133,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -107065,6 +107224,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -108159,6 +108319,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -109250,6 +109411,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -110341,6 +110503,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -111440,6 +111603,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -112588,6 +112752,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -113680,6 +113845,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -114776,6 +114942,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -115869,6 +116036,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -116960,6 +117128,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -118053,6 +118222,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -119207,6 +119377,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -120450,6 +120621,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -121603,6 +121775,7 @@ backend:
       - tests/unit/engine/test_cycle329_mapping_absent_full_fill.py
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -122722,6 +122895,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -123796,6 +123970,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -124907,6 +125082,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -125997,6 +126173,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -128457,6 +128634,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -129546,6 +129724,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -130641,6 +130820,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -131730,6 +131910,7 @@ backend:
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_cycle332_cancel_timer_key.py
       - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
+      - tests/unit/engine/test_cycle339_position_exit_lines.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
@@ -132036,6 +132217,7 @@ frontend:
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
+      - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - frontend/src/components/__tests__/BalanceTable.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
@@ -132053,6 +132235,7 @@ frontend:
       - frontend/src/api/__tests__/stock-master.test.ts
       - frontend/src/api/__tests__/trading.params.test.ts
       - frontend/src/api/__tests__/trading.test.ts
+      - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - frontend/src/components/__tests__/BalanceTable.test.tsx
       - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
@@ -132268,6 +132451,7 @@ frontend:
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
+      - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - frontend/src/components/__tests__/BalanceTable.test.tsx
       - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
@@ -132293,6 +132477,7 @@ frontend:
       - frontend/src/pages/__tests__/StrategiesTeRr.test.tsx
   frontend/src/components/BalanceTable.tsx:
     direct_tests:
+      - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - frontend/src/components/__tests__/BalanceTable.test.tsx
     transitive_tests:
@@ -132325,6 +132510,7 @@ frontend:
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
+      - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - frontend/src/components/__tests__/BalanceTable.test.tsx
       - >-
@@ -132509,6 +132695,7 @@ frontend:
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
+      - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - frontend/src/components/__tests__/BalanceTable.test.tsx
       - frontend/src/components/__tests__/BreakoutCandidateMonitor.test.tsx
@@ -132587,6 +132774,7 @@ frontend:
       - frontend/src/pages/__tests__/Recommendations.weightReasoning.test.tsx
   frontend/src/contexts/TradingStatusContext.tsx:
     direct_tests:
+      - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - frontend/src/components/__tests__/BalanceTable.test.tsx
       - frontend/src/components/__tests__/PerformanceCard.test.tsx
@@ -132721,6 +132909,7 @@ frontend:
       - frontend/src/api/__tests__/recommendations.test.ts
       - frontend/src/api/__tests__/stock-master.test.ts
       - frontend/src/api/__tests__/trading.test.ts
+      - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - frontend/src/components/__tests__/BalanceTable.test.tsx
       - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
@@ -132795,6 +132984,7 @@ frontend:
       - frontend/src/api/__tests__/stock-master.test.ts
       - frontend/src/api/__tests__/trading.params.test.ts
       - frontend/src/api/__tests__/trading.test.ts
+      - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - frontend/src/components/__tests__/BalanceTable.test.tsx
       - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
@@ -132865,6 +133055,7 @@ frontend:
       - frontend/src/api/__tests__/stock-master.test.ts
       - frontend/src/api/__tests__/trading.params.test.ts
       - frontend/src/api/__tests__/trading.test.ts
+      - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - frontend/src/components/__tests__/BalanceTable.test.tsx
       - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
@@ -132931,6 +133122,7 @@ frontend:
       - frontend/src/api/__tests__/stock-master.test.ts
       - frontend/src/api/__tests__/trading.params.test.ts
       - frontend/src/api/__tests__/trading.test.ts
+      - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - frontend/src/components/__tests__/BalanceTable.test.tsx
       - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
@@ -132987,6 +133179,7 @@ frontend:
       - frontend/src/pages/__tests__/StrategyFunnel.bottleneckTrend.test.tsx
   frontend/src/test/providers.tsx:
     direct_tests:
+      - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - frontend/src/components/__tests__/BalanceTable.test.tsx
       - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
@@ -133041,6 +133234,7 @@ frontend:
       - frontend/src/api/__tests__/stock-master.test.ts
       - frontend/src/api/__tests__/trading.params.test.ts
       - frontend/src/api/__tests__/trading.test.ts
+      - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - frontend/src/components/__tests__/BalanceTable.test.tsx
       - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
@@ -133112,6 +133306,7 @@ frontend:
       - frontend/src/pages/__tests__/Recommendations.weightReasoning.test.tsx
   frontend/src/types/balance.ts:
     direct_tests:
+      - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - frontend/src/components/__tests__/BalanceTable.test.tsx
     transitive_tests:
@@ -133133,6 +133328,7 @@ frontend:
       - frontend/src/api/__tests__/stock-master.test.ts
       - frontend/src/api/__tests__/trading.params.test.ts
       - frontend/src/api/__tests__/trading.test.ts
+      - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - frontend/src/components/__tests__/BalanceTable.test.tsx
       - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
@@ -133224,6 +133420,7 @@ frontend:
       - frontend/src/api/__tests__/stock-master.test.ts
       - frontend/src/api/__tests__/trading.params.test.ts
       - frontend/src/api/__tests__/trading.test.ts
+      - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - frontend/src/components/__tests__/BalanceTable.test.tsx
       - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
@@ -133375,6 +133572,7 @@ frontend:
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
+      - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - frontend/src/components/__tests__/BalanceTable.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.activeBoard.test.tsx
@@ -133421,6 +133619,7 @@ frontend:
       - frontend/src/api/__tests__/stock-master.test.ts
       - frontend/src/api/__tests__/trading.params.test.ts
       - frontend/src/api/__tests__/trading.test.ts
+      - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - frontend/src/components/__tests__/BalanceTable.test.tsx
       - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
@@ -133531,6 +133730,7 @@ frontend:
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
+      - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
       - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
       - frontend/src/components/__tests__/BalanceTable.test.tsx
       - frontend/src/components/__tests__/DailyReportTab.ext.test.tsx
@@ -133568,12 +133768,12 @@ frontend:
       - >-
         frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
       - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
-generated_at: '2026-09-21T14:04:15.909Z'
+generated_at: '2026-09-21T14:22:24.507Z'
 stats:
-  backend_modules: 157
-  backend_tests: 1073
+  backend_modules: 158
+  backend_tests: 1074
   frontend_modules: 120
-  frontend_tests: 97
+  frontend_tests: 98
   unmapped_modules:
     - frontend/src/api/backtest.ts
     - frontend/src/components/LogViewer.tsx

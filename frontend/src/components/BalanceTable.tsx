@@ -28,6 +28,32 @@ const MARKET_BADGE_BASE = 'inline-block px-1.5 py-0.5 rounded text-xs font-mediu
  *   - false &&  halted → 정지    (red)
  *   - 미캐시(null/undefined) → 확인중 (light-gray)
  */
+/**
+ * cycle339 — 손절가 칸의 설명.
+ *
+ * 🔴 **가격 무관 청산은 이 숫자에 안 담긴다** — VB 의 15:20 일괄매도, kojiro 의
+ * stage3 추세종료, 익일청산이 그것이다. 손절가가 보인다고 그 가격까지 안 팔리는
+ * 것이 아니므로 그 사실을 툴팁이 말한다.
+ */
+function stopTitle(h: Holding): string {
+  if (!h.stop_price) {
+    return '손절선을 판정할 수 없다 (보유 전략 미상 또는 손절 파라미터 없음). 숫자를 지어내지 않는다.'
+  }
+  const base =
+    h.stop_source === 'effective'
+      ? '전략이 실제로 쓰는 실효 손절선 (청산 판정과 같은 산식)'
+      : '고정% 손절 근사 — 매입가 × (1 + 하드손절%). 트레일링·시간 청산은 담기지 않는다'
+  return `${base}. ⚠️ 가격과 무관한 청산(15:20 일괄매도 · 스테이지 종료 · 익일청산)은 이 값에 담기지 않는다.`
+}
+
+/** 목표가 칸의 설명 — 대부분의 전략에 목표가가 **없다**는 사실을 말한다. */
+function targetTitle(h: Holding): string {
+  if (h.target_source === 'measured_move') {
+    return '측정 목표가 (깃대폭 + 깃발고점) — 눌림목 돌파 전략의 부분 익절 트리거다. 전량 청산선이 아니다.'
+  }
+  return '이 전략은 목표가를 쓰지 않는다 — 트레일링·시간·스테이지로 청산한다.'
+}
+
 function marketBadgeProps(h: Holding): { label: string; cls: string } {
   const nxt = h.nxt_tradable
   const halted = h.krx_halted
@@ -189,6 +215,8 @@ export default function BalanceTable({ selectedStrategy }: Props) {
               <th className="px-4 py-3 text-right font-medium text-gray-600">보유수량</th>
               <th className="px-4 py-3 text-right font-medium text-gray-600">매입가</th>
               <th className="px-4 py-3 text-right font-medium text-gray-600">현재가</th>
+              <th className="px-4 py-3 text-right font-medium text-gray-600">손절가</th>
+              <th className="px-4 py-3 text-right font-medium text-gray-600">목표가</th>
               <th className="px-4 py-3 text-right font-medium text-gray-600">평가금액</th>
               <th className="px-4 py-3 text-right font-medium text-gray-600">평가손익</th>
               <th className="px-4 py-3 text-right font-medium text-gray-600">수익률</th>
@@ -198,7 +226,7 @@ export default function BalanceTable({ selectedStrategy }: Props) {
           <tbody>
             {filteredHoldings.length === 0 ? (
               <tr>
-                <td colSpan={isAll ? 11 : 10} className="px-4 py-8 text-center text-gray-400">
+                <td colSpan={isAll ? 13 : 12} className="px-4 py-8 text-center text-gray-400">
                   보유 종목이 없습니다.
                 </td>
               </tr>
@@ -238,6 +266,25 @@ export default function BalanceTable({ selectedStrategy }: Props) {
                     <td className="px-4 py-3 text-right text-gray-700">{formatKRW(h.quantity)}</td>
                     <td className="px-4 py-3 text-right text-gray-700">{formatKRW(h.avg_price)}</td>
                     <td className="px-4 py-3 text-right text-gray-700">{formatKRW(h.current_price)}</td>
+                    <td
+                      data-testid={`stop-price-${h.ticker}`}
+                      title={stopTitle(h)}
+                      className={`px-4 py-3 text-right ${
+                        h.stop_source === 'hard_pct' ? 'text-gray-400' : 'text-gray-700'
+                      }`}
+                    >
+                      {h.stop_price ? formatKRW(h.stop_price) : '—'}
+                      {h.stop_source === 'hard_pct' && h.stop_price ? (
+                        <span className="ml-1 text-[10px] text-gray-400">근사</span>
+                      ) : null}
+                    </td>
+                    <td
+                      data-testid={`target-price-${h.ticker}`}
+                      title={targetTitle(h)}
+                      className="px-4 py-3 text-right text-gray-700"
+                    >
+                      {h.target_price ? formatKRW(h.target_price) : '—'}
+                    </td>
                     <td className="px-4 py-3 text-right text-gray-700">{formatKRW(h.eval_amount)}원</td>
                     <td className={`px-4 py-3 text-right font-medium ${profitColor(h.eval_profit_loss)}`}>
                       {formatKRW(h.eval_profit_loss)}원

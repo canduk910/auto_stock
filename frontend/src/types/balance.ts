@@ -17,6 +17,15 @@ export interface Holding {
   // 2026-08-04 — 업종 한글명(bstp_kor_isnm) 우선 → KRX 산업지수 플래그/업종코드
   // 폴백 → `미분류-{ticker}`. 백엔드 `sector_naming` 단일 진실원.
   sector?: string | null
+  // cycle339 — 그 종목을 보유한 전략의 청산선. 백엔드 `position_exit_lines` 단일 진실원.
+  // 🔴 판정 불가는 전부 null 이고 화면은 `—` 를 그린다 — 숫자를 지어내지 않는다.
+  strategy_id?: string | null
+  stop_price?: number | null
+  /** `effective` = 전략 실효 손절선(check_exit 와 동일 산식) / `hard_pct` = 고정%손절 근사. */
+  stop_source?: 'effective' | 'hard_pct' | null
+  target_price?: number | null
+  /** `measured_move` = BFB 측정 목표(부분 익절 트리거). 그 밖 전략은 목표가가 없다. */
+  target_source?: 'measured_move' | null
 }
 
 export interface BalanceSummary {
