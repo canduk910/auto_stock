@@ -8,81 +8,81 @@ KIS OpenAPI 기반 주식 자동매매시스템 설계 문서. **지금 동작�
 
 ## 1. 전체 아키텍처
 
-```
-+------------------+        +-------------------+        +-------------------+
-|   React Frontend |  REST  |  FastAPI Backend   | KIS API|  한국투자증권      |
-|   (Vite + Nginx) | <----> |  (Uvicorn)         | <----> |  OpenAPI Server   |
-|   Port 80        |  /api  |  127.0.0.1:8000    |        |                   |
-|   Basic Auth     |        |  ApiAuthMiddleware |        |                   |
-+------------------+        +--------+----------+        +--------+----------+
-                                     |                             |
-                                     |                    +--------+----------+
-                                     |                    |  KIS WebSocket    |
-                                     |                    |  ops.koreainvest  |
-                                     |                    |  :21000 (실전)    |
-                                     |                    |  :31000 (모의)    |
-                                     |                    +-------------------+
-                                     |                             ^
-                                     |                             |
-                                     v                             |
-                              +------+------+              실시간 시세 +
-                              |  AWS RDS    |              체결통보
-                              |  PostgreSQL |  (asyncpg)
-                              +-------------+
+```mermaid
+flowchart LR
+    FE["React Frontend<br/>(Vite + Nginx)<br/>Port 80<br/>Basic Auth"]
+    BE["FastAPI Backend<br/>(Uvicorn)<br/>127.0.0.1:8000<br/>ApiAuthMiddleware"]
+    KIS["한국투자증권<br/>OpenAPI Server"]
+    WS["KIS WebSocket<br/>ops.koreainvest<br/>:21000 (실전)<br/>:31000 (모의)"]
+    DB[("AWS RDS<br/>PostgreSQL")]
+
+    FE <-->|"REST /api"| BE
+    BE <-->|"KIS API"| KIS
+    KIS --- WS
+    WS -->|"실시간 시세 + 체결통보"| BE
+    BE -->|"(asyncpg)"| DB
 ```
 
 ### 요청 인증 흐름
 
+```mermaid
+%%{init: {"flowchart": {"wrappingWidth": 360}}}%%
+flowchart TD
+    CL["브라우저 / curl"]
+    HTTPS["(1) https://auto.dkstock.cloud/…<br/>TLS 1.2/1.3 · HSTS max-age=86400"]
+    HTTP["http://#60;EC2#62;:80/…"]
+    NG["nginx : frontend 컨테이너<br/>auth_basic #quot;auto_stock#quot;<br/>auth_basic_user_file /etc/nginx/secrets/.htpasswd"]
+    E401["401"]
+    E403["403 (ENOENT)"]
+    E500["500 (EACCES)"]
+    HDR["(2) location /api/ 헤더 주입<br/>proxy_set_header X-API-Key #quot;${API_AUTH_KEY}#quot;<br/>proxy_set_header Host $http_host"]
+    BE["FastAPI : backend 컨테이너<br/>127.0.0.1:8000"]
+    AUTH["ApiAuthMiddleware (최외곽)"]
+    A401["401 (fail-closed)"]
+    O401["cross_origin 401"]
+    CORS["CORSMiddleware"]
+    RT["라우터"]
+
+    CL --> HTTPS
+    CL --> HTTP
+    HTTP -->|"301 로 https 로 보낸다"| HTTPS
+    HTTPS --> NG
+    NG -->|"무자격"| E401
+    NG -->|"자격 + 파일 부재"| E403
+    NG -->|"자격 + 권한 거부"| E500
+    NG --> HDR
+    HDR --> BE
+    BE --> AUTH
+    AUTH -->|"키 미설정/불일치"| A401
+    AUTH -->|"상태변경 · Origin 검사 실패"| O401
+    AUTH --> CORS
+    CORS --> RT
 ```
-브라우저 / curl
-   |
-   | (1) https://auto.dkstock.cloud/…  ← TLS 1.2/1.3 · HSTS max-age=86400
-   |     http://<EC2>:80/…            ← 301 로 https 로 보낸다.
-   |                                     ACME 챌린지 경로(`/.well-known/acme-challenge/`)만 예외
-   v
-[nginx : frontend 컨테이너]
-   |  auth_basic  "auto_stock"        ← server 레벨. SPA·/api/ 전부 덮는다.
-   |  auth_basic_user_file /etc/nginx/secrets/.htpasswd   (호스트 bind mount, git 미커밋)
-   |     · 무자격            → 401
-   |     · 자격 + 파일 부재  → 403   (ENOENT)
-   |     · 자격 + 권한 거부  → 500   (EACCES — worker uid 101 이 못 여는 경우)
-   |
-   | (2) location /api/ 에서 헤더 주입 (클라이언트가 보낸 동명 헤더는 **치환**된다)
-   |        proxy_set_header X-API-Key "${API_AUTH_KEY}"   ← 브라우저에 노출 안 됨
-   |        proxy_set_header Host      $http_host          ← 원 포트 보존(포트 탈락 시 CSRF 오탐)
-   v
-[FastAPI : backend 컨테이너 — 127.0.0.1:8000 (SG 오설정 2차 방어)]
-   |
-   |  ApiAuthMiddleware  ← **최외곽**(MetricsMiddleware 보다 바깥)
-   |     · /health 만 예외, 그 외 전 경로 보호(/docs·/openapi.json 포함)
-   |     · 키 미설정/불일치 → 401  (fail-closed)
-   |     · 상태변경(POST/PUT/PATCH/DELETE)은 Origin 검사 추가 → cross_origin 401
-   |     · 익명 401 은 하위 앱에 도달하지 않는다 = raw path 메트릭 오염 차단
-   v
-CORSMiddleware → 라우터
-```
+
+| 단계 | 세부 |
+|------|------|
+| (1) 진입 | http → https 301 에서 ACME 챌린지 경로(`/.well-known/acme-challenge/`)만 예외 |
+| nginx `auth_basic "auto_stock"` | server 레벨. SPA·/api/ 전부 덮는다 |
+| `auth_basic_user_file` | 호스트 bind mount, git 미커밋. 500(EACCES)은 worker uid 101 이 못 여는 경우다 |
+| (2) `location /api/` 헤더 주입 | 클라이언트가 보낸 동명 헤더는 **치환**된다. `X-API-Key` 는 브라우저에 노출 안 됨 · `Host $http_host` 는 원 포트 보존(포트 탈락 시 CSRF 오탐) |
+| backend `127.0.0.1:8000` | SG 오설정 2차 방어 |
+| `ApiAuthMiddleware` | **최외곽**(MetricsMiddleware 보다 바깥). `/health` 만 예외, 그 외 전 경로 보호(`/docs`·`/openapi.json` 포함). 상태변경은 POST/PUT/PATCH/DELETE 다. 익명 401 은 하위 앱에 도달하지 않는다 = raw path 메트릭 오염 차단 |
 
 dev 는 nginx 를 거치지 않는다 — vite proxy 가 서버 측에서 `X-API-Key` 와 `Origin` 을
 넣어 같은 관문을 통과시킨다(`frontend/vite.config.ts`).
 
 ### 컨테이너 구성 (Docker Compose)
 
-```
-docker network: auto_stock_default
-+------------------------------------------+
-|                                          |
-|  +----------------+  +----------------+  |
-|  |   backend      |  |   frontend     |  |
-|  |   python:3.12  |  |   nginx:alpine |  |
-|  |   Port 8000    |  |   Port 80      |  |
-|  |   TZ=KST       |  |                |  |
-|  |   단일 워커     |  |  /api → backend |  |
-|  +----------------+  +----------------+  |
-|                                          |
-+------------------------------------------+
-           |
-     volumes: ./logs
-     env_file: .env
+```mermaid
+flowchart TB
+    subgraph NET["docker network: auto_stock_default"]
+        direction LR
+        BE["backend<br/>python:3.12<br/>Port 8000<br/>TZ=KST<br/>단일 워커"]
+        FE["frontend<br/>nginx:alpine<br/>Port 80"]
+        FE -->|"/api → backend"| BE
+    end
+    VOL["volumes: ./logs<br/>env_file: .env"]
+    NET --- VOL
 ```
 
 ---
@@ -156,271 +156,239 @@ src/
 
 ## 3. 모듈 의존관계
 
-```
-                         config.py (Settings 싱글턴)
-                              ^
-                   모든 모듈에서 import
-                              |
-          +-------------------+-------------------+
-          |                   |                   |
-     auth/token.py      api/base.py       db/pg.py (asyncpg)
-          ^              ^       ^              ^
-          |              |       |              |
-    +-----+-----+   +---+---+   |         +----+----+
-    | websocket | | order  |   |         | trade_  |
-    | .py       | | .py    |   |         | history |
-    +-----------+ | balance|   |         | positions|
-                  | .py    |   |         | daily_  |
-                  | condi- |   |         | perf    |
-                  | tion.py|   |         | strategy|
-                  +---+----+   |         | _config |
-                      |        |         +---------+
-                      v        v              ^
-              +-------+--------+----+         |
-              |    engine/          |         |
-              |  +-----------+      |         |
-              |  | scheduler |------+---------+
-              |  +-----+-----+      |
-              |        |            |
-              |  +-----v-----+     |
-              |  | risk.py   |     |
-              |  +-----+-----+     |
-              |        |           |
-              |  +-----v--------+ |
-              |  | order_engine +--+
-              |  +-----+--------+
-              |        |
-              |  +-----v-----+
-              |  | strategies |
-              |  | momentum   |
-              |  | volatility |
-              |  +------------+
-              +----------------+
-                      ^
-                      |
-               routes/*.py ──→ main.py (FastAPI)
+화살표 `A --> B` = A 가 B 를 import·사용한다.
+
+```mermaid
+%%{init: {"flowchart": {"wrappingWidth": 360}}}%%
+flowchart BT
+    CFG["config.py (Settings 싱글턴)<br/>모든 모듈에서 import"]
+    TOK["auth/token.py"]
+    BASE["api/base.py"]
+    PG["db/pg.py (asyncpg)"]
+    WSK["websocket.py"]
+    APIS["order.py<br/>balance.py<br/>condition.py"]
+    DBM["trade_history<br/>positions<br/>daily_perf<br/>strategy_config"]
+    subgraph ENG["engine/"]
+        direction TB
+        SCH["scheduler"] --> RISK["risk.py"]
+        RISK --> OE["order_engine"]
+        OE --> STR["strategies<br/>momentum<br/>volatility"]
+    end
+    ROUTES["routes/*.py"]
+    MAIN["main.py (FastAPI)"]
+
+    TOK --> CFG
+    BASE --> CFG
+    PG --> CFG
+    WSK --> TOK
+    APIS --> BASE
+    DBM --> PG
+    ENG --> APIS
+    ENG --> BASE
+    SCH --> DBM
+    OE --> DBM
+    ROUTES --> ENG
+    MAIN --> ROUTES
 ```
 
 ---
 
 ## 4. 매매 엔진 내부 구조
 
+```mermaid
+%%{init: {"flowchart": {"wrappingWidth": 360}}}%%
+flowchart TD
+    TS["TradingScheduler (scheduler.py)"]
+    REG["StrategyRegistry"]
+    ST["SessionTracker<br/>(session.py — Phase 3 신설)"]
+    OE["OrderEngine"]
+    RM["RiskManager"]
+    TS --> REG
+    TS --> ST
+    TS --> OE
+    TS --> RM
+
+    REG --> MOM["MomentumStrategy<br/>tradable_boards: krx_open + main"]
+    REG --> VB["VolatilityBreakoutStrategy<br/>tradable_boards: main, 사이클 26 KRX ONLY"]
+    REG --> LTV["LongTailVolatilityStrategy<br/>tradable_boards: main, 사이클 26 KRX ONLY"]
+    REG --> DON["DonchianSwingStrategy<br/>tradable_boards: main"]
+
+    RM --> R1["on_tick() → ticker_prices 갱신<br/>→ registry.enabled() 순회"]
+    R1 --> R2["check_exit_signal()"]
+    R2 --> R3["session_tracker.is_tradable(strategy)<br/>← 보드 가드 (Phase 8)"]
+    R3 --> R4["registry.is_ticker_blocked_for_buy()"]
+    R4 --> R5["check_buy_signal() → execute_buy()"]
 ```
-TradingScheduler (scheduler.py)
-│
-├── StrategyRegistry
-│   ├── MomentumStrategy             (tradable_boards: krx_open + main)
-│   │   ├── StrategyConfig (id, name, weight, params{tradable_boards, exchange, ...})
-│   │   └── StrategyState (positions, pending_buys, sold_today, pnl,
-│   │                       cached_buyable_*, buy_blocked_until, low_funds_tickers)
-│   ├── VolatilityBreakoutStrategy   (tradable_boards: main, 사이클 26 KRX ONLY)
-│   │   ├── StrategyConfig (k_value_krx_main / k_value_nxt_pre[호환] / k_value_nxt_post[호환])
-│   │   ├── StrategyState
-│   │   ├── _targets (K, prev_range, target_offset_base,
-│   │   │              boards: {board: {open_price, target_price, target_offset}})
-│   │   └── _next_day_clear_pending (안전망: 15:20 청산 누락 시 익일 NXT 프리 청산)
-│   ├── LongTailVolatilityStrategy   (tradable_boards: main, 사이클 26 KRX ONLY)
-│   │   └── + _limit_up_reached set (상한가 모드 전환 종목)
-│   └── DonchianSwingStrategy        (tradable_boards: main)
-│       └── _candidates / _bought_today / _scan_stats
-│
-├── SessionTracker (session.py — Phase 3 신설)
-│   ├── _active: frozenset[MarketBoard]
-│   ├── tick(now) → 시각 기반 보드 매핑 + 진입/종료 콜백 발화
-│   ├── on_h0nxmko0(tr_key, code, payload) → NXT 보드 코드 기록
-│   └── is_tradable(strategy_id, params) → 활성 보드 ∩ tradable_boards ≠ ∅
-│
-├── OrderEngine
-│   ├── _order_ticker   {order_no → ticker}     # 체결통보 종목 보정
-│   ├── _order_strategy {order_no → strategy_id} # 전략 라우팅
-│   ├── _pending_buy_orders {order_no → info}    # 미체결 매수 추적
-│   ├── _selling        set[ticker]              # 매도 중복 차단
-│   ├── _filled_qty     {order_no → 누적체결수량}
-│   └── _completed_orders set[order_no]          # 체결통보 선행 race 가드
-│
-└── RiskManager
-    └── on_tick() → ticker_prices 갱신 → registry.enabled() 순회
-        ├─ check_exit_signal()
-        ├─ session_tracker.is_tradable(strategy)  ← 보드 가드 (Phase 8)
-        ├─ registry.is_ticker_blocked_for_buy()
-        └─ check_buy_signal() → execute_buy()
-```
+
+**전략 객체의 멤버**
+
+| 전략 | 멤버 |
+|------|------|
+| MomentumStrategy | `StrategyConfig (id, name, weight, params{tradable_boards, exchange, ...})` · `StrategyState (positions, pending_buys, sold_today, pnl, cached_buyable_*, buy_blocked_until, low_funds_tickers)` |
+| VolatilityBreakoutStrategy | `StrategyConfig (k_value_krx_main / k_value_nxt_pre[호환] / k_value_nxt_post[호환])` · `StrategyState` · `_targets (K, prev_range, target_offset_base, boards: {board: {open_price, target_price, target_offset}})` · `_next_day_clear_pending`(안전망: 15:20 청산 누락 시 익일 NXT 프리 청산) |
+| LongTailVolatilityStrategy | `+ _limit_up_reached` set (상한가 모드 전환 종목) |
+| DonchianSwingStrategy | `_candidates` / `_bought_today` / `_scan_stats` |
+
+**SessionTracker**
+
+- `_active: frozenset[MarketBoard]`
+- `tick(now)` → 시각 기반 보드 매핑 + 진입/종료 콜백 발화
+- `on_h0nxmko0(tr_key, code, payload)` → NXT 보드 코드 기록
+- `is_tradable(strategy_id, params)` → 활성 보드 ∩ tradable_boards ≠ ∅
+
+**OrderEngine**
+
+| 멤버 | 형 | 용도 |
+|------|----|------|
+| `_order_ticker` | `{order_no → ticker}` | 체결통보 종목 보정 |
+| `_order_strategy` | `{order_no → strategy_id}` | 전략 라우팅 |
+| `_pending_buy_orders` | `{order_no → info}` | 미체결 매수 추적 |
+| `_selling` | `set[ticker]` | 매도 중복 차단 |
+| `_filled_qty` | `{order_no → 누적체결수량}` | |
+| `_completed_orders` | `set[order_no]` | 체결통보 선행 race 가드 |
 
 ---
 
 ## 5. 일일 매매 스케줄 시퀀스 — KRX/NXT 통합 (매매 08:00~20:00 · 저녁 작업 ~21:30)
 
+```mermaid
+sequenceDiagram
+    participant S as Scheduler
+    participant W as WebSocket
+    participant O as OrderEngine
+    participant K as KIS API
+    participant D as DB
+    participant X as OpenAI (외부 API)
+
+    Note over S,X: 07:45 run_daily() 기상 (TIME_AUTO_START) → _boot()
+    S->>K: get_token() → POST /oauth2/tokenP
+    D-->>S: _load_strategy_config() ← DB strategy_config
+    S->>K: get_balance() → GET inquire-balance
+    Note over S: allocate_funds()
+    S->>K: strategy.prepare() → GET daily-price (일봉)
+    Note over S: ticker_prev_close 사전 등록 (전일 종가)
+    D-->>S: DB positions 복구 ← DB positions
+    Note over S: KIS 잔고 교차검증
+
+    Note over S,X: 07:59 connect() (TIME_PRESUBSCRIBE)
+    S->>W: connect() → WebSocket 연결
+    S->>W: subscribe(H0STCNI0/9, 체결통보)
+    S->>W: subscribe(H0NXMKO0, "")<br/>— 실전 한정 · NXT 장운영정보
+    Note over S: + register_board_handler(SessionTracker.on_h0nxmko0)<br/>+ _session_loop() task<br/>— 30초 주기 SessionTracker.tick()
+    S->>W: _collect_presubscribe_tickers()<br/>→ subscribe(tick_tr_id_for(t), 종목들)
+    Note over S: 유니버스 비어있으면 prepare() 재실행
+
+    Note over S,X: 08:00 PRE_NXT 보드 진입 (TIME_PRE_NXT_OPEN)
+    Note over S: asyncio.create_task(_execute_next_day_clear())<br/>— 비차단<br/>+ _confirm_breakout_open_prices(board="pre_nxt")<br/>_phase = "pre_nxt_trading"<br/>LTV PRE_NXT 매수 시작
+
+    Note over S,X: 09:00:05 KRX 메인 시가 확정 (TIME_KRX_OPEN_CONFIRM)
+    Note over S: _confirm_breakout_open_prices(board="main")<br/>_phase = "main_trading"<br/>VB + LTV MAIN 매매 진입
+
+    Note over S,X: 09:30 스캔 · 모멘텀 매수 감시 시작
+    S->>K: scan_stocks() → GET fluctuation-rank
+    S->>K: GET inquire-price
+    S->>W: subscribe_filtered_stocks()
+    Note over S: _phase = "trading"<br/>_scan_loop() 시작 (5분 주기)
+    W-->>S: 실시간 체결가<br/>(H0STCNT0 KRX 전용 / H0NXCNT0 NXT 전용)
+    Note over S: RiskManager.on_tick()<br/>session_tracker.is_tradable(strategy)<br/>← Phase 8 보드 가드
+    S->>O: check_exit_signal() → execute_sell()
+    O->>K: POST order (매도)<br/>EXCG_ID_DVSN_CD = exchange
+    S->>O: check_buy_signal() → _resolve_active_board()<br/>→ execute_buy()
+    O->>K: POST order (매수)
+    W-->>O: H0STCNI0 체결통보<br/>(KRX/NXT/SOR 통합)
+    Note over O: handle_execution_notice()<br/>_order_ticker[order_no] → 정확한 ticker
+    alt BUY
+        Note over O: _handle_buy_fill()<br/>Position 등록 (메모리)
+        O->>D: save_position()
+    else SELL
+        Note over O: _handle_sell_fill()<br/>Position 제거 (메모리)
+        O->>D: delete_position()
+        Note over O: sold_today.add(ticker)
+    end
+
+    Note over S,X: 15:20 KRX 메인 신규 매수 중단 + 강제 청산 (TIME_KRX_MAIN_BUY_STOP)
+    Note over S: _force_clear_main_only()<br/>시간 가드<br/>— 진입 시 #62;=15:30 이면 즉시 skip
+    S->>O: execute_sell(FORCE_CLEAR)
+    O->>K: POST order
+
+    Note over S,X: 15:30 KRX 메인 마감 (TIME_KRX_MAIN_CLOSE)
+    Note over S: _phase = "post_nxt_trading"<br/>_confirm_breakout_open_prices(board="post_nxt")<br/>구독 유지 = positions HIGH 그룹
+
+    Note over S,X: 15:40 POST_NXT 보드 진입 (session._BOARD_SCHEDULE)
+
+    Note over S,X: 19:50 애프터 신규 매수 중단 (TIME_NXT_POST_BUY_STOP)
+    Note over S: buy_disabled = True (모든 활성 전략)
+
+    Note over S,X: 20:00 애프터 종료 (TIME_NXT_POST_CLOSE)
+    S->>W: unsubscribe_all() → WebSocket 구독 해제
+
+    Note over S,X: 20:00 generate_recommendations() — 전략수정 AI자문 (TIME_RECOMMENDATION)
+    S->>D: collect_metrics() → trade_history 집계
+    S->>X: OpenAI Chat Completion
+    S->>D: insert_recommendation() → parameter_recommendations (status: pending)
+
+    Note over S,X: 20:00:05 _full_universe_load_once() (TIME_FULL_UNIVERSE_LOAD)
+    S->>D: 전체 유니버스 적재 → stock_master (AI자문 직후 5초 마진)
+    Note over S: 같은 20:00 이 기동 거부 경계<br/>(TIME_SESSION_START_CUTOFF, cycle283 D4)
+
+    Note over S,X: 20:05 run_daily_metrics_snapshot() (TIME_METRICS_SNAPSHOT, cycle283 D5)
+    S->>D: collect_daily_log_metrics() → system_logs / trade_history
+    S->>D: insert_log_report(model=None) → daily_log_reports (1차, OpenAI 미호출)
+
+    Note over S,X: 20:30 _stock_master_daily_load_once() (TIME_STOCK_MASTER_DAILY_LOAD, cycle283 D2)
+    S->>K: KIS FHKST03010100
+    S->>D: stock_master_daily 적재 (~121초)
+
+    Note over S,X: 21:30 _settle() (TIME_SETTLEMENT, cycle283 D3)
+    S->>K: get_balance() → GET inquire-balance
+    S->>D: upsert_daily_performance() (전략별 + total)
+    S->>X: generate_daily_log_report() (OpenAI)
+    S->>D: daily_log_reports ← 완전판이 20:05 1차 행을 upsert 로 덮어쓴다
+    S->>W: disconnect() → WebSocket 종료
+    Note over S,X: 익일 07:45까지 대기 (주말 자동 건너뜀)
 ```
-시각     Scheduler          WebSocket         OrderEngine       KIS API
-─────────────────────────────────────────────────────────────────────────
-07:45  run_daily() 기상       (TIME_AUTO_START)
-       │
-       _boot()                 (start() 안에서 즉시 — 07:45 자동 기동이면 그 직후.
-       │                        TIME_BOOT(07:55) 는 런타임 미사용 상수다)
-       ├─ get_token() ──────────────────────────────────────→ POST /oauth2/tokenP
-       ├─ _load_strategy_config() ←── DB strategy_config
-       │   (tradable_boards / k_value_* / exchange 포함)
-       ├─ get_balance() ────────────────────────────────────→ GET inquire-balance
-       ├─ allocate_funds()
-       ├─ strategy.prepare() ───────────────────────────────→ GET daily-price (일봉)
-       │   └─ ticker_prev_close 사전 등록 (전일 종가)
-       ├─ DB positions 복구 ←── DB positions
-       └─ KIS 잔고 교차검증
-       │
-07:59  connect() ──────────→ WebSocket 연결        (TIME_PRESUBSCRIBE)
-       │  ├─ subscribe(H0STCNI0/9, 체결통보)
-       │  └─ subscribe(H0NXMKO0, "")  (실전 한정 — NXT 장운영정보)
-       │  + register_board_handler(SessionTracker.on_h0nxmko0)
-       │  + _session_loop() task — 30초 주기 SessionTracker.tick()
-       │  _collect_presubscribe_tickers() →
-       │     subscribe(tick_tr_id_for(t), 종목들)  (cycle294 — 프리장 NXT 전용 H0NXCNT0 / 정규장+애프터 KRX 전용 H0STCNT0. 통합 H0UNCNT0 는 킬스위치 off 에서만)
-       │  유니버스 비어있으면 prepare() 재실행 (KIS API 일시장애 대비)
-       │                         │
-08:00  PRE_NXT 보드 진입       (TIME_PRE_NXT_OPEN)
-       │  asyncio.create_task(_execute_next_day_clear())
-       │     ← 비차단 (NEXT_DAY_STABILIZE_SECS=30s 안정화)
-       │     ← 다음 영업일 NXT 프리 시가에서 청산 (Q2=B)
-       │  + _confirm_breakout_open_prices(board="pre_nxt") — 0.5초/5초 폴링
-       │  _phase = "pre_nxt_trading"
-       │  LTV PRE_NXT 매수 시작 (k_value_nxt_pre 적용)
-       │     VB 는 `DEFAULT_TRADABLE_BOARDS=("main",)` — 프리장 매수 없음
-       │                         │
-09:00:05 KRX 메인 시가 확정    (TIME_KRX_OPEN_CONFIRM)
-       │  _confirm_breakout_open_prices(board="main")  ← 보드별 별도 시가
-       │  _phase = "main_trading"
-       │  VB + LTV MAIN 매매 진입 (k_value_krx_main 적용)
-       │                         │
-09:30  scan_stocks() ───────────────────────────────────────→ GET fluctuation-rank
-       │  subscribe_filtered_stocks()                        GET inquire-price
-       │  _phase = "trading"  (모멘텀 매수 감시 시작)
-       │  ├─ _scan_loop() 시작 (5분 주기)
-       │                         │
-       │         ←───────────────┤ 실시간 체결가 (H0STCNT0 KRX 전용 / H0NXCNT0 NXT 전용 — 47필드 동일, 한 파서)
-       │                         │
-       │  RiskManager.on_tick()  │
-       │  ├─ session_tracker.is_tradable(strategy)  ← Phase 8 보드 가드
-       │  ├─ check_exit_signal() │
-       │  │  └─ execute_sell() ──┼──────────────────────────→ POST order (매도)
-       │  │                                              EXCG_ID_DVSN_CD = exchange
-       │  └─ check_buy_signal()  │
-       │     ├─ _resolve_active_board()  ← 활성 보드 결정 (main 우선)
-       │     └─ execute_buy() ───┼──────────────────────────→ POST order (매수)
-       │                         │
-       │         ←───────────────┤ H0STCNI0 체결통보 (KRX/NXT/SOR 통합)
-       │                         │
-       │  handle_execution_notice()
-       │  ├─ _order_ticker[order_no] → 정확한 ticker
-       │  ├─ _handle_buy_fill()
-       │  │  ├─ Position 등록 (메모리)
-       │  │  └─ save_position() → DB
-       │  └─ _handle_sell_fill()
-       │     ├─ Position 제거 (메모리)
-       │     ├─ delete_position() → DB
-       │     └─ sold_today.add(ticker)
-       │
-15:20  KRX 메인 신규 매수 중단 + 강제 청산  (TIME_KRX_MAIN_BUY_STOP)
-       │  _force_clear_main_only()
-       │     ← 시간 가드 (2026-05-15 hotfix): 진입 시 >=15:30 이면 즉시 skip
-       │        → 익일 청산 안전망 위임 (재시작 시점이 15:30 이후일 때 KRX 애프터
-       │           SOR 시장가가 APBK3013 거부되던 사고 차단)
-       │     ← VB/LTV 둘 다 POST_NXT 매수 비활성이라 keeps_post_nxt=False
-       │     ← LTV check_force_clear()는 _limit_up_reached 제외 (상한가 모드 보유)
-       │  └─ execute_sell(FORCE_CLEAR) ─────────────────────→ POST order
-       │
-15:30  KRX 메인 마감                          (TIME_KRX_MAIN_CLOSE)
-       │  _phase = "post_nxt_trading"
-       │  _confirm_breakout_open_prices(board="post_nxt")  ← LTV 상한가 모드 보유 +
-       │                                                      donchian 보유 시세 확정용
-       │  구독 유지: VB/LTV 보유 종목 + donchian 보유 (positions HIGH 그룹)
-       │  VB 는 POST_NXT 매수 비활성(main 단독). LTV 는 코드 기본에 post_nxt 가 있고
-       │  실제 활성 보드의 정본은 DB `strategy_config.params.tradable_boards` 다
-       │  손절·트레일링·익일청산 평가는 보드와 무관하게 계속 돈다
-       │
-15:40  POST_NXT 보드 진입                     (session._BOARD_SCHEDULE)
-       │  SessionTracker 보드 = post_nxt  (15:30~15:40 은 MAIN 유지 = 종가 흡수 마진)
-       │  보드 경계의 정본은 `_BOARD_SCHEDULE` 이다. TIME_POST_NXT_OPEN(15:40) 은
-       │  같은 값이지만 런타임 미사용 상수이고, 스케줄러의 전환·시가 확정은 위 15:30 이다
-       │  시장 구간 정본 = `market_state.MARKET_TABLE`
-       │     KRX 15:30~16:00 장후 시간외 종가(K5) · 16:00~20:00 애프터마켓(K6)
-       │     NXT 15:30~15:40 애프터 단일가(N5) · 15:40~20:00 애프터마켓(N6)
-       │
-19:50  애프터 신규 매수 중단                   (TIME_NXT_POST_BUY_STOP)
-       │  buy_disabled = True (모든 활성 전략)
-       │
-20:00  애프터 종료, unsubscribe_all() ─────→ WebSocket 구독 해제
-       │                                       (TIME_NXT_POST_CLOSE)
-       │
-20:00  generate_recommendations()  (전략수정 AI자문 — TIME_RECOMMENDATION)
-       │  ├─ collect_metrics() ──────────────────→ DB trade_history 집계
-       │  ├─ OpenAI Chat Completion ─────────────→ 외부 API
-       │  └─ insert_recommendation() → DB parameter_recommendations (status: pending)
-       │
-20:00:05 _full_universe_load_once()            (TIME_FULL_UNIVERSE_LOAD)
-       │  └─ 전체 유니버스 적재 → DB stock_master (AI자문 직후 5초 마진)
-       │
-       │  ※ 같은 20:00 이 기동 거부 경계   (TIME_SESSION_START_CUTOFF, cycle283 D4)
-       │    — 이 시각 이후 `start()` 는 거부된다. 20:00~21:30 재기동은 그날 20:30
-       │      일봉 적재를 통째로 잃는다(다음 영업일 아침 immediate 가 보정하지만
-       │      `_boot()` 의 prepare 보다 늦다 → `[daily_head_stale]` WARNING)
-       │
-20:05  run_daily_metrics_snapshot()           (TIME_METRICS_SNAPSHOT, cycle283 D5)
-       │  ├─ collect_daily_log_metrics() ─────→ DB system_logs / trade_history
-       │  └─ insert_log_report(model=None) → DB daily_log_reports (1차, OpenAI 미호출)
-       │     ※ api_metrics·strategy_funnel 은 프로세스 메모리 전용 — 유실 노출 90분 → 5분
-       │
-20:30  _stock_master_daily_load_once()        (TIME_STOCK_MASTER_DAILY_LOAD, cycle283 D2)
-       │  └─ KIS FHKST03010100 ──────────────→ DB stock_master_daily (~121초)
-       │     ※ 09-14 KRX 애프터마켓(16:00~20:00) 종료 후 = 그날 거래량이 확정된 뒤
-       │
-21:30  _settle()                              (TIME_SETTLEMENT, cycle283 D3)
-       │  ├─ get_balance() ─────────────────────────────────→ GET inquire-balance
-       │  ├─ upsert_daily_performance() → DB (전략별 + total)
-       │  ├─ generate_daily_log_report() → DB daily_log_reports (OpenAI, 완전판이
-       │  │                                  20:05 1차 행을 upsert 로 덮어쓴다)
-       │  └─ disconnect() ─────→ WebSocket 종료
-       │
-       └── 익일 07:45까지 대기 (주말 자동 건너뜀)
-```
+
+| 시각 | 상수 | 세부 |
+|------|------|------|
+| 07:45 | `TIME_AUTO_START` | `_boot()` 는 `start()` 안에서 즉시 돈다 — 07:45 자동 기동이면 그 직후. `TIME_BOOT`(07:55) 는 런타임 미사용 상수다. `_load_strategy_config()` 는 `tradable_boards` / `k_value_*` / `exchange` 를 포함해 읽는다 |
+| 07:59 | `TIME_PRESUBSCRIBE` | `subscribe(H0NXMKO0, "")` 는 실전 한정(NXT 장운영정보). `tick_tr_id_for(t)` 채널 = cycle294 — 프리장 NXT 전용 `H0NXCNT0` / 정규장+애프터 KRX 전용 `H0STCNT0`. 통합 `H0UNCNT0` 는 킬스위치 off 에서만. 유니버스가 비었을 때의 `prepare()` 재실행은 KIS API 일시장애 대비다 |
+| 08:00 | `TIME_PRE_NXT_OPEN` | `_execute_next_day_clear()` 는 비차단(`NEXT_DAY_STABILIZE_SECS=30s` 안정화)이고 다음 영업일 NXT 프리 시가에서 청산한다(Q2=B). 시가 확정은 0.5초/5초 폴링. LTV 는 `k_value_nxt_pre` 적용. VB 는 `DEFAULT_TRADABLE_BOARDS=("main",)` — 프리장 매수 없음 |
+| 09:00:05 | `TIME_KRX_OPEN_CONFIRM` | 보드별 별도 시가. `k_value_krx_main` 적용 |
+| 09:30 | — | 실시간 체결가는 `H0STCNT0` KRX 전용 / `H0NXCNT0` NXT 전용 — 47필드 동일, 한 파서. `_resolve_active_board()` 가 활성 보드를 결정한다(main 우선). 체결통보는 `_order_ticker[order_no]` 로 정확한 ticker 를 잡는다 |
+| 15:20 | `TIME_KRX_MAIN_BUY_STOP` | `_force_clear_main_only()` 시간 가드(2026-05-15 hotfix): 진입 시 >=15:30 이면 즉시 skip → 익일 청산 안전망 위임(재시작 시점이 15:30 이후일 때 KRX 애프터 SOR 시장가가 APBK3013 거부되던 사고 차단). VB/LTV 둘 다 POST_NXT 매수 비활성이라 `keeps_post_nxt=False`. LTV `check_force_clear()` 는 `_limit_up_reached` 제외(상한가 모드 보유) |
+| 15:30 | `TIME_KRX_MAIN_CLOSE` | post_nxt 시가 확정은 LTV 상한가 모드 보유 + donchian 보유 시세 확정용. 구독 유지 = VB/LTV 보유 종목 + donchian 보유(positions HIGH 그룹). VB 는 POST_NXT 매수 비활성(main 단독). LTV 는 코드 기본에 post_nxt 가 있고 실제 활성 보드의 정본은 DB `strategy_config.params.tradable_boards` 다. 손절·트레일링·익일청산 평가는 보드와 무관하게 계속 돈다 |
+| 15:40 | `session._BOARD_SCHEDULE` | SessionTracker 보드 = post_nxt (15:30~15:40 은 MAIN 유지 = 종가 흡수 마진). 보드 경계의 정본은 `_BOARD_SCHEDULE` 이다. `TIME_POST_NXT_OPEN`(15:40) 은 같은 값이지만 런타임 미사용 상수이고, 스케줄러의 전환·시가 확정은 위 15:30 이다. 시장 구간 정본 = `market_state.MARKET_TABLE` — KRX 15:30~16:00 장후 시간외 종가(K5) · 16:00~20:00 애프터마켓(K6) · NXT 15:30~15:40 애프터 단일가(N5) · 15:40~20:00 애프터마켓(N6) |
+| 19:50 | `TIME_NXT_POST_BUY_STOP` | `buy_disabled = True` (모든 활성 전략) |
+| 20:00 | `TIME_NXT_POST_CLOSE` · `TIME_RECOMMENDATION` | 애프터 종료와 구독 해제, 이어서 전략수정 AI자문 |
+| 20:00:05 | `TIME_FULL_UNIVERSE_LOAD` | AI자문 직후 5초 마진. 같은 20:00 이 기동 거부 경계(`TIME_SESSION_START_CUTOFF`, cycle283 D4)다 — 이 시각 이후 `start()` 는 거부된다. 20:00~21:30 재기동은 그날 20:30 일봉 적재를 통째로 잃는다(다음 영업일 아침 immediate 가 보정하지만 `_boot()` 의 prepare 보다 늦다 → `[daily_head_stale]` WARNING) |
+| 20:05 | `TIME_METRICS_SNAPSHOT` (cycle283 D5) | `api_metrics`·`strategy_funnel` 은 프로세스 메모리 전용 — 유실 노출 90분 → 5분 |
+| 20:30 | `TIME_STOCK_MASTER_DAILY_LOAD` (cycle283 D2) | 09-14 KRX 애프터마켓(16:00~20:00) 종료 후 = 그날 거래량이 확정된 뒤 |
+| 21:30 | `TIME_SETTLEMENT` (cycle283 D3) | 일일 로그 보고서 완전판(OpenAI)이 20:05 1차 행을 upsert 로 덮어쓴다 |
 
 ---
 
 ## 6. 체결통보 처리 시퀀스
 
-```
-KIS WebSocket                handler.py              OrderEngine
-─────────────────────────────────────────────────────────────────
-H0STCNI0 수신 ──────→ dispatch_message()
-(암호화된 payload)     │
-                       ├─ AES-256-CBC 복호화
-                       │  (iv/key: 구독 시 수신)
-                       │
-                       ├─ fields = payload.split("^")
-                       │  order_no = fields[2]
-                       │  side = fields[4]  (01:매도, 02:매수)
-                       │  exec_type = fields[13]
-                       │
-                       ├─ exec_type != "2" → 무시 (접수통보)
-                       │
-                       └─ _on_execution() ──────→ handle_execution_notice()
-                                                  │
-                                                  ├─ ticker = _order_ticker[order_no]
-                                                  │  (체결통보 ticker 필드 무시)
-                                                  │
-                                                  ├─ BUY → _handle_buy_fill()
-                                                  │  ├─ Position 생성/갱신
-                                                  │  ├─ pending_buys 제거
-                                                  │  ├─ DB positions 저장
-                                                  │  └─ trade_history COMPLETED
-                                                  │
-                                                  └─ SELL → _handle_sell_fill()
-                                                     ├─ 손익 계산 (체결가 - 매수가) × 수량
-                                                     ├─ Position 삭제
-                                                     ├─ DB positions 삭제
-                                                     ├─ sold_today 등록
-                                                     ├─ _selling 해제
-                                                     └─ trade_history COMPLETED
-                                                        (UPDATE 0건이면 → COMPLETED 직접 INSERT
-                                                         + _completed_orders.add(order_no))
+```mermaid
+sequenceDiagram
+    participant K as KIS WebSocket
+    participant H as handler.py
+    participant O as OrderEngine
+
+    K->>H: H0STCNI0 수신 (암호화된 payload) → dispatch_message()
+    Note over H: AES-256-CBC 복호화<br/>(iv/key: 구독 시 수신)
+    Note over H: fields = payload.split("^")<br/>order_no = fields[2]<br/>side = fields[4] (01:매도, 02:매수)<br/>exec_type = fields[13]
+    alt exec_type != "2"
+        Note over H: 무시 (접수통보)
+    else exec_type == "2"
+        H->>O: _on_execution() → handle_execution_notice()
+        Note over O: ticker = _order_ticker[order_no]<br/>(체결통보 ticker 필드 무시)
+        alt BUY
+            Note over O: _handle_buy_fill()<br/>Position 생성/갱신<br/>pending_buys 제거<br/>DB positions 저장<br/>trade_history COMPLETED
+        else SELL
+            Note over O: _handle_sell_fill()<br/>손익 계산 (체결가 - 매수가) × 수량<br/>Position 삭제<br/>DB positions 삭제<br/>sold_today 등록<br/>_selling 해제<br/>trade_history COMPLETED<br/>(UPDATE 0건이면 → COMPLETED 직접 INSERT<br/>+ _completed_orders.add(order_no))
+        end
+    end
 ```
 
 ### 체결통보 선행 race 가드
@@ -428,22 +396,25 @@ H0STCNI0 수신 ──────→ dispatch_message()
 시장가 즉시체결 시 `H0STCNI0` 체결통보가 KIS REST 응답보다 먼저 도착하는 경우가 있다.
 이 시점에는 `_order_ticker[order_no]` 매핑도, `trade_history`의 PENDING row도 아직 없다.
 
-```
-정상 흐름                            race 흐름
-────────────                         ──────────
-place_order() 응답 도착              체결통보 먼저 도착
-  ↓                                    ↓
-insert_trade(PENDING) + 매핑 등록      payload ticker로 우회 처리
-  ↓                                    ↓
-체결통보 도착                          update_trade_status → 0건 (PENDING 없음)
-  ↓                                    ↓
-update_trade_status → 1건 (COMPLETED) COMPLETED 직접 INSERT + _completed_orders.add
-                                       ↓
-                                     place_order() 응답 늦게 도착
-                                       ↓
-                                     execute_*가 _completed_orders 체크 → PENDING INSERT 생략
-                                       ↓
-                                     _completed_orders.discard(order_no)
+```mermaid
+%%{init: {"flowchart": {"wrappingWidth": 360}}}%%
+flowchart LR
+    subgraph NORMAL["정상 흐름"]
+        direction TB
+        N1["place_order() 응답 도착"] --> N2["insert_trade(PENDING) + 매핑 등록"]
+        N2 --> N3["체결통보 도착"]
+        N3 --> N4["update_trade_status → 1건 (COMPLETED)"]
+    end
+    subgraph RACE["race 흐름"]
+        direction TB
+        R1["체결통보 먼저 도착"] --> R2["payload ticker로 우회 처리"]
+        R2 --> R3["update_trade_status → 0건 (PENDING 없음)"]
+        R3 --> R4["COMPLETED 직접 INSERT + _completed_orders.add"]
+        R4 --> R5["place_order() 응답 늦게 도착"]
+        R5 --> R6["execute_*가 _completed_orders 체크 → PENDING INSERT 생략"]
+        R6 --> R7["_completed_orders.discard(order_no)"]
+    end
+    NORMAL ~~~ RACE
 ```
 
 → 양쪽 흐름 모두 `trade_history`에 단일 COMPLETED row만 남는다.
@@ -452,25 +423,23 @@ update_trade_status → 1건 (COMPLETED) COMPLETED 직접 INSERT + _completed_or
 
 ## 7. 포지션 복구 시퀀스 (서버 재기동)
 
-```
-_boot()
-│
-├─ 1차: DB positions 테이블 로드
-│  │
-│  ├─ KIS 잔고에 있는 종목만 복구
-│  │  └─ Position(buy_price, strategy_id, buy_date) 정확한 값
-│  │
-│  └─ KIS 잔고에 없는 DB 레코드 삭제
-│     (이미 매도 완료된 종목)
-│
-├─ 2차: KIS 잔고에 있지만 DB에 없는 종목 보완
-│  │
-│  ├─ trade_history에서 전략(strategy) 조회
-│  ├─ KIS 주문체결내역에서 매수일/매수가 조회
-│  ├─ Position 등록 (메모리 + DB)
-│  └─ 로그: "KIS 잔고 보완 복구"
-│
-└─ trade_history PENDING → COMPLETED 일괄 갱신
+```mermaid
+%%{init: {"flowchart": {"wrappingWidth": 360}}}%%
+flowchart TD
+    B["_boot()"] --> P1
+    subgraph P1["1차: DB positions 테이블 로드"]
+        direction TB
+        P1a["KIS 잔고에 있는 종목만 복구<br/>Position(buy_price, strategy_id, buy_date) 정확한 값"]
+        P1b["KIS 잔고에 없는 DB 레코드 삭제<br/>(이미 매도 완료된 종목)"]
+    end
+    P1 --> P2
+    subgraph P2["2차: KIS 잔고에 있지만 DB에 없는 종목 보완"]
+        direction TB
+        P2a["trade_history에서 전략(strategy) 조회"] --> P2b["KIS 주문체결내역에서 매수일/매수가 조회"]
+        P2b --> P2c["Position 등록 (메모리 + DB)"]
+        P2c --> P2d["로그: #quot;KIS 잔고 보완 복구#quot;"]
+    end
+    P2 --> P3["trade_history PENDING → COMPLETED 일괄 갱신"]
 ```
 
 ---
@@ -479,64 +448,84 @@ _boot()
 
 ### 8.1 상한가 모멘텀
 
-```
-on_tick(ticker, current_price)
-│
-├─ prev_rate = _prev_prdy_rate[ticker]   # 이전 틱 등락률
-├─ curr_rate = (current_price - prev_close) / prev_close × 100
-│
-├─ 조건: prev_rate < 29% AND curr_rate >= 29% AND curr_rate < 30%
-│         ↑ 돌파 순간        ↑ 29% 이상         ↑ 상한가 제외
-│
-├─ 추가 체크:
-│  ├─ has_position? → 건너뜀
-│  ├─ is_buy_pending? → 건너뜀
-│  ├─ is_sold_today? → 건너뜀 (당일 재매수 차단)
-│  ├─ is_max_positions? → 건너뜀 (positions + pending_buys 합산)
-│  └─ registry.is_ticker_held_by_any? → 건너뜀 (타 전략 중복)
-│
-└─ Signal.BUY → execute_buy(시장가)
+```mermaid
+%%{init: {"flowchart": {"wrappingWidth": 360}}}%%
+flowchart TD
+    T["on_tick(ticker, current_price)"] --> PR["prev_rate = _prev_prdy_rate[ticker]<br/>(이전 틱 등락률)"]
+    PR --> CR["curr_rate = (current_price - prev_close) / prev_close × 100"]
+    CR --> C{"조건<br/>prev_rate #60; 29% (돌파 순간)<br/>AND curr_rate #62;= 29% (29% 이상)<br/>AND curr_rate #60; 30% (상한가 제외)"}
+    C -->|"충족"| E1
+    subgraph CHK["추가 체크"]
+        direction TB
+        E1{"has_position?"} -->|"아니오"| E2{"is_buy_pending?"}
+        E2 -->|"아니오"| E3{"is_sold_today?<br/>(당일 재매수 차단)"}
+        E3 -->|"아니오"| E4{"is_max_positions?<br/>(positions + pending_buys 합산)"}
+        E4 -->|"아니오"| E5{"registry.is_ticker_held_by_any?<br/>(타 전략 중복)"}
+    end
+    E1 -->|"예"| SKIP["건너뜀"]
+    E2 -->|"예"| SKIP
+    E3 -->|"예"| SKIP
+    E4 -->|"예"| SKIP
+    E5 -->|"예"| SKIP
+    E5 -->|"아니오"| BUY["Signal.BUY → execute_buy(시장가)"]
 ```
 
 ### 8.2 변동성 돌파 (보드별 분리 — Phase 5 Q1=C)
 
+```mermaid
+%%{init: {"flowchart": {"wrappingWidth": 360}}}%%
+flowchart TD
+    subgraph PREP["prepare() 단계"]
+        direction TB
+        P1["_scan_universe(): stock_master.list_by_filter<br/>(DB 단일 조회, 사이클 108<br/>— 거래량순위 API 폐기, KIS 호출 0건)"]
+        P2["get_recent_daily_normalized(): DB 우선 일봉<br/>(사이클 173, 락/신선도/부족 시 KIS 폴백)"]
+        P3["K값 = avg(노이즈 비율)<br/>= avg(1 - |종가-시가| / (고가-저가))"]
+        P4["target_offset_base = 전일 Range × K<br/>← 보드별 K 곱 전 기본값"]
+        P5["ticker_prev_close[ticker] = candles[0].stck_clpr<br/>(전일 종가 사전 등록)"]
+        P6["_targets[ticker] = {target_offset_base, k, prev_range, boards: {}}"]
+        P1 --> P2 --> P3 --> P4 --> P5 --> P6
+    end
+
+    subgraph OPEN["보드별 시가 확정 — on_open_price_confirmed(ticker, open_price, board)"]
+        direction TB
+        O1["k_mult = params[f#quot;k_value_{board}#quot;]<br/>(main / nxt_pre / nxt_post)"]
+        O2["target_offset = target_offset_base × k_mult"]
+        O3["_targets[ticker][#quot;boards#quot;][board] = {open_price, target_price, target_offset}"]
+        O1 --> O2 --> O3
+    end
+
+    subgraph TRIG["보드별 시가 확정 호출 시점"]
+        direction TB
+        T1["08:00 NXT 프리 진입<br/>_confirm_breakout_open_prices(board=#quot;pre_nxt#quot;)"]
+        T2["09:00:05 KRX 메인 시가<br/>_confirm_breakout_open_prices(board=#quot;main#quot;)<br/>← 보드별 별도 시가"]
+        T3["15:30 KRX 메인 마감 직후<br/>_confirm_breakout_open_prices(board=#quot;post_nxt#quot;) (필요 시)"]
+        T1 ~~~ T2
+        T2 ~~~ T3
+    end
+
+    subgraph TICK["on_tick(ticker, current_price)"]
+        direction TB
+        K1["session_tracker.is_tradable(strategy)<br/>← Phase 8 보드 가드 (RiskManager)"]
+        K2["board = _resolve_active_board()<br/>← main 우선 → post_nxt → pre_nxt"]
+        K3["prev_price = _prev_price[ticker][board]<br/>(보드별 이전 틱)"]
+        K4{"prev_price #60; boards[board].target_price<br/>AND current_price #62;= target_price<br/>(보드별 돌파 순간)"}
+        K5["동일 체크: position, pending, sold_today, max_positions"]
+        K6["Signal.BUY → execute_buy(시장가)"]
+        K1 --> K2 --> K3 --> K4
+        K4 -->|"충족"| K5
+        K5 --> K6
+    end
+
+    PREP --> OPEN
+    TRIG --> OPEN
+    OPEN --> TICK
 ```
-prepare() 단계:
-│
-├─ _scan_universe(): stock_master.list_by_filter (DB 단일 조회, 사이클 108 —
-│    거래량순위 API 폐기, KIS 호출 0건)
-│    ├─ 시총    = raw.hts_avls (억원) JSONB 필터 ≥ min_market_cap
-│    ├─ 거래대금 = raw.acml_tr_pbmn JSONB 필터 ≥ min_trade_amount
-│    └─ 0종목 확정 시 ERROR 로그 + system_logs 기록
-├─ get_recent_daily_normalized(): DB 우선 일봉 (사이클 173, 락/신선도/부족 시 KIS 폴백)
-├─ K값 = avg(노이즈 비율) = avg(1 - |종가-시가| / (고가-저가))
-├─ target_offset_base = 전일 Range × K                  ← 보드별 K 곱 전 기본값
-├─ ticker_prev_close[ticker] = candles[0].stck_clpr     (전일 종가 사전 등록)
-└─ _targets[ticker] = {target_offset_base, k, prev_range, boards: {}}
 
-보드별 시가 확정 (on_open_price_confirmed(ticker, open_price, board)):
-│
-├─ k_mult = params[f"k_value_{board}"]   # main / nxt_pre / nxt_post
-├─ target_offset = target_offset_base × k_mult
-└─ _targets[ticker]["boards"][board] = {open_price, target_price, target_offset}
+`_scan_universe()` 필터:
 
-08:00 NXT 프리 진입:  _confirm_breakout_open_prices(board="pre_nxt")
-09:00:05 KRX 메인 시가: _confirm_breakout_open_prices(board="main")  ← 보드별 별도 시가
-15:30 KRX 메인 마감 직후: _confirm_breakout_open_prices(board="post_nxt")  (필요 시)
-
-on_tick(ticker, current_price)
-│
-├─ session_tracker.is_tradable(strategy)  ← Phase 8 보드 가드 (RiskManager)
-├─ board = _resolve_active_board()         ← main 우선 → post_nxt → pre_nxt
-├─ prev_price = _prev_price[ticker][board]   (보드별 이전 틱)
-│
-├─ 조건: prev_price < boards[board].target_price AND current_price >= target_price
-│         ↑ 보드별 돌파 순간
-│
-├─ 동일 체크: position, pending, sold_today, max_positions
-│
-└─ Signal.BUY → execute_buy(시장가)
-```
+- 시총 = `raw.hts_avls` (억원) JSONB 필터 ≥ `min_market_cap`
+- 거래대금 = `raw.acml_tr_pbmn` JSONB 필터 ≥ `min_trade_amount`
+- 0종목 확정 시 ERROR 로그 + `system_logs` 기록
 
 ---
 
@@ -694,29 +683,31 @@ frontend/src/
 
 ### 대시보드 레이아웃
 
+```mermaid
+%%{init: {"flowchart": {"wrappingWidth": 360}}}%%
+flowchart TB
+    subgraph PAGE["대시보드"]
+        direction TB
+        CP["ControlPanel (시작/정지/재기동)"]
+        TAB["전략 탭 [전체] [상한가 모멘텀(N)] [변동성 돌파(N)]"]
+        SM["ScanMonitor<br/>· 스캔 요약<br/>· 종목 리스트<br/>· VB 타겟가<br/>· 매수 신호"]
+        OM["OrderMonitor<br/>· 투자가능금액<br/>· 매수 대기<br/>· 보유 포지션<br/>· 체결 진행"]
+        BT["BalanceTable<br/>· 예수금/총평가금/순자산/총평가손익 카드<br/>· 잔고 내역 (실시간 시세 + 전략 라벨 + 매도)"]
+        PC["PerformanceCard (운영일수/수익률)"]
+        CH["ProfitChart (일별/월별 수익률 차트)"]
+        LV["LogViewer (실시간 시스템 로그)"]
+        CP ~~~ TAB
+        TAB ~~~ SM
+        TAB ~~~ OM
+        SM ~~~ BT
+        OM ~~~ BT
+        BT ~~~ PC
+        PC ~~~ CH
+        CH ~~~ LV
+    end
 ```
-┌──────────────────────────────────────────────┐
-│  ControlPanel (시작/정지/재기동)               │
-├──────────────────────────────────────────────┤
-│  전략 탭 [전체] [상한가 모멘텀(N)] [변동성 돌파(N)] │
-├──────────────────┬───────────────────────────┤
-│  ScanMonitor     │  OrderMonitor             │
-│  - 스캔 요약     │  - 투자가능금액            │
-│  - 종목 리스트   │  - 매수 대기              │
-│  - VB 타겟가     │  - 보유 포지션            │
-│  - 매수 신호     │  - 체결 진행              │
-├──────────────────┴───────────────────────────┤
-│  BalanceTable                                │
-│  - 예수금/총평가금/순자산/총평가손익 카드       │
-│  - 잔고 내역 (실시간 시세 + 전략 라벨 + 매도)  │
-├──────────────────────────────────────────────┤
-│  PerformanceCard (운영일수/수익률)             │
-├──────────────────────────────────────────────┤
-│  ProfitChart (일별/월별 수익률 차트)           │
-├──────────────────────────────────────────────┤
-│  LogViewer (실시간 시스템 로그)                │
-└──────────────────────────────────────────────┘
-```
+
+위에서 아래로 화면 행 순서다. ScanMonitor(좌)·OrderMonitor(우)만 한 행을 반씩 나눠 쓰고, 나머지 행은 전체 폭이다.
 
 ---
 
@@ -742,17 +733,27 @@ frontend/src/
 
 ## 12. 배포 환경 (AWS EC2)
 
-```
-개발자 PC                    GitHub                     AWS EC2 (서울)
-───────────                  ──────                     ──────────────
-git push ───────────→ CI (Build & Test)
-                      └─ conclusion=success 일 때만 Deploy 가 뜬다 (workflow_run)
-                         ├─ appleboy/ssh-action
-                         └───────────────────────────→ SSH 접속
-                                                       ├─ git pull origin main
-                                                       ├─ supabase/migrations/*.sql psql 적용
-                                                       └─ tools/deploy/compose_up_changed.sh
-                                                          (full / frontend / none — 15.7)
+```mermaid
+flowchart LR
+    subgraph DEV["개발자 PC"]
+        GP["git push"]
+    end
+    subgraph GH["GitHub"]
+        direction TB
+        CI["CI (Build & Test)"]
+        DEP["Deploy"]
+        SA["appleboy/ssh-action"]
+        CI -->|"conclusion=success 일 때만 뜬다 (workflow_run)"| DEP
+        DEP --> SA
+    end
+    subgraph EC2["AWS EC2 (서울)"]
+        direction TB
+        SSH["SSH 접속"] --> PULL["git pull origin main"]
+        PULL --> MIG["supabase/migrations/*.sql psql 적용"]
+        MIG --> CU["tools/deploy/compose_up_changed.sh<br/>(full / frontend / none — 15.7)"]
+    end
+    DEV --> GH
+    GH --> EC2
 ```
 
 ### 인프라 구성
@@ -988,22 +989,34 @@ tick blind — 루트 `CLAUDE.md` 운영 가이드 D6 = cycle232. cycle248 이 �
 
 ### 15.1 0단계 — 현재 (가동 중)
 
+```mermaid
+%%{init: {"flowchart": {"wrappingWidth": 360}}}%%
+flowchart LR
+    FE["frontend<br/>nginx:alpine<br/>SPA + BasicAuth"]
+    subgraph BE["backend (uvicorn 단일 워커)"]
+        direction TB
+        B1["scheduler / session / scanner"]
+        B2["strategies(7) -> risk -> order_engine"]
+        B3["llm_buy_gate (AI 매수평가 — 7전략 shadow)"]
+        B4["recommendation_engine (20:00 자문)"]
+        B5["log_analysis_engine (21:30 분석)"]
+        B6["api/base.py _semaphore = Semaphore(20)"]
+        B1 ~~~ B2
+        B2 ~~~ B3
+        B3 ~~~ B4
+        B4 ~~~ B5
+        B5 ~~~ B6
+    end
+    WS["KIS WebSocket<br/>(시세 · 체결통보)"]
+    REST["KIS REST<br/>(주문 · 잔고 · 일봉)"]
+    DB[("AWS RDS PostgreSQL")]
+    FE -->|"/api"| BE
+    BE <--> WS
+    BE <--> REST
+    BE -->|"asyncpg (db/pg.py)"| DB
 ```
-  +------------------+          +-------------------------------------------+
-  |  frontend        |   /api   |  backend  (uvicorn 단일 워커)             |
-  |  nginx:alpine    |--------->|  scheduler / session / scanner            |
-  |  SPA + BasicAuth |          |  strategies(7) -> risk -> order_engine    |     KIS WebSocket
-  +------------------+          |  llm_buy_gate (AI 매수평가 — 7전략 shadow) |<--> (시세 · 체결통보)
-                                |  recommendation_engine  (20:00 자문)      |
-                                |  log_analysis_engine    (21:30 분석)      |     KIS REST
-                                |  api/base.py  _semaphore = Semaphore(20)  |<--> (주문 · 잔고 · 일봉)
-                                +---------------------+---------------------+
-                                                      | asyncpg (db/pg.py)
-                                                      v
-                                          +------------------------+
-                                          |   AWS RDS PostgreSQL   |
-                                          +------------------------+
-```
+
+KIS REST 와의 연결은 backend 상자 안 `api/base.py` 의 `_semaphore = Semaphore(20)` 을 거친다.
 
 `docker-compose.prod.yml` 의 서비스는 `backend` · `frontend` 둘뿐이다. 위 상자 안의
 모든 이름은 같은 이벤트 루프 위에서 돈다.
@@ -1022,30 +1035,21 @@ tick blind — 루트 `CLAUDE.md` 운영 가이드 D6 = cycle232. cycle248 이 �
 큐로 **재사용할 대상**은 신규 메시지 브로커가 아니라 평가 테이블
 `llm_buy_evaluations`(`supabase/migrations/043_llm_buy_evaluations.sql`)다.
 
-```
-  +------------------+          +-------------------------------------------+
-  |  frontend        |   /api   |  backend  (uvicorn 단일 워커)             |
-  |  nginx + SPA     |--------->|  scheduler / scanner / strategies         |     KIS WS / REST
-  +------------------+          |  risk / order_engine                      |<--> (워커는 쓰지 않는다)
-                                |  execute_buy: place_order 성공 직후       |
-                                |    create_task 안에서 요청 행만 남긴다    |
-                                +---------------------+---------------------+
-                                                      | asyncpg
-                                                      v
-                        +--------------------------------------------------+
-                        |  llm_buy_evaluations   (migration 043)           |
-                        |  지금은 결과 기록 테이블이다 — 큐로 쓰려면       |
-                        |  선점 열(status/claimed_at/attempts) 추가 필요   |
-                        +--------------------------------------------------+
-                             |  미처리 행 선점      ^  결과 UPDATE
-                             v                      |
-                        +--------------------------------------------------+
-                        |  llm_worker  (신규 컨테이너 — 예정)              |
-                        |   stock_master_daily 일봉 조회 (DB)              |
-                        |   -> 지표 -> 프롬프트 -> 모델 호출               |
-                        |   -> 같은 행에 점수 · 근거 · 비용 기입           |
-                        |   KIS 미호출 (api/auth/realtime import 0)        |
-                        +--------------------------------------------------+
+```mermaid
+%%{init: {"flowchart": {"wrappingWidth": 360}}}%%
+flowchart TD
+    FE["frontend<br/>nginx + SPA"]
+    BE["backend (uvicorn 단일 워커)<br/>scheduler / scanner / strategies<br/>risk / order_engine<br/>execute_buy: place_order 성공 직후<br/>create_task 안에서 요청 행만 남긴다"]
+    KIS["KIS WS / REST<br/>(워커는 쓰지 않는다)"]
+    Q["llm_buy_evaluations (migration 043)<br/>지금은 결과 기록 테이블이다 — 큐로 쓰려면<br/>선점 열(status/claimed_at/attempts) 추가 필요"]
+    LW["llm_worker (신규 컨테이너 — 예정)<br/>stock_master_daily 일봉 조회 (DB)<br/>-> 지표 -> 프롬프트 -> 모델 호출<br/>-> 같은 행에 점수 · 근거 · 비용 기입<br/>KIS 미호출 (api/auth/realtime import 0)"]
+    FE -->|"/api"| BE
+    BE <--> KIS
+    BE -->|"asyncpg"| Q
+    Q -->|"미처리 행 선점"| LW
+    LW -->|"결과 UPDATE"| Q
+    classDef planned stroke-dasharray: 5 5
+    class LW planned
 ```
 
 - **얻는 것** — 프롬프트·지표·모델을 **장중에** 고칠 수 있다. 지금은 그 한 줄을 고치려 해도
@@ -1069,16 +1073,15 @@ tick blind — 루트 `CLAUDE.md` 운영 가이드 D6 = cycle232. cycle248 이 �
 
 현재(0단계) 훅 자리는 이렇다 — 1단계는 이 자리를 옮기지 않고 **뒷단만** 뗀다.
 
-```
-  execute_buy  (order_engine.py:251)
-  │
-  ├─ place_order (KIS 접수)
-  ├─ 주문번호 매핑 등록                            ← 동기 영역
-  ├─ llm_buy_gate.observe_order(...)               ← order_engine.py:434
-  │   └─ 래치/캡 확인 → asyncio.create_task(...)   ← llm_buy_gate.py:759
-  │        · 0단계: 같은 프로세스에서 모델 호출
-  │        · 1단계: 이 task 가 요청 행만 남기고 워커가 집어 간다
-  └─ PENDING INSERT
+```mermaid
+%%{init: {"flowchart": {"wrappingWidth": 360}}}%%
+flowchart TD
+    EB["execute_buy (order_engine.py:251)"] --> PO["place_order (KIS 접수)"]
+    PO --> MAP["주문번호 매핑 등록<br/>← 동기 영역"]
+    MAP --> OBS["llm_buy_gate.observe_order(...)<br/>← order_engine.py:434"]
+    OBS --> PI["PENDING INSERT"]
+    OBS --> CT["래치/캡 확인 → asyncio.create_task(...)<br/>← llm_buy_gate.py:759"]
+    CT -.- NOTE["0단계: 같은 프로세스에서 모델 호출<br/>1단계: 이 task 가 요청 행만 남기고 워커가 집어 간다"]
 ```
 
 훅은 여기 한 곳이 아니라 **두 곳**이다 — 위의 주 경로(`:434`)와 시장가 거부 뒤 지정가 폴백
@@ -1093,30 +1096,15 @@ tick blind — 루트 `CLAUDE.md` 운영 가이드 D6 = cycle232. cycle248 이 �
 
 20:00 AI 자문, 21:30 일일 로그 분석, 외부 백테스트 연동을 워커 쪽으로 옮긴다.
 
-```
-  +---------------------------------------------+
-  |  backend  (매매 전용으로 얇아진다)          |
-  |  scheduler / scanner / strategies           |
-  |  risk / order_engine / realtime             |
-  |  ※ 퍼널 캡처는 여기 남는다 (_funnel_steps)  |
-  +---------------------------------------------+
-                        | asyncpg
-                        v
-  +---------------------------------------------+
-  |       AWS RDS PostgreSQL                    |
-  |   parameter_recommendations                 |
-  |   daily_log_reports                         |
-  |   strategy_funnel_snapshots                 |
-  |   backtest_runs                             |
-  +---------------------------------------------+
-        ^  결과 쓰기               |  읽기
-        |                          v
-  +---------------------------------------------+
-  |  llm_worker  (2단계에서 분석 작업 추가)     |
-  |   20:00 AI 자문     recommendation_engine   |
-  |   21:30 로그 분석   log_analysis_engine     |
-  |   외부 백테스트 MCP                         |
-  +---------------------------------------------+
+```mermaid
+%%{init: {"flowchart": {"wrappingWidth": 360}}}%%
+flowchart TD
+    BE["backend (매매 전용으로 얇아진다)<br/>scheduler / scanner / strategies<br/>risk / order_engine / realtime<br/>※ 퍼널 캡처는 여기 남는다 (_funnel_steps)"]
+    DB[("AWS RDS PostgreSQL<br/>parameter_recommendations<br/>daily_log_reports<br/>strategy_funnel_snapshots<br/>backtest_runs")]
+    LW["llm_worker (2단계에서 분석 작업 추가)<br/>20:00 AI 자문 · recommendation_engine<br/>21:30 로그 분석 · log_analysis_engine<br/>외부 백테스트 MCP"]
+    BE -->|"asyncpg"| DB
+    LW -->|"결과 쓰기"| DB
+    DB -->|"읽기"| LW
 ```
 
 - **얻는 것** — 리포트 로직을 장중에 고칠 수 있다. 21:30 정산 시각에 무거운 분석이
@@ -1138,21 +1126,21 @@ tick blind — 루트 `CLAUDE.md` 운영 가이드 D6 = cycle232. cycle248 이 �
 사용자 원안의 "시세 감시(데몬) → 전략 판정 → 주문" 완전 분리다. 아래 도식의 ①~④ 네 곳이
 현재 코드가 **프로세스 안** 자원으로 강제하고 있는 지점이며, 그것이 보류 근거다.
 
-```
-  +------------------+   ticks   +------------------+  orders  +------------------+
-  |  feed daemon     |---------->|  decision proc.  |--------->|  order proc.     |
-  |  WS 구독 · 캐시  |           |  전략 판정       |    ④     |  KIS 주문 접수   |
-  +--------+---------+           +--------+---------+          +--------+---------+
-           |                              |                             |
-           | ③ 체결통보 메인 단일         |                             | ① REST 20/s
-           | ① REST 20/s  ② 토큰 발급     |                             | ② 토큰 발급
-           |   (폴링 · 조건검색도 쓴다)   |                             |
-           +------------------------------+-----------------------------+
-                                          |
-                                          v
-                               +--------------------+
-                               |  AWS RDS Postgres  |
-                               +--------------------+
+```mermaid
+flowchart LR
+    FD["feed daemon<br/>WS 구독 · 캐시"]
+    DP["decision proc.<br/>전략 판정"]
+    OP["order proc.<br/>KIS 주문 접수"]
+    DB[("AWS RDS Postgres")]
+    CF["③ 체결통보 메인 단일<br/>① REST 20/s · ② 토큰 발급<br/>(폴링 · 조건검색도 쓴다)"]
+    CO["① REST 20/s<br/>② 토큰 발급"]
+    FD -->|"ticks"| DP
+    DP -->|"orders ④"| OP
+    FD --> DB
+    DP --> DB
+    OP --> DB
+    FD -.- CF
+    OP -.- CO
 ```
 
 ①②는 **양쪽 기둥에 다 걸린다** — 주문만 REST·토큰을 쓰는 게 아니라 피드·스캔 쪽도 쓴다
@@ -1194,33 +1182,24 @@ tick blind — 루트 `CLAUDE.md` 운영 가이드 D6 = cycle232. cycle248 이 �
 > 이 절은 **승인된 설계가 아니라 방향 기록**이다(1·2·3단계와 같은 지위). "할 것이다" 가 아니라
 > "이렇게 하려면 무엇이 필요하다" 로 읽는다. 아래 코드 사실은 2026-09-15 HEAD 기준 실측이다.
 
-```
-        KIS WebSocket                                        KIS REST
-     (시세 · 체결통보 수신)                        (주문 · 취소 · 조회 · 토큰)
-              |                                                 ^
-              v                                                 |
-  +-----------------------------------+      +----------------------------------+
-  |  W  웹소켓 프로세스               |      |  R  REST 프로세스                |
-  |   수신 · 파싱 · 라우팅만          |      |   _semaphore(20) · 라벨 (18)     |
-  |   approval_key 만 (tokenP 미호출) |      |   _GLOBAL_ISSUE_LOCK · 토큰 캐시 |
-  |   체결통보 = 이 프로세스의 메인   |      |   재시도 · hashkey · 거부 원문   |
-  +----+-------------------------+----+      +---+------------------------+-----+
-       |                         |               ^                        |
-    T1 | md.tick              T2 | exec.notice   | T4 request       T5    | result
-       |                         |               |                        |
-       v                         v               |                        |
-  +--------------------+  +--------------------+ |                        |
-  |  1 시세 · 전략평가 |  |  3 체결 프로세스   | |                        |
-  |   ticker_prices    |<-|   주문확인         | |                        |
-  |   전략 판정·사이징 |T6|   체결처리         | |                        |
-  |   A-ATOMIC 잔존    |  |   trade_history    | |                        |
-  +---------+----------+  +--------------------+ |                        |
-            |                                    |                        |
-            | T3 order.intent                    |                        |
-            v                                    |                        v
-  +------------------------------------------------------------------------------+
-  |  2 주문 프로세스 — 전문 조합 · 시각별 거래소/호가유형 · 취소·재주문 타이머   |
-  +------------------------------------------------------------------------------+
+```mermaid
+%%{init: {"flowchart": {"wrappingWidth": 360}}}%%
+flowchart TB
+    KWS["KIS WebSocket<br/>(시세 · 체결통보 수신)"]
+    KREST["KIS REST<br/>(주문 · 취소 · 조회 · 토큰)"]
+    W["W 웹소켓 프로세스<br/>수신 · 파싱 · 라우팅만<br/>approval_key 만 (tokenP 미호출)<br/>체결통보 = 이 프로세스의 메인"]
+    R["R REST 프로세스<br/>_semaphore(20) · 라벨 (18)<br/>_GLOBAL_ISSUE_LOCK · 토큰 캐시<br/>재시도 · hashkey · 거부 원문"]
+    P1["1 시세 · 전략평가<br/>ticker_prices<br/>전략 판정·사이징<br/>A-ATOMIC 잔존"]
+    P3["3 체결 프로세스<br/>주문확인<br/>체결처리<br/>trade_history"]
+    P2["2 주문 프로세스<br/>전문 조합 · 시각별 거래소/호가유형<br/>취소·재주문 타이머"]
+    KWS --> W
+    R --> KREST
+    W -->|"T1 md.tick"| P1
+    W -->|"T2 exec.notice"| P3
+    P3 -->|"T6"| P1
+    P1 -->|"T3 order.intent"| P2
+    P2 -->|"T4 request"| R
+    R -->|"T5 result"| P2
 ```
 
 도식에 **그리지 않은 화살표가 하나 더 있다** — `1 시세·전략평가 -> R`. donchian
@@ -1353,22 +1332,32 @@ B안이 함께 옮겨야 하는 조각 둘: 사이징 **앞**의 `get_buyable`(R
 
 #### 15.5.5 지연 — 늘어나는 항은 하나, 줄어드는 항이 더 크다
 
-```
-  오늘(0단계) — 프로세스 경계 0. 그러나 사슬 전체가 WS 수신 루프 **안**이다.
-    KIS WS -> _receive_loop -> _handle_tick -> risk.on_tick
-                                                  |  (이하 같은 코루틴 · await 만)
-                                                  v
-                          check_exit_signal -> execute_sell -> place_order
-                                                  |                 |
-                                    stock_master.get        hashkey + 주문
-                                    (RDS 왕복 1)            (KIS 왕복 2 = 220~300ms)
-                                                  |
-        그 세션은 그동안 소켓을 읽지 않는다 = 전 보유 종목 틱 + 체결통보가 줄을 선다
-
-  4단계 — 주문 발사까지 경계 3홉. 대신 수신 루프가 막히지 않는다.
-    KIS WS -> W --T1--> 1 전략평가 --T3--> 2 주문 --T4--> R -> KIS
-              ^                                          |
-              +-- 계속 읽는다 (다른 종목 · 체결통보)     +--T5--> 2 (order_no 회신)
+```mermaid
+%%{init: {"flowchart": {"wrappingWidth": 360}}}%%
+flowchart LR
+    subgraph NOW["오늘(0단계) — 프로세스 경계 0. 그러나 사슬 전체가 WS 수신 루프 안이다"]
+        direction TB
+        a1["KIS WS"] --> a2["_receive_loop"]
+        a2 --> a3["_handle_tick"]
+        a3 --> a4["risk.on_tick"]
+        a4 -->|"이하 같은 코루틴 · await 만"| a5["check_exit_signal"]
+        a5 --> a6["execute_sell"]
+        a6 --> a7["place_order"]
+        a6 -.- a8["stock_master.get<br/>(RDS 왕복 1)"]
+        a7 -.- a9["hashkey + 주문<br/>(KIS 왕복 2 = 220~300ms)"]
+        a4 -.- a10["그 세션은 그동안 소켓을 읽지 않는다<br/>= 전 보유 종목 틱 + 체결통보가 줄을 선다"]
+    end
+    subgraph STAGE4["4단계 — 주문 발사까지 경계 3홉. 대신 수신 루프가 막히지 않는다"]
+        direction TB
+        b1["KIS WS"] --> b2["W"]
+        b2 -->|"T1"| b3["1 전략평가"]
+        b3 -->|"T3"| b4["2 주문"]
+        b4 -->|"T4"| b5["R"]
+        b5 --> b6["KIS"]
+        b2 -->|"계속 읽는다 (다른 종목 · 체결통보)"| b2
+        b5 -->|"T5 (order_no 회신)"| b4
+    end
+    NOW ~~~ STAGE4
 ```
 
 | 항 | 오늘 | 4단계 | 출처 |

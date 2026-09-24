@@ -4,44 +4,28 @@
 
 ## 시스템 아키텍처
 
+```mermaid
+flowchart TB
+    FE["React Frontend<br/>- 대시보드/거래내역<br/>- AI자문 / 설정"]
+    KIS["한국투자증권 (KIS)<br/>- REST: 주문/잔고<br/>- WS: 실시간 시세"]
+    subgraph BE["FastAPI Backend (단일 워커)"]
+        direction LR
+        ROUTES["Routes<br/>trading/<br/>strategies<br/>history<br/>recommend."]
+        ENGINE["Engine<br/>Scheduler<br/>Registry<br/>RiskManager<br/>OrderEngine<br/>TickChannel*<br/>Strategies<br/>├ momentum<br/>├ vol_break<br/>├ long_tail<br/>├ donchian<br/>├ bull_flag<br/>├ vcp_break<br/>└ kojiro"]
+        RT["Realtime<br/>WebsocketPool<br/>(메인+보조 세션)<br/>체결가 H0STCNT0(KRX) /<br/>H0NXCNT0(NXT)<br/>체결통보 H0STCNI0"]
+        AUTH["Auth / Token"]
+        ROUTES --> ENGINE --> RT
+    end
+    RDS[("AWS RDS (PostgreSQL)<br/>asyncpg (src/db/pg.py)")]
+    GPT["OpenAI GPT<br/>(자문 + 로그 분석)"]
+    FE -->|"REST + 5s polling"| BE
+    KIS --- BE
+    BE -->|"async CRUD"| RDS
+    RDS <-->|"20:00"| GPT
+    RDS <-->|"21:30"| GPT
 ```
-            ┌────────────────────────┐                       ┌────────────────────────┐
-            │   React Frontend       │                       │   한국투자증권 (KIS)   │
-            │   - 대시보드/거래내역  │                       │   - REST: 주문/잔고    │
-            │   - AI자문 / 설정      │                       │   - WS:   실시간 시세  │
-            └─────────────┬──────────┘                       └────────┬───────────────┘
-                          │ REST + 5s polling                         │
-                          ▼                                           │
-            ┌─────────────────────────────────────────────────────────┴───┐
-            │                FastAPI Backend (단일 워커)                  │
-            │  ┌────────────┐  ┌──────────────┐  ┌──────────────────────┐ │
-            │  │ Routes     │  │ Engine       │  │ Realtime             │ │
-            │  │ trading/   │→ │ Scheduler    │→ │ WebsocketPool        │ │
-            │  │ strategies │  │ Registry     │  │  (메인+보조 세션)    │ │
-            │  │ history    │  │ RiskManager  │  │ 체결가 H0STCNT0(KRX) │ │
-            │  │ recommend. │  │ OrderEngine  │  │        H0NXCNT0(NXT) │ │
-            │  └────────────┘  │ TickChannel* │  │ 체결통보 H0STCNI0    │ │
-            │                  │ Strategies   │  └──────────────────────┘ │
-            │                  │  ├ momentum  │  ┌──────────────────────┐ │
-            │                  │  ├ vol_break │  │ Auth / Token         │ │
-            │                  │  ├ long_tail │  └──────────────────────┘ │
-            │                  │  ├ donchian  │                           │
-            │                  │  ├ bull_flag │                           │
-            │                  │  ├ vcp_break │                           │
-            │                  │  └ kojiro    │                           │
-            │                  └──────────────┘                           │
-            └──────────────────────────┬──────────────────────────────────┘
-                                       │ async CRUD
-                                       ▼
-                          ┌────────────────────────┐         ┌──────────────┐
-                          │  AWS RDS (PostgreSQL)  │  20:00  │   OpenAI     │
-                          │  asyncpg (src/db/pg.py)│ ◀─────→ │  GPT         │
-                          │  positions / strategy  │  21:30  │  (자문 +     │
-                          │  parameter_recommend.  │ ◀─────→ │   로그 분석) │
-                          │  daily_log_reports     │         └──────────────┘
-                          │  daily_performance     │
-                          └────────────────────────┘
-```
+
+그림의 RDS 에 담기는 주요 테이블 — `positions` · `strategy_config` · `parameter_recommendations` · `daily_log_reports` · `daily_performance`.
 
 \* `TickChannel` 은 시세 채널 결정을 묶어 부르는 이름이고, 실제 모듈은
 `src/engine/tick_channel_clock.py`(전환 시각 계산) · `tick_channel_switch.py`(전환 실행) ·
@@ -312,35 +296,32 @@ KIS_HTS_ID_REAL=실전용_HTS_ID
 > `risk._PRE_MARKET_EXIT_EVAL_STRATEGIES` 에 든 전략(현재 LTV 하나)만 보류 없이 평가한다.
 > 보류하는 것은 **평가**이고 주문이 아니다 — 주문만 미루면 허깨비 신호가 09:00 에 실매도로 바뀐다.
 
+```mermaid
+flowchart TD
+    REG["StrategyRegistry (자금 분배)<br/>순자산 × weight =<br/>전략별 할당 자금"]
+    M["momentum<br/>(상한가)"]
+    VB["volatility_breakout"]
+    LTV["long_tail_volatility"]
+    DC["donchian_swing"]
+    BFB["bull_flag_breakout"]
+    VCP["vcp_breakout<br/>(미네르비니)"]
+    RISK["RiskManager<br/>on_tick(시세)<br/>→ 신호 판단"]
+    ORD["OrderEngine<br/>KIS 주문 실행<br/>포지션 관리"]
+    REG --> M & VB & LTV & DC & BFB & VCP
+    M & VB & LTV & DC & BFB & VCP --> RISK
+    RISK --> ORD
 ```
-                ┌───────────────────────────────────────────────────────────────────────────────────────────┐
-                │                          StrategyRegistry (자금 분배)                                     │
-                │                       순자산 × weight = 전략별 할당 자금                                  │
-                └────┬───────────────┬───────────────┬────────────────┬───────────────┬───────────────┬─────┘
-                     │               │               │                │               │               │
-                     ▼               ▼               ▼                ▼               ▼               ▼
-              ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐
-              │ momentum     │ │ volatility_  │ │ long_tail_   │ │ donchian_    │ │ bull_flag_   │ │ vcp_breakout │
-              │ (상한가)     │ │ breakout     │ │ volatility   │ │ swing        │ │ breakout     │ │ (미네르비니) │
-              ├──────────────┤ ├──────────────┤ ├──────────────┤ ├──────────────┤ ├──────────────┤ ├──────────────┤
-              │ 진입 09:30~  │ │ 진입 09:01:30│ │ 진입 09:01:30│ │ 진입 09:05~  │ │ 진입 09:05~  │ │ 진입 09:05~  │
-              │ 시그널: +29% │ │ 시그널: 시가 │ │ 시그널: 시가 │ │  09:30 시장가│ │   13:00      │ │   14:30      │
-              │   돌파       │ │  + Range×K   │ │  + Range×K   │ │ 시그널: 20일 │ │ 시그널: 폴+  │ │ 시그널: VCP  │
-              │ 손절 -7.5%   │ │ 보드별 손절  │ │ 당일 -3%     │ │   신고가+추세│ │   플래그 돌파│ │   베이스 돌파│
-              │ 익일 청산    │ │ 15:20 강제   │ │ 상한가 도달→ │ │ 손절 -7%     │ │ 손절 -5%     │ │ 손절 -7%     │
-              │ (갭/트레일)  │ │   청산       │ │   익일 청산  │ │ ATR×2 트레일 │ │ 측정된 이동+ │ │ ATR×2+50EMA  │
-              │ 당일 매매    │ │ 당일 매매    │ │ 당일 또는    │ │ 멀티데이     │ │ ATR×2 트레일 │ │   이탈       │
-              │              │ │              │ │ 익일 청산    │ │  (5~15일)    │ │ 5일 시간청산 │ │ 멀티데이     │
-              └──────┬───────┘ └──────┬───────┘ └──────┬───────┘ └──────┬───────┘ └──────┬───────┘ └──────┬───────┘
-                     │                │                │                │                │                │
-                     └────────────────┴────────────────┴────────┬───────┴────────────────┴────────────────┘
-                                                                ▼
-                                                     ┌───────────────┐  ┌───────────────┐
-                                                     │ RiskManager   │  │ OrderEngine   │
-                                                     │ on_tick(시세) │→ │ KIS 주문 실행 │
-                                                     │ → 신호 판단   │  │ 포지션 관리   │
-                                                     └───────────────┘  └───────────────┘
-```
+
+그림 속 전략별 요약(상세 규칙은 아래 각 전략 절):
+
+| 전략 | 진입 | 시그널 | 손절 | 청산·보유 |
+|------|------|--------|------|-----------|
+| `momentum` (상한가) | 09:30~ | +29% 돌파 | -7.5% | 익일 청산 (갭/트레일) · 당일 매매 |
+| `volatility_breakout` | 09:01:30 | 시가 + Range×K | 보드별 손절 | 15:20 강제 청산 · 당일 매매 |
+| `long_tail_volatility` | 09:01:30 | 시가 + Range×K | 당일 -3% | 상한가 도달→익일 청산 · 당일 또는 익일 청산 |
+| `donchian_swing` | 09:05~09:30 시장가 | 20일 신고가+추세 | -7% | ATR×2 트레일 · 멀티데이 (5~15일) |
+| `bull_flag_breakout` | 09:05~13:00 | 폴+플래그 돌파 | -5% | 측정된 이동+ATR×2 트레일 · 5일 시간청산 |
+| `vcp_breakout` (미네르비니) | 09:05~14:30 | VCP 베이스 돌파 | -7% | ATR×2+50EMA 이탈 · 멀티데이 |
 
 ### 전략 A: 상한가 모멘텀 (`momentum`)
 | 구분 | 규칙 |
@@ -684,17 +665,15 @@ auto_stock/
 
 현재 운영 프로세스는 컨테이너 2개다 (`docker-compose.prod.yml`).
 
-```
-            ┌────────────────────┐        ┌──────────────────────────────┐
-            │  frontend          │  /api  │  backend (uvicorn 단일 워커) │        ┌───────────────────┐
-            │  nginx + SPA       │───────▶│  시세 감시 · 전략 판정 ·     │◀──────▶│  KIS OpenAPI      │
-            │  Basic Auth        │        │  주문 · 정산 · 관측이 한 곳  │        │  REST · WebSocket │
-            └────────────────────┘        └───────────────┬──────────────┘        └───────────────────┘
-                                                          │ asyncpg
-                                                          ▼
-                                             ┌────────────────────────┐
-                                             │   AWS RDS PostgreSQL   │
-                                             └────────────────────────┘
+```mermaid
+flowchart LR
+    FE["frontend<br/>nginx + SPA<br/>Basic Auth"]
+    BE["backend (uvicorn 단일 워커)<br/>시세 감시 · 전략 판정 ·<br/>주문 · 정산 · 관측이 한 곳"]
+    KIS["KIS OpenAPI<br/>REST · WebSocket"]
+    RDS[("AWS RDS PostgreSQL")]
+    FE -->|"/api"| BE
+    BE <--> KIS
+    BE -->|"asyncpg"| RDS
 ```
 
 매매에 필요한 모든 일이 한 프로세스 안에 있어서, 프롬프트 한 줄만 고쳐도 backend 전체를
@@ -753,11 +732,13 @@ mkdir -p certbot-www
 ### 자동 배포 (CI/CD)
 `git push origin main` → CI(`CI — Build & Test`) 성공 → Deploy(`workflow_run` 트리거) → EC2 자동 배포.
 
-```
-git push → CI 성공 → Deploy → SSH → EC2
-                                     ├─ git pull
-                                     ├─ psql 로 supabase/migrations/*.sql 순차 적용
-                                     └─ bash tools/deploy/compose_up_changed.sh (모드 판정)
+```mermaid
+flowchart LR
+    PUSH["git push"] --> CI["CI 성공"] --> DEP["Deploy"] -->|"SSH"| EC2
+    subgraph EC2["EC2"]
+        direction TB
+        S1["git pull"] --> S2["psql 로 supabase/migrations/*.sql 순차 적용"] --> S3["bash tools/deploy/compose_up_changed.sh (모드 판정)"]
+    end
 ```
 
 - **CI 가 실패하면 배포는 자동 skip** 된다 (Deploy 조건 = CI `conclusion == success` + `event == push`).
@@ -831,16 +812,38 @@ bash tools/deploy/compose_up_changed.sh   # 자동 배포와 같은 판정 · �
 
 ## 스케줄 — KRX/NXT 통합 운영 (08:00~20:00)
 
-```
- 부팅               NXT 프리           KRX 메인           애프터(NXT→KRX)    저녁 블록
- ──────────────────┼──────────────────┼──────────────────┼──────────────────┼──────────────────
- 07:45~07:59       │08:00~09:00       │09:00~15:40       │15:40~20:00       │20:00~21:30
- 07:45 자동 시작   │08:00 익일 청산   │09:00:05 시가 확정│15:40 NXT 애프터  │20:00 애프터 종료
-       _boot 즉시  │08:00 PRE_NXT 매수│09:30 모멘텀 스캔 │      (매수 LTV)  │20:00 AI자문+적용
- 07:59 사전 구독   │      (LTV)       │15:20 매수 중단   │16:00 KRX 애프터  │20:05 metrics
-                   │                  │      + 강제 청산 │      마켓 개시   │20:30 일봉 적재
-                   │                  │15:30 KRX 마감    │19:50 매수 중단   │21:30 정산+로그
-                   │                  │                  │                  │      분석+정리
+```mermaid
+gantt
+    title KRX/NXT 통합 운영 (08#58;00~20#58;00)
+    dateFormat HH:mm:ss
+    axisFormat %H:%M
+    todayMarker off
+    section 부팅
+    부팅 07#58;45~07#58;59 :boot, 07:45:00, 07:59:00
+    07#58;45 자동 시작 · _boot 즉시 :milestone, 07:45:00, 0m
+    07#58;59 사전 구독 :milestone, 07:59:00, 0m
+    section NXT 프리
+    NXT 프리 08#58;00~09#58;00 :pre, 08:00:00, 09:00:00
+    08#58;00 익일 청산 :milestone, 08:00:00, 0m
+    08#58;00 PRE_NXT 매수 (LTV) :milestone, 08:00:00, 0m
+    section KRX 메인
+    KRX 메인 09#58;00~15#58;40 :main, 09:00:00, 15:40:00
+    09#58;00#58;05 시가 확정 :milestone, 09:00:05, 0m
+    09#58;30 모멘텀 스캔 :milestone, 09:30:00, 0m
+    15#58;20 매수 중단 + 강제 청산 :milestone, 15:20:00, 0m
+    15#58;30 KRX 마감 :milestone, 15:30:00, 0m
+    section 애프터
+    애프터 15#58;40~20#58;00 :post, 15:40:00, 20:00:00
+    15#58;40 NXT 애프터 (매수 LTV) :milestone, 15:40:00, 0m
+    16#58;00 KRX 애프터마켓 개시 :milestone, 16:00:00, 0m
+    19#58;50 매수 중단 :milestone, 19:50:00, 0m
+    section 저녁 블록
+    저녁 블록 20#58;00~21#58;30 :eve, 20:00:00, 21:30:00
+    20#58;00 애프터 종료 :milestone, 20:00:00, 0m
+    20#58;00 AI자문+적용 :milestone, 20:00:00, 0m
+    20#58;05 metrics :milestone, 20:05:00, 0m
+    20#58;30 일봉 적재 :milestone, 20:30:00, 0m
+    21#58;30 정산+로그 분석+정리 :milestone, 21:30:00, 0m
 ```
 
 | 시각 | 동작 |
@@ -872,42 +875,31 @@ bash tools/deploy/compose_up_changed.sh   # 자동 배포와 같은 판정 · �
 
 ### 전략수정 AI자문 사이클
 
-```
-  20:00 (당일)                                            다음 영업일
- ──────────────────────────────────────────────────────────────────►
-  ┌──────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-  │ generate_recom-  │    │  /recommendations │    │ Settings 적용   │
-  │ mendations()     │ ─► │  신규 탭(최근    │ ─► │ → strategy_     │
-  │  trade_history → │    │   target_date)   │    │   config.params │
-  │  metrics 집계 → │    │  status 무관     │    │   갱신          │
-  │  OpenAI GPT →    │    │  pending/applied/│    │  (다음 사이클   │
-  │  validate +      │    │  rejected/expired│    │   부터 반영)    │
-  │  DB INSERT       │    │   배지 표시      │    └─────────────────┘
-  └──────────────────┘    └──────────────────┘
-                                  │
-                                  ▼
-                          ┌──────────────────┐
-                          │  이력 탭         │
-                          │  이전 target_date│
-                          │  + 상태/전략     │
-                          │   필터           │
-                          └──────────────────┘
+```mermaid
+flowchart LR
+    subgraph T0["20:00 (당일)"]
+        A["generate_recommendations()<br/>trade_history →<br/>metrics 집계 →<br/>OpenAI GPT →<br/>validate + DB INSERT"]
+    end
+    B["/recommendations<br/>신규 탭 (최근 target_date)<br/>status 무관<br/>pending/applied/rejected/expired<br/>배지 표시"]
+    D["이력 탭<br/>이전 target_date<br/>+ 상태/전략 필터"]
+    subgraph T1["다음 영업일"]
+        C["Settings 적용<br/>→ strategy_config.params<br/>갱신<br/>(다음 사이클부터 반영)"]
+    end
+    A --> B --> C
+    B --> D
 ```
 
 ### 일일 로그 분석 사이클
 
-```
-  21:30 정산 직후                                                     사용자
- ──────────────────────────────────────────────────────────────────────►
-  ┌────────────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-  │ generate_daily_log_   │    │ /logs (분석 탭)  │    │ 우상단 "지금     │
-  │ report()              │    │ 좌측: 영업일     │    │  분석 실행"     │
-  │  당일 KST 00:00~now   │ ─► │ 우측: 총평 +     │ ◀─ │  버튼 (수동      │
-  │  system_logs 집계 →   │    │ findings + 메트릭│    │  트리거,         │
-  │  trade_history 집계 → │    │ (severity 색상   │    │  영업일당 1건)   │
-  │  OpenAI JSON →        │    │  + category 칩)  │    │                  │
-  │  daily_log_reports    │    │                  │    └─────────────────┘
-  │  upsert (UNIQUE)      │    └──────────────────┘
-  └────────────────────────┘
+```mermaid
+flowchart LR
+    subgraph T0["21:30 정산 직후"]
+        A["generate_daily_log_report()<br/>당일 KST 00:00~now<br/>system_logs 집계 →<br/>trade_history 집계 →<br/>OpenAI JSON →<br/>daily_log_reports upsert (UNIQUE)"]
+    end
+    subgraph T1["사용자"]
+        direction RL
+        C["우상단 #quot;지금 분석 실행#quot; 버튼<br/>(수동 트리거, 영업일당 1건)"] --> B["/logs (분석 탭)<br/>좌측: 영업일<br/>우측: 총평 + findings + 메트릭<br/>(severity 색상 + category 칩)"]
+    end
+    A --> B
 ```
 
