@@ -815,6 +815,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -1902,6 +1903,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -2996,6 +2998,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -4087,6 +4090,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -5177,6 +5181,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -6269,6 +6274,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -7361,6 +7367,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -8455,6 +8462,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -9545,6 +9553,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -10640,6 +10649,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -11747,6 +11757,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -12839,6 +12850,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -13937,6 +13949,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -15043,6 +15056,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -16117,6 +16131,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -17207,6 +17222,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -18299,6 +18315,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -19391,6 +19408,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -20483,6 +20501,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -21576,6 +21595,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -22667,6 +22687,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -23759,6 +23780,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -24851,6 +24873,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -25943,6 +25966,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -27037,6 +27061,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -28132,6 +28157,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -29220,6 +29246,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -30311,6 +30338,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -31405,6 +31433,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -32496,6 +32525,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -33612,6 +33642,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -34685,6 +34716,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -35778,6 +35810,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -36867,6 +36900,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -37960,6 +37994,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -39053,6 +39088,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -40145,6 +40181,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -41237,6 +41274,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -42328,6 +42366,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -43420,6 +43459,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -43724,6 +43764,7 @@ backend:
     - tests/unit/engine/test_cycle258_observer_trace.py
     - tests/unit/engine/test_cycle264_open_source_compare.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_daily_emit_cap.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
     - tests/unit/engine/test_sell_rejection_tracker.py
@@ -45604,6 +45645,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -46696,6 +46738,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -47788,6 +47831,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -48880,6 +48924,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -49973,6 +50018,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -51065,6 +51111,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -52156,6 +52203,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -53316,6 +53364,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -54406,6 +54455,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -55494,6 +55544,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -56587,6 +56638,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -57689,6 +57741,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -58769,6 +58822,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -59861,6 +59915,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -60159,6 +60214,7 @@ backend:
     - tests/unit/engine/test_cycle293_channel_resolver.py
     - tests/unit/engine/test_cycle294_stage3.py
     - tests/unit/engine/test_cycle294b_adversarial_fixes.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -62045,6 +62101,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -63137,6 +63194,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -64229,6 +64287,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -65320,6 +65379,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -66490,6 +66550,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -67653,6 +67714,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -68806,6 +68868,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -69899,6 +69962,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -70991,6 +71055,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -72093,6 +72158,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -73177,6 +73243,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -74270,6 +74337,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -75357,6 +75425,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -75917,6 +75986,7 @@ backend:
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle64_price_filter_scanner_apply.py
@@ -76897,6 +76967,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -78636,6 +78707,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -79728,6 +79800,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -80818,6 +80891,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -81909,6 +81983,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -83003,6 +83078,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -84114,6 +84190,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -85186,6 +85263,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -86296,6 +86374,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -87371,6 +87450,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -87669,6 +87749,7 @@ backend:
     - tests/unit/engine/test_cycle252_stale_watcher_no_feed.py
     - tests/unit/engine/test_cycle252_tester_addenda.py
     - tests/unit/engine/test_cycle293_channel_resolver.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle74_stale_watcher_aggregation.py
     - tests/unit/engine/test_cycle78_memory_leak_prevention.py
     - tests/unit/realtime/test_cycle135_subscribe_grace_period.py
@@ -89554,6 +89635,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -90646,6 +90728,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -91738,6 +91821,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -92834,6 +92918,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -93953,6 +94038,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -95048,6 +95134,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -96138,6 +96225,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -97229,6 +97317,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -98321,6 +98410,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -99414,6 +99504,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -100507,6 +100598,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -101629,6 +101721,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -102708,6 +102801,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -103782,6 +103876,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -104873,6 +104968,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -105236,6 +105332,7 @@ backend:
     direct_tests:
     - tests/unit/engine/test_cycle294_stage3.py
     - tests/unit/engine/test_cycle295_gap_hold_removed.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/routes/test_cycle295_gap_route_surface.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
@@ -107128,6 +107225,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -108218,6 +108316,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -109312,6 +109411,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -110403,6 +110503,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -111494,6 +111595,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -112593,6 +112695,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -113741,6 +113844,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -114833,6 +114937,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -115929,6 +116034,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -117022,6 +117128,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -118113,6 +118220,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -119206,6 +119314,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -120360,6 +120469,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -121605,6 +121715,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -122758,6 +122869,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -123877,6 +123989,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -124951,6 +125064,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -126062,6 +126176,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -126341,6 +126456,7 @@ backend:
     - tests/unit/engine/test_cycle252_tester_addenda.py
     - tests/unit/engine/test_cycle293_channel_resolver.py
     - tests/unit/engine/test_cycle294_stage3.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_observability_logs.py
     - tests/unit/engine/test_order_engine_unsubscribe_on_sell.py
@@ -129618,6 +129734,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -130707,6 +130824,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -131802,6 +131920,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -132891,6 +133010,7 @@ backend:
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle356_sell_post_send_exc_info.py
+    - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -134676,10 +134796,10 @@ frontend:
     - frontend/src/pages/__tests__/MarketState.test.tsx
     - frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
     - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
-generated_at: '2026-09-25T04:33:52.521891+09:00'
+generated_at: '2026-09-25T04:53:11.320664+09:00'
 stats:
   backend_modules: 159
-  backend_tests: 1089
+  backend_tests: 1090
   frontend_modules: 120
   frontend_tests: 98
   unmapped_modules:

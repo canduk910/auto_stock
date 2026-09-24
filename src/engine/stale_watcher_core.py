@@ -156,6 +156,39 @@ _no_feed_held_logged: "KstDailyEmitCap[str]" = KstDailyEmitCap[str]()
 _NO_FEED_HELD_KEY = "no_feed_held"
 
 
+def _is_before_krx_continuous_open(now: datetime) -> bool:
+    """cycle357 — 지금이 KRX 연속체결 시작(K3 REGULAR, 통상 09:00) 이전인가.
+
+    NXT 프리장(N1) 동안 `nxt_tradable=False` 종목은 채널 리졸버가 전환 횟수를
+    아끼려고 **KRX 전용 채널**에 미리 둔다(`src/engine/CLAUDE.md` 「시세 채널」
+    절 — "그 종목은 그 시간 NXT 미거래 + KRX 시가 단일가라 어느 채널이든
+    연속체결 프레임이 없고, KRX 에 두면 09:00 첫 체결을 전환 없이 받는다").
+    그 구간은 KRX 도 시가 단일가라 **어느 채널에 있든** 연속체결 프레임이
+    정의상 0 이다. `[no_feed_held]` 판정을 그 구간에도 돌리면 이 정의상 공백을
+    「무송출」로 오판한다(운영 2026-09-22·23 08:00:1x 실측 거짓 경보).
+
+    경계는 `tick_channel_clock._windows()`(공개 API `market_state.
+    get_market_table` 파생, 시각 리터럴 0건 체인)의 `krx_regular_open` 을
+    재사용한다 — 새 시각 리터럴을 박지 않는다(cycle252 G-252-6 "시간창 리터럴
+    신설 0" 계약 보존). `tick_channel_switch.run_switch_cycle` 이 이미 같은
+    private 헬퍼를 같은 방식으로 부른다(전례, `src/engine/tick_channel_switch.py`).
+
+    판정 실패(표 조회 예외·경계 미확보)는 **판정을 억제하지 않는 방향**으로
+    fail-open 한다 — `False`(= "창 이전이 아니다")를 돌려주면 호출부가 이
+    시정 *전과 byte 동일하게* 평가를 계속한다. 관찰 마커를 죽이는 방향의
+    fail-open 은 관찰 그 자체를 무력화하므로 금지 방향이다.
+    """
+    try:
+        from src.engine import tick_channel_clock as _tick_channel_clock
+
+        krx_regular_open, _pre_end, _krx_end = _tick_channel_clock._windows(now.date())
+        if krx_regular_open is None:
+            return False
+        return now.time() < krx_regular_open
+    except Exception:
+        return False
+
+
 def _maybe_emit_no_feed_held(tickers: set, now: datetime) -> None:
     """HIGH(보유/익일청산) ∩ no_feed 가 비어있지 않으면 WARNING 1회/일.
 
@@ -179,12 +212,20 @@ def _maybe_emit_no_feed_held(tickers: set, now: datetime) -> None:
     판정 실패(출처 미확인·미분류) 또는 전환 실패다. ⚠️ 단 배포 **직후**에는
     계속 비영인 것이 정상이다 — 기본 모드가 `observe`(행위 0)이고, `enforce_low`
     는 HIGH 를 스코프 밖에 두기 때문이다.
+
+    🔴 **cycle357 — KRX 연속체결 창(09:00~) 이전은 판정 자체를 억제한다**
+    (`_is_before_krx_continuous_open`). cap **앞**에 두어 프리장 호출이 cap 을
+    소비하지 않는다 — 09:00 이후 같은 날 진짜 무송출이면 그때 1회/일 cap 이
+    정상 소비된다. 이 게이트는 판정 시점만 좁힐 뿐 HIGH 재등록 등 구독 행위는
+    한 글자도 바꾸지 않는다(호출부·재등록 경로 무접촉).
     """
     try:
+        if _is_before_krx_continuous_open(now):
+            return
         if not _no_feed_held_logged.should_emit(_NO_FEED_HELD_KEY, now=now):
             return
         logger.warning(
-            "[no_feed_held] tickers=%s — WS 프레임 0(KRX 단독, H0UNCNT0 무송출). "
+            "[no_feed_held] tickers=%s — KRX 채널인데 WS 프레임 0(연속체결 미수신). "
             "손절 평가는 REST 폴(donchian/kojiro 60s 09:05~15:20)만. tick 전략 보유면 사각",
             sorted(tickers),
         )

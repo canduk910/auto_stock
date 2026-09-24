@@ -430,8 +430,12 @@ _SRC_TREE_FILES = 156
 #: 🔁 cycle354 재핀 — `scheduler.py`(`_sync_orders_to_db` order_no 매핑 폴백, 사용자
 #: 승인) 변경으로 digest 가 다시 움직였다. 파일 수는 156 로 불변이다. 직전 값 =
 #: `32d7e24ece298fa3283400fbfeb14f02c91c3918ea82997816b271f899e80c98`.
+#: 🔁 cycle357 재핀 — `stale_watcher_core.py`(`[no_feed_held]` 판정을 KRX 연속체결
+#: 창(09:00~) 이전으로 억제 — 새 헬퍼 `_is_before_krx_continuous_open`, 8영역 밖 ·
+#: 사용자 승인 워크리스트 ⑪) 변경으로 digest 가 다시 움직였다. 파일 수는 156 로
+#: 불변이다. 직전 값 = `232a25a939206a92f5351ebed2a865d6e19c5b8d164852fa0b99a0a54c342f96`.
 _SRC_TREE_DIGEST = (
-    "232a25a939206a92f5351ebed2a865d6e19c5b8d164852fa0b99a0a54c342f96"
+    "5909f502708f55e251deca07cb1b68c7623b97d73efaec0345df42c45551a3fc"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
