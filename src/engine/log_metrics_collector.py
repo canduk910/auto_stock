@@ -32,10 +32,16 @@ import src.db.pg as pg
 from src.api.base import get_request_metrics
 from src.db.strategy_funnel import list_snapshots
 from src.db.trade_history import get_today_buy_trades_for_funnel, get_trades_in_range
+from src.engine.daily_emit_cap import KstDailyEmitCap
 
 logger = logging.getLogger(__name__)
 
 KST = timezone(timedelta(hours=9))
+
+# cycle349 (E4) — `[vcp_breakout_events]` WARNING KST 하루 1회(매수 창이 닫힌 뒤 첫 호출).
+# 20:05 1차 스냅샷·20:20 번들·21:30 완전판이 모두 이 모듈을 부르므로 모듈 전역 cap 으로
+# 중복을 막는다.
+_vcp_breakout_events_cap: KstDailyEmitCap = KstDailyEmitCap()
 
 # 패턴 추출용 정규식 — 종목코드(6자리)/숫자/주문번호 등 제거 후 패턴화
 _TICKER_RE = re.compile(r"\b[0-9A-Z]{6}\b")
@@ -602,6 +608,85 @@ async def _collect_strategy_funnel() -> dict[str, dict[str, int]]:
     return funnel
 
 
+#: cycle349 (E4) — VCP `entry_end` 를 못 읽을 때의 매수 창 끝(코드 기본값과 같다).
+_VCP_ENTRY_END_FALLBACK = _dtime(14, 30)
+
+
+def _vcp_entry_end(strat) -> _dtime:
+    """VCP 매수 창 끝(`params["entry_end"]`, "HH:MM"). 읽기·파싱 실패는 14:30."""
+    try:
+        raw = strat.config.params["entry_end"]
+        h, m = str(raw).split(":")
+        return _dtime(int(h), int(m))
+    except Exception:
+        return _VCP_ENTRY_END_FALLBACK
+
+
+async def _collect_vcp_breakout_events(target_date: date) -> dict | None:
+    """cycle349 (E4) — VCP ③ 하루 돌파 사건 요약을 레지스트리에서 읽는다.
+
+    전략 부재·조회 실패·요약 실패는 전부 `None`(그 키만) — 나머지 metrics 는 무영향.
+    요약 dict 에는 `final` 을 붙인다 — 1 = 그날 매수 창(`entry_end`)이 닫힌 뒤의 값
+    (더 바뀌지 않는다, 지난 날짜 포함), 0 = 창이 아직 열려 있어 중간값이다.
+    WARNING 줄은 `target_date == 오늘(KST)` ∧ 창이 닫힌 뒤에만, 모듈 전역 cap 으로
+    KST 하루 1회 찍는다. 창이 열린 동안의 호출(낮의 번들 GET·수동 run)과 과거 날짜
+    호출은 cap 을 소비하지 않는다 — 소비하면 그 중간값이 그날의 결과 줄이 된다.
+    추가 I/O 0 — 레지스트리 조회·`breakout_event_summary` 는 둘 다 메모리 읽기다.
+    """
+    try:
+        from src.engine.scheduler import trading_scheduler
+
+        strat = trading_scheduler.registry.get("vcp_breakout")
+    except Exception:
+        logger.debug("[vcp_breakout_events_error] 레지스트리 조회 실패 graceful", exc_info=True)
+        return None
+    if strat is None:
+        return None
+
+    try:
+        summary = strat.breakout_event_summary(target_date)
+    except Exception:
+        logger.debug("[vcp_breakout_events_error] 요약 조회 실패 graceful", exc_info=True)
+        return None
+
+    try:
+        now_real_kst = datetime.now(KST)
+        today = now_real_kst.date()
+        window_closed = target_date < today or (
+            target_date == today and now_real_kst.time() > _vcp_entry_end(strat)
+        )
+        if isinstance(summary, dict):
+            summary = {**summary, "final": 1 if window_closed else 0}
+        if target_date == today and window_closed:
+            cap_key = "vcp_breakout_events"
+            if _vcp_breakout_events_cap.should_emit(cap_key, now=now_real_kst):
+                status = summary.get("status") if isinstance(summary, dict) else None
+                if status == "ok":
+                    crossed_tickers = summary.get("crossed_tickers") or []
+                    logger.warning(
+                        "[vcp_breakout_events] date=%s status=ok crossed=%s/%s "
+                        "observed=%s unobserved=%s run_at=%s window=%s partial=%d "
+                        "crossed_tickers=%s",
+                        target_date.isoformat(),
+                        summary.get("crossed", 0), summary.get("candidates", 0),
+                        summary.get("observed", 0),
+                        len(summary.get("unobserved_tickers") or []),
+                        summary.get("run_at"), summary.get("window"),
+                        1 if summary.get("partial") else 0,
+                        ",".join(crossed_tickers) if crossed_tickers else "-",
+                    )
+                else:
+                    logger.warning(
+                        "[vcp_breakout_events] date=%s status=%s",
+                        target_date.isoformat(), status,
+                    )
+                _vcp_breakout_events_cap.mark_emitted(cap_key, now=now_real_kst)
+    except Exception:
+        logger.debug("[vcp_breakout_events_error] emit 실패 graceful", exc_info=True)
+
+    return summary
+
+
 async def collect_daily_log_metrics(
     target_date: date, *, now_kst: datetime | None = None
 ) -> dict:
@@ -611,9 +696,10 @@ async def collect_daily_log_metrics(
     20:20 KST 클라우드 루틴이 `GET /api/log-reports/bundle` 로 읽는 번들이 이 함수의
     반환값과 **같은 것**이어야 병행 기간(OpenAI ↔ Claude) 비교가 성립한다.
 
-    반환 dict 의 **키 집합·순서**는 종전 `generate_daily_log_report` 의 `metrics` 와
-    정확히 같다 — 이 dict 는 그대로 (a) OpenAI 프롬프트 본문이고 (b)
-    `daily_log_reports.metrics` JSONB 다.
+    반환 dict 의 **키 집합·순서**는 계약이다 — 이 dict 는 그대로 (a) OpenAI 프롬프트
+    본문이고 (b) `daily_log_reports.metrics` JSONB 다. cycle349 가 끝에
+    `"vcp_breakout_events"` 1키를 추가했다(VCP ③ 관찰 전용, 기존 9키는 무변경) —
+    새 키를 더할 때는 항상 **끝에** 추가하고 기존 순서를 흔들지 않는다.
 
     Args:
         target_date: 집계 대상 영업일.
@@ -666,6 +752,13 @@ async def collect_daily_log_metrics(
         logger.debug("[portfolio_risk] 스냅샷 빌드 실패 graceful", exc_info=True)
         portfolio_risk_snapshot = None
 
+    # cycle349 (E4) — VCP ③ 하루 돌파 사건 요약. 실패는 이 키만 None(never-raise).
+    try:
+        vcp_breakout_events = await _collect_vcp_breakout_events(target_date)
+    except Exception:
+        logger.debug("[vcp_breakout_events_error] 수집 실패 graceful", exc_info=True)
+        vcp_breakout_events = None
+
     metrics = {
         "target_date": target_date.isoformat(),
         "logs": log_metrics,
@@ -676,6 +769,7 @@ async def collect_daily_log_metrics(
         "next_day_clear": next_day_clear_metrics,
         "portfolio_risk_snapshot": portfolio_risk_snapshot,  # 신규 (사이클 H, 관찰 전용)
         "tick_blind": tick_blind_metrics,  # 신규 (cycle234 — 프로세스 부재 blind)
+        "vcp_breakout_events": vcp_breakout_events,  # 신규 (cycle349, VCP ③ 관찰 전용)
     }
 
     logger.info(

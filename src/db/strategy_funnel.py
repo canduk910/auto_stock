@@ -84,7 +84,9 @@ async def insert_snapshot(
         - 사이클 145 시정 = `.upsert(on_conflict="target_date,strategy_id,step_no")` 전환
           + migration 035 영역 영구 영속 UNIQUE 변경 (snapshot_at 키 폐기).
         - 같은 (target_date, strategy_id, step_no) 영역 영구 영속 = 최신 값 영구 영속 1 row.
-        - snapshot_at 영역 영구 영속 = DB DEFAULT now() (UPSERT 시 자동 갱신).
+        - snapshot_at = DB DEFAULT now() (migration 030). INSERT 때만 들어가고 아래
+          `DO UPDATE SET` 에 없어 최초 INSERT 시각에 고정된다 — 행의 값이 언제
+          쓰였는지는 알 수 없다.
         - 매매 안전성 무영향 (진단/추적 영역 한정).
     """
     if not strategy_id:

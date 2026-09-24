@@ -34,6 +34,7 @@ import logging
 from datetime import date, datetime, time, timedelta, timezone
 
 from src.api.condition import add_business_days
+from src.engine.daily_emit_cap import KstDailyEmitCap
 from src.engine.strategy_base import FunnelStage, Signal, StrategyBase, StrategyConfig
 
 # vcp_breakout 은 멀티데이 — `Position._MULTIDAY_STRATEGIES` 리터럴에 정적 선언됨
@@ -272,6 +273,12 @@ class VcpBreakoutStrategy(StrategyBase):
         # 순간**이 무장 트리거다(retention 신설 금지 — 진입 임계 신설은 표본 보호와
         # 충돌, 자문 Q4). 엔트리 = {armed_at, armed_date, base_high, base_low}.
         self._vol_latch: dict[str, dict] = {}
+        # cycle349 — ① 오전 후보별 돌파선 거리 관측(D2/D4) 하루 1회 cap(전략 인스턴스
+        # 소유, 모듈 전역 금지) + ③ 하루 돌파 사건 watch(E1). 관측 전용 — 매매 행위 0.
+        self._breakout_distance_cap: KstDailyEmitCap = KstDailyEmitCap()
+        self._breakout_watch: dict | None = None
+        # cycle349 F3 — run 요약 줄 「직전과 같으면 생략」 비교 키. (kst_date, content_key).
+        self._breakout_summary_last: tuple | None = None
 
     # ------------------------------------------------------------------
     # prepare — 일봉 100일(prepare cap) → 추세/베이스/pullback/거래량 수축 자동 검출
@@ -373,6 +380,10 @@ class VcpBreakoutStrategy(StrategyBase):
             logger.info("VCP 유니버스 0종목")
             self._scanned_tickers = []
             stats["last_run_at"] = datetime.now(KST).isoformat()
+            try:
+                self._observe_breakout_distance({})
+            except Exception:
+                logger.debug("[vcp_breakout_distance_failed] 관측 실패 graceful", exc_info=True)
             return
 
         today_str = datetime.now(KST).strftime("%Y%m%d")
@@ -413,6 +424,9 @@ class VcpBreakoutStrategy(StrategyBase):
         base_excluded: list[dict] = []
         pullback_excluded: list[dict] = []
         volume_contraction_excluded: list[dict] = []
+        # cycle349 — ① 오전 후보별 돌파선 거리 관측용 참조(D5, read-only). 새 계산·
+        # 새 I/O 0 — `_candidates[ticker]=...` 대입 직후 candles/base 참조만 담는다.
+        _dist_refs: dict[str, dict] = {}
 
         from src.engine.strategy_base import _resolve_ticker_name
 
@@ -573,6 +587,9 @@ class VcpBreakoutStrategy(StrategyBase):
                     "prev_close": prev_close,
                     "avg_volume_20": base["avg_volume_20"],
                 }
+                # cycle349 (D5) — read-only 참조만 담는다. `_candidates` 엔트리에
+                # 키를 추가하지 않는다(UI get_targets_status 등으로 새는 것 방지).
+                _dist_refs[ticker] = {"candles": candles, "base": base}
                 stats["final_prepared"] += 1
                 final_prepared_tickers.append(ticker)  # 사이클 39
             except Exception as e:
@@ -640,6 +657,10 @@ class VcpBreakoutStrategy(StrategyBase):
             stats["trend_filter_pass"], stats["base_pass"],
             stats["pullback_pass"], stats["volume_contraction_pass"],
         )
+        try:
+            self._observe_breakout_distance(_dist_refs)
+        except Exception:
+            logger.debug("[vcp_breakout_distance_failed] 관측 실패 graceful", exc_info=True)
 
     def _check_trend_filter(self, candles: list[dict], *,
                              effective_ema_long: int | None = None) -> dict | None:
@@ -1099,12 +1120,258 @@ class VcpBreakoutStrategy(StrategyBase):
             return  # 관찰기 자기실패가 prepare 를 막으면 안 된다
 
     # ------------------------------------------------------------------
+    # cycle349 — VCP 관측 3종(①③, ② 보류). 관측 전용 — 매매 행위 0.
+    # 명세 = `_workspace/red/cycle349_vcp_observe_spec.md`.
+    # ------------------------------------------------------------------
+    def _observe_breakout_distance(self, refs: dict[str, dict]) -> None:
+        """① D1~D5 — 오전 후보별 돌파선 거리 + run 요약 + ③ E1 watch 교체.
+
+        예외 경계(D6) — 본체 전체를 감싸는 try 는 없다. 종목 단위 계산과 요약 줄은
+        각자 try 라 한 종목 실패는 그 줄만 생략된다. 그 밖(파라미터 읽기·watch 교체)
+        에서 난 예외는 호출부 2곳(prepare 정상 끝 · `if not tickers:` 조기 반환)의
+        자기 try 가 흡수한다 — prepare 는 어느 경우에도 확장 전과 같은 상태로 끝난다.
+        `refs[ticker] = {"candles":…, "base":…}` 는 `_candidates[ticker]=…` 대입
+        직후 담은 read-only 참조다(D5) — 여기서 `_candidates`/`_scanned_tickers`/
+        `_scan_stats`/`_funnel_steps`/`_bought_today`/`scanner.ticker_prev_close`
+        어느 것도 쓰지 않는다.
+        `box_high_ago` 는 1부터 센다(전일 봉 = 1). cycle347 탐침의 `high_age` 는
+        0부터(전일 = 0)라 두 값을 비교할 때는 1을 뺀다.
+        """
+        p = self.config.params
+        now_dt = datetime.now()
+        entry_end = _parse_time_hhmm(p["entry_end"])
+        if now_dt.time() > entry_end:
+            # D1 — 창 끝을 넘은 prepare(16:20 저녁 재준비 등)는 줄도 watch 도 무접촉.
+            return
+        run_at = now_dt.strftime("%H:%M:%S")
+
+        tickers_order = list(self._candidates.keys())
+        dist_values: list[float] = []
+        within5 = 0
+        over10 = 0
+
+        for ticker in tickers_order:
+            try:
+                cand = self._candidates.get(ticker) or {}
+                base_high = int(cand.get("base_high", 0))
+                prev_close = int(cand.get("prev_close", 0))
+
+                ref = refs.get(ticker) if isinstance(refs, dict) else None
+                base = ref["base"]
+                candles = ref["candles"]
+                base_low = int(base.get("low", 0))
+                base_len = int(base.get("length", 0))
+
+                box_high_date: str = "na"
+                box_high_ago: object = "na"
+                for idx, c in enumerate(candles[:base_len]):
+                    try:
+                        if int(c.get("stck_hgpr", "0")) == base_high:
+                            box_high_date = c.get("stck_bsop_date") or "na"
+                            box_high_ago = idx + 1
+                            break
+                    except Exception:
+                        continue
+
+                dist_str = "na"
+                dist_val: float | None = None
+                if prev_close > 0:
+                    dist_val = (base_high - prev_close) / prev_close * 100
+                    dist_str = f"{dist_val:+.2f}"
+
+                cap_key = (ticker, base_high, prev_close)
+                if self._breakout_distance_cap.should_emit(cap_key):
+                    logger.warning(
+                        "[vcp_breakout_distance] run=%s ticker=%s base_high=%d "
+                        "prev_close=%d dist_pct=%s box_high_date=%s box_high_ago=%s "
+                        "base_low=%d base_len=%d",
+                        run_at, ticker, base_high, prev_close, dist_str,
+                        box_high_date, box_high_ago, base_low, base_len,
+                    )
+                    self._breakout_distance_cap.mark_emitted(cap_key)
+
+                if dist_val is not None:
+                    dist_values.append(dist_val)
+                    if dist_val <= 5.0:
+                        within5 += 1
+                    if dist_val > 10.0:
+                        over10 += 1
+            except Exception:
+                continue  # D6 — 한 종목 계산 실패는 그 줄만 생략, 요약은 남는다
+
+        n = len(tickers_order)
+        if dist_values:
+            srt = sorted(dist_values)
+            m = len(srt)
+            median = (
+                srt[m // 2] if m % 2 == 1
+                else (srt[m // 2 - 1] + srt[m // 2]) / 2
+            )
+            median_str = f"{median:.2f}"
+        else:
+            median_str = "na"
+        tickers_str = ",".join(tickers_order) if tickers_order else "-"
+
+        try:
+            # F3 — 「직전」 요약 1개와만 비교한다(하루 전체 dedupe 금지, A→B→A = 3줄).
+            # 날짜가 키에 있어 KST 날짜가 바뀌면 같은 내용도 그날 첫 줄로 다시 찍힌다.
+            summary_key = (
+                datetime.now(KST).date(),
+                (n, median_str, within5, over10, tickers_str),
+            )
+            if summary_key != self._breakout_summary_last:
+                logger.warning(
+                    "[vcp_breakout_distance_summary] run=%s n=%d median_pct=%s "
+                    "within5=%d over10=%d tickers=%s",
+                    run_at, n, median_str, within5, over10, tickers_str,
+                )
+                self._breakout_summary_last = summary_key  # peek→로그→mark
+        except Exception:
+            pass
+
+        # ③ E1 — 오전 prepare 가 끝날 때(조기 반환 포함) watch 를 통째로 교체한다.
+        watch_tickers: dict[str, dict] = {}
+        for ticker in tickers_order:
+            try:
+                base_high_val = int((self._candidates.get(ticker) or {}).get("base_high", 0))
+            except Exception:
+                base_high_val = 0
+            watch_tickers[ticker] = {
+                "base_high": base_high_val, "max": 0, "ticks": 0, "first_cross_at": None,
+                "first_tick_at": None, "last_tick_at": None,
+            }
+        self._breakout_watch = {
+            "date": datetime.now(KST).date(),
+            "run_at": run_at,
+            "tickers": watch_tickers,
+        }
+
+    def _observe_breakout_tick(self, ticker: str, current_price: int) -> None:
+        """③ E2 — 틱 관측 훅. watch 만 읽고 쓴다(never-raise, 반환값 없음).
+
+        `check_buy_signal` 의 계좌 SOFT 게이트(첫 문장) 바로 다음 한 줄로 불린다
+        — 그 뒤의 어떤 매수 게이트(buy_disabled/보유/쿨다운 등)보다 앞이라
+        `_prev_price`/`_vol_latch`/`_bought_today`/`_scan_stats`/`_gate_emit_capped`
+        /`_candidates`/`state` 는 절대 건드리지 않는다.
+        `first_tick_at`/`last_tick_at` 은 창 안 첫·마지막 틱 시각(게이트와 같은 naive
+        시계)이다 — 관측이 창의 어느 구간을 덮었는지(중간에 끊겼는지) 읽는 근거다.
+        """
+        try:
+            watch = self._breakout_watch
+            if not watch:
+                return
+            tickers_map = watch.get("tickers", {})
+            if ticker not in tickers_map:
+                return
+            if watch.get("date") != datetime.now(KST).date():
+                return
+            if current_price <= 0:
+                return
+            p = self.config.params
+            now_t = datetime.now().time()
+            entry_start = _parse_time_hhmm(p["entry_start"])
+            entry_end = _parse_time_hhmm(p["entry_end"])
+            if now_t < entry_start or now_t > entry_end:
+                return
+            ent = tickers_map[ticker]
+            now_s = now_t.strftime("%H:%M:%S")
+            ent["ticks"] += 1
+            if ent.get("first_tick_at") is None:
+                ent["first_tick_at"] = now_s
+            ent["last_tick_at"] = now_s
+            if current_price > ent["max"]:
+                ent["max"] = current_price
+            if ent["first_cross_at"] is None and current_price >= ent["base_high"]:
+                ent["first_cross_at"] = now_s
+        except Exception:
+            return
+
+    def breakout_event_summary(self, target_date: date) -> dict:
+        """③ E3 — 하루 돌파 사건 요약(순수 읽기, never-raise).
+
+        status — `ok`(그날 watch 가 있다) · `no_watch`(오늘(또는 그 뒤) 날짜인데 watch 가
+        없다 = 그날 관측 대상이 없어 모른다) · `not_retained`(지난 날짜인데 이
+        프로세스가 그날 watch 를 갖고 있지 않다 — 관측됐는지도 모른다. 그날 값의
+        정본은 그날 `daily_log_reports.metrics`) · `error`.
+        """
+        try:
+            watch = self._breakout_watch
+            if not watch or watch.get("date") != target_date:
+                if target_date < datetime.now(KST).date():
+                    return {"status": "not_retained", "date": target_date.isoformat()}
+                return {"status": "no_watch", "date": target_date.isoformat()}
+
+            p = self.config.params
+            entry_start_raw = p.get("entry_start", "")
+            entry_end_raw = p.get("entry_end", "")
+            run_at = watch.get("run_at", "")
+
+            partial = False
+            try:
+                run_at_t = datetime.strptime(run_at, "%H:%M:%S").time()
+                entry_start_t = _parse_time_hhmm(entry_start_raw)
+                partial = run_at_t > entry_start_t
+            except Exception:
+                partial = False
+
+            tickers_map = watch.get("tickers", {})
+            candidates_n = len(tickers_map)
+            observed = 0
+            crossed_tickers: list[str] = []
+            unobserved_tickers: list[str] = []
+            per_ticker: dict[str, dict] = {}
+
+            for ticker, ent in tickers_map.items():
+                base_high = ent.get("base_high", 0)
+                max_val = ent.get("max", 0)
+                ticks = ent.get("ticks", 0)
+                first_cross_at = ent.get("first_cross_at")
+                if ticks > 0:
+                    observed += 1
+                    gap_pct = (
+                        round((max_val - base_high) / base_high * 100, 2)
+                        if base_high else None
+                    )
+                    if base_high and max_val >= base_high:
+                        crossed_tickers.append(ticker)
+                else:
+                    unobserved_tickers.append(ticker)
+                    gap_pct = None
+                per_ticker[ticker] = {
+                    "base_high": base_high, "max": max_val, "gap_pct": gap_pct,
+                    "ticks": ticks, "first_cross_at": first_cross_at,
+                    "first_tick_at": ent.get("first_tick_at"),
+                    "last_tick_at": ent.get("last_tick_at"),
+                }
+
+            return {
+                "status": "ok",
+                "date": target_date.isoformat(),
+                "run_at": run_at,
+                "window": f"{entry_start_raw}-{entry_end_raw}",
+                "partial": partial,
+                "candidates": candidates_n,
+                "observed": observed,
+                "crossed": len(crossed_tickers),
+                "crossed_tickers": crossed_tickers,
+                "unobserved_tickers": unobserved_tickers,
+                "per_ticker": per_ticker,
+            }
+        except Exception:
+            try:
+                return {"status": "error", "date": target_date.isoformat()}
+            except Exception:
+                return {"status": "error", "date": ""}
+
+    # ------------------------------------------------------------------
     # 신호 평가
     # ------------------------------------------------------------------
     def check_buy_signal(self, ticker, current_price, open_price) -> Signal:
         # cycle233 — 계좌 SOFT Σ상한 순간 게이트 (다크런치·fail-open, 신규 매수만)
         if self._account_soft_gate_blocked(ticker):
             return Signal.NONE
+        # cycle349 (E2) — 틱 관측 훅. 계좌 게이트 바로 다음, 다른 매수 게이트보다 앞.
+        self._observe_breakout_tick(ticker, current_price)
         if self.state.buy_disabled:
             return Signal.NONE
         if self.state.has_position(ticker) or self.state.is_buy_pending(ticker):

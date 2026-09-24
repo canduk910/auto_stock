@@ -153,7 +153,7 @@ _BASE_SHA = {
     "src/engine/strategies/momentum.py":
         "50d5c0b9a232d6110f6b85fc524569853f2b8edffe2fd44adc24289800b95ae2",
     "src/engine/strategies/vcp_breakout.py":
-        "5b324b34335f922f82b848ae2313e08660bde75c02d12432867ed224e9709228",
+        "d3192834126ef0f167ad563e427d6d6284180145edf38395261aec3d6fc785ed",
     "src/engine/strategies/volatility_breakout.py":
         "d13efaa4a9424e2822b5476ce159987d2a5192a4bca30af3f1a0cae9c3ffcabc",
 }
@@ -404,8 +404,13 @@ _SRC_TREE_FILES = 155
 #: (observe_macd_stage6·STAGE6_GC_DAILY_LIMIT) · daily_emit_cap.py
 #: (읽기 전용 count_matching)를 더해 digest 가 움직였다 — 파일 수는 불변(155)이다.
 #: 직전 값은 `a155915874c411b0493fb9798bf06cb61391a89c4fbebc9fa0e9a6bb58f7d5fd` 다.
+#: cycle349 가 vcp_breakout.py(① 돌파선 거리 줄 · ③ 틱 관측 훅·watch·하루 요약) ·
+#: log_metrics_collector.py(metrics 끝 `vcp_breakout_events` 키 + 하루 1회 WARNING) ·
+#: db/strategy_funnel.py(docstring — `snapshot_at` 서술 정정)를 고쳐 digest 가 움직였다
+#: — 파일 수는 불변(155)이다.
+#: 직전 값은 `f3a0b486fde656f9b45162520f5411777ebbfe87621b84066881aa99c6b4ee65` 다.
 _SRC_TREE_DIGEST = (
-    "f3a0b486fde656f9b45162520f5411777ebbfe87621b84066881aa99c6b4ee65"
+    "3158d70b86f8f973d18c5beb8f20c29e663b5713c3204654b8799c4bc3395298"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

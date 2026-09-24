@@ -601,6 +601,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -806,6 +807,7 @@ backend:
     - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -1675,6 +1677,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -1883,6 +1886,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -2768,6 +2772,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -2967,6 +2972,7 @@ backend:
     - tests/unit/engine/test_cycle332_cancel_timer_key.py
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -3838,6 +3844,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
@@ -4048,6 +4055,7 @@ backend:
     - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -4911,6 +4919,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -5128,6 +5137,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -5994,6 +6004,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -6210,6 +6221,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -7075,6 +7087,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -7292,6 +7305,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -8163,6 +8177,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -8376,6 +8391,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -9242,6 +9258,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -9456,6 +9473,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -10326,6 +10344,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -10541,6 +10560,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -11421,6 +11441,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -11638,6 +11659,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -12507,6 +12529,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -12720,6 +12743,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -13597,6 +13621,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -13808,6 +13833,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -14706,6 +14732,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -14904,6 +14931,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -15756,6 +15784,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -15968,6 +15997,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -16831,6 +16861,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -17048,6 +17079,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -17913,6 +17945,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -18130,6 +18163,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -18999,6 +19033,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -19212,6 +19247,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -20078,6 +20114,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -20294,6 +20331,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -21160,6 +21198,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -21377,6 +21416,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -22242,6 +22282,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -22458,6 +22499,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -23323,6 +23365,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -23540,6 +23583,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -24405,6 +24449,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -24622,6 +24667,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -25487,6 +25533,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -25704,6 +25751,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -26587,6 +26635,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -26788,6 +26837,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -27669,6 +27719,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -27873,6 +27924,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -28737,6 +28789,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -28951,6 +29004,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -29815,6 +29869,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -30032,6 +30087,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -30899,6 +30955,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -31116,6 +31173,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -31983,6 +32041,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -32197,6 +32256,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -33096,6 +33156,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -33303,6 +33364,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -34150,6 +34212,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -34366,6 +34429,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -35233,6 +35297,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -35449,6 +35514,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -36311,6 +36377,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -36528,6 +36595,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -37395,6 +37463,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -37611,6 +37680,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -38484,6 +38554,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -38694,6 +38765,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -39564,6 +39636,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -39776,6 +39849,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -40643,6 +40717,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -40858,6 +40933,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -41724,6 +41800,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -41939,6 +42016,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -42811,6 +42889,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -43021,6 +43100,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -43316,6 +43396,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle158_momentum_next_day_clear_cap.py
     - tests/unit/engine/strategies/test_cycle226_zero_breakout_defense.py
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
     - tests/unit/engine/test_cycle252_stale_watcher_no_feed.py
     - tests/unit/engine/test_cycle258_account_risk_watcher_trace.py
@@ -44107,6 +44188,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -44968,6 +45050,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -45185,6 +45268,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -46053,6 +46137,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -46267,6 +46352,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -47134,6 +47220,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -47349,6 +47436,7 @@ backend:
     - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -48217,6 +48305,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -48431,6 +48520,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -49297,6 +49387,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -49514,6 +49605,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -50379,6 +50471,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -50596,6 +50689,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -51461,6 +51555,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -51677,6 +51772,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -52616,6 +52712,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -52827,6 +52924,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -53117,6 +53215,7 @@ backend:
     - tests/unit/engine/test_cycle234_log_report_tick_blind.py
     - tests/unit/engine/test_cycle249_collect_metrics.py
     - tests/unit/engine/test_cycle251_report_account_gate.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycleH_log_analysis_snapshot.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -53696,6 +53795,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -54768,6 +54868,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -54985,6 +55086,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -55853,6 +55955,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -56068,6 +56171,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -56946,6 +57050,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -57160,6 +57265,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -58022,6 +58128,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -58230,6 +58337,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -59096,6 +59204,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -59312,6 +59421,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -60183,6 +60293,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -60394,6 +60505,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -61260,6 +61372,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -61476,6 +61589,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -62343,6 +62457,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -62558,6 +62673,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -63425,6 +63541,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -63640,6 +63757,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -64504,6 +64622,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -64721,6 +64840,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -65665,6 +65785,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -65881,6 +66002,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -66820,6 +66942,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -67034,6 +67157,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -67961,6 +68085,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -68178,6 +68303,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -69048,6 +69174,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -69260,6 +69387,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -70151,6 +70279,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -70352,6 +70481,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -71209,6 +71339,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -71426,6 +71557,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -72293,6 +72425,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -72509,6 +72642,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -73369,6 +73503,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -73586,6 +73721,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -74066,6 +74202,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle272_main_rest_basis.py
     - tests/unit/engine/strategies/test_cycle274_shadow_behavior_zero.py
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycleG_vb_failed_breakout_exit.py
@@ -74739,6 +74876,7 @@ backend:
     - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -75111,6 +75249,7 @@ backend:
     - tests/unit/engine/test_cycle298_scan_loop_first_delay.py
     - tests/unit/engine/test_cycle302_backfill_scope_expansion.py
     - tests/unit/engine/test_cycle321_cash_ratio_source.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -75668,6 +75807,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -76620,6 +76760,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -76835,6 +76976,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -77701,6 +77843,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -77917,6 +78060,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -78780,6 +78924,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -78997,6 +79142,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -79861,6 +80007,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -80078,6 +80225,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -80949,6 +81097,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -81162,6 +81311,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -82048,6 +82198,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -82263,6 +82414,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -83110,6 +83262,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -83325,6 +83478,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -84209,6 +84363,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -84425,6 +84580,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -85275,6 +85431,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -85490,6 +85647,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -86362,6 +86520,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -86574,6 +86733,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -87437,6 +87597,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -87653,6 +87814,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -88519,6 +88681,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -88735,6 +88898,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -89601,6 +89765,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -89817,6 +89982,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -90688,6 +90854,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -90903,6 +91070,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -91816,6 +91984,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
@@ -92012,6 +92181,7 @@ backend:
     - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -92902,6 +93072,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -93097,6 +93268,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -93983,6 +94155,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -94177,6 +94350,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -95060,6 +95234,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -95258,6 +95433,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -96140,6 +96316,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -96340,6 +96517,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -96642,6 +96820,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle233_effective_stop_mirrors.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -97423,6 +97602,7 @@ backend:
     - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -98309,6 +98489,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -98506,6 +98687,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -98921,6 +99103,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -99618,6 +99801,7 @@ backend:
     - tests/unit/engine/test_cycle335_buy_post_send_boundary.py
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -100509,6 +100693,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -100687,6 +100872,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -101534,6 +101720,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -101751,6 +101938,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -102621,6 +102809,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -102832,6 +103021,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -103769,6 +103959,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -103984,6 +104175,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -104854,6 +105046,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -105067,6 +105260,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -105931,6 +106125,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -106147,6 +106342,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -106444,6 +106640,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle228_bfb_gate_transition.py
     - tests/unit/engine/strategies/test_cycle228_log_cap_counters.py
     - tests/unit/engine/strategies/test_cycle228_vcp_gate_transition.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_vcp_breakout.py
     - tests/unit/engine/test_cycle227_e2e_acml_vol_pipeline.py
     - tests/unit/engine/test_cycle227_risk_on_tick_acml.py
@@ -107231,6 +107428,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -108096,6 +108294,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -108312,6 +108511,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -109177,6 +109377,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -109393,6 +109594,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -110270,6 +110472,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -110482,6 +110685,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -111403,6 +111607,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -111620,6 +111825,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -112485,6 +112691,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -112702,6 +112909,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -113572,6 +113780,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -113788,6 +113997,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -114656,6 +114866,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -114871,6 +115082,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -115739,6 +115951,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -115952,6 +116165,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -116818,6 +117032,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -117035,6 +117250,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -117972,6 +118188,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -118179,6 +118396,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -119199,6 +119417,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -119412,6 +119631,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -120344,6 +120564,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -120555,6 +120776,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -121452,6 +121674,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -121664,6 +121887,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -122513,6 +122737,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -122728,6 +122953,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -123616,6 +123842,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -123829,6 +124056,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -124699,6 +124927,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -124909,6 +125138,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -127146,6 +127376,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -127359,6 +127590,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -128222,6 +128454,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -128438,6 +128671,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -129308,6 +129542,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -129523,6 +129758,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -130385,6 +130621,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -130602,6 +130839,7 @@ backend:
     - tests/unit/engine/test_cycle339_position_exit_lines.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
+    - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -132386,10 +132624,10 @@ frontend:
     - frontend/src/pages/__tests__/MarketState.test.tsx
     - frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
     - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
-generated_at: '2026-09-24T19:33:22.879003+09:00'
+generated_at: '2026-09-24T22:05:12.826029+09:00'
 stats:
   backend_modules: 158
-  backend_tests: 1079
+  backend_tests: 1081
   frontend_modules: 120
   frontend_tests: 98
   unmapped_modules:

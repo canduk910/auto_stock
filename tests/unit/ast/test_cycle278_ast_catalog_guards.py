@@ -250,7 +250,7 @@ _BASE_SHA = {
     "src/engine/strategies/bull_flag_breakout.py":
         "acf564db24b37efe0cc64b690f17e3e83d9ad943aac0b5bb4f572d5a2940d916",
     "src/engine/strategies/vcp_breakout.py":
-        "5b324b34335f922f82b848ae2313e08660bde75c02d12432867ed224e9709228",
+        "d3192834126ef0f167ad563e427d6d6284180145edf38395261aec3d6fc785ed",
     "src/engine/strategies/kojiro.py":
         "0e2e7e07e802b541aeeab5bce2ad29716148d59a8c9daf2213127550114214a9",
 }

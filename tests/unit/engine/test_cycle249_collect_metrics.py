@@ -48,6 +48,7 @@ EXPECTED_METRIC_KEYS = [
     "next_day_clear",
     "portfolio_risk_snapshot",
     "tick_blind",
+    "vcp_breakout_events",
 ]
 
 

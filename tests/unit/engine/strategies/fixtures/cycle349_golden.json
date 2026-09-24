@@ -1,0 +1,1280 @@
+{
+ "_meta": {
+  "source_commit": "2ef289ba53131c76ae6c69a7af677a9899d04be9",
+  "cycle": "cycle349",
+  "revision": 2,
+  "generator": "scratchpad/gen_c349_golden_v2.py (리포 밖 — 커밋하지 않는다). HEAD 2ef289b 를 git archive 로 푼 트리에서 실행",
+  "contents": "g1_morning/g1_evening = VCP prepare 07:45/16:25 · g2 = check_buy_signal 스크립트 틱. 둘 다 교차일 상태(`_cooldown_until`·`_position_setup`·`_prev_price`·`_vol_latch`)를 prepare 전에 채운 인스턴스로 뜨고, 스냅샷에 그 4필드 + G2 끝 `_candidates` 를 담는다",
+  "note": "테스트는 이 값과 비교만 한다. 재생성은 확장 전 코드에서만 — 확장 후 재생성 금지."
+ },
+ "g1_morning": {
+  "candidates": {
+   "900001": {
+    "base_high": 10302,
+    "base_low": 8886,
+    "last_pullback_pct": 0.02030456852791878,
+    "atr14": 269,
+    "ema50": 9946,
+    "ema150": 9932,
+    "ema200": 9719,
+    "prev_close": 10149,
+    "avg_volume_20": 120000
+   },
+   "900002": {
+    "base_high": 20754,
+    "base_low": 17772,
+    "last_pullback_pct": 0.050505050505050504,
+    "atr14": 600,
+    "ema50": 19892,
+    "ema150": 19864,
+    "ema200": 19439,
+    "prev_close": 20298,
+    "avg_volume_20": 200000
+   },
+   "900003": {
+    "base_high": 5151,
+    "base_low": 4342,
+    "last_pullback_pct": 0.055931528662420384,
+    "atr14": 141,
+    "ema50": 4933,
+    "ema150": 4913,
+    "ema200": 4813,
+    "prev_close": 5008,
+    "avg_volume_20": 300000
+   },
+   "900013": {
+    "base_high": 10302,
+    "base_low": 8886,
+    "last_pullback_pct": 0.02030456852791878,
+    "atr14": 269,
+    "ema50": 9946,
+    "ema150": 9932,
+    "ema200": 9719,
+    "prev_close": 10149,
+    "avg_volume_20": 120000
+   }
+  },
+  "scanned": [
+   "900001",
+   "900002",
+   "900003",
+   "900013"
+  ],
+  "scan_stats": {
+   "universe_union": 13,
+   "universe_candidates": 11,
+   "universe_filtered": 11,
+   "mcap_pass": 11,
+   "candle_fetch_ok": 8,
+   "trend_filter_pass": 7,
+   "base_pass": 6,
+   "pullback_pass": 5,
+   "volume_contraction_pass": 4,
+   "final_prepared": 4,
+   "vol_gate_pass": 0,
+   "vol_gate_reject_ext": 0,
+   "vol_gate_no_data": 0,
+   "latch_armed_count": 0,
+   "breakout_seen_count": 0,
+   "breakout_retreat_count": 0,
+   "db_atr_miss": 2,
+   "db_atr_hit": 1,
+   "db_atr_mismatch": 1
+  },
+  "funnel_steps": [
+   {
+    "step_no": 1,
+    "step_name": "전체 상장 유니버스 (시총/거래대금 컷 전)",
+    "step_conditions": "전체 상장 (지수 무제약) 원천 유니버스 후보 (시총/거래대금 컷 전)",
+    "survived": [
+     {
+      "ticker": "900001",
+      "name": "합성01"
+     },
+     {
+      "ticker": "900002",
+      "name": "합성02"
+     },
+     {
+      "ticker": "900003",
+      "name": "합성03"
+     },
+     {
+      "ticker": "900004",
+      "name": "합성04"
+     },
+     {
+      "ticker": "900005",
+      "name": "합성05"
+     },
+     {
+      "ticker": "900006",
+      "name": "합성06"
+     },
+     {
+      "ticker": "900007",
+      "name": "합성07"
+     },
+     {
+      "ticker": "900008",
+      "name": "합성08"
+     },
+     {
+      "ticker": "900009",
+      "name": "합성09"
+     },
+     {
+      "ticker": "900010",
+      "name": "합성10"
+     },
+     {
+      "ticker": "900011",
+      "name": "합성11"
+     },
+     {
+      "ticker": "900012",
+      "name": "합성12"
+     },
+     {
+      "ticker": "900013",
+      "name": "합성13"
+     }
+    ],
+    "survived_count": 13,
+    "excluded": [],
+    "excluded_count": 0
+   },
+   {
+    "step_no": 2,
+    "step_name": "시총·거래대금 컷 통과",
+    "step_conditions": "시총 ≥ 100억 + 거래대금 ≥ 10억",
+    "survived": [
+     {
+      "ticker": "900001",
+      "name": "합성01"
+     },
+     {
+      "ticker": "900002",
+      "name": "합성02"
+     },
+     {
+      "ticker": "900003",
+      "name": "합성03"
+     },
+     {
+      "ticker": "900004",
+      "name": "합성04"
+     },
+     {
+      "ticker": "900005",
+      "name": "합성05"
+     },
+     {
+      "ticker": "900006",
+      "name": "합성06"
+     },
+     {
+      "ticker": "900007",
+      "name": "합성07"
+     },
+     {
+      "ticker": "900008",
+      "name": "합성08"
+     },
+     {
+      "ticker": "900009",
+      "name": "합성09"
+     },
+     {
+      "ticker": "900010",
+      "name": "합성10"
+     },
+     {
+      "ticker": "900013",
+      "name": "합성13"
+     }
+    ],
+    "survived_count": 11,
+    "excluded": [],
+    "excluded_count": 0
+   },
+   {
+    "step_no": 3,
+    "step_name": "1단계 진입 차단 13건 통과 (거래정지/관리/단기과열/투자유의 등)",
+    "step_conditions": "1단계 진입 차단 13건 (거래정지/관리/단기과열/투자유의/공매도과열/이상급등 등)",
+    "survived": [
+     {
+      "ticker": "900001",
+      "name": "합성01"
+     },
+     {
+      "ticker": "900002",
+      "name": "합성02"
+     },
+     {
+      "ticker": "900003",
+      "name": "합성03"
+     },
+     {
+      "ticker": "900004",
+      "name": "합성04"
+     },
+     {
+      "ticker": "900005",
+      "name": "합성05"
+     },
+     {
+      "ticker": "900006",
+      "name": "합성06"
+     },
+     {
+      "ticker": "900007",
+      "name": "합성07"
+     },
+     {
+      "ticker": "900008",
+      "name": "합성08"
+     },
+     {
+      "ticker": "900009",
+      "name": "합성09"
+     },
+     {
+      "ticker": "900013",
+      "name": "합성13"
+     }
+    ],
+    "survived_count": 10,
+    "excluded": [
+     {
+      "ticker": "900010",
+      "name": "합성10",
+      "reason": "관리종목 (mang_issu_yn=Y)"
+     }
+    ],
+    "excluded_count": 1
+   },
+   {
+    "step_no": 4,
+    "step_name": "일봉 fetch + 추세필터",
+    "step_conditions": "일봉 ≥ effective_ema_long(config 30, 읽기 60봉 기준 ~30 캡) + 우상향 5일 + 5",
+    "survived": [
+     {
+      "ticker": "900001",
+      "name": "합성01"
+     },
+     {
+      "ticker": "900002",
+      "name": "합성02"
+     },
+     {
+      "ticker": "900003",
+      "name": "합성03"
+     },
+     {
+      "ticker": "900004",
+      "name": "합성04"
+     },
+     {
+      "ticker": "900005",
+      "name": "합성05"
+     },
+     {
+      "ticker": "900006",
+      "name": "합성06"
+     },
+     {
+      "ticker": "900007",
+      "name": "합성07"
+     },
+     {
+      "ticker": "900013",
+      "name": "합성13"
+     }
+    ],
+    "survived_count": 8,
+    "excluded": [
+     {
+      "ticker": "900008",
+      "name": "합성08",
+      "reason": "KIS 일봉 응답 빈/None"
+     },
+     {
+      "ticker": "900009",
+      "name": "합성09",
+      "reason": "가용 EMA 길이 20 < 30 (KIS 한도)"
+     }
+    ],
+    "excluded_count": 2
+   },
+   {
+    "step_no": 5,
+    "step_name": "단기/중기/장기 EMA 정렬",
+    "step_conditions": "종가 > 10EMA > 20EMA > 장기EMA(config 30, 읽기 60봉 기준 effective ~30) + effective 장기EMA 5일 우상향",
+    "survived": [
+     {
+      "ticker": "900001",
+      "name": "합성01"
+     },
+     {
+      "ticker": "900002",
+      "name": "합성02"
+     },
+     {
+      "ticker": "900003",
+      "name": "합성03"
+     },
+     {
+      "ticker": "900005",
+      "name": "합성05"
+     },
+     {
+      "ticker": "900006",
+      "name": "합성06"
+     },
+     {
+      "ticker": "900007",
+      "name": "합성07"
+     },
+     {
+      "ticker": "900013",
+      "name": "합성13"
+     }
+    ],
+    "survived_count": 7,
+    "excluded": [
+     {
+      "ticker": "900004",
+      "name": "합성04",
+      "reason": "EMA 정렬 미충족 (종가 / 10EMA / 20EMA / 30EMA 정렬 또는 5일 우상향)"
+     }
+    ],
+    "excluded_count": 1
+   },
+   {
+    "step_no": 6,
+    "step_name": "베이스 자동 검출",
+    "step_conditions": "베이스 길이 10~20일 + 깊이 ≤ 30%",
+    "survived": [
+     {
+      "ticker": "900001",
+      "name": "합성01"
+     },
+     {
+      "ticker": "900002",
+      "name": "합성02"
+     },
+     {
+      "ticker": "900003",
+      "name": "합성03"
+     },
+     {
+      "ticker": "900006",
+      "name": "합성06"
+     },
+     {
+      "ticker": "900007",
+      "name": "합성07"
+     },
+     {
+      "ticker": "900013",
+      "name": "합성13"
+     }
+    ],
+    "survived_count": 6,
+    "excluded": [
+     {
+      "ticker": "900005",
+      "name": "합성05",
+      "reason": "베이스 자동 검출 실패 (길이 10~20일 + 깊이 ≤ 30%)"
+     }
+    ],
+    "excluded_count": 1
+   },
+   {
+    "step_no": 7,
+    "step_name": "Pullback 점진 수축",
+    "step_conditions": "1~4회 회수 + 직전 대비 폭 감소 + 마지막 폭 ≤ 15%",
+    "survived": [
+     {
+      "ticker": "900001",
+      "name": "합성01"
+     },
+     {
+      "ticker": "900002",
+      "name": "합성02"
+     },
+     {
+      "ticker": "900003",
+      "name": "합성03"
+     },
+     {
+      "ticker": "900007",
+      "name": "합성07"
+     },
+     {
+      "ticker": "900013",
+      "name": "합성13"
+     }
+    ],
+    "survived_count": 5,
+    "excluded": [
+     {
+      "ticker": "900006",
+      "name": "합성06",
+      "reason": "Pullback 점진 수축 미충족 (회수 1~4회 + 직전 대비 폭 감소 + 마지막 폭 ≤ 15%) — 베이스 평탄, swing 미검출 (변동성 < min_swing_atr_mult × ATR)"
+     }
+    ],
+    "excluded_count": 1
+   },
+   {
+    "step_no": 8,
+    "step_name": "거래량 수축",
+    "step_conditions": "마지막 5일 평균 < 베이스 직전 20일 평균 × 100%",
+    "survived": [
+     {
+      "ticker": "900001",
+      "name": "합성01"
+     },
+     {
+      "ticker": "900002",
+      "name": "합성02"
+     },
+     {
+      "ticker": "900003",
+      "name": "합성03"
+     },
+     {
+      "ticker": "900013",
+      "name": "합성13"
+     }
+    ],
+    "survived_count": 4,
+    "excluded": [
+     {
+      "ticker": "900007",
+      "name": "합성07",
+      "reason": "거래량 수축 미충족 (마지막 5일 평균 < 베이스 직전 20일 평균 × 100%)"
+     }
+    ],
+    "excluded_count": 1
+   },
+   {
+    "step_no": 9,
+    "step_name": "최종 prepared",
+    "step_conditions": "모든 단계 통과 — 매수 후보 등록 (base_high 돌파 대기)",
+    "survived": [
+     {
+      "ticker": "900001",
+      "name": "합성01"
+     },
+     {
+      "ticker": "900002",
+      "name": "합성02"
+     },
+     {
+      "ticker": "900003",
+      "name": "합성03"
+     },
+     {
+      "ticker": "900013",
+      "name": "합성13"
+     }
+    ],
+    "survived_count": 4,
+    "excluded": [],
+    "excluded_count": 0
+   }
+  ],
+  "ticker_prev_close": {
+   "900001": 10149,
+   "900002": 20298,
+   "900003": 5008,
+   "900013": 10149
+  },
+  "bought_today": [],
+  "cooldown_until": {
+   "900013": "date:2026-09-25"
+  },
+  "prev_price": {
+   "900002": 20800
+  },
+  "vol_latch": {
+   "900004": {
+    "armed_at": "datetime:2026-09-21T10:00:00+09:00",
+    "armed_date": "date:2026-09-21",
+    "base_high": 7300,
+    "base_low": 6900
+   }
+  },
+  "position_setup": {
+   "900020": {
+    "base_low": 48000,
+    "atr14": 1250,
+    "ema50": 49500
+   }
+  }
+ },
+ "g1_evening": {
+  "candidates": {
+   "900001": {
+    "base_high": 10302,
+    "base_low": 8886,
+    "last_pullback_pct": 0.02030456852791878,
+    "atr14": 269,
+    "ema50": 9946,
+    "ema150": 9932,
+    "ema200": 9719,
+    "prev_close": 10149,
+    "avg_volume_20": 120000
+   },
+   "900002": {
+    "base_high": 20754,
+    "base_low": 17772,
+    "last_pullback_pct": 0.050505050505050504,
+    "atr14": 600,
+    "ema50": 19892,
+    "ema150": 19864,
+    "ema200": 19439,
+    "prev_close": 20298,
+    "avg_volume_20": 200000
+   },
+   "900003": {
+    "base_high": 5151,
+    "base_low": 4342,
+    "last_pullback_pct": 0.055931528662420384,
+    "atr14": 141,
+    "ema50": 4933,
+    "ema150": 4913,
+    "ema200": 4813,
+    "prev_close": 5008,
+    "avg_volume_20": 300000
+   },
+   "900013": {
+    "base_high": 10302,
+    "base_low": 8886,
+    "last_pullback_pct": 0.02030456852791878,
+    "atr14": 269,
+    "ema50": 9946,
+    "ema150": 9932,
+    "ema200": 9719,
+    "prev_close": 10149,
+    "avg_volume_20": 120000
+   }
+  },
+  "scanned": [
+   "900001",
+   "900002",
+   "900003",
+   "900013"
+  ],
+  "scan_stats": {
+   "universe_union": 13,
+   "universe_candidates": 11,
+   "universe_filtered": 11,
+   "mcap_pass": 11,
+   "candle_fetch_ok": 8,
+   "trend_filter_pass": 7,
+   "base_pass": 6,
+   "pullback_pass": 5,
+   "volume_contraction_pass": 4,
+   "final_prepared": 4,
+   "vol_gate_pass": 0,
+   "vol_gate_reject_ext": 0,
+   "vol_gate_no_data": 0,
+   "latch_armed_count": 0,
+   "breakout_seen_count": 0,
+   "breakout_retreat_count": 0,
+   "db_atr_miss": 2,
+   "db_atr_hit": 1,
+   "db_atr_mismatch": 1
+  },
+  "funnel_steps": [
+   {
+    "step_no": 1,
+    "step_name": "전체 상장 유니버스 (시총/거래대금 컷 전)",
+    "step_conditions": "전체 상장 (지수 무제약) 원천 유니버스 후보 (시총/거래대금 컷 전)",
+    "survived": [
+     {
+      "ticker": "900001",
+      "name": "합성01"
+     },
+     {
+      "ticker": "900002",
+      "name": "합성02"
+     },
+     {
+      "ticker": "900003",
+      "name": "합성03"
+     },
+     {
+      "ticker": "900004",
+      "name": "합성04"
+     },
+     {
+      "ticker": "900005",
+      "name": "합성05"
+     },
+     {
+      "ticker": "900006",
+      "name": "합성06"
+     },
+     {
+      "ticker": "900007",
+      "name": "합성07"
+     },
+     {
+      "ticker": "900008",
+      "name": "합성08"
+     },
+     {
+      "ticker": "900009",
+      "name": "합성09"
+     },
+     {
+      "ticker": "900010",
+      "name": "합성10"
+     },
+     {
+      "ticker": "900011",
+      "name": "합성11"
+     },
+     {
+      "ticker": "900012",
+      "name": "합성12"
+     },
+     {
+      "ticker": "900013",
+      "name": "합성13"
+     }
+    ],
+    "survived_count": 13,
+    "excluded": [],
+    "excluded_count": 0
+   },
+   {
+    "step_no": 2,
+    "step_name": "시총·거래대금 컷 통과",
+    "step_conditions": "시총 ≥ 100억 + 거래대금 ≥ 10억",
+    "survived": [
+     {
+      "ticker": "900001",
+      "name": "합성01"
+     },
+     {
+      "ticker": "900002",
+      "name": "합성02"
+     },
+     {
+      "ticker": "900003",
+      "name": "합성03"
+     },
+     {
+      "ticker": "900004",
+      "name": "합성04"
+     },
+     {
+      "ticker": "900005",
+      "name": "합성05"
+     },
+     {
+      "ticker": "900006",
+      "name": "합성06"
+     },
+     {
+      "ticker": "900007",
+      "name": "합성07"
+     },
+     {
+      "ticker": "900008",
+      "name": "합성08"
+     },
+     {
+      "ticker": "900009",
+      "name": "합성09"
+     },
+     {
+      "ticker": "900010",
+      "name": "합성10"
+     },
+     {
+      "ticker": "900013",
+      "name": "합성13"
+     }
+    ],
+    "survived_count": 11,
+    "excluded": [],
+    "excluded_count": 0
+   },
+   {
+    "step_no": 3,
+    "step_name": "1단계 진입 차단 13건 통과 (거래정지/관리/단기과열/투자유의 등)",
+    "step_conditions": "1단계 진입 차단 13건 (거래정지/관리/단기과열/투자유의/공매도과열/이상급등 등)",
+    "survived": [
+     {
+      "ticker": "900001",
+      "name": "합성01"
+     },
+     {
+      "ticker": "900002",
+      "name": "합성02"
+     },
+     {
+      "ticker": "900003",
+      "name": "합성03"
+     },
+     {
+      "ticker": "900004",
+      "name": "합성04"
+     },
+     {
+      "ticker": "900005",
+      "name": "합성05"
+     },
+     {
+      "ticker": "900006",
+      "name": "합성06"
+     },
+     {
+      "ticker": "900007",
+      "name": "합성07"
+     },
+     {
+      "ticker": "900008",
+      "name": "합성08"
+     },
+     {
+      "ticker": "900009",
+      "name": "합성09"
+     },
+     {
+      "ticker": "900013",
+      "name": "합성13"
+     }
+    ],
+    "survived_count": 10,
+    "excluded": [
+     {
+      "ticker": "900010",
+      "name": "합성10",
+      "reason": "관리종목 (mang_issu_yn=Y)"
+     }
+    ],
+    "excluded_count": 1
+   },
+   {
+    "step_no": 4,
+    "step_name": "일봉 fetch + 추세필터",
+    "step_conditions": "일봉 ≥ effective_ema_long(config 30, 읽기 60봉 기준 ~30 캡) + 우상향 5일 + 5",
+    "survived": [
+     {
+      "ticker": "900001",
+      "name": "합성01"
+     },
+     {
+      "ticker": "900002",
+      "name": "합성02"
+     },
+     {
+      "ticker": "900003",
+      "name": "합성03"
+     },
+     {
+      "ticker": "900004",
+      "name": "합성04"
+     },
+     {
+      "ticker": "900005",
+      "name": "합성05"
+     },
+     {
+      "ticker": "900006",
+      "name": "합성06"
+     },
+     {
+      "ticker": "900007",
+      "name": "합성07"
+     },
+     {
+      "ticker": "900013",
+      "name": "합성13"
+     }
+    ],
+    "survived_count": 8,
+    "excluded": [
+     {
+      "ticker": "900008",
+      "name": "합성08",
+      "reason": "KIS 일봉 응답 빈/None"
+     },
+     {
+      "ticker": "900009",
+      "name": "합성09",
+      "reason": "가용 EMA 길이 20 < 30 (KIS 한도)"
+     }
+    ],
+    "excluded_count": 2
+   },
+   {
+    "step_no": 5,
+    "step_name": "단기/중기/장기 EMA 정렬",
+    "step_conditions": "종가 > 10EMA > 20EMA > 장기EMA(config 30, 읽기 60봉 기준 effective ~30) + effective 장기EMA 5일 우상향",
+    "survived": [
+     {
+      "ticker": "900001",
+      "name": "합성01"
+     },
+     {
+      "ticker": "900002",
+      "name": "합성02"
+     },
+     {
+      "ticker": "900003",
+      "name": "합성03"
+     },
+     {
+      "ticker": "900005",
+      "name": "합성05"
+     },
+     {
+      "ticker": "900006",
+      "name": "합성06"
+     },
+     {
+      "ticker": "900007",
+      "name": "합성07"
+     },
+     {
+      "ticker": "900013",
+      "name": "합성13"
+     }
+    ],
+    "survived_count": 7,
+    "excluded": [
+     {
+      "ticker": "900004",
+      "name": "합성04",
+      "reason": "EMA 정렬 미충족 (종가 / 10EMA / 20EMA / 30EMA 정렬 또는 5일 우상향)"
+     }
+    ],
+    "excluded_count": 1
+   },
+   {
+    "step_no": 6,
+    "step_name": "베이스 자동 검출",
+    "step_conditions": "베이스 길이 10~20일 + 깊이 ≤ 30%",
+    "survived": [
+     {
+      "ticker": "900001",
+      "name": "합성01"
+     },
+     {
+      "ticker": "900002",
+      "name": "합성02"
+     },
+     {
+      "ticker": "900003",
+      "name": "합성03"
+     },
+     {
+      "ticker": "900006",
+      "name": "합성06"
+     },
+     {
+      "ticker": "900007",
+      "name": "합성07"
+     },
+     {
+      "ticker": "900013",
+      "name": "합성13"
+     }
+    ],
+    "survived_count": 6,
+    "excluded": [
+     {
+      "ticker": "900005",
+      "name": "합성05",
+      "reason": "베이스 자동 검출 실패 (길이 10~20일 + 깊이 ≤ 30%)"
+     }
+    ],
+    "excluded_count": 1
+   },
+   {
+    "step_no": 7,
+    "step_name": "Pullback 점진 수축",
+    "step_conditions": "1~4회 회수 + 직전 대비 폭 감소 + 마지막 폭 ≤ 15%",
+    "survived": [
+     {
+      "ticker": "900001",
+      "name": "합성01"
+     },
+     {
+      "ticker": "900002",
+      "name": "합성02"
+     },
+     {
+      "ticker": "900003",
+      "name": "합성03"
+     },
+     {
+      "ticker": "900007",
+      "name": "합성07"
+     },
+     {
+      "ticker": "900013",
+      "name": "합성13"
+     }
+    ],
+    "survived_count": 5,
+    "excluded": [
+     {
+      "ticker": "900006",
+      "name": "합성06",
+      "reason": "Pullback 점진 수축 미충족 (회수 1~4회 + 직전 대비 폭 감소 + 마지막 폭 ≤ 15%) — 베이스 평탄, swing 미검출 (변동성 < min_swing_atr_mult × ATR)"
+     }
+    ],
+    "excluded_count": 1
+   },
+   {
+    "step_no": 8,
+    "step_name": "거래량 수축",
+    "step_conditions": "마지막 5일 평균 < 베이스 직전 20일 평균 × 100%",
+    "survived": [
+     {
+      "ticker": "900001",
+      "name": "합성01"
+     },
+     {
+      "ticker": "900002",
+      "name": "합성02"
+     },
+     {
+      "ticker": "900003",
+      "name": "합성03"
+     },
+     {
+      "ticker": "900013",
+      "name": "합성13"
+     }
+    ],
+    "survived_count": 4,
+    "excluded": [
+     {
+      "ticker": "900007",
+      "name": "합성07",
+      "reason": "거래량 수축 미충족 (마지막 5일 평균 < 베이스 직전 20일 평균 × 100%)"
+     }
+    ],
+    "excluded_count": 1
+   },
+   {
+    "step_no": 9,
+    "step_name": "최종 prepared",
+    "step_conditions": "모든 단계 통과 — 매수 후보 등록 (base_high 돌파 대기)",
+    "survived": [
+     {
+      "ticker": "900001",
+      "name": "합성01"
+     },
+     {
+      "ticker": "900002",
+      "name": "합성02"
+     },
+     {
+      "ticker": "900003",
+      "name": "합성03"
+     },
+     {
+      "ticker": "900013",
+      "name": "합성13"
+     }
+    ],
+    "survived_count": 4,
+    "excluded": [],
+    "excluded_count": 0
+   }
+  ],
+  "ticker_prev_close": {
+   "900001": 10149,
+   "900002": 20298,
+   "900003": 5008,
+   "900013": 10149
+  },
+  "bought_today": [],
+  "cooldown_until": {
+   "900013": "date:2026-09-25"
+  },
+  "prev_price": {
+   "900002": 20800
+  },
+  "vol_latch": {
+   "900004": {
+    "armed_at": "datetime:2026-09-21T10:00:00+09:00",
+    "armed_date": "date:2026-09-21",
+    "base_high": 7300,
+    "base_low": 6900
+   }
+  },
+  "position_setup": {
+   "900020": {
+    "base_low": 48000,
+    "atr14": 1250,
+    "ema50": 49500
+   }
+  }
+ },
+ "g2": {
+  "signals": [
+   [
+    "09:04:59",
+    "900001",
+    10350,
+    "NONE"
+   ],
+   [
+    "09:05:00",
+    "900001",
+    10250,
+    "NONE"
+   ],
+   [
+    "09:05:00",
+    "900004",
+    7000,
+    "NONE"
+   ],
+   [
+    "09:10:00",
+    "900001",
+    10320,
+    "NONE"
+   ],
+   [
+    "09:12:00",
+    "900001",
+    10280,
+    "NONE"
+   ],
+   [
+    "09:15:00",
+    "900001",
+    10400,
+    "BUY"
+   ],
+   [
+    "09:19:00",
+    "900002",
+    20760,
+    "NONE"
+   ],
+   [
+    "09:20:00",
+    "900002",
+    20700,
+    "NONE"
+   ],
+   [
+    "09:21:00",
+    "900002",
+    22900,
+    "NONE"
+   ],
+   [
+    "09:22:00",
+    "900002",
+    23000,
+    "NONE"
+   ],
+   [
+    "09:40:00",
+    "900013",
+    10320,
+    "NONE"
+   ],
+   [
+    "10:00:00",
+    "900003",
+    5140,
+    "NONE"
+   ],
+   [
+    "10:01:00",
+    "900003",
+    5151,
+    "NONE"
+   ],
+   [
+    "14:30:00",
+    "900003",
+    5160,
+    "BUY"
+   ],
+   [
+    "14:30:00",
+    "900001",
+    10500,
+    "NONE"
+   ],
+   [
+    "14:30:01",
+    "900002",
+    20800,
+    "NONE"
+   ]
+  ],
+  "end": {
+   "prev_price": {
+    "900002": 22900,
+    "900001": 10320,
+    "900003": 5151
+   },
+   "vol_latch": {
+    "900004": {
+     "armed_at": "datetime:2026-09-21T10:00:00+09:00",
+     "armed_date": "date:2026-09-21",
+     "base_high": 7300,
+     "base_low": 6900
+    },
+    "900002": {
+     "armed_at": "datetime:2026-09-22T18:21:00+09:00",
+     "armed_date": "date:2026-09-22",
+     "base_high": 20754,
+     "base_low": 17772
+    }
+   },
+   "bought_today": [
+    "900001",
+    "900003"
+   ],
+   "scan_stats": {
+    "universe_union": 13,
+    "universe_candidates": 11,
+    "universe_filtered": 11,
+    "mcap_pass": 11,
+    "candle_fetch_ok": 8,
+    "trend_filter_pass": 7,
+    "base_pass": 6,
+    "pullback_pass": 5,
+    "volume_contraction_pass": 4,
+    "final_prepared": 4,
+    "vol_gate_pass": 2,
+    "vol_gate_reject_ext": 2,
+    "vol_gate_no_data": 1,
+    "latch_armed_count": 3,
+    "breakout_seen_count": 0,
+    "breakout_retreat_count": 0,
+    "db_atr_miss": 2,
+    "db_atr_hit": 1,
+    "db_atr_mismatch": 1
+   },
+   "gate_emit_capped": [
+    [
+     "900001",
+     "latch_armed"
+    ],
+    [
+     "900002",
+     "latch_armed"
+    ],
+    [
+     "900002",
+     "reject_ext"
+    ],
+    [
+     "900003",
+     "latch_armed"
+    ],
+    [
+     "900003",
+     "no_data"
+    ]
+   ],
+   "buy_signals": [
+    {
+     "ticker": "900001",
+     "name": "",
+     "price": 10400,
+     "base_high": 10302,
+     "atr": 269,
+     "change_rate": 0,
+     "time": "09:15:00"
+    },
+    {
+     "ticker": "900003",
+     "name": "",
+     "price": 5160,
+     "base_high": 5151,
+     "atr": 141,
+     "change_rate": 0,
+     "time": "14:30:00"
+    }
+   ],
+   "position_setup": {
+    "900020": {
+     "base_low": 48000,
+     "atr14": 1250,
+     "ema50": 49500
+    },
+    "900001": {
+     "base_low": 8886,
+     "atr14": 269,
+     "ema50": 9946
+    },
+    "900003": {
+     "base_low": 4342,
+     "atr14": 141,
+     "ema50": 4933
+    }
+   },
+   "cooldown_until": {
+    "900013": "date:2026-09-25"
+   },
+   "candidates": {
+    "900001": {
+     "base_high": 10302,
+     "base_low": 8886,
+     "last_pullback_pct": 0.02030456852791878,
+     "atr14": 269,
+     "ema50": 9946,
+     "ema150": 9932,
+     "ema200": 9719,
+     "prev_close": 10149,
+     "avg_volume_20": 120000
+    },
+    "900002": {
+     "base_high": 20754,
+     "base_low": 17772,
+     "last_pullback_pct": 0.050505050505050504,
+     "atr14": 600,
+     "ema50": 19892,
+     "ema150": 19864,
+     "ema200": 19439,
+     "prev_close": 20298,
+     "avg_volume_20": 200000
+    },
+    "900003": {
+     "base_high": 5151,
+     "base_low": 4342,
+     "last_pullback_pct": 0.055931528662420384,
+     "atr14": 141,
+     "ema50": 4933,
+     "ema150": 4913,
+     "ema200": 4813,
+     "prev_close": 5008,
+     "avg_volume_20": 300000
+    },
+    "900013": {
+     "base_high": 10302,
+     "base_low": 8886,
+     "last_pullback_pct": 0.02030456852791878,
+     "atr14": 269,
+     "ema50": 9946,
+     "ema150": 9932,
+     "ema200": 9719,
+     "prev_close": 10149,
+     "avg_volume_20": 120000
+    }
+   }
+  }
+ }
+}

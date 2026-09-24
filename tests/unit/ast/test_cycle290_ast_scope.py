@@ -235,13 +235,17 @@ _SEGMENT_SHA: dict[tuple[str, str], str] = {
     ("bull_flag_breakout", "prepare"):
         "cb0d01540a75049fcb06f90a24d35c606c2dc425599346fc0bf6ec4cde25dd9c",
     ("vcp_breakout", "check_buy_signal"):
-        "66dbac6020acb0a8c5a97aaa7b1a0a768ecb574339d6c07e7ef5106462da00a6",
+        # cycle349 재핀 — VCP 관측 ①③(돌파선 거리 줄 · 틱 관측 훅 · watch). 매매 경로 diff 0
+        # = 확장 전 HEAD 산출 골든 G1(prepare)·G2(check_buy_signal) 완전 일치로 확인.
+        "e50969e3ffcdd8f7b5f8ce0bd61e67852436e4ead7130c54006a2f22c11adb6f",
     ("vcp_breakout", "check_exit_signal"):
         "2fc8da7094dfa43a3baa824fb0c5d5864fd4ef89bd6786f5ff790216a00eabad",
     ("vcp_breakout", "calc_buy_quantity"):
         "2678212b154c25f00d8cb3a14ad819ad9e92a12787ff42b3635ac32399685e56",
     ("vcp_breakout", "prepare"):
-        "b8468a3694b8b4fff9bdfc6b2114464bad349dadab15730d174768c71aed2e53",
+        # cycle349 재핀 — VCP 관측 ①③(돌파선 거리 줄 · 틱 관측 훅 · watch). 매매 경로 diff 0
+        # = 확장 전 HEAD 산출 골든 G1(prepare)·G2(check_buy_signal) 완전 일치로 확인.
+        "2567dc4be45f00a2b9dcd4e057cc83acdaae3269af7adb2de619faf5f6e51a1f",
     ("kojiro", "check_buy_signal"):
         "dda6c6fc318afec8db576826f4cfc16d03fdc6dbdd544e7accc3f8a41de9e74f",
     ("kojiro", "check_exit_signal"):
