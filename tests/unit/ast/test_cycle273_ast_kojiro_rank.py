@@ -205,9 +205,11 @@ def test_c12b_leaf_writes_only_its_own_cap():
     # 더하며 모듈 상수 2개(`MACD_MARKER`·`_RULE_STAGES`)가 늘었다. 계약의 뜻은
     # "leaf 가 **가변 공유 상태**를 만들지 않는다" 이고 둘 다 불변 상수라 그 뜻은
     # 그대로다 — 집합만 넓히고 단언 형태는 유지한다(가변 전역은 여전히 붉어진다).
+    # cycle348 — `observe_macd_stage6` 의 일일 상한 불변 상수 `STAGE6_GC_DAILY_LIMIT`
+    # 도 같은 이유로 추가한다(가변 카운터는 새로 두지 않고 `_cap` 상태에서 도출).
     assert top_assigned <= {
         "logger", "MARKER", "MODULE_TOKEN", "_cap",
-        "MACD_MARKER", "_RULE_STAGES",
+        "MACD_MARKER", "_RULE_STAGES", "STAGE6_GC_DAILY_LIMIT",
     }, (
         f"모듈 레벨 대입이 계약 밖 — {top_assigned}"
     )
@@ -219,7 +221,11 @@ def test_c12c_leaf_public_fns_never_raise_and_return_none():
     """
     src, tree = _require_leaf()
     # cycle340 — `observe_macd` 도 같은 계약을 진다(형제 관측기).
-    for name in ("observe_band", "observe_macd", "absorb_band_call_failure"):
+    # cycle348 — `observe_macd_stage6` 도 같은 계약(단일 try·None 반환·never-raise).
+    for name in (
+        "observe_band", "observe_macd", "observe_macd_stage6",
+        "absorb_band_call_failure",
+    ):
         fn = _fn(tree, name)
         body = [s for s in fn.body if not (isinstance(s, ast.Expr)
                                            and isinstance(s.value, ast.Constant))]

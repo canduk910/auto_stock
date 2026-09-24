@@ -103,6 +103,19 @@ def _num(v) -> str:
     return f"{f:.2f}"
 
 
+def _int_or_dash(v) -> str:
+    """cycle348 — `close` 전용 정수 서식. `_num`(소수 2자리)과 다르다.
+
+    종가는 원(KRW) 정수라 소수점이 없는 것이 자연스럽고, 비수치(`None`·문자열)는
+    `_fmt` 처럼 그대로 흘리지 않고 `-` 로 접는다 — 이 마커는 나중에 파싱할
+    표본이라 필드가 항상 정수 문자열이거나 `-` 여야 한다.
+    """
+    try:
+        return str(int(v))
+    except (TypeError, ValueError):
+        return "-"
+
+
 def _safe_diff(a, b) -> str:
     """히스토그램 = MACD1 − 시그널. 원전이 「예측 도구」라 부른 그 값이다."""
     try:
@@ -132,6 +145,11 @@ MACD_MARKER = "[kojiro_macd_observe]"
 #: 원전 `docs/trading_base/이동평균선과MACD.md` §7 의 3단 진입 — 국면만 다르고
 #: 조건은 같다(MACD(하) 골든크로스 ∧ 3 MACD 모두 우상향).
 _RULE_STAGES = {"rule6": 6, "rule5": 5, "rule4": 4}
+
+#: cycle348 — 국면6 크로스(role=stage6_gc) 일일 상한. 불변 상수(런타임 dict
+#: 아님) — `sizing_mode`/`max_lot_units` 류의 DEFAULT_PARAMS 편입 대상이 아니라
+#: 단순 관측 폭주 방지 캡이다. `test_c12b` 허용 집합에 이 이름 하나만 추가한다.
+STAGE6_GC_DAILY_LIMIT = 60
 
 
 def absorb_macd_call_failure(caller) -> None:
@@ -215,6 +233,88 @@ def observe_macd(macd_raw, ranked_final, held_only) -> None:
                 continue
     except Exception:
         trace_observer_failure(MACD_MARKER, "macd_batch", _cap)
+
+
+def observe_macd_stage6(macd_s6_raw) -> None:
+    """`[kojiro_macd_observe]` role=stage6_gc — 국면6 크로스(gc3) shadow 관측(cycle348).
+
+    🔴 **매매를 한 글자도 바꾸지 않는다.** `observe_macd` 는 strict entry 최종
+    후보(candidate)·보유(held) 만 기록해 국면6 종목은 한 줄도 안 남는다. cycle346
+    의 B6 규칙(ATR 밴드 ∧ 국면6 ∧ gc3)을 실매매 유니버스에서 앞으로 재려면 그
+    사건을 별도 role 로 기록해야 한다.
+
+    행 계약 = 15원소 튜플 = `observe_macd` 의 12원소 계약(`(stage, m1, m2, m3,
+    s1, s2, s3, gc3, bars_since_gc3, m1_up, m2_up, m3_up)`) + `(bar_date,
+    prev_close, atr_val)`. `KojiroStrategy._stage6_gc_observe_row` 로만 채워진다
+    (`gc3` 는 `_macd_observe_row` 의 결과를 재사용 — 상태가 아니라 교차 사건).
+
+    행 서식은 `observe_macd` 와 **같은 필드·같은 순서**(role 만 `stage6_gc` 고정)
+    이고 끝에 `bar=` `close=` `atr=` 를 덧붙인다. `close`/`atr` 는 `_num`/
+    `_int_or_dash` 로 수치 아님을 `-` 로 접는다.
+
+    cap 키 = `(ticker, "macd:stage6_gc")` — held/candidate 슬롯과 다투지 않는다
+    (같은 `_cap` 공유, 둘째 원소만 다르다). **일일 상한 `STAGE6_GC_DAILY_LIMIT`**
+    (기본 60)을 넘는 종목은 기록하지 않고, 그 배치 끝에 요약 1행(하루 1회, 별도
+    cap 키 `("-", "macd:stage6_gc:summary")`)을 남긴다. 새 가변 모듈 전역을
+    두지 않는다 — 일일 카운트는 `_cap.count_matching(...)` 으로 기존 `_cap` 상태
+    에서 도출한다(명세 조정, cycle348).
+
+    **never-raise** — 본체 전체가 단일 `try`, 개별 ticker 실패는 그 ticker 만
+    건너뛴다. 15원소가 아닌 행(12원소 기존 계약 포함)은 skip 한다.
+    """
+    try:
+        if not isinstance(macd_s6_raw, dict):
+            return
+        emitted_today = _cap.count_matching(
+            lambda k: isinstance(k, tuple) and len(k) == 2
+            and k[1] == "macd:stage6_gc"
+        )
+        suppressed = 0
+        for ticker, row in macd_s6_raw.items():
+            try:
+                if not (isinstance(row, tuple) and len(row) == 15):
+                    continue
+                key = (str(ticker), "macd:stage6_gc")
+                if not _cap.should_emit(key):
+                    continue
+                if emitted_today >= STAGE6_GC_DAILY_LIMIT:
+                    suppressed += 1
+                    continue
+                (stage, m1, m2, m3, s1, s2, s3,
+                 gc3, bars_since, m1_up, m2_up, m3_up,
+                 bar, close, atr) = row
+                all_up = bool(m1_up) and bool(m2_up) and bool(m3_up)
+                rules = {
+                    name: int(bool(gc3) and all_up and stage == want)
+                    for name, want in _RULE_STAGES.items()
+                }
+                logger.warning(
+                    "%s ticker=%s role=stage6_gc stage=%s gc3=%d bars_since_gc3=%s "
+                    "m1=%s m2=%s m3=%s s1=%s s2=%s s3=%s hist3=%s "
+                    "m1_up=%d m2_up=%d m3_up=%d all_macd_up=%d "
+                    "rule6=%d rule5=%d rule4=%d bar=%s close=%s atr=%s",
+                    MACD_MARKER, ticker, _fmt(stage), int(bool(gc3)),
+                    _fmt(bars_since), _num(m1), _num(m2), _num(m3),
+                    _num(s1), _num(s2), _num(s3),
+                    _safe_diff(m3, s3),
+                    int(bool(m1_up)), int(bool(m2_up)), int(bool(m3_up)), int(all_up),
+                    rules["rule6"], rules["rule5"], rules["rule4"],
+                    _fmt(bar), _int_or_dash(close), _num(atr),
+                )
+                _cap.mark_emitted(key)
+                emitted_today += 1
+            except Exception:
+                continue
+        if suppressed > 0:
+            summary_key = ("-", "macd:stage6_gc:summary")
+            if _cap.should_emit(summary_key):
+                logger.warning(
+                    "%s role=stage6_gc cap_reached=1 limit=%d suppressed=%d",
+                    MACD_MARKER, STAGE6_GC_DAILY_LIMIT, suppressed,
+                )
+                _cap.mark_emitted(summary_key)
+    except Exception:
+        trace_observer_failure(MACD_MARKER, "macd_stage6_batch", _cap)
 
 
 def observe_band(

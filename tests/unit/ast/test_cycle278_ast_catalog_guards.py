@@ -252,7 +252,7 @@ _BASE_SHA = {
     "src/engine/strategies/vcp_breakout.py":
         "5b324b34335f922f82b848ae2313e08660bde75c02d12432867ed224e9709228",
     "src/engine/strategies/kojiro.py":
-        "89058d0e4ebafc41f2b2aec4801b1a5a4d8c00965379d91c533d802210761571",
+        "0e2e7e07e802b541aeeab5bce2ad29716148d59a8c9daf2213127550114214a9",
 }
 
 

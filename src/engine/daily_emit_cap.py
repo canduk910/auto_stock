@@ -183,6 +183,26 @@ class KstDailyEmitCap(DailyEmitCap[K]):
                 self._day = primed
         super().mark_emitted(key)
 
+    def count_matching(self, predicate, *, now: "datetime | None" = None) -> int:
+        """읽기 전용 — 오늘(KST) `_emitted` 중 ``predicate(key)`` 가 참인 개수(cycle348).
+
+        새 가변 모듈 전역을 두지 않고 이 cap 의 내부 상태만으로 일일 카운트를
+        도출하려는 호출부(예: `kojiro_band_observe.observe_macd_stage6` 의 일일
+        상한 판정)를 위한 leaf. **상태를 바꾸지 않는다** — `should_emit`/
+        `mark_emitted` 와 달리 emit 여부에 관여하지 않는다. `should_emit` 과 같은
+        자기 날짜 동기화를 먼저 태워 날짜가 바뀐 뒤의 카운트가 전날 값을 이어받지
+        않게 한다. 🔴 기존 `DailyEmitCap`(base) 은 이 메서드가 없다 — cycle258 계약
+        (base byte 불변, 서브클래스 추가만)이 base 확장을 금지한다.
+        """
+        try:
+            self._sync_day(now)
+        except Exception:  # pragma: no cover — never-raise
+            pass
+        try:
+            return sum(1 for k in self._emitted if predicate(k))
+        except Exception:
+            return 0
+
     def emit_once(
         self, key: K, log_fn, msg: str, *args, now: "datetime | None" = None,
     ) -> bool:

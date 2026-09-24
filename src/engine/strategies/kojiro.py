@@ -34,6 +34,7 @@ from src.engine.kojiro_band_observe import (
     absorb_macd_call_failure,
     observe_band,
     observe_macd,
+    observe_macd_stage6,
 )
 from src.engine.kojiro_gap_observe import absorb_call_failure, observe_gap
 from src.engine.kojiro_indicators import KojiroIndicatorConfig, enrich
@@ -362,6 +363,7 @@ class KojiroStrategy(StrategyBase):
         rank_raw: dict[str, tuple] = {}   # 후보 랭킹 raw 3성분 (2-pass: 루프 stash → 후 정규화)
         band_raw: dict[str, tuple] = {}   # cycle273 shadow 관측 원자료 (leaf 로만 소비, 행위 무영향)
         macd_raw: dict[str, tuple] = {}   # cycle344 대순환 MACD 관측 원자료 (동일 계약)
+        macd_s6_raw: dict[str, tuple] = {}   # cycle348 국면6 크로스(gc3) shadow 관측 원자료
         fetch_ex: list[dict] = []
         band_ex: list[dict] = []
         stage_valid_ex: list[dict] = []
@@ -424,6 +426,19 @@ class KojiroStrategy(StrategyBase):
                 stage = int(stage)
                 stats["stage_valid_pass"] += 1
                 stage_valid_t.append(ticker)
+
+                # cycle348 — stage6_gc 수집(step6 직후, 보유 stamp 앞). 자기
+                # try — 실패해도 held stamp·step7·step8·후보 등록은 그대로
+                # 진행한다(B4/B9 — 매매 경로 무접촉).
+                try:
+                    s6_row = self._stage6_gc_observe_row(
+                        enriched, stage, bar_date, prev_close, atr_val)
+                    if s6_row is not None:
+                        macd_s6_raw[ticker] = s6_row
+                except Exception:
+                    logger.debug(
+                        "[kojiro_macd_observe] stage6_gc 수집 실패 graceful: %s",
+                        ticker, exc_info=True)
 
                 ema_s = float(last["ema_s"])
                 ema_m = float(last["ema_m"])
@@ -540,6 +555,13 @@ class KojiroStrategy(StrategyBase):
         # 실패가 다른 관측기까지 삼키면 무엇이 죽었는지 D+1 에 가릴 수 없다.
         try:
             observe_macd(macd_raw, ranked_final, held_only)
+        except Exception:
+            absorb_macd_call_failure("prepare")
+        # cycle348 — role=stage6_gc 확장. `observe_macd` 와 별도 try(M8 차단) —
+        # 한쪽 관측기의 실패가 다른 쪽 표본까지 삼키면 안 된다. 흡수기는 같은
+        # MACD 계열(`absorb_macd_call_failure`) — 밴드 관측기로 오귀인 금지.
+        try:
+            observe_macd_stage6(macd_s6_raw)
         except Exception:
             absorb_macd_call_failure("prepare")
         self._scanned_tickers = ranked_final + held_only
@@ -1375,6 +1397,34 @@ class KojiroStrategy(StrategyBase):
             )
         except Exception:
             return fallback
+
+    def _stage6_gc_observe_row(
+        self, enriched, stage, bar_date, prev_close, atr_val,
+    ) -> tuple | None:
+        """cycle348 — 국면6 크로스(gc3) shadow 관측 원자료 수집(step6 직후).
+
+        `stage != 6` 이면 `_macd_observe_row` 를 **부르지 않는다**(추가 계산
+        최소, B2). `gc3` 는 `_macd_observe_row(enriched, stage)` 의 결과
+        `row[7]` 을 그대로 재사용한다 — 상태(`m3 > s3`)가 아니라 교차 사건이라
+        새 정의를 쓰지 않는다. 마지막 봉이 교차가 아니면 `None`(silent).
+
+        반환 = 기존 12원소 행 + `(bar_date, prev_close, atr_val)` = 15원소.
+        `src.engine.kojiro_band_observe.observe_macd_stage6` 로만 소비된다.
+
+        **never-raise** — 호출부(`prepare`)가 이 헬퍼를 자기 `try` 로 감싸지만,
+        이 헬퍼 자신도 실패를 전부 흡수해 이중으로 방어한다(B8).
+        """
+        try:
+            if stage != 6:
+                return None
+            base = self._macd_observe_row(enriched, stage)
+            if not (isinstance(base, tuple) and len(base) == 12):
+                return None
+            if not base[7]:
+                return None
+            return base + (bar_date, prev_close, atr_val)
+        except Exception:
+            return None
 
     def _score_candidates(self, rank_raw: dict[str, tuple], params: dict) -> dict[str, float]:
         """후보 풀 min-max 정규화 + 가중합 → {ticker: score∈[0,1]}.

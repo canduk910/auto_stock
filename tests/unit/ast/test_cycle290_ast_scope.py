@@ -249,7 +249,9 @@ _SEGMENT_SHA: dict[tuple[str, str], str] = {
     ("kojiro", "calc_buy_quantity"):
         "f3491400f38b3295d37767b008c8821883f8443e76efe6ca26e792bf00e3c17e",
     ("kojiro", "prepare"):
-        "f0f01cfe326893c40727211f4ad7aae5a559568068f78617f7e65ae8a3bd3fa4",
+        # cycle348 재핀 — `[kojiro_macd_observe]` role=stage6_gc 확장(step6 직후
+        # 자기 try 수집 + observe_macd 뒤 별도 try emit). 매매 경로 diff 0.
+        "ead691361c0b4f96c4f823ca9db90ccfba06643ebb801142cd60f4b661c45045",
 }
 
 
