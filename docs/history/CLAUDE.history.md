@@ -365,3 +365,22 @@ VCP universe(KOSPI200∪KOSDAQ150) backfill target **120일** · retention `DAIL
 | `strategy_funnel_snapshots` | 전략별 조건검색 단계별 후보/탈락 종목 영구 추적. `(target_date, strategy_id, step_no, snapshot_at)` UNIQUE. `survived_tickers` JSONB cap 200 / `excluded_sample` JSONB cap 20. 09:30 자동 캡처(`scheduler._auto_capture_funnel_snapshots`, 단계별 + `step_no=99`) + 수동 trigger `POST /api/strategy-funnel/snapshot`(`capture_funnel_snapshots(registry, is_provisional=False)`) |
 
 → CHANGELOG: cycle350 행
+
+## 자금 관리 — `max_lot_units` 항목
+
+### 2026-09-25 — 「피라미딩 착수 시 K→1.0」 교체 (설계안 D-2, 사용자 결정 2026-09-24)
+
+정본 문장 원문:
+
+피라미딩(사다리 증량) 착수 시 **K→1.0** 으로 조인다(K=2 랏 + 4유닛 사다리 = 8유닛 = R15 재위반).
+
+바뀐 사실 = 사용자가 설계안 `_workspace/design/2026-09-24_three_stage_sizing_pyramiding.md` D-2 ⓐ 를
+택했다 — K 는 2.0 을 유지하고, 1주 폴백으로 산 랏에는 사다리를 걸지 않는다.
+
+근거(설계안 §5 · 자문 `_workspace/domain_consult/cycle345_three_stage_pyramiding.md` Q4) = 사다리 트랜치는
+전부 정상 분기(≥2주)라 K 캡에 닿지 않는다. 8유닛 문제는 「K=2 폴백 랏 위에 사다리」 조합에서만 생기므로
+그 조합을 막으면 닫힌다. 반대로 K→1.0 은 사다리와 무관하게 kojiro 신규 진입 8%·donchian 20% 를 없앤다
+(u<1 종목의 1주 폴백 랏 차단, 09-24 예산 기준).
+
+같은 서술을 함께 고친 곳 = `_workspace/00_leader_trading_rules.md` · `docs/trading_base/{피라미딩,자금관리,리스크관리,README}.md`
+· `_workspace/00_URGENT_WORKLIST.md`(결정 완료 3번 · R6 행 폐기 표시).

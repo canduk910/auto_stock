@@ -43,7 +43,7 @@
 2. **MACD 진입 규약 변경(국면1→6)** = **보류**. 사유 = 판정에 1년 · 추가가 대체가 됨 · 3단 분할 부재.
    상세 = [`domain_consult/cycle340_kojiro_macd.md`](domain_consult/cycle340_kojiro_macd.md)
 3. **수량 3단 분할 + 피라미딩** = **설계 시작**. 🔴 설계만 하고 코드는 고치지 않는다 — 설계안을 가져와 다시 승인받는다.
-   선결 = 카드 E(`pending_buy_amounts` 키를 `(ticker, order_no)` 로) · 착수 시 `max_lot_units` K→1.0
+   선결 = 카드 E(`pending_buy_amounts` 키를 `(ticker, order_no)` 로). K축 `max_lot_units` 는 **2.0 유지 + 1주 폴백으로 산 랏에는 사다리 금지**(설계안 D-2 사용자 결정 — K→1.0 은 kojiro 진입 8%·donchian 20% 를 없앤다)
 4. **UI 스크롤 제외 2곳** = **그대로 둔다**
 5. **목표가는 `눌림목 돌파` 하나뿐** = **현 상태 유지**
 
@@ -58,16 +58,21 @@
 | ③ | MACD 관측기 국면6 확장(cycle348) | ✅ `2ef289b` 배포 |
 | ③-2 | VCP 관측 — 오전 후보별 돌파선 거리 · 하루 돌파 사건 수 (cycle349). 스냅샷 분리는 ③-3 으로 이관 | ✅ `80efddf` 배포 |
 | ③-3 | **저녁 캡처 A안** (2026-09-24 사용자 결정, `scheduler.py` 승인) — 16:20 → **20:30 일봉 적재 뒤**로 옮기고 스냅샷 날짜를 **다음 거래일**로 · 부팅 +600초 아침 재실행에 **신선도 게이트**(저녁 실패 시에만 catch-up). 배경: 적재가 16:00→18:10→20:30 으로 밀리며 16:20 캡처가 전일 봉 기준이 돼 「내일 미리보기」가 아니게 됐고, 07:57 재실행은 07:45 부팅 준비의 중복(09-22·23 결과 동일). cycle193 이 이 task 만 게이트에서 뺐다(「변경 0」). 오전 확정 행을 저녁이 덮는 문제도 여기서 함께 닫는다 | ⚠️ **일부만(cycle350)** — `snapshot_at` 을 마지막 쓰기 시각으로 + market_ops 저녁 캡처 증거 하한. 🔴 **보류 2건(결정 카드)**: #1 6전략이 벽시계 오늘 봉을 버려(`prev_idx`) 20:30 뒤로 옮겨도 전일 봉 기준 → A1 `prepare(as_of=)`(권고, 부수효과 감사+자문 선행)/A2 격리 계산/A3 미리보기 은퇴. 확정 행 보호(③-b)는 이 결정과 함께. #2 부팅 +600초 재준비는 **월요일(주말 뒤 TTL 재적재) 실매매 후보를 바꾸는 유일한 교정 경로**(09-14·09-21 실측) → 게이트 보류, 4b 유지 권고·4c(보충 적재 완료 뒤 재준비) 별도. 명세 `red/cycle350_evening_funnel_spec.md` |
-| ④ | 피라미딩 설계 D-1~D-5 권고대로 = 단계1 과거 재현 + 단계2 야간 가상 기록 | 대기 |
-| ⑤ | F3 LTV 상한가 트레일링(자문 선행) | 대기 |
-| ⑥ | F2 스캔 단계 주가 상한(자문 선행) | 대기 |
-| ⑦ | 카드 C — `_sync_orders_to_db` 의 `"momentum"` 폴백(성과 귀인 1순위, `scheduler.py`) | 대기 |
+| ④ | 피라미딩 설계 D-1~D-5 권고대로 = 단계1 과거 재현 + 단계2 야간 가상 기록 | ✅ cycle351 `2ca9c60` 배포. 단계 1 S0 = Δ **+0.047R**, 진입일 클러스터 95% [−0.058, +0.161] · 표본 **855 < 문턱 1,500**(일봉 보존 390일이면 약 1,000 에서 멈춤, 추정) → 🔴 **문턱 재설계 결정 필요**. 단계 2 가상 기록 가동. 결과 [cycle351](domain_consult/cycle351_pyramid_s0_replay.md) |
+| ⑤ | F3 LTV 상한가 트레일링(자문 선행) | 🔴 **보류(크리티컬 분기)** — 실손실은 이미 −3.5% 에서 멈추고, 당일 트레일링은 평균 수익을 깎는다(건당 평균 — 폭 7% −2.1%p · 10% −1.5%p · 15% −0.9~0%p). 권고 ① **15:20 1회 점검**(상한가 모드인데 임계 아래면 종가 매도 — 평균 −0.07%p, −5% 이하 손실 6→3건). 선택지 ① / ② 15% 트레일링 / ③ 둘 다 / ④ 현행 + 문서 정정. 자문 [cycle352](domain_consult/cycle352_ltv_limit_up_trailing.md) |
+| ⑥ | F2 스캔 단계 주가 상한(자문 선행) | 🔴 **보류(크리티컬 분기)** — 자문 결론: VB·LTV 에만 주가 상한 「설계 랏 ÷ N」(momentum 은 기록만). N=1 권고(N≥2 면 VB 성격이 바뀐다). shadow 선행(`DEFAULT_PARAMS` 새 키 = 승인 대상). 코드 없는 임시안 = VB·LTV `max_lot_ratio_mult` 1.0 PUT. ⚠️ 자문 메모는 자동 모드 안전 검사에 막혀 **파일로 저장되지 않았다**(세션 기록에만 있다) — 저장 여부 사용자 결정 |
+| ⑦ | 카드 C — `_sync_orders_to_db` 의 `"momentum"` 폴백(성과 귀인 1순위, `scheduler.py`) | ⏳ cycle354 `cdae749` push — 배포 확인 중. `boot_manager.py` 의 별개 `"momentum"` 폴백 2곳은 후속 |
+| ⑦-2 | **F-A** BFB `position_ratio` 매수가 다음 날 부팅 재도출(`_rederive_entry_atr`)로 ATR 손절 경로(−7% 받침선)로 넘어간다. 100840 −7.1% 사례 — 메인 세션이 코드·운영 DB 로 확인 | 🔴 **승인 대기** — 격리 워크트리에서 수정 준비 중. 09-28 개장 전 배포 여부 결정 |
+| ⑦-3 | **F-B** `H0UNMKO0` 파서 한 칸 밀림 → 가짜 VI · 보유 종목 재구독 skip(`src/api/market_operation.py` + 8영역 `src/realtime/handler.py`) | 🔴 **승인 대기** |
+| ⑦-4 | **F-C** `stock_master_daily.change_rate` 전 행 0(매매 코드는 이 칸을 안 읽는다) | 대기 |
 | ⑧ | 카드 E — `pending_buy_amounts` 키를 `(ticker, order_no)` 로(피라미딩 선결, **8영역**) | 대기. ⚠️ 설계안 D-5 권고(「가상 기록 문턱 뒤」)와 시점이 다르다 — 착수 전 확인 |
 | ⑨ | 카드 A·B·D — 매수 대사 · 거래소 자동취소 통보 · PARTIAL/CANCELLED `affected==0` 관측 | 대기 |
 | ⑩ | 카드 F — `[sell_post_send_error]` `exc_info` 단언(테스트 전용) | 대기 |
 | ⑪ | N1 `[no_feed_held]` 판정 시각 · N2 청산 사유 표기(`TRAILING_STOP` 오표기) | 대기 |
 | ⑫ | B4 3~7단계 · B7 · J-1~J-4 | 대기 |
 | ⑬ | README.md · docs/architecture.md 의 ASCII 구성도를 Mermaid 로(그림 블록만, bash/env·트리·로그는 유지, `mmdc` 문법 검증) | 대기 |
+
+F-A~F-C 출처 = [검토 메모](reports/2026-09-25_daily_and_advice_review.md) §4 · 증거 원본 `reports/2026-09-25_evidence_bfb_atr_and_mkop_raw.txt`. 🔴 원본 INFO 로그는 **09-28 21:30 에 삭제**된다.
 
 🔴 **자율 구간 (2026-09-24 21:40 ~ 09-25 07:40, 사용자 지시)** — 워크리스트를 쉬지 않고 순서대로. 커밋·배포는 건별(21:35~익일 07:45 + 휴장일이라 창 열림, 20:00~21:35 금지).
 **크리티컬 분기가 나오면 그 작업만 보류**하고 아침 아티팩트 보고서의 결정 카드로. 워크리스트 완료 뒤 = 금일 일일 보고서·주간 자문 보고서를 검토해 **내일 추가 작업 제안**을 보고서에 포함.
@@ -113,7 +118,7 @@ R1 매수 빈도 = 그대로 · R3 비중 재배분 = 보류(VB 실적 부진) �
 | C3 | `[buy_fill_strategy_from_pending]` | 있으면 **시정이 실제로 막았다** | 그 ticker 의 `positions` 가 같은 날 안에 있는지 대조 |
 | C4 | `[buy_fill_fallback_held_conflict]` | **0 에 수렴** | 남으면 그 `order_no` 를 KIS 주문내역과 대조(수동/외부인지) |
 | C5 | `[sell_fill_during_insert]`·`[sell_position_gone]` | 0 또는 소수 | 🔴 **INFO 라 `system_logs` 보존 2일** — 월·화 안에 안 보면 영구 소실 |
-| C6 | `[cash_usage_ratio_source]` · `[param_drift] count=39` | `reason=auto_disabled applied=1.00` | `reason=computed` 면 예산이 1/4 — 즉시 정지 |
+| C6 | `[cash_usage_ratio_source]` · `[param_drift] count=46` | `reason=auto_disabled applied=1.00` | `reason=computed` 면 예산이 1/4 — 즉시 정지 |
 | C7 | `[buy_partial_no_cancel_timer]` · `[fill_partial_no_reorder]` | 0 또는 소수 | 잦으면 귀속 판정이 자주 물러선다는 뜻 |
 | C8 | 21:30 일일 분석의 `top_patterns` | — | ⚠️ cycle334 가 **매수 폴백 skip WARNING** 에 ` (주문번호: %s)` 를 붙였다. 그 줄은 메시지 전문이 패턴 키라 **09-21 전후 문자열 비교 금지**(다른 패턴으로 집계된다) |
 | C9 | `[buy_post_send_error]`(cycle335 신설, ERROR·무cap) | **0건** | 1~4건이면 그 `order_no` 를 KIS 주문내역과 대조(예산을 점유한 채 장부가 없는 주문 목록이다). 🔴 **하루 5건 이상이면 RDS 를 본다** — 이 마커가 느는 것은 경계의 결함이 아니라 DB 가 아픈 것이고, revert 는 경계를 없애 로그만 지운다 |
@@ -3362,7 +3367,7 @@ order_engine 수량-0 WARNING 은 "잔고 부족"에서 "캡 스킵 포함"으�
 | R3 | 캡 불성립 | `units_after > K` 또는 `[oversized_fallback] units > K` **1건** | 즉시 핫픽스 |
 | R4 | 파라미터 커플링 | weight / `position_ratio` / `risk_pct` 변경 | K 실효 강도가 예산에 선형 비례 → **K 재검토 의무** |
 | R5 | 자연 은퇴 | 6개월 무발화 + `P_max` 중앙값 > 유니버스 90퍼센타일 | 게이트 **유지**(자본이 줄면 다시 필요), 삭제 금지 |
-| R6 | 피라미딩 착수(T1) | 피라미딩 다크런치와 동시 | **K → 1.0**(K=2 랏 + 4유닛 사다리 = 8유닛 = R15 재위반) |
+| R6 | 피라미딩 착수(T1) | — | 🚫 **폐기** — 설계안 D-2(2026-09-24 사용자 결정)가 대체했다: K 는 2.0 유지 + 1주 폴백으로 산 랏에는 사다리 금지. 8유닛(R15 재위반)은 폴백 랏 위 사다리에서만 생기고, K→1.0 은 kojiro 진입 8%·donchian 20% 를 없앤다([설계안 §5](design/2026-09-24_three_stage_sizing_pyramiding.md)) |
 
 **⑪ G0 종료 기준 재정의** — 검토 보고서 §4.3 의 "`[oversized_fallback]` 발화 0"은 K>1 과 **논리적 양립 불가**
 (캡을 통과한 랏도 ρ 상한을 계속 넘을 수 있다). 실제 종료 = ①`[fallback_notional_capped]` 실발화 1건 이상 ∧
