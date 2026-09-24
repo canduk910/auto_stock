@@ -1,4 +1,4 @@
-# 🔴 2026-09-22(화) — 최신 상태
+# 🔴 2026-09-25(금, 휴장) — 최신 상태는 아래 「작업 순서」 표와 아침 보고서
 
 > 이 문서는 **다른 작업 전에 먼저 읽는다**(루트 `CLAUDE.md`). 아래 「지금 상태」가 정본이고,
 > 그 아래 옛 절들은 **배경**이다 — 날짜 표제를 보고 최신 여부를 판단하라.
@@ -61,14 +61,14 @@
 | ④ | 피라미딩 설계 D-1~D-5 권고대로 = 단계1 과거 재현 + 단계2 야간 가상 기록 | ✅ cycle351 `2ca9c60` 배포. 단계 1 S0 = Δ **+0.047R**, 진입일 클러스터 95% [−0.058, +0.161] · 표본 **855 < 문턱 1,500**(일봉 보존 390일이면 약 1,000 에서 멈춤, 추정) → 🔴 **문턱 재설계 결정 필요**. 단계 2 가상 기록 가동. 결과 [cycle351](domain_consult/cycle351_pyramid_s0_replay.md) |
 | ⑤ | F3 LTV 상한가 트레일링(자문 선행) | 🔴 **보류(크리티컬 분기)** — 실손실은 이미 −3.5% 에서 멈추고, 당일 트레일링은 평균 수익을 깎는다(건당 평균 — 폭 7% −2.1%p · 10% −1.5%p · 15% −0.9~0%p). 권고 ① **15:20 1회 점검**(상한가 모드인데 임계 아래면 종가 매도 — 평균 −0.07%p, −5% 이하 손실 6→3건). 선택지 ① / ② 15% 트레일링 / ③ 둘 다 / ④ 현행 + 문서 정정. 자문 [cycle352](domain_consult/cycle352_ltv_limit_up_trailing.md) |
 | ⑥ | F2 스캔 단계 주가 상한(자문 선행) | 🔴 **보류(크리티컬 분기)** — 자문 결론: VB·LTV 에만 주가 상한 「설계 랏 ÷ N」(momentum 은 기록만). N=1 권고(N≥2 면 VB 성격이 바뀐다). shadow 선행(`DEFAULT_PARAMS` 새 키 = 승인 대상). 코드 없는 임시안 = VB·LTV `max_lot_ratio_mult` 1.0 PUT. ⚠️ 자문 메모는 자동 모드 안전 검사에 막혀 **파일로 저장되지 않았다**(세션 기록에만 있다) — 저장 여부 사용자 결정 |
-| ⑦ | 카드 C — `_sync_orders_to_db` 의 `"momentum"` 폴백(성과 귀인 1순위, `scheduler.py`) | ⏳ cycle354 `cdae749` push — 배포 확인 중. `boot_manager.py` 의 별개 `"momentum"` 폴백 2곳은 후속 |
-| ⑦-2 | **F-A** BFB `position_ratio` 매수가 다음 날 부팅 재도출(`_rederive_entry_atr`)로 ATR 손절 경로(−7% 받침선)로 넘어간다. 100840 −7.1% 사례 — 메인 세션이 코드·운영 DB 로 확인 | 🔴 **승인 대기** — 격리 워크트리에서 수정 준비 중. 09-28 개장 전 배포 여부 결정 |
+| ⑦ | 카드 C — `_sync_orders_to_db` 의 `"momentum"` 폴백(성과 귀인 1순위, `scheduler.py`) | ✅ cycle354 `cdae749` 배포. `boot_manager.py` 의 별개 `"momentum"` 폴백 2곳(KIS 잔고 보완 복구·미체결 매수 복구)은 후속 |
+| ⑦-2 | **F-A** BFB `position_ratio` 매수가 다음 날 부팅 재도출(`_rederive_entry_atr`)로 ATR 손절 경로(−7% 받침선)로 넘어간다. 100840 −7.1% 사례 — 메인 세션이 코드·운영 DB 로 확인 | 🔴 **승인 대기(09-28 07:45 전)** — 수정 준비 완료 = 로컬 브랜치 `fix/cycle355-bfb-entry-atr-gate`(`edb6ade`, push 안 함, main 뒤로 5커밋 → 승인 시 재기반·핀 재조정). 재도출을 「현재 설정 turtle」 일 때만. 메모 `domain_consult/cycle355_bfb_entry_atr_gate.md` |
 | ⑦-3 | **F-B** `H0UNMKO0` 파서 한 칸 밀림 → 가짜 VI · 보유 종목 재구독 skip(`src/api/market_operation.py` + 8영역 `src/realtime/handler.py`) | 🔴 **승인 대기** |
 | ⑦-4 | **F-C** `stock_master_daily.change_rate` 전 행 0(매매 코드는 이 칸을 안 읽는다) | 대기 |
 | ⑧ | 카드 E — `pending_buy_amounts` 키를 `(ticker, order_no)` 로(피라미딩 선결, **8영역**) | 대기. ⚠️ 설계안 D-5 권고(「가상 기록 문턱 뒤」)와 시점이 다르다 — 착수 전 확인 |
-| ⑨ | 카드 A·B·D — 매수 대사 · 거래소 자동취소 통보 · PARTIAL/CANCELLED `affected==0` 관측 | 대기 |
-| ⑩ | 카드 F — `[sell_post_send_error]` `exc_info` 단언(테스트 전용) | 대기 |
-| ⑪ | N1 `[no_feed_held]` 판정 시각 · N2 청산 사유 표기(`TRAILING_STOP` 오표기) | 대기 |
+| ⑨ | 카드 A·B·D — 매수 대사 · 거래소 자동취소 통보 · PARTIAL/CANCELLED `affected==0` 관측 | D ✅ cycle358 `fa7b894`(`[trade_status_update_miss]`). A 매수 대사·B 거래소 자동취소 통보(취소 프레임 필드 실측이 휴장이라 불가)는 미착수 |
+| ⑩ | 카드 F — `[sell_post_send_error]` `exc_info` 단언(테스트 전용) | ✅ cycle356 `857518a` |
+| ⑪ | N1 `[no_feed_held]` 판정 시각 · N2 청산 사유 표기(`TRAILING_STOP` 오표기) | N1 ✅ cycle357 `e8c8f31`(KRX 연속체결 창에서만 판정). N2 = 공통 `Signal` 에 시간 청산 값이 없어 8영역 청산 분기 동반 → 설계만, P2 BFB 청산 자문에 합칠 것 |
 | ⑫ | B4 3~7단계 · B7 · J-1~J-4 | 대기 |
 | ⑬ | README.md · docs/architecture.md 의 ASCII 구성도를 Mermaid 로(그림 블록만, bash/env·트리·로그는 유지, `mmdc` 문법 검증) | 대기 |
 
