@@ -103,6 +103,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -353,6 +354,7 @@ backend:
     - tests/unit/db/test_cycle285_task_last_success_bulk.py
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -1062,6 +1064,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -1152,6 +1155,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -1425,6 +1429,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -2146,6 +2151,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -2194,6 +2200,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -2523,6 +2530,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -3230,6 +3238,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -3332,6 +3341,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -3595,6 +3605,7 @@ backend:
     - tests/unit/db/test_cycle285_task_last_success_bulk.py
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -4314,6 +4325,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -4390,6 +4402,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -4667,6 +4680,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -5398,6 +5412,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -5476,6 +5491,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -5752,6 +5768,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -6482,6 +6499,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -6560,6 +6578,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -6836,6 +6855,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -7566,6 +7586,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -7651,6 +7672,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -7925,6 +7947,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -8650,6 +8673,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -8730,6 +8754,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -9006,6 +9031,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -9734,6 +9760,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -9815,6 +9842,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -10092,6 +10120,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -10818,6 +10847,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -10911,6 +10941,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -11189,6 +11220,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -11920,6 +11952,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -12012,6 +12045,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -12277,6 +12311,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -13004,6 +13039,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -13095,6 +13131,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -13370,6 +13407,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -14090,6 +14128,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -14171,6 +14210,7 @@ backend:
     - tests/unit/db/test_cycle285_task_last_success_bulk.py
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle84_count_eager_refresh_today.py
@@ -14304,6 +14344,7 @@ backend:
     - tests/integration/test_cycle276_llm_eval_pg_roundtrip.py
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -15182,6 +15223,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle90_concurrent_lock.py
     - tests/unit/routes/test_cycle90_emit_persistence.py
     - tests/unit/routes/test_cycle90_fetch_top_500_call.py
@@ -15205,6 +15247,7 @@ backend:
     direct_tests:
     - tests/integration/test_cycle276_llm_eval_pg_roundtrip.py
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycleM2b_universe_daily_roundtrip.py
     - tests/unit/db/test_cycle129_master_raw_column.py
     - tests/unit/db/test_cycle68_kst_helper_module_g1.py
@@ -15537,6 +15580,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -16256,6 +16300,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -16336,6 +16381,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -16611,6 +16657,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -17340,6 +17387,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -17419,6 +17467,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -17695,6 +17744,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -18424,6 +18474,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -18511,6 +18562,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -18785,6 +18837,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -19508,6 +19561,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -19584,6 +19638,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -19862,6 +19917,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -20592,6 +20648,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -20675,6 +20732,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -20949,6 +21007,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -21676,6 +21735,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -21757,6 +21817,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -22033,6 +22094,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -22760,6 +22822,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -22843,6 +22906,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -23119,6 +23183,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -23844,6 +23909,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -23924,6 +23990,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -24199,6 +24266,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -24928,6 +24996,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -25014,6 +25083,7 @@ backend:
     - tests/integration/test_cycle283_log_report_upsert_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -25283,6 +25353,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -26012,6 +26083,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -26060,6 +26132,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -26385,6 +26458,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -27096,6 +27170,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -27225,6 +27300,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -27480,6 +27556,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -28184,6 +28261,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle90_concurrent_lock.py
     - tests/unit/routes/test_cycle90_emit_persistence.py
@@ -28282,6 +28360,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -28547,6 +28626,7 @@ backend:
     - tests/unit/db/test_cycle285_task_last_success_bulk.py
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -29264,6 +29344,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -29343,6 +29424,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -29620,6 +29702,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -30348,6 +30431,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -30427,6 +30511,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -30704,6 +30789,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -31432,6 +31518,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -31466,10 +31553,12 @@ backend:
     - tests/contract/test_cycle171_snapshot_route_steps.py
     - tests/contract/test_routes_strategy_funnel.py
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycleM1_3_daily_perf_funnel_roundtrip.py
     - tests/integration/test_cycleM6_date_column_str_binding_roundtrip.py
     - tests/unit/db/test_cycle145_funnel_upsert.py
     - tests/unit/db/test_cycle171_funnel_provisional.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycleM1_3_strategy_funnel_pg.py
     - tests/unit/db/test_cycleM6_date_column_str_binding.py
     - tests/unit/db/test_strategy_funnel_crud.py
@@ -32516,6 +32605,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -32658,6 +32748,7 @@ backend:
     - tests/integration/test_cycle276_llm_eval_pg_roundtrip.py
     - tests/integration/test_cycle283_log_report_upsert_roundtrip.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
     - tests/integration/test_cycle99_fluctuation_single_call.py
     - tests/integration/test_cycleM1_1_pg_roundtrip.py
@@ -32924,6 +33015,7 @@ backend:
     - tests/unit/db/test_cycle276_llm_evaluations_db.py
     - tests/unit/db/test_cycle283_log_report_upsert.py
     - tests/unit/db/test_cycle299_retention_expansion.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
     - tests/unit/db/test_cycle68_kst_global_ast_guard_g10.py
     - tests/unit/db/test_cycle68_kst_helper_module_g1.py
@@ -33611,6 +33703,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
     - tests/unit/routes/test_cycle84_route_invalid_limit.py
@@ -33696,6 +33789,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -33966,6 +34060,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -34689,6 +34784,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -34778,6 +34874,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -35050,6 +35147,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -35773,6 +35871,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -35847,6 +35946,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -36125,6 +36225,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -36856,6 +36957,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -36933,6 +37035,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -37211,6 +37314,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -37941,6 +38045,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -38028,6 +38133,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -38304,6 +38410,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -39025,6 +39132,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -39106,6 +39214,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -39384,6 +39493,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -40109,6 +40219,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -40188,6 +40299,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -40465,6 +40577,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -41193,6 +41306,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -41270,6 +41384,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -41548,6 +41663,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -42277,6 +42393,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -42360,6 +42477,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -42638,6 +42756,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -43361,6 +43480,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -43451,6 +43571,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -43728,6 +43849,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -44445,6 +44567,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -44521,6 +44644,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -44798,6 +44922,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -45529,6 +45654,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -45609,6 +45735,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -45885,6 +46012,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -46613,6 +46741,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -46692,6 +46821,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -46970,6 +47100,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -47697,6 +47828,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -47776,6 +47908,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -48054,6 +48187,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -48781,6 +48915,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -48857,6 +48992,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -49135,6 +49271,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -49865,6 +50002,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -49941,6 +50079,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -50219,6 +50358,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -50949,6 +51089,7 @@ backend:
     - tests/unit/routes/test_cycle295_manual_sell_exempt.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -51025,6 +51166,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -51303,6 +51445,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -52033,6 +52176,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -52183,6 +52327,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -52460,6 +52605,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -53178,6 +53324,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -53265,6 +53412,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -53543,6 +53691,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -54262,6 +54411,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -54340,6 +54490,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -54616,6 +54767,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -55346,6 +55498,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -55425,6 +55578,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -55703,6 +55857,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -56430,6 +56585,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -56521,6 +56677,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -56798,6 +56955,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -57516,6 +57674,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -57599,6 +57758,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -57876,6 +58036,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -58598,6 +58759,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -58674,6 +58836,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -58952,6 +59115,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -59682,6 +59846,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -59763,6 +59928,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -60041,6 +60207,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -60766,6 +60933,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -60844,6 +61012,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -61122,6 +61291,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -61850,6 +62020,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -61927,6 +62098,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -62205,6 +62377,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -62934,6 +63107,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -63012,6 +63186,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -63290,6 +63465,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -64018,6 +64194,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -64092,6 +64269,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -64370,6 +64548,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -65101,6 +65280,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -65255,6 +65435,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -65533,6 +65714,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -66263,6 +66445,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -66412,6 +66595,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -66690,6 +66874,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -67417,6 +67602,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -67555,6 +67741,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -67833,6 +68020,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -68563,6 +68751,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -68645,6 +68834,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -68922,6 +69112,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -69647,6 +69838,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -69771,6 +69963,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -70035,6 +70228,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -70731,6 +70925,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -70809,6 +71004,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -71087,6 +71283,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -71815,6 +72012,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -71895,6 +72093,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -72173,6 +72372,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -72899,6 +73099,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -72973,6 +73174,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -73251,6 +73453,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -73982,6 +74185,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -74057,6 +74261,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -74568,6 +74773,7 @@ backend:
     - tests/unit/db/test_cycle285_task_last_success_bulk.py
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -75075,6 +75281,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -75141,6 +75348,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -75338,6 +75546,7 @@ backend:
     - tests/unit/realtime/test_cycle222a2_handler_hgpr_hour.py
     - tests/unit/routes/test_cycle253_channel_probe.py
     - tests/unit/routes/test_cycle285_market_ops_route.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     transitive_tests:
     - tests/unit/api/test_base.py
     - tests/unit/api/test_base_logging.py
@@ -75565,6 +75774,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -76230,6 +76440,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -76508,6 +76719,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -77236,6 +77448,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -77313,6 +77526,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -77591,6 +77805,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -78319,6 +78534,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -78394,6 +78610,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -78672,6 +78889,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -79403,6 +79621,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -79477,6 +79696,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -79755,6 +79975,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -80486,6 +80707,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -80568,6 +80790,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -80846,6 +81069,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -81571,6 +81795,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -81676,6 +81901,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -81954,6 +82180,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -82655,6 +82882,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -82733,6 +82961,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -83011,6 +83240,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -83739,6 +83969,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -83839,6 +84070,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -84117,6 +84349,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -84823,6 +85056,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -84901,6 +85135,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -85179,6 +85414,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -85907,6 +86143,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -85992,6 +86229,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -86270,6 +86508,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -86991,6 +87230,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -87067,6 +87307,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -87345,6 +87586,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -88075,6 +88317,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -88152,6 +88395,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -88429,6 +88673,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -89159,6 +89404,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -89235,6 +89481,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -89513,6 +89760,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -90243,6 +90491,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -90328,6 +90577,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -90605,6 +90855,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -91327,6 +91578,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -91474,6 +91726,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -91749,6 +92002,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -92439,6 +92693,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -92487,6 +92742,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -92840,6 +93096,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -93523,6 +93780,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -93635,6 +93893,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -93910,6 +94169,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -94607,6 +94867,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -94655,6 +94916,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -94994,6 +95256,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -95691,6 +95954,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -95739,6 +96003,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -96069,6 +96334,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -96775,6 +97041,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -96892,6 +97159,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -97167,6 +97435,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -97859,6 +98128,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -97907,6 +98177,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -98251,6 +98522,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -98943,6 +99215,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -98995,6 +99268,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -99489,6 +99763,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -100031,6 +100306,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -100078,6 +100354,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -100443,6 +100720,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -101114,6 +101392,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -101190,6 +101469,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -101468,6 +101748,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -102198,6 +102479,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -102280,6 +102562,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -102557,6 +102840,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -103282,6 +103566,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -103429,6 +103714,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -103707,6 +103993,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -104435,6 +104722,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -104516,6 +104804,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -104794,6 +105083,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -105519,6 +105809,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -105595,6 +105886,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -105873,6 +106165,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -106603,6 +106896,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -106693,6 +106987,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -106971,6 +107266,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -107687,6 +107983,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -107764,6 +108061,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -108042,6 +108340,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -108771,6 +109070,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -108847,6 +109147,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -109125,6 +109426,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -109855,6 +110157,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -109942,6 +110245,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -110220,6 +110524,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -110942,6 +111247,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -111077,6 +111383,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -111355,6 +111662,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -112086,6 +112394,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -112161,6 +112470,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -112439,6 +112749,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -113170,6 +113481,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -113252,6 +113564,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -113529,6 +113842,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -114258,6 +114572,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -114332,6 +114647,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -114614,6 +114930,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -115342,6 +115659,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -115421,6 +115739,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -115699,6 +116018,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -116426,6 +116746,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -116506,6 +116827,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -116780,6 +117102,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -117510,6 +117833,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -117619,6 +117943,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -117936,6 +118261,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -118655,6 +118981,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -118780,6 +119107,7 @@ backend:
     - tests/contract/test_weight_unit_contract.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/unit/db/test_cycle283_log_report_upsert.py
     - tests/unit/engine/test_cycle245_ratio_notional_cap.py
@@ -118812,6 +119140,7 @@ backend:
     - tests/unit/routes/test_cycle295_gap_route_surface.py
     - tests/unit/routes/test_cycle295_manual_sell_exempt.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -118910,6 +119239,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
     - tests/integration/test_cycle98_fluctuation_kis_api.py
     - tests/integration/test_cycle99_fluctuation_single_call.py
@@ -119183,6 +119513,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -119888,6 +120219,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_route_404.py
     - tests/unit/routes/test_cycle84_route_invalid_limit.py
@@ -120042,6 +120374,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -120314,6 +120647,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -121034,6 +121368,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -121150,6 +121485,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -121422,6 +121758,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -122118,6 +122455,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -122209,6 +122547,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -122485,6 +122824,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -123202,6 +123542,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -123313,6 +123654,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -123590,6 +123932,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -124286,6 +124629,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -124405,6 +124749,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -124678,6 +125023,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -125370,6 +125716,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -125813,6 +126160,7 @@ backend:
     - tests/contract/test_weight_unit_contract.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/unit/main/test_cycle72_db_log_dedupe.py
     - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
@@ -125829,6 +126177,7 @@ backend:
     - tests/unit/routes/test_cycle253_channel_probe.py
     - tests/unit/routes/test_cycle282_market_state_route.py
     - tests/unit/routes/test_cycle285_market_ops_route.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -125907,7 +126256,9 @@ backend:
   src/routes/market_ops.py:
     direct_tests:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/unit/routes/test_cycle285_market_ops_route.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -126058,6 +126409,7 @@ backend:
     - tests/contract/test_weight_unit_contract.py
     - tests/integration/test_cycle100_count_eager_refresh_integration.py
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_mcp_client_lifecycle.py
     - tests/unit/main/test_cycle72_db_log_dedupe.py
     - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
@@ -126075,6 +126427,7 @@ backend:
     - tests/unit/routes/test_cycle253_channel_probe.py
     - tests/unit/routes/test_cycle282_market_state_route.py
     - tests/unit/routes/test_cycle285_market_ops_route.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -126847,6 +127200,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -127124,6 +127478,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -127850,6 +128205,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -127924,6 +128280,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -128202,6 +128559,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -128932,6 +129290,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -129013,6 +129372,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -129290,6 +129650,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -130019,6 +130380,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -130092,6 +130454,7 @@ backend:
     - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
     - tests/integration/test_cycle295_bool_roundtrip_pg.py
     - tests/integration/test_cycle297_llm_retrospective_pg.py
+    - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
     - tests/integration/test_cycle64_price_filter_scanner_integration.py
     - tests/integration/test_cycle65_trade_amount_filter_e2e.py
     - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -130369,6 +130732,7 @@ backend:
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
+    - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -131100,6 +131464,7 @@ backend:
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
+    - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
     - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -132624,10 +132989,10 @@ frontend:
     - frontend/src/pages/__tests__/MarketState.test.tsx
     - frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
     - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
-generated_at: '2026-09-24T22:05:12.826029+09:00'
+generated_at: '2026-09-24T23:55:30.697561+09:00'
 stats:
   backend_modules: 158
-  backend_tests: 1081
+  backend_tests: 1084
   frontend_modules: 120
   frontend_tests: 98
   unmapped_modules:

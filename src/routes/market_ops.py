@@ -148,6 +148,11 @@ _TS = "'YYYY-MM-DD\"T\"HH24:MI:SS+09:00'"
 #: (다른 세 생산자는 전부 `False`) 이 필터가 없으면 아침 자동 캡처 행이 저녁 캡처의
 #: "성공" 으로 오인된다(cycle285 검증 HIGH #1 — 09:30 에 이미 "완료" 가 뜨고, 16:20
 #: 캡처가 그날 완전히 실패해도 상태가 바뀌지 않았다).
+#: `funnel_rows` 는 추가로 `snapshot_at >= $2`(저녁 캡처 evidence-time 하한, cycle350)
+#: 도 요구한다 — `insert_snapshot` 이 덮어쓸 때마다 `snapshot_at` 을 최신 쓰기 시각으로
+#: 갱신하게 되면서, 부팅 +600초(≈07:57) 잠정 캡처 행이 그 값만으로는 16:20 저녁 캡처의
+#: "완료" 와 구별되지 않는다 — 다른 행이 쓰는 `_evidence_after_schedule` 와 같은 규칙이다.
+#: `funnel_last_at` 은 이 하한을 타지 않는다(전체 기간 최댓값 계약 불변).
 _COMBINED_SQL = f"""
 SELECT
   (SELECT count(*) FROM parameter_recommendations WHERE target_date = $1) AS rec_rows,
@@ -157,7 +162,7 @@ SELECT
   (SELECT count(*) FROM stock_master_daily WHERE bas_dd = $1) AS daily_today_rows,
   (SELECT min(bas_dd) FROM stock_master_daily) AS daily_tail,
   (SELECT count(*) FROM strategy_funnel_snapshots
-     WHERE target_date = $1 AND is_provisional = TRUE) AS funnel_rows,
+     WHERE target_date = $1 AND is_provisional = TRUE AND snapshot_at >= $2) AS funnel_rows,
   (SELECT to_char(max(snapshot_at), {_TS}) FROM strategy_funnel_snapshots
      WHERE is_provisional = TRUE) AS funnel_last_at,
   (SELECT to_char(max(refreshed_at), {_TS}) FROM stock_master) AS sm_refreshed_last,
@@ -239,6 +244,19 @@ def _evidence_after_schedule(value, today: date, scheduled: "time | None") -> bo
         return True
     scheduled_dt = datetime.combine(today, scheduled, tzinfo=_KST)
     return dt_kst >= scheduled_dt - _SCHEDULE_EVIDENCE_GRACE
+
+
+def _funnel_evidence_floor(today: date) -> datetime:
+    """저녁 잠정 퍼널 캡처 산출물의 evidence-time 하한 (cycle350).
+
+    `_evidence_after_schedule` 과 같은 규칙(예정 시각 − `_SCHEDULE_EVIDENCE_GRACE`)을
+    `strategy_funnel_snapshots.snapshot_at` 비교용으로 SQL 바인딩값으로 뽑아 둔다 —
+    `insert_snapshot` 이 덮어쓸 때마다 `snapshot_at` 을 최신 쓰기 시각으로 갱신하므로,
+    부팅 +600초(≈07:57) 잠정 캡처 행을 16:20 저녁 캡처의 "완료" 로 오인하지 않으려면
+    이 하한 이후의 쓰기만 증거로 인정해야 한다. 두 상수는 호출 시점에 모듈 전역에서
+    읽는다(기본 인자로 묶으면 monkeypatch 로 상수를 옮기는 테스트가 못 따라온다).
+    """
+    return datetime.combine(today, TIME_EVENING_FUNNEL_CAPTURE, tzinfo=_KST) - _SCHEDULE_EVIDENCE_GRACE
 
 
 def _degrade_on_error(status: str, *, errored: bool) -> str:
@@ -452,7 +470,7 @@ async def read_market_ops():
 
     combined: "dict | None" = None
     try:
-        combined = await pg.fetchrow(_COMBINED_SQL, to_date(today))
+        combined = await pg.fetchrow(_COMBINED_SQL, to_date(today), _funnel_evidence_floor(today))
     except Exception:
         logger.exception("[market_ops] 산출물 집계 쿼리 실패")
         errors.append("artifacts")

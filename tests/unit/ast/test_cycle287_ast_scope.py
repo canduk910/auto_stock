@@ -409,8 +409,13 @@ _SRC_TREE_FILES = 155
 #: db/strategy_funnel.py(docstring — `snapshot_at` 서술 정정)를 고쳐 digest 가 움직였다
 #: — 파일 수는 불변(155)이다.
 #: 직전 값은 `f3a0b486fde656f9b45162520f5411777ebbfe87621b84066881aa99c6b4ee65` 다.
+#: cycle350 이 db/strategy_funnel.py(`insert_snapshot` 의 `DO UPDATE SET` 에
+#: `snapshot_at = now()` 추가 + docstring 정정) · routes/market_ops.py(순수 헬퍼
+#: `_funnel_evidence_floor` + `_COMBINED_SQL` funnel_rows 서브쿼리에 `snapshot_at >= $2`
+#: 하한 게이트)를 고쳐 digest 가 움직였다 — 파일 수는 불변(155)이다.
+#: 직전 값은 `3158d70b86f8f973d18c5beb8f20c29e663b5713c3204654b8799c4bc3395298` 다.
 _SRC_TREE_DIGEST = (
-    "3158d70b86f8f973d18c5beb8f20c29e663b5713c3204654b8799c4bc3395298"
+    "397c83e3add00589d85c96d8a5f75ff7ee6e62e57c9fc219bc745fe20a328d84"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

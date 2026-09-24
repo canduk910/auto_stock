@@ -179,7 +179,7 @@ AWS RDS PostgreSQL CRUD 모듈. DB 클라이언트 정본 = **`pg.py` (asyncpg �
 
 ## strategy_funnel.py — 조건검색 단계별 추적
 
-- **`insert_snapshot(*, target_date, strategy_id, step_no, step_name, survived_tickers=None, excluded_sample=None, survived_count=None, excluded_count=0, step_conditions=None, is_provisional=False) -> dict | None`** — 인자는 전부 keyword-only 다. `(target_date, strategy_id, step_no)` **UPSERT** 라 같은 단계는 최신 1행만 남는다. `snapshot_at` 은 **최초 INSERT 시각에 고정**된다 — `DO UPDATE SET` 에 `snapshot_at` 이 없고, 기본값 `now()`(migration 030)는 INSERT 때만 들어간다. 그래서 `snapshot_at` 으로는 그 행의 값이 언제 쓰였는지 알 수 없다(하루 쓰기 순서 = `src/engine/CLAUDE.md` 「funnel 스냅샷 캡처」 절).
+- **`insert_snapshot(*, target_date, strategy_id, step_no, step_name, survived_tickers=None, excluded_sample=None, survived_count=None, excluded_count=0, step_conditions=None, is_provisional=False) -> dict | None`** — 인자는 전부 keyword-only 다. `(target_date, strategy_id, step_no)` **UPSERT** 라 같은 단계는 최신 1행만 남는다. `snapshot_at` 은 **그 행의 마지막 쓰기 시각**이다. 첫 INSERT 는 컬럼 기본값 `now()`(migration 030)가 채우고, 덮어쓸 때는 `DO UPDATE SET … snapshot_at = now()` 가 채운다. 두 경우 모두 DB 시계 하나만 쓴다(애플리케이션 `datetime` 을 바인딩하지 않는다). 즉 `snapshot_at` 은 「그 값이 언제 쓰였나」이지 「그 행이 언제 처음 생겼나」가 아니다(하루 쓰기 순서 = `src/engine/CLAUDE.md` 「funnel 스냅샷 캡처」 절). `snapshot_at` 을 조건으로 쓰는 소비처는 `routes/market_ops.py` 하나다(`src/routes/CLAUDE.md` `/api/market-ops` 행).
   - `survived_tickers` 는 `list[str]` 과 `list[dict]`(`{ticker, name}`) 를 모두 받고, `excluded_sample` 은 `[{ticker, name, reason}]`(수치 포함 사유) 형식이다. DB 응답을 읽는 쪽이 형식을 분기 처리한다.
   - `survived_count` 가 `None` 이면 `len(survived_tickers)` 를 쓴다. `step_conditions` 는 UI 툴팁용 단계 조건 문자열이다.
   - `is_provisional=True` = 16:20 저녁 잠정 캡처(전일 마스터 + 16:10 basics 기준), `False`(기본) = 09:30 자동·수동 trigger(확정).

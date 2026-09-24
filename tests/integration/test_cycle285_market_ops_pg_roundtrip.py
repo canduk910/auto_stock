@@ -31,6 +31,31 @@ _KST = timezone(timedelta(hours=9))
 _D = date(2026, 9, 14)
 
 
+def _funnel_floor(d: date):
+    """cycle350 B2 — `_COMBINED_SQL` 의 두 번째 인자(저녁 funnel 증거 하한).
+
+    `getattr` 로 찾는 이유 = 미구현일 때 import 오류가 아니라 assert 로 붉게 하려고.
+    """
+    import src.routes.market_ops as mo
+
+    fn = getattr(mo, "_funnel_evidence_floor", None)
+    assert callable(fn), (
+        "src/routes/market_ops.py::_funnel_evidence_floor 미구현 (Red — cycle350 B2-2)"
+    )
+    return fn(d)
+
+
+async def _pin_funnel_snapshot_at(pg, at: datetime, *, target_date: date, step_no: int) -> None:
+    """cycle350 — 벽시계 배제. 저녁 캡처 행의 `snapshot_at` 을 그날 16:21 로 고정한다
+    (B1 이후 `snapshot_at` = 마지막 쓰기 시각이고 B2 가 그 값에 하한을 건다)."""
+    status = await pg.execute(
+        "UPDATE strategy_funnel_snapshots SET snapshot_at = $1 "
+        "WHERE target_date = $2 AND strategy_id = 'donchian_swing' AND step_no = $3",
+        at, target_date, step_no,
+    )
+    assert status == "UPDATE 1", status
+
+
 @pytest.mark.asyncio
 async def test_c285_pg_1_funnel_rows_excludes_non_provisional(
     clean_strategy_funnel, clean_system_config,
@@ -48,7 +73,11 @@ async def test_c285_pg_1_funnel_rows_excludes_non_provisional(
         target_date=_D, strategy_id="donchian_swing", step_no=99,
         step_name="최종", survived_tickers=["005930"], is_provisional=False,
     )
-    row = await pg.fetchrow(_COMBINED_SQL, to_date(_D))
+    # cycle350 — 하한 이후 시각으로 고정해 「is_provisional 필터만」 을 잰다(시각 게이트와 분리).
+    await _pin_funnel_snapshot_at(
+        pg, datetime(2026, 9, 14, 16, 21, tzinfo=_KST), target_date=_D, step_no=99,
+    )
+    row = await pg.fetchrow(_COMBINED_SQL, to_date(_D), _funnel_floor(_D))
     assert row["funnel_rows"] == 0, (
         "09:30 자동 캡처(is_provisional=False)가 저녁 잠정 캡처 카운트에 새고 있다"
         " — HIGH #1 이 실제로는 안 고쳐졌다"
@@ -59,7 +88,10 @@ async def test_c285_pg_1_funnel_rows_excludes_non_provisional(
         target_date=_D, strategy_id="donchian_swing", step_no=99,
         step_name="최종", survived_tickers=["005930"], is_provisional=True,
     )
-    row2 = await pg.fetchrow(_COMBINED_SQL, to_date(_D))
+    await _pin_funnel_snapshot_at(
+        pg, datetime(2026, 9, 14, 16, 21, tzinfo=_KST), target_date=_D, step_no=99,
+    )
+    row2 = await pg.fetchrow(_COMBINED_SQL, to_date(_D), _funnel_floor(_D))
     assert row2["funnel_rows"] == 1
     assert row2["funnel_last_at"] is not None
 
@@ -80,12 +112,15 @@ async def test_c285_pg_2_last_at_fields_are_all_time_not_today_only(
         target_date=yesterday, strategy_id="donchian_swing", step_no=99,
         step_name="최종", survived_tickers=["005930"], is_provisional=True,
     )
+    await _pin_funnel_snapshot_at(
+        pg, datetime(2026, 9, 13, 16, 21, tzinfo=_KST), target_date=yesterday, step_no=99,
+    )
     # 오늘(target_date=_D) 은 아직 아무 행도 없다.
-    row = await pg.fetchrow(_COMBINED_SQL, to_date(_D))
+    row = await pg.fetchrow(_COMBINED_SQL, to_date(_D), _funnel_floor(_D))
     assert row["funnel_rows"] == 0, "오늘 행이 없어야 한다"
-    assert row["funnel_last_at"] is not None, (
+    assert row["funnel_last_at"] == "2026-09-13T16:21:00+09:00", (
         "어제 성공한 저녁 캡처의 마지막 성공 시각이 여전히 보여야 한다"
-        "(전체 기간 최댓값 계약)"
+        "(전체 기간 최댓값 계약 — cycle350 하한은 funnel_rows 에만 걸린다)"
     )
 
 
@@ -120,6 +155,12 @@ async def test_c285_pg_4_route_end_to_end_over_real_pg(
     await insert_snapshot(
         target_date=_D, strategy_id="donchian_swing", step_no=99,
         step_name="최종", survived_tickers=["005930"], is_provisional=True,
+    )
+    # cycle350 — 벽시계 배제: 저녁 캡처 행을 그날 16:21 로 고정(하한 이후 = 저녁 증거).
+    import src.db.pg as pg
+
+    await _pin_funnel_snapshot_at(
+        pg, datetime(2026, 9, 14, 16, 21, tzinfo=_KST), target_date=_D, step_no=99,
     )
     await set_task_last_success(
         "stock_master_basics_refresh", "2026-09-14T16:12:00+09:00"

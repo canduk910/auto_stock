@@ -1364,3 +1364,21 @@ is_buy_pending` 이기 때문이다.
 
 ⚠️ 21:30 리포트의 `_normalize_message` 가 메시지 전문을 패턴 키로 쓰므로
 **2026-09-21 전후의 `top_patterns` 문자열을 비교하지 않는다**(cycle328 폴백 문구 통일과 같은 주의).
+
+## 정기 task 루프 (`task_loop_helper.run_periodic_task_loop`)
+
+### 2026-09-25 cycle350 — stagger 값 서술 교체 (cycle159 상향이 반영되지 않았던 서술)
+
+정본 원문. 코드는 cycle159(`3a237fd`)부터 0/240/480/720초였다:
+
+task 별 stagger `initial_delay_secs`(full_universe=0 / basics=60 / daily=120 / master=180 / financial=900초).
+
+## scheduler.py — KRX/NXT 통합 운영 08:00~20:00
+
+### 2026-09-25 cycle350 — `TIME_SESSION_START_CUTOFF` 행의 일봉 immediate stagger 서술 교체
+
+정본 원문(행 일부). 일봉 task 의 `initial_delay_secs` 는 240초다:
+
+`start()` 직후 stagger 120초)이 7일 증분으로 보정하지만 `_boot()` 의 prepare 보다 늦다 — `[daily_head_stale]` 관측이 그것을 알린다)
+
+→ CHANGELOG: cycle350 행

@@ -355,3 +355,13 @@ VCP universe(KOSPI200∪KOSDAQ150) backfill target **120일** · retention `DAIL
 장 종료 후 수동 trigger 로 돌린다(`TIME_QUOTE_TOKEN_REFRESH`(20:45) 불변식 창 20:35~ 를 1분 침범).
 
 상세 = `docs/history/src-engine-CLAUDE.history.md` 「분할 backfill 분기 — 대상 확대」.
+
+## DB 스키마 — `strategy_funnel_snapshots` 행
+
+### 2026-09-25 cycle350 — UNIQUE 키 서술 교체 (migration 035 뒤에도 남아 있던 옛 키)
+
+정본 표 행 원문. UNIQUE 는 migration 035(cycle145)부터 `(target_date, strategy_id, step_no)` 였다:
+
+| `strategy_funnel_snapshots` | 전략별 조건검색 단계별 후보/탈락 종목 영구 추적. `(target_date, strategy_id, step_no, snapshot_at)` UNIQUE. `survived_tickers` JSONB cap 200 / `excluded_sample` JSONB cap 20. 09:30 자동 캡처(`scheduler._auto_capture_funnel_snapshots`, 단계별 + `step_no=99`) + 수동 trigger `POST /api/strategy-funnel/snapshot`(`capture_funnel_snapshots(registry, is_provisional=False)`) |
+
+→ CHANGELOG: cycle350 행

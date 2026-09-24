@@ -830,3 +830,13 @@ target 220 → 마진 34 영업일(사이클196 의 34 와 같다). `fetch_daily
   추가했다 — 리터럴만 잡던 탐지기는 상수화 직후 공허해진다.
 - 되돌리기 = `_MAX_DAILY_ROWS` 를 100 으로 되돌리는 한 줄. 단 그 순간 VCP `"full"` 모드도
   함께 100 으로 잘린다(두 겹 중 한 겹만 닫는 것이라 무매매는 되지 않는다).
+
+## strategy_funnel.py — 조건검색 단계별 추적
+
+### 2026-09-25 cycle350 — `snapshot_at` 이 마지막 쓰기 시각이 됐다
+
+`insert_snapshot` 의 `DO UPDATE SET` 에 `snapshot_at = now()` 가 들어가기 전 정본 서술(원문):
+
+`snapshot_at` 은 **최초 INSERT 시각에 고정**된다 — `DO UPDATE SET` 에 `snapshot_at` 이 없고, 기본값 `now()`(migration 030)는 INSERT 때만 들어간다. 그래서 `snapshot_at` 으로는 그 행의 값이 언제 쓰였는지 알 수 없다(하루 쓰기 순서 = `src/engine/CLAUDE.md` 「funnel 스냅샷 캡처」 절).
+
+→ CHANGELOG: cycle350 행
