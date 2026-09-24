@@ -113,11 +113,11 @@ _BASE_SHA: dict[str, str] = {
         "3461242a47080379c8d48dc5efd5799ce5fac173803a95476547ea4758b40a81",
     # 🔴 cycle290 이 방금 `DEFAULT_PARAMS` 를 건드렸다 — 또 건드리면 그 증명이 무너진다.
     "src/engine/strategy_base.py":
-        "869dc20ca561adc561a9ebe9fdb5fe5a3e097f7ec176fdf274d577d509de9252",
+        "3f27be39784f9cb86d72b0c625b705b57d4ee8f555121024f757a2df51a3161d",
     "src/engine/strategies/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "src/engine/strategies/bull_flag_breakout.py":
-        "acf564db24b37efe0cc64b690f17e3e83d9ad943aac0b5bb4f572d5a2940d916",
+        "6ee3cb9f8df149d2c3a4fdc00885b855399cf13036e9ea02021263b773676bfa",
     "src/engine/strategies/donchian_swing.py":
         "cc57e5673f9982aca97f61677084e040171fff307483fedf10459b567a4679e3",
     "src/engine/strategies/kojiro.py":
@@ -127,7 +127,7 @@ _BASE_SHA: dict[str, str] = {
     "src/engine/strategies/momentum.py":
         "50d5c0b9a232d6110f6b85fc524569853f2b8edffe2fd44adc24289800b95ae2",
     "src/engine/strategies/vcp_breakout.py":
-        "d3192834126ef0f167ad563e427d6d6284180145edf38395261aec3d6fc785ed",
+        "da6ef794fc92493ce3780853116902190d716087ed562b7d04e7395014773b7d",
     "src/engine/strategies/volatility_breakout.py":
         "d13efaa4a9424e2822b5476ce159987d2a5192a4bca30af3f1a0cae9c3ffcabc",
     # 파라미터 축 — 킬스위치를 임의로 추가하지 않는다(자문 §5: 파라미터 없음).

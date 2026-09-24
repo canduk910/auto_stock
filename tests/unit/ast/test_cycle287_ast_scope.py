@@ -119,7 +119,7 @@ _BASE_SHA = {
         "4125c271b4147e59922f4f000e523429fb4bbef37058dc754fd92b9475ec58f1",
     # 8영역은 아니지만 이 사이클이 무접촉을 약속한 파일
     "src/engine/strategy_base.py":
-        "869dc20ca561adc561a9ebe9fdb5fe5a3e097f7ec176fdf274d577d509de9252",
+        "3f27be39784f9cb86d72b0c625b705b57d4ee8f555121024f757a2df51a3161d",
     # 시각 표의 **유일 정본** — cycle287 은 읽기만 했다. 바꾸면 픽스처 동기 사슬
     # (`tools/test_fixtures/gen_market_state_fixture.py` + 프론트/E2E 픽스처 2)이
     # 통째로 딸려 오고, cycle282 `test_i1/i2/i3` 가 즉시 RED 다(실증: cycle289 가
@@ -143,7 +143,7 @@ _BASE_SHA = {
     "src/engine/strategies/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "src/engine/strategies/bull_flag_breakout.py":
-        "acf564db24b37efe0cc64b690f17e3e83d9ad943aac0b5bb4f572d5a2940d916",
+        "6ee3cb9f8df149d2c3a4fdc00885b855399cf13036e9ea02021263b773676bfa",
     "src/engine/strategies/donchian_swing.py":
         "cc57e5673f9982aca97f61677084e040171fff307483fedf10459b567a4679e3",
     "src/engine/strategies/kojiro.py":
@@ -153,7 +153,7 @@ _BASE_SHA = {
     "src/engine/strategies/momentum.py":
         "50d5c0b9a232d6110f6b85fc524569853f2b8edffe2fd44adc24289800b95ae2",
     "src/engine/strategies/vcp_breakout.py":
-        "d3192834126ef0f167ad563e427d6d6284180145edf38395261aec3d6fc785ed",
+        "da6ef794fc92493ce3780853116902190d716087ed562b7d04e7395014773b7d",
     "src/engine/strategies/volatility_breakout.py":
         "d13efaa4a9424e2822b5476ce159987d2a5192a4bca30af3f1a0cae9c3ffcabc",
 }
@@ -434,8 +434,13 @@ _SRC_TREE_FILES = 156
 #: 창(09:00~) 이전으로 억제 — 새 헬퍼 `_is_before_krx_continuous_open`, 8영역 밖 ·
 #: 사용자 승인 워크리스트 ⑪) 변경으로 digest 가 다시 움직였다. 파일 수는 156 로
 #: 불변이다. 직전 값 = `232a25a939206a92f5351ebed2a865d6e19c5b8d164852fa0b99a0a54c342f96`.
+#: 🔁 cycle355 재핀(main 반영은 cycle357 뒤 — 도메인 자문 브랜치 승인 지연) —
+#: strategy_base.py(`_entry_atr_rederive_allowed` 게이트 헬퍼) · bull_flag_breakout.py ·
+#: vcp_breakout.py(부팅 훅 재도출 호출부에 turtle 게이트) 변경으로 digest 가 다시
+#: 움직였다. 파일 수는 156 로 불변이다. 직전 값 =
+#: `5909f502708f55e251deca07cb1b68c7623b97d73efaec0345df42c45551a3fc`.
 _SRC_TREE_DIGEST = (
-    "5909f502708f55e251deca07cb1b68c7623b97d73efaec0345df42c45551a3fc"
+    "aa51efbf07168aec4a7aa4f7d4b1641c6e8d3990c72234bf2bcad5e6974d8e26"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

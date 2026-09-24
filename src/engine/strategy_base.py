@@ -1455,6 +1455,30 @@ class StrategyBase(ABC):
         except Exception:
             logger.exception("[%s_entry_atr_rederive] 재도출 실패: %s", label, ticker)
 
+    def _entry_atr_rederive_allowed(self, ticker: str) -> bool:
+        """재시작 뒤 `_entry_atr` 을 재도출해도 되는가 — **지금 설정이 turtle 일 때만** (cycle355).
+
+        스탬프는 **터틀로 산 랏의 표식**이다. position_ratio 로 산 랏은 처음부터 스탬프가
+        없었으므로 "소실"된 것이 아니다 — 되살리면 고정% 손절이 ATR 손절 + % 받침선으로
+        바뀐다(2026-09-23 BFB 100840: −5% 규약인데 재도출 뒤 −7% 받침선에서 −7.1% 매도).
+        랏별 사이징 기록이 없으므로 전략의 현재 `sizing_mode` 로 판정한다 — donchian
+        `recompute_held_atr` 가 Phase 2A-2 부터 쓰던 게이트와 같다. 호출부는 in-memory
+        스탬프가 없을 때만 이 판정을 부른다(살아 있는 스탬프는 설정과 무관하게 진실이다).
+
+        예외를 던지지 않는다 — 부팅 훅 루프에서 한 종목의 판정 실패가 뒤 종목의 고점·셋업
+        복구를 끊으면 안 된다.
+        """
+        try:
+            mode = self.config.params.get("sizing_mode")
+        except Exception:
+            mode = None
+        if mode == "turtle":
+            return True
+        label = self._ENTRY_ATR_REDERIVE_LABEL or self.strategy_id
+        logger.info("[%s_entry_atr_rederive_skip] %s sizing_mode=%s — 고정%% 손절 유지",
+                    label, ticker, mode)
+        return False
+
     async def _refine_cooldown_business_days(self, ticker: str) -> None:
         """재진입 쿨다운을 정확한 N영업일로 정정 (refactor-review A3, 단일 진실원).
 

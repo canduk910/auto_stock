@@ -1616,7 +1616,9 @@ class BullFlagBreakoutStrategy(StrategyBase):
             if not candles:
                 continue
             # in-memory 스탬프가 살아 있으면(당일 매수·미재시작) 그게 정확한 진입 ATR.
-            if ticker not in self._entry_atr:
+            # cycle355 — 스탬프가 없으면 **turtle 로 사는 전략일 때만** 되살린다.
+            # position_ratio 랏은 처음부터 미스탬프라 되살리면 −5% 가 −7% backstop 이 된다.
+            if ticker not in self._entry_atr and self._entry_atr_rederive_allowed(ticker):
                 self._rederive_entry_atr(ticker, pos, candles, atr_period)
             self._refresh_position_setup_from_candles(ticker, pos, candles)
             await self._apply_high_since_buy_from_candles(pos, candles, today)

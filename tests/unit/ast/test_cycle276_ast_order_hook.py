@@ -382,7 +382,7 @@ _BASE_SHA = {
     "src/engine/scheduler.py":
         "3461242a47080379c8d48dc5efd5799ce5fac173803a95476547ea4758b40a81",
     "src/engine/strategy_base.py":
-        "869dc20ca561adc561a9ebe9fdb5fe5a3e097f7ec176fdf274d577d509de9252",
+        "3f27be39784f9cb86d72b0c625b705b57d4ee8f555121024f757a2df51a3161d",
     # 🔁 cycle296(2026-09-17) 재핀 — 사용자 승인 `issue()` 매니저 단위 in-flight 합류(`src/auth/**`). 같은 값을 10곳 동시 갱신했다.
     "src/auth/token.py":
         "4125c271b4147e59922f4f000e523429fb4bbef37058dc754fd92b9475ec58f1",
@@ -402,9 +402,9 @@ _BASE_SHA = {
     "src/engine/strategies/kojiro.py":
         "0e2e7e07e802b541aeeab5bce2ad29716148d59a8c9daf2213127550114214a9",
     "src/engine/strategies/vcp_breakout.py":
-        "d3192834126ef0f167ad563e427d6d6284180145edf38395261aec3d6fc785ed",
+        "da6ef794fc92493ce3780853116902190d716087ed562b7d04e7395014773b7d",
     "src/engine/strategies/bull_flag_breakout.py":
-        "acf564db24b37efe0cc64b690f17e3e83d9ad943aac0b5bb4f572d5a2940d916",
+        "6ee3cb9f8df149d2c3a4fdc00885b855399cf13036e9ea02021263b773676bfa",
 }
 
 # cycle272 시점 = cycle274 배선 **이전**의 메서드 세그먼트 sha. C11 은 이 값으로의

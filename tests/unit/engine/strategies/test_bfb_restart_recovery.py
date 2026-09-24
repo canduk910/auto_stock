@@ -178,13 +178,31 @@ def test_rederive_never_raises():
 
 @pytest.mark.asyncio
 async def test_recovery_restores_entry_atr_and_high(monkeypatch):
-    s = _bfb()
+    """turtle 로 사는 전략 — 재시작 소실분 `_entry_atr` 재도출 + 고점 복구."""
+    s = _bfb(sizing_mode="turtle")
     pos = _hold(s, buy=70_000, days_ago=5)
     up = _patch_io(monkeypatch, _candles(60, high_boost_at=2, boost=88_000))
 
     await s.recompute_high_since_buy()
 
     assert s._entry_atr.get("005930", 0) > 0, "재시작 소실분 재도출"
+    assert pos.high_since_buy == 88_000, "매수일 이후 일봉 high max 로 복구"
+    up.assert_awaited_once_with("005930", 88_000)
+
+
+@pytest.mark.asyncio
+async def test_recovery_position_ratio_restores_high_but_not_entry_atr(monkeypatch):
+    """cycle355 — position_ratio 랏은 처음부터 미스탬프라 재도출 대상이 아니다.
+
+    고점 복구는 사이징 방식과 무관하게 그대로 산다(트레일링 기준점).
+    """
+    s = _bfb()  # 기본값 = position_ratio (운영도 동일)
+    pos = _hold(s, buy=70_000, days_ago=5)
+    up = _patch_io(monkeypatch, _candles(60, high_boost_at=2, boost=88_000))
+
+    await s.recompute_high_since_buy()
+
+    assert "005930" not in s._entry_atr, "position_ratio 랏에 ATR 손절 스탬프가 찍혔다"
     assert pos.high_since_buy == 88_000, "매수일 이후 일봉 high max 로 복구"
     up.assert_awaited_once_with("005930", 88_000)
 

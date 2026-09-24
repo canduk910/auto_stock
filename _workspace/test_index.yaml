@@ -605,6 +605,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -1691,6 +1692,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -2797,6 +2799,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -3878,6 +3881,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
@@ -4963,6 +4967,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -6058,6 +6063,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -7151,6 +7157,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -8251,6 +8258,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -9342,6 +9350,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -10438,6 +10447,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -11545,6 +11555,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -12643,6 +12654,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -13745,6 +13757,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -14867,6 +14880,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -15928,6 +15942,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -17015,6 +17030,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -18109,6 +18125,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -19207,6 +19224,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -20298,6 +20316,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -21392,6 +21411,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -22486,6 +22506,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -23579,6 +23600,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -24673,6 +24695,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -25767,6 +25790,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -26880,6 +26904,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -27973,6 +27998,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -29053,6 +29079,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -30143,6 +30170,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -31239,6 +31267,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -32335,6 +32364,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -33460,6 +33490,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -34526,6 +34557,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -35622,6 +35654,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -36711,6 +36744,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -37807,6 +37841,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -38908,6 +38943,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -40000,6 +40036,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -41091,6 +41128,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -42184,6 +42222,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -43283,6 +43322,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -44382,6 +44422,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -45464,6 +45505,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -46561,6 +46603,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -47654,6 +47697,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -48749,6 +48793,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -49842,6 +49887,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -50935,6 +50981,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -52029,6 +52076,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -53196,6 +53244,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -54290,6 +54339,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -55372,6 +55422,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -56469,6 +56520,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -57574,6 +57626,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -58662,6 +58715,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -59748,6 +59802,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -60848,6 +60903,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -61936,6 +61992,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -63031,6 +63088,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -64125,6 +64183,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -65216,6 +65275,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -66389,6 +66449,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -67556,6 +67617,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -68710,6 +68772,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -69803,6 +69866,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -70902,6 +70966,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -72017,6 +72082,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -73087,6 +73153,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -74183,6 +74250,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -75271,6 +75339,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -76514,6 +76583,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -77599,6 +77669,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -78558,6 +78629,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -79651,6 +79723,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -80742,6 +80815,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -81835,6 +81909,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -82935,6 +83010,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -84046,6 +84122,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -85120,6 +85197,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -86231,6 +86309,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -87309,6 +87388,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -88409,6 +88489,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -89495,6 +89576,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -90589,6 +90671,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -91683,6 +91766,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -92782,6 +92866,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -93340,6 +93425,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle228b_setup_resolver.py
     - tests/unit/engine/strategies/test_cycle233_effective_stop_mirrors.py
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
@@ -94494,6 +94580,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle233_effective_stop_mirrors.py
     - tests/unit/engine/strategies/test_cycle237_donchian_exit_log_cap.py
     - tests/unit/engine/strategies/test_cycle258_donchian_observer_trace.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle_p2a2_donchian_turtle.py
     - tests/unit/engine/strategies/test_donchian_swing.py
@@ -96113,6 +96200,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -97202,6 +97290,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -98294,6 +98383,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -98805,6 +98895,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -100487,6 +100578,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -101109,6 +101201,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -102712,6 +102805,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -103748,6 +103842,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -104847,6 +104942,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -106008,6 +106104,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -107104,6 +107201,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -108193,6 +108291,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -109294,6 +109393,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -110382,6 +110482,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -111475,6 +111576,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -112580,6 +112682,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -113725,6 +113828,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -114819,6 +114923,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -115918,6 +116023,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -117014,6 +117120,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -118109,6 +118216,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -119200,6 +119308,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -120367,6 +120476,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -121607,6 +121717,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -122765,6 +122876,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -123884,6 +123996,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -124957,6 +125070,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -126072,6 +126186,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -127168,6 +127283,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -129632,6 +129748,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -130720,6 +130837,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -131818,6 +131936,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -132907,6 +133026,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -134916,10 +135036,10 @@ frontend:
     - frontend/src/pages/__tests__/MarketState.test.tsx
     - frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
     - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
-generated_at: '2026-09-25T05:32:51.173330+09:00'
+generated_at: '2026-09-25T07:36:47.580413+09:00'
 stats:
   backend_modules: 159
-  backend_tests: 1091
+  backend_tests: 1092
   frontend_modules: 120
   frontend_tests: 98
   unmapped_modules:

@@ -145,7 +145,7 @@ _BASE_SHA: dict[str, str] = {
     "src/engine/scheduler.py":
         "3461242a47080379c8d48dc5efd5799ce5fac173803a95476547ea4758b40a81",
     "src/engine/strategy_base.py":
-        "869dc20ca561adc561a9ebe9fdb5fe5a3e097f7ec176fdf274d577d509de9252",
+        "3f27be39784f9cb86d72b0c625b705b57d4ee8f555121024f757a2df51a3161d",
     # 🔴 등재만으로 판정이 통해야 한다 — 검증 로직을 고쳐 통과시키면 안 된다.
     "src/engine/param_validation.py":
         "b4c5c029800191523bcc511919d6de3774e9ab49ca2fc0a0558ee3907868ee17",

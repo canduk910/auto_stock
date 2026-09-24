@@ -564,7 +564,7 @@ donchian_swing 은 멀티데이 보유 + ATR×2 Chandelier + 하드 손절 전�
 4. **잔여 ATR×2 트레일링**: `_partial_exit[ticker]==True` 분기에서 `current_price <= high_since_buy - ATR×2` → Signal.TRAILING_STOP (donchian 컨벤션 재사용)
 5. **시간 청산**: 진입 후 **5영업일 경과** 시 잔량 시장가 (`max_hold_days=5`) — `pos.buy_date + 5영업일 ≤ today` 판정
 
-> ⚠️ **BFB 는 익일 청산 전략이 아니다.** `_execute_next_day_clear`·`_force_clear_main_only` 어느 목록에도 없고 `check_force_clear()==[]` 이라 위 5번까지 **실질 멀티데이 보유**다(`_MULTIDAY_STRATEGIES` 비멤버라는 사실은 `is_next_day` 배지 표시에만 영향한다). 그래서 재시작 복구가 필요하다 — `_rederive_entry_atr` + `recompute_high_since_buy` 를 `boot_manager` 에 배선한다(`scheduler.py` 는 8영역이라 무접촉, `_SWING_POLL_STRATEGIES` 편입은 매수 폴루프·구독까지 바꾸므로 금지).
+> ⚠️ **BFB 는 익일 청산 전략이 아니다.** `_execute_next_day_clear`·`_force_clear_main_only` 어느 목록에도 없고 `check_force_clear()==[]` 이라 위 5번까지 **실질 멀티데이 보유**다(`_MULTIDAY_STRATEGIES` 비멤버라는 사실은 `is_next_day` 배지 표시에만 영향한다). 그래서 재시작 복구가 필요하다 — `_rederive_entry_atr`(**`sizing_mode="turtle"` 일 때만** — position_ratio 랏은 −5% 고정 손절 유지, cycle355) + `recompute_high_since_buy` 를 `boot_manager` 에 배선한다(`scheduler.py` 는 8영역이라 무접촉, `_SWING_POLL_STRATEGIES` 편입은 매수 폴루프·구독까지 바꾸므로 금지).
 >
 > ⚠️ **청산 2~4번은 `_candidates` 단독 의존 금지** (P1, 2026-08-06 · VCP 와 동일 규약). 특히 3번 measured-move 는 BFB 의 **유일한 익절 경로**인데 `info["pole_high"]` 직접 인덱싱이라 부분 재채움 시 `KeyError` 로 `check_exit_signal` 전체가 죽었다 → `.get()` 방어 + **키 결손 시 미발화**(임의 기본값으로 익절을 쏘면 과잉 청산)가 계약.
 

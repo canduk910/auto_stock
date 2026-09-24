@@ -661,9 +661,9 @@ _CYCLE228_STRATEGY_CONTENT_SHA: dict[str, str] = {
     "src/engine/strategies/momentum.py":
         "50d5c0b9a232d6110f6b85fc524569853f2b8edffe2fd44adc24289800b95ae2",
     "src/engine/strategies/vcp_breakout.py":
-        "d3192834126ef0f167ad563e427d6d6284180145edf38395261aec3d6fc785ed",
+        "da6ef794fc92493ce3780853116902190d716087ed562b7d04e7395014773b7d",
     "src/engine/strategies/bull_flag_breakout.py":
-        "acf564db24b37efe0cc64b690f17e3e83d9ad943aac0b5bb4f572d5a2940d916",
+        "6ee3cb9f8df149d2c3a4fdc00885b855399cf13036e9ea02021263b773676bfa",
 }
 
 

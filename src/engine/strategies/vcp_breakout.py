@@ -1842,7 +1842,9 @@ class VcpBreakoutStrategy(StrategyBase):
             # B-2 게이트 2 — 터틀 entry_atr 재시작 재도출. **같은 fetch 응답 재사용**이라
             # 추가 KIS 호출 0 + scheduler 배선 변경 0. in-memory 스탬프가 남아 있으면
             # (당일 매수 · 미재시작) 정확한 진입 ATR 이므로 미접촉.
-            if ticker not in self._entry_atr:
+            # cycle355 — 스탬프가 없으면 **turtle 로 사는 전략일 때만** 되살린다
+            # (position_ratio 랏은 처음부터 미스탬프 — 되살리면 −7% 고정 손절이 바뀐다).
+            if ticker not in self._entry_atr and self._entry_atr_rederive_allowed(ticker):
                 self._rederive_entry_atr(ticker, pos, candles, params["atr_period"])
             # P1 — 청산 지표(atr14/ema50) 일일 갱신. **같은 candles 재사용**이라
             # KIS 추가 호출 0 + scheduler 배선 변경 0.
