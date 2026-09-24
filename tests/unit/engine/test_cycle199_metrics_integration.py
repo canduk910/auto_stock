@@ -72,6 +72,12 @@ async def test_metrics_includes_funnel_stages_and_coarse_coexist(monkeypatch):
 
     monkeypatch.setattr(collector, "_collect_strategy_funnel_stages", _stages, raising=False)
 
+    async def _no_pyramid_shadow(_target_date):
+        return None
+
+    # cycle351 — 셰도 진입점 대역(DB·30초 상한 무접촉). Green 전에는 속성이 없어 raising=False.
+    monkeypatch.setattr(collector, "_collect_pyramid_shadow", _no_pyramid_shadow, raising=False)
+
     row = await lae.generate_daily_log_report()
     assert row == {"id": "row-199"}
 
@@ -124,6 +130,12 @@ async def test_metrics_funnel_stages_receives_target_date(monkeypatch):
     monkeypatch.setattr(lae.settings, "openai_api_key", "dummy-key")
     monkeypatch.setattr(collector, "_collect_strategy_funnel", _coarse)
     monkeypatch.setattr(collector, "_collect_strategy_funnel_stages", _stages, raising=False)
+
+    async def _no_pyramid_shadow(_target_date):
+        return None
+
+    # cycle351 — 셰도 진입점 대역(DB·30초 상한 무접촉). Green 전에는 속성이 없어 raising=False.
+    monkeypatch.setattr(collector, "_collect_pyramid_shadow", _no_pyramid_shadow, raising=False)
 
     from datetime import datetime
 

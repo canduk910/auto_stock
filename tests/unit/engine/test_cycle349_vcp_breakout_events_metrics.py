@@ -96,6 +96,12 @@ def isolated(monkeypatch):
     monkeypatch.setattr(collector, "_collect_strategy_funnel_stages", _stages)
     monkeypatch.setattr(collector, "_build_portfolio_risk_snapshot", _snapshot)
 
+    async def _no_pyramid_shadow(target_date):
+        return None
+
+    # cycle351 — 셰도 진입점 대역(DB·30초 상한 무접촉). Green 전에는 속성이 없어 raising=False.
+    monkeypatch.setattr(collector, "_collect_pyramid_shadow", _no_pyramid_shadow, raising=False)
+
 
 class _FakeVcp:
     strategy_id = "vcp_breakout"
@@ -151,7 +157,8 @@ async def test_e4_key_appended_last_after_existing_nine(isolated, monkeypatch):
     d = date(2026, 10, 5)
     _install_registry(monkeypatch, [_FakeVcp()])
     metrics = await _collect(d, "2026-10-05 20:05:00")
-    assert list(metrics) == BASE_KEYS + ["vcp_breakout_events"], list(metrics)
+    # cycle351 — 그 뒤에 `pyramid_shadow` 가 하나 더 붙는다(새 키는 항상 끝).
+    assert list(metrics) == BASE_KEYS + ["vcp_breakout_events", "pyramid_shadow"], list(metrics)
 
 
 async def test_e4_value_is_strategy_summary_for_target_date(isolated, monkeypatch):

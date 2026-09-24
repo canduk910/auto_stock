@@ -317,6 +317,9 @@ _ENGINE_PY_FILES: dict[str, tuple[str, ...]] = {
         "open_price_observe.py", "open_price_rest.py", "order_engine.py",
         "param_catalog.py", "param_drift.py", "param_validation.py", "portfolio_risk.py",
         "position_exit_lines.py",
+        # cycle351 — 피라미딩 가상 사다리(셰도) leaf. 이름을 등재해도 "다음 신규 파일" 은
+        # 여전히 붉어진다(이름 축 가드는 변경 없음).
+        "pyramid_shadow.py",
         "quant_score.py", "quote_token_refresh.py", "recommendation_engine.py",
         "recommendation_metrics.py", "refresh_progress.py", "risk.py", "scanner.py",
         "scheduler.py", "sector_naming.py", "sell_rejection.py",

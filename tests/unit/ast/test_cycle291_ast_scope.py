@@ -355,9 +355,13 @@ def test_a8_no_new_leaf_in_src_engine() -> None:
     `strategy_registry.positions_detail` 에 한 필드만 더하면 됐지만 그 파일이
     8영역이라, `routes/portfolio.py` 가 이미 쓰는 registry 패턴을 라우트에서
     재사용하는 쪽을 택했다. `scheduler.py` 무접촉.
+
+    ⚠️ cycle351(피라미딩 가상 사다리 셰도)이 leaf 1개 `pyramid_shadow.py` 를 신설해
+    67 → **68** 이 됐다 — 순수 코어(`overlay_ladder`·`no_add_flags`) + async 어댑터
+    (`build_pyramid_shadow`), 매매 행위 0·DB 는 SELECT 만. `scheduler.py` 무접촉.
     """
     got = len(list((_ROOT / "src" / "engine").glob("*.py")))
-    assert got == 67, f"`src/engine/*.py` 파일 수 {got} (cycle339 기준선 67)"
+    assert got == 68, f"`src/engine/*.py` 파일 수 {got} (cycle351 기준선 68)"
 
 
 # ===========================================================================

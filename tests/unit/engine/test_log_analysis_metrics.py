@@ -92,6 +92,12 @@ async def test_generate_daily_log_report_exposes_next_day_clear_in_metrics(monke
         return {}
     monkeypatch.setattr(collector, "_collect_strategy_funnel", _empty_funnel)
 
+    async def _no_pyramid_shadow(_target_date):
+        return None
+
+    # cycle351 — 셰도 진입점 대역(DB·30초 상한 무접촉). Green 전에는 속성이 없어 raising=False.
+    monkeypatch.setattr(collector, "_collect_pyramid_shadow", _no_pyramid_shadow, raising=False)
+
     await lae.generate_daily_log_report()
 
     metrics = captured.get("metrics")

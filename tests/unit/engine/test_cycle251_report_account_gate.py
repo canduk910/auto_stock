@@ -329,6 +329,12 @@ def collect_deps(monkeypatch, snapshot_deps):
     monkeypatch.setattr(collector, "_collect_strategy_funnel", _funnel)
     monkeypatch.setattr(collector, "_collect_strategy_funnel_stages", _stages)
 
+    async def _no_pyramid_shadow(_target_date):
+        return None
+
+    # cycle351 — 셰도 진입점 대역(DB·30초 상한 무접촉). Green 전에는 속성이 없어 raising=False.
+    monkeypatch.setattr(collector, "_collect_pyramid_shadow", _no_pyramid_shadow, raising=False)
+
 
 async def test_t5_collect_metrics_when_built_then_bundle_carries_eval_timeouts_today(
     collect_deps,

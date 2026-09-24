@@ -183,7 +183,11 @@ _BASE_SHA = {
 #: 신규 leaf 1 = `src/engine/llm_retrospective.py`(cycle297 — 회고 조인·집계 순수
 #: 함수, `src.*` import 0). cycle296 은 신규 파일 **0** — 기존 `auth/token.py`·
 #: `engine/quote_token_refresh.py` 편집만이다.
-_SRC_TREE_FILES = 155
+#: ⚠️ **cycle351(피라미딩 가상 사다리 셰도) 기준선으로 갱신** — 파일 수가 155 → **156**.
+#: 신규 leaf 1 = `src/engine/pyramid_shadow.py`(순수 코어 `overlay_ladder`·`no_add_flags`
+#: + async 어댑터 `build_pyramid_shadow`, 매매 행위 0·SELECT 전용). digest 에는 그
+#: leaf + `log_metrics_collector.py`(끝 키 `pyramid_shadow` 배선)가 포함돼 재계산했다.
+_SRC_TREE_FILES = 156
 #: ⚠️ 값은 **cycle285 적대 검증 반영** 기준선이다. 그 직전(초판 cycle285 배포)
 #: digest 는 `97483c5114a1d00dc8f7ca7c1ed08e1b3dc1d0b585065b14176dc227da9bed8c` 였다.
 #: cycle287b 배포분의 digest 는
@@ -414,8 +418,17 @@ _SRC_TREE_FILES = 155
 #: `_funnel_evidence_floor` + `_COMBINED_SQL` funnel_rows 서브쿼리에 `snapshot_at >= $2`
 #: 하한 게이트)를 고쳐 digest 가 움직였다 — 파일 수는 불변(155)이다.
 #: 직전 값은 `3158d70b86f8f973d18c5beb8f20c29e663b5713c3204654b8799c4bc3395298` 다.
+#: cycle351 이 신규 leaf `pyramid_shadow.py` 와 콜렉터 끝 키를 더해 digest 가 움직였다
+#: — 파일 수는 155 → **156**(신규 파일 1개).
+#: 직전 값은 `397c83e3add00589d85c96d8a5f75ff7ee6e62e57c9fc219bc745fe20a328d84` 다.
+#: 🔁 cycle351 커밋 전 보강(독립 검증 지적 25건 반영 — `_stop_floor` 래칫·늦은 확정
+#: lookback·`held_by_sid`·`delta_R`/`extra_notional`/`gap_stress` 정합·실패 WARNING
+#: 승격·docstring 한계 명기 등)으로 `pyramid_shadow.py`·`log_metrics_collector.py`
+#: 내용이 여러 차례 바뀌어 digest 가 다시 움직였다 — 파일 수는 156 로 불변이다.
+#: 직전 값(1차 보강 중간값) 은 `56beac69958d9dccb9488f676fcf50e2992bbffd118e3cd86867435d92b66de8`
+#: · `61e52f16d367ae2ace95908072280996f6cd68705b6752436594f44381fafd8c` 였다.
 _SRC_TREE_DIGEST = (
-    "397c83e3add00589d85c96d8a5f75ff7ee6e62e57c9fc219bc745fe20a328d84"
+    "32d7e24ece298fa3283400fbfeb14f02c91c3918ea82997816b271f899e80c98"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
@@ -436,7 +449,8 @@ _PINNED_DIR_FILE_COUNTS = {
     "src/realtime": 4,
     "src/auth": 3,
     "src/engine/strategies": 8,
-    "src/engine": 77,
+    # cycle351 — 신규 leaf `pyramid_shadow.py` 로 77 → 78.
+    "src/engine": 78,
 }
 
 #: `scheduler.py` 정확 라인 수 + cycle257 영구 상한.

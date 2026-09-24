@@ -49,6 +49,7 @@ EXPECTED_METRIC_KEYS = [
     "portfolio_risk_snapshot",
     "tick_blind",
     "vcp_breakout_events",
+    "pyramid_shadow",  # cycle351 — 피라미딩 셰도(관측 전용), 항상 맨 끝
 ]
 
 
@@ -60,6 +61,10 @@ def _collector():
             "`collect_daily_log_metrics(target_date, *, now_kst=None)` 미구현"
         )
     return fn
+
+
+async def _no_pyramid_shadow(target_date):
+    return None
 
 
 @pytest.fixture
@@ -103,6 +108,8 @@ def isolated(monkeypatch):
     monkeypatch.setattr(collector, "_collect_strategy_funnel", _funnel)
     monkeypatch.setattr(collector, "_collect_strategy_funnel_stages", _stages)
     monkeypatch.setattr(collector, "_build_portfolio_risk_snapshot", _snapshot)
+    # cycle351 — 셰도 진입점도 대역(DB·30초 상한을 타지 않게). Green 전에는 속성이 없어 raising=False.
+    monkeypatch.setattr(collector, "_collect_pyramid_shadow", _no_pyramid_shadow, raising=False)
     return seen
 
 

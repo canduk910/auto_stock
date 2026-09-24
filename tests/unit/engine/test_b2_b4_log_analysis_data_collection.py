@@ -632,6 +632,12 @@ async def test_s5_when_064400_scenario_then_report_metrics_accurate(
     monkeypatch.setattr(lae, "_call_openai", _fake_call_openai)
     monkeypatch.setattr(lae, "insert_log_report", _fake_insert)
     monkeypatch.setattr(collector, "_collect_strategy_funnel", _empty_funnel)
+
+    async def _no_pyramid_shadow(_target_date):
+        return None
+
+    # cycle351 — 셰도 진입점 대역(DB·30초 상한 무접촉). Green 전에는 속성이 없어 raising=False.
+    monkeypatch.setattr(collector, "_collect_pyramid_shadow", _no_pyramid_shadow, raising=False)
     monkeypatch.setattr(lae.settings, "openai_api_key", "dummy-key")
 
     # api_metrics 도 차단 (외부 영향 없음)
@@ -798,6 +804,12 @@ async def test_s6_when_18000_logs_then_generate_report_counts_drained_at_7668(
     monkeypatch.setattr(lae, "_call_openai", _fake_call_openai)
     monkeypatch.setattr(lae, "insert_log_report", _fake_insert)
     monkeypatch.setattr(collector, "_collect_strategy_funnel", _empty_funnel)
+
+    async def _no_pyramid_shadow(_target_date):
+        return None
+
+    # cycle351 — 셰도 진입점 대역(DB·30초 상한 무접촉). Green 전에는 속성이 없어 raising=False.
+    monkeypatch.setattr(collector, "_collect_pyramid_shadow", _no_pyramid_shadow, raising=False)
     monkeypatch.setattr(lae.settings, "openai_api_key", "dummy-key")
     monkeypatch.setattr(collector, "get_request_metrics", lambda: {})
     monkeypatch.setattr(lae, "reset_request_metrics", lambda: None)

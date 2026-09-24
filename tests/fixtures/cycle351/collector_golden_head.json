@@ -1,0 +1,190 @@
+{
+  "base_sha": "0a7752a",
+  "generated_by": "tests/unit/engine/test_cycle351_pyramid_shadow_collect.py::_golden_collect (생성 스크립트 = 세션 스크래치패드 gen_cycle351_golden.py, 모듈 docstring 참조)",
+  "target_date": "2026-10-19",
+  "frozen_utc": "2026-10-19 12:30:00",
+  "metrics": {
+    "target_date": "2026-10-19",
+    "logs": {
+      "level_counts": {
+        "INFO": 3,
+        "WARNING": 2,
+        "ERROR": 1,
+        "CRITICAL": 1
+      },
+      "top_patterns": {
+        "WARNING": [
+          {
+            "pattern": "[next_day_clear_deferred] ticker=<TICKER> strategy=kojiro reason=nxt_underthreshold",
+            "count": 1
+          },
+          {
+            "pattern": "[budget_clamp] ticker=<TICKER> qty 12 -> 3 remaining=<TICKER>",
+            "count": 1
+          }
+        ],
+        "ERROR": [
+          {
+            "pattern": "[buy_post_send_error] ticker=<TICKER> order_no=<N> strategy=kojiro path=market qty=3 price=<TICKER>",
+            "count": 1
+          }
+        ],
+        "CRITICAL": [
+          {
+            "pattern": "[after_exit_giveup] ticker=<TICKER> fails=5 next_day_clear=1",
+            "count": 1
+          }
+        ]
+      },
+      "samples": {
+        "WARNING": [
+          {
+            "ts": "2026-10-19T08:00:31.000000+09:00",
+            "message": "[next_day_clear_deferred] ticker=005930 strategy=kojiro reason=nxt_underthreshold"
+          },
+          {
+            "ts": "2026-10-19T09:31:00.000000+09:00",
+            "message": "[budget_clamp] ticker=000660 qty 12 -> 3 remaining=450000"
+          }
+        ],
+        "ERROR": [
+          {
+            "ts": "2026-10-19T10:15:00.000000+09:00",
+            "message": "[buy_post_send_error] ticker=035420 order_no=0000123456 strategy=kojiro path=market qty=3 price=150000"
+          }
+        ],
+        "CRITICAL": [
+          {
+            "ts": "2026-10-19T16:30:00.000000+09:00",
+            "message": "[after_exit_giveup] ticker=035420 fails=5 next_day_clear=1"
+          }
+        ]
+      },
+      "total_logs": 7,
+      "fetched_logs": 7,
+      "truncated": false,
+      "covered_from": "2026-10-19T07:45:03.000000+09:00",
+      "covered_to": "2026-10-19T14:00:00.000000+09:00",
+      "coverage_note": "covered_from~covered_to 는 ERROR/CRITICAL 을 제외한 레벨의 수집 구간이다. ERROR/CRITICAL 은 상한과 무관하게 전량 포함.",
+      "level_counts_actual": {
+        "INFO": 3,
+        "WARNING": 2,
+        "ERROR": 1,
+        "CRITICAL": 1
+      }
+    },
+    "trades": {
+      "trades_total": 5,
+      "buy_count": 3,
+      "sell_count": 2,
+      "realized_pnl": 8024.0,
+      "by_strategy": {
+        "kojiro": 2,
+        "donchian_swing": 1,
+        "momentum": 1,
+        "vcp_breakout": 1
+      },
+      "by_status": {
+        "PENDING": 1,
+        "COMPLETED": 3,
+        "CANCELLED": 1
+      },
+      "by_ticker_pnl": {
+        "000660": {
+          "realized_pnl": 12345.0,
+          "sell_count": 1
+        },
+        "005930": {
+          "realized_pnl": -4321.0,
+          "sell_count": 1
+        }
+      },
+      "by_hour_pnl": {
+        "09": {
+          "realized_pnl": -4321.0,
+          "sell_count": 1
+        },
+        "10": {
+          "realized_pnl": 12345.0,
+          "sell_count": 1
+        }
+      }
+    },
+    "api_metrics": {
+      "total": 1234,
+      "errors_5xx": 2,
+      "by_path_5xx": {
+        "/uapi/x": 2
+      }
+    },
+    "strategy_funnel": {
+      "kojiro": {
+        "signals": 3,
+        "orders": 2,
+        "fills": 1
+      },
+      "donchian_swing": {
+        "signals": 1,
+        "orders": 1,
+        "fills": 1
+      }
+    },
+    "strategy_funnel_stages": {
+      "vcp_breakout": {
+        "steps": [
+          {
+            "step_no": 1,
+            "step_name": "유니버스",
+            "survived_count": 8,
+            "excluded_count": 0
+          }
+        ],
+        "peak_survived": 8,
+        "final_prepared": 2,
+        "drop_step": null,
+        "verdict": "후보준비완료"
+      }
+    },
+    "next_day_clear": {
+      "deferred": 1,
+      "drained_success": 1,
+      "drained_fail": 0
+    },
+    "portfolio_risk_snapshot": {
+      "open_risk_pct_of_net": 1.23,
+      "by_strategy": {
+        "kojiro": {
+          "open_risk": 1000.0,
+          "positions": 1
+        }
+      },
+      "account_gate": {
+        "level": "ok",
+        "stale": false
+      }
+    },
+    "tick_blind": {
+      "boot_count": 1,
+      "downtime_secs_total": 120,
+      "market_blind_secs_total": 30
+    },
+    "vcp_breakout_events": {
+      "status": "ok",
+      "date": "2026-10-19",
+      "run_at": "07:45:00",
+      "window": "09:05-14:30",
+      "partial": false,
+      "candidates": 3,
+      "observed": 2,
+      "crossed": 1,
+      "crossed_tickers": [
+        "900002"
+      ],
+      "unobserved_tickers": [
+        "900003"
+      ],
+      "per_ticker": {},
+      "final": 1
+    }
+  }
+}

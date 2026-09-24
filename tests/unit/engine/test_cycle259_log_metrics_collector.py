@@ -110,6 +110,7 @@ EXPECTED_METRIC_KEYS = [
     "portfolio_risk_snapshot",
     "tick_blind",
     "vcp_breakout_events",
+    "pyramid_shadow",  # cycle351 — 피라미딩 셰도(관측 전용), 항상 맨 끝
 ]
 
 
@@ -365,6 +366,12 @@ def _isolate_collector(monkeypatch) -> types.ModuleType:
     monkeypatch.setattr(collector, "_collect_strategy_funnel", _funnel)
     monkeypatch.setattr(collector, "_collect_strategy_funnel_stages", _stages)
     monkeypatch.setattr(collector, "_build_portfolio_risk_snapshot", _snapshot)
+
+    async def _no_pyramid_shadow(target_date):
+        return None
+
+    # cycle351 — 셰도 진입점도 대역(DB·30초 상한 무접촉). Green 전에는 속성이 없어 raising=False.
+    monkeypatch.setattr(collector, "_collect_pyramid_shadow", _no_pyramid_shadow, raising=False)
     return collector
 
 

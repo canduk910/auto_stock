@@ -17,10 +17,16 @@
 `collect_daily_log_metrics` 의 반환 dict 는 그대로 (a) OpenAI 프롬프트 본문
 (b) `daily_log_reports.metrics` JSONB (c) 20:20 클라우드 루틴 번들이다 — 키 **집합·순서**
 는 계약이다(cycle249 C-1).
+
+**`"pyramid_shadow"` 키(cycle351, 관측 전용)** — 맨 끝(11번째) 키. `kojiro`·`donchian_swing`
+의 레지스트리 파라미터 사본 + 예산만 읽어 `src.engine.pyramid_shadow.build_pyramid_shadow`
+에 넘기고, 30초 상한(`_PYRAMID_SHADOW_TIMEOUT_SECS`)·예외는 이 키만 `None`(never-raise).
+매매 행위 0 — 상세는 `pyramid_shadow.py` 모듈 docstring.
 """
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import re
 from collections import Counter
@@ -42,6 +48,11 @@ KST = timezone(timedelta(hours=9))
 # 20:05 1차 스냅샷·20:20 번들·21:30 완전판이 모두 이 모듈을 부르므로 모듈 전역 cap 으로
 # 중복을 막는다.
 _vcp_breakout_events_cap: KstDailyEmitCap = KstDailyEmitCap()
+
+# cycle351 minor — 피라미딩 셰도 **전체** 수집 실패/타임아웃의 관측 흔적. DEBUG 단독은
+# `_DbLogHandler`(INFO 컷)를 못 넘어 도입 이전 무음과 구별되지 않는다(`observer_trace`
+# 규약, cycle237 C237-L2-1). WARNING 1회/일 + DEBUG 는 매 실패마다(observer_trace.py 참조).
+_pyramid_shadow_failure_cap: KstDailyEmitCap = KstDailyEmitCap()
 
 # 패턴 추출용 정규식 — 종목코드(6자리)/숫자/주문번호 등 제거 후 패턴화
 _TICKER_RE = re.compile(r"\b[0-9A-Z]{6}\b")
@@ -687,6 +698,74 @@ async def _collect_vcp_breakout_events(target_date: date) -> dict | None:
     return summary
 
 
+# cycle351 — 피라미딩 가상 사다리(셰도) 30초 상한. 21:30 파이프라인(LLM 호출·INSERT)을
+# 셰도가 붙잡지 못하게 한다.
+_PYRAMID_SHADOW_TIMEOUT_SECS = 30.0
+
+
+async def _collect_pyramid_shadow(target_date: date) -> dict | None:
+    """cycle351 — kojiro·donchian_swing 의 피라미딩 가상 사다리 요약(관측 전용).
+
+    레지스트리 메모리에서 `dict(config.params)` 사본과 `int(state.total_investment)`
+    (0 이하 → None)만 읽어 leaf 에 넘긴다 — **읽기만**, 레지스트리·전략 상태 무변경.
+    실패는 이 함수가 `None` 을 돌려주는 것으로 흡수(호출부가 다시 타임아웃으로 감싼다).
+
+    독립 검증 지적 #20 — `state.positions` 의 ticker 집합 사본(`held_by_sid`)도 함께 넘겨
+    leaf 가 유령 open 페어(실보유와 어긋난 `trade_history` 순수량)를 거를 수 있게 한다.
+    """
+    try:
+        from src.engine.scheduler import trading_scheduler
+
+        registry = trading_scheduler.registry
+    except Exception:
+        logger.debug("[pyramid_shadow_error] 레지스트리 조회 실패 graceful", exc_info=True)
+        return None
+
+    params_by_sid: dict[str, dict] = {}
+    budget_by_sid: dict[str, int | None] = {}
+    held_by_sid: dict[str, set] = {}
+    for sid in ("kojiro", "donchian_swing"):
+        try:
+            strat = registry.get(sid)
+        except Exception:
+            strat = None
+        if strat is None:
+            continue
+        try:
+            config = getattr(strat, "config", None)
+            params = getattr(config, "params", None)
+            if isinstance(params, dict):
+                params_by_sid[sid] = dict(params)
+        except Exception:
+            logger.debug(
+                "[pyramid_shadow_error] %s params 조회 실패 graceful", sid, exc_info=True,
+            )
+        try:
+            state = getattr(strat, "state", None)
+            total = int(getattr(state, "total_investment", 0) or 0)
+            budget_by_sid[sid] = total if total > 0 else None
+        except Exception:
+            logger.debug(
+                "[pyramid_shadow_error] %s 예산 조회 실패 graceful", sid, exc_info=True,
+            )
+        try:
+            held_state = getattr(strat, "state", None)
+            positions = getattr(held_state, "positions", None)
+            if isinstance(positions, dict):
+                held_by_sid[sid] = set(positions.keys())
+        except Exception:
+            logger.debug(
+                "[pyramid_shadow_error] %s 보유 조회 실패 graceful", sid, exc_info=True,
+            )
+
+    from src.engine.pyramid_shadow import build_pyramid_shadow
+
+    return await build_pyramid_shadow(
+        target_date, params_by_sid=params_by_sid, budget_by_sid=budget_by_sid,
+        held_by_sid=held_by_sid,
+    )
+
+
 async def collect_daily_log_metrics(
     target_date: date, *, now_kst: datetime | None = None
 ) -> dict:
@@ -699,7 +778,8 @@ async def collect_daily_log_metrics(
     반환 dict 의 **키 집합·순서**는 계약이다 — 이 dict 는 그대로 (a) OpenAI 프롬프트
     본문이고 (b) `daily_log_reports.metrics` JSONB 다. cycle349 가 끝에
     `"vcp_breakout_events"` 1키를 추가했다(VCP ③ 관찰 전용, 기존 9키는 무변경) —
-    새 키를 더할 때는 항상 **끝에** 추가하고 기존 순서를 흔들지 않는다.
+    새 키를 더할 때는 항상 **끝에** 추가하고 기존 순서를 흔들지 않는다. cycle351 이
+    그 뒤에 `"pyramid_shadow"` 1키를 더했다(피라미딩 가상 사다리 관찰, 기존 10키 무변경).
 
     Args:
         target_date: 집계 대상 영업일.
@@ -759,6 +839,20 @@ async def collect_daily_log_metrics(
         logger.debug("[vcp_breakout_events_error] 수집 실패 graceful", exc_info=True)
         vcp_breakout_events = None
 
+    # cycle351 — 피라미딩 가상 사다리(셰도) 요약. 30초 상한 + 실패는 이 키만
+    # None(never-raise) — 21:30 파이프라인을 붙잡지 않는다.
+    try:
+        pyramid_shadow = await asyncio.wait_for(
+            _collect_pyramid_shadow(target_date), timeout=_PYRAMID_SHADOW_TIMEOUT_SECS,
+        )
+    except Exception:
+        from src.engine.observer_trace import trace_observer_failure
+
+        trace_observer_failure(
+            "[pyramid_shadow_error]", "shadow", _pyramid_shadow_failure_cap, dest_logger=logger,
+        )
+        pyramid_shadow = None
+
     metrics = {
         "target_date": target_date.isoformat(),
         "logs": log_metrics,
@@ -770,6 +864,7 @@ async def collect_daily_log_metrics(
         "portfolio_risk_snapshot": portfolio_risk_snapshot,  # 신규 (사이클 H, 관찰 전용)
         "tick_blind": tick_blind_metrics,  # 신규 (cycle234 — 프로세스 부재 blind)
         "vcp_breakout_events": vcp_breakout_events,  # 신규 (cycle349, VCP ③ 관찰 전용)
+        "pyramid_shadow": pyramid_shadow,  # 신규 (cycle351, 피라미딩 가상 사다리 관찰 전용)
     }
 
     logger.info(
