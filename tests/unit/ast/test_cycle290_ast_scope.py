@@ -98,8 +98,11 @@ def _sha(text: str) -> str:
 # ===========================================================================
 _BASE_SHA: dict[str, str] = {
     # 8영역 — 엔진 5파일 전부 (order_engine 포함! cycle290 은 무접촉)
+    # 🔁 2026-09-25 (cycle358) 재핀 — 카드 D(관측 전용). PARTIAL/CANCELLED UPDATE
+    # `affected==0` 무흔적에 `[trade_status_update_miss]` WARNING 추가(사용자 승인,
+    # 워크리스트 ⑨). 매매·상태전이 로직 무변경.
     "src/engine/order_engine.py":
-        "fe9886c8e2e3cccd03370f3470cc73449bf3a7c615c177c8ea87bd399949a8b2",
+        "118ebf38fd9004bf37cebf065199b949d9093d98ab9792b710b06345b5a119e3",
     "src/engine/risk.py":
         "79fddbec8cf9315c5172fc6634c4f4ea77f525d9ff9a3aba48f321affeb4d3e8",
     "src/engine/session.py":

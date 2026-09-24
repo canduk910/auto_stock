@@ -206,7 +206,10 @@ def test_seven_strategy_default_params_source_sha_unchanged(strategy_id: str):
 _BASE_SHA = {
     "src/engine/risk.py":
         "79fddbec8cf9315c5172fc6634c4f4ea77f525d9ff9a3aba48f321affeb4d3e8",
-    "src/engine/order_engine.py": "fe9886c8e2e3cccd03370f3470cc73449bf3a7c615c177c8ea87bd399949a8b2",
+    # 🔁 2026-09-25 (cycle358) 재핀 — 카드 D(관측 전용). PARTIAL/CANCELLED UPDATE
+    # `affected==0` 무흔적에 `[trade_status_update_miss]` WARNING 추가(사용자 승인,
+    # 워크리스트 ⑨). 매매·상태전이 로직 무변경.
+    "src/engine/order_engine.py": "118ebf38fd9004bf37cebf065199b949d9093d98ab9792b710b06345b5a119e3",
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
     # 🔁 cycle302(2026-09-18) 재핀 — 사용자 승인 일봉 backfill **대상** 확대

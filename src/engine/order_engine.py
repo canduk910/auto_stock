@@ -390,6 +390,10 @@ class OrderEngine:
         self._fill_qty_src_logged: "_KstDailyEmitCap[str]" = _KstDailyEmitCap()
         self._ordered_qty_mismatch_logged: "_KstDailyEmitCap[str]" = _KstDailyEmitCap()
         self._fill_qty_src_count: dict[str, int] = {}
+        # cycle358 (카드 D, 관측 전용) — `update_trade_status` UPDATE 가
+        # PARTIAL/CANCELLED 에서 `affected==0` 이어도 아무 흔적이 없던 결함.
+        # 매매·상태전이 로직은 무변경 — 로그 호출만 추가한다. 키 = (order_no, status).
+        self._trade_status_update_miss_logged: "_KstDailyEmitCap[tuple]" = _KstDailyEmitCap()
 
     # ──────────────────────────── 사이클 52 호환 layer (사이클 55 R-1)
 
@@ -970,6 +974,32 @@ class OrderEngine:
             trace_observer_failure(
                 "[ordered_qty_mismatch]", f"{ticker}|{side}",
                 self._ordered_qty_mismatch_logged,
+            )
+
+    def _emit_trade_status_update_miss(
+        self, status: str, order_no: str, ticker: str, side: str,
+    ) -> None:
+        """🔴 `[trade_status_update_miss]` — PARTIAL/CANCELLED UPDATE 가 0건(cycle358 카드 D).
+
+        관측 전용 — 매매·상태전이 로직 무변경. COMPLETED 는 `affected==0` 시 보정
+        INSERT/강제 UPDATE 로 스스로 흡수하지만(§ 위 두 영역), PARTIAL/CANCELLED 는
+        그런 흡수 경로가 없어 장부 행이 없으면 부분체결·취소가 한 글자도 안 남는다
+        — 이 로그가 그 창의 유일한 흔적이다. 1회/(order_no, status)/일
+        (`KstDailyEmitCap` 자기 리셋, `reset_daily_state()` 배선 불필요 —
+        `_market_rest_blocked_cap` 과 같은 선례). never-raise — 로그 실패가 주문
+        흐름을 끊지 않는다(관측 emit 은 예외 흡수, 행위는 cap 밖).
+        """
+        try:
+            self._trade_status_update_miss_logged.emit_once(
+                (order_no, status), logger.warning,
+                "[trade_status_update_miss] status=%s order_no=%s ticker=%s side=%s",
+                status, order_no, t(ticker), side,
+            )
+        except Exception:
+            from src.engine.observer_trace import trace_observer_failure
+            trace_observer_failure(
+                "[trade_status_update_miss]", f"{order_no}|{status}",
+                self._trade_status_update_miss_logged,
             )
 
     def emit_fill_qty_src_daily_summary(self) -> None:
@@ -2752,10 +2782,15 @@ class OrderEngine:
         else:
             # 부분 체결 → PARTIAL 기록, 30초 후 잔여 취소
             # 사이클 161 (2026-06-17): `price=price` 인자 명시 — 부분 체결 시점 체결단가 정합.
-            await update_trade_status(
+            _partial_affected = await update_trade_status(
                 ticker, TradeType.BUY, TradeStatus.PARTIAL,
                 strategy=strategy_id, price=price, order_no=order_no,
             )
+            if _partial_affected == 0:
+                # cycle358 카드 D(관측 전용) — 장부 행이 없으면 부분체결이 한 글자도 안 남는다.
+                self._emit_trade_status_update_miss(
+                    TradeStatus.PARTIAL.value, order_no, ticker, TradeType.BUY.value,
+                )
             # 🔴 cycle331 필수 동반 조항 — **귀속이 확정된 랏에만** 잔량 취소 타이머를 건다.
             # cycle331 이 `pending` 귀속 단을 열면서 발사 창의 통보가 **처음으로** 이
             # 분기에 도달한다. `_cancel_after_wait` 는 30초 뒤 잔량을 취소하는데,
@@ -2923,7 +2958,12 @@ class OrderEngine:
             await self._unsubscribe_if_no_other_strategy(ticker)
         else:
             # 부분 체결 → PARTIAL, 30초 후 잔여 취소 + 손절 시 재주문
-            await update_trade_status(ticker, TradeType.SELL, TradeStatus.PARTIAL, strategy=strategy_id, price=price, profit_loss=profit_loss, order_no=order_no)
+            _partial_affected = await update_trade_status(ticker, TradeType.SELL, TradeStatus.PARTIAL, strategy=strategy_id, price=price, profit_loss=profit_loss, order_no=order_no)
+            if _partial_affected == 0:
+                # cycle358 카드 D(관측 전용) — 장부 행이 없으면 부분체결이 한 글자도 안 남는다.
+                self._emit_trade_status_update_miss(
+                    TradeStatus.PARTIAL.value, order_no, ticker, TradeType.SELL.value,
+                )
             remaining = ordered_qty - total_filled
             # 🔴 cycle329 필수 동반 조항 — **매핑이 확정된 주문에만** 취소·재주문 타이머를 건다.
             # 이 시정으로 매핑 부재 창의 통보가 처음으로 **부분 분기에 도달**하는데,
@@ -2999,7 +3039,12 @@ class OrderEngine:
                     "map" if _orig_div else "absent",
                     ex, "ok" if _cancel_ok else "error", _cancel_err,
                 )
-            await update_trade_status(ticker, TradeType.BUY, TradeStatus.CANCELLED, strategy=strategy_id, order_no=order_no)
+            _cancel_affected = await update_trade_status(ticker, TradeType.BUY, TradeStatus.CANCELLED, strategy=strategy_id, order_no=order_no)
+            if _cancel_affected == 0:
+                # cycle358 카드 D(관측 전용) — 장부 행이 없으면 취소가 한 글자도 안 남는다.
+                self._emit_trade_status_update_miss(
+                    TradeStatus.CANCELLED.value, order_no, ticker, TradeType.BUY.value,
+                )
             logger.info("부분 체결 잔여 취소: %s (주문번호: %s)", t(ticker), order_no)
         except asyncio.CancelledError:
             pass  # 새 task로 교체됨 — pop은 새 task가 관리
@@ -3081,7 +3126,12 @@ class OrderEngine:
                     "map" if _orig_div else "absent",
                     ex, "ok" if _cancel_ok else "error", _cancel_err,
                 )
-            await update_trade_status(ticker, TradeType.SELL, TradeStatus.CANCELLED, strategy=strategy_id, order_no=order_no)
+            _cancel_affected = await update_trade_status(ticker, TradeType.SELL, TradeStatus.CANCELLED, strategy=strategy_id, order_no=order_no)
+            if _cancel_affected == 0:
+                # cycle358 카드 D(관측 전용) — 장부 행이 없으면 취소가 한 글자도 안 남는다.
+                self._emit_trade_status_update_miss(
+                    TradeStatus.CANCELLED.value, order_no, ticker, TradeType.SELL.value,
+                )
             logger.info("매도 잔여 취소: %s %d주", t(ticker), remaining)
 
             if is_stop_loss and remaining > 0:

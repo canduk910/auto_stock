@@ -573,9 +573,10 @@ def test_c17_4_leaf_does_not_import_eight_area_modules() -> None:
 #    바꿨다. 값만 현재 워킹트리로 재산출한다(같은 승계 절차).
 _BASE_SHA = {
     "src/engine/risk.py": "79fddbec8cf9315c5172fc6634c4f4ea77f525d9ff9a3aba48f321affeb4d3e8",
-    # 🔁 cycle276 → cycle286 — 사용자 명시 승인 하에 order_engine.py 를 바꾼 두 사이클의
-    # 누적 결과값이다. A-ATOMIC 구간은 byte 동일.
-    "src/engine/order_engine.py": "fe9886c8e2e3cccd03370f3470cc73449bf3a7c615c177c8ea87bd399949a8b2",
+    # 🔁 2026-09-25 (cycle358) 재핀 — 카드 D(관측 전용). PARTIAL/CANCELLED UPDATE
+    # `affected==0` 무흔적에 `[trade_status_update_miss]` WARNING 추가(사용자 승인,
+    # 워크리스트 ⑨). 매매·상태전이 로직 무변경, A-ATOMIC 구간은 byte 동일.
+    "src/engine/order_engine.py": "118ebf38fd9004bf37cebf065199b949d9093d98ab9792b710b06345b5a119e3",
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
     # 🔁 cycle302(2026-09-18) 재핀 — 사용자 승인 일봉 backfill **대상** 확대

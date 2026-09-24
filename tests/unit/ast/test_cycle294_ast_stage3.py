@@ -274,8 +274,11 @@ _BASE_SHA: dict[str, str] = {
 #: (구독 사실)를 거치므로 3단계에 할 일이 없다. 붉어지면 "왜 필요해졌는가" 를
 #: 먼저 적고 나서 핀을 옮겨라.
 _PIN_APPROVED_BUT_UNUSED: dict[str, str] = {
+    # 🔁 2026-09-25 (cycle358) 재핀 — 카드 D(관측 전용). PARTIAL/CANCELLED UPDATE
+    # `affected==0` 무흔적에 `[trade_status_update_miss]` WARNING 추가(사용자 승인,
+    # 워크리스트 ⑨). 매매·상태전이 로직 무변경.
     "src/engine/order_engine.py":
-        "fe9886c8e2e3cccd03370f3470cc73449bf3a7c615c177c8ea87bd399949a8b2",
+        "118ebf38fd9004bf37cebf065199b949d9093d98ab9792b710b06345b5a119e3",
 }
 
 #: cycle293 착지 값(= cycle294 **착수 시점**) — 기록용이다. 이 두 파일은 이 사이클의

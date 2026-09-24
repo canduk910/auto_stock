@@ -38,7 +38,7 @@ AWS RDS PostgreSQL CRUD 모듈. DB 클라이언트 정본 = **`pg.py` (asyncpg �
 ## trade_history.py — 거래 내역
 
 - `insert_trade(record)`: 주문 시 INSERT (status: PENDING)
-- **`update_trade_status(ticker, trade_type, status, strategy="momentum", price=None, profit_loss=None, *, order_no=None, match_partial=False) -> int`**: 진행 중 거래 행의 status 를 갱신하고 영향 행 수를 돌려준다. 0건이면 호출자(OrderEngine)가 체결통보 선행 race 로 판단해 COMPLETED 보정 INSERT 를 한다.
+- **`update_trade_status(ticker, trade_type, status, strategy="momentum", price=None, profit_loss=None, *, order_no=None, match_partial=False) -> int`**: 진행 중 거래 행의 status 를 갱신하고 영향 행 수를 돌려준다. COMPLETED 는 0건이면 호출자(OrderEngine)가 체결통보 선행 race 로 판단해 보정 INSERT 를 한다. **PARTIAL·CANCELLED 는 그런 흡수 경로가 없다** — 0건이면 장부 행이 없다는 뜻인데도 이전에는 아무 흔적이 없었다. `OrderEngine` 의 4 호출부(매수 PARTIAL·매도 PARTIAL·매수 CANCELLED·매도 CANCELLED)가 반환값을 받아 0건일 때 `[trade_status_update_miss] status= order_no= ticker= side=` WARNING 1줄을 낸다(cycle358 카드 D, 관측 전용 — 매매·상태전이 로직 무변경). 1회/(order_no, status)/일(`KstDailyEmitCap`), 로그 실패는 흡수해 주문 흐름을 끊지 않는다.
   - `match_partial=True`(opt-in) 면 `status = ANY(...)` 로 PENDING ∪ PARTIAL 을 함께 잡는다. **기본을 넓히지 않는다** — 넓히면 `_cancel_after_wait`/`_cancel_and_reorder` 의 CANCELLED 호출까지 함께 넓어져 부분 체결 사실이 정산·sync 양쪽에서 사라진다. 이 인자를 넘기는 호출부는 COMPLETED 2곳뿐이고 AST 가 봉인한다.
   - 같은 인자가 `AND timestamp >= (KST 오늘 00:00)` 하한도 켠다. 하한은 **`datetime` 바인딩**이다(str 로 바인딩하면 실 PG 에서 `DataError` 가 나 매수·매도 체결 경로가 전건 예외다 — AST5 가 바인딩 타입을 잰다).
   - `order_no`(keyword-only, 기본 `None`)를 넘기면 WHERE 에 `AND order_no = $n` 이 붙어 그 주문 행으로 좁혀진다(빈 문자열도 필터로 취급). **order_engine 호출 6곳은 전부 넘긴다** — 넘기지 않으면 같은 `(ticker, trade_type, strategy)` 의 다른 `order_no` 행까지 함께 덮는다(필옵틱스 161580 사건의 원인).

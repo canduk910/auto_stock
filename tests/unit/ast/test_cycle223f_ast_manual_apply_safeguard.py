@@ -370,8 +370,11 @@ _PREEXISTING_CONTENT_SHA: dict[str, str] = {
     # `tests/unit/engine/strategies/test_cycle226_zero_breakout_defense.py`.
     # `test_cycle274_ast_llm_gate.py` 는 dict 이름이 `_BASE_SHA` 라 그 4곳 목록 밖이지만
     # 같은 파일을 핀하므로 함께 갱신한다(자기 가드가 따로 검사한다).
+    # 🔁 2026-09-25 (cycle358) 재핀 — 카드 D(관측 전용). PARTIAL/CANCELLED UPDATE
+    # `affected==0` 무흔적에 `[trade_status_update_miss]` WARNING 추가(사용자 승인,
+    # 워크리스트 ⑨). 매매·상태전이 로직 무변경. 자매 가드 네 곳 전부 같은 값.
     "src/engine/order_engine.py":
-        "fe9886c8e2e3cccd03370f3470cc73449bf3a7c615c177c8ea87bd399949a8b2",
+        "118ebf38fd9004bf37cebf065199b949d9093d98ab9792b710b06345b5a119e3",
     # ✅ 2026-09-12 (cycle287) — 시각이 거래소·호가유형을 정한다. docstring 만
     # (본문 byte 동일). 자매 가드 네 곳 전부 같은 값.
     "src/api/order.py":

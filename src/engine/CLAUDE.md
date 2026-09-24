@@ -301,6 +301,7 @@ run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, recor
 - 보정 INSERT 가 `UniqueViolation` 이면 `try/except Exception` + `_update_trade_status_by_order_no(price=price)` 로 강제 UPDATE 한다.
 - 호출부 6곳(C1~C6)은 전부 **`order_no=order_no`** 를 함께 넘겨 WHERE 를 그 주문 행으로 좁히고, 전량 체결 분기 2곳은 **`match_partial=True`** 로 PARTIAL 행까지 포괄한다.
 - 가드 = AST G-161-K-6(`_handle_buy_fill` 영역의 `update_trade_status` 호출에 `price=` 키워드 의무) + `test_cycle273b_ast_no_behavior_guards.py` AST1/AST2.
+- **PARTIAL·CANCELLED `affected==0` 관측 (cycle358 카드 D)** — COMPLETED 는 `affected==0` 시 보정 INSERT/강제 UPDATE 로 스스로 흡수하지만, PARTIAL·CANCELLED 4 호출부(매수 PARTIAL·매도 PARTIAL·매수 CANCELLED·매도 CANCELLED)는 그런 흡수 경로가 없어 장부 행이 없으면 부분체결·취소가 한 글자도 안 남았다. 관측 전용 — 매매·상태전이 로직 무변경. `affected==0` 이면 `_emit_trade_status_update_miss`(`_trade_status_update_miss_logged: KstDailyEmitCap` 1회/(order_no, status)/일)가 `[trade_status_update_miss] status=PARTIAL|CANCELLED order_no= ticker= side=` WARNING 1줄을 낸다. never-raise — 로그 실패는 `observer_trace.trace_observer_failure` 로 흡수하고 주문 흐름을 끊지 않는다(관측 emit 은 예외 흡수, 행위는 cap 밖 — 기존 관측 마커와 같은 규약).
 
 ## strategy_base.py
 

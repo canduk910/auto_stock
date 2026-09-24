@@ -1162,9 +1162,11 @@ _ALLOWED_CONTENT_SHA: dict[str, str] = {
     #    TODO(cycle302 커밋 후): 이 항목을 **삭제**한다.
     "src/engine/scanner.py":
         "95cbb103a38821bb3b68d267a3662094b192fa55ad6071fa8dc4a63726e1c942",
-    # (비어 있음 — cycle273 그룹 1·2, cycle274 병합 뒤 2026-09-11 정리. 등록은 승인된 사이클의 Green 이, 비우기는 병합 후속 커밋이 한다)
+    # 🔁 2026-09-25 (cycle358) 재핀 — 카드 D(관측 전용). PARTIAL/CANCELLED UPDATE
+    # `affected==0` 무흔적에 `[trade_status_update_miss]` WARNING 추가(사용자 승인,
+    # 워크리스트 ⑨). 매매·상태전이 로직 무변경. 자매 가드 네 곳 전부 같은 값.
     "src/engine/order_engine.py":
-        "fe9886c8e2e3cccd03370f3470cc73449bf3a7c615c177c8ea87bd399949a8b2",
+        "118ebf38fd9004bf37cebf065199b949d9093d98ab9792b710b06345b5a119e3",
     # ✅ 2026-09-12 (cycle287) — 시각이 거래소·호가유형을 정한다. docstring 만
     # (본문 byte 동일). 자매 가드 네 곳 전부 같은 값.
     "src/api/order.py":

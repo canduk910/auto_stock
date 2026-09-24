@@ -461,8 +461,12 @@ _PREEXISTING_CONTENT_SHA: dict[str, str] = {
     #    TODO(cycle302 커밋 후): 이 항목을 **삭제**한다.
     "src/engine/scanner.py":
         "95cbb103a38821bb3b68d267a3662094b192fa55ad6071fa8dc4a63726e1c942",
+    # 🔁 2026-09-25 (cycle358) 재핀 — 카드 D(관측 전용). PARTIAL/CANCELLED UPDATE
+    #    `affected==0` 무흔적에 `[trade_status_update_miss]` WARNING 추가(사용자
+    #    승인, 워크리스트 ⑨). 매매·상태전이 로직 무변경. 자매 가드 네 곳 전부 같은
+    #    값(`test_g3_9b` 계약). TODO(cycle358 커밋 후): 이 항목을 **삭제**한다.
     "src/engine/order_engine.py":
-        "fe9886c8e2e3cccd03370f3470cc73449bf3a7c615c177c8ea87bd399949a8b2",
+        "118ebf38fd9004bf37cebf065199b949d9093d98ab9792b710b06345b5a119e3",
     "src/api/order.py":
         "08c5cafd7b8678ec0d0fa85f856fdea3cce38ad92488c6d74c03cd13faa415bb",
     # ✅ 2026-09-14 (cycle293) — 시세 채널 리졸버 2단계(속성축 배관). 사용자 승인
