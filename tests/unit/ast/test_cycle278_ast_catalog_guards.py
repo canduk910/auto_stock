@@ -237,7 +237,7 @@ _BASE_SHA = {
     # 붉어져 승인된 변경을 되돌리도록 오도한다. 직전 값 =
     # `50658e06062a0d38afecab1baa08871b89212e295cc95f2a3af62a2ae076115d`.
     "src/engine/scheduler.py":
-        "4b9c8ac94706ae622d3404fa10bfa805a69a4b36485787c388dff3aa6e76763d",
+        "3461242a47080379c8d48dc5efd5799ce5fac173803a95476547ea4758b40a81",
     "src/engine/strategy_base.py":
         "869dc20ca561adc561a9ebe9fdb5fe5a3e097f7ec176fdf274d577d509de9252",
     # 🔁 cycle290(킬스위치 등재, 2026-09-13) 재핀 — `DEFAULT_PARAMS` 말미 2키 추가뿐.

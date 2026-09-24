@@ -427,8 +427,11 @@ _SRC_TREE_FILES = 156
 #: 내용이 여러 차례 바뀌어 digest 가 다시 움직였다 — 파일 수는 156 로 불변이다.
 #: 직전 값(1차 보강 중간값) 은 `56beac69958d9dccb9488f676fcf50e2992bbffd118e3cd86867435d92b66de8`
 #: · `61e52f16d367ae2ace95908072280996f6cd68705b6752436594f44381fafd8c` 였다.
+#: 🔁 cycle354 재핀 — `scheduler.py`(`_sync_orders_to_db` order_no 매핑 폴백, 사용자
+#: 승인) 변경으로 digest 가 다시 움직였다. 파일 수는 156 로 불변이다. 직전 값 =
+#: `32d7e24ece298fa3283400fbfeb14f02c91c3918ea82997816b271f899e80c98`.
 _SRC_TREE_DIGEST = (
-    "32d7e24ece298fa3283400fbfeb14f02c91c3918ea82997816b271f899e80c98"
+    "232a25a939206a92f5351ebed2a865d6e19c5b8d164852fa0b99a0a54c342f96"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
@@ -458,7 +461,7 @@ _PINNED_DIR_FILE_COUNTS = {
 #: 신규 leaf `src/engine/market_op_subscribe.py` 로 추출해(행위 변경 0 · 5줄
 #: 위임 wrapper) 3,897 → 3,726 이 됐다. 값만 옮긴다 — 정확 핀을 상한 핀으로
 #: 완화하면 cycle287 의 무접촉 대리 지표가 사라진다.
-_SCHEDULER_LINES = 3795
+_SCHEDULER_LINES = 3812  # cycle354 재핀 — order_no 매핑 폴백 추가 (`_sync_orders_to_db`)
 _SCHEDULER_LINE_CAP = 3900
 
 #: 손대지 않기로 한 **원문 구간**의 sha256 (base `a42f519`).

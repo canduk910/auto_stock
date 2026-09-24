@@ -594,7 +594,7 @@ _BASE_SHA = {
     # 을 **한 값으로 동시에** 옮겼다 — 한 곳만 넣으면 나머지가 "코드를 되돌려라" 로
     # 붉어져 승인된 변경을 되돌리도록 오도한다. 직전 값 =
     # `50658e06062a0d38afecab1baa08871b89212e295cc95f2a3af62a2ae076115d`.
-    "src/engine/scheduler.py": "4b9c8ac94706ae622d3404fa10bfa805a69a4b36485787c388dff3aa6e76763d",
+    "src/engine/scheduler.py": "3461242a47080379c8d48dc5efd5799ce5fac173803a95476547ea4758b40a81",
     "src/engine/strategy_base.py":
         "869dc20ca561adc561a9ebe9fdb5fe5a3e097f7ec176fdf274d577d509de9252",
     # 🔁 cycle296(2026-09-17) 재핀 — 사용자 승인 `issue()` 매니저 단위 in-flight 합류(`src/auth/**`). 같은 값을 10곳 동시 갱신했다.
@@ -660,7 +660,7 @@ def test_c16_1_scheduler_line_count_unchanged() -> None:
     그러면 확보한 174줄 예산의 무단 증식을 아무도 못 잡는다.
     """
     lines = len(_read(_SCHEDULER).splitlines())
-    assert lines == 3795, f"scheduler.py {lines}L (기대 3,785 — cycle283 저녁 창 재설계 뒤 3,897 → cycle292 leaf 추출 → cycle298 재핀)"
+    assert lines == 3812, f"scheduler.py {lines}L (기대 3,785 — cycle283 저녁 창 재설계 뒤 3,897 → cycle292 leaf 추출 → cycle298 재핀 3,795 → cycle354 order_no 매핑 폴백 추가 재핀)"
 
 
 def test_c16_2_scheduler_line_cap_is_not_looser_than_cycle257() -> None:

@@ -813,6 +813,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -1898,6 +1899,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -2990,6 +2992,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -4079,6 +4082,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -5167,6 +5171,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -6257,6 +6262,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -7347,6 +7353,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -8439,6 +8446,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -9527,6 +9535,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -10620,6 +10629,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -11725,6 +11735,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -12815,6 +12826,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -13911,6 +13923,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -14329,6 +14342,7 @@ backend:
     - tests/unit/engine/test_cycle296_quote_token_refresh_observe.py
     - tests/unit/engine/test_cycle315_regime_source_switch.py
     - tests/unit/engine/test_cycle321_cash_ratio_source.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle83_r6_frequency_regression.py
     - tests/unit/engine/test_cycle83_sk_square_fixture.py
@@ -16087,6 +16101,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -17175,6 +17190,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -18265,6 +18281,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -19355,6 +19372,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -20445,6 +20463,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -21536,6 +21555,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -22625,6 +22645,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -23715,6 +23736,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -24805,6 +24827,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -25895,6 +25918,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -26987,6 +27011,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -28080,6 +28105,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -29166,6 +29192,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -30255,6 +30282,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -31347,6 +31375,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -32436,6 +32465,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -33550,6 +33580,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -34621,6 +34652,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -34924,6 +34956,7 @@ backend:
     - tests/unit/db/test_trade_history_for_sync.py
     - tests/unit/db/test_trade_history_kst.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_sync_orders_to_db_042700_pingpong.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     transitive_tests:
@@ -36799,6 +36832,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -37890,6 +37924,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -38981,6 +39016,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -40071,6 +40107,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -41161,6 +41198,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -42250,6 +42288,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -43340,6 +43379,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -44434,6 +44474,7 @@ backend:
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -45520,6 +45561,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -46610,6 +46652,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -47700,6 +47743,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -48790,6 +48834,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -49881,6 +49926,7 @@ backend:
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -50971,6 +51017,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -52060,6 +52107,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -53218,6 +53266,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -54306,6 +54355,7 @@ backend:
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -55392,6 +55442,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -56483,6 +56534,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -57583,6 +57635,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -58661,6 +58714,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -59751,6 +59805,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -60841,6 +60896,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -61931,6 +61987,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -63021,6 +63078,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -64111,6 +64169,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -65200,6 +65259,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -66368,6 +66428,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -67529,6 +67590,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -68680,6 +68742,7 @@ backend:
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
     - tests/unit/engine/test_cycle340_kojiro_macd_observe.py
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -69771,6 +69834,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -70861,6 +70925,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -71961,6 +72026,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -73043,6 +73109,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -74134,6 +74201,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -75219,6 +75287,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -75777,6 +75846,7 @@ backend:
     - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
     - tests/unit/engine/test_cycle332_cancel_timer_key.py
     - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle64_price_filter_scanner_apply.py
@@ -76756,6 +76826,7 @@ backend:
     - tests/unit/engine/test_cycle321_cash_ratio_source.py
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -78492,6 +78563,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -79582,6 +79654,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -80670,6 +80743,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -81759,6 +81833,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -82851,6 +82926,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -83960,6 +84036,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -85030,6 +85107,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -86138,6 +86216,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -87211,6 +87290,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -88303,6 +88383,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -89390,6 +89471,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -90480,6 +90562,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -91570,6 +91653,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -92664,6 +92748,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -93781,6 +93866,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -94874,6 +94960,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -95962,6 +96049,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -97051,6 +97139,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -98141,6 +98230,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -99232,6 +99322,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -100323,6 +100414,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -101443,6 +101535,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -102520,6 +102613,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -103592,6 +103686,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -104681,6 +104776,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -105841,6 +105937,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -106932,6 +107029,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -108020,6 +108118,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -109112,6 +109211,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -110201,6 +110301,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -111290,6 +111391,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -112387,6 +112489,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -113533,6 +113636,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -114623,6 +114727,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -115717,6 +115822,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -116808,6 +116914,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -117897,6 +118004,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -118988,6 +119096,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -120140,6 +120249,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -121383,6 +121493,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -122534,6 +122645,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -123651,6 +123763,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -124723,6 +124836,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -125832,6 +125946,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -126920,6 +127035,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -129384,6 +129500,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -130471,6 +130588,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -131564,6 +131682,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -132651,6 +132770,7 @@ backend:
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_core.py
+    - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -134436,10 +134556,10 @@ frontend:
     - frontend/src/pages/__tests__/MarketState.test.tsx
     - frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
     - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
-generated_at: '2026-09-25T01:50:08.862130+09:00'
+generated_at: '2026-09-25T04:07:35.359258+09:00'
 stats:
   backend_modules: 159
-  backend_tests: 1087
+  backend_tests: 1088
   frontend_modules: 120
   frontend_tests: 98
   unmapped_modules:

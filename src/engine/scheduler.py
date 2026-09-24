@@ -2333,6 +2333,13 @@ class TradingScheduler:
         # DB 매수 기록에서 strategy 매핑 (매도 시 참조) — ticker 별 1건만 필요하므로 dedupe 함수 사용
         existing_buys_for_strategy = await get_today_buy_trades()
         db_strategy_map = {row["ticker"]: row.get("strategy", "momentum") for row in existing_buys_for_strategy}
+        # cycle354 카드 C — DB(당일 같은 티커 매수 기록)에도 없으면(가장 흔한 sync 경로 —
+        # 그날 첫 매수는 db_strategy_map 에 아직 그 ticker 가 없다) order_no 매핑
+        # (`order_engine._order_strategy`, place_order 응답 직후 동기 등록·전량 체결 시
+        # pop, 루트 CLAUDE.md 「주문번호 매핑」 규약)을 다음 출처로 본다 — 읽기 전용,
+        # 등록·pop 은 order_engine 자신만 한다(8영역 무접촉). 구형 스텁(`order_engine`
+        # 속성 부재) 호환을 위해 getattr 이중 폴백으로 빈 dict 를 fail-open 한다.
+        order_strategy_map = getattr(getattr(self, "order_engine", None), "_order_strategy", {}) or {}
 
         synced = 0
         for order in orders:
@@ -2351,20 +2358,30 @@ class TradingScheduler:
             if not is_buy and key in existing_sell_keys:
                 continue
 
-            # 매도 시 전략/손익 매핑
-            strategy = "momentum"
+            # 전략/손익 매핑 — 출처 순서 = DB(당일 같은 티커 매수 기록) →
+            # order_no 매핑(cycle354 신규) → 하드코딩 "momentum"(최종 폴백).
+            # `or None` 정규화로 빈 문자열 오염을 "값 있음"으로 오판하지 않는다.
+            mapped_strategy = order_strategy_map.get(kis_order_no) or None
+            resolved_strategy = db_strategy_map.get(ticker) or mapped_strategy
+            strategy = resolved_strategy or "momentum"
             profit_loss = 0.0
-            if is_buy:
-                strategy = db_strategy_map.get(ticker, "momentum")
-            else:
-                strategy = db_strategy_map.get(ticker, "momentum")
-                # 보유 포지션에서 매수가 참조하여 손익 계산
+            if not is_buy:
+                # 보유 포지션에서 매수가 참조하여 손익 계산 — 라이브 상태가 최종 권위
+                # (order_no 매핑보다 후순위로 두지 않는다 — 정확한 buy_price 의 유일한 출처).
                 for s in self.registry.all():
                     if ticker in s.state.positions:
                         buy_price = s.state.positions[ticker].buy_price
                         profit_loss = (avg_price - buy_price) * ccld_qty
                         strategy = s.strategy_id
+                        resolved_strategy = s.strategy_id
                         break
+
+            if resolved_strategy is None:
+                logger.warning(
+                    "[sync_strategy_unknown] ticker=%s order_no=%s — DB·order_no 매핑 "
+                    "전부 미확보, momentum 폴백(성과 귀인 오염 가능)",
+                    ticker, kis_order_no,
+                )
 
             from src.engine.scanner import ticker_names
             record = TradeRecord(

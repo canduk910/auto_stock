@@ -1475,6 +1475,6 @@ def test_scope_scheduler_and_strategies_are_untouched() -> None:
 
     root = pathlib.Path(__file__).resolve().parents[3]
     lines = len((root / "src/engine/scheduler.py").read_text(encoding="utf-8").splitlines())
-    assert lines == 3795, (
-        f"scheduler.py = {lines}L (착수 시점 3,726L → cycle298 재핀 3,785L) — 무접촉 계약 위반(절대 규칙 7)"
+    assert lines == 3812, (
+        f"scheduler.py = {lines}L (착수 시점 3,726L → cycle298 재핀 3,785L → cycle354 재핀 3,812L) — 무접촉 계약 위반(절대 규칙 7)"
     )

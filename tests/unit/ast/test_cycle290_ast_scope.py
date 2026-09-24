@@ -140,7 +140,7 @@ _BASE_SHA: dict[str, str] = {
     # `50658e06062a0d38afecab1baa08871b89212e295cc95f2a3af62a2ae076115d`.
     # 8영역은 아니지만 이 사이클이 무접촉을 약속한 파일
     "src/engine/scheduler.py":
-        "4b9c8ac94706ae622d3404fa10bfa805a69a4b36485787c388dff3aa6e76763d",
+        "3461242a47080379c8d48dc5efd5799ce5fac173803a95476547ea4758b40a81",
     "src/engine/strategy_base.py":
         "869dc20ca561adc561a9ebe9fdb5fe5a3e097f7ec176fdf274d577d509de9252",
     # 🔴 등재만으로 판정이 통해야 한다 — 검증 로직을 고쳐 통과시키면 안 된다.
@@ -157,7 +157,7 @@ _SCHEDULER_LINE_CAP = 3900
 #: 신규 leaf `src/engine/market_op_subscribe.py` 로 추출해(행위 변경 0 · 5줄
 #: 위임 wrapper) 3,897 → 3,726 이 됐다. 값만 옮긴다 — 정확 핀을 상한 핀으로
 #: 완화하면 cycle290 의 무접촉 대리 지표가 사라진다.
-_SCHEDULER_LINES = 3795
+_SCHEDULER_LINES = 3812  # cycle354 재핀 — order_no 매핑 폴백 추가 (`_sync_orders_to_db`)
 
 
 @pytest.mark.parametrize("rel", sorted(_BASE_SHA))
