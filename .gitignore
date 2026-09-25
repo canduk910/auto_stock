@@ -73,3 +73,6 @@ docs/*.pdf
 
 # 영상 대본 원문 — 저장소에 올리지 않는다(개인 요약본만 커밋)
 docs/contents/_raw/
+
+# cycle362 — KRX 일별 전종목 시세 별도 보관소(매매 DB 밖, 5년치). 수백MB~1GB 대라 git 에 넣지 않는다.
+data/archive/krx_daily/
