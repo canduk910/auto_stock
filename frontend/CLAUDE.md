@@ -443,7 +443,7 @@ Dashboard 환경 배너 직하, 전략 탭 위 (`<ControlPanel />` 직후).
 
 `fetchRealtimeHealth()`(`frontend/src/api/realtime-health.ts`)가 `/api/logs/search` 로 4 prefix 를 grep 해 카드 4개를 만든다 — `[dispatch_drop_summary]` · `[callback_exception]` · `[stale_force_retry]` · `[ws_auto_restart]`. 타입 `RealtimeHealthSnapshot`(`types/realtime-health.ts`).
 
-5번째 카드 `MarketOperationCard`(testid `realtime-health-card-market-operation`) — `fetchMarketOperationStatus()` → `GET /api/realtime/market-operation`(`data.data ?? fallback`). VI 활성 N / 거래정지 N / 종목상태 이상 N 배지(count 0=gray, >0=amber/red) + **서킷브레이커 배지**(`realtime-health-cb-badge`, `circuit_breaker.suspected` true→orange "추정" / false→gray "정상") + 종목별 detail + raw `MKOP_CLS_CODE`/거래정지 사유. 데이터 원천은 백엔드 `market_operation_monitor`(H0UNMKO0). **CB 는 휴리스틱**(사유 키워드 OR 전 시장 halt 비율)이다 — KIS H0UNMKO0 에 CB 전용 필드가 없다. **표시만(매수 가드 아님)**. 회귀 가드 `RealtimeHealth.cycle186.test.tsx`.
+5번째 카드 `MarketOperationCard`(testid `realtime-health-card-market-operation`) — `fetchMarketOperationStatus()` → `GET /api/realtime/market-operation`(`data.data ?? fallback`). VI 활성 N / 거래정지 N / 종목상태 이상 N 배지(count 0=gray, >0=amber/red) + **서킷브레이커 배지**(`realtime-health-cb-badge`, `circuit_breaker.suspected` true→orange "추정" / false→gray "정상") + 종목별 detail + raw `MKOP_CLS_CODE`/거래정지 사유. 데이터 원천은 백엔드 `market_operation_monitor`(H0UNMKO0). 「종목상태 이상」 배지는 `iscd_stat_active_count` 이고, 백엔드가 **표시 집합** 51~54·58·59(관리·시장경고·거래정지·단기과열)로 센다 — 55(신용가능)·57(증거금100%)·00 은 세지 않는다. 「거래정지」 배지는 `TRHT_YN=="Y"` 또는 종목상태 `58` 인 종목만 센다. 범위가 달라서 두 배지 숫자가 달라도 정상이다. **CB 는 휴리스틱**(사유 키워드 OR 전 시장 halt 비율)이다 — KIS H0UNMKO0 에 CB 전용 필드가 없다. **표시만(매수 가드 아님)**. 회귀 가드 `RealtimeHealth.cycle186.test.tsx`.
 
 ## Strategies (`/strategies`)
 

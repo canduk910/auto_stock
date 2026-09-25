@@ -57,8 +57,15 @@ def test_G_A1_market_op_tr_id_and_payload_parsing() -> None:
         ("N", "1", "0", "0", True),
         # 시간외 VI 활성
         ("N", "0", "1", "0", True),
-        # 종목상태 이상 (의제 5 자문 채택)
-        ("N", "0", "0", "1", True),
+        # 종목상태 — cycle368(2026-09-25 사용자 결정): 정지 판정은 `58`(거래정지 지정) 하나뿐.
+        # 종전 케이스 `"1"` 은 KIS 값 표(51~59, 00)에 없는 가상 코드였고, truthy 매핑이
+        # 55(신용가능)·57(증거금100%)·00(그 외)까지 「이상」으로 읽게 만든 근거였다.
+        ("N", "0", "0", "58", True),
+        ("N", "0", "0", "55", False),
+        ("N", "0", "0", "57", False),
+        ("N", "0", "0", "00", False),
+        ("N", "0", "0", "51", False),
+        ("N", "0", "0", "59", False),
         # KIS 향후 확장 호환 (의제 1 truthy 매핑) — "2"/"3" 등 = 활성
         ("N", "2", "0", "0", True),
         ("N", "0", "3", "0", True),
@@ -70,7 +77,8 @@ def test_G_A2_is_event_blocking_truthy_mapping(
 ) -> None:
     """is_event_blocking 의제 1 truthy 매핑 영속 (자문 채택).
 
-    "0"/"" = 비활성 블랙리스트, 그 외 모두 = 활성.
+    VI·시간외 VI: "0"/"" = 비활성 블랙리스트, 그 외 모두 = 활성.
+    종목상태: `58` 만 차단(cycle368 — 화이트리스트 `ISCD_STAT_BLOCKING`).
     """
     from datetime import datetime, timezone, timedelta
 

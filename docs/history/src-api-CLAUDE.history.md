@@ -352,3 +352,29 @@ KRX 키 관리 인프라 + Supabase 저장 + 마스킹. 본 사이클 = 인프�
   움직인 것은 `test_cycle287::_SRC_TREE_DIGEST` 하나다.
 - **호출자** — `fetch_daily_candles_backfill` 의 프로덕션 호출자는 `scanner._stock_master_daily_load_once`
   **하나뿐**임을 `grep` 으로 재확인했다. 별도 함수 `fetch_daily_candles` 는 무접촉이다.
+
+## market_operation.py — 장운영정보(H0UNMKO0) 정본 + VI 현황 REST 폴백
+
+### 2026-09-26 cycle368 — 칸 기준점·종목상태 `58` 단독·`(null)` 비활성 반영으로 교체한 표 행과 주의문
+
+정본 원문(`src/api/CLAUDE.md:244-250`, 2026-09-26 이관):
+
+---
+
+| `@dataclass MarketOpEvent` | KIS 10컬럼 전수 파싱 결과 |
+| `parse_market_op_payload(tr_key, payload) -> MarketOpEvent` | `^` 구분 페이로드 → 이벤트 |
+| `is_event_blocking(event) -> bool` | stale 회피 판정 = VI 활성 + 거래정지 + 종목상태 이상(MRKT_TRTM 제외) |
+| `inquire_vi_status_today() -> set[str]` | 부팅 REST 1회 시드. graceful — 실패해도 매매 안전성 영향 0 |
+
+🔴 **`VI_CLS_CODE` 의 `"0"`/`""`/`None` 은 전부 비활성이다**(truthy 매핑 = 블랙리스트 방식).
+KIS 가 코드를 늘려도 새 값이 자동으로 "활성" 으로 읽히게 하려는 의도다.
+
+---
+
+경위: cycle359 조사가 라이브 `H0UNMKO0` 프레임의 첫 칸이 종목코드라 파서가 모든 칸을 한 칸씩 밀려 읽는다는
+것을 찾았다(가짜 VI → 보유 종목이 stale 재구독에서 빠짐). 2026-09-25 사용자 결정 「칸 위치는 바로 잡아.
+거래정지 판정은 58만 봐」로 파서 기준점과 종목상태 판정을 바꿨다. 종목상태를 `_is_code_active` 로 넓게 읽던
+판정은 55(신용가능)·57(증거금100%)까지 「이상」으로 잡던 두 번째 덫이라 폐기했다. `(null)` 비활성과 정지 사유
+정규화는 적대적 검토 뒤 메인 세션 결정(사용자 승인 범위 안)이다.
+
+→ CHANGELOG: cycle368 행

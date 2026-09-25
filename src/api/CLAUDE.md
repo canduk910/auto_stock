@@ -241,13 +241,34 @@ WebSocket 장운영정보의 **파싱 정본**이 여기 있다. 구독을 보�
 |---|---|
 | `MARKET_OP_TR_ID = "H0UNMKO0"` | 통합 장운영정보 TR_ID |
 | `VI_STATUS_TR_ID = "FHPST01390000"` · `VI_STATUS_URL = "/uapi/domestic-stock/v1/quotations/inquire-vi-status"` | 부팅 시드용 REST 보조 폴백. 이 path 는 시세 풀 화이트리스트에 **있어야 한다**(2026-08-04 추가 — 없던 동안 매 부팅 `QuotePoolPathError` 로 VI 시드가 100% 실패했다) |
-| `@dataclass MarketOpEvent` | KIS 10컬럼 전수 파싱 결과 |
-| `parse_market_op_payload(tr_key, payload) -> MarketOpEvent` | `^` 구분 페이로드 → 이벤트 |
-| `is_event_blocking(event) -> bool` | stale 회피 판정 = VI 활성 + 거래정지 + 종목상태 이상(MRKT_TRTM 제외) |
+| `@dataclass MarketOpEvent` | 논리 10칸의 파싱 결과. 칸 이름과 순서는 KIS 문서 통합 표(`[0]=TRHT_YN` … `[9]=EXCH_CLS_CODE`)를 따른다. `ticker` 는 `tr_key` 에서 온다 |
+| `parse_market_op_payload(tr_key, payload) -> MarketOpEvent` | `^` 구분 페이로드 → 이벤트. 실제로 몇 번째 칸을 읽을지는 아래 「칸 기준점」이 정한다. 없는 칸은 `""` |
+| `ISCD_STAT_BLOCKING = frozenset({"58"})` · `is_iscd_stat_blocking(code) -> bool` | 종목상태구분코드(`ISCD_STAT_CLS_CODE`)의 거래정지 판정. `58`(거래정지 지정 종목) **하나만** True |
+| `is_event_blocking(event) -> bool` | stale 회피 판정 = `TRHT_YN=="Y"` · VI 활성(`VI_CLS_CODE`·`OVTM_VI_CLS_CODE`) · 종목상태 `58` 중 하나(MRKT_TRTM 제외). 프로덕션 호출자는 0 이다 — 운영 경로는 `market_operation_monitor.record_market_op_event` 가 같은 규칙을 인라인으로 판정한다 |
 | `inquire_vi_status_today() -> set[str]` | 부팅 REST 1회 시드. graceful — 실패해도 매매 안전성 영향 0 |
 
-🔴 **`VI_CLS_CODE` 의 `"0"`/`""`/`None` 은 전부 비활성이다**(truthy 매핑 = 블랙리스트 방식).
+🔴 **칸 기준점 — 라이브 프레임은 첫 칸이 종목코드다.** KIS 문서 통합 절(`docs/kis/domestic-stock-realtime.md`)은
+종목코드 칸 없이 `[0]=TRHT_YN` 으로 적혀 있다. 라이브 `H0UNMKO0` 프레임은 KRX·NXT 단독 표처럼
+`[0]=종목코드` 다(EC2 실측 2026-09-21~23, 17건 전수). 그래서 파서는
+`off = 0 if fields[0] in ("Y","N") else 1` 로 기준점을 정한다. `fields[0]` 이 정확히(`==`, `startswith` 아님)
+`"Y"`/`"N"` 이면 문서 모양, 그 밖은 전부 라이브 모양(한 칸씩 밀림)이다.
+- `tr_key == fields[0]` 으로 판별하지 않는다 — `KisWebSocket._handle_raw` 가 `tr_key` 를
+  `payload.split("^")[0]` 로 뽑으므로 운영 경로에서는 항상 참이라 판별력이 없다.
+- 칸 계산은 이 파서 **한 곳뿐**이다. `src/realtime/handler.py::_handle_market_op` 는 `payload.split` 을 직접 하지
+  않고, 파싱된 `event.mkop_cls_code` 를 로그와 보드 콜백에 넘긴다.
+- 근거 메모 = `_workspace/domain_consult/cycle359_mkop_field_offset.md`.
+
+🔴 **거래정지는 `TRHT_YN=="Y"` 또는 종목상태 `58` 뿐이다(2026-09-25 사용자 결정).** 51(관리)·52~54(시장경고)·
+55(신용가능)·57(증거금100%)·59(단기과열)·00 은 정지가 아니다. 종목상태를 비활성 블랙리스트로 넓게 읽으면
+55·57 같은 정상 상태까지 정지로 잡혀, 보유 종목이 재구독 안전망에서 빠진다.
+51·59 보유 종목의 청산·신규 매수 차단은 이 모듈에 없다(별도 사이클, `domain-consult` 선행).
+
+🔴 **VI 칸(`VI_CLS_CODE`·`OVTM_VI_CLS_CODE`)은 블랙리스트 방식이다.** `None` 과
+`_INACTIVE_VALUES = {"", "0", "N", "n", "(null)"}` 은 비활성, 그 밖은 전부 활성이다.
 KIS 가 코드를 늘려도 새 값이 자동으로 "활성" 으로 읽히게 하려는 의도다.
+`"(null)"` 은 KIS null 토큰이다 — 라이브 프레임은 일부 빈 칸을 빈 문자열 대신 이 글자 그대로 보낸다(실측 17건 모두 정지 사유 칸이 `(null)`).
+정지 사유 칸(`TR_SUSP_REAS_CNTT`)도 값이 **정확히** `"(null)"`(`_NULL_TOKEN`)이면 `""` 로 바꾼다.
+부분 문자열 치환은 하지 않는다 — 실제 사유 문장 안의 `(null)` 까지 깎인다.
 
 매매 안전성 무영향이 명문화된 영역이다 — 이 모듈이 바꾸는 것은 stale 판정의 *지연*뿐이고
 `risk.on_tick`·`order_engine`·`auth` 는 건드리지 않는다.

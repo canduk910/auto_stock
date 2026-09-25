@@ -723,27 +723,48 @@ async def _handle_execution(payload: str, *, encrypted: bool = False) -> None:
 async def _handle_market_op(tr_id: str, tr_key: str, payload: str) -> None:
     """장운영정보(H0UNMKO0/H0STMKO0/H0NXMKO0) 메시지 — 보드 전환 + 종목별 VI/거래정지 이벤트.
 
-    KIS 명세 기준 응답 필드(공통 — 통합/KRX/NXT 동일 구조):
-      [0] TRHT_YN — 거래정지 여부
-      [1] TR_SUSP_REAS_CNTT — 거래 정지 사유
-      [2] MKOP_CLS_CODE — 장운영 구분 코드 (110/112/121/129...)
-      [3] ANTC_MKOP_CLS_CODE — 예상 장운영 구분 코드
-      [4] MRKT_TRTM_CLS_CODE — 임의연장구분코드
-      [5] DIVI_APP_CLS_CODE — 동시호가배분처리구분코드
-      [6] ISCD_STAT_CLS_CODE — 종목상태구분코드
-      [7] VI_CLS_CODE — VI적용구분코드
-      [8] OVTM_VI_CLS_CODE — 시간외단일가VI적용구분코드
-      [9] EXCH_CLS_CODE — 거래소 구분코드 (KRX/NXT)
+    🔴 **칸 계산은 파서 한 곳(`parse_market_op_payload`)뿐이다.** 이 함수는
+    `payload.split(...)` 을 직접 하지 않는다 — 로그와 보드 콜백에 넘기는 장운영 코드는
+    파싱된 `event.mkop_cls_code` 다. 파서 import 는 파싱 try 안에, 기록 모듈
+    (`record_market_op_event`) import 는 기록 try 안에 각자 있다 — 어느 쪽이 없거나
+    import 자체가 실패해도(배포 중 부분 롤아웃·순환 의존 등) 그 예외는 함수 밖으로 새지
+    않고 `[market_op_parse_failed]`/`[market_op_record_failed]` ERROR 1행으로 흡수된다.
+    파싱이 실패하면 기록은 호출되지 않는다(파싱 결과 `event` 가 없으므로). 두 실패 어느
+    쪽이든 **보드 콜백은 항상 호출된다** — 기록만 깨지면 콜백은 파싱된 실제 코드
+    (`AB1` 등)를 그대로 받는다.
+
+    🔴 **세션 행위 영향은 조건부다.** 라이브 종목별 `MKOP_CLS_CODE` 가 `AB1` 인 동안
+    (2026-09-21~23 EC2 실측 **17/17** 프레임 전수)은 `SessionTracker.is_call_auction_now`
+    가 `110`/`121` 두 코드에만 반응하므로, 이 함수가 파싱해 넘기는 실제 코드와 무관하게
+    세션 쪽 행위 영향은 **0** 이다(증명 =
+    `tests/unit/realtime/test_cycle368_market_op_decisions.py` H4). KIS 가 앞으로 종목별
+    프레임에 `110`(장전 동시호가)·`121`(장후 동시호가)을 실어 보내면, cycle182 가 설계해
+    둔 `is_call_auction_now` 의 그 코드 분기가 그날부터 실제로 켜진다 — "행위 영향 0" 은
+    지금 관측된 상태의 서술이지 이 함수가 그 분기를 영구히 막아 둔다는 뜻이 아니다.
 
     사이클 26 영속 (대표 종목 005930 보드 전환 SessionTracker 호출) +
     사이클 149 (2026-06-16) 종목별 H0UNMKO0 구독 확장 시 record_market_op_event 호출.
     domain-expert 자문 산출물 `_workspace/domain_consult/cycle149_h0unmko0_per_ticker_subscription.md`.
+    칸 밀림 조사 = `_workspace/domain_consult/cycle359_mkop_field_offset.md`.
 
-    SessionTracker `_on_board` 콜백 분기 + 종목별 monitor record_market_op_event 분기
-    모두 try/except 4중 영속 (사이클 102 G-REJECT-1 callback 예외 raise 영속).
+    파싱 실패·기록 실패는 각자 격리된 try/except 로 흡수해 보드 콜백을 항상 부른다
+    (사이클 102 G-REJECT-1 callback 예외 raise 영속과 별개 — 콜백 자체의 예외는 전파한다).
     """
-    fields = payload.split("^")
-    mkop_cls_code = fields[2] if len(fields) > 2 else ""
+    event = None
+    mkop_cls_code = ""
+    try:
+        from src.api.market_operation import parse_market_op_payload
+        event = parse_market_op_payload(tr_key, payload)
+        mkop_cls_code = event.mkop_cls_code
+    except Exception:
+        # graceful 영속 (사이클 88 G-REJECT 답습) — 파싱(및 그 import) 실패 시 보드
+        # 전환 영역 보호. import 문도 이 try 안에 있어 import 실패도 여기서
+        # 흡수된다(cycle368).
+        logger.exception(
+            "[market_op_parse_failed] tr_id=%s tr_key=%s graceful",
+            tr_id, tr_key,
+        )
+
     logger.info(
         "[%s] tr_key=%s, mkop_cls_code=%s, payload=%s",
         tr_id, tr_key, mkop_cls_code, payload[:140],
@@ -752,18 +773,18 @@ async def _handle_market_op(tr_id: str, tr_key: str, payload: str) -> None:
     # 사이클 149 (2026-06-16) — 종목별 VI/거래정지 state 갱신.
     # 사이클 26 영속 = 005930 대표 구독 보드 전환 영역 보존 + 종목별 영역 확장.
     # 자문 의제 5 채택 = VI/거래정지/종목상태 이상 3 영역 통합.
-    try:
-        from src.api.market_operation import parse_market_op_payload
-        from src.engine.market_operation_monitor import record_market_op_event
-
-        event = parse_market_op_payload(tr_key, payload)
-        record_market_op_event(event)
-    except Exception:
-        # graceful 영속 (사이클 88 G-REJECT 답습) — record 실패 시 보드 전환 영역 보호
-        logger.exception(
-            "[market_op_record_failed] tr_id=%s tr_key=%s graceful",
-            tr_id, tr_key,
-        )
+    if event is not None:
+        try:
+            from src.engine.market_operation_monitor import record_market_op_event
+            record_market_op_event(event)
+        except Exception:
+            # graceful 영속 (사이클 88 G-REJECT 답습) — record(및 그 import) 실패 시
+            # 보드 전환 영역 보호. import 문도 이 try 안에 있어 import 실패도 여기서
+            # 흡수된다(cycle368).
+            logger.exception(
+                "[market_op_record_failed] tr_id=%s tr_key=%s graceful",
+                tr_id, tr_key,
+            )
 
     if _on_board:
         try:

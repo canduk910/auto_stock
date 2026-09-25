@@ -430,9 +430,20 @@ _PREEXISTING_CONTENT_SHA: dict[str, str] = {
     #    `handler.py` 변경은 **파싱 1블록 + 콜백 인자 1개**뿐이다 — 체결수량 소스
     #    `fields[9]` 는 무접촉이고 `test_cycle235_ast_execution_qty.py` 가 그대로 봉인한다.
     #    자매 가드 **세 곳 전부** 같은 값(`test_g3_9b` 계약).
-    #    TODO(cycle329 커밋 후): 이 항목을 **삭제**한다.
+    #    TODO(cycle368 커밋 후): 이 항목을 삭제한다
+    # 🔁 cycle368(2026-09-25) 재핀 — 장운영정보 칸 밀림 수정 세트. USER DECISION: 칸
+    #    기준점 판별(`parse_market_op_payload` 단일 판별자)을 handler 에도 적용해
+    #    handler 가 더 이상 `payload.split` 을 직접 하지 않고 파싱된
+    #    `event.mkop_cls_code` 를 쓴다. MAIN-SESSION DECISION(적대적 검토 뒤, 사용자
+    #    승인 범위 안): 두 import(`parse_market_op_payload`·`record_market_op_event`)를
+    #    각자의 try 안에 둔다 — HEAD 도 이미 import 를 (하나의) try 안에 두어 보드
+    #    콜백은 원래도 안전했고, 이번 변경은 그 try 를 파싱/기록 둘로 나눠 한쪽이
+    #    깨져도 다른 쪽 결과가 살아남게 한 것이지 없던 보호를 처음 넣은 게 아니다.
+    #    docstring 을 현재 계약만 서술하도록 다시 썼다(세션 행위 영향은 AB1 조건부
+    #    라는 서술 포함). 그 밖 로직 무변경. 직전 값 =
+    #    `37b1755210c83cdb2a462e6a37f919b326f8b48bee73d924adcc277d770a8d17`.
     "src/realtime/handler.py":
-        "37b1755210c83cdb2a462e6a37f919b326f8b48bee73d924adcc277d770a8d17",
+        "cc8af0de831e98d79f558d0c56f1360ce5ee5438ec59f23dbe79ca6725d472bc",
 }
 
 

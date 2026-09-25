@@ -1519,3 +1519,18 @@ run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, recor
   실측(실 `get_task_last_success` 경로 테스트)으로 확인하고 문서에 명시했다. 코드는 무변경이다.
 
 → CHANGELOG: cycle363(배포 전 보강) 행
+
+## VI · 장운영 채널 (H0UNMKO0)
+
+### 2026-09-26 cycle368 — `market_operation_monitor.py` 항목의 상태 목록·파싱 서술 교체
+
+정본 원문(행 일부, `src/engine/CLAUDE.md:84`):
+
+- **`market_operation_monitor.py`** — H0UNMKO0 **수신·상태 추적**. `handler._handle_market_op` → `record_market_op_event(MarketOpEvent)` → `_vi_active_tickers`/`_halt_active_tickers`/`_market_op_last_event` 3 dict. `MarketOpEvent`(`src/api/market_operation.py`) = KIS 10컬럼 전수 파싱. `is_ticker_stale_excluded(ticker)` 를 `stale_watcher_core` 가 소비한다(VI·거래정지 종목 stale 회피). … + `get_market_op_state_summary()`(`circuit_breaker` + `iscd_stat_active_count`) + …
+
+경위: 「KIS 10컬럼 전수 파싱」은 라이브 프레임에서 사실이 아니었다(첫 칸이 종목코드라 한 칸씩 밀렸다 —
+cycle359 조사). cycle368 이 파서 기준점을 고치고, VI 수명 600초(사용자 결정 「10분 뒤 자동 해제」)와
+거래정지 수명 600초(메인 세션 결정, 사용자 승인 범위 안)를 위해 수명 dict 2개를 더해 상태가 5개가 됐다.
+`iscd_stat_active_count` 는 표시 집합 {51,52,53,54,58,59} 로 세도록 바뀌었다(55·57·00 제외).
+
+→ CHANGELOG: cycle368 행

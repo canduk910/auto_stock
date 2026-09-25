@@ -102,8 +102,24 @@ _BASE_SHA = {
         "3461242a47080379c8d48dc5efd5799ce5fac173803a95476547ea4758b40a81",
     "src/engine/market_op_subscribe.py":
         "7d58f9464c1ed35e4fa8706d801beb5a6b5c062d5a2941f0db6482d028d3d4ac",
+    # 🔁 cycle368(2026-09-25) 재핀 — halt 판정을 `_is_code_active` → `is_iscd_stat_blocking`
+    # (58 단독, USER DECISION)으로 좁히고, VI·거래정지 둘 다 마지막 활성 프레임 뒤 600초
+    # 지연 해제를 받는다(VI 수명은 USER DECISION, 거래정지도 같은 수명을 받는 것과 만료
+    # sweep 을 `record_market_op_event` 첫머리에 두는 것은 적대적 검토 뒤 MAIN-SESSION
+    # DECISION, 사용자 승인 범위 안). 신규 `_now()` 시계 + `datetime`/`timezone` import +
+    # 신규 dict 2(`_vi_last_active_at`·`_halt_last_active_at`, 서로 완전 독립) + 신규
+    # 상수 2(`VI_ACTIVE_TTL_SECONDS`·`HALT_ACTIVE_TTL_SECONDS`) + `is_iscd_stat_blocking`
+    # import. sweep 호출부 = `record_market_op_event` 첫머리 + 읽기 함수 5곳
+    # (`is_ticker_stale_excluded`·`get_market_op_active_tickers`·`get_halt_active_tickers`·
+    # `get_circuit_breaker_state`·`get_market_op_state_summary`, 기존 `get_vi_active_tickers`
+    # 는 그대로 VI sweep 만 부른다). `seed_vi_active_from_rest` 도 시드 시각을 스탬프한다.
+    # `iscd_stat_active_count` 는 표시 집합(`_ISCD_STAT_DISPLAY_CODES`)으로 센다. 방어적
+    # 분기 — 활성 집합에 시각 없이 있는 종목은 무기한 유지하지 않고 발견 시각을 찍어
+    # 그로부터 TTL 뒤 해제한다(`reset_market_op_state` 가 새 dict 2 개도 clear). 나머지
+    # leaf 는 무접촉이다. 직전 값 =
+    # `b9bd158b1503546a2d214b1269b2ae961f7c09241035149081e65eb61ac4c509`.
     "src/engine/market_operation_monitor.py":
-        "b9bd158b1503546a2d214b1269b2ae961f7c09241035149081e65eb61ac4c509",
+        "49de2441198cf1dee2c34deed50ded6fb8a5536bec0f475a0feba8237c977961",
 }
 
 

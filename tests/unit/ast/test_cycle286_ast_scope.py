@@ -89,8 +89,19 @@ _BASE_SHA = {
     # 8영역 — realtime 전부
     "src/realtime/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    # 🔁 cycle368(2026-09-25) 재핀 — 장운영정보 칸 밀림 수정 세트. USER DECISION: 칸
+    #    기준점 판별(`parse_market_op_payload` 단일 판별자)을 handler 에도 적용해
+    #    handler 가 더 이상 `payload.split` 을 직접 하지 않고 파싱된
+    #    `event.mkop_cls_code` 를 쓴다. MAIN-SESSION DECISION(적대적 검토 뒤, 사용자
+    #    승인 범위 안): 두 import(`parse_market_op_payload`·`record_market_op_event`)를
+    #    각자의 try 안에 둔다 — HEAD 도 이미 import 를 (하나의) try 안에 두어 보드
+    #    콜백은 원래도 안전했고, 이번 변경은 그 try 를 파싱/기록 둘로 나눠 한쪽이
+    #    깨져도 다른 쪽 결과가 살아남게 한 것이지 없던 보호를 처음 넣은 게 아니다.
+    #    docstring 을 현재 계약만 서술하도록 다시 썼다(세션 행위 영향은 AB1 조건부
+    #    라는 서술 포함). 그 밖 로직 무변경. 직전 값 =
+    #    `37b1755210c83cdb2a462e6a37f919b326f8b48bee73d924adcc277d770a8d17`.
     "src/realtime/handler.py":
-        "37b1755210c83cdb2a462e6a37f919b326f8b48bee73d924adcc277d770a8d17",
+        "cc8af0de831e98d79f558d0c56f1360ce5ee5438ec59f23dbe79ca6725d472bc",
     "src/realtime/websocket.py":
         "d4c443bde2ed7aeafba3e9471db0ca4efc15a654610555435145a9b305150c5b",
     "src/realtime/websocket_pool.py":
