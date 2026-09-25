@@ -59,7 +59,7 @@ HEAD_METRIC_KEYS = [
     "strategy_funnel_stages", "next_day_clear", "portfolio_risk_snapshot", "tick_blind",
     "vcp_breakout_events",
 ]
-EXPECTED_METRIC_KEYS = HEAD_METRIC_KEYS + ["pyramid_shadow"]
+EXPECTED_METRIC_KEYS = HEAD_METRIC_KEYS + ["pyramid_shadow", "report_accuracy"]
 
 #: §2-3 레코드 키 순서(고정).
 RECORD_KEYS = [
@@ -454,9 +454,16 @@ def _load_golden() -> dict:
     return payload
 
 
+#: 골든(0a7752a) 이후 끝에 더해진 키들 — `_ten()` 이 골든 byte 비교에서 제외한다.
+#: cycle351 이 "pyramid_shadow" 하나로 시작했고, cycle366 이 "report_accuracy" 를
+#: 더했다(§P6). 새 키를 더하는 사이클은 이 집합에 이름만 보태면 된다 — 기존 10키의
+#: byte 계약은 그대로 유지된다.
+_NON_GOLDEN_KEYS = ("pyramid_shadow", "report_accuracy")
+
+
 def _ten(metrics: dict) -> dict:
     return json.loads(json.dumps(
-        {k: v for k, v in metrics.items() if k != "pyramid_shadow"}, ensure_ascii=False))
+        {k: v for k, v in metrics.items() if k not in _NON_GOLDEN_KEYS}, ensure_ascii=False))
 
 
 # ===========================================================================

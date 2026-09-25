@@ -133,6 +133,10 @@ SYSTEM_PROMPT = (
     "`logs.level_counts_actual`(DB 전수 집계)을 인용**하고, 하루 전체를 본 것처럼 "
     "서술하지 말고 summary 에 분석 구간을 명시하라. "
     "ERROR/CRITICAL 은 절단과 무관하게 전량 포함돼 있다.\n"
+    "- **휴장일 주의**: `report_accuracy.market_closed` 가 true 이거나 "
+    "`report_accuracy.trading_day` 가 false 면 그날은 휴장일이다 — 거래·로그가 "
+    "0건이거나 적은 것은 결함이 아니라 정상이니 findings 로 보고하지 마라. "
+    "`report_accuracy.trading_day` 가 null 이면 판정 불가이니 휴장이라 단정하지 마라.\n"
     "- 한국어로 출력."
 )
 

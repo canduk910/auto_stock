@@ -18,10 +18,21 @@
 (b) `daily_log_reports.metrics` JSONB (c) 20:20 클라우드 루틴 번들이다 — 키 **집합·순서**
 는 계약이다(cycle249 C-1).
 
-**`"pyramid_shadow"` 키(cycle351, 관측 전용)** — 맨 끝(11번째) 키. `kojiro`·`donchian_swing`
+**`"pyramid_shadow"` 키(cycle351, 관측 전용)** — 11번째 키. `kojiro`·`donchian_swing`
 의 레지스트리 파라미터 사본 + 예산만 읽어 `src.engine.pyramid_shadow.build_pyramid_shadow`
 에 넘기고, 30초 상한(`_PYRAMID_SHADOW_TIMEOUT_SECS`)·예외는 이 키만 `None`(never-raise).
 매매 행위 0 — 상세는 `pyramid_shadow.py` 모듈 docstring.
+
+**`"report_accuracy"` 키(cycle366, 관측 전용)** — 맨 끝(12번째) 키. `{trading_day,
+market_closed, by_ticker_pnl_total_tickers, by_ticker_pnl_truncated,
+after_market_blind_secs_total, pre_market_blind_secs_total}`. `trading_day`(휴장일
+판정, `trading_calendar.is_open_day` 재사용 — `bool | None`, `None` = 판정 불가)과
+`market_closed`(`trading_day is False`)는 20:20 클라우드 루틴·21:30 LLM 이 휴장일의
+0건을 결함으로 오독하지 않게 한다. `by_ticker_pnl_total_tickers`/`by_ticker_pnl_truncated`
+는 `trades.by_ticker_pnl` 상위 5개 절단 여부(`_by_ticker_pnl_truncation`). 확장 blind
+2필드는 기존 `tick_blind.market_blind_secs_total`(KRX 09:00~15:30)과 별도로 애프터마켓
+(16:00~20:00)·NXT 프리마켓(08:00~08:50) 겹침을 잰다(`_aggregate_extended_blind`). 실패는
+`trading_day=None` 으로 흡수(never-raise) — 매매 행위 0.
 """
 
 from __future__ import annotations
@@ -283,6 +294,36 @@ def _aggregate_tick_blind(logs: list[dict]) -> dict[str, int]:
     }
 
 
+# cycle366 (P6-b) — 확장 blind 초(애프터마켓·NXT 프리마켓) 별도 집계. `_aggregate_tick_blind`
+# 의 반환 dict 는 cycle351 골든 byte 계약 대상이라 그 안에 새 키를 넣지 않는다 — 같은
+# `[tick_blind_boot]` 로그를 별도 정규식으로 다시 훑어 새 top-level 키(`report_accuracy`)
+# 에만 얹는다. 구버전 프로세스가 남긴 로그(신규 필드 없음)는 매치 실패 → 0 (하위호환).
+_TICK_BLIND_EXTENDED_RE = re.compile(
+    r"\[tick_blind_boot\]\s+downtime_secs=\d+\s+market_blind_secs=\d+"
+    r"\s+after_market_blind_secs=(\d+)\s+pre_market_blind_secs=(\d+)"
+)
+
+
+def _aggregate_extended_blind(logs: list[dict]) -> dict[str, int]:
+    """`[tick_blind_boot]` 의 확장 blind 초(cycle366 P6-b) — 애프터마켓(16:00~20:00)·
+    NXT 프리마켓(08:00~08:50) 겹침 총합. `_aggregate_tick_blind`(기존 09:00~15:30
+    KRX 메인, cycle234)와 완전히 독립된 함수·독립된 반환값이다 — 그 함수의 반환
+    dict 는 손대지 않는다.
+    """
+    after_total = 0
+    pre_total = 0
+    for row in logs:
+        msg = row.get("message") or ""
+        m = _TICK_BLIND_EXTENDED_RE.search(msg)
+        if m:
+            after_total += int(m.group(1))
+            pre_total += int(m.group(2))
+    return {
+        "after_market_blind_secs_total": after_total,
+        "pre_market_blind_secs_total": pre_total,
+    }
+
+
 # PR-B (2026-05-14): 구조화 prefix 카운팅
 _NDC_DEFERRED_RE = re.compile(r"\[next_day_clear_deferred\]")
 _NDC_DRAINED_SUCCESS_RE = re.compile(r"\[next_day_clear_drained\][^\n]*result=success")
@@ -307,6 +348,11 @@ def _aggregate_next_day_clear(logs: list[dict]) -> dict[str, int]:
         "drained_success": drained_success,
         "drained_fail": drained_fail,
     }
+
+
+# cycle366 (P6-a) — `by_ticker_pnl` 상위 N 절단 커트라인. 아래 슬라이싱과
+# `_by_ticker_pnl_truncation` 이 같은 값을 공유한다(리터럴 이원화 금지).
+_BY_TICKER_PNL_TOP_N = 5
 
 
 def _aggregate_trades(trades: list[dict]) -> dict[str, Any]:
@@ -369,12 +415,14 @@ def _aggregate_trades(trades: list[dict]) -> dict[str, Any]:
         elif status == "CANCELLED":
             cancelled += 1
 
-    # 종목별 상위 5개(절대값 큰 순)
+    # 종목별 상위 5개(절대값 큰 순) — 잘림 여부·전체 건수는 `_by_ticker_pnl_truncation`(cycle366)
+    # 이 별도로 관측한다. 이 함수의 반환 dict 는 cycle351 골든 byte 계약 대상이라 새 키를
+    # 여기 넣지 않는다.
     by_ticker_pnl = {
         ticker: {"realized_pnl": round(v["realized_pnl"], 0), "sell_count": v["sell_count"]}
         for ticker, v in sorted(
             ticker_pnl.items(), key=lambda x: -abs(x[1]["realized_pnl"])
-        )[:5]
+        )[:_BY_TICKER_PNL_TOP_N]
     }
     by_hour_pnl = {
         h: {"realized_pnl": round(v["realized_pnl"], 0), "sell_count": v["sell_count"]}
@@ -392,6 +440,27 @@ def _aggregate_trades(trades: list[dict]) -> dict[str, Any]:
         },
         "by_ticker_pnl": by_ticker_pnl,
         "by_hour_pnl": by_hour_pnl,
+    }
+
+
+def _by_ticker_pnl_truncation(trades: list[dict]) -> dict[str, Any]:
+    """`trades.by_ticker_pnl` 절단 여부 관측(cycle366 P6-a).
+
+    `_aggregate_trades` 의 반환 dict(`by_ticker_pnl`)는 cycle351 골든 byte 계약
+    대상이라 그 함수 안에 새 키를 추가하지 않는다 — 같은 `trades` 리스트를 다시 훑어
+    SELL 대상 티커 총수와 절단 여부만 별도로 계산한다(추가 I/O 0, 이미 메모리에 있는
+    리스트를 다시 본다). `_BY_TICKER_PNL_TOP_N` 을 `_aggregate_trades` 의 슬라이싱과
+    공유해 두 값이 항상 같은 커트라인을 본다.
+    """
+    tickers = {
+        t.get("ticker")
+        for t in trades
+        if t.get("trade_type") == "SELL" and t.get("ticker")
+    }
+    total = len(tickers)
+    return {
+        "by_ticker_pnl_total_tickers": total,
+        "by_ticker_pnl_truncated": total > _BY_TICKER_PNL_TOP_N,
     }
 
 
@@ -780,6 +849,8 @@ async def collect_daily_log_metrics(
     `"vcp_breakout_events"` 1키를 추가했다(VCP ③ 관찰 전용, 기존 9키는 무변경) —
     새 키를 더할 때는 항상 **끝에** 추가하고 기존 순서를 흔들지 않는다. cycle351 이
     그 뒤에 `"pyramid_shadow"` 1키를 더했다(피라미딩 가상 사다리 관찰, 기존 10키 무변경).
+    cycle366 이 그 뒤에 `"report_accuracy"` 1키를 더했다(휴장일 판정 + `by_ticker_pnl`
+    절단 표시 + 확장 blind 초, 기존 11키 무변경).
 
     Args:
         target_date: 집계 대상 영업일.
@@ -853,6 +924,26 @@ async def collect_daily_log_metrics(
         )
         pyramid_shadow = None
 
+    # cycle366 (P6) — 리포트·지표 정확도 관측: 휴장일 판정(trading_calendar 재사용,
+    # never-raise) + by_ticker_pnl 절단 표시 + 확장 blind 초(애프터마켓·NXT 프리마켓).
+    # 관측 전용 — 매매 무변경. 실패는 `trading_day=None`("모름") 으로 흡수한다(휴장
+    # 여부를 함부로 단정하지 않는 방향).
+    try:
+        from src.engine.trading_calendar import is_open_day
+
+        trading_day = await is_open_day(target_date)
+    except Exception:
+        logger.debug("[report_accuracy_error] 휴장일 판정 실패 graceful", exc_info=True)
+        trading_day = None
+
+    report_accuracy = {
+        # None = 판정 불가("모름") — False(휴장)와 구분한다.
+        "trading_day": trading_day,
+        "market_closed": trading_day is False,
+        **_by_ticker_pnl_truncation(trades),
+        **_aggregate_extended_blind(logs),
+    }
+
     metrics = {
         "target_date": target_date.isoformat(),
         "logs": log_metrics,
@@ -865,6 +956,7 @@ async def collect_daily_log_metrics(
         "tick_blind": tick_blind_metrics,  # 신규 (cycle234 — 프로세스 부재 blind)
         "vcp_breakout_events": vcp_breakout_events,  # 신규 (cycle349, VCP ③ 관찰 전용)
         "pyramid_shadow": pyramid_shadow,  # 신규 (cycle351, 피라미딩 가상 사다리 관찰 전용)
+        "report_accuracy": report_accuracy,  # 신규 (cycle366, 리포트·지표 정확도 관찰 전용)
     }
 
     logger.info(

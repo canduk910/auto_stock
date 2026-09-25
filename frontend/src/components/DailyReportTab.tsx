@@ -199,6 +199,8 @@ function ReportCard({ report }: { report: LogReportItem }) {
 
   const logs = report.metrics?.logs
   const trades = report.metrics?.trades
+  // cycle366 (P6) — 휴장일이면 이 날의 0건/적은 건수가 결함이 아니라 정상임을 밝힌다.
+  const marketClosed = report.metrics?.report_accuracy?.market_closed === true
 
   return (
     <div className="space-y-6">
@@ -265,7 +267,18 @@ function ReportCard({ report }: { report: LogReportItem }) {
 
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-semibold text-gray-900">{report.target_date} 총평</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-gray-900">{report.target_date} 총평</h2>
+            {marketClosed && (
+              <span
+                data-testid="report-holiday-badge"
+                title="휴장일 — 거래·로그 0건(또는 적은 건수)은 결함이 아니라 정상입니다."
+                className="px-1.5 py-0.5 text-[10px] font-medium bg-gray-100 text-gray-500 border border-gray-300 rounded"
+              >
+                휴장일
+              </span>
+            )}
+          </div>
           <span className="text-xs text-gray-400">
             생성 {formatDateTime(report.created_at)}
             {report.model && ` · ${report.model}`}

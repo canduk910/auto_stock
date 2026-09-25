@@ -471,8 +471,18 @@ _SRC_TREE_FILES = 157
 #: 재핀은 `test_cycle278_ast_catalog_guards.py` 가 별도로 잠근다). 파일 수는
 #: **157 로 불변**(신규 파일 0). 직전 값 =
 #: `b890121d0ec78bad0a86e0a44fed6f599f935ea7ff773c975943ab9a1d0e65d6`.
+#: 🔁 cycle366(2026-09-25, 사용자 승인 P6 「리포트·지표 정확도 관측」) 재핀 — 움직인
+#: 파일 3(전부 관측 전용, 8영역·`scheduler.py` 무접촉) = `engine/uptime_monitor.py`
+#: (애프터마켓 16:00~20:00·NXT 프리마켓 08:00~08:50 확장 blind 초, 공용 코어
+#: `_weekday_window_overlap_secs` 로 리팩토링 — 기존 `market_blind_overlap_secs`
+#: 값은 불변) · `engine/log_metrics_collector.py`(`collect_daily_log_metrics` 맨
+#: 끝에 `"report_accuracy"` 키 추가 — 휴장일 판정 `trading_calendar.is_open_day`
+#: 재사용 + `by_ticker_pnl` 절단 표시 + 확장 blind 초 집계) ·
+#: `engine/log_analysis_engine.py`(`SYSTEM_PROMPT` 에 휴장일 해석 규칙 1줄 추가).
+#: 파일 수는 **157 로 불변**(신규 파일 0). 직전 값 =
+#: `661ebfb69807e0465d16c554445bc49e455a7e2947840ed052d2220da0437915`.
 _SRC_TREE_DIGEST = (
-    "661ebfb69807e0465d16c554445bc49e455a7e2947840ed052d2220da0437915"
+    "68eeee7bd1216024ad93fca476327d321fe392281ffab184d1a60580517249fe"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

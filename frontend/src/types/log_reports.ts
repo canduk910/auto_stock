@@ -34,10 +34,24 @@ export interface LogReportTradeMetrics {
   by_status: Record<string, number>
 }
 
+// cycle366 (P6) — 리포트·지표 정확도 관측. `trading_day` 는 3상태다: true=개장 /
+// false=휴장 / null=판정 불가("모름", 휴장으로 단정하지 않는다). `market_closed` 는
+// `trading_day === false` 일 때만 true — 0건 통계가 결함이 아니라 정상임을 알린다.
+// 구버전 리포트 행에는 이 키가 없을 수 있어 optional.
+export interface LogReportAccuracy {
+  trading_day: boolean | null
+  market_closed: boolean
+  by_ticker_pnl_total_tickers: number
+  by_ticker_pnl_truncated: boolean
+  after_market_blind_secs_total: number
+  pre_market_blind_secs_total: number
+}
+
 export interface LogReportMetrics {
   target_date: string
   logs: LogReportLogMetrics
   trades: LogReportTradeMetrics
+  report_accuracy?: LogReportAccuracy
 }
 
 export interface LogReportItem {

@@ -828,6 +828,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -1929,6 +1930,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -3037,6 +3039,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -4142,6 +4145,7 @@ backend:
     - tests/unit/engine/test_cycle358_trade_status_update_miss.py
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -5246,6 +5250,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -6352,6 +6357,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -7458,6 +7464,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -8567,6 +8574,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -9670,6 +9678,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -10779,6 +10788,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -11900,6 +11910,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -13006,6 +13017,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -14118,6 +14130,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -14541,6 +14554,7 @@ backend:
     - tests/unit/engine/test_cycle321_cash_ratio_source.py
     - tests/unit/engine/test_cycle354_sync_strategy_order_map.py
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle83_r6_frequency_regression.py
     - tests/unit/engine/test_cycle83_sk_square_fixture.py
@@ -16326,6 +16340,7 @@ backend:
     - tests/unit/engine/test_cycle357_no_feed_held_krx_window_gate.py
     - tests/unit/engine/test_cycle358_trade_status_update_miss.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -17430,6 +17445,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -18536,6 +18552,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -19642,6 +19659,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -20748,6 +20766,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -21855,6 +21874,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -22960,6 +22980,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -24066,6 +24087,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -25172,6 +25194,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -26278,6 +26301,7 @@ backend:
     - tests/unit/engine/test_cycle358_trade_status_update_miss.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -27386,6 +27410,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -28495,6 +28520,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -29597,6 +29623,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -30702,6 +30729,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -31810,6 +31838,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -32915,6 +32944,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -33283,6 +33313,7 @@ backend:
     - tests/unit/engine/test_cycle293_channel_resolver.py
     - tests/unit/engine/test_cycle315_regime_source_switch.py
     - tests/unit/engine/test_cycle321_cash_ratio_source.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle64_price_filter_scanner_apply.py
     - tests/unit/engine/test_cycle64_price_filter_scanner_cache.py
     - tests/unit/engine/test_cycle64_price_filter_scanner_daily_summary.py
@@ -35132,6 +35163,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -36239,6 +36271,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -37342,6 +37375,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -38449,6 +38483,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -39556,6 +39591,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -40662,6 +40698,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -41768,6 +41805,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -42873,6 +42911,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -43979,6 +44018,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -45089,6 +45129,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -46191,6 +46232,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -47297,6 +47339,7 @@ backend:
     - tests/unit/engine/test_cycle358_trade_status_update_miss.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -48403,6 +48446,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -49509,6 +49553,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -50616,6 +50661,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -51722,6 +51768,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -52827,6 +52874,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -53188,6 +53236,7 @@ backend:
     - tests/unit/engine/test_cycle251_report_account_gate.py
     - tests/unit/engine/test_cycle259_gate_snapshot.py
     - tests/unit/engine/test_cycle283_metrics_snapshot.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycleH_log_analysis_snapshot.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -54295,6 +54344,7 @@ backend:
     - tests/unit/engine/test_cycle251_report_account_gate.py
     - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
     - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycleH_log_analysis_snapshot.py
     - tests/unit/engine/test_cycleM5_log_analysis_pg.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -56207,6 +56257,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -57315,6 +57366,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -58430,6 +58482,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -59524,6 +59577,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -60630,6 +60684,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -61736,6 +61791,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -62842,6 +62898,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -63948,6 +64005,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -65054,6 +65112,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -66159,6 +66218,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -67344,6 +67404,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -68521,6 +68582,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -69688,6 +69750,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -70795,6 +70858,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -71901,6 +71965,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -73017,6 +73082,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -74115,6 +74181,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -75222,6 +75289,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -76323,6 +76391,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -77501,6 +77570,7 @@ backend:
     - tests/unit/engine/test_cycle358_trade_status_update_miss.py
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -78626,6 +78696,7 @@ backend:
     - tests/unit/engine/test_cycle358_trade_status_update_miss.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle61_phase2A2_dataclass_completeness.py
@@ -79644,6 +79715,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -80750,6 +80822,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -81854,6 +81927,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -82959,6 +83033,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -84067,6 +84142,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -85192,6 +85268,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -86278,6 +86355,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -87402,6 +87480,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -88491,6 +88570,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -89599,6 +89679,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -90702,6 +90783,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -91808,6 +91890,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -92914,6 +92997,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -94024,6 +94108,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -95157,6 +95242,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -96266,6 +96352,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -97370,6 +97457,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -98475,6 +98563,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -99581,6 +99670,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -100688,6 +100778,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -101795,6 +101886,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -102931,6 +103023,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -104024,6 +104117,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -105112,6 +105206,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -106217,6 +106312,7 @@ backend:
     - tests/unit/engine/test_cycle358_trade_status_update_miss.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -107393,6 +107489,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -108500,6 +108597,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -109604,6 +109702,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -110712,6 +110811,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -111815,6 +111915,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -112923,6 +113024,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -113216,6 +113318,7 @@ backend:
   src/engine/uptime_monitor.py:
     direct_tests:
     - tests/unit/engine/test_cycle234_uptime_monitor.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -115141,6 +115244,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -116303,6 +116407,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -117409,6 +117514,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -118519,6 +118625,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -119626,6 +119733,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -120731,6 +120839,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -121838,6 +121947,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -123006,6 +123116,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -124265,6 +124376,7 @@ backend:
     - tests/unit/engine/test_cycle358_trade_status_update_miss.py
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -125432,6 +125544,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -126566,6 +126679,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -127654,6 +127768,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -128779,6 +128894,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -129883,6 +129999,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -132362,6 +132479,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -133465,6 +133583,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -134574,6 +134693,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -135677,6 +135797,7 @@ backend:
     - tests/unit/engine/test_cycle363_immediate_slot_gate.py
     - tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py
     - tests/unit/engine/test_cycle363_trading_calendar.py
+    - tests/unit/engine/test_cycle366_report_accuracy.py
     - tests/unit/engine/test_cycle36_scheduler_kst_backtest_pending.py
     - tests/unit/engine/test_cycle37_ccnl_cache.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
@@ -136006,6 +136127,7 @@ frontend:
     - frontend/src/components/__tests__/BalanceTable.test.tsx
     - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
     - frontend/src/components/__tests__/DailyReportTab.ext.test.tsx
+    - frontend/src/components/__tests__/DailyReportTab.holiday.test.tsx
     - frontend/src/components/__tests__/IntegrationToggleCard.auto_apply.test.tsx
     - frontend/src/components/__tests__/IntegrationToggleCard.test.tsx
     - frontend/src/components/__tests__/KisAccountPoolCard.stale_integration.test.tsx
@@ -136087,6 +136209,7 @@ frontend:
     - frontend/src/api/__tests__/log_reports.test.ts
     transitive_tests:
     - frontend/src/components/__tests__/DailyReportTab.ext.test.tsx
+    - frontend/src/components/__tests__/DailyReportTab.holiday.test.tsx
     - frontend/src/pages/__tests__/Logs.test.tsx
   frontend/src/api/logs.ts:
     direct_tests: []
@@ -136291,6 +136414,7 @@ frontend:
   frontend/src/components/DailyReportTab.tsx:
     direct_tests:
     - frontend/src/components/__tests__/DailyReportTab.ext.test.tsx
+    - frontend/src/components/__tests__/DailyReportTab.holiday.test.tsx
     transitive_tests:
     - frontend/src/pages/__tests__/Logs.test.tsx
   frontend/src/components/InfoTooltip.tsx:
@@ -136651,6 +136775,7 @@ frontend:
     - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
     - frontend/src/components/__tests__/DailyReportTab.ext.test.tsx
     - frontend/src/components/__tests__/DailyReportTab.format.test.tsx
+    - frontend/src/components/__tests__/DailyReportTab.holiday.test.tsx
     - frontend/src/components/__tests__/IntegrationToggleCard.auto_apply.test.tsx
     - frontend/src/components/__tests__/IntegrationToggleCard.test.tsx
     - frontend/src/components/__tests__/KisAccountPoolCard.stale_integration.test.tsx
@@ -136723,6 +136848,7 @@ frontend:
     - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
     - frontend/src/components/__tests__/DailyReportTab.ext.test.tsx
     - frontend/src/components/__tests__/DailyReportTab.format.test.tsx
+    - frontend/src/components/__tests__/DailyReportTab.holiday.test.tsx
     - frontend/src/components/__tests__/IntegrationToggleCard.auto_apply.test.tsx
     - frontend/src/components/__tests__/IntegrationToggleCard.test.tsx
     - frontend/src/components/__tests__/KisAccountPoolCard.stale_integration.test.tsx
@@ -136791,6 +136917,7 @@ frontend:
     - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
     - frontend/src/components/__tests__/DailyReportTab.ext.test.tsx
     - frontend/src/components/__tests__/DailyReportTab.format.test.tsx
+    - frontend/src/components/__tests__/DailyReportTab.holiday.test.tsx
     - frontend/src/components/__tests__/IntegrationToggleCard.auto_apply.test.tsx
     - frontend/src/components/__tests__/IntegrationToggleCard.test.tsx
     - frontend/src/components/__tests__/KisAccountPoolCard.stale_integration.test.tsx
@@ -136855,6 +136982,7 @@ frontend:
     - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
     - frontend/src/components/__tests__/DailyReportTab.ext.test.tsx
     - frontend/src/components/__tests__/DailyReportTab.format.test.tsx
+    - frontend/src/components/__tests__/DailyReportTab.holiday.test.tsx
     - frontend/src/components/__tests__/IntegrationToggleCard.auto_apply.test.tsx
     - frontend/src/components/__tests__/IntegrationToggleCard.test.tsx
     - frontend/src/components/__tests__/KisAccountPoolCard.stale_integration.test.tsx
@@ -136909,6 +137037,7 @@ frontend:
     - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
     - frontend/src/components/__tests__/DailyReportTab.ext.test.tsx
     - frontend/src/components/__tests__/DailyReportTab.format.test.tsx
+    - frontend/src/components/__tests__/DailyReportTab.holiday.test.tsx
     - frontend/src/components/__tests__/IntegrationToggleCard.auto_apply.test.tsx
     - frontend/src/components/__tests__/IntegrationToggleCard.test.tsx
     - frontend/src/components/__tests__/KisAccountPoolCard.stale_integration.test.tsx
@@ -136961,6 +137090,7 @@ frontend:
     - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
     - frontend/src/components/__tests__/DailyReportTab.ext.test.tsx
     - frontend/src/components/__tests__/DailyReportTab.format.test.tsx
+    - frontend/src/components/__tests__/DailyReportTab.holiday.test.tsx
     - frontend/src/components/__tests__/IntegrationToggleCard.auto_apply.test.tsx
     - frontend/src/components/__tests__/IntegrationToggleCard.test.tsx
     - frontend/src/components/__tests__/KisAccountPoolCard.stale_integration.test.tsx
@@ -137050,6 +137180,7 @@ frontend:
     - frontend/src/components/__tests__/BalanceTable.test.tsx
     - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
     - frontend/src/components/__tests__/DailyReportTab.ext.test.tsx
+    - frontend/src/components/__tests__/DailyReportTab.holiday.test.tsx
     - frontend/src/components/__tests__/IntegrationToggleCard.auto_apply.test.tsx
     - frontend/src/components/__tests__/IntegrationToggleCard.test.tsx
     - frontend/src/components/__tests__/KisAccountPoolCard.stale_integration.test.tsx
@@ -137136,6 +137267,7 @@ frontend:
     - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
     - frontend/src/components/__tests__/DailyReportTab.ext.test.tsx
     - frontend/src/components/__tests__/DailyReportTab.format.test.tsx
+    - frontend/src/components/__tests__/DailyReportTab.holiday.test.tsx
     - frontend/src/components/__tests__/IntegrationToggleCard.auto_apply.test.tsx
     - frontend/src/components/__tests__/IntegrationToggleCard.test.tsx
     - frontend/src/components/__tests__/KisAccountPoolCard.stale_integration.test.tsx
@@ -137186,6 +137318,7 @@ frontend:
     direct_tests:
     - frontend/src/components/__tests__/DailyReportTab.ext.test.tsx
     - frontend/src/components/__tests__/DailyReportTab.format.test.tsx
+    - frontend/src/components/__tests__/DailyReportTab.holiday.test.tsx
     transitive_tests:
     - frontend/src/api/__tests__/log_reports.test.ts
     - frontend/src/pages/__tests__/Logs.test.tsx
@@ -137327,6 +137460,7 @@ frontend:
     - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
     - frontend/src/components/__tests__/DailyReportTab.ext.test.tsx
     - frontend/src/components/__tests__/DailyReportTab.format.test.tsx
+    - frontend/src/components/__tests__/DailyReportTab.holiday.test.tsx
     - frontend/src/components/__tests__/IntegrationToggleCard.auto_apply.test.tsx
     - frontend/src/components/__tests__/IntegrationToggleCard.test.tsx
     - frontend/src/components/__tests__/KisAccountPoolCard.stale_integration.test.tsx
@@ -137387,6 +137521,7 @@ frontend:
     - frontend/src/__tests__/AppShell.test.tsx
     - frontend/src/__tests__/ContentWidthSlider.test.tsx
     - frontend/src/components/__tests__/DailyReportTab.ext.test.tsx
+    - frontend/src/components/__tests__/DailyReportTab.holiday.test.tsx
     - frontend/src/components/__tests__/PortfolioRiskCard.accountGate.test.tsx
     - frontend/src/components/__tests__/PortfolioRiskCard.test.tsx
     - frontend/src/components/__tests__/StrategyParamsEditor.test.tsx
@@ -137431,6 +137566,7 @@ frontend:
     - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
     - frontend/src/components/__tests__/BalanceTable.test.tsx
     - frontend/src/components/__tests__/DailyReportTab.ext.test.tsx
+    - frontend/src/components/__tests__/DailyReportTab.holiday.test.tsx
     - frontend/src/components/__tests__/PerformanceCard.test.tsx
     - frontend/src/pages/__tests__/Logs.test.tsx
     - frontend/src/pages/__tests__/MarketState.test.tsx
@@ -137463,12 +137599,12 @@ frontend:
     - frontend/src/pages/__tests__/MarketState.test.tsx
     - frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
     - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
-generated_at: '2026-09-25T15:34:42.781048+09:00'
+generated_at: '2026-09-25T16:13:24.373069+09:00'
 stats:
   backend_modules: 160
-  backend_tests: 1103
+  backend_tests: 1104
   frontend_modules: 120
-  frontend_tests: 98
+  frontend_tests: 99
   unmapped_modules:
   - frontend/src/api/backtest.ts
   - frontend/src/components/LogViewer.tsx

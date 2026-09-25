@@ -110,7 +110,8 @@ EXPECTED_METRIC_KEYS = [
     "portfolio_risk_snapshot",
     "tick_blind",
     "vcp_breakout_events",
-    "pyramid_shadow",  # cycle351 — 피라미딩 셰도(관측 전용), 항상 맨 끝
+    "pyramid_shadow",  # cycle351 — 피라미딩 셰도(관측 전용)
+    "report_accuracy",  # cycle366 — 리포트·지표 정확도 관측(관측 전용), 항상 맨 끝
 ]
 
 

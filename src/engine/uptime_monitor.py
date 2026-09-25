@@ -39,6 +39,17 @@ _MAX_OVERLAP_DAYS = 400
 _MARKET_OPEN = time(9, 0)
 _MARKET_CLOSE = time(15, 30)
 
+# cycle366 (P6-b) — 확장 blind 창. `market_blind_secs`(위 09:00~15:30) 는 그대로 두고
+# NXT 프리마켓(N1)·KRX 애프터마켓(K6)만 별도로 잰다(`src/engine/session.py` 시장 시간표
+# 근사 — 이 leaf 는 `session.py`/`market_state.py` 를 import 하지 않는다, 기존 09:00~15:30
+# 근사와 같은 설계 원칙). 09-14 KRX 애프터마켓 신설 이후 그 구간의 다운타임이 기존
+# `market_blind_secs` 에 전혀 안 잡히던 사각을 메운다 — 참고용 관측이라 기존 필드의
+# 판정(WARNING/INFO 분기 기준)은 바꾸지 않는다.
+_PRE_MARKET_OPEN = time(8, 0)
+_PRE_MARKET_CLOSE = time(8, 50)
+_AFTER_MARKET_OPEN = time(16, 0)
+_AFTER_MARKET_CLOSE = time(20, 0)
+
 
 def reset_state_for_test() -> None:
     """테스트 전용 — 모듈 상태 초기화."""
@@ -46,12 +57,17 @@ def reset_state_for_test() -> None:
     _hb_task = None
 
 
-def market_blind_overlap_secs(start: datetime, end: datetime) -> int:
-    """다운 구간 [start, end] 이 **평일 09:00~15:30 KST** 와 겹치는 초.
+def _weekday_window_overlap_secs(
+    start: datetime, end: datetime, window_open: time, window_close: time,
+) -> int:
+    """`[start, end]` 이 **평일** `[window_open, window_close)` KST 와 겹치는 초 — 공용 코어.
 
-    멀티데이 지원(일 단위 순회, 상한 400일). 주말 제외. **공휴일은 미고려 근사** —
-    공휴일 다운을 장중 blind 로 과대계상하는 방향(보수)이라 편익 정량화에 안전.
-    역전/None 입력은 0 (never-raise 소비처 계약).
+    `market_blind_overlap_secs`/`after_market_blind_overlap_secs`/
+    `pre_market_blind_overlap_secs` 가 창만 바꿔 재사용한다(cycle366, 행위 보존 리팩토링
+    — 세 함수의 로직 중복을 걷어내되 기존 `market_blind_overlap_secs` 의 반환값은
+    한 비트도 바뀌지 않는다). 멀티데이 지원(일 단위 순회, 상한 `_MAX_OVERLAP_DAYS`).
+    주말 제외. **공휴일은 미고려 근사**(보수적 과대계상 방향). 역전/None 입력은 0
+    (never-raise 소비처 계약).
     """
     try:
         if start is None or end is None or end <= start:
@@ -65,16 +81,40 @@ def market_blind_overlap_secs(start: datetime, end: datetime) -> int:
             if day > last_day:
                 break
             if day.weekday() < 5:  # 월~금
-                m_open = datetime.combine(day, _MARKET_OPEN, tzinfo=KST)
-                m_close = datetime.combine(day, _MARKET_CLOSE, tzinfo=KST)
-                lo = max(start, m_open)
-                hi = min(end, m_close)
+                w_open = datetime.combine(day, window_open, tzinfo=KST)
+                w_close = datetime.combine(day, window_close, tzinfo=KST)
+                lo = max(start, w_open)
+                hi = min(end, w_close)
                 if hi > lo:
                     total += int((hi - lo).total_seconds())
             day += timedelta(days=1)
         return total
     except Exception:
         return 0
+
+
+def market_blind_overlap_secs(start: datetime, end: datetime) -> int:
+    """다운 구간 [start, end] 이 **평일 09:00~15:30 KST** 와 겹치는 초.
+
+    멀티데이 지원(일 단위 순회, 상한 400일). 주말 제외. **공휴일은 미고려 근사** —
+    공휴일 다운을 장중 blind 로 과대계상하는 방향(보수)이라 편익 정량화에 안전.
+    역전/None 입력은 0 (never-raise 소비처 계약).
+    """
+    return _weekday_window_overlap_secs(start, end, _MARKET_OPEN, _MARKET_CLOSE)
+
+
+def after_market_blind_overlap_secs(start: datetime, end: datetime) -> int:
+    """(cycle366 P6-b) [start, end] 이 **평일 16:00~20:00 KST(KRX 애프터마켓)** 와 겹치는 초.
+
+    `market_blind_secs` 와 별도 값 — 기존 계측 용도(G2 서버 스탑 재검토)는 무변경이고,
+    09-14 KRX 애프터마켓 신설 이후의 다운타임을 참고용으로 추가한다.
+    """
+    return _weekday_window_overlap_secs(start, end, _AFTER_MARKET_OPEN, _AFTER_MARKET_CLOSE)
+
+
+def pre_market_blind_overlap_secs(start: datetime, end: datetime) -> int:
+    """(cycle366 P6-b) [start, end] 이 **평일 08:00~08:50 KST(NXT 프리마켓)** 와 겹치는 초."""
+    return _weekday_window_overlap_secs(start, end, _PRE_MARKET_OPEN, _PRE_MARKET_CLOSE)
 
 
 async def record_heartbeat() -> None:
@@ -109,12 +149,17 @@ async def report_boot_blind_gap() -> None:
             if gap < 0:
                 gap = 0  # 미래 마커 방어 (사이클 193 음수 방어 선례)
             market = market_blind_overlap_secs(last, now) if gap > 0 else 0
+            # cycle366 (P6-b) — 확장 blind 초, 참고용(WARNING/INFO 분기는 `market` 만 본다).
+            after_market = after_market_blind_overlap_secs(last, now) if gap > 0 else 0
+            pre_market = pre_market_blind_overlap_secs(last, now) if gap > 0 else 0
             log_fn = logger.warning if market > 0 else logger.info
             log_fn(
                 "[tick_blind_boot] downtime_secs=%d market_blind_secs=%d "
+                "after_market_blind_secs=%d pre_market_blind_secs=%d "
                 "last_alive=%s — 프로세스 부재 blind (하트비트 60s 해상도·공휴일 "
-                "미고려 근사. market>0 = 장중 다운 실측 = G2 서버 스탑 편익의 분자)",
-                gap, market, raw,
+                "미고려 근사. market>0 = 장중 다운 실측 = G2 서버 스탑 편익의 분자. "
+                "after_market/pre_market = 애프터마켓·NXT 프리마켓 겹침 참고용)",
+                gap, market, after_market, pre_market, raw,
             )
         try:
             await record_heartbeat()

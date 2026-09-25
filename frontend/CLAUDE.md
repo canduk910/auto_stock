@@ -384,7 +384,8 @@ Dashboard 만 즉시 import. 나머지 9 페이지(History · Recommendations ·
 - **파리티 계약**: ext 6필드가 전부 없는 행은 `hasExtAnalysis()` 가 `false` 라 블록 자체가 렌더 트리에 없다 — 기존 OpenAI 총평/findings/원본 메트릭 DOM 은 byte 동일. 좌측 날짜 목록은 `ext_summary` 있는 행에만 배지 "Claude"(`data-testid="ext-badge-{id}"`)
 - **항목 내부 정규화**: `ExternalReportIn.findings`(백엔드)는 항목 내부를 검증하지 않는 `list[dict]` 라 `ext_findings` 는 임의 형태가 그대로 온다. `sortedExtFindings` 산출 시 `normalizeExtFinding`(같은 파일)이 severity ∉ `{high,medium,low}` → `medium`, category ∉ 9종 → `etc`, title/detail/suggestion 비문자열은 `JSON.stringify` 강제, title 또는 detail 이 빈 문자열이면 항목 **드롭**. 정규화 없이 객체를 자식으로 렌더하면 "Objects are not valid as a React child" 로 탭 전체가 빈 화면이 된다
 - **레거시 `findings` 는 정규화 대상이 아니다**(백엔드 `log_analysis_engine._validate_report` 가 이미 검증) — 대신 `ReportCard` 를 `ReportCardBoundary`(같은 파일, class error boundary, `key={report.id}` 로 리포트 전환 시 에러 상태 리셋)로 감싸 예상 밖 예외가 나도 `data-testid="report-card-error"` 카드 하나만 대체되고 좌측 날짜 목록·탭은 살아남는다
-- 회귀 = `components/__tests__/DailyReportTab.ext.test.tsx`(파리티·렌더·토글·배지·타입 가드 + severity 정렬 뮤테이션 가드 + 정규화 3 + error boundary)
+- **휴장일 배지 (cycle366 P6)**: `report.metrics?.report_accuracy?.market_closed === true` 일 때만 총평 카드 헤더에 회색 배지(`data-testid="report-holiday-badge"`, "휴장일" + 툴팁 "거래·로그 0건은 결함이 아니라 정상")를 렌더한다 — 휴장일의 0건 통계를 결함처럼 보이지 않게 한다. `report_accuracy` 가 없는(구버전) 행·`trading_day: null`("모름")·`market_closed: false` 는 배지를 그리지 않는다. `LogReportMetrics.report_accuracy`(`types/log_reports.ts::LogReportAccuracy`)는 옵셔널이라 부재해도 크래시하지 않는다.
+- 회귀 = `components/__tests__/DailyReportTab.ext.test.tsx`(파리티·렌더·토글·배지·타입 가드 + severity 정렬 뮤테이션 가드 + 정규화 3 + error boundary) + `DailyReportTab.holiday.test.tsx`(휴장일 배지 4케이스)
 
 ## Recommendations (`/recommendations`)
 

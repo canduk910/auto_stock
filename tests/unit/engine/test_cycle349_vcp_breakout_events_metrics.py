@@ -157,8 +157,11 @@ async def test_e4_key_appended_last_after_existing_nine(isolated, monkeypatch):
     d = date(2026, 10, 5)
     _install_registry(monkeypatch, [_FakeVcp()])
     metrics = await _collect(d, "2026-10-05 20:05:00")
-    # cycle351 — 그 뒤에 `pyramid_shadow` 가 하나 더 붙는다(새 키는 항상 끝).
-    assert list(metrics) == BASE_KEYS + ["vcp_breakout_events", "pyramid_shadow"], list(metrics)
+    # cycle351 — 그 뒤에 `pyramid_shadow` 가, cycle366 이 그 뒤에 `report_accuracy` 가
+    # 하나 더 붙는다(새 키는 항상 끝).
+    assert list(metrics) == BASE_KEYS + [
+        "vcp_breakout_events", "pyramid_shadow", "report_accuracy",
+    ], list(metrics)
 
 
 async def test_e4_value_is_strategy_summary_for_target_date(isolated, monkeypatch):
