@@ -25,7 +25,7 @@
     부팅 로드 경로는 라우트를 거치지 않는다(`strategy_base.py:944-947` 주석).
 ``param_ranges``
     `recommendation_engine.PARAM_RANGES` 의 값을 **그대로** 옮긴 것. 단 그 범위가
-    7 전략 기본값 전부를 포함할 때만 쓴다(포함하지 않는 유일한 키 = `max_scan_stocks`).
+    7 전략 기본값 전부를 포함할 때만 쓴다.
     PARAM_RANGES 는 원래 *AI 튜너가 밤새 흔들어도 되는 좁은 안전대*이지 사람의 편집
     한계가 아니다. 그래도 근거 있는 유일한 숫자라 그대로 쓰고, 넓히지 않는다.
 ``sign``
@@ -131,7 +131,7 @@ __all__ = [
     "forbidden_choices_for",
 ]
 
-CATALOG_VERSION = "cycle352.1"
+CATALOG_VERSION = "cycle365.1"
 
 #: 전략 id 의 정본 순서(레지스트리 등록 순서).
 STRATEGY_IDS: tuple[str, ...] = (
@@ -849,7 +849,14 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         type="float", min=-10.0, max=0.0, step=0.5, unit="%",
         editable=True, risk="high", auto_tunable=True, deprecated=False,
         applies_to=("momentum", "long_tail_volatility"), range_src="param_ranges",
-        help="매수 후 최고가 대비 이 비율만큼 밀리면 청산. **음수여야 한다.**",
+        help="매수 후 최고가 대비 이 비율만큼 밀리면 청산. **음수여야 한다.**"
+             " **적용 범위(두 전략 모두 좁다 — cycle365 P5a)**: 당일(intraday) 손절에는"
+             " 쓰이지 않는다. 오직 **익일 청산 모드**(`pos.is_next_day` ∧ 갭률"
+             " `gap_up_threshold` 이상 유지)에서만 최고가 대비 하락폭을 잰다"
+             " (`momentum.py` `check_exit_signal` §2). LTV 는 여기에 더해 **전일 상한가"
+             " 도달 종목**(`_limit_up_reached`)으로 한정된다(`long_tail_volatility.py`"
+             " `check_exit_signal` §익일 청산 모드, 약 1041~1066행). 당일 모드 손절은"
+             " momentum `stop_loss_rate`, LTV `intraday_stop_loss` 고정% 뿐이다.",
     ),
     _s(
         key="daily_loss_limit", label_ko="일일 손실 한도", group="exit",
@@ -1124,14 +1131,14 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
     ),
     _s(
         key="max_scan_stocks", label_ko="최대 스캔 종목수", group="scan_universe",
-        type="int", min=None, max=None, step=1, unit="개",
+        type="int", min=10, max=4000, step=1, unit="개",
         editable=True, risk="high", auto_tunable=True, deprecated=False,
-        applies_to=_SCAN6, range_src="none",
-        help="⚠️ **범위 미정.** `PARAM_RANGES` 는 (10, 500) 이지만 BFB·VCP·고지로의"
-             " 현재 기본값이 **4000** 이라 그 범위를 사람의 편집 한계로 쓰면 아무것도"
-             " 안 고치고 저장만 눌러도 거부된다. 두 숫자 중 어느 쪽이 옳은지에 대한"
-             " 근거 문서가 없어 범위를 **지어내지 않았다** — 자료형(정수)과 양수만 본다."
-             " (AI 튜너는 종전대로 PARAM_RANGES 안에서만 움직인다.)",
+        applies_to=_SCAN6, range_src="param_ranges",
+        help="유니버스 스캔 상한(종목 수). BFB·VCP·고지로 운영 기본값은 **4000**(전체"
+             " 유니버스 사실상 무제한), donchian **400**, VB·LTV **100**이다."
+             " cycle365 P5b 이전엔 `PARAM_RANGES` 상한이 500 이라 이 세 전략 기본값을"
+             " 담지 못해(그래서 그때는 `range_src=\"none\"`) AI 자문이 매일 500 을"
+             " 권고했다 — 상한을 4000 으로 올려 운영값을 전부 포함시켰다.",
     ),
     _s(
         key="exclude_tickers", label_ko="제외 종목코드", group="scan_universe",

@@ -56,6 +56,21 @@ _KIS_KEY_CHANGE_RATE = "prdy_ctrt"
 _KIS_KEY_FLNG_CLS = "flng_cls_code"
 _KIS_KEY_PRTT_RATE = "prtt_rate"
 
+# cycle365 P4 — FHKST03010100 output2(일봉)에는 `prdy_ctrt`(전일 대비율)가 없다.
+# `output1`(단건 요약) 전용 필드다(docs/kis/domestic-stock-quote.md:5514-5518
+# Response Body 표 + KIS MCP `chk_inquire_daily_itemchartprice.py` 공식 COLUMN_MAPPING
+# 재확인 — output2 엔 `prdy_vrss`/`prdy_vrss_sign`만 있다). 그래서 `_KIS_KEY_CHANGE_RATE`
+# 를 그대로 읽으면 적재 시작(06-12)부터 전 행이 0 이었다. 대신 `prdy_vrss`(전일 대비,
+# 부호 포함 원 단위)로 등락률을 후처리 산출한다 — `scanner._trade_amount_key` 의
+# `prdy_close = stck_prpr - prdy_vrss` 와 같은 부호 규약.
+_KIS_KEY_PRDY_VRSS = "prdy_vrss"
+_KIS_KEY_PRDY_VRSS_SIGN = "prdy_vrss_sign"
+
+# KIS 전일대비 부호 코드(전 API 공통) — 1:상한 2:상승 3:보합 4:하한 5:하락
+_PRDY_SIGN_UP = {"1", "2"}
+_PRDY_SIGN_FLAT = {"3"}
+_PRDY_SIGN_DOWN = {"4", "5"}
+
 # Batch upsert 단위 — Supabase HTTP/2 stale connection 회피 (사이클 26 답습)
 _BATCH_SIZE = 100
 
@@ -122,6 +137,45 @@ def _parse_bas_dd(value: str | date) -> Optional[date]:
     return None
 
 
+def _derive_change_rate(candle: dict) -> float:
+    """등락률(change_rate) 산출 — cycle365 P4.
+
+    `_KIS_KEY_CHANGE_RATE`(`prdy_ctrt`)가 candle 에 있으면(다른 TR 경유 등 미래
+    호환) 그 값을 그대로 쓴다. 실제 FHKST03010100 output2 에는 이 필드가 없으므로
+    (모듈 상단 주석 참조) 보통은 이 갈래를 타지 않는다.
+
+    없으면 `prdy_vrss`(전일 대비, 원 단위) ÷ 전일종가 × 100 으로 계산한다.
+    전일종가 = 오늘 종가(`stck_clpr`) − `prdy_vrss` — `prdy_vrss` 는 부호를 포함한
+    값이 KIS 응답의 일반 규약이라(상승=양수/하락=음수) 그대로 뺀다. `prdy_vrss_sign`
+    (1상한/2상승/3보합/4하한/5하락)으로 부호를 교차검증해, 원본 문자열에 부호가
+    빠져 있는 경우(예: "500" 인데 sign="5")를 보정한다.
+
+    분모가 0 이거나 `prdy_vrss` 자체가 결측이면 0.0 (graceful — 과거 동작과 동일값).
+    """
+    raw_ctrt = candle.get(_KIS_KEY_CHANGE_RATE)
+    if raw_ctrt not in (None, ""):
+        return _safe_float(raw_ctrt)
+
+    if candle.get(_KIS_KEY_PRDY_VRSS) in (None, ""):
+        return 0.0
+
+    vrss = _safe_float(candle.get(_KIS_KEY_PRDY_VRSS))
+    sign = str(candle.get(_KIS_KEY_PRDY_VRSS_SIGN) or "").strip()
+    if sign in _PRDY_SIGN_DOWN and vrss > 0:
+        vrss = -vrss
+    elif sign in _PRDY_SIGN_UP and vrss < 0:
+        vrss = abs(vrss)
+    elif sign in _PRDY_SIGN_FLAT:
+        vrss = 0.0
+
+    close = _safe_float(candle.get(_KIS_KEY_CLOSE))
+    prev_close = close - vrss
+    if prev_close == 0:
+        return 0.0
+
+    return round(vrss / prev_close * 100, 4)
+
+
 def _candle_to_row(ticker: str, candle: dict) -> Optional[dict]:
     """KIS FHKST03010100 output2 row → DB row dict.
 
@@ -141,7 +195,7 @@ def _candle_to_row(ticker: str, candle: dict) -> Optional[dict]:
         "close_price": _safe_int(candle.get(_KIS_KEY_CLOSE)),
         "volume": _safe_int(candle.get(_KIS_KEY_VOLUME)),
         "trade_value": _safe_int(candle.get(_KIS_KEY_TRADE_VALUE)),
-        "change_rate": _safe_float(candle.get(_KIS_KEY_CHANGE_RATE)),
+        "change_rate": _derive_change_rate(candle),
         "flng_cls_code": str(candle.get(_KIS_KEY_FLNG_CLS) or ""),
         "prtt_rate": _safe_float(candle.get(_KIS_KEY_PRTT_RATE)),
         "raw": dict(candle),

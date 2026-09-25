@@ -19,8 +19,9 @@ cycle300 이 101→102 · cycle352 가 102→103).
 * **C6** 103키(cycle352 이후) × `applies_to` 전수에 대해 **그 전략의 기본값이 카탈로그 범위·자료형 안**이다.
   (기본값이 범위 밖이면 운영자가 아무것도 안 바꾸고 저장만 눌러도 422 가 된다.)
 * **C9** `range_src="none"` 이면 `min`/`max` 는 `None` 이다 — 근거 없는 범위를 숫자로 위장하지 않는다.
-  특히 `max_scan_stocks`(PARAM_RANGES 상한 500 vs bfb/vcp/kojiro 기본값 4000)를 파생시키면
-  3 전략이 전면 저장 불가가 된다(HAZARD-1).
+  cycle278~363 에는 `max_scan_stocks`(PARAM_RANGES 상한 500 vs bfb/vcp/kojiro 기본값 4000)가
+  이 갈래였다(HAZARD-1 — 파생하면 3 전략이 전면 저장 불가). **cycle365 P5b 가 PARAM_RANGES 상한을
+  4000 으로 올려 시정**했고, 지금은 `param_ranges` 로 옮겨 8키만 `range_src="none"` 이다.
 * **C7/C7b/C8** `deprecated` 8키(전부 `editable=False`) · `risk="identity"` 16키
   (cycle290 이 13→15, cycle300 이 15→16) ·
   `deprecated_for` ⊆ `applies_to`.
@@ -399,34 +400,41 @@ def test_defaults_when_type_list_str_then_items_valid():
 
 
 # ===========================================================================
-# C9 — 범위를 지어내지 않는다 (HAZARD-1 / M13)
+# C9 — 범위를 지어내지 않는다 (M13) / cycle365 P5b — HAZARD-1 근본 시정
 # ===========================================================================
-def test_max_scan_stocks_when_read_then_range_is_none_not_param_ranges():
-    """B15/C9 — `max_scan_stocks` 는 `range_src="none"` 이고 min/max 가 없다.
+def test_max_scan_stocks_when_read_then_range_matches_widened_param_ranges():
+    """B15/C9/cycle365 P5b — `max_scan_stocks` 는 이제 `range_src="param_ranges"` 다.
 
-    `PARAM_RANGES["max_scan_stocks"] = (10, 500)` 인데 bfb·vcp·kojiro 기본값이 4000 이다.
-    카탈로그 범위를 PARAM_RANGES 에서 파생시키면 **3 전략이 저장 전면 422** 가 된다.
+    cycle278~cycle363 에는 `PARAM_RANGES["max_scan_stocks"] = (10, 500)` 인데
+    bfb·vcp·kojiro 기본값이 4000 이라 카탈로그 범위를 그 값에서 파생시키면 **3 전략이
+    저장 전면 422**(HAZARD-1)였다. cycle365 가 PARAM_RANGES 상한을 4000 으로 올려
+    7 전략 기본값을 전부 담게 됐다(도메인 자문 §5 P5b — AI 자문이 매일 500 을
+    권고하던 근본 원인 시정). 이제 이 키도 다른 `param_ranges` 키와 같은 갈래를 탄다.
     """
     spec = pc.get_spec("max_scan_stocks")
-    assert spec.range_src == "none", f"range_src={spec.range_src}"
-    assert spec.min is None and spec.max is None, f"({spec.min}, {spec.max}) — 근거 없는 범위"
+    assert spec.range_src == "param_ranges", f"range_src={spec.range_src}"
 
     lo, hi = _param_ranges()["max_scan_stocks"]
+    assert (lo, hi) == (10, 4000), f"PARAM_RANGES 가 바뀌었다: ({lo}, {hi})"
+    assert (spec.min, spec.max) == (lo, hi), f"카탈로그 ({spec.min}, {spec.max}) ≠ PARAM_RANGES"
+
     defaults = _defaults()
     over = {sid: defaults[sid]["max_scan_stocks"] for sid in spec.applies_to
             if defaults[sid]["max_scan_stocks"] > hi}
-    assert over, "PARAM_RANGES 상한을 넘는 기본값이 사라졌다 — HAZARD-1 전제 재확인 필요"
-    assert (lo, hi) == (10, 500)
+    assert not over, f"PARAM_RANGES 상한을 넘는 기본값이 다시 생겼다: {over}"
 
 
 def test_range_src_none_when_read_then_bounds_are_none():
-    """B15b/C9 — `range_src="none"` 인 모든 키(9키)가 min/max 를 갖지 않는다."""
+    """B15b/C9 — `range_src="none"` 인 모든 키(cycle365 P5b 로 9→8키)가 min/max 를 갖지 않는다.
+
+    `max_scan_stocks` 가 위 테스트에서 `param_ranges` 로 옮겨갔으므로 8키다.
+    """
     offenders = [
         (s.key, s.min, s.max) for s in pc.PARAM_SPECS
         if s.range_src == "none" and not (s.min is None and s.max is None)
     ]
     assert not offenders, f"근거 없는 범위를 숫자로 위장: {offenders}"
-    assert len([s for s in pc.PARAM_SPECS if s.range_src == "none"]) == 9
+    assert len([s for s in pc.PARAM_SPECS if s.range_src == "none"]) == 8
 
 
 # ===========================================================================

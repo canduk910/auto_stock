@@ -263,7 +263,8 @@ list_paged_by_filter(*, market=None, min_market_cap=0, min_trade_amount=0,
 
 - 테이블 `stock_master_daily`(migration 033). PK 복합 `(ticker, bas_dd)` + 인덱스 `(ticker, bas_dd DESC)` + `(bas_dd DESC)`
 - 컬럼 10종: `open_price`/`high_price`/`low_price`/`close_price`/`volume`/`trade_value`/`change_rate`/`flng_cls_code`/`prtt_rate`/`raw JSONB`
-- KIS FHKST03010100(`chk_inquire_daily_itemchartprice.py` 정본) 응답 키 매핑 — `stck_bsop_date / stck_oprc / stck_hgpr / stck_lwpr / stck_clpr / acml_vol / acml_tr_pbmn / prdy_ctrt / flng_cls_code / prtt_rate`
+- KIS FHKST03010100(`chk_inquire_daily_itemchartprice.py` 정본) 응답 키 매핑 — `stck_bsop_date / stck_oprc / stck_hgpr / stck_lwpr / stck_clpr / acml_vol / acml_tr_pbmn / flng_cls_code / prtt_rate`
+- **`change_rate` 는 `prdy_vrss` 로 후처리 산출한다(cycle365 P4)** — output2(일봉)에는 `prdy_ctrt`(전일 대비율)가 없다(`output1` 단건 요약 전용, KIS MCP `chk_inquire_daily_itemchartprice.py` COLUMN_MAPPING·`docs/kis/domestic-stock-quote.md:5514-5518` 확인). `_derive_change_rate(candle)` = `prdy_ctrt` 가 있으면(미래 호환) 그대로 쓰고, 없으면 `prdy_vrss ÷ (stck_clpr − prdy_vrss) × 100`(전일종가 = 종가 − prdy_vrss, `scanner._trade_amount_key` 의 `prdy_close = stck_prpr - prdy_vrss` 와 같은 부호 규약)로 계산한다. `prdy_vrss_sign`(1상한/2상승/3보합/4하한/5하락)으로 부호를 교차검증해 원본 문자열에 부호가 빠진 경우를 보정한다. 분모 0·`prdy_vrss` 결측은 0.0(graceful). **과거 적재 행(적재 시작 06-12 이후 전 행 0)은 백필하지 않는다** — 앞으로 적재할 행만 고친다(과거 행 UPDATE 는 별도 승인). 매매 코드는 이 칼럼을 읽지 않는다(소비처는 UI `StockMaster.tsx` 일봉 탭뿐, `grep` 전수 확인).
 - CRUD:
   - `upsert_daily(ticker, bas_dd, ohlcv)` — KIS row 단건 정규화 후 upsert
   - `upsert_batch(ticker, candles) -> int` — `_BATCH_SIZE = 100` 건 chunk 배치 upsert

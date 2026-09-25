@@ -463,8 +463,16 @@ _SRC_TREE_FILES = 157
 #: 강제실행 배선) · `engine/task_loop_helper.py`(F-4 `force_run_reason` kwarg +
 #: F-2 안정화는 leaf 쪽). 파일 수는 **157 로 불변**(신규 파일 0). 직전 값 =
 #: `b5e65b4e20bbed997998761b406302b8705d72649d63effe48d2122baae9e1b0`.
+#: 🔁 cycle365(2026-09-25, 사용자 승인 P4·P5a·P5b) 재핀 — 움직인 파일 2 =
+#: `db/stock_master_daily.py`(P4, FHKST03010100 output2 에 `prdy_ctrt` 가 없어
+#: 전 행 0 이던 `change_rate` 를 `prdy_vrss`/`prdy_vrss_sign` 로 후처리 산출) ·
+#: `engine/param_catalog.py`(P5a `trailing_stop_rate` 도움말에 적용 범위 명시 +
+#: P5b `max_scan_stocks` range_src none→param_ranges — `PARAM_RANGES` 상한 500→4000
+#: 재핀은 `test_cycle278_ast_catalog_guards.py` 가 별도로 잠근다). 파일 수는
+#: **157 로 불변**(신규 파일 0). 직전 값 =
+#: `b890121d0ec78bad0a86e0a44fed6f599f935ea7ff773c975943ab9a1d0e65d6`.
 _SRC_TREE_DIGEST = (
-    "b890121d0ec78bad0a86e0a44fed6f599f935ea7ff773c975943ab9a1d0e65d6"
+    "661ebfb69807e0465d16c554445bc49e455a7e2947840ed052d2220da0437915"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

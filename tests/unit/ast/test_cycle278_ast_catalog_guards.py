@@ -118,9 +118,14 @@ def _func_segment(rel: str, func_name: str) -> str:
 # ===========================================================================
 _RECO = "src/engine/recommendation_engine.py"
 
+#: 🔁 cycle365(2026-09-25, 사용자 승인 P5b) 재핀 — `max_scan_stocks` 상한 500→4000.
+#: kojiro/BFB/VCP 운영 기본값(4000)을 PARAM_RANGES 가 못 담아 AI 자문이 매일 500
+#: (유니버스 87% 축소)을 권고하던 결함(`_workspace/reports/2026-09-25_daily_and_advice_review.md`
+#: §5 P5)의 근본 시정이다 — 값 변경이 이 사이클의 **정당한 목적**이라 재핀했다.
+#: 나머지 키·`INT_PARAMS` 는 무접촉이다.
 _SEGMENT_SHA: dict[tuple[str, str, str | None], str] = {
     (_RECO, "PARAM_RANGES", None):
-        "11ed6cd7d849d414e9668056d1e53ef64e172ef8356b97b73ad66ac07d87f346",
+        "7d69e4aa30437c0544c5f1151f001d4af6b8376ce24c284d8137f907cc1e499b",
     (_RECO, "INT_PARAMS", None):
         "c2a0d4d45123c409c5e977b787dab0a44b25f90920d2969e15338d0fef679066",
 }

@@ -899,3 +899,34 @@ target 220 → 마진 34 영업일(사이클196 의 34 와 같다). `fetch_daily
   "쿼리 실패는 RUN 쪽").
 
 → CHANGELOG: cycle363(배포 전 보강) 행
+
+## stock_master_daily.py — `change_rate`
+
+### 2026-09-25 cycle365 P4 — `prdy_ctrt` 읽기 → `prdy_vrss` 후처리 산출
+
+경위 (도메인 자문 §4 F-C 실증, 사용자 결정 2026-09-25 「P4 진행」):
+
+- `_KIS_KEY_CHANGE_RATE = "prdy_ctrt"` 를 그대로 읽던 구현은 적재 시작(06-12)부터
+  `change_rate` 전 행이 0 이었다. 원인 = FHKST03010100 **output2**(일봉 배열)에는
+  `prdy_ctrt`(전일 대비율) 필드 자체가 없다 — `output1`(단건 요약)에만 있다.
+  `docs/kis/domestic-stock-quote.md:5514-5518` Response Body 표(35~47번 = output2 필드)에
+  `prdy_ctrt` 가 없고, KIS MCP `chk_inquire_daily_itemchartprice.py` 공식 COLUMN_MAPPING·
+  Response Example 도 output2 행이 `prdy_vrss`/`prdy_vrss_sign` 만 가짐을 확인했다.
+  마이그레이션 033 의 컬럼 코멘트("KIS prdy_ctrt 또는 후처리 산출")가 이미 이 후처리
+  갈래를 예견하고 있었다.
+- 시정 = `_derive_change_rate(candle)` 신설. `prdy_ctrt` 가 있으면(다른 TR 경유 등 미래
+  호환) 그대로 쓰고, 없으면 `prdy_vrss`(전일 대비, 원 단위) ÷ 전일종가 × 100 으로
+  계산한다. 전일종가 = 오늘 종가(`stck_clpr`) − `prdy_vrss` — `scanner._trade_amount_key`
+  의 `prdy_close = stck_prpr - prdy_vrss` 와 같은 부호 규약(코드베이스에 이미 프로덕션
+  검증된 패턴). `prdy_vrss_sign`(1상한/2상승/3보합/4하한/5하락)으로 부호를 교차검증해
+  원본 문자열에 부호가 빠져 있는 경우(예: "500"인데 sign="5")를 보정한다.
+- 분모(전일종가) 0 이거나 `prdy_vrss` 자체가 결측이면 0.0(graceful — 과거 동작과 동일값).
+- **과거 적재 행은 백필하지 않는다** — DB UPDATE 는 별도 승인 대상이라 이 사이클은
+  앞으로 적재할 행만 고친다.
+- `grep` 전수 확인 — `stock_master_daily.change_rate` 를 읽는 매매 코드는 0건이다
+  (전략들은 실시간 change_rate 를 현재가로 별도 계산한다). 소비처는 UI
+  `StockMaster.tsx` 일봉 탭(0.00% 로 표시되던 문제)과 사람·AI 의 사후 분석뿐이다.
+- 회귀 = `tests/unit/db/test_cycle365_change_rate.py`(9케이스 — 실제 output2 형태 계산 ·
+  부호 보존·교차검증·보합·결측·분모0·prdy_ctrt 미래호환·종단통합·매매코드 무접촉 grep 가드).
+
+→ CHANGELOG: cycle365 행

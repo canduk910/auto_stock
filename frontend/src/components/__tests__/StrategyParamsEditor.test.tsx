@@ -44,7 +44,11 @@ import { http, HttpResponse } from 'msw'
 import StrategyParamsEditor, { localBlocks } from '../StrategyParamsEditor'
 import { server } from '../../test/server'
 import { wrap } from '../../test/factories'
-import { fixtureSpec, schemaWithCurrent } from '../../test/fixtures/paramSchema.fixture'
+import {
+  cloneParamSchema,
+  fixtureSpec,
+  schemaWithCurrent,
+} from '../../test/fixtures/paramSchema.fixture'
 import type { ParamSpec } from '../../types/strategy-params'
 
 const VB = 'volatility_breakout'
@@ -443,15 +447,56 @@ describe('cycle278 F13~F15 — 숨기지 않고 사실대로 보여 준다', () 
   })
 
   it('F15 range_src=none 키는 "범위 근거 없음" 배지를 단다', async () => {
+    // cycle365 P5b — `max_scan_stocks` 는 `PARAM_RANGES` 상한이 500→4000 으로 올라
+    // range_src="param_ranges" 로 옮겨갔다(실제 상한값 배지로 바뀐다). 남은
+    // `range_src="none"` 8키는 전부 `editable=False`(F13 의 `quant_filter_enabled`
+    // 류)라 "근거 없음 배지 + 편집 가능"을 동시에 보여주는 실키가 더는 없다 —
+    // 메커니즘 자체는 스키마에 합성 키를 심어 검증한다.
+    const SYNTHETIC_KEY = '_cycle365_synthetic_unbounded_key'
+    const clone = cloneParamSchema()
+    clone.params.push({
+      key: SYNTHETIC_KEY,
+      label_ko: '합성 테스트 키(cycle365 회귀 전용)',
+      group: 'scan_universe',
+      type: 'int',
+      min: null,
+      max: null,
+      step: 1,
+      unit: '개',
+      editable: true,
+      risk: 'normal',
+      auto_tunable: false,
+      deprecated: false,
+      deprecated_for: [],
+      range_src: 'none',
+      pattern: null,
+      min_items: 0,
+      forbidden_choices: [],
+      choices: [],
+      applies_to: [VB],
+      help: 'cycle365 P5b 회귀 테스트 전용 합성 키 — 카탈로그에 실재하지 않는다.',
+    })
+    const vbStrategy = clone.strategies.find((s) => s.strategy_id === VB)
+    if (!vbStrategy) throw new Error(`픽스처에 없는 전략: ${VB}`)
+    vbStrategy.keys = [...vbStrategy.keys, SYNTHETIC_KEY]
+    vbStrategy.params = { ...vbStrategy.params, [SYNTHETIC_KEY]: 10 }
+    vbStrategy.defaults = { ...vbStrategy.defaults, [SYNTHETIC_KEY]: 10 }
+
+    server.use(
+      http.get('/api/strategies/params-schema', () => HttpResponse.json(wrap(clone))),
+    )
+
     const { user } = renderEditor()
     await waitEditor()
     await openGroup(user, 'scan_universe')
 
     expect(
-      screen.getByTestId('strategy-params-badge-unbounded-max-scan-stocks'),
+      screen.getByTestId(`strategy-params-badge-unbounded-${dash(SYNTHETIC_KEY)}`),
     ).toBeInTheDocument()
     // 범위 근거가 없다고 편집을 막지는 않는다(AI 는 바꿀 수 있는 키다 — 명세 D5).
-    expect(screen.getByTestId('strategy-params-input-max-scan-stocks')).toBeEnabled()
+    expect(
+      screen.getByTestId(`strategy-params-input-${dash(SYNTHETIC_KEY)}`),
+    ).toBeEnabled()
   })
 })
 

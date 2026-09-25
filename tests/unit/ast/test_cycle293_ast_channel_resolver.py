@@ -188,8 +188,12 @@ _BASE_SHA: dict[str, str] = {
     "src/engine/strategies/volatility_breakout.py":
         "be4327754fc4ebf63de58553e68c7a2d8eba14f43f847490bf22cae90d7e5400",
     # 파라미터 축 — 킬스위치는 `system_config` 다(§8-B). 전략 파라미터로 새지 않는다.
+    # 🔁 cycle365(2026-09-25) 재핀 — 사용자 승인 P5a·P5b:
+    # trailing_stop_rate 도움말에 적용 범위 명시 + max_scan_stocks range_src
+    # none→param_ranges 전환(PARAM_RANGES 상한 500→4000). 값 변경이 이 사이클의
+    # 정당한 목적이라 재핀했다.
     "src/engine/param_catalog.py":
-        "246e9dddd08ea6110bef296a2eeddfef91ae317aff612c027c92f415b244c4e1",
+        "654460a97497094cec243104062252dbdd881a7a7f8d305790b964b306c7b484",
     "src/engine/param_validation.py":
         "b4c5c029800191523bcc511919d6de3774e9ab49ca2fc0a0558ee3907868ee17",
     # 시각·거래소 표의 유일 정본 — 리졸버는 **속성축**이라 이 표를 읽지 않는다.

@@ -64,7 +64,11 @@ PARAM_RANGES: dict[str, tuple[float, float]] = {
     "k_period": (5, 60),
     "min_market_cap": (10_000_000_000, 10_000_000_000_000),
     "min_trade_amount": (1_000_000_000, 1_000_000_000_000),
-    "max_scan_stocks": (10, 500),
+    # cycle365 P5b — 상한 500 은 kojiro/BFB/VCP 운영 기본값 4000 을 못 담아
+    # AI 자문이 그 3전략에 매일 500(유니버스 87% 축소)을 권고했다(도메인 자문
+    # `_workspace/reports/2026-09-25_daily_and_advice_review.md` §5 P5).
+    # 운영값(400~4000)을 전부 담도록 상한을 4000 으로 올린다.
+    "max_scan_stocks": (10, 4000),
     "min_prdy_rate": (0.0, 30.0),
     "exclude_consecutive_limit": (0, 5),
     "limit_up_threshold": (15.0, 30.0),

@@ -509,17 +509,44 @@ async def test_put_when_ltv_k_value_nxt_post_sent_then_no_warning(params_env):
     assert "no_effect_for_strategy" not in _warning_codes(body), _warnings(body)
 
 
-async def test_put_when_range_unbounded_key_sent_then_200_with_warning(params_env):
-    """B66c/C30 — `max_scan_stocks`(range_src="none") 는 저장되고 `range_unbounded` 경고.
+async def test_put_when_range_unbounded_key_sent_then_200_with_warning(params_env, monkeypatch):
+    """B66c/C30 — `range_src="none"` 인 편집 가능 키는 저장되고 `range_unbounded` 경고.
 
-    범위 근거가 없다는 사실이 화면에 남는다. PARAM_RANGES 상한(500)을 범위로 쓰면
-    bfb·vcp·kojiro 기본값 4000 이 즉시 422 다(HAZARD-1).
+    cycle278~363 에는 `max_scan_stocks`(range_src="none")가 이 시나리오의 실례였다
+    (`PARAM_RANGES` 상한 500 을 그대로 범위로 쓰면 bfb·vcp·kojiro 기본값 4000 이 즉시
+    422 — HAZARD-1). **cycle365 P5b 가 PARAM_RANGES 상한을 4000 으로 올려 시정**했고
+    `max_scan_stocks` 는 `param_ranges` 로 옮겨갔다. 남은 8개 `range_src="none"` 키는
+    전부 `editable=False`(kojiro `max_units_*` · VB `quant_*`/`rs_filter_enabled`/
+    `rsi_*`)라 "저장 성공 + 경고" 시나리오를 실키로 더는 재현할 수 없다 — 메커니즘
+    자체(`range_unbounded` 경고 발화)는 `param_catalog.get_spec` 을 합성 스펙으로
+    바꿔치기해 검증한다.
     """
-    status, body = await _put("kojiro", {"max_scan_stocks": 3000})
+    import src.engine.param_catalog as pc_mod
 
-    assert status == 200, f"근거 없는 범위로 4자리 기본값을 막았다 — {body!r}"
+    fake_key = "_cycle365_synthetic_range_unbounded_key"
+    fake_spec = pc_mod.ParamSpec(
+        key=fake_key, label_ko="합성 테스트 키(cycle365 회귀 전용)", group="scan_universe",
+        type="int", min=None, max=None, step=1, unit="개",
+        editable=True, risk="normal", auto_tunable=False, deprecated=False,
+        applies_to=("kojiro",), range_src="none",
+        help="cycle365 P5b 회귀 테스트 전용 합성 키 — 카탈로그에 실재하지 않는다.",
+    )
+    original_get_spec = pc_mod.get_spec
+
+    def _fake_get_spec(key: str):
+        if key == fake_key:
+            return fake_spec
+        return original_get_spec(key)
+
+    monkeypatch.setattr(pc_mod, "get_spec", _fake_get_spec)
+    # unknown_key 를 피하려면 current_params 에도 있어야 한다(`key in current_params`).
+    params_env.params("kojiro")[fake_key] = 10
+
+    status, body = await _put("kojiro", {fake_key: 3000})
+
+    assert status == 200, f"근거 없는 범위인데 편집 가능한 값을 막았다 — {body!r}"
     assert "range_unbounded" in _warning_codes(body), _warnings(body)
-    assert params_env.params("kojiro")["max_scan_stocks"] == 3000
+    assert params_env.params("kojiro")[fake_key] == 3000
 
 
 # ===========================================================================

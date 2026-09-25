@@ -101,7 +101,7 @@ export interface ParamSchemaData {
 }
 
 export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
-  "catalog_version": "cycle352.1",
+  "catalog_version": "cycle365.1",
   "groups": [
     {
       "id": "entry",
@@ -1401,7 +1401,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "momentum",
         "long_tail_volatility"
       ],
-      "help": "매수 후 최고가 대비 이 비율만큼 밀리면 청산. **음수여야 한다.**"
+      "help": "매수 후 최고가 대비 이 비율만큼 밀리면 청산. **음수여야 한다.** **적용 범위(두 전략 모두 좁다 — cycle365 P5a)**: 당일(intraday) 손절에는 쓰이지 않는다. 오직 **익일 청산 모드**(`pos.is_next_day` ∧ 갭률 `gap_up_threshold` 이상 유지)에서만 최고가 대비 하락폭을 잰다 (`momentum.py` `check_exit_signal` §2). LTV 는 여기에 더해 **전일 상한가 도달 종목**(`_limit_up_reached`)으로 한정된다(`long_tail_volatility.py` `check_exit_signal` §익일 청산 모드, 약 1041~1066행). 당일 모드 손절은 momentum `stop_loss_rate`, LTV `intraday_stop_loss` 고정% 뿐이다."
     },
     {
       "key": "daily_loss_limit",
@@ -2215,8 +2215,8 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
       "label_ko": "최대 스캔 종목수",
       "group": "scan_universe",
       "type": "int",
-      "min": null,
-      "max": null,
+      "min": 10,
+      "max": 4000,
       "step": 1,
       "unit": "개",
       "editable": true,
@@ -2224,7 +2224,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
       "auto_tunable": true,
       "deprecated": false,
       "deprecated_for": [],
-      "range_src": "none",
+      "range_src": "param_ranges",
       "pattern": null,
       "min_items": 0,
       "forbidden_choices": [],
@@ -2237,7 +2237,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "vcp_breakout",
         "kojiro"
       ],
-      "help": "⚠️ **범위 미정.** `PARAM_RANGES` 는 (10, 500) 이지만 BFB·VCP·고지로의 현재 기본값이 **4000** 이라 그 범위를 사람의 편집 한계로 쓰면 아무것도 안 고치고 저장만 눌러도 거부된다. 두 숫자 중 어느 쪽이 옳은지에 대한 근거 문서가 없어 범위를 **지어내지 않았다** — 자료형(정수)과 양수만 본다. (AI 튜너는 종전대로 PARAM_RANGES 안에서만 움직인다.)"
+      "help": "유니버스 스캔 상한(종목 수). BFB·VCP·고지로 운영 기본값은 **4000**(전체 유니버스 사실상 무제한), donchian **400**, VB·LTV **100**이다. cycle365 P5b 이전엔 `PARAM_RANGES` 상한이 500 이라 이 세 전략 기본값을 담지 못해(그래서 그때는 `range_src=\"none\"`) AI 자문이 매일 500 을 권고했다 — 상한을 4000 으로 올려 운영값을 전부 포함시켰다."
     },
     {
       "key": "exclude_tickers",

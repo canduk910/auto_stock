@@ -360,6 +360,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -1453,6 +1454,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -2573,6 +2575,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -3666,6 +3669,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -4758,6 +4762,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -5864,6 +5869,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -6969,6 +6975,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -8080,6 +8087,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -9181,6 +9189,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -10288,6 +10297,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -11406,6 +11416,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -12515,6 +12526,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -13629,6 +13641,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -14822,6 +14835,7 @@ backend:
     - tests/unit/db/test_cycle273a_update_trade_status_match_partial.py
     - tests/unit/db/test_cycle273b_trade_status_order_no_and_multi_update.py
     - tests/unit/db/test_cycle299_retention_expansion.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
     - tests/unit/db/test_cycle68_kst_global_ast_guard_g10.py
     - tests/unit/db/test_cycle68_kst_helper_module_g1.py
@@ -15840,6 +15854,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -16933,6 +16948,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -18038,6 +18054,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -19149,6 +19166,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -20247,6 +20265,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -21355,6 +21374,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -22460,6 +22480,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -23567,6 +23588,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -24668,6 +24690,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -25774,6 +25797,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -26897,6 +26921,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -28012,6 +28037,7 @@ backend:
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -28771,6 +28797,7 @@ backend:
     - tests/unit/db/test_cycle192_daily_purge_loop_batch.py
     - tests/unit/db/test_cycle299_retention_expansion.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycleM2b_safety_diff0.py
     - tests/unit/db/test_cycleM2b_stock_master_daily_pg.py
     - tests/unit/db/test_cycleM6_date_column_str_binding.py
@@ -30194,6 +30221,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -31299,6 +31327,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -32408,6 +32437,7 @@ backend:
     - tests/unit/db/test_cycle316_cash_ratio_observe.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -33561,6 +33591,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
     - tests/unit/db/test_cycle68_kst_global_ast_guard_g10.py
     - tests/unit/db/test_cycle68_kst_helper_module_g1.py
@@ -34624,6 +34655,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -35730,6 +35762,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -36825,6 +36858,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -37932,6 +37966,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -39046,6 +39081,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -40147,6 +40183,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -41249,6 +41286,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -42353,6 +42391,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -43464,6 +43503,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -44578,6 +44618,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -45666,6 +45707,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -46775,6 +46817,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -47880,6 +47923,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -48985,6 +49029,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -50088,6 +50133,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -51192,6 +51238,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -52297,6 +52344,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -53475,6 +53523,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -54580,6 +54629,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -55673,6 +55723,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -56782,6 +56833,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -57897,6 +57949,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -58996,6 +59049,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -60093,6 +60147,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -61204,6 +61259,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -62305,6 +62361,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -63409,6 +63466,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -64515,6 +64573,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -65616,6 +65675,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -66801,6 +66861,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -67979,6 +68040,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -69144,6 +69206,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -70248,6 +70311,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -71358,6 +71422,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -72492,6 +72557,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -73565,6 +73631,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -74672,6 +74739,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -75771,6 +75839,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -77115,6 +77184,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -78134,6 +78204,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -79091,6 +79162,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -80195,6 +80267,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -81297,6 +81370,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -82401,6 +82475,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -83513,6 +83588,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -84642,6 +84718,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -85720,6 +85797,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -86847,6 +86925,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -87930,6 +88009,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -89043,6 +89123,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -90138,6 +90219,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -91243,6 +91325,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -92348,6 +92431,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -93461,6 +93545,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -94628,6 +94713,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -95740,6 +95826,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -96830,6 +96917,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -97936,6 +98024,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -99030,6 +99119,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -100151,6 +100241,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -101255,6 +101346,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -102518,6 +102610,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -103489,6 +103582,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -104534,6 +104628,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -105644,6 +105739,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -106816,6 +106912,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -107923,6 +108020,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -109023,6 +109121,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -110142,6 +110241,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -111231,6 +111331,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -112339,6 +112440,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -113443,6 +113545,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -114559,6 +114662,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -115715,6 +115819,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -116820,6 +116925,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -117931,6 +118037,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -119037,6 +119144,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -120143,6 +120251,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -121245,6 +121354,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -122423,6 +122533,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -123693,6 +123804,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -124845,6 +124957,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -125974,6 +126087,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -127058,6 +127172,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -128184,6 +128299,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -129294,6 +129410,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -131765,6 +131882,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -132864,6 +132982,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -133973,6 +134092,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -135073,6 +135193,7 @@ backend:
     - tests/unit/db/test_cycle350_funnel_snapshot_at.py
     - tests/unit/db/test_cycle363_count_missing_kis_provenance_key.py
     - tests/unit/db/test_cycle363_expected_head.py
+    - tests/unit/db/test_cycle365_change_rate.py
     - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
     - tests/unit/db/test_cycle65_trade_amount_filter_config.py
     - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -137342,10 +137463,10 @@ frontend:
     - frontend/src/pages/__tests__/MarketState.test.tsx
     - frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
     - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
-generated_at: '2026-09-25T14:26:33.303549+09:00'
+generated_at: '2026-09-25T15:34:42.781048+09:00'
 stats:
   backend_modules: 160
-  backend_tests: 1102
+  backend_tests: 1103
   frontend_modules: 120
   frontend_tests: 98
   unmapped_modules:
