@@ -340,10 +340,15 @@ class KojiroStrategy(StrategyBase):
 
         today_str = datetime.now(KST).strftime("%Y%m%d")
 
+        # cycle363 — ①′ 일봉 신선도 기준(「직전 영업일」) prepare 당 1회 계산.
+        # 범위 밖(현행 달력 판정 유지) = `recompute_held_atr` 계열(아래 별도 호출부).
+        expected_head = await self._resolve_expected_daily_head()
+
         async def _fetch_one(ticker: str):
             try:
                 return ticker, await get_recent_daily_normalized(
                     ticker, days=KOJIRO_FETCH_DAYS, min_required=KOJIRO_MIN_REQUIRED,
+                    expected_head=expected_head,
                 )
             except Exception as e:
                 logger.warning("고지로 일봉 fetch 실패: %s — %s", ticker, e)

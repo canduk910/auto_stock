@@ -81,7 +81,7 @@
 | D1 F-A | **배포 진행**. 그 뒤 **BFB 를 터틀식 관리로 전환**. 터틀식이 아닌 전략은 momentum·VB·LTV 3개뿐(= donchian·kojiro·BFB·VCP 는 터틀). ⚠️ F-A 수정(재도출을 「현재 설정 turtle」 일 때만)과 BFB 터틀 전환이 겹치면 **기존 비중 매수 보유분이 재시작 때 ATR 표식을 받는다** — 전환 전 대책 필요(보유분 처리 또는 랏별 사이징 기록) |
 | D2 F-B | 조사 진행 |
 | D3 저녁 캡처 | **A1**(`prepare(as_of=)` — 기본은 다음 거래일 기준으로 **오늘 봉 포함**). + **비상 캡처 대안**: 특정 파라미터를 주면 오늘 봉을 버리고 캡처(오전 비상 작업용) |
-| D4 부팅 재준비 | 사용자 지적: 월요일마다 다시 고르면 금요일 저녁 캡처가 무의미해지고 D3(A1)과 충돌. **4a 를 기초로 보완책을 깊게 검토해 진행 전에 다시 제안**(구현 금지) |
+| D4 부팅 재준비 | 재제안 `domain_consult/cycle360_boot_reprepare_4a_proposal.md`(월요일 +600초 재준비는 교정이 아니라 **목요일 KRX 값으로 금요일 입력을 덮는 것** — cycle350 문서의 「유일한 교정 경로」 서술은 틀림, 문서 동기화 때 정정). **2026-09-25 사용자 결정**: 카드1 (가) 4a + ①②③(+A1 과 ①′④·비상 캡처 규칙) · 카드2 (나) **① + ①′ 를 09-28 전 배포**(①′ = 일봉 신선도를 직전 영업일 기준으로 — 연휴 뒤 전 종목 KIS 100봉 폴백 방지, 사용자 추가 선택) · 카드3 (나) donchian 보유 트레일링은 **오늘 ATR** 채택 → P2 청산 자문으로 · 카드4 (가) 비상 캡처 = 07:58 전·08:50~08:59·20:00 뒤·휴장일만 |
 | D5 F3 | ① 15:20 1회 점검 |
 | D6 F2 | ① 자문 메모 저장 = 예 · ② shadow 구현 = 아니오 · ③ 임시안(VB·LTV `max_lot_ratio_mult` 1.0 PUT) = 예 |
 | D7 피라미딩 문턱 | 검토 완료(`domain_consult/cycle361_daily_retention_730.md`) → **2026-09-25 사용자 결정 = 권고대로: 매매 DB 밖 별도 보관소(안 C) · 5년 · DB retention 390 유지**. KRX `stk_bydd_trd`·`ksq_bydd_trd` 날짜별 전종목(5년 ≈ 2,460콜) 1회 수집 → 수정주가 보정(기준가 = 종가 − 전일대비) → 2025-10-10~ 겹치는 구간을 KIS 수정주가와 대조 → S0 덤프 모양으로 저장(로컬, git 제외). 매매 코드·KIS 호출·배포 0. 월 1회 추가분 수동 |
@@ -96,6 +96,23 @@
 | P7 | 09-23 루틴 누락 조사 · PR #24 정정 적용 · PR #23 닫기 — 진행 |
 
 F-A~F-C 출처 = [검토 메모](reports/2026-09-25_daily_and_advice_review.md) §4 · 증거 원본 `reports/2026-09-25_evidence_bfb_atr_and_mkop_raw.txt`. 🔴 원본 INFO 로그는 **09-28 21:30 에 삭제**된다.
+
+### 🔴 09-28(월) 아침 확인 목록 (D4 — cycle363 + 배포 전 보강 F-1/F-3/F-4 검증)
+
+cycle360 §8 후속 검증 권고에 F-1/F-3/F-4 시정분을 더한 것. 근거·원리 = `_workspace/red/cycle363_business_day_freshness_spec.md` §8.
+
+| # | 확인할 것 | 정상값 | 벗어나면 |
+|---|---|---|---|
+| A1 | 부팅 `immediate run skip` 3종(daily·basics·full_universe 는 `no_marker`) | 07:45 직후 로그 3줄, `reason=fresh`(daily·basics) / `reason=no_marker`(full_universe, 부트스트랩) | 하나라도 `stale`/`calendar_unknown` 이면 원인 조사(휴장일 조회 실패 가능성) |
+| A2 | 아침 `[krx_empty_response]` | **0줄**(① 이 월요일 KRX 즉시 실행 자체를 막는다) | 나오면 슬롯 게이트가 뚫린 것 |
+| A3 | 🔴 **「부팅 준비 = 재준비 숫자 동일」 기준 — F-1 수정 뒤에도 09-28 은 예외일 수 있다.** 09-28 은 `stock_master` 행이 24h(주말+연휴 5일)를 넘겨 `[scan_pool_eager_refresh]`(장전 5분 주기)가 실제로 도는 첫날이고, +600초 재준비와 같은 시각(T+600)에 겹칠 것으로 추정된다(F-1/F-5 confirmed). **F-1 로 raw 파괴는 막혔지만 겹침 자체는 안 막았다** — 재준비가 그 갱신 도중의 `stock_master` 를 읽으면 부팅 준비와 여전히 다른 숫자가 나올 수 있다(원인이 F-1 잔존이 아니라 이 겹침이면 그 자체가 새로운 관찰이다). 6전략 숫자를 대조하고, 다르면 F-3-b 로 넘어가지 말고 시각차부터 본다 | 6전략 숫자 동일(평시 기준) | 다르면 `[scan_pool_eager_refresh] refreshed=` 시각과 재준비 시각을 대조 |
+| A3-b | `[scan_pool_eager_refresh] refreshed=N` (raw 보존 확인) | `N>0`(그 사이클이 실제로 돌았다는 뜻, 정상) **이고** `select count(*) from stock_master where not raw ? 'acml_tr_pbmn'` 가 그 전후로 **늘지 않아야** 한다(F-1 머지가 살아 있다는 증거) | 그 카운트가 늘면 F-1 회귀 — `scanner.py::_scan_pool_eager_refresh_loop` 의 raw 머지 블록 확인 |
+| A4 | `stock_master` 행 수 유지(전날 대비) | 3,583 안팎(±신규상장) | 급감하면 KRX 폴백이 다시 전량 덮어쓴 것 |
+| A5 | 그 주 20:00:05 정기 실행의 신규 상장 유입 | 정상 반영 | 안 되면 전량 덮어쓰기 경로 재검토 |
+| A6 | `[daily_head_stale]`(F-3 폴백 사유 분포) | ①′ F-3 예외로 대부분 DB 유지 — `[prepare_db_fallback] reason=stale` 건수가 09-23(평시) 대비 급증하지 않아야 한다 | 급증하면 F-3 `_is_exactly_one_business_day_behind` 판정이 실패(휴장일 조회 예외 등)로 안전 방향(폴백)에 몰린 것 — 원인 조사(값은 맞지만 prepare 가 느려진다) |
+| A7 | basics 강제 재실행(F-4) — 정상적으로는 **발화하지 않아야 한다** | `[immediate_gate] task=stock_master_basics_refresh reason=fresh` (평시처럼 SKIP) | `reason=kis_keys_missing` 이 뜨면 그 자체가 「KRX 전용 실행 뒤 basics 가 못 돈 날」의 증거이자 F-4 가 정확히 설계대로 자가 치유했다는 뜻 — CRITICAL 아님, 관측 |
+
+⚠️ VCP `daily_fetch_depth_mode="full"`(운영) 준비가 100봉이 아니라 200 EMA 로 도는지도 이날 곁다리로 확인 가치가 있다(F-3 의 직접 목적).
 
 🔴 **자율 구간 (2026-09-24 21:40 ~ 09-25 07:40, 사용자 지시)** — 워크리스트를 쉬지 않고 순서대로. 커밋·배포는 건별(21:35~익일 07:45 + 휴장일이라 창 열림, 20:00~21:35 금지).
 **크리티컬 분기가 나오면 그 작업만 보류**하고 아침 아티팩트 보고서의 결정 카드로. 워크리스트 완료 뒤 = 금일 일일 보고서·주간 자문 보고서를 검토해 **내일 추가 작업 제안**을 보고서에 포함.

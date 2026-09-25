@@ -78,8 +78,9 @@ _BASE_SHA = {
     #    (분기에서 지수 소속 판정 제거 · `vcp_universe_tickers` 집합 소멸.
     #    목표 깊이 상수는 불변). 값만 옮긴다 — 단언은 그대로다.
     #    구 값은 cycle299 기준선(3b7366cc…)이다.
+    # 🔁 2026-09-25 (cycle363 F-1) 재핀 — `_scan_pool_eager_refresh_loop` upsert 전 기존 raw 머지(사이클 176 basics 경로 답습, 사용자 승인 8영역). 장전 0값 키(acml_tr_pbmn 등)가 raw 통째 교체로 지워지던 결함 시정. 나머지 7영역 diff 0.
     "src/engine/scanner.py":
-        "95cbb103a38821bb3b68d267a3662094b192fa55ad6071fa8dc4a63726e1c942",
+        "2c104fba38dd1e942b091bfac14cb7d152d766676405e9fd66fe27e75cb3f5a6",
     "src/engine/strategy_registry.py":
         "d794696e54ffdc36efa6df917879d780e86bc1f373bb3b5d8dcbc0beac8cef8b",
     # 8영역 — 주문 API
@@ -104,23 +105,23 @@ _BASE_SHA = {
         "4125c271b4147e59922f4f000e523429fb4bbef37058dc754fd92b9475ec58f1",
     # 8영역은 아니지만 이 사이클이 무접촉을 약속한 파일
     "src/engine/strategy_base.py":
-        "3f27be39784f9cb86d72b0c625b705b57d4ee8f555121024f757a2df51a3161d",
+        "19353f030cda3bf0dde33bee04d9a00f7870f6c083d6d4cf90b86b8223dc2c12",
     # 나머지 전략 6파일 (LTV 만 변경 대상) — 🔁 cycle290(킬스위치 등재, 2026-09-13)
     # 재핀. `DEFAULT_PARAMS` 말미 2키 추가뿐.
     "src/engine/strategies/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "src/engine/strategies/bull_flag_breakout.py":
-        "6ee3cb9f8df149d2c3a4fdc00885b855399cf13036e9ea02021263b773676bfa",
+        "f72cc0c71ee6f9b1851407e3e57df549468a2904d6a702d4f99e4ef97c4b4b1b",
     "src/engine/strategies/donchian_swing.py":
-        "cc57e5673f9982aca97f61677084e040171fff307483fedf10459b567a4679e3",
+        "0108f5a03ebc96aa6a14190eafb92ac174202bb13df4c2383e4d6bb9a59f5364",
     "src/engine/strategies/kojiro.py":
-        "0e2e7e07e802b541aeeab5bce2ad29716148d59a8c9daf2213127550114214a9",
+        "329bd29d661f8be1d551ce9b44780dd9d78461df7c21ab2ed1b662e31e52cee5",
     "src/engine/strategies/momentum.py":
         "50d5c0b9a232d6110f6b85fc524569853f2b8edffe2fd44adc24289800b95ae2",
     "src/engine/strategies/vcp_breakout.py":
-        "da6ef794fc92493ce3780853116902190d716087ed562b7d04e7395014773b7d",
+        "7c6477fd4d51623fa8f10daf53cedd4c0bf5fe778e59a005369f9ec798cb201a",
     "src/engine/strategies/volatility_breakout.py":
-        "d13efaa4a9424e2822b5476ce159987d2a5192a4bca30af3f1a0cae9c3ffcabc",
+        "be4327754fc4ebf63de58553e68c7a2d8eba14f43f847490bf22cae90d7e5400",
 }
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
@@ -145,7 +146,7 @@ _LTV_FROZEN_METHODS = {
     "calc_buy_quantity":
         "1149ecc8ea37fb1ba164cc1fd88e6525111d5142168ca879f1026c7890905b81",
     "prepare":
-        "70f3fbb893f67ab4bcc552e285f5e1653990ed82460e0e4415c46de8775538fc",
+        "bd185aad3d2f9b9bcf24cff81047f437ec6aadb73ec35c7c9eb30a09929c2c11",
     "on_open_price_confirmed":
         "4834b4cc6b03f2eddbfa94390ddcf0df41b3a561afd9056a5b2cac04f76a72ec",
 }

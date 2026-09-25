@@ -396,6 +396,9 @@ class DonchianSwingStrategy(StrategyBase):
         prepared = 0
         short_candles_logged = False  # 길이 부족 시 첫 1건만 system_logs에 기록
 
+        # cycle363 — ①′ 일봉 신선도 기준(「직전 영업일」) prepare 당 1회 계산.
+        expected_head = await self._resolve_expected_daily_head()
+
         # 일봉 fetch 병렬화 — KIS Rate Limit(20/sec)는 base.py Semaphore에서 직렬화되므로
         # asyncio.gather로 안전하게 묶을 수 있음. 100+ 종목 순차 호출(5~10초) → 1~2초로 단축
         # 사이클 173 — DB 우선 어댑터 (락/신선도/부족 시 KIS 폴백). min_required=63 명시
@@ -403,7 +406,7 @@ class DonchianSwingStrategy(StrategyBase):
         async def _fetch_one(ticker: str):
             try:
                 return ticker, await get_recent_daily_normalized(
-                    ticker, days=fetch_days, min_required=63,
+                    ticker, days=fetch_days, min_required=63, expected_head=expected_head,
                 )
             except Exception as e:
                 logger.warning("도치안 일봉 fetch 실패: %s — %s", ticker, e)

@@ -396,10 +396,17 @@ class TestLineReductionEffect:
         )
 
     def test_g_134_f2_helper_module_compact(self):
-        """G-134-F2 — 헬퍼 모듈 compact 영속 (≤ 200L 의무).
+        """G-134-F2 — 헬퍼 모듈 compact 영속 (≤ 345L 의무).
 
         사이클 193 의미 전환: 134 ≤ 150L → 193 ≤ 200L
         (신선도 게이트 로직 +50L — 상수 1 + 파라미터 1 + 게이트 ~25L + 마커 기록 ~23L).
+        사이클 363 의미 전환: 193 ≤ 200L → 363 ≤ 320L (영업일 슬롯 게이트 +100L —
+        `_evaluate_slot_gate` 판정 함수 ~60L + `_emit_immediate_gate_log` ~25L +
+        신규 kw 3개 + docstring 확장. 값은 실측 304L 위에 여유를 둔다).
+        cycle363 F-4/F-5(독립 검증 반영, 사용자 승인) 재조정: 363 ≤ 320L → ≤ 345L
+        (`immediate_force_run_reason` kwarg 1개 + `_evaluate_slot_gate` 키워드 인자
+        스레딩 + docstring 확장 — basics 의 KIS 출처 키 결측 강제 재실행이
+        `reason=kis_keys_missing` 을 남기게 한다. 실측 330L 위에 여유를 둔다).
         """
         helper_paths = [
             Path("src/engine/task_loop_helper.py"),
@@ -415,7 +422,7 @@ class TestLineReductionEffect:
             pytest.skip("Red 단계 — Green 후 영속 의무")
 
         line_count = len(helper_src.read_text(encoding="utf-8").splitlines())
-        assert line_count <= 200, (
-            f"헬퍼 모듈 compact 영속 위반 — got {line_count}L, target ≤ 200L "
-            "(사이클 134 ≤ 150L → 193 ≤ 200L, 신선도 게이트 +50L)."
+        assert line_count <= 345, (
+            f"헬퍼 모듈 compact 영속 위반 — got {line_count}L, target ≤ 345L "
+            "(사이클 134 ≤ 150L → 193 ≤ 200L → 363(①) ≤ 320L → 363(F-4/F-5) ≤ 345L)."
         )

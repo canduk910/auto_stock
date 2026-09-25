@@ -840,3 +840,62 @@ target 220 → 마진 34 영업일(사이클196 의 34 와 같다). `fetch_daily
 `snapshot_at` 은 **최초 INSERT 시각에 고정**된다 — `DO UPDATE SET` 에 `snapshot_at` 이 없고, 기본값 `now()`(migration 030)는 INSERT 때만 들어간다. 그래서 `snapshot_at` 으로는 그 행의 값이 언제 쓰였는지 알 수 없다(하루 쓰기 순서 = `src/engine/CLAUDE.md` 「funnel 스냅샷 캡처」 절).
 
 → CHANGELOG: cycle350 행
+
+## system_config.py — 시스템 설정 키-값 헬퍼
+
+### 2026-09-25 cycle363 — task 신선도 마커의 소비처 서술 교체
+
+정본 원문:
+
+- **task 신선도 마커**: `get_task_last_success(task_label) -> str | None`(키 `task_last_success_<label>`) / `set_task_last_success(task_label, iso_ts)`. 값은 KST ISO(`now_kst_iso()`). `task_loop_helper.run_periodic_task_loop` 의 `immediate_skip_if_fresh_hours` 게이트 전용이다 — 재시작 직후의 immediate run 이 N시간 안에 성공 마커가 있으면 건너뛴다(아침 프리마켓 burst 완화). **`get_task_last_success_bulk(task_labels) -> dict`** 은 같은 마커를 `key = ANY($1)` **단일 쿼리**로 묶는다(`GET /api/market-ops` 야간작업 타임라인이 폴링마다 라벨 수만큼 왕복하지 않게). 결측 라벨은 반환 dict 에 **키 자체가 없다**(빈 문자열이 아니다). 쿼리 실패는 빈 dict(fail-open)
+
+경위: cycle363 이 부팅 즉시 실행 게이트를 두 갈래로 나눴다 — 시간 게이트(master·financial)와 영업일 슬롯 게이트(basics·daily_load·full_universe). 마커는 두 게이트가 함께 읽고, full_universe 도 처음으로 마커를 남긴다. 「`immediate_skip_if_fresh_hours` 게이트 전용」이 더는 참이 아니라 교체했다(하트비트 `engine_alive_heartbeat` 도 같은 키 공간을 쓴다).
+
+→ CHANGELOG: cycle363 행
+
+## stock_master_daily.py — KIS 일봉 정규화
+
+### 2026-09-25 cycle363 — 어댑터에 `expected_head` 를 더하고 신선도 게이트를 두 갈래로 나눴다
+
+정본 원문(시그니처 · 신선도 게이트 · 상수 줄):
+
+  - **`get_recent_daily_normalized(ticker, days, *, min_required=None)`** — DB일봉 어댑터. DB row 의 `raw` JSONB(KIS 원본 키 `stck_clpr`/`stck_oprc` 등 보존)를 **그대로 반환**해 prepare 의 `c.get("stck_clpr")` 를 무변경으로 쓰게 한다. raw 키가 없는 row 는 row 자체를 돌려준다(graceful)
+  2. **신선도 게이트** — `max_bas_dd(ticker)` 가 `today - DAILY_STALENESS_DAYS` 보다 오래면 폴백. `max_bas_dd` 가 `None`(판정 불가)이면 graceful 통과
+  - 상수 `DAILY_STALENESS_DAYS = 4`(주말 2일 + 공휴일 마진 — 거짓 폴백 차단). 전략별 `days`/`min_required` = VB/LTV 22 · donchian 63 · BFB 35 · VCP 100
+
+경위 (사용자 결정 2026-09-25 「①′ 도 같이」):
+
+- `DAILY_STALENESS_DAYS = 4` 는 **달력일**이다. 09-28(월)은 추석 연휴(09-24·25) + 주말 뒤 첫 영업일이라
+  `(09-28 − 09-23).days = 5 > 4` — 부팅 준비와 재준비에서 **모든 종목이 KIS 폴백**으로 갈 예정이었다
+  (코드 계산, 아직 실제로 일어난 적은 없다). KIS 는 한 호출 100봉까지만 주므로 VCP
+  `daily_fetch_depth_mode="full"`(250봉 설계)이 그날 100봉으로 계산될 참이었다. cycle173(06-22) 이후 달력 공백
+  5일 이상은 이번이 처음으로 보였다(달력 추론).
+- 평상시에도 봉 입력의 약 1/3 은 이미 KIS 폴백이다 — 09-23 하루 폴백 사유는 `lock` 2,232 · `insufficient`
+  247 · `stale` 27 · `miss` 21 이었다(cycle360 §1.5).
+- 시정 = 호출자가 넘긴 `expected_head`(직전 영업일)와 비교한다. 인자가 없으면 달력 판정 바이트 동일
+  (하위 호환 — kojiro `recompute_held_atr` · `llm_buy_gate`). 부작용(하루치 결손도 폴백)은 테스트로 고정했다
+  (`tests/unit/db/test_cycle363_expected_head.py`).
+- 근거 = `_workspace/domain_consult/cycle360_boot_reprepare_4a_proposal.md` §1.5·§3 표 ①′.
+
+→ CHANGELOG: cycle363 행
+
+## stock_master_daily.py / stock_master.py
+
+### 2026-09-25 cycle363(배포 전 보강) — F-3 (100봉 초과 + 1영업일 결손 예외) · F-4 (신규 카운트 함수)
+
+경위 (독립 검증 finding #3 확정 반영, 사용자 결정 2026-09-25 D4 결정 2):
+
+- F-3 이전 코드는 `expected_head` 가 있을 때 `latest < expected_head` 면 무조건 KIS 폴백했다.
+  이것이 연휴가 아닌 **평상시 요일에도** 문제였다 — VCP `daily_fetch_depth_mode="full"`(~250봉
+  요청)이 헤드가 하루 밀린 종목마다 KIS 100봉 상한에 걸려 200 EMA 가 75 EMA 로 계산됐다(독립
+  검증이 harness 로 실측). 시정 = `days > 100`(KIS 1회 한도) 이고 `latest` 가 `expected_head`
+  의 **정확히 1영업일 전**이면 폴백하지 않고 DB 를 그대로 쓴다. 2영업일 이상 결손·`days≤100` 은
+  현행대로 폴백(사용자 결정 — 연휴 뒤 등은 값을 바로잡는 것이 목적이라 폴백이 정답).
+- 판정은 `trading_calendar.previous_trading_day(expected_head)` 를 지연 import 로 불러
+  `latest` 와 비교한다(never-raise, 실패·모름은 False = 폴백 쪽 안전 방향).
+- F-4 — `stock_master.count_missing_kis_provenance_key()` 신규(`raw` 에 KIS
+  `cptt_trad_tr_psbl_yn` 키가 없는 행 수). basics 강제 재실행 판정의 재료다. `count_active()`
+  류의 "예외 시 0" fail-safe 방향과 **반대** — 이 함수는 예외를 삼키지 않는다(사용자 결정
+  "쿼리 실패는 RUN 쪽").
+
+→ CHANGELOG: cycle363(배포 전 보강) 행

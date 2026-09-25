@@ -311,3 +311,23 @@ Phase 1 산출 — 실행/조회 엔드포인트는 미구현
 ```
 
 → CHANGELOG: —
+
+## market_state.py / market_ops.py — 장운영상태 화면
+
+### 2026-09-25 cycle363 — `/api/market-ops` 행의 「마커 영구 결측 4작업」 서술 교체
+
+정본 원문(행 일부 두 곳):
+
+— 마커가 영구 결측인 4작업(`full_universe_load`·`evening_funnel_capture`·`stock_master_daily_purge`·`quote_token_refresh`)은 시각이 지나도 `failed` 가 아니라 `unknown` 이다.
+
+그러지 않으면 boot 즉시실행이 매일 남기는 07:5x 증거가 저녁 예정 실행을 하루 종일 거짓 "완료" 로 보이게 한다.
+
+경위: cycle363 이 `full_universe_load` 에 영업일 슬롯 게이트를 붙이면서 그 task 도 성공 마커를 남긴다.
+그래서 「마커가 영구 결측인 4작업」은 3작업(`evening_funnel_capture`·`stock_master_daily_purge`·
+`quote_token_refresh`)이 됐다. 다만 이 화면의 9행(전체 유니버스 적재)은 여전히 진행률만 읽는다
+(`marker_iso=None`) — 화면 행위는 불변이고 서술만 낡았다. 같은 게이트 때문에 부팅 즉시 실행이 평상시
+아침에는 돌지 않으므로 「매일 남기는 07:5x 증거」의 「매일」도 걷었다. 원문의 「4작업은 시각이 지나도
+`failed` 가 아니라 `unknown`」은 `full_universe_load`(진행률 판정 — `not_fired`/`failed` 가능)와
+`evening_funnel_capture`(산출물 판정)에는 맞지 않아, 행마다 판정 소스를 적는 문장으로 바꿨다.
+
+→ CHANGELOG: cycle363 행

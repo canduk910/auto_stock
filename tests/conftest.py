@@ -534,3 +534,53 @@ def _neutralize_api_auth(
         monkeypatch.setattr(_api_auth_mod, "authorize", lambda scope: "", raising=False)
     except Exception:
         pass
+
+
+# ---------------------------------------------------------------------------
+# cycle363 — 휴장일 판정 leaf 의 조회 seam 중립화 (cycle295·317 교훈: 게이트를 넣는
+# 사이클이 중립화 픽스처를 같이 만든다)
+#
+# `src/engine/trading_calendar.py` 는 KIS CTCA0903R(`src.api.condition.is_trading_day`)
+# 로 개장 여부를 묻고 결과를 **프로세스 수명 메모**에 담는다. 그대로 두면 두 가지가
+# 스위트를 흔든다 — (1) 부팅 즉시 실행 슬롯 게이트와 6전략 prepare 가 테스트마다 실 KIS
+# 로 나가려 하고 (2) 한 테스트가 채운 메모가 다음 테스트의 판정을 바꾼다.
+#
+# 시정 = 조회 seam `_lookup_open` 을 **None(모름)** 으로 바꾸고 메모를 비운다. 그래서
+# 이 마커가 없는 기존 테스트는 ① 슬롯 게이트에서 `reason=calendar_unknown → RUN`
+# (현행 「실행」 방향) ② prepare 에서 `expected_head=None` → 어댑터의 현행 달력 판정을 본다.
+# 휴장일 판정 자체를 검증하는 테스트는 `@pytest.mark.real_trading_calendar` 로
+# 옵트아웃하거나, 이 픽스처보다 뒤에 도는 `monkeypatch.setattr(... "_lookup_open", ...)`
+# 로 달력을 명시한다(후자가 이긴다). 옵트아웃이어도 메모는 비운다(테스트 간 격리).
+# Red 단계(leaf 미존재)에서는 import 가 실패하므로 아무것도 하지 않는다 — 전체 스위트가
+# 이 픽스처 때문에 죽지 않는다. `raising=False` 도 같은 이유다.
+# ---------------------------------------------------------------------------
+def _reset_trading_calendar_memo() -> None:
+    try:
+        from src.engine import trading_calendar as _tc_mod
+    except Exception:
+        return
+    reset = getattr(_tc_mod, "_reset_cache_for_tests", None)
+    if callable(reset):
+        try:
+            reset()
+        except Exception:
+            pass
+
+
+@pytest.fixture(autouse=True)
+def _neutralize_trading_calendar(
+    request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch
+):
+    _reset_trading_calendar_memo()
+    if not request.node.get_closest_marker("real_trading_calendar"):
+        try:
+            from src.engine import trading_calendar as _tc_mod
+
+            async def _unknown(_d: Any) -> None:
+                return None
+
+            monkeypatch.setattr(_tc_mod, "_lookup_open", _unknown, raising=False)
+        except Exception:
+            pass
+    yield
+    _reset_trading_calendar_memo()

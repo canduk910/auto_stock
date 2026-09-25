@@ -1602,3 +1602,27 @@ class StrategyBase(ABC):
                 survivors.append(ticker)
 
         return survivors
+
+    async def _resolve_expected_daily_head(self) -> date | None:
+        """cycle363 — 일봉 신선도(①′) 기준 = 「직전 영업일」.
+
+        `trading_calendar.previous_trading_day(today_kst())` 를 호출 시점에 모듈
+        속성으로 찾는다(지연 import) — never-raise(예외 → None). 6전략(VB·LTV·donchian·
+        BFB·VCP·kojiro) prepare 가 gather 전에 **1회** 호출해
+        `get_recent_daily_normalized(..., expected_head=<반환값>)` 로 넘긴다(휴장일
+        모름이면 None 을 명시해서 넘겨 어댑터의 현행 달력 판정으로 낙하시킨다).
+        """
+        expected_head: date | None = None
+        try:
+            from src.db._kst import today_kst as _today_kst  # noqa: PLC0415
+            from src.engine import trading_calendar as _tc_mod  # noqa: PLC0415
+
+            expected_head = await _tc_mod.previous_trading_day(_today_kst())
+        except Exception:
+            expected_head = None
+        logger.info(
+            "[prepare_expected_head] strategy=%s expected_head=%s",
+            self.strategy_id,
+            expected_head.isoformat() if expected_head else "None",
+        )
+        return expected_head

@@ -388,6 +388,9 @@ class VcpBreakoutStrategy(StrategyBase):
 
         today_str = datetime.now(KST).strftime("%Y%m%d")
 
+        # cycle363 — ①′ 일봉 신선도 기준(「직전 영업일」) prepare 당 1회 계산.
+        expected_head = await self._resolve_expected_daily_head()
+
         # 사이클 173 — DB 우선 어댑터. days=fetch_days + min_required=100.
         # cycle300 — `daily_fetch_depth_mode` 가 `fetch_days` 를 정한다: 기본 "cap100" 이면
         # 100(행위 보존, G-VCP-1), "full" 이면 ema_long + base_max + 10. `min_required` 는
@@ -396,7 +399,7 @@ class VcpBreakoutStrategy(StrategyBase):
         async def _fetch_one(ticker: str):
             try:
                 return ticker, await get_recent_daily_normalized(
-                    ticker, days=fetch_days, min_required=100,
+                    ticker, days=fetch_days, min_required=100, expected_head=expected_head,
                 )
             except Exception as e:
                 logger.warning("VCP 일봉 fetch 실패: %s — %s", ticker, e)

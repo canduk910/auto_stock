@@ -2018,6 +2018,8 @@ async def _scan_pool_eager_refresh_loop(
     - 24h TTL fresh skip (Q3=B)
     - ticker 간 50ms sleep (KIS Rate Limit 보호)
     - graceful 예외 처리
+    - cycle363 F-1 — upsert 전 기존 raw 머지(사이클 176 basics 경로와 같은 규칙).
+      장전 0값 키(`acml_tr_pbmn` 등)가 raw 통째 교체로 지워지는 것을 막는다.
 
     인자:
         candidates: None 이면 `_scan_pool_candidates_collector` 를 소비 (scheduler 호출),
@@ -2060,6 +2062,21 @@ async def _scan_pool_eager_refresh_loop(
         try:
             basics = await inquire_stock_basics(ticker)
             if basics is not None:
+                # cycle363 F-1 — 기존 raw 머지 보존(사이클 176 basics 경로 답습).
+                # 장전(개장 전) 이 루프가 돌면 FHKST acml_tr_pbmn=0 이 cycle145
+                # _ZERO_VALUE_SKIP_KEYS 로 skip 되고, upsert_one 이 raw 를 통째
+                # 교체하므로 거래대금 등 0값 키가 지워진다(사용자 승인, 8영역).
+                _new_raw = getattr(basics, "raw", None)
+                if isinstance(_new_raw, dict):
+                    try:
+                        _prev = await stock_master.get(ticker)
+                    except Exception:
+                        _prev = None
+                    _prev_raw = getattr(_prev, "raw", None) if _prev else None
+                    if isinstance(_prev_raw, dict) and _prev_raw:
+                        basics = basics.model_copy(
+                            update={"raw": {**_prev_raw, **_new_raw}}
+                        )
                 await stock_master.upsert_one(basics)
             refreshed += 1
         except Exception as e:

@@ -477,8 +477,9 @@ _APPROVED_CONTENT_SHA: dict[str, str] = {
     #    나머지 7영역과 `scheduler.py` 는 diff 0.
     #    자매 가드 **네 곳 전부** 같은 값(`test_g3_9b` 계약).
     #    TODO(cycle302 커밋 후): 이 항목을 **삭제**한다.
+    # 🔁 2026-09-25 (cycle363 F-1) 재핀 — `_scan_pool_eager_refresh_loop` upsert 전 기존 raw 머지(사이클 176 basics 경로 답습, 사용자 승인 8영역). 장전 0값 키(acml_tr_pbmn 등)가 raw 통째 교체로 지워지던 결함 시정. 나머지 7영역 diff 0.
     "src/engine/scanner.py":
-        "95cbb103a38821bb3b68d267a3662094b192fa55ad6071fa8dc4a63726e1c942",
+        "2c104fba38dd1e942b091bfac14cb7d152d766676405e9fd66fe27e75cb3f5a6",
     # 🔁 2026-09-25 (cycle358) 재핀 — 카드 D(관측 전용). `trade_history` PARTIAL/
     #    CANCELLED UPDATE 가 `affected==0` 이어도 무흔적이던 결함에 `[trade_status_
     #    update_miss]` WARNING 을 추가한다(사용자 승인, 워크리스트 ⑨). 매매·상태전이

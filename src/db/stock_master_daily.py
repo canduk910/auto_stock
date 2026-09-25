@@ -620,6 +620,44 @@ def _extract_raw(db_rows: list[dict], *, ticker: Optional[str] = None) -> list[d
     return normalized
 
 
+# cycle363 F-3 — KIS 일봉 API 1회 호출 상한(봉수). `days` 가 이 값을 넘어도 KIS 는
+# 최대 이 만큼만 돌려주므로, 1영업일 결손 폴백이 오히려 깊은 요청(VCP full 모드
+# 200 EMA 등)을 얕게 깎는다(200 EMA → 75 EMA 실측). 값의 근거 = KIS 공식 문서
+# (`docs/kis/domestic-stock-quote.md` 일별시세) 1회 100건 상한.
+_KIS_SINGLE_CALL_MAX_DAYS = 100
+
+
+def _legacy_calendar_fresh(latest: date) -> bool:
+    """cycle363 F-3 — 깊은 읽기(>100봉)는 현행 달력 판정을 그대로 보존한다(사용자 결정).
+
+    `expected_head` 가 없던 시절의 규칙(`today - latest <= DAILY_STALENESS_DAYS`)으로 신선하면
+    DB 를 쓴다 — KIS 는 1회 100봉만 주므로 폴백하면 VCP full 의 200 EMA 가 75 EMA 로 퇴화한다.
+    평일 2영업일 결손(달력 4일 이내)도 현행처럼 DB 로 남는다.
+    """
+    from datetime import datetime as _dt
+
+    return (_dt.now(KST).date() - latest).days <= DAILY_STALENESS_DAYS
+
+
+async def _is_exactly_one_business_day_behind(latest: date, expected_head: date) -> bool:
+    """cycle363 F-3 — `latest` 가 `expected_head` 바로 전 영업일인지 판정.
+
+    never-raise(조회 실패·모름 → False = 폴백 쪽, 안전 방향 — 값을 바로잡는
+    현행 동작을 우선한다). True 는 "정확히 1영업일 결손" 일 때만 — 2영업일
+    이상 결손(연휴 뒤 등)은 계속 KIS 폴백해 값을 바로잡는다(설계 결정,
+    `_workspace/red/cycle363_business_day_freshness_spec.md` 사용자 결정 2).
+    """
+    try:
+        from src.engine import trading_calendar as _tc  # noqa: PLC0415 — 지연 import(순환 회피)
+
+        prev = await _tc.previous_trading_day(expected_head)
+    except Exception:
+        return False
+    if prev is None:
+        return False
+    return latest == prev
+
+
 async def _kis_fallback(ticker: str, days: int, db_rows: list[dict], *, reason: str) -> list[dict]:
     """KIS fetch_daily_candles 폴백 (락/신선도/부족 공통). 실패 시 DB raw graceful."""
     try:
@@ -648,7 +686,8 @@ async def _kis_fallback(ticker: str, days: int, db_rows: list[dict], *, reason: 
 # 무변경 사용. 락/신선도/부족 시 KIS fetch_daily_candles 폴백.
 # ---------------------------------------------------------------------------
 async def get_recent_daily_normalized(
-    ticker: str, days: int, *, min_required: int | None = None
+    ticker: str, days: int, *, min_required: int | None = None,
+    expected_head: date | None = None,
 ) -> list[dict]:
     """DB raw JSONB (KIS 원본 키 보존) 반환 + 락/신선도/부족 시 KIS 폴백.
 
@@ -657,13 +696,32 @@ async def get_recent_daily_normalized(
 
     폴백 우선순위 (DB 사용 전 검사):
       1. 락 게이트 (최우선): 윈도우 내 1 row 라도 락 → KIS 폴백.
-      2. 신선도 게이트: max_bas_dd 가 today-DAILY_STALENESS_DAYS 초과 오래 → KIS 폴백.
+      2. 신선도 게이트: `expected_head` 있으면 `latest < expected_head` → KIS 폴백
+         (단, cycle363 F-3 예외 — 아래 참조), 없으면 현행 달력 판정(`max_bas_dd` 가
+         today-DAILY_STALENESS_DAYS 초과 오래) → KIS 폴백.
       3. min_required 게이트: len < min_required → KIS 폴백.
 
     Args:
         ticker: KRX 6자리 단축코드.
         days: 조회 일수.
         min_required: 최소 행 수 (이하 시 KIS 폴백). 기본 None = max(days // 2, 10).
+        expected_head: cycle363 — 「직전 영업일」 기준 신선도 판정(키워드 전용).
+            지정 시 `latest < expected_head` 만 보고 벽시계 달력 판정(`DAILY_STALENESS_DAYS`)은
+            보지 않는다. 기본 None = 현행 달력 판정 바이트 동일(하위 호환 — kojiro
+            `recompute_held_atr` · `llm_buy_gate` 등 인자 생략 호출부는 무변경).
+            알려진 부작용 = 하루치 결손도 폴백으로 잡힌다(`latest == expected_head - 1영업일`
+            → 폴백) — 저녁 적재가 하루 밀린 날은 전 종목 KIS 폴백이 발생한다(값은 맞아지지만
+            prepare 가 느려진다).
+            🔴 **cycle363 F-3 예외** — `days > 100`(KIS 1회 호출 상한, `_KIS_SINGLE_CALL_MAX_DAYS`)
+            **이고** `latest` 가 `expected_head` 보다 **정확히 1영업일** 늦으면 폴백하지
+            않고 DB 행을 그대로 쓴다. 100봉 초과 요청(VCP `daily_fetch_depth_mode="full"`
+            등)이 KIS 폴백으로 100봉으로 깎여 200 EMA 가 75 EMA 로 퇴화하던 결함
+            시정이다(실측 = 도메인 검증 finding #3). **2영업일 이상 결손이거나 얕은
+            요청(≤100봉)은 이 예외에 걸리지 않고 현행대로 KIS 폴백**한다(값을 바로잡는
+            것이 우선 — 연휴 뒤 전 종목 폴백은 그대로 방지된다는 뜻이 아니라, 그 경우는
+            애초에 값을 고치는 것이 목적이라 폴백이 정답이라는 뜻이다). 판정은
+            `_is_exactly_one_business_day_behind`(휴장일 조회 leaf, never-raise —
+            조회 실패·모름은 False = 폴백 쪽 안전 방향)가 한다.
 
     Returns:
         list[dict] — DB raw JSONB 또는 KIS fetch_daily_candles 응답 (KIS 원본 키).
@@ -686,16 +744,34 @@ async def get_recent_daily_normalized(
         )
         return await _kis_fallback(ticker, days, db_rows, reason="lock")
 
-    # 2. 신선도 게이트 — DB 최신봉이 today-staleness 보다 오래되면 KIS 폴백.
+    # 2. 신선도 게이트 — DB 최신봉이 기준보다 오래되면 KIS 폴백.
     #    max_bas_dd None (판정 불가) 은 graceful 통과 (db_rows 충분이면 사용).
     if db_rows:
         try:
             latest = await max_bas_dd(ticker)
             if latest is not None:
-                from datetime import datetime as _dt
-                today = _dt.now(KST).date()
-                if (today - latest).days > DAILY_STALENESS_DAYS:
-                    return await _kis_fallback(ticker, days, db_rows, reason="stale")
+                if expected_head is not None:
+                    # cycle363 — 직전 영업일 기준(벽시계 무관).
+                    if latest < expected_head:
+                        # cycle363 F-3 — 요청 깊이가 KIS 1회 한도(100봉)를 넘으면(VCP full 등)
+                        # 현행 달력 판정(4일 이내)으로 신선하거나 헤드가 정확히 1영업일
+                        # 결손이면 폴백하지 않고 DB 행을 그대로 쓴다 — 100봉 KIS 폴백으로
+                        # 200 EMA 가 75 EMA 로 깎이는 것을 막고 깊은 읽기의 현행 행위를
+                        # 보존한다(사용자 결정). 그 밖(연휴 뒤 2영업일 이상 결손 등)과
+                        # 얕은 요청(≤100봉)은 KIS 폴백해 값을 바로잡는다.
+                        if days > _KIS_SINGLE_CALL_MAX_DAYS and (
+                            _legacy_calendar_fresh(latest)
+                            or await _is_exactly_one_business_day_behind(latest, expected_head)
+                        ):
+                            pass
+                        else:
+                            return await _kis_fallback(ticker, days, db_rows, reason="stale")
+                else:
+                    # 현행 달력 판정(하위 호환) — 바이트 동일.
+                    from datetime import datetime as _dt
+                    today = _dt.now(KST).date()
+                    if (today - latest).days > DAILY_STALENESS_DAYS:
+                        return await _kis_fallback(ticker, days, db_rows, reason="stale")
         except Exception:
             logger.exception(
                 "[stock_master_daily] 신선도 검사 예외 graceful ticker=%s", ticker,

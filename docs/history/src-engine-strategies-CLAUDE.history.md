@@ -811,3 +811,16 @@ cycle287 배포 시점에 두 키가 어디에도 없어 `PUT /api/strategies/{i
 ---
 
 → CHANGELOG: cycle301 행
+
+## prepare 공통
+
+### 2026-09-25 cycle363 — 어댑터 호출 계약에 `expected_head` · kojiro 를 더했다
+
+정본 원문:
+
+- 5 전략(VB/LTV/donchian/BFB/VCP) 일봉 소스 = `get_recent_daily_normalized(ticker, days=N, min_required=M)`(DB 우선 어댑터). **전략별 `min_required`**: VB 22 · LTV 22 · donchian **63**(필수 lookback 61 = `long_ma` 60+1 — **절대 하향 금지**, silent 왜곡) · BFB 35 · VCP 100(깊이 모드와 무관하게 100 — 위 VCP 절 참조). `None` 의존 금지. momentum 은 실시간이라 제외.
+
+경위: cycle363 ①′ 이 6전략 `prepare()` 에 `expected_head`(직전 영업일)를 배선했다. kojiro 도 같은 어댑터를
+`min_required=KOJIRO_MIN_REQUIRED`(80)로 쓰고 있었으나 원문 목록(5 전략)에서 빠져 있어 함께 넣었다.
+
+→ CHANGELOG: cycle363 행

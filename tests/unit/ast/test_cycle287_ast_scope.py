@@ -96,8 +96,9 @@ _BASE_SHA = {
     #    (분기에서 지수 소속 판정 제거 · `vcp_universe_tickers` 집합 소멸.
     #    목표 깊이 상수는 불변). 값만 옮긴다 — 단언은 그대로다.
     #    구 값은 cycle299 기준선(3b7366cc…)이다.
+    # 🔁 2026-09-25 (cycle363 F-1) 재핀 — `_scan_pool_eager_refresh_loop` upsert 전 기존 raw 머지(사이클 176 basics 경로 답습, 사용자 승인 8영역). 장전 0값 키(acml_tr_pbmn 등)가 raw 통째 교체로 지워지던 결함 시정. 나머지 7영역 diff 0.
     "src/engine/scanner.py":
-        "95cbb103a38821bb3b68d267a3662094b192fa55ad6071fa8dc4a63726e1c942",
+        "2c104fba38dd1e942b091bfac14cb7d152d766676405e9fd66fe27e75cb3f5a6",
     "src/engine/strategy_registry.py":
         "d794696e54ffdc36efa6df917879d780e86bc1f373bb3b5d8dcbc0beac8cef8b",
     # 8영역 — realtime 전부
@@ -119,7 +120,7 @@ _BASE_SHA = {
         "4125c271b4147e59922f4f000e523429fb4bbef37058dc754fd92b9475ec58f1",
     # 8영역은 아니지만 이 사이클이 무접촉을 약속한 파일
     "src/engine/strategy_base.py":
-        "3f27be39784f9cb86d72b0c625b705b57d4ee8f555121024f757a2df51a3161d",
+        "19353f030cda3bf0dde33bee04d9a00f7870f6c083d6d4cf90b86b8223dc2c12",
     # 시각 표의 **유일 정본** — cycle287 은 읽기만 했다. 바꾸면 픽스처 동기 사슬
     # (`tools/test_fixtures/gen_market_state_fixture.py` + 프론트/E2E 픽스처 2)이
     # 통째로 딸려 오고, cycle282 `test_i1/i2/i3` 가 즉시 RED 다(실증: cycle289 가
@@ -143,19 +144,19 @@ _BASE_SHA = {
     "src/engine/strategies/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "src/engine/strategies/bull_flag_breakout.py":
-        "6ee3cb9f8df149d2c3a4fdc00885b855399cf13036e9ea02021263b773676bfa",
+        "f72cc0c71ee6f9b1851407e3e57df549468a2904d6a702d4f99e4ef97c4b4b1b",
     "src/engine/strategies/donchian_swing.py":
-        "cc57e5673f9982aca97f61677084e040171fff307483fedf10459b567a4679e3",
+        "0108f5a03ebc96aa6a14190eafb92ac174202bb13df4c2383e4d6bb9a59f5364",
     "src/engine/strategies/kojiro.py":
-        "0e2e7e07e802b541aeeab5bce2ad29716148d59a8c9daf2213127550114214a9",
+        "329bd29d661f8be1d551ce9b44780dd9d78461df7c21ab2ed1b662e31e52cee5",
     "src/engine/strategies/long_tail_volatility.py":
-        "1948c394c1fe1fc612a063d528dc4282b2b25d7ababd266ba1d7e9fe6c54158e",
+        "2c638a76dbded9a7151963f0a3fef7405b1a6233329f65050d66960913bf394c",
     "src/engine/strategies/momentum.py":
         "50d5c0b9a232d6110f6b85fc524569853f2b8edffe2fd44adc24289800b95ae2",
     "src/engine/strategies/vcp_breakout.py":
-        "da6ef794fc92493ce3780853116902190d716087ed562b7d04e7395014773b7d",
+        "7c6477fd4d51623fa8f10daf53cedd4c0bf5fe778e59a005369f9ec798cb201a",
     "src/engine/strategies/volatility_breakout.py":
-        "d13efaa4a9424e2822b5476ce159987d2a5192a4bca30af3f1a0cae9c3ffcabc",
+        "be4327754fc4ebf63de58553e68c7a2d8eba14f43f847490bf22cae90d7e5400",
 }
 
 #: `src/**/*.py` 전수(세 변경 파일 제외)의 (경로, 내용sha) 누적 digest.
@@ -187,7 +188,9 @@ _BASE_SHA = {
 #: 신규 leaf 1 = `src/engine/pyramid_shadow.py`(순수 코어 `overlay_ladder`·`no_add_flags`
 #: + async 어댑터 `build_pyramid_shadow`, 매매 행위 0·SELECT 전용). digest 에는 그
 #: leaf + `log_metrics_collector.py`(끝 키 `pyramid_shadow` 배선)가 포함돼 재계산했다.
-_SRC_TREE_FILES = 156
+#: 🔁 cycle363 재핀 — 신규 leaf `src/engine/trading_calendar.py`(휴장일 판정 공용,
+#: `src.*` import 0) 추가로 156 → **157**. 사용자 승인 D4 카드1(가)·카드2(나).
+_SRC_TREE_FILES = 157
 #: ⚠️ 값은 **cycle285 적대 검증 반영** 기준선이다. 그 직전(초판 cycle285 배포)
 #: digest 는 `97483c5114a1d00dc8f7ca7c1ed08e1b3dc1d0b585065b14176dc227da9bed8c` 였다.
 #: cycle287b 배포분의 digest 는
@@ -446,8 +449,22 @@ _SRC_TREE_FILES = 156
 #: 반영(부동소수 경계 반올림 + `DEFAULT_PARAMS` 주석 오타 시정 + `CATALOG_VERSION`
 #: `cycle300.1`→`cycle352.1`)으로 두 번 더 움직였다. 파일 수는 156 로 불변이다.
 #: 직전 값 = `61f098adf846176252aa81886a3f328b61295f73018b222dfe38a7edd5546f12`.
+#: 🔁 cycle363 재핀 — 영업일 기준 신선도(①) + 일봉 신선도 직전 영업일 기준(①′).
+#: 신규 leaf `trading_calendar.py` + `task_loop_helper.py`(슬롯 게이트) +
+#: `data_load_tasks.py`(배선) + `db/stock_master_daily.py`(`expected_head`) +
+#: `strategy_base.py` + 6전략 `prepare`(`expected_head` 배선). 직전 값 =
+#: `e54d5fce287dd87d12f2f9dd907e6a65429492bcb37be3802868c212dc4963cc`.
+#: 🔁 cycle363 F-2 재핀 — `_evaluate_slot_gate` never-raise 보강(naive 마커·비 tz-aware
+#: 슬롯 흡수). 직전 값 = `ade9c7c5c269b25dedb26950da4a474f726a41822ff4b0ffc3464bc97ac34995`.
+#: 🔁 cycle363(배포 전 보강, 독립 검증 confirmed 반영) 재핀 — 움직인 파일 5 =
+#: `engine/scanner.py`(F-1 raw 머지, sha 재핀 별도 — `_APPROVED_CONTENT_SHA` 13곳) ·
+#: `db/stock_master_daily.py`(F-3 1영업일 예외) · `db/stock_master.py`(F-4 신규
+#: `count_missing_kis_provenance_key`) · `engine/data_load_tasks.py`(F-4 basics
+#: 강제실행 배선) · `engine/task_loop_helper.py`(F-4 `force_run_reason` kwarg +
+#: F-2 안정화는 leaf 쪽). 파일 수는 **157 로 불변**(신규 파일 0). 직전 값 =
+#: `b5e65b4e20bbed997998761b406302b8705d72649d63effe48d2122baae9e1b0`.
 _SRC_TREE_DIGEST = (
-    "e54d5fce287dd87d12f2f9dd907e6a65429492bcb37be3802868c212dc4963cc"
+    "b890121d0ec78bad0a86e0a44fed6f599f935ea7ff773c975943ab9a1d0e65d6"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
@@ -469,7 +486,8 @@ _PINNED_DIR_FILE_COUNTS = {
     "src/auth": 3,
     "src/engine/strategies": 8,
     # cycle351 — 신규 leaf `pyramid_shadow.py` 로 77 → 78.
-    "src/engine": 78,
+    # cycle363 — 신규 leaf `trading_calendar.py` 로 78 → 79.
+    "src/engine": 79,
 }
 
 #: `scheduler.py` 정확 라인 수 + cycle257 영구 상한.

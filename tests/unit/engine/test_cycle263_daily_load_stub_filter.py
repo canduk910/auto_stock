@@ -11,7 +11,8 @@
 
 시정 두 축:
 - **(가)** `data_load_tasks.stock_master_daily_load_task_loop` 의 `run_periodic_task_loop`
-  호출에 `immediate_skip_if_fresh_hours=IMMEDIATE_FRESH_SKIP_HOURS`(20.0) 추가 — 8영역 밖.
+  호출에 부팅 즉시 실행 신선도 게이트 추가 — 8영역 밖. (cycle263 은 시간 게이트
+  `IMMEDIATE_FRESH_SKIP_HOURS`(20h)였고 **cycle363 이 영업일 슬롯 게이트로 바꿨다** — 아래 🔁 절.)
 - **(다)** `scanner._stock_master_daily_load_once` 가 `fetched += 1` **뒤** ·
   `upsert_batch` **앞**에서 **함수 진입 시각이 20:00 KST(cycle283) 이전이면 `bas_dd == today` 캔들을
   폐기** — 8영역(사용자 결정 09-06 카드 ④ 승인).
@@ -66,6 +67,24 @@ Red 유효성(현재 소스):
 ⚠️ 의미 반전 ②: `[daily_load_today_bar_filter] mode=` 이 **세 번째 세대**다
    (원본 / cycle263 / cycle283). 15:40~20:00 구간 실행의 `mode` 가 keep → **drop**
    으로 뒤집힌다. 3세대 로그 합산 금지.
+
+────────────────────────────────────────────────────────────────────────────
+🔁 cycle363 개정 (2026-09-25, 사용자 결정 D4 카드1 (가)·카드2 (나)) — A1·A3~A8·G2
+────────────────────────────────────────────────────────────────────────────
+daily 게이트가 **시간(20h) → 영업일 슬롯**(`immediate_skip_if_fresh_since_trading_slot=True`,
+슬롯 = `wait_time` = 20:30)으로 바뀌었다. 「마커가 직전 영업일 20:30 뒤인가」로 판정한다.
+그래서 A 계열의 「N시간 전 마커」 합성은 **고정 시각(`task_loop_helper._now_kst`) + 고정
+달력(`trading_calendar._lookup_open`)** 위의 날짜 마커로 바꿨다 — 벽시계 독립. 각 단언의
+의도(아침 껍데기 봉 생성 주체 소멸 · 저녁 실패 다음 아침 자가 치유 · fail-open · 정기 발화
+불변 · 실패 시 마커 미기록)는 그대로다.
+- **A5 는 의도적으로 뒤집힌다**: 「주말 63.9h → 월요일 실행 = 주 1회 무결성 재fetch」 →
+  「금요일 20:30 뒤 마커 → 월요일 **SKIP**」. 월요일 재fetch 가 없어져도 월요일 20:30 정기
+  실행의 7일 증분 창이 같은 구간을 다시 덮는다(G2 의 「보정 창 존치」 단언이 그 창을 잠근다).
+  금요일 「마커 남기고 부분 실패」는 평일과 같은 위험 등급이다(cycle360 메모 §7).
+- A7·A8·G2 는 지시서 목록 밖이지만 fresh-skip 을 전제한다 — 전역 중립화(달력 모름 →
+  `calendar_unknown → RUN`) 아래에서는 A8·G2 가 거짓 붉음이 되므로 같은 방식으로 고정했다.
+근거 = `_workspace/domain_consult/cycle360_boot_reprepare_4a_proposal.md` §1.1·§1.2·§7 ·
+지시서 `_workspace/red/cycle363_business_day_freshness_spec.md` §3.2.
 """
 
 from __future__ import annotations
@@ -83,7 +102,7 @@ from freezegun import freeze_time
 
 from src.db._kst import KST
 from src.engine import data_load_tasks, scanner
-from src.engine.task_loop_helper import IMMEDIATE_FRESH_SKIP_HOURS
+from src.engine.scheduler import TIME_STOCK_MASTER_DAILY_LOAD
 
 pytestmark = pytest.mark.unit
 
@@ -196,15 +215,45 @@ class FakeScheduler:
         return None
 
 
-def _iso_hours_ago(hours: float) -> str:
-    return (datetime.now(KST) - timedelta(hours=hours)).isoformat()
+# cycle363 — A 계열 고정 시각·달력 (벽시계 독립). 2026-09: 09-18(금)·09-21(월)~09-23(수)
+# 개장, 09-24·25 추석 휴장, 주말 휴장.
+_A_HOLIDAYS = frozenset({date(2026, 9, 24), date(2026, 9, 25)})
+_TUE_0922_0745 = datetime(2026, 9, 22, 7, 45, tzinfo=KST)
+_MON_0921_0745 = datetime(2026, 9, 21, 7, 45, tzinfo=KST)
+
+
+def _marker_iso(y: int, m: int, d: int, hh: int, mm: int) -> str:
+    return datetime(y, m, d, hh, mm, tzinfo=KST).isoformat()
+
+
+async def _fake_lookup_open(d: date) -> bool:
+    """`trading_calendar._lookup_open` 대역 — 평일 개장, 추석 이틀 휴장."""
+    return d.weekday() < 5 and d not in _A_HOLIDAYS
+
+
+def _calendar_patches(stack, now: datetime | None) -> None:
+    """고정 달력(+ 선택적 고정 시각). leaf 부재(Red)면 ModuleNotFoundError."""
+    import importlib
+
+    stack.enter_context(patch("src.engine.trading_calendar._lookup_open", _fake_lookup_open))
+    importlib.import_module("src.engine.trading_calendar")._reset_cache_for_tests()
+    if now is not None:
+        stack.enter_context(
+            patch("src.engine.task_loop_helper._now_kst", lambda: now, create=True)
+        )
 
 
 async def _run_daily_facade(
-    *, scheduler: FakeScheduler, once_mock, get_mock, set_mock
+    *, scheduler: FakeScheduler, once_mock, get_mock, set_mock,
+    now: datetime = _TUE_0922_0745,
 ) -> None:
-    """`stock_master_daily_load_task_loop` 를 실 헬퍼로 구동 (게이트 배선 검증용)."""
-    with patch(
+    """`stock_master_daily_load_task_loop` 를 실 헬퍼로 구동 (게이트 배선 검증용).
+
+    cycle363 — 시각(`_now_kst`)·달력(`_lookup_open`) 고정 + 슬롯 = 정본 20:30.
+    """
+    from contextlib import ExitStack
+
+    with ExitStack() as stack, patch(
         "src.engine.scanner._stock_master_daily_load_once", once_mock
     ), patch(
         "src.engine.stock_master_daily_metrics.record_stock_master_daily_load",
@@ -219,8 +268,9 @@ async def _run_daily_facade(
     ), patch(
         "src.engine.task_loop_helper.asyncio.sleep", new_callable=AsyncMock
     ):
+        _calendar_patches(stack, now)
         await data_load_tasks.stock_master_daily_load_task_loop(
-            scheduler, wait_time=dtime(16, 0)
+            scheduler, wait_time=TIME_STOCK_MASTER_DAILY_LOAD
         )
 
 
@@ -295,10 +345,11 @@ class _LoadHarness:
 # ══════════════════════════════════════════════════════════════════════
 @pytest.mark.asyncio
 async def test_A1_daily_facade_passes_freshness_gate_argument():
-    """C1 — daily_load facade 가 `immediate_skip_if_fresh_hours=20.0` 을 넘긴다.
+    """C1 — daily_load facade 가 부팅 즉시 실행 신선도 게이트 인자를 넘긴다.
 
-    basics/master/financial 3 task 는 이미 넘기고 프로덕션에서 skip 중이다
-    (`system_config` 실측). daily_load 만 부재 = 이 결함의 (가) 축.
+    🔁 cycle363 — 시간 게이트(`immediate_skip_if_fresh_hours=20.0`) → **영업일 슬롯 게이트**
+    (`immediate_skip_if_fresh_since_trading_slot=True`, 슬롯 = `wait_time`). 시간 kw 는
+    **없어야** 한다(동시 지정 = ValueError). 모듈 docstring 🔁 절.
     """
     captured: dict = {}
 
@@ -307,18 +358,19 @@ async def test_A1_daily_facade_passes_freshness_gate_argument():
 
     with patch("src.engine.task_loop_helper.run_periodic_task_loop", _capture):
         await data_load_tasks.stock_master_daily_load_task_loop(
-            FakeScheduler(), wait_time=dtime(16, 0)
+            FakeScheduler(), wait_time=TIME_STOCK_MASTER_DAILY_LOAD
         )
 
     assert captured.get("task_label") == "stock_master_daily_load"
-    assert "immediate_skip_if_fresh_hours" in captured, (
-        "C1 위반 — daily_load task 가 신선도 게이트 인자를 전달하지 않는다 "
+    assert captured.get("immediate_skip_if_fresh_since_trading_slot") is True, (
+        "C1 위반 — daily_load task 가 영업일 슬롯 게이트 인자를 전달하지 않는다 "
         f"(전달 인자={sorted(captured)})"
     )
-    assert captured["immediate_skip_if_fresh_hours"] == IMMEDIATE_FRESH_SKIP_HOURS, (
-        f"게이트 임계는 IMMEDIATE_FRESH_SKIP_HOURS(=20.0) 정본 재사용 의무 "
-        f"(실측 {captured['immediate_skip_if_fresh_hours']!r})"
+    assert captured.get("immediate_skip_if_fresh_hours") is None, (
+        "cycle363 — daily_load 는 시간 게이트를 떠났다 "
+        f"(실측 {captured.get('immediate_skip_if_fresh_hours')!r})"
     )
+    assert captured.get("wait_time") == TIME_STOCK_MASTER_DAILY_LOAD, "슬롯 = 정본 20:30"
 
 
 def test_A2_stale_not_applied_comment_is_corrected():
@@ -331,14 +383,14 @@ def test_A2_stale_not_applied_comment_is_corrected():
 
 
 @pytest.mark.asyncio
-async def test_A3_marker_15h9_skips_immediate_run():
-    """§A-6 (2) 경계 — 마커 15.9h(전일 16:00 성공) → 아침 immediate **skip**.
+async def test_A3_marker_after_previous_slot_skips_immediate_run():
+    """§A-6 (2) — 화 07:45 · 마커 월 20:32(전 영업일 20:30 슬롯 뒤 성공) → 아침 immediate **skip**.
 
-    이게 껍데기 봉 생성 주체를 없애는 축이다.
+    이게 껍데기 봉 생성 주체를 없애는 축이다. 🔁 cycle363: 「15.9h」 → 「직전 영업일 슬롯 뒤」.
     """
     sched = FakeScheduler(running=False)
     once = AsyncMock(return_value={"total": 0})
-    get_mock = AsyncMock(return_value=_iso_hours_ago(15.9))
+    get_mock = AsyncMock(return_value=_marker_iso(2026, 9, 21, 20, 32))
     set_mock = AsyncMock(return_value=None)
 
     await _run_daily_facade(
@@ -347,16 +399,19 @@ async def test_A3_marker_15h9_skips_immediate_run():
 
     assert get_mock.await_count == 1, "게이트 배선 시 마커 조회 1회 의무"
     assert once.await_count == 0, (
-        "15.9h < 20h → immediate 실행 금지 (아침 껍데기 봉 생성 주체 소멸)"
+        "마커 ≥ 직전 영업일 20:30 슬롯 → immediate 실행 금지 (아침 껍데기 봉 생성 주체 소멸)"
     )
 
 
 @pytest.mark.asyncio
-async def test_A4_marker_39h9_runs_immediate_selfheal():
-    """§A-6 (2) 경계 — 39.9h(전날 16:00 실패) → immediate 실행 = 자기 치유."""
+async def test_A4_marker_before_previous_slot_runs_immediate_selfheal():
+    """§A-6 (2) — 화 07:45 · 마커 금 20:32(월 20:30 정기 실패) → immediate 실행 = 자기 치유.
+
+    🔁 cycle363: 「39.9h」 → 「마커 < 직전 영업일(월) 20:30 슬롯」.
+    """
     sched = FakeScheduler(running=False)
     once = AsyncMock(return_value={"total": 0})
-    get_mock = AsyncMock(return_value=_iso_hours_ago(39.9))
+    get_mock = AsyncMock(return_value=_marker_iso(2026, 9, 18, 20, 32))
     set_mock = AsyncMock(return_value=None)
 
     await _run_daily_facade(
@@ -364,30 +419,43 @@ async def test_A4_marker_39h9_runs_immediate_selfheal():
     )
 
     assert once.await_count == 1, (
-        "39.9h > 20h → immediate 실행 의무 (16:00 실패 다음날 D 봉 복구 = 사이클106 안전망)"
+        "마커 < 직전 영업일 슬롯 → immediate 실행 의무 (정기 실패 다음날 D 봉 복구 = 사이클106 안전망)"
     )
     assert set_mock.await_count == 1, "immediate 성공 → 마커 기록 의무"
 
 
 @pytest.mark.asyncio
-async def test_A5_marker_63h9_weekend_runs_immediate():
-    """§A-6 (2) 경계 — 63.9h(금 16:00 → 월 07:56) → immediate 실행 (주 1회 무결성 재fetch)."""
+async def test_A5_weekend_friday_marker_skips_monday_immediate():
+    """🔁 cycle363 **의도적 반전** — 월 07:45 · 마커 금 20:32 → 월요일 immediate **SKIP**.
+
+    종전(cycle263): 「63.9h(금 → 월) > 20h → 월요일 immediate 실행 = 주 1회 무결성 재fetch」.
+    지금: 금요일 20:30 정기 실행은 월요일 기준 **직전 영업일** 실행이라 신선하다. 월요일
+    재fetch 가 없어져도 월요일 20:30 정기 실행의 7일 증분 창이 같은 구간을 다시 덮는다
+    (G2 「보정 창 존치」 단언이 그 창을 잠근다). 금요일 「마커 남기고 부분 실패」는 평일과
+    같은 위험 등급이다(cycle360 메모 §7). 모듈 docstring 🔁 절.
+    """
     sched = FakeScheduler(running=False)
     once = AsyncMock(return_value={"total": 0})
-    get_mock = AsyncMock(return_value=_iso_hours_ago(63.9))
+    get_mock = AsyncMock(return_value=_marker_iso(2026, 9, 18, 20, 32))
     set_mock = AsyncMock(return_value=None)
 
     await _run_daily_facade(
-        scheduler=sched, once_mock=once, get_mock=get_mock, set_mock=set_mock
+        scheduler=sched, once_mock=once, get_mock=get_mock, set_mock=set_mock,
+        now=_MON_0921_0745,
     )
 
     assert get_mock.await_count == 1, "게이트 배선 시 마커 조회 1회 의무"
-    assert once.await_count == 1, "주말 경과(63.9h > 20h) → 월요일 immediate 실행 의무"
+    assert once.await_count == 0, (
+        "금요일 20:30 뒤 마커 = 직전 영업일 슬롯 이후 → 월요일 immediate 실행 금지 (cycle363)"
+    )
 
 
 @pytest.mark.asyncio
 async def test_A6_marker_query_exception_runs_immediate_fail_open():
-    """§A-6 (3) — 마커 조회 예외 → immediate 실행(fail-open). (다)가 오늘봉을 버려 무해."""
+    """§A-6 (3) — 마커 조회 예외 → immediate 실행(fail-open). (다)가 오늘봉을 버려 무해.
+
+    🔁 cycle363: 슬롯 게이트에서도 `reason=marker_error → RUN`. 시각·달력은 고정해 둔다.
+    """
     sched = FakeScheduler(running=False)
     once = AsyncMock(return_value={"total": 0})
     get_mock = AsyncMock(side_effect=RuntimeError("pg down"))
@@ -415,7 +483,8 @@ async def test_A7_evening_success_records_marker_for_daily_label():
         return {"total": 7}
 
     once = AsyncMock(side_effect=_once)
-    get_mock = AsyncMock(return_value=_iso_hours_ago(15.9))
+    # 🔁 cycle363 — 「15.9h」 → 화 07:45 기준 직전 영업일(월) 20:30 슬롯 뒤 마커.
+    get_mock = AsyncMock(return_value=_marker_iso(2026, 9, 21, 20, 32))
     set_mock = AsyncMock(return_value=None)
 
     await _run_daily_facade(
@@ -447,7 +516,8 @@ async def test_A8_evening_raise_does_not_record_marker():
         raise RuntimeError("KIS 장애")
 
     once = AsyncMock(side_effect=_boom)
-    get_mock = AsyncMock(return_value=_iso_hours_ago(15.9))
+    # 🔁 cycle363 — 「15.9h」 → 화 07:45 기준 직전 영업일(월) 20:30 슬롯 뒤 마커.
+    get_mock = AsyncMock(return_value=_marker_iso(2026, 9, 21, 20, 32))
     set_mock = AsyncMock(return_value=None)
 
     await _run_daily_facade(
@@ -1328,7 +1398,8 @@ async def test_G1_intraday_redeploy_hole_is_closed():
 async def test_G2_three_day_convergence_simulation():
     """§A-6 (5) — D0 껍데기 → D1 전환 → D2 정상 (07:56 / **20:30** × 3일, cycle283).
 
-    성공 서명: (i) 아침 immediate 는 **첫날만** 실행 (D1·D2 는 마커 15.9h 로 skip)
+    성공 서명: (i) 아침 immediate 는 **첫날만** 실행 (D1·D2 는 마커가 직전 영업일 20:30
+    슬롯 뒤라 skip — 🔁 cycle363: 종전 「15.9h」 시간 판정을 영업일 슬롯 판정으로, 달력 고정)
     (ii) DB 에 껍데기 행이 한 건도 남지 않는다 (iii) D1 부터 아침 prepare 가 읽는
     헤드가 **직전 거래일 확정 실봉**이다.
     """
@@ -1391,6 +1462,9 @@ async def test_G2_three_day_convergence_simulation():
             create=True))
         stack.enter_context(patch("src.engine.task_loop_helper.asyncio.sleep",
                                   new_callable=AsyncMock))
+        # 🔁 cycle363 — 슬롯 게이트는 휴장일 leaf 를 탄다. 전역 중립화(모름 → RUN) 대신
+        # 고정 달력. 시각은 바깥 `freeze_time` 이 `_now_kst()` 까지 고정한다.
+        _calendar_patches(stack, None)
 
     heads_at_morning: dict[str, str] = {}
     sim_days = [date(2026, 9, 7), date(2026, 9, 8), date(2026, 9, 9)]
@@ -1414,7 +1488,7 @@ async def test_G2_three_day_convergence_simulation():
 
     morning_calls = [c for c in once_calls if c.hour == 7]
     assert len(morning_calls) == 1, (
-        f"아침 immediate 는 D0(마커 부재) 1회뿐 의무 — D1/D2 는 15.9h fresh skip. "
+        f"아침 immediate 는 D0(마커 부재) 1회뿐 의무 — D1/D2 는 직전 영업일 슬롯 뒤 마커로 skip. "
         f"실측 {[c.isoformat() for c in morning_calls]}"
     )
     assert morning_calls[0].date() == date(2026, 9, 7)

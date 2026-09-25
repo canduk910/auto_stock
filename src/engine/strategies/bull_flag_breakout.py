@@ -306,11 +306,14 @@ class BullFlagBreakoutStrategy(StrategyBase):
 
         today_str = datetime.now(KST).strftime("%Y%m%d")
 
+        # cycle363 — ①′ 일봉 신선도 기준(「직전 영업일」) prepare 당 1회 계산.
+        expected_head = await self._resolve_expected_daily_head()
+
         # 사이클 173 — DB 우선 어댑터 (락/신선도/부족 시 KIS 폴백). min_required=35 명시 (자문 §4).
         async def _fetch_one(ticker: str):
             try:
                 return ticker, await get_recent_daily_normalized(
-                    ticker, days=fetch_days, min_required=35,
+                    ticker, days=fetch_days, min_required=35, expected_head=expected_head,
                 )
             except Exception as e:
                 logger.warning("눌림목 일봉 fetch 실패: %s — %s", ticker, e)

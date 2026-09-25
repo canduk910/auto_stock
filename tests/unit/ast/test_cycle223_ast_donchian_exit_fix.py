@@ -459,8 +459,9 @@ _PREEXISTING_CONTENT_SHA: dict[str, str] = {
     #    나머지 7영역과 `scheduler.py` 는 diff 0.
     #    자매 가드 **네 곳 전부** 같은 값(`test_g3_9b` 계약).
     #    TODO(cycle302 커밋 후): 이 항목을 **삭제**한다.
+    # 🔁 2026-09-25 (cycle363 F-1) 재핀 — `_scan_pool_eager_refresh_loop` upsert 전 기존 raw 머지(사이클 176 basics 경로 답습, 사용자 승인 8영역). 장전 0값 키(acml_tr_pbmn 등)가 raw 통째 교체로 지워지던 결함 시정. 나머지 7영역 diff 0.
     "src/engine/scanner.py":
-        "95cbb103a38821bb3b68d267a3662094b192fa55ad6071fa8dc4a63726e1c942",
+        "2c104fba38dd1e942b091bfac14cb7d152d766676405e9fd66fe27e75cb3f5a6",
     # 🔁 2026-09-25 (cycle358) 재핀 — 카드 D(관측 전용). PARTIAL/CANCELLED UPDATE
     #    `affected==0` 무흔적에 `[trade_status_update_miss]` WARNING 추가(사용자
     #    승인, 워크리스트 ⑨). 매매·상태전이 로직 무변경. 자매 가드 네 곳 전부 같은
@@ -653,17 +654,17 @@ def test_g223_11_eight_areas_have_no_donchian_exit_symbols():
 #    TODO(cycle290 커밋 후): 이 항목들 삭제하고 dict 를 다시 비운다.
 _CYCLE228_STRATEGY_CONTENT_SHA: dict[str, str] = {
     "src/engine/strategies/volatility_breakout.py":
-        "d13efaa4a9424e2822b5476ce159987d2a5192a4bca30af3f1a0cae9c3ffcabc",
+        "be4327754fc4ebf63de58553e68c7a2d8eba14f43f847490bf22cae90d7e5400",
     "src/engine/strategies/long_tail_volatility.py":
-        "1948c394c1fe1fc612a063d528dc4282b2b25d7ababd266ba1d7e9fe6c54158e",
+        "2c638a76dbded9a7151963f0a3fef7405b1a6233329f65050d66960913bf394c",
     "src/engine/strategies/kojiro.py":
-        "0e2e7e07e802b541aeeab5bce2ad29716148d59a8c9daf2213127550114214a9",
+        "329bd29d661f8be1d551ce9b44780dd9d78461df7c21ab2ed1b662e31e52cee5",
     "src/engine/strategies/momentum.py":
         "50d5c0b9a232d6110f6b85fc524569853f2b8edffe2fd44adc24289800b95ae2",
     "src/engine/strategies/vcp_breakout.py":
-        "da6ef794fc92493ce3780853116902190d716087ed562b7d04e7395014773b7d",
+        "7c6477fd4d51623fa8f10daf53cedd4c0bf5fe778e59a005369f9ec798cb201a",
     "src/engine/strategies/bull_flag_breakout.py":
-        "6ee3cb9f8df149d2c3a4fdc00885b855399cf13036e9ea02021263b773676bfa",
+        "f72cc0c71ee6f9b1851407e3e57df549468a2904d6a702d4f99e4ef97c4b4b1b",
 }
 
 

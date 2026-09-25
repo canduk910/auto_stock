@@ -21,6 +21,47 @@ from typing import Any
 # 운영 로그 접두사([full_universe_load_summary] 등) grep 이력 단절 방지 (사이클 60 I1).
 logger = logging.getLogger("src.engine.scheduler")
 
+# cycle363 — full_universe 부트스트랩 행 수 하한(자가 치유 안전망). 운영 3,583행 ·
+# 2026-08-08 degrade 사고 60행 — 정상 운영보다 한참 아래, degrade 보다 한참 위.
+FULL_UNIVERSE_IMMEDIATE_MIN_ROWS = 2000
+
+
+async def _full_universe_below_immediate_floor() -> bool:
+    """cycle363 — `stock_master.count_active() < FULL_UNIVERSE_IMMEDIATE_MIN_ROWS`.
+
+    `count_active` 는 호출 시점에 `src.db.stock_master` 모듈 속성으로 찾는다(지연 import).
+    그 함수 자체가 예외 시 0 을 반환하므로(DB 장애 = 실행, fail-safe) 이 콜백은 별도
+    방어를 두지 않는다 — `test_cycle106_full_universe_load_lifecycle` 이 이 동작에 기댄다.
+    """
+    from src.db import stock_master as _stock_master_mod  # noqa: PLC0415
+
+    count = await _stock_master_mod.count_active()
+    return count < FULL_UNIVERSE_IMMEDIATE_MIN_ROWS
+
+
+# cycle363 F-4 — basics 강제 재실행 임계(결측 행 수). 운영 실측 결측 0행(정상) ·
+# 월요일 KRX 전량 덮어쓰기 사고 규모 2,670~2,674행 — 그 사이 어디든 안전하게
+# 걸리도록 넉넉히 잡는다.
+STOCK_MASTER_BASICS_FORCE_RUN_MISSING_THRESHOLD = 100
+
+
+async def _stock_master_basics_kis_keys_missing_above_threshold() -> bool:
+    """cycle363 F-4 — full_universe 만 돈 월요일 아침의 자가 치유.
+
+    full_universe(+0초)가 RUN 하고 basics(+480초)가 SKIP 하면, KRX 적재의
+    하드코딩 False(`nxt_tradable`·`krx_halted`·`admin_item`)와 KIS 출처 키 부재가
+    16:10 정기 실행까지 방치된다(독립 검증 finding #6). 판정은 full_universe
+    실행 *뒤* 라 실제 손상(결측 행 수)을 보고 결정한다.
+
+    `count_missing_kis_provenance_key()` 는 **의도적으로 예외를 삼키지 않는다** —
+    쿼리 실패가 여기로 전파되면 `_evaluate_slot_gate` 의 force_check 예외 처리가
+    `reason=force_check_error` 로 RUN 시킨다(사용자 결정: 쿼리 실패는 RUN 쪽).
+    """
+    from src.db import stock_master as _stock_master_mod  # noqa: PLC0415
+
+    missing = await _stock_master_mod.count_missing_kis_provenance_key()
+    return missing > STOCK_MASTER_BASICS_FORCE_RUN_MISSING_THRESHOLD
+
 
 async def scan_pool_eager_refresh_loop(scheduler: Any) -> None:
     """사이클 83 — _scan_loop 후보 풀 ticker stock_master 5분 eager refresh task.
@@ -52,6 +93,11 @@ async def full_universe_load_task_loop(scheduler: Any, *, wait_time) -> None:
 
     run_periodic_task_loop 헬퍼 위임 (사이클 67 facade 답습). 24h TTL idempotency +
     lifecycle race 차단(사이클 106) 은 헬퍼 영역에서 흡수.
+
+    cycle363 — 영업일 슬롯 게이트로 전환한다(TTL 멱등만으로는 월요일·연휴 뒤 아침에
+    직전 영업일보다 더 오래된 KRX 값이 최신 값을 덮는 것을 못 막는다 — 09-21(월) 실측이
+    09-18(목) 값을 09-22(화) 값 위에 썼다). 부트스트랩(마커 영구 결측)은 행 수 하한이
+    충분하면 skip 한다 — 「마커 없음 = 실행」이면 09-28 에 같은 덮어쓰기가 재현된다.
     """
     from src.engine.scanner import _full_universe_load_once as _load_once
     from src.engine.stock_master_metrics import (
@@ -77,7 +123,10 @@ async def full_universe_load_task_loop(scheduler: Any, *, wait_time) -> None:
         ),
         # 사이클 158 Q3 stagger — 가장 무거운 task = 즉시 발화 (0초)
         initial_delay_secs=0,
-        # 사이클 193 신선도 게이트 미적용 — full_universe 는 TTL 멱등 (게이트 대상 = basics/master 만).
+        # cycle363 — 영업일 슬롯 게이트 + 행 수 하한 자가 치유 + 마커 없음(부트스트랩) skip.
+        immediate_skip_if_fresh_since_trading_slot=True,
+        immediate_force_run_check=_full_universe_below_immediate_floor,
+        immediate_skip_if_marker_absent=True,
     )
 
 
@@ -92,7 +141,7 @@ async def stock_master_daily_load_task_loop(scheduler: Any, *, wait_time) -> Non
         record_stock_master_daily_load,
         flush_stock_master_daily_load_collector,
     )
-    from src.engine.task_loop_helper import run_periodic_task_loop, IMMEDIATE_FRESH_SKIP_HOURS
+    from src.engine.task_loop_helper import run_periodic_task_loop
 
     await run_periodic_task_loop(
         scheduler=scheduler,
@@ -117,7 +166,11 @@ async def stock_master_daily_load_task_loop(scheduler: Any, *, wait_time) -> Non
         # 실행을 전 종목 skip 시킨다(09-03/09-04 실측). 게이트는 그 껍데기 생성 주체를 없애
         # 사이클 193 의 전제를 되살린다. 마커는 once() 성공 시에만 갱신되므로 저녁 실패·
         # 프로세스 다운이면 다음 아침 immediate 가 자동 부활한다(사이클 106 안전망 보존).
-        immediate_skip_if_fresh_hours=IMMEDIATE_FRESH_SKIP_HOURS,
+        # cycle363 — 시간(20h) 게이트를 영업일 슬롯 게이트로 바꿨다. 20h 시계는 주말·연휴를
+        # 「낡았다」고 세어 월요일 아침마다 자기 치유를 발화시켰고, 그 실행이 실제로 쓴 값은
+        # 목요일(또는 그 전) KRX 값이었다(09-21 실측). 슬롯 = `wait_time`(20:30) — 마커가
+        # 직전 영업일 20:30 뒤면 fresh 로 skip 한다.
+        immediate_skip_if_fresh_since_trading_slot=True,
     )
 
 
@@ -128,7 +181,7 @@ async def stock_master_basics_refresh_task_loop(scheduler: Any, *, wait_time) ->
         record_stock_master_basics_refresh,
         flush_stock_master_basics_refresh_collector,
     )
-    from src.engine.task_loop_helper import run_periodic_task_loop, IMMEDIATE_FRESH_SKIP_HOURS
+    from src.engine.task_loop_helper import run_periodic_task_loop
 
     await run_periodic_task_loop(
         scheduler=scheduler,
@@ -146,8 +199,13 @@ async def stock_master_basics_refresh_task_loop(scheduler: Any, *, wait_time) ->
         ),
         # 사이클 159 stagger = full_universe 처리 시간 정합
         initial_delay_secs=480,
-        # 사이클 193 신선도 게이트 — basics 는 멱등 없이 매 run 전량 재작성 (17분 burst).
-        immediate_skip_if_fresh_hours=IMMEDIATE_FRESH_SKIP_HOURS,
+        # basics 는 멱등 없이 매 run 전량 재작성 (17분 burst).
+        # cycle363 — 시간(20h) 게이트를 영업일 슬롯 게이트로 바꿨다(daily_load 와 같은 이유
+        # — 월요일·연휴 뒤 아침 자기 치유가 실제로는 목요일 이전 값을 덮어썼다).
+        immediate_skip_if_fresh_since_trading_slot=True,
+        # cycle363 F-4 — full_universe 만 도는 월요일 아침의 자가 치유(사용자 승인).
+        immediate_force_run_check=_stock_master_basics_kis_keys_missing_above_threshold,
+        immediate_force_run_reason="kis_keys_missing",
     )
 
 

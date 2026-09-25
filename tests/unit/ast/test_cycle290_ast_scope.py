@@ -111,8 +111,9 @@ _BASE_SHA: dict[str, str] = {
     #    (분기에서 지수 소속 판정 제거 · `vcp_universe_tickers` 집합 소멸.
     #    목표 깊이 상수는 불변). 값만 옮긴다 — 단언은 그대로다.
     #    구 값은 cycle299 기준선(3b7366cc…)이다.
+    # 🔁 2026-09-25 (cycle363 F-1) 재핀 — `_scan_pool_eager_refresh_loop` upsert 전 기존 raw 머지(사이클 176 basics 경로 답습, 사용자 승인 8영역). 장전 0값 키(acml_tr_pbmn 등)가 raw 통째 교체로 지워지던 결함 시정. 나머지 7영역 diff 0.
     "src/engine/scanner.py":
-        "95cbb103a38821bb3b68d267a3662094b192fa55ad6071fa8dc4a63726e1c942",
+        "2c104fba38dd1e942b091bfac14cb7d152d766676405e9fd66fe27e75cb3f5a6",
     "src/engine/strategy_registry.py":
         "d794696e54ffdc36efa6df917879d780e86bc1f373bb3b5d8dcbc0beac8cef8b",
     # 8영역 — api/order
@@ -145,7 +146,7 @@ _BASE_SHA: dict[str, str] = {
     "src/engine/scheduler.py":
         "3461242a47080379c8d48dc5efd5799ce5fac173803a95476547ea4758b40a81",
     "src/engine/strategy_base.py":
-        "3f27be39784f9cb86d72b0c625b705b57d4ee8f555121024f757a2df51a3161d",
+        "19353f030cda3bf0dde33bee04d9a00f7870f6c083d6d4cf90b86b8223dc2c12",
     # 🔴 등재만으로 판정이 통해야 한다 — 검증 로직을 고쳐 통과시키면 안 된다.
     "src/engine/param_validation.py":
         "b4c5c029800191523bcc511919d6de3774e9ab49ca2fc0a0558ee3907868ee17",
@@ -212,7 +213,7 @@ _SEGMENT_SHA: dict[tuple[str, str], str] = {
     ("volatility_breakout", "calc_buy_quantity"):
         "6d24ef3f3afd211ae6123623075b08320cdc08c9cd48a6db965355305ad4e732",
     ("volatility_breakout", "prepare"):
-        "4f67ae86a6e8b81473ebd04bf072ad579845700290bf511377a5ba8c67778190",
+        "bb1c4c5ed32f051c6e4f9a7377e4834fb5555dc70ef470a92ba123cbd8bb5d0c",
     ("long_tail_volatility", "check_buy_signal"):
         "6c70101fe4abc9e5afc7f7e4a47af46ce5ebdf68fd84c2a18e22a46cb4546d1b",
     ("long_tail_volatility", "check_exit_signal"):
@@ -220,7 +221,7 @@ _SEGMENT_SHA: dict[tuple[str, str], str] = {
     ("long_tail_volatility", "calc_buy_quantity"):
         "1149ecc8ea37fb1ba164cc1fd88e6525111d5142168ca879f1026c7890905b81",
     ("long_tail_volatility", "prepare"):
-        "70f3fbb893f67ab4bcc552e285f5e1653990ed82460e0e4415c46de8775538fc",
+        "bd185aad3d2f9b9bcf24cff81047f437ec6aadb73ec35c7c9eb30a09929c2c11",
     ("donchian_swing", "check_buy_signal"):
         "c872af3dcc790942c4d954e47f2c2a9a64983b92fc0647c2e3605ab743a91ebc",
     ("donchian_swing", "check_exit_signal"):
@@ -228,7 +229,7 @@ _SEGMENT_SHA: dict[tuple[str, str], str] = {
     ("donchian_swing", "calc_buy_quantity"):
         "35c9046669290d945e78282e50b87ee04bae9d6b276e3648004b3b89f95b4c5b",
     ("donchian_swing", "prepare"):
-        "13ff9171d7fe8afea150b41b3228c51dd9ba168f17970524f76f00b2283a3a2a",
+        "0008d780e2b40b314188b0a73171a1a7e466381b465146029f5891445dd04b65",
     ("bull_flag_breakout", "check_buy_signal"):
         "b39b26fb398ca352edaf91816b4aed04cd50f47aef29d13a8b82af0f6580ed7d",
     ("bull_flag_breakout", "check_exit_signal"):
@@ -236,7 +237,7 @@ _SEGMENT_SHA: dict[tuple[str, str], str] = {
     ("bull_flag_breakout", "calc_buy_quantity"):
         "7b66c61590c8ccf51583c3121bf6519ff24c3529811ee856c730fbd8de7a850a",
     ("bull_flag_breakout", "prepare"):
-        "cb0d01540a75049fcb06f90a24d35c606c2dc425599346fc0bf6ec4cde25dd9c",
+        "25fa52230aec03549003c54c6bf9418cecb428b5303a1d9abf2f33152434c850",
     ("vcp_breakout", "check_buy_signal"):
         # cycle349 재핀 — VCP 관측 ①③(돌파선 거리 줄 · 틱 관측 훅 · watch). 매매 경로 diff 0
         # = 확장 전 HEAD 산출 골든 G1(prepare)·G2(check_buy_signal) 완전 일치로 확인.
@@ -248,7 +249,7 @@ _SEGMENT_SHA: dict[tuple[str, str], str] = {
     ("vcp_breakout", "prepare"):
         # cycle349 재핀 — VCP 관측 ①③(돌파선 거리 줄 · 틱 관측 훅 · watch). 매매 경로 diff 0
         # = 확장 전 HEAD 산출 골든 G1(prepare)·G2(check_buy_signal) 완전 일치로 확인.
-        "2567dc4be45f00a2b9dcd4e057cc83acdaae3269af7adb2de619faf5f6e51a1f",
+        "ba9361b7feaf12ee000d1e76921c8b36109af60f287cd8f4c2d5df17eb3d7916",
     ("kojiro", "check_buy_signal"):
         "dda6c6fc318afec8db576826f4cfc16d03fdc6dbdd544e7accc3f8a41de9e74f",
     ("kojiro", "check_exit_signal"):
@@ -258,7 +259,7 @@ _SEGMENT_SHA: dict[tuple[str, str], str] = {
     ("kojiro", "prepare"):
         # cycle348 재핀 — `[kojiro_macd_observe]` role=stage6_gc 확장(step6 직후
         # 자기 try 수집 + observe_macd 뒤 별도 try emit). 매매 경로 diff 0.
-        "ead691361c0b4f96c4f823ca9db90ccfba06643ebb801142cd60f4b661c45045",
+        "cc692259b71b0f1d763bfb43bf1d00c123aa00bc154784898699aa5959bce7ec",
 }
 
 
@@ -335,6 +336,10 @@ _ENGINE_PY_FILES: dict[str, tuple[str, ...]] = {
         "task_loop_helper.py", "te_metrics.py", "tick_channel_clock.py",
         "tick_channel_mode.py", "tick_channel_switch.py",
         "tick_volume.py",
+        # cycle363 — 휴장일 판정 공용 leaf(`src.*` import 0). 영업일 기준 신선도(①) +
+        # 일봉 신선도 직전 영업일 기준(①′) 이 공유한다. 등재해도 "다음 신규 파일" 은
+        # 여전히 붉어진다(이름 축 가드는 변경 없음).
+        "trading_calendar.py",
         "turtle_sizing.py", "uptime_monitor.py",
     ),
     "src/engine/strategies": (

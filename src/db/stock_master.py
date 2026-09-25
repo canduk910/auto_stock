@@ -741,6 +741,25 @@ async def get_nxt_provenance_map(tickers: list[str]) -> dict[str, bool]:
     return result
 
 
+async def count_missing_kis_provenance_key() -> int:
+    """cycle363 F-4 — `raw` 에 KIS CTPF1002R 키 `cptt_trad_tr_psbl_yn` 이 없는 행 수.
+
+    basics 강제 재실행 판정(월요일 등 full_universe 만 도는 아침의 자가 치유)의
+    재료다. `get_nxt_provenance_map` 과 같은 판별자(`raw ? 'cptt_trad_tr_psbl_yn'`)를
+    쓰지만 이쪽은 전체 카운트다.
+
+    🔴 **의도적으로 예외를 삼키지 않는다** — `count_active()` 류의 "실패 시 0" 관례를
+    여기서 반복하면 쿼리 실패가 "결측 0건"(SKIP 방향)으로 읽혀 사용자 결정
+    ("쿼리 실패는 RUN 쪽 fail-safe")과 정반대로 움직인다. 예외는 그대로 전파해
+    `task_loop_helper._evaluate_slot_gate` 의 force_check 예외 처리
+    (`reason=force_check_error`, RUN)가 흡수하게 둔다.
+    """
+    count = await pg.fetchval(
+        "SELECT count(*) FROM stock_master WHERE NOT (raw ? 'cptt_trad_tr_psbl_yn')"
+    )
+    return int(count or 0)
+
+
 async def get_nxt_tradable_map(tickers: list[str]) -> dict[str, bool | None]:
     """cycle252 — `no_feed_registry.ensure_fresh` 전용 벌크 조회.
 

@@ -1382,3 +1382,140 @@ task 별 stagger `initial_delay_secs`(full_universe=0 / basics=60 / daily=120 / 
 `start()` 직후 stagger 120초)이 7일 증분으로 보정하지만 `_boot()` 의 prepare 보다 늦다 — `[daily_head_stale]` 관측이 그것을 알린다)
 
 → CHANGELOG: cycle350 행
+
+## 정기 task 루프 (`task_loop_helper.run_periodic_task_loop`)
+
+### 2026-09-25 cycle363 — 부팅 즉시 실행 게이트를 두 갈래(시간 / 영업일 슬롯)로 나눴다
+
+정본 원문(시그니처 + 게이트 서술 4줄):
+
+```
+run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, record_fn, flush_fn,
+                       summary_log_format, summary_keys, immediate_first_run=True,
+                       retry_delay_secs=60, initial_delay_secs=0,
+                       immediate_skip_if_fresh_hours=None)
+```
+
+- **신선도 게이트**: `immediate_skip_if_fresh_hours` 를 주면 immediate 블록(stagger sleep 뒤 · once 앞)에서 `system_config.get_task_last_success(task_label)` 마커가 `0 <= elapsed < hours*3600`(미래 마커 음수 방어)일 때 immediate `once()` 를 skip 하고 `[<label>] immediate run skip — fresh` INFO 1행을 남긴다. 마커는 `once()` **성공 직후에만** 기록한다(기록 실패 → 다음 부팅 immediate 실행 = 안전 방향).
+- 모듈 상수 `IMMEDIATE_FRESH_SKIP_HOURS = 20.0`(저녁 성공 → 익일 아침 boot 이 그 안, 저녁 장애 시에는 넘어서 catch-up 실행).
+- 게이트 대상 = basics / master / daily_load / financial. 🔴 daily_load 를 넣는 이유 = 아침 immediate 가 **오늘 날짜 껍데기 봉**(O=H=L=C=전일종가, 거래량 0)을 먼저 써서 `max_bas_dd == today` 를 만들면 그날 정기 실행이 전 종목을 `skipped_fresh` 로 건너뛴다. 미대상 = full_universe / purge / evening_funnel(full_universe 는 `stock_master.is_stale()` 24h TTL 로 이미 멱등이라 같은 영업일 2회 실행이 무해하다).
+- 가드 `test_cycle193_immediate_fresh_gate.py` · `test_cycle193_task_marker_helpers.py` · `test_cycle193_ast_fresh_gate.py` · `test_cycle263_daily_load_stub_filter.py`.
+
+경위 (사용자 결정 2026-09-25 D4 카드1 (가) · 카드2 (나) + 「①′ 도 같이」):
+
+- **20h 시계가 주말·연휴를 「낡았다」로 셌다.** 금요일 저녁 마커 → 월 07:5x 부팅은 20h 를 훌쩍 넘어
+  (cycle263 A5 의 합성 = 주말 63.9h) basics·일봉 보충 적재가 월요일마다 돌았다. 영업일 슬롯 게이트는 「마커가 직전 영업일 정기 슬롯 뒤인가」
+  로 판정하므로 평상시 월요일·연휴 뒤 아침에는 돌지 않는다. master(16:30)·financial(16:40)은 범위 밖이라
+  시간 게이트에 남겼다.
+- **`test_cycle193_ast_fresh_gate.py::F-10-2` 개정 — full_universe 가 무게이트 목록을 떠났다.**
+  위 원문의 제외 근거 「TTL 멱등이라 즉시 실행이 저렴」은 실측과 달랐다. EC2 파일 로그 10거래일에서
+  20:00:0x 정기 full_universe 는 10일 모두 `fetched=0`(TTL skip)이었고, 아침 즉시 실행이 일을 한 날은
+  두 월요일(09-14 `fetched=2,674` · 09-21 `fetched=2,670`)뿐이었다. 그 일은 **전량 덮어쓰기**였다.
+  평일 아침에는 16:10 basics 가 전 종목 `refreshed_at` 을 매일 갱신해 24h TTL 이 전부 skip 했다.
+- **덮어쓴 값은 목요일 KRX 값이었다.** KRX `basDd` 는 `today − 1일` 부터 거꾸로 찾는데, 아침
+  07:45~07:53 로그 10일 전부에 `[krx_empty_response] basDd=<직전 영업일>` 이 찍혔다 — 직전 영업일 KRX
+  자료는 다음 영업일 07:53 까지 비어 있다. 09-21 07:52:52 `basDd=20260918 빈 응답` → **09-17(목) 자료를
+  적재**했다(DB 대조: `raw.TDD_CLSPRC` 가 09-17 종가와 같은 종목 965개, 09-18 종가와 같은 종목 27개).
+  09-14 07:45:52 `basDd=20260911 빈 응답` → 09-10(목) 적재. 이 값이 덮은 것은 금요일 16:10 basics 가 쓴
+  금요일 KIS 값이다. 정의 차이는 작다(09-23 KIS 16:1x 스냅샷 대 그날 일봉 거래대금 중앙값 비율 0.98,
+  10억 경계 뒤집힘 970 중 2) — **문제는 정의가 아니라 날짜였다.**
+- 자가 치유(populator)는 행 수 하한 `FULL_UNIVERSE_IMMEDIATE_MIN_ROWS=2000` 으로 보존했다(운영 3,583행 ·
+  2026-08-08 degrade 사고 60행). full_universe 는 이 게이트 전에 마커를 남긴 적이 없어(`market_ops` 가
+  「영구 결측」으로 다뤘다) 09-28(월, 추석 연휴 뒤 첫 영업일) 07:45 에 마커가 없다. 「마커 없음 = 실행」
+  이면 09-28 에 09-22 KRX 값 덮어쓰기가 그대로 일어나 카드2 (나)를 고른 이유가 사라지므로, full_universe
+  만 「마커 없음 + 행 수 ≥ 하한 → skip」으로 정했다(team-leader 설계 결정). 첫 마커는 09-28 20:00:05
+  정기 실행이 남긴다.
+- **`test_cycle263_daily_load_stub_filter.py` A5 를 의도적으로 뒤집었다.**
+  `test_A5_marker_63h9_weekend_runs_immediate`(「주말 63.9h → 월요일 실행 = 주 1회 무결성 재fetch」) →
+  `test_A5_weekend_friday_marker_skips_monday_immediate`(「금요일 20:30 뒤 마커 → 월요일 SKIP」).
+  월요일 재fetch 가 없어져도 월요일 20:30 정기 실행의 7일 증분 창이 같은 구간을 다시 덮는다(G2 의
+  「보정 창 존치」 단언이 그 창을 잠근다). 금요일 「마커를 남기고 부분 실패」는 평일과 같은 위험 등급이다
+  (cycle360 메모 §7). A1·A3~A8·G2 는 「N시간 전 마커」 합성을 고정 시각(`task_loop_helper._now_kst`) +
+  고정 달력(`trading_calendar._lookup_open`) 위의 날짜 마커로 바꿨다.
+- 함께 움직인 가드 값 둘 — `test_cycle134_task_loop_helper.py::G-134-F2` 헬퍼 라인 상한 200L → 320L
+  (실측 304L, 슬롯 게이트 +100L) · `test_cycle348_kojiro_macd_stage6.py::test_g348_b10` kojiro `prepare`
+  의 `await` 수 7 → 8(`_resolve_expected_daily_head` 1건 — 관측 확장이 아니라 별도 승인 사이클의 신규 await).
+- 근거 = `_workspace/domain_consult/cycle360_boot_reprepare_4a_proposal.md` §1.1·§1.2·§1.5·§6 · 지시서
+  `_workspace/red/cycle363_business_day_freshness_spec.md`.
+
+→ CHANGELOG: cycle363 행
+
+## funnel 스냅샷 캡처
+
+### 2026-09-25 cycle363 — 「재준비 = 월요일 보충 적재를 반영하는 유일한 경로」 서술 정정
+
+정본 원문:
+
+- **저녁 task 는 아침에도 한 번 돈다** — `run_periodic_task_loop` 의 즉시 1회(`immediate_first_run` 기본값, 신선도 게이트 `immediate_skip_if_fresh_hours` 미전달)가 `start()` +600초에 실행된다(07:45 기동이면 ≈07:57). `run_daily` 가 매 거래일 `start()` 를 다시 부르므로 재시작이 없어도 매일 돈다. 그때도 등록 전략 전부의 `prepare()` 를 다시 부르고 오늘 날짜로 잠정(`is_provisional=True`) 행을 쓴다. 이 재준비는 살아 있는 전략 객체의 후보를 교체하므로 그 뒤 매수 평가는 이 결과를 쓴다. 부팅 준비(`_boot()` 안의 전 전략 `prepare()`)는 `start()` 가 적재 태스크(`_full_universe_load_task` +0초 · `_stock_master_daily_load_task` +240초 · `_stock_master_basics_refresh_task` +480초)를 만들기 **전에** 끝난다. 그래서 월요일·연휴 뒤 아침 보충 적재(full_universe TTL 재적재 · 일봉 · basics)가 바꾼 입력을 라이브 후보에 반영하는 경로는 이 재준비 **하나뿐**이다. 🔴 **이 즉시 1회에 신선도 게이트를 걸지 않는다** — 평일 8일은 같은 결과였지만 2026-09-14·09-21(월)에는 그날 실매매 후보를 바꿨다(근거 = `_workspace/red/cycle350_evening_funnel_spec.md` §1). 이 교정은 순서 보장이 아니라 경합에 기댄다 — 재준비는 `count_all() > 0` 만 기다리고 +240초 일봉 보충 적재의 **완료**는 기다리지 않는다.
+
+경위:
+
+- cycle350 명세 §1·§3 은 +600초 재준비를 「월요일 보충 적재를 라이브 후보에 반영하는 유일한 교정 경로
+  (게이트 금지 사유)」로 적었다. cycle360 자문 실측상 그 경로가 반영한 것은 **더 오래된(목요일) KRX 값**
+  이었다 — 교정이 아니라 교체였다. 09-21 재준비의 변화(VB 81→63, VCP 7/729→5/640)는 「금요일 값 →
+  목요일 값」 교체다. 월요일 08:00 basics 가 뒤따라 돌았지만 장전이라 거래대금이 0 이고,
+  `_ZERO_VALUE_SKIP_KEYS`(`acml_tr_pbmn` 포함) 때문에 목요일 KRX 거래대금이 월요일 16:10 까지 남았다.
+- 금 19:46 재기동 부팅 준비와 월 07:51 부팅 준비는 6전략 유니버스 분모가 모두 같았다(주말 동안
+  `stock_master` 불변). 평일 부팅 준비와 +600초 재준비는 8일 중 7일 6전략 숫자까지 같았다(cycle360 §1.3).
+- cycle363 의 영업일 슬롯 게이트 뒤로는 평상시 월요일에 보충 적재가 돌지 않아 재준비가 부팅 준비와 같은
+  입력을 읽는다. 재준비 자체(+600초 즉시 1회)는 그대로 두고 게이트도 걸지 않는다 — 게이트(4a ②③)는
+  donchian 보유 트레일링 ATR 출처를 바꾸므로 카드3 결정 뒤(단계 3)다. 게이트 금지의 근거 문장을 그
+  이유로 바꿨다.
+- **F-1(미시정, 결정 대기)** — `scanner._scan_pool_eager_refresh_loop`(`scanner.py:2051-2063`)는
+  basics 경로(`scanner.py:3475`, cycle176)와 달리 기존 raw 를 머지하지 않고 `upsert_one` 이 raw 를 통째로
+  바꾼다. 월요일·연휴 뒤 아침엔 `stock_master` 행이 24h 를 넘겨 이 경로가 풀 종목(추정 120~150)을 장전에
+  KIS 로 갱신하고, 장전 0 값 키가 사라져 `acml_tr_pbmn_won` 이 NULL 이 된다. 그러면 그날 16:10 basics 가
+  복원할 때까지 그 종목이 `list_by_filter`(거래대금 임계)에서 빠진다. 월요일 아침 KRX 적재·basics 가 행을
+  fresh 로 만들던 동안에는 잠들어 있던 경로이고, 슬롯 게이트가 그 두 적재를 월요일 아침에서 걷어 내면서
+  드러났다(cycle363 심층 검증). 시정은 `scanner.py`(8영역) = 사용자 승인 대상이다.
+
+→ CHANGELOG: cycle363 행
+
+## scheduler.py — KRX/NXT 통합 운영 08:00~20:00
+
+### 2026-09-25 cycle363 — `TIME_SESSION_START_CUTOFF` 행의 보정 경로 서술 교체
+
+정본 원문(행 일부):
+
+⚠️ 그 창의 재기동은 **그날 20:30 일봉 적재를 통째로 잃는다**(다음 영업일 일봉 task 의 immediate 실행(`run_periodic_task_loop` 의 `immediate_first_run`, `start()` 직후 stagger 240초)이 7일 증분으로 보정하지만 `_boot()` 의 prepare 보다 늦다 — `[daily_head_stale]` 관측이 그것을 알린다. 보정된 일봉을 라이브 후보에 반영하는 경로는 +600초 재준비 하나이고, 그 재준비는 적재 완료를 기다리지 않는다 — 「funnel 스냅샷 캡처」 절)
+
+경위: cycle363 ①′ 이후 6전략 prepare 는 헤드가 `expected_head`(직전 영업일)보다 오래된 종목을 KIS 로
+폴백해 읽으므로, 저녁 적재가 결손된 다음 날에도 부팅 준비가 보정된 봉을 본다(휴장일 조회가 실패한 날만
+하루 밀린 DB 헤드). 「재준비 하나」가 더는 참이 아니라 교체했다.
+
+→ CHANGELOG: cycle363 행
+
+## 일봉 적재 본체
+
+### 2026-09-25 cycle363 — 어댑터 호출부 서술 교체
+
+정본 원문:
+
+- 어댑터 `get_recent_daily_normalized`(`src/db/stock_master_daily.py`)는 `strategy_base` · 전략 6파일 · `llm_buy_gate` 가 쓴다.
+
+`strategy_base` 는 어댑터를 부르지 않는다(docstring 언급뿐). 호출부는 전략 6파일 `prepare()` · kojiro
+`recompute_held_atr` · `llm_buy_gate` 이고, cycle363 부터 `prepare()` 만 `expected_head` 를 넘긴다.
+
+→ CHANGELOG: cycle363 행
+
+## 정기 task 루프 / funnel 스냅샷 캡처 / trading_calendar.py
+
+### 2026-09-25 cycle363(배포 전 보강) — 독립 검증 confirmed 반영
+
+경위: cycle363 배포 전 독립 검증(적대적, 26 에이전트 — suite·09-28 시뮬레이션·전략별 영향·
+비활성화 심층검증 4렌즈)이 confirmed 8건을 냈다. 그중 4건(F-1·F-3·F-4·F-5, major 3·minor 1)을
+같은 배포 전에 시정했다.
+
+- **F-1** — funnel 캡처 절이 「월요일·연휴 뒤 장전 `scanner._scan_pool_eager_refresh_loop` 가
+  기존 raw 머지 없이 upsert 해 장전 0값 키를 지운다」를 「미시정(결정 대기)」로 적었던 것을
+  「시정(사용자 8영역 승인)」으로 갱신했다. 시정 자체는 `scanner.py` 코드(cycle176 basics 경로와
+  같은 `{**기존, **신규}` 머지)이고, 이 문서 갱신은 그 사실을 반영한 것뿐이다. 겹치는 시각(T+600)
+  자체는 여전하다 — 바뀐 것은 그 겹침이 더 이상 데이터를 파괴하지 않는다는 것.
+- **F-4** — basics 가 full_universe 뒤에도 계속 SKIP 하며 KIS 출처 키 결손을 16:10 까지
+  방치하던 것에 강제 재실행 콜백(`immediate_force_run_check`/`immediate_force_run_reason`)을
+  신설했다. `task_loop_helper` 의 `run_periodic_task_loop`/`_evaluate_slot_gate` 시그니처에
+  키워드 인자가 하나씩 늘었다(기본값이 기존 `"below_floor"` 라 full_universe 회귀 0).
+- **F-5** — `_evaluate_slot_gate` 판정 순서 ②(marker_error)가 실제로는 도달 불가라는 사실을
+  실측(실 `get_task_last_success` 경로 테스트)으로 확인하고 문서에 명시했다. 코드는 무변경이다.
+
+→ CHANGELOG: cycle363(배포 전 보강) 행

@@ -114,7 +114,8 @@ async def _capture_prepare_fetch(strategy, candles: list[dict]) -> dict:
     """`prepare()` 가 어댑터에 넘긴 `days`/`min_required` 를 캡처한다."""
     seen: dict = {}
 
-    async def _fake_adapter(ticker, days=None, *, min_required=None):
+    async def _fake_adapter(ticker, days=None, *, min_required=None, expected_head=None):
+        # cycle363 — `expected_head` kw 수용(무시). 이 테스트의 주제는 days/min_required.
         seen["days"] = days
         seen["min_required"] = min_required
         return list(candles)

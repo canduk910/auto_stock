@@ -80,8 +80,9 @@ _BASE_SHA: dict[str, str] = {
     #    (분기에서 지수 소속 판정 제거 · `vcp_universe_tickers` 집합 소멸.
     #    목표 깊이 상수는 불변). 값만 옮긴다 — 단언은 그대로다.
     #    구 값은 cycle299 기준선(3b7366cc…)이다.
+    # 🔁 2026-09-25 (cycle363 F-1) 재핀 — `_scan_pool_eager_refresh_loop` upsert 전 기존 raw 머지(사이클 176 basics 경로 답습, 사용자 승인 8영역). 장전 0값 키(acml_tr_pbmn 등)가 raw 통째 교체로 지워지던 결함 시정. 나머지 7영역 diff 0.
     "src/engine/scanner.py":
-        "95cbb103a38821bb3b68d267a3662094b192fa55ad6071fa8dc4a63726e1c942",
+        "2c104fba38dd1e942b091bfac14cb7d152d766676405e9fd66fe27e75cb3f5a6",
     "src/engine/strategy_registry.py":
         "d794696e54ffdc36efa6df917879d780e86bc1f373bb3b5d8dcbc0beac8cef8b",
     # 8영역 — realtime 전부
@@ -113,23 +114,23 @@ _BASE_SHA: dict[str, str] = {
         "3461242a47080379c8d48dc5efd5799ce5fac173803a95476547ea4758b40a81",
     # 🔴 cycle290 이 방금 `DEFAULT_PARAMS` 를 건드렸다 — 또 건드리면 그 증명이 무너진다.
     "src/engine/strategy_base.py":
-        "3f27be39784f9cb86d72b0c625b705b57d4ee8f555121024f757a2df51a3161d",
+        "19353f030cda3bf0dde33bee04d9a00f7870f6c083d6d4cf90b86b8223dc2c12",
     "src/engine/strategies/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "src/engine/strategies/bull_flag_breakout.py":
-        "6ee3cb9f8df149d2c3a4fdc00885b855399cf13036e9ea02021263b773676bfa",
+        "f72cc0c71ee6f9b1851407e3e57df549468a2904d6a702d4f99e4ef97c4b4b1b",
     "src/engine/strategies/donchian_swing.py":
-        "cc57e5673f9982aca97f61677084e040171fff307483fedf10459b567a4679e3",
+        "0108f5a03ebc96aa6a14190eafb92ac174202bb13df4c2383e4d6bb9a59f5364",
     "src/engine/strategies/kojiro.py":
-        "0e2e7e07e802b541aeeab5bce2ad29716148d59a8c9daf2213127550114214a9",
+        "329bd29d661f8be1d551ce9b44780dd9d78461df7c21ab2ed1b662e31e52cee5",
     "src/engine/strategies/long_tail_volatility.py":
-        "1948c394c1fe1fc612a063d528dc4282b2b25d7ababd266ba1d7e9fe6c54158e",
+        "2c638a76dbded9a7151963f0a3fef7405b1a6233329f65050d66960913bf394c",
     "src/engine/strategies/momentum.py":
         "50d5c0b9a232d6110f6b85fc524569853f2b8edffe2fd44adc24289800b95ae2",
     "src/engine/strategies/vcp_breakout.py":
-        "da6ef794fc92493ce3780853116902190d716087ed562b7d04e7395014773b7d",
+        "7c6477fd4d51623fa8f10daf53cedd4c0bf5fe778e59a005369f9ec798cb201a",
     "src/engine/strategies/volatility_breakout.py":
-        "d13efaa4a9424e2822b5476ce159987d2a5192a4bca30af3f1a0cae9c3ffcabc",
+        "be4327754fc4ebf63de58553e68c7a2d8eba14f43f847490bf22cae90d7e5400",
     # 파라미터 축 — 킬스위치를 임의로 추가하지 않는다(자문 §5: 파라미터 없음).
     "src/engine/param_catalog.py":
         "246e9dddd08ea6110bef296a2eeddfef91ae317aff612c027c92f415b244c4e1",
@@ -359,9 +360,14 @@ def test_a8_no_new_leaf_in_src_engine() -> None:
     ⚠️ cycle351(피라미딩 가상 사다리 셰도)이 leaf 1개 `pyramid_shadow.py` 를 신설해
     67 → **68** 이 됐다 — 순수 코어(`overlay_ladder`·`no_add_flags`) + async 어댑터
     (`build_pyramid_shadow`), 매매 행위 0·DB 는 SELECT 만. `scheduler.py` 무접촉.
+
+    ⚠️ cycle363(영업일 기준 신선도)이 leaf 1개 `trading_calendar.py` 를 신설해
+    68 → **69** 가 됐다 — 휴장일 판정 공용 leaf(`src.*` import 0, never-raise).
+    부팅 즉시 실행 슬롯 게이트(`task_loop_helper`)와 일봉 신선도(`stock_master_daily`)
+    가 공유한다. `scheduler.py` 무접촉.
     """
     got = len(list((_ROOT / "src" / "engine").glob("*.py")))
-    assert got == 68, f"`src/engine/*.py` 파일 수 {got} (cycle351 기준선 68)"
+    assert got == 69, f"`src/engine/*.py` 파일 수 {got} (cycle363 기준선 69)"
 
 
 # ===========================================================================

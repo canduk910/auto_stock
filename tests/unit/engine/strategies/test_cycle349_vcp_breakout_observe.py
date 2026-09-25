@@ -230,7 +230,8 @@ def prepare_env(series: dict | None = None):
     series = series if series is not None else build_series()
     names = {t: f"합성{t[-2:]}" for t in UNION + [T_K]}
 
-    async def _fake_adapter(ticker, days=None, *, min_required=None):
+    async def _fake_adapter(ticker, days=None, *, min_required=None, expected_head=None):
+        # cycle363 — `expected_head` kw 수용(무시). 이 대역은 시리즈 조회만 대체한다.
         c = series.get(ticker)
         return copy.deepcopy(c) if c is not None else None
 

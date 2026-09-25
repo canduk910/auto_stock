@@ -42,14 +42,17 @@
 
 ## 마커가 없는 작업들 — 있는 그대로 노출한다
 
-`task_loop_helper.run_periodic_task_loop` 의 `immediate_skip_if_fresh_hours` 게이트
-안에서만 `system_config.set_task_last_success` 가 불린다(`src/engine/CLAUDE.md`
-task_loop_helper.py 절) — 8개 `task_label` 중 **4개**(`stock_master_daily_load`·
-`stock_master_basics_refresh`·`stock_master_master_load`·`stock_master_financial_load`)
-만 실제로 마커를 남긴다. `full_universe_load`·`evening_funnel_capture`·
-`stock_master_daily_purge`·`quote_token_refresh` 는 이 필드가 영구 결측이고, 이 화면은
-그 결측을 "실패" 로 위장하지 않는다 — 산출물이 있으면 산출물로, 없으면 `unknown`
-+ 이유를 적는다(never-raise 요구와 같은 정신: 없는 안전을 보여주지 않는다).
+`task_loop_helper.run_periodic_task_loop` 의 부팅 즉시 실행 게이트(시간 게이트
+`immediate_skip_if_fresh_hours` 또는 영업일 슬롯 게이트
+`immediate_skip_if_fresh_since_trading_slot`)를 쓰는 task 만
+`system_config.set_task_last_success` 를 부른다(`src/engine/CLAUDE.md` 「정기 task 루프」
+절) — 8개 `task_label` 중 **5개**(`stock_master_daily_load`·`stock_master_basics_refresh`·
+`stock_master_master_load`·`stock_master_financial_load`·`full_universe_load`)가 마커를
+남긴다. 다만 이 화면의 `full_universe_load` 행은 그 마커를 읽지 않고 진행률만 본다
+(`marker_iso=None`). `evening_funnel_capture`·`stock_master_daily_purge`·
+`quote_token_refresh` 는 이 필드가 영구 결측이고, 이 화면은 그 결측을 "실패" 로 위장하지
+않는다 — 산출물이 있으면 산출물로, 없으면 `unknown` + 이유를 적는다(never-raise 요구와
+같은 정신: 없는 안전을 보여주지 않는다).
 
 ## `daily_log_reports` 의 4구간 (§4-4 확장, cycle285 적대 검증 시정으로 3→4)
 
@@ -108,7 +111,8 @@ router = APIRouter(prefix="/api/market-ops", tags=["market-ops"])
 
 _KST = timezone(timedelta(hours=9))
 
-#: 마커를 남기는 4 task + 마커가 영구 결측인 4 task — 전수 8개(`task_loop_helper` 계약).
+#: 마커를 남기는 5 task + 마커가 영구 결측인 3 task — 전수 8개(`task_loop_helper` 계약).
+#: `full_universe_load` 는 마커를 남기지만 9행은 진행률만 읽는다(`marker_iso=None`).
 _MARKER_TASK_LABELS = (
     "full_universe_load",
     "stock_master_daily_load",
@@ -127,8 +131,8 @@ _FINANCIAL_WEEKLY_GATE_HOURS = 168.0
 
 #: 부팅 즉시실행(`immediate_first_run`)·수동 새로고침 라우트(`POST /api/stock-master/
 #: {basics,master,daily}/refresh`)가 예정 시각과 무관하게 같은 마커/진행률 키를 쓴다.
-#: `full_universe_load` 는 신선도 게이트 자체가 없어 **매일** 부팅 시 07:5x 경 완료
-#: 증거를 남기고, 그 값이 예정(20:00:05) 훨씬 이전인데도 날짜만 같다는 이유로 "오늘
+#: `full_universe_load` 는 부팅 즉시실행이 돈 날(영업일 슬롯 게이트가 run 으로 판정한
+#: 날) 07:5x 경 완료 증거를 남기고, 그 값이 예정(20:00:05) 훨씬 이전인데도 날짜만 같다는 이유로 "오늘
 #: 이 행이 대표하는 실행" 으로 오인되면 하루 종일 거짓 완료가 뜬다(cycle285 검증
 #: HIGH #2). daily_load 도 전날 20:30 실행이 실패해 다음날 catch-up 이 07:5x 에 쓴
 #: 마커가 그날 20:30 행을 같은 방식으로 오분류한다(HIGH #3). 수동 새로고침을 스케줄
@@ -605,7 +609,7 @@ async def read_market_ops():
         evidence={"recommendation_rows_today": rec_rows},
     ))
 
-    # 9. 전체 유니버스 적재 — TIME_FULL_UNIVERSE_LOAD. 마커 없음, progress 만
+    # 9. 전체 유니버스 적재 — TIME_FULL_UNIVERSE_LOAD. 마커는 읽지 않는다, progress 만
     status, evidence = _progress_status(
         progress=progress("universe"),
         marker_iso=None,

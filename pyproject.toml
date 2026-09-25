@@ -24,6 +24,10 @@ markers = [
     # 커밋에 등재하는 것이 계약(명세 §9.1).
     "real_api_auth: API 인증 중립화 픽스처 옵트아웃 (실제 인증 판정 검증)",
     "real_market_rest: 15:30~16:00 완전 휴식 컷 중립화 픽스처 옵트아웃 (컷 자체 검증)",
+    # cycle363 — autouse `_neutralize_trading_calendar` 옵트아웃. 휴장일 leaf 의 조회 seam
+    # (`src.engine.trading_calendar._lookup_open`)을 실제로 타야 하는 테스트만 붙인다.
+    # 미부착 테스트는 seam 이 None(모름)을 돌려주고 메모가 비워진 상태를 본다.
+    "real_trading_calendar: 휴장일 조회 seam 중립화 픽스처 옵트아웃 (leaf 직접 검증)",
 ]
 filterwarnings = [
     "error",

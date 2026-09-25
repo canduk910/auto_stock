@@ -106,7 +106,8 @@
 
 ### prepare 공통
 
-- 5 전략(VB/LTV/donchian/BFB/VCP) 일봉 소스 = `get_recent_daily_normalized(ticker, days=N, min_required=M)`(DB 우선 어댑터). **전략별 `min_required`**: VB 22 · LTV 22 · donchian **63**(필수 lookback 61 = `long_ma` 60+1 — **절대 하향 금지**, silent 왜곡) · BFB 35 · VCP 100(깊이 모드와 무관하게 100 — 위 VCP 절 참조). `None` 의존 금지. momentum 은 실시간이라 제외.
+- 6 전략(VB/LTV/donchian/BFB/VCP/kojiro) 일봉 소스 = `get_recent_daily_normalized(ticker, days=N, min_required=M, expected_head=E)`(DB 우선 어댑터). **전략별 `min_required`**: VB 22 · LTV 22 · donchian **63**(필수 lookback 61 = `long_ma` 60+1 — **절대 하향 금지**, silent 왜곡) · BFB 35 · VCP 100(깊이 모드와 무관하게 100 — 위 VCP 절 참조) · kojiro 80(`KOJIRO_MIN_REQUIRED`). `None` 의존 금지. momentum 은 실시간이라 제외.
+- `expected_head` = 「직전 영업일」 — `prepare()` 가 gather 전에 `self._resolve_expected_daily_head()` 로 **1회** 구해 모든 종목에 같은 값을 넘긴다(종목마다 휴장일을 묻지 않는다). 헤드가 그보다 오래된 종목은 KIS 로 폴백하고, `None`(휴장일 모름)이면 달력 판정(`DAILY_STALENESS_DAYS`)으로 떨어진다. 이 인자를 넘기지 않는 호출부 = kojiro `recompute_held_atr` · `llm_buy_gate`(달력 판정). 판정·부작용 = `src/db/CLAUDE.md` `stock_master_daily.py` 절. ⚠️ **kojiro 보유 종목 일관성** — 헤드가 하루 밀린 날, 보유 중인 종목의 부팅 재계산(`recompute_held_atr`, 달력 판정)과 그날 재준비(`prepare`, `expected_head` 판정)가 **다른 봉**을 볼 수 있다. **청산 코드 자체는 바뀌지 않는다** — 바뀌는 것은 입력뿐이고, `expected_head` 쪽이 더 최신 봉을 본다는 뜻이지 어느 쪽도 결함이 아니다(stale 날에는 청산 입력이 더 신선해진다).
 - donchian 신고가는 **어댑터 candles 단일 소스**다(별도 DB 조회 금지 — 락 종목의 신고가/EMA 혼재 차단). 수정주가 divergence 방어 = 어댑터 락 게이트(상세 `src/db/CLAUDE.md`).
 - **1단계 진입 차단 hook**(`_is_master_blocked_for_entry`) = 공통 헬퍼 `scanner.apply_master_block_filter(tickers, protected_tickers)` + 5 전략 wrapper `_apply_master_block_filter_in_prepare` + momentum 은 `scan_stocks` 내부 hook. 거래정지·관리종목·단기과열·투자유의 등 13건을 차단하고 **보유 종목은 절대 보호**한다.
 - **`nxt_tradable=None`** — 유니버스 단계에서 NXT 필터를 걸지 않는다. NXT/KRX 분기는 주문 시점(`_strategy_exchange_async`)의 책임이다.

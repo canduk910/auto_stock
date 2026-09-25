@@ -440,7 +440,13 @@ async def test_g348_b3_row_tail_is_last_completed_bar(monkeypatch, caplog, with_
 
 
 def test_g348_b10_helper_is_sync_and_awaitless():
-    """추가 I/O 0 — 수집 헬퍼는 동기 함수이고 await 0건. prepare 의 await 수는 7 그대로."""
+    """추가 I/O 0 — 수집 헬퍼는 동기 함수이고 await 0건.
+
+    prepare 의 await 수는 cycle348 기준 7 이었고, cycle363 이 `expected_head =
+    await self._resolve_expected_daily_head()` 1건을 gather 전에 더해 **8**이 됐다
+    (①′ 일봉 신선도를 직전 영업일 기준으로 — `_workspace/red/cycle363_business_day_freshness_spec.md`
+    §2.5). 관측 확장이 아니라 별도 승인 사이클의 신규 await 이다.
+    """
     tree = ast.parse(_KOJIRO_PY.read_text(encoding="utf-8"))
     fns = {n.name: n for n in ast.walk(tree)
            if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))}
@@ -449,8 +455,9 @@ def test_g348_b10_helper_is_sync_and_awaitless():
     assert isinstance(h, ast.FunctionDef), "수집 헬퍼가 async 다"
     assert not any(isinstance(x, ast.Await) for x in ast.walk(h))
     prep = fns["prepare"]
-    assert sum(isinstance(x, ast.Await) for x in ast.walk(prep)) == 7, (
-        "prepare 의 await 수가 바뀌었다 — 관측 확장에 I/O 가 끼었다")
+    assert sum(isinstance(x, ast.Await) for x in ast.walk(prep)) == 8, (
+        "prepare 의 await 수가 바뀌었다 — 관측 확장에 I/O 가 끼었다 "
+        "(cycle363 의 `_resolve_expected_daily_head` 1건은 예외로 반영됨)")
 
 
 def test_g348_b10_no_new_default_params():

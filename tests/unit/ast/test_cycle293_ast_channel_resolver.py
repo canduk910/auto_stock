@@ -170,23 +170,23 @@ _BASE_SHA: dict[str, str] = {
         "7d58f9464c1ed35e4fa8706d801beb5a6b5c062d5a2941f0db6482d028d3d4ac",
     # 전략 7파일 + 베이스 (절대 규칙 5)
     "src/engine/strategy_base.py":
-        "3f27be39784f9cb86d72b0c625b705b57d4ee8f555121024f757a2df51a3161d",
+        "19353f030cda3bf0dde33bee04d9a00f7870f6c083d6d4cf90b86b8223dc2c12",
     "src/engine/strategies/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "src/engine/strategies/bull_flag_breakout.py":
-        "6ee3cb9f8df149d2c3a4fdc00885b855399cf13036e9ea02021263b773676bfa",
+        "f72cc0c71ee6f9b1851407e3e57df549468a2904d6a702d4f99e4ef97c4b4b1b",
     "src/engine/strategies/donchian_swing.py":
-        "cc57e5673f9982aca97f61677084e040171fff307483fedf10459b567a4679e3",
+        "0108f5a03ebc96aa6a14190eafb92ac174202bb13df4c2383e4d6bb9a59f5364",
     "src/engine/strategies/kojiro.py":
-        "0e2e7e07e802b541aeeab5bce2ad29716148d59a8c9daf2213127550114214a9",
+        "329bd29d661f8be1d551ce9b44780dd9d78461df7c21ab2ed1b662e31e52cee5",
     "src/engine/strategies/long_tail_volatility.py":
-        "1948c394c1fe1fc612a063d528dc4282b2b25d7ababd266ba1d7e9fe6c54158e",
+        "2c638a76dbded9a7151963f0a3fef7405b1a6233329f65050d66960913bf394c",
     "src/engine/strategies/momentum.py":
         "50d5c0b9a232d6110f6b85fc524569853f2b8edffe2fd44adc24289800b95ae2",
     "src/engine/strategies/vcp_breakout.py":
-        "da6ef794fc92493ce3780853116902190d716087ed562b7d04e7395014773b7d",
+        "7c6477fd4d51623fa8f10daf53cedd4c0bf5fe778e59a005369f9ec798cb201a",
     "src/engine/strategies/volatility_breakout.py":
-        "d13efaa4a9424e2822b5476ce159987d2a5192a4bca30af3f1a0cae9c3ffcabc",
+        "be4327754fc4ebf63de58553e68c7a2d8eba14f43f847490bf22cae90d7e5400",
     # 파라미터 축 — 킬스위치는 `system_config` 다(§8-B). 전략 파라미터로 새지 않는다.
     "src/engine/param_catalog.py":
         "246e9dddd08ea6110bef296a2eeddfef91ae317aff612c027c92f415b244c4e1",

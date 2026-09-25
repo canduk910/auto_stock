@@ -90,12 +90,17 @@ async def emit_daily_head_staleness() -> None:
     왜 필요한가 (자문 R1): cycle283 D4 가 기동 거부 경계를 20:00 로 두면서 **20:00~21:30
     재기동은 그날 20:30 일봉 적재를 통째로 잃는다**(`start()` 가 거부되면 그날
     `_stock_master_daily_load_task` 자체가 생성되지 않는다). 보정 자체는 이미 존재한다 —
-    다음 영업일 07:59 immediate 가 마커 20h 초과로 실행돼 7일 증분으로 D-1 을 덮는다.
-    없는 것은 보정이 아니라 **순서**다: 그 보정이 `prepare()`(07:55)보다 4분 늦다.
-    그 사이 prepare 가 읽는 헤드는 하루 밀려 있고, 재prepare 는 `_scanned_tickers` 가
+    다음 영업일 아침 일봉 immediate(`start()` +240초)가 실행돼 7일 증분으로 D-1 을 덮는다.
+    마커가 직전 영업일 20:30 슬롯보다 이르므로 영업일 슬롯 게이트가 `reason=stale` 로
+    실행을 고른다(cycle363 — `task_loop_helper` 의 `[immediate_gate]`).
+    없는 것은 보정이 아니라 **순서**다: 그 보정이 `_boot()` 의 `prepare()` 보다 늦다.
+    6전략 prepare 는 `expected_head`(직전 영업일, cycle363)로 하루 밀린 헤드를 알아채
+    그 종목을 KIS 로 폴백하므로 목표가·신고가는 맞는 값으로 계산된다 — 대가는 전 종목
+    폴백으로 prepare 가 느려지는 것이다. 휴장일 조회가 실패한 날(`expected_head=None`
+    → 달력 판정)은 헤드가 하루 밀린 채로 읽히고, 재prepare 는 `_scanned_tickers` 가
     공집합일 때만 시도되므로 "하루 밀린" 상태는 재시도 대상이 아니다 ⇒ VB/LTV 목표가
-    (`K×(prev_high − prev_low)`)와 donchian 신고가(`max(highs[1:21])`)가 **종일** 밀린
-    값으로 돈다. 사람이 07:56 에 알면 09:00 전에
+    (`K×(prev_high − prev_low)`)와 donchian 신고가(`max(highs[1:21])`)가 밀린 값으로
+    돌 수 있다(+600초 재준비는 적재 완료를 기다리지 않는다). 사람이 07:56 에 알면 09:00 전에
     `POST /api/stock-master/daily/refresh` + `POST /api/trading/restart` 로 복구할 수 있다.
 
     무음 조건(오탐 차단): 헤드 == 직전 영업일(정상) · 주말 갭(월요일 아침의 금요일 헤드) ·

@@ -283,12 +283,15 @@ class VolatilityBreakoutStrategy(StrategyBase):
         today_str = datetime.now(timezone(timedelta(hours=9))).date().strftime("%Y%m%d")
         prepared = 0
 
+        # cycle363 — ①′ 일봉 신선도 기준(「직전 영업일」) prepare 당 1회 계산.
+        expected_head = await self._resolve_expected_daily_head()
+
         # 일봉 fetch 병렬화 (KIS Rate Limit semaphore가 자동 직렬화)
         # 사이클 173 — DB 우선 어댑터 (락/신선도/부족 시 KIS 폴백). min_required 명시 (자문 §4).
         async def _fetch_one(ticker: str):
             try:
                 return ticker, await get_recent_daily_normalized(
-                    ticker, days=k_period + 2, min_required=22,
+                    ticker, days=k_period + 2, min_required=22, expected_head=expected_head,
                 )
             except Exception as e:
                 logger.warning("변동성돌파 일봉 fetch 실패: %s — %s", ticker, e)

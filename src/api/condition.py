@@ -268,7 +268,14 @@ async def is_trading_day(target_date) -> "bool | None":
     조용한 True 는 휴장일에 장운영상태 화면이 정상 개장처럼 보이게 만든다.
     그래서 같은 호출(같은 URL·TR_ID)을 3상태로 감싼 함수를 **따로** 둔다.
 
-    호출자 = `src/routes/market_state.py` 뿐이다(매매 경로 무관).
+    호출자 = 둘이다.
+    - `src/routes/market_state.py` — 장운영상태 화면(`market_ops.py` 는 그 모듈의
+      `_resolve_trading_day` 를 재사용한다).
+    - `src/engine/trading_calendar.py` — 조회 seam `_lookup_open` (cycle363). 부팅 즉시
+      실행의 영업일 슬롯 게이트와 6전략 prepare 의 일봉 신선도 기준(`expected_head`)이
+      「직전 영업일」을 여기서 얻는다. 그 leaf 는 None 을 「모른다」로 그대로 받아 게이트는
+      실행 쪽, 어댑터는 달력 판정 쪽으로 떨어뜨린다 — 주문·청산 판정에는 쓰이지 않는다.
+      KIS 공지(CTCA0903R 「가급적 1일 1회」)는 그 leaf 의 날짜별 메모가 지킨다.
     """
     yyyymmdd = target_date.strftime("%Y%m%d")
     try:

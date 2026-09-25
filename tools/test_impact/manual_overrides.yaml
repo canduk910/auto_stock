@@ -85,3 +85,21 @@
 "e2e/fixtures/market-state.fixture.ts":
   - "tests/unit/routes/test_cycle282_fixture_sync.py"
   - "e2e/market-state.spec.ts"
+
+# cycle363 — 휴장일 leaf. 테스트가 Red 관례대로 `importlib`/문자열 패치로 **지연 참조**해
+# (미구현 단계에서 수집 오류 대신 FAIL) 정적 import 분석에 잡히지 않는다.
+"src/engine/trading_calendar.py":
+  - "tests/unit/engine/test_cycle363_trading_calendar.py"
+  - "tests/unit/engine/test_cycle363_immediate_slot_gate.py"
+  - "tests/unit/engine/strategies/test_cycle363_prepare_expected_head.py"
+  - "tests/unit/engine/test_cycle263_daily_load_stub_filter.py"
+  - "tests/unit/ast/test_cycle363_ast_business_day_gate.py"
+# cycle363 AST 가드는 소스를 파일로 읽는다(import 없음) — 읽는 파일마다 명시.
+"src/engine/task_loop_helper.py":
+  - "tests/unit/ast/test_cycle363_ast_business_day_gate.py"
+"src/engine/data_load_tasks.py":
+  - "tests/unit/ast/test_cycle363_ast_business_day_gate.py"
+"src/engine/strategies/*.py":
+  - "tests/unit/ast/test_cycle363_ast_business_day_gate.py"
+"src/engine/llm_buy_gate.py":
+  - "tests/unit/ast/test_cycle363_ast_business_day_gate.py"

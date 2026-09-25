@@ -264,7 +264,8 @@ KIS 가 코드를 늘려도 새 값이 자동으로 "활성" 으로 읽히게 �
 
 - **시세성 호출 풀 라우팅**: 본 모듈 함수는 `kis_get_quote` 사용 — 보조 라운드로빈 + 메인 fallback
 - 등락률순위 API (FHPST01700000, `/ranking/fluctuation`) 로 종목 필터링 (momentum 전용 — `거래량순위`(FHPST01710000)와 다른 TR). 시총/거래대금 필터
-- `is_market_open(date)`: KIS chk-holiday API (CTCA0903R) 로 개장일 여부 (`opnd_yn == "Y"`)
+- `is_market_open(date)`: KIS chk-holiday API (CTCA0903R) 로 개장일 여부 (`opnd_yn == "Y"`). 조회 실패 시 **True**(영업일 가정) — scheduler·strategy_funnel 등 매매 경로의 fail-open 계약
+- `is_trading_day(target_date) -> bool | None`: 같은 CTCA0903R 호출을 **3상태**로 감싼 함수 — True=개장 / False=휴장 / None=모름(조회 실패·그 날짜 행 없음·예외). 「모른다」를 「개장」으로 바꾸지 않는 것이 `is_market_open` 과의 차이다. 호출자 = `src/routes/market_state.py`(장운영상태 화면, `market_ops.py` 가 그 `_resolve_trading_day` 를 재사용) + `src/engine/trading_calendar.py` 의 조회 seam `_lookup_open`(부팅 즉시 실행 영업일 슬롯 게이트 · 6전략 prepare `expected_head` — None 이면 게이트는 실행 쪽, 어댑터는 달력 판정 쪽으로 떨어진다). KIS 공지 「CTCA0903R 은 가급적 1일 1회」는 그 leaf 의 날짜별 메모(True/False 만 캐시)가 지킨다 — 상세 = `src/engine/CLAUDE.md` `trading_calendar.py` 항목
 - `next_trading_day(after_date)`: 다음 개장일 (휴일 다음날 자동)
 - `add_business_days(base_date, n)`: base_date 이후 n번째 개장일 date. CTCA0903R 1회 호출(~30일치)에서 `opnd_yn=="Y"` n번째 row. 실패/개장일 부족 시 `base + timedelta(n+2)` 달력일 폴백 graceful. BFB/VCP 재진입 쿨다운 영업일 정정용 (`_refine_cooldown_business_days` 소비)
 - `fetch_daily_candles(ticker, days)`: 일봉 N영업일치. `FHKST03010100` (`/quotations/inquire-daily-itemchartprice`, 모의/실전 동일) — **100일은 단일 호출 한도이지 총량 한도가 아니다**(총량은 아래 `fetch_daily_candles_backfill` 의 날짜 윈도우 분할로 늘린다). 응답 `output2` (최신순), `stck_bsop_date` 빈 placeholder 제거. 윈도우 = `days + days//2 + 10` (영업일/달력일 5/7 + 마진)

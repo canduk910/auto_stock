@@ -505,8 +505,9 @@ _BASE_SHA: dict[str, str] = {
     #    (분기에서 지수 소속 판정 제거 · `vcp_universe_tickers` 집합 소멸.
     #    목표 깊이 상수는 불변). 값만 옮긴다 — 단언은 그대로다.
     #    구 값은 cycle299 기준선(3b7366cc…)이다.
+    # 🔁 2026-09-25 (cycle363 F-1) 재핀 — `_scan_pool_eager_refresh_loop` upsert 전 기존 raw 머지(사이클 176 basics 경로 답습, 사용자 승인 8영역). 장전 0값 키(acml_tr_pbmn 등)가 raw 통째 교체로 지워지던 결함 시정. 나머지 7영역 diff 0.
     "src/engine/scanner.py":
-        "95cbb103a38821bb3b68d267a3662094b192fa55ad6071fa8dc4a63726e1c942",
+        "2c104fba38dd1e942b091bfac14cb7d152d766676405e9fd66fe27e75cb3f5a6",
     "src/engine/strategy_registry.py":
         "d794696e54ffdc36efa6df917879d780e86bc1f373bb3b5d8dcbc0beac8cef8b",
     "src/api/order.py":
@@ -520,11 +521,11 @@ _BASE_SHA: dict[str, str] = {
     "src/engine/scheduler.py":
         "3461242a47080379c8d48dc5efd5799ce5fac173803a95476547ea4758b40a81",
     "src/engine/strategy_base.py":
-        "3f27be39784f9cb86d72b0c625b705b57d4ee8f555121024f757a2df51a3161d",
+        "19353f030cda3bf0dde33bee04d9a00f7870f6c083d6d4cf90b86b8223dc2c12",
     "src/engine/strategies/volatility_breakout.py":
-        "d13efaa4a9424e2822b5476ce159987d2a5192a4bca30af3f1a0cae9c3ffcabc",
+        "be4327754fc4ebf63de58553e68c7a2d8eba14f43f847490bf22cae90d7e5400",
     "src/engine/strategies/long_tail_volatility.py":
-        "1948c394c1fe1fc612a063d528dc4282b2b25d7ababd266ba1d7e9fe6c54158e",
+        "2c638a76dbded9a7151963f0a3fef7405b1a6233329f65050d66960913bf394c",
 }
 
 
