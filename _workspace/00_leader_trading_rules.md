@@ -18,7 +18,8 @@ KIS OpenAPI 기반 국내주식 자동매매시스템. 다중 전략 아키텍�
 노이즈 비율 기반 동적 K값으로 보드별 시가 + 전일Range × K로 매수 목표가 설정, 돌파 시 매수. **KRX 메인 단독 활성**(`DEFAULT_TRADABLE_BOARDS=("main",)`, 사이클 26 — PRE_NXT/POST_NXT 매수 제거). 보드별 K값 파라미터(`k_value_nxt_pre/post`)는 잔존하나 매수 보드가 main 뿐이라 실효는 `k_value_krx_main` 만.
 
 ### 전략 C: 롱테일 변동성 돌파 (strategy_id: long_tail_volatility)
-변동성 돌파 방식으로 조기 진입 + 당일 +29% 도달 시 익일 청산 모드 전환(롱테일 추구). **매수는 PRE_NXT / MAIN / POST_NXT 3보드** (사이클 38, 2026-05-22 사용자 의도 복원 — 야간 NXT 프리 진입 + 연속 상한가 종목 애프터 진입). 상한가 미도달 종목은 15:20 일괄 청산, 상한가 도달 종목은 익일 NXT 프리 청산 + POST_NXT 시간대 손절 모니터링. **`main` 보드 신규 매수는 15:20 컷**(cycle286 C2-a, 2026-09-12 — KRX 연속체결 종료 이후 신규 매수를 막는다. `pre_nxt`/`post_nxt` 무접촉, 청산 무접촉).
+변동성 돌파 방식으로 조기 진입 + 당일 +29% 도달 시 익일 청산 모드 전환(롱테일 추구). **매수는 PRE_NXT / MAIN / POST_NXT 3보드**(코드 기본값, 사이클 38, 2026-05-22 사용자 의도 복원 — 야간 NXT 프리 진입 + 연속 상한가 종목 애프터 진입). **운영 DB `tradable_boards` 는 `["main"]` 단독**이라 당일 상한가 모드는 09:01:30~15:20 매수에서만 생긴다. 상한가 미도달 종목은 15:20 일괄 청산. 상한가 도달 종목은 **15:20 시점에 가격이 `limit_up_threshold` 미만으로 되밀렸으면 그날 15:20 강제청산 경로에서 판다**(`limit_up_close_hold_mode="enforce"` 기본, cycle352 — 사용자 결정 D5 F3① 「15:20 상한가 유지 확인」). 임계 이상을 유지 중이면 익일 갭 ≥ `gap_up_threshold` 면 트레일링, 미달이면 09:00 KRX 시장가 청산 + POST_NXT 시간대 손절 모니터링. **`main` 보드 신규 매수는 15:20 컷**(cycle286 C2-a, 2026-09-12 — KRX 연속체결 종료 이후 신규 매수를 막는다. `pre_nxt`/`post_nxt` 무접촉, 청산 무접촉).
+- **cycle352 15:20 상한가 유지 확인** — 킬스위치 `limit_up_close_hold_mode`(기본 `enforce`, `off` 만 롤백) — `PARAM_RANGES`/`INT_PARAMS` 미편입. 8영역·`scheduler.py`·`risk.py` 무접촉, 전략 파일 `check_force_clear()` 한 곳에서 끝난다. 경위·실측 = `docs/history/workspace-00_leader_trading_rules.history.md`(자문 원문 `_workspace/domain_consult/cycle352_ltv_limit_up_trailing.md`).
 
 ### 전략 D: 20일 신고가 스윙 (strategy_id: donchian_swing)
 일봉 종가가 20일 신고가 돌파 + 60일 EMA 우상향 + 거래대금 1.5배 → 다음 영업일 09:05 시장가 매수. ATR(14)×2 트레일링 청산 / 하드 -7% / 15:20 강제 청산 없음(단 `breakout_fail_n_days`=5 시간 기반 청산은 있음) / 평균 5~15 영업일 보유. **KRX 메인만 활성**(추세추종은 일중 변동성 필요).
@@ -340,10 +341,10 @@ KIS MCP 4질의 결과(2026-05-11) **CTPF1002R(주식기본조회) 응답의 두
 
 ### 강제 청산 — 보드별 분리
 - **15:20 KRX 메인 매수 중단 + 강제 청산**: POST_NXT 활성 여부와 **무관하게** 각 전략의 `check_force_clear()` 를 호출해 반환 종목을 청산한다. 보유 유지 여부는 `check_force_clear()` 본체가 결정한다(`keeps_post_nxt` 는 로그로만 남는다).
-- **VB·LTV는 15:20 일괄 청산**: VB `DEFAULT_TRADABLE_BOARDS = ("main",)` / LTV `("pre_nxt", "main", "post_nxt")`. VB는 모든 보유 청산, LTV 는 `_limit_up_reached` 제외(상한가 모드만 익일 보유). LTV 상한가 모드의 POST_NXT 손절 모니터링은 `risk.on_tick` 청산 평가가 보드 가드와 무관하게 작동한다.
+- **VB·LTV는 15:20 일괄 청산**: VB `DEFAULT_TRADABLE_BOARDS = ("main",)` / LTV `("pre_nxt", "main", "post_nxt")`(운영 DB 는 `["main"]` 단독). VB는 모든 보유 청산. LTV 는 `_limit_up_reached` 종목 중 **15:20 가격이 `limit_up_threshold` 이상을 유지할 때만** 익일 보유로 제외한다(`limit_up_close_hold_mode="enforce"` 기본, cycle352) — 미달로 되밀렸으면 그 15:20 청산에서 함께 판다. LTV 상한가 모드(임계 유지분)의 POST_NXT 손절 모니터링은 `risk.on_tick` 청산 평가가 보드 가드와 무관하게 작동한다.
 - **VB 익일 청산 안전망**: VB 도 `_execute_next_day_clear` 대상이다. 당일 15:20 청산이 비상 상황으로 누락되면 다음 영업일 NXT 프리 시가에서 자동 청산한다. `check_exit_signal` 익일 청산 분기 순서 = STOP_LOSS 우선 → pending 가드 → NEXT_DAY_CLEAR.
 - **19:50 NXT 애프터 매수 중단**: 모든 활성 전략 `buy_disabled = True`. POST_NXT 매수가 VB/LTV 에서 비활성이라 19:50 강제 청산 코드 부재는 실질 영향이 없다(LTV 상한가 모드 종목은 정책상 익일 청산 의도).
-- **20:00 NXT 애프터 종료**: VB 는 정상 경로상 OVERNIGHT 보유 없음 (15:20 청산). LTV 상한가 모드 종목 + 안전망 발동 VB 종목만 다음 영업일 NXT 프리 청산 대기.
+- **20:00 NXT 애프터 종료**: VB 는 정상 경로상 OVERNIGHT 보유 없음 (15:20 청산). LTV 상한가 모드 종목(15:20 확인을 통과한 종목만, `limit_up_close_hold_mode`, cycle352) + 안전망 발동 VB 종목만 다음 영업일 NXT 프리 청산 대기.
 
 ### 리스크 관리
 - 종목당 최대 투자: 할당 자금의 10%
@@ -371,8 +372,8 @@ VB와 진입 로직 동일 + 상한가 도달 시 익일 청산 모드로 전환
 - 연속상한가 종목 제외 (`exclude_consecutive_limit`, 기본 2일 — 전일 기준 N일 연속 +25%↑면 후보 제외)
 - 상한가 도달(+29%) 시 → 익일 청산 모드 전환(`_limit_up_reached` set)
 - **2단계 청산**:
-  - 당일 모드(상한가 미도달): 손절 -3%, 15:20 강제 청산 보류 가능(POST_NXT 활성 시 19:50까지)
-  - 상한가 모드: 손절 -5%, 다음 영업일 NXT 프리 시가에서 갭상승 +10% → 트레일링 -2% / 그 외 즉시 매도
+  - 당일 모드(상한가 미도달): 손절 -3%(운영 DB -5), 15:20 강제 청산(POST_NXT 활성 여부와 무관 — cycle142)
+  - 상한가 모드: 손절 -5%(운영 DB -3.5 — 상한가 전환이 손절을 조인다), **15:20 시점에 가격이 `limit_up_threshold` 미만이면 그날 15:20 강제청산 경로에서 판다**(`limit_up_close_hold_mode="enforce"` 기본, cycle352). 임계 이상 유지 중이면 다음 영업일 NXT 프리 시가에서 갭상승 ≥`gap_up_threshold` → 트레일링 -2%, 갭 미달·시가 미수신·`nxt_tradable=False` → **09:00 KRX 시장가 청산**(NXT 프리 즉시 체결이 아니다)
 - 보드별 K값 분리는 VB와 동일
 
 ### 매매 보드 / 거래소 라우팅
@@ -836,7 +837,7 @@ BFB/VCP 매수 신호는 (donchian 의 폴링 루프와 달리) `risk.on_tick`(W
 | 09:00:05 | KRX 메인 시가 확정 — VB/LTV `board="main"` 별도 시가 + KRX 09:00 시가 + (전일Range × `k_value_krx_main`) Target_Price 계산 → MAIN 매매 진입 |
 | 09:05~09:30 | donchian_swing 진입창 — 시장가 1주문/종목, 갭 +3%↑ 스킵 |
 | 09:30 | 모멘텀 종목 스캔 시작. 5분 주기 `_scan_loop` 시작(돌파+스윙+보유 합집합 재구독) |
-| 15:20 | KRX 메인 신규 매수 중단 + KRX 메인 강제 청산(`_force_clear_main_only`) — 청산 목록은 각 전략 `check_force_clear()` 가 정한다(VB 전량 · LTV 는 `_limit_up_reached` 상한가 모드만 제외) |
+| 15:20 | KRX 메인 신규 매수 중단 + KRX 메인 강제 청산(`_force_clear_main_only`) — 청산 목록은 각 전략 `check_force_clear()` 가 정한다(VB 전량 · LTV 는 `_limit_up_reached` 상한가 모드 중 이 시점 가격이 `limit_up_threshold` 이상을 유지하는 종목만 제외, cycle352) |
 | 15:30 | KRX 메인 마감 (종가 흡수 마진 시작, `_force_clear_main_only` 가드 기준). 스케줄러는 여기서 `post_nxt_trading` 으로 넘어가고 `_confirm_breakout_open_prices(board="post_nxt")` 를 부른다 — `post_nxt` **보드**가 열리는 15:40 보다 10분 앞선다 |
 | 15:40 | NXT 애프터 진입 — LTV 는 POST_NXT 신규 매수, VB 는 보유 매도만 |
 | 16:10 | KIS CTPF1002R 종목 basics 매스 보강 |

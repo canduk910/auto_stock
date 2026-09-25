@@ -277,6 +277,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -605,6 +606,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -1011,6 +1013,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -1359,6 +1362,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -1692,6 +1696,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -2105,6 +2110,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -2469,6 +2475,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -2799,6 +2806,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -3200,6 +3208,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -3553,6 +3562,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -3881,6 +3891,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -4296,6 +4307,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -4634,6 +4646,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -4967,6 +4980,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -5390,6 +5404,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -5730,6 +5745,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -6063,6 +6079,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -6485,6 +6502,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -6825,6 +6843,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -7157,6 +7176,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -7580,6 +7600,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -7683,6 +7704,7 @@ backend:
     - tests/unit/engine/test_cycle214_h0unmko0_pool.py
     - tests/unit/engine/test_cycle221_market_op_off_main.py
     - tests/unit/engine/test_market_op_subscribe_import_regression.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/routes/test_cycle186_market_op_route.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
@@ -7925,6 +7947,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -8258,6 +8281,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -9017,6 +9041,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -9350,6 +9375,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -9770,6 +9796,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -10114,6 +10141,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -10447,6 +10475,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -10865,6 +10894,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -11222,6 +11252,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -11555,6 +11586,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -11978,6 +12010,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -12326,6 +12359,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -12654,6 +12688,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -13073,6 +13108,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -13425,6 +13461,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -13757,6 +13794,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -14171,6 +14209,7 @@ backend:
     - tests/unit/realtime/test_cycle222a_handler_day_high.py
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -14639,6 +14678,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -14880,6 +14920,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -15275,6 +15316,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -15615,6 +15657,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -15942,6 +15985,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -16358,6 +16402,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -16700,6 +16745,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -17030,6 +17076,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -17453,6 +17500,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -17794,6 +17842,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -18125,6 +18174,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -18548,6 +18598,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -18897,6 +18948,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -19224,6 +19276,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -19643,6 +19696,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -19983,6 +20037,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -20316,6 +20371,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -20738,6 +20794,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -21083,6 +21140,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -21411,6 +21469,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -21834,6 +21893,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -22176,6 +22236,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -22506,6 +22567,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -22928,6 +22990,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -23273,6 +23336,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -23600,6 +23664,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -24023,6 +24088,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -24365,6 +24431,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -24695,6 +24762,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -25118,6 +25186,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -25464,6 +25533,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -25790,6 +25860,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -26213,6 +26284,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -26573,6 +26645,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -26904,6 +26977,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -27308,6 +27382,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -27694,6 +27769,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -27998,6 +28074,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -28407,6 +28484,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -28764,6 +28842,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -29079,6 +29158,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -29498,6 +29578,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -29840,6 +29921,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -30170,6 +30252,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -30593,6 +30676,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -30935,6 +31019,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -31267,6 +31352,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -31690,6 +31776,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -32037,6 +32124,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -32364,6 +32452,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -32783,6 +32872,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -33183,6 +33273,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -33490,6 +33581,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -33891,6 +33983,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -34233,6 +34326,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -34557,6 +34651,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -34978,6 +35073,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -35331,6 +35427,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -35654,6 +35751,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -36073,6 +36171,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -36411,6 +36510,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -36744,6 +36844,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -37167,6 +37268,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -37508,6 +37610,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -37841,6 +37944,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -38263,6 +38367,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -38612,6 +38717,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -38943,6 +39049,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -39359,6 +39466,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -39703,6 +39811,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -40036,6 +40145,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -40453,6 +40563,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -40795,6 +40906,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -41128,6 +41240,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -41548,6 +41661,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -41889,6 +42003,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -42222,6 +42337,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -42643,6 +42759,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -42990,6 +43107,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -43322,6 +43440,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -43738,6 +43857,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -43837,6 +43957,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle226_zero_breakout_defense.py
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/test_b3_nxt_downgrade_log_cap.py
     - tests/unit/engine/test_cycle252_stale_watcher_no_feed.py
     - tests/unit/engine/test_cycle258_account_risk_watcher_trace.py
@@ -44093,6 +44214,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -44833,6 +44955,7 @@ backend:
     - tests/unit/realtime/test_cycle222a_handler_day_high.py
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -45173,6 +45296,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -45505,6 +45629,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -45928,6 +46053,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -46270,6 +46396,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -46603,6 +46730,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -47023,6 +47151,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -47366,6 +47495,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -47697,6 +47827,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -48118,6 +48249,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -48461,6 +48593,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -48793,6 +48926,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -49213,6 +49347,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -49554,6 +49689,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -49887,6 +50023,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -50308,6 +50445,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -50648,6 +50786,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -50981,6 +51120,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -51404,6 +51544,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -51743,6 +51884,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -52076,6 +52218,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -52498,6 +52641,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -52912,6 +53056,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -53244,6 +53389,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -53656,6 +53802,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -54006,6 +54153,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -54339,6 +54487,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -54749,6 +54898,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -55089,6 +55239,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -55422,6 +55573,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -55844,6 +55996,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -55941,6 +56094,7 @@ backend:
     - tests/unit/engine/test_cycle149_market_operation_monitor.py
     - tests/unit/engine/test_cycle186_market_op_cb_heuristic.py
     - tests/unit/realtime/test_cycle149_handler_market_op.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/routes/test_cycle186_market_op_route.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
@@ -56187,6 +56341,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -56520,6 +56675,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -57293,6 +57449,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -57626,6 +57783,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -58036,6 +58194,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -58382,6 +58541,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -58715,6 +58875,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -59129,6 +59290,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -59469,6 +59631,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -59802,6 +59965,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -60224,6 +60388,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -60570,6 +60735,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -60903,6 +61069,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -61319,6 +61486,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -61661,6 +61829,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -61992,6 +62161,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -62414,6 +62584,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -62755,6 +62926,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -63088,6 +63260,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -63509,6 +63682,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -63851,6 +64025,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -64183,6 +64358,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -64604,6 +64780,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -64942,6 +65119,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -65275,6 +65453,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -65698,6 +65877,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -65795,6 +65975,7 @@ backend:
     direct_tests:
     - tests/unit/ast/test_cycle278_ast_catalog_guards.py
     - tests/unit/ast/test_cycle297_ast_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
     - tests/unit/engine/test_cycle278_param_catalog.py
     - tests/unit/engine/test_cycle287_sor_retired.py
@@ -66116,6 +66297,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -66449,6 +66631,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -66871,6 +67054,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -67284,6 +67468,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -67617,6 +67802,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -68036,6 +68222,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -68439,6 +68626,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -68772,6 +68960,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -69193,6 +69382,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -69533,6 +69723,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -69866,6 +70057,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -70288,6 +70480,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -70633,6 +70826,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -70966,6 +71160,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -71384,6 +71579,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -71492,6 +71688,7 @@ backend:
     - tests/unit/ast/test_cycle276_ast_order_hook.py
     - tests/unit/ast/test_cycle287_ast_scope.py
     - tests/unit/ast/test_cycle297_ast_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/engine/strategies/test_bfb_turtle_sizing.py
     - tests/unit/engine/strategies/test_cycle208_donchian_box_removal.py
     - tests/unit/engine/strategies/test_cycle220_kojiro_breakeven_floor.py
@@ -72082,6 +72279,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -72478,6 +72676,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -72820,6 +73019,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -73153,6 +73353,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -73573,6 +73774,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -73917,6 +74119,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -74250,6 +74453,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -74671,6 +74875,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -75006,6 +75211,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -75339,6 +75545,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -75762,6 +75969,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -76047,6 +76255,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle274_shadow_behavior_zero.py
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycleG_vb_failed_breakout_exit.py
@@ -76175,6 +76384,7 @@ backend:
     - tests/unit/engine/test_sync_orders_to_db_042700_pingpong.py
     - tests/unit/engine/test_sync_orders_to_db_dedup.py
     - tests/unit/engine/test_tick_coverage.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_websocket_ack.py
     - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
@@ -76346,6 +76556,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -77194,6 +77405,7 @@ backend:
     - tests/unit/engine/test_vb_next_day_clear_safety_net.py
     - tests/unit/engine/test_weight_config_anomaly.py
     - tests/unit/realtime/test_cycle222a2_handler_hgpr_hour.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/routes/test_cycle253_channel_probe.py
     - tests/unit/routes/test_cycle285_market_ops_route.py
     - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
@@ -77347,6 +77559,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -77669,6 +77882,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -78296,6 +78510,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -78629,6 +78844,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -79049,6 +79265,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -79390,6 +79607,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -79723,6 +79941,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -80143,6 +80362,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -80482,6 +80702,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -80815,6 +81036,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -81238,6 +81460,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -81576,6 +81799,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -81909,6 +82133,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -82332,6 +82557,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -82678,6 +82904,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -83010,6 +83237,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -83428,6 +83656,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -83797,6 +84026,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -84122,6 +84352,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -84523,6 +84754,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -84865,6 +85097,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -85197,6 +85430,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -85618,6 +85852,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -85982,6 +86217,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -86309,6 +86545,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -86713,6 +86950,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -87055,6 +87293,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -87388,6 +87627,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -87808,6 +88048,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -88158,6 +88399,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -88489,6 +88731,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -88903,6 +89146,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -89243,6 +89487,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -89576,6 +89821,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -89998,6 +90244,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -90338,6 +90585,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -90671,6 +90919,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -91093,6 +91342,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -91433,6 +91683,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -91766,6 +92017,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -92188,6 +92440,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -92536,6 +92789,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -92866,6 +93120,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -93283,6 +93538,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -93692,6 +93948,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -94008,6 +94265,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
@@ -94408,6 +94666,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -94795,6 +95054,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -95107,6 +95367,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
     - tests/unit/engine/strategies/test_cycle49_vcp_pullback_width_fix.py
@@ -95503,6 +95764,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -95875,6 +96137,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -96200,6 +96463,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle301_vcp_default_alignment.py
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -96598,6 +96862,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -96764,6 +97029,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle272_main_rest_basis.py
     - tests/unit/engine/strategies/test_cycle274_shadow_behavior_zero.py
     - tests/unit/engine/strategies/test_cycle286_ltv_main_buy_cutoff.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_kojiro_turtle_sizing.py
     - tests/unit/engine/strategies/test_long_tail_volatility.py
@@ -96969,6 +97235,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -97693,6 +97960,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -98055,6 +98323,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -98383,6 +98652,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -98788,6 +99058,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -99165,6 +99436,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -99486,6 +99758,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle50_bfb_funnel_stage_detail.py
     - tests/unit/engine/strategies/test_cycleC3_vb_quant_filter_observe.py
@@ -99883,6 +100156,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -100259,6 +100533,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -100578,6 +100853,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
     - tests/unit/engine/strategies/test_cycle48_bfb_vcp_zero_trade_fix.py
@@ -100978,6 +101254,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -101201,6 +101478,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -101512,6 +101790,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -102075,6 +102354,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -102474,6 +102754,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -102805,6 +103086,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -103169,6 +103451,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -103509,6 +103792,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -103842,6 +104126,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -104264,6 +104549,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -104609,6 +104895,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -104942,6 +105229,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -105359,6 +105647,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -105771,6 +106060,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -106104,6 +106394,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -106524,6 +106815,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -106868,6 +107160,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -107201,6 +107494,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -107620,6 +107914,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -107958,6 +108253,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -108291,6 +108587,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -108713,6 +109010,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -109067,6 +109365,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -109393,6 +109692,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -109809,6 +110109,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -110149,6 +110450,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -110482,6 +110784,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -110903,6 +111206,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -111243,6 +111547,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -111576,6 +111881,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -111998,6 +112304,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -112349,6 +112656,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -112682,6 +112990,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -113096,6 +113405,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -113495,6 +113805,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -113828,6 +114139,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -114251,6 +114563,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -114590,6 +114903,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -114923,6 +115237,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -115346,6 +115661,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -115691,6 +116007,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -116023,6 +116340,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -116445,6 +116763,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -116787,6 +117106,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -117120,6 +117440,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -117540,6 +117861,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -117883,6 +118205,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -118216,6 +118539,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -118635,6 +118959,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -118976,6 +119301,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -119308,6 +119634,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -119731,6 +120058,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -120143,6 +120471,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -120476,6 +120805,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -120886,6 +121216,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -121402,6 +121733,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -121717,6 +122049,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -122132,6 +122465,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -122549,6 +122883,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -122876,6 +123211,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -123289,6 +123625,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -123417,6 +123754,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle92_auto_restart_cooldown.py
     - tests/unit/realtime/test_cycle92_auto_restart_hourly_cap.py
@@ -123663,6 +124001,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -123996,6 +124335,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -124493,6 +124833,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_handler_tick_parse_guard.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
@@ -124737,6 +125078,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -125070,6 +125412,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -125594,6 +125937,7 @@ backend:
     - tests/unit/realtime/test_cycle102_last_ws_message_at.py
     - tests/unit/realtime/test_cycle135_subscribe_grace_period.py
     - tests/unit/realtime/test_cycle197_max_sub_warn_cap.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle74_ws_action_aggregation.py
@@ -125853,6 +126197,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -126186,6 +126531,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -126705,6 +127051,7 @@ backend:
     - tests/unit/engine/test_stale_watcher_thresholds.py
     - tests/unit/engine/test_tick_coverage.py
     - tests/unit/engine/test_universe_guard.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_pool_safety_rules.py
     - tests/unit/realtime/test_websocket_pool.py
@@ -126953,6 +127300,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -127283,6 +127631,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -129415,6 +129764,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -129748,6 +130098,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -130166,6 +130517,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -130504,6 +130856,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -130837,6 +131190,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -131259,6 +131613,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -131603,6 +131958,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -131936,6 +132292,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -132357,6 +132714,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -132693,6 +133051,7 @@ backend:
     - tests/unit/ast/test_cycle328_sell_pending_helper.py
     - tests/unit/ast/test_cycle341_pytestmark_not_shadowed.py
     - tests/unit/ast/test_cycle351_pyramid_shadow_scope.py
+    - tests/unit/ast/test_cycle352_ast_ltv_close_hold.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -133026,6 +133385,7 @@ backend:
     - tests/unit/engine/strategies/test_cycle344_kojiro_macd_wiring.py
     - tests/unit/engine/strategies/test_cycle348_kojiro_macd_stage6.py
     - tests/unit/engine/strategies/test_cycle349_vcp_breakout_observe.py
+    - tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py
     - tests/unit/engine/strategies/test_cycle355_entry_atr_rederive_gate.py
     - tests/unit/engine/strategies/test_cycle38_ltv_default_restored.py
     - tests/unit/engine/strategies/test_cycle39_funnel_step_capture.py
@@ -133449,6 +133809,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -135036,10 +135397,10 @@ frontend:
     - frontend/src/pages/__tests__/MarketState.test.tsx
     - frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
     - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
-generated_at: '2026-09-25T07:36:47.580413+09:00'
+generated_at: '2026-09-25T09:14:39.373262+09:00'
 stats:
   backend_modules: 159
-  backend_tests: 1092
+  backend_tests: 1095
   frontend_modules: 120
   frontend_tests: 98
   unmapped_modules:

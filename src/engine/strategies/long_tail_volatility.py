@@ -162,6 +162,20 @@ class LongTailVolatilityStrategy(StrategyBase):
         # `_workspace/00_leader_trading_rules.md` 「거래소 라우팅」 절.
         "order_exchange_clock_mode": "enforce",
         "after_market_exit_division": "44",
+        # cycle352 (2026-09-25) — 15:20 상한가 유지 확인. 사용자 결정 D5 F3①
+        # (`_workspace/domain_consult/cycle352_ltv_limit_up_trailing.md`). 실측 —
+        # 실현손실은 이미 overnight_stop_loss 에서 멈추고(모집단 373건 중 15%
+        # 이상 되밀림은 2%), 이름 그대로의 당일 트레일링은 폭을 얼마로 잡아도
+        # 평균 수익을 깎는다(7~15% 폭 전부 A 대비 열위). 가장 싸게 같은 걱정을
+        # 닫는 것은 "15:20 에 아직 상한가 근처인가" 한 번만 묻는 것 —
+        # 아니면 그날 종가에 판다(평균 수익 거의 그대로, −5% 이하 손실
+        # 표본은 절반으로 준다). `"off"` 만 롤백값(대소문자·공백 무시 정확
+        # 일치), 그 밖의 값·부재·비문자열은 전부 `enforce`(`open_price_scope_mode`
+        # 와 같은 규약 — 배포 즉시 켜진다). `PARAM_RANGES`/`INT_PARAMS` 편입
+        # 금지(청산 규약 킬스위치). 장중 롤백 =
+        # `PUT /api/strategies/long_tail_volatility/params
+        # {"limit_up_close_hold_mode":"off"}` 즉시.
+        "limit_up_close_hold_mode": "enforce",
     }
 
     def __init__(self, config: StrategyConfig):
@@ -195,6 +209,11 @@ class LongTailVolatilityStrategy(StrategyBase):
         # 인스턴스**(같은 슬롯을 다투면 config 1행이 그날의 blocked 표본을 통째로
         # 침묵시킨다 — cycle236 '별개 cap 가드' / donchian OB-11 선례). 1회/ticker/일.
         self._main_buy_cutoff_logged: "KstDailyEmitCap[str]" = KstDailyEmitCap[str]()
+        # cycle352 — 15:20 상한가 유지 확인 관측 cap 2종. 기존 cap 들과 **별개
+        # 인스턴스**(같은 슬롯을 다투면 config 1행이 그날의 표본을 침묵시킨다 —
+        # cycle236 '별개 cap 가드' 선례).
+        self._limit_up_close_config_logged: "KstDailyEmitCap[str]" = KstDailyEmitCap[str]()
+        self._limit_up_close_decision_logged: "KstDailyEmitCap[str]" = KstDailyEmitCap[str]()
 
     def register_cooldown_after_exit(self, ticker: str) -> None:
         """청산 완료 후 호출 — 쿨다운 1단계 즉시 등록 (사이클 213, VB 201 패턴 답습).
@@ -1090,12 +1109,152 @@ class LongTailVolatilityStrategy(StrategyBase):
 
         return Signal.NONE
 
+    # ────────── cycle352 — 15:20 상한가 유지 확인 (`limit_up_close_hold_mode`) ──────────
+    #
+    # 실측 = `_workspace/domain_consult/cycle352_ltv_limit_up_trailing.md`. 상한가
+    # 모드 종목이 15:20 시점에 `limit_up_threshold` 아래로 되밀렸으면 그날 종가
+    # 부근(15:20 강제청산 경로)에서 판다 — 밤을 넘길 자격(강한 마감)을 잃었다고
+    # 보는 것이다. 한 번 찍고 풀린 뒤에도 `limit_up_threshold` 이상을 유지 중이면
+    # 그대로 보유(현행 익일청산 경로).
+
+    def _read_limit_up_close_hold_mode(self) -> str:
+        """`limit_up_close_hold_mode` 읽기 — `"off"` 만 롤백, 그 외 전부 enforce.
+
+        `open_price_scope_mode` 와 같은 규약(대소문자·앞뒤 공백 무시 정확 일치만
+        `off`) — 부재·비문자열·오타·예외는 전부 `enforce` 다(배포 즉시 켜진다).
+        """
+        try:
+            raw = self.config.params.get("limit_up_close_hold_mode", "enforce")
+            if isinstance(raw, str) and raw.strip().lower() == "off":
+                return "off"
+        except Exception:
+            pass
+        return "enforce"
+
+    def _emit_limit_up_close_config(
+        self, mode: str, threshold: float, limit_up_same_day: int,
+    ) -> None:
+        """`[ltv_limit_up_close_config]` — 하루 1회, 보유 0 에서도 발화."""
+        self._limit_up_close_config_logged.emit_once(
+            "cfg",
+            logger.info,
+            "[ltv_limit_up_close_config] mode=%s threshold=%.1f limit_up_same_day=%d",
+            mode, threshold, limit_up_same_day,
+        )
+
+    def _emit_limit_up_close_decision(
+        self, ticker: str, decision: str, threshold: float,
+        prdy: float | None, price: int | None, prev_close: int | None,
+        tick_age_s: int | None, reason: str,
+    ) -> None:
+        """`[ltv_limit_up_close_decision]` — 상한가 모드 당일 종목마다 1행."""
+        self._limit_up_close_decision_logged.emit_once(
+            f"decision|{ticker}",
+            logger.info,
+            "[ltv_limit_up_close_decision] ticker=%s decision=%s prdy=%s "
+            "threshold=%.1f price=%s prev_close=%s tick_age_s=%s reason=%s",
+            ticker, decision,
+            f"{prdy:.2f}" if prdy is not None else "-",
+            threshold,
+            price if price is not None else "-",
+            prev_close if prev_close is not None else "-",
+            tick_age_s if tick_age_s is not None else "-",
+            reason,
+        )
+
+    def _evaluate_limit_up_close_hold(
+        self, ticker: str, threshold: float,
+    ) -> tuple[str, str, float | None, int | None, int | None, int | None]:
+        """가격 조회 + 판정. 반환 = (decision, reason, prdy, price, prev_close, tick_age_s).
+
+        decision ∈ `exit|hold|hold_unknown`. **판정 불가면 보유**(가격 없음·0
+        이하·전일종가 없음·예외) — 잠긴 상한가는 체결이 드물어 틱이 오래될 수
+        있는데 그때 마지막 가격은 상한가라 보유가 맞다. 신선도 게이트는 두지
+        않고 `tick_age_s` 로 나이만 남긴다. **전체가 try/except 안**이라
+        never-raise 다 — 이 함수가 던지면 안 된다(호출부가 여러 종목을
+        순회하므로 한 종목의 실패가 나머지 종목 판정을 막으면 안 된다).
+        """
+        try:
+            from src.engine.scanner import ticker_prices, ticker_prev_close, ticker_last_tick
+
+            tick_age_s: int | None = None
+            try:
+                last_tick = ticker_last_tick.get(ticker)
+                if last_tick is not None:
+                    tick_age_s = int((datetime.now(KST) - last_tick).total_seconds())
+            except Exception:
+                tick_age_s = None
+
+            price_info = ticker_prices.get(ticker) or {}
+            price = price_info.get("current_price", 0) if isinstance(price_info, dict) else 0
+            if not price or price <= 0:
+                return "hold_unknown", "no_price", None, (price or 0), None, tick_age_s
+
+            prev_close = ticker_prev_close.get(ticker, 0)
+            if not prev_close or prev_close <= 0:
+                return "hold_unknown", "no_prev_close", None, price, (prev_close or 0), tick_age_s
+
+            # `risk.on_tick` 의 `prdy_ctrt` 와 같은 반올림(소수 둘째 자리) — 부동소수
+            # 표현 오차(`0.29` 는 이진수로 정확히 표현되지 않는다)로 정확히 +29.00%
+            # 가 28.999999999999996 이 되어 「경계는 보유(>=)」 계약이 깨지는 것을 막는다.
+            prdy = round((price - prev_close) / prev_close * 100, 2)
+            if prdy < threshold:
+                return "exit", "-", prdy, price, prev_close, tick_age_s
+            return "hold", "-", prdy, price, prev_close, tick_age_s
+        except Exception:
+            return "hold_unknown", "error", None, None, None, None
+
+    def _limit_up_close_hold_extra_clears(self) -> list[str]:
+        """상한가 모드 당일 종목 중 15:20 가격이 임계 미만인 종목 목록.
+
+        `check_force_clear` 가 이 메서드 호출을 통째로 `try/except` 로 감싼다 —
+        여기가 예외를 던져도 당일 모드 종목의 15:20 청산은 지켜져야 한다.
+        """
+        try:
+            threshold = float(self.config.params.get("limit_up_threshold", 29.0))
+        except Exception:
+            threshold = 29.0
+        mode = self._read_limit_up_close_hold_mode()
+        limit_up_same_day = [
+            ticker for ticker in self.state.positions
+            if ticker in self._limit_up_reached
+            and not self.state.positions[ticker].is_next_day
+        ]
+        self._emit_limit_up_close_config(mode, threshold, len(limit_up_same_day))
+        if mode != "enforce":
+            return []
+        result: list[str] = []
+        for ticker in limit_up_same_day:
+            decision, reason, prdy, price, prev_close, tick_age_s = (
+                self._evaluate_limit_up_close_hold(ticker, threshold)
+            )
+            self._emit_limit_up_close_decision(
+                ticker, decision, threshold, prdy, price, prev_close, tick_age_s, reason,
+            )
+            if decision == "exit":
+                result.append(ticker)
+        return result
+
     def check_force_clear(self) -> list[str]:
-        """15:20 강제 청산 대상 — 상한가 모드가 아닌 종목만."""
-        return [
+        """15:20 강제 청산 대상.
+
+        현행 = 당일 모드(상한가 미도달) 종목 전부. cycle352 추가 = 상한가 모드
+        ∧ 당일 매수(`not pos.is_next_day`) ∧ `limit_up_close_hold_mode="enforce"`
+        ∧ 15:20 가격의 전일대비 등락률이 `limit_up_threshold` 미만인 종목(그날
+        종가 부근에서 판다). 🔴 새 판정은 **never-raise 가 계약**이다 —
+        `scheduler._force_clear_main_only` 가 이 메서드를 try 없이 부르므로,
+        새 분기가 예외를 던지면 당일 모드 종목까지 15:20 청산을 못 하고 밤을
+        넘긴다. 실패하면 현행 목록만 반환한다.
+        """
+        base = [
             ticker for ticker in self.state.positions
             if ticker not in self._limit_up_reached
         ]
+        try:
+            extra = self._limit_up_close_hold_extra_clears()
+        except Exception:
+            extra = []
+        return base + extra
 
     def calc_buy_quantity(self, current_price: int, ticker: str | None = None) -> int:
         """할당 자금의 position_ratio 비중. 예산 잔여로 클램프(`_apply_budget_limit`).

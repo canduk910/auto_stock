@@ -190,12 +190,20 @@ _CYCLE300_NEW_KEYS: tuple[str, ...] = ("daily_fetch_depth_mode",)
 _CYCLE300_AFFECTED_SIDS: frozenset[str] = frozenset({"vcp_breakout"})
 
 
+#: cycle352(2026-09-25) — LTV 전용 15:20 상한가 유지 확인 킬스위치. 또 **다른 축**이라
+#: 위와 섞지 않는다(사용자 결정 D5 F3①). LTV 한 전략에만 붙는다.
+_CYCLE352_NEW_KEYS: tuple[str, ...] = ("limit_up_close_hold_mode",)
+_CYCLE352_AFFECTED_SIDS: frozenset[str] = frozenset({"long_tail_volatility"})
+
+
 def _expected_new_keys(sid: str) -> set[str]:
     expected = set(_NEW_KEYS)
     if sid in _CYCLE297_AFFECTED_SIDS:
         expected |= set(_CYCLE297_NEW_KEYS)
     if sid in _CYCLE300_AFFECTED_SIDS:
         expected |= set(_CYCLE300_NEW_KEYS)
+    if sid in _CYCLE352_AFFECTED_SIDS:
+        expected |= set(_CYCLE352_NEW_KEYS)
     return expected
 
 
@@ -757,7 +765,8 @@ def test_g290_37_help_names_the_side_effects(key: str, phrase: str) -> None:
 
 
 def test_g290_38_catalog_spec_count_is_102() -> None:
-    """카탈로그 스펙 수 99 → **101**(cycle290) → **102**(cycle300 깊이 스위치). 중복 없음.
+    """카탈로그 스펙 수 99 → **101**(cycle290) → **102**(cycle300 깊이 스위치) →
+    **103**(cycle352 15:20 상한가 유지 확인). 중복 없음.
 
     cycle278 계열 가드 4곳(`test_cycle278_param_catalog`·`test_cycle278_params_schema`·
     `test_routes_strategies`·프론트 `_ast_param_key_hardcode`)이 같은 숫자를 세므로
@@ -765,9 +774,9 @@ def test_g290_38_catalog_spec_count_is_102() -> None:
     """
     from src.engine import param_catalog as pc
 
-    assert len(pc.PARAM_SPECS) == 102, len(pc.PARAM_SPECS)
-    assert len(pc.SPEC_BY_KEY) == 102, len(pc.SPEC_BY_KEY)
-    assert len({s.key for s in pc.PARAM_SPECS}) == 102, "키 중복"
+    assert len(pc.PARAM_SPECS) == 103, len(pc.PARAM_SPECS)
+    assert len(pc.SPEC_BY_KEY) == 103, len(pc.SPEC_BY_KEY)
+    assert len({s.key for s in pc.PARAM_SPECS}) == 103, "키 중복"
 
 
 # ===========================================================================

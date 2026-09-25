@@ -150,3 +150,59 @@ async def test_force_clear_does_not_target_momentum_or_donchian(scheduler_env):
 
     # momentum / donchian 은 _force_clear_main_only 의 대상 strategies 에 없음
     assert scheduler_env.calls.execute_sell == []
+
+
+# ---------------------------------------------------------------------------
+# cycle352 — I1/I2: LTV 15:20 상한가 유지 확인 (`limit_up_close_hold_mode`)
+#
+# 정본 = `_workspace/domain_consult/cycle352_ltv_limit_up_trailing.md` §5.4.
+# I3(=`check_force_clear` 자체 예외 시 `_force_clear_main_only` 는 try 없이 호출한다는
+# 현행 결함 재현)은 이번에 고치지 않는다(`scheduler.py` 무접촉) — 전략 쪽에서
+# `T11`(단위 테스트)이 그 경로를 이미 막는다는 사실만 여기 문서로 남긴다.
+# ---------------------------------------------------------------------------
+async def test_force_clear_ltv_limit_up_mode_exits_when_below_threshold_at_1520(
+    scheduler_env,
+):
+    """I1 — 상한가 모드 당일 보유 + 15:20 가격이 임계 미만 → FORCE_CLEAR 매도 1회."""
+    from src.engine import scanner
+
+    sched = scheduler_env.scheduler
+    ltv = sched.registry.get("long_tail_volatility")
+    ltv.config.enabled = True
+    ltv.config.params["tradable_boards"] = ["main"]
+    _seed_pos(ltv, "005930", buy_price=80000)
+    ltv._limit_up_reached.add("005930")
+
+    # ticker_prev_close["005930"] = 70000 (scheduler_env 고정) → +24% ≈ 86800
+    scanner.ticker_prices["005930"] = {"current_price": 86800}
+
+    await sched._force_clear_main_only()
+
+    sells = scheduler_env.calls.execute_sell
+    assert len(sells) == 1, f"got sells={sells}"
+    assert sells[0]["ticker"] == "005930"
+    assert sells[0]["signal"] == Signal.FORCE_CLEAR
+    assert sells[0]["strategy_id"] == "long_tail_volatility"
+    assert "005930" not in ltv.state.positions
+
+
+async def test_force_clear_ltv_limit_up_mode_holds_when_at_threshold_at_1520(
+    scheduler_env,
+):
+    """I2 — 같은 조건, 15:20 가격이 여전히 임계(29%) 이상 → 매도 없음(익일 보유 보존)."""
+    from src.engine import scanner
+
+    sched = scheduler_env.scheduler
+    ltv = sched.registry.get("long_tail_volatility")
+    ltv.config.enabled = True
+    ltv.config.params["tradable_boards"] = ["main"]
+    _seed_pos(ltv, "005930", buy_price=80000)
+    ltv._limit_up_reached.add("005930")
+
+    # +29.9% ≈ 90930 (limit_up_threshold=29.0 이상 → hold)
+    scanner.ticker_prices["005930"] = {"current_price": 90930}
+
+    await sched._force_clear_main_only()
+
+    assert scheduler_env.calls.execute_sell == []
+    assert "005930" in ltv.state.positions

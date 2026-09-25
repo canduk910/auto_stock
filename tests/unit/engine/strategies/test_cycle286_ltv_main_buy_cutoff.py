@@ -208,6 +208,10 @@ def _field(line: str, name: str) -> str:
 
 #: cycle286 **이전** 의 LTV 인스턴스 emit cap 이름 전수(실측). 이 목록과의 차집합이
 #: 곧 이 사이클이 새로 만든 cap 이다 — "개수 >= N" 단정은 이미 7개가 있어 공허하다.
+#: 🔁 cycle352 재핀 — 15:20 상한가 유지 확인 관측 cap 2종(`_limit_up_close_config_logged`
+#: `_limit_up_close_decision_logged`)이 추가돼 이 목록에 편입했다(이 파일의 관심사는
+#: "cycle286 이 몇 개를 새로 만들었나" 이지 "지금 몇 개가 있나" 가 아니다 — 그 답은
+#: 여전히 1 이어야 한다).
 _PREEXISTING_CAPS = frozenset({
     "_budget_clamp_logged",        # strategy_base — 예산 클램프
     "_account_gate_logged",        # cycle233 — 계좌 SOFT 게이트
@@ -216,6 +220,8 @@ _PREEXISTING_CAPS = frozenset({
     "_ratio_cap_logged",           # cycle245 — ρ축 명목 캡
     "_open_entry_hold_config_logged",   # cycle262
     "_open_entry_hold_blocked_logged",  # cycle262
+    "_limit_up_close_config_logged",    # cycle352
+    "_limit_up_close_decision_logged",  # cycle352
 })
 
 
@@ -620,6 +626,10 @@ def test_s6_1_no_new_default_params_key() -> None:
     자체)과 무관한 새 매수 게이트 키다. `order_exchange_clock_mode`·
     `after_market_exit_division` 은 컷과 무관한 **거래소 라우팅** 킬스위치라
     27→29 로 갱신됐다(사용자 결정 "나머지는 권고대로" — cycle290 브리프).
+
+    🔁 **cycle352(2026-09-25, 15:20 상한가 유지 확인)** — `limit_up_close_hold_mode`
+    는 컷(§S1-2)과 무관한 **청산** 킬스위치라(사용자 결정 D5 F3①) 29→30 으로
+    갱신됐다.
     """
     expected = {
         "tradable_boards", "k_period", "min_prdy_rate",
@@ -633,11 +643,12 @@ def test_s6_1_no_new_default_params_key() -> None:
         "llm_gate_mode", "llm_gate_min_score", "llm_gate_daily_call_cap",
         "llm_gate_timeout_secs",
         "order_exchange_clock_mode", "after_market_exit_division",
+        "limit_up_close_hold_mode",
     }
     got = set(LongTailVolatilityStrategy.DEFAULT_PARAMS)
     assert got == expected, (
         f"신규 {sorted(got - expected)} / 삭제 {sorted(expected - got)} — "
-        "cycle286 은 `DEFAULT_PARAMS` 무접촉이다(킬스위치 키 금지, cycle290 등재 2키 제외)"
+        "cycle286 은 `DEFAULT_PARAMS` 무접촉이다(킬스위치 키 금지, cycle290/352 등재 제외)"
     )
 
 

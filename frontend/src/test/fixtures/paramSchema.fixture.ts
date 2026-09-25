@@ -1,7 +1,7 @@
 /**
  * cycle278 Red — `GET /api/strategies/params-schema` 응답 **골든 픽스처**.
  *
- * ⚠️ 손으로 쓰지 않는다. `src/engine/param_catalog.py` 의 102 스펙과 7 전략
+ * ⚠️ 손으로 쓰지 않는다. `src/engine/param_catalog.py` 의 103 스펙과 7 전략
  * `DEFAULT_PARAMS` 에서 **기계 생성**했다 (생성기:
  * `_workspace/red/cycle278_param_catalog_ui_spec.md` §7.4 · 생성 스크립트는 사이클 산출물).
  *
@@ -101,7 +101,7 @@ export interface ParamSchemaData {
 }
 
 export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
-  "catalog_version": "cycle300.1",
+  "catalog_version": "cycle352.1",
   "groups": [
     {
       "id": "entry",
@@ -1809,6 +1809,43 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
       "help": "당일 등락률이 이 값 이상이면 '상한가 모드'로 전환해 익일 청산 경로를 탄다(청산 규약 자체가 바뀌는 스위치)."
     },
     {
+      "key": "limit_up_close_hold_mode",
+      "label_ko": "15:20 상한가 유지 확인",
+      "group": "exit",
+      "type": "enum",
+      "min": null,
+      "max": null,
+      "step": null,
+      "unit": "",
+      "editable": true,
+      "risk": "high",
+      "auto_tunable": false,
+      "deprecated": false,
+      "deprecated_for": [],
+      "range_src": "enum",
+      "pattern": null,
+      "min_items": 0,
+      "forbidden_choices": [],
+      "choices": [
+        {
+          "value": "enforce",
+          "label_ko": "강제 (15:20 에 임계 미만이면 그날 종가에 매도)",
+          "deprecated": false,
+          "help": ""
+        },
+        {
+          "value": "off",
+          "label_ko": "끄기 (롤백 — 상한가 모드는 가격 무관 익일 보유)",
+          "deprecated": false,
+          "help": ""
+        }
+      ],
+      "applies_to": [
+        "long_tail_volatility"
+      ],
+      "help": "cycle352 — 상한가 모드 당일 종목이 15:20 시점에 `limit_up_threshold` 아래로 되밀렸으면 그 15:20 강제청산 경로에서 판다(밤을 넘길 자격을 잃었다고 본다). `off` 만 롤백이고, 부재·오타·비문자열은 전부 `enforce`(`open_price_scope_mode` 와 같은 규약 — 배포 즉시 켜진다)."
+    },
+    {
       "key": "failed_breakout_exit_enabled",
       "label_ko": "가짜 돌파 조기청산 사용",
       "group": "exit",
@@ -3118,6 +3155,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "intraday_stop_loss",
         "overnight_stop_loss",
         "limit_up_threshold",
+        "limit_up_close_hold_mode",
         "position_ratio",
         "max_positions",
         "max_lot_ratio_mult",
@@ -3149,6 +3187,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "intraday_stop_loss": -3.0,
         "overnight_stop_loss": -5.0,
         "limit_up_threshold": 29.0,
+        "limit_up_close_hold_mode": "enforce",
         "position_ratio": 0.15,
         "max_positions": 6,
         "max_lot_ratio_mult": 2.5,
@@ -3184,6 +3223,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "intraday_stop_loss": -3.0,
         "overnight_stop_loss": -5.0,
         "limit_up_threshold": 29.0,
+        "limit_up_close_hold_mode": "enforce",
         "position_ratio": 0.15,
         "max_positions": 6,
         "max_lot_ratio_mult": 2.5,

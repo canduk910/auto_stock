@@ -149,7 +149,7 @@ _BASE_SHA = {
     "src/engine/strategies/kojiro.py":
         "0e2e7e07e802b541aeeab5bce2ad29716148d59a8c9daf2213127550114214a9",
     "src/engine/strategies/long_tail_volatility.py":
-        "51b50560a1240df3fc6085da7253438605079d7d453ff3e77a806e814473be25",
+        "1948c394c1fe1fc612a063d528dc4282b2b25d7ababd266ba1d7e9fe6c54158e",
     "src/engine/strategies/momentum.py":
         "50d5c0b9a232d6110f6b85fc524569853f2b8edffe2fd44adc24289800b95ae2",
     "src/engine/strategies/vcp_breakout.py":
@@ -439,8 +439,15 @@ _SRC_TREE_FILES = 156
 #: vcp_breakout.py(부팅 훅 재도출 호출부에 turtle 게이트) 변경으로 digest 가 다시
 #: 움직였다. 파일 수는 156 로 불변이다. 직전 값 =
 #: `5909f502708f55e251deca07cb1b68c7623b97d73efaec0345df42c45551a3fc`.
+#: 🔁 cycle352 재핀 — 15:20 상한가 유지 확인(`long_tail_volatility.py` 신규 킬스위치
+#: `limit_up_close_hold_mode` + `check_force_clear` 확장) · `param_catalog.py`
+#: (스펙 1행, 102→103) 변경으로 digest 가 다시 움직였다. 사용자 승인(D5 F3①,
+#: `_workspace/domain_consult/cycle352_ltv_limit_up_trailing.md`). 커밋 전 독립 검증
+#: 반영(부동소수 경계 반올림 + `DEFAULT_PARAMS` 주석 오타 시정 + `CATALOG_VERSION`
+#: `cycle300.1`→`cycle352.1`)으로 두 번 더 움직였다. 파일 수는 156 로 불변이다.
+#: 직전 값 = `61f098adf846176252aa81886a3f328b61295f73018b222dfe38a7edd5546f12`.
 _SRC_TREE_DIGEST = (
-    "aa51efbf07168aec4a7aa4f7d4b1641c6e8d3990c72234bf2bcad5e6974d8e26"
+    "e54d5fce287dd87d12f2f9dd907e6a65429492bcb37be3802868c212dc4963cc"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

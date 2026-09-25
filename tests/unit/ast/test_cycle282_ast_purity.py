@@ -433,7 +433,7 @@ _BASE_SHA = {
     "src/engine/strategies/kojiro.py":
         "0e2e7e07e802b541aeeab5bce2ad29716148d59a8c9daf2213127550114214a9",
     "src/engine/strategies/long_tail_volatility.py":
-        "51b50560a1240df3fc6085da7253438605079d7d453ff3e77a806e814473be25",
+        "1948c394c1fe1fc612a063d528dc4282b2b25d7ababd266ba1d7e9fe6c54158e",
     "src/engine/strategies/momentum.py":
         "50d5c0b9a232d6110f6b85fc524569853f2b8edffe2fd44adc24289800b95ae2",
     "src/engine/strategies/vcp_breakout.py":

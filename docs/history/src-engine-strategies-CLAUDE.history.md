@@ -253,6 +253,25 @@ P0-1 유령 키 `acml_vol` 경위와 cycle227 관측 마커 `[*_vol_gate_observe
 
 ---
 
+### 2026-09-25 cycle352 — LTV 15:20 상한가 유지 확인(`limit_up_close_hold_mode`) 채택 경위
+
+자문 실측(`_workspace/domain_consult/cycle352_ltv_limit_up_trailing.md`)이 사용자 결정의 전제(트레일링이
+없어 고점에서 23% 를 반납한다)를 반증했다 — 실현 손실은 이미 `overnight_stop_loss` 에서 멈추고(모집단
+373건 중 15% 넘게 되밀린 경우는 2%), 이름 그대로의 당일 트레일링은 폭을 얼마로 잡아도 평균 수익을
+깎는다(7~15% 폭 전부 열위). 채택된 것은 **B안** — 「15:20 에 아직 상한가 근처인가」 한 번만 묻는다.
+
+옛 표 행(`src/engine/strategies/CLAUDE.md:16`, cycle352 이전, 2026-09-25 이관) — 손절률·청산 경로가
+지금과 다르다(당일 −3%/상한가 −5% 는 코드 기본값, 운영 DB 는 반대로 −5%/−3.5%. 상한가 모드는
+15:20 확인 없이 무조건 「익일 NXT 프리 청산」이라고 적었으나 실제로는 갭 미달 시 09:00 KRX 시장가다):
+
+---
+
+| `long_tail_volatility` | `long_tail_volatility.py` | VB 방식 + 전일대비 `min_prdy_rate%`↑. `_limit_up_reached` set 으로 모드 관리. **`_cooldown_until` 2영업일 재진입 쿨다운** — `on_position_closed` 훅에서 `was_limit_up`(discard 전 판정)이면 면제, **당일 모드 손절 종목만** 등록(상한가 익일보유 정상 재진입 보존). `reentry_cooldown_days=2` 는 `PARAM_RANGES` 미등록, 일일 리셋 금지. 각주 ②③④⑤ | 당일 모드 -3% / 상한가 모드 -5% + 익일 갭/트레일링. **15:20 상한가 미도달 일괄 청산** / 상한가 모드는 익일 NXT 프리 청산 + POST_NXT 손절 모니터링. `_next_day_clear_pending` 가드 | **PRE_NXT + MAIN + POST_NXT 3보드** — 연속 상한가 익일 청산 + 야간 매수. 매수 진입 전용(보유 손절·Trailing·익일청산은 보드 가드 무관 항상 작동). DB `strategy_config` 도 3보드 |
+
+---
+
+→ CHANGELOG: cycle352 행
+
 ### 표 행 원문 — `kojiro`
 
 2026-07-20 백테스트(밴드 4.5→6.0 · freshness 3→5), cycle273c 랭킹 복원 경위(ρ=+0.853 · `1e-9` 분모), H-1 전후 샹들리에 편입 논거와 Σ리스크 27,162→20,797 실측, 2026-08-04 삼영무역 ATR 결측 사고와 시정, 2026-08-18 샹들리에 3청산 근거, 2026-08-06 `high == buy` 실측.

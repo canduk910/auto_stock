@@ -143,9 +143,11 @@ _DEFAULT_PARAMS_SHA: dict[str, tuple[str, str, str]] = {
     "volatility_breakout": (
         "src/engine/strategies/volatility_breakout.py", "VolatilityBreakoutStrategy",
         "f91b1acc5ebf7278e7a4a85419a415b8cb4c6ec70cc19d8fac8e789e4e3751a0"),
+    # 🔁 cycle352 재핀 — 15:20 상한가 유지 확인 킬스위치 `limit_up_close_hold_mode`
+    #    1키 추가(사용자 승인). 구 값(cycle290 기준선)은 git 이력에 남는다.
     "long_tail_volatility": (
         "src/engine/strategies/long_tail_volatility.py", "LongTailVolatilityStrategy",
-        "41e0b7b5a790c11af934bf3dea1895463b5fc569d42b940db6ef36639279d96e"),
+        "979cb31c47de0c20bcdc5ff9f6fd6d2655bac4b06edb1f18f43320f3a6b1f954"),
     "donchian_swing": (
         "src/engine/strategies/donchian_swing.py", "DonchianSwingStrategy",
         "f8700a1080c7a4750a171c42ae5940f5add35ee793ccb53e6d4ec64b6e7d08ca"),
@@ -247,7 +249,7 @@ _BASE_SHA = {
     "src/engine/strategies/momentum.py":
         "50d5c0b9a232d6110f6b85fc524569853f2b8edffe2fd44adc24289800b95ae2",
     "src/engine/strategies/volatility_breakout.py": "d13efaa4a9424e2822b5476ce159987d2a5192a4bca30af3f1a0cae9c3ffcabc",
-    "src/engine/strategies/long_tail_volatility.py": "51b50560a1240df3fc6085da7253438605079d7d453ff3e77a806e814473be25",
+    "src/engine/strategies/long_tail_volatility.py": "1948c394c1fe1fc612a063d528dc4282b2b25d7ababd266ba1d7e9fe6c54158e",
     "src/engine/strategies/donchian_swing.py":
         "cc57e5673f9982aca97f61677084e040171fff307483fedf10459b567a4679e3",
     "src/engine/strategies/bull_flag_breakout.py":

@@ -10,7 +10,7 @@ Green 단계에서 명세의 계약을 그대로 옮겨 작성했다.
 
 ## 이 파일이 잠그는 계약
 
-* **C11** 200 + `data.params` 101 항목(cycle290 이후), 각 항목이 `ParamSpec` 의 **전 필드**를 가진다.
+* **C11** 200 + `data.params` 103 항목(cycle352 이후), 각 항목이 `ParamSpec` 의 **전 필드**를 가진다.
 * **C12** `data.strategies` 는 등록 전략마다 1행 — `keys`(= `keys_for_strategy`) ·
   `params`(현재값) · `defaults`(코드 기본값)를 **함께** 준다.
   현재값을 별도 `GET /api/strategies`(staleTime 15s)와 섞으면 diff 미리보기가
@@ -135,7 +135,8 @@ def _strategy_row(data: dict, sid: str) -> dict:
 # C11 — 카탈로그 전체
 # ===========================================================================
 async def test_schema_when_requested_then_200_with_101_params(schema_env):
-    """B43/C11 — 101 항목 전수(cycle290 이 킬스위치 2키 등재해 99→101).
+    """B43/C11 — 103 항목 전수(cycle290 이 킬스위치 2키 등재해 99→101, cycle300 이
+    101→102, cycle352 가 102→103).
 
     부분 노출은 지금의 재드리프트(73키 화면 밖)의 재현이다.
     """
@@ -144,7 +145,7 @@ async def test_schema_when_requested_then_200_with_101_params(schema_env):
     assert data["catalog_version"] == pc.CATALOG_VERSION
     keys = [p["key"] for p in data["params"]]
     assert keys == list(pc.all_keys()), "params 순서/집합이 카탈로그 정의 순서와 다르다"
-    assert len(keys) == 102, f"{len(keys)}개 — 102 전수여야 한다"
+    assert len(keys) == 103, f"{len(keys)}개 — 103 전수여야 한다"
 
 
 async def test_schema_when_read_then_each_param_has_all_fields(schema_env):

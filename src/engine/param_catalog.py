@@ -1,4 +1,4 @@
-"""전략 파라미터 카탈로그 — 7 전략 `DEFAULT_PARAMS` 합집합 102 키의 **단일 진실원**.
+"""전략 파라미터 카탈로그 — 7 전략 `DEFAULT_PARAMS` 합집합 103 키의 **단일 진실원**.
 
 사이클 278. 이 모듈은 **순수 데이터**다.
 
@@ -131,7 +131,7 @@ __all__ = [
     "forbidden_choices_for",
 ]
 
-CATALOG_VERSION = "cycle300.1"
+CATALOG_VERSION = "cycle352.1"
 
 #: 전략 id 의 정본 순서(레지스트리 등록 순서).
 STRATEGY_IDS: tuple[str, ...] = (
@@ -431,7 +431,7 @@ def _s(**kw: Any) -> ParamSpec:
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# 102 키
+# 103 키
 # ═══════════════════════════════════════════════════════════════════════════
 PARAM_SPECS: tuple[ParamSpec, ...] = (
     # ── 진입 (47) ───────────────────────────────────────────────────────────
@@ -831,7 +831,7 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         help="돌파가가 이 시간만큼 유지돼야 진짜 돌파로 인정(가짜 돌파 흡수).",
     ),
 
-    # ── 청산 (21) ───────────────────────────────────────────────────────────
+    # ── 청산 (22) ───────────────────────────────────────────────────────────
     _s(
         key="stop_loss_rate", label_ko="손절률", group="exit",
         type="float", min=-15.0, max=0.0, step=0.5, unit="%",
@@ -987,6 +987,20 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         applies_to=("long_tail_volatility",), range_src="param_ranges",
         help="당일 등락률이 이 값 이상이면 '상한가 모드'로 전환해 익일 청산 경로를 탄다"
              "(청산 규약 자체가 바뀌는 스위치).",
+    ),
+    _s(
+        key="limit_up_close_hold_mode", label_ko="15:20 상한가 유지 확인", group="exit",
+        type="enum", min=None, max=None, step=None, unit="",
+        editable=True, risk="high", auto_tunable=False, deprecated=False,
+        applies_to=("long_tail_volatility",), range_src="enum",
+        choices=(
+            Choice("enforce", "강제 (15:20 에 임계 미만이면 그날 종가에 매도)"),
+            Choice("off", "끄기 (롤백 — 상한가 모드는 가격 무관 익일 보유)"),
+        ),
+        help="cycle352 — 상한가 모드 당일 종목이 15:20 시점에 `limit_up_threshold`"
+             " 아래로 되밀렸으면 그 15:20 강제청산 경로에서 판다(밤을 넘길 자격을"
+             " 잃었다고 본다). `off` 만 롤백이고, 부재·오타·비문자열은 전부 `enforce`"
+             "(`open_price_scope_mode` 와 같은 규약 — 배포 즉시 켜진다).",
     ),
     _s(
         key="failed_breakout_exit_enabled", label_ko="가짜 돌파 조기청산 사용", group="exit",

@@ -356,7 +356,7 @@ flowchart TD
 | 매수 | 돌파 순간. `main` 보드 기준가는 VB 와 같은 **KRX REST `stck_oprc` 단일 출처**(`open_price_scope_mode`) — `pre_nxt`/`post_nxt` 보드는 스코프 밖 |
 | AI 매수평가 | VB 와 동일 — 매수 주문 접수 직후 `llm_buy_gate.observe_order` 가 점수를 `llm_buy_evaluations` 에 기록한다. `llm_gate_mode` 기본 `"shadow"` = 기록만, 매수 차단 없음 |
 | 손절 | 당일 모드 -3% / 익일 청산 모드 -5% |
-| 청산 (당일 모드) | **15:20 일괄 청산** — 상한가 미도달 종목만이고, `check_force_clear()` 가 `_limit_up_reached` 종목을 제외한다 |
+| 청산 (당일 모드) | **15:20 일괄 청산** — 상한가 모드 ∧ 당일 매수 중 15:20 가격이 `limit_up_threshold` 이상인 종목만 제외(`limit_up_close_hold_mode`, cycle352). 상세 = `src/engine/strategies/CLAUDE.md` LTV 절 |
 | 청산 (익일 청산 모드) | 다음 영업일 NXT 프리 시가(08:00) + 30초 안정화 후 갭상승 +10% → 트레일링 -2% / 그 외 즉시 매도. POST_NXT 시간대 시세 모니터링 손절 평가는 그대로 작동한다 |
 | 모드 전환 | 당일 +29% 도달 → 익일 청산 모드(`_limit_up_reached` set 등록) |
 | 보유 기간 | 당일 또는 1영업일 (상한가 도달 여부가 정한다) |
@@ -475,7 +475,7 @@ KIS OpenAPI 가 NXT(넥스트레이드 ATS) 주문·시세를 정식 지원하�
 | 전략별 매매 가능 보드 | `DEFAULT_TRADABLE_BOARDS` — `momentum`: KRX_OPEN+MAIN (코드 enum 유지, 활성 보드는 MAIN) / **`volatility_breakout`: MAIN only** / **`long_tail_volatility`: PRE_NXT+MAIN+POST_NXT (연속 상한가 익일 청산 + 야간 매수)** / `donchian_swing`·`bull_flag_breakout`·`vcp_breakout`·`kojiro`: MAIN only. `session.py` 의 fallback dict `_DEFAULT_TRADABLE_BOARDS` 는 momentum·VB·LTV·donchian 4전략만 담고, BFB·VCP·kojiro 는 각 전략 파일의 `DEFAULT_PARAMS["tradable_boards"]`(전부 `("main",)`) 로 결정된다 |
 | VB/LTV K값 | `k_value_krx_main` (기본 1.0) — KRX 09:00 시가 기준. 보드별 K 키는 `_BOARD_K_KEY` 가 고른다(`main`→`k_value_krx_main` / `pre_nxt`→`k_value_nxt_pre` / `post_nxt`→`k_value_nxt_post`). **VB 는** 보드가 `("main",)` 라 뒤 두 키가 곱해지는 경로가 없어 DB/AI 자문 응답 호환 보존만이고(`param_catalog` `deprecated_for=("volatility_breakout",)`), **LTV 는 프리·애프터 목표가에 실제로 곱한다** |
 | 익일 청산 시점 | 다음 영업일 NXT 프리 첫 거래(08:00 부근) + 30초 안정화 후 청산 (`NEXT_DAY_STABILIZE_SECS=30`). 대상 = `momentum` · `long_tail_volatility` 상한가 모드 · `volatility_breakout` **안전망**(VB 는 오버나이트를 하지 않는다 — 시세 미수신·시장가 거부·재시작 race 로 15:20 청산이 누락된 비상 상황에서만 `_execute_next_day_clear` 가 받아 WARNING 과 함께 청산한다) |
-| 15:20 강제 청산 | `_force_clear_main_only` — 대상은 VB·LTV 두 전략이고 각 전략의 `check_force_clear()` 가 목록을 정한다. VB = 전량. LTV = `_limit_up_reached`(상한가 모드) 종목만 제외하고 나머지는 청산한다 — **POST_NXT 가 `tradable_boards` 에 있어도 보유가 유지되지 않는다**(cycle142). **시간 가드**: 함수 진입 시 `>=15:30` 이면 즉시 skip + 익일 청산 안전망 위임 |
+| 15:20 강제 청산 | `_force_clear_main_only` — 대상은 VB·LTV 두 전략이고 각 전략의 `check_force_clear()` 가 목록을 정한다. VB = 전량. LTV = `_limit_up_reached`(상한가 모드) 종목 중 **15:20 가격이 `limit_up_threshold` 이상을 유지할 때만** 제외하고 나머지는 청산한다(`limit_up_close_hold_mode`, cycle352 — 상세 = `src/engine/strategies/CLAUDE.md` LTV 절) — **POST_NXT 가 `tradable_boards` 에 있어도 보유가 유지되지 않는다**(cycle142). **시간 가드**: 함수 진입 시 `>=15:30` 이면 즉시 skip + 익일 청산 안전망 위임 |
 | 스윙 일중 시세 REST 폴링 | `_swing_rest_poll_loop` — **2단 창**(cycle222-a): **09:00:30~09:30 = 보유 종목 전용 + stale 중립**(`SWING_REST_POLL_EARLY_START` — 09:00:30 부터 도는 이유는 WS 무송출(no_feed) 보유 종목의 시가 직후 손절 사각을 줄이기 위해서다. 'stale 중립' 인 이유는 REST 가 `ticker_last_tick` 을 갱신하면 개장 러시 blind 종목이 '신선'으로 보여 강제 재구독이 안 걸리기 때문이다) / **09:30~15:20 = 전체 폴**(후보 포함 + `last_tick` 갱신). 대상 전략 = `_SWING_POLL_STRATEGIES = ("donchian_swing", "kojiro")` — **BFB·VCP 는 비멤버라 REST 보강이 없고 틱으로만 매수 평가한다**(미구독 = 매수 기회 완전 상실). 60s 주기로 `_scanned_tickers ∪ positions ∪ pending_buys` 합집합을 `fetch_stock_detail` 폴링 → `scanner.ticker_prices` 갱신 + `ticker_last_tick` touch + `ticker_names` 보강. 보유 종목만 `RiskManager.on_tick` 호출로 기존 트레일링/-7% 손절 평가 재사용. WS stale 시 ATR 트레일링 평가 끊김 차단 (2026-05-15 결함 B) |
 
 ## API 엔드포인트

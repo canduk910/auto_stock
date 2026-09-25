@@ -655,7 +655,7 @@ _CYCLE228_STRATEGY_CONTENT_SHA: dict[str, str] = {
     "src/engine/strategies/volatility_breakout.py":
         "d13efaa4a9424e2822b5476ce159987d2a5192a4bca30af3f1a0cae9c3ffcabc",
     "src/engine/strategies/long_tail_volatility.py":
-        "51b50560a1240df3fc6085da7253438605079d7d453ff3e77a806e814473be25",
+        "1948c394c1fe1fc612a063d528dc4282b2b25d7ababd266ba1d7e9fe6c54158e",
     "src/engine/strategies/kojiro.py":
         "0e2e7e07e802b541aeeab5bce2ad29716148d59a8c9daf2213127550114214a9",
     "src/engine/strategies/momentum.py":
