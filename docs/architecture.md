@@ -1549,7 +1549,7 @@ flowchart LR
 | ① | REST 초당 20건 한도가 **프로세스 안** 세마포어 | `src/api/base.py:28` — `_semaphore = asyncio.Semaphore(20)` | 두 프로세스면 계정 한도 40/s 위반. 두 프로세스 **모두** REST 를 쓴다 |
 | ② | 토큰 발급 분당 1건 가드가 **프로세스 안** Lock | `src/auth/token.py:50` — `_GLOBAL_ISSUE_LOCK: asyncio.Lock \| None = None`(lazy 생성 `:55-60`) + `:52` `_ISSUE_GAP_SECS: float = 61.0` | KIS `/oauth2/tokenP` 는 분당 1개 전역 한도라 두 프로세스가 각자 발급하면 일부 403(`token.py:10`) |
 | ③ | 체결통보(H0STCNI0/H0STCNI9) **메인 세션 단일 강제** | `src/realtime/websocket_pool.py:64` `_EXECUTION_NOTICE_TR_IDS` + `:109` `_enforce_main_only_execution_notice` (보조 세션 구독 시 `QuoteSessionExecutionNoticeError` `:57`) | 체결이 다른 프로세스에 도착해 손절 경로에 한 홉이 늘어난다 |
-| ④ | 매수 수량 계산 ~ 대기 등록 사이 `await` 0건 규약(A-ATOMIC) | `src/engine/order_engine.py:741`(`calc_buy_quantity`) ~ `:782`(`pending_buys.add`) ~ `:784`(`pending_buy_amounts`), 가드 `tests/unit/ast/test_budget_limit_ast.py:60` | 단일 이벤트 루프 전제가 깨져 예산·중복 판정이 분산 잠금 문제가 된다. 이 경로에서 메시지 한 건 중복 = 주문 한 건 중복 |
+| ④ | 매수 수량 계산 ~ 대기 등록 사이 `await` 0건 규약(A-ATOMIC) | `src/engine/order_engine.py` `OrderEngine.execute_buy` 안의 `strategy.calc_buy_quantity(...)` ~ `state.pending_buys.add(ticker)` ~ `state.pending_buy_amounts[ticker]`, 가드 `tests/unit/ast/test_budget_limit_ast.py::test_execute_buy_sizing_to_pending_is_await_free` | 단일 이벤트 루프 전제가 깨져 예산·중복 판정이 분산 잠금 문제가 된다. 이 경로에서 메시지 한 건 중복 = 주문 한 건 중복 |
 
 **예상** — 지금 설계는 틱 경로를 동기적으로 막지는 않는다. 평가를 `asyncio.create_task` 로
 던지고 즉시 반환하기 때문이다(`src/engine/llm_buy_gate.py:759`, 동시 실행은 `:141`
@@ -1573,7 +1573,8 @@ flowchart LR
 근거 ①②③ 을 없앤다 — REST 를 쓰는 주체가 몇이든 REST 가 나가는 프로세스는 하나뿐이기 때문이다.
 
 > 이 절은 **승인된 설계가 아니라 방향 기록**이다(1·2·3단계와 같은 지위). "할 것이다" 가 아니라
-> "이렇게 하려면 무엇이 필요하다" 로 읽는다. 아래 코드 사실은 2026-09-15 HEAD 기준 실측이다.
+> "이렇게 하려면 무엇이 필요하다" 로 읽는다. 아래 코드 사실은 실측이다. 파일:줄 앵커는
+> 2026-09-15 HEAD 의 줄이고, `order_engine.py` 인용은 줄 대신 심볼(함수·메서드)로 적는다.
 
 ```mermaid
 %%{init: {"flowchart": {"wrappingWidth": 360}}}%%
@@ -1631,8 +1632,8 @@ flowchart TB
 > `is_ticker_blocked_for_buy` 와 예산 정규화가 즉시 분산 잠금 문제가 된다. 4단계에서 프로세스
 > 수를 늘리면 안 되는 지점이 여기다.
 
-⚠️ 15.4·15.5 표의 파일:줄 앵커는 사이클마다 밀린다. 앵커가 어긋나면 **심볼 이름으로 찾는다** —
-제약 자체(①~④)는 넷 다 그대로 살아 있다.
+⚠️ 15.4·15.5 표의 파일:줄 앵커는 사이클마다 밀린다. 가장 많이 밀리는 `order_engine.py` 는 그래서
+심볼로 적었다. 앵커가 어긋나면 **심볼 이름으로 찾는다** — 제약 자체(①~④)는 넷 다 그대로 살아 있다.
 
 #### 15.5.2 메시지 계약 — 토픽 7종
 
@@ -1646,10 +1647,11 @@ flowchart TB
 | T4 `order.request` | 2 → R | `{req_id, kind: place\|cancel, ticker, side, quantity, price, ORD_DVSN, EXCG_ID_DVSN_CD, ORGN_ODNO?}` | `place_order`/`cancel_order` body 조립 직전 값(`src/api/order.py:69-88`, `:147-158`). 계좌·hashkey·TR_ID 는 R 이 채운다 |
 | T5 `order.result` | R → 2 | 성공 `{req_id, order_no, order_time}` / 실패 `{req_id, rt_cd, msg_cd, msg1, http_status}` — **분류하지 않은 원문** | 15.5.4 |
 | T6 `fill.applied` | 3 → 1 | `{ticker, order_no, strategy_id, side, fill_price, total_filled, ordered_qty, is_full}` | `_handle_buy_fill`/`_handle_sell_fill` 이 지금 메모리에 반영하는 것의 데이터화 |
-| T7 `sub.control` | 3 → W | `{op: subscribe\|unsubscribe, ticker, priority}` | 매도 전량 체결 뒤 `_unsubscribe_if_no_other_strategy`(`order_engine.py:1910`). **사용자 도식에 없는 화살표다** |
+| T7 `sub.control` | 3 → W | `{op: subscribe\|unsubscribe, ticker, priority}` | 매도 전량 체결 뒤 `_handle_sell_fill` 이 부르는 `OrderEngine._unsubscribe_if_no_other_strategy`. **사용자 도식에 없는 화살표다** |
 
 **지금 경계는 데이터가 아니라 살아 있는 객체를 넘긴다.** "1 → 2" 에 해당하는 코드는
-`order_engine.execute_buy(ticker, current_price, strategy)`(`src/engine/risk.py:749`)이고
+`order_engine.execute_buy(ticker, current_price, strategy)`(`risk.on_tick` 이 부르고, donchian·kojiro
+는 `scheduler._swing_buy_poll_loop` 이 부른다)이고
 **세 번째 인자가 전략 객체 자체**다. 매도는 `execute_sell(ticker, signal, strategy_id)` 로
 문자열 id 지만 주문 쪽이 `self.registry.get(strategy_id)` 로 다시 살아 있는 객체를 잡는다.
 그래서 계약 설계의 첫 일은 페이로드 나열이 아니라 **"주문 프로세스가 전략에 대해 무엇을
@@ -1690,22 +1692,24 @@ B안이 함께 옮겨야 하는 조각 둘: 사이징 **앞**의 `get_buyable`(R
    에 정의만 있고 `src/` 전체 참조가 **0건**이다(유일 등장 = `src/api/order.py:113` 의 기본값
    인자 `CancelType.CANCEL`). 문자 그대로의 "정정이 신규를 추월" 은 재현되지 않는다.
 2. **신규 주문 시점에 모주문번호가 없다.** `order_no` 는 `place_order` 의 **응답**으로 생긴다
-   (`order_engine.py:906` → `:914`). 배정 키로 쓸 값이 그 시점에 존재하지 않으므로
+   (`execute_buy` 의 `result = await place_order(...)` 뒤에야 `self._order_qty[result.order_no]` 를
+   쓴다). 배정 키로 쓸 값이 그 시점에 존재하지 않으므로
    "모주문번호 mod 라인수" 는 수학적으로 성립하지 않는다.
 
-⇒ **우리 파티션 키는 `ticker` 다.** 정당화 셋 — (가) `_order_ticker`(`order_engine.py:240`)가
+⇒ **우리 파티션 키는 `ticker` 다.** 정당화 셋 — (가) `OrderEngine._order_ticker` 가
 `order_no → ticker` 를 갖고 있어 취소도 같은 키로 환원된다 (나) 전략 간 중복 진입을
 `is_ticker_blocked_for_buy` 가 이미 막으므로 ticker 는 주문 흐름의 자연 파티션 키다
-(다) 코드가 이미 ticker 로 직렬화를 전제한다(`_pending_cancel_tasks: dict[str, Task]` 가 ticker 키).
+(다) 코드가 이미 ticker 로 직렬화를 전제한다(`_pending_cancel_tasks` 키가 `(ticker, side)` 다.
+첫 축이 ticker 이고, 같은 종목·같은 방향의 취소 타이머는 하나만 산다 — cycle332).
 
 **동형 위험은 실재한다 — "취소가 원주문을 앞지른다" 로 온다.** 세 쌍이 있고 셋 다 오늘은
 `await` 한 줄이 순서를 지킨다:
 
 | 쌍 | 코드 | 순서가 뒤집히면 |
 |----|------|-----------------|
-| 취소 → 재주문 | `_cancel_and_reorder`: `cancel_order`(`:2445`) 직후 같은 함수에서 `place_order`(`:2505`), 사이 sleep 0 | 원주문 잔량과 재주문이 **둘 다 살아** 보유의 2배를 매도한다. 잔량이 실제로 있으므로 APBK0400 도 안 난다 |
-| 원주문 → 시장가 거부 폴백(매수) | `:906` 실패 → `:1035` | 같은 종목 이중 접수 |
-| 원주문 → 시장가 거부 폴백(매도) | `:1305` → `:1645` | 같은 종목 이중 접수 |
+| 취소 → 재주문 | `_cancel_and_reorder`: `cancel_order` 직후 같은 함수에서 `place_order`, 사이 sleep 0 | 원주문 잔량과 재주문이 **둘 다 살아** 보유의 2배를 매도한다. 잔량이 실제로 있으므로 APBK0400 도 안 난다 |
+| 원주문 → 시장가 거부 폴백(매수) | `execute_buy`: 주 `place_order` 거부 → 같은 `except KisApiError` 안의 폴백 `place_order` | 같은 종목 이중 접수 |
+| 원주문 → 시장가 거부 폴백(매도) | `execute_sell`: 재시도 루프의 주 `place_order` 거부 → 폴백 `place_order`(`fb_result`) | 같은 종목 이중 접수 |
 
 ⚠️ 그래서 규약 둘이 나온다. **(가) 같은 `ticker` 의 주문·취소는 같은 큐, 그 큐 안에서 FIFO.**
 우선순위를 2단(주문·취소 > 폴링·스캔)으로 나누더라도 **파티션 안에서는 한 큐여야 한다** — 큐를
@@ -1758,9 +1762,9 @@ flowchart LR
 | 프로세스 경계 (주문 발사까지) | 0 | 3 one-way | 코드 사슬 / 사용자 골자 |
 | 홉 비용 합 | 0 | **~0.07ms** | [실측] 이 머신 2프로세스 UDS+JSON, n=20,000 — RT 중앙값 0.046ms · p90 0.056 · p99 0.120 · **max 2.59** ⇒ one-way 0.023ms |
 | KIS 왕복 (주문 1건 = hashkey + 주문 2회) | **220~300ms** | 같음 | [실측] 순수 왕복 110~150ms — `_workspace/analysis/2026-09-10_cycle272_U2_rest_capacity.md:229-231` |
-| RDS 왕복(`stock_master.get`, 무캐시) | 1회, 인라인 | 같음(또는 캐시로 제거) | `order_engine.py:549` |
-| **수신 루프 최악 blocking** | **≈3.7초** | **0** | 매도 3회 재시도의 `sleep(1s)+sleep(2s)`(`order_engine.py:218-219`, `:1769`, `:1777`) + 3×~0.25s, 전부 `risk.on_tick` 인라인 |
-| 체결 → 손절 감시 무장 | 0 | 2홉 (버스가 정한다) | `order_engine.py:2042` / `risk.py:680` |
+| RDS 왕복(`stock_master.get`, 무캐시) | 1회, 인라인 | 같음(또는 캐시로 제거) | `_probe_nxt_downgrade_base` — `execute_buy`·`execute_sell` 이 발사 전 `_strategy_exchange_async` 로 부른다 |
+| **수신 루프 최악 blocking** | **≈3.7초** | **0** | 매도 3회 재시도의 `sleep(1s)+sleep(2s)`(상수 `SELL_MAX_RETRIES = 3`·`SELL_RETRY_DELAY = 1.0` + `execute_sell` 재시도 루프의 `asyncio.sleep(SELL_RETRY_DELAY * (2 ** (attempt - 1)))`) + 3×~0.25s, 전부 `risk.on_tick` 인라인 |
+| 체결 → 손절 감시 무장 | 0 | 2홉 (버스가 정한다) | `_handle_buy_fill` 의 `state.positions[ticker] = Position(...)` / `risk.on_tick` 의 `state.positions.get(ticker)` |
 
 ⇒ **손절 경로에서 늘어나는 항은 ~0.07ms 하나뿐이고, 줄어드는 항은 최악 3.7초다.** 즉 지연
 관점의 판정은 "홉이 싸다" 가 아니라 **"오늘의 인라인 구조가 이미 더 비싸다"** 쪽이다. 그 3.7초
@@ -1780,9 +1784,9 @@ KIS PINGPONG echo 까지 같은 막힌 루프 안에 있다.
 2. **애프터마켓 16:00~20:00 의 폴백 가격.** `execute_sell` 의 애프터 분기와 `_cancel_and_reorder`
    가 `scanner.ticker_prices[ticker]` 를 읽어 `41` 지정가를 정하는데, 4단계에서 그 dict 는
    전략평가 소유이고 가격 결정은 주문 프로세스에서 일어난다. 낡은 가격이 거부를 부르면 그 거부가
-   `_AFTER_EXIT_GIVEUP_THRESHOLD = 5`(`order_engine.py:77`) 예산을 깎아 **그날 밤 손절을 포기**
-   시킨다(`:485`) — 손절이 아예 일어나지 않는 유일한 경로다. ⇒ **의사 메시지가 가격을 싣고 간다**
-   가 유일하게 옳은 답이다(주문 프로세스가 경계 너머로 읽거나 R 에 단건 조회하는 안은 둘 다 나쁘다).
+   `_AFTER_EXIT_GIVEUP_THRESHOLD = 5`(`order_engine.py` 모듈 상수) 예산을 깎아 **그날 밤 손절을 포기**
+   시킨다(`_bump_after_exit_fails_and_maybe_giveup`) — 손절이 아예 일어나지 않는 유일한 경로다.
+   ⇒ **의사 메시지가 가격을 싣고 간다** 가 유일하게 옳은 답이다(주문 프로세스가 경계 너머로 읽거나 R 에 단건 조회하는 안은 둘 다 나쁘다).
 
 한편 4단계가 지연을 **줄이는** 자리도 있다 — 09:00 익일청산 drain(`scheduler.py:1545-1604`)은
 지금 직렬 for 루프라 마지막 종목이 `N × ~300ms` 를 기다린다. 20/s 예산이 R 한 곳에 모이면
@@ -1795,8 +1799,8 @@ KIS PINGPONG echo 까지 같은 막힌 루프 안에 있다.
 
 | 상태 | 쓰는 쪽 | 읽는 쪽 | 4단계에서 |
 |------|---------|---------|-----------|
-| `_order_qty` · `_pending_buy_orders` · `_order_strategy` · `_order_ticker` · `_order_exchange`(cycle287) · `_order_division`(cycle291) — `order_engine.py:237-249`, **전부 메모리 전용** | **주문** (`place_order` 응답 직후 동기 영역 4곳: `:912-936` · `:1046-1058` · `:1314-1320` · `:1655-1663`) | **체결** (`:1846` · `:1877` · `:2005` · `:2231`) + 취소 경로 | 주문 → 체결 |
-| `_completed_orders`(`:258`) | **체결** (`:2102` · `:2281`) | **주문** (`:669` 흡수기 · `:974` · `:1089` · `:1325` · `:1664`) | **체결 → 주문 (반대 방향)** |
+| `_order_qty` · `_pending_buy_orders` · `_order_strategy` · `_order_ticker` · `_order_exchange`(cycle287) · `_order_division`(cycle291) — `OrderEngine.__init__`, **전부 메모리 전용** | **주문** (`place_order` 응답 직후 동기 영역 — `execute_buy`·`execute_sell` 의 주 경로·시장가 거부 폴백 4곳 + `_cancel_and_reorder` 손절 잔여 재주문) | **체결** (`handle_execution_notice` 의 ticker 보정·주문수량 · `_handle_buy_fill`·`_handle_sell_fill` 의 전략 귀속) + 취소 경로 | 주문 → 체결 |
+| `_completed_orders`(`OrderEngine.__init__`) | **체결** (`_handle_buy_fill`·`_handle_sell_fill` — 전량 체결 UPDATE 가 0건이라 보정 INSERT 할 때 add) | **주문** (`_insert_pending_or_absorb_race` 흡수기 · `_persist_pending_after_send`(매수·매도 4경로 공용) · `_cancel_and_reorder`) | **체결 → 주문 (반대 방향)** |
 
 즉 한 주문 한 건에 대해 두 프로세스가 **서로의 상태를 쓰고 지운다.** 그리고 이 교차는 이론이
 아니라 **설계된 창**이다 — 루트 `CLAUDE.md` 금기 "매핑 등록은 `place_order` 응답 직후 동기 영역,
@@ -1812,9 +1816,9 @@ race 를 흡수하는 장치가 셋이나 있다(`_completed_orders` 선행 가�
 
 | 안 | 내용 | 평가 |
 |----|------|------|
-| A | 주문 → 체결 push 메시지 | 순서 보장을 요구해 가장 비싸다. 증거 없는 UniqueViolation 전파 계약(`:669-670`)이 **구조적으로 오발화**한다(cycle271 이 고친 결함의 재현) |
+| A | 주문 → 체결 push 메시지 | 순서 보장을 요구해 가장 비싸다. 증거 없는 UniqueViolation 전파 계약(`_insert_pending_or_absorb_race`)이 **구조적으로 오발화**한다(cycle271 이 고친 결함의 재현) |
 | B | 매핑을 DB 에 영속(outbox 와 같은 트랜잭션), 체결이 `order_no` 로 조회 | **권고.** 오늘 이 매핑은 주문 프로세스가 죽으면 소실되는데, "하나가 죽어도 나머지는 산다" 가 목표인 설계에서 소실을 허용하면 자기모순이다 |
-| C | 매핑 없이 버틴다 | 폴백은 이미 있다(`:1846` ticker 보정 · `:1877` 클램프 생략) **그러나 `_order_strategy` miss 의 폴백은 `"momentum"` 하드코딩**(`:2233`)이라 오귀속이 조용히 흐른다 |
+| C | 매핑 없이 버틴다 | 폴백은 이미 있다(`handle_execution_notice` — ticker 는 체결통보 값, 주문수량은 3단 출처 `map`→`payload`→`increment`, cycle329) **그러나 `_order_strategy` 와 trade_history 조회가 모두 빗나가면 최후 폴백은 `"momentum"` 하드코딩**(`_handle_buy_fill`·`_handle_sell_fill`)이라 오귀속이 WARNING 한 줄만 남기고 장부로 흐른다 |
 
 > **부팅 규약의 원형은 이미 코드에 있다.** `boot_manager.py:403-411` 이 재기동 시 KIS 당일 주문
 > 조회로 `_pending_buy_orders`/`_order_qty`/`_order_strategy`/`_order_ticker` 를 재구성한다.
@@ -1838,8 +1842,10 @@ race 를 흡수하는 장치가 셋이나 있다(`_completed_orders` 선행 가�
   `SellRejectionTracker` TTL 차단 · 전략/포지션 없음 · 장운영시간 외 거부 · 수량 락). 오늘도
   부분적으로 틀렸고(완충 = 다음 날 `_execute_next_day_clear` 가 재수집) **4단계에서는 100% 틀린다**
   — 메시지를 큐에 넣은 시점에서 반환하므로 거부·차단이 원리적으로 반환값에 담기지 않는다.
-  따라야 할 규율의 원형은 이미 있다 — `_selling` 은 `execute_sell` 진입에 add 되고
-  **`_handle_sell_fill` 전량 체결에서만** discard 된다(`:2269`).
+  따라야 할 규율의 원형은 이미 있다 — `_selling` 은 `execute_sell` 진입에 add 된다. 주문이
+  접수된 뒤 그것을 푸는 곳은 셋뿐이다 — 체결통보(`_handle_sell_fill` 의 전량 체결 분기 · 전략 미발견
+  분기) · KIS 재대조(`_sync_positions_from_balance` → `reconcile_stale_selling` — 보유 잔존 ∧ 열린
+  매도주문 없음 ∧ `SELLING_RECONCILE_MIN_AGE_S` 경과) · 21:30 `_reset_daily_state`.
 
 #### 15.5.7 scheduler.py 는 여섯 번째 프로세스가 아니다
 
