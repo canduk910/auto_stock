@@ -20,7 +20,7 @@
 ### 🔴 남은 일 — 명시 목록
 
 **A. 결정은 끝, 구현만 남은 것**
-1. **cycle369 관리종목·단기과열 보유 청산** — 🔴 **구현·검증 끝(라운드 1~3, 미커밋) — 커밋·full 배포 대기**. 배포 뒤 첫 영업일에 08:45(`pre_nxt` 전략이 있으면 07:59) `[status_block_pass] kind=p0` · 09:00:05 `kind=p1` · 09:00:30 `[status_exit_summary]` 한 줄씩 확인. 지연 개장일(수능일 등)은 개장 전에 `PUT /api/integrations/status-exit {"sell_mode":"off"}` 로 내리고 개장 뒤 `enforce`(고정 발사 창 한계). 남은 코드 주석 = leaf docstring 의 P1 09:00:00·8영역 목록. 경위 = `docs/HARNESS_CHANGELOG.md` cycle369 행. 결정 경위(사용자 답 2026-09-26: 질문② = 「당일 재매수 차단 + 신규 진입 필터」 동의. 질문① = **지정 첫날 매수도 막는다** → 지금 진입 필터(전날 16:10 종목마스터)로는 첫날을 못 막으므로 **아침 장 전 후보 상태 재확인 장치를 새로 넣어야 한다**(자문 §8 B/C 중 설계). 보유 종목 **시장가 청산은 그대로 한다** — 「재구독 중지」 만 글자 그대로 하지 않는다). 자문 권고 = 바로 시장가 청산(enforce), 판정은 REST `FHKST01010100` 전용 플래그(`mang_issu_cls_code`·`short_over_yn`), 발사 창 KRX 정규장 09:00:30~15:28(애프터장 발사 금지 — KRX 가 단기과열을 애프터 대상에서 제외), 킬스위치 `system_config.status_exit_mode`, 8영역 0. 질문 3개는 09-26 답 받음(위 괄호). 🔴 크리티컬: `ssts_hot_yn` 은 **공매도과열**(단기과열 아님) · 단기과열 **예고**는 지정이 아니다 · iscd 51 단독 판정은 관리종목 절반을 놓친다
+1. ~~cycle369 관리종목·단기과열 보유 청산~~ → ✅ `a198e75` full 배포(09-26 19:41, CI·Deploy·`/health` 200, 킬스위치 GET 응답 sell/buy 모두 `enforce`). 설계·결정 = `domain_consult/cycle369_status_51_59_exit.md` + `red/cycle369_status_exit_spec.md`. 롤백 = `PUT /api/integrations/status-exit` `{"sell_mode":"off"}`/`{"buy_block_mode":"off"}`(즉시) · 코드 revert(full)
 2. ~~VCP 터틀 전환 여부~~ → ✅ 전환함(위 완료 표)
 
 **B. 날짜·조건이 정해진 것**
@@ -49,6 +49,8 @@
 | 21:30 | `portfolio_risk` | donchian·BFB 손절선이 20:05 값과 같음(PV-1) |
 | 09-29 07:4x | `[funnel_boot_vs_evening] phase=boot` | 웹소켓 연결 뒤 6전략 `same=1`. +600초 레거시는 `decision=legacy_reprepare` |
 | 아무 때 | 종목마스터 일봉 탭 | 과거 날짜 등락률이 0.00% 아님(P4 백필) |
+| 08:45 · 09:00:05 | cycle369 `[status_block_pre_session_check]` · `[status_block_summary]` | P0·P1 1회씩, 후보 약 150~200 조회. 지정 종목이 있으면 `[status_block_armed]` |
+| 09:00:30~ 300초 | cycle369 청산 패스 | 보유 12종목 조회. 지정 보유가 없으면 발사 0(09-26 조회 기준 해당 0). 발사 시 `[status_exit_fire]` WARNING(system_logs) |
 
 ---
 
