@@ -120,8 +120,14 @@ _BASE_SHA = {
     # 그로부터 TTL 뒤 해제한다(`reset_market_op_state` 가 새 dict 2 개도 clear). 나머지
     # leaf 는 무접촉이다. 직전 값 =
     # `b9bd158b1503546a2d214b1269b2ae961f7c09241035149081e65eb61ac4c509`.
+    # 🔁 cycle371(2026-09-26) 재핀 — `get_iscd_stat_active_tickers()`/
+    # `_ISCD_STAT_DETAIL_ONLY_CODES` 신규 추가(값만 이동, 다른 함수 본체 무변경).
+    # `GET /api/realtime/market-operation` 의 `details` 가 VI ∪ 거래정지만 훑어 관리종목
+    # (51)·단기과열(59) 단독 종목의 상세 행이 없던 것을 라우트가 이 함수로 메운다(58 은
+    # 거래정지 TTL 이 이미 관리하므로 제외). 직전 값 =
+    # `49de2441198cf1dee2c34deed50ded6fb8a5536bec0f475a0feba8237c977961`.
     "src/engine/market_operation_monitor.py":
-        "49de2441198cf1dee2c34deed50ded6fb8a5536bec0f475a0feba8237c977961",
+        "51441c07e9ea9ccf1b0fa7ac9df4eb263fbdf8bbe5e51ed417f5d64fa33c35e2",
 }
 
 

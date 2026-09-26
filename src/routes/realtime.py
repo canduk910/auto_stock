@@ -645,14 +645,22 @@ async def get_market_operation() -> ApiResponse:
         circuit_breaker         — 서킷브레이커 휴리스틱 dict
             suspected / reasons / halt_ratio / halted / observed
             representative_mkop_cls_code / halt_reasons_sample
-        details                 — VI ∪ 거래정지 종목 상세 (최대 200)
+        details                 — VI ∪ 거래정지 ∪ 종목상태(표시집합) 종목 상세 (최대 200)
             ticker / vi_code / ovtm_vi_code / halt_yn / halt_reason
             iscd_stat / mkop_cls_code / exch_code / received_at
+
+    cycle371 — `details` 는 VI ∪ 거래정지 에 `get_iscd_stat_active_tickers()`(표시 집합
+    중 51/52/53/54/59 멤버십 — 58 은 이미 거래정지 TTL 로 관리돼 제외)를 합집합한다.
+    헤더 `iscd_stat_active_count` 는 51~54·58·59 6종으로 세는데 종전 `details` 는 VI ∪
+    거래정지만 훑어, 관리종목(51)·단기과열(59) 단독(VI 비활성 + 거래정지 아님) 종목은
+    헤더 카운트엔 잡히고 상세 행이 없었다. **카운트(summary)는 무변경** — `details`
+    원본 행만 늘린다.
     """
     # 지연 import — 순환 의존 회피
     from src.engine.market_operation_monitor import (
         get_circuit_breaker_state,
         get_halt_active_tickers,
+        get_iscd_stat_active_tickers,
         get_last_event,
         get_market_op_state_summary,
         get_vi_active_tickers,
@@ -660,8 +668,10 @@ async def get_market_operation() -> ApiResponse:
 
     summary = get_market_op_state_summary()
 
-    # details: VI ∪ halt 종목 sorted, cap 200
-    active_tickers = sorted(get_vi_active_tickers() | get_halt_active_tickers())[:200]
+    # details: VI ∪ halt ∪ 종목상태(표시집합) 종목 sorted, cap 200 (cycle371)
+    active_tickers = sorted(
+        get_vi_active_tickers() | get_halt_active_tickers() | get_iscd_stat_active_tickers()
+    )[:200]
     details = []
     for ticker in active_tickers:
         event = get_last_event(ticker)

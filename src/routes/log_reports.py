@@ -23,13 +23,46 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/log-reports", tags=["log-reports"])
 
 #: `/api/log-reports/bundle` 이 노출하는 `api_metrics`/`strategy_funnel`/
-#: `portfolio_risk_snapshot` 은 프로세스의 **현재** 스냅샷이다 — 과거 날짜를
-#: 조회해도 "그 날의 값" 이 아니다(`portfolio_risk_snapshot` 은 현재 보유·잔고를
-#: 읽는 `compute_portfolio_risk_snapshot` 호출 결과라 특히 그렇다 — 과거 영업일
-#: 번들에 실려도 "그날의 리스크"가 아니라 "지금의 리스크"다). 20:20 클라우드
-#: 루틴이 과거 번들을 그날의 사실로 읽고 거짓 인과를 리포트에 쓰지 않도록 응답에
-#: 그 사실을 명시한다.
+#: `portfolio_risk_snapshot` 은 `collect_daily_log_metrics` 안에서 프로세스의
+#: **현재** 상태로 채워진다 — 과거 날짜를 그냥 넘겨도 호출 시점(오늘)의 값이다.
+#: **과거 날짜 조회는 그날 저장된 `daily_log_reports.metrics` 값으로 이 3키만
+#: 덮어쓴다**(`_overlay_process_scoped_from_db`) — 20:05 1차 스냅샷·21:30 완전판이
+#: 그날 정확히 채워 이미 저장해 둔 값이 정본이다. 저장 행이 없거나(아직 그날
+#: 리포트가 안 만들어짐)·조회가 실패하면 fail-open 으로 프로세스 값을 그대로 둔다
+#: (번들 전체가 죽으면 안 된다). **오늘 날짜 조회는 이 오버레이를 시도하지 않는다**
+#: (byte 동일 — 20:20 클라우드 루틴의 매일 호출 경로 무변경). 그래도 이 목록은
+#: "이 3키는 본질적으로 프로세스에서 나온다" 는 표식으로 응답에 남긴다 —
+#: `portfolio_risk_snapshot` 은 과거 조회에서도 "그날 21:30 시점의 지금" 일 뿐
+#: 그날 전체의 리스크 이력이 아니다.
 _PROCESS_SCOPED_KEYS = ["api_metrics", "strategy_funnel", "portfolio_risk_snapshot"]
+
+
+async def _overlay_process_scoped_from_db(metrics: dict, target: date) -> dict:
+    """과거 날짜 조회 시 `_PROCESS_SCOPED_KEYS` 3키를 그날 저장값으로 덮어쓴다.
+
+    `metrics` 는 `collect_daily_log_metrics(target)` 가 방금 만든 dict 다 — 로그·거래·
+    funnel 단계별 등 나머지 키는 이미 `target` 로 필터링돼 정확하므로 손대지 않는다.
+    이 3키만 `daily_log_reports` 의 그날 행(`get_log_report`)에서 가져와 in-place 로
+    바꾼다. 행이 없거나 `metrics` 컬럼 모양이 dict 가 아니거나 조회 자체가 실패하면
+    **fail-open**(프로세스 값 유지) — 과거 값 복원 실패가 번들 전체를 죽이면 안 된다.
+    """
+    try:
+        stored = await get_log_report(target)
+    except Exception:
+        logger.exception(
+            "[log_reports_bundle_overlay] target_date=%s DB 조회 실패 — 프로세스 값 유지",
+            target,
+        )
+        return metrics
+    if not stored:
+        return metrics
+    stored_metrics = stored.get("metrics")
+    if not isinstance(stored_metrics, dict):
+        return metrics
+    for key in _PROCESS_SCOPED_KEYS:
+        if key in stored_metrics:
+            metrics[key] = stored_metrics[key]
+    return metrics
 
 
 def _parse_date_strict(raw: str) -> date:
@@ -80,6 +113,8 @@ async def get_bundle(date: str | None = None):
 
     try:
         metrics = await collect_daily_log_metrics(target)
+        if target < now.date():
+            metrics = await _overlay_process_scoped_from_db(metrics, target)
     except Exception:
         logger.exception("[log_reports_bundle] 수집 실패")
         return ApiResponse(success=False, message="번들 수집 실패")

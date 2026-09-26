@@ -430,22 +430,15 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
     # ratio=0% → 5분 주기 재구독 시도 반복 = KIS LMS chain 위험.
     # 근본 원인 = 동시호가 시간대 (15:20~15:30) 체결 부재 = 정상 → stale 오판.
     # domain-expert 자문 산출물 `_workspace/domain_consult/cycle162_pending_persist_and_call_auction.md`.
-    # 사이클 135 grace + 사이클 149 VI 패턴 답습 = stale 종목 *전체* skip + WARNING 1행.
+    # 사이클 371 — cycle216(5분 우선 재구독)이 이미 LOW-scoped 로 좁혀 둔 것을 K watcher
+    # 에도 미러한다: HIGH(보유·익일청산)는 09:00/15:30 갭개장·마감 손절 대비 그대로
+    # 처리하고, LOW 후보만 skip 한다(사이클 38 「stale 판정 전체 지연」 명문화는 LOW
+    # 전용으로 좁혀졌다 — HIGH 를 skip 하면 그 8분 잔류가 곧 005935 사고 패턴이다).
     try:
         from src.engine.session import session_tracker as _session_tracker
         _is_call_auction = _session_tracker.is_call_auction_now(now)
     except Exception:
         _is_call_auction = False
-
-    if _is_call_auction:
-        # 동시호가 시간대 → stale 판정 *전체* 지연 (사이클 38 명문화 영속 — stale 판정 지연만)
-        logger.warning(
-            "[stale_skip_call_auction] subscribed=%d — 동시호가 시간대 stale 회피 "
-            "(체결 부재 정상 영역)",
-            len(subscribed),
-        )
-        # 누적 retry 카운터 보존 (fresh 회복 케이스 분기 미진입 = 정상 영역 영구 영속)
-        return
 
     stale_tickers = sorted(
         t for t in subscribed
@@ -468,6 +461,8 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
     # cycle252 — stale_tickers 가 비어도(전부 fresh) high_tickers 는 필요하다
     # (아래 [no_feed_held] 판정이 stale 여부와 무관하게 매 사이클 계산되므로
     # `if not stale_tickers: return` **앞**으로 끌어올렸다, §2(c)).
+    # cycle371 — 동시호가 LOW-scoped skip 판정도 high_tickers 가 있어야 하므로 같은
+    # 이유로 그 판정 **앞**에 둔다.
     high_tickers: set[str] = set()
     try:
         for s in scheduler.registry.all():
@@ -483,8 +478,25 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
     except Exception:
         pass
 
-    # cycle252(c) — HIGH ∩ no_feed 관측. `is_no_feed` 호출은 동시호가 조기
-    # return **뒤**(위 262행)이므로 W9(동시호가 사이클에서 판정 0회)를 만족한다.
+    if _is_call_auction:
+        # cycle371 — LOW 만 skip(사이클 216 미러), HIGH 는 이어서 그대로 처리한다.
+        low_stale = [t for t in stale_tickers if t not in high_tickers]
+        high_stale = [t for t in stale_tickers if t in high_tickers]
+        logger.warning(
+            "[stale_skip_call_auction] subscribed=%d low=%d high=%d — 동시호가 시간대 "
+            "LOW stale 회피 (HIGH 유지, 체결 부재 정상 영역)",
+            len(subscribed), len(low_stale), len(high_stale),
+        )
+        if not high_stale:
+            # HIGH stale 없음(LOW 뿐이거나 stale 자체가 없음) — 누적 retry 카운터 보존
+            # (fresh 회복 케이스 분기 미진입 = 정상 영역 영구 영속, 사이클 162 원 계약).
+            # `is_no_feed`(아래 no_feed_held 판정) 호출도 이 반환 *뒤*라 W9 불변 유지.
+            return
+        stale_tickers = sorted(high_stale)
+
+    # cycle252(c) — HIGH ∩ no_feed 관측. `is_no_feed` 호출은 동시호가 LOW-scoped
+    # skip 이 HIGH stale 없이 조기 반환하는 경로의 **뒤**(위)이므로 W9(HIGH 없는
+    # 동시호가 사이클에서 판정 0회)를 만족한다.
     if high_tickers:
         no_feed_high = {t for t in high_tickers if no_feed_registry.is_no_feed(t)}
         if no_feed_high:

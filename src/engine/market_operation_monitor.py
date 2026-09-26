@@ -401,3 +401,32 @@ def get_market_op_state_summary() -> dict:
         "circuit_breaker": get_circuit_breaker_state(),
         "iscd_stat_active_count": iscd_stat_active_count,
     }
+
+
+#: `get_iscd_stat_active_tickers()`(details 합집합 대상)가 보는 부분집합 — 표시 집합
+#: (`_ISCD_STAT_DISPLAY_CODES`)에서 **58 을 뺀 것**이다(cycle371). 58 은 이미
+#: `get_halt_active_tickers()`(마지막 정지 프레임 뒤 `HALT_ACTIVE_TTL_SECONDS` 로 TTL
+#: 관리)가 담당한다 — `_market_op_last_event` 는 TTL 을 모르는 raw 값이라 58 을 여기
+#: 넣으면 거래정지가 TTL 로 풀린 **뒤에도** details 에 영구히 남는다(`test_V8_route_
+#: details_drop_expired_vi_and_expired_halt` 회귀). 51·52·53·54·59 는 별도 수명이 없어
+#: (cycle369 설계도 그 값을 "발동" 자체로 취급) 이 문제가 없다.
+_ISCD_STAT_DETAIL_ONLY_CODES: frozenset[str] = frozenset({"51", "52", "53", "54", "59"})
+
+
+def get_iscd_stat_active_tickers() -> set[str]:
+    """표시 집합에서 58 을 뺀 ticker 전체 (cycle371, read-only view).
+
+    VI ∪ 거래정지 활성이 아니어도(51·52·53·54·59 단독) 여기엔 잡힌다 — `GET
+    /api/realtime/market-operation` 의 `details` 가 VI ∪ 거래정지로만 좁혀져 헤더
+    `iscd_stat_active_count` 보다 행이 적던 결함(cycle368 후속, 워크리스트 「남은 일」
+    C 절 "51·59 만인 종목은 화면 행이 없다")을 라우트가 이 함수로 메운다. **58 은
+    제외**한다(위 `_ISCD_STAT_DETAIL_ONLY_CODES` 주석 — halt TTL 과 이중 관리하면
+    TTL 만료가 무의미해진다). `iscd_stat_active_count` 자체(58 포함 6종)와 이 함수가
+    돌려주는 집합(58 제외 5종)이 다른 것은 의도다 — 카운트는 무변경 계약이라 그대로
+    두고, 이 함수는 details 확장에만 쓰인다.
+    """
+    return {
+        ticker
+        for ticker, event in _market_op_last_event.items()
+        if event.iscd_stat_cls_code in _ISCD_STAT_DETAIL_ONLY_CODES
+    }

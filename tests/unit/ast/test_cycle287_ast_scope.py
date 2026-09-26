@@ -561,8 +561,14 @@ _SRC_TREE_FILES = 159
 #: 일치 · F5 `_is_global_candidate` = `buy_targets` 멤버십) + `routes/
 #: system_integrations.py`(F4 축별 고정→쓰기→고정해제 순서) 편집. 직전 값 =
 #: `fe91ad5c94d0a6b498ae4a2bf6e59346db09682f967db19c6029d4ced04c64eb`.
+#: 🔁 cycle371 재핀 — `market_operation_monitor.py`(`get_iscd_stat_active_tickers()`/
+#: `_ISCD_STAT_DETAIL_ONLY_CODES` 신규) · `stale_watcher_core.py`(`check_and_
+#: resubscribe_stale`(K watcher) 동시호가 처리를 cycle216 과 같은 LOW-scoped skip 으로
+#: 재구성 — `high_tickers` 계산을 그 분기 앞으로 이동) · `routes/realtime.py`
+#: (`get_market_operation` details 합집합 확장) 편집. 파일 수는 159 로 불변(신규 파일
+#: 0). 직전 값 = `5cc4ba347d33396f45146b3cf859c09362234a3c2d2a378b86e8d812e9b5fd52`.
 _SRC_TREE_DIGEST = (
-    "5cc4ba347d33396f45146b3cf859c09362234a3c2d2a378b86e8d812e9b5fd52"
+    "4c05fd9656747e1bb8002a326c30eaa1e27eadfc91af1594a438177649bfe59f"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
