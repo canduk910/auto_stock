@@ -18,7 +18,10 @@ flowchart TB
     end
     RDS[("AWS RDS (PostgreSQL)<br/>asyncpg (src/db/pg.py)")]
     GPT["OpenAI GPT<br/>(자문 + 로그 분석)"]
+    MAC["macro 컨테이너<br/>- 매크로 API (/api/macro/*)<br/>- 매매 레짐의 출처 (관찰 전용)"]
     FE -->|"REST + 5s polling"| BE
+    FE -->|"/api/macro"| MAC
+    BE -->|"레짐 조회"| MAC
     KIS --- BE
     BE -->|"async CRUD"| RDS
     RDS <-->|"20:00"| GPT
@@ -305,11 +308,15 @@ flowchart TD
     DC["donchian_swing"]
     BFB["bull_flag_breakout"]
     VCP["vcp_breakout<br/>(미네르비니)"]
+    KJ["kojiro<br/>(고지로 대순환)"]
     RISK["RiskManager<br/>on_tick(시세)<br/>→ 신호 판단"]
+    POLL["스윙 매수 폴<br/>09:05~09:30 · 1분 REST<br/>(donchian · kojiro)"]
     ORD["OrderEngine<br/>KIS 주문 실행<br/>포지션 관리"]
-    REG --> M & VB & LTV & DC & BFB & VCP
-    M & VB & LTV & DC & BFB & VCP --> RISK
+    REG --> M & VB & LTV & DC & BFB & VCP & KJ
+    M & VB & LTV & DC & BFB & VCP & KJ --> RISK
+    DC & KJ -->|"매수 평가만"| POLL
     RISK --> ORD
+    POLL --> ORD
 ```
 
 그림 속 전략별 요약(상세 규칙은 아래 각 전략 절):
@@ -322,6 +329,10 @@ flowchart TD
 | `donchian_swing` | 09:05~09:30 시장가 | 20일 신고가+추세 | -7% | ATR×2 트레일 · 멀티데이 (5~15일) |
 | `bull_flag_breakout` | 09:05~13:00 | 폴+플래그 돌파 | -5% | 측정된 이동+ATR×2 트레일 · 5일 시간청산 |
 | `vcp_breakout` (미네르비니) | 09:05~14:30 | VCP 베이스 돌파 | -7% | ATR×2+50EMA 이탈 · 멀티데이 |
+| `kojiro` (고지로 대순환) | 09:05~09:30 시장가 | EMA 5/20/40 스테이지1 진입 (6→1 전환 직후) | -8% | 2ATR → 스테이지3 → 2.5ATR 트레일 · 멀티데이 |
+
+donchian·kojiro 는 WS 틱이 아니라 1분 REST 폴(`_swing_buy_poll_loop`)로 매수를 평가한다.
+전략별 흐름도 = [`docs/architecture.md` 8장](docs/architecture.md#8-전략-매수-신호-흐름).
 
 ### 전략 A: 상한가 모멘텀 (`momentum`)
 | 구분 | 규칙 |
@@ -663,15 +674,19 @@ auto_stock/
 
 ## 프로세스 구성과 분리 로드맵
 
-현재 운영 프로세스는 컨테이너 2개다 (`docker-compose.prod.yml`).
+현재 운영 컨테이너는 3개다 (`docker-compose.prod.yml`) — `backend` · `frontend` · `macro`.
+`macro` 는 매크로 화면 API 이고 매매 판단을 하지 않는다. 매매에 관한 일은 전부 `backend` 한 프로세스에 있다.
 
 ```mermaid
 flowchart LR
     FE["frontend<br/>nginx + SPA<br/>Basic Auth"]
     BE["backend (uvicorn 단일 워커)<br/>시세 감시 · 전략 판정 ·<br/>주문 · 정산 · 관측이 한 곳"]
+    MAC["macro<br/>매크로 API"]
     KIS["KIS OpenAPI<br/>REST · WebSocket"]
     RDS[("AWS RDS PostgreSQL")]
     FE -->|"/api"| BE
+    FE -->|"/api/macro"| MAC
+    BE -->|"레짐 조회 (관찰)"| MAC
     BE <--> KIS
     BE -->|"asyncpg"| RDS
 ```
@@ -690,8 +705,8 @@ flowchart LR
 단일 강제, 매수 수량 계산의 원자성 — 이 네 가지가 모두 **한 프로세스 안에서만** 성립하는
 장치이기 때문이다. 가르려면 넷을 프로세스 밖으로 옮기는 별도 설계가 먼저 필요하다.
 
-단계별 도식(0~3단계)과 근거가 되는 파일·행은
-[`docs/architecture.md` 15장 — 프로세스 분리 로드맵](docs/architecture.md#15-프로세스-분리-로드맵-2026-09-11) 에 있다.
+단계별 도식(0~4단계)과 근거가 되는 파일·행은
+[`docs/architecture.md` 15장 — 프로세스 분리 로드맵](docs/architecture.md#15-프로세스-분리-로드맵) 에 있다.
 
 ## 배포 (AWS EC2)
 
@@ -751,13 +766,13 @@ GitHub Secrets 필요: `EC2_HOST`, `EC2_USERNAME`, `EC2_SSH_KEY`, `SUPABASE_DB_U
 
 #### 선택적 배포 (cycle248)
 EC2 는 모든 push 에 `up --build` 를 돌지 않는다. `compose_up_changed.sh` 가 마커
-`.deployed_sha`(마지막 **성공** 배포 SHA)와 HEAD 의 누적 diff 를 보고 세 모드 중 하나를 고른다.
+`.deployed_sha`(마지막 **성공** 배포 SHA)와 HEAD 의 누적 diff 를 보고 모드를 고른다 — `full` · 선택 배포 · `none`.
 
 | 모드 | 조건 (변경 경로) | 실행 | backend |
 |------|------------------|------|---------|
-| `full` | `src/` · `requirements.txt` · `Dockerfile` · `.dockerignore` · `docker-compose.prod.yml`/`.tls.yml`/`.tls2.yml` · `.github/workflows/deploy.yml` · `tools/deploy/` 중 하나라도 | `up --build -d --remove-orphans` | 재생성 |
-| `frontend` | `frontend/` 또는 `tools/ops/tls_stage2/` 만 | `up --build -d --remove-orphans --no-deps frontend` | 무접촉 |
-| `none` | 위 두 축 어느 것도 아님(docs·tests 등) 또는 마커 == HEAD | `up -d --remove-orphans` (빌드 없음) | 재생성 0 |
+| `full` | `src/` · `requirements.txt` · `Dockerfile` · `.dockerignore` · `docker-compose.prod.yml`/`.tls.yml`/`.tls2.yml` · `.github/workflows/deploy.yml` · `tools/deploy/` 중 하나라도. 단 `src/` 안 `.md` 는 뺀다 | `up --build -d --remove-orphans` | 재생성 |
+| 선택 배포 — `frontend` · `macro` · `frontend+macro` | backend 축이 그대로이고 `frontend/`·`tools/ops/tls_stage2/`(frontend 축) · `macro/`(macro 축) 중 바뀐 축만. 모드 이름이 곧 서비스 목록이다 | `up --build -d --remove-orphans --no-deps <서비스…>` | 무접촉 |
+| `none` | 위 축 어느 것도 아님(docs·tests 등) 또는 마커 == HEAD | `up -d --remove-orphans` (빌드 없음) | 재생성 0 |
 
 - **판정 불가는 전부 `full`** 이다(fail-safe) — 마커 없음 · 마커 SHA 미지 · 직전 시도 마커(`.deployed_sha.attempt`) 잔존 · diff 실패.
 - `.tls_enabled` 가 있으면 모든 compose 호출에 `-f docker-compose.tls.yml` 이, `.tls_stage2` 도 함께 있으면 `-f docker-compose.tls2.yml` 까지 base 뒤에 붙는다. 두 마커는 **모드 판정에는 개입하지 않는다**.

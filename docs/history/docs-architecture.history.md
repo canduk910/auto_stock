@@ -364,3 +364,374 @@ GitHub Secrets: `EC2_HOST`, `EC2_USERNAME`, `EC2_SSH_KEY`
 경위: 퍼널 캡처가 09:35 확정 + 21:00 저녁 미리보기가 됐다. 저녁 흐름 도식(5장)과 시각 표에는 21:00 행을 더했다(추가라 옮길 원문 없음).
 
 → CHANGELOG: cycle364 S1 행
+
+## 1. 전체 아키텍처
+
+### 2026-09-26 sync-docs — 요청 인증 흐름의 헤더 주입 노드
+
+정본 원문:
+
+````
+    HDR["(2) location /api/ 헤더 주입<br/>proxy_set_header X-API-Key #quot;${API_AUTH_KEY}#quot;<br/>proxy_set_header Host $http_host"]
+````
+
+경위: nginx 는 cycle249 부터 `map $remote_user $api_key_for_user` 가 고른 키를 주입한다(`frontend/nginx.conf.template`). 노드가 그 전의 `${API_AUTH_KEY}` 직접 주입을 적고 있었다.
+
+→ CHANGELOG: 해당 없음 — 2026-09-26 `/sync-docs` 문서 정합(코드 변경 없음, report-writer)
+
+## 1. 전체 아키텍처
+
+### 2026-09-26 sync-docs — 컨테이너 구성 — 2개 서술
+
+정본 원문:
+
+````
+### 컨테이너 구성 (Docker Compose)
+
+```mermaid
+flowchart TB
+    subgraph NET["docker network: auto_stock_default"]
+        direction LR
+        BE["backend<br/>python:3.12<br/>Port 8000<br/>TZ=KST<br/>단일 워커"]
+        FE["frontend<br/>nginx:alpine<br/>Port 80"]
+        FE -->|"/api → backend"| BE
+    end
+    VOL["volumes: ./logs<br/>env_file: .env"]
+    NET --- VOL
+```
+````
+
+경위: `docker-compose.prod.yml` 의 서비스는 backend · frontend · macro 셋이다(macro = cycle303). 전체 아키텍처 그림에도 macro 를 더했다(추가라 옮길 원문 없음).
+
+→ CHANGELOG: 해당 없음 — 2026-09-26 `/sync-docs` 문서 정합(코드 변경 없음, report-writer)
+
+## 3. 모듈 의존관계
+
+### 2026-09-26 sync-docs — engine 상자의 전략 노드
+
+정본 원문:
+
+````
+        OE --> STR["strategies<br/>momentum<br/>volatility"]
+````
+
+경위: 전략 노드가 momentum·volatility 둘만 적고 있었다. 등록 전략은 7개다.
+
+→ CHANGELOG: 해당 없음 — 2026-09-26 `/sync-docs` 문서 정합(코드 변경 없음, report-writer)
+
+## 4. 매매 엔진 내부 구조
+
+### 2026-09-26 sync-docs — 엔진 그림과 전략 멤버 표(4전략)
+
+정본 원문:
+
+````
+## 4. 매매 엔진 내부 구조
+
+```mermaid
+%%{init: {"flowchart": {"wrappingWidth": 360}}}%%
+flowchart TD
+    TS["TradingScheduler (scheduler.py)"]
+    REG["StrategyRegistry"]
+    ST["SessionTracker<br/>(session.py — Phase 3 신설)"]
+    OE["OrderEngine"]
+    RM["RiskManager"]
+    TS --> REG
+    TS --> ST
+    TS --> OE
+    TS --> RM
+
+    REG --> MOM["MomentumStrategy<br/>tradable_boards: krx_open + main"]
+    REG --> VB["VolatilityBreakoutStrategy<br/>tradable_boards: main, 사이클 26 KRX ONLY"]
+    REG --> LTV["LongTailVolatilityStrategy<br/>tradable_boards: main, 사이클 26 KRX ONLY"]
+    REG --> DON["DonchianSwingStrategy<br/>tradable_boards: main"]
+
+    RM --> R1["on_tick() → ticker_prices 갱신<br/>→ registry.enabled() 순회"]
+    R1 --> R2["check_exit_signal()"]
+    R2 --> R3["session_tracker.is_tradable(strategy)<br/>← 보드 가드 (Phase 8)"]
+    R3 --> R4["registry.is_ticker_blocked_for_buy()"]
+    R4 --> R5["check_buy_signal() → execute_buy()"]
+```
+
+**전략 객체의 멤버**
+
+| 전략 | 멤버 |
+|------|------|
+| MomentumStrategy | `StrategyConfig (id, name, weight, params{tradable_boards, exchange, ...})` · `StrategyState (positions, pending_buys, sold_today, pnl, cached_buyable_*, buy_blocked_until, low_funds_tickers)` |
+| VolatilityBreakoutStrategy | `StrategyConfig (k_value_krx_main / k_value_nxt_pre[호환] / k_value_nxt_post[호환])` · `StrategyState` · `_targets (K, prev_range, target_offset_base, boards: {board: {open_price, target_price, target_offset}})` · `_next_day_clear_pending`(안전망: 15:20 청산 누락 시 익일 NXT 프리 청산) |
+| LongTailVolatilityStrategy | `+ _limit_up_reached` set (상한가 모드 전환 종목) |
+| DonchianSwingStrategy | `_candidates` / `_bought_today` / `_scan_stats` |
+````
+
+경위: 그림·표가 momentum·VB·LTV·donchian 넷만 다뤘다. LTV 노드가 `main` 단독으로 적혀 있었는데 코드 `DEFAULT_TRADABLE_BOARDS` 는 `("pre_nxt", "main", "post_nxt")` 다. VB 행의 「익일 NXT 프리 청산」은 현행 익일청산(08:00 판정 → 미달이면 09:00 KRX 시장가)과 다르다. donchian·kojiro 의 틱 매수 평가 skip 경로도 그림에 없었다.
+
+→ CHANGELOG: 해당 없음 — 2026-09-26 `/sync-docs` 문서 정합(코드 변경 없음, report-writer)
+
+## 5. 일일 매매 스케줄 시퀀스
+
+### 2026-09-26 sync-docs — 시각 표의 08:00 · 09:00:05 · 15:30 행
+
+정본 원문:
+
+````
+| 08:00 | `TIME_PRE_NXT_OPEN` | `_execute_next_day_clear()` 는 비차단(`NEXT_DAY_STABILIZE_SECS=30s` 안정화)이고 다음 영업일 NXT 프리 시가에서 청산한다(Q2=B). 시가 확정은 0.5초/5초 폴링. LTV 는 `k_value_nxt_pre` 적용. VB 는 `DEFAULT_TRADABLE_BOARDS=("main",)` — 프리장 매수 없음 |
+| 09:00:05 | `TIME_KRX_OPEN_CONFIRM` | 보드별 별도 시가. `k_value_krx_main` 적용 |
+| 15:30 | `TIME_KRX_MAIN_CLOSE` | post_nxt 시가 확정은 LTV 상한가 모드 보유 + donchian 보유 시세 확정용. 구독 유지 = VB/LTV 보유 종목 + donchian 보유(positions HIGH 그룹). VB 는 POST_NXT 매수 비활성(main 단독). LTV 는 코드 기본에 post_nxt 가 있고 실제 활성 보드의 정본은 DB `strategy_config.params.tradable_boards` 다. 손절·트레일링·익일청산 평가는 보드와 무관하게 계속 돈다 |
+````
+
+경위: 08:00 — 익일청산은 NXT 프리 시가에서 청산하지 않는다. 갭 미달·시가 미수신·`nxt_tradable=False` 는 `_pending_next_day_clear` 로 보류돼 09:00 KRX 시장가로 판다(`scheduler._execute_next_day_clear`). 09:00:05 — VB·LTV `main` 기준가는 KRX REST 단일 출처(cycle272)라 이 호출이 09:05 전까지 두 전략을 건너뛴다(`open_price_rest.owns_board`). 15:30 — post_nxt 시가 확정 대상은 VB·LTV 뿐이라(`_confirm_breakout_open_prices`) donchian 은 대상이 아니고, 구독 유지(positions HIGH)는 전 전략 보유다. 09:05~09:30 스윙 매수 폴 행과 시퀀스 노트는 추가라 옮길 원문 없음.
+
+→ CHANGELOG: 해당 없음 — 2026-09-26 `/sync-docs` 문서 정합(코드 변경 없음, report-writer)
+
+## 8. 전략 매수 신호 흐름
+
+### 2026-09-26 sync-docs — 8.1 · 8.2 원문(2전략만 다루던 시절)
+
+정본 원문:
+
+````
+## 8. 전략 매수 신호 흐름
+
+### 8.1 상한가 모멘텀
+
+```mermaid
+%%{init: {"flowchart": {"wrappingWidth": 360}}}%%
+flowchart TD
+    T["on_tick(ticker, current_price)"] --> PR["prev_rate = _prev_prdy_rate[ticker]<br/>(이전 틱 등락률)"]
+    PR --> CR["curr_rate = (current_price - prev_close) / prev_close × 100"]
+    CR --> C{"조건<br/>prev_rate #60; 29% (돌파 순간)<br/>AND curr_rate #62;= 29% (29% 이상)<br/>AND curr_rate #60; 30% (상한가 제외)"}
+    C -->|"충족"| E1
+    subgraph CHK["추가 체크"]
+        direction TB
+        E1{"has_position?"} -->|"아니오"| E2{"is_buy_pending?"}
+        E2 -->|"아니오"| E3{"is_sold_today?<br/>(당일 재매수 차단)"}
+        E3 -->|"아니오"| E4{"is_max_positions?<br/>(positions + pending_buys 합산)"}
+        E4 -->|"아니오"| E5{"registry.is_ticker_held_by_any?<br/>(타 전략 중복)"}
+    end
+    E1 -->|"예"| SKIP["건너뜀"]
+    E2 -->|"예"| SKIP
+    E3 -->|"예"| SKIP
+    E4 -->|"예"| SKIP
+    E5 -->|"예"| SKIP
+    E5 -->|"아니오"| BUY["Signal.BUY → execute_buy(시장가)"]
+```
+
+### 8.2 변동성 돌파 (보드별 분리 — Phase 5 Q1=C)
+
+```mermaid
+%%{init: {"flowchart": {"wrappingWidth": 360}}}%%
+flowchart TD
+    subgraph PREP["prepare() 단계"]
+        direction TB
+        P1["_scan_universe(): stock_master.list_by_filter<br/>(DB 단일 조회, 사이클 108<br/>— 거래량순위 API 폐기, KIS 호출 0건)"]
+        P2["get_recent_daily_normalized(): DB 우선 일봉<br/>(사이클 173, 락/신선도/부족 시 KIS 폴백)"]
+        P3["K값 = avg(노이즈 비율)<br/>= avg(1 - |종가-시가| / (고가-저가))"]
+        P4["target_offset_base = 전일 Range × K<br/>← 보드별 K 곱 전 기본값"]
+        P5["ticker_prev_close[ticker] = candles[0].stck_clpr<br/>(전일 종가 사전 등록)"]
+        P6["_targets[ticker] = {target_offset_base, k, prev_range, boards: {}}"]
+        P1 --> P2 --> P3 --> P4 --> P5 --> P6
+    end
+
+    subgraph OPEN["보드별 시가 확정 — on_open_price_confirmed(ticker, open_price, board)"]
+        direction TB
+        O1["k_mult = params[f#quot;k_value_{board}#quot;]<br/>(main / nxt_pre / nxt_post)"]
+        O2["target_offset = target_offset_base × k_mult"]
+        O3["_targets[ticker][#quot;boards#quot;][board] = {open_price, target_price, target_offset}"]
+        O1 --> O2 --> O3
+    end
+
+    subgraph TRIG["보드별 시가 확정 호출 시점"]
+        direction TB
+        T1["08:00 NXT 프리 진입<br/>_confirm_breakout_open_prices(board=#quot;pre_nxt#quot;)"]
+        T2["09:00:05 KRX 메인 시가<br/>_confirm_breakout_open_prices(board=#quot;main#quot;)<br/>← 보드별 별도 시가"]
+        T3["15:30 KRX 메인 마감 직후<br/>_confirm_breakout_open_prices(board=#quot;post_nxt#quot;) (필요 시)"]
+        T1 ~~~ T2
+        T2 ~~~ T3
+    end
+
+    subgraph TICK["on_tick(ticker, current_price)"]
+        direction TB
+        K1["session_tracker.is_tradable(strategy)<br/>← Phase 8 보드 가드 (RiskManager)"]
+        K2["board = _resolve_active_board()<br/>← main 우선 → post_nxt → pre_nxt"]
+        K3["prev_price = _prev_price[ticker][board]<br/>(보드별 이전 틱)"]
+        K4{"prev_price #60; boards[board].target_price<br/>AND current_price #62;= target_price<br/>(보드별 돌파 순간)"}
+        K5["동일 체크: position, pending, sold_today, max_positions"]
+        K6["Signal.BUY → execute_buy(시장가)"]
+        K1 --> K2 --> K3 --> K4
+        K4 -->|"충족"| K5
+        K5 --> K6
+    end
+
+    PREP --> OPEN
+    TRIG --> OPEN
+    OPEN --> TICK
+```
+
+`_scan_universe()` 필터:
+
+- 시총 = `raw.hts_avls` (억원) JSONB 필터 ≥ `min_market_cap`
+- 거래대금 = `raw.acml_tr_pbmn` JSONB 필터 ≥ `min_trade_amount`
+- 0종목 확정 시 ERROR 로그 + `system_logs` 기록
+````
+
+경위: 8장이 momentum·VB 둘만 다뤘다. 8.3~8.7(LTV·donchian·BFB·VCP·kojiro)을 더했다. 8.1 의 E5 노드는 전략 안이 아니라 `risk.on_tick` 이 보는 `is_ticker_blocked_for_buy` 로 고쳤고 15:20 컷을 넣었다. 8.2 는 VB 가 `main` 단독이고 `main` 기준가가 KRX REST 시가 하나라는 현행(cycle272)에 맞춰 다시 그렸다.
+
+→ CHANGELOG: 해당 없음 — 2026-09-26 `/sync-docs` 문서 정합(코드 변경 없음, report-writer)
+
+## 9. DB 스키마
+
+### 2026-09-26 sync-docs — 9.1 `market_regime_snapshots` 행
+
+정본 원문:
+
+````
+| `market_regime_snapshots` | 022 | dkstock.cloud 매크로 일일 스냅샷 — `_boot()` 시점 1행 + `buy_blocked/computed_cash_usage_ratio/raw_response JSONB` |
+````
+
+경위: 레짐 출처는 cycle315 부터 우리 `macro` 컨테이너다. dkstock.cloud 는 2026-08-18 철거됐다.
+
+→ CHANGELOG: 해당 없음 — 2026-09-26 `/sync-docs` 문서 정합(코드 변경 없음, report-writer)
+
+## 10. 프론트엔드 구조
+
+### 2026-09-26 sync-docs — 대시보드 레이아웃 그림
+
+정본 원문:
+
+````
+### 대시보드 레이아웃
+
+```mermaid
+%%{init: {"flowchart": {"wrappingWidth": 360}}}%%
+flowchart TB
+    subgraph PAGE["대시보드"]
+        direction TB
+        CP["ControlPanel (시작/정지/재기동)"]
+        TAB["전략 탭 [전체] [상한가 모멘텀(N)] [변동성 돌파(N)]"]
+        SM["ScanMonitor<br/>· 스캔 요약<br/>· 종목 리스트<br/>· VB 타겟가<br/>· 매수 신호"]
+        OM["OrderMonitor<br/>· 투자가능금액<br/>· 매수 대기<br/>· 보유 포지션<br/>· 체결 진행"]
+        BT["BalanceTable<br/>· 예수금/총평가금/순자산/총평가손익 카드<br/>· 잔고 내역 (실시간 시세 + 전략 라벨 + 매도)"]
+        PC["PerformanceCard (운영일수/수익률)"]
+        CH["ProfitChart (일별/월별 수익률 차트)"]
+        LV["LogViewer (실시간 시스템 로그)"]
+        CP ~~~ TAB
+        TAB ~~~ SM
+        TAB ~~~ OM
+        SM ~~~ BT
+        OM ~~~ BT
+        BT ~~~ PC
+        PC ~~~ CH
+        CH ~~~ LV
+    end
+```
+
+위에서 아래로 화면 행 순서다. ScanMonitor(좌)·OrderMonitor(우)만 한 행을 반씩 나눠 쓰고, 나머지 행은 전체 폭이다.
+````
+
+경위: 전략 탭은 `/api/trading/status` 의 전략 목록으로 그려져 7전략이 다 나온다. `Dashboard.tsx` 에는 MarketRegimeCard · PortfolioRiskCard · KisAccountPoolCard 가 있고 LogViewer 는 `/logs` 메뉴로 옮겨 갔다.
+
+→ CHANGELOG: 해당 없음 — 2026-09-26 `/sync-docs` 문서 정합(코드 변경 없음, report-writer)
+
+## 12. 배포 환경 (AWS EC2)
+
+### 2026-09-26 sync-docs — 배포 흐름 그림의 모드 표기
+
+정본 원문:
+
+````
+        MIG --> CU["tools/deploy/compose_up_changed.sh<br/>(full / frontend / none — 15.7)"]
+````
+
+경위: 모드는 full · 선택 배포(`frontend`·`macro`·`frontend+macro`, cycle303) · none 이다.
+
+→ CHANGELOG: 해당 없음 — 2026-09-26 `/sync-docs` 문서 정합(코드 변경 없음, report-writer)
+
+## 13. 확장 인프라 — 전략 · 시세 풀 · 레짐 · 백테스트 · 자문
+
+### 2026-09-26 sync-docs — 13.1 전략 3종 서술
+
+정본 원문:
+
+````
+- `bull_flag_breakout` (눌림목 돌파, `stock_master.list_by_filter` 시총·거래대금 컷 → 폴 자동 검출 + 플래그 검출 → 09:05~13:00 돌파 + 거래량 ≥ 평균×2. 5영업일 시간 청산, 3영업일 쿨다운)
+- `vcp_breakout` (미네르비니식 VCP. 일봉 100일(prepare cap) → 추세 필터 + 베이스 검출 + pullback 점진 수축 + 거래량 수축 → 09:05~14:30 돌파. **멀티데이 보유**. 7영업일 쿨다운)
+- `kojiro` (고지로 대순환 스윙 — EMA 5/20/40 대순환 스테이지 + ATR/종가 밴드 1.0~4.5% → strict entry(스테이지1 + 6→1 인접 + 3선 우상향 + 종가>EMA5) → 09:05~09:30 시장가(갭업/갭다운/붕괴 스킵). 청산 = 고정%(-8%)→2ATR→스테이지3→2.5ATR 트레일. **멀티데이**. 사이징은 `sizing_mode` 가 정한다 — 코드 기본 `position_ratio`, `turtle` opt-in. 지표 순수모듈 `kojiro_indicators.py`)
+  - **코드 기본값 `enabled=False` 는 다크런치 잔재다. 운영 DB 는 `enabled=True` = 실매매 중**이고,
+    활성 여부·비중·`sizing_mode` 의 정본은 DB `strategy_config` 다
+````
+
+경위: kojiro 의 ATR/종가 밴드가 1.0~4.5% 로 적혀 있었는데 코드는 `atr_ratio_max = 0.06`(6.0%)이다. 매수 흐름은 8장으로 옮기고 여기는 청산 요약과 링크만 남겼다.
+
+→ CHANGELOG: 해당 없음 — 2026-09-26 `/sync-docs` 문서 정합(코드 변경 없음, report-writer)
+
+## 13. 확장 인프라 — 전략 · 시세 풀 · 레짐 · 백테스트 · 자문
+
+### 2026-09-26 sync-docs — 13.3 레짐 출처
+
+정본 원문:
+
+````
+- `src/engine/market_regime.py` — dkstock.cloud 매크로 fetch → `MarketRegime` dataclass (regime/vix/fear_greed/buffett/cash_min)
+````
+
+경위: 레짐 출처는 cycle315 부터 우리 `macro` 컨테이너(`src/services/macro_client.py`)다.
+
+→ CHANGELOG: 해당 없음 — 2026-09-26 `/sync-docs` 문서 정합(코드 변경 없음, report-writer)
+
+## 15. 프로세스 분리 로드맵
+
+### 2026-09-26 sync-docs — 0단계 컨테이너 수와 15.7 배포 모드 표 · 스크립트 줄 번호
+
+정본 원문:
+
+````
+| 0 | 현재 — 컨테이너 2개(backend / frontend) | 가동 중 |
+`docker-compose.prod.yml` 의 서비스는 `backend` · `frontend` 둘뿐이다. 위 상자 안의
+모든 이름은 같은 이벤트 루프 위에서 돈다.
+**지금**: 0단계(컨테이너 2개)가 가동 중이고, 1단계는 **설계 단계에서 진행 중**이다 — 코드는
+| H | **배포 모드** | `BACKEND_RE` 첫 대안이 `^src/`(`tools/deploy/compose_up_changed.sh:85`). 다섯 프로세스가 `src/engine`·`src/api`·`src/db` 를 공유하므로 **경로로 프로세스를 가르려는 시도는 구조적으로 실패한다** | **단일 이미지 + 서비스별 CMD**(빌드 1회 유지) + **메시지 스키마 모듈 1개를 정본으로 두고 그 파일 해시가 바뀌면 모드를 무조건 `full`**(버전 스큐 방어). 모드는 9종이 아니라 위험 계층 4~5종 — `full`/`frontend`/`none`/`worker`/**`engine`**(전략평가+주문+체결만, W·R 무접촉). ⚠️ 15.7 의 함정 2건(오버레이가 아닌 **본체** 정의 · `env_file: .env` 를 다섯에 다 걸면 `.env` 한 글자가 전부를 재생성)이 5배가 된다 |
+| 4 | 실제 `full` 배포 횟수·시각 | GitHub Actions deploy 로그의 `mode=full` 90일 집계(`compose_up_changed.sh:181` 이 남긴다) | 위 "하루 0.83건" 은 커밋 타임스탬프 **대리 추정**이다 |
+### 15.7 배포 모드 — 현재 3종, 1단계 이후 4종(예정)
+
+모드 판정의 정본은 `tools/deploy/compose_up_changed.sh` 다(`.deployed_sha` 마커와 HEAD 의
+누적 diff → 모드, cycle248).
+
+| 모드 | 트리거 경로 | compose 호출 | backend 영향 |
+|------|-------------|--------------|--------------|
+| `full` | `BACKEND_RE` (`tools/deploy/compose_up_changed.sh:85`) — `src/`·`requirements.txt`·`Dockerfile`·compose·`deploy.yml`·`tools/deploy/` | `up --build -d --remove-orphans` (`:190`) | 재생성 |
+| `frontend` | `FRONTEND_RE` (`:93`) — `frontend/`·`tools/ops/tls_stage2/` | `up --build -d --remove-orphans --no-deps frontend` (`:194`) | 무접촉 |
+| `none` | 그 외(tests·`tools/test_impact`·…) 또는 마커==HEAD | `up -d --remove-orphans` (`:198`) | 빌드 없음 |
+| `worker` (미구현 · 예정) | 워커 전용 경로만 | `up --build -d --remove-orphans --no-deps llm_worker` | 무접촉 **전망** |
+
+`worker` 모드는 `frontend` 모드와 같은 원리(`--no-deps` 로 그 서비스만 재생성)로 backend
+무접촉이 될 **전망**이다. 아직 코드에는 없다 — 현재 `case "$MODE"` 는 full/frontend/none
+3갈래뿐이고 그 밖은 `log "internal error: unknown mode"; exit 2` 다(`:188-203`).
+
+⚠️ **`llm_worker` 는 `docker-compose.prod.yml` 본체에 정의한다.** TLS 처럼 오버레이
+(`docker-compose.tls.yml`/`tls2.yml`)에만 두면, 그 오버레이를 붙이지 않는 `full`·`none` 배포의
+`--remove-orphans`(`:190`/`:198`)가 **돌고 있던 워커 컨테이너를 orphan 으로 삭제한다**.
+
+⚠️ **지금의 `BACKEND_RE` 는 첫 대안이 `src/` 다**(`:85`) — 워커 코드를 `src/` 아래에 그대로
+두면 워커 전용 변경도 `full` 로 분류돼 backend 가 재시작된다(D6 발동). 1단계가 노리는
+"backend 무접촉 배포" 가 경로 설계에 달려 있다는 뜻이라, 어떤 경로를 워커 축으로 뗄지(그리고
+`BACKEND_RE` 에서 어떻게 제외할지)는 cycle279 에서 정한다. 모드 판정 불가는 전부
+`full`(fail-safe)이다.
+````
+
+경위: 컨테이너는 backend · frontend · macro 셋이고(cycle303), 배포 모드는 full · 선택 배포(`frontend`·`macro`·`frontend+macro`) · none 이다. `tools/deploy/compose_up_changed.sh` 줄 번호(:85 · :93 · :181 · :190 · :194 · :198 · :188-203)가 cycle303·305·322 뒤로 밀려 현재 값(:113 · :121 · :128 · :140 · :247 · :265 · :269 · :277 · :263-282)으로 맞췄다. 0단계 그림에 macro 를 더한 것은 추가라 옮길 원문 없음.
+
+→ CHANGELOG: 해당 없음 — 2026-09-26 `/sync-docs` 문서 정합(코드 변경 없음, report-writer)
+
+## 13. 확장 인프라 — 전략 · 시세 풀 · 레짐 · 백테스트 · 자문
+
+### 2026-09-26 sync-docs — 13.4 백테스트 job 수
+
+정본 원문:
+
+````
+- 20:00 AI 자문 INSERT 직후 6 전략 × 2 kind = 12 job fire-and-forget
+````
+
+경위: job 은 `backtest_orchestration._enqueue_backtest_jobs` 가 그날 INSERT 된 자문 행마다 current·recommended 2개를 만든다. 등록 전략은 7개이고 자문 행은 활성 전략 수만큼이라 「6 전략 × 2 = 12」 는 고정값이 아니다(루트 `CLAUDE.md` 「외부 통합」 과 같은 표현으로 맞췄다).
+
+→ CHANGELOG: 해당 없음 — 2026-09-26 `/sync-docs` 문서 정합(코드 변경 없음, report-writer)
