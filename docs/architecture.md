@@ -339,6 +339,11 @@ sequenceDiagram
     S->>K: KIS FHKST03010100
     S->>D: stock_master_daily 적재 (~121초)
 
+    Note over S,X: 21:00 저녁 funnel 미리보기 (TIME_EVENING_FUNNEL_CAPTURE, cycle364)
+    D-->>S: 20:30 적재 성공 마커 확인 (30초 간격, 21:15 까지)
+    Note over S: strategy.prepare(as_of=다음 거래일)<br/>— 오늘 봉 포함 · 보유 종목 청산 입력 무접촉(PV-1)
+    S->>D: strategy_funnel_snapshots ← 다음 거래일 날짜 잠정 행
+
     Note over S,X: 21:30 _settle() (TIME_SETTLEMENT, cycle283 D3)
     S->>K: get_balance() → GET inquire-balance
     S->>D: upsert_daily_performance() (전략별 + total)
@@ -363,6 +368,7 @@ sequenceDiagram
 | 20:00:05 | `TIME_FULL_UNIVERSE_LOAD` | AI자문 직후 5초 마진. 같은 20:00 이 기동 거부 경계(`TIME_SESSION_START_CUTOFF`, cycle283 D4)다 — 이 시각 이후 `start()` 는 거부된다. 20:00~21:30 재기동은 그날 20:30 일봉 적재를 통째로 잃는다(다음 영업일 아침 immediate 가 보정하지만 `_boot()` 의 prepare 보다 늦다 → `[daily_head_stale]` WARNING) |
 | 20:05 | `TIME_METRICS_SNAPSHOT` (cycle283 D5) | `api_metrics`·`strategy_funnel` 은 프로세스 메모리 전용 — 유실 노출 90분 → 5분 |
 | 20:30 | `TIME_STOCK_MASTER_DAILY_LOAD` (cycle283 D2) | 09-14 KRX 애프터마켓(16:00~20:00) 종료 후 = 그날 거래량이 확정된 뒤 |
+| 21:00 | `TIME_EVENING_FUNNEL_CAPTURE` (cycle364) | 다음 거래일 후보 미리보기. 20:30 적재 뒤 · 20:45 보조 계정 토큰 재발급 체인 뒤 · 정산 전이라 이 시각이다. 적재 성공 마커가 21:15 까지 없으면 건너뛴다. 결과는 다음 거래일 날짜의 잠정 행이고, 그날 09:35 확정 행을 덮지 않는다 |
 | 21:30 | `TIME_SETTLEMENT` (cycle283 D3) | 일일 로그 보고서 완전판(OpenAI)이 20:05 1차 행을 upsert 로 덮어쓴다 |
 
 ---
@@ -630,7 +636,7 @@ flowchart TD
 | `market_regime_snapshots` | 022 | dkstock.cloud 매크로 일일 스냅샷 — `_boot()` 시점 1행 + `buy_blocked/computed_cash_usage_ratio/raw_response JSONB` |
 | `kis_quote_accounts` | 026 | 보조 KIS 시세 수신 계좌 (UUID PK, label UNIQUE, active=true 부분 인덱스). 60s TTL 메모리 캐시 |
 | `trade_history` 부분 UNIQUE | 029 | `(ticker, order_no, trade_type) WHERE order_no IS NOT NULL AND order_no != ''` — 핑퐁 INSERT 영구 차단 (사이클 30) |
-| `strategy_funnel_snapshots` | 030 (+035) | 전략별 조건검색 단계별 후보/탈락 영구 추적 — UNIQUE `(target_date, strategy_id, step_no)` + UPSERT |
+| `strategy_funnel_snapshots` | 030 (+035, 040) | 전략별 조건검색 단계별 후보/탈락 영구 추적 — UNIQUE `(target_date, strategy_id, step_no)` + UPSERT. 잠정(`is_provisional`) 쓰기는 확정 행을 덮지 못한다 |
 | `stock_master_history` | 032 (+036) | stock_master 갱신 이력 — PK (ticker, seq=0/1) + trigger |
 | `stock_master_daily` | 033 | KIS FHKST03010100 일봉 정규화 — PK (ticker, bas_dd) + OHLCV + change_rate + raw JSONB. 매일 **20:30** KST 적재(`TIME_STOCK_MASTER_DAILY_LOAD`, T-100 백필 → D-1 증분) |
 | `stock_master.master_raw` | 034 | KIS 공식 일일 마스터 파일 raw JSONB + master_raw_updated_at + is_kospi200/is_kosdaq150 BOOLEAN (037, 사이클 153) |
@@ -1115,7 +1121,7 @@ flowchart TD
 |------|------|------|
 | 21:30 로그 분석 · 외부 백테스트 | 낮음 | live registry 를 읽지 않는다. DB 를 읽어 DB 에 쓴다 |
 | 20:00 AI 자문 | **중간 — 매매 행위가 바뀐다** | `recommendation_engine.py:404-406`·`:581-582` 가 `trading_scheduler.registry` 를 잡아 **살아 있는 전략 객체**를 읽고, auto_apply 는 `:626 strategy.config.weight = new_weight` · `:657 strategy.config.params[k] = v` 로 그 객체를 **직접 변이**한다. 이 in-memory 쓰기가 파라미터 즉시 반영의 유일한 경로다(루트 `CLAUDE.md` — `strategy_config` SQL UPDATE 는 다음 재시작에서만 반영). 워커로 옮기면 DB 쓰기만 남아 감액·보수적 파라미터가 **다음 재시작까지 실매매에 반영되지 않는다** |
-| 퍼널 스냅샷 | 가를 수 없다 | 데이터 원천이 DB 가 아니라 **엔진 프로세스의 메모리**다. `capture_funnel_snapshots(registry, …)`(`scheduler.py:186`)가 registry 를 순회해 각 전략의 `_funnel_steps` 를 읽고(`:236`, 접근 실패 로그 `:238`), 호출자는 `_scan_loop` 안의 `:2424` 다. 워커 프로세스엔 그 객체가 없다 |
+| 퍼널 스냅샷 | 가를 수 없다 | 데이터 원천이 DB 가 아니라 **엔진 프로세스의 메모리**다. `capture_funnel_snapshots(registry, …)`(`scheduler.py:188`)가 registry 를 순회해 각 전략의 `_funnel_steps` 를 읽고(`:264`, 접근 실패 로그 `:266`), 호출자는 `_scan_loop` 안의 `:2552`(09:35 확정)과 저녁 미리보기(`funnel_capture.evening_capture_once`)다. 저녁 미리보기는 캡처 전에 같은 메모리 객체를 `prepare(as_of=)` 로 다시 채운다. 워커 프로세스엔 그 객체가 없다 |
 
 그래서 2단계의 실제 범위는 **적재·분석 쪽**이다. 퍼널은 **캡처는 엔진에 남기고 적재(영속)만**
 옮길 수 있고, 20:00 자문은 적용(`auto_apply`)을 엔진 측 API(`PUT /api/strategies/{id}/params`)로
@@ -1463,7 +1469,7 @@ import 하는 **공통 라이브러리**(`market_state` 처럼 순수) ② "오�
 |------|--------------------------|
 | W | `TIME_PRESUBSCRIBE`(07:59) · `_stale_watcher_loop`(120s) · `_detect_silent_inactive_sessions` · `_evaluate_universe_guard` · `_report_tick_coverage` · `_session_health_loop` |
 | R | `_boot()` 토큰 선발급(기동 직후) · `TIME_STOCK_MASTER_*`(16:10/16:30/16:40) · 일봉 적재(20:30) · 유니버스 적재(20:00:05) |
-| 1 | `_scan_loop`(9:30~) · `_confirm_breakout_open_prices`(9:00:05) · `_swing_buy_poll_loop` · `_swing_rest_poll_loop` · 퍼널 캡처(16:20) |
+| 1 | `_scan_loop`(9:30~) · `_confirm_breakout_open_prices`(9:00:05) · `_swing_buy_poll_loop` · `_swing_rest_poll_loop` · 퍼널 캡처(09:35 확정 · 21:00 저녁 미리보기) |
 | 2 | 익일청산 8:00 · 15:20 `_force_clear_main_only` · 19:50 NXT 매수 중단 |
 | 3 | `_sync_orders_to_db` · `_sync_positions_from_balance` (KIS 진실과 장부 재대조) |
 

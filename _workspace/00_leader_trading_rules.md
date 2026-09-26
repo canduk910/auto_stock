@@ -842,7 +842,6 @@ BFB/VCP 매수 신호는 (donchian 의 폴링 루프와 달리) `risk.on_tick`(W
 | 15:40 | NXT 애프터 진입 — LTV 는 POST_NXT 신규 매수, VB 는 보유 매도만 |
 | 16:10 | KIS CTPF1002R 종목 basics 매스 보강 |
 | 16:15 | 일봉 retention purge (`DAILY_RETENTION_DAYS`) |
-| 16:20 | 저녁 잠정 funnel 캡처 (운영자 밤 후보 확인) |
 | 16:30 | KIS 종목 마스터 파일 적재 (`master_raw`) |
 | 16:40 | 재무 5 TR 주1회 적재 (`stock_master_financial`) |
 | 19:50 | NXT 애프터 신규 매수 중단 (`buy_disabled = True`) |
@@ -850,6 +849,7 @@ BFB/VCP 매수 신호는 (donchian 의 폴링 루프와 달리) `risk.on_tick`(W
 | 20:00:05 | 전체 유니버스 적재 (`_full_universe_load`, AI자문 직후 5초 마진) |
 | 20:05 | metrics 1차 스냅샷(`daily_metrics_snapshot`, OpenAI 미호출) — `api_metrics`·`strategy_funnel` 은 프로세스 메모리 전용이라 정산까지 기다리면 유실 노출이 90분이다 |
 | 20:30 | KIS 일봉 일괄 적재 (`stock_master_daily`) — KRX 애프터마켓(16:00~20:00) 종료 후 = 그날 거래량이 확정된 뒤. 전략 진입 판정이 읽는 전일봉 거래량의 품질을 결정한다 |
+| 21:00 | 저녁 funnel 미리보기 — 다음 거래일 후보를 오늘 봉까지 넣어 뽑고(`prepare(as_of=다음 거래일)`) 다음 거래일 날짜의 잠정 행으로 저장한다(운영자 밤 후보 확인). 20:30 적재 성공 마커를 21:15 까지 기다리고 없으면 건너뛴다. 미리보기는 보유 종목의 청산 입력을 바꾸지 않는다(PV-1 — `src/engine/strategies/CLAUDE.md` 「prepare 공통」) |
 | 21:30 | 전략별 + 합산 일일 정산, daily_performance 기록, 일일 로그 분석 리포트 생성(OpenAI → `daily_log_reports`, 완전판이 20:05 1차 행을 덮어쓴다), 로그 retention purge, 프로세스 Sleep |
 
 ### 야간 매매(POST_NXT 15:40~20:00) 운용 원칙
@@ -888,7 +888,6 @@ BFB/VCP 매수 신호는 (donchian 의 폴링 루프와 달리) `risk.on_tick`(W
 | `TIME_POST_NXT_OPEN` | 15:40 | **런타임 미사용** — 스케줄러의 POST_NXT 전환과 `post_nxt` 시가 확정은 `TIME_KRX_MAIN_CLOSE`(15:30) 직후다. 보드 경계 15:40 의 정본은 `session._BOARD_SCHEDULE` 이다 |
 | `TIME_STOCK_MASTER_BASICS_REFRESH` | 16:10 | KIS CTPF1002R 매스 보강 |
 | `TIME_STOCK_MASTER_DAILY_PURGE` | 16:15 | `stock_master_daily` retention purge |
-| `TIME_EVENING_FUNNEL_CAPTURE` | 16:20 | 저녁 잠정 funnel 캡처 |
 | `TIME_STOCK_MASTER_MASTER_LOAD` | 16:30 | KIS 종목 마스터 파일 적재 |
 | `TIME_STOCK_MASTER_FINANCIAL_LOAD` | 16:40 | 재무 5 TR 주1회 적재 |
 | `TIME_NXT_POST_BUY_STOP` | 19:50 | NXT 애프터 매수 중단 (안전 마감, 변경 금지) |
@@ -898,6 +897,7 @@ BFB/VCP 매수 신호는 (donchian 의 폴링 루프와 달리) `risk.on_tick`(W
 | `TIME_SESSION_START_CUTOFF` | 20:00 | `scheduler.start()` 기동 거부 경계. `run_daily` 의 일자 전환 판정도 같은 상수를 쓴다(갈리면 그 창에서 헛 재시도가 돈다). ⚠️ 그 창의 재기동은 그날 20:30 일봉 적재를 잃는다 |
 | `TIME_METRICS_SNAPSHOT` | 20:05 | metrics 1차 스냅샷 (OpenAI 미호출, `reset_request_metrics()` 미호출) |
 | `TIME_STOCK_MASTER_DAILY_LOAD` | 20:30 | KIS 일봉 일괄 적재 — 애프터마켓 종료 후 |
+| `TIME_EVENING_FUNNEL_CAPTURE` | 21:00 | 저녁 funnel 미리보기(다음 거래일 기준) — 일봉 적재 뒤 · 20:45 보조 계정 토큰 재발급 체인 뒤 · 정산 전 |
 | `TIME_SETTLEMENT` | 21:30 | 정산 + 일일 로그 분석. 일봉 적재(20:30) 뒤여야 한다. 주기 task 수명 상한이기도 하다 |
 | `NEXT_DAY_STABILIZE_SECS` | 30 | 익일 청산 NXT 프리 시가 안정화 |
 | `SESSION_TICK_INTERVAL` | 30 | SessionTracker 보드 전환 감시 주기 |

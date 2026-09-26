@@ -976,3 +976,16 @@ await page.route("**/api/logs*", (route) => {
 - 사이클 81 G-MOBILE-9 영속 (9개 메뉴)
 
 ---
+
+## StrategyFunnel (`/strategy-funnel`)
+
+### 2026-09-26 cycle364 S1 — 잠정 배지 툴팁 16:20 → 21:00
+
+정본 원문(목록 행):
+
+- `FunnelSnapshot.is_provisional === true` 행은 단계명 옆 amber "잠정" 배지(`funnel-provisional-badge-{sid}-{step_no}`, title="16:20 저녁 잠정 캡처 — 익일 아침 마스터 델타 반영 전 (후보가 바뀔 수 있음)"). 운영자가 "밤에 본 후보 ≠ 아침 확정 후보" 를 인지하게 하는 것이 목적이다. 회귀 가드 `StrategyFunnel.cycle171.test.tsx`.
+
+경위: 저녁 잠정 캡처가 21:00 다음 거래일 미리보기로 바뀌어 배지 툴팁·KojiroMonitor 문구·MSW market-ops 목(`scheduled_at`)이 21:00 을 말한다.
+잠정 행은 다음 거래일 날짜로 저장되므로 날짜 picker 로 그 날짜를 골라야 보인다.
+
+→ CHANGELOG: cycle364 S1 행

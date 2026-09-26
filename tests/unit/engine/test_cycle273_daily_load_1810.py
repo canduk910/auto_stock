@@ -114,13 +114,18 @@ def test_g273f_2_no_scheduled_work_collides_with_the_load_window():
 
 
 def test_g273f_2b_data_layer_order_is_preserved():
-    """16:10 basics · 16:15 purge · 16:20 funnel · 16:30 master · 16:40 재무는 **그대로**다.
+    """16:10 basics · 16:15 purge · 16:30 master · 16:40 재무는 **그대로**다.
 
     이 사이클이 옮기는 것은 일봉 적재 하나뿐이며, 나머지 데이터 층의 순서를 건드리지 않는다.
+
+    🔁 cycle364 의도적 개정 — 저녁 funnel 캡처는 16:20 → **21:00**(A1 저녁 미리보기, 사용자
+    결정 카드2 (가)). 16:20 은 적재(20:30) 앞이라 전략의 오늘봉 절단 때문에 D-1 목록만 만들 수
+    있었다. 새 자리는 적재 **뒤**·토큰 체인 뒤·정산 전이다(불변식 = `test_cycle364_time_invariants`).
     """
     assert sched.TIME_STOCK_MASTER_BASICS_REFRESH == time(16, 10)
     assert sched.TIME_STOCK_MASTER_DAILY_PURGE == time(16, 15)
-    assert sched.TIME_EVENING_FUNNEL_CAPTURE == time(16, 20)
+    assert sched.TIME_EVENING_FUNNEL_CAPTURE == time(21, 0)
+    assert sched.TIME_STOCK_MASTER_DAILY_LOAD < sched.TIME_EVENING_FUNNEL_CAPTURE
     assert sched.TIME_STOCK_MASTER_MASTER_LOAD == time(16, 30)
     assert sched.TIME_STOCK_MASTER_FINANCIAL_LOAD == time(16, 40)
 
@@ -183,30 +188,48 @@ def test_g273f_3_quote_token_refresh_window_still_clear():
 
 
 # ===========================================================================
-# G-273F-4 — 16:20 저녁 funnel 캡처 무영향 (두 겹)
+# G-273F-4 — 저녁 funnel 캡처와 일봉 적재의 관계 (🔁 cycle364 의도적 개정)
 # ===========================================================================
 
 def test_g273f_4_evening_funnel_does_not_depend_on_todays_bar():
-    """(a) 대기 폴링이 `count_all()`(테이블 전체 행수)이라 헤드 날짜와 무관하고,
-    (b) 전략 7종의 오늘봉 절단이 **날짜 비교**라 오늘 행이 없으면 같은 전일 봉을 쓴다.
+    """🔁 cycle364 의도적 개정 — 종전 단언은 「캡처가 `count_all()` 만 보고 헤드 날짜를 보지
+    않으니 적재 시각 이동이 16:20 캡처를 깨지 않는다」였다. A1(설계
+    `_workspace/domain_consult/cycle364_a1_as_of_design.md` §2.4)은 반대로 **그날 적재 완료를
+    기다려야** 성립한다(적재 없이 돌리면 ①′ 폴백이 수천 건 KIS 호출·내일 라벨 부실 목록).
 
-    ⇒ 18:10 이동으로 16:20 캡처가 새로 깨지는 것이 없다.
+    그래서 불변식이 바뀐다: 저녁 경로의 신호 = 20:30 일봉 적재 **성공 마커**
+    (`task_last_success_stock_master_daily_load`) — `count_all()`(빈 테이블만 막는다, F-D8-a)·
+    `max_bas_dd`(적재 대상 밖 종목 때문에 임계가 성립하지 않는다 §2.4)가 아니다.
+    본체는 leaf `funnel_capture.evening_capture_once` 로 옮겨 간다(scheduler 는 위임만 — §4.6).
+    행위 검증 = `tests/unit/engine/test_cycle364_evening_capture.py` (EVE-1~4 · EVE-12).
+
+    🔁 cycle364 round 2(R5) — 요약 행의 `daily_head=` 를 인덱스 `max(bas_dd)` 로 채우게 되면서
+    「leaf 에 `max_bas_dd` 호출 0」 이 「**대기 루프(`while`) 안에** `max_bas_dd`·`count_all` 호출
+    0」 으로 좁혀졌다. 불변식(대기 신호 = 마커) 자체는 같다 — 헤드가 오늘이어도 마커가 없으면
+    건너뛰는 것은 EVE-4 · EVE-12 가 행위로 잡는다.
     """
-    src = Path(inspect.getfile(sched)).read_text(encoding="utf-8")
-    tree = ast.parse(src)
-    fn = next(n for n in ast.walk(tree)
-              if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
-              and n.name == "_evening_funnel_capture_once")
-    body = ast.get_source_segment(src, fn)
-    assert "count_all" in body
-    assert "max_bas_dd" not in body, (
-        "캡처가 헤드 날짜를 보게 되면 18:10 이동이 이 경로를 깬다"
+    leaf = Path(inspect.getfile(sched)).resolve().parent / "funnel_capture.py"
+    assert leaf.exists(), "src/engine/funnel_capture.py 미구현 (Red — cycle364 §2.2)"
+    text = leaf.read_text(encoding="utf-8")
+    tree = ast.parse(text)
+    fn = next(
+        (n for n in ast.walk(tree)
+         if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n.name == "evening_capture_once"),
+        None,
     )
-    # F-D8-a — 주석 정직화: `count_all()` 은 '빈 테이블' 만 막는다
-    assert "일봉 적재 완료 대기" not in body or "빈 테이블" in body, (
-        "docstring 이 '적재 완료 대기' 라고 적는데 실제로는 빈 테이블만 막는다 — "
-        "시각을 옮기는 사이클에서 이 문구를 정직화한다(F-D8-a)"
-    )
+    assert fn is not None, "leaf 에 `evening_capture_once` 가 없다"
+    consts = {
+        n.value for n in ast.walk(tree)
+        if isinstance(n, ast.Constant) and isinstance(n.value, str)
+    }
+    assert "stock_master_daily_load" in consts, "저녁 경로가 일봉 적재 마커 라벨을 보지 않는다"
+    in_loops = {
+        (c.func.attr if isinstance(c.func, ast.Attribute) else getattr(c.func, "id", None))
+        for loop in ast.walk(tree) if isinstance(loop, ast.While)
+        for c in ast.walk(loop) if isinstance(c, ast.Call)
+    }
+    assert "max_bas_dd" not in in_loops, "헤드 날짜 기준 대기는 설계가 기각했다(§2.4) — 헤드는 요약 행에만"
+    assert "count_all" not in in_loops, "`count_all()` 은 적재 완료 신호가 아니다(F-D8-a, M5)"
 
 
 def test_g273f_4b_strategies_cut_today_bar_by_date_comparison():

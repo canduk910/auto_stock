@@ -175,29 +175,31 @@ _BASE_SHA: dict[str, str] = {
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     # 🔴 `scheduler.py` 무접촉 (절대 규칙 3). cycle292 가 3,897→3,726L 로 만든
     #    여유 174줄은 이 사이클의 예산이 아니다. §4-C 풀 우회 2곳은 관측만.
+    # 🔁 cycle364(2026-09-26) 재핀 — 저녁 A1 미리보기(`prepare(as_of=)`) 도입 + 저녁
+    # 캡처 본체 leaf 이관(전략 7파일 전부 + strategy_base + scheduler, 사용자 승인 D3).
     "src/engine/scheduler.py":
-        "3461242a47080379c8d48dc5efd5799ce5fac173803a95476547ea4758b40a81",
+        "1c20b668d886e10b993b266a59e2db5d75080fd12d2920a3b98f61a31a209271",
     "src/engine/market_op_subscribe.py":
         "7d58f9464c1ed35e4fa8706d801beb5a6b5c062d5a2941f0db6482d028d3d4ac",
     # 전략 7파일 + 베이스 (절대 규칙 5)
     "src/engine/strategy_base.py":
-        "19353f030cda3bf0dde33bee04d9a00f7870f6c083d6d4cf90b86b8223dc2c12",
+        "e7cc4965ce8d1e2e35bb04b427799b0898f744754415a7942fd546d6d22ca89e",
     "src/engine/strategies/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "src/engine/strategies/bull_flag_breakout.py":
-        "f72cc0c71ee6f9b1851407e3e57df549468a2904d6a702d4f99e4ef97c4b4b1b",
+        "f44c3757db0c9bced8754f34723cc94e7956057b4405903900d519fb4e5b28d8",
     "src/engine/strategies/donchian_swing.py":
-        "0108f5a03ebc96aa6a14190eafb92ac174202bb13df4c2383e4d6bb9a59f5364",
+        "31bd41bb0e435a0185649dee3aa309622d2044d9978cf3d9ddb687a778327ea7",
     "src/engine/strategies/kojiro.py":
-        "329bd29d661f8be1d551ce9b44780dd9d78461df7c21ab2ed1b662e31e52cee5",
+        "66758fb3fce62d509d6d6750cb8ff903df09f1671e8b2d11c139e1cde9da6038",
     "src/engine/strategies/long_tail_volatility.py":
-        "2c638a76dbded9a7151963f0a3fef7405b1a6233329f65050d66960913bf394c",
+        "0e6d14bbb013ccb76b4a5d2944eb97becd34165554c74c0de314233423a0fdc5",
     "src/engine/strategies/momentum.py":
-        "50d5c0b9a232d6110f6b85fc524569853f2b8edffe2fd44adc24289800b95ae2",
+        "38743ab1ecdb4aa9bcd6ac37e5d28f75501d2d4eceb2e70f3aace44d00d502a1",
     "src/engine/strategies/vcp_breakout.py":
-        "7c6477fd4d51623fa8f10daf53cedd4c0bf5fe778e59a005369f9ec798cb201a",
+        "a609ded41a916563c6706aac16fe1867845687233c195b7dab478d336cc94b37",
     "src/engine/strategies/volatility_breakout.py":
-        "be4327754fc4ebf63de58553e68c7a2d8eba14f43f847490bf22cae90d7e5400",
+        "b5febd0420f4e087673b46daee0c9298c13ec3d1d30e18b6a5f1ed8db56c20dc",
     # 파라미터 축 — 킬스위치는 `system_config` 다(§8-B). 전략 파라미터로 새지 않는다.
     # 🔁 cycle365(2026-09-25) 재핀 — 사용자 승인 P5a·P5b:
     # trailing_stop_rate 도움말에 적용 범위 명시 + max_scan_stocks range_src
@@ -228,7 +230,7 @@ _PIN_PENDING_APPROVAL: dict[str, str] = {
         "79fddbec8cf9315c5172fc6634c4f4ea77f525d9ff9a3aba48f321affeb4d3e8",
 }
 
-_SCHEDULER_LINES = 3812  # cycle354 재핀 — order_no 매핑 폴백 추가 (`_sync_orders_to_db`)
+_SCHEDULER_LINES = 3777  # cycle364 재핀 — 저녁 캡처 본체를 funnel_capture leaf 로 이관
 _SCHEDULER_LINE_CAP = 3900
 
 

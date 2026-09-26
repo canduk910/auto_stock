@@ -50,7 +50,7 @@ async def insert_snapshot(
     survived_count: int | None = None,
     excluded_count: int = 0,
     step_conditions: str | None = None,  # 사이클 41 — 단계 조건 (UI 툴팁)
-    is_provisional: bool = False,  # 사이클 171 — 저녁 16:20 잠정 캡처 플래그
+    is_provisional: bool = False,  # 사이클 171 — 저녁 잠정 캡처 플래그(cycle364 = 21:00 A1)
 ) -> dict | None:
     """1단계 snapshot UPSERT (사이클 145 — UPSERT 전환 영구 영속).
 
@@ -71,11 +71,16 @@ async def insert_snapshot(
         excluded_count: 탈락 카운트.
         step_conditions: 단계 필터 조건 (UI 툴팁용, 사이클 41). DB 저장 안 함 (API 응답만).
         is_provisional: 잠정 캡처 여부 (사이클 171, migration 040).
-            - True = 16:20 저녁 잠정 캡처 (전일 마스터 + 16:10 basics 기준, 아침 델타 미반영).
-            - False (기본) = 09:30 자동 / 수동 trigger (확정). 기존 호출자 회귀 0.
+            - True = 21:00 저녁 A1 잠정 캡처(cycle364) — `target_date` 는 **다음 거래일**
+              미리보기(`prepare(as_of=다음 거래일)`, 오늘 봉 포함). 부팅 +600초 즉시 1회
+              (레거시, S1 임시)만 예외로 오늘 라벨을 쓴다.
+            - False (기본) = 09:30 자동 / 수동 trigger (확정, target_date=오늘). 기존
+              호출자 회귀 0. ③-b(`WHERE NOT (…is_provisional=FALSE AND EXCLUDED=TRUE)`)가
+              잠정 쓰기의 확정 행 덮어쓰기를 막는다 — 거부되면 이 함수는 `None` 을 돌려준다.
 
     Returns:
-        upsert 된 row dict (id 포함) 또는 None (실패 시).
+        upsert 된 row dict (id 포함) 또는 None — DB 예외 실패이거나, 잠정 쓰기가 이미 확정된
+        행을 덮으려 해 ③-b `WHERE` 가 거부한 경우(cycle364, 아래 Note).
 
     Note:
         사이클 145 (2026-06-16) — UPSERT 전환 영구 영속 (결함 3 시정).
@@ -88,6 +93,14 @@ async def insert_snapshot(
           `now()`(migration 030), 이후 덮어쓸 때마다 `DO UPDATE SET` 이 같은 DB
           시계로 갱신한다.
         - 매매 안전성 무영향 (진단/추적 영역 한정).
+        - cycle364 (2026-09-26) — SQL 의 `ON CONFLICT … DO UPDATE … WHERE NOT (…)` 절이
+          막는 조합은 **잠정 쓰기(`is_provisional=True`)가 이미 확정(`is_provisional=False`)
+          된 행을 덮는 경우 하나뿐**이다. 그 조합이면 `RETURNING` 이 비어 이 함수가 `None`
+          을 돌려주고 기존 확정 행(`snapshot_at` 포함)은 그대로 남는다. 나머지 세 조합
+          (잠정→잠정 · **확정이 기존 잠정 행을 덮음** · 확정→확정)은 전부 갱신된다 —
+          그중 「확정이 기존 잠정 행을 덮음」은 **매 거래일 09:35 자동 캡처가 전날 21:00
+          저녁 미리보기(잠정)가 다음 거래일 라벨로 쓴 같은 `(target_date, strategy_id,
+          step_no)` 행을 확정으로 교체하는 정상 경로**다(cycle364 A1 도입 이후 매일 발생).
     """
     if not strategy_id:
         raise ValueError("strategy_id 필수")
@@ -121,6 +134,7 @@ async def insert_snapshot(
                 excluded_sample = EXCLUDED.excluded_sample,
                 is_provisional = EXCLUDED.is_provisional,
                 snapshot_at = now()
+            WHERE NOT (strategy_funnel_snapshots.is_provisional = FALSE AND EXCLUDED.is_provisional = TRUE)
             RETURNING *
             """,
             row_id,
@@ -147,12 +161,17 @@ async def list_snapshots(
     *,
     target_date: date,
     strategy_id: str | None = None,
+    raise_on_error: bool = False,
 ) -> list[dict]:
     """단일 영업일 snapshot 조회 (step_no ASC).
 
     Args:
         target_date: 영업일.
         strategy_id: 단일 전략 필터 (None 이면 전체).
+        raise_on_error: cycle364 F1 — 기본값 `False` 는 현행(예외를 삼키고 `[]`).
+            `True` 면 DB 예외를 그대로 전파한다. `funnel_capture._emit`(④ 부팅↔저녁
+            대조)가 이 값으로 부른다 — 기본값으로는 DB 장애가 「저녁 캡처 없음」과
+            구분되지 않아 `error=list_snapshots_failed` 분기가 도달 불가였다.
 
     Returns:
         snapshot row list. 응답 cap 없음 (전략당 단계 수 ≤ 10 가정).
@@ -180,6 +199,8 @@ async def list_snapshots(
             )
         return rows or []
     except Exception as exc:
+        if raise_on_error:
+            raise
         logger.warning(
             "strategy_funnel list 실패 — target=%s strategy=%s err=%s",
             target_date, strategy_id, exc,

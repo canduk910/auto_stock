@@ -255,12 +255,12 @@ async def boot(scheduler: "TradingScheduler") -> None:
     # 읽고 그 상태가 종일 고정된다. 관측이 prepare 뒤면 이미 굳은 뒤라 소용이 없다.
     await emit_daily_head_staleness()
 
-    # 전략별 prepare 호출
+    # 전략별 prepare 호출 — wrapper 가 never-raise 라 이 자리에 try/except 를 두지
+    # 않는다(cycle364 R7). 실패 로그는 `funnel_capture` 의 `[live_prepare]` 행이
+    # 옛 문구(「전략 prepare 실패」, phase=boot)를 그대로 담아 남긴다.
+    from src.engine import funnel_capture as _fc
     for strategy in scheduler.registry.enabled():
-        try:
-            await strategy.prepare()
-        except Exception:
-            logger.exception("전략 prepare 실패: %s", strategy.strategy_id)
+        await _fc.live_prepare_one(strategy, phase="boot")
 
     from src.engine.strategy_base import Position
     from src.engine.scanner import ticker_names
@@ -526,6 +526,12 @@ async def boot(scheduler: "TradingScheduler") -> None:
         )
     except Exception:
         logger.exception("[pending_ndc_boot_restore] DB 복구 실패 graceful — 메모리 set 보존")
+
+    # cycle364 R2 — ④ 저녁 목록 ↔ 부팅 목록 대조는 백그라운드 task 다. `_boot()` 는
+    # WebSocket 연결 *전*에 await 되므로, 여기서 동기로 기다리면(최대 10초 상한 +
+    # DB 3쿼리) 보유 중 재기동의 틱 공백이 그만큼 늘어난다. 스폰만 하고(await 없음)
+    # 실제 실행은 WS 연결 단계가 시작된 뒤로 미룬다(leaf 안 `_sleep` seam 대기).
+    _fc.spawn_funnel_boot_vs_evening(scheduler, phase="boot")
 
     # cycle233 — 계좌 리스크 감시 부팅 동기 1회 (자문 cycle232 §2.5-γ 반례 2 요구사항:
     # 이게 없으면 07:55 부팅 ~ 첫 주기 평가 사이 09:05 매수창이 무평가로 열린다)

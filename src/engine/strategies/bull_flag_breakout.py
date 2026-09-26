@@ -221,8 +221,12 @@ class BullFlagBreakoutStrategy(StrategyBase):
     # ------------------------------------------------------------------
     # prepare — 일봉 fetch → 폴/플래그 자동 검출
     # ------------------------------------------------------------------
-    async def prepare(self) -> None:
+    async def prepare(self, *, as_of: date | None = None) -> None:
         import asyncio
+
+        as_of_date, preview = self._resolve_prepare_as_of(as_of)
+        keep = self._preview_keep_tickers() if preview else set()
+        skip = self._preview_skip_tickers() if preview else set()
 
         # 사이클 173 (2026-06-22) — 일봉 source KIS → DB 어댑터 전환 (행위 보존).
         from src.db.stock_master_daily import get_recent_daily_normalized
@@ -239,7 +243,11 @@ class BullFlagBreakoutStrategy(StrategyBase):
         atr_period = params["atr_period"]
         fetch_days = pole_max + flag_max + atr_period + 10  # 여유
 
-        self._candidates = {}
+        # cycle364 R1 — 미리보기는 자기 보유·자기 익일청산대기 엔트리만 같은
+        # 객체로 보존한다(donchian·kojiro 와 같은 규약). 비미리보기는 현행대로
+        # 전량 와이프(빈 keep = `{}` 와 동치).
+        self._candidates = {t: v for t, v in self._candidates.items() if t in keep}
+        preserved = set(self._candidates)
         stats = _empty_scan_stats()
         self._scan_stats = stats
         # 사이클 39 (2026-05-22) — 단계별 ticker 캡처 reset
@@ -256,7 +264,8 @@ class BullFlagBreakoutStrategy(StrategyBase):
                 30, retry_attempt + 1,
             )
             await asyncio.sleep(30)
-            self._candidates = {}
+            self._candidates = {t: v for t, v in self._candidates.items() if t in keep}
+            preserved = set(self._candidates)
             stats = _empty_scan_stats()
             self._scan_stats = stats
             self._reset_funnel_steps(FUNNEL_STAGES)
@@ -304,10 +313,10 @@ class BullFlagBreakoutStrategy(StrategyBase):
             stats["last_run_at"] = datetime.now(KST).isoformat()
             return
 
-        today_str = datetime.now(KST).strftime("%Y%m%d")
+        today_str = as_of_date.strftime("%Y%m%d")
 
         # cycle363 — ①′ 일봉 신선도 기준(「직전 영업일」) prepare 당 1회 계산.
-        expected_head = await self._resolve_expected_daily_head()
+        expected_head = await self._resolve_expected_daily_head(as_of)
 
         # 사이클 173 — DB 우선 어댑터 (락/신선도/부족 시 KIS 폴백). min_required=35 명시 (자문 §4).
         async def _fetch_one(ticker: str):
@@ -338,6 +347,8 @@ class BullFlagBreakoutStrategy(StrategyBase):
         volume_contraction_excluded: list[dict] = []  # step 6 (거래량 수축)
 
         for ticker, candles in fetched:
+            if preview and ticker in skip:
+                continue
             from src.engine.strategy_base import _resolve_ticker_name
             ticker_name = _resolve_ticker_name(ticker)
             if candles is None or not candles:
@@ -499,7 +510,7 @@ class BullFlagBreakoutStrategy(StrategyBase):
             step_conditions="모든 단계 통과 — 매수 후보 등록",
         )
 
-        self._scanned_tickers = list(self._candidates.keys())
+        self._scanned_tickers = [t for t in self._candidates if t not in preserved]
         self._bought_today.clear()
         stats["last_run_at"] = datetime.now(KST).isoformat()
         logger.info(

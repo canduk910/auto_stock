@@ -154,10 +154,15 @@ _BASE_SHA: dict[str, str] = {
     # 붉어져 승인된 변경을 되돌리도록 오도한다. 직전 값 =
     # `50658e06062a0d38afecab1baa08871b89212e295cc95f2a3af62a2ae076115d`.
     # 8영역은 아니지만 이 사이클이 무접촉을 약속한 파일
+    # 🔁 cycle364(2026-09-26) 재핀 — 저녁 A1 미리보기(`prepare(as_of=)`) 도입(사용자 승인 D3).
+    # 🔁 cycle364 round 2(적대적 검토 반영, 같은 날) 재핀 — `scheduler.py` 는 죽은
+    # try/except 2곳 제거 + 「16:20」 주석 정직화(라인 3,758→3,755). `strategy_base.py`
+    # 는 `_preview_keep_tickers`/`_preview_skip_tickers`(R1, 자기 보유·자기 익일청산만
+    # 보존 / 보호 종목 전부 건너뜀) 로 `_preview_protected_tickers` 를 대체했다.
     "src/engine/scheduler.py":
-        "3461242a47080379c8d48dc5efd5799ce5fac173803a95476547ea4758b40a81",
+        "1c20b668d886e10b993b266a59e2db5d75080fd12d2920a3b98f61a31a209271",
     "src/engine/strategy_base.py":
-        "19353f030cda3bf0dde33bee04d9a00f7870f6c083d6d4cf90b86b8223dc2c12",
+        "e7cc4965ce8d1e2e35bb04b427799b0898f744754415a7942fd546d6d22ca89e",
     # 🔴 등재만으로 판정이 통해야 한다 — 검증 로직을 고쳐 통과시키면 안 된다.
     "src/engine/param_validation.py":
         "b4c5c029800191523bcc511919d6de3774e9ab49ca2fc0a0558ee3907868ee17",
@@ -172,7 +177,7 @@ _SCHEDULER_LINE_CAP = 3900
 #: 신규 leaf `src/engine/market_op_subscribe.py` 로 추출해(행위 변경 0 · 5줄
 #: 위임 wrapper) 3,897 → 3,726 이 됐다. 값만 옮긴다 — 정확 핀을 상한 핀으로
 #: 완화하면 cycle290 의 무접촉 대리 지표가 사라진다.
-_SCHEDULER_LINES = 3812  # cycle354 재핀 — order_no 매핑 폴백 추가 (`_sync_orders_to_db`)
+_SCHEDULER_LINES = 3777  # cycle364 재핀 — 저녁 캡처 본체를 funnel_capture leaf 로 이관
 
 
 @pytest.mark.parametrize("rel", sorted(_BASE_SHA))
@@ -215,40 +220,50 @@ _SEGMENT_SHA: dict[tuple[str, str], str] = {
         "33c06df9546f40e91b1857300f0da8480eb671c1c8778454691248c9e90b9ef1",
     ("momentum", "calc_buy_quantity"):
         "1149ecc8ea37fb1ba164cc1fd88e6525111d5142168ca879f1026c7890905b81",
+    # 🔁 cycle364(2026-09-26) 재핀 — `prepare(as_of=)` 시그니처 확장(사용자 승인 D3).
     ("momentum", "prepare"):
-        "ca7a6e64c6d3032f0fbc752610b17f545afb43fda358dff64eb510e0b8395f81",
+        "eff5452d07567436585a498aedeb45deeac9c4fc913a9782b00242beef288085",
     ("volatility_breakout", "check_buy_signal"):
         "e620ae0d14a71f916550ee13f57edff12e1b84c12b8a4712b29583b44b56f20a",
     ("volatility_breakout", "check_exit_signal"):
         "86593b038e4cf8121ae47069fb368346edc50d9692b29db4cbdcc8897421b72e",
     ("volatility_breakout", "calc_buy_quantity"):
         "6d24ef3f3afd211ae6123623075b08320cdc08c9cd48a6db965355305ad4e732",
+    # 🔁 cycle364 재핀 — `prepare(as_of=)` 시그니처 확장.
     ("volatility_breakout", "prepare"):
-        "bb1c4c5ed32f051c6e4f9a7377e4834fb5555dc70ef470a92ba123cbd8bb5d0c",
+        "0a378b804169ed99843eca465f404fbe136184b436cd627aa1af2c2268e98ab7",
     ("long_tail_volatility", "check_buy_signal"):
         "6c70101fe4abc9e5afc7f7e4a47af46ce5ebdf68fd84c2a18e22a46cb4546d1b",
     ("long_tail_volatility", "check_exit_signal"):
         "c8b0e6a8c8705d49bb6f12f82f505d426a5bdeb81413f8b2e0276eabb7dd9cad",
     ("long_tail_volatility", "calc_buy_quantity"):
         "1149ecc8ea37fb1ba164cc1fd88e6525111d5142168ca879f1026c7890905b81",
+    # 🔁 cycle364 재핀 — `prepare(as_of=)` 시그니처 확장.
     ("long_tail_volatility", "prepare"):
-        "bd185aad3d2f9b9bcf24cff81047f437ec6aadb73ec35c7c9eb30a09929c2c11",
+        "8837076acd413ed97127a7a74ebbb4e62b7000fa9495727ad268bfedcd13b73a",
     ("donchian_swing", "check_buy_signal"):
         "c872af3dcc790942c4d954e47f2c2a9a64983b92fc0647c2e3605ab743a91ebc",
     ("donchian_swing", "check_exit_signal"):
         "86ae465f87a03bac0b3a418338f7a01e40c2f6992ef609791f915590dd5b85f4",
     ("donchian_swing", "calc_buy_quantity"):
         "35c9046669290d945e78282e50b87ee04bae9d6b276e3648004b3b89f95b4c5b",
+    # 🔁 cycle364 재핀 — `prepare(as_of=)` + PV-1(보유·익일청산 종목 보존).
+    # 🔁 cycle364 round 2 재핀 — keep(자기 보유∪자기 익일청산) / skip(자기 ∪ 전 전략
+    # 보호 종목) 두 집합으로 분리(R1) — 남의 보유 엔트리를 보존·재구성 어느 쪽도 하지
+    # 않는다.
     ("donchian_swing", "prepare"):
-        "0008d780e2b40b314188b0a73171a1a7e466381b465146029f5891445dd04b65",
+        "18869f2f5562c577dde0912878005512db6279e3c1399b38cd22b797af46bbb9",
     ("bull_flag_breakout", "check_buy_signal"):
         "b39b26fb398ca352edaf91816b4aed04cd50f47aef29d13a8b82af0f6580ed7d",
     ("bull_flag_breakout", "check_exit_signal"):
         "eacb8a79407a37fb80227f977c54a7faac247ce525d3bfa10e54341965fd8796",
     ("bull_flag_breakout", "calc_buy_quantity"):
         "7b66c61590c8ccf51583c3121bf6519ff24c3529811ee856c730fbd8de7a850a",
+    # 🔁 cycle364 재핀 — `prepare(as_of=)` 시그니처 확장.
+    # 🔁 cycle364 round 2 재핀 — PV-1 을 BFB 로 확대(keep/skip 분리, R1) — 미리보기가
+    # 보유 종목의 `_candidates`(청산 입력 `atr14`·구조 레벨)를 더 이상 지우지 않는다.
     ("bull_flag_breakout", "prepare"):
-        "25fa52230aec03549003c54c6bf9418cecb428b5303a1d9abf2f33152434c850",
+        "a7f51dba952b610bbe6cda95e6bada182024327c0bdb67fd4fb2376818f8a392",
     ("vcp_breakout", "check_buy_signal"):
         # cycle349 재핀 — VCP 관측 ①③(돌파선 거리 줄 · 틱 관측 훅 · watch). 매매 경로 diff 0
         # = 확장 전 HEAD 산출 골든 G1(prepare)·G2(check_buy_signal) 완전 일치로 확인.
@@ -260,7 +275,11 @@ _SEGMENT_SHA: dict[tuple[str, str], str] = {
     ("vcp_breakout", "prepare"):
         # cycle349 재핀 — VCP 관측 ①③(돌파선 거리 줄 · 틱 관측 훅 · watch). 매매 경로 diff 0
         # = 확장 전 HEAD 산출 골든 G1(prepare)·G2(check_buy_signal) 완전 일치로 확인.
-        "ba9361b7feaf12ee000d1e76921c8b36109af60f287cd8f4c2d5df17eb3d7916",
+        # 🔁 cycle364 재핀 — `prepare(as_of=)` + P3(미리보기에서 `_observe_breakout_distance` 생략).
+        # 🔁 cycle364 round 2 재핀 — PV-1 을 VCP 로 확대(keep/skip 분리, R1) — 미리보기가
+        # 보유 종목의 `_candidates`(청산 입력 `atr14`·`ema50`·`base_low`)를 더 이상
+        # 지우지 않는다(round-1 적대 검토 trading-safety medium 반영).
+        "466ebfcf83dc5781b3cb25fb9da943238fcc229a65306800c020a1edf69b0803",
     ("kojiro", "check_buy_signal"):
         "dda6c6fc318afec8db576826f4cfc16d03fdc6dbdd544e7accc3f8a41de9e74f",
     ("kojiro", "check_exit_signal"):
@@ -270,7 +289,11 @@ _SEGMENT_SHA: dict[tuple[str, str], str] = {
     ("kojiro", "prepare"):
         # cycle348 재핀 — `[kojiro_macd_observe]` role=stage6_gc 확장(step6 직후
         # 자기 try 수집 + observe_macd 뒤 별도 try emit). 매매 경로 diff 0.
-        "cc692259b71b0f1d763bfb43bf1d00c123aa00bc154784898699aa5959bce7ec",
+        # 🔁 cycle364 재핀 — `prepare(as_of=)` + PV-1(보유 종목 보존, stage3 미스탬프) +
+        # P3(미리보기에서 observe_band/observe_macd/observe_macd_stage6 생략).
+        # 🔁 cycle364 round 2 재핀 — keep/skip 분리(R1) — 남의 보유가 `held_only` 로
+        # 새지 않는다(round-1 적대 검토 low 반영).
+        "9e1907df75b62db14339bac63f9039ec3aff527d9271b12ad74035d9cd718ea9",
 }
 
 
@@ -316,7 +339,12 @@ _ENGINE_PY_FILES: dict[str, tuple[str, ...]] = {
         "__init__.py", "account_risk_guard.py", "account_risk_watcher.py",
         "backtest_engine.py", "backtest_orchestration.py", "backtest_yaml.py",
         "boot_manager.py", "daily_emit_cap.py", "daily_metrics_snapshot.py",
-        "data_load_tasks.py", "kojiro_band_observe.py", "kojiro_gap_observe.py",
+        "data_load_tasks.py",
+        # cycle364 — 저녁 A1 미리보기(`prepare(as_of=)`) 라이브 준비 wrapper + 잠금 +
+        # meta + `resolve_as_of`/`capture_skip_reason` leaf. 등재해도 "다음 신규 파일"
+        # 은 여전히 붉어진다(이름 축 가드는 변경 없음).
+        "funnel_capture.py",
+        "kojiro_band_observe.py", "kojiro_gap_observe.py",
         "kojiro_indicators.py", "llm_buy_gate.py", "llm_features.py",
         # cycle297 — 주간 회고 조인·집계 순수 leaf(`src.*` import 0). 이름을 등재해도
         # "다음 신규 파일" 은 여전히 붉어진다(이름 축 가드는 변경 없음).

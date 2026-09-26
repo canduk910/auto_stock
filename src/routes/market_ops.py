@@ -145,18 +145,25 @@ _SCHEDULE_EVIDENCE_GRACE = timedelta(hours=2)
 #: `bas_dd`/`target_date`/`date` 는 DATE(타임존 무관), TIMESTAMPTZ 컬럼만 `to_char` 로
 #: KST 고정 문자열로 뽑는다(루트 CLAUDE.md "TIMESTAMPTZ 읽기 = to_char(...,'+09:00')").
 _TS = "'YYYY-MM-DD\"T\"HH24:MI:SS+09:00'"
-#: ⚠️ `strategy_funnel_snapshots` 는 이 한 행(16:20 저녁 잠정 캡처)의 산출물만 담는
-#: 테이블이 아니다 — 09:30 자동 캡처(`scheduler._auto_capture_funnel_snapshots`)와
-#: 스캐너 가격/거래대금 필터 훅(step_no 97/98)도 같은 `(target_date, strategy_id,
-#: step_no)` UNIQUE 에 UPSERT 한다. `is_provisional=TRUE` 는 16:20 캡처만 쓰는 값이라
-#: (다른 세 생산자는 전부 `False`) 이 필터가 없으면 아침 자동 캡처 행이 저녁 캡처의
-#: "성공" 으로 오인된다(cycle285 검증 HIGH #1 — 09:30 에 이미 "완료" 가 뜨고, 16:20
-#: 캡처가 그날 완전히 실패해도 상태가 바뀌지 않았다).
-#: `funnel_rows` 는 추가로 `snapshot_at >= $2`(저녁 캡처 evidence-time 하한, cycle350)
-#: 도 요구한다 — `insert_snapshot` 이 덮어쓸 때마다 `snapshot_at` 을 최신 쓰기 시각으로
-#: 갱신하게 되면서, 부팅 +600초(≈07:57) 잠정 캡처 행이 그 값만으로는 16:20 저녁 캡처의
-#: "완료" 와 구별되지 않는다 — 다른 행이 쓰는 `_evidence_after_schedule` 와 같은 규칙이다.
-#: `funnel_last_at` 은 이 하한을 타지 않는다(전체 기간 최댓값 계약 불변).
+#: ⚠️ `strategy_funnel_snapshots` 는 이 한 행(21:00 저녁 A1 잠정 캡처, cycle364)의
+#: 산출물만 담는 테이블이 아니다 — 09:30 자동 캡처(`scheduler._auto_capture_funnel_
+#: snapshots`)와 스캐너 가격/거래대금 필터 훅(step_no 97/98)도 같은 `(target_date,
+#: strategy_id, step_no)` UNIQUE 에 UPSERT 한다. `is_provisional=TRUE` 는 저녁 task(21:00
+#: A1·부팅 +600초 레거시)만 쓰는 값이라(나머지는 `False`) 이 필터가 없으면 아침 자동 캡처 행이
+#: 저녁 캡처의 "성공" 으로 오인된다(cycle285 검증 HIGH #1 — 09:30 에 이미 "완료" 가
+#: 뜨고, 저녁 캡처가 그날 완전히 실패해도 상태가 바뀌지 않았다).
+#: cycle364 — 저녁 A1 이 `target_date=다음 거래일` 미리보기가 되면서 `target_date = $1`
+#: (오늘)이 아니라 **`target_date > $1`** 로 바뀌었다. `funnel_rows`(= evidence 키
+#: `snapshot_rows_today`)가 세는 것은 이제 "오늘 저녁에 쓴 **다음 세션** 잠정 행" 이지
+#: 오늘 날짜 행이 아니다 — 오늘 날짜 잠정 행(부팅 +600초 레거시 재준비)은 이 조건
+#: 밖이라 저녁 증거로 세지 않는다(S1 기준 — 레거시 행은 라벨이 오늘이라 이 조건에서
+#: 빠진다). `snapshot_at >= $2`(저녁 캡처 evidence-time 하한,
+#: cycle350 → cycle364 = `TIME_EVENING_FUNNEL_CAPTURE`(21:00) − `_SCHEDULE_EVIDENCE_
+#: GRACE`(2h) = 19:00)도 함께 요구한다 — `insert_snapshot` 이 덮어쓸 때마다
+#: `snapshot_at` 을 최신 쓰기 시각으로 갱신하므로, 같은 다음 세션 라벨을 아침에 먼저
+#: 건드린 쓰기(있다면)가 저녁 캡처의 "완료" 로 오인되지 않게 하려는 것이다.
+#: `funnel_last_at` 은 이 하한·날짜 조건 어느 것도 타지 않는다(전체 기간 최댓값
+#: 계약 불변).
 _COMBINED_SQL = f"""
 SELECT
   (SELECT count(*) FROM parameter_recommendations WHERE target_date = $1) AS rec_rows,
@@ -166,7 +173,7 @@ SELECT
   (SELECT count(*) FROM stock_master_daily WHERE bas_dd = $1) AS daily_today_rows,
   (SELECT min(bas_dd) FROM stock_master_daily) AS daily_tail,
   (SELECT count(*) FROM strategy_funnel_snapshots
-     WHERE target_date = $1 AND is_provisional = TRUE AND snapshot_at >= $2) AS funnel_rows,
+     WHERE target_date > $1 AND is_provisional = TRUE AND snapshot_at >= $2) AS funnel_rows,
   (SELECT to_char(max(snapshot_at), {_TS}) FROM strategy_funnel_snapshots
      WHERE is_provisional = TRUE) AS funnel_last_at,
   (SELECT to_char(max(refreshed_at), {_TS}) FROM stock_master) AS sm_refreshed_last,
@@ -256,9 +263,10 @@ def _funnel_evidence_floor(today: date) -> datetime:
     `_evidence_after_schedule` 과 같은 규칙(예정 시각 − `_SCHEDULE_EVIDENCE_GRACE`)을
     `strategy_funnel_snapshots.snapshot_at` 비교용으로 SQL 바인딩값으로 뽑아 둔다 —
     `insert_snapshot` 이 덮어쓸 때마다 `snapshot_at` 을 최신 쓰기 시각으로 갱신하므로,
-    부팅 +600초(≈07:57) 잠정 캡처 행을 16:20 저녁 캡처의 "완료" 로 오인하지 않으려면
-    이 하한 이후의 쓰기만 증거로 인정해야 한다. 두 상수는 호출 시점에 모듈 전역에서
-    읽는다(기본 인자로 묶으면 monkeypatch 로 상수를 옮기는 테스트가 못 따라온다).
+    부팅 +600초(≈07:57) 잠정 캡처 행을 21:00 저녁 A1 캡처(cycle364)의 "완료" 로
+    오인하지 않으려면 이 하한 이후의 쓰기만 증거로 인정해야 한다. 두 상수는 호출
+    시점에 모듈 전역에서 읽는다(기본 인자로 묶으면 monkeypatch 로 상수를 옮기는
+    테스트가 못 따라온다).
     """
     return datetime.combine(today, TIME_EVENING_FUNNEL_CAPTURE, tzinfo=_KST) - _SCHEDULE_EVIDENCE_GRACE
 
@@ -528,21 +536,7 @@ async def read_market_ops():
         note="이 작업은 성공 마커를 남기지 않는다 — 보관 경계값만으로는 오늘 실행 여부를 알 수 없다",
     ))
 
-    # 3. 저녁 잠정 퍼널 캡처 — TIME_EVENING_FUNNEL_CAPTURE. `is_provisional=TRUE` 산출물로만 판정
-    # (09:30 자동 캡처·스캐너 필터 훅은 `is_provisional=False` 라 여기 안 섞인다 — HIGH #1 시정)
-    funnel_rows = combined.get("funnel_rows") or 0
-    status = _degrade_on_error(
-        _artifact_status(count=funnel_rows, now_t=now_t, scheduled=TIME_EVENING_FUNNEL_CAPTURE),
-        errored=_artifacts_failed,
-    )
-    tasks.append(_task_row(
-        "evening_funnel_capture", "저녁 잠정 퍼널 캡처",
-        TIME_EVENING_FUNNEL_CAPTURE, _finalize_status(status, trading_day),
-        last_success_at=combined.get("funnel_last_at"),
-        evidence={"snapshot_rows_today": funnel_rows},
-    ))
-
-    # 4. 종목 마스터 파일(.mst) 적재 — TIME_STOCK_MASTER_MASTER_LOAD
+    # 3. 종목 마스터 파일(.mst) 적재 — TIME_STOCK_MASTER_MASTER_LOAD
     status, evidence = _progress_status(
         progress=progress("master"),
         marker_iso=marker("stock_master_master_load"),
@@ -559,7 +553,7 @@ async def read_market_ops():
         last_success_at=marker("stock_master_master_load"), evidence=evidence,
     ))
 
-    # 5. 재무 데이터 적재 — TIME_STOCK_MASTER_FINANCIAL_LOAD(주 1회 게이트)
+    # 4. 재무 데이터 적재 — TIME_STOCK_MASTER_FINANCIAL_LOAD(주 1회 게이트)
     status, evidence = _progress_status(
         progress=progress("financial"),
         marker_iso=marker("stock_master_financial_load"),
@@ -580,7 +574,7 @@ async def read_market_ops():
         ) if status == "skipped_weekly" else None,
     ))
 
-    # 6. 보조 시세계정 토큰 강제 재발급 — TIME_QUOTE_TOKEN_REFRESH. 마커 자체가 없다
+    # 5. 보조 시세계정 토큰 강제 재발급 — TIME_QUOTE_TOKEN_REFRESH. 마커 자체가 없다
     tasks.append(_task_row(
         "quote_token_refresh", "보조 시세계정 토큰 강제 재발급",
         TIME_QUOTE_TOKEN_REFRESH,
@@ -588,7 +582,7 @@ async def read_market_ops():
         note="이 작업은 성공 마커를 남기지 않는다 — 서버 로그(system_logs) 로만 확인 가능",
     ))
 
-    # 7. NXT 애프터 신규 매수 중단 — TIME_NXT_POST_BUY_STOP. 시계 마일스톤, 산출물 없음
+    # 6. NXT 애프터 신규 매수 중단 — TIME_NXT_POST_BUY_STOP. 시계 마일스톤, 산출물 없음
     tasks.append(_task_row(
         "nxt_post_buy_stop", "NXT 애프터 신규 매수 중단",
         TIME_NXT_POST_BUY_STOP,
@@ -596,7 +590,7 @@ async def read_market_ops():
         note="시각 기준 컷오프 — 별도 산출물 없음(코드가 그 시각부터 매수를 막는다는 사실만 보장)",
     ))
 
-    # 8. AI 매매자문 — TIME_RECOMMENDATION
+    # 7. AI 매매자문 — TIME_RECOMMENDATION
     rec_rows = combined.get("rec_rows") or 0
     status = _degrade_on_error(
         _artifact_status(count=rec_rows, now_t=now_t, scheduled=TIME_RECOMMENDATION),
@@ -609,7 +603,7 @@ async def read_market_ops():
         evidence={"recommendation_rows_today": rec_rows},
     ))
 
-    # 9. 전체 유니버스 적재 — TIME_FULL_UNIVERSE_LOAD. 마커는 읽지 않는다, progress 만
+    # 8. 전체 유니버스 적재 — TIME_FULL_UNIVERSE_LOAD. 마커는 읽지 않는다, progress 만
     status, evidence = _progress_status(
         progress=progress("universe"),
         marker_iso=None,
@@ -625,7 +619,7 @@ async def read_market_ops():
         evidence=evidence,
     ))
 
-    # 10. metrics 1차 스냅샷 — TIME_METRICS_SNAPSHOT. daily_log_reports 휘발성 컬럼
+    # 9. metrics 1차 스냅샷 — TIME_METRICS_SNAPSHOT. daily_log_reports 휘발성 컬럼
     status = _degrade_on_error(
         _metrics_snapshot_status(log_report=log_report, now_t=now_t, scheduled=TIME_METRICS_SNAPSHOT),
         errored=_log_report_failed,
@@ -640,7 +634,7 @@ async def read_market_ops():
         ),
     ))
 
-    # 11. 클라우드 로그 분석 루틴 (외부, 예정 시각 상수 없음)
+    # 10. 클라우드 로그 분석 루틴 (외부, 예정 시각 상수 없음)
     status = _degrade_on_error(_cloud_routine_status(log_report=log_report), errored=_log_report_failed)
     tasks.append(_task_row(
         "cloud_report_routine", "클라우드 로그 분석 루틴(외부)",
@@ -653,7 +647,7 @@ async def read_market_ops():
         note="이 코드베이스에 예정 시각 상수가 없다 — 외부 크론이 부른다",
     ))
 
-    # 12. 일봉 적재 — TIME_STOCK_MASTER_DAILY_LOAD
+    # 11. 일봉 적재 — TIME_STOCK_MASTER_DAILY_LOAD
     status, evidence = _progress_status(
         progress=progress("daily"),
         marker_iso=marker("stock_master_daily_load"),
@@ -677,6 +671,20 @@ async def read_market_ops():
             if (not _artifacts_failed) and _iso_date(combined.get("daily_head")) != today.isoformat()
             else None
         ),
+    ))
+
+    # 12. 저녁 잠정 퍼널 캡처(cycle364 A1, 21:00) — TIME_EVENING_FUNNEL_CAPTURE. `is_provisional=TRUE` 산출물로만 판정
+    # (09:30 자동 캡처·스캐너 필터 훅은 `is_provisional=False` 라 여기 안 섞인다 — HIGH #1 시정)
+    funnel_rows = combined.get("funnel_rows") or 0
+    status = _degrade_on_error(
+        _artifact_status(count=funnel_rows, now_t=now_t, scheduled=TIME_EVENING_FUNNEL_CAPTURE),
+        errored=_artifacts_failed,
+    )
+    tasks.append(_task_row(
+        "evening_funnel_capture", "저녁 잠정 퍼널 캡처",
+        TIME_EVENING_FUNNEL_CAPTURE, _finalize_status(status, trading_day),
+        last_success_at=combined.get("funnel_last_at"),
+        evidence={"snapshot_rows_today": funnel_rows},
     ))
 
     # 13. 정산(_settle) — TIME_SETTLEMENT

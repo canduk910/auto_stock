@@ -663,19 +663,22 @@ def test_g223_11_eight_areas_have_no_donchian_exit_symbols():
 #    등록(이전 사이클들은 이 세 파일을 건드리지 않았다). donchian_swing.py 는 여전히
 #    이 dict 소관이 아니다(파일 상단 `_BASE` — 별도 세그먼트 가드로 다룬다).
 #    TODO(cycle290 커밋 후): 이 항목들 삭제하고 dict 를 다시 비운다.
+# 🔁 cycle364(2026-09-26) 재핀 — 6파일 전부 `prepare(as_of=)` 시그니처 확장
+#    (+ kojiro PV-1, vcp P3, 사용자 승인 D3).
+# 🔁 cycle364 round 2 — PV-1 BFB·VCP 확대 + keep/skip 분리(R1).
 _CYCLE228_STRATEGY_CONTENT_SHA: dict[str, str] = {
     "src/engine/strategies/volatility_breakout.py":
-        "be4327754fc4ebf63de58553e68c7a2d8eba14f43f847490bf22cae90d7e5400",
+        "b5febd0420f4e087673b46daee0c9298c13ec3d1d30e18b6a5f1ed8db56c20dc",
     "src/engine/strategies/long_tail_volatility.py":
-        "2c638a76dbded9a7151963f0a3fef7405b1a6233329f65050d66960913bf394c",
+        "0e6d14bbb013ccb76b4a5d2944eb97becd34165554c74c0de314233423a0fdc5",
     "src/engine/strategies/kojiro.py":
-        "329bd29d661f8be1d551ce9b44780dd9d78461df7c21ab2ed1b662e31e52cee5",
+        "66758fb3fce62d509d6d6750cb8ff903df09f1671e8b2d11c139e1cde9da6038",
     "src/engine/strategies/momentum.py":
-        "50d5c0b9a232d6110f6b85fc524569853f2b8edffe2fd44adc24289800b95ae2",
+        "38743ab1ecdb4aa9bcd6ac37e5d28f75501d2d4eceb2e70f3aace44d00d502a1",
     "src/engine/strategies/vcp_breakout.py":
-        "7c6477fd4d51623fa8f10daf53cedd4c0bf5fe778e59a005369f9ec798cb201a",
+        "a609ded41a916563c6706aac16fe1867845687233c195b7dab478d336cc94b37",
     "src/engine/strategies/bull_flag_breakout.py":
-        "f72cc0c71ee6f9b1851407e3e57df549468a2904d6a702d4f99e4ef97c4b4b1b",
+        "f44c3757db0c9bced8754f34723cc94e7956057b4405903900d519fb4e5b28d8",
 }
 
 

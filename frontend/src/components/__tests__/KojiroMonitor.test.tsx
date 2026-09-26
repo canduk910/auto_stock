@@ -31,7 +31,7 @@ function makeKojiro(over: Partial<StrategyInfo> = {}): Record<string, StrategyIn
       universe_union: 348, universe_candidates: 95, universe_filtered: 90,
       candle_fetch_ok: 88, band_pass: 40, stage_valid_pass: 38,
       stage1_uptrend_pass: 6, strict_entry_pass: 3, final_prepared: 3,
-      last_run_at: '2026-07-17T16:20:00+09:00',
+      last_run_at: '2026-07-17T21:00:00+09:00',
     },
     params: {
       stop_atr: 2.0, trail_atr: 2.5, hard_stop_pct: -8.0,
@@ -48,7 +48,7 @@ describe('KojiroMonitor — 6 패널', () => {
     const banner = screen.getByTestId('kojiro-darklaunch-banner')
     expect(banner.textContent).toMatch(/관찰.*모드|다크런치/)
     expect(banner.textContent).toContain('enabled=false')
-    expect(banner.textContent).toMatch(/07-17|16:20/) // KST last_run_at
+    expect(banner.textContent).toMatch(/07-17|21:00/) // KST last_run_at
   })
 
   it('1b) 배너: enabled=true → 활성(실매매) 경고 (진실 반영)', () => {

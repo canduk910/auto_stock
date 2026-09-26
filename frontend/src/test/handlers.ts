@@ -575,9 +575,9 @@ export const handlers = [
           {
             id: "evening_funnel_capture",
             label_ko: "저녁 잠정 퍼널 캡처",
-            scheduled_at: "16:20",
+            scheduled_at: "21:00",
             status: "done",
-            last_success_at: "2026-09-13T16:20:11+09:00",
+            last_success_at: "2026-09-13T21:01:12+09:00",
             evidence: { snapshot_rows_today: 61 },
             note: null,
           },

@@ -544,7 +544,7 @@ KIS OpenAPI 가 NXT(넥스트레이드 ATS) 주문·시세를 정식 지원하�
 | GET | `/api/market-regime/history?days=30` | `market_regime_snapshots` 최근 N일 (`days` 는 1~365 로 클램프) |
 | GET | `/api/strategy-funnel?strategy_id=&target_date=` | cycle34: 전략별 조건검색 단계별 후보/탈락 종목 (`survived_tickers` cap 200 / `excluded_sample` cap 20) |
 | GET | `/api/strategy-funnel/recent?strategy_id=&days=7` | 최근 N영업일 추이 |
-| POST | `/api/strategy-funnel/snapshot` | 수동 trigger — `scheduler.capture_funnel_snapshots(registry, is_provisional=False)` 로 09:30 자동 hook 과 같은 단계별 + `step_no=99` 캡처. prepare 는 재실행하지 않고 최근 결과(`_funnel_steps`)만 담는다. 응답 `{target_date, saved_count, count}` |
+| POST | `/api/strategy-funnel/snapshot` | 수동 trigger — `scheduler.capture_funnel_snapshots(registry, is_provisional=False)` 로 09:30 자동 hook 과 같은 단계별 + `step_no=99` 캡처. prepare 는 재실행하지 않고 최근 결과(`_funnel_steps`)만 담는다. 날짜는 항상 오늘이다 — 메모리 목록이 다른 날짜 기준(밤의 다음 거래일 미리보기)인 전략은 저장하지 않고 `message` 로 알린다. 응답 `{target_date, saved_count, count}` |
 | GET·PUT | `/api/integrations/dkstock-regime` | 매크로 레짐 활성 토글(출처 = 자체 `macro` 컨테이너. 슬러그·변수명은 DB 행과 짝이라 유지). DB 우선 / `.env` fallback. 활성화 시 백그라운드 fetch 발화, 비활성화 시 메모리 레짐 리셋. 매크로 fetch 실패는 graceful(토글 자체는 성공) |
 | GET·PUT | `/api/integrations/kis-mcp` | 외부 백테스트 MCP 서버 활성 토글. 즉시 fetch 없음 — 백테스트는 20:00 자문 시점에 발화한다 |
 | GET·PUT | `/api/integrations/auto-regime-adjust` | 매크로 레짐에 따라 `cash_usage_ratio` 를 자동 갱신할지 토글. 다음 영업일 `_boot` 부터 반영. **새로 쓰는 코드는 이 경로를 쓴다**(Settings 화면도 이쪽). 별칭 `PUT /api/market-regime/auto-adjust` 는 같은 키·같은 동작으로 남아 있다 |
@@ -861,7 +861,6 @@ gantt
 | 16:00 | **KRX 애프터마켓 개시** (16:00~20:00 실시간 연속체결). 보드는 `post_nxt` 그대로지만 **주문 거래소가 이 시각부터 KRX 로 바뀐다** — 「매매 안전장치」의 「시각이 거래소를 정한다」·「KRX 애프터마켓 청산 호가유형」 참조. 15:40~16:00 은 KRX 에 연속 체결이 없어 NXT 애프터만 열려 있다 |
 | 16:10 | (장 마감 후 데이터 계층) `stock_master` basics 보강 — KIS CTPF1002R 매스 (`TIME_STOCK_MASTER_BASICS_REFRESH`) |
 | 16:15 | `stock_master_daily` retention purge (`TIME_STOCK_MASTER_DAILY_PURGE`) — 적재(20:30)보다 **앞**이라 그날 적재분은 다음 날 purge 대상이다. 전일까지의 경계만 다루므로 행위 무영향 |
-| 16:20 | 저녁 잠정 funnel 캡처 (`TIME_EVENING_FUNNEL_CAPTURE`, 운영자 밤 후보 확인용) |
 | 16:30 | KIS 종목 마스터 파일 적재 — `kospi_code.mst` / `kosdaq_code.mst` (`TIME_STOCK_MASTER_MASTER_LOAD`) |
 | 16:40 | 퀀트 재무 5 TR 주1회 적재 — `_stock_master_financial_load_task_loop` (마스터 16:30 후 stagger, 주1회 신선도 게이트). 매매 무관 (cycleC1~C3, 마법공식·F-Score-7 원천) |
 | 19:50 | NXT 애프터 신규 매수 중단 (`TIME_NXT_POST_BUY_STOP` — 전 전략 `buy_disabled=True`. 이 시각에 하는 일은 매수 중단뿐이다) |
@@ -869,6 +868,7 @@ gantt
 | 20:00:05 | 전체 유니버스 적재 (`TIME_FULL_UNIVERSE_LOAD` — 전략수정 AI자문 직후 5초 마진) |
 | 20:05 | metrics 1차 스냅샷 (`TIME_METRICS_SNAPSHOT` → `daily_metrics_snapshot.run_daily_metrics_snapshot`, OpenAI 미호출). `api_metrics`·`strategy_funnel` 은 프로세스 메모리 전용이라, 21:30 정산 전에 재시작이 나면 통째로 사라진다. 이 스냅샷이 그 유실 노출을 5분으로 줄인다 |
 | 20:30 | `stock_master_daily` 일봉 적재 (`TIME_STOCK_MASTER_DAILY_LOAD` — KRX 애프터마켓(16:00~20:00) 동안 일봉 거래량이 계속 늘어 그 뒤에 적재한다) |
+| 21:00 | 저녁 funnel 미리보기 (`TIME_EVENING_FUNNEL_CAPTURE`) — 다음 거래일 후보를 오늘 봉까지 넣어 미리 뽑고 **다음 거래일 날짜**의 잠정 행으로 저장한다. 20:30 일봉 적재가 끝났다는 표식을 21:15 까지 기다리고, 없으면 건너뛴다. 보유 종목의 청산 입력은 건드리지 않는다. 운영자 밤 후보 확인용 |
 | 21:30 | 전략별 + 합산 일일 정산 (`TIME_SETTLEMENT` — 일봉 적재 20:30 뒤), DB 실적 기록. 직후 일일 로그 분석 리포트 생성 (OpenAI → `daily_log_reports`). 직후 `purge_old_logs()` (INFO 2일 / WARNING+ 30일 retention 자동 정리, cycle6) |
 
 **중간 시각 시작 시**: 현재 시각 이후 스케줄부터 실행. **20:00**(`TIME_SESSION_START_CUTOFF`) 이후 시작은 거부한다 — 정산 시각(21:30)과 분리된 별도 경계다. 그 창의 재기동은 그날 20:30 일봉 적재 · `_settle()` · 일일 로그 분석 · retention 정리를 통째로 잃는다.

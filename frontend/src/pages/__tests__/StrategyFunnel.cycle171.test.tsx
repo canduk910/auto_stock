@@ -2,7 +2,7 @@
  * 사이클 171 (2026-06-22) — StrategyFunnel.tsx 잠정(provisional) 배지 + 타입 영속 가드.
  *
  * 배경 (자문 cycle171 의제 4 우선순위 2 + 의제 9 반례 3):
- * - 16:20 저녁 잠정 funnel 캡처 (is_provisional=true) → 운영자 밤 후보 확인.
+ * - 21:00 저녁 잠정 funnel 캡처 (is_provisional=true) → 운영자 밤 후보 확인.
  * - "저녁에 본 후보" 와 "아침 확정 후보" 가 다를 수 있어 UI 에 "잠정/확정" 명시 필요.
  *
  * 회귀 가드 (사이클 132 정적 source 검증 패턴 답습):

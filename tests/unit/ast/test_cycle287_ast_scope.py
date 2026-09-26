@@ -130,8 +130,9 @@ _BASE_SHA = {
     "src/auth/token.py":
         "4125c271b4147e59922f4f000e523429fb4bbef37058dc754fd92b9475ec58f1",
     # 8영역은 아니지만 이 사이클이 무접촉을 약속한 파일
+    # 🔁 cycle364(2026-09-26) 재핀 — `prepare(as_of=)` A1 미리보기 + PV-1 헬퍼 추가(사용자 승인 D3).
     "src/engine/strategy_base.py":
-        "19353f030cda3bf0dde33bee04d9a00f7870f6c083d6d4cf90b86b8223dc2c12",
+        "e7cc4965ce8d1e2e35bb04b427799b0898f744754415a7942fd546d6d22ca89e",
     # 시각 표의 **유일 정본** — cycle287 은 읽기만 했다. 바꾸면 픽스처 동기 사슬
     # (`tools/test_fixtures/gen_market_state_fixture.py` + 프론트/E2E 픽스처 2)이
     # 통째로 딸려 오고, cycle282 `test_i1/i2/i3` 가 즉시 RED 다(실증: cycle289 가
@@ -152,22 +153,24 @@ _BASE_SHA = {
     # `after_market_exit_division` 2키 추가뿐, 그 외 한 글자도 안 바뀌었다는 증거는
     # `test_cycle290_ast_scope.py::test_g290_2`(세그먼트 sha 28핀) 가 별도로 잠근다.
     # 구 값(cycle287 기준선)은 이 dict 의 git 이력에 남는다.
+    # 🔁 cycle364(2026-09-26) 재핀 — 7파일 전부 `prepare(as_of=)` 시그니처 확장
+    # (+ donchian·kojiro PV-1 보유 종목 보존 · vcp `_observe_breakout_distance` P3 생략).
     "src/engine/strategies/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "src/engine/strategies/bull_flag_breakout.py":
-        "f72cc0c71ee6f9b1851407e3e57df549468a2904d6a702d4f99e4ef97c4b4b1b",
+        "f44c3757db0c9bced8754f34723cc94e7956057b4405903900d519fb4e5b28d8",
     "src/engine/strategies/donchian_swing.py":
-        "0108f5a03ebc96aa6a14190eafb92ac174202bb13df4c2383e4d6bb9a59f5364",
+        "31bd41bb0e435a0185649dee3aa309622d2044d9978cf3d9ddb687a778327ea7",
     "src/engine/strategies/kojiro.py":
-        "329bd29d661f8be1d551ce9b44780dd9d78461df7c21ab2ed1b662e31e52cee5",
+        "66758fb3fce62d509d6d6750cb8ff903df09f1671e8b2d11c139e1cde9da6038",
     "src/engine/strategies/long_tail_volatility.py":
-        "2c638a76dbded9a7151963f0a3fef7405b1a6233329f65050d66960913bf394c",
+        "0e6d14bbb013ccb76b4a5d2944eb97becd34165554c74c0de314233423a0fdc5",
     "src/engine/strategies/momentum.py":
-        "50d5c0b9a232d6110f6b85fc524569853f2b8edffe2fd44adc24289800b95ae2",
+        "38743ab1ecdb4aa9bcd6ac37e5d28f75501d2d4eceb2e70f3aace44d00d502a1",
     "src/engine/strategies/vcp_breakout.py":
-        "7c6477fd4d51623fa8f10daf53cedd4c0bf5fe778e59a005369f9ec798cb201a",
+        "a609ded41a916563c6706aac16fe1867845687233c195b7dab478d336cc94b37",
     "src/engine/strategies/volatility_breakout.py":
-        "be4327754fc4ebf63de58553e68c7a2d8eba14f43f847490bf22cae90d7e5400",
+        "b5febd0420f4e087673b46daee0c9298c13ec3d1d30e18b6a5f1ed8db56c20dc",
 }
 
 #: `src/**/*.py` 전수(세 변경 파일 제외)의 (경로, 내용sha) 누적 digest.
@@ -201,7 +204,10 @@ _BASE_SHA = {
 #: leaf + `log_metrics_collector.py`(끝 키 `pyramid_shadow` 배선)가 포함돼 재계산했다.
 #: 🔁 cycle363 재핀 — 신규 leaf `src/engine/trading_calendar.py`(휴장일 판정 공용,
 #: `src.*` import 0) 추가로 156 → **157**. 사용자 승인 D4 카드1(가)·카드2(나).
-_SRC_TREE_FILES = 157
+#: 🔁 cycle364 재핀 — 신규 leaf `src/engine/funnel_capture.py`(저녁 A1 미리보기 본체,
+#: `resolve_as_of`/`live_prepare_one`/`live_prepare_many`/잠금/meta/`capture_skip_reason`)
+#: 추가로 157 → **158**. 사용자 승인 D3.
+_SRC_TREE_FILES = 158
 #: ⚠️ 값은 **cycle285 적대 검증 반영** 기준선이다. 그 직전(초판 cycle285 배포)
 #: digest 는 `97483c5114a1d00dc8f7ca7c1ed08e1b3dc1d0b585065b14176dc227da9bed8c` 였다.
 #: cycle287b 배포분의 digest 는
@@ -507,8 +513,40 @@ _SRC_TREE_FILES = 157
 #: 기록으로 나눈 것) + docstring 을 현재 계약만 서술하도록 재작성, 세션 행위 영향은
 #: AB1 조건부라는 서술 포함). 파일 수는 **157 로 불변**(신규 파일 0). 직전 값 =
 #: `68eeee7bd1216024ad93fca476327d321fe392281ffab184d1a60580517249fe`.
+#: 🔁 **cycle364(A1 저녁 미리보기 · S1, 2026-09-26) 기준선으로 갱신** — 파일 수가
+#: 157 → **158**(신규 leaf `src/engine/funnel_capture.py` 1개). digest 에는 그 leaf +
+#: 이 사이클이 정당하게 바꾼 파일들(`scheduler.py`·`boot_manager.py`·`strategy_base.py`·
+#: `trading_calendar.py`·전략 7파일·`db/strategy_funnel.py`·`routes/market_ops.py`·
+#: `routes/strategy_funnel.py`)이 포함돼 재계산했다. 8영역 접촉 0(scanner/risk/
+#: order_engine/session/strategy_registry/api/order/realtime/auth 전부 무접촉).
+#: 직전(cycle363 착지) 값은
+#: `28c3c792172090f3f495023bc807fd3cbcc58bc99fe1fdd1f188bf6be9517123` 였다.
+#: ⚠️ cycle364 안에서 한 번 더 갱신 — `funnel_capture.py` 의 `_boot_vs_evening_hints`
+#: 를 스텁(항상 0)에서 실제 DB 3쿼리(§4.3)로 채웠다. 파일 수는 158 로 불변이고
+#: 이 파일이 범위 밖 첫 값(`42678f9d…`)에 포함돼 있어 재계산했다. 직전 값 =
+#: `42678f9da060ca87c8a26cefb663fdaca657b267a1f63015f942c715eb140cba`.
+#: 🔁 cycle364 S1 **round 2**(적대적 검토 반영, 2026-09-26, 사용자 승인 D3 범위) 세 번째
+#: 갱신 — PV-1 을 BFB·VCP 로 확대(donchian·kojiro 도 "자기 것만 보존·전부 건너뜀" 으로
+#: 정밀화, `strategy_base.py`) · ④ 를 백그라운드 task + 힌트 1회 계산으로 재작성
+#: (`funnel_capture.py`) · 라벨 가드에 `in_progress`/확정↔저녁 분기(R3) · 21:00 폴링
+#: 루프 안에서 달력 재조회(R4) · `daily_head=` 실값(R5) · 레거시 분기
+#: `decision=legacy_reprepare`(R6) · `boot_manager.py`/`scheduler.py` 의 죽은
+#: try/except 제거(R7, 새 마커 `[live_prepare]` 가 옛 문구를 담는다) · 문서 정직화
+#: (`db/strategy_funnel.py`·`routes/strategy_funnel.py`·`routes/market_ops.py`·
+#: `data_load_tasks.py`·`donchian_swing.py`·`vcp_breakout.py`, 16:20→21:00). 파일
+#: 수는 158 로 불변(신규·삭제 없음). 직전 값 =
+#: `ef1c41d38cd94081cbc08c0b7b9f9da368c1a0857eb7f19035c16f47e58e7568`.
+#: 🔁 cycle364 S1 **round 3**(F1~F9, 2026-09-26, 사용자 승인 범위) 네 번째 갱신 —
+#: `list_snapshots(raise_on_error=)`(F1, `db/strategy_funnel.py`) · 힌트 실패
+#: `hint_error=<축>` WARNING(F2) · 백그라운드 task 위생 `_BG_TASKS` + 120초 상한(F3,
+#: `funnel_capture.py`) · `capture_funnel_snapshots(skipped_out=)`(F4, `scheduler.py`·
+#: `routes/strategy_funnel.py`) · `_reprepare_breakout_if_empty` 중복 ERROR 제거(F5,
+#: `scheduler.py`) · `live_prepare_many` 미사용 `deadline` 인자 제거 + `routes/
+#: market_ops.py` 주석 정정(F6) · 문서 정직화(F7, `funnel_capture.py`·`db/
+#: strategy_funnel.py`·`scheduler.py`). 파일 수는 158 로 불변(신규·삭제 없음). 직전 값 =
+#: `e97e72981e4c649036dc1b9eb99707a2d41fc1a9cb2819f9d32a1d37780b189e`.
 _SRC_TREE_DIGEST = (
-    "28c3c792172090f3f495023bc807fd3cbcc58bc99fe1fdd1f188bf6be9517123"
+    "777ffaa46919ab69a80bc9a18c38891842f8459ee3e0553cfe8e51854949eb23"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
@@ -531,7 +569,8 @@ _PINNED_DIR_FILE_COUNTS = {
     "src/engine/strategies": 8,
     # cycle351 — 신규 leaf `pyramid_shadow.py` 로 77 → 78.
     # cycle363 — 신규 leaf `trading_calendar.py` 로 78 → 79.
-    "src/engine": 79,
+    # cycle364 — 신규 leaf `funnel_capture.py` 로 79 → 80.
+    "src/engine": 80,
 }
 
 #: `scheduler.py` 정확 라인 수 + cycle257 영구 상한.
@@ -539,7 +578,7 @@ _PINNED_DIR_FILE_COUNTS = {
 #: 신규 leaf `src/engine/market_op_subscribe.py` 로 추출해(행위 변경 0 · 5줄
 #: 위임 wrapper) 3,897 → 3,726 이 됐다. 값만 옮긴다 — 정확 핀을 상한 핀으로
 #: 완화하면 cycle287 의 무접촉 대리 지표가 사라진다.
-_SCHEDULER_LINES = 3812  # cycle354 재핀 — order_no 매핑 폴백 추가 (`_sync_orders_to_db`)
+_SCHEDULER_LINES = 3777  # cycle364 재핀 — 저녁 캡처 본체를 funnel_capture leaf 로 이관(순감 약 35줄)
 _SCHEDULER_LINE_CAP = 3900
 
 #: 손대지 않기로 한 **원문 구간**의 sha256 (base `a42f519`).

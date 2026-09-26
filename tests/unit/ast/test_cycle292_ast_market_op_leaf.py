@@ -89,7 +89,7 @@ _MARKERS = (
 _LOGGER_NAME = "src.engine.scheduler"
 
 #: `scheduler.py` 정확 라인 수 + cycle257 이 세운 영구 상한.
-_SCHEDULER_LINES = 3812  # cycle354 재핀 — order_no 매핑 폴백 추가 (`_sync_orders_to_db`)
+_SCHEDULER_LINES = 3777  # cycle364 재핀 — 저녁 캡처 본체를 funnel_capture leaf 로 이관
 _SCHEDULER_LINE_CAP = 3_900
 
 #: cycle292 가 만진 **전부**인 프로덕션 3파일의 내용 sha. 붉어지면 핀을 갱신하기 전에
@@ -98,8 +98,9 @@ _SCHEDULER_LINE_CAP = 3_900
 #: `get_market_op_active_tickers()` docstring 의 소비처 서술 2개가 둘 다 거짓임을
 #: 확인했다(프로덕션 호출자 0건 · 델타는 `scheduler._market_op_subs` 로 잰다).
 _BASE_SHA = {
+    # 🔁 cycle364(2026-09-26) 재핀 — 저녁 A1 미리보기 도입 + 저녁 캡처 본체 leaf 이관.
     "src/engine/scheduler.py":
-        "3461242a47080379c8d48dc5efd5799ce5fac173803a95476547ea4758b40a81",
+        "1c20b668d886e10b993b266a59e2db5d75080fd12d2920a3b98f61a31a209271",
     "src/engine/market_op_subscribe.py":
         "7d58f9464c1ed35e4fa8706d801beb5a6b5c062d5a2941f0db6482d028d3d4ac",
     # 🔁 cycle368(2026-09-25) 재핀 — halt 판정을 `_is_code_active` → `is_iscd_stat_blocking`

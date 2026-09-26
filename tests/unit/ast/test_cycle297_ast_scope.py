@@ -529,14 +529,15 @@ _BASE_SHA: dict[str, str] = {
         "d4c443bde2ed7aeafba3e9471db0ca4efc15a654610555435145a9b305150c5b",
     "src/realtime/websocket_pool.py":
         "8b02442bcf5f558d6f7095b47d2016f004e3746e07ddc91dae8768b1dd46a10d",
+    # 🔁 cycle364(2026-09-26) 재핀 — 저녁 A1 미리보기(`prepare(as_of=)`) 도입(사용자 승인 D3).
     "src/engine/scheduler.py":
-        "3461242a47080379c8d48dc5efd5799ce5fac173803a95476547ea4758b40a81",
+        "1c20b668d886e10b993b266a59e2db5d75080fd12d2920a3b98f61a31a209271",
     "src/engine/strategy_base.py":
-        "19353f030cda3bf0dde33bee04d9a00f7870f6c083d6d4cf90b86b8223dc2c12",
+        "e7cc4965ce8d1e2e35bb04b427799b0898f744754415a7942fd546d6d22ca89e",
     "src/engine/strategies/volatility_breakout.py":
-        "be4327754fc4ebf63de58553e68c7a2d8eba14f43f847490bf22cae90d7e5400",
+        "b5febd0420f4e087673b46daee0c9298c13ec3d1d30e18b6a5f1ed8db56c20dc",
     "src/engine/strategies/long_tail_volatility.py":
-        "2c638a76dbded9a7151963f0a3fef7405b1a6233329f65050d66960913bf394c",
+        "0e6d14bbb013ccb76b4a5d2944eb97becd34165554c74c0de314233423a0fdc5",
 }
 
 
@@ -563,7 +564,11 @@ def test_g2_9b_scheduler_line_budget_and_auth_exclusion_is_explicit() -> None:
     """
     sched = _ROOT / "src/engine/scheduler.py"
     n = len(_read(sched).splitlines())
-    assert n == 3812, f"`scheduler.py` {n}L (착수 시점 3,726L → cycle298 재핀 3,785L → cycle354 재핀 3,812L)"
+    assert n == 3777, (
+        f"`scheduler.py` {n}L (착수 시점 3,726L → cycle298 재핀 3,785L → cycle354 재핀 3,812L → "
+        "cycle364 저녁 캡처 leaf 이관 재핀 3,758L → cycle364 S1 round 3(F4 skipped_out + F5 중복 "
+        "ERROR 제거 + F7 docstring 정직화) 재핀 3,777L)"
+    )
     assert n < 3900, f"`scheduler.py` 라인 상한 3,900 초과 — {n}L"
 
     assert not any(r.startswith("src/auth/") for r in _BASE_SHA), (

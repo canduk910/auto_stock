@@ -380,10 +380,12 @@ _BASE_SHA = {
     # 을 **한 값으로 동시에** 옮겼다 — 한 곳만 넣으면 나머지가 "코드를 되돌려라" 로
     # 붉어져 승인된 변경을 되돌리도록 오도한다. 직전 값 =
     # `50658e06062a0d38afecab1baa08871b89212e295cc95f2a3af62a2ae076115d`.
+    # 🔁 cycle364(2026-09-26) 재핀 — 저녁 A1 미리보기(`prepare(as_of=)`) 도입 + 저녁 캡처
+    # 본체 leaf 이관(사용자 승인 D3).
     "src/engine/scheduler.py":
-        "3461242a47080379c8d48dc5efd5799ce5fac173803a95476547ea4758b40a81",
+        "1c20b668d886e10b993b266a59e2db5d75080fd12d2920a3b98f61a31a209271",
     "src/engine/strategy_base.py":
-        "19353f030cda3bf0dde33bee04d9a00f7870f6c083d6d4cf90b86b8223dc2c12",
+        "e7cc4965ce8d1e2e35bb04b427799b0898f744754415a7942fd546d6d22ca89e",
     # 🔁 cycle296(2026-09-17) 재핀 — 사용자 승인 `issue()` 매니저 단위 in-flight 합류(`src/auth/**`). 같은 값을 10곳 동시 갱신했다.
     "src/auth/token.py":
         "4125c271b4147e59922f4f000e523429fb4bbef37058dc754fd92b9475ec58f1",
@@ -407,16 +409,19 @@ _BASE_SHA = {
     "src/realtime/websocket_pool.py":
         "8b02442bcf5f558d6f7095b47d2016f004e3746e07ddc91dae8768b1dd46a10d",
     # 🔁 cycle290(킬스위치 등재, 2026-09-13) 재핀 — `DEFAULT_PARAMS` 말미 2키 추가뿐.
+    # 🔁 cycle364(2026-09-26) 재핀 — `prepare(as_of=)` 시그니처 확장(+ donchian·kojiro PV-1,
+    # vcp P3).
+    # 🔁 cycle364 round 2 — PV-1 BFB·VCP 확대 + keep/skip 분리(R1).
     "src/engine/strategies/momentum.py":
-        "50d5c0b9a232d6110f6b85fc524569853f2b8edffe2fd44adc24289800b95ae2",
+        "38743ab1ecdb4aa9bcd6ac37e5d28f75501d2d4eceb2e70f3aace44d00d502a1",
     "src/engine/strategies/donchian_swing.py":
-        "0108f5a03ebc96aa6a14190eafb92ac174202bb13df4c2383e4d6bb9a59f5364",
+        "31bd41bb0e435a0185649dee3aa309622d2044d9978cf3d9ddb687a778327ea7",
     "src/engine/strategies/kojiro.py":
-        "329bd29d661f8be1d551ce9b44780dd9d78461df7c21ab2ed1b662e31e52cee5",
+        "66758fb3fce62d509d6d6750cb8ff903df09f1671e8b2d11c139e1cde9da6038",
     "src/engine/strategies/vcp_breakout.py":
-        "7c6477fd4d51623fa8f10daf53cedd4c0bf5fe778e59a005369f9ec798cb201a",
+        "a609ded41a916563c6706aac16fe1867845687233c195b7dab478d336cc94b37",
     "src/engine/strategies/bull_flag_breakout.py":
-        "f72cc0c71ee6f9b1851407e3e57df549468a2904d6a702d4f99e4ef97c4b4b1b",
+        "f44c3757db0c9bced8754f34723cc94e7956057b4405903900d519fb4e5b28d8",
 }
 
 # cycle272 시점 = cycle274 배선 **이전**의 메서드 세그먼트 sha. C11 은 이 값으로의
@@ -781,7 +786,7 @@ def test_c5_2_scheduler_line_count_is_pinned() -> None:
     그러면 확보한 174줄 예산의 무단 증식을 아무도 못 잡는다.
     """
     lines = len(_read(_SCHEDULER).splitlines())
-    assert lines == 3812, f"scheduler.py {lines}L (기대 3,785 — cycle283 뒤 3,897 → cycle292 leaf 추출 → cycle298 재핀 3,795 → cycle354 order_no 매핑 폴백 추가 재핀)"
+    assert lines == 3777, f"scheduler.py {lines}L (기대 3,785 — cycle283 뒤 3,897 → cycle292 leaf 추출 → cycle298 재핀 3,795 → cycle354 order_no 매핑 폴백 추가 재핀 3,812 → cycle364 저녁 캡처 leaf 이관 재핀)"
 
 
 def test_c5_3_scheduler_line_cap_is_not_looser_than_cycle257() -> None:

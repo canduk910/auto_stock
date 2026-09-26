@@ -139,7 +139,14 @@ async def trigger_snapshot() -> ApiResponse:
     사이클 171 (2026-06-22) — 단계별 전체 캡처로 전환 (자문 의제 6 (a)).
     종전 step_no=99 (최종) 단독 → `capture_funnel_snapshots(registry, is_provisional=False)`
     공통 헬퍼 위임 (09:30 자동 hook 과 동일 단계별 + step_no=99 캡처). 운영자가 "지금 각
-    단계 후보를 보고 싶다" 니즈 충족. is_provisional=False (확정 — 잠정은 16:20 저녁 task).
+    단계 후보를 보고 싶다" 니즈 충족. is_provisional=False (확정 — 잠정은 21:00 저녁 A1 task).
+    카드3 (가) — 메모리 목록의 기준일이 오늘과 다르면(저녁 A1 이 만든 다음 거래일 미리보기)
+    그 전략은 라벨 가드가 건너뛰고, 응답 message 가 그 기준일을 알린다.
+
+    🔁 round 3 (F4) — 건너뛴 전략마다 사유(`in_progress`·`prepare_failed`·`as_of_mismatch`·
+    `evening_preview_reject`·`no_meta`)도 `sid:사유` 토큰으로 message 에 적는다(「0개 저장」
+    한 줄로 끝나면 운영자가 이유를 모른다). `data` 키(`target_date`·`saved_count`·`count`)와
+    기존 기준일 문구는 불변이다.
 
     실제 prepare() 재실행은 하지 않음 — 최근 prepare 결과(`_funnel_steps`)만 캡처.
     """
@@ -153,10 +160,25 @@ async def trigger_snapshot() -> ApiResponse:
         raise HTTPException(status_code=500, detail=f"strategy registry 접근 실패: {exc}")
 
     # 사이클 171 — 09:30 자동 hook 과 동일 헬퍼 (단계별 + step_no=99, is_provisional=False)
-    saved_count = await capture_funnel_snapshots(registry, is_provisional=False)
+    skipped: dict[str, str] = {}
+    saved_count = await capture_funnel_snapshots(
+        registry, is_provisional=False, skipped_out=skipped,
+    )
+    others = sorted({
+        m["as_of"].isoformat() for s in registry.all()
+        for m in [getattr(s, "_live_prepare_meta", None)]
+        if isinstance(m, dict) and m.get("as_of") and m.get("as_of") != today
+    })
+    msg = f"{saved_count}개 snapshot 저장"
+    if others:
+        msg += f" — 메모리 목록은 {', '.join(others)} 기준이라 오늘 날짜로 저장하지 않았다"
+    if skipped:
+        # 🔁 round 3 (F4) — 건너뛴 전략·사유 노출
+        tokens = ", ".join(f"{sid}:{reason}" for sid, reason in sorted(skipped.items()))
+        msg += f" (건너뜀: {tokens})"
 
     return ApiResponse(
         success=True,
         data={"target_date": today.isoformat(), "saved_count": saved_count, "count": saved_count},
-        message=f"{saved_count}개 snapshot 저장",
+        message=msg,
     )

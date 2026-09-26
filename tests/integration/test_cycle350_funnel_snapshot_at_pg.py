@@ -17,6 +17,12 @@ test_cycle350_market_ops_funnel_floor.py`)는 SQL 문구와 호출 인자만 본
 🔴 「잠정이 확정을 덮는다」를 단언하지 않는다(명세 §4 B1-2) — 여기 모든 덮어쓰기는 같은
 `is_provisional` 값끼리다.
 
+🔁 cycle364 의도적 개정(설계 `_workspace/domain_consult/cycle364_a1_as_of_design.md` §2.6) —
+저녁 캡처가 21:00 A1(다음 거래일 라벨)이 되면서 저녁 증거 SQL 이 `target_date > $1` 이 됐다.
+B2 계열의 「저녁 행」은 이제 `target_date = _D + 1`(오늘 저녁에 쓴 다음 세션 행)이고, 하한은
+21:00 − 2h = 19:00 이다. B1(같은 `is_provisional` 끼리 덮으면 `snapshot_at` 갱신)은 그대로다.
+「확정→잠정 거부」·「확정→확정 허용」은 `test_cycle364_funnel_protect_confirmed_pg.py` 가 든다.
+
 docker/`DATABASE_URL_TEST` 없으면 `pg_harness` fixture 가 `pytest.skip`.
 """
 
@@ -33,6 +39,7 @@ pytestmark = [pytest.mark.integration, pytest.mark.slow]
 
 _KST = timezone(timedelta(hours=9))
 _D = date(2026, 9, 14)
+_NXT = date(2026, 9, 15)  # cycle364 — A1 저녁 캡처가 쓰는 다음 세션 라벨
 _SID = "vcp_breakout"
 _STEP = 99
 
@@ -172,11 +179,16 @@ async def test_c350_pg_b1_2_overwrite_when_same_key_then_one_row_and_last_write_
 async def test_c350_pg_b2_1_morning_provisional_row_when_before_floor_then_not_evening_evidence(
     clean_strategy_funnel,
 ):
-    """B2-1 / B2-4 — 부팅 +600초(07:57) 잠정 행은 저녁 캡처 증거가 아니다(M3). 그래도
-    `funnel_last_at` 은 그 07:57 을 보여야 한다 — 이 태스크의 마지막 쓰기다(M2)."""
+    """B2-1 / B2-4 — 하한(19:00) 앞인 07:57 에 쓴 다음 세션(`_D + 1`) 잠정 행은 저녁 캡처
+    증거가 아니다(M3). 그래도 `funnel_last_at` 은 그 07:57 을 보여야 한다 — 이 태스크의 마지막
+    쓰기다(M2).
+
+    🔁 cycle364 — 행을 `target_date = _D + 1` 로 쓰는 것은 날짜 조건(`target_date > $1`)을
+    통과시켜 **하한 게이트 하나만** 이 행을 빼게 하려는 것이다. S1 의 부팅 +600초 레거시
+    캡처(07:57)는 실제로는 오늘 라벨(`target_date = _D`)이라 날짜 조건만으로도 빠진다."""
     pg = clean_strategy_funnel
-    await _write(is_provisional=True)
-    await _pin(pg, _kst(_D, 7, 57))
+    await _write(is_provisional=True, target_date=_NXT)
+    await _pin(pg, _kst(_D, 7, 57), target_date=_NXT)
 
     row = await _combined(pg)
     assert row["funnel_rows"] == 0, (
@@ -192,11 +204,11 @@ async def test_c350_pg_b2_1_evening_provisional_row_when_after_capture_then_coun
     clean_strategy_funnel,
 ):
     pg = clean_strategy_funnel
-    await _write(is_provisional=True)
-    await _pin(pg, _kst(_D, 16, 21))
+    await _write(is_provisional=True, target_date=_NXT)
+    await _pin(pg, _kst(_D, 21, 1), target_date=_NXT)
     row = await _combined(pg)
     assert row["funnel_rows"] == 1
-    assert row["funnel_last_at"] == "2026-09-14T16:21:00+09:00"
+    assert row["funnel_last_at"] == "2026-09-14T21:01:00+09:00"
 
 
 @pytest.mark.asyncio
@@ -207,16 +219,16 @@ async def test_c350_pg_b2_3_row_when_exactly_at_floor_then_counted_and_1us_befor
     고정 시각은 테스트가 명세 식으로 **독립 계산**한다(헬퍼가 움직여도 기준은 고정)."""
     pg = clean_strategy_funnel
     boundary = _spec_floor(_D)
-    await _write(is_provisional=True)
+    await _write(is_provisional=True, target_date=_NXT)
 
-    await _pin(pg, boundary)
+    await _pin(pg, boundary, target_date=_NXT)
     at_floor = await _combined(pg)
     assert at_floor["funnel_rows"] == 1, (
         f"하한 정각({boundary.isoformat()}) 행이 빠졌다 — `>=` 가 `>` 로 바뀌었거나(M4) "
         "하한이 명세 식과 다르다"
     )
 
-    await _pin(pg, boundary - timedelta(microseconds=1))
+    await _pin(pg, boundary - timedelta(microseconds=1), target_date=_NXT)
     before = await _combined(pg)
     assert before["funnel_rows"] == 0, "하한 1µs 전 행이 셈해졌다 — 하한이 명세 식보다 이르다"
 
@@ -224,7 +236,7 @@ async def test_c350_pg_b2_3_row_when_exactly_at_floor_then_counted_and_1us_befor
 @pytest.mark.asyncio
 async def test_c350_pg_b2_1_row_when_inside_grace_window_then_counted(clean_strategy_funnel):
     """M5 — 예정 시각 전 2시간 유예 안(예정 − 유예/2)의 잠정 행은 정상 near-schedule
-    증거다. 하한에서 유예를 빼면(16:20 정각) 이 행이 빠진다."""
+    증거다. 하한에서 유예를 빼면(예정 시각 정각 = 21:00) 이 행이 빠진다."""
     import src.routes.market_ops as mo
     from src.engine.scheduler import TIME_EVENING_FUNNEL_CAPTURE
 
@@ -233,8 +245,8 @@ async def test_c350_pg_b2_1_row_when_inside_grace_window_then_counted(clean_stra
         datetime.combine(_D, TIME_EVENING_FUNNEL_CAPTURE, tzinfo=_KST)
         - mo._SCHEDULE_EVIDENCE_GRACE / 2
     )
-    await _write(is_provisional=True)
-    await _pin(pg, inside)
+    await _write(is_provisional=True, target_date=_NXT)
+    await _pin(pg, inside, target_date=_NXT)
     row = await _combined(pg)
     assert row["funnel_rows"] == 1, (
         f"유예 구간 안({inside.isoformat()}) 행이 빠졌다 — 하한에서 유예가 빠졌다 (M5)"
@@ -248,8 +260,8 @@ async def test_c350_pg_b2_1_non_provisional_row_when_after_floor_then_still_excl
     """보존(cycle285 HIGH #1) — 09:35 확정 캡처·스캐너 훅(`is_provisional=False`)은 하한
     이후라도 저녁 캡처 증거가 아니다. 새 게이트가 기존 필터를 대체하면 안 된다."""
     pg = clean_strategy_funnel
-    await _write(is_provisional=False)
-    await _pin(pg, _kst(_D, 16, 21))
+    await _write(is_provisional=False, target_date=_NXT)
+    await _pin(pg, _kst(_D, 21, 1), target_date=_NXT)
     row = await _combined(pg)
     assert row["funnel_rows"] == 0
     assert row["funnel_last_at"] is None
@@ -263,9 +275,9 @@ async def test_c350_pg_b1_b2_evening_overwrite_when_morning_row_exists_then_coun
     없으면(M1) 행이 07:57 에 고정돼 `funnel_rows=0` — 저녁 캡처가 매일 안 돈 것처럼 보인다.
     (두 번째 쓰기 시각 = 실제 DB now() 라 `_D` 하한보다 늘 늦다.)"""
     pg = clean_strategy_funnel
-    await _write(is_provisional=True)
-    await _pin(pg, _kst(_D, 7, 57))
-    await _write(is_provisional=True, survived=("005930", "000660"))
+    await _write(is_provisional=True, target_date=_NXT)
+    await _pin(pg, _kst(_D, 7, 57), target_date=_NXT)
+    await _write(is_provisional=True, survived=("005930", "000660"), target_date=_NXT)
 
     row = await _combined(pg)
     assert row["funnel_rows"] == 1, (
@@ -310,8 +322,8 @@ async def test_c350_pg_b2_2_floor_when_process_tz_is_utc_then_still_kst_instant(
         datetime.combine(_D, TIME_EVENING_FUNNEL_CAPTURE, tzinfo=_KST)
         - mo._SCHEDULE_EVIDENCE_GRACE / 2
     )
-    await _write(is_provisional=True)
-    await _pin(pg, inside)
+    await _write(is_provisional=True, target_date=_NXT)
+    await _pin(pg, inside, target_date=_NXT)
     row = await _combined(pg)
     assert row["funnel_rows"] == 1, (
         "프로세스 TZ 가 UTC 일 때 유예 구간 안 행이 빠졌다 — 하한이 naive datetime 이다 (M6)"
@@ -348,10 +360,13 @@ async def test_c350_pg_route_morning_provisional_row_when_viewed_same_morning_th
     clean_daily_performance, clean_parameter_recommendations,
 ):
     """명세 §4 B2-1 효과 — 07:57~09:35 동안 「저녁 캡처 완료」로 보이던 오판이 사라진다.
-    10:00(예정 16:20 전)에는 `scheduled`, 마지막 쓰기(07:57)는 그대로 보인다."""
+    10:00(예정 21:00 전)에는 `scheduled`, 마지막 쓰기(07:57)는 그대로 보인다.
+
+    🔁 cycle364 — 07:57 행을 `target_date = _D + 1`(다음 세션 라벨)로 쓴다. 오늘 라벨이면
+    `target_date > $1` 날짜 조건만으로 빠져 하한 게이트를 격리하지 못한다."""
     pg = clean_strategy_funnel
-    await _write(is_provisional=True)
-    await _pin(pg, _kst(_D, 7, 57))
+    await _write(is_provisional=True, target_date=_NXT)
+    await _pin(pg, _kst(_D, 7, 57), target_date=_NXT)
 
     data = await _route_at(_kst(_D, 10, 0))
     assert data["evidence_errors"] == [], f"실 PG 경로 소스 실패: {data['evidence_errors']}"
@@ -369,13 +384,16 @@ async def test_c350_pg_route_morning_row_only_when_viewed_after_capture_time_the
     clean_strategy_funnel, clean_system_config, clean_log_reports,
     clean_daily_performance, clean_parameter_recommendations,
 ):
-    """저녁 캡처가 그날 실패해 07:57 행만 남았으면 18:00 에는 `not_fired` 여야 한다 —
-    지금은 07:57 행 때문에 「완료」로 보여 저녁 실패가 가려진다."""
-    pg = clean_strategy_funnel
-    await _write(is_provisional=True)
-    await _pin(pg, _kst(_D, 7, 57))
+    """저녁 캡처가 그날 실패해 07:57 행만 남았으면 캡처 시각(21:00) 뒤 22:00 에는
+    `not_fired` 여야 한다 — 07:57 행 때문에 「완료」로 보이면 저녁 실패가 가려진다.
 
-    data = await _route_at(_kst(_D, 18, 0))
+    🔁 cycle364 — 07:57 행을 `target_date = _D + 1`(다음 세션 라벨)로 쓴다. 오늘 라벨이면
+    `target_date > $1` 날짜 조건만으로 빠져, 이 테스트가 하한 게이트(M3)를 격리하지 못한다."""
+    pg = clean_strategy_funnel
+    await _write(is_provisional=True, target_date=_NXT)
+    await _pin(pg, _kst(_D, 7, 57), target_date=_NXT)
+
+    data = await _route_at(_kst(_D, 22, 0))  # 🔁 cycle364 — 캡처 21:00 뒤
     assert data["evidence_errors"] == []
     row = {t["id"]: t for t in data["tasks"]}["evening_funnel_capture"]
     assert row["status"] == "not_fired", (
@@ -389,14 +407,16 @@ async def test_c350_pg_route_evening_row_when_viewed_after_capture_time_then_don
     clean_strategy_funnel, clean_system_config, clean_log_reports,
     clean_daily_performance, clean_parameter_recommendations,
 ):
-    """보존 — 16:21 저녁 잠정 행이 있으면 18:00 에 `done`, 증거 1."""
-    pg = clean_strategy_funnel
-    await _write(is_provisional=True)
-    await _pin(pg, _kst(_D, 16, 21))
+    """보존 — 저녁 잠정 행이 있으면 캡처 시각 뒤에 `done`, 증거 1.
 
-    data = await _route_at(_kst(_D, 18, 0))
+    🔁 cycle364 — 저녁 행 = 21:01 에 쓴 다음 세션 행(target_date = _D + 1), 조회 22:00."""
+    pg = clean_strategy_funnel
+    await _write(is_provisional=True, target_date=_NXT)
+    await _pin(pg, _kst(_D, 21, 1), target_date=_NXT)
+
+    data = await _route_at(_kst(_D, 22, 0))
     assert data["evidence_errors"] == []
     row = {t["id"]: t for t in data["tasks"]}["evening_funnel_capture"]
     assert row["status"] == "done"
     assert row["evidence"] == {"snapshot_rows_today": 1}
-    assert row["last_success_at"] == "2026-09-14T16:21:00+09:00"
+    assert row["last_success_at"] == "2026-09-14T21:01:00+09:00"

@@ -824,3 +824,23 @@ cycle287 배포 시점에 두 키가 어디에도 없어 `PUT /api/strategies/{i
 `min_required=KOJIRO_MIN_REQUIRED`(80)로 쓰고 있었으나 원문 목록(5 전략)에서 빠져 있어 함께 넣었다.
 
 → CHANGELOG: cycle363 행
+
+## 공통 패턴
+
+### 2026-09-26 cycle364 S1 — 각주 ⑥ 의 「16:20 캡처가 덮는다」 · `prev_idx` 기준 · prepare 기준일 계약(PV-1·P3) 신설
+
+정본 원문(각주 ⑥ 첫 두 행 · 「prepare 공통」 `prev_idx` 행):
+
+**각주 ⑥ VCP 돌파 관측 — 돌파선 거리 · 하루 돌파 사건 (cycle349, 관측 전용)** — 목적은 「그날 돌파 사건이 있었나」를 사후에 판정하는 것이다. 오전 후보 목록은 일반 로그에 나열되지 않고, 퍼널 스냅샷은 16:20 캡처가 덮는다(`src/engine/CLAUDE.md` 「funnel 스냅샷 캡처」 절). **매매 행위는 0이다** — 후보 집합·순서·매수 판정·`DEFAULT_PARAMS` 를 바꾸지 않는다.
+- **오전 prepare 만 기록한다** — `_observe_breakout_distance(refs)` 는 실행 시각이 `entry_end`(14:30) **이하**일 때만 줄을 남긴다. 시계는 `check_buy_signal` 창 게이트와 같은 식이다(naive `datetime.now().time()` vs `_parse_time_hhmm(params["entry_end"])`). 창 끝을 넘은 prepare(16:20 저녁 재준비 등)는 줄 0 · watch 무접촉이다. 호출은 2곳이고 둘 다 자기 `try` 다 — prepare 정상 끝(`VCP 준비 완료` INFO 뒤) · 유니버스 0종목 조기 반환 분기.
+- VB/LTV/donchian/BFB/VCP 모두 `prev_idx` 분기가 같다 — `candles[0].stck_bsop_date == 오늘` 이면 `candles[1]` 을 전일로 쓴다.
+
+경위: 16:20 저녁 재준비가 없어지고 21:00 다음 거래일 미리보기(`prepare(as_of=)`)가 들어왔다. 저녁 쓰기가 다음 거래일 날짜로 가서
+그날 09:35 확정 행을 덮지 않는다. `prev_idx` 는 벽시계 오늘이 아니라 `today_str`(= 기준일)과 비교한다.
+미리보기가 보유 종목 청산 입력을 바꾸지 않는 계약(PV-1)은 설계에서 donchian·kojiro 둘이었다가, 적대적 검토가
+VCP·BFB `_effective_setup` 이 live `_candidates` 의 `atr14`/`ema50` 를 먼저 읽는다는 것을 재현(스크래치 재현 — 보유 VCP 가
+미리보기 뒤 같은 틱에서 `Signal.NONE` → `Signal.TRAILING_STOP`, 손절선 9,600 → 10,400)해 네 전략으로 넓혔다(메인 세션 R1).
+같은 라운드에서 「자기 것은 남기고, 보호 종목은 전부 건너뛴다」로 keep/skip 을 갈랐다 — 단일 keep 집합은 kojiro `held_only`
+와 donchian `get_targets_status` 를 다른 전략 보유로 오염시켰다.
+
+→ CHANGELOG: cycle364 S1 행

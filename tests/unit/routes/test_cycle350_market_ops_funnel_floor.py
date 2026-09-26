@@ -175,7 +175,7 @@ def test_c350_b2_2_floor_when_grace_constant_moves_then_floor_follows(monkeypatc
         timedelta(hours=-2),                   # 하한 정각 — 포함(B2-3 `>=`)
         timedelta(hours=-1),                   # 유예 안
         timedelta(0),                          # 예정 정각
-        timedelta(hours=3, minutes=30),        # 저녁 늦게
+        timedelta(hours=2, minutes=30),        # 저녁 늦게 (🔁 cycle364 — 캡처 21:00 이라 +3h30m 은 자정을 넘는다)
     ],
     ids=["floor-1us", "floor", "grace-mid", "scheduled", "late"],
 )
@@ -234,13 +234,17 @@ async def test_c350_b2_route_when_as_of_is_next_morning_then_floor_is_that_day(m
 # ===========================================================================
 def test_c350_b2_1_combined_sql_when_counting_funnel_rows_then_gated_by_floor_param():
     """M3·M4 — `funnel_rows` 서브쿼리에 `snapshot_at >= $2`. `>` 이면 하한과 같은 순간의
-    행이 빠진다(B2-3). 기존 두 조건(`target_date = $1` · `is_provisional = TRUE`) 유지."""
+    행이 빠진다(B2-3). 기존 조건 `is_provisional = TRUE` 유지.
+
+    🔁 cycle364 의도적 개정 — 날짜 조건 `target_date = $1` → **`target_date > $1`**. A1 저녁
+    캡처는 다음 거래일 라벨로 쓰므로 저녁 증거 = 「오늘 저녁에 쓴 다음 세션 행」이다(설계
+    `_workspace/domain_consult/cycle364_a1_as_of_design.md` §2.6 · M12)."""
     import src.routes.market_ops as mo
 
     subs = _funnel_subqueries(mo._COMBINED_SQL)
     body = subs.get("funnel_rows")
     assert body is not None, f"funnel_rows 서브쿼리를 못 찾았다: {sorted(subs)}"
-    assert "target_date = $1" in body, body
+    assert re.search(r"\btarget_date\s*>\s*\$1\b", body), body
     assert "is_provisional = TRUE" in body, body
     assert re.search(r"\bsnapshot_at\s*>=\s*\$2\b", body), (
         f"funnel_rows 에 `snapshot_at >= $2` 게이트가 없다 (Red — cycle350 B2-1 미구현): {body}"
@@ -273,7 +277,10 @@ async def test_c350_b2_5_funnel_row_when_counted_then_evidence_key_and_status_un
     mo, monkeypatch,
 ):
     """evidence 키 `snapshot_rows_today` · `last_success_at` = `funnel_last_at` 그대로 ·
-    상태 어휘 불변 → 프론트·MSW·e2e mock 무변경."""
+    상태 어휘 불변 → 프론트·MSW·e2e mock 무변경.
+
+    🔁 cycle364 — 조회 시각 18:00 → 22:00. 캡처가 21:00 으로 옮겨 18:00 은 이제 「예정 전」
+    (`scheduled`)이다. 「예정 시각이 지났는데 증거 0 → not_fired」 라는 이 단언의 뜻은 그대로다."""
     monkeypatch.setattr(
         mo.pg, "fetchrow",
         AsyncMock(return_value={
@@ -281,7 +288,7 @@ async def test_c350_b2_5_funnel_row_when_counted_then_evidence_key_and_status_un
             "funnel_last_at": "2026-09-14T07:57:00+09:00",
         }),
     )
-    data = await _call_route_at(mo, monkeypatch, datetime(2026, 9, 14, 18, 0, tzinfo=_KST))
+    data = await _call_route_at(mo, monkeypatch, datetime(2026, 9, 14, 22, 0, tzinfo=_KST))
     row = {t["id"]: t for t in data["tasks"]}["evening_funnel_capture"]
     assert row["evidence"] == {"snapshot_rows_today": 0}
     assert row["last_success_at"] == "2026-09-14T07:57:00+09:00"

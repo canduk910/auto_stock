@@ -1534,3 +1534,100 @@ cycle359 조사). cycle368 이 파서 기준점을 고치고, VI 수명 600초(�
 `iscd_stat_active_count` 는 표시 집합 {51,52,53,54,58,59} 로 세도록 바뀌었다(55·57·00 제외).
 
 → CHANGELOG: cycle368 행
+
+## funnel 스냅샷 캡처
+
+### 2026-09-26 cycle364 S1 — 16:20 저녁 재준비 → 21:00 다음 거래일 미리보기(A1), 확정 행 보호(③-b)·라벨 가드·④ 대조 신설
+
+정본 원문(절 본문 전체, 교체 전):
+
+- 공통 헬퍼 `capture_funnel_snapshots(registry, *, is_provisional)` — registry 를 순회하며 전략별 `_funnel_steps` 단계별 + `step_no=99` 를 insert 한다. 전략별 예외 격리(graceful), momentum 은 영구 제외, in-place upsert.
+- 호출처 3 = 09:30 자동(`_auto_capture_funnel_snapshots`, `is_provisional=False` — 실행은 `_scan_loop` 첫 패스라 첫 대기 `SCAN_INTERVAL` 뒤 ≈09:35) · 16:20 저녁(`_evening_funnel_capture_once`, `is_provisional=True`) · 수동 trigger(`routes/strategy_funnel.py::trigger_snapshot`, `is_provisional=False`).
+- 저녁 task `TIME_EVENING_FUNNEL_CAPTURE = time(16, 20)`, `initial_delay_secs=600`: (1) `stock_master_daily.count_all() > 0` 5분 cap polling — ⚠️ **그날 적재 완료를 기다리는 것이 아니다**(일봉은 20:30 이라 16:20 캡처는 전일 봉 기준이고, 전략 절단이 날짜 비교라 결과가 같다). 빈 테이블만 막는다 (2) 등록 전략 전부(`registry.all()`)의 `prepare()` (3) 캡처.
+- **저녁 task 는 아침에도 한 번 돈다** — `run_periodic_task_loop` 의 즉시 1회(`immediate_first_run` 기본값, 게이트 kw 전무)가 `start()` +600초에 실행된다(07:45 기동이면 ≈07:57). `run_daily` 가 매 거래일 `start()` 를 다시 부르므로 재시작이 없어도 매일 돈다. 그때도 등록 전략 전부의 `prepare()` 를 다시 부르고 오늘 날짜로 잠정(`is_provisional=True`) 행을 쓴다. 이 재준비는 살아 있는 전략 객체의 후보를 교체하므로 그 뒤 매수 평가는 이 결과를 쓴다.
+  - **입력은 부팅 준비와 같다.** 부팅 준비(`_boot()` 안의 전 전략 `prepare()`)는 `start()` 가 적재 태스크(`_full_universe_load_task` +0초 · `_stock_master_daily_load_task` +240초 · `_stock_master_basics_refresh_task` +480초)를 만들기 **전에** 끝난다. 그 세 적재의 즉시 실행은 영업일 슬롯 게이트를 지나야 돈다(「정기 task 루프」 절). 그래서 평상시 월요일·연휴 뒤 아침에는 보충 적재가 돌지 않고, 재준비는 부팅 준비와 같은 입력을 읽어 같은 목록을 낸다.
+  - **보충 적재가 도는 날**(직전 영업일 정기 실행 결손 = `reason=stale` · 휴장일 모름 = `calendar_unknown` · full_universe 행 수 미달 = `below_floor`)에는 그 적재가 바꾼 입력을 라이브 후보에 반영하는 경로가 이 재준비다. 이 반영은 순서 보장이 아니라 경합에 기댄다 — 재준비는 `count_all() > 0` 만 기다리고 +240초 일봉 보충 적재의 **완료**는 기다리지 않는다.
+  - 🔴 **이 즉시 1회에 게이트를 걸지 않는다** — 재준비의 `self._candidates = {}` 가 donchian 보유 종목을 후보에서 지워, 그날 트레일링 ATR 이 `_entry_atr`(매수 시점 ATR)로 떨어진다. 재준비를 건너뛰면 그 기준이 부팅 recompute 의 오늘 ATR 로 바뀐다. 청산 규약 변화라 그 결정(cycle360 카드 3)이 게이트보다 먼저다(근거 = `_workspace/domain_consult/cycle360_boot_reprepare_4a_proposal.md` §1.4·§5).
+  - ✅ **「같은 입력」을 깨던 예외 경로(F-1) — cycle363 배포 전 보강으로 시정(사용자 승인 8영역).** 월요일·연휴 뒤 장전에는 `scanner._scan_pool_eager_refresh_loop`(5분 주기)가 24h 를 넘긴 풀 종목을 갱신하는데, 그 갱신과 +600초 재준비가 **같은 시각(T+600)에 시작하는 것 자체는 여전하다**(독립 검증 finding #1/#5, 09-28 에 실제로 겹칠 것으로 추정). 바뀐 것은 그 갱신이 더 이상 raw 를 통째로 지우지 않는다는 것이다 — `upsert_one` 전에 basics 경로(cycle176)와 같은 `{**기존 raw, **신규 raw}` 머지를 넣어, 장전 0 값 키(`_ZERO_VALUE_SKIP_KEYS` — `acml_tr_pbmn` 등)가 사라지지 않고 기존 값에서 보존된다. 그래서 재준비가 그 갱신과 겹쳐도 `list_by_filter` 거래대금 임계(`acml_tr_pbmn_won`)가 더 이상 NULL 로 떨어지지 않는다. 판별 마커 = `[scan_pool_eager_refresh] refreshed=N`(N>0 이면 그 사이클이 실제로 돌았다는 뜻, 결함 여부와 무관) + `select count(*) from stock_master where not raw ? 'acml_tr_pbmn'`(머지가 살아 있으면 이 값이 늘지 않아야 한다). 회귀 = `tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py`.
+- 🔴 **결함 — 16:20 캡처가 그날 확정 행을 덮는다.** `capture_funnel_snapshots` 는 호출자와 무관하게 `target_date = 오늘(KST)` 를 쓴다. 그래서 하루 세 쓰기가 같은 `(target_date, strategy_id, step_no)` 행에 떨어진다 — ≈07:57 잠정 INSERT → ≈09:35 확정 UPSERT → 16:21 잠정 UPSERT. **그날 매매에 쓴 확정 행은 남지 않고**, 20:05·21:30 리포트의 `strategy_funnel_stages` 도 16:20 숫자를 읽는다. 덮인 행은 `snapshot_at`(마지막 쓰기 시각)이 16:21 을, `is_provisional` 이 `TRUE` 를 가리키므로 행만 보고는 09:35 확정 값이 있었는지 알 수 없다(`snapshot_at` 정의 = `src/db/CLAUDE.md` `strategy_funnel.py` 절). 잠정 쓰기가 확정 행을 못 덮게 하는 보호는 들어가 있지 않다 — 지금 일정(16:20 · 오늘 날짜)에서 단독으로 넣으면 평일 저녁 쓰기가 전부 거부돼 저녁 산출물이 사라지기 때문이다(설계와 근거 = `_workspace/red/cycle350_evening_funnel_spec.md` §2). 실측·근거·결정에 필요한 사실 = `_workspace/red/cycle349_vcp_observe_spec.md` 「② 퍼널 스냅샷 오전/16:20 분리」 절. VCP 의 오전 후보 목록은 이 스냅샷이 아니라 `[vcp_breakout_distance_summary]` 로 복원한다(`strategies/CLAUDE.md` 각주 ⑥).
+- 🔴 **저녁 캡처를 20:30 일봉 적재 뒤로 옮기는 것만으로는 다음 거래일 미리보기가 되지 않는다** — funnel 을 내는 6전략(momentum 제외)의 `prepare()` 가 벽시계 오늘(KST) 날짜의 봉을 버려(`prev_idx = 1 if candles[0].get("stck_bsop_date") == today_str else 0`) 20:4x 에 돌려도 D-1 기준이므로, `prepare()` 에 기준일을 넣는 것이 선결이다(근거·선택지 = `_workspace/red/cycle350_evening_funnel_spec.md` §2).
+- `task_attrs` 4 위치(start + connect finally + run_daily finally + stop, G-AST2).
+- `is_provisional` 컬럼 = migration 040.
+- 관찰성 한정 — `check_exit`/`check_buy` funnel hook 0건 + risk/order_engine/realtime/auth 참조 0(SAFETY 가드).
+
+경위: 사용자 결정 D3(2026-09-25 저녁 「D3 카드는 모두 권고대로」 — 설계 `_workspace/domain_consult/cycle364_a1_as_of_design.md` 카드 1~5 (가)).
+위 원문의 「🔴 결함 — 16:20 캡처가 그날 확정 행을 덮는다」는 세 가지로 닫혔다 — 저녁 쓰기가 다음 거래일 날짜로 가고,
+잠정 쓰기가 확정 행을 못 덮고(③-b), 확정 캡처가 저녁 미리보기 meta 를 거부한다(라벨 가드).
+「저녁 캡처를 20:30 일봉 적재 뒤로 옮기는 것만으로는 다음 거래일 미리보기가 되지 않는다」는 `prepare(as_of=)` 로 해결했다.
+캡처 시각은 20:30 이 아니라 21:00 이다(20:45 보조 계정 토큰 재발급 체인과 겹치지 않게). 16:20 재준비가 사라지면서
+애프터장(16:00~20:00) 도중 LTV 후보가 갈리던 일과 donchian 보유 트레일링 ATR 이 16:20 에 매수 시점 ATR 로 떨어지던 일이 없어졌다.
+부팅 +600초 즉시 1회는 S1 임시 「레거시 재준비」로 남았고 대기 신호(`count_all() > 0` 5분 폴링)는 없어졌다.
+실측 근거(09-21~23, 16:20 재준비가 분모를 매일 바꿈 — BFB 600→564, VCP 711→659, kojiro 703→657)는 설계 §0-8.
+
+→ CHANGELOG: cycle364 S1 행
+
+## 저녁 데이터 적재 (scanner + data_load_tasks)
+
+### 2026-09-26 cycle364 S1 — 시각 표의 저녁 funnel 행
+
+정본 원문(표 행):
+
+| `TIME_EVENING_FUNNEL_CAPTURE = time(16, 20)` | 16:20 | 저녁 잠정 funnel 캡처 |
+
+경위: 캡처 시각을 21:00 으로 옮기고 행을 시각순(20:30 적재 뒤)으로 옮겼다.
+
+→ CHANGELOG: cycle364 S1 행
+
+## scheduler.py — KRX/NXT 통합 운영 08:00~20:00
+
+### 2026-09-26 cycle364 S1 — `TIME_*` 표의 저녁 funnel 행 · 07:59 사전 구독 행 · 재준비 cap 문장
+
+정본 원문(표 행 2 + 목록 행 1):
+
+| `TIME_EVENING_FUNNEL_CAPTURE` | 16:20 | 저녁 잠정 funnel 캡처(`_evening_funnel_capture_task_loop`) — 상세 = 「funnel 스냅샷 캡처」 절 |
+| `TIME_PRESUBSCRIBE` | 07:59 | `_collect_presubscribe_tickers()` — VB/LTV/donchian + 모든 전략 보유 합집합 사전 구독 |
+- **`_reprepare_breakout_if_empty` WARNING DailyEmitCap**: "스캔 후보 비어있음 — 재 prepare 시도" logger.warning + `write_log` DB INSERT 를 `_reprepare_empty_logged_today: DailyEmitCap[str]` 로 1회/전략/일 cap 한다(후보 0 은 정상 장세일 수 있다). 🔴 **`strategy.prepare()` 재시도 행위는 cap 밖 불변**이다(회복 메커니즘 보존). `getattr` 폴백 = `__new__` 스텁 인스턴스 호환(cap 부재 시 기존 무제한 emit). 회귀 `tests/unit/engine/test_cycle189_reprepare_emit_cap.py`
+
+경위: 저녁 funnel 행을 21:00 으로 옮겼고, 07:59 재준비와 `_reprepare_breakout_if_empty` 의 재준비가 `strategy.prepare()` 직접 호출에서
+`funnel_capture.live_prepare_one(…)` 경유로 바뀌었다(라이브 준비 단일 입구 + 잠금 + meta).
+
+→ CHANGELOG: cycle364 S1 행
+
+## 모듈 맵
+
+### 2026-09-26 cycle364 S1 — `trading_calendar.py` 항목(소비처 2곳 → 3곳, API 3개 → 4개)
+
+정본 원문(목록 행 2):
+
+- **`trading_calendar.py`** — 휴장일 판정 공용 leaf(8영역·`scheduler.py`·`boot_manager.py` import 0). 「몇 시간 지났나」·「달력 며칠 지났나」 대신 「직전 영업일이 언제인가」를 묻는 두 곳이 쓴다 — 부팅 즉시 실행 슬롯 게이트(`task_loop_helper._evaluate_slot_gate`)와 6전략 prepare 의 일봉 신선도 기준(`StrategyBase._resolve_expected_daily_head`).
+  - API 3개는 전부 **never-raise**(예외 → `None`)다. `is_open_day(d) -> bool | None` · `previous_trading_day(today) -> date | None`(`today` 보다 엄격히 이전의 가장 최근 개장일. 최대 `_PREVIOUS_TRADING_DAY_LOOKBACK_DAYS`=10 달력일을 거슬러 가고, 도중 `None` 을 만나면 추측하지 않고 `None`) · `latest_passed_trading_slot(now_kst, slot) -> datetime | None`(`now` 이하인 「개장일 D 의 `slot` 시각」 중 가장 최근, KST aware. `now.time() >= slot` 이면 오늘부터 본다).
+
+경위: `next_trading_day(d)`(앞으로 최대 14 달력일)가 더해졌고 저녁 미리보기(`funnel_capture`)가 세 번째 소비처가 됐다.
+
+→ CHANGELOG: cycle364 S1 행
+
+## 정기 task 루프 (`task_loop_helper.run_periodic_task_loop`)
+
+### 2026-09-26 cycle364 S1 — 「미대상」 문장
+
+정본 원문(목록 행):
+
+- 미대상 = purge · evening_funnel(게이트 kw 전무). evening_funnel 의 즉시 1회가 +600초 재준비다 — 게이트를 걸지 않는 이유는 「funnel 스냅샷 캡처」 절.
+
+경위: +600초 즉시 1회는 21:00 전이라 레거시 재준비 분기를 탄다. 그 분기는 미리보기가 아니다.
+
+→ CHANGELOG: cycle364 S1 행
+
+## strategy_base.py
+
+### 2026-09-26 cycle364 S1 — 추상 `prepare` 시그니처 · `_resolve_expected_daily_head` 시그니처
+
+정본 원문(목록 행 2, 둘째 행은 앞부분만):
+
+- `StrategyBase` 추상 메서드: `prepare` / `check_buy_signal` / `check_exit_signal` / `calc_buy_quantity`
+- **일봉 신선도 기준 `_resolve_expected_daily_head() -> date | None`** — `trading_calendar.previous_trading_day(today_kst())` 를 지연 import 로 부르고(never-raise, 예외 → `None`) `[prepare_expected_head] strategy=<id…
+
+경위: `prepare(self, *, as_of: date | None = None)` 로 기준일 인자가 생겼고 `_resolve_expected_daily_head(as_of_date=None)` 가
+`previous_trading_day(as_of_date 또는 오늘)` 을 쓴다. 헬퍼 3종(`_resolve_prepare_as_of`·`_preview_keep_tickers`·`_preview_skip_tickers`)이 더해졌다.
+
+→ CHANGELOG: cycle364 S1 행

@@ -394,8 +394,57 @@ class StrategyBase(ABC):
         )
 
     @abstractmethod
-    async def prepare(self) -> None:
+    async def prepare(self, *, as_of: date | None = None) -> None:
         """장 시작 전 준비 (데이터 로드 등)."""
+
+    def _resolve_prepare_as_of(self, as_of: date | None) -> tuple[date, bool]:
+        """cycle364 — (기준일, 미리보기 여부). None/오늘 = 현행, 미래 = 미리보기, 과거 = ValueError."""
+        from src.db._kst import today_kst as _today_kst  # noqa: PLC0415
+
+        today = _today_kst()
+        if as_of is None:
+            return today, False
+        if as_of < today:
+            raise ValueError(f"prepare as_of={as_of} < today={today}")
+        return as_of, as_of > today
+
+    def _preview_keep_tickers(self) -> set[str]:
+        """cycle364 R1 — 미리보기 보존 집합: 자기 보유 ∪ **자기** 익일청산대기.
+
+        와이프(시작부·재시도) 뒤에도 같은 객체로 남기는 대상이다. 다른 전략의
+        보유·익일청산 종목은 여기 들지 않는다 — 넣으면 그 전략의 후보 목록·
+        `_scanned_tickers`·kojiro `held_only`·donchian `get_targets_status` 가
+        남의 보유로 오염된다.
+        """
+        out: set[str] = set(self.state.positions.keys())
+        try:
+            from src.engine.scheduler import trading_scheduler as _sched  # noqa: PLC0415
+
+            for item in getattr(_sched, "_pending_next_day_clear", None) or ():
+                if isinstance(item, tuple) and len(item) == 2:
+                    ticker, sid = item
+                    if sid == self.strategy_id:
+                        out.add(ticker)
+        except Exception:
+            pass
+        return out
+
+    def _preview_skip_tickers(self) -> set[str]:
+        """cycle364 R1 — 미리보기 건너뜀 집합: 자기 보유 ∪ 전 전략 보호 종목(헬퍼).
+
+        종목 루프에서 이 집합에 속한 ticker 는 fetch 결과를 버리고 건너뛴다 —
+        `_candidates`·`ticker_prev_close`·`_held_stage3`·관측 원자료 어느 것도
+        쓰지 않는다. 자기 보유는 헬퍼가 조회 실패로 ∅ 를 돌려줘도(try/except 로
+        조용히 삼킨다) 지켜야 하므로 **합집합**이다(round-1 tester 생존 돌연변이 Y2).
+        """
+        out: set[str] = set(self.state.positions.keys())
+        try:
+            from src.engine import scanner as _scanner_mod  # noqa: PLC0415
+
+            out |= set(_scanner_mod._collect_protected_tickers_for_scanner())
+        except Exception:
+            pass
+        return out
 
     @abstractmethod
     def check_buy_signal(
@@ -1603,7 +1652,7 @@ class StrategyBase(ABC):
 
         return survivors
 
-    async def _resolve_expected_daily_head(self) -> date | None:
+    async def _resolve_expected_daily_head(self, as_of_date: date | None = None) -> date | None:
         """cycle363 — 일봉 신선도(①′) 기준 = 「직전 영업일」.
 
         `trading_calendar.previous_trading_day(today_kst())` 를 호출 시점에 모듈
@@ -1617,7 +1666,9 @@ class StrategyBase(ABC):
             from src.db._kst import today_kst as _today_kst  # noqa: PLC0415
             from src.engine import trading_calendar as _tc_mod  # noqa: PLC0415
 
-            expected_head = await _tc_mod.previous_trading_day(_today_kst())
+            expected_head = await _tc_mod.previous_trading_day(
+                as_of_date if as_of_date is not None else _today_kst()
+            )
         except Exception:
             expected_head = None
         logger.info(

@@ -283,8 +283,12 @@ class VcpBreakoutStrategy(StrategyBase):
     # ------------------------------------------------------------------
     # prepare — 일봉 100일(prepare cap) → 추세/베이스/pullback/거래량 수축 자동 검출
     # ------------------------------------------------------------------
-    async def prepare(self) -> None:
+    async def prepare(self, *, as_of: date | None = None) -> None:
         import asyncio
+
+        as_of_date, preview = self._resolve_prepare_as_of(as_of)
+        keep = self._preview_keep_tickers() if preview else set()
+        skip = self._preview_skip_tickers() if preview else set()
 
         # 사이클 173 (2026-06-22) — 일봉 source KIS → DB 어댑터 전환 (행위 보존).
         # cycle300 — 읽기를 막던 클램프 두 겹 중 DB 쪽(`get_recent_daily` 의 100행)은
@@ -320,7 +324,11 @@ class VcpBreakoutStrategy(StrategyBase):
         else:
             fetch_days = min(ema_long + base_max + 10, KIS_DAILY_CANDLES_MAX)
 
-        self._candidates = {}
+        # cycle364 R1 — 미리보기는 자기 보유·자기 익일청산대기 엔트리만 같은
+        # 객체로 보존한다(donchian·kojiro 와 같은 규약). 비미리보기는 현행대로
+        # 전량 와이프(빈 keep = `{}` 와 동치).
+        self._candidates = {t: v for t, v in self._candidates.items() if t in keep}
+        preserved = set(self._candidates)
         stats = _empty_scan_stats()
         self._scan_stats = stats
         # 사이클 39 (2026-05-22) — 단계별 ticker 캡처 reset
@@ -337,7 +345,8 @@ class VcpBreakoutStrategy(StrategyBase):
                 30, retry_attempt + 1,
             )
             await asyncio.sleep(30)
-            self._candidates = {}
+            self._candidates = {t: v for t, v in self._candidates.items() if t in keep}
+            preserved = set(self._candidates)
             stats = _empty_scan_stats()
             self._scan_stats = stats
             self._reset_funnel_steps(FUNNEL_STAGES)
@@ -381,15 +390,16 @@ class VcpBreakoutStrategy(StrategyBase):
             self._scanned_tickers = []
             stats["last_run_at"] = datetime.now(KST).isoformat()
             try:
-                self._observe_breakout_distance({})
+                if not preview:
+                    self._observe_breakout_distance({})
             except Exception:
                 logger.debug("[vcp_breakout_distance_failed] 관측 실패 graceful", exc_info=True)
             return
 
-        today_str = datetime.now(KST).strftime("%Y%m%d")
+        today_str = as_of_date.strftime("%Y%m%d")
 
         # cycle363 — ①′ 일봉 신선도 기준(「직전 영업일」) prepare 당 1회 계산.
-        expected_head = await self._resolve_expected_daily_head()
+        expected_head = await self._resolve_expected_daily_head(as_of)
 
         # 사이클 173 — DB 우선 어댑터. days=fetch_days + min_required=100.
         # cycle300 — `daily_fetch_depth_mode` 가 `fetch_days` 를 정한다: 기본 "cap100" 이면
@@ -434,6 +444,8 @@ class VcpBreakoutStrategy(StrategyBase):
         from src.engine.strategy_base import _resolve_ticker_name
 
         for ticker, candles in fetched:
+            if preview and ticker in skip:
+                continue
             ticker_name = _resolve_ticker_name(ticker)
             if candles is None or not candles:
                 candle_fetch_excluded.append({
@@ -651,7 +663,7 @@ class VcpBreakoutStrategy(StrategyBase):
             step_conditions="모든 단계 통과 — 매수 후보 등록 (base_high 돌파 대기)",
         )
 
-        self._scanned_tickers = list(self._candidates.keys())
+        self._scanned_tickers = [t for t in self._candidates if t not in preserved]
         self._bought_today.clear()
         stats["last_run_at"] = datetime.now(KST).isoformat()
         logger.info(
@@ -661,7 +673,8 @@ class VcpBreakoutStrategy(StrategyBase):
             stats["pullback_pass"], stats["volume_contraction_pass"],
         )
         try:
-            self._observe_breakout_distance(_dist_refs)
+            if not preview:
+                self._observe_breakout_distance(_dist_refs)
         except Exception:
             logger.debug("[vcp_breakout_distance_failed] 관측 실패 graceful", exc_info=True)
 
@@ -1144,7 +1157,7 @@ class VcpBreakoutStrategy(StrategyBase):
         now_dt = datetime.now()
         entry_end = _parse_time_hhmm(p["entry_end"])
         if now_dt.time() > entry_end:
-            # D1 — 창 끝을 넘은 prepare(16:20 저녁 재준비 등)는 줄도 watch 도 무접촉.
+            # D1 — 창 끝을 넘은 prepare(21:00 저녁 A1 등)는 줄도 watch 도 무접촉.
             return
         run_at = now_dt.strftime("%H:%M:%S")
 

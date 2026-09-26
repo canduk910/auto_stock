@@ -126,6 +126,25 @@ async def previous_trading_day(today: date) -> date | None:
         return None
 
 
+_NEXT_TRADING_DAY_LOOKAHEAD_DAYS = 14
+
+
+async def next_trading_day(d: date) -> date | None:
+    """`d` 보다 엄격히 뒤의 가장 가까운 개장일. 최대 14 달력일, 도중 None 이면 None."""
+    try:
+        cursor = d
+        for _ in range(_NEXT_TRADING_DAY_LOOKAHEAD_DAYS):
+            cursor = cursor + timedelta(days=1)
+            opened = await is_open_day(cursor)
+            if opened is None:
+                return None
+            if opened:
+                return cursor
+        return None
+    except Exception:
+        return None
+
+
 async def latest_passed_trading_slot(now_kst: datetime, slot: time) -> datetime | None:
     """`now` 이하인 「개장일 D 의 slot 시각」 중 가장 최근(KST aware).
 

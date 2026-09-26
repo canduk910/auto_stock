@@ -51,12 +51,27 @@ _MARKER = "[daily_head_stale]"
 _BOOT_SRC = Path(inspect.getfile(boot_manager)).read_text(encoding="utf-8")
 
 
+# 🔁 cycle364 — 부팅 준비 호출이 `strategy.prepare()` 직접 호출에서 잠금·meta wrapper
+# `live_prepare_one(strategy, phase="boot")` 로 바뀐다(설계 §4.4 LOCK). 이 파일이 재는 것은
+# 「관측이 준비 루프 **앞**」이라 루프 표지를 둘 다 인정한다(문자열만 바뀐 것 — 의미 불변).
+_PREPARE_TOKENS = ("strategy.prepare()", "live_prepare_one(strategy")
+
+
+def _has_prepare_token(seg: str) -> bool:
+    return any(tok in seg for tok in _PREPARE_TOKENS)
+
+
+def _prepare_token_index(seg: str) -> int:
+    idx = [seg.find(tok) for tok in _PREPARE_TOKENS if tok in seg]
+    return min(idx) if idx else -1
+
+
 def _prepare_fn() -> ast.AST:
     tree = ast.parse(_BOOT_SRC)
     for node in ast.walk(tree):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             seg = ast.get_source_segment(_BOOT_SRC, node) or ""
-            if "strategy.prepare()" in seg:
+            if _has_prepare_token(seg):
                 return node
     raise AssertionError("prepare 루프를 담은 함수를 찾지 못했다")
 
@@ -111,11 +126,11 @@ def _observer_call_linenos(fn: ast.AST) -> list[int]:
 
 def _prepare_loop_lineno(fn: ast.AST) -> int:
     for n in ast.walk(fn):
-        if isinstance(n, ast.For) and "strategy.prepare()" in (
+        if isinstance(n, ast.For) and _has_prepare_token(
             ast.get_source_segment(_BOOT_SRC, n) or ""
         ):
             return n.lineno
-    raise AssertionError("`strategy.prepare()` 를 도는 For 루프를 찾지 못했다")
+    raise AssertionError("준비(`strategy.prepare()`/`live_prepare_one`)를 도는 For 루프를 찾지 못했다")
 
 
 def test_c283_stale_1_marker_exists():
@@ -184,7 +199,7 @@ def test_c283_stale_3_is_observation_only_no_await_on_loading():
     별도 사이클·별도 승인 대상이다. 여기서 조용히 끼워 넣으면 승인 우회다.
     """
     seg = ast.get_source_segment(_BOOT_SRC, _prepare_fn()) or ""
-    head = seg[: seg.find("strategy.prepare()")]
+    head = seg[: _prepare_token_index(seg)]
     for banned in ("_stock_master_daily_load_once", "fetch_daily_candles",
                    "upsert_batch"):
         assert banned not in head, (

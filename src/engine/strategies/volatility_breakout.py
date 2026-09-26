@@ -204,7 +204,7 @@ class VolatilityBreakoutStrategy(StrategyBase):
         self._open_entry_hold_config_logged: "KstDailyEmitCap[str]" = KstDailyEmitCap[str]()
         self._open_entry_hold_blocked_logged: "KstDailyEmitCap[str]" = KstDailyEmitCap[str]()
 
-    async def prepare(self) -> None:
+    async def prepare(self, *, as_of: date | None = None) -> None:
         """장 시작 전: 시총/거래대금 조건 종목 스캔 → 21일 일봉으로 K값/Target 계산.
 
         사이클 143 (2026-06-15) — 사이클 140 자문 영속 VB 5단계 funnel hook 추가.
@@ -216,6 +216,7 @@ class VolatilityBreakoutStrategy(StrategyBase):
         """
         import asyncio
 
+        as_of_date, _preview = self._resolve_prepare_as_of(as_of)
         # 사이클 173 (2026-06-22) — 일봉 source KIS → DB 어댑터 전환 (행위 보존).
         from src.db.stock_master_daily import get_recent_daily_normalized
 
@@ -280,11 +281,11 @@ class VolatilityBreakoutStrategy(StrategyBase):
         )
 
         k_period = self.config.params["k_period"]
-        today_str = datetime.now(timezone(timedelta(hours=9))).date().strftime("%Y%m%d")
+        today_str = as_of_date.strftime("%Y%m%d")
         prepared = 0
 
         # cycle363 — ①′ 일봉 신선도 기준(「직전 영업일」) prepare 당 1회 계산.
-        expected_head = await self._resolve_expected_daily_head()
+        expected_head = await self._resolve_expected_daily_head(as_of)
 
         # 일봉 fetch 병렬화 (KIS Rate Limit semaphore가 자동 직렬화)
         # 사이클 173 — DB 우선 어댑터 (락/신선도/부족 시 KIS 폴백). min_required 명시 (자문 §4).

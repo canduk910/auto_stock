@@ -308,9 +308,13 @@ class DonchianSwingStrategy(StrategyBase):
                 self._time_exit_logged, dest_logger=logger,
             )
 
-    async def prepare(self) -> None:
+    async def prepare(self, *, as_of: date | None = None) -> None:
         """장 시작 전: 유니버스 스캔 → 종목별 일봉 fetch → 신고가/MA/ATR/거래량 검증."""
         import asyncio
+
+        as_of_date, preview = self._resolve_prepare_as_of(as_of)
+        keep = self._preview_keep_tickers() if preview else set()
+        skip = self._preview_skip_tickers() if preview else set()
 
         # 사이클 173 (2026-06-22) — 일봉 source KIS → DB 어댑터 전환 (행위 보존).
         # 신고가/EMA/거래대금 모두 어댑터 candles 단일 source (락 종목 혼재 차단, 자문 §249).
@@ -324,7 +328,8 @@ class DonchianSwingStrategy(StrategyBase):
         atr_period = params["atr_period"]
 
         # 매번 prepare 시 단계별 카운트 초기화 (universe_* 는 _scan_universe에서 채움)
-        self._candidates = {}
+        self._candidates = {t: v for t, v in self._candidates.items() if t in keep}
+        preserved = set(self._candidates)
         stats = _empty_scan_stats()
         self._scan_stats = stats
         # 사이클 39 (2026-05-22) — 단계별 ticker 캡처 reset
@@ -342,7 +347,7 @@ class DonchianSwingStrategy(StrategyBase):
                 30, retry_attempt + 1,
             )
             await asyncio.sleep(30)
-            self._candidates = {}
+            self._candidates = {t: v for t, v in self._candidates.items() if t in keep}
             stats = _empty_scan_stats()
             self._scan_stats = stats
             self._reset_funnel_steps(FUNNEL_STAGES)
@@ -392,12 +397,12 @@ class DonchianSwingStrategy(StrategyBase):
 
         # 60일 + 여유 = 65일 일봉 fetch (+1: candles[0]=오늘 부분봉 케이스 폴백 여유)
         fetch_days = max(long_ma_period + 5, donchian_period + 5) + 1
-        today_str = datetime.now(KST).strftime("%Y%m%d")
+        today_str = as_of_date.strftime("%Y%m%d")
         prepared = 0
         short_candles_logged = False  # 길이 부족 시 첫 1건만 system_logs에 기록
 
         # cycle363 — ①′ 일봉 신선도 기준(「직전 영업일」) prepare 당 1회 계산.
-        expected_head = await self._resolve_expected_daily_head()
+        expected_head = await self._resolve_expected_daily_head(as_of)
 
         # 일봉 fetch 병렬화 — KIS Rate Limit(20/sec)는 base.py Semaphore에서 직렬화되므로
         # asyncio.gather로 안전하게 묶을 수 있음. 100+ 종목 순차 호출(5~10초) → 1~2초로 단축
@@ -432,6 +437,8 @@ class DonchianSwingStrategy(StrategyBase):
         from src.engine.strategy_base import _resolve_ticker_name
 
         for ticker, candles in fetched:
+            if preview and ticker in skip:
+                continue
             ticker_name = _resolve_ticker_name(ticker)
             if candles is None:
                 candle_fetch_excluded.append({
@@ -633,7 +640,7 @@ class DonchianSwingStrategy(StrategyBase):
             step_conditions="모든 단계 통과 — 멀티데이 보유 매수 후보",
         )
 
-        self._scanned_tickers = list(self._candidates.keys())
+        self._scanned_tickers = [t for t in self._candidates if t not in preserved]
         self._bought_today.clear()
         stats["final_prepared"] = prepared
         stats["last_run_at"] = datetime.now(KST).isoformat()
@@ -934,9 +941,12 @@ class DonchianSwingStrategy(StrategyBase):
              라 플래그 False 인데, 갭 보정 `+1` 이 그 휴장일을 세어 **과다** 계상된다.
              (주말 `today` 는 사이클 223 G1 이 `today.weekday() < 5` 가드로 막았고,
              평일 공휴일은 달력 없이 코드로 가를 수 없다.)
-          2. 저녁 구간(15:40~20:00): 16:20 funnel prepare 가 **오늘 봉**을 캐시에
-             넣으므로 `cache_max == today` 가 되어, 캐시 **중간 결손**이 있어도
-             플래그가 서지 않는다. 값은 과소(= 청산 지연 = 보유 연장, 안전 방향).
+          2. 저녁 구간(21:00~21:30): cycle364 PV-1 이 미리보기 준비에서 보유 종목을
+             건너뛰므로(§2.1), 21:00 저녁 A1(`prepare(as_of=다음 거래일)`)은 보유
+             종목의 이 캐시를 더 이상 건드리지 않는다 — 평시엔 무해. 다만 그 전에
+             비미리보기 준비(부팅 +600초 레거시·07:59/5분 재준비)가 **오늘 봉**을 캐시에
+             넣으면 `cache_max == today` 가 되어, 캐시 **중간 결손**이 있어도 플래그가
+             서지 않는다. 값은 과소(= 청산 지연 = 보유 연장, 안전 방향).
 
         즉 이 플래그는 "캐시가 직전 weekday 까지 닿았다"는 **필요조건 관찰**일 뿐
         정확성 보증이 아니다. 플래그 False 를 "값이 맞다"로 읽지 말 것.

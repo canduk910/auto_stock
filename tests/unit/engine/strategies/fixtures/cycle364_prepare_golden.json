@@ -1,0 +1,5386 @@
+{
+ "boot_morning": {
+  "bull_flag_breakout": {
+   "_bought_today": [],
+   "_candidates": {},
+   "_prev_price": {},
+   "funnel_steps": [
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "전체 상장 (지수 무제약) 원천 유니버스 후보 (시총·거래대금 컷 전)",
+     "step_name": "유니버스 후보",
+     "step_no": 1,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "시총 ≥ 100억 + 거래대금 ≥ 15억",
+     "step_name": "유니버스 필터 통과 (시총·거래대금)",
+     "step_no": 2,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "1단계 진입 차단 13건 (거래정지/관리/단기과열/투자유의/공매도과열/이상급등 등)",
+     "step_name": "1단계 진입 차단 13건 통과 (거래정지/관리/단기과열/투자유의 등)",
+     "step_no": 3,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [
+      {
+       "name": "",
+       "reason": "일봉 길이 10 < 필요 23",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "reason": "KIS 일봉 응답 빈/None",
+       "ticker": "990105"
+      }
+     ],
+     "excluded_count": 2,
+     "step_conditions": "KIS 일봉 ≥ 23일",
+     "step_name": "일봉 fetch 성공",
+     "step_no": 4,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 4
+    },
+    {
+     "excluded": [
+      {
+       "name": "",
+       "reason": "폴 상승률 +0.9% < 임계 +15%",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "reason": "폴 상승률 +0.1% < 임계 +15%",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "reason": "폴 상승률 +0.5% < 임계 +15%",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "reason": "폴 상승률 +1.1% < 임계 +15%",
+       "ticker": "990106"
+      }
+     ],
+     "excluded_count": 4,
+     "step_conditions": "3~10영업일 누적 +15%↑ + 음봉 비율 ≤ 45%",
+     "step_name": "폴(Pole) 자동 검출",
+     "step_no": 5,
+     "survived": [],
+     "survived_count": 0
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "3~10영업일 조정 폭 ≤ 폴 폭 × 50.0%",
+     "step_name": "플래그(Flag) 자동 검출",
+     "step_no": 6,
+     "survived": [],
+     "survived_count": 0
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "플래그 평균 거래량 < 폴 평균 × 60%",
+     "step_name": "거래량 수축",
+     "step_no": 7,
+     "survived": [],
+     "survived_count": 0
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "ATR(14) > 0 (변동성 측정 가능)",
+     "step_name": "ATR(14) > 0",
+     "step_no": 8,
+     "survived": [],
+     "survived_count": 0
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "모든 단계 통과 — 매수 후보 등록",
+     "step_name": "최종 prepared",
+     "step_no": 9,
+     "survived": [],
+     "survived_count": 0
+    }
+   ],
+   "scan_stats": {
+    "atr_pass": 0,
+    "breakout_retreat_count": 0,
+    "breakout_seen_count": 0,
+    "candle_fetch_ok": 4,
+    "final_prepared": 0,
+    "flag_pass": 0,
+    "last_run_at": "2026-09-22T07:50:00+09:00",
+    "latch_armed_count": 0,
+    "min_trade_amount_failed": 0,
+    "pole_pass": 0,
+    "universe_candidates": 0,
+    "universe_filtered": 0,
+    "universe_union": 0,
+    "vol_gate_no_data": 0,
+    "vol_gate_pass": 0,
+    "vol_gate_reject_ext": 0,
+    "volume_contraction_pass": 0
+   },
+   "scanned": [],
+   "ticker_prev_close": {
+    "990101": null,
+    "990102": null,
+    "990103": null,
+    "990104": null,
+    "990105": null,
+    "990106": null
+   }
+  },
+  "donchian_swing": {
+   "_bought_today": [],
+   "_candidates": {
+    "990101": {
+     "atr": 90,
+     "donchian_high": 15430,
+     "ema60": 14181,
+     "prev_close": 15450
+    },
+    "990103": {
+     "atr": 86,
+     "donchian_high": 24350,
+     "ema60": 23345,
+     "prev_close": 24360
+    }
+   },
+   "_scan_stage_counts": {},
+   "_trading_days": [
+    "2026-04-21",
+    "2026-04-22",
+    "2026-04-23",
+    "2026-04-24",
+    "2026-04-27",
+    "2026-04-28",
+    "2026-04-29",
+    "2026-04-30",
+    "2026-05-01",
+    "2026-05-04",
+    "2026-05-05",
+    "2026-05-06",
+    "2026-05-07",
+    "2026-05-08",
+    "2026-05-11",
+    "2026-05-12",
+    "2026-05-13",
+    "2026-05-14",
+    "2026-05-15",
+    "2026-05-18",
+    "2026-05-19",
+    "2026-05-20",
+    "2026-05-21",
+    "2026-05-22",
+    "2026-05-25",
+    "2026-05-26",
+    "2026-05-27",
+    "2026-05-28",
+    "2026-05-29",
+    "2026-06-01",
+    "2026-06-02",
+    "2026-06-03",
+    "2026-06-04",
+    "2026-06-05",
+    "2026-06-08",
+    "2026-06-09",
+    "2026-06-10",
+    "2026-06-11",
+    "2026-06-12",
+    "2026-06-15",
+    "2026-06-16",
+    "2026-06-17",
+    "2026-06-18",
+    "2026-06-19",
+    "2026-06-22",
+    "2026-06-23",
+    "2026-06-24",
+    "2026-06-25",
+    "2026-06-26",
+    "2026-06-29",
+    "2026-06-30",
+    "2026-07-01",
+    "2026-07-02",
+    "2026-07-03",
+    "2026-07-06",
+    "2026-07-07",
+    "2026-07-08",
+    "2026-07-09",
+    "2026-07-10",
+    "2026-07-13",
+    "2026-07-14",
+    "2026-07-15",
+    "2026-07-16",
+    "2026-07-17",
+    "2026-07-20",
+    "2026-07-21",
+    "2026-07-22",
+    "2026-07-23",
+    "2026-07-24",
+    "2026-07-27",
+    "2026-07-28",
+    "2026-07-29",
+    "2026-07-30",
+    "2026-07-31",
+    "2026-08-03",
+    "2026-08-04",
+    "2026-08-05",
+    "2026-08-06",
+    "2026-08-07",
+    "2026-08-10",
+    "2026-08-11",
+    "2026-08-12",
+    "2026-08-13",
+    "2026-08-14",
+    "2026-08-17",
+    "2026-08-18",
+    "2026-08-19",
+    "2026-08-20",
+    "2026-08-21",
+    "2026-08-24",
+    "2026-08-25",
+    "2026-08-26",
+    "2026-08-27",
+    "2026-08-28",
+    "2026-08-31",
+    "2026-09-01",
+    "2026-09-02",
+    "2026-09-03",
+    "2026-09-04",
+    "2026-09-07",
+    "2026-09-08",
+    "2026-09-09",
+    "2026-09-10",
+    "2026-09-11",
+    "2026-09-14",
+    "2026-09-15",
+    "2026-09-16",
+    "2026-09-17",
+    "2026-09-18",
+    "2026-09-21"
+   ],
+   "funnel_steps": [
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "코스피200 + 코스닥150 합집합 (필터 전 원천 유니버스)",
+     "step_name": "코스피200+코스닥150 합집합",
+     "step_no": 1,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "시총 ≥ 500억 + 거래대금 ≥ 10억 컷 통과 (시총 6 → 거래대금 6)",
+     "step_name": "시총+거래대금 컷 통과",
+     "step_no": 2,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "1단계 진입 차단 13건 (거래정지/관리/단기과열/투자유의/공매도과열/이상급등 등)",
+     "step_name": "1단계 진입 차단 13건 통과 (거래정지/관리/단기과열/투자유의 등)",
+     "step_no": 3,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [
+      {
+       "name": "",
+       "reason": "KIS 일봉 응답 None",
+       "ticker": "990105"
+      }
+     ],
+     "excluded_count": 1,
+     "step_conditions": "KIS 일봉 ≥ 61일 + 전일 종가 > 0",
+     "step_name": "일봉 fetch + 전일종가>0",
+     "step_no": 4,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 4
+    },
+    {
+     "excluded": [
+      {
+       "name": "",
+       "reason": "전일 종가 33,460 ≤ 직전 20일 신고가 34,700",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "reason": "전일 종가 54,908 ≤ 직전 20일 신고가 55,363",
+       "ticker": "990106"
+      }
+     ],
+     "excluded_count": 2,
+     "step_conditions": "전일 종가 > 직전 20일 최고가",
+     "step_name": "신고가 돌파",
+     "step_no": 5,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      }
+     ],
+     "survived_count": 2
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "60일 EMA 우상향 + 전일 종가 > EMA",
+     "step_name": "EMA 우상향 + 종가>EMA",
+     "step_no": 6,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      }
+     ],
+     "survived_count": 2
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "당일 거래대금 ≥ 20일 평균 × 1.5",
+     "step_name": "거래대금 평균 대비 통과",
+     "step_no": 7,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      }
+     ],
+     "survived_count": 2
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "ATR(14) > 0 (변동성 측정 가능)",
+     "step_name": "ATR(14) > 0",
+     "step_no": 8,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      }
+     ],
+     "survived_count": 2
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "모든 단계 통과 — 멀티데이 보유 매수 후보",
+     "step_name": "최종 후보",
+     "step_no": 9,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      }
+     ],
+     "survived_count": 2
+    }
+   ],
+   "scan_stats": {
+    "atr_pass": 2,
+    "candle_fetch_ok": 4,
+    "donchian_pass": 2,
+    "ema_uptrend_pass": 2,
+    "final_prepared": 2,
+    "last_run_at": "2026-09-22T07:50:00+09:00",
+    "universe_candidates": 0,
+    "universe_filtered": 0,
+    "universe_union": 0,
+    "volume_pass": 2
+   },
+   "scanned": [
+    "990101",
+    "990103"
+   ],
+   "ticker_prev_close": {
+    "990101": 15450,
+    "990102": null,
+    "990103": 24360,
+    "990104": null,
+    "990105": null,
+    "990106": null
+   }
+  },
+  "kojiro": {
+   "_bought_today": [],
+   "_candidates": {},
+   "_held_stage3": {},
+   "_scan_stage_counts": {},
+   "funnel_steps": [
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "전체 상장 종목 (시총/거래대금 필터 전 원천 유니버스)",
+     "step_name": "전체 상장 유니버스 (시총/거래대금 컷 전)",
+     "step_no": 1,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "시총 ≥ 500억 + 거래대금 ≥ 10억 컷 통과",
+     "step_name": "시총+거래대금 컷 통과",
+     "step_no": 2,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "1단계 진입 차단 (거래정지/관리/단기과열/투자유의/공매도과열/이상급등 등)",
+     "step_name": "1단계 진입 차단 통과 (거래정지/관리/단기과열/투자유의 등)",
+     "step_no": 3,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [
+      {
+       "name": "",
+       "reason": "워밍업봉 부족 10 < 80",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "reason": "일봉 응답 None",
+       "ticker": "990105"
+      }
+     ],
+     "excluded_count": 2,
+     "step_conditions": "일봉 ≥ 80봉 + 전일 종가 > 0",
+     "step_name": "일봉 fetch + 전일종가>0 + 워밍업봉 충족",
+     "step_no": 4,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 4
+    },
+    {
+     "excluded": [
+      {
+       "name": "",
+       "reason": "ATR/종가 0.58% ∉ [1.0%, 6.0%]",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "reason": "ATR/종가 0.33% ∉ [1.0%, 6.0%]",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "reason": "ATR/종가 0.36% ∉ [1.0%, 6.0%]",
+       "ticker": "990103"
+      }
+     ],
+     "excluded_count": 3,
+     "step_conditions": "ATR/종가 ∈ [1.0%, 6.0%]",
+     "step_name": "ATR/종가 변동성 밴드 통과 (1.0~6.0%)",
+     "step_no": 5,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 1
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "EMA 5/20/40 동가 아님 (스테이지 판별 가능)",
+     "step_name": "스테이지 판별 가능 (EMA 동가 제외)",
+     "step_no": 6,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 1
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "스테이지 1 + EMA 5/20/40 모두 우상향",
+     "step_name": "스테이지1 + 3선 우상향",
+     "step_no": 7,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 1
+    },
+    {
+     "excluded": [
+      {
+       "name": "",
+       "reason": "6→1 인접 False / 종가>EMA5 True (종가 54,908 EMA5 54,818)",
+       "ticker": "990106"
+      }
+     ],
+     "excluded_count": 1,
+     "step_conditions": "최근 5봉 내 6→1 전환 + 전일 종가 > EMA5",
+     "step_name": "6→1 전환 인접 + 종가>EMA5 (대순환 진입 확정)",
+     "step_no": 8,
+     "survived": [],
+     "survived_count": 0
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "모든 단계 통과 — 멀티데이 대순환 매수 후보",
+     "step_name": "최종 후보",
+     "step_no": 9,
+     "survived": [],
+     "survived_count": 0
+    }
+   ],
+   "scan_stats": {
+    "band_pass": 1,
+    "candle_fetch_ok": 4,
+    "final_prepared": 0,
+    "last_run_at": "2026-09-22T07:50:00+09:00",
+    "stage1_uptrend_pass": 1,
+    "stage_valid_pass": 1,
+    "strict_entry_pass": 0,
+    "universe_candidates": 0,
+    "universe_filtered": 0,
+    "universe_union": 0
+   },
+   "scanned": [],
+   "ticker_prev_close": {
+    "990101": null,
+    "990102": null,
+    "990103": null,
+    "990104": null,
+    "990105": null,
+    "990106": null
+   }
+  },
+  "long_tail_volatility": {
+   "_open_confirmed": {
+    "990101": {},
+    "990102": {},
+    "990104": {},
+    "990106": {}
+   },
+   "_prev_price": {},
+   "_targets": {
+    "990101": {
+     "boards": {},
+     "k": 0.7778,
+     "open_price": 0,
+     "prev_range": 90,
+     "target_offset": 70,
+     "target_offset_base": 70,
+     "target_price": 0
+    },
+    "990102": {
+     "boards": {},
+     "k": 0.7778,
+     "open_price": 0,
+     "prev_range": 90,
+     "target_offset": 70,
+     "target_offset_base": 70,
+     "target_price": 0
+    },
+    "990104": {
+     "boards": {},
+     "k": 0.5,
+     "open_price": 0,
+     "prev_range": 40,
+     "target_offset": 20,
+     "target_offset_base": 20,
+     "target_price": 0
+    },
+    "990106": {
+     "boards": {},
+     "k": 0.9804,
+     "open_price": 0,
+     "prev_range": 1020,
+     "target_offset": 1000,
+     "target_offset_base": 1000,
+     "target_price": 0
+    }
+   },
+   "_universe_candidate_tickers": [],
+   "funnel_steps": [
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "stock_master.list_by_filter 원천 유니버스 후보 (limit=100)",
+     "step_name": "거래량순위 + stock_master 기반 후보",
+     "step_no": 1,
+     "survived": [],
+     "survived_count": 0
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "시총 ≥ 1000억 + 거래대금 ≥ 200억",
+     "step_name": "시총 + 거래대금 필터 통과",
+     "step_no": 2,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "1단계 진입 차단 13건 (거래정지/관리/단기과열/투자유의/공매도과열/이상급등 등)",
+     "step_name": "1단계 진입 차단 13건 통과 (거래정지/관리/단기과열/투자유의 등)",
+     "step_no": 3,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [
+      {
+       "reason": "fetch 실패",
+       "ticker": "990105"
+      }
+     ],
+     "excluded_count": 1,
+     "step_conditions": "KIS fetch_daily_candles 정상 응답 (20일)",
+     "step_name": "일봉 fetch 통과",
+     "step_no": 4,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 5
+    },
+    {
+     "excluded": [
+      {
+       "reason": "prev_range=0 ≤ 0",
+       "ticker": "990103"
+      }
+     ],
+     "excluded_count": 1,
+     "step_conditions": "전일 Range > 0 + noise 영역 계산 통과",
+     "step_name": "전일 Range > 0 + noise 계산 통과",
+     "step_no": 5,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 4
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "연속 상한가 2일 미만 통과",
+     "step_name": "연속 상한가 필터 통과",
+     "step_no": 6,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 4
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "K값 노이즈 비율 + target_offset > 0",
+     "step_name": "K값 계산 + target_offset > 0",
+     "step_no": 7,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 4
+    }
+   ],
+   "scan_stats": {
+    "candle_fetch_ok": 5,
+    "consecutive_limit_pass": 4,
+    "final_prepared": 4,
+    "k_value_computed": 4,
+    "last_run_at": "2026-09-22T07:50:00+09:00",
+    "mcap_pass": 0,
+    "price_filtered": 0,
+    "trade_amount_pass": 0,
+    "universe_candidates": 0,
+    "universe_filtered": 0
+   },
+   "scanned": [
+    "990101",
+    "990102",
+    "990104",
+    "990106"
+   ],
+   "ticker_prev_close": {
+    "990101": 15450,
+    "990102": 33460,
+    "990103": null,
+    "990104": 30090,
+    "990105": null,
+    "990106": 54908
+   }
+  },
+  "vcp_breakout": {
+   "_bought_today": [],
+   "_breakout_summary_last": null,
+   "_breakout_watch": null,
+   "_candidates": {},
+   "_prev_price": {},
+   "funnel_steps": [
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "전체 상장 (지수 무제약) 원천 유니버스 후보 (시총/거래대금 컷 전)",
+     "step_name": "전체 상장 유니버스 (시총/거래대금 컷 전)",
+     "step_no": 1,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "시총 ≥ 100억 + 거래대금 ≥ 10억",
+     "step_name": "시총·거래대금 컷 통과",
+     "step_no": 2,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "1단계 진입 차단 13건 (거래정지/관리/단기과열/투자유의/공매도과열/이상급등 등)",
+     "step_name": "1단계 진입 차단 13건 통과 (거래정지/관리/단기과열/투자유의 등)",
+     "step_no": 3,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [
+      {
+       "name": "",
+       "reason": "가용 EMA 길이 -15 < 30 (KIS 한도)",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "reason": "KIS 일봉 응답 빈/None",
+       "ticker": "990105"
+      }
+     ],
+     "excluded_count": 2,
+     "step_conditions": "일봉 ≥ effective_ema_long(config 200, 읽기 100봉 기준 ~75 캡) + 우상향 20일 + 5",
+     "step_name": "일봉 fetch + 추세필터",
+     "step_no": 4,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 4
+    },
+    {
+     "excluded": [
+      {
+       "name": "",
+       "reason": "EMA 정렬 미충족 (종가 / 50EMA / 150EMA / 85EMA 정렬 또는 20일 우상향)",
+       "ticker": "990102"
+      }
+     ],
+     "excluded_count": 1,
+     "step_conditions": "종가 > 50EMA > 150EMA > 장기EMA(config 200, 읽기 100봉 기준 effective ~75) + effective 장기EMA 20일 우상향",
+     "step_name": "단기/중기/장기 EMA 정렬",
+     "step_no": 5,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 3
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "베이스 길이 25~75일 + 깊이 ≤ 30%",
+     "step_name": "베이스 자동 검출",
+     "step_no": 6,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 3
+    },
+    {
+     "excluded": [
+      {
+       "name": "",
+       "reason": "Pullback 점진 수축 미충족 (회수 2~4회 + 직전 대비 폭 감소 + 마지막 폭 ≤ 12%) — 베이스 평탄, swing 미검출 (변동성 < min_swing_atr_mult × ATR)",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "reason": "Pullback 점진 수축 미충족 (회수 2~4회 + 직전 대비 폭 감소 + 마지막 폭 ≤ 12%) — 베이스 평탄, swing 미검출 (변동성 < min_swing_atr_mult × ATR)",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "reason": "Pullback 점진 수축 미충족 (회수 2~4회 + 직전 대비 폭 감소 + 마지막 폭 ≤ 12%) — 베이스 평탄, swing 미검출 (변동성 < min_swing_atr_mult × ATR)",
+       "ticker": "990106"
+      }
+     ],
+     "excluded_count": 3,
+     "step_conditions": "2~4회 회수 + 직전 대비 폭 감소 + 마지막 폭 ≤ 12%",
+     "step_name": "Pullback 점진 수축",
+     "step_no": 7,
+     "survived": [],
+     "survived_count": 0
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "마지막 5일 평균 < 베이스 직전 20일 평균 × 70%",
+     "step_name": "거래량 수축",
+     "step_no": 8,
+     "survived": [],
+     "survived_count": 0
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "모든 단계 통과 — 매수 후보 등록 (base_high 돌파 대기)",
+     "step_name": "최종 prepared",
+     "step_no": 9,
+     "survived": [],
+     "survived_count": 0
+    }
+   ],
+   "scan_stats": {
+    "base_pass": 3,
+    "breakout_retreat_count": 0,
+    "breakout_seen_count": 0,
+    "candle_fetch_ok": 4,
+    "final_prepared": 0,
+    "last_run_at": "2026-09-22T07:50:00+09:00",
+    "latch_armed_count": 0,
+    "mcap_pass": 0,
+    "pullback_pass": 0,
+    "trend_filter_pass": 3,
+    "universe_candidates": 0,
+    "universe_filtered": 0,
+    "universe_union": 0,
+    "vol_gate_no_data": 0,
+    "vol_gate_pass": 0,
+    "vol_gate_reject_ext": 0,
+    "volume_contraction_pass": 0
+   },
+   "scanned": [],
+   "ticker_prev_close": {
+    "990101": null,
+    "990102": null,
+    "990103": null,
+    "990104": null,
+    "990105": null,
+    "990106": null
+   }
+  },
+  "volatility_breakout": {
+   "_failed_breakout_count": {},
+   "_open_confirmed": {
+    "990101": {},
+    "990102": {},
+    "990104": {},
+    "990106": {}
+   },
+   "_prev_price": {},
+   "_targets": {
+    "990101": {
+     "boards": {},
+     "k": 0.7778,
+     "open_price": 0,
+     "prev_range": 90,
+     "target_offset": 70,
+     "target_offset_base": 70,
+     "target_price": 0
+    },
+    "990102": {
+     "boards": {},
+     "k": 0.7778,
+     "open_price": 0,
+     "prev_range": 90,
+     "target_offset": 70,
+     "target_offset_base": 70,
+     "target_price": 0
+    },
+    "990104": {
+     "boards": {},
+     "k": 0.5,
+     "open_price": 0,
+     "prev_range": 40,
+     "target_offset": 20,
+     "target_offset_base": 20,
+     "target_price": 0
+    },
+    "990106": {
+     "boards": {},
+     "k": 0.9804,
+     "open_price": 0,
+     "prev_range": 1020,
+     "target_offset": 1000,
+     "target_offset_base": 1000,
+     "target_price": 0
+    }
+   },
+   "_universe_candidate_tickers": [],
+   "funnel_steps": [
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "stock_master.list_by_filter 원천 유니버스 후보 (limit=100)",
+     "step_name": "거래량순위 + stock_master 기반 후보",
+     "step_no": 1,
+     "survived": [],
+     "survived_count": 0
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "시총 ≥ 1000억 + 거래대금 ≥ 200억",
+     "step_name": "시총 + 거래대금 필터 통과",
+     "step_no": 2,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "1단계 진입 차단 13건 (거래정지/관리/단기과열/투자유의/공매도과열/이상급등 등)",
+     "step_name": "1단계 진입 차단 13건 통과 (거래정지/관리/단기과열/투자유의 등)",
+     "step_no": 3,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [
+      {
+       "reason": "fetch 실패",
+       "ticker": "990105"
+      }
+     ],
+     "excluded_count": 1,
+     "step_conditions": "KIS fetch_daily_candles 정상 응답 (20일)",
+     "step_name": "일봉 fetch 통과",
+     "step_no": 4,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 5
+    },
+    {
+     "excluded": [
+      {
+       "reason": "prev_range=0 ≤ 0",
+       "ticker": "990103"
+      }
+     ],
+     "excluded_count": 1,
+     "step_conditions": "전일 Range > 0 + noise 영역 계산 통과",
+     "step_name": "전일 Range > 0 + noise 계산 통과",
+     "step_no": 5,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 4
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "K값 노이즈 비율 + target_offset > 0",
+     "step_name": "K값 계산 + target_offset > 0",
+     "step_no": 6,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 4
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "관찰 전용(quant_filter_enabled=False) — F-Score/마법공식 스코어 기록, 배제 0",
+     "step_name": "퀀트 재무 게이트(관찰) — F-Score/마법공식 스코어 기록, 배제 0",
+     "step_no": 7,
+     "survived": [
+      {
+       "f_score": null,
+       "mf_rank": null,
+       "ticker": "990101"
+      },
+      {
+       "f_score": null,
+       "mf_rank": null,
+       "ticker": "990102"
+      },
+      {
+       "f_score": null,
+       "mf_rank": null,
+       "ticker": "990104"
+      },
+      {
+       "f_score": null,
+       "mf_rank": null,
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 4
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "관찰 전용(rs_filter_enabled=False) — 지수(KODEX200 069500) 대비 상대강도 스코어 기록, 배제 0",
+     "step_name": "상대강도 RS 관찰 — 지수(KODEX200) 대비 강세 스코어 기록, 배제 0",
+     "step_no": 8,
+     "survived": [
+      {
+       "rs": null,
+       "ticker": "990101"
+      },
+      {
+       "rs": null,
+       "ticker": "990102"
+      },
+      {
+       "rs": null,
+       "ticker": "990104"
+      },
+      {
+       "rs": null,
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 4
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "관찰 전용(rsi_filter_enabled=False) — RSI 과매수 극단(>85) 스코어 기록, 배제 0",
+     "step_name": "RSI 관찰 — 과매수 극단(>rsi_extreme_max) 스코어 기록, 배제 0",
+     "step_no": 9,
+     "survived": [
+      {
+       "rsi": null,
+       "ticker": "990101"
+      },
+      {
+       "rsi": null,
+       "ticker": "990102"
+      },
+      {
+       "rsi": null,
+       "ticker": "990104"
+      },
+      {
+       "rsi": null,
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 4
+    }
+   ],
+   "scan_stats": {
+    "candle_fetch_ok": 5,
+    "final_prepared": 4,
+    "k_value_computed": 4,
+    "last_run_at": "2026-09-22T07:50:00+09:00",
+    "mcap_pass": 0,
+    "price_filtered": 0,
+    "trade_amount_pass": 0,
+    "universe_candidates": 0,
+    "universe_filtered": 0
+   },
+   "scanned": [
+    "990101",
+    "990102",
+    "990104",
+    "990106"
+   ],
+   "ticker_prev_close": {
+    "990101": 15450,
+    "990102": 33460,
+    "990103": null,
+    "990104": 30090,
+    "990105": null,
+    "990106": 54908
+   }
+  }
+ },
+ "evening_held_today": {
+  "bull_flag_breakout": {
+   "_bought_today": [],
+   "_candidates": {},
+   "_prev_price": {},
+   "funnel_steps": [
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "전체 상장 (지수 무제약) 원천 유니버스 후보 (시총·거래대금 컷 전)",
+     "step_name": "유니버스 후보",
+     "step_no": 1,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "시총 ≥ 100억 + 거래대금 ≥ 15억",
+     "step_name": "유니버스 필터 통과 (시총·거래대금)",
+     "step_no": 2,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "1단계 진입 차단 13건 (거래정지/관리/단기과열/투자유의/공매도과열/이상급등 등)",
+     "step_name": "1단계 진입 차단 13건 통과 (거래정지/관리/단기과열/투자유의 등)",
+     "step_no": 3,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [
+      {
+       "name": "",
+       "reason": "일봉 길이 10 < 필요 24",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "reason": "KIS 일봉 응답 빈/None",
+       "ticker": "990105"
+      }
+     ],
+     "excluded_count": 2,
+     "step_conditions": "KIS 일봉 ≥ 23일",
+     "step_name": "일봉 fetch 성공",
+     "step_no": 4,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 4
+    },
+    {
+     "excluded": [
+      {
+       "name": "",
+       "reason": "폴 상승률 +0.9% < 임계 +15%",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "reason": "폴 상승률 +0.1% < 임계 +15%",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "reason": "폴 상승률 +0.5% < 임계 +15%",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "reason": "폴 상승률 +1.1% < 임계 +15%",
+       "ticker": "990106"
+      }
+     ],
+     "excluded_count": 4,
+     "step_conditions": "3~10영업일 누적 +15%↑ + 음봉 비율 ≤ 45%",
+     "step_name": "폴(Pole) 자동 검출",
+     "step_no": 5,
+     "survived": [],
+     "survived_count": 0
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "3~10영업일 조정 폭 ≤ 폴 폭 × 50.0%",
+     "step_name": "플래그(Flag) 자동 검출",
+     "step_no": 6,
+     "survived": [],
+     "survived_count": 0
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "플래그 평균 거래량 < 폴 평균 × 60%",
+     "step_name": "거래량 수축",
+     "step_no": 7,
+     "survived": [],
+     "survived_count": 0
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "ATR(14) > 0 (변동성 측정 가능)",
+     "step_name": "ATR(14) > 0",
+     "step_no": 8,
+     "survived": [],
+     "survived_count": 0
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "모든 단계 통과 — 매수 후보 등록",
+     "step_name": "최종 prepared",
+     "step_no": 9,
+     "survived": [],
+     "survived_count": 0
+    }
+   ],
+   "scan_stats": {
+    "atr_pass": 0,
+    "breakout_retreat_count": 0,
+    "breakout_seen_count": 0,
+    "candle_fetch_ok": 4,
+    "final_prepared": 0,
+    "flag_pass": 0,
+    "last_run_at": "2026-09-22T21:00:00+09:00",
+    "latch_armed_count": 0,
+    "min_trade_amount_failed": 0,
+    "pole_pass": 0,
+    "universe_candidates": 0,
+    "universe_filtered": 0,
+    "universe_union": 0,
+    "vol_gate_no_data": 0,
+    "vol_gate_pass": 0,
+    "vol_gate_reject_ext": 0,
+    "volume_contraction_pass": 0
+   },
+   "scanned": [],
+   "ticker_prev_close": {
+    "990101": null,
+    "990102": null,
+    "990103": null,
+    "990104": null,
+    "990105": null,
+    "990106": null
+   }
+  },
+  "donchian_swing": {
+   "_bought_today": [],
+   "_candidates": {
+    "990101": {
+     "atr": 90,
+     "donchian_high": 15380,
+     "ema60": 14131,
+     "prev_close": 15400
+    },
+    "990103": {
+     "atr": 90,
+     "donchian_high": 24310,
+     "ema60": 23305,
+     "prev_close": 24320
+    }
+   },
+   "_scan_stage_counts": {},
+   "_trading_days": [
+    "2026-04-22",
+    "2026-04-23",
+    "2026-04-24",
+    "2026-04-27",
+    "2026-04-28",
+    "2026-04-29",
+    "2026-04-30",
+    "2026-05-01",
+    "2026-05-04",
+    "2026-05-05",
+    "2026-05-06",
+    "2026-05-07",
+    "2026-05-08",
+    "2026-05-11",
+    "2026-05-12",
+    "2026-05-13",
+    "2026-05-14",
+    "2026-05-15",
+    "2026-05-18",
+    "2026-05-19",
+    "2026-05-20",
+    "2026-05-21",
+    "2026-05-22",
+    "2026-05-25",
+    "2026-05-26",
+    "2026-05-27",
+    "2026-05-28",
+    "2026-05-29",
+    "2026-06-01",
+    "2026-06-02",
+    "2026-06-03",
+    "2026-06-04",
+    "2026-06-05",
+    "2026-06-08",
+    "2026-06-09",
+    "2026-06-10",
+    "2026-06-11",
+    "2026-06-12",
+    "2026-06-15",
+    "2026-06-16",
+    "2026-06-17",
+    "2026-06-18",
+    "2026-06-19",
+    "2026-06-22",
+    "2026-06-23",
+    "2026-06-24",
+    "2026-06-25",
+    "2026-06-26",
+    "2026-06-29",
+    "2026-06-30",
+    "2026-07-01",
+    "2026-07-02",
+    "2026-07-03",
+    "2026-07-06",
+    "2026-07-07",
+    "2026-07-08",
+    "2026-07-09",
+    "2026-07-10",
+    "2026-07-13",
+    "2026-07-14",
+    "2026-07-15",
+    "2026-07-16",
+    "2026-07-17",
+    "2026-07-20",
+    "2026-07-21",
+    "2026-07-22",
+    "2026-07-23",
+    "2026-07-24",
+    "2026-07-27",
+    "2026-07-28",
+    "2026-07-29",
+    "2026-07-30",
+    "2026-07-31",
+    "2026-08-03",
+    "2026-08-04",
+    "2026-08-05",
+    "2026-08-06",
+    "2026-08-07",
+    "2026-08-10",
+    "2026-08-11",
+    "2026-08-12",
+    "2026-08-13",
+    "2026-08-14",
+    "2026-08-17",
+    "2026-08-18",
+    "2026-08-19",
+    "2026-08-20",
+    "2026-08-21",
+    "2026-08-24",
+    "2026-08-25",
+    "2026-08-26",
+    "2026-08-27",
+    "2026-08-28",
+    "2026-08-31",
+    "2026-09-01",
+    "2026-09-02",
+    "2026-09-03",
+    "2026-09-04",
+    "2026-09-07",
+    "2026-09-08",
+    "2026-09-09",
+    "2026-09-10",
+    "2026-09-11",
+    "2026-09-14",
+    "2026-09-15",
+    "2026-09-16",
+    "2026-09-17",
+    "2026-09-18",
+    "2026-09-21",
+    "2026-09-22"
+   ],
+   "funnel_steps": [
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "코스피200 + 코스닥150 합집합 (필터 전 원천 유니버스)",
+     "step_name": "코스피200+코스닥150 합집합",
+     "step_no": 1,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "시총 ≥ 500억 + 거래대금 ≥ 10억 컷 통과 (시총 6 → 거래대금 6)",
+     "step_name": "시총+거래대금 컷 통과",
+     "step_no": 2,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "1단계 진입 차단 13건 (거래정지/관리/단기과열/투자유의/공매도과열/이상급등 등)",
+     "step_name": "1단계 진입 차단 13건 통과 (거래정지/관리/단기과열/투자유의 등)",
+     "step_no": 3,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [
+      {
+       "name": "",
+       "reason": "KIS 일봉 응답 None",
+       "ticker": "990105"
+      }
+     ],
+     "excluded_count": 1,
+     "step_conditions": "KIS 일봉 ≥ 61일 + 전일 종가 > 0",
+     "step_name": "일봉 fetch + 전일종가>0",
+     "step_no": 4,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 4
+    },
+    {
+     "excluded": [
+      {
+       "name": "",
+       "reason": "전일 종가 33,520 ≤ 직전 20일 신고가 34,760",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "reason": "전일 종가 54,863 ≤ 직전 20일 신고가 55,318",
+       "ticker": "990106"
+      }
+     ],
+     "excluded_count": 2,
+     "step_conditions": "전일 종가 > 직전 20일 최고가",
+     "step_name": "신고가 돌파",
+     "step_no": 5,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      }
+     ],
+     "survived_count": 2
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "60일 EMA 우상향 + 전일 종가 > EMA",
+     "step_name": "EMA 우상향 + 종가>EMA",
+     "step_no": 6,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      }
+     ],
+     "survived_count": 2
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "당일 거래대금 ≥ 20일 평균 × 1.5",
+     "step_name": "거래대금 평균 대비 통과",
+     "step_no": 7,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      }
+     ],
+     "survived_count": 2
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "ATR(14) > 0 (변동성 측정 가능)",
+     "step_name": "ATR(14) > 0",
+     "step_no": 8,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      }
+     ],
+     "survived_count": 2
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "모든 단계 통과 — 멀티데이 보유 매수 후보",
+     "step_name": "최종 후보",
+     "step_no": 9,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      }
+     ],
+     "survived_count": 2
+    }
+   ],
+   "scan_stats": {
+    "atr_pass": 2,
+    "candle_fetch_ok": 4,
+    "donchian_pass": 2,
+    "ema_uptrend_pass": 2,
+    "final_prepared": 2,
+    "last_run_at": "2026-09-22T21:00:00+09:00",
+    "universe_candidates": 0,
+    "universe_filtered": 0,
+    "universe_union": 0,
+    "volume_pass": 2
+   },
+   "scanned": [
+    "990101",
+    "990103"
+   ],
+   "ticker_prev_close": {
+    "990101": 15400,
+    "990102": null,
+    "990103": 24320,
+    "990104": null,
+    "990105": null,
+    "990106": null
+   }
+  },
+  "kojiro": {
+   "_bought_today": [],
+   "_candidates": {
+    "990106": {
+     "atr": 1020.0,
+     "atr_ratio": 0.018592,
+     "ema_l": 53989.458842,
+     "ema_m": 54435.508643,
+     "ema_s": 54773.0,
+     "name": "",
+     "prev_close": 54863,
+     "stage": 1
+    }
+   },
+   "_held_stage3": {
+    "990106": [
+     "2026-09-22",
+     false
+    ]
+   },
+   "_scan_stage_counts": {},
+   "funnel_steps": [
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "전체 상장 종목 (시총/거래대금 필터 전 원천 유니버스)",
+     "step_name": "전체 상장 유니버스 (시총/거래대금 컷 전)",
+     "step_no": 1,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "시총 ≥ 500억 + 거래대금 ≥ 10억 컷 통과",
+     "step_name": "시총+거래대금 컷 통과",
+     "step_no": 2,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "1단계 진입 차단 (거래정지/관리/단기과열/투자유의/공매도과열/이상급등 등)",
+     "step_name": "1단계 진입 차단 통과 (거래정지/관리/단기과열/투자유의 등)",
+     "step_no": 3,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [
+      {
+       "name": "",
+       "reason": "워밍업봉 부족 9 < 80",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "reason": "일봉 응답 None",
+       "ticker": "990105"
+      }
+     ],
+     "excluded_count": 2,
+     "step_conditions": "일봉 ≥ 80봉 + 전일 종가 > 0",
+     "step_name": "일봉 fetch + 전일종가>0 + 워밍업봉 충족",
+     "step_no": 4,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 4
+    },
+    {
+     "excluded": [
+      {
+       "name": "",
+       "reason": "ATR/종가 0.58% ∉ [1.0%, 6.0%]",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "reason": "ATR/종가 0.33% ∉ [1.0%, 6.0%]",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "reason": "ATR/종가 0.37% ∉ [1.0%, 6.0%]",
+       "ticker": "990103"
+      }
+     ],
+     "excluded_count": 3,
+     "step_conditions": "ATR/종가 ∈ [1.0%, 6.0%]",
+     "step_name": "ATR/종가 변동성 밴드 통과 (1.0~6.0%)",
+     "step_no": 5,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 1
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "EMA 5/20/40 동가 아님 (스테이지 판별 가능)",
+     "step_name": "스테이지 판별 가능 (EMA 동가 제외)",
+     "step_no": 6,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 1
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "스테이지 1 + EMA 5/20/40 모두 우상향",
+     "step_name": "스테이지1 + 3선 우상향",
+     "step_no": 7,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 1
+    },
+    {
+     "excluded": [
+      {
+       "name": "",
+       "reason": "6→1 인접 False / 종가>EMA5 True (종가 54,863 EMA5 54,773)",
+       "ticker": "990106"
+      }
+     ],
+     "excluded_count": 1,
+     "step_conditions": "최근 5봉 내 6→1 전환 + 전일 종가 > EMA5",
+     "step_name": "6→1 전환 인접 + 종가>EMA5 (대순환 진입 확정)",
+     "step_no": 8,
+     "survived": [],
+     "survived_count": 0
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "모든 단계 통과 — 멀티데이 대순환 매수 후보",
+     "step_name": "최종 후보",
+     "step_no": 9,
+     "survived": [],
+     "survived_count": 0
+    }
+   ],
+   "scan_stats": {
+    "band_pass": 1,
+    "candle_fetch_ok": 4,
+    "final_prepared": 0,
+    "last_run_at": "2026-09-22T21:00:00+09:00",
+    "stage1_uptrend_pass": 1,
+    "stage_valid_pass": 1,
+    "strict_entry_pass": 0,
+    "universe_candidates": 0,
+    "universe_filtered": 0,
+    "universe_union": 0
+   },
+   "scanned": [
+    "990106"
+   ],
+   "ticker_prev_close": {
+    "990101": null,
+    "990102": null,
+    "990103": null,
+    "990104": null,
+    "990105": null,
+    "990106": null
+   }
+  },
+  "long_tail_volatility": {
+   "_open_confirmed": {
+    "990101": {},
+    "990102": {},
+    "990103": {},
+    "990104": {},
+    "990106": {}
+   },
+   "_prev_price": {},
+   "_targets": {
+    "990101": {
+     "boards": {},
+     "k": 0.7778,
+     "open_price": 0,
+     "prev_range": 90,
+     "target_offset": 70,
+     "target_offset_base": 70,
+     "target_price": 0
+    },
+    "990102": {
+     "boards": {},
+     "k": 0.7778,
+     "open_price": 0,
+     "prev_range": 90,
+     "target_offset": 70,
+     "target_offset_base": 70,
+     "target_price": 0
+    },
+    "990103": {
+     "boards": {},
+     "k": 0.7778,
+     "open_price": 0,
+     "prev_range": 90,
+     "target_offset": 70,
+     "target_offset_base": 70,
+     "target_price": 0
+    },
+    "990104": {
+     "boards": {},
+     "k": 0.5,
+     "open_price": 0,
+     "prev_range": 40,
+     "target_offset": 20,
+     "target_offset_base": 20,
+     "target_price": 0
+    },
+    "990106": {
+     "boards": {},
+     "k": 0.9804,
+     "open_price": 0,
+     "prev_range": 1020,
+     "target_offset": 1000,
+     "target_offset_base": 1000,
+     "target_price": 0
+    }
+   },
+   "_universe_candidate_tickers": [],
+   "funnel_steps": [
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "stock_master.list_by_filter 원천 유니버스 후보 (limit=100)",
+     "step_name": "거래량순위 + stock_master 기반 후보",
+     "step_no": 1,
+     "survived": [],
+     "survived_count": 0
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "시총 ≥ 1000억 + 거래대금 ≥ 200억",
+     "step_name": "시총 + 거래대금 필터 통과",
+     "step_no": 2,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "1단계 진입 차단 13건 (거래정지/관리/단기과열/투자유의/공매도과열/이상급등 등)",
+     "step_name": "1단계 진입 차단 13건 통과 (거래정지/관리/단기과열/투자유의 등)",
+     "step_no": 3,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [
+      {
+       "reason": "fetch 실패",
+       "ticker": "990105"
+      }
+     ],
+     "excluded_count": 1,
+     "step_conditions": "KIS fetch_daily_candles 정상 응답 (20일)",
+     "step_name": "일봉 fetch 통과",
+     "step_no": 4,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 5
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "전일 Range > 0 + noise 영역 계산 통과",
+     "step_name": "전일 Range > 0 + noise 계산 통과",
+     "step_no": 5,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 5
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "연속 상한가 2일 미만 통과",
+     "step_name": "연속 상한가 필터 통과",
+     "step_no": 6,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 5
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "K값 노이즈 비율 + target_offset > 0",
+     "step_name": "K값 계산 + target_offset > 0",
+     "step_no": 7,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 5
+    }
+   ],
+   "scan_stats": {
+    "candle_fetch_ok": 5,
+    "consecutive_limit_pass": 5,
+    "final_prepared": 5,
+    "k_value_computed": 5,
+    "last_run_at": "2026-09-22T21:00:00+09:00",
+    "mcap_pass": 0,
+    "price_filtered": 0,
+    "trade_amount_pass": 0,
+    "universe_candidates": 0,
+    "universe_filtered": 0
+   },
+   "scanned": [
+    "990101",
+    "990102",
+    "990103",
+    "990104",
+    "990106"
+   ],
+   "ticker_prev_close": {
+    "990101": 15400,
+    "990102": 33520,
+    "990103": 24320,
+    "990104": 30080,
+    "990105": null,
+    "990106": 54863
+   }
+  },
+  "vcp_breakout": {
+   "_bought_today": [],
+   "_breakout_summary_last": [
+    "2026-09-22",
+    [
+     0,
+     "na",
+     0,
+     0,
+     "-"
+    ]
+   ],
+   "_breakout_watch": {
+    "date": "2026-09-22",
+    "run_at": "12:00:00",
+    "tickers": {}
+   },
+   "_candidates": {},
+   "_prev_price": {},
+   "funnel_steps": [
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "전체 상장 (지수 무제약) 원천 유니버스 후보 (시총/거래대금 컷 전)",
+     "step_name": "전체 상장 유니버스 (시총/거래대금 컷 전)",
+     "step_no": 1,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "시총 ≥ 100억 + 거래대금 ≥ 10억",
+     "step_name": "시총·거래대금 컷 통과",
+     "step_no": 2,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "1단계 진입 차단 13건 (거래정지/관리/단기과열/투자유의/공매도과열/이상급등 등)",
+     "step_name": "1단계 진입 차단 13건 통과 (거래정지/관리/단기과열/투자유의 등)",
+     "step_no": 3,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [
+      {
+       "name": "",
+       "reason": "가용 EMA 길이 -16 < 30 (KIS 한도)",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "reason": "KIS 일봉 응답 빈/None",
+       "ticker": "990105"
+      }
+     ],
+     "excluded_count": 2,
+     "step_conditions": "일봉 ≥ effective_ema_long(config 200, 읽기 100봉 기준 ~75 캡) + 우상향 20일 + 5",
+     "step_name": "일봉 fetch + 추세필터",
+     "step_no": 4,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 4
+    },
+    {
+     "excluded": [
+      {
+       "name": "",
+       "reason": "EMA 정렬 미충족 (종가 / 50EMA / 150EMA / 84EMA 정렬 또는 20일 우상향)",
+       "ticker": "990102"
+      }
+     ],
+     "excluded_count": 1,
+     "step_conditions": "종가 > 50EMA > 150EMA > 장기EMA(config 200, 읽기 100봉 기준 effective ~75) + effective 장기EMA 20일 우상향",
+     "step_name": "단기/중기/장기 EMA 정렬",
+     "step_no": 5,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 3
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "베이스 길이 25~75일 + 깊이 ≤ 30%",
+     "step_name": "베이스 자동 검출",
+     "step_no": 6,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 3
+    },
+    {
+     "excluded": [
+      {
+       "name": "",
+       "reason": "Pullback 점진 수축 미충족 (회수 2~4회 + 직전 대비 폭 감소 + 마지막 폭 ≤ 12%) — 베이스 평탄, swing 미검출 (변동성 < min_swing_atr_mult × ATR)",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "reason": "Pullback 점진 수축 미충족 (회수 2~4회 + 직전 대비 폭 감소 + 마지막 폭 ≤ 12%) — 베이스 평탄, swing 미검출 (변동성 < min_swing_atr_mult × ATR)",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "reason": "Pullback 점진 수축 미충족 (회수 2~4회 + 직전 대비 폭 감소 + 마지막 폭 ≤ 12%) — 베이스 평탄, swing 미검출 (변동성 < min_swing_atr_mult × ATR)",
+       "ticker": "990106"
+      }
+     ],
+     "excluded_count": 3,
+     "step_conditions": "2~4회 회수 + 직전 대비 폭 감소 + 마지막 폭 ≤ 12%",
+     "step_name": "Pullback 점진 수축",
+     "step_no": 7,
+     "survived": [],
+     "survived_count": 0
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "마지막 5일 평균 < 베이스 직전 20일 평균 × 70%",
+     "step_name": "거래량 수축",
+     "step_no": 8,
+     "survived": [],
+     "survived_count": 0
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "모든 단계 통과 — 매수 후보 등록 (base_high 돌파 대기)",
+     "step_name": "최종 prepared",
+     "step_no": 9,
+     "survived": [],
+     "survived_count": 0
+    }
+   ],
+   "scan_stats": {
+    "base_pass": 3,
+    "breakout_retreat_count": 0,
+    "breakout_seen_count": 0,
+    "candle_fetch_ok": 4,
+    "final_prepared": 0,
+    "last_run_at": "2026-09-22T21:00:00+09:00",
+    "latch_armed_count": 0,
+    "mcap_pass": 0,
+    "pullback_pass": 0,
+    "trend_filter_pass": 3,
+    "universe_candidates": 0,
+    "universe_filtered": 0,
+    "universe_union": 0,
+    "vol_gate_no_data": 0,
+    "vol_gate_pass": 0,
+    "vol_gate_reject_ext": 0,
+    "volume_contraction_pass": 0
+   },
+   "scanned": [],
+   "ticker_prev_close": {
+    "990101": null,
+    "990102": null,
+    "990103": null,
+    "990104": null,
+    "990105": null,
+    "990106": null
+   }
+  },
+  "volatility_breakout": {
+   "_failed_breakout_count": {},
+   "_open_confirmed": {
+    "990101": {},
+    "990102": {},
+    "990103": {},
+    "990104": {},
+    "990106": {}
+   },
+   "_prev_price": {},
+   "_targets": {
+    "990101": {
+     "boards": {},
+     "k": 0.7778,
+     "open_price": 0,
+     "prev_range": 90,
+     "target_offset": 70,
+     "target_offset_base": 70,
+     "target_price": 0
+    },
+    "990102": {
+     "boards": {},
+     "k": 0.7778,
+     "open_price": 0,
+     "prev_range": 90,
+     "target_offset": 70,
+     "target_offset_base": 70,
+     "target_price": 0
+    },
+    "990103": {
+     "boards": {},
+     "k": 0.7778,
+     "open_price": 0,
+     "prev_range": 90,
+     "target_offset": 70,
+     "target_offset_base": 70,
+     "target_price": 0
+    },
+    "990104": {
+     "boards": {},
+     "k": 0.5,
+     "open_price": 0,
+     "prev_range": 40,
+     "target_offset": 20,
+     "target_offset_base": 20,
+     "target_price": 0
+    },
+    "990106": {
+     "boards": {},
+     "k": 0.9804,
+     "open_price": 0,
+     "prev_range": 1020,
+     "target_offset": 1000,
+     "target_offset_base": 1000,
+     "target_price": 0
+    }
+   },
+   "_universe_candidate_tickers": [],
+   "funnel_steps": [
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "stock_master.list_by_filter 원천 유니버스 후보 (limit=100)",
+     "step_name": "거래량순위 + stock_master 기반 후보",
+     "step_no": 1,
+     "survived": [],
+     "survived_count": 0
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "시총 ≥ 1000억 + 거래대금 ≥ 200억",
+     "step_name": "시총 + 거래대금 필터 통과",
+     "step_no": 2,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "1단계 진입 차단 13건 (거래정지/관리/단기과열/투자유의/공매도과열/이상급등 등)",
+     "step_name": "1단계 진입 차단 13건 통과 (거래정지/관리/단기과열/투자유의 등)",
+     "step_no": 3,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [
+      {
+       "reason": "fetch 실패",
+       "ticker": "990105"
+      }
+     ],
+     "excluded_count": 1,
+     "step_conditions": "KIS fetch_daily_candles 정상 응답 (20일)",
+     "step_name": "일봉 fetch 통과",
+     "step_no": 4,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 5
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "전일 Range > 0 + noise 영역 계산 통과",
+     "step_name": "전일 Range > 0 + noise 계산 통과",
+     "step_no": 5,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 5
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "K값 노이즈 비율 + target_offset > 0",
+     "step_name": "K값 계산 + target_offset > 0",
+     "step_no": 6,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 5
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "관찰 전용(quant_filter_enabled=False) — F-Score/마법공식 스코어 기록, 배제 0",
+     "step_name": "퀀트 재무 게이트(관찰) — F-Score/마법공식 스코어 기록, 배제 0",
+     "step_no": 7,
+     "survived": [
+      {
+       "f_score": null,
+       "mf_rank": null,
+       "ticker": "990101"
+      },
+      {
+       "f_score": null,
+       "mf_rank": null,
+       "ticker": "990102"
+      },
+      {
+       "f_score": null,
+       "mf_rank": null,
+       "ticker": "990103"
+      },
+      {
+       "f_score": null,
+       "mf_rank": null,
+       "ticker": "990104"
+      },
+      {
+       "f_score": null,
+       "mf_rank": null,
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 5
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "관찰 전용(rs_filter_enabled=False) — 지수(KODEX200 069500) 대비 상대강도 스코어 기록, 배제 0",
+     "step_name": "상대강도 RS 관찰 — 지수(KODEX200) 대비 강세 스코어 기록, 배제 0",
+     "step_no": 8,
+     "survived": [
+      {
+       "rs": null,
+       "ticker": "990101"
+      },
+      {
+       "rs": null,
+       "ticker": "990102"
+      },
+      {
+       "rs": null,
+       "ticker": "990103"
+      },
+      {
+       "rs": null,
+       "ticker": "990104"
+      },
+      {
+       "rs": null,
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 5
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "관찰 전용(rsi_filter_enabled=False) — RSI 과매수 극단(>85) 스코어 기록, 배제 0",
+     "step_name": "RSI 관찰 — 과매수 극단(>rsi_extreme_max) 스코어 기록, 배제 0",
+     "step_no": 9,
+     "survived": [
+      {
+       "rsi": null,
+       "ticker": "990101"
+      },
+      {
+       "rsi": null,
+       "ticker": "990102"
+      },
+      {
+       "rsi": null,
+       "ticker": "990103"
+      },
+      {
+       "rsi": null,
+       "ticker": "990104"
+      },
+      {
+       "rsi": null,
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 5
+    }
+   ],
+   "scan_stats": {
+    "candle_fetch_ok": 5,
+    "final_prepared": 5,
+    "k_value_computed": 5,
+    "last_run_at": "2026-09-22T21:00:00+09:00",
+    "mcap_pass": 0,
+    "price_filtered": 0,
+    "trade_amount_pass": 0,
+    "universe_candidates": 0,
+    "universe_filtered": 0
+   },
+   "scanned": [
+    "990101",
+    "990102",
+    "990103",
+    "990104",
+    "990106"
+   ],
+   "ticker_prev_close": {
+    "990101": 15400,
+    "990102": 33520,
+    "990103": 24320,
+    "990104": 30080,
+    "990105": null,
+    "990106": 54863
+   }
+  }
+ },
+ "intraday_today_bar": {
+  "bull_flag_breakout": {
+   "_bought_today": [],
+   "_candidates": {},
+   "_prev_price": {},
+   "funnel_steps": [
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "전체 상장 (지수 무제약) 원천 유니버스 후보 (시총·거래대금 컷 전)",
+     "step_name": "유니버스 후보",
+     "step_no": 1,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "시총 ≥ 100억 + 거래대금 ≥ 15억",
+     "step_name": "유니버스 필터 통과 (시총·거래대금)",
+     "step_no": 2,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "1단계 진입 차단 13건 (거래정지/관리/단기과열/투자유의/공매도과열/이상급등 등)",
+     "step_name": "1단계 진입 차단 13건 통과 (거래정지/관리/단기과열/투자유의 등)",
+     "step_no": 3,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [
+      {
+       "name": "",
+       "reason": "일봉 길이 10 < 필요 24",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "reason": "KIS 일봉 응답 빈/None",
+       "ticker": "990105"
+      }
+     ],
+     "excluded_count": 2,
+     "step_conditions": "KIS 일봉 ≥ 23일",
+     "step_name": "일봉 fetch 성공",
+     "step_no": 4,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 4
+    },
+    {
+     "excluded": [
+      {
+       "name": "",
+       "reason": "폴 상승률 +0.9% < 임계 +15%",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "reason": "폴 상승률 +0.1% < 임계 +15%",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "reason": "폴 상승률 +0.5% < 임계 +15%",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "reason": "폴 상승률 +1.1% < 임계 +15%",
+       "ticker": "990106"
+      }
+     ],
+     "excluded_count": 4,
+     "step_conditions": "3~10영업일 누적 +15%↑ + 음봉 비율 ≤ 45%",
+     "step_name": "폴(Pole) 자동 검출",
+     "step_no": 5,
+     "survived": [],
+     "survived_count": 0
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "3~10영업일 조정 폭 ≤ 폴 폭 × 50.0%",
+     "step_name": "플래그(Flag) 자동 검출",
+     "step_no": 6,
+     "survived": [],
+     "survived_count": 0
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "플래그 평균 거래량 < 폴 평균 × 60%",
+     "step_name": "거래량 수축",
+     "step_no": 7,
+     "survived": [],
+     "survived_count": 0
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "ATR(14) > 0 (변동성 측정 가능)",
+     "step_name": "ATR(14) > 0",
+     "step_no": 8,
+     "survived": [],
+     "survived_count": 0
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "모든 단계 통과 — 매수 후보 등록",
+     "step_name": "최종 prepared",
+     "step_no": 9,
+     "survived": [],
+     "survived_count": 0
+    }
+   ],
+   "scan_stats": {
+    "atr_pass": 0,
+    "breakout_retreat_count": 0,
+    "breakout_seen_count": 0,
+    "candle_fetch_ok": 4,
+    "final_prepared": 0,
+    "flag_pass": 0,
+    "last_run_at": "2026-09-22T10:00:00+09:00",
+    "latch_armed_count": 0,
+    "min_trade_amount_failed": 0,
+    "pole_pass": 0,
+    "universe_candidates": 0,
+    "universe_filtered": 0,
+    "universe_union": 0,
+    "vol_gate_no_data": 0,
+    "vol_gate_pass": 0,
+    "vol_gate_reject_ext": 0,
+    "volume_contraction_pass": 0
+   },
+   "scanned": [],
+   "ticker_prev_close": {
+    "990101": null,
+    "990102": null,
+    "990103": null,
+    "990104": null,
+    "990105": null,
+    "990106": null
+   }
+  },
+  "donchian_swing": {
+   "_bought_today": [],
+   "_candidates": {
+    "990101": {
+     "atr": 90,
+     "donchian_high": 15380,
+     "ema60": 14131,
+     "prev_close": 15400
+    },
+    "990103": {
+     "atr": 90,
+     "donchian_high": 24310,
+     "ema60": 23305,
+     "prev_close": 24320
+    }
+   },
+   "_scan_stage_counts": {},
+   "_trading_days": [
+    "2026-04-22",
+    "2026-04-23",
+    "2026-04-24",
+    "2026-04-27",
+    "2026-04-28",
+    "2026-04-29",
+    "2026-04-30",
+    "2026-05-01",
+    "2026-05-04",
+    "2026-05-05",
+    "2026-05-06",
+    "2026-05-07",
+    "2026-05-08",
+    "2026-05-11",
+    "2026-05-12",
+    "2026-05-13",
+    "2026-05-14",
+    "2026-05-15",
+    "2026-05-18",
+    "2026-05-19",
+    "2026-05-20",
+    "2026-05-21",
+    "2026-05-22",
+    "2026-05-25",
+    "2026-05-26",
+    "2026-05-27",
+    "2026-05-28",
+    "2026-05-29",
+    "2026-06-01",
+    "2026-06-02",
+    "2026-06-03",
+    "2026-06-04",
+    "2026-06-05",
+    "2026-06-08",
+    "2026-06-09",
+    "2026-06-10",
+    "2026-06-11",
+    "2026-06-12",
+    "2026-06-15",
+    "2026-06-16",
+    "2026-06-17",
+    "2026-06-18",
+    "2026-06-19",
+    "2026-06-22",
+    "2026-06-23",
+    "2026-06-24",
+    "2026-06-25",
+    "2026-06-26",
+    "2026-06-29",
+    "2026-06-30",
+    "2026-07-01",
+    "2026-07-02",
+    "2026-07-03",
+    "2026-07-06",
+    "2026-07-07",
+    "2026-07-08",
+    "2026-07-09",
+    "2026-07-10",
+    "2026-07-13",
+    "2026-07-14",
+    "2026-07-15",
+    "2026-07-16",
+    "2026-07-17",
+    "2026-07-20",
+    "2026-07-21",
+    "2026-07-22",
+    "2026-07-23",
+    "2026-07-24",
+    "2026-07-27",
+    "2026-07-28",
+    "2026-07-29",
+    "2026-07-30",
+    "2026-07-31",
+    "2026-08-03",
+    "2026-08-04",
+    "2026-08-05",
+    "2026-08-06",
+    "2026-08-07",
+    "2026-08-10",
+    "2026-08-11",
+    "2026-08-12",
+    "2026-08-13",
+    "2026-08-14",
+    "2026-08-17",
+    "2026-08-18",
+    "2026-08-19",
+    "2026-08-20",
+    "2026-08-21",
+    "2026-08-24",
+    "2026-08-25",
+    "2026-08-26",
+    "2026-08-27",
+    "2026-08-28",
+    "2026-08-31",
+    "2026-09-01",
+    "2026-09-02",
+    "2026-09-03",
+    "2026-09-04",
+    "2026-09-07",
+    "2026-09-08",
+    "2026-09-09",
+    "2026-09-10",
+    "2026-09-11",
+    "2026-09-14",
+    "2026-09-15",
+    "2026-09-16",
+    "2026-09-17",
+    "2026-09-18",
+    "2026-09-21",
+    "2026-09-22"
+   ],
+   "funnel_steps": [
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "코스피200 + 코스닥150 합집합 (필터 전 원천 유니버스)",
+     "step_name": "코스피200+코스닥150 합집합",
+     "step_no": 1,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "시총 ≥ 500억 + 거래대금 ≥ 10억 컷 통과 (시총 6 → 거래대금 6)",
+     "step_name": "시총+거래대금 컷 통과",
+     "step_no": 2,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "1단계 진입 차단 13건 (거래정지/관리/단기과열/투자유의/공매도과열/이상급등 등)",
+     "step_name": "1단계 진입 차단 13건 통과 (거래정지/관리/단기과열/투자유의 등)",
+     "step_no": 3,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [
+      {
+       "name": "",
+       "reason": "KIS 일봉 응답 None",
+       "ticker": "990105"
+      }
+     ],
+     "excluded_count": 1,
+     "step_conditions": "KIS 일봉 ≥ 61일 + 전일 종가 > 0",
+     "step_name": "일봉 fetch + 전일종가>0",
+     "step_no": 4,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 4
+    },
+    {
+     "excluded": [
+      {
+       "name": "",
+       "reason": "전일 종가 33,520 ≤ 직전 20일 신고가 34,760",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "reason": "전일 종가 54,863 ≤ 직전 20일 신고가 55,318",
+       "ticker": "990106"
+      }
+     ],
+     "excluded_count": 2,
+     "step_conditions": "전일 종가 > 직전 20일 최고가",
+     "step_name": "신고가 돌파",
+     "step_no": 5,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      }
+     ],
+     "survived_count": 2
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "60일 EMA 우상향 + 전일 종가 > EMA",
+     "step_name": "EMA 우상향 + 종가>EMA",
+     "step_no": 6,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      }
+     ],
+     "survived_count": 2
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "당일 거래대금 ≥ 20일 평균 × 1.5",
+     "step_name": "거래대금 평균 대비 통과",
+     "step_no": 7,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      }
+     ],
+     "survived_count": 2
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "ATR(14) > 0 (변동성 측정 가능)",
+     "step_name": "ATR(14) > 0",
+     "step_no": 8,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      }
+     ],
+     "survived_count": 2
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "모든 단계 통과 — 멀티데이 보유 매수 후보",
+     "step_name": "최종 후보",
+     "step_no": 9,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      }
+     ],
+     "survived_count": 2
+    }
+   ],
+   "scan_stats": {
+    "atr_pass": 2,
+    "candle_fetch_ok": 4,
+    "donchian_pass": 2,
+    "ema_uptrend_pass": 2,
+    "final_prepared": 2,
+    "last_run_at": "2026-09-22T10:00:00+09:00",
+    "universe_candidates": 0,
+    "universe_filtered": 0,
+    "universe_union": 0,
+    "volume_pass": 2
+   },
+   "scanned": [
+    "990101",
+    "990103"
+   ],
+   "ticker_prev_close": {
+    "990101": 15400,
+    "990102": null,
+    "990103": 24320,
+    "990104": null,
+    "990105": null,
+    "990106": null
+   }
+  },
+  "kojiro": {
+   "_bought_today": [],
+   "_candidates": {},
+   "_held_stage3": {},
+   "_scan_stage_counts": {},
+   "funnel_steps": [
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "전체 상장 종목 (시총/거래대금 필터 전 원천 유니버스)",
+     "step_name": "전체 상장 유니버스 (시총/거래대금 컷 전)",
+     "step_no": 1,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "시총 ≥ 500억 + 거래대금 ≥ 10억 컷 통과",
+     "step_name": "시총+거래대금 컷 통과",
+     "step_no": 2,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "1단계 진입 차단 (거래정지/관리/단기과열/투자유의/공매도과열/이상급등 등)",
+     "step_name": "1단계 진입 차단 통과 (거래정지/관리/단기과열/투자유의 등)",
+     "step_no": 3,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [
+      {
+       "name": "",
+       "reason": "워밍업봉 부족 9 < 80",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "reason": "일봉 응답 None",
+       "ticker": "990105"
+      }
+     ],
+     "excluded_count": 2,
+     "step_conditions": "일봉 ≥ 80봉 + 전일 종가 > 0",
+     "step_name": "일봉 fetch + 전일종가>0 + 워밍업봉 충족",
+     "step_no": 4,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 4
+    },
+    {
+     "excluded": [
+      {
+       "name": "",
+       "reason": "ATR/종가 0.58% ∉ [1.0%, 6.0%]",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "reason": "ATR/종가 0.33% ∉ [1.0%, 6.0%]",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "reason": "ATR/종가 0.37% ∉ [1.0%, 6.0%]",
+       "ticker": "990103"
+      }
+     ],
+     "excluded_count": 3,
+     "step_conditions": "ATR/종가 ∈ [1.0%, 6.0%]",
+     "step_name": "ATR/종가 변동성 밴드 통과 (1.0~6.0%)",
+     "step_no": 5,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 1
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "EMA 5/20/40 동가 아님 (스테이지 판별 가능)",
+     "step_name": "스테이지 판별 가능 (EMA 동가 제외)",
+     "step_no": 6,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 1
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "스테이지 1 + EMA 5/20/40 모두 우상향",
+     "step_name": "스테이지1 + 3선 우상향",
+     "step_no": 7,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 1
+    },
+    {
+     "excluded": [
+      {
+       "name": "",
+       "reason": "6→1 인접 False / 종가>EMA5 True (종가 54,863 EMA5 54,773)",
+       "ticker": "990106"
+      }
+     ],
+     "excluded_count": 1,
+     "step_conditions": "최근 5봉 내 6→1 전환 + 전일 종가 > EMA5",
+     "step_name": "6→1 전환 인접 + 종가>EMA5 (대순환 진입 확정)",
+     "step_no": 8,
+     "survived": [],
+     "survived_count": 0
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "모든 단계 통과 — 멀티데이 대순환 매수 후보",
+     "step_name": "최종 후보",
+     "step_no": 9,
+     "survived": [],
+     "survived_count": 0
+    }
+   ],
+   "scan_stats": {
+    "band_pass": 1,
+    "candle_fetch_ok": 4,
+    "final_prepared": 0,
+    "last_run_at": "2026-09-22T10:00:00+09:00",
+    "stage1_uptrend_pass": 1,
+    "stage_valid_pass": 1,
+    "strict_entry_pass": 0,
+    "universe_candidates": 0,
+    "universe_filtered": 0,
+    "universe_union": 0
+   },
+   "scanned": [],
+   "ticker_prev_close": {
+    "990101": null,
+    "990102": null,
+    "990103": null,
+    "990104": null,
+    "990105": null,
+    "990106": null
+   }
+  },
+  "long_tail_volatility": {
+   "_open_confirmed": {
+    "990101": {},
+    "990102": {},
+    "990103": {},
+    "990104": {},
+    "990106": {}
+   },
+   "_prev_price": {},
+   "_targets": {
+    "990101": {
+     "boards": {},
+     "k": 0.7778,
+     "open_price": 0,
+     "prev_range": 90,
+     "target_offset": 70,
+     "target_offset_base": 70,
+     "target_price": 0
+    },
+    "990102": {
+     "boards": {},
+     "k": 0.7778,
+     "open_price": 0,
+     "prev_range": 90,
+     "target_offset": 70,
+     "target_offset_base": 70,
+     "target_price": 0
+    },
+    "990103": {
+     "boards": {},
+     "k": 0.7778,
+     "open_price": 0,
+     "prev_range": 90,
+     "target_offset": 70,
+     "target_offset_base": 70,
+     "target_price": 0
+    },
+    "990104": {
+     "boards": {},
+     "k": 0.5,
+     "open_price": 0,
+     "prev_range": 40,
+     "target_offset": 20,
+     "target_offset_base": 20,
+     "target_price": 0
+    },
+    "990106": {
+     "boards": {},
+     "k": 0.9804,
+     "open_price": 0,
+     "prev_range": 1020,
+     "target_offset": 1000,
+     "target_offset_base": 1000,
+     "target_price": 0
+    }
+   },
+   "_universe_candidate_tickers": [],
+   "funnel_steps": [
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "stock_master.list_by_filter 원천 유니버스 후보 (limit=100)",
+     "step_name": "거래량순위 + stock_master 기반 후보",
+     "step_no": 1,
+     "survived": [],
+     "survived_count": 0
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "시총 ≥ 1000억 + 거래대금 ≥ 200억",
+     "step_name": "시총 + 거래대금 필터 통과",
+     "step_no": 2,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "1단계 진입 차단 13건 (거래정지/관리/단기과열/투자유의/공매도과열/이상급등 등)",
+     "step_name": "1단계 진입 차단 13건 통과 (거래정지/관리/단기과열/투자유의 등)",
+     "step_no": 3,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [
+      {
+       "reason": "fetch 실패",
+       "ticker": "990105"
+      }
+     ],
+     "excluded_count": 1,
+     "step_conditions": "KIS fetch_daily_candles 정상 응답 (20일)",
+     "step_name": "일봉 fetch 통과",
+     "step_no": 4,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 5
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "전일 Range > 0 + noise 영역 계산 통과",
+     "step_name": "전일 Range > 0 + noise 계산 통과",
+     "step_no": 5,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 5
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "연속 상한가 2일 미만 통과",
+     "step_name": "연속 상한가 필터 통과",
+     "step_no": 6,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 5
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "K값 노이즈 비율 + target_offset > 0",
+     "step_name": "K값 계산 + target_offset > 0",
+     "step_no": 7,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 5
+    }
+   ],
+   "scan_stats": {
+    "candle_fetch_ok": 5,
+    "consecutive_limit_pass": 5,
+    "final_prepared": 5,
+    "k_value_computed": 5,
+    "last_run_at": "2026-09-22T10:00:00+09:00",
+    "mcap_pass": 0,
+    "price_filtered": 0,
+    "trade_amount_pass": 0,
+    "universe_candidates": 0,
+    "universe_filtered": 0
+   },
+   "scanned": [
+    "990101",
+    "990102",
+    "990103",
+    "990104",
+    "990106"
+   ],
+   "ticker_prev_close": {
+    "990101": 15400,
+    "990102": 33520,
+    "990103": 24320,
+    "990104": 30080,
+    "990105": null,
+    "990106": 54863
+   }
+  },
+  "vcp_breakout": {
+   "_bought_today": [],
+   "_breakout_summary_last": [
+    "2026-09-22",
+    [
+     0,
+     "na",
+     0,
+     0,
+     "-"
+    ]
+   ],
+   "_breakout_watch": {
+    "date": "2026-09-22",
+    "run_at": "01:00:00",
+    "tickers": {}
+   },
+   "_candidates": {},
+   "_prev_price": {},
+   "funnel_steps": [
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "전체 상장 (지수 무제약) 원천 유니버스 후보 (시총/거래대금 컷 전)",
+     "step_name": "전체 상장 유니버스 (시총/거래대금 컷 전)",
+     "step_no": 1,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "시총 ≥ 100억 + 거래대금 ≥ 10억",
+     "step_name": "시총·거래대금 컷 통과",
+     "step_no": 2,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "1단계 진입 차단 13건 (거래정지/관리/단기과열/투자유의/공매도과열/이상급등 등)",
+     "step_name": "1단계 진입 차단 13건 통과 (거래정지/관리/단기과열/투자유의 등)",
+     "step_no": 3,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [
+      {
+       "name": "",
+       "reason": "가용 EMA 길이 -16 < 30 (KIS 한도)",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "reason": "KIS 일봉 응답 빈/None",
+       "ticker": "990105"
+      }
+     ],
+     "excluded_count": 2,
+     "step_conditions": "일봉 ≥ effective_ema_long(config 200, 읽기 100봉 기준 ~75 캡) + 우상향 20일 + 5",
+     "step_name": "일봉 fetch + 추세필터",
+     "step_no": 4,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 4
+    },
+    {
+     "excluded": [
+      {
+       "name": "",
+       "reason": "EMA 정렬 미충족 (종가 / 50EMA / 150EMA / 84EMA 정렬 또는 20일 우상향)",
+       "ticker": "990102"
+      }
+     ],
+     "excluded_count": 1,
+     "step_conditions": "종가 > 50EMA > 150EMA > 장기EMA(config 200, 읽기 100봉 기준 effective ~75) + effective 장기EMA 20일 우상향",
+     "step_name": "단기/중기/장기 EMA 정렬",
+     "step_no": 5,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 3
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "베이스 길이 25~75일 + 깊이 ≤ 30%",
+     "step_name": "베이스 자동 검출",
+     "step_no": 6,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 3
+    },
+    {
+     "excluded": [
+      {
+       "name": "",
+       "reason": "Pullback 점진 수축 미충족 (회수 2~4회 + 직전 대비 폭 감소 + 마지막 폭 ≤ 12%) — 베이스 평탄, swing 미검출 (변동성 < min_swing_atr_mult × ATR)",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "reason": "Pullback 점진 수축 미충족 (회수 2~4회 + 직전 대비 폭 감소 + 마지막 폭 ≤ 12%) — 베이스 평탄, swing 미검출 (변동성 < min_swing_atr_mult × ATR)",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "reason": "Pullback 점진 수축 미충족 (회수 2~4회 + 직전 대비 폭 감소 + 마지막 폭 ≤ 12%) — 베이스 평탄, swing 미검출 (변동성 < min_swing_atr_mult × ATR)",
+       "ticker": "990106"
+      }
+     ],
+     "excluded_count": 3,
+     "step_conditions": "2~4회 회수 + 직전 대비 폭 감소 + 마지막 폭 ≤ 12%",
+     "step_name": "Pullback 점진 수축",
+     "step_no": 7,
+     "survived": [],
+     "survived_count": 0
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "마지막 5일 평균 < 베이스 직전 20일 평균 × 70%",
+     "step_name": "거래량 수축",
+     "step_no": 8,
+     "survived": [],
+     "survived_count": 0
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "모든 단계 통과 — 매수 후보 등록 (base_high 돌파 대기)",
+     "step_name": "최종 prepared",
+     "step_no": 9,
+     "survived": [],
+     "survived_count": 0
+    }
+   ],
+   "scan_stats": {
+    "base_pass": 3,
+    "breakout_retreat_count": 0,
+    "breakout_seen_count": 0,
+    "candle_fetch_ok": 4,
+    "final_prepared": 0,
+    "last_run_at": "2026-09-22T10:00:00+09:00",
+    "latch_armed_count": 0,
+    "mcap_pass": 0,
+    "pullback_pass": 0,
+    "trend_filter_pass": 3,
+    "universe_candidates": 0,
+    "universe_filtered": 0,
+    "universe_union": 0,
+    "vol_gate_no_data": 0,
+    "vol_gate_pass": 0,
+    "vol_gate_reject_ext": 0,
+    "volume_contraction_pass": 0
+   },
+   "scanned": [],
+   "ticker_prev_close": {
+    "990101": null,
+    "990102": null,
+    "990103": null,
+    "990104": null,
+    "990105": null,
+    "990106": null
+   }
+  },
+  "volatility_breakout": {
+   "_failed_breakout_count": {},
+   "_open_confirmed": {
+    "990101": {},
+    "990102": {},
+    "990103": {},
+    "990104": {},
+    "990106": {}
+   },
+   "_prev_price": {},
+   "_targets": {
+    "990101": {
+     "boards": {},
+     "k": 0.7778,
+     "open_price": 0,
+     "prev_range": 90,
+     "target_offset": 70,
+     "target_offset_base": 70,
+     "target_price": 0
+    },
+    "990102": {
+     "boards": {},
+     "k": 0.7778,
+     "open_price": 0,
+     "prev_range": 90,
+     "target_offset": 70,
+     "target_offset_base": 70,
+     "target_price": 0
+    },
+    "990103": {
+     "boards": {},
+     "k": 0.7778,
+     "open_price": 0,
+     "prev_range": 90,
+     "target_offset": 70,
+     "target_offset_base": 70,
+     "target_price": 0
+    },
+    "990104": {
+     "boards": {},
+     "k": 0.5,
+     "open_price": 0,
+     "prev_range": 40,
+     "target_offset": 20,
+     "target_offset_base": 20,
+     "target_price": 0
+    },
+    "990106": {
+     "boards": {},
+     "k": 0.9804,
+     "open_price": 0,
+     "prev_range": 1020,
+     "target_offset": 1000,
+     "target_offset_base": 1000,
+     "target_price": 0
+    }
+   },
+   "_universe_candidate_tickers": [],
+   "funnel_steps": [
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "stock_master.list_by_filter 원천 유니버스 후보 (limit=100)",
+     "step_name": "거래량순위 + stock_master 기반 후보",
+     "step_no": 1,
+     "survived": [],
+     "survived_count": 0
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "시총 ≥ 1000억 + 거래대금 ≥ 200억",
+     "step_name": "시총 + 거래대금 필터 통과",
+     "step_no": 2,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "1단계 진입 차단 13건 (거래정지/관리/단기과열/투자유의/공매도과열/이상급등 등)",
+     "step_name": "1단계 진입 차단 13건 통과 (거래정지/관리/단기과열/투자유의 등)",
+     "step_no": 3,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990105"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 6
+    },
+    {
+     "excluded": [
+      {
+       "reason": "fetch 실패",
+       "ticker": "990105"
+      }
+     ],
+     "excluded_count": 1,
+     "step_conditions": "KIS fetch_daily_candles 정상 응답 (20일)",
+     "step_name": "일봉 fetch 통과",
+     "step_no": 4,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 5
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "전일 Range > 0 + noise 영역 계산 통과",
+     "step_name": "전일 Range > 0 + noise 계산 통과",
+     "step_no": 5,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 5
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "K값 노이즈 비율 + target_offset > 0",
+     "step_name": "K값 계산 + target_offset > 0",
+     "step_no": 6,
+     "survived": [
+      {
+       "name": "",
+       "ticker": "990101"
+      },
+      {
+       "name": "",
+       "ticker": "990102"
+      },
+      {
+       "name": "",
+       "ticker": "990103"
+      },
+      {
+       "name": "",
+       "ticker": "990104"
+      },
+      {
+       "name": "",
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 5
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "관찰 전용(quant_filter_enabled=False) — F-Score/마법공식 스코어 기록, 배제 0",
+     "step_name": "퀀트 재무 게이트(관찰) — F-Score/마법공식 스코어 기록, 배제 0",
+     "step_no": 7,
+     "survived": [
+      {
+       "f_score": null,
+       "mf_rank": null,
+       "ticker": "990101"
+      },
+      {
+       "f_score": null,
+       "mf_rank": null,
+       "ticker": "990102"
+      },
+      {
+       "f_score": null,
+       "mf_rank": null,
+       "ticker": "990103"
+      },
+      {
+       "f_score": null,
+       "mf_rank": null,
+       "ticker": "990104"
+      },
+      {
+       "f_score": null,
+       "mf_rank": null,
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 5
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "관찰 전용(rs_filter_enabled=False) — 지수(KODEX200 069500) 대비 상대강도 스코어 기록, 배제 0",
+     "step_name": "상대강도 RS 관찰 — 지수(KODEX200) 대비 강세 스코어 기록, 배제 0",
+     "step_no": 8,
+     "survived": [
+      {
+       "rs": null,
+       "ticker": "990101"
+      },
+      {
+       "rs": null,
+       "ticker": "990102"
+      },
+      {
+       "rs": null,
+       "ticker": "990103"
+      },
+      {
+       "rs": null,
+       "ticker": "990104"
+      },
+      {
+       "rs": null,
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 5
+    },
+    {
+     "excluded": [],
+     "excluded_count": 0,
+     "step_conditions": "관찰 전용(rsi_filter_enabled=False) — RSI 과매수 극단(>85) 스코어 기록, 배제 0",
+     "step_name": "RSI 관찰 — 과매수 극단(>rsi_extreme_max) 스코어 기록, 배제 0",
+     "step_no": 9,
+     "survived": [
+      {
+       "rsi": null,
+       "ticker": "990101"
+      },
+      {
+       "rsi": null,
+       "ticker": "990102"
+      },
+      {
+       "rsi": null,
+       "ticker": "990103"
+      },
+      {
+       "rsi": null,
+       "ticker": "990104"
+      },
+      {
+       "rsi": null,
+       "ticker": "990106"
+      }
+     ],
+     "survived_count": 5
+    }
+   ],
+   "scan_stats": {
+    "candle_fetch_ok": 5,
+    "final_prepared": 5,
+    "k_value_computed": 5,
+    "last_run_at": "2026-09-22T10:00:00+09:00",
+    "mcap_pass": 0,
+    "price_filtered": 0,
+    "trade_amount_pass": 0,
+    "universe_candidates": 0,
+    "universe_filtered": 0
+   },
+   "scanned": [
+    "990101",
+    "990102",
+    "990103",
+    "990104",
+    "990106"
+   ],
+   "ticker_prev_close": {
+    "990101": 15400,
+    "990102": 33520,
+    "990103": 24320,
+    "990104": 30080,
+    "990105": null,
+    "990106": 54863
+   }
+  }
+ }
+}

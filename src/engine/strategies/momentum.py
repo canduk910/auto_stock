@@ -97,7 +97,7 @@ class MomentumStrategy(StrategyBase):
         """사이클 185 — cross-day 전일등락율 캐시 초기화. 익일 첫 tick 거짓돌파 차단."""
         self._prev_prdy_rate.clear()
 
-    async def prepare(self) -> None:
+    async def prepare(self, *, as_of: date | None = None) -> None:
         """준비 작업 없음 — 실시간 본질 영역 영구 영속.
 
         momentum 전략 = 전일종가 +29% 돌파 순간 실시간 감지 영역 영구 영속.

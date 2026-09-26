@@ -281,13 +281,16 @@ class KojiroStrategy(StrategyBase):
 
     # ────────────────────────── prepare ──────────────────────────
 
-    async def prepare(self) -> None:
+    async def prepare(self, *, as_of: date | None = None) -> None:
         """장 시작 전: 유니버스 스캔 → 일봉 fetch → 대순환 스테이지/ATR 밴드/strict entry 검증."""
         import asyncio
 
         from src.db.stock_master_daily import get_recent_daily_normalized
 
-        self._candidates = {}
+        as_of_date, preview = self._resolve_prepare_as_of(as_of)
+        keep = self._preview_keep_tickers() if preview else set()
+        skip = self._preview_skip_tickers() if preview else set()
+        self._candidates = {t: v for t, v in self._candidates.items() if t in keep}
         stats = _empty_scan_stats()
         self._scan_stats = stats
         self._reset_funnel_steps(FUNNEL_STAGES)
@@ -302,7 +305,7 @@ class KojiroStrategy(StrategyBase):
                 retry_attempt + 1,
             )
             await asyncio.sleep(30)
-            self._candidates = {}
+            self._candidates = {t: v for t, v in self._candidates.items() if t in keep}
             stats = _empty_scan_stats()
             self._scan_stats = stats
             self._reset_funnel_steps(FUNNEL_STAGES)
@@ -338,11 +341,11 @@ class KojiroStrategy(StrategyBase):
             stats["last_run_at"] = datetime.now(KST).isoformat()
             return
 
-        today_str = datetime.now(KST).strftime("%Y%m%d")
+        today_str = as_of_date.strftime("%Y%m%d")
 
         # cycle363 — ①′ 일봉 신선도 기준(「직전 영업일」) prepare 당 1회 계산.
         # 범위 밖(현행 달력 판정 유지) = `recompute_held_atr` 계열(아래 별도 호출부).
-        expected_head = await self._resolve_expected_daily_head()
+        expected_head = await self._resolve_expected_daily_head(as_of)
 
         async def _fetch_one(ticker: str):
             try:
@@ -378,6 +381,8 @@ class KojiroStrategy(StrategyBase):
         prepared = 0
         held_marked = 0
         for ticker, candles in fetched:
+            if preview and ticker in skip:
+                continue
             name = _resolve_ticker_name(ticker)
             if candles is None:
                 fetch_ex.append({"ticker": ticker, "name": name, "reason": "일봉 응답 None"})
@@ -553,20 +558,23 @@ class KojiroStrategy(StrategyBase):
         # cycle273 — `[kojiro_band_observe]` shadow 관측 1블록. 점수 확정 뒤,
         # `_scanned_tickers` 대입 전. never-raise(leaf) + 호출 실패도 absorb 로 흡수.
         try:
-            observe_band(band_raw, ranked_final, held_only, scores=scores)
+            if not preview:
+                observe_band(band_raw, ranked_final, held_only, scores=scores)
         except Exception:
             absorb_band_call_failure("prepare")
         # cycle344 — `[kojiro_macd_observe]` shadow 관측. 별도 try 다: 한 관측기의
         # 실패가 다른 관측기까지 삼키면 무엇이 죽었는지 D+1 에 가릴 수 없다.
         try:
-            observe_macd(macd_raw, ranked_final, held_only)
+            if not preview:
+                observe_macd(macd_raw, ranked_final, held_only)
         except Exception:
             absorb_macd_call_failure("prepare")
         # cycle348 — role=stage6_gc 확장. `observe_macd` 와 별도 try(M8 차단) —
         # 한쪽 관측기의 실패가 다른 쪽 표본까지 삼키면 안 된다. 흡수기는 같은
         # MACD 계열(`absorb_macd_call_failure`) — 밴드 관측기로 오귀인 금지.
         try:
-            observe_macd_stage6(macd_s6_raw)
+            if not preview:
+                observe_macd_stage6(macd_s6_raw)
         except Exception:
             absorb_macd_call_failure("prepare")
         self._scanned_tickers = ranked_final + held_only

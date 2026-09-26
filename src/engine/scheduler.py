@@ -38,7 +38,7 @@ from src.engine.strategies.kojiro import KojiroStrategy
 from src.engine.strategies.long_tail_volatility import LongTailVolatilityStrategy
 from src.engine.strategies.vcp_breakout import VcpBreakoutStrategy
 from src.engine.strategies.volatility_breakout import VolatilityBreakoutStrategy
-from src.engine import data_load_tasks  # refactor-review B1 위임 모듈
+from src.engine import data_load_tasks, funnel_capture  # refactor-review B1 위임 모듈 · cycle364 라이브 준비 leaf
 from src.engine import open_price_observe, open_price_rest  # cycle264 관측 leaf / cycle272 기준가 leaf (라인 상한 보호)
 from src.engine import market_op_subscribe, quote_token_refresh  # cycle292 VI 구독 leaf / cycle269 토큰 갱신 leaf (라인 상한 보호)
 from src.realtime.handler import (
@@ -68,7 +68,7 @@ TIME_STOCK_MASTER_BASICS_REFRESH = time(16, 10)  # 사이클 126 — KIS CTPF100
 TIME_STOCK_MASTER_MASTER_LOAD = time(16, 30)  # 사이클 129 — KIS 종목 마스터 파일 (kospi_code.mst / kosdaq_code.mst) 일괄 적재 (basics task 직후 20분 마진, domain-consult 의제 5 옵션 A)
 TIME_STOCK_MASTER_FINANCIAL_LOAD = time(16, 40)  # 사이클 C3 — 퀀트 재무 (마법공식/F-Score-7) 주1회 적재 (master 16:30 후 stagger)
 TIME_STOCK_MASTER_DAILY_PURGE = time(16, 15)  # 사이클 150 — stock_master_daily T-150일 retention cron. ⚠️ 원래는 '일봉 적재 직후 15분 마진' 이었으나 적재가 cycle273f/cycle283 으로 밀려 이제 적재보다 **4시간 15분 앞**이다(그날 적재분은 다음 날 purge 대상). 전일까지의 retention 경계만 다루므로 행위 무영향
-TIME_EVENING_FUNNEL_CAPTURE = time(16, 20)  # 사이클 171 — 저녁 잠정 funnel 캡처 (16:10 basics 직후, 16:30 마스터 직전; 일봉 적재(20:30)보다 앞이라 이 캡처는 여전히 전일 봉 기준 — 전략 오늘봉 절단이 날짜 비교라 결과 동일. 운영자 밤 후보 확인)
+TIME_EVENING_FUNNEL_CAPTURE = time(21, 0)  # cycle364 — 저녁 A1 미리보기(다음 거래일): 20:30 일봉 적재 뒤 · 20:45~20:51 토큰 체인 뒤 · 21:30 정산 전
 TIME_NXT_POST_BUY_STOP = time(19, 50)      # NXT 애프터 신규 매수 중단 (안전 마감, 변경 금지)
 TIME_RECOMMENDATION = time(20, 0)          # AI자문 (Phase 0, 2026-05-15: 19:50 → 20:00 이동 — 백테스트 검증 정합성)
 TIME_FULL_UNIVERSE_LOAD = time(20, 0, 5)   # 사이클 101 — 전체 유니버스 적재 (AI자문 직후 5초 마진)
@@ -185,24 +185,38 @@ def flush_swing_rest_poll_collector() -> None:
     _swing_rest_poll_collector.clear()
 
 
-async def capture_funnel_snapshots(registry, *, is_provisional: bool = False) -> int:
-    """사이클 171 — funnel snapshot 단계별 캡처 공통 헬퍼 (3 호출처 공유).
+async def capture_funnel_snapshots(
+    registry, *, is_provisional: bool = False, target_date=None, skipped_out: dict | None = None,
+) -> int:
+    """사이클 171 — funnel snapshot 단계별 캡처 공통 헬퍼 (4 호출처 공유).
 
     `_auto_capture_funnel_snapshots` (09:30 자동) 의 "registry 순회 → 각 strategy
-    `_funnel_steps` 단계별 + step_no=99 insert_snapshot" 로직을 추출. 3 호출처 공유:
-    - (a) 09:30 자동 (`_auto_capture_funnel_snapshots` 위임, is_provisional=False)
-    - (b) 16:20 저녁 (`_evening_funnel_capture_once`, is_provisional=True)
-    - (c) 수동 trigger (`routes/strategy_funnel.py::trigger_snapshot`, is_provisional=False)
+    `_funnel_steps` 단계별 + step_no=99 insert_snapshot" 로직을 추출. 4 호출처 공유:
+    - (a) 09:30 자동 (`_auto_capture_funnel_snapshots`, is_provisional=False, target_date=오늘 명시)
+    - (b) 21:00 저녁 A1(`_evening_funnel_capture_once` → leaf `funnel_capture.evening_capture_once`,
+      is_provisional=True, target_date=다음 거래일)
+    - (c) 수동 trigger(is_provisional=False) · (d) 부팅 +600초 레거시(True, target_date=오늘)
 
-    흐름 (사이클 39 인프라 + 사이클 170 in-place upsert 영속):
-    1. `registry.all()` 순회 — `_funnel_steps` 가 있는 전략만
-    2. 각 전략 단계별 (`step_no=1..N`) row + 최종 (`step_no=99`) row insert_snapshot
-    3. 한 전략 처리 중 예외 → 다른 전략 계속 (graceful, 사이클 88 답습)
-    4. `_funnel_steps` 빈 리스트 → 단계 row 0건 + 최종 row 만 (사이클 132 momentum 영구 제외)
+    흐름 (사이클 39 인프라 + 사이클 170 in-place upsert 영속 + cycle364 라벨 가드):
+    1. `label = target_date or 오늘(KST)` — 이 라벨로 캡처 여부를 가른다(아래 2).
+    2. `registry.all()` 순회 — 전략마다 먼저 leaf `funnel_capture.capture_skip_reason(strategy,
+       label, today, is_provisional=is_provisional)` 를 물어 `_live_prepare_meta` 가 이
+       라벨(진행 중·실패·기준일 불일치·확정↔저녁 프리뷰)과 맞는지 가른다. `None` 이면 캡처,
+       그 밖이면 그 전략을 건너뛰고 사유를 `skipped`(완료 로그) + `skipped_out`(호출자, F4)
+       에 남긴다.
+    3. 통과한 전략만 `_funnel_steps` 단계별 (`step_no=1..N`) row + 최종 (`step_no=99`) row
+       insert_snapshot.
+    4. 한 전략 처리 중 예외 → 다른 전략 계속 (graceful, 사이클 88 답습)
+    5. `_funnel_steps` 빈 리스트 → 단계 row 0건 + 최종 row 만 (사이클 132 momentum 영구 제외)
 
     Args:
         registry: StrategyRegistry — `all()` 순회.
-        is_provisional: 잠정(True) / 확정(False, 기본) — insert_snapshot 전파.
+        is_provisional: 잠정(True) / 확정(False, 기본) — `capture_skip_reason` 판정 + insert_snapshot 전파.
+        target_date: 캡처 라벨. `None` 이면 오늘(KST) — 수동 trigger 가 기본값, 09:30·레거시는
+            오늘을, 21:00 저녁 A1 은 다음 거래일을 명시로 넘긴다.
+        skipped_out: (F4) dict 를 주면 건너뛴 전략마다 `skipped_out[sid] = 사유` 를 채운다
+            (사유 문자열은 완료 로그 `skipped=` 와 동일). 반환값(int)은 이 인자와 무관하게
+            불변 — 09:30 자동·21:00 저녁 A1·레거시 호출자는 이 인자를 넘기지 않는다.
 
     Returns:
         저장된 row 수 (saved_count).
@@ -211,13 +225,19 @@ async def capture_funnel_snapshots(registry, *, is_provisional: bool = False) ->
     - 본체 예외 graceful (호출자 try/except 흡수)
     - DB JSONB cap 200/20 (사이클 34 strategy_funnel.py 자동 적용)
     - check_exit_signal / check_buy_signal funnel hook 0건 (사이클 143/170 SAFETY 영속)
+
+    `scheduler.py` 는 라인 상한 <3,900(cycle257 영구 상한)이라, 이 함수 본체는 위임 없이
+    직접 여기 있다 — 저녁 A1·라이브 준비 leaf 로 옮긴 것은 `funnel_capture.py` 뿐이다.
     """
     from datetime import datetime as _dt
     from src.db.strategy_funnel import insert_snapshot
     from src.engine.scanner import KST_TZ as _KST_TZ
 
     today_kst = _dt.now(_KST_TZ).date()
+    label = target_date or today_kst
     saved_count = 0
+    skipped: list[str] = []
+    from src.engine.funnel_capture import capture_skip_reason as _skip_reason
 
     try:
         strategies = registry.all()
@@ -228,6 +248,12 @@ async def capture_funnel_snapshots(registry, *, is_provisional: bool = False) ->
     for strategy in strategies:
         sid = getattr(strategy, "strategy_id", "")
         if not sid:
+            continue
+        _reason = _skip_reason(strategy, label, today_kst, is_provisional=is_provisional)
+        if _reason:
+            skipped.append(f"{sid}:{_reason}")
+            if skipped_out is not None:
+                skipped_out[sid] = _reason
             continue
         try:
             # 사이클 200 (D-1) — 원자적 shallow copy. capture 는 step 마다 await(yield)
@@ -244,7 +270,7 @@ async def capture_funnel_snapshots(registry, *, is_provisional: bool = False) ->
         for step in funnel_steps:
             try:
                 row = await insert_snapshot(
-                    target_date=today_kst,
+                    target_date=label,
                     strategy_id=sid,
                     step_no=int(step.get("step_no", 0)),
                     step_name=str(step.get("step_name", "")),
@@ -269,7 +295,7 @@ async def capture_funnel_snapshots(registry, *, is_provisional: bool = False) ->
             get_scanned = getattr(strategy, "get_scanned_tickers", None)
             scanned = list(get_scanned()) if callable(get_scanned) else []
             row = await insert_snapshot(
-                target_date=today_kst,
+                target_date=label,
                 strategy_id=sid,
                 step_no=99,
                 step_name="최종 prepared (auto)",
@@ -285,8 +311,8 @@ async def capture_funnel_snapshots(registry, *, is_provisional: bool = False) ->
             logger.exception("[funnel_snapshot] %s 최종 단계 INSERT 실패", sid)
 
     logger.info(
-        "[funnel_snapshot] 캡처 완료 — target_date=%s saved=%d provisional=%s",
-        today_kst.isoformat(), saved_count, is_provisional,
+        "[funnel_snapshot] 캡처 완료 — target_date=%s saved=%d provisional=%s skipped=%s",
+        label.isoformat(), saved_count, is_provisional, ",".join(skipped),
     )
     # 사이클 72 hotfix: write_log 제거 — logger.info → _DbLogHandler 위임 단일 INSERT
     return saved_count
@@ -727,8 +753,9 @@ class TradingScheduler:
                 self._stock_master_daily_purge_task_loop()
             )
 
-            # 사이클 171 (2026-06-22) — 매일 16:20 KST 저녁 잠정 funnel 캡처 task.
-            # 16:10 basics → 16:20 funnel → 16:30 마스터 → 20:30 일봉(cycle283 D2) 순서 (운영자 밤 후보 확인).
+            # 사이클 171 (2026-06-22) — 매일 저녁 잠정 funnel 캡처 task.
+            # cycle364 S1 — 20:30 일봉 적재 뒤 · 21:00 캡처(다음 거래일 미리보기, PV-1 적용) ·
+            # 21:30 정산 전(`TIME_EVENING_FUNNEL_CAPTURE`). 본체 = leaf `funnel_capture`.
             # domain-consult 의제 4 우선순위 2 + 사이클 134 task_loop_helper 패턴 답습.
             self._evening_funnel_capture_task = asyncio.create_task(
                 self._evening_funnel_capture_task_loop()
@@ -754,19 +781,15 @@ class TradingScheduler:
                     for sid in ("volatility_breakout", "long_tail_volatility"):
                         strategy = self.registry.get(sid)
                         if strategy and strategy.config.enabled:
-                            try:
-                                await strategy.prepare()
-                            except Exception:
-                                logger.exception("재 prepare 실패: %s", sid)
+                            # wrapper 는 never-raise(cycle364 R7) — 실패 로그는
+                            # `[live_prepare]` 행이 옛 문구를 담아 남긴다.
+                            await funnel_capture.live_prepare_one(strategy, phase="presubscribe")
                 for _sid in _SWING_POLL_STRATEGIES:
                     ds = self.registry.get(_sid)
                     if ds and ds.config.enabled and not ds.get_scanned_tickers():
                         logger.info("스윙 전략(%s) 유니버스 비어있음 → prepare 재실행", _sid)
                         await write_log("INFO", f"스윙({_sid}) 유니버스 비어있어 prepare 재실행")
-                        try:
-                            await ds.prepare()
-                        except Exception:
-                            logger.exception("재 prepare 실패: %s", _sid)
+                        await funnel_capture.live_prepare_one(ds, phase="presubscribe")
 
                 presub = self._collect_presubscribe_tickers()
                 if presub:
@@ -2661,10 +2684,11 @@ class TradingScheduler:
                 if _reprepare_cap is not None:
                     _reprepare_cap.mark_emitted(sid)
 
-            try:
-                await strategy.prepare()
-            except Exception:
-                logger.exception("재 prepare 실패: %s", sid)
+            if not await funnel_capture.live_prepare_one(strategy, phase="intraday_empty"):
+                # cycle364 F5 — 여기서 `logger.error` 를 또 찍지 않는다. wrapper 가 이미
+                # `[live_prepare] … phase=intraday_empty 재 prepare 실패` ERROR 1행을 남긴다
+                # (grep 연속성은 그 마커 안에 옛 문구가 그대로 있다). 이 자리에서 또 찍으면
+                # 같은 실패 1건이 ERROR 2행이 되어 21:30 `top_patterns` 집계가 배가된다.
                 try:
                     await write_log("ERROR", f"{sid} 재 prepare 실패")
                 except Exception:
@@ -3124,68 +3148,8 @@ class TradingScheduler:
         await data_load_tasks.stock_master_financial_load_task_loop(self, wait_time=TIME_STOCK_MASTER_FINANCIAL_LOAD)
 
     async def _evening_funnel_capture_once(self) -> dict:
-        """사이클 171 — 16:20 저녁 잠정 funnel 캡처 본체 (한 번 실행).
-
-        흐름 (domain-consult 의제 4 우선순위 2):
-        1. 일봉 테이블 비어있지 않음 확인 — `count_all() > 0` 폴링(⚠️ 그날 적재 완료 대기가 아니다 — F-D8-a)
-           (사이클 163 boot prepare 가드 패턴, 일봉 미적재 시 빈 funnel 영속 방지)
-        2. 5 전략 `prepare()` 호출 (기존 KIS-fetch 그대로 — 16:20 한가, 속도 무관.
-           HIGH DB일봉 전환은 사이클 173). graceful (사이클 88) — 전략별 실패 격리
-        3. `capture_funnel_snapshots(registry, is_provisional=True)` 단계별 + step_no=99 캡처
-
-        안전 가드 (관찰성 한정 — 매매 hot path diff 0):
-        - 16:10 basics → 16:20 prepare → 16:30 마스터 → 20:30 일봉(cycle283 D2) 순서; 캡처는 전일 봉 기준(전략 절단이 날짜 비교라 동일)
-        - 사이클 158 재시도 hook + 사이클 32 R4 보유/익일청산 보호 영속
-        - 사이클 132 momentum funnel 영구 제외 (prepare 호출은 하되 _funnel_steps 미적재)
-        """
-        from src.db.stock_master_daily import count_all as _daily_count_all
-
-        # (1) 일봉 테이블 비어있지 않음 확인 — 전체 행 수 > 0 만 본다(공허 게이트, F-D8-a 정직화. 사이클 163 패턴, 5분 cap)
-        _WAIT_CAP_SECS = 300
-        _POLL_SECS = 10
-        waited = 0
-        while waited < _WAIT_CAP_SECS:
-            try:
-                cnt = await _daily_count_all()
-            except Exception:
-                logger.exception("[evening_funnel] count_all 예외 graceful")
-                cnt = 0
-            if cnt > 0:
-                if waited > 0:
-                    logger.info(
-                        "[evening_funnel] stock_master_daily count=%d (waited=%ds)",
-                        cnt, waited,
-                    )
-                break
-            await asyncio.sleep(_POLL_SECS)
-            waited += _POLL_SECS
-
-        # (2) 5 전략 prepare (graceful — 전략별 실패 격리, 사이클 88 답습)
-        prepared = 0
-        try:
-            strategies = self.registry.all()
-        except Exception:
-            logger.exception("[evening_funnel] registry 접근 실패 graceful")
-            strategies = []
-
-        for strategy in strategies:
-            prep = getattr(strategy, "prepare", None)
-            if not callable(prep):
-                continue
-            try:
-                await prep()
-                prepared += 1
-            except Exception:
-                logger.exception(
-                    "[evening_funnel] %s prepare 실패 graceful",
-                    getattr(strategy, "strategy_id", "?"),
-                )
-                continue
-
-        # (3) 잠정 funnel 캡처 (is_provisional=True)
-        saved = await capture_funnel_snapshots(self.registry, is_provisional=True)
-
-        return {"prepared": prepared, "saved": saved}
+        """cycle364 — 저녁 A1 본체는 leaf `funnel_capture.evening_capture_once` (§4.6)."""
+        return await funnel_capture.evening_capture_once(self)
 
     async def _evening_funnel_capture_task_loop(self) -> None:
         """refactor-review B1 — 본체 data_load_tasks 위임 (scheduler 재비대 시정)."""
@@ -3341,7 +3305,7 @@ class TradingScheduler:
         """사이클 39 (2026-05-22) — 09:30 자동 funnel snapshot.
 
         사이클 171 (2026-06-22) — 공통 헬퍼 `capture_funnel_snapshots(registry, *,
-        is_provisional)` 위임 (3 호출처 공유: 09:30 자동 / 16:20 저녁 / 수동 trigger).
+        is_provisional)` 위임 (3 호출처 공유: 09:30 자동 / 21:00 저녁 A1 / 수동 trigger).
         09:30 자동 = 확정 캡처 (is_provisional=False) — 행위 보존 (단계별 + step_no=99).
 
         흐름 (헬퍼 본체):
@@ -3354,7 +3318,8 @@ class TradingScheduler:
         - DB JSONB cap 200/20 (사이클 34 strategy_funnel.py 자동 적용)
         - 일일 1회 가드는 호출자 (`_auto_funnel_snapshot_done_today`) 가 보장
         """
-        await capture_funnel_snapshots(self.registry, is_provisional=False)
+        from src.db._kst import today_kst as _today_kst
+        await capture_funnel_snapshots(self.registry, is_provisional=False, target_date=_today_kst())
 
     async def _report_tick_coverage(self) -> None:
         """현재 TICK 구독 종목 중 최근 60초 내 tick 수신 비율을 로깅한다 (Phase D + 가설 B 확장 2026-05-12).

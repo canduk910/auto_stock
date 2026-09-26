@@ -274,11 +274,13 @@ async def stock_master_financial_load_task_loop(scheduler: Any, *, wait_time) ->
 
 
 async def evening_funnel_capture_task_loop(scheduler: Any, *, wait_time) -> None:
-    """사이클 171 — 매일 16:20 KST 저녁 잠정 funnel 캡처 task facade.
+    """사이클 171 — 매일 저녁 잠정 funnel 캡처 task facade.
 
-    16:00 일봉 → 16:10 basics → 16:20 funnel → 16:30 마스터 순서 (운영자 밤 후보 확인).
-    본체(`_evening_funnel_capture_once`) 는 capture_funnel_snapshots 다중 호출처 결합으로
-    scheduler 잔류 — 여기선 once_callable 로 참조만.
+    cycle364 S1 — `wait_time=TIME_EVENING_FUNNEL_CAPTURE`(21:00, 20:30 일봉 적재 뒤·
+    21:30 정산 전). 본체는 leaf `funnel_capture.evening_capture_once`(다음 거래일
+    미리보기 A1, `prepare(as_of=)`). `_evening_funnel_capture_once` 는 그 leaf 로 가는
+    3줄 위임이다(§4.6). start() 직후 +600초 즉시 1회는 S1 임시 레거시 재준비를 탄다
+    (`decision=legacy_reprepare`) — S2 가 이 분기를 없앤다.
     """
     from src.engine.task_loop_helper import run_periodic_task_loop
 
@@ -292,7 +294,7 @@ async def evening_funnel_capture_task_loop(scheduler: Any, *, wait_time) -> None
     await run_periodic_task_loop(
         scheduler=scheduler,
         task_label="evening_funnel_capture",
-        wait_time=wait_time,  # 16:20 KST
+        wait_time=wait_time,  # cycle364 — 21:00 KST(TIME_EVENING_FUNNEL_CAPTURE)
         once_callable=scheduler._evening_funnel_capture_once,
         record_fn=_noop_record,
         flush_fn=_noop_flush,

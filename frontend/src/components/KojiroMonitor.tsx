@@ -1,5 +1,5 @@
 // 고지로(kojiro) 대순환 스윙 전용 모니터링 패널 (대시보드 kojiro 탭).
-// kojiro 는 enabled=False 다크런치 — 데이터는 매일 저녁 16:20 스캔 기준(실시간 아님).
+// kojiro 는 enabled=False 다크런치 — 데이터는 매일 저녁 21:00 스캔 기준(실시간 아님).
 // 대부분 API 노출값을 렌더하며, ATR 밴드·청산선·스테이지 분포는 클라이언트 계산.
 import { useMemo } from 'react'
 import type { StrategyInfo, KojiroTarget, TickerPrice } from '../types/trading'
@@ -100,7 +100,7 @@ export default function KojiroMonitor({
   if (!kojiro) {
     return (
       <div data-testid="kojiro-monitor-empty" className="text-sm text-gray-400 py-4 text-center">
-        고지로 전략 데이터가 아직 없습니다 (매일 저녁 16:20 스캔 후 표시).
+        고지로 전략 데이터가 아직 없습니다 (매일 저녁 21:00 스캔 후 표시).
       </div>
     )
   }
@@ -127,7 +127,7 @@ export default function KojiroMonitor({
         <div className={`mt-1 ${kojiro.enabled ? 'text-amber-700' : 'text-violet-600'}`}>
           {kojiro.enabled
             ? `실매매 진행 (enabled=true · 비중 ${Math.round((kojiro.weight ?? 0) * 100)}%). 다음 영업일 09:05~09:30 스캔·매수 발생. 데이터는 스캔 시점 기준.`
-            : `실매매 없음 (enabled=false · 비중 ${Math.round((kojiro.weight ?? 0) * 100)}%). 데이터는 매일 저녁 16:20 스캔 기준 — 장중 실시간 갱신 아님.`}
+            : `실매매 없음 (enabled=false · 비중 ${Math.round((kojiro.weight ?? 0) * 100)}%). 데이터는 매일 저녁 21:00 스캔 기준 — 장중 실시간 갱신 아님.`}
         </div>
       </div>
 
@@ -200,7 +200,7 @@ export default function KojiroMonitor({
             })()}
           </div>
         ) : (
-          <div className="text-xs text-gray-400">아직 스캔 전 — 매일 저녁 16:20 이후 표시</div>
+          <div className="text-xs text-gray-400">아직 스캔 전 — 매일 저녁 21:00 이후 표시</div>
         )}
       </div>
 

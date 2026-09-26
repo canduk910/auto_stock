@@ -18,7 +18,7 @@
 - **`strategies/`** — 7 전략(`momentum` · `volatility_breakout` · `long_tail_volatility` · `donchian_swing` · `bull_flag_breakout` · `vcp_breakout` · `kojiro`). 매수·청산·보드 명세 = `strategies/CLAUDE.md`.
 - **`session.py`** — `MarketBoard` · `SessionTracker`. `is_call_auction_now(now=None) -> bool` = H0UNMKO0 `MKOP_CLS_CODE`(110 장전 / 121 장후) **AND** 명목창 ±5분(110: 08:25~09:05 / 121: 15:15~15:35) 게이트 + 시간 기반 폴백, `now or datetime.now(_KST)` KST 강제. 🔴 코드 단독으로 판정하지 않는다 — KIS 가 코드 의미·push 트리거를 문서화하지 않아 전환 코드가 안 오면 `_last_nxt_mkop_code` 가 고착하고, 고착하면 보유 종목 stale 탐지가 꺼져 손절이 누락된다. 가드 `test_cycle182_call_auction_time_gate.py` · `test_cycle182_call_auction_ast_gate.py`. 시간표는 하단 `session.py` 절.
 - **`risk.py`** → **`order_engine.py`** → **`scheduler.py`** — 틱 판정 → 체결통보·DB 영속화 → 시간 가드·run/settle. 각 전용 절은 하단.
-- **`boot_manager.py`** — `_boot` 본체. `_load_strategy_config` 직후 `portfolio_risk.check_budget_invariant` 를 불러 `[budget_invariant_violation]` WARNING 을 남긴다.
+- **`boot_manager.py`** — `_boot` 본체. `_load_strategy_config` 직후 `portfolio_risk.check_budget_invariant` 를 불러 `[budget_invariant_violation]` WARNING 을 남긴다. 활성 전략 준비는 `funnel_capture.live_prepare_one(strategy, phase="boot")` 로 부른다(wrapper 가 never-raise 라 호출부에 try 가 없다). 익일청산 복구 직후 `funnel_capture.spawn_funnel_boot_vs_evening(scheduler, phase="boot")` 를 **await 없이** 1회 부른다(④ 대조 — 하단 「funnel 스냅샷 캡처」 절).
 - **`scanner.py`** — 종목 스캔·구독·`STATIC_TICKER_NAMES` + 적재 함수 4종(`_stock_master_daily_load_once` · `_stock_master_basics_refresh_once` · `_stock_master_master_load_once` · `_stock_master_financial_load_once`) + 매수 진입 차단 `_is_master_blocked_for_entry` + 시세 채널 리졸버 `tick_tr_id_for`. 적재 규약은 하단 「저녁 데이터 적재」 절, 구독 규약은 하단 `scanner.py` 절.
 
 ### stale 계열 (K stale watcher)
@@ -38,8 +38,9 @@
 - **`stock_master_metrics.py` / `stock_master_basics_metrics.py` / `stock_master_daily_metrics.py` / `stock_master_master_metrics.py`** — 위 팩토리 위 re-export facade. 각 flush 는 `scheduler.py` 영역에서 **1회 이상** 호출돼야 한다(G-AST1).
 - **`task_loop_helper.py`** — `run_periodic_task_loop(...)`. 계약은 하단 「정기 task 루프」 절.
 - **`data_load_tasks.py`** — 저녁 데이터 적재 task loop 본체 8종(`scan_pool_eager_refresh_loop` / `full_universe_load_task_loop` / `stock_master_daily_load_task_loop` / `stock_master_basics_refresh_task_loop` / `stock_master_master_load_task_loop` / `stock_master_financial_load_task_loop` / `evening_funnel_capture_task_loop` / `stock_master_daily_purge_task_loop`). 각 함수는 `scheduler` 인자 + `wait_time` kwarg 를 받고(TIME_* 는 wrapper 가 넘긴다 = 순환 import 회피), `scheduler.py` 쪽은 2줄 위임 wrapper 다. 🔴 `logger = logging.getLogger("src.engine.scheduler")` 고정(`system_logs` 접두 연속성). full_universe 부팅 즉시 실행의 행 수 하한 `FULL_UNIVERSE_IMMEDIATE_MIN_ROWS = 2000` 과 그 판정 콜백 `_full_universe_below_immediate_floor` 도 여기 있다(하단 「정기 task 루프」 절). 가드 `test_refactor_b1_data_load_tasks.py`.
-- **`trading_calendar.py`** — 휴장일 판정 공용 leaf(8영역·`scheduler.py`·`boot_manager.py` import 0). 「몇 시간 지났나」·「달력 며칠 지났나」 대신 「직전 영업일이 언제인가」를 묻는 두 곳이 쓴다 — 부팅 즉시 실행 슬롯 게이트(`task_loop_helper._evaluate_slot_gate`)와 6전략 prepare 의 일봉 신선도 기준(`StrategyBase._resolve_expected_daily_head`).
-  - API 3개는 전부 **never-raise**(예외 → `None`)다. `is_open_day(d) -> bool | None` · `previous_trading_day(today) -> date | None`(`today` 보다 엄격히 이전의 가장 최근 개장일. 최대 `_PREVIOUS_TRADING_DAY_LOOKBACK_DAYS`=10 달력일을 거슬러 가고, 도중 `None` 을 만나면 추측하지 않고 `None`) · `latest_passed_trading_slot(now_kst, slot) -> datetime | None`(`now` 이하인 「개장일 D 의 `slot` 시각」 중 가장 최근, KST aware. `now.time() >= slot` 이면 오늘부터 본다).
+- **`funnel_capture.py`** — 라이브 전략 준비의 **단일 입구** + 저녁 미리보기 본체 leaf. 공개 API = `resolve_as_of(now_kst, mode) -> AsOf | None` · `live_prepare_one(strategy, *, phase) -> bool` · `live_prepare_many(strategies, *, as_of, phase) -> {"prepared", "failed"}` · `capture_skip_reason(strategy, label, today, *, is_provisional) -> str | None` · `evening_capture_once(scheduler) -> dict` · `emit_funnel_boot_vs_evening(scheduler, *, phase="boot")` · `spawn_funnel_boot_vs_evening(scheduler, *, phase="boot") -> asyncio.Task`. 상수 = `EVENING_POLL_SECS = 30` · `EVENING_START_DEADLINE = timedelta(minutes=15)` · `BOOT_VS_EVENING_TIMEOUT_SECS = 10` · `_WS_WAIT_TIMEOUT_SECS = 120.0`. 스폰한 task 는 모듈 전역 `_BG_TASKS` 가 붙든다. 공개 함수는 전부 **never-raise** 다(호출자가 부팅 경로·task loop 라 하나가 죽으면 전체가 죽는다). 🔴 8영역 import 0 · naive 벽시계 0(가드 `tests/unit/ast/test_cycle364_ast_live_prepare_lock.py`) — 보호 종목도 scanner 헬퍼가 아니라 scheduler 가 가진 registry·`_pending_next_day_clear` 에서 모은다. `scheduler`(TIME 상수·`capture_funnel_snapshots`)와 `trading_calendar` 는 함수 안에서 지연 import 한다. 계약 상세 = 하단 「funnel 스냅샷 캡처」 절.
+- **`trading_calendar.py`** — 휴장일 판정 공용 leaf(8영역·`scheduler.py`·`boot_manager.py` import 0). 「몇 시간 지났나」·「달력 며칠 지났나」 대신 「직전·다음 영업일이 언제인가」를 묻는 세 곳이 쓴다 — 부팅 즉시 실행 슬롯 게이트(`task_loop_helper._evaluate_slot_gate`) · 6전략 prepare 의 일봉 신선도 기준(`StrategyBase._resolve_expected_daily_head`) · 저녁 미리보기의 기준일(`funnel_capture.resolve_as_of`·`evening_capture_once`).
+  - API 4개는 전부 **never-raise**(예외 → `None`)다. `is_open_day(d) -> bool | None` · `previous_trading_day(today) -> date | None`(`today` 보다 엄격히 이전의 가장 최근 개장일. 최대 `_PREVIOUS_TRADING_DAY_LOOKBACK_DAYS`=10 달력일을 거슬러 가고, 도중 `None` 을 만나면 추측하지 않고 `None`) · `next_trading_day(d) -> date | None`(`d` 보다 엄격히 뒤의 가장 가까운 개장일. 최대 `_NEXT_TRADING_DAY_LOOKAHEAD_DAYS`=14 달력일을 앞으로 가고, 도중 `None` 이면 `None` — 추석 5일 연휴도 한 번에 넘는다) · `latest_passed_trading_slot(now_kst, slot) -> datetime | None`(`now` 이하인 「개장일 D 의 `slot` 시각」 중 가장 최근, KST aware. `now.time() >= slot` 이면 오늘부터 본다).
   - 조회 seam 은 모듈 전역 `_lookup_open(d)` 하나다. 호출 시점에 `src.api.condition.is_trading_day`(KIS CTCA0903R, 3상태 True=개장 / False=휴장 / None=모름)를 지연 import 로 부른다.
   - 메모 = 모듈 전역 dict 에 **True/False 만 영구** 담는다(날짜의 개장 여부는 바뀌지 않는다). 주말(`weekday() >= 5`)은 조회 없이 휴장이다. `_MEMO_MAX_AGE_DAYS`(40일)보다 오래된 키는 **삽입되는 날짜 기준**으로 정리한다 — 벽시계 기준이면 회귀 스위트가 달력이 흐르는 것만으로 붉어진다.
   - **cycle363 F-2(독립 검증 반영)** — `None`(모름)은 영구 캐시하지 않지만 `_NEGATIVE_CACHE_TTL_SECS`(90초) 동안 별도 저장소(`_negative_memo`)에 짧게 재사용한다(같은 CTCA0903R 지연을 반복해서 기다리지 않는다). 조회 자체는 `_LOOKUP_TIMEOUT_SECS`(5초)로 감싼다(`asyncio.wait_for`) — 지연이 부팅 prepare 를 분 단위로 늘리는 것을 막는다. 타임아웃도 never-raise 계약 안에서 「모름」으로 흡수하고 「모르면 실행」 방향은 바뀌지 않는다. `_reset_cache_for_tests()` 는 영구 메모·음성 캐시 양쪽을 비운다.
@@ -155,7 +156,7 @@ run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, recor
   - **마커 없음 = SKIP**(`immediate_skip_if_marker_absent=True`, 부트스트랩) — 마커 없는 부팅을 실행으로 두면 그 부팅이 직전 영업일보다 오래된 KRX 값으로 전량을 덮는다. 행 수가 하한 이상이면 건너뛰고, 첫 마커는 20:00:05 정기 실행이 남긴다. daily·basics 는 마커 없음 = 실행이다.
 - **basics 전용 자가 치유 — 강제 재실행(cycle363 F-4, 사용자 승인)** — `stock_master.count_missing_kis_provenance_key()`(`raw` 에 KIS CTPF1002R 키 `cptt_trad_tr_psbl_yn` 이 없는 행 수) `> STOCK_MASTER_BASICS_FORCE_RUN_MISSING_THRESHOLD`(=100, `data_load_tasks.py`)이면 마커가 fresh 여도 실행한다(`immediate_force_run_check=_stock_master_basics_kis_keys_missing_above_threshold`, `immediate_force_run_reason="kis_keys_missing"`). 판정은 full_universe(+0초) **뒤**(basics +480초)라 실제 손상(결측 행 수)을 보고 결정한다 — full_universe 만 RUN 하고 basics 가 SKIP 하는 월요일 아침에, KRX 적재의 하드코딩 False(`nxt_tradable`·`krx_halted`·`admin_item`)와 KIS 출처 키 부재가 16:10 정기 실행까지 방치되던 결함(독립 검증 finding #6) 시정이다. 🔴 `count_missing_kis_provenance_key()` 는 **예외를 삼키지 않는다** — `count_active()` 류의 "실패 시 0" 관례를 반복하면 쿼리 실패가 "결측 0건"(SKIP 방향)으로 읽혀 사용자 결정("쿼리 실패는 RUN 쪽 fail-safe")과 반대로 움직인다. 예외는 그대로 전파해 위 ①의 `force_check_error` 가 흡수한다.
 - 🔴 daily_load 가 게이트 대상인 이유 = 아침 immediate 가 **오늘 날짜 껍데기 봉**(O=H=L=C=전일종가, 거래량 0)을 먼저 써서 `max_bas_dd == today` 를 만들면 그날 정기 실행이 전 종목을 `skipped_fresh` 로 건너뛴다. 🔴 full_universe 를 무게이트로 두지 않는 이유 = 아침의 KRX 는 직전 영업일 자료를 아직 내놓지 않아(07:53 까지 빈 응답 실측) 즉시 실행이 **그 전 영업일 값으로 전량을 덮는다** — 월요일이면 목요일 값이 금요일 값을 덮는다(경위 = history). 신규 상장 유입은 20:00:05 정기 실행이 맡는다.
-- 미대상 = purge · evening_funnel(게이트 kw 전무). evening_funnel 의 즉시 1회가 +600초 재준비다 — 게이트를 걸지 않는 이유는 「funnel 스냅샷 캡처」 절.
+- 미대상 = purge · evening_funnel(게이트 kw 전무). evening_funnel 의 즉시 1회(+600초)는 21:00 전에 돌아 레거시 재준비 분기를 탄다 — 그 분기와 게이트를 걸지 않는 이유는 「funnel 스냅샷 캡처」 절.
 - 가드 `test_cycle193_immediate_fresh_gate.py` · `test_cycle193_task_marker_helpers.py` · `test_cycle193_ast_fresh_gate.py`(F-10-1 시간/슬롯 두 갈래 · F-10-2 무게이트 = purge·evening_funnel) · `test_cycle263_daily_load_stub_filter.py` · `test_cycle363_immediate_slot_gate.py` · `test_cycle363_ast_business_day_gate.py`.
 
 ## 저녁 데이터 적재 (scanner + data_load_tasks)
@@ -167,10 +168,10 @@ run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, recor
 | 상수 | 값 | 작업 |
 |---|---|---|
 | `TIME_STOCK_MASTER_BASICS_REFRESH = time(16, 10)` | 16:10 | KIS CTPF1002R 매스 보강 |
-| `TIME_EVENING_FUNNEL_CAPTURE = time(16, 20)` | 16:20 | 저녁 잠정 funnel 캡처 |
 | `TIME_STOCK_MASTER_MASTER_LOAD = time(16, 30)` | 16:30 | KIS 공식 마스터 파일(`kospi_code.mst`/`kosdaq_code.mst`) |
 | `TIME_STOCK_MASTER_FINANCIAL_LOAD = time(16, 40)` | 16:40 | 재무 5 TR 주1회 |
 | `TIME_STOCK_MASTER_DAILY_LOAD = time(20, 30)` | 20:30 | 일봉 적재 |
+| `TIME_EVENING_FUNNEL_CAPTURE = time(21, 0)` | 21:00 | 저녁 미리보기 funnel 캡처(다음 거래일 기준, 일봉 적재 성공 마커를 기다린다) |
 
 `TIME_STOCK_MASTER_DAILY_LOAD = time(20, 30)` 인 이유 = KRX 애프터마켓 종료(20:00) 뒤라야 그날 거래량이 확정된 값이고, 16:1x~16:40 마스터 작업보다 뒤라야 유니버스 판정이 오늘치 raw 를 본다. 매수 진입과 무관한 데이터 계층이다.
 
@@ -252,19 +253,90 @@ run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, recor
 
 ## funnel 스냅샷 캡처
 
-- 공통 헬퍼 `capture_funnel_snapshots(registry, *, is_provisional)` — registry 를 순회하며 전략별 `_funnel_steps` 단계별 + `step_no=99` 를 insert 한다. 전략별 예외 격리(graceful), momentum 은 영구 제외, in-place upsert.
-- 호출처 3 = 09:30 자동(`_auto_capture_funnel_snapshots`, `is_provisional=False` — 실행은 `_scan_loop` 첫 패스라 첫 대기 `SCAN_INTERVAL` 뒤 ≈09:35) · 16:20 저녁(`_evening_funnel_capture_once`, `is_provisional=True`) · 수동 trigger(`routes/strategy_funnel.py::trigger_snapshot`, `is_provisional=False`).
-- 저녁 task `TIME_EVENING_FUNNEL_CAPTURE = time(16, 20)`, `initial_delay_secs=600`: (1) `stock_master_daily.count_all() > 0` 5분 cap polling — ⚠️ **그날 적재 완료를 기다리는 것이 아니다**(일봉은 20:30 이라 16:20 캡처는 전일 봉 기준이고, 전략 절단이 날짜 비교라 결과가 같다). 빈 테이블만 막는다 (2) 등록 전략 전부(`registry.all()`)의 `prepare()` (3) 캡처.
-- **저녁 task 는 아침에도 한 번 돈다** — `run_periodic_task_loop` 의 즉시 1회(`immediate_first_run` 기본값, 게이트 kw 전무)가 `start()` +600초에 실행된다(07:45 기동이면 ≈07:57). `run_daily` 가 매 거래일 `start()` 를 다시 부르므로 재시작이 없어도 매일 돈다. 그때도 등록 전략 전부의 `prepare()` 를 다시 부르고 오늘 날짜로 잠정(`is_provisional=True`) 행을 쓴다. 이 재준비는 살아 있는 전략 객체의 후보를 교체하므로 그 뒤 매수 평가는 이 결과를 쓴다.
+캡처는 **라이브 전략 객체의 메모리**(`_funnel_steps`·`get_scanned_tickers()`)를 DB `strategy_funnel_snapshots` 에 옮긴다. 매매 행위와 무관한 관찰 경로지만, 같은 전략 객체를 준비(`prepare`)가 다시 채우므로 **준비·캡처 순서와 라벨**이 계약이다.
+
+### 공통 헬퍼와 호출처
+
+- `capture_funnel_snapshots(registry, *, is_provisional=False, target_date=None, skipped_out=None) -> int` — 라벨 `label = target_date or 오늘(KST)`. 전략마다 먼저 `funnel_capture.capture_skip_reason(strategy, label, today, is_provisional=...)` 를 묻고, 통과한 전략만 `_funnel_steps` 단계별 + `step_no=99` 를 `target_date=label` 로 insert 한다. 전략별 예외 격리(graceful), momentum 영구 제외, in-place upsert. 완료 로그 = `[funnel_snapshot] 캡처 완료 — target_date= saved= provisional= skipped=<sid:사유,…>`. `skipped_out` 에 dict 를 주면 건너뛴 전략마다 `{sid: 사유}` 를 채운다(사유 문자열은 완료 로그와 같다). 반환값은 이 인자와 무관하다 — 수동 trigger 만 이 인자를 넘긴다.
+- 호출처 3:
+  - 09:30 자동 — `_auto_capture_funnel_snapshots`, `is_provisional=False`, `target_date=today_kst()`. 실행은 `_scan_loop` 첫 패스라 첫 대기 `SCAN_INTERVAL` 뒤 ≈09:35.
+  - 저녁 — `_evening_funnel_capture_once` → `funnel_capture.evening_capture_once(self)`(한 줄 위임), `is_provisional=True`. 21:00 정기 실행은 `target_date=다음 거래일`, 레거시 분기는 오늘(아래).
+  - 수동 trigger — `routes/strategy_funnel.py::trigger_snapshot`, `is_provisional=False`, `target_date` 없음 = 오늘.
+
+### 라이브 준비는 wrapper 한 곳에서, 한 번에 하나
+
+- 라이브 전략의 `prepare()` 는 `funnel_capture.live_prepare_one(strategy, *, phase)` · `live_prepare_many(strategies, *, as_of, phase)` 로만 부른다. `phase` = `boot`(`boot_manager`) · `presubscribe`(07:59 사전 구독 직전, 후보가 빈 VB/LTV·스윙 재준비) · `intraday_empty`(`_reprepare_breakout_if_empty`) · `evening`(21:00) · `reprepare_legacy`(레거시 분기). 가드 = `test_cycle364_ast_live_prepare_lock.py` — `src/engine` 에서 `strategies/**`·`funnel_capture.py` 를 뺀 곳의 `.prepare(` 직접 호출과 `getattr(X, "prepare")` 가 0 이다.
+- 잠금 = 이벤트 루프별 `asyncio.Lock` 하나(`_lock()`). 두 준비가 같은 객체의 `_funnel_steps`/`_candidates` 를 섞지 않게 한다. `live_prepare_many` 는 전략마다 잡고 푼다.
+- never-raise — `prepare()` 예외는 wrapper 가 흡수해 `False` 를 돌려주고 `[live_prepare] <sid> phase=<phase> 전략 prepare 실패`(phase=boot) 또는 `… 재 prepare 실패`(그 밖) 를 ERROR + traceback 으로 남긴다. 옛 호출부 문구를 그대로 담는 것은 grep 연속성 때문이다. 그래서 호출부에 try/except 를 두지 않는다. `_reprepare_breakout_if_empty` 는 `False` 를 받으면 `write_log("ERROR", "<sid> 재 prepare 실패")` 한 줄만 더 남긴다. 🔴 그 자리에서 logger ERROR 를 또 찍지 않는다 — 실패 1건이 ERROR 로그 2행이 되어 21:30 `top_patterns` 집계가 배가된다.
+- meta = 전략 객체의 `_live_prepare_meta = {as_of, phase, started_at, finished_at, ok}`. **시작 시점에 `ok=None` 으로 먼저 찍고**, 끝나면 `ok`(bool)·`finished_at` 을 채운다. `as_of` 인자가 없으면 시작 시각의 KST 날짜가 들어간다. 전략 코드는 이 필드를 읽지도 쓰지도 않는다.
+
+### 캡처 라벨 가드 — `capture_skip_reason`
+
+판정은 위에서부터 첫 해당에서 멈춘다. `None` 이면 캡처한다.
+
+1. meta 가 dict 가 아님 → `label == 오늘` 이면 `None`, 아니면 `no_meta`
+2. `ok is False` → `prepare_failed`
+3. `ok is not True`(시작만 찍혔다) → `in_progress` — 반쯤 만든 목록을 저장하지 않는다
+4. `meta["as_of"] != label` → `as_of_mismatch`
+5. 확정 캡처(`is_provisional=False`)인데 `meta["phase"] == "evening"` → `evening_preview_reject`
+
+5 가 필요한 이유 = 자정이 지나면 저녁 meta 의 `as_of` 가 새 오늘과 같아져 4 를 통과한다. 그대로 두면 00:xx 수동 캡처가 저녁 미리보기를 **확정** 행으로 저장한다. 수동 캡처는 건너뛴 전략과 그 사유를 응답 `message` 에 적는다(응답 키 불변 — `src/routes/CLAUDE.md`).
+
+### 저녁 미리보기 — 21:00 정기 실행
+
+- task = `_evening_funnel_capture_task_loop` → `data_load_tasks.evening_funnel_capture_task_loop` → `run_periodic_task_loop(wait_time=TIME_EVENING_FUNNEL_CAPTURE, initial_delay_secs=600)`.
+- 🔴 **21:00 인 이유와 금기** — 20:30 일봉 적재 뒤라야 오늘(D) 봉을 「전일」로 읽는다. 20:45 보조 7계정 토큰 강제 재발급 체인(`quote_token_refresh`) 뒤라야 한다 — 그 직렬화 창 [20:35, 20:53] 에 보조 풀 REST(일봉 KIS 폴백·휴장일 조회)가 들어가면 자연 재발급이 겹쳐 발급 수가 두 배가 된다. 21:30 정산 전에 끝나야 한다. **20:30~20:55 로 당기지 않는다.** 가드 = `test_cycle364_time_invariants.py`(적재 < 캡처 · `TIME_QUOTE_TOKEN_REFRESH + 15분 ≤ 캡처` · 캡처 + `EVENING_START_DEADLINE` + 준비 예산 3분 ≤ `TIME_SETTLEMENT`) + 기존 충돌 스캔 `test_cycle273…::test_g273f_2` · `test_cycle269…::test_c9`.
+- 흐름(`evening_capture_once`, 시각 ≥ 21:00):
+  1. 30초(`EVENING_POLL_SECS`) 간격 폴링. 시작 마감 = 캡처 시각 + `EVENING_START_DEADLINE`(15분) = **21:15**.
+  2. 회차마다 달력을 다시 푼다. `is_open_day(오늘)` 이 `False` 면 즉시 `decision=skip reason=today_closed`(INFO). `True` 면 `resolve_as_of(now, "evening")` 이 `as_of = next_trading_day(오늘)` · `expected_head = 오늘` 을 준다(`mode="evening"` 만 지원, 모르면 `None`).
+  3. 적재 완료 신호 = `system_config.get_task_last_success("stock_master_daily_load")` 가 **오늘 `TIME_STOCK_MASTER_DAILY_LOAD`(20:30) KST 이상**일 때만이다(`_marker_done`). 날짜만 같은 마커(부팅 보충 적재가 07:5x 에 쓴 것)와 naive 마커는 완료가 아니다 — 받아들이면 20:30 적재가 실패한 날 D-1 헤드로 미리보기가 돈다.
+  4. 21:15 까지 준비가 안 되면 건너뛴다 — 달력을 끝내 모르면 `reason=calendar_unknown`, 마커가 없으면 `reason=daily_load_not_done`, 둘 다 **WARNING**. 준비는 부르지 않는다. 🔴 추측한 날짜로 라벨을 붙이지 않는다(다음 부팅이 정본 목록을 만든다). 🔴 대기 신호를 `count_all() > 0` 으로 되돌리지 않는다 — 빈 테이블만 막을 뿐 그날 적재를 기다리지 않는다.
+  5. `live_prepare_many(…, as_of=as_of, phase="evening")` — 대상은 `registry.all()`(비활성 포함). 순서 = 활성 먼저, 그 안에서 VB → LTV → BFB → VCP → donchian → kojiro → momentum → 그 밖.
+  6. `capture_funnel_snapshots(registry, is_provisional=True, target_date=as_of)`.
+- 요약 1행 = `[evening_funnel_capture] decision=run|skip|legacy_reprepare reason= as_of= expected_head= load_marker= daily_head= prepared= saved= skipped=<sid:prepare_failed,…>`. `daily_head` = `stock_master_daily.max_bas_dd()`(인덱스 컬럼) 1회, 폴링 루프 밖에서 구한다. 조회 실패는 `None`(모름)이다.
+- 🔴 **PV-1 이 전제다** — 21:00 에 옮기는 것만으로는 안전하지 않다. 미리보기 준비가 보유 종목의 청산 입력(kojiro `_held_stage3`, 네 전략의 `_candidates` 보유 엔트리)을 바꾸면 야간 틱 하나로 청산이 나갈 수 있다. 20:00 뒤에도 stale watcher 가 보유를 HIGH 로 다시 구독하므로 틱 부재는 보장이 아니다. 계약 = `strategies/CLAUDE.md` 「prepare 공통」 절.
+- 미리보기가 만든 준비 상태는 21:30 정산 뒤에도 메모리에 남는다(`_reset_daily_state` 는 전략의 후보·`_funnel_steps`·`_scanned_tickers` 를 지우지 않는다). 그래서 다음 부팅까지 대시보드가 다음 세션 후보를 보여 준다. 활성 전략은 다음 부팅이 다시 준비한다.
+
+### 레거시 분기 — 21:00 전 (S1 임시)
+
+- `evening_capture_once` 는 `now.time() < TIME_EVENING_FUNNEL_CAPTURE` 이면 이 분기를 탄다. 실제로 타는 것은 `start()` +600초 즉시 1회다(`immediate_first_run` 기본값, 게이트 kw 전무 — 07:45 기동이면 ≈07:57). `run_daily` 가 매 거래일 `start()` 를 다시 부르므로 재시작이 없어도 매일 돈다. 오후 재기동(16:00~20:00)의 +600초도 이 분기다.
+- 동작은 미리보기가 아니다 — `registry.all()` 전부를 `as_of=None`(오늘)로 다시 준비하고(`phase="reprepare_legacy"`) 오늘 라벨 잠정(`is_provisional=True`) 행을 쓴다. 로그 = `[evening_funnel_capture] decision=legacy_reprepare reason=boot_immediate_run …`. 이 재준비는 살아 있는 전략 객체의 후보를 교체하므로 그 뒤 매수 평가는 이 결과를 쓴다.
   - **입력은 부팅 준비와 같다.** 부팅 준비(`_boot()` 안의 전 전략 `prepare()`)는 `start()` 가 적재 태스크(`_full_universe_load_task` +0초 · `_stock_master_daily_load_task` +240초 · `_stock_master_basics_refresh_task` +480초)를 만들기 **전에** 끝난다. 그 세 적재의 즉시 실행은 영업일 슬롯 게이트를 지나야 돈다(「정기 task 루프」 절). 그래서 평상시 월요일·연휴 뒤 아침에는 보충 적재가 돌지 않고, 재준비는 부팅 준비와 같은 입력을 읽어 같은 목록을 낸다.
-  - **보충 적재가 도는 날**(직전 영업일 정기 실행 결손 = `reason=stale` · 휴장일 모름 = `calendar_unknown` · full_universe 행 수 미달 = `below_floor`)에는 그 적재가 바꾼 입력을 라이브 후보에 반영하는 경로가 이 재준비다. 이 반영은 순서 보장이 아니라 경합에 기댄다 — 재준비는 `count_all() > 0` 만 기다리고 +240초 일봉 보충 적재의 **완료**는 기다리지 않는다.
+  - **보충 적재가 도는 날**(직전 영업일 정기 실행 결손 = `reason=stale` · 휴장일 모름 = `calendar_unknown` · full_universe 행 수 미달 = `below_floor`)에는 그 적재가 바꾼 입력을 라이브 후보에 반영하는 경로가 이 재준비다. 이 반영은 순서 보장이 아니라 경합에 기댄다 — 레거시 재준비는 아무것도 기다리지 않아 +240초 일봉 보충 적재의 **완료**를 기다리지 않는다.
   - 🔴 **이 즉시 1회에 게이트를 걸지 않는다** — 재준비의 `self._candidates = {}` 가 donchian 보유 종목을 후보에서 지워, 그날 트레일링 ATR 이 `_entry_atr`(매수 시점 ATR)로 떨어진다. 재준비를 건너뛰면 그 기준이 부팅 recompute 의 오늘 ATR 로 바뀐다. 청산 규약 변화라 그 결정(cycle360 카드 3)이 게이트보다 먼저다(근거 = `_workspace/domain_consult/cycle360_boot_reprepare_4a_proposal.md` §1.4·§5).
   - ✅ **「같은 입력」을 깨던 예외 경로(F-1) — cycle363 배포 전 보강으로 시정(사용자 승인 8영역).** 월요일·연휴 뒤 장전에는 `scanner._scan_pool_eager_refresh_loop`(5분 주기)가 24h 를 넘긴 풀 종목을 갱신하는데, 그 갱신과 +600초 재준비가 **같은 시각(T+600)에 시작하는 것 자체는 여전하다**(독립 검증 finding #1/#5, 09-28 에 실제로 겹칠 것으로 추정). 바뀐 것은 그 갱신이 더 이상 raw 를 통째로 지우지 않는다는 것이다 — `upsert_one` 전에 basics 경로(cycle176)와 같은 `{**기존 raw, **신규 raw}` 머지를 넣어, 장전 0 값 키(`_ZERO_VALUE_SKIP_KEYS` — `acml_tr_pbmn` 등)가 사라지지 않고 기존 값에서 보존된다. 그래서 재준비가 그 갱신과 겹쳐도 `list_by_filter` 거래대금 임계(`acml_tr_pbmn_won`)가 더 이상 NULL 로 떨어지지 않는다. 판별 마커 = `[scan_pool_eager_refresh] refreshed=N`(N>0 이면 그 사이클이 실제로 돌았다는 뜻, 결함 여부와 무관) + `select count(*) from stock_master where not raw ? 'acml_tr_pbmn'`(머지가 살아 있으면 이 값이 늘지 않아야 한다). 회귀 = `tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py`.
-- 🔴 **결함 — 16:20 캡처가 그날 확정 행을 덮는다.** `capture_funnel_snapshots` 는 호출자와 무관하게 `target_date = 오늘(KST)` 를 쓴다. 그래서 하루 세 쓰기가 같은 `(target_date, strategy_id, step_no)` 행에 떨어진다 — ≈07:57 잠정 INSERT → ≈09:35 확정 UPSERT → 16:21 잠정 UPSERT. **그날 매매에 쓴 확정 행은 남지 않고**, 20:05·21:30 리포트의 `strategy_funnel_stages` 도 16:20 숫자를 읽는다. 덮인 행은 `snapshot_at`(마지막 쓰기 시각)이 16:21 을, `is_provisional` 이 `TRUE` 를 가리키므로 행만 보고는 09:35 확정 값이 있었는지 알 수 없다(`snapshot_at` 정의 = `src/db/CLAUDE.md` `strategy_funnel.py` 절). 잠정 쓰기가 확정 행을 못 덮게 하는 보호는 들어가 있지 않다 — 지금 일정(16:20 · 오늘 날짜)에서 단독으로 넣으면 평일 저녁 쓰기가 전부 거부돼 저녁 산출물이 사라지기 때문이다(설계와 근거 = `_workspace/red/cycle350_evening_funnel_spec.md` §2). 실측·근거·결정에 필요한 사실 = `_workspace/red/cycle349_vcp_observe_spec.md` 「② 퍼널 스냅샷 오전/16:20 분리」 절. VCP 의 오전 후보 목록은 이 스냅샷이 아니라 `[vcp_breakout_distance_summary]` 로 복원한다(`strategies/CLAUDE.md` 각주 ⑥).
-- 🔴 **저녁 캡처를 20:30 일봉 적재 뒤로 옮기는 것만으로는 다음 거래일 미리보기가 되지 않는다** — funnel 을 내는 6전략(momentum 제외)의 `prepare()` 가 벽시계 오늘(KST) 날짜의 봉을 버려(`prev_idx = 1 if candles[0].get("stck_bsop_date") == today_str else 0`) 20:4x 에 돌려도 D-1 기준이므로, `prepare()` 에 기준일을 넣는 것이 선결이다(근거·선택지 = `_workspace/red/cycle350_evening_funnel_spec.md` §2).
+  - ⚠️ **07:59 사전 구독 재준비가 이 분기 뒤에서 기다릴 수 있다.** 두 준비는 같은 잠금을 쓰고, 07:45 기동이면 레거시(≈07:57 시작, 60~75초)가 `TIME_PRESUBSCRIBE`(07:59)에 걸친다. 사전 구독 재준비는 부팅 뒤 VB/LTV 후보나 스윙 후보가 빈 날에만 돈다(부팅 준비 실패 회복). `asyncio.Lock` 은 들어온 순서대로 넘기므로 기다림은 호출 하나당 전략 하나의 준비(VCP 약 35초)까지다. 그 사이 뒤에 이어지는 사전 구독(보유 포함)과 08:00 프리장 진입이 그만큼 밀린다.
+- 🔴 **S2 가 이 분기를 없앤다** — 아침 재준비를 「입력이 실제로 바뀐 날만」으로 바꾸는 판정(②)·완료 대기와 조용한 창(③)·비상 캡처는 **아직 코드가 없다**(설계 = `_workspace/domain_consult/cycle364_a1_as_of_design.md` §4·§5). S2 착수 근거는 아래 ④ 의 평시 `same=1` 실측이다.
+
+### 하루 쓰기 순서와 확정 행 보호
+
+- 거래일 D 의 쓰기 = ≈07:57 레거시 → `(D, 잠정)` · ≈09:35 자동 → `(D, 확정)`(잠정을 덮는다) · 21:00 → `(다음 거래일, 잠정)`. 저녁 쓰기는 다른 날짜 키로 가므로 **그날 매매에 쓴 확정 행이 남는다**. 20:05·21:30 리포트의 `strategy_funnel_stages`(D) 는 09:35 확정본을 읽는다.
+- 같은 키에서 **잠정 쓰기는 확정 행을 못 덮는다**(③-b — `insert_snapshot` 이 `None` 을 돌려준다, 계약 = `src/db/CLAUDE.md` `strategy_funnel.py` 절). 거래일 20:00 뒤 오늘 라벨 잠정 쓰기(장중·저녁 재기동의 레거시 분기)가 그 경우다.
+- 다음 거래일 09:30 확정 캡처가 저녁 잠정 행을 덮는다. 저녁 목록의 영구 기록은 ④ 로그뿐이다. VCP 의 오전 prepare 별 후보 목록은 스냅샷이 아니라 `[vcp_breakout_distance_summary]` 로 복원한다(`strategies/CLAUDE.md` 각주 ⑥).
+
+### ④ 저녁 목록 ↔ 부팅 목록 대조 `[funnel_boot_vs_evening]`
+
+- 배선 = `boot_manager` 가 익일청산 복구 직후 `spawn_funnel_boot_vs_evening(scheduler, phase="boot")` 를 **await 없이** 부른다. task 는 `scheduler._ws_task` 가 생길 때까지 0.2초 간격으로 기다린 뒤(그동안 DB 무접촉) `emit_funnel_boot_vs_evening` 을 돈다. 🔴 `_boot()` 는 WebSocket 연결 **전**에 await 되므로, 동기로 두면 보유 중 재기동의 틱 공백이 그만큼 늘어난다.
+- 대기의 끝 — 기다리는 동안 `scheduler._running` 이 거짓이 되면 DB 를 건드리지 않고 조용히 끝난다(정지·기동 실패 뒤 다음 기동과 겹쳐 ④ 가 두 번 찍히지 않게). 속성이 없으면 참으로 본다. 누적 대기가 `_WS_WAIT_TIMEOUT_SECS`(120초)를 넘으면 `[funnel_boot_vs_evening] phase=boot error=ws_not_started strategies=<활성 전부>` WARNING 1행을 남기고 끝난다.
+- task 참조 = 모듈 전역 `_BG_TASKS` 에 넣고 `add_done_callback(_BG_TASKS.discard)` 로 스스로 빠진다(`llm_buy_gate` 관례). asyncio 는 버린 Task 를 약한 참조로만 쥐기 때문이다.
+- 전체 상한 = `BOOT_VS_EVENING_TIMEOUT_SECS`(10초, `asyncio.wait_for`). S1 의 `phase` 는 `boot` 뿐이다.
+- 저녁 목록 = `list_snapshots(target_date=오늘, raise_on_error=True)` 의 `step_no=99 ∧ is_provisional=True` 행 `survived_tickers`(보통 전날 21:0x 미리보기가 쓴 것). 없으면 `[funnel_boot_vs_evening] phase=boot as_of= evening=absent` INFO 1행. `raise_on_error=True` 인 이유 = 기본값은 DB 예외를 삼키고 `[]` 를 돌려주므로 DB 장애가 「저녁 캡처 없음」으로 읽힌다.
+- 부팅 목록 = 활성 전략의 `get_scanned_tickers()`. 비교 전에 양쪽에서 보호 종목(전 전략 보유 ∪ `_pending_next_day_clear`)을 뺀다 — 저녁엔 보호 종목이 마스터 차단·가격 필터를 통과하고, 부팅엔 포지션 복구 전이라 보유가 0 이다. 그 차이는 설명된 차이다.
+- 원인 힌트 = **부팅당 1회**, DB 3쿼리, 창 `[evening_at, until)`. `evening_at` = 저녁 행 `snapshot_at` 최솟값, `until` = 가장 이른 `phase=boot` meta 의 `started_at`(없으면 지금). 상한을 두는 이유 = 부팅 자신의 보유 종목 eager refresh 는 준비 **뒤**에 돈다. 상한이 없으면 그것이 `sm_refreshed_after` 로 새어 월요일·연휴 뒤마다 WARNING 이 억제된다.
+  - `params_changed` = `strategy_config.updated_at` 이 창 안인 행 수
+  - `bars_changed_after`·`head_now` = `stock_master_daily` 를 `bas_dd >= evening_at::date − 2일`(인덱스 컬럼)로 먼저 묶고, `updated_at` 이 창 안인 행 수와 `max(bas_dd)` — 무인덱스 `updated_at` 전 행 스캔을 피한다
+  - `sm_refreshed_after` = `stock_master.refreshed_at` 이 창 안인 행 수
+  - 못 구한 축은 `None`(모름)이다. 한 호출 안에서 첫 쿼리 실패가 나면 `[funnel_boot_vs_evening] phase=boot hint_error=<축>` WARNING 1행을 남긴다(세 쿼리가 다 실패해도 1행). 힌트가 `None` 이면 아래 WARNING 판정이 서지 않으므로, 이 행이 「꺼진 판정」과 「깨끗한 결과」를 가른다. 이 행은 ④ 실패(`error=`)가 아니다.
+  - PG 왕복 = `tests/integration/test_cycle364_boot_vs_evening_hints_pg.py` — 창 안·밖 행을 심고 세 개수가 정확한 정수인지, `head_now` 가 `max(bas_dd)` 인지 본다.
+- 행 = 전략마다 `[funnel_boot_vs_evening] phase=boot strategy= as_of= evening_at= evening_n= boot_n= same= added= removed= sample_added=<≤5> sample_removed=<≤5> held_excluded= params_changed= bars_changed_after= sm_refreshed_after= head_now=`. 기본은 INFO 다. `same=0` 이면서 세 힌트가 **전부 0** 일 때만 WARNING(설명 안 되는 차이)이다 — 힌트가 `None` 이면 WARNING 이 아니다.
+- 🔴 **실패는 조용히 사라지지 않는다** — 이 대조가 S2 착수의 판정 근거라서다. 전략 한 줄의 예외는 그 전략만 격리하고 끝에 `[funnel_boot_vs_evening] phase=boot error=strategy_failed strategies=<…>` WARNING 1행. `list_snapshots` 실패는 `error=list_snapshots_failed strategies=<활성 전부>` WARNING 1행이다(`evening=absent` 로 보고하지 않는다). 타임아웃과 그 밖 예외는 `error=timeout_or_exception strategies=<아직 못 낸 전략>` WARNING 1행. WebSocket 단계가 120초 안에 안 생기면 `error=ws_not_started`(위).
+
+### 기타
+
 - `task_attrs` 4 위치(start + connect finally + run_daily finally + stop, G-AST2).
 - `is_provisional` 컬럼 = migration 040.
 - 관찰성 한정 — `check_exit`/`check_buy` funnel hook 0건 + risk/order_engine/realtime/auth 참조 0(SAFETY 가드).
+- 테스트 = `tests/unit/engine/test_cycle364_{evening_capture,capture_label_guard,funnel_boot_vs_evening,time_invariants,trading_calendar_next}.py` · `tests/unit/engine/strategies/test_cycle364_{prepare_as_of,preview_held_guard,preview_keep_own_skip_all}.py` · `tests/unit/db/test_cycle364_funnel_protect_confirmed.py` · `tests/integration/test_cycle364_{funnel_protect_confirmed,boot_vs_evening_hints}_pg.py` · `tests/unit/routes/test_cycle364_market_ops_evening_preview.py`.
 
 ## 접수 후 PENDING 영속화 — 1코어 + 축별 경계 래퍼 2
 
@@ -338,14 +410,18 @@ run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, recor
 
 ## strategy_base.py
 
-- `StrategyBase` 추상 메서드: `prepare` / `check_buy_signal` / `check_exit_signal` / `calc_buy_quantity`
+- `StrategyBase` 추상 메서드: `prepare(self, *, as_of: date | None = None)` / `check_buy_signal` / `check_exit_signal` / `calc_buy_quantity`
+- **준비 기준일 헬퍼 3종**(`as_of` 계약·PV-1 = `strategies/CLAUDE.md` 「prepare 공통」 절)
+  - `_resolve_prepare_as_of(as_of) -> (as_of_date, preview)` — `None` = (오늘, False) · 오늘 = (오늘, False) · 미래 = (as_of, True) · 과거 = `ValueError`(DB 가 as_of 뒤의 봉을 돌려주므로 과거 재현은 성립하지 않는다).
+  - `_preview_keep_tickers() -> set[str]` — 자기 보유 ∪ **자기** 익일청산대기(`trading_scheduler._pending_next_day_clear` 의 `(ticker, 자기 strategy_id)`). 미리보기 와이프 뒤에도 같은 객체로 남기는 집합이다. 🔴 다른 전략의 보호 종목을 넣지 않는다 — 넣으면 그 전략의 후보 목록·`_scanned_tickers`·kojiro `held_only`·donchian `get_targets_status` 가 남의 보유로 오염된다.
+  - `_preview_skip_tickers() -> set[str]` — 자기 보유 ∪ `scanner._collect_protected_tickers_for_scanner()`(전 전략 보유 ∪ 익일청산). 종목 루프가 건너뛰는 집합이다. 🔴 **합집합**인 이유 = 헬퍼는 조회 실패를 조용히 ∅ 로 삼키는데, 그때도 자기 보유는 지켜야 한다. 헬퍼 예외는 흡수한다.
 - **생명주기 훅** (기본 no-op + 서브클래스 override):
   - `_reset_daily_state()` — 일일 transient cross-day 상태 정리. `scheduler._reset_daily_state`(21:30 정산 후) registry 순회가 전략별로 호출한다(try/except graceful). override = momentum `_prev_prdy_rate.clear()`(익일 첫틱 거짓돌파 차단) + BFB `_breakout_first_seen.clear()`. 🔴 **보유결합 필드(`_limit_up_reached`/`_partial_exit`)는 이 훅에서 지우지 않는다** — 익일 보유(LTV 상한가 종목 밤샘) 청산 모드가 깨진다.
   - `on_position_closed(ticker)` — 포지션 전량 청산(매도 체결) 시 per-ticker 보유결합 상태 정리. 호출 site 는 `order_engine` **정확히 2곳**(`_handle_sell_fill` 전량체결 `if pos:` 후 + `execute_sell` insufficient_qty reconciliation, 각 try/except 격리). override = LTV `_limit_up_reached.discard(ticker)`(재매수 종목의 전일 상한가 모드 누설 차단) + BFB `_partial_exit.pop(ticker, None)`(재진입 익절 억제 차단) + BFB·VCP `register_cooldown_after_exit(ticker)` + `asyncio.create_task(_refine_cooldown_business_days)`(즉시 달력일 근사 `days+2` → CTCA0903R `add_business_days` 로 정확 N영업일 정정).
   - 불변식 = **"보유 중 flag 유지, 전량 매도 시 clear"**. 포지션 제거 site 가 2곳뿐이라는 것이 누설의 구조적 봉쇄이고 AST `G2-STRUCT-INVARIANT` 가 3번째 site 누락을 막는다. 부분 체결은 full-fill 한정이라 잔량 청산모드가 자연 보존된다.
   - 🔴 `_cooldown_until` 은 multi-day 상태다 — 일일·prepare 리셋 금지(AST `G-191-NO-DAILY-RESET`).
 - **트레일링 기준점 복구 단일 진실원**: `_apply_high_since_buy_from_candles(pos, candles, today)` — `buy_date < 영업일 < today` 일봉 high max 로 고점 보정(**올리기 전용**) + `update_high` DB 영속 + `[high_since_buy_recover]`. base 에 하나만 둔다 — **전략별 복제 금지**(`_HIGH_RECOVER_LABEL` ClassVar 로 로그 접두사만 다르게: donchian "도치안 스윙" / VCP "VCP"). 보조 파서 `_candle_trade_date`/`_candle_high` 는 KIS 원본 키(`stck_bsop_date`/`stck_hgpr`)와 DB 정규화 컬럼(`bas_dd` date 객체/`high_price`) **양쪽을 수용**한다 — `get_recent_daily_normalized` 가 raw 없는 row 를 row 자체로 반환하기 때문이다. `_candle_high` 는 `except Exception: return 0`(OverflowError 포함 — 봉 하나가 배치 복구를 중단시키면 안 된다). ⚠️ `recompute_high_since_buy` 자체는 base 승격 금지(전략별 fetch 소스·일수가 다르다 — donchian/VCP/BFB 자체 정의, kojiro 는 `recompute_held_atr` 에 내장). 소비자 분업 = `risk.on_tick`(메모리 갱신) → boot 훅(일봉 복구 + DB 영속)이고 **on_tick 에 DB write 금지**(회귀 가드).
-- **일봉 신선도 기준 `_resolve_expected_daily_head() -> date | None`** — `trading_calendar.previous_trading_day(today_kst())` 를 지연 import 로 부르고(never-raise, 예외 → `None`) `[prepare_expected_head] strategy=<id> expected_head=<YYYY-MM-DD|None>` INFO 1행을 남긴다. 6전략(VB·LTV·donchian·BFB·VCP·kojiro) `prepare()` 가 gather **전에 1회** 불러 `_fetch_one` 안의 `get_recent_daily_normalized(..., expected_head=expected_head)` 로 넘긴다(종목마다 부르지 않는다). 휴장일을 모르면 `None` 을 명시해 넘겨 어댑터의 달력 판정으로 떨어뜨린다. 판정 계약 = `src/db/CLAUDE.md` `stock_master_daily.py` 절. momentum 은 일봉을 쓰지 않아 무관하다.
+- **일봉 신선도 기준 `_resolve_expected_daily_head(as_of_date=None) -> date | None`** — `trading_calendar.previous_trading_day(as_of_date 또는 today_kst())` 를 지연 import 로 부르고(never-raise, 예외 → `None`) `[prepare_expected_head] strategy=<id> expected_head=<YYYY-MM-DD|None>` INFO 1행을 남긴다. 6전략(VB·LTV·donchian·BFB·VCP·kojiro) `prepare()` 가 받은 `as_of` 를 그대로 넘겨(미리보기면 `previous_trading_day(as_of)` — 저녁 미리보기에선 오늘) gather **전에 1회** 불러 `_fetch_one` 안의 `get_recent_daily_normalized(..., expected_head=expected_head)` 로 넘긴다(종목마다 부르지 않는다). 휴장일을 모르면 `None` 을 명시해 넘겨 어댑터의 달력 판정으로 떨어뜨린다. 판정 계약 = `src/db/CLAUDE.md` `stock_master_daily.py` 절. momentum 은 일봉을 쓰지 않아 무관하다.
 - 공통 헬퍼: `_calc_used_funds()` / `_fallback_one_share(current_price)` — 잔여 자금 = `total_investment - (positions buy_price×qty 합 + pending_buy_amounts 합)`
 - **`_apply_budget_limit(qty, current_price, ticker=None)` — 7 전략 `calc_buy_quantity` 의 공통 return 관문**(전략 예산 이중제한의 ② 명목 축 `Σ매수금액 ≤ total_investment`. ① 개수 축 `max_positions` 는 `is_max_positions` 가 `check_buy_signal` 에서 담당).
   - **분기 순서가 계약이다** — `price ≤ 0 → 0` → (`qty ≤ 0` → `_fallback_one_share` 위임 / `qty > 0` → 잔여 클램프 `min(qty, 잔여//price)` + `[budget_clamp]`) → `_apply_lot_units_cap`(K축) → `[oversized_fallback]` 관측 → `_apply_ratio_notional_cap`(ρ축) → `return`. 잔여 < price 면 0 이고 그 밖은 **부분 매수 허용**이다. `qty<=0` 분기가 폴백을 호출한다는 사실 자체를 `test_strategy_fallback_budget.py` Case D 가 검증한다.
@@ -568,7 +644,7 @@ run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, recor
 |------|------|------|
 | `TIME_AUTO_START` | 07:45 | DB `auto_start` 우선 폴백 자동 시작 |
 | `TIME_BOOT` | 07:55 | **런타임 미사용 상수** — `_boot()` 는 이 시각을 기다리지 않고 `scheduler.start()` 안에서 **즉시** 실행된다(`scheduler.py:600`). 07:45 자동 기동이면 그 직후, 수동 재기동이면 그 시각이다. `src/` 안 참조는 정의 1줄과 `realtime/websocket.py:46` 주석뿐이고, 값 07:55 는 테스트 핀(`tests/unit/engine/test_cycle92_time_boot_moved.py`)이 남아 있어 지우지 않는다. `_boot()` 본체는 `src/engine/boot_manager.py::boot(scheduler)` 위임(2줄 wrapper). `_preissue_all_tokens()`(메인+보조 N 매니저를 분당 1개 한도로 직렬화 사전 발급) → DB positions 복구 → KIS 잔고 교차 검증 → 미체결 복구 → `_eager_refresh_stock_master_for_held_positions()`(보유 + 익일청산 후보 ticker 를 `stock_master` eager 갱신) → 매크로 fetch + `market_regime_snapshots` INSERT → `cash_usage_ratio` 자동 조정 → **`portfolio_risk.check_budget_invariant`**(`position_ratio × max_positions > 1.0` 위반 시 `[budget_invariant_violation]` WARNING, **차단 아닌 관찰**) → `allocate_funds(net_asset × ratio)` |
-| `TIME_PRESUBSCRIBE` | 07:59 | `_collect_presubscribe_tickers()` — VB/LTV/donchian + 모든 전략 보유 합집합 사전 구독 |
+| `TIME_PRESUBSCRIBE` | 07:59 | `_collect_presubscribe_tickers()` — VB/LTV/donchian + 모든 전략 보유 합집합 사전 구독. 그 직전에 돌파 후보가 비었으면 VB/LTV 를, 후보가 빈 스윙 전략을 `funnel_capture.live_prepare_one(…, phase="presubscribe")` 로 다시 준비한다(부팅 준비 실패 회복용) |
 | `TIME_PRE_NXT_OPEN` | 08:00 | 익일 청산 task (`_execute_next_day_clear`, `NEXT_DAY_STABILIZE_SECS=30s`) + `_confirm_breakout_open_prices(board="pre_nxt")`(LTV `pre_nxt` 보드 시가 확정. VB 는 `tradable_boards=("main",)` 라 대상 없음) |
 | `TIME_KRX_OPEN_CONFIRM` | 09:00:05 | `_confirm_breakout_open_prices(board="main")` — VB/LTV 가 KRX 09:00 시가로 target_price 계산. 직후 `_drain_pending_next_day_clear()` — 08:00 보류 종목 KRX 시장가 일괄 청산. 모두 이미 확정이면 idempotent skip |
 | `TIME_SCAN_START` | 09:30 | 모멘텀 `scan_stocks()` + 통합 구독 |
@@ -576,7 +652,6 @@ run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, recor
 | `TIME_KRX_MAIN_CLOSE` | 15:30 | KRX 메인 마감. 15:30~15:39:59 = MAIN 유지 (종가 흡수 마진) |
 | `TIME_POST_NXT_OPEN` | 15:40 | **런타임 미사용 상수** — 스케줄러의 POST_NXT 전환(`_phase = "post_nxt_trading"`)과 `_confirm_breakout_open_prices(board="post_nxt")` 는 `TIME_KRX_MAIN_CLOSE`(15:30) 대기 직후에 일어난다(`scheduler.py:863-876`). 값 15:40 은 `session._BOARD_SCHEDULE` 의 `post_nxt` 보드 시작과 같지만 **보드 경계의 정본은 `_BOARD_SCHEDULE` 이지 이 상수가 아니다**. 테스트 핀(`tests/unit/engine/scheduler/test_post_nxt_open_time.py`)이 값을 잡고 있어 지우지 않는다 |
 | `TIME_STOCK_MASTER_BASICS_REFRESH` | 16:10 | basics 갱신 (상세 = 「저녁 데이터 적재」 절) |
-| `TIME_EVENING_FUNNEL_CAPTURE` | 16:20 | 저녁 잠정 funnel 캡처(`_evening_funnel_capture_task_loop`) — 상세 = 「funnel 스냅샷 캡처」 절 |
 | `TIME_STOCK_MASTER_MASTER_LOAD` | 16:30 | 마스터 파일 적재 |
 | `TIME_STOCK_MASTER_FINANCIAL_LOAD` | 16:40 | 재무 5 TR 주1회 적재 |
 | `TIME_NXT_POST_BUY_STOP` | 19:50 | `buy_disabled = True` (NXT 애프터 신규 매수 중단, 변경 금지) |
@@ -586,6 +661,7 @@ run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, recor
 | `TIME_METRICS_SNAPSHOT` | 20:05 | metrics 1차 스냅샷(`daily_metrics_snapshot.run_daily_metrics_snapshot`, leaf). `api_metrics`·`strategy_funnel` 이 프로세스 메모리 전용이라 21:30 정산까지의 유실 노출을 5분으로 묶는다. 🔴 **OpenAI 미호출**(비용·지연 0, `model`·토큰 5컬럼 전부 NULL) · 🔴 **`reset_request_metrics()` 미호출**(부르면 21:30 완전판이 저녁 90분치만 본다) · never-raise · 마커 `[daily_metrics_snapshot] target_date= pass=1 elapsed_ms=` 실행당 1행 |
 | `TIME_STOCK_MASTER_DAILY_LOAD` | 20:30 | KIS 일봉 적재(`scanner._stock_master_daily_load_once`) — 상세 = 「저녁 데이터 적재」 절 |
 | `quote_token_refresh.TIME_QUOTE_TOKEN_REFRESH` | 20:45 | 보조 시세 계정 접근토큰 강제 재발급 — 상세·시각 불변식 3은 모듈 맵의 `quote_token_refresh.py` 항목이 정본이다 |
+| `TIME_EVENING_FUNNEL_CAPTURE` | 21:00 | 저녁 미리보기 funnel 캡처(`_evening_funnel_capture_task_loop` → `funnel_capture.evening_capture_once`) — 다음 거래일 기준 `prepare(as_of=)` + 잠정 캡처. 20:30 적재 성공 마커를 30초 간격으로 21:15 까지 기다린다. 상세 = 「funnel 스냅샷 캡처」 절 |
 | `TIME_SETTLEMENT` | 21:30 | `_settle()` → `generate_daily_log_report()`(완전판이 20:05 1차 행을 upsert 로 덮어쓴다) → **`purge_old_logs()`**(INFO 2일 / WARNING+ 30일 retention 자동 정리, 실패 graceful `[log_retention_skip]` INFO + 다음 사이클 재시도) → `_reset_daily_state()`(퍼널 카운터 초기화는 분석 *후*) |
 
 기타:
@@ -632,7 +708,7 @@ run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, recor
 - `_drain_pending_next_day_clear()`: `_confirm_breakout_open_prices(board="main")` 직후 호출. `_pending_next_day_clear` 종목 KRX 시장가 일괄 청산
 - 구조화 로그: `[next_day_clear_deferred] ticker={t} strategy={s} reason={nxt_not_tradable|nxt_open_missing|nxt_underthreshold}` / `[next_day_clear_drained] ticker={t} strategy={s} result={success|fail} elapsed_ms={ms}` / `[selling_reconcile] stale _selling 해제: {t}`(재대조 discard)
 - `_reset_daily_state()`: 전략별 positions/pending_buys/sold_today + OrderEngine 추적 상태 + scanner 글로벌 dict (`ticker_last_tick.clear()` 포함) + `_pending_next_day_clear.clear()` + `_stale_retry_count.clear()` + `_reprepare_empty_logged_today.reset_daily()` 전체 초기화
-- **`_reprepare_breakout_if_empty` WARNING DailyEmitCap**: "스캔 후보 비어있음 — 재 prepare 시도" logger.warning + `write_log` DB INSERT 를 `_reprepare_empty_logged_today: DailyEmitCap[str]` 로 1회/전략/일 cap 한다(후보 0 은 정상 장세일 수 있다). 🔴 **`strategy.prepare()` 재시도 행위는 cap 밖 불변**이다(회복 메커니즘 보존). `getattr` 폴백 = `__new__` 스텁 인스턴스 호환(cap 부재 시 기존 무제한 emit). 회귀 `tests/unit/engine/test_cycle189_reprepare_emit_cap.py`
+- **`_reprepare_breakout_if_empty` WARNING DailyEmitCap**: "스캔 후보 비어있음 — 재 prepare 시도" logger.warning + `write_log` DB INSERT 를 `_reprepare_empty_logged_today: DailyEmitCap[str]` 로 1회/전략/일 cap 한다(후보 0 은 정상 장세일 수 있다). 🔴 **재준비(`funnel_capture.live_prepare_one(strategy, phase="intraday_empty")`) 행위는 cap 밖 불변**이다(회복 메커니즘 보존). `getattr` 폴백 = `__new__` 스텁 인스턴스 호환(cap 부재 시 기존 무제한 emit). 회귀 `tests/unit/engine/test_cycle189_reprepare_emit_cap.py`
 
 ## scanner.py
 

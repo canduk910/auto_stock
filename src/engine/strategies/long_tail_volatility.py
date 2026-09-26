@@ -243,7 +243,7 @@ class LongTailVolatilityStrategy(StrategyBase):
             except RuntimeError:
                 coro.close()  # 이벤트 루프 없는 환경 — coroutine 명시적 닫기, 근사값 유지
 
-    async def prepare(self) -> None:
+    async def prepare(self, *, as_of: date | None = None) -> None:
         """장 시작 전: 종목 스캔 → K값 계산 → 연속상한가 필터링.
 
         사이클 143 (2026-06-15) — 사이클 140 자문 영속 LTV 6단계 funnel hook 추가.
@@ -254,6 +254,7 @@ class LongTailVolatilityStrategy(StrategyBase):
         """
         import asyncio
 
+        as_of_date, _preview = self._resolve_prepare_as_of(as_of)
         # 사이클 173 (2026-06-22) — 일봉 source KIS → DB 어댑터 전환 (행위 보존).
         from src.db.stock_master_daily import get_recent_daily_normalized
 
@@ -318,11 +319,11 @@ class LongTailVolatilityStrategy(StrategyBase):
 
         k_period = self.config.params["k_period"]
         consecutive_limit = self.config.params["exclude_consecutive_limit"]
-        today_str = datetime.now(timezone(timedelta(hours=9))).date().strftime("%Y%m%d")
+        today_str = as_of_date.strftime("%Y%m%d")
         prepared = 0
 
         # cycle363 — ①′ 일봉 신선도 기준(「직전 영업일」) prepare 당 1회 계산.
-        expected_head = await self._resolve_expected_daily_head()
+        expected_head = await self._resolve_expected_daily_head(as_of)
 
         # 일봉 fetch 병렬화 (KIS Rate Limit semaphore가 자동 직렬화)
         # 사이클 173 — DB 우선 어댑터 (락/신선도/부족 시 KIS 폴백). min_required 명시 (자문 §4).

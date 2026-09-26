@@ -2501,3 +2501,25 @@ L477 트레일링 영속 · L513 거래대금 컷 · L926 `allocate_funds` 재�
 바뀐 사실 = 사용자가 설계안 `_workspace/design/2026-09-24_three_stage_sizing_pyramiding.md` D-2 ⓐ 를
 택했다 — K 는 2.0 을 유지하고, 1주 폴백으로 산 랏에는 사다리를 걸지 않는다. K→1.0 은 사다리와 무관하게
 kojiro 신규 진입 8%·donchian 20% 를 없앤다(설계안 §5). 상세 경위 = `CLAUDE.history.md` 같은 날짜 항목.
+
+## 스케줄 — KRX/NXT 통합 운영 (08:00~20:00)
+
+### 2026-09-26 cycle364 S1 — 저녁 funnel 캡처 16:20 → 21:00
+
+정본 원문(표 행):
+
+| 16:20 | 저녁 잠정 funnel 캡처 (운영자 밤 후보 확인) |
+
+경위: 사용자 결정 D3(A1). 21:00 = 20:30 일봉 적재 뒤 · 20:45 보조 계정 토큰 재발급 체인 뒤 · 21:30 정산 전. 매수·청산 파라미터 변경은 없다.
+
+→ CHANGELOG: cycle364 S1 행
+
+## 시간 상수 (`src/engine/scheduler.py`)
+
+### 2026-09-26 cycle364 S1 — `TIME_EVENING_FUNNEL_CAPTURE` 16:20 → 21:00
+
+정본 원문(표 행):
+
+| `TIME_EVENING_FUNNEL_CAPTURE` | 16:20 | 저녁 잠정 funnel 캡처 |
+
+→ CHANGELOG: cycle364 S1 행

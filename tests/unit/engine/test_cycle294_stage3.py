@@ -1475,6 +1475,9 @@ def test_scope_scheduler_and_strategies_are_untouched() -> None:
 
     root = pathlib.Path(__file__).resolve().parents[3]
     lines = len((root / "src/engine/scheduler.py").read_text(encoding="utf-8").splitlines())
-    assert lines == 3812, (
-        f"scheduler.py = {lines}L (착수 시점 3,726L → cycle298 재핀 3,785L → cycle354 재핀 3,812L) — 무접촉 계약 위반(절대 규칙 7)"
+    assert lines == 3777, (
+        f"scheduler.py = {lines}L (착수 시점 3,726L → cycle298 재핀 3,785L → cycle354 재핀 3,812L → "
+        "cycle364 S1 저녁 캡처 leaf 이관 재핀 3,758L → cycle364 S1 round 2(R7) 죽은 try/except "
+        "2곳 제거 + 문서 정직화 재핀 3,755L → cycle364 S1 round 3(F4 skipped_out + F5 중복 ERROR "
+        "제거 + F7 docstring 정직화) 재핀 3,777L) — 무접촉 계약 위반(절대 규칙 7)"
     )

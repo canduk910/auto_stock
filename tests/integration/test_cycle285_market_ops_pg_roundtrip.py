@@ -45,13 +45,15 @@ def _funnel_floor(d: date):
     return fn(d)
 
 
-async def _pin_funnel_snapshot_at(pg, at: datetime, *, target_date: date, step_no: int) -> None:
-    """cycle350 — 벽시계 배제. 저녁 캡처 행의 `snapshot_at` 을 그날 16:21 로 고정한다
+async def _pin_funnel_snapshot_at(
+    pg, at: datetime, *, target_date: date, step_no: int, strategy_id: str = "donchian_swing",
+) -> None:
+    """cycle350 — 벽시계 배제. 저녁 캡처 행의 `snapshot_at` 을 고정 시각으로 되돌린다
     (B1 이후 `snapshot_at` = 마지막 쓰기 시각이고 B2 가 그 값에 하한을 건다)."""
     status = await pg.execute(
         "UPDATE strategy_funnel_snapshots SET snapshot_at = $1 "
-        "WHERE target_date = $2 AND strategy_id = 'donchian_swing' AND step_no = $3",
-        at, target_date, step_no,
+        "WHERE target_date = $2 AND strategy_id = $3 AND step_no = $4",
+        at, target_date, strategy_id, step_no,
     )
     assert status == "UPDATE 1", status
 
@@ -60,40 +62,77 @@ async def _pin_funnel_snapshot_at(pg, at: datetime, *, target_date: date, step_n
 async def test_c285_pg_1_funnel_rows_excludes_non_provisional(
     clean_strategy_funnel, clean_system_config,
 ):
-    """09:30 자동 캡처(`is_provisional=False`)와 16:20 저녁 캡처(`True`)가 같은
-    (target_date, strategy_id, step_no) 를 UPSERT 해도 `_COMBINED_SQL` 의
-    `funnel_rows`/`funnel_last_at` 은 저녁 캡처 행만 센다."""
+    """09:30 자동 캡처(`is_provisional=False`)는 저녁 잠정 캡처 카운트에 새지 않는다(HIGH #1).
+
+    🔁 cycle364 의도적 개정(설계 `_workspace/domain_consult/cycle364_a1_as_of_design.md` §2.6 ·
+    ③-b · M7/M12) — 종전 이 테스트는 「확정 행을 잠정 쓰기가 덮으면 그 행이 저녁 증거가 된다」
+    (False→True 덮어쓰기 뒤 `funnel_rows == 1`)를 단언했다. cycle350 §8.2 가 「③-b 착수 때 다시
+    짜야 한다」고 적어 둔 바로 그 봉인이다. 이제:
+    (a) 오늘 09:35 확정 행을 잠정 쓰기가 **덮지 못한다**(행·`snapshot_at` 불변, 반환 None)
+    (b) 오늘 날짜 잠정 행은 저녁 증거가 아니다(아침 +600초 캡처·거래일 비상)
+    (c) 다음 세션 확정 행도 아니다 — (d) 다음 세션 잠정 행(하한 이후)만 센다.
+    """
     from src.db.strategy_funnel import insert_snapshot
     from src.routes.market_ops import _COMBINED_SQL
     from src.db._kst import to_date
     import src.db.pg as pg
 
-    # 09:30 자동 캡처(비잠정) — 실제로는 이게 먼저 UPSERT 되는 순서다.
+    nxt = _D + timedelta(days=1)
+    # 09:30 자동 캡처(확정) — 오늘 키
     await insert_snapshot(
         target_date=_D, strategy_id="donchian_swing", step_no=99,
         step_name="최종", survived_tickers=["005930"], is_provisional=False,
     )
-    # cycle350 — 하한 이후 시각으로 고정해 「is_provisional 필터만」 을 잰다(시각 게이트와 분리).
-    await _pin_funnel_snapshot_at(
-        pg, datetime(2026, 9, 14, 16, 21, tzinfo=_KST), target_date=_D, step_no=99,
-    )
+    confirmed_at = datetime(2026, 9, 14, 9, 35, tzinfo=_KST)
+    await _pin_funnel_snapshot_at(pg, confirmed_at, target_date=_D, step_no=99)
     row = await pg.fetchrow(_COMBINED_SQL, to_date(_D), _funnel_floor(_D))
-    assert row["funnel_rows"] == 0, (
-        "09:30 자동 캡처(is_provisional=False)가 저녁 잠정 캡처 카운트에 새고 있다"
-        " — HIGH #1 이 실제로는 안 고쳐졌다"
-    )
+    assert row["funnel_rows"] == 0, "09:30 자동 캡처(확정)가 저녁 캡처 카운트에 샌다 (HIGH #1)"
 
-    # 16:20 저녁 캡처(잠정) — 같은 step_no 라 UPSERT 가 그 행을 덮어쓴다.
-    await insert_snapshot(
+    # (a) 같은 키 잠정 쓰기 → 거부
+    rejected = await insert_snapshot(
         target_date=_D, strategy_id="donchian_swing", step_no=99,
+        step_name="최종", survived_tickers=["000660"], is_provisional=True,
+    )
+    assert rejected is None, "잠정 쓰기가 확정 행을 덮었다 (③-b / M7)"
+    kept = await pg.fetchrow(
+        "SELECT is_provisional, snapshot_at, survived_tickers FROM strategy_funnel_snapshots "
+        "WHERE target_date = $1 AND strategy_id = 'donchian_swing' AND step_no = 99", _D,
+    )
+    assert kept["is_provisional"] is False and kept["snapshot_at"] == confirmed_at
+    assert kept["survived_tickers"] == ["005930"]
+
+    # (b) 오늘 날짜 잠정 행(다른 전략 키) — 21:01 에 써도 저녁 증거가 아니다
+    await insert_snapshot(
+        target_date=_D, strategy_id="kojiro", step_no=99,
         step_name="최종", survived_tickers=["005930"], is_provisional=True,
     )
     await _pin_funnel_snapshot_at(
-        pg, datetime(2026, 9, 14, 16, 21, tzinfo=_KST), target_date=_D, step_no=99,
+        pg, datetime(2026, 9, 14, 21, 1, tzinfo=_KST), target_date=_D, step_no=99,
+        strategy_id="kojiro",
+    )
+    # (c) 다음 세션 확정 행
+    await insert_snapshot(
+        target_date=nxt, strategy_id="vcp_breakout", step_no=99,
+        step_name="최종", survived_tickers=["005930"], is_provisional=False,
+    )
+    await _pin_funnel_snapshot_at(
+        pg, datetime(2026, 9, 14, 21, 1, tzinfo=_KST), target_date=nxt, step_no=99,
+        strategy_id="vcp_breakout",
     )
     row2 = await pg.fetchrow(_COMBINED_SQL, to_date(_D), _funnel_floor(_D))
-    assert row2["funnel_rows"] == 1
-    assert row2["funnel_last_at"] is not None
+    assert row2["funnel_rows"] == 0, "오늘 날짜 잠정 행·다음 세션 확정 행이 저녁 증거로 셈해졌다 (M12)"
+
+    # (d) 다음 세션 잠정 행(A1 저녁 캡처)
+    await insert_snapshot(
+        target_date=nxt, strategy_id="donchian_swing", step_no=99,
+        step_name="최종", survived_tickers=["005930"], is_provisional=True,
+    )
+    await _pin_funnel_snapshot_at(
+        pg, datetime(2026, 9, 14, 21, 1, tzinfo=_KST), target_date=nxt, step_no=99,
+    )
+    row3 = await pg.fetchrow(_COMBINED_SQL, to_date(_D), _funnel_floor(_D))
+    assert row3["funnel_rows"] == 1
+    assert row3["funnel_last_at"] is not None
 
 
 @pytest.mark.asyncio
@@ -101,24 +140,27 @@ async def test_c285_pg_2_last_at_fields_are_all_time_not_today_only(
     clean_strategy_funnel, clean_system_config,
 ):
     """`rec_last_at`/`funnel_last_at` 은 마커 기반 4열과 같은 의미(전체 기간 마지막
-    성공)를 가지도록 오늘 필터가 없어야 한다(honest 렌즈 LOW #8 시정)."""
+    성공)를 가지도록 오늘 필터가 없어야 한다(honest 렌즈 LOW #8 시정).
+
+    🔁 cycle364 — 어제 저녁 A1 캡처 행은 **target_date=오늘**(다음 세션)로 쓰였고 `snapshot_at`
+    은 어제 21:01 이다. 오늘 저녁 증거(`target_date > 오늘`)는 아니지만 마지막 쓰기 시각으로는
+    여전히 보여야 한다.
+    """
     from src.db.strategy_funnel import insert_snapshot
     from src.routes.market_ops import _COMBINED_SQL
     from src.db._kst import to_date
     import src.db.pg as pg
 
-    yesterday = _D - timedelta(days=1)
     await insert_snapshot(
-        target_date=yesterday, strategy_id="donchian_swing", step_no=99,
+        target_date=_D, strategy_id="donchian_swing", step_no=99,
         step_name="최종", survived_tickers=["005930"], is_provisional=True,
     )
     await _pin_funnel_snapshot_at(
-        pg, datetime(2026, 9, 13, 16, 21, tzinfo=_KST), target_date=yesterday, step_no=99,
+        pg, datetime(2026, 9, 13, 21, 1, tzinfo=_KST), target_date=_D, step_no=99,
     )
-    # 오늘(target_date=_D) 은 아직 아무 행도 없다.
     row = await pg.fetchrow(_COMBINED_SQL, to_date(_D), _funnel_floor(_D))
-    assert row["funnel_rows"] == 0, "오늘 행이 없어야 한다"
-    assert row["funnel_last_at"] == "2026-09-13T16:21:00+09:00", (
+    assert row["funnel_rows"] == 0, "오늘 저녁에 쓴 다음 세션 행이 아직 없어야 한다"
+    assert row["funnel_last_at"] == "2026-09-13T21:01:00+09:00", (
         "어제 성공한 저녁 캡처의 마지막 성공 시각이 여전히 보여야 한다"
         "(전체 기간 최댓값 계약 — cycle350 하한은 funnel_rows 에만 걸린다)"
     )
@@ -152,21 +194,23 @@ async def test_c285_pg_4_route_end_to_end_over_real_pg(
     from src.db.strategy_funnel import insert_snapshot
     from src.db.system_config import set_task_last_success
 
+    nxt = _D + timedelta(days=1)
     await insert_snapshot(
-        target_date=_D, strategy_id="donchian_swing", step_no=99,
+        target_date=nxt, strategy_id="donchian_swing", step_no=99,
         step_name="최종", survived_tickers=["005930"], is_provisional=True,
     )
-    # cycle350 — 벽시계 배제: 저녁 캡처 행을 그날 16:21 로 고정(하한 이후 = 저녁 증거).
+    # cycle350 — 벽시계 배제: 저녁 캡처 행을 그날 21:01 로 고정(하한 이후 = 저녁 증거).
+    # 🔁 cycle364 — A1 저녁 캡처는 다음 세션 라벨(target_date = 오늘 + 1)로 쓴다.
     import src.db.pg as pg
 
     await _pin_funnel_snapshot_at(
-        pg, datetime(2026, 9, 14, 16, 21, tzinfo=_KST), target_date=_D, step_no=99,
+        pg, datetime(2026, 9, 14, 21, 1, tzinfo=_KST), target_date=nxt, step_no=99,
     )
     await set_task_last_success(
         "stock_master_basics_refresh", "2026-09-14T16:12:00+09:00"
     )
 
-    frozen = datetime(2026, 9, 14, 18, 0, tzinfo=_KST)
+    frozen = datetime(2026, 9, 14, 22, 0, tzinfo=_KST)  # 🔁 cycle364 — 저녁 캡처(21:00) 뒤
 
     class _FrozenDatetime(datetime):
         @classmethod
@@ -193,6 +237,7 @@ async def test_c285_pg_4_route_end_to_end_over_real_pg(
     assert by_id["evening_funnel_capture"]["status"] == "done"
     assert by_id["evening_funnel_capture"]["evidence"]["snapshot_rows_today"] == 1
     assert by_id["stock_master_basics_refresh"]["status"] == "done"
-    # 18:00 은 TIME_RECOMMENDATION(20:00) 이전이라 증거가 없어도 "scheduled" 다.
-    assert by_id["recommendation"]["status"] == "scheduled"
+    # 22:00 은 TIME_RECOMMENDATION(20:00) 뒤라 증거가 없으면 "not_fired" 다
+    # (🔁 cycle364 — 조회 시각 18:00 → 22:00. 「증거 없음은 시계로 판정」 이라는 뜻은 같다).
+    assert by_id["recommendation"]["status"] == "not_fired"
     assert by_id["recommendation"]["evidence"]["recommendation_rows_today"] == 0

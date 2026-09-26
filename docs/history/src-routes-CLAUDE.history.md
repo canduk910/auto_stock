@@ -331,3 +331,22 @@ Phase 1 산출 — 실행/조회 엔드포인트는 미구현
 `evening_funnel_capture`(산출물 판정)에는 맞지 않아, 행마다 판정 소스를 적는 문장으로 바꿨다.
 
 → CHANGELOG: cycle363 행
+
+## 엔드포인트 목록
+
+### 2026-09-26 cycle364 S1 — `/api/strategy-funnel/snapshot` 행 · `/api/market-ops` 행의 행 순서와 저녁 funnel 증거 문장
+
+정본 원문(`/api/strategy-funnel/snapshot` 행 전체):
+
+| POST | `/api/strategy-funnel/snapshot` | strategy_funnel.py | 수동 trigger — 각 전략 prepare 결과(`_funnel_steps`) snapshot 즉시 생성. `scheduler.capture_funnel_snapshots(registry, is_provisional=False)` 공통 헬퍼에 위임한다(09:30 자동 hook 과 동일 — 단계별 + `step_no=99` 전체 캡처). 운영자 "지금 각 단계 후보 보기" 니즈 충족. 응답 `{target_date, saved_count, count}` (saved_count = 저장 row 수). `is_provisional=True` 는 16:20 저녁 task 전용 |
+
+정본 원문(`/api/market-ops` 행 중 행 순서 괄호와 저녁 funnel 증거 문장):
+
+오늘 야간작업 현황(시각순 14행: basics 보강·purge·저녁 funnel·마스터·재무·토큰 재발급·매수중단·AI자문·유니버스·metrics 스냅샷·클라우드 루틴·일봉 적재·정산·로그분석).
+`evening_funnel_capture` 의 산출물 카운트는 `strategy_funnel_snapshots` 의 `is_provisional=TRUE` 행만 센다 — 09:30 자동 캡처·스캐너 필터 훅(둘 다 `is_provisional=False`)이 16:20 저녁 캡처의 "성공" 으로 새지 않게 하기 위해서다. 그 카운트도 같은 evidence-time 게이트를 타서 `snapshot_at >= _funnel_evidence_floor(today)`(= `TIME_EVENING_FUNNEL_CAPTURE` − `_SCHEDULE_EVIDENCE_GRACE`, KST) 인 행만 센다 — 부팅 +600초(≈07:57) 잠정 쓰기가 저녁 캡처 "완료" 로 보이지 않게 하기 위해서이고, `funnel_last_at` 은 이 하한 없이 전체 기간 최댓값이다.
+
+경위: 저녁 캡처가 21:00 다음 거래일 미리보기가 되면서 market-ops 저녁 증거가 `target_date = $1` → `target_date > $1` 로 바뀌었다
+(evidence 키 `snapshot_rows_today` 는 계약이라 이름 유지, 뜻 = 오늘 19:00 이후에 쓴 다음 세션 잠정 행). 하한은 21:00 − 2시간 = 19:00.
+행 순서에서 저녁 funnel 이 일봉 적재(20:30)와 정산(21:30) 사이로 옮겨졌다. 수동 캡처는 라벨 가드(카드3 (가))가 기준일이 다른 전략을 건너뛰고 message 로 알린다.
+
+→ CHANGELOG: cycle364 S1 행

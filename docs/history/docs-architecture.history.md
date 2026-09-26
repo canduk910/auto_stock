@@ -328,3 +328,39 @@ GitHub Secrets: `EC2_HOST`, `EC2_USERNAME`, `EC2_SSH_KEY`
 15:30 블록에 이미 바르게 적혀 있다.
 
 → CHANGELOG: cycle298 행
+
+## 9.1 확장 테이블
+
+### 2026-09-26 cycle364 S1 — `strategy_funnel_snapshots` 행
+
+정본 원문(표 행):
+
+| `strategy_funnel_snapshots` | 030 (+035) | 전략별 조건검색 단계별 후보/탈락 영구 추적 — UNIQUE `(target_date, strategy_id, step_no)` + UPSERT |
+
+경위: 잠정(`is_provisional`, migration 040) 쓰기가 확정 행을 덮지 못한다는 사실(③-b)을 행에 더했다.
+
+→ CHANGELOG: cycle364 S1 행
+
+## 15.3 2단계 — 관측·분석 분리 (계획 · 착수 미정)
+
+### 2026-09-26 cycle364 S1 — 「퍼널 스냅샷」 행의 `scheduler.py` 줄 번호와 호출자
+
+정본 원문(표 행):
+
+| 퍼널 스냅샷 | 가를 수 없다 | 데이터 원천이 DB 가 아니라 **엔진 프로세스의 메모리**다. `capture_funnel_snapshots(registry, …)`(`scheduler.py:186`)가 registry 를 순회해 각 전략의 `_funnel_steps` 를 읽고(`:236`, 접근 실패 로그 `:238`), 호출자는 `_scan_loop` 안의 `:2424` 다. 워커 프로세스엔 그 객체가 없다 |
+
+경위: `scheduler.py` 줄 번호를 현재 값으로 맞췄다(186/236/238/2424 는 이 사이클 이전부터 어긋나 있었다). 호출자에 21:00 저녁 미리보기(`funnel_capture.evening_capture_once`)를 더했다.
+
+→ CHANGELOG: cycle364 S1 행
+
+## 15.5.7 scheduler.py 는 여섯 번째 프로세스가 아니다
+
+### 2026-09-26 cycle364 S1 — 소유 표의 퍼널 캡처 시각
+
+정본 원문(표 행):
+
+| 1 | `_scan_loop`(9:30~) · `_confirm_breakout_open_prices`(9:00:05) · `_swing_buy_poll_loop` · `_swing_rest_poll_loop` · 퍼널 캡처(16:20) |
+
+경위: 퍼널 캡처가 09:35 확정 + 21:00 저녁 미리보기가 됐다. 저녁 흐름 도식(5장)과 시각 표에는 21:00 행을 더했다(추가라 옮길 원문 없음).
+
+→ CHANGELOG: cycle364 S1 행

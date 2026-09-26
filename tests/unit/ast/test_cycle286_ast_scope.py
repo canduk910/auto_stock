@@ -115,24 +115,27 @@ _BASE_SHA = {
     "src/auth/token.py":
         "4125c271b4147e59922f4f000e523429fb4bbef37058dc754fd92b9475ec58f1",
     # 8영역은 아니지만 이 사이클이 무접촉을 약속한 파일
+    # 🔁 cycle364(2026-09-26) 재핀 — 저녁 A1 미리보기(`prepare(as_of=)`) 도입(사용자 승인 D3).
     "src/engine/strategy_base.py":
-        "19353f030cda3bf0dde33bee04d9a00f7870f6c083d6d4cf90b86b8223dc2c12",
+        "e7cc4965ce8d1e2e35bb04b427799b0898f744754415a7942fd546d6d22ca89e",
     # 나머지 전략 6파일 (LTV 만 변경 대상) — 🔁 cycle290(킬스위치 등재, 2026-09-13)
     # 재핀. `DEFAULT_PARAMS` 말미 2키 추가뿐.
+    # 🔁 cycle364 재핀 — `prepare(as_of=)` 시그니처 확장(+ donchian·kojiro PV-1, vcp P3).
+    # 🔁 cycle364 round 2 — PV-1 BFB·VCP 확대 + keep/skip 분리(R1).
     "src/engine/strategies/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "src/engine/strategies/bull_flag_breakout.py":
-        "f72cc0c71ee6f9b1851407e3e57df549468a2904d6a702d4f99e4ef97c4b4b1b",
+        "f44c3757db0c9bced8754f34723cc94e7956057b4405903900d519fb4e5b28d8",
     "src/engine/strategies/donchian_swing.py":
-        "0108f5a03ebc96aa6a14190eafb92ac174202bb13df4c2383e4d6bb9a59f5364",
+        "31bd41bb0e435a0185649dee3aa309622d2044d9978cf3d9ddb687a778327ea7",
     "src/engine/strategies/kojiro.py":
-        "329bd29d661f8be1d551ce9b44780dd9d78461df7c21ab2ed1b662e31e52cee5",
+        "66758fb3fce62d509d6d6750cb8ff903df09f1671e8b2d11c139e1cde9da6038",
     "src/engine/strategies/momentum.py":
-        "50d5c0b9a232d6110f6b85fc524569853f2b8edffe2fd44adc24289800b95ae2",
+        "38743ab1ecdb4aa9bcd6ac37e5d28f75501d2d4eceb2e70f3aace44d00d502a1",
     "src/engine/strategies/vcp_breakout.py":
-        "7c6477fd4d51623fa8f10daf53cedd4c0bf5fe778e59a005369f9ec798cb201a",
+        "a609ded41a916563c6706aac16fe1867845687233c195b7dab478d336cc94b37",
     "src/engine/strategies/volatility_breakout.py":
-        "be4327754fc4ebf63de58553e68c7a2d8eba14f43f847490bf22cae90d7e5400",
+        "b5febd0420f4e087673b46daee0c9298c13ec3d1d30e18b6a5f1ed8db56c20dc",
 }
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
@@ -143,7 +146,7 @@ _PINNED_DIRS = ("src/realtime", "src/auth", "src/engine/strategies")
 #: 신규 leaf `src/engine/market_op_subscribe.py` 로 추출해(행위 변경 0 · 5줄
 #: 위임 wrapper) 3,897 → 3,726 이 됐다. 값만 옮긴다 — 정확 핀을 상한 핀으로
 #: 완화하면 cycle286 의 무접촉 대리 지표가 사라진다.
-_SCHEDULER_LINES = 3812  # cycle354 재핀 — order_no 매핑 폴백 추가 (`_sync_orders_to_db`)
+_SCHEDULER_LINES = 3777  # cycle364 재핀 — 저녁 캡처 본체를 funnel_capture leaf 로 이관
 #: cycle257 이 세운 영구 상한 (종전 표기 4,000 은 느슨한 쪽이라 폐기 — 두 수가 갈라지면
 #: 항상 **더 조인 쪽**이 정본이다).
 _SCHEDULER_LINE_CAP = 3900
@@ -156,8 +159,9 @@ _LTV_FROZEN_METHODS = {
         "c8b0e6a8c8705d49bb6f12f82f505d426a5bdeb81413f8b2e0276eabb7dd9cad",
     "calc_buy_quantity":
         "1149ecc8ea37fb1ba164cc1fd88e6525111d5142168ca879f1026c7890905b81",
+    # 🔁 cycle364(2026-09-26) 재핀 — `prepare(as_of=)` 시그니처 확장(사용자 승인 D3).
     "prepare":
-        "bd185aad3d2f9b9bcf24cff81047f437ec6aadb73ec35c7c9eb30a09929c2c11",
+        "8837076acd413ed97127a7a74ebbb4e62b7000fa9495727ad268bfedcd13b73a",
     "on_open_price_confirmed":
         "4834b4cc6b03f2eddbfa94390ddcf0df41b3a561afd9056a5b2cac04f76a72ec",
 }

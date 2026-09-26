@@ -938,3 +938,19 @@ target 220 → 마진 34 영업일(사이클196 의 34 와 같다). `fetch_daily
 - 결과: 356,636행 갱신 · 보합 10,542행은 0 유지 · `prdy_vrss` 결측 0 · NUMERIC(8,4) 초과 0. 02:20 KST, 38초.
 - 검산: 연속 거래일 364,996쌍 중 종가 비율과 0.05%p 넘게 다른 쌍 379(0.10%, 75종목) · 1%p 초과 40 · 5%p 초과 8. 5%p 초과는 권리락·액면변경일로, 이 칸 쪽이 실제 등락률이다(예: 417310 종가 비율 −78.9% vs 이 칸 +0.53%). 작은 어긋남(예: 001230 매일 약 0.06%p)은 일괄 적재 때 종가에만 수정주가 보정이 걸린 것으로 보인다(추정).
 - 주별 상한가(`change_rate >= 29`): 08-24 17 · 08-31 15 · 09-07 27 · 09-14 26 · 09-21(3일) 12 — 주간 자문 정정 부기 ②의 `prdy_vrss` 재계산값(27·26)과 같다.
+
+## strategy_funnel.py — 조건검색 단계별 추적
+
+### 2026-09-26 cycle364 S1 — `is_provisional` 뜻 · 호출처 서술 · 확정 행 보호(③-b) 신설
+
+정본 원문(목록 행 2):
+
+  - `is_provisional=True` = 16:20 저녁 잠정 캡처(전일 마스터 + 16:10 basics 기준), `False`(기본) = 09:30 자동·수동 trigger(확정).
+- **호출은 공통 헬퍼 `scheduler.capture_funnel_snapshots(registry, *, is_provisional)` 하나로 모인다** — 호출처 3 = 09:30 `_scan_loop` 첫 진입의 자동 캡처(`_auto_capture_funnel_snapshots`, `is_provisional=False`) / 16:20 저녁 잠정 캡처(`_evening_funnel_capture_once`, `is_provisional=True`) / 수동 trigger `POST /api/strategy-funnel/snapshot`. 세 경로 모두 **단계별 + 최종(`step_no=99`)** 을 캡처한다. 단계 수집은 BFB/VCP/donchian `prepare()` 의 8단계 `_record_funnel_step` hook 이 하고, `_reset_daily_state` 가 동행 reset 한다.
+
+경위: 저녁 잠정 캡처가 16:20(오늘 날짜, 전일 봉 기준)에서 21:00 다음 거래일 미리보기로 바뀌었다. `insert_snapshot` 의 UPSERT 에
+`WHERE NOT (strategy_funnel_snapshots.is_provisional = FALSE AND EXCLUDED.is_provisional = TRUE)` 가 붙어 잠정 쓰기가 확정 행을
+덮지 못한다(거부되면 `None`). cycle350 이 이 보호의 단독 배포를 막았던 이유(「평일 저녁 쓰기가 전부 거부돼 저녁 산출물이 사라진다」)는
+저녁 쓰기가 다음 거래일 키로 가면서 없어졌다.
+
+→ CHANGELOG: cycle364 S1 행

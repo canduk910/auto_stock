@@ -10,9 +10,10 @@
 - G-171-CAP-2: 헬퍼가 단계별 + step_no=99 insert_snapshot 호출 (09:30 행위 보존)
 - G-171-CAP-3: is_provisional 전파 (True/False 그대로 insert_snapshot 동행)
 - G-171-CAP-4: _auto_capture_funnel_snapshots 가 헬퍼 위임 (is_provisional=False)
-- G-171-EVE-1: TIME_EVENING_FUNNEL_CAPTURE == time(16, 20)
+- G-171-EVE-1: TIME_EVENING_FUNNEL_CAPTURE == time(21, 0)  (🔁 cycle364 개정 — 16:20 → 21:00, A1 저녁 미리보기)
 - G-171-EVE-2: 16:20 task 가 prepare → capture(is_provisional=True) 호출
-- G-171-EVE-3: 일봉 미적재 시 count_all 폴링 대기 (사이클 163 패턴)
+- G-171-EVE-3: 🔁 cycle364 개정 — 저녁 경로는 20:30 일봉 적재 **성공 마커**를 30초 간격으로 기다린다
+  (`count_all() > 0` 은 빈 테이블만 막을 뿐 그날 적재를 기다리지 않는다 — F-D8-a · 설계 §2.4 · M5)
 - G-171-EVE-4: task_attrs 4 위치 (_evening_funnel_capture_task)
 - G-171-SAFETY-1 (HIGH): check_exit_signal / check_buy_signal funnel hook 0건
 - G-171-SAFETY-2 (HIGH): risk / order_engine / realtime / auth import 0
@@ -22,7 +23,7 @@ from __future__ import annotations
 
 import ast
 import inspect
-from datetime import date, time
+from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -164,13 +165,19 @@ class TestEveningTask:
     """16:20 저녁 잠정 funnel 캡처 task."""
 
     def test_g_171_eve_1_time_constant(self):
-        """G-171-EVE-1: TIME_EVENING_FUNNEL_CAPTURE == time(16, 20)."""
+        """G-171-EVE-1: TIME_EVENING_FUNNEL_CAPTURE == time(21, 0).
+
+        🔁 cycle364 의도적 개정(설계 `_workspace/domain_consult/cycle364_a1_as_of_design.md`
+        §2.4 · 사용자 결정 카드2 (가)) — 16:20 은 20:30 일봉 적재 **앞**이라 전략의 오늘봉 절단과
+        겹쳐 D-1 목록만 만들 수 있었다. A1 은 적재(20:30) 뒤 · 토큰 체인(20:45~20:51) 뒤 ·
+        정산(21:30) 전인 21:00 에 다음 거래일 미리보기를 만든다.
+        """
         from src.engine import scheduler as sched_mod
 
         assert hasattr(sched_mod, "TIME_EVENING_FUNNEL_CAPTURE"), (
             "TIME_EVENING_FUNNEL_CAPTURE 상수 부재"
         )
-        assert sched_mod.TIME_EVENING_FUNNEL_CAPTURE == time(16, 20)
+        assert sched_mod.TIME_EVENING_FUNNEL_CAPTURE == time(21, 0)
 
     def test_g_171_eve_2_task_loop_method_exists(self):
         """G-171-EVE-2: _evening_funnel_capture_task_loop 메서드 + run_periodic_task_loop 답습."""
@@ -192,9 +199,33 @@ class TestEveningTask:
         )
 
     @pytest.mark.asyncio
-    async def test_g_171_eve_2b_once_prepares_and_captures_provisional(self):
-        """G-171-EVE-2b: once 본체가 prepare → capture(is_provisional=True) 호출."""
+    async def test_g_171_eve_2b_once_prepares_and_captures_provisional(self, monkeypatch):
+        """G-171-EVE-2b: once 본체가 prepare → capture(is_provisional=True) 호출.
+
+        🔁 cycle364 개정 — 벽시계 제거(21:00 고정) + 저녁 경로 계약: 준비 = `prepare(as_of=다음
+        거래일)` · 캡처 라벨 = 그 as_of · 잠정. 종전 단언(「capture 가 is_provisional=True 로
+        불린다」)의 의도는 그대로 — 저녁 캡처는 여전히 잠정이다.
+        """
+        from freezegun import freeze_time
+
         from src.engine.scheduler import TradingScheduler
+
+        async def _cal(d):
+            return d.weekday() < 5
+
+        monkeypatch.setattr("src.engine.trading_calendar._lookup_open", _cal)
+        monkeypatch.setattr(
+            "src.db.system_config.get_task_last_success",
+            AsyncMock(return_value="2026-09-22T20:32:10+09:00"),
+        )
+        inserts: list = []
+
+        async def _insert(**kw):
+            inserts.append(kw)
+            return {"id": "x"}
+
+        monkeypatch.setattr("src.db.strategy_funnel.insert_snapshot", _insert)
+        monkeypatch.setattr("src.db.stock_master_daily.count_all", AsyncMock(return_value=2768))
 
         strat = MagicMock()
         strat.strategy_id = "volatility_breakout"
@@ -204,26 +235,50 @@ class TestEveningTask:
 
         sched = TradingScheduler.__new__(TradingScheduler)
         sched.registry = _make_registry([strat])
+        sched._pending_next_day_clear = set()
 
-        capture_mock = AsyncMock()
-        with patch("src.engine.scheduler.capture_funnel_snapshots", capture_mock), \
-             patch("src.db.stock_master_daily.count_all", AsyncMock(return_value=2768)):
-            # once 본체 직접 호출 (run_periodic_task_loop once_callable)
-            once = sched._evening_funnel_capture_once
-            await once()
+        with freeze_time("2026-09-22T21:00:00+09:00", real_asyncio=True):
+            await sched._evening_funnel_capture_once()
 
         strat.prepare.assert_awaited()
-        capture_mock.assert_awaited()
-        # is_provisional=True 전달 검증
-        _, kwargs = capture_mock.call_args
-        assert kwargs.get("is_provisional") is True, (
+        assert strat.prepare.await_args.kwargs.get("as_of") == date(2026, 9, 23), (
+            "저녁 준비는 prepare(as_of=다음 거래일)"
+        )
+        assert inserts, "저녁 캡처가 한 행도 쓰지 않았다"
+        assert all(kw.get("is_provisional") is True for kw in inserts), (
             "저녁 capture 는 is_provisional=True 의무"
         )
+        assert {kw["target_date"] for kw in inserts} == {date(2026, 9, 23)}
 
     @pytest.mark.asyncio
-    async def test_g_171_eve_3_waits_for_daily_load(self):
-        """G-171-EVE-3: 일봉 미적재(count_all=0) 시 폴링 대기 (사이클 163 패턴)."""
+    async def test_g_171_eve_3_waits_for_daily_load(self, monkeypatch):
+        """G-171-EVE-3: 🔁 cycle364 개정 — 20:30 일봉 적재 **성공 마커**를 30초 간격으로 기다린다.
+
+        종전(사이클 163 패턴 `count_all()` 폴링)은 빈 테이블만 막고 그날 적재 완료를 기다리지
+        않았다(F-D8-a). 의도(「적재 전에 준비하지 않는다」)는 같고 신호만 정확해졌다 — 설계 §2.4.
+        """
+        import asyncio as _asyncio
+
+        from freezegun import freeze_time
+
         from src.engine.scheduler import TradingScheduler
+
+        kst = timezone(timedelta(hours=9))
+
+        async def _cal(d):
+            return d.weekday() < 5
+
+        monkeypatch.setattr("src.engine.trading_calendar._lookup_open", _cal)
+
+        async def _marker(label):
+            if datetime.now(kst) >= datetime(2026, 9, 22, 21, 1, tzinfo=kst):
+                return "2026-09-22T21:00:50+09:00"
+            return "2026-09-21T20:32:10+09:00"
+
+        monkeypatch.setattr("src.db.system_config.get_task_last_success", _marker)
+        monkeypatch.setattr("src.db.strategy_funnel.insert_snapshot", AsyncMock(return_value={"id": "x"}))
+        # 🔴 count_all 이 참이어도 마커가 오늘 20:30 이상이 될 때까지는 준비하지 않는다(M5)
+        monkeypatch.setattr("src.db.stock_master_daily.count_all", AsyncMock(return_value=2768))
 
         strat = MagicMock()
         strat.strategy_id = "vcp_breakout"
@@ -233,19 +288,27 @@ class TestEveningTask:
 
         sched = TradingScheduler.__new__(TradingScheduler)
         sched.registry = _make_registry([strat])
+        sched._pending_next_day_clear = set()
 
-        # count_all: 처음 0 (대기) → 이후 2768 (진입)
-        count_seq = AsyncMock(side_effect=[0, 0, 2768])
-        sleep_mock = AsyncMock()
+        orig_sleep = _asyncio.sleep
+        sleeps: list = []
 
-        with patch("src.engine.scheduler.capture_funnel_snapshots", AsyncMock()), \
-             patch("src.db.stock_master_daily.count_all", count_seq), \
-             patch("src.engine.scheduler.asyncio.sleep", sleep_mock):
+        with freeze_time("2026-09-22T21:00:00+09:00", real_asyncio=True) as fz:
+            async def _fake_sleep(secs, *a, **k):
+                sleeps.append(secs)
+                fz.tick(timedelta(seconds=float(secs)))
+                await orig_sleep(0)
+
+            monkeypatch.setattr(_asyncio, "sleep", _fake_sleep)
+            try:
+                import src.engine.funnel_capture as _fc
+
+                monkeypatch.setattr(_fc, "_sleep", _fake_sleep, raising=False)
+            except ImportError:
+                pass
             await sched._evening_funnel_capture_once()
 
-        # count_all 0 동안 sleep 발화 (폴링 대기)
-        assert sleep_mock.await_count >= 1, "일봉 미적재 시 폴링 대기 누락"
-        # 최종 진입 후 prepare 발화
+        assert sleeps and set(sleeps) == {30}, f"적재 마커 대기 = 30초 폴링 (실측 {sleeps})"
         strat.prepare.assert_awaited()
 
     def test_g_171_eve_4_task_attrs_4_sites(self):

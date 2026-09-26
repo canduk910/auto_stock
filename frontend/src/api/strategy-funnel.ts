@@ -36,7 +36,7 @@ export interface FunnelSnapshot {
   survived_tickers: SurvivedItem[] | null
   excluded_sample: ExcludedSampleRow[] | null
   // 사이클 171 (2026-06-22) — 잠정(provisional) 플래그 (migration 040)
-  // true = 16:20 저녁 잠정 캡처 (전일 마스터 + 16:10 basics 기준, 아침 델타 미반영)
+  // true = 21:00 저녁 잠정 캡처 (다음 거래일 대상 미리보기, 오늘 봉 포함 — 아침 델타 미반영)
   // false = 09:30 자동 / 수동 trigger (확정)
   is_provisional?: boolean
 }

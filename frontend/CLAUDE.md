@@ -185,7 +185,7 @@ Dashboard 만 즉시 import. 나머지 9 페이지(History · Recommendations ·
 전략별 조건검색 단계별 후보/탈락 종목 추적 페이지. 전략 dropdown + 날짜 picker + 단계별 expand 가능한 테이블 + 수동 trigger 버튼(`POST /api/strategy-funnel/snapshot`). 단계 클릭 시 `survived_tickers` 리스트 + `excluded_sample` 탈락 사유 표시. API `getFunnel / getRecentFunnel / triggerFunnelSnapshot`(`frontend/src/api/strategy-funnel.ts`). queryKey `['strategy-funnel', strategy_id, target_date]`.
 
 - 단계명 옆 `조건` 툴팁(`data-testid="funnel-step-conditions-..."` + `title`) · 통과/탈락 종목 ticker 옆 종목명 병기(`SurvivedItem` 타입 + dict/string 분기) · 탈락 사유에 수치 포함(예: `"음봉 비율 35% > 30%"`).
-- `FunnelSnapshot.is_provisional === true` 행은 단계명 옆 amber "잠정" 배지(`funnel-provisional-badge-{sid}-{step_no}`, title="16:20 저녁 잠정 캡처 — 익일 아침 마스터 델타 반영 전 (후보가 바뀔 수 있음)"). 운영자가 "밤에 본 후보 ≠ 아침 확정 후보" 를 인지하게 하는 것이 목적이다. 회귀 가드 `StrategyFunnel.cycle171.test.tsx`.
+- `FunnelSnapshot.is_provisional === true` 행은 단계명 옆 amber "잠정" 배지(`funnel-provisional-badge-{sid}-{step_no}`, title="21:00 저녁 잠정 캡처 — 익일 아침 마스터 델타 반영 전 (후보가 바뀔 수 있음)"). 운영자가 "밤에 본 후보 ≠ 아침 확정 후보" 를 인지하게 하는 것이 목적이다. 저녁 잠정 행은 **다음 거래일 날짜**로 저장되므로 날짜 picker 로 그 날짜를 골라야 보인다(기본 날짜는 오늘 그대로다). 회귀 가드 `StrategyFunnel.cycle171.test.tsx` · 문구 가드 `tests/unit/ast/test_cycle364_frontend_evening_wording.py`.
 - **병목 강조 + 추이**: ① `funnel-bottleneck-banner` — 직전 단계 대비 **절대 감소 수** 최대 단계(⚠️ 감소'율'로 잡으면 막판 `7→0`(100%)이 `329→7`(97.9%)을 이겨 진짜 병목을 가린다. rows 는 DB `ORDER BY step_no` 보장) ② `funnel-bar-{sid}-{step_no}` 단계별 상대 막대 ③ `funnel-recent-trend` — `getRecentFunnel(strategy_id, 14)` 로 최종 단계 일자별 스파크라인 + 연속 0 배지. `target_date` 를 `Date()` 파싱 없이 slice 만 하므로 KST 규약 무관하게 안전. 로딩/에러/빈 데이터는 해당 섹션 안에서만 graceful(실패해도 단계별 테이블 정상). 회귀 가드 13.
 
 ## Settings

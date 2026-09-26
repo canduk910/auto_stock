@@ -25,7 +25,7 @@ function kojiroStatus() {
     phase: 'main_trading',
     scan: {
       filtered_tickers: [], filtered_count: 0, subscribed_tickers: [], subscribed_count: 0,
-      last_scan_time: '2026-07-17T16:20:00', ticker_names: {}, ticker_prices: {},
+      last_scan_time: '2026-07-17T21:00:00', ticker_names: {}, ticker_prices: {},
       ticker_market_info: {}, tick_coverage_total: 0, tick_coverage_acked: 0,
       tick_coverage_fresh: 0, tick_coverage_stale: 0,
     },
@@ -43,7 +43,7 @@ function kojiroStatus() {
         scan_stats: {
           universe_union: 348, universe_candidates: 95, universe_filtered: 90, candle_fetch_ok: 88,
           band_pass: 40, stage_valid_pass: 38, stage1_uptrend_pass: 6, strict_entry_pass: 3,
-          final_prepared: 3, last_run_at: '2026-07-17T16:20:00+09:00',
+          final_prepared: 3, last_run_at: '2026-07-17T21:00:00+09:00',
         },
         params: { stop_atr: 2.0, trail_atr: 2.5, hard_stop_pct: -8.0, atr_ratio_min: 0.01, atr_ratio_max: 0.045 },
         invested_amount: 0, min_weight: 0, tradable_boards: ['main'],
