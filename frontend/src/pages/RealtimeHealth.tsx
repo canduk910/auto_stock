@@ -19,6 +19,12 @@ import { fetchRealtimeHealth } from '../api/realtime-health'
 import { fetchMarketOperationStatus } from '../api/market-operation'
 import type { TimeWindow, RealtimeHealthCard } from '../types/realtime-health'
 import type { MarketOperationStatus } from '../types/market-operation'
+import {
+  isViCodeActive,
+  ISCD_STAT_HALT_CODE,
+  ISCD_STAT_DISPLAY_LABELS,
+  HALT_REASON_NULL_TOKEN,
+} from '../types/market-operation'
 
 // KST 시각 표시 헬퍼 — getHours() 사용 금지 (사이클 68 G-AST 영속)
 function formatKst(isoStr: string): string {
@@ -145,27 +151,58 @@ function MarketOperationCard({ status }: { status: MarketOperationStatus | undef
         <p className="text-xs text-gray-400 italic">0건 — 정상</p>
       ) : (
         <div className="space-y-1 max-h-48 overflow-y-auto mt-1">
-          {status.details.slice(0, 200).map((detail) => (
-            <div
-              key={detail.ticker}
-              className="text-xs border-l-2 border-gray-200 pl-2 py-0.5 flex flex-wrap gap-x-2"
-            >
-              <span className="font-medium text-gray-900">{detail.ticker}</span>
-              {detail.halt_yn === 'Y' && (
-                <span className="text-red-600 font-medium">거래정지</span>
-              )}
-              {detail.halt_reason && (
-                <span className="text-gray-700">{detail.halt_reason}</span>
-              )}
-              <span className="text-gray-500">MKOP:{detail.mkop_cls_code}</span>
-              {detail.vi_code && detail.vi_code !== '0' && (
-                <span className="text-amber-600">VI:{detail.vi_code}</span>
-              )}
-              {detail.received_at && (
-                <span className="text-gray-400">{formatKst(detail.received_at)}</span>
-              )}
-            </div>
-          ))}
+          {status.details.slice(0, 200).map((detail) => {
+            // 거래정지 = halt_yn Y 또는 종목상태 58(cycle368 사용자 결정). 58 은
+            // 종목상태 배지로 중복 그리지 않는다(ISCD_STAT_DISPLAY_LABELS 에 58 없음).
+            const isHalted = detail.halt_yn?.toUpperCase() === 'Y' || detail.iscd_stat === ISCD_STAT_HALT_CODE
+            const statLabel = Object.hasOwn(ISCD_STAT_DISPLAY_LABELS, detail.iscd_stat)
+              ? ISCD_STAT_DISPLAY_LABELS[detail.iscd_stat]
+              : undefined
+            const viActive = isViCodeActive(detail.vi_code) || isViCodeActive(detail.ovtm_vi_code)
+            const reason =
+              detail.halt_reason && detail.halt_reason !== HALT_REASON_NULL_TOKEN
+                ? detail.halt_reason
+                : null
+
+            return (
+              <div
+                key={detail.ticker}
+                data-testid={`realtime-health-op-row-${detail.ticker}`}
+                className="text-xs border-l-2 border-gray-200 pl-2 py-0.5 flex flex-wrap gap-x-2"
+              >
+                <span className="font-medium text-gray-900">{detail.ticker}</span>
+                {isHalted && (
+                  <span
+                    data-testid="realtime-health-op-halt-badge"
+                    className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700"
+                  >
+                    거래정지
+                  </span>
+                )}
+                {statLabel && (
+                  <span
+                    data-testid="realtime-health-op-stat-badge"
+                    className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-700"
+                  >
+                    {statLabel}
+                  </span>
+                )}
+                {reason && <span className="text-gray-700">{reason}</span>}
+                <span className="text-gray-500">MKOP:{detail.mkop_cls_code}</span>
+                {viActive && (
+                  <span
+                    data-testid="realtime-health-op-vi-badge"
+                    className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800"
+                  >
+                    VI
+                  </span>
+                )}
+                {detail.received_at && (
+                  <span className="text-gray-400">{formatKst(detail.received_at)}</span>
+                )}
+              </div>
+            )
+          })}
         </div>
       )}
     </div>
