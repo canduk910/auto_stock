@@ -223,11 +223,15 @@ async def get_balance(afhr_flpr: str = "N") -> tuple[list[StockHolding], Account
     return holdings, summary
 
 
-async def get_daily_orders(target_date: str = "", exchange: str = "ALL") -> list[dict]:
+async def get_daily_orders(target_date: str = "", exchange: str = "ALL", *, odno: str = "") -> list[dict]:
     """당일(또는 지정일) 주문체결내역을 조회한다.
 
     KIS 주식일별주문체결조회 API (TTTC0081R).
     `exchange`: `ALL`(기본, KRX+NXT+SOR) / `KRX` / `NXT` / `SOR`.
+    `odno`(cycle379, keyword-only): 그 주문번호 1건만 필터한다(`ODNO`). 기본값(``""``)
+    이면 전체 목록 — params 는 기존과 byte 동일하다. `buying_reconcile` 이 자기 주문
+    행의 첫 쪽 잘림 위험 없이 조회하는 데 쓴다(cycle373 실측 — `ODNO` 단독 필터는
+    그 주문 1행만 돌려준다).
     """
     from datetime import datetime as _datetime, timedelta as _timedelta, timezone as _timezone
     if not target_date:
@@ -244,7 +248,7 @@ async def get_daily_orders(target_date: str = "", exchange: str = "ALL") -> list
         "PDNO": "",
         "CCLD_DVSN": "00",  # 전체
         "ORD_GNO_BRNO": "",
-        "ODNO": "",
+        "ODNO": odno,
         "INQR_DVSN_3": "00",
         "INQR_DVSN_1": "",
         "EXCG_ID_DVSN_CD": exchange,

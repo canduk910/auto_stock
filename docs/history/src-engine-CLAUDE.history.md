@@ -1655,3 +1655,28 @@ cycle359 조사). cycle368 이 파서 기준점을 고치고, VI 수명 600초(�
 경위: cycle374 가 `handler.py::_handle_execution` 에 접수 전문(`CNTG_YN=1`) 기록을 넣었다 — INFO `[order_notice]`(이름 붙은 칸) + 거부면 WARNING `[order_rejected_notice]`. 「DEBUG 한 줄만 남기고 버려」 와 「현행 DEBUG 줄이 `order_no`·`ticker` 두 필드만 찍으므로」 는 사실이 아니게 됐다. 관측 방법 「그 DEBUG 줄에 `fields[:20]` 을 실어」 는 `[0]` HTS ID·`[1]` 계좌번호·`[17]` 계좌명을 로그에 싣는 방법이라 채택하지 않았고, 이름 붙은 칸만 싣는 `[order_notice]` 로 대신했다. 잔존 상태를 장중에 정리하는 경로가 없다는 결론은 그대로다(기록만, 콜백 없음).
 
 → CHANGELOG: cycle374 행
+
+## 접수 후 PENDING 영속화 — 1코어 + 축별 경계 래퍼 2
+
+### 2026-09-27 cycle379 — 「접수된 자금은 묶어 둔다」 행의 유지 비용 문장
+
+정본 원문(목록 행):
+
+- **접수된 자금은 묶어 둔다** — 접수 후 실패에서 `pending_buys`/`pending_buy_amounts` 를 **풀지 않는다**. 접수된 매수는 KIS 가 주문가능금액에서 이미 뺀 「묶인 자금」이라 푸는 것은 **우리가 묶인 사실을 잊는 것**이고, 계좌 방어(`get_buyable`)는 통과하므로 **전략 예산 관문만 조용히 무력화**된다. 유지의 비용은 **체결 0건인 주문 한정**으로 그 슬롯·금액이 21:30 `_reset_daily_state` 까지 노는 것뿐이다 — 첫 **부분**체결만 나도 `_handle_buy_fill` 이 해제한다(그 블록은 전량 분기 **앞**이다).
+
+경위: cycle379 가 leaf `src/engine/buying_reconcile.py` 를 넣었다. 15분 잔고 sync 가 그 주문 자신의 KIS 행(`tot_ccld_qty==0 ∧ rmn_qty==0`, 주문 뒤 300초 경과)을 보고 `pending_buys`·`pending_buy_amounts`·`_pending_buy_orders` 를 푼다. 「그 슬롯·금액이 21:30 `_reset_daily_state` 까지 노는 것」 은 20:00 뒤에 끝난 주문에만 맞는 말이 됐다. 접수 후 실패에서 `execute_buy` 가 pending 을 풀지 않는다는 규칙 자체는 그대로다.
+
+→ CHANGELOG: cycle379 행
+
+## order_engine.py
+
+### 2026-09-27 cycle379 — 규칙 4 「알려진 비용 — GTP 08:50 자동취소 잔존 상태」 의 잔존 기간 문장 · 「시정 경로」 머리
+
+정본 원문(목록 행 2):
+
+  - **알려진 비용 — GTP 08:50 자동취소 잔존 상태.** 취소 통보는 체결통보 채널로 **온다**(09-14 실측 073240: `08:29:34` 접수 통보 + `08:50:00` 정각에 같은 주문번호로 두 번째 통보, KIS 주문내역은 그 주문을 `GTP매수자동취소*` 로 기록). 그러나 `handler.py::_handle_execution` 은 `CNTG_YN != "2"` 프레임을 `[order_notice]` 로 **기록만** 하고 콜백으로 넘기지 않는다(`src/realtime/CLAUDE.md` 「접수 전문 기록」). 그래서 잔존 상태(`pending_buys`/`pending_buy_amounts`/`_pending_buy_orders`/`_order_qty`/`_order_strategy`/`_order_ticker`/`_order_exchange`/`_order_division`/`trade_history` PENDING 행)를 **장중에 정리하는 경로가 없다**. 그 종목은 그날 21:30 `reset_daily_state()`(메모리 5종)까지, `trade_history` 행은 **영구**로 남고 `is_ticker_blocked_for_buy` 가 그날 재진입을 막고 예산을 점유한다. GTP 는 이 빈도를 **늘린다**(08:50 까지 안 채워진 모든 프리장 매수가 대상 — `00` 은 09:00:30 정규장 이월로 일부가 결국 체결·취소돼 조기 정리된다). 순수 기회비용이고 자본 위험은 아니다.
+    - **시정 경로** = 이미 구독 중인 체결통보 채널로 취소가 도착하므로 `handler.py` 가 `CNTG_YN=="1"` 프레임에서 취소를 판별해 콜백으로 넘기고 `order_engine` 이 잔존 상태를 정리한다. 접촉 = `src/realtime/handler.py` + `order_engine.py`(**둘 다 8영역, 승인 필요**) · `scheduler.py` **무접촉**.
+
+경위: cycle379 의 `buying_reconcile` 이 그날 첫 잔고 sync(≈09:45)에서 자동취소된 매수의 `pending_buys`·`pending_buy_amounts`·`_pending_buy_orders` 를 풀고 `trade_history` PENDING 행을 CANCELLED 로 적는다. 「장중에 정리하는 경로가 없다」 와 「`trade_history` 행은 영구로 남고」 는 사실이 아니게 됐다. 주문번호 매핑 5종은 늦은 체결통보 안전망이라 일부러 21:30 까지 남긴다. 통보(`CNTG_YN=="1"`)로 정리하는 경로는 여전히 없지만, 그 경로가 줄이는 것은 08:50~≈09:45 의 점유뿐이라 「시정 경로」 가 아니라 「통보로 즉시 정리하는 경로」 로 이름을 바꿨다.
+
+→ CHANGELOG: cycle379 행

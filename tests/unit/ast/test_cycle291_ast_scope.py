@@ -125,8 +125,9 @@ _BASE_SHA: dict[str, str] = {
     # 🔁 cycle364(2026-09-26) 재핀 — 저녁 A1 미리보기(`prepare(as_of=)`) 도입 + 저녁
     # 캡처 본체 leaf 이관(전략 7파일 전부 + strategy_base + scheduler, 사용자 승인 D3).
     # 🔁 cycle369 재핀 — 관리종목51·단기과열59 청산·매수차단 leaf 배선(값만 이동)
+    # 🔁 cycle379 재핀 — buying_reconcile leaf 4줄 위임 배선(사용자 승인, 값만 이동)
     "src/engine/scheduler.py":
-        "acaddd23f935fdd288cca8c3dfd1bbcd62b134a9b80cdd922a1f73acfd1deb8a",
+        "b1aaa4816267adb49207fd043a3d640144f4eb493980fcd1302ffb02ef086d54",
     # 🔴 cycle290 이 방금 `DEFAULT_PARAMS` 를 건드렸다 — 또 건드리면 그 증명이 무너진다.
     # 🔁 cycle369 R2 재핀 — buy-block 게이트(`_status_buy_blocked` 승격) + STATUS_EXIT Signal + Q7 edge-baseline clear 배선(전략 7파일은 무변경, 배선은 이 파일)
     "src/engine/strategy_base.py":
@@ -165,7 +166,7 @@ _BASE_SHA: dict[str, str] = {
 #: 신규 leaf `src/engine/market_op_subscribe.py` 로 추출해(행위 변경 0 · 5줄
 #: 위임 wrapper) 3,897 → 3,726 이 됐다. 값만 옮긴다 — 정확 핀을 상한 핀으로
 #: 완화하면 cycle291 의 무접촉 대리 지표가 사라진다.
-_SCHEDULER_LINES = 3781  # cycle369 재핀 — 관리종목51·단기과열59 청산·매수차단 task 배선(+4)
+_SCHEDULER_LINES = 3786  # cycle379 재핀 — buying_reconcile leaf 위임 배선(+5)
 _SCHEDULER_LINE_CAP = 3900
 
 
@@ -395,9 +396,13 @@ def test_a8_no_new_leaf_in_src_engine() -> None:
     `status_exit_watch.py` 를 신설해 70 → **71** 이 됐다 — 청산 패스(09:00:30~15:28)
     + 매수 차단 패스(P0·P1·INC) 순수·lazy-import leaf. `scheduler.py` 는 task 배선
     1줄 + task_attrs 3곳만 접촉한다(사용자 승인 「369사이클 진행」).
+
+    ⚠️ cycle379(⑨A 체결 0 매수의 pending 회수)가 leaf 1개 `buying_reconcile.py` 를
+    신설해 71 → **72** 가 됐다 — `selling_reconcile.py` 대칭, 8영역 import 0. `scheduler.py`
+    는 `_sync_positions_from_balance` 끝 위임 4줄만 접촉한다(사용자 승인 「9-a」).
     """
     got = len(list((_ROOT / "src" / "engine").glob("*.py")))
-    assert got == 71, f"`src/engine/*.py` 파일 수 {got} (cycle369 기준선 71)"
+    assert got == 72, f"`src/engine/*.py` 파일 수 {got} (cycle379 기준선 72)"
 
 
 # ===========================================================================

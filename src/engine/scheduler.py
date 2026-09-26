@@ -3475,6 +3475,11 @@ class TradingScheduler:
                 self.order_engine, holdings, min_age_s=SELLING_RECONCILE_MIN_AGE_S,
             )
 
+        # cycle379 ⑨A — 체결 0 으로 끝난 매수의 pending 회수(자기 주문 행의 양성 증거로만). leaf 위임.
+        if any(s.state.pending_buys for s in self.registry.all()):
+            from src.engine.buying_reconcile import reconcile_stale_buying
+            await reconcile_stale_buying(self.registry, self.order_engine, holdings)
+
     async def _settle(self) -> None:
         """일일 정산: 잔고 조회 후 전략별 + 합산 daily_performance 기록.
 

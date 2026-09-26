@@ -149,8 +149,11 @@ _BASE_SHA = {
     "src/engine/sell_rejection.py":
         "6df3a6c697019f0d0a35e4870d0fc115171d1504f11fb3e43ae16aea4883fdec",
     # 거부 분류기 — 키워드 집합을 늘리지 않는다(미분류 봉인이 정면 대응이다).
+    # 🔁 cycle379(2026-09-27) 재핀 — `get_daily_orders` 에 keyword-only `odno=""` 추가
+    #    (buying_reconcile 의 자기 주문 행 조회, 사용자 승인). 기본값 호출 params 는
+    #    byte 동일(D1 회귀 가드). 직전 값 = `d8f3da874b3e2623695935d768cf5a502a3756e3425c41185e42576c27f6aa35`.
     "src/api/balance.py":
-        "d8f3da874b3e2623695935d768cf5a502a3756e3425c41185e42576c27f6aa35",
+        "ac9a74d4f04c514a75ab56fc99f5b7a6582960da52ac74bab3a1363418af5003",
     # 전략 7파일 (+ 패키지) — cycle287 당시 "전원 diff 0" 이었으나 **cycle290(킬스위치
     # 등재) 이 정당하게 갱신**했다 — `DEFAULT_PARAMS` 말미에 `order_exchange_clock_mode`
     # `after_market_exit_division` 2키 추가뿐, 그 외 한 글자도 안 바뀌었다는 증거는
@@ -212,7 +215,9 @@ _BASE_SHA = {
 #: 추가로 157 → **158**. 사용자 승인 D3.
 #: 🔁 cycle369 재핀 — 신규 leaf `src/engine/status_exit_watch.py`(관리종목51·단기과열59
 #: 보유 청산 + 당일 매수 차단) 추가로 158 → **159**. 사용자 승인 「369사이클 진행」.
-_SRC_TREE_FILES = 159
+#: 🔁 cycle379 재핀 — 신규 leaf `src/engine/buying_reconcile.py`(⑨A 체결 0 매수의 pending
+#: 회수) 추가로 159 → **160**. 사용자 승인 「9-a 풀어준 종목 재매수가능」.
+_SRC_TREE_FILES = 160
 #: ⚠️ 값은 **cycle285 적대 검증 반영** 기준선이다. 그 직전(초판 cycle285 배포)
 #: digest 는 `97483c5114a1d00dc8f7ca7c1ed08e1b3dc1d0b585065b14176dc227da9bed8c` 였다.
 #: cycle287b 배포분의 digest 는
@@ -571,8 +576,13 @@ _SRC_TREE_FILES = 159
 # 🔁 cycle374(2026-09-27) 재핀 — `src/realtime/handler.py` 접수 전문(`CNTG_YN=1`)
 # 기록 추가(사용자 승인, 8영역) 하나가 움직였다. 파일 수는 159 로 불변. 직전 값 =
 # `4c05fd9656747e1bb8002a326c30eaa1e27eadfc91af1594a438177649bfe59f`.
+# 🔁 cycle379(2026-09-27) 재핀 — 신규 leaf `src/engine/buying_reconcile.py` 추가
+# (⑨A 매수 pending 회수, 사용자 승인) + `src/api/balance.py`(`get_daily_orders`
+# odno= 추가) + `src/engine/scheduler.py`(4줄 위임 배선, 3781→3786L) 3파일이 움직여
+# 파일 수 159 → **160**(신규 1). 직전 값 =
+# `9042688c4671bffcc646bcf5f1dcbbbc013c1f3070d0d7b54dcd73e566c9924b`.
 _SRC_TREE_DIGEST = (
-    "9042688c4671bffcc646bcf5f1dcbbbc013c1f3070d0d7b54dcd73e566c9924b"
+    "0b40e6373438fc3dc1126691352650d14490be0bcc84e7850dca75f2424ac8fe"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
@@ -597,7 +607,8 @@ _PINNED_DIR_FILE_COUNTS = {
     # cycle363 — 신규 leaf `trading_calendar.py` 로 78 → 79.
     # cycle364 — 신규 leaf `funnel_capture.py` 로 79 → 80.
     # cycle369 — 신규 leaf `status_exit_watch.py` 로 80 → 81.
-    "src/engine": 81,
+    # cycle379 — 신규 leaf `buying_reconcile.py` 로 81 → 82.
+    "src/engine": 82,
 }
 
 #: `scheduler.py` 정확 라인 수 + cycle257 영구 상한.
@@ -605,7 +616,7 @@ _PINNED_DIR_FILE_COUNTS = {
 #: 신규 leaf `src/engine/market_op_subscribe.py` 로 추출해(행위 변경 0 · 5줄
 #: 위임 wrapper) 3,897 → 3,726 이 됐다. 값만 옮긴다 — 정확 핀을 상한 핀으로
 #: 완화하면 cycle287 의 무접촉 대리 지표가 사라진다.
-_SCHEDULER_LINES = 3781  # cycle369 재핀 — 관리종목51·단기과열59 청산·매수차단 task 배선(+4)
+_SCHEDULER_LINES = 3786  # cycle379 재핀 — buying_reconcile leaf 위임 배선(+5)
 _SCHEDULER_LINE_CAP = 3900
 
 #: 손대지 않기로 한 **원문 구간**의 sha256 (base `a42f519`).

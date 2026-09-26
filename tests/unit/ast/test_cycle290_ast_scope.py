@@ -161,8 +161,9 @@ _BASE_SHA: dict[str, str] = {
     # 는 `_preview_keep_tickers`/`_preview_skip_tickers`(R1, 자기 보유·자기 익일청산만
     # 보존 / 보호 종목 전부 건너뜀) 로 `_preview_protected_tickers` 를 대체했다.
     # 🔁 cycle369 재핀 — 관리종목51·단기과열59 청산·매수차단 leaf 배선(값만 이동)
+    # 🔁 cycle379 재핀 — buying_reconcile leaf 4줄 위임 배선(사용자 승인, 값만 이동)
     "src/engine/scheduler.py":
-        "acaddd23f935fdd288cca8c3dfd1bbcd62b134a9b80cdd922a1f73acfd1deb8a",
+        "b1aaa4816267adb49207fd043a3d640144f4eb493980fcd1302ffb02ef086d54",
     # 🔁 cycle369 R2 재핀 — buy-block 게이트(`_status_buy_blocked` 승격) + STATUS_EXIT Signal + Q7 edge-baseline clear 배선(전략 7파일은 무변경, 배선은 이 파일)
     "src/engine/strategy_base.py":
         "e9b379dcae6e4db664b2f159442b11bac3bf00be6e4481680332da494b61bf8e",
@@ -180,7 +181,7 @@ _SCHEDULER_LINE_CAP = 3900
 #: 신규 leaf `src/engine/market_op_subscribe.py` 로 추출해(행위 변경 0 · 5줄
 #: 위임 wrapper) 3,897 → 3,726 이 됐다. 값만 옮긴다 — 정확 핀을 상한 핀으로
 #: 완화하면 cycle290 의 무접촉 대리 지표가 사라진다.
-_SCHEDULER_LINES = 3781  # cycle369 재핀 — 관리종목51·단기과열59 청산·매수차단 task 배선(+4)
+_SCHEDULER_LINES = 3786  # cycle379 재핀 — buying_reconcile leaf 위임 배선(+5)
 
 
 @pytest.mark.parametrize("rel", sorted(_BASE_SHA))
@@ -341,7 +342,12 @@ _ENGINE_PY_FILES: dict[str, tuple[str, ...]] = {
     "src/engine": (
         "__init__.py", "account_risk_guard.py", "account_risk_watcher.py",
         "backtest_engine.py", "backtest_orchestration.py", "backtest_yaml.py",
-        "boot_manager.py", "daily_emit_cap.py", "daily_metrics_snapshot.py",
+        "boot_manager.py",
+        # cycle379 — ⑨A 체결 0 으로 끝난 매수의 pending 회수 leaf(`selling_reconcile.py`
+        # 대칭, 8영역 import 0). 등재해도 "다음 신규 파일" 은 여전히 붉어진다(이름 축 가드는
+        # 변경 없음).
+        "buying_reconcile.py",
+        "daily_emit_cap.py", "daily_metrics_snapshot.py",
         "data_load_tasks.py",
         # cycle364 — 저녁 A1 미리보기(`prepare(as_of=)`) 라이브 준비 wrapper + 잠금 +
         # meta + `resolve_as_of`/`capture_skip_reason` leaf. 등재해도 "다음 신규 파일"

@@ -533,7 +533,7 @@ _BASE_SHA: dict[str, str] = {
     # 🔁 cycle364(2026-09-26) 재핀 — 저녁 A1 미리보기(`prepare(as_of=)`) 도입(사용자 승인 D3).
     # 🔁 cycle369 재핀 — 관리종목51·단기과열59 청산·매수차단 leaf 배선(값만 이동)
     "src/engine/scheduler.py":
-        "acaddd23f935fdd288cca8c3dfd1bbcd62b134a9b80cdd922a1f73acfd1deb8a",
+        "b1aaa4816267adb49207fd043a3d640144f4eb493980fcd1302ffb02ef086d54",
     # 🔁 cycle369 R2 재핀 — buy-block 게이트(`_status_buy_blocked` 승격) + STATUS_EXIT Signal + Q7 edge-baseline clear 배선(전략 7파일은 무변경, 배선은 이 파일)
     "src/engine/strategy_base.py":
         "e9b379dcae6e4db664b2f159442b11bac3bf00be6e4481680332da494b61bf8e",
@@ -567,7 +567,7 @@ def test_g2_9b_scheduler_line_budget_and_auth_exclusion_is_explicit() -> None:
     """
     sched = _ROOT / "src/engine/scheduler.py"
     n = len(_read(sched).splitlines())
-    assert n == 3781, (
+    assert n == 3786, (
         f"`scheduler.py` {n}L (착수 시점 3,726L → cycle298 재핀 3,785L → cycle354 재핀 3,812L → "
         "cycle364 저녁 캡처 leaf 이관 재핀 3,758L → cycle364 S1 round 3(F4 skipped_out + F5 중복 "
         "ERROR 제거 + F7 docstring 정직화) 재핀 3,777L → cycle369 재핀 — 관리종목51·단기과열59 "

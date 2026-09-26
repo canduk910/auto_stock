@@ -813,6 +813,7 @@ BFB/VCP 매수 신호는 (donchian 의 폴링 루프와 달리) `risk.on_tick`(W
   거래소 식별은 시세가 아니라 체결통보 `ODER_KIND` 필드에서 한다
 - **장운영정보 H0UNMKO0 구독** (실전 한정): 대표 종목(`005930`) 1개로 보드 전환 코드(`MKOP_CLS_CODE`) 실시간 수신
 - 주문 접수 시 pending_buys에 등록 (중복 주문 차단)
+- **체결 0 으로 끝난 매수의 pending 회수 (cycle379)**: 거래소가 접수 뒤 끝낸 매수 주문(거부·취소·GTP 자동취소·KRX 15:30 자동취소)의 `pending_buys`·`pending_buy_amounts`(= 전략 슬롯·예산)는 15분 잔고 sync 가 푼다. 조건 = KIS 일별주문체결에서 그 주문 자신의 행이 `tot_ccld_qty==0 ∧ rmn_qty==0` 이고 주문 뒤 300초(`BUYING_RECONCILE_MIN_AGE_S`)가 지났을 때만. 행이 없거나 조회가 실패하면 풀지 않는다. 같은 주문의 `trade_history` PENDING 행은 CANCELLED 로 적는다. **푼 뒤 같은 날 같은 종목을 다시 살 수 있다**(2026-09-27 사용자 결정) — 새 차단은 없고 기존 가드(보유·주문중·당일매도, 4전략 `_bought_today`)만 적용된다. 상세 = `src/engine/CLAUDE.md` `buying_reconcile.py` 항목
 - **체결통보 수신 시** 포지션 등록/제거 (주문 직후가 아님 — 체결 확인 전 포지션 등록하면 안 됨)
 - 주문번호 매핑(`_order_qty`/`_order_strategy`/`_order_ticker`) 등록은 `place_order` 응답 직후 동기 영역에서. `await insert_trade` 진입 전 (시장가 즉시체결 race 방지)
 - 체결통보 선행 race 가드: `_completed_orders` set + UPDATE 0건 보정 INSERT

@@ -23,6 +23,9 @@
   - "tests/integration/*"
   # cycle369 — task 배선(S1)을 AST 가드가 소스 파일로 읽는다(import 없음)
   - "tests/unit/ast/test_cycle369_ast_status_exit.py"
+  # cycle379 — ⑨A 위임 4줄의 위치·인자·조건을 AST 가드(G6)가 파일로 읽고, 배선 테스트는 leaf 를 지연 import 한다
+  - "tests/unit/ast/test_cycle379_ast_buying_reconcile.py"
+  - "tests/unit/engine/test_cycle379_sync_wiring.py"
 
 # cycle292 — `_subscribe_market_operation_tickers` 본체가 scheduler 에서 이 leaf 로
 # 옮겨왔다. scheduler.py 의 `tests/integration/*` 매핑은 leaf 로 **자동 승계되지 않으므로**
@@ -145,3 +148,13 @@
 # cycle369 R3 F3 — 발사·giveup·would_fire 의 영속은 루트 `_DbLogHandler` 한 줄이다. 그 핸들러를 importlib 로 지연 참조한다(정적 import 면 src.main 전이 의존 전체로 번진다)
 "src/main.py":
   - "tests/unit/engine/test_cycle369_r2_sell_safety.py"
+# cycle379 — ⑨A 체결 0 매수 pending 회수 leaf. 테스트는 importlib 로 **지연 참조**하고(미구현 단계 FAIL 관례)
+# scheduler 도 함수 안에서 지연 import 한다 — 정적 분석이 못 잇는다. AST 가드는 소스를 파일로 읽는다.
+"src/engine/buying_reconcile.py":
+  - "tests/unit/engine/test_cycle379_*.py"
+  - "tests/unit/ast/test_cycle379_ast_buying_reconcile.py"
+  - "tests/integration/test_cycle379_buying_reconcile_pg.py"
+# cycle379 — leaf 가 `get_daily_orders(odno=)` 를 함수 안에서 지연 import 한다(정적 import 없음).
+"src/api/balance.py":
+  - "tests/unit/engine/test_cycle379_buying_reconcile.py"
+  - "tests/integration/test_cycle379_buying_reconcile_pg.py"

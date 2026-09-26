@@ -102,7 +102,7 @@ KIS OpenAPI REST 호출 모듈. 모든 호출은 `base.py` 공통 래퍼를 통�
 - **자금 안전**: 본 모듈은 `kis_get` (메인 단일) 만 사용. 보조 시세 풀 함수 절대 import 안 함 — `test_balance_module_never_imports_quote_pool` 가드
 - `get_balance(afhr_flpr="N")`: `AFHR_FLPR_YN` query. `N`(기본 정규장) / `Y`(시간외 단일가) / `X`(NXT 정규장) — required
 - 🔴 **`get_balance()` 의 `prpr`(현재가)은 KRX 애프터마켓 체결을 반영하지 않는다 (2026-09-14 라이브 실측).** 16:00~20:00 내내 보유 11종목의 `prpr` 이 전부 무변동이었는데, 같은 종목 `004020` 을 `quotation.inquire_ccnl` 로 조회하면 `last_cntg_hour=195947`(19:59:47 체결)이 나온다 — **REST 시세 조회는 그 체결을 본다.** **실측 범위는 `prpr` 하나다** — `evlu_amt`(평가금액)·`nass_amt`(순자산, `summary.net_asset` 의 원천)는 KIS 가 서버에서 계산해 내려주는 별도 필드라 같이 얼었는지 **재지 않았다**. 얼었다고 보는 것이 자연스럽지만(같은 현재가에서 파생될 것이므로) 그건 **[추론]** 이다. 확인 방법 = 애프터 구간에 `evlu_amt` 와 `prpr × hldg_qty` 를 대조한다 — 어긋나면 별도 갱신 경로가 있다는 뜻이다. ⚠️ 2026-09-14 제도 변경으로 그 창이 연속 체결 구간이 됐으니, 애프터마켓 가격을 근거로 판단하는 코드는 `get_balance` 가 아니라 시세 조회를 써야 한다(현재 소비처 = 대시보드 표시 · `account_risk_watcher` 의 `summary.net_asset`)
-- `get_daily_orders(target_date="", exchange="ALL")`: TTTC0081R. `EXCG_ID_DVSN_CD` query required — `ALL`(기본, KRX+NXT+SOR 합산) / `KRX` / `NXT` / `SOR`. NXT 체결 누락 방지 위해 기본 ALL
+- `get_daily_orders(target_date="", exchange="ALL", *, odno="")`: TTTC0081R. `EXCG_ID_DVSN_CD` query required — `ALL`(기본, KRX+NXT+SOR 합산) / `KRX` / `NXT` / `SOR`. NXT 체결 누락 방지 위해 기본 ALL. `odno`(keyword-only)는 `ODNO` 필터라 그 주문 1건의 행만 돌려준다(cycle373 실측). 기본값 `""` 이면 params 가 전체 목록 조회와 같다. 소비처 = `engine/buying_reconcile.py`(자기 주문 행 조회 — 전체 목록의 첫 쪽 잘림에 기대지 않는다)
 
 ### KIS 거부 응답 분류 헬퍼
 
