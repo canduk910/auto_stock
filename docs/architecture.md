@@ -447,10 +447,11 @@ sequenceDiagram
 
     K->>H: H0STCNI0 수신 (암호화된 payload) → dispatch_message()
     Note over H: AES-256-CBC 복호화<br/>(iv/key: 구독 시 수신)
-    Note over H: fields = payload.split("^")<br/>order_no = fields[2]<br/>side = fields[4] (01:매도, 02:매수)<br/>exec_type = fields[13]
-    alt exec_type != "2"
-        Note over H: 무시 (접수통보)
-    else exec_type == "2"
+    Note over H: fields = payload.split("^")<br/>계좌 필터 (fields[1])<br/>CNTG_YN = fields[13]
+    alt CNTG_YN == "1" (주문·정정·취소·거부 접수)
+        Note over H: [order_notice] INFO 1줄<br/>거부(rfus 1 또는 Y)면 [order_rejected_notice] WARNING 1줄 더<br/>콜백 없음 · 상태 변경 없음 → return
+    else CNTG_YN == "2" (체결)
+        Note over H: order_no = fields[2]<br/>side = fields[4] (01:매도, 02:매수)<br/>체결단가 fields[10] · 체결수량 fields[9]
         H->>O: _on_execution() → handle_execution_notice()
         Note over O: ticker = _order_ticker[order_no]<br/>(체결통보 ticker 필드 무시)
         alt BUY
@@ -458,8 +459,13 @@ sequenceDiagram
         else SELL
             Note over O: _handle_sell_fill()<br/>손익 계산 (체결가 - 매수가) × 수량<br/>Position 삭제<br/>DB positions 삭제<br/>sold_today 등록<br/>_selling 해제<br/>trade_history COMPLETED<br/>(UPDATE 0건이면 → COMPLETED 직접 INSERT<br/>+ _completed_orders.add(order_no))
         end
+    else 그 밖의 값
+        Note over H: DEBUG 한 줄 → return
     end
 ```
+
+접수 전문은 기록만 한다. 거래소가 접수 뒤 거부한 주문은 `[order_rejected_notice]` WARNING 으로 `system_logs` 에
+남는다. 싣는 칸 목록과 개인정보 제외 규칙은 [`src/realtime/CLAUDE.md`](../src/realtime/CLAUDE.md) 「접수 전문 기록」 절이 정본이다.
 
 ### 체결통보 선행 race 가드
 
@@ -1642,7 +1648,7 @@ flowchart TB
 | 토픽 | 방향 | 페이로드(초안) | 정본 |
 |------|------|----------------|------|
 | T1 `md.tick` | W → 1 | `{ticker, current_price, open_price, change_rate, day_high, acml_vol, tr_id, recv_ts}` | `handler._handle_tick` 이 `_on_tick` 에 넘기는 인자 집합(`src/realtime/handler.py:629-633`). **`tr_id` 를 반드시 싣는다** — cycle294 3단계가 종목마다 채널을 가르고 매수 축 술어가 "구독 사실" 을 읽으므로, 채널 정보가 빠지면 그 게이트가 재현 불가다 |
-| T2 `exec.notice` | W → 3 | `{ticker, order_no, side, price, quantity, exec_type, recv_ts}` | `_on_execution(...)` 인자(`handler.py:698-700`). 계좌 필터와 `exec_type != "2"` drop 은 **W 에 남긴다**(잡음을 큐에 올리지 않는다) |
+| T2 `exec.notice` | W → 3 | `{ticker, order_no, side, price, quantity, exec_type, recv_ts}` | `_on_execution(...)` 인자(`handler.py::_handle_execution` 끝의 호출). 계좌 필터와 `CNTG_YN != "2"` 분기(접수 전문 `[order_notice]` 기록 뒤 return)는 **W 에 남긴다**(잡음을 큐에 올리지 않는다) |
 | T3 `order.intent` | 1 → 2 | 15.5.3 | — |
 | T4 `order.request` | 2 → R | `{req_id, kind: place\|cancel, ticker, side, quantity, price, ORD_DVSN, EXCG_ID_DVSN_CD, ORGN_ODNO?}` | `place_order`/`cancel_order` body 조립 직전 값(`src/api/order.py:69-88`, `:147-158`). 계좌·hashkey·TR_ID 는 R 이 채운다 |
 | T5 `order.result` | R → 2 | 성공 `{req_id, order_no, order_time}` / 실패 `{req_id, rt_cd, msg_cd, msg1, http_status}` — **분류하지 않은 원문** | 15.5.4 |
@@ -1722,9 +1728,10 @@ B안이 함께 옮겨야 하는 조각 둘: 사이징 **앞**의 `get_buyable`(R
 그 `order_no → 어느 체결 프로세스` 매핑은 주문 프로세스가 쥐고 있다. **사용자 골자가 체결
 프로세스를 1개로 그린 것은 이 점에서 옳다.**
 
-> 다만 우리가 **버리고 있는** 자산이 하나 있다 — KIS 체결통보는 `[3] OODER_NO`(원주문번호)와
-> `[12] RFUS_YN`(거부여부)을 싣고 오는데, 우리는 그 필드를 파싱하지 않는다(`handler.py:662-668`
-> 에 주석만 있고 `fields[3]`·`fields[12]` 코드 참조 0건). 4단계에서 주문↔REST 가 비동기가 되면
+> 다만 우리가 **기록만 하고 쓰지 않는** 자산이 하나 있다 — KIS 체결통보의 접수 전문은
+> `[3] OODER_NO`(원주문번호)와 `[12] RFUS_YN`(거부여부)을 싣고 온다. 우리는 그 칸을
+> `[order_notice]`·`[order_rejected_notice]` 로그에만 남기고(`handler.py::_handle_execution`)
+> 주문 상태에는 반영하지 않는다. 4단계에서 주문↔REST 가 비동기가 되면
 > **체결통보 축이 거부를 알려 주는 두 번째 채널**이 될 수 있다.
 
 #### 15.5.5 지연 — 늘어나는 항은 하나, 줄어드는 항이 더 크다

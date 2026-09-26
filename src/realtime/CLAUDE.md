@@ -281,10 +281,38 @@ resolved_unified=80 provenance_ok=149`. `scanner.py::emit_tick_channel_config` �
 
 - 파이프(`|`) 구분 메시지 파싱
 - **실시간 체결가** (H0STCNT0/H0NXCNT0/H0UNCNT0): 현재가/시가/등락률 추출 → `RiskManager.on_tick` 콜백 (세 TR_ID 동일 포맷 → 단일 파서). 현행 구독은 프리장 `H0NXCNT0` / 정규장·애프터 `H0STCNT0` 이고 통합은 `mode=off` 에서만 나간다. `handler` 는 tr_id 를 `on_tick` 으로 넘기지 않으므로(P1-7 N-4, `handler.py` 는 미승인 8영역) `tick_volume` 의 채널 구분은 **이중 채널 금지 + 전환 창 프레임 0** 으로만 닫힌다
-- **체결통보** (H0STCNI0/H0STCNI9): AES-256-CBC 복호화 → **계좌번호 필터** → `OrderEngine.handle_execution_notice` 콜백
+- **체결통보** (H0STCNI0/H0STCNI9): AES-256-CBC 복호화 → **계좌번호 필터** → `[13] CNTG_YN` 분기. `"2"`(체결)만 숫자 파싱을 거쳐 `OrderEngine.handle_execution_notice` 콜백으로 간다. 그 밖의 값은 아래 「접수 전문 기록」 뒤 return 한다
 - **NXT 장운영정보** (H0NXMKO0): 보드 전환 이벤트 → `register_board_handler` 등록 콜백(SessionTracker) 전달. KIS 명세 필드 미기재 → 운영 데이터 기반 확정
 - 체결통보 필드 매핑 (`^` 구분, KIS `ccnl_notice` 26컬럼): [0]CUST_ID(HTS ID), **[1]계좌번호(8)+상품코드(2)**, [2]주문번호, [3]원주문번호, [4]매도매수구분(02:매수/01:매도), [5]정정구분, [6]주문종류, [7]주문조건, **[8]종목코드**, **[9]CNTG_QTY 체결수량(통보 건별 증분)**, [10]CNTG_UNPR 체결단가, [11]체결시간, [12]거부여부, [13]CNTG_YN 체결구분(1:접수,2:체결), [14]ACPT_YN, [15]BRNC_NO, **[16]ODER_QTY 주문수량**, [17]고객명, [18]ORD_COND_PRC. 🔴 **수량은 반드시 `fields[9]`** — `[16]` 은 주문수량이라 부분/분할 체결에서 positions 과대가 된다(08-28 257720: 실체결 2주가 3주 등록 → 익일 매도 전량 APBK0400). AST 봉인 `test_cycle235_ast_execution_qty.py` + 엔진 overrun 클램프 `[fill_qty_overrun]` 이중 방어
 - **계좌 필터**: `fields[1]` 이 `settings.kis_account_no` 로 시작하지 않으면 무시 (실전 H0STCNI0 은 동일 HTS ID 묶인 타 계좌 통보 함께 푸시)
+
+### 접수 전문 기록 — `[order_notice]` · `[order_rejected_notice]` (**기록만, 상태 변경 0**)
+
+체결통보 채널은 체결(`CNTG_YN=2`)만 보내지 않는다. 주문·정정·취소·거부의 **접수 전문**(`CNTG_YN=1`)도 같은
+채널로 온다(KIS 명세 `CNTG_YN` `1` = 주문·정정·취소·거부). 거래소가 접수 뒤 거부한 주문은 REST 주문 응답이
+성공이라 `[kis_rejection]` 에 남지 않는다. 장중에 그 거부를 알 수 있는 곳이 이 전문이다. 그래서
+`_handle_execution` 이 접수 전문을 로그로 남긴다. ⚠️ 거부 전문의 실제 값(`rfus=`)은 라이브 표본 대기다.
+
+- **자리** = 계좌 필터 **뒤**, 체결 경로의 숫자 파싱(`int(fields[10])`·`int(fields[9])`) **앞**. 다른 계좌의
+  통보는 기록 전에 걸러진다. 접수 전문은 숫자 파싱에 닿지 않는다.
+- `CNTG_YN == "1"` → INFO 1줄:
+  `[order_notice] order_no=[2] orig_order_no=[3] side=BUY|SELL rctf=[5] kind=[6] cond=[7] ticker=[8] qty=[9] price=[10] hour=[11] rfus=[12] acpt=[14] ord_qty=[16]`.
+  `side` 는 `[4]=="02"` 면 `BUY`, 그 밖은 `SELL` 이다. `[16]` 이 없으면 `ord_qty=` 는 빈 값이다.
+  나머지 값은 원문 문자열 그대로 싣고 숫자로 바꾸지 않는다. ⚠️ 접수 전문의 `[9]`/`[10]` 이 무엇을 싣는지는
+  실측 대기다(워크리스트).
+- 그중 `rfus` 가 `"1"`(KIS 명세의 거부) 또는 `"Y"` 면 같은 칸으로 WARNING `[order_rejected_notice]` 1줄을
+  더 남긴다. 거부 1건은 INFO·WARNING **두 행**이 된다. 거부 건수는 WARNING 만 센다.
+- `CNTG_YN` 이 `"1"`·`"2"` 둘 다 아니면 기록 없이 DEBUG 한 줄 뒤 return 한다.
+- KIS 코드값(`docs/kis/domestic-stock-realtime.md` H0STCNI0 절) = `RFUS_YN` `0` 승인·`1` 거부 ·
+  `ACPT_YN` `1` 주문접수·`2` 확인·`3` 취소(FOK/IOC) · `RCTF_CLS` `0` 정상·`1` 정정·`2` 취소.
+- 🔴 **개인정보를 싣지 않는다** — `[0]` CUST_ID(HTS ID) · `[1]` 계좌번호 · `[17]` 계좌명, 그리고 원문 payload
+  (`fields[:N]` 통째 포함)는 어떤 레벨로도 로그에 넣지 않는다.
+- 🔴 **`write_log` 를 따로 부르지 않는다** — 루트 `_DbLogHandler` 가 `src.*` 로거의 INFO 이상을 이미
+  `system_logs` 로 나른다(cycle72 G-6 이중 INSERT 금지). 그 핸들러는 `"[<logger>] <msg>"[:500]` 로 자르므로
+  한 줄이 500자 안에 들어가야 한다.
+- 콜백(`_on_execution`)·주문번호 매핑·포지션은 건드리지 않는다. 취소·거부 전문으로 잔존 주문 상태를 정리하는
+  경로는 없다(`src/engine/CLAUDE.md` `order_engine.py` 절 규칙 4 「알려진 비용」).
+- 회귀 가드 = `tests/unit/realtime/test_cycle374_order_ack_notice.py`.
 
 ### `[open_scope_observe]` 시가 스코프 관측 (**행위 변경 0**)
 

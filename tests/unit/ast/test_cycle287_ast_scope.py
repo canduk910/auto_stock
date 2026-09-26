@@ -115,8 +115,9 @@ _BASE_SHA = {
     #    docstring 을 현재 계약만 서술하도록 다시 썼다(세션 행위 영향은 AB1 조건부
     #    라는 서술 포함). 그 밖 로직 무변경. 직전 값 =
     #    `37b1755210c83cdb2a462e6a37f919b326f8b48bee73d924adcc277d770a8d17`.
+    # 🔁 cycle374(2026-09-27) 재핀 — 접수 전문(`CNTG_YN=1`) INFO `[order_notice]` + 거부 WARNING `[order_rejected_notice]` 기록 추가(사용자 승인, 8영역). 콜백/상태 변경 0 — 체결(`CNTG_YN=2`) 경로는 byte 동일. 직전 값 = `cc8af0de831e98d79f558d0c56f1360ce5ee5438ec59f23dbe79ca6725d472bc`.
     "src/realtime/handler.py":
-        "cc8af0de831e98d79f558d0c56f1360ce5ee5438ec59f23dbe79ca6725d472bc",
+        "e1a484e9ac82d43f0fa85cba693ea5a206ecfbae1076dfee0f4e6bf6d4f2a2d4",
     "src/realtime/websocket.py":
         "d4c443bde2ed7aeafba3e9471db0ca4efc15a654610555435145a9b305150c5b",
     "src/realtime/websocket_pool.py":
@@ -567,8 +568,11 @@ _SRC_TREE_FILES = 159
 #: 재구성 — `high_tickers` 계산을 그 분기 앞으로 이동) · `routes/realtime.py`
 #: (`get_market_operation` details 합집합 확장) 편집. 파일 수는 159 로 불변(신규 파일
 #: 0). 직전 값 = `5cc4ba347d33396f45146b3cf859c09362234a3c2d2a378b86e8d812e9b5fd52`.
+# 🔁 cycle374(2026-09-27) 재핀 — `src/realtime/handler.py` 접수 전문(`CNTG_YN=1`)
+# 기록 추가(사용자 승인, 8영역) 하나가 움직였다. 파일 수는 159 로 불변. 직전 값 =
+# `4c05fd9656747e1bb8002a326c30eaa1e27eadfc91af1594a438177649bfe59f`.
 _SRC_TREE_DIGEST = (
-    "4c05fd9656747e1bb8002a326c30eaa1e27eadfc91af1594a438177649bfe59f"
+    "9042688c4671bffcc646bcf5f1dcbbbc013c1f3070d0d7b54dcd73e566c9924b"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

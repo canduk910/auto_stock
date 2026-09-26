@@ -512,8 +512,11 @@ _APPROVED_CONTENT_SHA: dict[str, str] = {
     # 📄 2026-09-17 — **문서 전용 변경**(덧칠 정리). 경위·실측 수치·폐기 값은
     #    `docs/history/src-realtime-CLAUDE.history.md` 로 verbatim 이관하고 정본엔
     #    현재 계약만 남겼다. 프로덕션 코드 영향 0.
+    # 📄 2026-09-27 (cycle374) — **문서 전용 변경**. `handler.py` 절에 「접수 전문 기록」
+    #    (`[order_notice]`·`[order_rejected_notice]`, 기록만·개인정보 칸 제외) 소절을
+    #    더했다. 프로덕션 코드 영향 0. 직전 값 = `7c3d432254a9f71a8341d371cb14bbc8e58112a16cc536301620c7f1ab62f58d`.
     "src/realtime/CLAUDE.md":
-        "7c3d432254a9f71a8341d371cb14bbc8e58112a16cc536301620c7f1ab62f58d",
+        "45817e18bff13cef49af02704f1fae7a5f73b7b0be49d84a42d409b7fc4237aa",
     # ✅ 2026-09-17 (cycle296) — `TokenManager.issue()` 매니저 단위 in-flight
     #    합류. 사용자 명시 8영역 승인(`src/auth/**`), 범위 = `src/auth/token.py`
     #    `issue()` + `__init__` 신규 필드뿐(`get_token`/`revoke`/`_is_valid` 무접촉).
@@ -550,8 +553,9 @@ _APPROVED_CONTENT_SHA: dict[str, str] = {
     #    docstring 을 현재 계약만 서술하도록 다시 썼다(세션 행위 영향은 AB1 조건부
     #    라는 서술 포함). 그 밖 로직 무변경. 직전 값 =
     #    `37b1755210c83cdb2a462e6a37f919b326f8b48bee73d924adcc277d770a8d17`.
+    # 🔁 cycle374(2026-09-27) 재핀 — 접수 전문(`CNTG_YN=1`) INFO `[order_notice]` + 거부 WARNING `[order_rejected_notice]` 기록 추가(사용자 승인, 8영역). 콜백/상태 변경 0 — 체결(`CNTG_YN=2`) 경로는 byte 동일. 직전 값 = `cc8af0de831e98d79f558d0c56f1360ce5ee5438ec59f23dbe79ca6725d472bc`.
     "src/realtime/handler.py":
-        "cc8af0de831e98d79f558d0c56f1360ce5ee5438ec59f23dbe79ca6725d472bc",
+        "e1a484e9ac82d43f0fa85cba693ea5a206ecfbae1076dfee0f4e6bf6d4f2a2d4",
 }
 
 

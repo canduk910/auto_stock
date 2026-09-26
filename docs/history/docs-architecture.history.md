@@ -735,3 +735,39 @@ flowchart TB
 경위: job 은 `backtest_orchestration._enqueue_backtest_jobs` 가 그날 INSERT 된 자문 행마다 current·recommended 2개를 만든다. 등록 전략은 7개이고 자문 행은 활성 전략 수만큼이라 「6 전략 × 2 = 12」 는 고정값이 아니다(루트 `CLAUDE.md` 「외부 통합」 과 같은 표현으로 맞췄다).
 
 → CHANGELOG: 해당 없음 — 2026-09-26 `/sync-docs` 문서 정합(코드 변경 없음, report-writer)
+
+## 6. 체결통보 처리 시퀀스
+
+### 2026-09-27 cycle374 — 시퀀스 도식의 접수 전문 분기
+
+정본 원문(mermaid 4행):
+
+```
+    Note over H: fields = payload.split("^")<br/>order_no = fields[2]<br/>side = fields[4] (01:매도, 02:매수)<br/>exec_type = fields[13]
+    alt exec_type != "2"
+        Note over H: 무시 (접수통보)
+    else exec_type == "2"
+```
+
+경위: cycle374 가 접수 전문(`CNTG_YN=1`)을 「무시」 하지 않고 INFO `[order_notice]` + 거부면 WARNING `[order_rejected_notice]` 로 기록한다(콜백·상태 변경 없음). 분기 판정 이름도 코드의 판정 칸 이름(`CNTG_YN` = `fields[13]`)으로 맞췄다.
+
+→ CHANGELOG: cycle374 행
+
+## 15. 프로세스 분리 로드맵
+
+### 2026-09-27 cycle374 — 15.5.2 T2 행 · 15.5.4 「버리고 있는 자산」 인용
+
+정본 원문(T2 표 행):
+
+| T2 `exec.notice` | W → 3 | `{ticker, order_no, side, price, quantity, exec_type, recv_ts}` | `_on_execution(...)` 인자(`handler.py:698-700`). 계좌 필터와 `exec_type != "2"` drop 은 **W 에 남긴다**(잡음을 큐에 올리지 않는다) |
+
+정본 원문(15.5.4 인용 4행):
+
+> 다만 우리가 **버리고 있는** 자산이 하나 있다 — KIS 체결통보는 `[3] OODER_NO`(원주문번호)와
+> `[12] RFUS_YN`(거부여부)을 싣고 오는데, 우리는 그 필드를 파싱하지 않는다(`handler.py:662-668`
+> 에 주석만 있고 `fields[3]`·`fields[12]` 코드 참조 0건). 4단계에서 주문↔REST 가 비동기가 되면
+> **체결통보 축이 거부를 알려 주는 두 번째 채널**이 될 수 있다.
+
+경위: cycle374 가 접수 전문의 `[3]`·`[12]` 를 `[order_notice]`·`[order_rejected_notice]` 로그에 싣는다 — 「파싱하지 않는다 · 코드 참조 0건」 은 사실이 아니게 됐다(상태 반영은 여전히 없다). T2 행의 줄 앵커 `handler.py:698-700` 은 이미 밀려 있었고(HEAD 기준 호출은 711행) 15.5 서두 규약대로 심볼 앵커로 바꿨다.
+
+→ CHANGELOG: cycle374 행

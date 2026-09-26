@@ -6,6 +6,7 @@ backend:
     - tests/unit/ast/test_cycle273e_ast_tick_buy_skip_constant.py
     - tests/unit/ast/test_cycle292_ast_market_op_leaf.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     transitive_tests: []
   src/api/__init__.py:
     direct_tests:
@@ -1052,6 +1053,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -2193,6 +2195,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -3335,6 +3338,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -4478,6 +4482,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -5619,6 +5624,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -6761,6 +6767,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -7903,6 +7910,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -9047,6 +9055,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -10187,6 +10196,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -11329,6 +11339,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -12489,6 +12500,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -13632,6 +13644,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -13752,6 +13765,7 @@ backend:
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/middleware/test_cycle243_api_auth.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/routes/test_cycle282_market_state_route.py
     - tests/unit/services/test_macro_client.py
     - tests/unit/test_cycle243_auth_fixture.py
@@ -15914,6 +15928,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -17057,6 +17072,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -18199,6 +18215,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -19341,6 +19358,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -20483,6 +20501,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -21625,6 +21644,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -22769,6 +22789,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -23909,6 +23930,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -25051,6 +25073,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -26193,6 +26216,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -27335,6 +27359,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -28477,6 +28502,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -29623,6 +29649,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -30761,6 +30788,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -31903,6 +31931,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -33047,6 +33076,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -34187,6 +34217,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -35333,6 +35364,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -35451,6 +35483,7 @@ backend:
     - tests/unit/engine/test_cycle273b_selling_hold_observe.py
     - tests/unit/engine/test_cycle369_r2_sell_safety.py
     - tests/unit/engine/test_scheduler_stale_force_retry.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -37618,6 +37651,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -38759,6 +38793,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -39902,6 +39937,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -41045,6 +41081,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -42186,6 +42223,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -43328,6 +43366,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -44470,6 +44509,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -45612,6 +45652,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -46754,6 +46795,7 @@ backend:
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -47896,6 +47938,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -49038,6 +49081,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -50180,6 +50224,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -51322,6 +51367,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -52464,6 +52510,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -53606,6 +53653,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -54749,6 +54797,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -55890,6 +55939,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -57097,6 +57147,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -58236,6 +58287,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -59378,6 +59430,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -60522,6 +60575,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -61664,6 +61718,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -62804,6 +62859,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -63946,6 +64002,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -65088,6 +65145,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -66230,6 +66288,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -67372,6 +67431,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -68514,6 +68574,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -69655,6 +69716,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -70877,6 +70939,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -72090,6 +72153,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -73295,6 +73359,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -74437,6 +74502,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -75580,6 +75646,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -76721,6 +76788,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -77863,6 +77931,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -79008,6 +79077,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -80146,6 +80216,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -81309,6 +81380,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
     - tests/unit/realtime/test_cycle73_ws_reverify_no_write_log.py
@@ -82434,6 +82506,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -83574,6 +83647,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -84715,6 +84789,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -85857,6 +85932,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -86998,6 +87074,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -88141,6 +88218,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -89283,6 +89361,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -90425,6 +90504,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -91567,6 +91647,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -92709,6 +92790,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -93851,6 +93933,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -94992,6 +95075,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -96135,6 +96219,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -97277,6 +97362,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -98419,6 +98505,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -99561,6 +99648,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -100733,6 +100821,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -101875,6 +101964,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -103017,6 +103107,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -104159,6 +104250,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -105301,6 +105393,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -106443,6 +106536,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -107585,6 +107679,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -108729,6 +108824,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -109870,6 +109966,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -111012,6 +111109,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -112154,6 +112252,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -113367,6 +113466,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -114510,6 +114610,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -115650,6 +115751,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -116793,6 +116895,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -117933,6 +118036,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -119076,6 +119180,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -120218,6 +120323,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -121363,6 +121469,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -122566,6 +122673,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -123708,6 +123816,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -124854,6 +124963,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -125996,6 +126106,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -127138,6 +127249,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -128281,6 +128393,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -129484,6 +129597,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -130787,6 +130901,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -131994,6 +132109,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -132130,6 +132246,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle92_auto_restart_cooldown.py
     - tests/unit/realtime/test_cycle92_auto_restart_hourly_cap.py
@@ -133253,6 +133370,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_handler_tick_parse_guard.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
@@ -135439,6 +135557,7 @@ backend:
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
     - tests/unit/realtime/test_cycle73_ws_reverify_no_write_log.py
     - tests/unit/realtime/test_cycle73_ws_subscribe_reject_no_write_log.py
@@ -136573,6 +136692,7 @@ backend:
     - tests/unit/realtime/test_cycle227_handler_acml_vol.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
     - tests/unit/realtime/test_cycle73_ws_reverify_no_write_log.py
@@ -139144,6 +139264,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -140284,6 +140405,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -141429,6 +141551,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -142568,6 +142691,7 @@ backend:
     - tests/unit/realtime/test_cycle264_open_scope_observe.py
     - tests/unit/realtime/test_cycle359_mkop_field_offset.py
     - tests/unit/realtime/test_cycle368_market_op_decisions.py
+    - tests/unit/realtime/test_cycle374_order_ack_notice.py
     - tests/unit/realtime/test_cycle42_pingpong_metrics.py
     - tests/unit/realtime/test_cycle43_session_label_unified.py
     - tests/unit/realtime/test_cycle73_logger_persistence.py
@@ -144191,10 +144315,10 @@ frontend:
     - frontend/src/pages/__tests__/MarketState.test.tsx
     - frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
     - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
-generated_at: '2026-09-26T20:52:54.666532+09:00'
+generated_at: '2026-09-27T01:25:06.836133+09:00'
 stats:
   backend_modules: 162
-  backend_tests: 1139
+  backend_tests: 1140
   frontend_modules: 120
   frontend_tests: 100
   unmapped_modules:

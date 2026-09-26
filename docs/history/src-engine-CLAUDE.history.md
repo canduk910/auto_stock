@@ -1643,3 +1643,15 @@ cycle359 조사). cycle368 이 파서 기준점을 고치고, VI 수명 600초(�
 경위: 괄호 안 위임처 둘 다 걸린 잔량을 거두지 않는다. `cancel_remaining` 은 `src/` 안에 호출자가 없고(정의 1곳뿐), 그 함수가 취소하는 `pos.order_no` 는 포지션을 만든 매수 주문번호다. `risk.on_tick` 재평가는 새 매도를 낼 뿐 취소를 하지 않는다. 운영자가 「16:00 에 알아서 회수된다」고 믿고 걸린 주문을 두게 만드는 문장이라 걷었다.
 
 → 근거: `_workspace/domain_consult/cycle332_buy_cancel_timer.md` §10 · `_workspace/red/bundle_D_plan.md` S1
+
+### 2026-09-27 cycle374 — 규칙 4 「알려진 비용 — GTP 08:50 자동취소 잔존 상태」 의 DEBUG 서술 · 관측 방법 문장
+
+정본 원문(목록 행 3):
+
+  - **알려진 비용 — GTP 08:50 자동취소 잔존 상태.** 취소 통보는 체결통보 채널로 **온다**(09-14 실측 073240: `08:29:34` 접수 통보 + `08:50:00` 정각에 같은 주문번호로 두 번째 통보, KIS 주문내역은 그 주문을 `GTP매수자동취소*` 로 기록). 그러나 `handler.py::_handle_execution` 의 `exec_type != "2"` 분기가 DEBUG 한 줄만 남기고 버려, 잔존 상태(`pending_buys`/`pending_buy_amounts`/`_pending_buy_orders`/`_order_qty`/`_order_strategy`/`_order_ticker`/`_order_exchange`/`_order_division`/`trade_history` PENDING 행)를 **장중에 정리하는 경로가 없다**. 그 종목은 그날 21:30 `reset_daily_state()`(메모리 5종)까지, `trade_history` 행은 **영구**로 남고 `is_ticker_blocked_for_buy` 가 그날 재진입을 막고 예산을 점유한다. GTP 는 이 빈도를 **늘린다**(08:50 까지 안 채워진 모든 프리장 매수가 대상 — `00` 은 09:00:30 정규장 이월로 일부가 결국 체결·취소돼 조기 정리된다). 순수 기회비용이고 자본 위험은 아니다.
+    - **시정 경로** = 이미 구독 중인 체결통보 채널로 취소가 도착하므로 `handler.py` 가 `exec_type=="1"` 프레임에서 취소를 판별해 콜백으로 넘기고 `order_engine` 이 잔존 상태를 정리한다. 접촉 = `src/realtime/handler.py` + `order_engine.py`(**둘 다 8영역, 승인 필요**) · `scheduler.py` **무접촉**.
+    - 🔴 **선결 = 취소 프레임의 판별 필드 실측.** 09-14 관측은 "프레임이 왔다" 까지만 증명한다 — 현행 DEBUG 줄이 `order_no`·`ticker` 두 필드만 찍으므로 그 프레임의 `fields[5]`(RCTF_CLS 정정구분)·`fields[12]`(RFUS_YN 거부여부)·`fields[14]`(ACPT_YN 1:주문접수 2:확인 3:취소) 실제 값은 모른다. 접수(08:29:34)와 취소(08:50:00)를 가르는 필드를 확정하지 않고 분기를 짜면 접수 통보를 취소로 오인해 **살아 있는 주문의 상태를 지운다**. 관측 방법 = 그 DEBUG 줄에 `fields[:20]` 을 실어 GTP 미체결 1건 관측(`handler.py` 8영역 1줄 변경, 승인 대상).
+
+경위: cycle374 가 `handler.py::_handle_execution` 에 접수 전문(`CNTG_YN=1`) 기록을 넣었다 — INFO `[order_notice]`(이름 붙은 칸) + 거부면 WARNING `[order_rejected_notice]`. 「DEBUG 한 줄만 남기고 버려」 와 「현행 DEBUG 줄이 `order_no`·`ticker` 두 필드만 찍으므로」 는 사실이 아니게 됐다. 관측 방법 「그 DEBUG 줄에 `fields[:20]` 을 실어」 는 `[0]` HTS ID·`[1]` 계좌번호·`[17]` 계좌명을 로그에 싣는 방법이라 채택하지 않았고, 이름 붙은 칸만 싣는 `[order_notice]` 로 대신했다. 잔존 상태를 장중에 정리하는 경로가 없다는 결론은 그대로다(기록만, 콜백 없음).
+
+→ CHANGELOG: cycle374 행

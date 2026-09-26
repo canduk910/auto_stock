@@ -679,6 +679,56 @@ async def _handle_execution(payload: str, *, encrypted: bool = False) -> None:
         logger.debug("체결통보 계좌 불일치 - 무시: 수신=%s, 대상=%s", recv_account, target_account)
         return
 
+    # cycle374 (2026-09-27) — 접수 전문(`CNTG_YN=1`: 주문·정정·취소·거부 접수) 기록.
+    #
+    # 2026-09-14 워크리스트 계획(「09-14 실측 ①」 따라오는 것 3)이 접수 전문 필드를
+    # 남기는 것이었는데 미구현이었다 — 이 자리는 지금까지 `order_no`/`ticker` 두 칸만
+    # 실은 DEBUG 한 줄로 접수 전문을 버렸고, DEBUG 는 `_DbLogHandler`(INFO 이상만
+    # `system_logs` 로 나른다)에 닿지 않아 **거래소가 접수 뒤 거부한 주문이 운영
+    # 로그에 한 줄도 남지 않았다**(cycle373 실측: 437730 09-15 매수 PENDING 잔존의
+    # 정체). 2026-09-27 사용자 결정 = 「거래소 거부 기록하기로 했었어 … 안되어
+    # 있다면 바로 해야해」, 8영역 handler.py 접촉 승인.
+    #
+    # 범위 = **기록만** — 콜백(`_on_execution`)·상태 변경 없음. 체결 경로(아래)는
+    # `CNTG_YN=="2"` 일 때만 이 분기 밖에서 진행되므로 byte 동일하게 보존된다.
+    # 계좌 필터(바로 위)를 **반드시 통과한 뒤**에만 기록해야 다른 계좌 통보가 새지
+    # 않는다 — 그래서 이 분기를 필터 다음, 기존 파싱(`int(fields[10])`/`int(fields[9])`)
+    # **앞**에 둔다(HEAD 는 그 파싱이 CNTG_YN 판정보다 먼저라 접수 전문의 비숫자
+    # [9]/[10] 에서 예외가 새 WS 수신 루프까지 올라갔다).
+    #
+    # 이름 붙은 칸만 원문 그대로 싣는다 — [9]/[10] 이 접수 전문에서 무엇을 담는지
+    # (주문수량·주문가인지 0 인지)는 아직 실측되지 않아 숫자로 바꾸면 그 증거가
+    # 사라진다(워크리스트 「아직 못 잰 것」). 🔴 개인정보([0] CUST_ID/HTS ID ·
+    # [1] 계좌번호 · [17] 계좌명)와 원문 payload 는 어떤 레벨로도 싣지 않는다.
+    #
+    # KIS 명세(`docs/kis/domestic-stock-realtime.md` H0STCNI0 절, 09-11 스냅샷 —
+    # 이 TR 은 09-14 제도 변경 무관): [12] RFUS_YN 거부여부 = `0` 승인·`1` 거부
+    # (호출자 지시 `"Y"` 도 라이브 값 미실측 대비 함께 거부로 본다. `"0"`·`"N"`·빈
+    # 값은 거부 아님) / [14] ACPT_YN = `1` 주문접수·`2` 확인·`3` 취소(FOK/IOC) /
+    # [5] RCTF_CLS = `0` 정상·`1` 정정·`2` 취소.
+    #
+    # `write_log` 를 따로 부르지 않는다 — 루트 `_DbLogHandler` 가 `src.*` 로거의
+    # INFO 이상을 이미 system_logs 로 나른다(cycle72 G-6 이중 INSERT 금지). 그
+    # `_DbLogHandler` 는 `"[<logger>] <msg>"[:500]` 로 자르므로 이 한 줄이 그 안에
+    # 들어가야 한다.
+    if fields[13] != "2":
+        if fields[13] == "1":
+            _notice_fmt = (
+                "order_no=%s orig_order_no=%s side=%s rctf=%s kind=%s cond=%s "
+                "ticker=%s qty=%s price=%s hour=%s rfus=%s acpt=%s ord_qty=%s"
+            )
+            _notice_args = (
+                fields[2], fields[3], "BUY" if fields[4] == "02" else "SELL",
+                fields[5], fields[6], fields[7], fields[8], fields[9], fields[10],
+                fields[11], fields[12], fields[14],
+                fields[16] if len(fields) > 16 else "",
+            )
+            logger.info("[order_notice] " + _notice_fmt, *_notice_args)
+            if fields[12] in ("1", "Y"):
+                logger.warning("[order_rejected_notice] " + _notice_fmt, *_notice_args)
+        logger.debug("체결통보 접수(미체결): order_no=%s, ticker=%s", fields[2], fields[8])
+        return
+
     order_no = fields[2]
     side = "BUY" if fields[4] == "02" else "SELL"
     exec_type = fields[13]  # 1:접수, 2:체결
