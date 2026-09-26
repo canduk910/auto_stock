@@ -278,6 +278,10 @@ def test_stop_tuple_equals_finally_tuple_members():
         # 09:00:35~15:20 을 도는 루프라 cancel 누락 시 `stop()` 이 그 REST 스윕을
         # 끊지 못한다(같은 종목 이중 스윕 위험).
         "_main_rest_basis_task",
+        # cycle369 추가 (2026-09-26) — 관리종목(51)·단기과열(59) 보유 청산 + 당일 매수 차단
+        # 조회 task(08:45 P0 · 09:00 P1 · 60초 INC · 09:00:30~15:28 300초 청산 패스).
+        # cancel 누락 시 `stop()` 뒤에도 시장가 청산(`execute_sell`)을 쏠 수 있다.
+        "_status_exit_task",
         "_ws_task",
         "_scan_task",
     }

@@ -38,6 +38,12 @@ _MAX_LOT_RATIO_MULT_MIN = 1.0       # K_ρ<1 은 정상 비중 랏까지 잘라 
 _MAX_LOT_RATIO_MULT_MAX = 20.0      # 09-04 예산에서 K=20 컷오프가 비터틀 5전략 전부
                                     # price_filter_max(500,000) 초과 = 사실상 현행 복귀(롤백 다이얼)
 
+# ── cycle369 — 게이트가 발사 직전(momentum·VB)인 전략은 후보 목록이 없거나
+# (momentum) 발사 순간 자체가 곧 후보 증거라 항상 「후보」로 센다. 폴·래치형
+# 5전략(첫 문장 게이트)은 실제 `_targets`/`_candidates`/`get_scanned_tickers()`
+# 멤버십으로 판정한다 — 그래야 skip 카운트가 "어느 전략이 사려 했는지" 를 말한다.
+_ALWAYS_STATUS_GATE_CANDIDATE_SIDS = frozenset({"momentum", "volatility_breakout"})
+
 
 class Signal(str, Enum):
     """매매 신호."""
@@ -47,6 +53,7 @@ class Signal(str, Enum):
     NEXT_DAY_CLEAR = "NEXT_DAY_CLEAR"
     TRAILING_STOP = "TRAILING_STOP"
     FORCE_CLEAR = "FORCE_CLEAR"
+    STATUS_EXIT = "STATUS_EXIT"  # cycle369 — 관리종목(51)·단기과열(59) 보유 청산
 
 
 @dataclass
@@ -1290,7 +1297,13 @@ class StrategyBase(ABC):
         **fail-open** — import/판정 실패 시 False (매수 경로가 죽지 않는다).
         lazy import — strategy_base 최상위 import 금지 (AST G-5, 순환 차단).
         관측 = `[account_gate_skip]` 1회/전략/일 (날짜 키 자기 리셋).
+
+        cycle369 — 첫 문장이 종목상태(관리·단기과열) 당일 매수 차단을 먼저 본다
+        (`_status_buy_blocked`). 7전략 `check_buy_signal` 배선을 공통 게이트가
+        대신하므로 새 전략도 이 차단이 자동으로 따라온다(AST 가드 J25).
         """
+        if self._status_buy_blocked(ticker):
+            return True
         try:
             from src.engine import account_risk_watcher
             if not account_risk_watcher.is_soft_gated():
@@ -1315,6 +1328,85 @@ class StrategyBase(ABC):
             logger.debug("[account_gate_skip_failed] 게이트 판정 실패 fail-open",
                          exc_info=True)
             return False
+
+    def _status_buy_blocked(self, ticker: str | None) -> bool:
+        """cycle369 — 관리종목·단기과열 당일 매수 차단(지정 첫날 포함).
+
+        순수 메모리 조회(`status_exit_watch.buy_gate`) 위임. **fail-open** —
+        leaf import·판정 실패는 False(매수 경로를 닫지 않는다). leaf 는
+        lazy import(순환 차단 — `status_exit_watch` 도 이 모듈을 lazy import
+        한다). 로그는 leaf 가 남긴다 — 여기는 판정 실패 흔적(DEBUG)만 남긴다.
+
+        cycle369 — 판정(막을지)과 관측(어떻게 셀지)을 분리한다.
+        - Q10: `cand`(이 전략이 지금 이 종목을 후보로 들고 있나) 를 계산해
+          leaf 에 넘긴다 — 막기는 후보 여부와 무관하게 늘 막지만(fail-safe),
+          skip 집계는 실제로 사려던 전략만 세야 "어느 전략이 사려 했나" 를
+          말할 수 있다.
+        - Q7: 막힌 순간 이 전략의 이 종목 edge-crossing 기준가를 비운다 —
+          첫 문장 게이트(LTV) 는 차단 동안 기준가 갱신 자체가 안 돌아 얼고,
+          해제 뒤 첫 틱이 그 옛 기준가 대비 거짓 돌파가 된다.
+        """
+        if not ticker:
+            return False
+        try:
+            from src.engine import status_exit_watch
+            cand = self._is_status_gate_candidate(ticker)
+            blocked = bool(status_exit_watch.buy_gate(ticker, self.strategy_id, cand=cand))
+        except Exception:
+            logger.debug("[status_block_gate_failed] ticker=%s", ticker, exc_info=True)
+            return False
+        if blocked:
+            self._clear_edge_baseline_on_block(ticker)
+        return blocked
+
+    def _is_status_gate_candidate(self, ticker: str) -> bool:
+        """cycle369 — 이 전략이 지금 `ticker` 를 후보로 들고 있나(순수 메모리).
+
+        momentum·VB 는 게이트가 발사 직전이라(cycle233 C233-F1) 그 자리에 닿는
+        것 자체가 이미 후보 증거다 — 항상 True. 나머지는 실제 후보 자료구조를
+        본다. 어떤 예외도 흡수해 False(관측만 줄고 차단은 그대로다).
+        """
+        try:
+            if self.strategy_id in _ALWAYS_STATUS_GATE_CANDIDATE_SIDS:
+                return True
+            fn = getattr(self, "get_scanned_tickers", None)
+            if callable(fn):
+                try:
+                    if ticker in (fn() or []):
+                        return True
+                except Exception:
+                    pass
+            for attr in ("_targets", "_candidates"):
+                d = getattr(self, attr, None)
+                if isinstance(d, dict) and ticker in d:
+                    return True
+            return False
+        except Exception:
+            return False
+
+    def _clear_edge_baseline_on_block(self, ticker: str) -> None:
+        """cycle369 — 공통 게이트가 이 전략의 이 종목 매수를 막을 때
+        edge-crossing 기준가를 비운다. 순수 메모리, `await` 0, never-raise.
+
+        `_prev_price` 는 전략마다 모양이 다르다 — VB·LTV 는 **중첩** dict
+        (`{ticker: {board: price}}`) 이고 없는 종목은 `setdefault` 가 새
+        빈 dict 를 만들어 "첫 관측(교차 아님)" 으로 안전하게 읽힌다. BFB·VCP 는
+        **평평한** dict(`{ticker: price}`) 라 없는 값이 `0` 으로 읽혀
+        `0 < level <= current` 가 참이 되는 새 거짓 교차를 만든다 — 그래서
+        평평한 모양은 절대 건드리지 않는다(모양으로 구분하지 전략 이름을
+        하드코딩하지 않는다 — 새 전략이 같은 모양을 쓰면 자동으로 맞는다).
+        momentum 의 `_prev_prdy_rate`(`{ticker: rate}`)는 없으면 "첫 tick =
+        기록만" 이라 안전해서 그대로 지운다.
+        """
+        try:
+            pp = getattr(self, "_prev_price", None)
+            if isinstance(pp, dict) and isinstance(pp.get(ticker), dict):
+                pp.pop(ticker, None)
+            rate = getattr(self, "_prev_prdy_rate", None)
+            if isinstance(rate, dict):
+                rate.pop(ticker, None)
+        except Exception:
+            logger.debug("[status_block_baseline_clear_failed] ticker=%s", ticker, exc_info=True)
 
     def _emit_budget_clamp(
         self, ticker: str | None, requested: int, clamped: int, remaining: int,

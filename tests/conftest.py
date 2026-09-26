@@ -584,3 +584,56 @@ def _neutralize_trading_calendar(
             pass
     yield
     _reset_trading_calendar_memo()
+
+
+# ---------------------------------------------------------------------------
+# cycle369 — 종목상태(관리 51·단기과열 59) 매수 차단 레지스트리 중립화 (K20)
+#
+# `src/engine/status_exit_watch.py` 의 매수 차단 레지스트리는 **모듈 전역**이고, 관측 훅
+# (`condition._fetch_stock_detail_and_cache` → `observe_fhkst`)이 FHKST 조회마다 기록한다.
+# 그대로 두면 api 테스트가 흘린 `short_over_yn:"Y"` 픽스처가 같은 날짜로 도는 무관한
+# 테스트의 `_account_soft_gate_blocked(...)` 를 True 로 뒤집는다(시각·순서 의존 flaky —
+# `test_cycle233_watcher_gate.py` 가 `"005930"` 으로 False 를 단언한다).
+#
+# 시정 = 매 테스트 전·후 `reset_state_for_test()` + 마커 `real_status_watch` 가 **없으면**
+#   (1) `observe_fhkst` → no-op (2) `buy_gate` → False
+#   (3) `task_loop` → 즉시 반환 코루틴 — `scheduler.start()` 를 도는 기존 테스트가 실 루프를
+#       띄워 실 KIS 조회로 새지 않게 한다(cycle363 「게이트를 넣는 사이클이 중립화 픽스처를
+#       같이 만든다」 · 일부 start() 테스트는 전역 `asyncio.sleep` 을 AsyncMock 으로 바꿔
+#       루프가 헛돌 수 있다).
+# leaf·배선을 직접 검증하는 테스트는 `@pytest.mark.real_status_watch` 로 옵트아웃한다.
+# Red 단계(leaf 미존재)에서는 import 가 실패하므로 아무것도 하지 않는다 — 전체 스위트가
+# 이 픽스처 때문에 죽지 않는다. `raising=False` 도 같은 이유다.
+# ---------------------------------------------------------------------------
+def _reset_status_watch_state() -> None:
+    try:
+        from src.engine import status_exit_watch as _sew_mod
+    except Exception:
+        return
+    reset = getattr(_sew_mod, "reset_state_for_test", None)
+    if callable(reset):
+        try:
+            reset()
+        except Exception:
+            pass
+
+
+@pytest.fixture(autouse=True)
+def _neutralize_status_watch(
+    request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch
+):
+    _reset_status_watch_state()
+    if not request.node.get_closest_marker("real_status_watch"):
+        try:
+            from src.engine import status_exit_watch as _sew_mod
+
+            async def _inert_task_loop(*_a: Any, **_k: Any) -> None:
+                return None
+
+            monkeypatch.setattr(_sew_mod, "observe_fhkst", lambda *_a, **_k: None, raising=False)
+            monkeypatch.setattr(_sew_mod, "buy_gate", lambda *_a, **_k: False, raising=False)
+            monkeypatch.setattr(_sew_mod, "task_loop", _inert_task_loop, raising=False)
+        except Exception:
+            pass
+    yield
+    _reset_status_watch_state()

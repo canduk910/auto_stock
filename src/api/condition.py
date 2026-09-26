@@ -462,6 +462,22 @@ async def inquire_stock_basics(pdno: str) -> "StockBasics":
     )
 
 
+def _notify_status_observer(ticker: str, output) -> None:
+    """cycle369 — 종목상태(관리·단기과열) 관측 훅. 매수 차단 레지스트리에 기록만
+    한다. never-raise.
+
+    api→engine lazy import 선례 = 이 파일 `fetch_rising_stocks` 의
+    `from src.engine.scanner import ticker_prev_close`. 훅이 예외를 흘리면
+    모든 FHKST 소비자가 깨진다(K19) — 그래서 본문 전체가 try 한 겹이다.
+    """
+    try:
+        from src.engine import status_exit_watch
+
+        status_exit_watch.observe_fhkst(ticker, output)
+    except Exception:
+        logger.debug("[status_observer_failed] ticker=%s", ticker, exc_info=True)
+
+
 async def _fetch_stock_detail_and_cache(ticker: str, epoch_at_start: int) -> dict:
     """KIS 호출 + epoch 일치 시 캐시 write + inflight 정리.
 
@@ -482,6 +498,7 @@ async def _fetch_stock_detail_and_cache(ticker: str, epoch_at_start: int) -> dic
         # 사이클 7-C — 시세성 호출 풀 (보조 라운드로빈 + 메인 fallback)
         data = await kis_get_quote(STOCK_PRICE_URL, "FHKST01010100", params)
         output = data.get("output", {})
+        _notify_status_observer(ticker, output)  # cycle369 — 종목상태 관측 훅
         async with _cache_lock:
             if _cache_epoch == epoch_at_start:
                 _price_cache[ticker] = (output, time.monotonic() + _PRICE_CACHE_TTL)

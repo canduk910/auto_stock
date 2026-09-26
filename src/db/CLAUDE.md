@@ -150,6 +150,15 @@ AWS RDS PostgreSQL CRUD 모듈. DB 클라이언트 정본 = **`pg.py` (asyncpg �
 - **외부 통합 토글 (DB 우선, `.env` 폴백)**: `get_dkstock_regime_enabled() -> bool | None` / `set_dkstock_regime_enabled(value)`(키 `dkstock_regime_enabled`) · `get_kis_mcp_enabled() -> bool | None` / `set_kis_mcp_enabled(value)`(키 `kis_mcp_enabled`). 기본값이 `None` 인 것이 `cash_usage_ratio`/`auto_regime_adjust` 와 다른 점이다 — 호출자가 `settings.*` 환경변수로 폴백한다(`.env` 호환 보존). 내부 헬퍼 `_get_bool_or_none(key)` / `_set_bool(key, value)` 가 JSONB `{"value": bool}` 과 과거 형식(직저장 bool, `'true'`/`'false'` 문자열)을 모두 흡수한다
 - **task 신선도 마커**: `get_task_last_success(task_label) -> str | None`(키 `task_last_success_<label>`) / `set_task_last_success(task_label, iso_ts)`. 값은 KST ISO(`now_kst_iso()`). `task_loop_helper.run_periodic_task_loop` 의 부팅 즉시 실행 게이트 두 갈래가 이 마커를 읽는다 — **시간 게이트** `immediate_skip_if_fresh_hours`(N시간 안에 성공 마커가 있으면 skip, master·financial)와 **영업일 슬롯 게이트** `immediate_skip_if_fresh_since_trading_slot`(마커가 가장 최근에 지나간 영업일 정기 슬롯 이후면 skip, basics·daily_load·full_universe). 두 게이트 모두 `once()` 성공 직후에만 기록한다. 목적 = 아침 프리마켓 burst 완화와 주말·연휴 뒤 오래된 값 덮어쓰기 차단(판정 순서 = `src/engine/CLAUDE.md` 「정기 task 루프」 절). 같은 키 공간을 60초 하트비트 `engine_alive_heartbeat`(`uptime_monitor.py`)도 쓴다. **`get_task_last_success_bulk(task_labels) -> dict`** 은 같은 마커를 `key = ANY($1)` **단일 쿼리**로 묶는다(`GET /api/market-ops` 야간작업 타임라인이 폴링마다 라벨 수만큼 왕복하지 않게). 결측 라벨은 반환 dict 에 **키 자체가 없다**(빈 문자열이 아니다). 쿼리 실패는 빈 dict(fail-open)
 
+**종목상태 킬스위치 2키 (cycle369)** — 관리종목(51)·단기과열(59) 보유 청산과 당일 매수 차단을 따로 끈다:
+
+- `get_status_exit_mode_raw() -> str | None` / `set_status_exit_mode(mode)` — 키 `status_exit_mode`(보유 청산).
+- `get_status_buy_block_mode_raw() -> str | None` / `set_status_buy_block_mode(mode)` — 키 `status_buy_block_mode`(당일 매수 차단).
+- 저장 형태 = JSONB `{"value": str}`. getter 는 직저장 문자열도 읽는다(`_string_from_raw`). 캐시 0.
+- 🔴 **`None`(키 없음)은 행 자체가 없을 때(`_select_value` 의 `_MISSING`)뿐이다.** 행은 있는데 모양이 틀리면 — 값 없는 dict · `{"value": null}` · JSONB null · 숫자 · 목록 — 어휘 밖 마커 `_MALFORMED_MARKER`(`"__cycle369_malformed__"`)를 돌려준다. leaf 는 이것을 알 수 없는 값으로 보고 `observe` 로 떨어진다. 깨진 행을 「키 없음 = `enforce`」 로 접으면 끄려던 매도가 켜진다.
+- 🔴 **getter 는 `_get_string_or_none` 을 쓰지 않고 `_select_value` 를 직접 부른다** — 키 없음은 `None`, **DB 예외는 그대로 전파**한다. 그 헬퍼는 예외를 `None` 으로 삼켜 「키 없음 = `enforce`」 와 「DB 장애 = 직전 값 유지」 를 구분하지 못한다. 예외 처리는 `status_exit_watch.refresh_modes()` 가 한다.
+- setter 는 어휘(`enforce`/`observe`/`off`)를 검증하지 않는다 — 라우트 모델 `StatusExitModeRequest` 가 한다. 값의 의미 = `src/engine/CLAUDE.md` 「종목상태 청산·당일 매수 차단」 절.
+
 **레짐 표시 설정 (매매가 소비하지 않는다)**:
 
 - `get_buy_block_mode() -> str` / `set_buy_block_mode(mode)`: 키 `buy_block_mode`, 기본 `HARD`. 4 모드 밖은 `ValueError`

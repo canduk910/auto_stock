@@ -101,3 +101,19 @@ class AutoApplyStatus(BaseModel):
     """`GET /api/integrations/auto-apply` 응답."""
 
     enabled: bool
+
+
+# ---------------------------------------------------------------------------
+# cycle369 — 종목상태(관리 51·단기과열 59) 킬스위치 2키
+# ---------------------------------------------------------------------------
+StatusExitMode = Literal["enforce", "observe", "off"]
+
+
+class StatusExitModeRequest(BaseModel):
+    """`PUT /api/integrations/status-exit` 요청 — 부분 갱신.
+
+    둘 다 없으면 라우트가 422. 어휘 밖 값은 pydantic 이 422 로 거부한다.
+    """
+
+    sell_mode: Optional[StatusExitMode] = None
+    buy_block_mode: Optional[StatusExitMode] = None

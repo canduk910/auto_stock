@@ -266,10 +266,12 @@ _BASE_SHA = {
     # 로 분리(R1). 아래 4전략(donchian·BFB·VCP·kojiro)은 그 분리를 반영해 PV-1 을
     # BFB·VCP 로 확대하고 남의 보유·익일청산 엔트리를 보존·재구성 어느 쪽도 하지
     # 않는다.
+    # 🔁 cycle369 재핀 — 관리종목51·단기과열59 청산·매수차단 leaf 배선(값만 이동)
     "src/engine/scheduler.py":
-        "1c20b668d886e10b993b266a59e2db5d75080fd12d2920a3b98f61a31a209271",
+        "acaddd23f935fdd288cca8c3dfd1bbcd62b134a9b80cdd922a1f73acfd1deb8a",
+    # 🔁 cycle369 R2 재핀 — buy-block 게이트(`_status_buy_blocked` 승격) + STATUS_EXIT Signal + Q7 edge-baseline clear 배선(전략 7파일은 무변경, 배선은 이 파일)
     "src/engine/strategy_base.py":
-        "e7cc4965ce8d1e2e35bb04b427799b0898f744754415a7942fd546d6d22ca89e",
+        "e9b379dcae6e4db664b2f159442b11bac3bf00be6e4481680332da494b61bf8e",
     # 🔁 cycle290(킬스위치 등재, 2026-09-13) 재핀 — `DEFAULT_PARAMS` 말미 2키 추가뿐.
     "src/engine/strategies/momentum.py":
         "38743ab1ecdb4aa9bcd6ac37e5d28f75501d2d4eceb2e70f3aace44d00d502a1",

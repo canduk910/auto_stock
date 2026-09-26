@@ -159,10 +159,12 @@ _BASE_SHA: dict[str, str] = {
     # try/except 2곳 제거 + 「16:20」 주석 정직화(라인 3,758→3,755). `strategy_base.py`
     # 는 `_preview_keep_tickers`/`_preview_skip_tickers`(R1, 자기 보유·자기 익일청산만
     # 보존 / 보호 종목 전부 건너뜀) 로 `_preview_protected_tickers` 를 대체했다.
+    # 🔁 cycle369 재핀 — 관리종목51·단기과열59 청산·매수차단 leaf 배선(값만 이동)
     "src/engine/scheduler.py":
-        "1c20b668d886e10b993b266a59e2db5d75080fd12d2920a3b98f61a31a209271",
+        "acaddd23f935fdd288cca8c3dfd1bbcd62b134a9b80cdd922a1f73acfd1deb8a",
+    # 🔁 cycle369 R2 재핀 — buy-block 게이트(`_status_buy_blocked` 승격) + STATUS_EXIT Signal + Q7 edge-baseline clear 배선(전략 7파일은 무변경, 배선은 이 파일)
     "src/engine/strategy_base.py":
-        "e7cc4965ce8d1e2e35bb04b427799b0898f744754415a7942fd546d6d22ca89e",
+        "e9b379dcae6e4db664b2f159442b11bac3bf00be6e4481680332da494b61bf8e",
     # 🔴 등재만으로 판정이 통해야 한다 — 검증 로직을 고쳐 통과시키면 안 된다.
     "src/engine/param_validation.py":
         "b4c5c029800191523bcc511919d6de3774e9ab49ca2fc0a0558ee3907868ee17",
@@ -177,7 +179,7 @@ _SCHEDULER_LINE_CAP = 3900
 #: 신규 leaf `src/engine/market_op_subscribe.py` 로 추출해(행위 변경 0 · 5줄
 #: 위임 wrapper) 3,897 → 3,726 이 됐다. 값만 옮긴다 — 정확 핀을 상한 핀으로
 #: 완화하면 cycle290 의 무접촉 대리 지표가 사라진다.
-_SCHEDULER_LINES = 3777  # cycle364 재핀 — 저녁 캡처 본체를 funnel_capture leaf 로 이관
+_SCHEDULER_LINES = 3781  # cycle369 재핀 — 관리종목51·단기과열59 청산·매수차단 task 배선(+4)
 
 
 @pytest.mark.parametrize("rel", sorted(_BASE_SHA))
@@ -369,6 +371,9 @@ _ENGINE_PY_FILES: dict[str, tuple[str, ...]] = {
         "selling_reconcile.py", "session.py", "stale_diagnostics.py",
         "stale_manager.py", "stale_session_recovery.py", "stale_tracker.py",
         "stale_universe_guard.py", "stale_watcher_core.py",
+        # cycle369 — 관리종목51·단기과열59 보유 청산 + 당일 매수 차단 leaf. 이름을
+        # 등재해도 "다음 신규 파일" 은 여전히 붉어진다(이름 축 가드는 변경 없음).
+        "status_exit_watch.py",
         "stock_master_basics_metrics.py", "stock_master_daily_metrics.py",
         "stock_master_master_metrics.py", "stock_master_metrics.py", "strategy.py",
         "strategy_base.py", "strategy_registry.py", "ta_indicators.py",

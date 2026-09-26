@@ -7,7 +7,7 @@
 
 ## 전략 카탈로그
 
-표 아래 각주 ①~⑤ 가 여러 전략에 걸리는 공통 게이트다.
+표 아래 각주 ①~⑦ 은 표의 해당 행이 가리키는 게이트다. 각주 ⑧ 은 **7 전략 전부**에 걸리는 공통 청산·매수 차단이라 행마다 적지 않는다.
 
 | ID | 파일 | 핵심 동작 | 손절·청산 | tradable_boards / exchange |
 |----|------|----------|----------|---------------------------|
@@ -53,6 +53,11 @@
 - **never-raise** — `scheduler._force_clear_main_only` 가 `check_force_clear()` 를 try 없이 부르므로 새 판정 전체가 실패해도 당일 모드 종목의 15:20 청산은 지켜진다(실패 시 현행 목록만 반환).
 - **무접촉** — `check_exit_signal`(장중 청산)·`scheduler.py`·`risk.py` 는 이 변경과 무관하다. 8영역 밖.
 - 마커 = `[ltv_limit_up_close_config]`(1행/일, 보유 0 에서도 발화) · `[ltv_limit_up_close_decision]`(상한가 모드 당일 종목마다 1행). 회귀 = `tests/unit/engine/strategies/test_cycle352_ltv_limit_up_close_hold.py`(T1~T13 — T14 는 기존 `test_long_tail_volatility.py` 소관, 손대지 않는다) · `tests/unit/ast/test_cycle352_ast_ltv_close_hold.py`(G1~G6, G3b 포함) · `tests/integration/test_force_clear_1520.py`(I1·I2).
+
+**각주 ⑧ 7 전략 공통 — 관리종목(51)·단기과열(59) 보유 청산 + 당일 매수 차단 (cycle369)** — 전략 파일에는 코드가 없다. 표의 「손절·청산」 열에 더해 모든 전략의 보유가 이 규칙을 탄다.
+- **청산** — leaf `src/engine/status_exit_watch.py` 가 보유 종목(꺼진 전략 포함)을 REST `FHKST01010100` 으로 읽는다. KRX 정규장 **09:00:30~15:28** 안에서 전용 플래그(`mang_issu_cls_code`·`short_over_yn`)가 `Y` 면 `execute_sell(t, Signal.STATUS_EXIT, sid)` 를 시장가로 낸다. 종목상태 코드 51·59 폴백만 맞으면 팔지 않고 경고만 남긴다. **전략 예외는 없다** — LTV 상한가 모드·kojiro 멀티데이 보유도 판다. 다른 청산 신호와 같은 틱에 겹치면 `_selling` 이 하나로 합치고, 표기는 먼저 쏜 쪽 신호가 된다.
+- **당일 매수 차단** — 공통 게이트 `StrategyBase._account_soft_gate_blocked` 의 **첫 문장**이 그날 장중 조회에서 해당인 종목의 신규 매수 신호를 막는다(지정 첫날 포함). 전략 파일은 이 게이트를 이미 경유하므로 새 배선이 없다. 그래서 게이트 위치 계약(폴·래치형 5전략 첫 문장 / momentum·VB 발사 직전 — 아래 「안전 규칙」)이 이 차단에도 그대로 걸린다. 막는 순간 그 전략의 그 종목 edge 기준가를 비운다 — VB·LTV 의 중첩 `_prev_price[t]` 와 momentum `_prev_prdy_rate[t]` 다. 첫 문장 게이트인 LTV 는 차단 동안 기준가가 얼어, 비우지 않으면 해제 뒤 첫 틱이 거짓 돌파가 된다. 🔴 BFB·VCP 의 평평한 `_prev_price` 는 건드리지 않는다(비우면 없는 값이 0 으로 읽혀 새 거짓 돌파가 된다).
+- 청산 창·판정 규칙·킬스위치(`status_exit_mode`·`status_buy_block_mode`)·마커 = `src/engine/CLAUDE.md` 「종목상태 청산·당일 매수 차단」 절.
 
 ## 자금관리 — 사이징 방식 × 손절 기준 매트릭스
 
@@ -167,7 +172,7 @@
 
 ## 안전 규칙
 
-- **계좌 SOFT Σ상한 게이트 (cycle233 — 다크런치)** — 7전략 `check_buy_signal` 이 `StrategyBase._account_soft_gate_blocked(ticker)` 를 경유한다(AST 가드가 전수 강제). **위치 이원화가 계약**: 폴/래치형 5전략(donchian/LTV/BFB/VCP/kojiro) = **첫 문장** / edge-crossing 2전략(momentum/VB) = **발사 직전**(`return Signal.BUY` 앞) — 최상단에 두면 block 구간 동안 `_prev_price`/`_prev_prdy_rate` baseline 갱신이 동결돼 게이트(양방향) 해제 후 첫 틱이 **거짓 돌파**가 된다(AST 가 최상단 배치를 금지). 게이트는 신규 매수 신호만 차단 — 청산·손절·트레일링·익일청산은 구조적으로 무관. fail-open(판정 실패 → False). 다크런치 = DB `account_risk_block_pct` 부재 시 항상 False. 신규 전략 추가 시 이 게이트 1줄 + `get_effective_stop_price` read-only 미러(보유형이면) 배선 의무.
+- **계좌 SOFT Σ상한 게이트 (cycle233 — 다크런치)** — 7전략 `check_buy_signal` 이 `StrategyBase._account_soft_gate_blocked(ticker)` 를 경유한다(AST 가드가 전수 강제). **위치 이원화가 계약**: 폴/래치형 5전략(donchian/LTV/BFB/VCP/kojiro) = **첫 문장** / edge-crossing 2전략(momentum/VB) = **발사 직전**(`return Signal.BUY` 앞) — 최상단에 두면 block 구간 동안 `_prev_price`/`_prev_prdy_rate` baseline 갱신이 동결돼 게이트(양방향) 해제 후 첫 틱이 **거짓 돌파**가 된다(AST 가 최상단 배치를 금지). 게이트는 신규 매수 신호만 차단 — 청산·손절·트레일링·익일청산은 구조적으로 무관. fail-open(판정 실패 → False). 다크런치 = DB `account_risk_block_pct` 부재 시 항상 False. 신규 전략 추가 시 이 게이트 1줄 + `get_effective_stop_price` read-only 미러(보유형이면) 배선 의무. 이 게이트의 **첫 문장은 종목상태(관리·단기과열) 당일 매수 차단**이다(cycle369, 각주 ⑧ — AST J25). 계좌 SOFT 판정과 달리 다크런치가 아니다(킬스위치 키가 없으면 `enforce`).
 - **`get_effective_target_price(ticker) -> (target, already_hit)` read-only 미러 (cycle342 — BFB 단독)** — 측정 목표가(`flag_high + (pole_high − pole_start)`)를 **`_effective_setup(ticker, observe=False)` stamp 폴백**으로 낸다. 🔴 **`get_targets_status()` 로 읽으면 안 된다** — 그쪽은 `_candidates` 순회라 보유 종목이 빠지면 잔고 화면이 **간헐적으로 빈 칸**이 된다(실측 09-14~09-21: 036800 은 매수 다음 날부터 **5영업일 내내** 부재, 003160 은 계속 잔류. ⚠️ 잔류하는 날에도 값이 **live 재검출 구조** 기준이라 엔진 §3 과 갈릴 수 있다). 같은 파일에서 손절 미러는 stamp 를 타는데 목표가만 안 타던 **비대칭**을 없앤 것이다. 키 결손·폭 ≤ 0 은 **미발화(`None`)** 가 계약(임의 기본값으로 익절을 쏘면 과잉 청산). 둘째 원소는 `_partial_exit` 래치 **읽기만** — 이미 발화한 목표를 숫자만 보이면 「아직 안 닿았다」로 읽힌다. 🔴 `observe=False` 필수(10초 폴링이 5분 watcher 의 `[setup_structure_conflict]` cap 을 선소비하면 그 마커의 D+1 귀인이 무너진다). 소비 = `engine/position_exit_lines` → `GET /api/balance`. 회귀 = `tests/unit/engine/strategies/test_cycle342_bfb_target_mirror.py`(13).
 - **`get_effective_stop_price(ticker)` read-only 미러 (cycle233 척도 병기)** — 보유형 4전략(kojiro/donchian/VCP/BFB)이 자신의 check_exit 가격선들의 max 를 노출한다(가격 무관 청산 — 시간·stage3·measured-move — 은 모델 제외). **read-only 계약**: 래치 set·`_stop_floor`·로그 무변조. VCP/BFB 는 `_effective_setup(ticker, observe=False)` 를 경유한다 — `observe=True` 로 부르면 watcher(5분 주기)가 `[setup_structure_conflict]` cap 을 선소비해 그 마커의 "청산 평가 문맥" D+1 귀인이 무너진다.
 - **VB·momentum 매수 컷 15:20 (`BUY_CUTOFF_KST` 모듈 상수)** — 15:20~15:30 은 KRX 장후 동시호가로 **시장가 호가가 접수**되므로(15:20 강제청산 매도가 방증) VB 매수가 체결되면 오버나잇이 확정되고, 15:30 랜덤엔드 확정 종가 틱은 허위 edge-crossing(+29% = 상한가 잠금 실패 마감 표본)을 만든다. 게이트는 `check_buy_signal` **최상단·상태 무갱신·KST 명시**(naive 금지). **DB override 불가 — `DEFAULT_PARAMS`/`PARAM_RANGES` 편입 금지**(OVERNIGHT 금지는 토글로 뚫리면 안 되는 규칙). 관측 `[vb_buy_cutoff]`/`[momentum_buy_cutoff]` 1회/일. `[단일가매매]` msg1 변형은 `balance.py` 분류기가 `is_market_order_disallowed` 로 흡수한다(매도 step_down 폴백 경로).

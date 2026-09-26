@@ -21,6 +21,8 @@
 # scheduler 시간 분기는 통합 시나리오 전반에 영향
 "src/engine/scheduler.py":
   - "tests/integration/*"
+  # cycle369 — task 배선(S1)을 AST 가드가 소스 파일로 읽는다(import 없음)
+  - "tests/unit/ast/test_cycle369_ast_status_exit.py"
 
 # cycle292 — `_subscribe_market_operation_tickers` 본체가 scheduler 에서 이 leaf 로
 # 옮겨왔다. scheduler.py 의 `tests/integration/*` 매핑은 leaf 로 **자동 승계되지 않으므로**
@@ -63,6 +65,9 @@
 "src/db/system_logs.py":
   - "tests/contract/test_routes_logs.py"
   - "tests/unit/db/test_system_logs_filter.py"
+  # cycle369 R2 Q4 — 오늘 `[status_exit_fire]` 행 조회(읽기 전용)를 leaf 가 함수 안에서 지연 import 한다
+  - "tests/integration/test_cycle369_r2_fire_seed_pg.py"
+  - "tests/unit/engine/test_cycle369_r2_sell_safety.py"
 
 # 사이클 282 (2026-09-11) — 장운영상태. 세 테스트 파일이 Red 관례대로
 # `importlib.import_module("src.engine.market_state")` 로 **지연 import** 해
@@ -103,3 +108,40 @@
   - "tests/unit/ast/test_cycle363_ast_business_day_gate.py"
 "src/engine/llm_buy_gate.py":
   - "tests/unit/ast/test_cycle363_ast_business_day_gate.py"
+
+# cycle369 — 종목상태(관리 51·단기과열 59) 청산·당일 매수 차단 leaf. 테스트는
+# `tests/unit/engine/_cycle369_support.leaf()` 로 **지연 참조**하고(미구현 단계 FAIL 관례),
+# 공통 매수 게이트(`strategy_base._status_buy_blocked`)·관측 훅(`condition`)도 함수 안에서
+# 지연 import 한다 — 게이트를 지나는 cycle233 배선 테스트까지 정적 분석이 못 잇는다.
+"src/engine/status_exit_watch.py":
+  - "tests/unit/engine/test_cycle369_*.py"
+  - "tests/unit/ast/test_cycle369_ast_status_exit.py"
+  - "tests/unit/routes/test_cycle369_status_exit_route.py"
+  - "tests/unit/engine/test_cycle233_watcher_gate.py"
+  # cycle369 R2 — 라우트 끝단 고정(Q1)·재시작 발사 횟수 실 PG(Q4)도 leaf 를 지연 참조한다
+  - "tests/unit/routes/test_cycle369_r2_status_exit_route.py"
+  - "tests/integration/test_cycle369_r2_fire_seed_pg.py"
+# cycle369 AST 가드가 소스를 파일로 읽는다(훅 배치·게이트 첫 문장·라우트 시각 리터럴) — 읽는 파일마다 명시.
+"src/api/condition.py":
+  - "tests/unit/ast/test_cycle369_ast_status_exit.py"
+  - "tests/unit/engine/test_cycle369_status_buy_wiring.py"
+# cycle369 — `_account_soft_gate_blocked` 첫 문장·`_status_buy_blocked` 를 AST 가드가 파일로 읽는다.
+"src/engine/strategy_base.py":
+  - "tests/unit/ast/test_cycle369_ast_status_exit.py"
+  - "tests/unit/engine/test_cycle369_status_buy_wiring.py"
+  # cycle369 R2 Q7 — 게이트가 막을 때 edge 기준가를 비운다(전략 클래스는 importlib 로 지연 로드)
+  - "tests/unit/engine/test_cycle369_r2_edge_baseline.py"
+  # cycle369 R2 Q10 — skip 기록 여부(후보 판정)가 공통 게이트에서 정해진다
+  - "tests/unit/engine/test_cycle369_r2_buy_observability.py"
+# cycle369 — `/status-exit` 라우트 함수의 시각 리터럴 0(R7)을 AST 가드가 파일로 읽는다.
+"src/routes/system_integrations.py":
+  - "tests/unit/ast/test_cycle369_ast_status_exit.py"
+  - "tests/unit/routes/test_cycle369_status_exit_route.py"
+  # cycle369 R2 Q1 — 저장 실패 PUT 이 축을 고정한다(라우트 → leaf apply_mode persisted)
+  - "tests/unit/routes/test_cycle369_r2_status_exit_route.py"
+# cycle369 R2 Q1 — 망가진 저장 행(dict·null·숫자·목록) → observe. getter 는 함수 안에서 지연 import 된다
+"src/db/system_config.py":
+  - "tests/unit/engine/test_cycle369_r2_kill_switch.py"
+# cycle369 R3 F3 — 발사·giveup·would_fire 의 영속은 루트 `_DbLogHandler` 한 줄이다. 그 핸들러를 importlib 로 지연 참조한다(정적 import 면 src.main 전이 의존 전체로 번진다)
+"src/main.py":
+  - "tests/unit/engine/test_cycle369_r2_sell_safety.py"

@@ -261,7 +261,9 @@ WebSocket 장운영정보의 **파싱 정본**이 여기 있다. 구독을 보�
 🔴 **거래정지는 `TRHT_YN=="Y"` 또는 종목상태 `58` 뿐이다(2026-09-25 사용자 결정).** 51(관리)·52~54(시장경고)·
 55(신용가능)·57(증거금100%)·59(단기과열)·00 은 정지가 아니다. 종목상태를 비활성 블랙리스트로 넓게 읽으면
 55·57 같은 정상 상태까지 정지로 잡혀, 보유 종목이 재구독 안전망에서 빠진다.
-51·59 보유 종목의 청산·신규 매수 차단은 이 모듈에 없다(별도 사이클, `domain-consult` 선행).
+51·59 보유 종목의 청산·당일 매수 차단은 이 파서를 쓰지 않는다 — `src/engine/status_exit_watch.py` 가
+REST `FHKST01010100` 의 전용 플래그(`mang_issu_cls_code`·`short_over_yn`)로 판정하고, 이 채널의 마지막
+이벤트는 힌트로 읽기만 한다(상세 = `src/engine/CLAUDE.md` 「종목상태 청산·당일 매수 차단」 절).
 
 🔴 **VI 칸(`VI_CLS_CODE`·`OVTM_VI_CLS_CODE`)은 블랙리스트 방식이다.** `None` 과
 `_INACTIVE_VALUES = {"", "0", "N", "n", "(null)"}` 은 비활성, 그 밖은 전부 활성이다.
@@ -310,6 +312,8 @@ KIS 부하 + 5xx 노출 면적 축소:
 - 무효화: TTL 자동 만료 + `clear_caches()` (`_reset_daily_state` 21:30 호출 — cycle283 D3). `_cache_epoch` bump 로 진행 중 inflight 의 stale write 차단
 - joiner 는 `await asyncio.shield(task)` 합류 — 자기 task cancel 시 inflight cancel 전파 차단
 - **사용 범위 안전 가드**: 스캐닝/조건검사 한정. `execute_buy/execute_sell` 의 체결가/주문가 결정 경로는 절대 사용 금지 (WebSocket tick 또는 직접 호출 유지)
+- **종목상태 관측 훅 `_notify_status_observer(ticker, output)` (cycle369)** — `_fetch_stock_detail_and_cache` 가 KIS 응답의 `output` 대입 **직후** · 캐시 lock **앞**에서 한 번 부른다. 훅은 `src.engine.status_exit_watch.observe_fhkst` 를 함수 안에서 지연 import 해 부르고, 관리종목·단기과열 당일 매수 차단 레지스트리에 기록만 한다. 캐시 적중·inflight 합류 경로는 부르지 않는다(첫 조회가 이미 기록했다). leaf 자신의 패스가 부른 조회는 leaf 가 기록을 건너뛴다(패스가 직접 기록한다 — 한 조회 한 기록). 🔴 **본문 전체의 `try/except Exception` 을 걷지 않는다**(DEBUG `[status_observer_failed]`, never-raise) — 훅이 예외를 흘리면 모든 `fetch_stock_detail` 소비자(VB·LTV 기준가 REST · 스윙 폴 · 급등 스캔)가 깨진다. 호출 자리·이중 try 는 AST J16 이 잠근다
+- **`_PRICE_CACHE_TTL` 을 leaf 가 읽는다** — `status_exit_watch` 의 P1 은 09:00 + 이 TTL(5초)에 시작한다. 장 전에 캐시된 값이 「장중 clean」 으로 봉인되지 않게 하려는 것이다. TTL 을 바꾸면 P1 시각도 함께 바뀐다
 
 ## 새 API 추가 절차
 

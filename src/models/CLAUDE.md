@@ -44,6 +44,9 @@ Pydantic 기반 데이터 모델. API 요청/응답, DB 레코드, 내부 데이
 ### system_integrations.py — 외부 통합 토글 (사이클 5, 2026-05-17)
 - `KIS_MCP_ENABLED` / `DKSTOCK_REGIME_ENABLED` / `etf_regime_enabled` / `auto_regime_adjust` /
   `auto_apply` 등 Settings UI 즉시 토글의 요청·응답 모델
+- `StatusExitModeRequest{sell_mode, buy_block_mode}` (cycle369) — `PUT /api/integrations/status-exit` 요청.
+  두 필드 모두 `Optional[Literal["enforce", "observe", "off"]]` 라 어휘 밖 값은 422 다. 둘 다 없을 때의 422 는
+  라우트가 낸다
 
 ### backtest.py — 외부 MCP 백테스트 (Phase 1~2)
 - `backtest_runs` 테이블 매핑 + MCP job 요청/응답. 소비 = `engine/backtest_engine.py` · `routes/backtest.py`

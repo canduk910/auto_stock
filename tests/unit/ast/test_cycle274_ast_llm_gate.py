@@ -598,9 +598,11 @@ _BASE_SHA = {
     # `50658e06062a0d38afecab1baa08871b89212e295cc95f2a3af62a2ae076115d`.
     # 🔁 cycle364(2026-09-26) 재핀 — 저녁 A1 미리보기(`prepare(as_of=)`) 도입, 저녁 캡처
     # 본체를 leaf `funnel_capture.py` 로 이관(순감 약 35줄, 사용자 승인 D3).
-    "src/engine/scheduler.py": "1c20b668d886e10b993b266a59e2db5d75080fd12d2920a3b98f61a31a209271",
+    # 🔁 cycle369 재핀 — 관리종목51·단기과열59 청산·매수차단 leaf 배선(값만 이동)
+    "src/engine/scheduler.py": "acaddd23f935fdd288cca8c3dfd1bbcd62b134a9b80cdd922a1f73acfd1deb8a",
+    # 🔁 cycle369 R2 재핀 — buy-block 게이트(`_status_buy_blocked` 승격) + STATUS_EXIT Signal + Q7 edge-baseline clear 배선(전략 7파일은 무변경, 배선은 이 파일)
     "src/engine/strategy_base.py":
-        "e7cc4965ce8d1e2e35bb04b427799b0898f744754415a7942fd546d6d22ca89e",
+        "e9b379dcae6e4db664b2f159442b11bac3bf00be6e4481680332da494b61bf8e",
     # 🔁 cycle296(2026-09-17) 재핀 — 사용자 승인 `issue()` 매니저 단위 in-flight 합류(`src/auth/**`). 같은 값을 10곳 동시 갱신했다.
     "src/auth/token.py":
         "4125c271b4147e59922f4f000e523429fb4bbef37058dc754fd92b9475ec58f1",
@@ -678,7 +680,7 @@ def test_c16_1_scheduler_line_count_unchanged() -> None:
     그러면 확보한 174줄 예산의 무단 증식을 아무도 못 잡는다.
     """
     lines = len(_read(_SCHEDULER).splitlines())
-    assert lines == 3777, f"scheduler.py {lines}L (기대 3,785 — cycle283 저녁 창 재설계 뒤 3,897 → cycle292 leaf 추출 → cycle298 재핀 3,795 → cycle354 order_no 매핑 폴백 추가 재핀 3,812 → cycle364 저녁 캡처 leaf 이관 재핀)"
+    assert lines == 3781, f"scheduler.py {lines}L (기대 3,785 — cycle283 저녁 창 재설계 뒤 3,897 → cycle292 leaf 추출 → cycle298 재핀 3,795 → cycle354 order_no 매핑 폴백 추가 재핀 3,812 → cycle364 저녁 캡처 leaf 이관 재핀 3,777 → cycle369 재핀 — 관리종목51·단기과열59 청산·매수차단 task 배선 +4)"
 
 
 def test_c16_2_scheduler_line_cap_is_not_looser_than_cycle257() -> None:

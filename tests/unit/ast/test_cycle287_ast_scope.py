@@ -131,8 +131,10 @@ _BASE_SHA = {
         "4125c271b4147e59922f4f000e523429fb4bbef37058dc754fd92b9475ec58f1",
     # 8영역은 아니지만 이 사이클이 무접촉을 약속한 파일
     # 🔁 cycle364(2026-09-26) 재핀 — `prepare(as_of=)` A1 미리보기 + PV-1 헬퍼 추가(사용자 승인 D3).
+    # 🔁 cycle369 R2 재핀 — buy-block 게이트(`_status_buy_blocked` 승격) + STATUS_EXIT Signal + Q7 edge-baseline clear 배선(전략 7파일은 무변경, 배선은 이 파일). 직전 값(cycle364) =
+    # `e7cc4965ce8d1e2e35bb04b427799b0898f744754415a7942fd546d6d22ca89e`.
     "src/engine/strategy_base.py":
-        "e7cc4965ce8d1e2e35bb04b427799b0898f744754415a7942fd546d6d22ca89e",
+        "e9b379dcae6e4db664b2f159442b11bac3bf00be6e4481680332da494b61bf8e",
     # 시각 표의 **유일 정본** — cycle287 은 읽기만 했다. 바꾸면 픽스처 동기 사슬
     # (`tools/test_fixtures/gen_market_state_fixture.py` + 프론트/E2E 픽스처 2)이
     # 통째로 딸려 오고, cycle282 `test_i1/i2/i3` 가 즉시 RED 다(실증: cycle289 가
@@ -207,7 +209,9 @@ _BASE_SHA = {
 #: 🔁 cycle364 재핀 — 신규 leaf `src/engine/funnel_capture.py`(저녁 A1 미리보기 본체,
 #: `resolve_as_of`/`live_prepare_one`/`live_prepare_many`/잠금/meta/`capture_skip_reason`)
 #: 추가로 157 → **158**. 사용자 승인 D3.
-_SRC_TREE_FILES = 158
+#: 🔁 cycle369 재핀 — 신규 leaf `src/engine/status_exit_watch.py`(관리종목51·단기과열59
+#: 보유 청산 + 당일 매수 차단) 추가로 158 → **159**. 사용자 승인 「369사이클 진행」.
+_SRC_TREE_FILES = 159
 #: ⚠️ 값은 **cycle285 적대 검증 반영** 기준선이다. 그 직전(초판 cycle285 배포)
 #: digest 는 `97483c5114a1d00dc8f7ca7c1ed08e1b3dc1d0b585065b14176dc227da9bed8c` 였다.
 #: cycle287b 배포분의 digest 는
@@ -545,8 +549,20 @@ _SRC_TREE_FILES = 158
 #: market_ops.py` 주석 정정(F6) · 문서 정직화(F7, `funnel_capture.py`·`db/
 #: strategy_funnel.py`·`scheduler.py`). 파일 수는 158 로 불변(신규·삭제 없음). 직전 값 =
 #: `e97e72981e4c649036dc1b9eb99707a2d41fc1a9cb2819f9d32a1d37780b189e`.
+#: 🔁 cycle369 재핀 — 관리종목51·단기과열59 청산·매수차단(신규 leaf `status_exit_watch.py`
+#: + `scheduler.py`·`strategy_base.py`·`api/condition.py`·`db/system_config.py`·
+#: `models/system_integrations.py`·`routes/system_integrations.py` 편집). 직전 값 =
+#: `777ffaa46919ab69a80bc9a18c38891842f8459ee3e0553cfe8e51854949eb23`.
+#: 🔁 cycle369 R2 재핀 — `strategy_base.py`(Q7 edge-baseline clear · Q10 cand 판정)
+#: + `status_exit_watch.py`(Q1~Q10) 추가 편집. 직전 값 =
+#: `0f1737d13caafb36fb1706db7d859222543290eb1f503047198188e780dbfe97`.
+#: 🔁 cycle369 R3 재핀 — `status_exit_watch.py`(F1 P0 창 상한 · F2 발사 직전 킬스위치
+#: 재확인 · F3 `_spawn_write`/`create_task` 전면 제거 + `_load_fire_counts` 부분
+#: 일치 · F5 `_is_global_candidate` = `buy_targets` 멤버십) + `routes/
+#: system_integrations.py`(F4 축별 고정→쓰기→고정해제 순서) 편집. 직전 값 =
+#: `fe91ad5c94d0a6b498ae4a2bf6e59346db09682f967db19c6029d4ced04c64eb`.
 _SRC_TREE_DIGEST = (
-    "777ffaa46919ab69a80bc9a18c38891842f8459ee3e0553cfe8e51854949eb23"
+    "5cc4ba347d33396f45146b3cf859c09362234a3c2d2a378b86e8d812e9b5fd52"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
@@ -570,7 +586,8 @@ _PINNED_DIR_FILE_COUNTS = {
     # cycle351 — 신규 leaf `pyramid_shadow.py` 로 77 → 78.
     # cycle363 — 신규 leaf `trading_calendar.py` 로 78 → 79.
     # cycle364 — 신규 leaf `funnel_capture.py` 로 79 → 80.
-    "src/engine": 80,
+    # cycle369 — 신규 leaf `status_exit_watch.py` 로 80 → 81.
+    "src/engine": 81,
 }
 
 #: `scheduler.py` 정확 라인 수 + cycle257 영구 상한.
@@ -578,7 +595,7 @@ _PINNED_DIR_FILE_COUNTS = {
 #: 신규 leaf `src/engine/market_op_subscribe.py` 로 추출해(행위 변경 0 · 5줄
 #: 위임 wrapper) 3,897 → 3,726 이 됐다. 값만 옮긴다 — 정확 핀을 상한 핀으로
 #: 완화하면 cycle287 의 무접촉 대리 지표가 사라진다.
-_SCHEDULER_LINES = 3777  # cycle364 재핀 — 저녁 캡처 본체를 funnel_capture leaf 로 이관(순감 약 35줄)
+_SCHEDULER_LINES = 3781  # cycle369 재핀 — 관리종목51·단기과열59 청산·매수차단 task 배선(+4)
 _SCHEDULER_LINE_CAP = 3900
 
 #: 손대지 않기로 한 **원문 구간**의 sha256 (base `a42f519`).

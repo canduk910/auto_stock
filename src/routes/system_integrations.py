@@ -35,6 +35,7 @@ from src.models.system_integrations import (
     BuyBlockUpdateRequest,
     IntegrationToggleRequest,
     IntegrationToggleStatus,
+    StatusExitModeRequest,
 )
 from src.models.krx_open_api import (
     KrxOpenApiStatus,
@@ -531,5 +532,127 @@ async def set_krx_open_api(req: KrxOpenApiUpdateRequest):
             "KRX 정식 OPEN API 설정을 저장했습니다."
             if (req.key or req.base_url is not None or req.enabled is not None)
             else "변경 사항이 없습니다."
+        ),
+    )
+
+
+# ---------------------------------------------------------------------------
+# cycle369 — 종목상태(관리 51·단기과열 59) 청산·당일 매수차단 킬스위치 2키
+# ---------------------------------------------------------------------------
+async def _status_exit_stored() -> dict:
+    """DB 저장값 조회 — 축마다 독립 try(한쪽 실패가 다른 쪽 값을 가리지 않는다)."""
+    from src.engine import status_exit_watch as sew
+
+    async def _safe(getter):
+        try:
+            return await getter()
+        except Exception:
+            logger.debug("[status_exit_stored_read_failed]", exc_info=True)
+            return None
+
+    return {
+        sew.SELL_MODE_KEY: await _safe(sc.get_status_exit_mode_raw),
+        sew.BUY_MODE_KEY: await _safe(sc.get_status_buy_block_mode_raw),
+    }
+
+
+def _status_exit_shape(sew, *, extra: Optional[dict] = None) -> dict:
+    """GET·PUT 공통 응답 뼈대 — `stored`/`today` 는 호출부가 채운다."""
+    data = {
+        "sell_mode": sew.current_modes()["sell"],
+        "buy_block_mode": sew.current_modes()["buy"],
+        "default": sew.DEFAULT_MODE,
+        "valid_modes": list(sew.VALID_MODES),
+        "config_keys": {"sell": sew.SELL_MODE_KEY, "buy": sew.BUY_MODE_KEY},
+        "fire_window": {
+            "start": sew.FIRE_WINDOW_START.isoformat(),
+            "end": sew.FIRE_WINDOW_END.isoformat(),
+        },
+        "today": sew.snapshot(),
+    }
+    if extra:
+        data.update(extra)
+    return data
+
+
+@router.get("/status-exit", response_model=ApiResponse)
+async def get_status_exit():
+    """관리종목(51)·단기과열(59) 보유 청산 + 당일 매수차단 킬스위치 현재 상태.
+
+    `sell_mode`/`buy_block_mode` 는 엔진 메모리 현재값(즉시 반영 확인용),
+    `stored` 는 DB 원값(축마다 독립 조회 — 한쪽 실패가 다른 쪽을 가리지 않고
+    그 축만 null). `today` 는 오늘 관측 스냅샷(`blocks`/`armed`/`passes`).
+    """
+    from src.engine import status_exit_watch as sew
+
+    stored = await _status_exit_stored()
+    return ApiResponse(success=True, data=_status_exit_shape(sew, extra={"stored": stored}))
+
+
+@router.put("/status-exit", response_model=ApiResponse)
+async def set_status_exit(req: StatusExitModeRequest):
+    """종목상태 킬스위치 부분 갱신 — 메모리를 먼저 고정 반영한 뒤 DB 에 쓴다.
+
+    둘 다 없으면 422(아무것도 바꾸지 않는다). DB 저장 실패는 `persisted=false`
+    로 알리고도 메모리 반영은 계속한다 — 사고 중에는 `off` 가 먼저다(cycle293).
+
+    🔁 cycle369 — 각 축을 **먼저** `apply_mode(kind, mode, persisted=False)`
+    로 고정 반영한다(메모리가 DB 쓰기를 기다리지 않는다 — `pg.execute` 는 acquire
+    타임아웃이 없어 RDS 가 멈추면 30초 넘게 운영자의 off 가 메모리에 안 닿았다).
+    그 다음 DB 쓰기를 하고, 성공한 축만 `apply_mode(kind, mode, persisted=True)`
+    로 고정을 푼다. 실패한 축은 고정된 채 남는다(다음 성공 저장 또는 재시작까지).
+    한 요청의 두 축은 **둘 다** 고정 반영을 끝낸 뒤에야 첫 DB 쓰기가 시작된다 —
+    한 축의 쓰기가 걸려도 다른 축의 메모리 반영이 묶이지 않는다.
+    """
+    if req.sell_mode is None and req.buy_block_mode is None:
+        raise HTTPException(status_code=422, detail="sell_mode 또는 buy_block_mode 중 하나는 필요합니다")
+
+    from src.engine import status_exit_watch as sew
+
+    if req.sell_mode is not None:
+        sew.apply_mode("sell", req.sell_mode, persisted=False)
+    if req.buy_block_mode is not None:
+        sew.apply_mode("buy", req.buy_block_mode, persisted=False)
+
+    persisted = True
+    if req.sell_mode is not None:
+        ok = True
+        try:
+            await sc.set_status_exit_mode(req.sell_mode)
+        except Exception:
+            logger.exception("[status_exit_mode] status_exit_mode DB 저장 실패")
+            ok = False
+            persisted = False
+        # cycle369 — 저장 실패는 그 축을 leaf 에 고정한 채 둔다(위에서 이미
+        # persisted=False 로 고정했다). 다음 refresh 가 DB 를 다시 읽어 60초(매수)·
+        # 300초(청산) 안에 이 off 를 enforce 로 되돌리지 못하게 한다(그 축의
+        # 다음 성공 저장 또는 재시작까지). 성공한 축만 고정을 푼다.
+        if ok:
+            sew.apply_mode("sell", req.sell_mode, persisted=True)
+    if req.buy_block_mode is not None:
+        ok = True
+        try:
+            await sc.set_status_buy_block_mode(req.buy_block_mode)
+        except Exception:
+            logger.exception("[status_exit_mode] status_buy_block_mode DB 저장 실패")
+            ok = False
+            persisted = False
+        if ok:
+            sew.apply_mode("buy", req.buy_block_mode, persisted=True)
+
+    modes = sew.current_modes()
+    logger.warning(
+        "[status_exit_mode] sell_mode=%s buy_block_mode=%s persisted=%s",
+        modes["sell"], modes["buy"], persisted,
+    )
+    stored = await _status_exit_stored()
+    return ApiResponse(
+        success=True,
+        data=_status_exit_shape(sew, extra={"stored": stored, "persisted": persisted}),
+        message=(
+            "저장했습니다."
+            if persisted
+            else "DB 저장에 실패했습니다 — 메모리에는 즉시 반영했고, 그 축을 고정했습니다"
+            "(다음 성공 저장 또는 재시작까지 유지 — refresh 가 되돌리지 않습니다)."
         ),
     )

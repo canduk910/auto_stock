@@ -247,6 +247,8 @@ flowchart TD
     R5 -->|"예"| R7["틱 매수 평가를 건너뜀"]
     TS --> POLL["_swing_buy_poll_loop<br/>09:05~09:30 · 1분 REST<br/>donchian · kojiro 매수 평가"]
     POLL -->|"check_buy_signal() → execute_buy()"| OE
+    TS --> SEW["status_exit_watch.task_loop<br/>관리종목·단기과열 감시<br/>09:00:30~15:28 · 5분 REST"]
+    SEW -->|"execute_sell(STATUS_EXIT) 시장가"| OE
 ```
 
 그림의 `boards` 는 코드 기본값(`DEFAULT_TRADABLE_BOARDS`)이다. 실제 매수 보드는 운영 DB
@@ -256,6 +258,10 @@ flowchart TD
 익일청산 대상은 `_execute_next_day_clear` 가 도는 momentum · LTV · VB 셋이다(VB 는 15:20 청산이
 빠졌을 때의 안전망). 나머지 넷은 청산 조건이 올 때까지 보유한다. 그중 donchian · VCP · kojiro 는
 `_MULTIDAY_STRATEGIES` 멤버이고, BFB 는 멤버가 아니지만 5영업일 시간 청산까지 보유한다.
+
+7전략 공통 청산이 하나 더 있다. 보유 종목이 관리종목이나 단기과열로 지정되면
+`status_exit_watch` 가 KRX 정규장(09:00:30~15:28)에 시장가로 판다. 같은 조회 결과로 그날 그 종목의
+신규 매수도 막는다 — 막는 자리는 `check_buy_signal` 이 거치는 공통 게이트다(14.9).
 
 **전략 객체의 멤버**
 
@@ -325,8 +331,16 @@ sequenceDiagram
     Note over S,X: 08:00 PRE_NXT 보드 진입 (TIME_PRE_NXT_OPEN)
     Note over S: asyncio.create_task(_execute_next_day_clear())<br/>— 비차단<br/>+ _confirm_breakout_open_prices(board="pre_nxt")<br/>_phase = "pre_nxt_trading"<br/>LTV PRE_NXT 매수 시작
 
+    Note over S,X: 08:45 · 09:00:05 종목상태 조회 (status_exit_watch)
+    S->>K: fetch_stock_detail() — 보유 · 매수 후보의 관리종목·단기과열 여부
+    Note over S: 08:45 는 기록만(주문 0) · 09:00:05 판정이 그날 매수 차단의 기준
+
     Note over S,X: 09:00:05 KRX 메인 시가 확정 (TIME_KRX_OPEN_CONFIRM)
     Note over S: _confirm_breakout_open_prices(board="main")<br/>_phase = "main_trading"<br/>VB + LTV MAIN 매매 진입<br/>(main 기준가 = KRX REST 시가, 09:00:35~)
+
+    Note over S,X: 09:00:30~15:28 종목상태 보유 청산 (5분마다)
+    S->>O: execute_sell(STATUS_EXIT) — 관리종목·단기과열 보유, 시장가
+    O->>K: POST order (매도)
 
     Note over S,X: 09:05~09:30 스윙 매수 폴 (_swing_buy_poll_loop)
     S->>K: fetch_stock_detail() — donchian · kojiro 후보, 1분 주기
@@ -406,6 +420,7 @@ sequenceDiagram
 | 07:45 | `TIME_AUTO_START` | `_boot()` 는 `start()` 안에서 즉시 돈다 — 07:45 자동 기동이면 그 직후. `TIME_BOOT`(07:55) 는 런타임 미사용 상수다. `_load_strategy_config()` 는 `tradable_boards` / `k_value_*` / `exchange` 를 포함해 읽는다 |
 | 07:59 | `TIME_PRESUBSCRIBE` | `subscribe(H0NXMKO0, "")` 는 실전 한정(NXT 장운영정보). `tick_tr_id_for(t)` 채널 = cycle294 — 프리장 NXT 전용 `H0NXCNT0` / 정규장+애프터 KRX 전용 `H0STCNT0`. 통합 `H0UNCNT0` 는 킬스위치 off 에서만. 유니버스가 비었을 때의 `prepare()` 재실행은 KIS API 일시장애 대비다 |
 | 08:00 | `TIME_PRE_NXT_OPEN` | `_execute_next_day_clear()` 는 비차단이다. NXT 프리 시가를 받고 `NEXT_DAY_STABILIZE_SECS`(30초) 안정화한 뒤 판정한다 — 갭이 `gap_up_threshold` 이상이면 트레일링 모드, 미달·시가 미수신·`nxt_tradable=False` 면 `_pending_next_day_clear` 에 보류했다가 09:00 KRX 시장가로 판다. 프리장 지정가 청산은 내지 않는다. 시가 확정은 0.5초/5초 폴링. LTV 는 `k_value_nxt_pre` 적용. VB 는 `DEFAULT_TRADABLE_BOARDS=("main",)` — 프리장 매수 없음 |
+| 08:45 · 09:00:05 · 09:00:30~15:28 | `status_exit_watch` 패스 | 관리종목·단기과열 조회. 08:45 는 장 전 기록만 한다(`pre_nxt` 매수 전략이 있으면 07:59). 09:00:05 에 매수 후보를 한 번에 읽어 그날 매수 차단을 정한다(5초 캐시가 장 전 값을 돌려주지 않게 5초 늦춘다. 스윙 donchian·kojiro 는 09:05 스윙 폴 조회가 덮으므로 뺀다). 09:00:30 부터 15:28 전까지 5분마다 보유를 읽어 전용 플래그가 `Y` 면 시장가로 판다. 휴장일로 확정된 날은 돌지 않는다. scheduler `TIME_*` 상수가 아니라 leaf 상수다 — 14.9 |
 | 09:00:05 | `TIME_KRX_OPEN_CONFIRM` | VB·LTV 의 `main` 목표가 기준가는 KRX REST 시가(`stck_oprc`) 하나다. `open_price_rest` 가 09:00:35 부터 확정하고, 이 호출은 09:05 전까지 그 두 전략을 건너뛴다(`open_price_rest.owns_board`). 목표가 = 시가 + 전일 Range × K × `k_value_krx_main` |
 | 09:05~09:30 | `_swing_buy_poll_loop` 창 | donchian·kojiro 의 매수 평가다(1분 주기 REST `fetch_stock_detail`). `risk.on_tick` 은 이 두 전략의 매수 평가를 건너뛴다(`_TICK_BUY_EVAL_SKIP_STRATEGIES`). BFB(09:05~13:00)·VCP(09:05~14:30)는 폴 루프가 없어 WS 틱이 유일한 매수 평가 경로다 — 8장 |
 | 09:30 | — | 실시간 체결가는 `H0STCNT0` KRX 전용 / `H0NXCNT0` NXT 전용 — 47필드 동일, 한 파서. `_resolve_active_board()` 가 활성 보드를 결정한다(main 우선). 체결통보는 `_order_ticker[order_no]` 로 정확한 ticker 를 잡는다 |
@@ -1289,6 +1304,55 @@ GitHub Secrets: `EC2_HOST`, `EC2_USERNAME`, `EC2_SSH_KEY`, `SUPABASE_DB_URL`(값
 
 - `_confirm_breakout_open_prices_if_pending` 5분 주기 hook — `_scan_loop` 통합. 미확정 종목 자동 시가 확정 재시도 (idempotent + disabled skip + graceful)
 - 이중 안전망 = VB `check_buy_signal` tick fallback + `_scan_loop` 5분 재시도
+
+### 14.9 관리종목 · 단기과열 보유 청산 + 당일 매수 차단
+
+관리종목이나 단기과열로 지정된 종목은 우리 전략이 기대한 움직임을 더는 보여 주지 않는다.
+그래서 보유 중이면 팔고, 그날은 새로 사지 않는다.
+
+```mermaid
+%%{init: {"flowchart": {"wrappingWidth": 360}}}%%
+flowchart TD
+    Q["REST FHKST01010100<br/>(fetch_stock_detail · 5초 캐시)"]
+    H["관측 훅<br/>스윙 폴 · 기준가 REST · 급등 스캔이<br/>이미 하는 조회를 그대로 기록"]
+    P["status_exit_watch 패스<br/>08:45 장 전 · 09:00:05 후보 전수 ·<br/>60초 증분 · 5분 보유"]
+    C["classify()<br/>관리 = mang_issu_cls_code<br/>단기과열 = short_over_yn"]
+    B["그날 매수 차단 목록<br/>(날짜 · 종목)"]
+    G["공통 게이트 첫 문장<br/>_account_soft_gate_blocked"]
+    S["execute_sell(STATUS_EXIT)<br/>시장가 · KRX"]
+    Q --> H
+    P --> Q
+    H --> C
+    P --> C
+    C -->|"해당"| B
+    B --> G
+    G -->|"7전략 check_buy_signal → 신호 없음"| X["매수 안 함"]
+    C -->|"보유 ∧ 전용 플래그 Y ∧ 09:00:30~15:28"| S
+```
+
+- **무엇으로 판정하나** — REST 응답의 전용 플래그 두 개다. 실시간 장운영 프레임(`H0UNMKO0`)은 힌트로만 본다.
+  그 프레임의 종목상태 칸은 값을 하나만 담아서 관리종목의 절반가량이 다른 코드(58 등)로 가려진다.
+  공매도과열(`ssts_hot_yn`)과 단기과열 **예고**는 대상이 아니다.
+- **언제 파나** — KRX 정규장 09:00:30~15:28 에 읽은 값으로만 판다. 창은 주문 직전에 한 번 더 본다.
+  16:00~20:00 KRX 애프터마켓은 단기과열종목을 거래 대상에서 빼서 그때 내면 거부된다.
+  저녁·장 전에 알게 된 것은 다음 정규장에 판다. 휴장일에 수동으로 켜도 팔지 않는다.
+  단기과열은 30분 단일가라 시장가도 다음 :00·:30 체결까지 최대 30분 걸린다.
+  창은 고정 시계라 지연 개장일(수능일 등)을 모른다. 그날은 개장 전에 청산을 끄고, 장이 열린 뒤 켠다.
+- **무엇이면 파나** — 전용 플래그가 `Y` 일 때만 판다. 종목상태 코드(51·59)만 맞으면 경고만 남긴다.
+  그 코드는 정상 ETF·스팩·우선주에도 붙기 때문이다. 새 매수를 막을 때는 그 코드도 쓴다.
+- **몇 번까지 내나** — 종목당 하루 3회다. 서버를 다시 켜도 그날 발사 기록(`system_logs`)으로 이어 센다.
+  발사 한 번은 `system_logs` 에 한 줄만 남는다. 재시작 뒤 이전 주문이 아직 걸려 있으면 한 번 더 쏘지만,
+  그 주문은 매도가능수량 초과로 거부되고 포지션은 그대로 남는다 — 두 번 팔리지 않는다.
+- **어떻게 새 매수를 막나** — 공통 매수 게이트의 첫 문장이 그날 목록을 본다. 7전략 모두 그 게이트를 거친다.
+  매일 새로 읽으므로 지정 첫날부터 막힌다. 조회에 실패한 종목은 막지 않는다 — 그 종목을 사게 되면
+  다음 보유 청산 패스(5분 안)가 판다.
+- **하지 않는 것** — 보유 종목의 시세 구독은 끊지 않는다. 끊으면 청산 주문이 거부됐을 때 손절을 볼 수 없다.
+- **끄는 방법** — `system_config` 2키(`status_exit_mode` 청산 · `status_buy_block_mode` 매수 차단),
+  즉시 = `PUT /api/integrations/status-exit`. 키가 없으면 켜진 상태(`enforce`)다.
+  PUT 은 엔진 메모리를 DB 쓰기보다 먼저 바꾼다. 청산 패스는 주문 직전마다 스위치를 다시 보므로,
+  패스 도중에 끈 것도 남은 종목부터 적용된다.
+  DB 저장이 실패해도 메모리에 고정돼, 다음 조회가 끈 값을 되돌리지 않는다.
+- 상세 계약 = [`src/engine/CLAUDE.md`](../src/engine/CLAUDE.md) 「종목상태 청산·당일 매수 차단」 절
 
 ---
 

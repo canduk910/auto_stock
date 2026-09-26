@@ -993,6 +993,63 @@ async def set_auto_start(enabled: bool) -> None:
     await _upsert_value(_AUTO_START_KEY, {"value": bool(enabled)})
 
 
+# ---------------------------------------------------------------------------
+# cycle369 — 종목상태(관리 51·단기과열 59) 킬스위치 2키
+# ---------------------------------------------------------------------------
+# 청산(`status_exit_mode`)과 매수 차단(`status_buy_block_mode`)을 별도 키로
+# 나눈다 — 롤백 시나리오가 다르다(명세 §5). getter 는 `_get_string_or_none` 을
+# 쓰지 않는다 — 그 헬퍼는 DB 예외를 None 으로 삼켜 leaf 가 「키 없음」과
+# 「DB 장애」를 구분하지 못하게 한다. 여기서는 예외를 **그대로 전파**하고,
+# `status_exit_watch.refresh_modes()` 가 예외를 잡아 직전 값을 유지한다.
+_STATUS_EXIT_MODE_KEY = "status_exit_mode"
+_STATUS_BUY_BLOCK_MODE_KEY = "status_buy_block_mode"
+
+
+_MALFORMED_MARKER = "__cycle369_malformed__"
+
+
+def _string_from_raw(raw: object) -> Optional[str]:
+    """cycle369 — 「키 없음」과 「행은 있는데 모양이 틀렸다」를 가른다.
+
+    `_MISSING`(행 자체가 없음) 만 `None` 이다. 그 밖의 어떤 값이든(값 없는 dict ·
+    `{"value": None}` · JSONB null · 숫자 · 목록) 어휘 밖 마커 문자열을 돌려줘
+    `status_exit_watch._resolve_mode` 가 **observe**(모르는 값)로 떨어지게 한다 —
+    이전에는 이 모양들도 `None` 으로 접혀 「키 없음 = enforce」 로 잘못 읽혔다.
+    """
+    if raw is _MISSING:
+        return None
+    if isinstance(raw, dict):
+        v = raw.get("value")
+        if isinstance(v, str):
+            return v
+        return _MALFORMED_MARKER
+    if isinstance(raw, str):
+        return raw
+    return _MALFORMED_MARKER
+
+
+async def get_status_exit_mode_raw() -> Optional[str]:
+    """청산 킬스위치 원값. 키 없음 → None. **DB 예외는 전파한다**(E8)."""
+    raw = await _select_value(_STATUS_EXIT_MODE_KEY)
+    return _string_from_raw(raw)
+
+
+async def set_status_exit_mode(mode: str) -> None:
+    """청산 킬스위치 저장. 어휘 검증은 라우트가 한다."""
+    await _upsert_value(_STATUS_EXIT_MODE_KEY, {"value": str(mode)})
+
+
+async def get_status_buy_block_mode_raw() -> Optional[str]:
+    """당일 매수 차단 킬스위치 원값. 키 없음 → None. **DB 예외는 전파한다**(E8)."""
+    raw = await _select_value(_STATUS_BUY_BLOCK_MODE_KEY)
+    return _string_from_raw(raw)
+
+
+async def set_status_buy_block_mode(mode: str) -> None:
+    """당일 매수 차단 킬스위치 저장. 어휘 검증은 라우트가 한다."""
+    await _upsert_value(_STATUS_BUY_BLOCK_MODE_KEY, {"value": str(mode)})
+
+
 async def get_task_last_success(task_label: str) -> Optional[str]:
     """task_last_success_<label> 키 ISO 문자열 조회. 키 부재 / 실패 시 None graceful.
 

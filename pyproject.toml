@@ -28,6 +28,10 @@ markers = [
     # (`src.engine.trading_calendar._lookup_open`)을 실제로 타야 하는 테스트만 붙인다.
     # 미부착 테스트는 seam 이 None(모름)을 돌려주고 메모가 비워진 상태를 본다.
     "real_trading_calendar: 휴장일 조회 seam 중립화 픽스처 옵트아웃 (leaf 직접 검증)",
+    # cycle369 — autouse `_neutralize_status_watch` 옵트아웃. 종목상태(관리 51·단기과열 59)
+    # 매수 차단 레지스트리는 모듈 전역이라 미부착 테스트는 관측 훅·게이트·루프가 중립화된다.
+    # leaf·배선을 직접 검증하는 테스트만 붙인다. `filterwarnings = error` 라 Red 와 같은 커밋.
+    "real_status_watch: 종목상태 매수차단 중립화 픽스처 옵트아웃 (leaf·배선 직접 검증)",
 ]
 filterwarnings = [
     "error",

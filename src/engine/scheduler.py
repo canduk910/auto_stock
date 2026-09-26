@@ -40,7 +40,7 @@ from src.engine.strategies.vcp_breakout import VcpBreakoutStrategy
 from src.engine.strategies.volatility_breakout import VolatilityBreakoutStrategy
 from src.engine import data_load_tasks, funnel_capture  # refactor-review B1 위임 모듈 · cycle364 라이브 준비 leaf
 from src.engine import open_price_observe, open_price_rest  # cycle264 관측 leaf / cycle272 기준가 leaf (라인 상한 보호)
-from src.engine import market_op_subscribe, quote_token_refresh  # cycle292 VI 구독 leaf / cycle269 토큰 갱신 leaf (라인 상한 보호)
+from src.engine import market_op_subscribe, quote_token_refresh, status_exit_watch  # cycle292 VI 구독 leaf / cycle269 토큰 갱신 leaf / cycle369 종목상태 청산·매수차단 leaf (라인 상한 보호)
 from src.realtime.handler import (
     dispatch_message,
     flush_silent_drop_count,
@@ -766,6 +766,7 @@ class TradingScheduler:
             self._open_source_compare_task = asyncio.create_task(open_price_observe.open_source_compare_task_loop(self))
             self._quote_token_refresh_task = asyncio.create_task(quote_token_refresh.task_loop(self))  # cycle269 — 매일 15:45 KST 보조 시세 계정 접근토큰 강제 재발급(만료 앵커 고정 = 장중 재발급 드리프트 차단)
             self._main_rest_basis_task = asyncio.create_task(open_price_rest.main_rest_basis_task_loop(self))  # cycle272 — main 목표가 기준가를 KRX REST 로 확정(09:00:35 R1, 09:05:00 이후 스케줄러 백스톱 인계)
+            self._status_exit_task = asyncio.create_task(status_exit_watch.task_loop(self))  # cycle369 — 관리종목51·단기과열59 보유 청산 + 당일 매수차단
 
             now = datetime.now().time()
 
@@ -1060,6 +1061,7 @@ class TradingScheduler:
                 "_stock_master_daily_purge_task",  # 사이클 150 추가 — T-150일 retention cron task
                 "_evening_funnel_capture_task",  # 사이클 171 추가 — 16:20 KST 저녁 잠정 funnel 캡처 task
                 "_open_source_compare_task", "_quote_token_refresh_task", "_main_rest_basis_task",  # cycle264 09:05:30 시가 3자 대조 shadow / cycle269 15:45 보조 토큰 강제 재발급 / cycle272 main 기준가 REST 확정
+                "_status_exit_task",  # cycle369 — 관리종목51·단기과열59 보유 청산 + 당일 매수차단
                 "_ws_task", "_scan_task",
             ):
                 task = getattr(self, task_attr, None)
@@ -1187,6 +1189,7 @@ class TradingScheduler:
                 "_stock_master_daily_purge_task",  # 사이클 150 추가 — T-150일 retention cron task
                 "_evening_funnel_capture_task",  # 사이클 171 추가 — 16:20 KST 저녁 잠정 funnel 캡처 task
                 "_open_source_compare_task", "_quote_token_refresh_task", "_main_rest_basis_task",  # cycle264 09:05:30 시가 3자 대조 shadow / cycle269 15:45 보조 토큰 강제 재발급 / cycle272 main 기준가 REST 확정
+                "_status_exit_task",  # cycle369 — 관리종목51·단기과열59 보유 청산 + 당일 매수차단
                     "_ws_task", "_scan_task",
                 ):
                     task = getattr(self, task_attr, None)
@@ -1223,6 +1226,7 @@ class TradingScheduler:
             "_stock_master_daily_purge_task",  # 사이클 150 추가 — T-150일 retention cron task
             "_evening_funnel_capture_task",  # 사이클 171 추가 — 16:20 KST 저녁 잠정 funnel 캡처 task
             "_open_source_compare_task", "_quote_token_refresh_task", "_main_rest_basis_task",  # cycle264 09:05:30 시가 3자 대조 shadow / cycle269 15:45 보조 토큰 강제 재발급 / cycle272 main 기준가 REST 확정
+            "_status_exit_task",  # cycle369 — 관리종목51·단기과열59 보유 청산 + 당일 매수차단
             "_ws_task", "_scan_task",
         ):
             task = getattr(self, task_attr, None)
