@@ -38,7 +38,7 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.mark.asyncio
-async def test_g_rt1_r6_silent_skip_frequency_after_eager_refresh():
+async def test_g_rt1_r6_silent_skip_frequency_after_eager_refresh(monkeypatch, fake_pg_kv):
     """G-RT1: eager refresh 후 R6 silent_skip trigger 빈도 감소 회귀.
 
     시나리오 (사이클 81 실측 재현 + 사이클 83 시정 효과 검증):
@@ -70,6 +70,9 @@ async def test_g_rt1_r6_silent_skip_frequency_after_eager_refresh():
     from src.engine import scanner as _scanner_mod
     from src.db import system_config
 
+    # 2026-09-26 C2 — 인메모리 KV 로 저장한다(모듈 전역 폴백 누수 차단 — 이유는
+    # `test_cycle83_sk_square_fixture.py` 같은 자리 주석).
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
     await system_config.set_price_filter(min_price=0, max_price=500_000)
 
     candidates = ["402340"]

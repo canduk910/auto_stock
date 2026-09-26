@@ -637,3 +637,143 @@ def _neutralize_status_watch(
             pass
     yield
     _reset_status_watch_state()
+
+
+# ---------------------------------------------------------------------------
+# 2026-09-26 C2(테스트 위생) — 실제 외부 네트워크 차단
+#
+# 2026-09-25 08:10 KST CI 첫 시도가 부팅 테스트 2개의 60초 타임아웃으로 취소됐다(재실행 초록).
+# 두 테스트가 부르는 `boot_manager.boot()` 의 VI 시드·계좌 리스크 감시가 패치되지 않아 **실제**
+# `openapivts.koreainvestment.com:29443` 으로 나갔고, 결과가 **그 시각 KIS 서버 속도**에 묶여 있었다
+# (전체 스위트 실측 28개 테스트 · DNS·연결 214회). 경위·재현 = `tests/unit/test_c2_suite_isolation.py`.
+#
+# 시정 = 루프백이 아닌 곳으로의 DNS 조회(`socket.getaddrinfo`)와 소켓 연결(`socket.socket.connect`
+# ·`connect_ex`)을 **즉시** 실패시킨다. 모양은 DNS 실패와 같다(httpx 는 `ConnectError`) — 프로덕션
+# 코드는 이미 네트워크 실패를 graceful 로 받으므로 결과는 같고 기다림만 사라진다.
+# - respx 모킹은 소켓 아래로 내려가지 않으므로 영향이 없다.
+# - CI Postgres(127.0.0.1)·로컬 docker 하네스·테스트 서버는 루프백이라 그대로 통과한다.
+# - asyncio 는 `socket.getaddrinfo` 를 호출 시점에 찾고 `sock.connect` 를 파이썬 속성으로 부르므로
+#   이벤트 루프 경로도 같은 차단을 탄다(IP 리터럴은 DNS 를 건너뛰므로 연결 쪽에서 막는다).
+# 실제 외부 호출이 꼭 필요한 테스트는 `@pytest.mark.real_network` 로 옵트아웃한다(현재 0건).
+# 차단된 시도는 `blocked_network_attempts` 픽스처로 읽는다(테스트마다 비운다).
+# ---------------------------------------------------------------------------
+import errno as _errno
+import ipaddress as _ipaddress
+import socket as _socket
+
+_REAL_GETADDRINFO = _socket.getaddrinfo
+_REAL_SOCK_CONNECT = _socket.socket.connect
+_REAL_SOCK_CONNECT_EX = _socket.socket.connect_ex
+_BLOCKED_NETWORK_ATTEMPTS: list[dict[str, Any]] = []
+_NETWORK_BLOCK_TAG = "[test_network_blocked]"
+
+
+def _host_text(host: Any) -> str:
+    if isinstance(host, (bytes, bytearray)):
+        return bytes(host).decode("ascii", "ignore")
+    return "" if host is None else str(host)
+
+
+def _is_loopback_host(host: Any) -> bool:
+    if host is None:
+        return True  # 수동(bind) 조회
+    text = _host_text(host).strip().strip("[]").lower()
+    if text in ("", "localhost", "localhost.localdomain") or text.endswith(".localhost"):
+        return True
+    try:
+        ip = _ipaddress.ip_address(text.split("%", 1)[0])
+    except ValueError:
+        return False  # 이름 — 루프백 이름이 아니면 외부로 간주
+    mapped = getattr(ip, "ipv4_mapped", None)
+    if mapped is not None:
+        ip = mapped
+    return ip.is_loopback or ip.is_unspecified
+
+
+def _blocked_message(host: Any, port: Any) -> str:
+    return (
+        f"{_NETWORK_BLOCK_TAG} {_host_text(host)}:{port} — 테스트는 외부 네트워크로 나가지 않는다 "
+        "(옵트아웃 = @pytest.mark.real_network)"
+    )
+
+
+def _record_blocked(kind: str, host: Any, port: Any) -> None:
+    _BLOCKED_NETWORK_ATTEMPTS.append({"kind": kind, "host": _host_text(host), "port": port})
+
+
+def _guarded_getaddrinfo(host: Any, port: Any, *args: Any, **kwargs: Any):
+    if _is_loopback_host(host):
+        return _REAL_GETADDRINFO(host, port, *args, **kwargs)
+    _record_blocked("dns", host, port)
+    raise _socket.gaierror(_socket.EAI_NONAME, _blocked_message(host, port))
+
+
+def _inet_target(sock: Any, address: Any) -> tuple[Any, Any] | None:
+    """외부로 향하는 INET 연결이면 (host, port), 아니면 None(루프백·UNIX 소켓)."""
+    if getattr(sock, "family", None) not in (_socket.AF_INET, _socket.AF_INET6):
+        return None
+    try:
+        host, port = address[0], address[1]
+    except Exception:
+        return None
+    return None if _is_loopback_host(host) else (host, port)
+
+
+def _guarded_connect(self: Any, address: Any) -> None:
+    target = _inet_target(self, address)
+    if target is None:
+        return _REAL_SOCK_CONNECT(self, address)
+    _record_blocked("connect", *target)
+    raise ConnectionRefusedError(_errno.ECONNREFUSED, _blocked_message(*target))
+
+
+def _guarded_connect_ex(self: Any, address: Any) -> int:
+    target = _inet_target(self, address)
+    if target is None:
+        return _REAL_SOCK_CONNECT_EX(self, address)
+    _record_blocked("connect_ex", *target)
+    return _errno.ECONNREFUSED
+
+
+@pytest.fixture(autouse=True)
+def _block_external_network(
+    request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch
+):
+    _BLOCKED_NETWORK_ATTEMPTS.clear()
+    if not request.node.get_closest_marker("real_network"):
+        monkeypatch.setattr(_socket, "getaddrinfo", _guarded_getaddrinfo)
+        monkeypatch.setattr(_socket.socket, "connect", _guarded_connect)
+        monkeypatch.setattr(_socket.socket, "connect_ex", _guarded_connect_ex)
+    yield _BLOCKED_NETWORK_ATTEMPTS
+
+
+@pytest.fixture
+def blocked_network_attempts(_block_external_network: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """이 테스트에서 차단된 외부 DNS·연결 시도 목록 (`kind`·`host`·`port`)."""
+    return _block_external_network
+
+
+# ---------------------------------------------------------------------------
+# 2026-09-26 C2(테스트 위생) — 가격 필터 인메모리 폴백 초기화
+#
+# `src/db/system_config.py::_price_filter_memory_override` 는 DB 쓰기가 실패하면 값을 담는 **모듈 전역**
+# dict 다(cycle83 — DB 미가동 테스트 환경 폴백). DB 없이 진짜 `set_price_filter` 를 부르는 테스트가
+# 하나라도 있으면 그 값이 뒤따르는 테스트의 기본값이 된다 — `tests/unit/db/test_cycle64_…::test_A1`
+# 이 수집 순서에 따라 `assert 500000 == 0` 으로 붉던 원인이다(원천 = cycle83 테스트 2개, 그쪽도 고쳤다).
+# 테스트 전·후로 비워 순서와 무관하게 만든다. 운영에서는 DB 가 항상 성공하므로 이 dict 는 비어 있다.
+# ---------------------------------------------------------------------------
+def _clear_price_filter_memory_override() -> None:
+    try:
+        from src.db import system_config as _sc_mod
+    except Exception:
+        return
+    override = getattr(_sc_mod, "_price_filter_memory_override", None)
+    if isinstance(override, dict):
+        override.clear()
+
+
+@pytest.fixture(autouse=True)
+def _reset_price_filter_memory_override():
+    _clear_price_filter_memory_override()
+    yield
+    _clear_price_filter_memory_override()

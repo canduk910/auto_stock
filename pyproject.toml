@@ -32,6 +32,10 @@ markers = [
     # 매수 차단 레지스트리는 모듈 전역이라 미부착 테스트는 관측 훅·게이트·루프가 중립화된다.
     # leaf·배선을 직접 검증하는 테스트만 붙인다. `filterwarnings = error` 라 Red 와 같은 커밋.
     "real_status_watch: 종목상태 매수차단 중립화 픽스처 옵트아웃 (leaf·배선 직접 검증)",
+    # 2026-09-26 C2 — autouse `_block_external_network` 옵트아웃. 루프백이 아닌 DNS·연결을
+    # 즉시 실패시키는 차단을 푼다. 실제 외부 호출이 꼭 필요한 테스트만 붙인다(현재 0건 —
+    # 부착 = 그 테스트 결과가 외부 서버 속도에 묶인다는 뜻이다).
+    "real_network: 외부 네트워크 차단 픽스처 옵트아웃 (실제 외부 호출)",
 ]
 filterwarnings = [
     "error",

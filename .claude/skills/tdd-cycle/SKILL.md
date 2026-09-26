@@ -58,6 +58,8 @@ description: "주식 자동매매시스템의 Red→Green→Refactor TDD 사이�
 - 파일 위치: `tests/unit/`, `tests/integration/`, `tests/contract/` 중 적합한 곳
 - 명명: `test_<대상>_<조건>_<기대>.py` 또는 `test_<대상>.py` 안에 `test_<조건>_when_<상황>_then_<기대>` 함수
 - 외부 의존성: 반드시 conftest.py의 fixture(`mock_kis`, `fake_supabase`, `freeze_time`, `fake_ws`)로 격리
+- 실제 외부 네트워크는 루트 `tests/conftest.py` autouse `_block_external_network` 가 막는다 — 루프백이 아닌 DNS·연결이 즉시 `ConnectError` 가 된다(차단 기록 = `blocked_network_attempts` 픽스처, 옵트아웃 마커 `real_network`). 테스트가 부르는 경로가 KIS 로 나가면 결과가 그 시각 서버 속도에 묶인다(2026-09-25 CI 부팅 테스트 60초 초과) — 모킹으로 막지 못한 호출을 옵트아웃으로 살리지 않는다
+- 모듈 전역 상태(싱글턴 필드·폴백 dict·메모)를 바꾸는 테스트는 `monkeypatch.setattr` 로 바꿔 테스트 끝에 되돌린다 — 직접 대입은 뒤따르는 테스트의 결과를 수집 순서에 묶는다
 - async 코드는 `pytest.mark.asyncio` (asyncio_mode=auto면 생략 가능)
 
 ### 프론트엔드 (vitest + RTL)

@@ -144,9 +144,11 @@ async def test_quote_manager_isolated_from_main_manager(
     main = await token_mod.get_token_manager(None)
     quote = await token_mod.get_token_manager("quote-iso")
 
-    # 메인에 가짜 토큰 세팅
-    main.access_token = "MAIN-TOKEN-XYZ"
-    main.token_expired = datetime.now() + timedelta(hours=1)
+    # 메인에 가짜 토큰 세팅 — `main` 은 모듈 싱글턴 `token_manager` 그 자체라 직접 대입하면
+    # 다음 테스트까지 남는다(2026-09-26 C2: 뒤따르는 부팅 테스트가 토큰 발급을 건너뛰고 실제 KIS
+    # REST 를 6회 치게 만든 누수). monkeypatch 로 테스트 끝에 되돌린다.
+    monkeypatch.setattr(main, "access_token", "MAIN-TOKEN-XYZ")
+    monkeypatch.setattr(main, "token_expired", datetime.now() + timedelta(hours=1))
 
     # 보조에 다른 토큰 세팅
     quote.access_token = "QUOTE-TOKEN-ABC"
@@ -161,7 +163,7 @@ async def test_quote_manager_isolated_from_main_manager(
     assert main.app_secret != quote.app_secret
 
 
-def test_main_manager_existing_flow_preserved():
+def test_main_manager_existing_flow_preserved(monkeypatch: pytest.MonkeyPatch):
     """F: 기존 메인 매니저 인스턴스가 그대로 노출됨 (회귀)."""
     from src.auth.token import token_manager, TokenManager
 
@@ -170,7 +172,8 @@ def test_main_manager_existing_flow_preserved():
     # label=None 인스턴스 (메인 식별자)
     assert token_manager.label is None
     # build_headers 가 기존 시그니처 그대로 동작
-    token_manager.access_token = "test"
+    # 모듈 싱글턴이라 monkeypatch 로 되돌린다(2026-09-26 C2 — 테스트 간 토큰 누수 차단)
+    monkeypatch.setattr(token_manager, "access_token", "test")
     headers = token_manager.build_headers("TTTC0012U")
     assert headers["authorization"] == "Bearer test"
     assert "appkey" in headers

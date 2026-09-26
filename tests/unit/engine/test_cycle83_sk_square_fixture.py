@@ -37,7 +37,7 @@ pytestmark = pytest.mark.unit
 
 
 @pytest.mark.asyncio
-async def test_g_op1_sk_square_eager_refresh_then_price_filter_block(caplog):
+async def test_g_op1_sk_square_eager_refresh_then_price_filter_block(caplog, monkeypatch, fake_pg_kv):
     """G-OP1: SK스퀘어 (402340) eager refresh 후 가격필터 정상 차단.
 
     검증 매트릭스:
@@ -71,6 +71,10 @@ async def test_g_op1_sk_square_eager_refresh_then_price_filter_block(caplog):
     from src.db import system_config
 
     # 가격필터 max=500,000 (사용자 설정 가정)
+    # 2026-09-26 C2 — 인메모리 KV 로 저장한다. DB 없이 진짜 pg 로 쓰면 모듈 전역 폴백
+    # `_price_filter_memory_override` 에 500,000 이 남아 뒤따르는
+    # `test_cycle64_…::test_A1`(기본값 0 기대)을 수집 순서에 따라 깨뜨렸다.
+    monkeypatch.setattr(system_config, "pg", fake_pg_kv)
     await system_config.set_price_filter(min_price=0, max_price=500_000)
 
     candidates = ["402340"]
