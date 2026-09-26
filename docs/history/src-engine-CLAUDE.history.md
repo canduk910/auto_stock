@@ -1631,3 +1631,15 @@ cycle359 조사). cycle368 이 파서 기준점을 고치고, VI 수명 600초(�
 `previous_trading_day(as_of_date 또는 오늘)` 을 쓴다. 헬퍼 3종(`_resolve_prepare_as_of`·`_preview_keep_tickers`·`_preview_skip_tickers`)이 더해졌다.
 
 → CHANGELOG: cycle364 S1 행
+
+## order_engine.py
+
+### 2026-09-26 묶음 D S1(J-1) — 규칙 3 「`_cancel_and_reorder` 는 쌍으로 막는다」 행의 회수 위임 문장
+
+정본 원문(목록 행 끝 괄호):
+
+  - **`_cancel_and_reorder` 는 쌍으로 막는다** — 이것만 `cancel_order` → `place_order` 의 atomic replace 다. 절반만 막으면 "호가창에 있던 손절을 우리가 빼고 아무것도 안 넣은" 상태가 된다. 컷이면 **취소도 하지 않고** 작동 중인 주문을 그대로 둔다(16:00 이후 `cancel_remaining` 또는 `risk.on_tick` 재평가에 위임).
+
+경위: 괄호 안 위임처 둘 다 걸린 잔량을 거두지 않는다. `cancel_remaining` 은 `src/` 안에 호출자가 없고(정의 1곳뿐), 그 함수가 취소하는 `pos.order_no` 는 포지션을 만든 매수 주문번호다. `risk.on_tick` 재평가는 새 매도를 낼 뿐 취소를 하지 않는다. 운영자가 「16:00 에 알아서 회수된다」고 믿고 걸린 주문을 두게 만드는 문장이라 걷었다.
+
+→ 근거: `_workspace/domain_consult/cycle332_buy_cancel_timer.md` §10 · `_workspace/red/bundle_D_plan.md` S1

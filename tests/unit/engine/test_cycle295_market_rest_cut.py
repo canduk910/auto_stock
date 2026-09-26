@@ -613,8 +613,12 @@ async def test_t10_cancel_and_reorder_is_gated_as_a_pair(
     → 거부 → `step_down` 지정가 `'00'` 폴백 접수 → 부분 체결 → 15:45:30
     `_cancel_and_reorder` → 취소 성공 → 재주문만 컷 → **잔여가 15분 무주문**.
 
-    ⇒ 컷이면 취소도 하지 않고 작동 중인 주문을 그대로 둔다. 16:00 이후
-    `cancel_remaining` 또는 `risk.on_tick` 재평가에 위임한다.
+    ⇒ 컷이면 취소도 하지 않고 작동 중인 주문을 그대로 둔다. 그 잔량을 우리가
+    거두는 경로는 없다 — `cancel_remaining` 은 프로덕션 호출자가 0 이고,
+    `risk.on_tick` 재평가는 걸린 주문을 취소하지 않는다. KRX 잔량은 정규장
+    마감 후 거래소가 자동 취소한다. NXT 잔량(프리장 `pre_nxt_keep` ·
+    `order_exchange_clock_mode="off"` · `probe_error` 로 base 를 유지한 매도)은
+    20:00 까지 남는다. 정본 = `src/engine/CLAUDE.md` 규칙 3.
     """
     engine, strat = engine_pair
     engine._order_strategy["ORD-P"] = _SID
