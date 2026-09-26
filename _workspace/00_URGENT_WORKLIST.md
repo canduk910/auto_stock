@@ -1,4 +1,55 @@
-# 🔴 2026-09-25(금, 휴장) 저녁 — 최신 상태는 아래 「09-25 저녁 결정 + 후속 순서」 절
+# 🔴 2026-09-26(토) 09시 — 최신 상태는 바로 아래 「지금 상태」 절
+
+## 지금 상태 (2026-09-26 09:2x KST — 주간 토큰 부족으로 작업 정리, 다음 거래일 09-28(월))
+
+### 완료 (09-25 21:5x ~ 09-26 09시)
+
+| 무엇 | 결과 | 커밋·배포 |
+|---|---|---|
+| 저녁 결정 기록 | 영구 메모리(`project_0925_decisions`) + 아래 「09-25 저녁 결정」 절 | `8e2c989` |
+| E1 BFB 매수 멈춤 | `entry_end` 14:30→**09:04** PUT(09-25 21:52), API·DB 확인. 청산·손절·`enabled`·비중 무접촉 | 설정 |
+| E2 **cycle368** F-B | 장운영정보 칸 밀림 전부(8영역 `handler.py` 포함) · 거래정지 = `TRHT_YN=Y` 또는 58 · VI·거래정지 마지막 신호 600초 뒤 자동 해제 · `(null)` 비활성 | `b8b06d7` full 09-26 02:18 ✅ |
+| E5 P4 백필 | `change_rate` 356,636행(09-26 02:20), 주별 상한가 27·26 검산 일치 | 기록 `3cf032a` |
+| E4 **cycle364 S1** D3 A1 | 21:00 저녁 미리보기(다음 거래일 기준, 오늘 봉 포함) · PV-1(donchian·kojiro·BFB·VCP 보유 청산 입력 보호) · 라벨 가드 · ③-b · 부팅 비교 ④ · `scheduler.py` 3,777줄 | `cfcaaac` full 09-26 09:25 ✅(CI 전 단계·Deploy·`/health` 200, 주말 대기 진입) |
+| E3 cycle369 자문 | 관리종목 51·단기과열 59 보유 청산 설계 — [메모](domain_consult/cycle369_status_51_59_exit.md). **구현 안 함**(아래 남은 일 A1) | 메모 커밋 |
+| 정리 | 세션 임시 워크트리 3개 제거(변경분 패치 백업) · 병합된 브랜치 3개 삭제 | — |
+
+### 🔴 남은 일 — 명시 목록
+
+**A. 사용자 답이 필요한 것**
+1. **cycle369 관리종목·단기과열 보유 청산** — 자문 권고 = 바로 시장가 청산(enforce), 판정은 REST `FHKST01010100` 전용 플래그(`mang_issu_cls_code`·`short_over_yn`), 발사 창 KRX 정규장 09:00:30~15:28(애프터장 발사 금지 — KRX 가 단기과열을 애프터 대상에서 제외), 킬스위치 `system_config.status_exit_mode`, 8영역 0. 사용자에게 물을 것 3개(메모 §8): ① 보유 안 한 후보가 지정 첫날(T+1) 사는 것도 막을지 — A 두고 센다(권고) / B 아침 마스터 재적재 / C 매수 직전 REST ② 「재구독 중지」 대신 당일 매도 차단 + 진입 필터로 막는 해석 동의 ③ (알림) 장외 감지는 다음 정규장에 팔고 59 는 체결까지 최대 30분. 🔴 크리티컬: `ssts_hot_yn` 은 **공매도과열**(단기과열 아님) · 단기과열 **예고**는 지정이 아니다 · iscd 51 단독 판정은 관리종목 절반을 놓친다
+2. **VCP 터틀 전환 여부** — 사용자 전제(「터틀 아닌 전략은 momentum·VB·LTV 셋」)와 달리 운영 VCP 는 `position_ratio`. 보유 0 이라 과도기 없음
+
+**B. 날짜·조건이 정해진 것**
+1. **09-28(월) 08:55 BFB `entry_end=09:04` 재확인** — 세션 예약은 세션이 닫히면 사라진다. 다음 세션이 직접 확인
+2. **BFB 터틀 전환** — 보유 3종목(003160·052710·295310)이 다 나가면(달력 규칙상 늦어도 10-01) 장외에 PUT `{"params":{"sizing_mode":"turtle","risk_pct":0.01,"entry_end":"14:30"}}`. 🔴 **그 전에 `param_catalog.py` `sizing_mode` 도움말 정정**(cycle355 뒤 거짓, full 배포)
+3. **P2 카드 2·3·4 코드 사이클(cycle367 구현)** — 10-03~04 장외. 카드3(BFB 영업일 `>5`)은 **BFB 보유가 다 나간 뒤** 배포. `max_hold_days` 도움말 · 리더 규칙 566행 「5영업일」 함께 정정
+4. **cycle364 S2**(아침 재준비 조건 · 비상 캡처) — 첫 거래일 실측(09-28 21:00 · 09-29 07:4x ④ `same=1`) 뒤
+5. D8 카드 E(`pending_buy_amounts` 키) 격리 브랜치 준비 — 승인됨, 미착수
+
+**C. 판단 없이 할 수 있는 것**
+- 문서: Mermaid 때 찾은 불일치 5곳 · `src/engine/CLAUDE.md` 모듈 맵 `param_drift.py` 누락 · changelog cycle363 행 깊은 읽기 규칙 문구(달력 4일 판정 ① 누락 — 정정 부기)
+- 테스트: CI 부팅 테스트 2개 간헐 60초 초과 · `test_cycle64` 순서 의존 실패
+- 09-23 백필 번들이 프로세스 3키를 0 으로 주는 것 · 보관소로 S0 과거 재현 재실행(cycle361 §6 C-3)
+- cycle368 후속: RealtimeHealth 화면이 거래정지(58) 행을 `VI:N` 주황 배지·`(null)` 로 보여 준다(표시만) · 한 메시지에 여러 레코드가 오면 첫 레코드만 읽는다(미관측) · per-ticker 프레임에 110/121 이 오면 K watcher 의 동시호가 조기 반환이 보유 종목도 건너뛴다(HIGH 면제 검토)
+
+**D. 원래 목록 뒤쪽** — ⑨A 매수 대사 · ⑨B 거래소 자동취소 통보(장중 실측 필요) · ⑫ B4 3~7단계 · B7 · J-1~J-4 · ⑦ 후속 `boot_manager.py` `"momentum"` 폴백 2곳
+
+### 🔴 09-28(월) 확인 — 이번에 새로 더해진 것 (기존 A1~A7·F-A 는 아래 「09-28 아침 확인 목록」)
+| 언제 | 무엇 | 정상 |
+|---|---|---|
+| 08:55 | BFB `entry_end` | API·DB 09:04, 09:05 뒤 BFB 신규 매수 0 |
+| 장중·애프터 | cycle368 `[H0UNMKO0] … mkop_cls_code=` | `AB1`(예전엔 `(null)`). 005930 아닌 종목에서 `110`/`121` 이 보이면 기록 |
+| 장중·애프터 | `[market_op_vi_active]` 뒤 | 해제 프레임이 없으면 10분 뒤 `[market_op_vi_release] reason=ttl`. 55/57 종목이 더는 VI 로 잡히지 않음 · `[stale_skip_market_op]` 급감 |
+| 16:20 | 준비 로그 | 0줄(애프터장 재준비 소멸) |
+| 21:00~21:02 | `[evening_funnel_capture]` | `decision=run as_of=2026-09-29 expected_head=2026-09-28 daily_head=2026-09-28` · DB `target_date=09-29 ∧ is_provisional` 약 59행 · market_ops 저녁 행 done · `[quote_token_refresh] window_issues_total=7` 불변 |
+| 21:30 | `portfolio_risk` | donchian·BFB 손절선이 20:05 값과 같음(PV-1) |
+| 09-29 07:4x | `[funnel_boot_vs_evening] phase=boot` | 웹소켓 연결 뒤 6전략 `same=1`. +600초 레거시는 `decision=legacy_reprepare` |
+| 아무 때 | 종목마스터 일봉 탭 | 과거 날짜 등락률이 0.00% 아님(P4 백필) |
+
+---
+
+
 
 > 이 문서는 **다른 작업 전에 먼저 읽는다**(루트 `CLAUDE.md`). 아래 「지금 상태」가 정본이고,
 > 그 아래 옛 절들은 **배경**이다 — 날짜 표제를 보고 최신 여부를 판단하라.
@@ -116,12 +167,12 @@ F-A~F-C 출처 = [검토 메모](reports/2026-09-25_daily_and_advice_review.md) 
 |---|---|---|---|
 | E1 | BFB `entry_end` 09:04 PUT + DB 확인 + 09-28 08:55 재확인 예약 | 지금 | ✅ 09-25 21:52 PUT(14:30→09:04, API·DB 확인, `enabled`·비중 무접촉). 08:55 재확인은 세션 예약(세션이 닫히면 사라진다 — 그때는 09-28 아침 확인 때 함께) |
 | E2 | F-B 칸 밀림 전부(8영역 포함) + 거래정지 `{58}` + VI 10분 자동 해제 | 09-27 | ✅ cycle368 `b8b06d7` full 배포(09-26 02:18, CI·Deploy·`/health` 200). 메인 세션 판단으로 거래정지에도 같은 600초 수명·`(null)` 비활성 추가(1차 승인 범위 안) |
-| E3 | F-B 51·59 보유 청산 + 신규 매수 차단 — 자문 → 명세 → TDD | 09-28 07:45 전 목표 | 대기 |
-| E4 | D3 A1 S1(`scheduler.py`) | 09-28 07:45 전 | 🔄 cycle364 S1 Green·검증 끝(09-26, round 3 까지 — 백엔드 전체 12,294 passed · 12 skipped · 329 xfailed · 12 xpassed · 실패 0, 8영역 0, `scheduler.py` 3,777줄) — **커밋 + full 배포 대기**(보유 중이라 주말·21:35~07:45 창). 배포 뒤 실측 = 첫 거래일 21:00~21:02 `[evening_funnel_capture] decision=run as_of=<다음 거래일> expected_head=<오늘>` · DB `target_date=다음 거래일 ∧ is_provisional` 행 · market-ops 저녁 행 done · `[quote_token_refresh] window_issues_total=7` 불변 · 21:30 `portfolio_risk` donchian 손절선 = 20:05 값 · 다음 날 07:4x `[funnel_boot_vs_evening] phase=boot` 활성 전략 `same=1`, 같은 부팅에 `hint_error=`·`error=` WARNING 0행(설계 `domain_consult/cycle364_a1_as_of_design.md` §6.4 · §8). S2(아침 ②③ + 비상 캡처)는 그 실측 뒤 |
+| E3 | F-B 51·59 보유 청산 + 신규 매수 차단 — 자문 → 명세 → TDD | 09-28 07:45 전 목표 | 자문 ✅(`domain_consult/cycle369_status_51_59_exit.md`) · **구현 보류** — 사용자 질문 3개 답 대기 + 주간 토큰 부족(맨 위 「남은 일」 A1) |
+| E4 | D3 A1 S1(`scheduler.py`) | 09-28 07:45 전 | ✅ cycle364 S1 `cfcaaac` — 백엔드 12,294 passed · 프론트 908 · 실제 Postgres 27 passed. S2 는 맨 위 B4 |
 | E5 | P4 백필 | 주말 | ✅ 09-26 02:20 — 356,636행 갱신(보합 10,542행 0 유지), 주별 상한가 09-07 27 · 09-14 26 으로 검산 일치. 경위 `docs/history/src-db-CLAUDE.history.md` |
-| E6 | B 묶음(도움말·문서 정정 · 테스트 정리 · 번들 프로세스 키 · 카드 E 브랜치 · 보관소 S0 재실행) | — | 대기 |
-| E7 | P2 카드 2·3·4 브랜치 준비 → 보유가 다 나간 뒤 배포 | 10-03~04 | 대기 |
-| E8 | C 묶음 중 가능한 것(⑨A 매수 대사 · ⑫ · ⑦ 후속 `boot_manager` momentum 폴백 2곳) | — | 대기 |
+| E6 | B 묶음(도움말·문서 정정 · 테스트 정리 · 번들 프로세스 키 · 카드 E 브랜치 · 보관소 S0 재실행) | — | 워크트리 정리만 ✅, 나머지 = 맨 위 「남은 일」 B·C |
+| E7 | P2 카드 2·3·4 브랜치 준비 → 보유가 다 나간 뒤 배포 | 10-03~04 | 대기(맨 위 B3) |
+| E8 | C 묶음 중 가능한 것(⑨A 매수 대사 · ⑫ · ⑦ 후속 `boot_manager` momentum 폴백 2곳) | — | 대기(맨 위 D) |
 
 ### 🔴 09-28(월) 아침 확인 목록 (D4 — cycle363 + 배포 전 보강 F-1/F-3/F-4 검증)
 
