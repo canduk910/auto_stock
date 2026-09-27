@@ -157,8 +157,13 @@ _BASE_SHA = {
     # 🔁 cycle379(2026-09-27) 재핀 — `get_daily_orders` 에 keyword-only `odno=""` 추가
     #    (buying_reconcile 의 자기 주문 행 조회, 사용자 승인). 기본값 호출 params 는
     #    byte 동일(D1 회귀 가드). 직전 값 = `d8f3da874b3e2623695935d768cf5a502a3756e3425c41185e42576c27f6aa35`.
+    # 🔁 cycle385 부록 R(2026-09-27) 재핀 — `get_daily_orders` 에 keyword-only
+    #    `pdno=""` 추가(F-1 재대조 크레딧이 TTTC0081R 을 종목 한정 조회 — 비8영역,
+    #    `src/api/balance.py` 는 8영역 목록 `_EIGHT_AREAS` 에 없다). 기본값 호출
+    #    params 는 byte 동일. 직전 값 =
+    #    `ac9a74d4f04c514a75ab56fc99f5b7a6582960da52ac74bab3a1363418af5003`.
     "src/api/balance.py":
-        "ac9a74d4f04c514a75ab56fc99f5b7a6582960da52ac74bab3a1363418af5003",
+        "cce7de0ee57a6fd095075943475dedf3e0e8f6ed441aa65c1834b4a907a404e7",
     # 전략 7파일 (+ 패키지) — cycle287 당시 "전원 diff 0" 이었으나 **cycle290(킬스위치
     # 등재) 이 정당하게 갱신**했다 — `DEFAULT_PARAMS` 말미에 `order_exchange_clock_mode`
     # `after_market_exit_division` 2키 추가뿐, 그 외 한 글자도 안 바뀌었다는 증거는
@@ -650,8 +655,17 @@ _SRC_TREE_FILES = 166
 # 만료 항목 제거(F7) / `routes/stock_chart.py`: ticker 정규식 `^[0-9]{6}$`(F3). 파일 수 무변경,
 # 두 파일 모두 이미 이 digest 안에 있던 차트 전용 파일 — 매매 행위 변경 없음. 직전 값 =
 # `6ddc5724112e33471b8e6dd4a53a1c5aef7c8035f9041a66b198cb09e68ecaef`.
+# 🔁 cycle385 main 위로 재적용 재핀(값만, 파일 수 불변 166) — B7(사용자 승인, 8영역
+# `order_engine.py` — `_CHANGED` 제외 대상이라 트리 다이제스트 자체엔 안 잡힌다) 브랜치를
+# cycle386·cycle387 이 반영된 main 위로 리베이스했다. B7 의 비8영역 동반 변경
+# `routes/trading.py`(manual-sell `_selling` 배치 · `_selling_locked_wait` 정리 ·
+# `_sell_placed` 삭제 · 발사 실패 되돌림 판정을 `_sell_not_placed_reason` 으로 확장) ·
+# `src/api/balance.py`(`pdno=`) · `src/db/positions.py`(`save_position` 빈 이름 무시
+# COALESCE/NULLIF) 가 이 다이제스트에 걸린다(셋 다 `_CHANGED` 제외 대상이 아니다). 리베이스
+# 자체는 파일 내용을 바꾸지 않으므로 값만 새 기준선(cycle387 적대 검토 반영분) 위로 옮긴다.
+# 직전 값 = `e7bbb4683ac238af6f32b3793bd4ebdea5fe017d98d17646b47bb3d979912670`.
 _SRC_TREE_DIGEST = (
-    "e7bbb4683ac238af6f32b3793bd4ebdea5fe017d98d17646b47bb3d979912670"
+    "e3e6f3ebb24ed4fa2709c2bbccf6a384c18f6b42d474570cf6e148947b221bc2"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

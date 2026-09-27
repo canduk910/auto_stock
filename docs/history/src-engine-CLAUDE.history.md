@@ -1705,6 +1705,61 @@ cycle359 조사). cycle368 이 파서 기준점을 고치고, VI 수명 600초(�
 
 → CHANGELOG: cycle384 행
 
+## 체결통보 주문수량 — 출처 3단 (cycle329)
+
+### 2026-09-27 cycle385 — 매도 피해 서술 · 「재조회 0」 · 남는 사각
+
+정본 원문(「고치는 것」 문단 중 한 문장):
+
+매도는 `del positions[ticker]` 로 **미체결 잔량이 손절 감시 밖으로 사라지고**(15분 sync 까지 무방비), 매수는 `_completed_buy_orders` 가 무장해 잔여 통보가 `[buy_fill_duplicate_ignored]` 로 **조용히 버려진 채** `_sync_positions_from_balance` 가 `is_ticker_held_by_any → continue` 라 **기보유 수량을 영원히 고치지 않는다**(10주를 갖고 3주로 믿는 상태가 익일 `_boot` 까지 간다).
+
+정본 원문(「재주문 타이머」 항목 중 한 구절):
+
+이 시정으로 매핑 부재 창의 통보가 처음으로 **부분 분기에 도달**하는데 `_cancel_and_reorder` 에는 포지션 재조회가 **한 줄도 없다**(실측).
+
+정본 원문(「남는 사각」 항목):
+
+- ⚠️ **남는 사각** — payload 가 없으면 매핑 부재 창에서 주문수량을 알 길이 없어 결함이 그대로다. 그 빈도는 `increment` 카운터가 센다.
+
+경위: cycle385(사용자 결정 2026-09-26·27 「부분매도해도 잔여보유수량에 대한 추가매도가 가능하도록 실시간잔고의 매도상황을 추적관리할 수 있다는 전제하에 허용」 · 「b7 분할매도 진행」)가 `_handle_sell_fill` 을 주문 축(`total_filled >= ordered_qty`)과 보유 축(`pos.quantity` 차감 → 0 이면 닫기)으로 나눴다. 매도는 매핑 부재 창에서 주문 축이 틀려도 보유 축이 체결량만큼만 빼므로 잔량이 추적에 남는다. 같은 사이클의 J-2 가 `_cancel_and_reorder` 의 `place_order` 직전에 registry 전수 보유 재조회(`_reorder_requery`)를 넣었으므로 「재조회가 한 줄도 없다」 는 사실이 아니게 됐다. 다만 취소는 여전히 조건 없이 나가므로 `qty_src == "map"` 게이트의 이유는 그대로다. 명세 = `_workspace/red/cycle385_b7_partial_sell_spec.md`.
+
+→ CHANGELOG: cycle385 행
+
+## strategy_base.py
+
+### 2026-09-27 cycle385 — `on_position_closed` 호출 site 표현 · 「full-fill 한정」
+
+정본 원문(두 구절):
+
+- `on_position_closed(ticker)` — 포지션 전량 청산(매도 체결) 시 per-ticker 보유결합 상태 정리. 호출 site 는 `order_engine` **정확히 2곳**(`_handle_sell_fill` 전량체결 `if pos:` 후 + `execute_sell` insufficient_qty reconciliation, 각 try/except 격리).
+- 부분 체결은 full-fill 한정이라 잔량 청산모드가 자연 보존된다.
+
+경위: cycle385 가 `_handle_sell_fill` 의 닫기 판정을 「주문 전량 체결」 에서 「보유가 0 이 됐나」(`if close_position:`)로 옮겼다. 호출 site 는 여전히 두 곳이고(G2-STRUCT-INVARIANT 그대로), 보유가 남는 매도는 훅을 부르지 않는다 — 뜻은 같고 판정 기준만 정확해졌다.
+
+→ CHANGELOG: cycle385 행
+
+## order_engine.py
+
+### 2026-09-27 cycle385 — 「체결 후처리」 매도 항목
+
+정본 원문(「체결 후처리」 매도 항목 첫 문장):
+
+- 매도 → DB positions 삭제 + `sold_today` 등록.
+
+경위: cycle385 부터 매도 체결은 보유가 0 이 될 때만 DB 삭제·`sold_today`·구독 해제를 한다. 보유가 남으면 차감 수량을 `save_position` 으로 저장한다.
+
+→ CHANGELOG: cycle385 행
+
+### 2026-09-27 cycle385 부록 R — `is_sell_qty_exceeded` #1.5 잔고 재대조 항목
+
+정본 원문(「`is_sell_qty_exceeded(err)` → #1.5 잔고 재대조」 항목):
+
+- **`is_sell_qty_exceeded(err)` → #1.5 잔고 재대조**: APBK0400 "수량 초과" 는 부분 보유 내재 코드라 insufficient(통째 삭제)로 **흡수 금지**다(257720 실사고). `execute_sell` 재시도 루프에서 closed 다음·insufficient 앞에 `get_balance` 재대조 — ① 오염(`held < positions`) = `[sell_qty_reconciled]` WARNING + **held(보유 실체)로 보정**(sellable 아님 — 잠긴 주식도 보유라 손절 감시 수량은 held 가 정합이고, sellable 부족 재거부는 다음 분기가 흡수한다) + `save_position` DB 동행 + `continue`(3회 한도 내 자기 치유) ② 부분/전량 잠김(`held ≥ positions ∧ sellable < held`) = `[sell_qty_partial_locked]`/`[sell_qty_locked]` WARNING + 보존 + return — **`_selling` 의도적 유지**(열린 기주문이 실재하므로 진행 중 표식이 참이고, on_tick 재진입 폭주를 차단한다. stale 은 `[selling_reconcile]` 180s 재대조 소관. market_closed 의 discard 와 다른 이유 = 그쪽엔 열린 주문이 없다) ③ 실보유 0 = 기존 insufficient 경로 재사용 ④ 재대조 실패 = graceful 일반 재시도. ⚠️ sync 는 기보유 종목 수량을 갱신하지 않으므로 DB 보정 실패 시 구값이 다음 보정·청산까지 남는다
+
+경위: cycle385 부록 R(사용자 전제 2026-09-26 「잔여보유수량에 대한 추가매도가 가능하도록 실시간잔고의 매도상황을 추적관리」 · 적대 검토 F-1·F-3)이 두 분기를 바꿨다. ① 오염 보정 전에 TTTC0081R(`get_daily_orders(exchange="ALL", pdno=ticker)`)로 주문별 「스냅샷에 이미 반영된 체결」 크레딧을 적는다. 보정 뒤 늦게 온 체결통보를 보유 축이 한 번 더 빼던 이중 차감의 시정이다(탐침: 추적 10 · MTS 3주 체결 · 통보 지연 → 재발사 `[10, 4]`, 실보유 7). ② 부분 잠김은 `fire = sellable − (held − eff)` 가 1 이상이면 그 수량을 판다(`eff` = 추적 − 아직 안 온 외부 체결 통보, 부록 R2-8). 외부 부분 매도주문이 걸린 동안 안 잠긴 추적 잔여의 손절이 그 주문이 끝날 때까지 멈추던 공백의 시정이다. 주문 조회를 못 믿으면 쏘지 않고 동결한다. 두 분기가 쓰는 주문 조회는 1건이고 2.0초 상한이다(부록 R2-9). 동결 분기는 `_selling_locked_wait` 표식을 단다(「주문 없이 멈춘 동결」 — 부록 R2-5). 부록 R3 가 원장 시작 시각(`_sell_ledger_since`)보다 먼저 접수된 주문을 「아직 안 온 체결 통보」에서 빼고(재시작 뒤 빈 원장 때문에 손절이 그날 멈추던 회귀의 시정), 걸린 매도가 없을 때의 보류를 `[sell_qty_unnoticed_fills]` 로 나눴다. 부록 R4 가 그 보류를 유지하기로 정하고(D1 — 글자대로 풀면 재대조가 운영자 몫을 판다), 주문 조회가 실패한 경우를 `[sell_qty_hold_orders_unavailable]` 로 다시 나눴다(D4 — 조회 `await` 동안 통보가 추적을 줄인 경합에서 「거래소가 확인한 미통보 체결」 문구가 사실이 아니었다, seed 1177).
+
+→ CHANGELOG: cycle385 행
+
 ## 저녁 데이터 적재 (scanner + data_load_tasks)
 
 ### 2026-09-28 cycle386 — 「확정 전 오늘봉 시각 필터」 D 봉의 최종값 보정 담지자

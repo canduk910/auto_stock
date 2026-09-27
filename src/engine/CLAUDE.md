@@ -526,15 +526,178 @@ run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, recor
 | `payload` | 체결통보 `fields[16] ODER_QTY` | **매핑 부재 창**에서 주문수량을 아는 유일한 경로 |
 | `increment` | 이번 통보의 증분 체결량 | 둘 다 없을 때의 **현행 폴백 그대로** |
 
-🔴 **고치는 것** — `order_no` 는 KIS 응답이 와야 알 수 있어 `await place_order` 가 걸린 동안 매핑 5종이 **전부 비어 있다**. 그 창에 착지한 통보는 `ordered_qty` 가 증분 체결량으로 폴백돼 `total_filled >= ordered_qty` 가 **항상 참**이 되고 **부분 체결이 전량으로 읽힌다**. 매도는 `del positions[ticker]` 로 **미체결 잔량이 손절 감시 밖으로 사라지고**(15분 sync 까지 무방비), 매수는 `_completed_buy_orders` 가 무장해 잔여 통보가 `[buy_fill_duplicate_ignored]` 로 **조용히 버려진 채** `_sync_positions_from_balance` 가 `is_ticker_held_by_any → continue` 라 **기보유 수량을 영원히 고치지 않는다**(10주를 갖고 3주로 믿는 상태가 익일 `_boot` 까지 간다).
+🔴 **고치는 것** — `order_no` 는 KIS 응답이 와야 알 수 있어 `await place_order` 가 걸린 동안 매핑 5종이 **전부 비어 있다**. 그 창에 착지한 통보는 `ordered_qty` 가 증분 체결량으로 폴백돼 `total_filled >= ordered_qty` 가 **항상 참**이 되고 **부분 체결이 전량으로 읽힌다**. 매수는 `_completed_buy_orders` 가 무장해 잔여 통보가 `[buy_fill_duplicate_ignored]` 로 **조용히 버려진 채** `_sync_positions_from_balance` 가 `is_ticker_held_by_any → continue` 라 **기보유 수량을 영원히 고치지 않는다**(10주를 갖고 3주로 믿는 상태가 익일 `_boot` 까지 간다). 매도는 **주문 축만** 틀린다 — 매핑·타이머·`_selling` 이 일찍 정리되지만, 보유 축이 체결량만큼만 빼므로 잔량은 손절 감시 안에 남는다(「매도 체결 — 주문 축과 보유 축」 절).
 
 - 🔴 **전량 판정에 출처 게이트를 걸지 않는다** — `qty_src != "increment"` 조건을 붙이면 payload 가 없는 퇴화 상황에서 **수동 전량 매도가 유보**되어 포지션 유령 잔존 + `_selling` 좀비(= 손절 마비)가 된다(`selling_reconcile` 의 `held_zero` 는 해제가 아니라 **유지** 분기다). 자문이 B′안을 배제한 이유다. payload 가 있으면 수동 주문도 정확해지므로 게이트 자체가 불필요하다.
-- 🔴 **재주문 타이머는 `qty_src == "map"` 일 때만 건다** — 이 시정으로 매핑 부재 창의 통보가 처음으로 **부분 분기에 도달**하는데 `_cancel_and_reorder` 에는 포지션 재조회가 **한 줄도 없다**(실측). `payload` 에는 수동 매매 주문도 포함되므로 게이트가 없으면 **사람이 낸 주문을 우리가 30초 뒤 취소하고 다시 낸다** — cycle327 이 봉한 「주문이 나간 뒤의 재발사」와 같은 계열이다. 우리 주문의 잔여는 ms 뒤 다음 통보가 `src=map` 으로 와서 정상적으로 건다(잃는 것 0). 보류는 `[fill_partial_no_reorder]` WARNING 이 남긴다.
+- 🔴 **재주문 타이머는 `qty_src == "map"` 일 때만 건다** — 이 시정으로 매핑 부재 창의 통보가 처음으로 **부분 분기에 도달**한다. `_cancel_and_reorder` 는 취소를 **조건 없이** 내고, 발사 직전 보유 재조회(J-2, 「매도 체결 — 주문 축과 보유 축」 절)는 **재발사 수량**만 보유에 맞춘다. `payload` 에는 수동 매매 주문도 포함되므로 게이트가 없으면 **사람이 낸 주문을 우리가 30초 뒤 취소하고 다시 낸다** — cycle327 이 봉한 「주문이 나간 뒤의 재발사」와 같은 계열이다. 우리 주문의 잔여는 ms 뒤 다음 통보가 `src=map` 으로 와서 정상적으로 건다(잃는 것 0). 보류는 `[fill_partial_no_reorder]` WARNING 이 남긴다.
 - **overrun 클램프 게이트가 `known_ordered` → `qty_src != "increment"` 로 넓어졌다** — payload 는 KIS 가 준 주문수량이라 매핑과 같은 신뢰도이고, 배제하면 이번에 고치는 그 창에서 클램프만 꺼진다.
 - 🔴 **`fields[16]` 은 cycle235 가 오독해 사고(257720)를 낸 자리다** — 체결수량 소스 `fields[9]` 는 무접촉이고 `test_cycle235_ast_execution_qty.py` 가 그대로 봉인한다. 그리고 매핑이 선 **정상 통보마다** `[ordered_qty_mismatch]` 로 payload 를 대조한다(불일치해도 판정은 `map` 값을 쓴다) — 그 사고는 부분/분할 체결에서만 드러나 오래 잠복했는데, 이 대조는 창을 기다리지 않는다.
 - **관측** = `[fill_qty_src] order_no= ticker= side= src= ordered= filled_total= incr=` — `src=map` 은 **DEBUG**(정상·대량), 나머지 둘은 **WARNING**(`KstDailyEmitCap[(src,ticker,side)]` 1회/일). WARNING 이상만 21:30 `top_patterns` 에 오르므로 **비정상만 리포트에 뜬다**(ρ축 마커가 INFO 라 리포트에 한 글자도 안 들어가 오귀인을 낳은 선례의 반대). `_settle()` 직전 `[fill_qty_src_summary] window=day map= payload= increment=` 1행 — 🔴 **호출부를 try/except 로 감싸지 않는다**(scanner 일일 summary 2종과 같은 이유). **판독** = `payload > 0` 이면 그 창이 실제로 열렸고 **우리가 막았다**(성공 서명) / `increment > 0` 인데 그날 수동 매매를 한 적이 없으면 **조사 신호**(payload 가 안 실려 온다 = 그 창의 결함이 아직 남는 경로).
-- ⚠️ **남는 사각** — payload 가 없으면 매핑 부재 창에서 주문수량을 알 길이 없어 결함이 그대로다. 그 빈도는 `increment` 카운터가 센다.
+- ⚠️ **남는 사각** — payload 가 없으면 매핑 부재 창에서 주문수량을 알 길이 없다. 매수는 결함이 그대로다. 매도는 주문 축만 틀리고 보유 축은 출처와 무관하게 정확하다. 그 빈도는 `increment` 카운터가 센다.
 - 자문 = `_workspace/domain_consult/cycle329_mapping_absent_full_fill.md` · 회귀 = `tests/unit/engine/test_cycle329_mapping_absent_full_fill.py`(5케이스)
+
+## 매도 체결 — 주문 축과 보유 축 (cycle385)
+
+사람은 보유의 일부만 팔 수 있다 — `POST /api/trading/manual-sell` 의 `quantity` < 보유, MTS/HTS 매도, 손절 잔여 재주문이 그렇다. 전략 매도는 언제나 보유 전량을 내므로 「주문이 끝났다」와 「보유가 0 이 됐다」가 같은 말이지만, 일부만 팔면 둘이 갈라진다. 그래서 `_handle_sell_fill` 은 두 판정을 나눈다. 근거 = 사용자 결정(2026-09-26·27) 「부분매도해도 잔여보유수량에 대한 추가매도가 가능하도록 실시간잔고의 매도상황을 추적관리할 수 있다는 전제하에 허용」.
+
+이 절의 규칙은 세 불변식을 지키려고 있다(명세 부록 R).
+
+- **추적 밖 실보유 0** — 추적 수량이 실보유보다 **작아지는** 쪽(과소 추적)은 만들지 않는다. 과대 추적은 허용한다. 다음 매도의 APBK0400 → #1.5 재대조가 회수한다.
+- **우리 주문 합 ≤ 추적 수량** — 걸린 우리 매도와 새 우리 매도를 합쳐도 추적을 넘지 않는다. 계좌에 운영자가 따로 산 몫이 있어도 우리 주문은 그 몫을 팔지 않는다.
+- **잔여는 팔 수 있어야 한다** — 다른 주문이 일부를 잠가도 안 잠긴 추적 잔여는 손절이 판다. 동결은 팔 수 있는 추적 잔여가 0 일 때만이다.
+
+⚠️ 세 불변식이 깨지는 경로가 아직 남아 있다 — 이 절 끝 「알려진 한계」.
+
+| 축 | 판정 | 정하는 것 |
+|---|---|---|
+| **주문 축** | `total_filled >= ordered_qty` (그 주문이 끝났나) | 장부(`update_trade_status` COMPLETED/PARTIAL · 보정 INSERT) · 매핑 pop · 취소 타이머 해제·등록 · `_selling`·`_selling_locked_wait` 해제(조건 없음) |
+| **보유 축** | `pos.quantity = max(0, 보유 − hold_dec)` 뒤 `pos.quantity == 0` | `del positions` · `delete_position` · `on_position_closed` · `sold_today.add` · 종목 크레딧 삭제 · 동결 해제(동결 중일 때) · 구독 해제(`_unsubscribe_if_no_other_strategy` — 주문 종료 분기 안에서만) |
+
+`hold_dec` = 이번 체결량에서 재대조 크레딧이 흡수한 몫을 뺀 수량이다(아래 「#1.5 재대조와 늦은 통보」). 크레딧이 없으면 체결량 그대로다.
+
+- **보유가 남으면** 차감 수량을 `save_position` 으로 upsert 한다. 인자 8개를 전부 넘긴다(한 필드라도 빠지면 다른 값이 덮인다). 종목명은 `scanner.ticker_names` 캐시에서 넘기고, 캐시가 비면 빈 이름이 간다 — `save_position` 은 빈 이름으로 저장된 이름을 덮지 않는다(`src/db/CLAUDE.md`). 삭제·훅·`sold_today`·구독 해제는 하지 않는다. 저장 실패는 `[sell_fill_db_error] step=save_position` ERROR 로 남기고 전파하지 않는다 — 체결통보 콜백의 예외는 `handler.py` 규약상 WS 재연결을 부른다. 메모리는 이미 차감됐고, DB 의 옛 수량은 재시작 뒤 매도 시점 #1.5 재대조가 고친다. 재시작 전에 접수된 주문의 체결은 `pending` 에 세지 않으므로 그날 재시작 전 매도가 있어도 고친다(아래 「원장 시작 전 주문」). `delete_position` 은 감싸지 않는다.
+- 🔴 **보유 축에도 출처 게이트를 걸지 않는다**(「체결통보 주문수량」 절 금기와 같다). `map`/`payload`/`increment` 어느 출처든 체결량만큼 빼고 0 에서만 닫는다(AST A10).
+- 🔴 **주문이 끝나면 `_selling` 을 푼다 — 어느 주문의 종료든, 보유가 남아도 푼다.** `risk.on_tick` 은 `_selling` 에 든 종목의 `check_exit_signal` 을 건너뛴다. 그래서 남기면 잔여 보유의 손절이 멈춘다. 주문 축 If 본문의 첫 두 문장이 `self._selling.discard(ticker)` · `self._selling_locked_wait.discard(ticker)` 이고, 그 If 의 첫 `await` 앞이다.
+  - 🔴 해제에 조건을 달지 않는다. `qty_src` · 보유자 · `pos` 는 통보 앞쪽 `await`(`_lookup_strategy_from_trade_history` · `delete_position` · `save_position`) 전에 잡은 값이다. 그 값으로 가르면, 우리 통보가 REST 응답보다 먼저 와서 DB 조회 중일 때 응답이 착지한 경우 주문이 끝나도 표식이 남는다(AST AR2-1 — 해제를 감싸는 If 가 없고, `qty_src` 가 해제를 가르지 않는다).
+  - 🔴 「표식을 세운 주문의 종료로만 푼다」로 좁히지 않는다 — 원주문 취소를 이미 낸 재주문 태스크가 다음 부분 체결 통보에 교체 취소되면 재주문이 나갔는지 알 길이 없어, 그 표식은 풀 주체 없이 `selling_reconcile` 까지 좀비로 남는다(명세 부록 R2-1). 대가는 이 절 끝 「알려진 한계」 첫 항목이다.
+  - `_selling_locked_wait` = 「지금 `_selling` 은 우리 `execute_sell` 이 **주문 없이** 멈춰 세워 둔 것이다」. 부분 잠김 판매의 보류(`fire ≤ 0` · 주문 조회 실패 — `[sell_qty_partial_locked]` · `[sell_qty_hold_orders_unavailable]` · `[sell_qty_unnoticed_fills]`)와 `[sell_qty_locked]` 가 return 직전에 넣는다. `execute_sell` 진입과 수동 매도 라우트의 `_selling` 세움(새 주인이 섰다) · 주문 축 종료 · J-2 `gone` · 재주문 미접수 해제 · 닫기 묶음 해제 · `reset_daily_state()` 가 뺀다.
+  - **동결이 지키던 보유가 닫히면 동결을 푼다.** 닫기 묶음(`if close_position:`)에서 `ticker in _selling_locked_wait` 이면 `_selling` · `_selling_since` · 표식을 비운다(`[selling_freeze_released]`). 동결이 기다리던 외부 주문이 부분 체결로 추적을 0 으로 만들고 「종료」가 끝내 오지 않으면(운영자가 나머지를 취소 등), 이것이 없을 때 `_selling` 이 하루 끝까지 남는다 — `selling_reconcile` 은 보유 0 인 종목의 표식을 유지한다(`held_zero`). 조건이 표식이라, 우리 주문이 걸린 채 외부 체결이 추적을 0 으로 만든 경우는 유지한다(AST AR2-7).
+  - 주문이 부분이면 `_selling` 은 그대로다(주문이 아직 열려 있다).
+  - `POST /api/trading/manual-sell` 이 `_selling` 을 발사 **앞**에서 세우는 것도 잔여 보유의 손절을 지키기 위해서다(`src/routes/CLAUDE.md`).
+  - `_handle_sell_fill` 의 「매도 체결: 전략 찾을 수 없음」 오류 경로도 `_selling` 을 푼다(운영에서 momentum 은 항상 등록돼 있어 도달하지 않는다).
+- 🔴 **`if total_filled >= ordered_qty:` 는 함수 본문 최상위에 글자 그대로 1개다**(AST A1). `test_cycle273a_ast_partial_optin_and_timer.py` g273_ast3/ast4 가 그 If 안에서 타이머 해제와 `order_no` 게이트를 찾는다. `del positions[...]` 는 `_handle_sell_fill` 안에 남는다(G2-STRUCT-INVARIANT 의 site 집합).
+- **소유 전략** — 장부 전략 `sid` = `_order_strategy` → `_lookup_strategy_from_trade_history` → **registry 전수 보유자가 정확히 1개**면 그 전략(`[sell_fill_owner_from_holding] from=none`) → `"momentum"` 순이다. 보유 축 전략 = `sid` 가 그 종목을 들고 있으면 그것, 아니면 보유자가 정확히 1개일 때 그것이다(`[sell_fill_owner_from_holding] from=<sid>`). `sid` 가 들고 있지 않은데 보유자가 2개 이상이거나 판정 예외면 **보유 축은 어느 수량도 바꾸지 않는다**(`[sell_fill_owner_ambiguous]` ERROR). 보유자가 0 이면 주문이 끝날 때 닫기 묶음(`on_position_closed`·`sold_today`·`delete_position`)을 돈다(추적 보유가 없는 전략의 멱등 정리).
+  - 🔴 `_ticker_holders(ticker)` 는 `registry.all()`(꺼진 전략 포함)을 본다. `enabled()` 로 좁히면 꺼진 전략의 실보유를 놓친다. `registry.get(strategy_id)` 로 좁히면 그것이 곧 `"momentum"` 기본값 함정이다. 동기 · `await` 0 · never-raise(예외 = `None`)(AST A5).
+  - 소유 해석 뒤 보유 차감까지 `await` 가 없다(AST A9). 그래서 `execute_sell` 루프 상단 재조회·J-2 재조회와 원자적으로 맞물린다.
+- **손익** = 이번 체결분만 `(체결가 − 매수가) × 체결량` 이고 보유 축 전략의 `daily_realized_pnl` 에 더한다. 크레딧이 흡수한 몫도 실제로 판 주식이라 손익은 체결량 전체로 잡는다(AST AR3). `trade_history` SELL 행 수량은 그 주문의 수량(= 판 수량)이다. 분할 매도의 매수↔매도 짝짓기는 `get_trade_pairs` 의 누적 보유 모델이 맡는다.
+- **보유보다 큰 체결** — 추적이 이미 실보유보다 작았다는 뜻이다(수동 추가매수 등). 보유를 0 으로 닫고(음수 금지) `[sell_fill_exceeds_holding]` WARNING 을 남긴다. 남은 실보유는 15분 sync 가 「미보유」로 보고 다시 채택한다. 주문 축 overrun 클램프(누적 > 주문수량)와는 다른 축이다.
+- 🔴 **`execute_sell` 은 발사 수량을 `send_qty` 로 고정한다.** 재시도 루프 상단 재조회 직후 `send_qty = pos.quantity` 를 잡고, `sell_cap` 이 있으면 `min(send_qty, sell_cap)` 으로 줄인다(줄이기만 한다 — 아래 부분 잠김). 발사·`_order_qty`·`_persist_sell_pending_after_send(quantity=)`·로그에 그 값만 쓴다(주 경로·폴백 둘 다). 루프 안 `send_qty` 대입은 정확히 2개다(AST A3 · AR5). `await place_order` 중 착지한 통보가 `pos.quantity` 를 먼저 깎으면, 발사 뒤 다시 읽은 값이 매핑에 적힌다. 그러면 잔여 통보가 overrun 클램프에 잘리고 유령 보유가 남는다.
+- 🔴 **#1.5 재대조와 늦은 통보는 같은 체결을 두 번 빼지 않는다.** 재대조(`[sell_qty_reconciled]`)는 `pos.quantity` 를 잔고 스냅샷의 `held` 로 덮는다. 그 스냅샷에 이미 반영된 체결의 통보가 뒤에 오면 보유 축이 같은 체결을 또 뺀다. 그러면 추적이 실보유보다 작아진다. 그래서 재대조가 주문별로 「스냅샷에 이미 반영된 체결」을 크레딧으로 적고, 통보는 크레딧을 먼저 쓴다. 순서가 계약이다.
+
+  | # | 단계 |
+  |---|---|
+  | 1 | `get_balance()` — 시각 t1, `held`·`sellable`. `0 < sellable < 추적` 이면 아래로 간다 |
+  | 2 | `_sell_orders_snapshot(ticker)` — `get_daily_orders(exchange="ALL", pdno=ticker)`(TTTC0081R) 1건. 반드시 1 **뒤**다. t2 ≥ t1 이어야 크레딧이 모자라지 않는다. 돌려주는 값 = `(fills, reason, pre)`. `reason` 은 `ok`·`error`·`timeout`·`bad_row`·`page_full` 이다. `pre` 는 원장 시작 전에 접수된 주문번호 집합이고, 실패 넷에서는 빈 집합이다(AST AR2-5 · AR2-6 · AR3-2) |
+  | 3 | `strategy.state.positions.get(ticker) is pos` — 아니면 `[sell_qty_reconcile_skipped] reason=position_replaced` 후 `continue`. 닫힌 포지션을 `save_position` 으로 되살리지 않는다 |
+  | 4 | `pending = _sell_pending_dec(fills, pre)` · `eff = pos.quantity − pending`(조회 실패면 `eff = pos.quantity`). `held ≥ eff` 면 아래 「부분 잠김 판매」로 가고, `held < eff` 면 5 로 간다 |
+  | 5 | 크레딧 기록 — 조회가 되면 원장 시작 뒤 주문 `o` 마다 `c = 누적 체결 − _sell_notice_seen[o]`. `c > 0` 이면 `_sell_reflected_credit[o] = c`, 아니면 pop. 원장 시작 전 주문은 같은 `c` 를 상한 `_pre_cap` 까지만 적는다(아래 「원장 시작 전 주문」). 종목 크레딧은 지운다. 조회가 안 되면 종목 크레딧에 `max(0, pos.quantity − target_qty)` 를 **더한다** |
+  | 6 | `pos.quantity = target_qty` · `sell_cap = None` → `save_position` → `continue` |
+
+  - 3 부터 대입(6 의 `pos.quantity` 또는 부분 잠김의 `sell_cap`)까지 `await` 가 없다. 2 의 await 뒤에 수량 술어를 다시 보지 않는 이유 — 6 의 대입은 「t1 의 계좌 보유 = `held`, 반영됐지만 미처리인 통보 = 크레딧」이라는 절대 진술이라, await 동안 어떤 통보가 처리됐든 성립한다(명세 R-1-6). 그래서 재검증은 객체 동일성만 본다. `eff` 는 await 뒤 상태로 계산한다. t1 뒤 체결은 `pending` 에만 들어가 덜 쏘는 쪽으로만 작용한다(명세 R2-8).
+  - `held < eff` 는 「원장 시작 뒤 주문으로 설명되지 않는 차이」(유령 보유 · 유실 통보 · 재시작 전 체결)다. 원장 시작 뒤 주문으로 설명되는 차이는 재대조하지 않는다 — 통보가 곧 뺄 몫을 `held` 로 덮으면 운영자 초과분까지 추적에 들어온다.
+  - 🔴 주문 조회는 `asyncio.wait_for(…, timeout=SELL_ORDERS_QUERY_TIMEOUT)` 로 묶는다. `SELL_ORDERS_QUERY_TIMEOUT = 2.0`(초)은 모듈 상수다 — `DEFAULT_PARAMS`·`system_config` 키가 아니다. 손절 경로가 APBK0400 뒤 잔고 1건을 이미 기다린 상태라 더 기다리지 않는다. 넘으면 `reason=timeout` 으로 조회 실패와 같게 간다. `wait_for` 가 취소하는 것은 읽기 조회뿐이다.
+  - 🔴 `exchange="ALL"`·`pdno=ticker` 는 키워드로 고정한다 — KRX 만 보면 NXT/SOR 체결을 놓쳐 크레딧이 모자란다(AST AR2-6).
+  - 파서 `_sell_fills_by_order(rows, ticker, page_size)`(모듈 함수 · 순수 · never-raise) — 그 종목(`pdno`) 매도(`sll_buy_dvsn_cd == "01"`) 행만 본다. 같은 `odno` 의 여러 행(SOR)은 `tot_ccld_qty` 를 합한다. 통과한 행 하나라도 `odno` 가 비었거나 수량이 정수가 아니면 **전체 `None`** 이다. 행 수가 `page_size` 이상이어도(한 쪽이 가득 — 잘렸을 수 있다) `None` 이다. 부분 신뢰를 하지 않는 이유 — 한 주문이 빠지면 그 주문의 늦은 통보가 이중 차감된다.
+  - 🔴 `page_size` 는 환경별이다 — `settings.is_production` 이면 `_DAILY_ORDERS_PAGE_REAL`(100), 아니면 `_DAILY_ORDERS_PAGE_VTS`(15)다(정본 `docs/kis/domestic-stock-order.md` — 실전 1회 100건 · 모의 15건). 인자에 기본값을 두지 않는다 — 기본값 하나가 곧 한쪽 환경의 잘림 오판이다.
+  - 🔴 **종목 크레딧은 더한다(덮어쓰지 않는다).** 두 번째 재대조가 세는 몫은 첫 재대조 이후 새로 반영된 체결뿐이다. 덮어쓰면 첫 몫의 통보가 다시 빠져 과소 추적이 된다(AST AR2-4). 조회가 되는 재대조는 종목 크레딧을 버린다 — 주문별 크레딧이 그 몫을 대신한다.
+  - 조회를 못 믿어도 재대조는 한다(`[sell_qty_reconcile_orders_unavailable]`). 재대조를 건너뛰면 오염된 포지션의 손절이 그 사이 멈춘다. 크레딧 없이 재대조하면 과소 추적이 된다.
+  - `_handle_sell_fill` 은 통보마다 `_sell_notice_seen[주문]` 에 체결량을 더한다. 그리고 자기 주문 크레딧 → 종목 크레딧 순으로 흡수하고, 남은 `hold_dec` 만 보유에서 뺀다(`[sell_fill_credit_absorbed]`). 주문 크레딧은 자기 주문의 통보만 쓴다 — 우리 재발사 체결이 MTS 주문의 크레딧을 먹으면 유령 보유가 남는다. 원장과 흡수는 출처 · `pos` 유무 · 모호 여부와 무관하게 돈다. 소유 해석 뒤 첫 `await` 보다 앞이다(AST AR2).
+  - 주문번호는 `_odno_key(s)`(앞 0 제거)로 맞춘다 — REST `ODNO` · 체결통보 · TTTC0081R `odno` 의 0-패딩 차이를 흡수한다. 포지션이 닫힐 때 그 종목 크레딧을 지운다. 다섯 구조(`_sell_notice_seen` · `_sell_reflected_credit` · `_sell_blind_credit` · `_manual_sell_orders` · `_selling_locked_wait`)는 `reset_daily_state()` 가 비우고, 같은 자리에서 원장 시작 시각을 그 순간으로 옮긴다(AST AR11 · AR3-1). 주문번호는 하루 단위로만 유일하다. 원장은 메모리에만 있어 재시작하면 빈다 — 그래서 아래 원장 시작 시각을 둔다.
+  - 🔴 **원장 시작 전에 접수된 주문은 `pending` 에서 뺀다(원장 시작 전 주문).** `_sell_ledger_since` 의 뜻 = 「`_sell_notice_seen` 은 이 시각 **뒤**에 처리한 매도 통보를 빠짐없이 담는다」. `__init__`(프로세스 시작)과 `reset_daily_state()` 가 `datetime.now(_KST_TZ)` 로 적는다. 재시작하면 원장이 빈다. 빼지 않으면 그날 재시작 전 체결이 전부 `pending` 으로 잡혀 `eff` 가 작아지고, 손절이 매 틱 발사 없이 보류된다(탐침 — 추적 5 · 계좌 4 · 재시작 전 MTS 6주 체결 → 발사 `[5, 5, 5, 5]`, 판 수량 0). 빼면 분기가 「보유 대 추적」 비교로 돌아가 재대조가 고친다(같은 탐침 → 발사 `[5, 4]`).
+    - 분류 = `_sell_orders_placed_before(rows, ticker, since)`(모듈 함수 · 동기 · never-raise, 예외 = 빈 집합). 그 종목 매도 행의 `ord_dt`(8자리) + `ord_tmd`(6자리)를 `_ord_datetime` 이 KST 시각으로 읽는다. 한 주문의 여러 행(SOR)은 가장 늦은 시각을 쓴다. 그 시각이 `since` 보다 **앞**(`<`)일 때만 넣는다. 🔴 한 행이라도 못 읽으면 그 주문은 「뒤」다 — `pending` 에 세어 덜 쏘는 쪽이다.
+    - 🔴 **벽시계 게이트가 아니다.** 기록된 두 시각(원장 시작 · 그 주문의 접수 시각)을 비교할 뿐이고, 지금 몇 시인지는 판정에 쓰지 않는다. 테스트는 `_sell_ledger_since` 를 상수로 대입한다.
+    - 원장을 「재시작 전 주문의 체결 = 다 봤다」로 채우지 않는다. 부팅은 복원 수량을 KIS 수량에 맞추지 않기 때문이다 — `boot_manager.py` 는 DB 행 수량을 그대로 쓰고, KIS 에 없는 종목의 행만 지운다. 그래서 복원 수량은 `save_position` 실패나 다운타임 체결만큼 KIS 와 다를 수 있다.
+    - 🔴 **원장 시작 전 주문도 크레딧은 적되 상한을 둔다.** 크레딧에서까지 빼면, 재시작 뒤 체결돼 잔고에서는 빠졌는데 통보가 아직인 몫이 두 번 빠진다(과소 추적). 상한이 없으면 원장이 모르는 재시작 전 체결까지 크레딧이 되어, 그 주문이 계속 체결될 때 새 통보를 삼킨다(과대 추적). 상한 = `_pre_cap = max(0, pos.quantity − target_qty − 뒤 주문 크레딧 + _old_credit)` — 이번 재대조가 내리는 폭에 남은 크레딧을 더한 값이다. `_old_credit`(그 주문들의 기존 주문 크레딧 + 종목 크레딧)은 첫 덮어쓰기 **앞**에서 센다. 순서 = 뒤 주문 루프 → `_pre_cap` → 앞 주문 루프(`min(누적 체결 − _sell_notice_seen, _pre_cap)`)이다(AST AR3-5).
+- 🔴 **외부 매도가 일부를 잠가도 안 잠긴 추적 잔여는 판다(부분 잠김 판매).** 4 에서 `held ≥ eff` 면 `surplus = held − eff` · `fire = sellable − surplus` 다. `held − sellable` 은 이 종목에 걸린 매도 전부다(우리 주문 · 수동 매도 · MTS, 매핑 여부 무관). 그래서 새 주문 + 걸린 주문 ≤ 추적이 되고, 우리가 이미 잠근 주식을 두 번 팔지 않는다. 주문 조회는 재대조와 **같은 1건**을 쓴다.
+  - 🔴 **아직 안 온 외부 체결 통보를 먼저 뺀다.** `_sell_pending_dec(fills, pre)`(동기 · `await` 0) = 원장 시작 뒤 주문마다 `max(0, 누적 체결 − _sell_notice_seen − _sell_reflected_credit)` 의 합이다(`pre` 에 든 주문은 세지 않는다). 거래소는 체결했지만 추적에서 아직 안 빠진 수량이다. 빼지 않으면 surplus 를 작게 봐서 운영자 몫을 판다(탐침 — 추적 10 · 계좌 15 · MTS 3주 체결 통보 전 · MTS 4주 걸림 → 전략 몫은 3 인데 6 을 냈다). 🔴 `max(0, …)` 는 **주문마다** 건다 — 합한 뒤 한 번 거르면, 주문 목록이 통보보다 늦은 주문의 음수가 다른 주문의 대기분을 지워 운영자 몫을 판다(AST AR3-3).
+  - 🔴 종목 크레딧(`_sell_blind_credit`)은 `pending` 에서 빼지 않는다 — 유실 통보가 섞일 수 있어, 빼면 `eff` 가 커져 운영자 몫을 판다. 빼지 않으면 덜 쏜다(AST AR2-8).
+  - 🔴 **주문 조회를 못 믿으면 쏘지 않는다**(`fire = 0` → 동결). 걸린 체결 통보와 운영자 초과분을 가를 수 없기 때문이다.
+  - `fire ≥ 1` → `sell_cap = fire` 를 두고 재시도한다(`[sell_qty_partial_sellable]`). `pos.quantity` 는 바꾸지 않는다(C236-F1 — 잠긴 주식도 추적 보유다. 걸린 주문이 취소되면 다시 손절 대상이다).
+  - `fire ≤ 0`(운영자 초과분이 걸린 주문을 덮는다 · 조회 실패) → 보존 · `_selling` 유지 · `_selling_locked_wait` 에 넣고 return 한다. 걸린 주문을 「운영자가 전략 몫부터 판다」로 읽는 보수 해석이다. 운영자 몫을 우리가 파는 쪽보다 낫다. 로그는 걸린 매도가 있는지와 주문 조회 성공 여부로 가른다(AST AR3-6 · AR4-2).
+    - `held > sellable`(무엇이 걸려 있다) → `[sell_qty_partial_locked]`.
+    - `held == sellable` ∧ 주문 조회 실패(`fills is None`) → `[sell_qty_hold_orders_unavailable]`. 진입 때는 `0 < sellable < 추적` 이었는데, 조회 `await` 동안 매도 통보가 추적을 보유 이하로 줄인 경우다. 조회를 못 믿으니 미통보 체결이 있는지 모른다. 그래서 「거래소가 확인한 미통보 체결」 문구를 쓰지 않는다.
+    - `held == sellable` ∧ 주문 조회 성공 → `[sell_qty_unnoticed_fills]`. 원장 시작 뒤 주문의 미통보 체결이 추적 전부를 덮을 때다 — 거래소 기록으로는 전략 몫이 이미 다 팔렸고, 계좌에 남은 것은 운영자 몫이다.
+    - 🔴 **걸린 매도가 없어도 보류한다**(명세 부록 R4 D1). 「걸린 것이 없으면 동결하지 않는다」를 글자대로 따르면 그 순간 재대조로 가서 계좌에 남은 운영자 몫을 판다. 탐침 — 추적 5 · 계좌 4 · 원장 시작 뒤 접수된 MTS 주문 5주 체결, 통보 대기. 글자대로면 재대조가 추적을 4 로 맞춰 다시 쏘고 운영자 4주가 팔린다. 지금은 첫 발사 `[5]` 뒤 보류하고, 통보가 오면 닫혀 계좌 4 가 남는다. 무작위 탐침에서도 글자대로 하면 운영자 몫 매도가 늘어 수용 기준을 못 맞춘다.
+    - 걸린 것 없는 보류를 푸는 주체는 셋이다 — 그 주문의 종료 통보 · 보유 닫힘(닫기 묶음의 동결 해제) · 통보가 유실되면 `selling_reconcile`. 이 보류는 늘 `held == sellable > 0` 이라 `selling_reconcile` 이 풀 수 있다. 「잠김」 문구는 이 두 경우에 뜨지 않는다.
+  - `sellable == 0 ∧ held > 0` → `[sell_qty_locked]` 동결(보존 · `_selling` 유지 · `_selling_locked_wait`).
+- **J-2 — 손절 잔여 재주문 직전 보유 재조회.** `_cancel_and_reorder` 는 30초 전 스냅샷 `remaining` 을 그대로 쏘지 않는다. 마지막 `await`(CANCELLED 장부) 뒤, `place_order` 앞에서 `_reorder_requery(ticker, order_no, remaining)`(동기 · never-raise)가 registry 전수 보유를 다시 본다(AST A4).
+
+  | 주문 · 보유자 | `verdict` | 발사 수량 |
+  |---|---|---|
+  | 수동 매도 라우트 주문(`order_no in _manual_sell_orders`) | `manual` (보유자 1 ∧ 보유 ≥ `remaining` 이면 INFO, 그 밖 WARNING) | `remaining` — 보유와 무관 |
+  | 1, 보유 ≥ `remaining` | `same` (INFO) | `remaining` |
+  | 1, 0 < 보유 < `remaining` | `shrunk` | 보유 |
+  | 0 (또는 보유 ≤ 0) | `gone` | 발사하지 않는다 + `_selling`·`_selling_since`·`_selling_locked_wait` 해제 |
+  | 2 이상 | `ambiguous` | `remaining` |
+  | 판정 예외(바깥 `except` 포함) | `error` | `remaining` |
+
+  - 🔴 **보유에 맞추는 것은 상한이지 증액이 아니다**(`min(remaining, 보유)`). 보유로 올리면 운영자가 남기려던 수량까지 판다.
+  - 🔴 **의심스러우면 쏜다** — 손절 잔여를 버리는 쪽이 더 비싸다. 과대 요청은 KIS 가 APBK0400 으로 막고 #1.5 가 흡수한다.
+  - 🔴 **수동 매도 라우트 주문은 운영자 의도를 따른다.** 운영자가 누른 수량의 대상은 추적 밖 주식일 수 있어 `shrunk`·`gone` 을 적용하지 않는다. 표식은 라우트가 매핑과 같은 동기 구간에서 `_manual_sell_orders[order_no] = _added` 로 단다. 🔴 `strategy_id`·`_order_strategy` 로 추론하지 않는다 — 라우트는 보유 전략이 있으면 그 전략 id 를 적는다(AST AR9). 재주문 번호는 표식을 물려받는다(`_cancel_and_reorder` 결과 블록). 그래서 재주문이 또 부분 체결되면 다음 J-2 도 같은 규칙을 탄다. 과대 요청은 KIS 가 APBK0400 으로 막고 `_cancel_and_reorder` 의 `except` 가 흡수한다.
+  - 취소(`cancel_order`)는 이 재조회와 무관하게 나간다. 그래서 재주문 타이머의 `qty_src == "map"` 게이트는 계속 필요하다(「체결통보 주문수량」 절).
+- 🔴 **원주문을 취소했는데 우리 재주문이 확정적으로 안 걸렸으면 `_selling` 을 푼다.** 우리 것이 하나도 안 걸렸는데 표식이 남으면 잔여 보유의 손절이 `selling_reconcile` 까지 멈춘다. `_cancel_and_reorder` 는 태스크 자신이 한 일 두 가지를 `try` 앞에서 초기화한다 — `_cancel_ok`(원주문 취소 성공) · `_place_state`(`none` · `sending` · `accepted` · `rejected`). `finally` 가 한 번 판정한다(`await` 0, AST AR2-3).
+
+  | 출구 | `_cancel_ok` | `_place_state` | `_selling` |
+  |---|---|---|---|
+  | 쌍 게이트 컷 · 원주문 취소 실패 · 취소 전 교체 취소 | 거짓 | `none` | 유지 — 원주문이 아직 걸려 있거나 이미 끝났다(끝났으면 그 통보가 푼다) |
+  | 취소 성공 → CANCELLED 장부·재조회 중 예외 · 태스크 교체 취소 | 참 | `none` | 해제 |
+  | 취소 성공 → J-2 `gone` | 참 | `none` | 해제(J-2 표의 해제가 먼저 돈다) |
+  | 취소 성공 → 재주문 거부, `_sell_not_placed_reason` 이 이유를 준다(APBK0400 수량 초과 · 장운영시간 외 · 시장가 불가 — 아래) | 참 | `rejected` | 해제(아래 주인·동결 조건) |
+  | 취소 성공 → 재주문 그 밖의 `KisApiError`(EGW00201 · APBK0918 보유 부족 문구 · 코드만 APBK0400 인 다른 문구 · 모르는 코드) | 참 | `sending` | 🔴 유지 — 앞 전송이 접수됐을 수 있다(아래) |
+  | 취소 성공 → 재주문 전송 중 다른 예외(타임아웃 등) · 전송 중 교체 취소 | 참 | `sending` | 🔴 유지 — 거래소에 나갔을 수 있다. 풀면 다음 틱이 한 번 더 낸다. `selling_reconcile` 이 푼다 |
+  | 취소 성공 → 재주문 접수 | 참 | `accepted` | 유지 — 새 주문의 종료가 푼다 |
+
+  - 🔴 **「안 걸렸다」는 `_sell_not_placed_reason(exc)` 한 곳이 가른다**(명세 부록 R4 D2). 모듈 함수 · 동기 · never-raise(예외 = `None`)다. 재주문과 수동 매도 라우트(`src/routes/CLAUDE.md` `manual-sell` 행)가 같은 함수를 쓴다. 분류는 `src.api.balance` 의 기존 판정 함수만 부르고 키워드를 다시 맞추지 않는다(AST AR4-1).
+
+    | 순서 | 예외 | 반환 |
+    |---|---|---|
+    | 1 | `is_sell_qty_exceeded` — APBK0400 ∧ msg1 「수량」·「초과」 | `qty_exceeded` |
+    | 2 | `is_market_closed_rejection` — 장운영시간 외 문구(프리마켓 문구는 두 분류기에 다 걸리고 여기서 끝난다 — `execute_sell` 과 같은 우선순위) | `market_closed` |
+    | 3 | `is_market_order_disallowed` — 시장가 불가 문구(APBK1943 · APBK3013 계열) | `market_order_disallowed` |
+    | — | 그 밖 — `KisApiError` 가 아닌 예외(전송 오류 · HTTP 5xx · `RuntimeError`) · EGW00201 · APBK0918 보유 부족 문구 · 코드만 APBK0400 인 다른 문구 · 모르는 코드 | `None` = 「전송 중」 |
+
+    - 왜 나머지는 「안 걸렸다」의 증거가 아닌가 — `src/api/base.py::_request` 는 주문 POST 도 전송 오류(`httpx.RequestError` — 타임아웃 포함)와 5xx 에서 다시 보낸다. KIS 거부(`rt_cd≠0`)는 다시 보내지 않는다. 그래서 거부 앞에는 전송 실패 시도만 있고, 그 시도가 응답만 잃고 접수됐을 수 있다. 풀면 다음 틱 손절이 걸린 재주문 위에 또 나간다(탐침 — 계좌 20 · 운영자 10 · 재주문 첫 전송 접수 + 재전송 EGW00201 → 운영자 6주 매도).
+    - APBK0400 이 안전한 이유 — J-2 `same`·`shrunk` 면 재주문 수량 R ≤ 추적 T 라, 숨은 재주문 옆에서 APBK0400 이 났다면 다음 틱의 첫 발사 T 도 APBK0400 을 받는다(명세 R3-2-3). 그 뒤 부분 잠김 판매가 걸린 재주문을 빼고 계산한다.
+    - 장운영시간 외 · 시장가 불가가 안전한 이유 — 주문 자체의 결정적 거부다. 시각 · 호가유형 · 종목으로 정해지므로 같은 본문의 앞 시도도 똑같이 거부됐다. 남기면 걸린 주문 없는 `_selling` 좀비가 된다(루트 `CLAUDE.md` 「NXT 매도 거부 좀비 차단」 과 같은 원리). 앞 시도와 뒤 시도 사이에 장 경계가 끼면 성립하지 않는다(「알려진 한계」).
+    - 🔴 분류는 msg1 문구 기반이다. 코드가 같아도 문구가 키워드에 없으면 `None` 이다 — 덜 푸는 쪽이다.
+  - `except KisApiError` 본문은 `_sell_not_placed_reason` 판정 1회와 맨 끝 bare `raise` 뿐이다. `_cancel_and_reorder` 안에서 분류기 셋을 직접 부르지 않는다(AST AR2-3). 이 판정은 「무엇이 안 걸렸나」만 정한다. 「누구의 표식을 푸나」는 `finally` 의 해제 조건(아래)이 정한다.
+  - 유지한 표식은 걸린 재주문의 종료나 `selling_reconcile`(열린 매도 0 · 180초)이 푼다.
+  - 해제 조건의 마지막 항 = `ticker in self._selling_locked_wait or self._manual_sell_orders.get(order_no, True)`. 해제 시점에 읽는다. 자동 주문(표식 없음)과 표식이 참인 manual 은 참이다. **손님 manual**(`_added` 거짓 — 자동 매도가 `_selling` 주인)은 동결 표식이 서 있을 때만 참이다. 동결 표식이 서 있으면 `_selling` 은 우리 `execute_sell` 이 주문 없이 멈춰 세운 것이다. 원주문은 방금 취소됐고 재주문은 안 걸린 것이 확정된 거부로 끝났으니 우리 것이 아무것도 안 걸려 있다. 동결 표식이 없으면 자동 매도의 주문이 걸려 있어 풀지 않는다. 재주문 번호가 표식을 물려받으므로 그 재주문의 재주문도 같다.
+  - 해제는 `_selling` · `_selling_since` · `_selling_locked_wait` 를 함께 비우고 `[reorder_selling_released]` 를 남긴다.
+- **마커** — 전부 `logger.*` 만 쓰고 cap 이 없다(행위 밖).
+  - `[sell_fill_holding_remains] order_no= ticker= owner= sold= held_after= ordered= src=` WARNING — 분할 매도의 성공 서명. `src=increment` 와 짝이면 주문 종료가 거짓일 수 있으니 `[fill_qty_src]` 와 대조한다.
+  - `[sell_fill_exceeds_holding] order_no= ticker= owner= held_before= fill= src=` WARNING — `fill=` 은 `hold_dec` 다. 0 이 정상.
+  - `[sell_fill_owner_from_holding] order_no= ticker= from=<sid|none> to=<sid> src=` WARNING — `from=none` = MTS·발사 창, `from=<sid>` = 장부 전략이 그 종목을 안 들고 있었다(이상).
+  - `[sell_fill_owner_ambiguous] order_no= ticker= sid= holders=<csv|error> src=` ERROR — 0 이 정상, 1건이면 조사.
+  - `[sell_fill_db_error] step=save_position ticker= order_no= owner= held_after= err=` ERROR — 하루 여러 건이면 RDS 를 본다.
+  - `[sell_fill_credit_absorbed] order_no= ticker= fill= absorbed_order= absorbed_blind= hold_dec= src=` WARNING — 늦은 통보를 이중 차감하지 않은 건수.
+  - `[sell_qty_reconciled]` WARNING — 문구 끝에 `credit_src=orders|blind credit_orders= credit_qty= pre_orders= pre_cap=` 가 붙는다. `credit_qty>0` 이면 재대조 순간 통보가 오는 중이었다. `pre_orders>0` 이면 원장 시작 전 접수 주문이 재대조에 섞여 크레딧 상한 `pre_cap` 을 적용했다.
+  - `[sell_qty_reconcile_orders_unavailable] ticker= reason=error|timeout|bad_row|page_full blind_credit=` WARNING — 주문 목록을 못 믿어 종목 크레딧으로 갔다. `blind_credit=` 은 이번 재대조가 더한 몫이다. 0 이 정상.
+  - `[sell_qty_reconcile_skipped] ticker= reason=position_replaced` INFO — 재대조 조회 중 포지션이 닫혔다.
+  - `[sell_qty_partial_sellable] ticker= strategy= held= sellable= positions= surplus= fire= pending=` WARNING — 걸린 외부 주문 옆에서 잔여를 팔았다. `pending>0` 이면 아직 안 온 외부 체결 통보를 빼고 쐈다.
+  - `[sell_qty_partial_locked]` WARNING — 걸린 매도가 있을 때(`held > sellable`)만 뜬다. 문구 끝에 `surplus= fire= pending=<n|?> orders=ok|error|timeout|bad_row|page_full` 가 붙는다. `orders` 가 `ok` 가 아니면 주문 조회를 못 믿어 동결했다.
+  - `[sell_qty_unnoticed_fills] ticker= strategy= held= sellable= positions= pending= eff=` WARNING — 걸린 매도 없이 보류했다(주문 조회는 성공). 드물다. 같은 종목에서 `selling_reconcile` 해제 뒤마다 되풀이되면 통보 유실을 의심한다(계좌에 남은 것은 운영자 몫이라 팔지 않는다).
+  - `[sell_qty_hold_orders_unavailable] ticker= strategy= held= sellable= positions= orders=error|timeout|bad_row|page_full` WARNING — 걸린 매도 없이 보류했는데 주문 조회를 못 믿었다. 드물다. `orders=` 는 조회 실패 이유다.
+  - `[reorder_selling_released] ticker= order_no= place=none|rejected reject=qty_exceeded|market_closed|market_order_disallowed|-` WARNING — 원주문 취소 뒤 우리 재주문이 안 걸려 `_selling` 을 풀었다. `reject=` 는 `_sell_not_placed_reason` 의 이유다. `place=none` 이면 `-` 다. 드물다.
+  - `[selling_freeze_released] ticker= order_no= reason=position_closed` INFO — 동결이 지키던 보유가 닫혀 동결을 풀었다.
+  - `[reorder_requery] verdict= ticker= order_no= remaining= held= fire_qty=` — `same` 은 INFO, `manual` 은 위 표, 그 밖은 WARNING.
+  - 「매도 부분 체결」 INFO 끝의 `held_after=` — 부분 체결마다 남은 보유.
+- ⚠️ **알려진 한계**
+  - **무관한 주문의 종료가 `_selling` 을 푼다.** 우리 손절 주문이 걸려 있는 동안 MTS 주문이나 손님 수동 매도가 끝나면 표식이 풀리고, 다음 틱 손절이 추적 잔여를 또 낸다. 계좌에 운영자 초과분 ≥ 추적 잔여이면 그 발사가 통과해 운영자 몫을 판다. 초과분이 없으면 KIS 가 APBK0400 으로 막는다. 막는 수단은 「걸린 우리 매도 등록부」(후속 F-385-5)다. strict xfail 테스트가 이 성질을 적어 둔다 — `tests/unit/engine/test_cycle385r2_round2.py` TQ22 · `tests/unit/engine/test_cycle385r_partial_locked_sell.py` TR18 · `tests/unit/routes/test_cycle385_manual_sell_selling.py` TR20 · TR20b. TR18·TR20 은 마커가 아니라 행위를 단언하므로, 이 한계가 고쳐지면 XPASS 로 붉어진다. `increment` 퇴화(`fields[16]` 없음)에서 우리 주문의 발사 창 첫 통보가 거짓 「종료」를 만들 때도 결과가 같다.
+  - **과대 추적은 운영자 초과분이 있으면 운영자 몫 매도로 번진다.** 과대 추적은 보통 다음 매도의 APBK0400 → #1.5 가 회수한다. 그 사이 계좌에 운영자 몫이 있으면 APBK0400 이 나지 않고 그 몫이 팔린다. 과대 추적이 생기는 곳은 넷이다.
+    - 재대조의 두 조회 사이(수백 ms)에 난 체결.
+    - 종목 크레딧(주문 조회 실패)이 유실 통보분이나 진짜 유령분까지 들고 있다가 뒤 통보를 흡수한 몫. 우리 매도 체결도 흡수 대상이라 우리 매도가 다 끝나도 추적이 남는다(탐침 — 추적 12 · 계좌 10 · 조회 실패 → 우리 10주 체결 뒤 추적 2 · 계좌 0). 그 뒤 운영자가 같은 종목을 사면 남은 추적만큼 손절이 판다. strict xfail `tests/unit/engine/test_cycle385r3_round3.py` TK13 이 적어 둔다.
+    - 원장 시작 전 접수 주문의 재대조 크레딧. 상한 `_pre_cap` 은 주문마다 걸려 합은 참값을 넘을 수 있다(명세 R3-13-4).
+    - 재대조 `held` 가 t1 전 운영자 수동 매수분을 포함할 때.
+  - 부분 잠김 판매의 `eff` 도 위 첫째·둘째와 같은 폭만큼 참값보다 클 수 있다. 그만큼 surplus 를 작게 봐서, 운영자 초과분이 있으면 운영자 몫을 판다.
+  - **원장 시작 전 접수 주문이 재시작 뒤에도 체결 중이고 통보가 늦으면** 그 체결이 `pending` 에서 빠진 만큼 `eff` 가 크다. 운영자 초과분이 있으면 부분 잠김 판매가 그만큼 더 쏜다(명세 R3-13-2).
+  - **접수 시각을 못 읽는 행은 「뒤」다.** 그 주문이 재시작 전 것이면 재시작 뒤 손절이 `[sell_qty_unnoticed_fills]` 로 보류된다(돈은 안전한 쪽이다). KIS 가 필수 필드 `ord_dt`·`ord_tmd` 를 비울 때만 생긴다. 운영 TTTC0081R 캡처에서 두 필드가 8·6자리 숫자인 것은 매수 행으로만 확인했다 — 매도 행과 SOR 부모·자식 행의 `ord_tmd` 는 재지 않았다(명세 R3-12 F-R3-1).
+  - **다운타임 체결**(프로세스가 죽은 동안의 체결 — 통보 없음)은 복원 수량에 없다. 운영자 초과분이 그 양 이상이면 재시작 뒤 첫 발사가 통과해 운영자 몫을 판다.
+  - **재시작으로 잃은 통보**(전송 중 · 다운타임)는 원장도 크레딧도 모른다. 유령 보유(과대 추적)가 남을 수 있고, 그 보유가 `held_zero` 면 `selling_reconcile` 이 `_selling` 을 풀지 못한다. 과소 추적은 만들지 않는다(명세 R3-1-7 완전 재시작 모의).
+  - **통보 유실 유령** — 원장 시작 뒤 주문의 체결 통보를 잃고 운영자 초과분이 있으면, `[sell_qty_unnoticed_fills]` 보류가 `selling_reconcile` 해제 뒤마다 되풀이된다(APBK0400 1회 + 조회 2회). 계좌에 남은 것은 운영자 몫이라 돈 손실은 없다.
+  - **재주문 해제의 남는 틈** — 셋 다 첫 항목(우리 주문이 `_selling` 없이 걸림) 모양이다.
+    - ① 앞 전송 접수(응답 유실) + 재전송 APBK0400 인데, 숨은 재주문의 부분 체결 통보가 다음 틱 **전**에 착지하면 추적이 재주문 수량 아래로 내려가 APBK0400 보장이 풀린다. 운영자 초과분이 있으면 그 몫이 팔린다(명세 R4-4 R4-1 — 탐침 발사 `[10, 6, 6, 3]` · 계좌 13 → 0 · 운영자 3주 매도. 통보가 다음 틱 뒤에 오면 계좌 3 이 남는다).
+    - ② J-2 `manual`·`ambiguous`·`error` 재주문은 수량이 추적을 넘을 수 있어 같은 보장이 없다(명세 R3-2-3).
+    - ③ **장 경계를 가로지른 재시도** — 앞 시도가 경계 앞에서 접수되고 응답만 잃은 뒤, 재시도가 경계 뒤에서 장운영시간 외·시장가 불가로 거부되면 걸린 주문 옆에서 `_selling` 이 풀린다(명세 R4-1). 닿는 경계는 NXT 15:20 하나다. NXT 로 라우팅된 수동 매도와 NXT 원주문의 재주문만 해당하고, NXT 잔량은 20:00 까지 남는다. 다음 KRX 손절은 운영자 초과분이 걸린 수량 이상일 때만 통과한다. 검토가 본 다른 경계(15:30 KRX · 20:00 · NXT 프리장)는 해당하지 않는다 — 15:30~16:00 은 `_market_rest_gate` 가 자동 매도를 막고 그 사이 걸린 주문이 종가 체결되거나 자동 취소된다.
+  - **교체된 재주문 타이머가 손님 수동 매도 옆에서 `_selling` 을 푼다**(명세 R4-4 R4-7). 손님 수동 매도(`_added` 거짓)가 걸린 동안, 자동 매도 원주문을 취소한 재주문 태스크가 CANCELLED 장부 `await` 창(ms)에서 다음 부분 체결 통보에 교체 취소되면, `finally` 가 `place=none` 으로 표식을 푼다. 다음 손절이 걸린 수동 매도 위에 쌓인다(탐침 — 발사 `[10, 4, 3, 6]` · 계좌 20 → 7). 운영자 초과분이 쌓인 몫보다 작으면 운영자 몫이 팔린다. 첫 항목과 같은 계열이다.
+  - **수동 매도가 발사 여부를 모르는 이유로 실패하면 `_selling` 이 남는다.** EGW00201 · 전송 예외 · 모르는 코드 · 보유 부족 문구는 앞 전송이 접수됐을 수 있어 풀지 않는다(`[manual_sell_selling_kept]`). 그동안 그 종목 자동 손절이 그 주문의 종료 통보나 `selling_reconcile`(15분 sync + 180초, 09:30 전에는 sync 가 돌지 않는다)까지 멈춘다(`src/routes/CLAUDE.md` `manual-sell` 행).
+  - 주문 조회 실패 중 운영자 초과분이 있으면 재대조가 초과분을 추적에 받아들일 수 있다(명세 R-13-8).
+  - 혼합 보유(전략 추적분 + 추적 밖 수동 매수분)의 수동 부분 매도는 전략 보유에서 빠진다 — 주식은 구별되지 않는다. 추적분이 닫힌 뒤 sync 가 나머지를 다시 채택한다.
+  - 우리 주문이 통보 없이 사라지면(MTS 로 우리 주문 취소 · 거래소 자동취소 · 접수 뒤 거부) `_selling` 은 `selling_reconcile` 이 풀 때까지 남는다. 09:30 전에는 sync 가 돌지 않는다. 동결이 기다리던 외부 주문이 통보 없이 사라져도(운영자가 앱에서 취소) 같다.
+  - `_selling` 에 주인 식별자가 없다. 해제하는 순간의 표식이 다른 코루틴이 새로 세운 것일 수 있다(첫 항목 경로로 한 번 풀린 뒤에만). 재주문 해제와 수동 매도 라우트의 되돌림도 표식의 주인을 보지 않는다. 결과는 첫 항목과 같다.
+  - 주문번호 형식(0-패딩)과 SOR 주문의 TTTC0081R 행 모양은 운영에서 재지 않았다(명세 R-14 F-R1·F-R3). SOR 행에 부모·자식 합계 행이 섞이면 파서의 합산이 이중 계산이 된다.
+  - `trade_history.profit_loss` 는 여러 통보로 끝나는 주문에서 마지막 증분으로 덮인다(`update_trade_status` 가 SET 한다). `daily_realized_pnl`(메모리)은 증분 합이라 정확하다.
+- 명세 = `_workspace/red/cycle385_b7_partial_sell_spec.md`(부록 R · R2 · R3 · R4 포함) · 회귀 = `tests/unit/engine/test_cycle385_b7_partial_sell.py` · `tests/unit/engine/test_cycle385_reorder_requery.py` · `tests/unit/engine/test_cycle385r_recount_credit.py` · `tests/unit/engine/test_cycle385r_partial_locked_sell.py` · `tests/unit/engine/test_cycle385r2_round2.py` · `tests/unit/engine/test_cycle385r3_round3.py` · `tests/unit/engine/test_cycle385r4_round4.py` · `tests/unit/routes/test_cycle385_manual_sell_selling.py` · AST = `tests/unit/ast/test_cycle385_ast_b7.py`
 
 ## 체결단가 정합 (`_handle_buy_fill` / `_handle_sell_fill`)
 
@@ -670,8 +833,8 @@ run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, recor
   - `_preview_skip_tickers() -> set[str]` — 자기 보유 ∪ `scanner._collect_protected_tickers_for_scanner()`(전 전략 보유 ∪ 익일청산). 종목 루프가 건너뛰는 집합이다. 🔴 **합집합**인 이유 = 헬퍼는 조회 실패를 조용히 ∅ 로 삼키는데, 그때도 자기 보유는 지켜야 한다. 헬퍼 예외는 흡수한다.
 - **생명주기 훅** (기본 no-op + 서브클래스 override):
   - `_reset_daily_state()` — 일일 transient cross-day 상태 정리. `scheduler._reset_daily_state`(21:30 정산 후) registry 순회가 전략별로 호출한다(try/except graceful). override = momentum `_prev_prdy_rate.clear()`(익일 첫틱 거짓돌파 차단) + BFB `_breakout_first_seen.clear()`. 🔴 **보유결합 필드(`_limit_up_reached`/`_partial_exit`)는 이 훅에서 지우지 않는다** — 익일 보유(LTV 상한가 종목 밤샘) 청산 모드가 깨진다.
-  - `on_position_closed(ticker)` — 포지션 전량 청산(매도 체결) 시 per-ticker 보유결합 상태 정리. 호출 site 는 `order_engine` **정확히 2곳**(`_handle_sell_fill` 전량체결 `if pos:` 후 + `execute_sell` insufficient_qty reconciliation, 각 try/except 격리). override = LTV `_limit_up_reached.discard(ticker)`(재매수 종목의 전일 상한가 모드 누설 차단) + BFB `_partial_exit.pop(ticker, None)`(재진입 익절 억제 차단) + BFB·VCP `register_cooldown_after_exit(ticker)` + `asyncio.create_task(_refine_cooldown_business_days)`(즉시 달력일 근사 `days+2` → CTCA0903R `add_business_days` 로 정확 N영업일 정정).
-  - 불변식 = **"보유 중 flag 유지, 전량 매도 시 clear"**. 포지션 제거 site 가 2곳뿐이라는 것이 누설의 구조적 봉쇄이고 AST `G2-STRUCT-INVARIANT` 가 3번째 site 누락을 막는다. 부분 체결은 full-fill 한정이라 잔량 청산모드가 자연 보존된다.
+  - `on_position_closed(ticker)` — 매도 체결로 보유 축이 닫힐 때 per-ticker 보유결합 상태 정리. 호출 site 는 `order_engine` **정확히 2곳**(`_handle_sell_fill` 의 닫기 묶음 `if close_position:` + `execute_sell` insufficient_qty reconciliation, 각 try/except 격리). override = LTV `_limit_up_reached.discard(ticker)`(재매수 종목의 전일 상한가 모드 누설 차단) + BFB `_partial_exit.pop(ticker, None)`(재진입 익절 억제 차단) + BFB·VCP `register_cooldown_after_exit(ticker)` + `asyncio.create_task(_refine_cooldown_business_days)`(즉시 달력일 근사 `days+2` → CTCA0903R `add_business_days` 로 정확 N영업일 정정).
+  - 불변식 = **"보유 중 flag 유지, 전량 매도 시 clear"**. 포지션 제거 site 가 2곳뿐이라는 것이 누설의 구조적 봉쇄이고 AST `G2-STRUCT-INVARIANT` 가 3번째 site 누락을 막는다. 보유가 남는 매도(부분 체결 · 보유보다 적은 주문)는 훅을 부르지 않으므로 잔여 보유의 청산모드가 보존된다(「매도 체결 — 주문 축과 보유 축」 절).
   - 🔴 `_cooldown_until` 은 multi-day 상태다 — 일일·prepare 리셋 금지(AST `G-191-NO-DAILY-RESET`).
 - **트레일링 기준점 복구 단일 진실원**: `_apply_high_since_buy_from_candles(pos, candles, today)` — `buy_date < 영업일 < today` 일봉 high max 로 고점 보정(**올리기 전용**) + `update_high` DB 영속 + `[high_since_buy_recover]`. base 에 하나만 둔다 — **전략별 복제 금지**(`_HIGH_RECOVER_LABEL` ClassVar 로 로그 접두사만 다르게: donchian "도치안 스윙" / VCP "VCP"). 보조 파서 `_candle_trade_date`/`_candle_high` 는 KIS 원본 키(`stck_bsop_date`/`stck_hgpr`)와 DB 정규화 컬럼(`bas_dd` date 객체/`high_price`) **양쪽을 수용**한다 — `get_recent_daily_normalized` 가 raw 없는 row 를 row 자체로 반환하기 때문이다. `_candle_high` 는 `except Exception: return 0`(OverflowError 포함 — 봉 하나가 배치 복구를 중단시키면 안 된다). ⚠️ `recompute_high_since_buy` 자체는 base 승격 금지(전략별 fetch 소스·일수가 다르다 — donchian/VCP/BFB 자체 정의, kojiro 는 `recompute_held_atr` 에 내장). 소비자 분업 = `risk.on_tick`(메모리 갱신) → boot 훅(일봉 복구 + DB 영속)이고 **on_tick 에 DB write 금지**(회귀 가드).
 - **일봉 신선도 기준 `_resolve_expected_daily_head(as_of_date=None) -> date | None`** — `trading_calendar.previous_trading_day(as_of_date 또는 today_kst())` 를 지연 import 로 부르고(never-raise, 예외 → `None`) `[prepare_expected_head] strategy=<id> expected_head=<YYYY-MM-DD|None>` INFO 1행을 남긴다. 6전략(VB·LTV·donchian·BFB·VCP·kojiro) `prepare()` 가 받은 `as_of` 를 그대로 넘겨(미리보기면 `previous_trading_day(as_of)` — 저녁 미리보기에선 오늘) gather **전에 1회** 불러 `_fetch_one` 안의 `get_recent_daily_normalized(..., expected_head=expected_head)` 로 넘긴다(종목마다 부르지 않는다). 휴장일을 모르면 `None` 을 명시해 넘겨 어댑터의 달력 판정으로 떨어뜨린다. 판정 계약 = `src/db/CLAUDE.md` `stock_master_daily.py` 절. momentum 은 일봉을 쓰지 않아 무관하다.
@@ -801,7 +964,7 @@ run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, recor
   - **폭주 알람**: `_append_history` 단일 진입점에서 10분 윈도우 5건 초과 시 CRITICAL `system_logs` INSERT + 30분 per-ticker cooldown. 임계 상수 `ALARM_WINDOW_SECONDS=600` / `ALARM_THRESHOLD=5` / `ALARM_COOLDOWN_SECONDS=1800`. fire-and-forget(`asyncio.create_task`) — 매매 hot path 블로킹 0.
 - **`is_market_order_disallowed(err)` + `order_division==MARKET`** → 지정가 5호가 폴백 1회. `step_down(scanner.ticker_prices[ticker]["current_price"], 5)` + `LIMIT`. 폴백 결과(성공/실패) 무관 `SellRejectionTracker.register_market_order_disallowed(fallback_succeeded=...)` 위임 → **30초 TTL** 등록(동일 tick 폭주 차단). NXT 시간대 폴백 실패(`is_nxt_session=True, fallback_succeeded=False`)면 `RejectionResult.next_day_clear_required=True` → `_pending_next_day_clear_provider().add((ticker, strategy_id))` + `[next_day_clear_deferred]` WARNING 1행. 폴백 실패 시 `_selling.discard` + positions 보존. 지정가 매도(`limit_price>0`)는 폴백하지 않는다. 키워드 = `시장가호가불가` / `최유리/최우선지정가 주문만` / `지정가 및 최유리`(APBK1943 / APBK3013)
 - **`is_insufficient_quantity(err)`**(보유 수량 부족) → 재시도 중단 + 메모리/DB positions 정리. `SellRejectionTracker.register_insufficient_quantity` 는 history 만 적재하고 **차단하지 않는다**(positions 제거가 자연 차단이다) + `[positions_reconciliation]` INFO + `get_balance()` 1회 호출(실제 잔량 > 0 이면 재등록 권고 로그). 실패 graceful
-- **`is_sell_qty_exceeded(err)` → #1.5 잔고 재대조**: APBK0400 "수량 초과" 는 부분 보유 내재 코드라 insufficient(통째 삭제)로 **흡수 금지**다(257720 실사고). `execute_sell` 재시도 루프에서 closed 다음·insufficient 앞에 `get_balance` 재대조 — ① 오염(`held < positions`) = `[sell_qty_reconciled]` WARNING + **held(보유 실체)로 보정**(sellable 아님 — 잠긴 주식도 보유라 손절 감시 수량은 held 가 정합이고, sellable 부족 재거부는 다음 분기가 흡수한다) + `save_position` DB 동행 + `continue`(3회 한도 내 자기 치유) ② 부분/전량 잠김(`held ≥ positions ∧ sellable < held`) = `[sell_qty_partial_locked]`/`[sell_qty_locked]` WARNING + 보존 + return — **`_selling` 의도적 유지**(열린 기주문이 실재하므로 진행 중 표식이 참이고, on_tick 재진입 폭주를 차단한다. stale 은 `[selling_reconcile]` 180s 재대조 소관. market_closed 의 discard 와 다른 이유 = 그쪽엔 열린 주문이 없다) ③ 실보유 0 = 기존 insufficient 경로 재사용 ④ 재대조 실패 = graceful 일반 재시도. ⚠️ sync 는 기보유 종목 수량을 갱신하지 않으므로 DB 보정 실패 시 구값이 다음 보정·청산까지 남는다
+- **`is_sell_qty_exceeded(err)` → #1.5 잔고 재대조**: APBK0400 "수량 초과" 는 부분 보유 내재 코드라 insufficient(통째 삭제)로 **흡수 금지**다(257720 실사고). `execute_sell` 재시도 루프에서 closed 다음·insufficient 앞에 `get_balance` 재대조. `0 < sellable < positions` 이면 먼저 `_sell_orders_snapshot`(TTTC0081R `get_daily_orders(exchange="ALL", pdno=ticker)` 1건, 2.0초 상한)을 읽고 포지션 객체 동일성을 다시 본 뒤 `eff = positions − 아직 안 온 체결 통보`(`_sell_pending_dec` — 원장 시작 전 접수 주문은 세지 않는다, 조회 실패면 `eff = positions`)로 가른다 — ① 오염(`held < eff`) = **held(보유 실체)로 보정**(sellable 아님 — 잠긴 주식도 보유라 손절 감시 수량은 held 가 정합이고, sellable 부족 재거부는 다음 분기가 흡수한다) + `save_position` DB 동행 + `continue`(3회 한도 내 자기 치유). 보정 전에 주문별 「스냅샷에 이미 반영된 체결」 크레딧을 적는다(조회 실패면 종목 크레딧에 더한다) — 늦은 체결통보가 같은 체결을 두 번 빼지 않게 하는 장치다(「매도 체결 — 주문 축과 보유 축」 절) ② 부분 잠김(`held ≥ eff`) = `fire = sellable − (held − eff)` 이 1 이상이면 그 수량만 판다(`[sell_qty_partial_sellable]`, `pos.quantity` 무변경). 0 이하이거나 조회를 못 믿으면, 전량 잠김(`sellable == 0 ∧ held > 0`)과 같이 `[sell_qty_partial_locked]`(걸린 매도 있음)/`[sell_qty_unnoticed_fills]`(걸린 매도 없음 · 주문 조회 성공)/`[sell_qty_hold_orders_unavailable]`(걸린 매도 없음 · 주문 조회 실패)/`[sell_qty_locked]` WARNING + 보존 + `_selling_locked_wait` 표식 + return — **`_selling` 의도적 유지**(열린 기주문이 실재하거나, 걸린 것이 없으면 운영자 몫을 팔지 않으려고 미통보 체결을 기다리는 보류이고(명세 부록 R4 D1), on_tick 재진입 폭주를 차단한다. 어느 주문이든 종료 통보가 오거나 지키던 보유가 닫히면 푼다. stale 은 `[selling_reconcile]` 180s 재대조 소관. market_closed 의 discard 와 다른 이유 = 그쪽엔 열린 주문이 없다) ③ 실보유 0 = 기존 insufficient 경로 재사용 ④ 재대조 실패 = graceful 일반 재시도. ⚠️ sync 는 기보유 종목 수량을 갱신하지 않으므로 DB 보정 실패 시 구값이 다음 보정·청산까지 남는다
 
 체결통보 race 가드:
 - 주문번호 매핑(`_order_qty / _order_strategy / _order_ticker / _pending_buy_orders`)은 **`place_order` 응답 직후 동기 영역**, `await insert_trade` 진입 *전*
@@ -860,7 +1023,7 @@ run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, recor
 
 체결 후처리:
 - 매수 → DB `positions` 저장 + `cached_buyable_at=0` (가용액 캐시 무효화)
-- 매도 → DB positions 삭제 + `sold_today` 등록. **WS 구독 정리 hook** — `_unsubscribe_if_no_other_strategy(ticker)` 가 (a) `registry.is_ticker_held_by_any(ticker)=False` + (b) `_pending_next_day_clear` 부재 + (c) 모든 전략 `get_scanned_tickers()` 부재 — 모두 통과 시 `kis_ws_pool.unsubscribe(TICK_TR_ID, ticker)`(KIS 정상 패턴 "불필요 종목 구독해제"). `_pending_next_day_clear_provider` 는 scheduler 가 `OrderEngine.__init__` 직후 주입한다(lambda)
+- 매도 → 보유가 남으면 차감 수량을 DB `positions` 에 저장하고 끝난다(「매도 체결 — 주문 축과 보유 축」 절). 보유가 0 이 되면 DB positions 삭제 + `sold_today` 등록 + (주문 종료 분기에서) **WS 구독 정리 hook** — `_unsubscribe_if_no_other_strategy(ticker)` 가 (a) `registry.is_ticker_held_by_any(ticker)=False` + (b) `_pending_next_day_clear` 부재 + (c) 모든 전략 `get_scanned_tickers()` 부재 — 모두 통과 시 `kis_ws_pool.unsubscribe(TICK_TR_ID, ticker)`(KIS 정상 패턴 "불필요 종목 구독해제"). `_pending_next_day_clear_provider` 는 scheduler 가 `OrderEngine.__init__` 직후 주입한다(lambda)
 - 체결통보 처리 실패 안전장치: ticker 매핑 실패 → `pending_buys` 제거, strategy 미발견 → `_selling` 해제
 
 퍼널 카운터: `place_order` 직전 `order_attempt_today += 1`, `_handle_buy_fill` 첫 체결 시 `fill_count_today += 1`

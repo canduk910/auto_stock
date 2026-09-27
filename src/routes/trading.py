@@ -140,14 +140,24 @@ async def manual_sell(req: ManualSellRequest):
 
     ⚠️ 알려진 별건(cycle287 잔여, 이 사이클 범위 밖) — 16:00~20:00 KRX 애프터에
     이 버튼을 누르면 44/41 호가유형 변환도 KRX 라우팅도 없이 시장가가 나가
-    APBK3013 로 거부되고, 실패 경로에 `_selling.discard` 가 없어 stale
-    `_selling` 이 남는다. 처분 = §9-Q3 ③(`execute_sell` 위임) 별도 카드.
+    APBK3013 로 거부된다. 처분 = §9-Q3 ③(`execute_sell` 위임) 별도 카드.
+
+    🔴 cycle385 §g-3 — `_selling` 은 `place_order` **앞**에서 선다(발사되지 않은 것이
+    확정된 실패(APBK0400 · 시장가 불가 · 장운영시간 외 — `_sell_not_placed_reason`)만
+    되돌리고, 그 밖의 실패·발사 뒤는 그 주문의 종료 통보 또는
+    `selling_reconcile` 이 해제한다). 시장가가 REST 응답보다
+    먼저 체결되면(체결통보가 `place_order` 의 await 도중 도착) 주문 종료가 먼저
+    `_selling.discard` 를 하므로, 뒤에 세우면 열린 주문이 없는데 표식만 남는
+    좀비가 되어 B7 이후 잔여 보유의 손절을 막는다.
     """
+    from datetime import datetime
+
     from src.api.order import place_order
     from src.models.order import OrderSide
     from src.db.trade_history import insert_trade
     from src.models.trade import TradeRecord, TradeType, TradeStatus
     from src.engine.scanner import t, ticker_names
+    from src.engine.order_engine import _KST_TZ, _sell_not_placed_reason
 
     registry = trading_scheduler.registry
 
@@ -162,6 +172,16 @@ async def manual_sell(req: ManualSellRequest):
     if strategy:
         exchange = str(strategy.config.params.get("exchange", "KRX")).upper()
 
+    engine = trading_scheduler.order_engine
+    # 🔴 cycle385 §g-3 — 발사 앞에서 선다. 이미 자동 매도가 진행 중이면
+    # (`_added` 거짓) 건드리지 않는다 — 그 표식은 그 매도가 주인이다.
+    _added = req.ticker not in engine._selling
+    if _added:
+        engine._selling.add(req.ticker)
+        engine._selling_locked_wait.discard(req.ticker)
+        engine._selling_since[req.ticker] = datetime.now(_KST_TZ)
+    _sent = False
+
     try:
         result = await place_order(
             ticker=req.ticker,
@@ -170,15 +190,15 @@ async def manual_sell(req: ManualSellRequest):
             price=0,  # 시장가
             exchange=exchange,
         )
+        _sent = True  # 🔴 여기부터는 주문이 이미 거래소에 있다 — 아래 실패는 되돌리지 않는다
 
         # 주문 추적 매핑 등록 — `place_order` 응답 직후 동기 영역에서 수행해야
         # 시장가 즉시체결 시 체결통보가 insert_trade await 도중 도착해도
         # `_order_ticker[order_no]`가 비어있지 않다 (CLAUDE.md 안전장치 준수)
-        engine = trading_scheduler.order_engine
         engine._order_qty[result.order_no] = req.quantity
         engine._order_strategy[result.order_no] = strategy_id
         engine._order_ticker[result.order_no] = req.ticker
-        engine._selling.add(req.ticker)
+        engine._manual_sell_orders[result.order_no] = _added
 
         # trade_history 기록 (await — 위에서 이미 매핑 등록 완료)
         name = ticker_names.get(req.ticker, "")
@@ -209,5 +229,21 @@ async def manual_sell(req: ManualSellRequest):
         )
 
     except Exception as e:
-        logger.error("수동 매도 실패: %s — %s", req.ticker, e)
+        # 🔴 cycle385 부록 R3 K2 · R4 D2 — 「발사 안 됨」이 **확정된** 실패만 되돌린다
+        # (`_sell_not_placed_reason` = APBK0400 · 시장가 불가 · 장운영시간 외). 그 밖은 표식을 두고 그 주문의
+        # 종료 통보 또는 `selling_reconcile` 에 맡긴다. 발사 뒤(`_sent`) 실패는 되돌리지 않는다.
+        _released = "-"
+        if _added and not _sent:
+            _not_placed = _sell_not_placed_reason(e)
+            if _not_placed is not None:
+                engine._selling.discard(req.ticker)
+                engine._selling_since.pop(req.ticker, None)
+                _released = _not_placed
+            else:
+                logger.warning(
+                    "[manual_sell_selling_kept] ticker=%s err=%s — 발사 여부를 확정할 수 없어 "
+                    "_selling 유지(열린 주문이 없으면 selling_reconcile 이 푼다)",
+                    req.ticker, e,
+                )
+        logger.error("수동 매도 실패: %s — %s selling_released=%s", req.ticker, e, _released)
         return ApiResponse(success=False, message=f"매도 주문 실패: {e}")

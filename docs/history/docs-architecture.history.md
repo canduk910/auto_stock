@@ -771,3 +771,46 @@ flowchart TB
 경위: cycle374 가 접수 전문의 `[3]`·`[12]` 를 `[order_notice]`·`[order_rejected_notice]` 로그에 싣는다 — 「파싱하지 않는다 · 코드 참조 0건」 은 사실이 아니게 됐다(상태 반영은 여전히 없다). T2 행의 줄 앵커 `handler.py:698-700` 은 이미 밀려 있었고(HEAD 기준 호출은 711행) 15.5 서두 규약대로 심볼 앵커로 바꿨다.
 
 → CHANGELOG: cycle374 행
+
+## 5. 일일 매매 스케줄 시퀀스 — KRX/NXT 통합 (매매 08:00~20:00 · 저녁 작업 ~21:30)
+
+### 2026-09-27 cycle385 — SELL 분기
+
+정본 원문(시퀀스 도식 SELL 분기):
+
+```
+    else SELL
+        Note over O: _handle_sell_fill()<br/>Position 제거 (메모리)
+        O->>D: delete_position()
+        Note over O: sold_today.add(ticker)
+    end
+```
+
+## 6. 체결통보 처리 시퀀스
+
+### 2026-09-27 cycle385 — `_handle_sell_fill()` 노트
+
+정본 원문(노트 한 줄):
+
+```
+            Note over O: _handle_sell_fill()<br/>손익 계산 (체결가 - 매수가) × 수량<br/>Position 삭제<br/>DB positions 삭제<br/>sold_today 등록<br/>_selling 해제<br/>trade_history COMPLETED<br/>(UPDATE 0건이면 → COMPLETED 직접 INSERT<br/>+ _completed_orders.add(order_no))
+```
+
+## 15. 프로세스 분리 로드맵
+
+### 2026-09-27 cycle385 — T7 행 · 15.5.6 `_selling` 해제 지점
+
+정본 원문(15.5.2 T7 행 비고 중 한 구절):
+
+매도 전량 체결 뒤 `_handle_sell_fill` 이 부르는 `OrderEngine._unsubscribe_if_no_other_strategy`.
+
+정본 원문(15.5.6 중 한 문단):
+
+  따라야 할 규율의 원형은 이미 있다 — `_selling` 은 `execute_sell` 진입에 add 된다. 주문이
+  접수된 뒤 그것을 푸는 곳은 셋뿐이다 — 체결통보(`_handle_sell_fill` 의 전량 체결 분기 · 전략 미발견
+  분기) · KIS 재대조(`_sync_positions_from_balance` → `reconcile_stale_selling` — 보유 잔존 ∧ 열린
+  매도주문 없음 ∧ `SELLING_RECONCILE_MIN_AGE_S` 경과) · 21:30 `_reset_daily_state`.
+
+경위(세 절 공통): cycle385 가 매도 체결을 주문 축(`total_filled >= ordered_qty`)과 보유 축(`pos.quantity` 차감 → 0 이면 닫기)으로 나눴다. 보유가 남으면 삭제 대신 `save_position` 으로 차감 수량을 저장하고, `_selling` 은 주문이 끝나면 보유가 남아도 푼다. 구독 해제는 주문이 끝나고 보유가 0 일 때만이다. J-2 가 `_cancel_and_reorder` 의 재조회에서 보유 0 을 보면 재주문하지 않고 `_selling` 을 푸는 해제 지점을 새로 만들었다(HEAD 의 셋 — 체결통보 · KIS 재대조 · `_reset_daily_state` — 에 더해진다). 수동 매도 라우트는 `_selling` 을 `place_order` 앞에서 세운다. 같은 사이클의 부록 R2(2차 검토 H5)가 `_cancel_and_reorder` 에 두 번째 해제를 더했다 — 원주문을 취소했는데 재주문이 확정적으로 안 걸리면(`KisApiError` · 발사 전 종료) 우리 것이 하나도 안 걸린 채 표식만 남기 때문이다. 부록 R2-5 는 동결이 지키던 보유가 닫히면 동결을 푸는 해제를 체결통보 분기에 더했다. 그래서 해제 지점을 체결통보 · 재주문 태스크 · KIS 재대조 · `_reset_daily_state` 「넷」 으로 묶어 적었다. 주문 종료 분기의 해제는 어느 주문의 종료든 조건 없이 한다 — 부록 R 이 「표식을 세운 주문의 종료로만」 좁혔던 규칙은 커밋 전에 걷었다(명세 부록 R2-1).
+
+→ CHANGELOG: cycle385 행

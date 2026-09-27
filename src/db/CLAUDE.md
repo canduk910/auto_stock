@@ -68,7 +68,7 @@ AWS RDS PostgreSQL CRUD 모듈. DB 클라이언트 정본 = **`pg.py` (asyncpg �
 
 | 함수 | 계약 |
 |---|---|
-| `save_position(ticker, ticker_name, buy_price, quantity, order_no, strategy_id, buy_date, high_since_buy=0)` | `ON CONFLICT (ticker) DO UPDATE` upsert. **ticker 가 PK** = 한 종목은 한 포지션. `high_since_buy` 가 0·미지정이면 `buy_price` 로 채운다(트레일링 고점의 하한이 매수가라는 계약 — 0 으로 남기면 첫 틱에 고점이 0 에서 출발해 트레일링이 즉시 발동한다) |
+| `save_position(ticker, ticker_name, buy_price, quantity, order_no, strategy_id, buy_date, high_since_buy=0)` | `ON CONFLICT (ticker) DO UPDATE` upsert. **ticker 가 PK** = 한 종목은 한 포지션. 갱신 때 **빈 종목명은 저장된 이름을 덮지 않는다**(`ticker_name = COALESCE(NULLIF(EXCLUDED.ticker_name, ''), positions.ticker_name)`) — 호출자(매수 체결 · #1.5 재대조 · 분할 매도 뒤 잔여 저장)는 이름 캐시가 비면 빈 이름을 넘긴다. 새 행 INSERT 는 넘긴 값 그대로다. `high_since_buy` 가 0·미지정이면 `buy_price` 로 채운다(트레일링 고점의 하한이 매수가라는 계약 — 0 으로 남기면 첫 틱에 고점이 0 에서 출발해 트레일링이 즉시 발동한다) |
 | `delete_position(ticker)` | 청산 완료 시 1행 삭제 |
 | `load_all() -> list[dict]` | 부팅 복구용 전량 조회 |
 | `update_high(ticker, high)` | 트레일링 고점 갱신 |

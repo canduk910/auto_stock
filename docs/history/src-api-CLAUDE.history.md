@@ -378,3 +378,15 @@ KIS 가 코드를 늘려도 새 값이 자동으로 "활성" 으로 읽히게 �
 정규화는 적대적 검토 뒤 메인 세션 결정(사용자 승인 범위 안)이다.
 
 → CHANGELOG: cycle368 행
+
+## balance.py — 잔고/조회
+
+### 2026-09-27 cycle385 부록 R — `get_daily_orders` 서명에 `pdno` 추가
+
+정본 원문(`get_daily_orders` 항목):
+
+- `get_daily_orders(target_date="", exchange="ALL", *, odno="")`: TTTC0081R. `EXCG_ID_DVSN_CD` query required — `ALL`(기본, KRX+NXT+SOR 합산) / `KRX` / `NXT` / `SOR`. NXT 체결 누락 방지 위해 기본 ALL. `odno`(keyword-only)는 `ODNO` 필터라 그 주문 1건의 행만 돌려준다(cycle373 실측). 기본값 `""` 이면 params 가 전체 목록 조회와 같다. 소비처 = `engine/buying_reconcile.py`(자기 주문 행 조회 — 전체 목록의 첫 쪽 잘림에 기대지 않는다)
+
+경위: cycle385 부록 R(적대 검토 F-1)이 `execute_sell` #1.5 재대조에 주문별 크레딧을 넣으면서 그 종목 매도 주문만 읽으려고 keyword-only `pdno=""` 를 더했다(params `"PDNO": pdno`). 기본값 호출의 params 는 byte 동일하다(`tests/unit/api/test_cycle385r_daily_orders_pdno.py`). `PDNO` 필터가 실제로 서버에서 먹는지는 운영에서 재지 않았고, 소비처가 행을 다시 거른다.
+
+→ CHANGELOG: cycle385 행

@@ -231,3 +231,7 @@
   - "frontend/src/utils/__tests__/stockChart.cycle387.test.ts"
   - "frontend/src/components/__tests__/StockChartModal.cycle387.test.tsx"
   - "frontend/src/components/__tests__/stockChartOpen.cycle387.test.tsx"
+
+# cycle385 부록 R — AST 가드(A8·AR8·AR2-2·AR3-7)가 manual-sell 라우트 소스를 파일로 읽는다(import 없음).
+"src/routes/trading.py":
+  - "tests/unit/ast/test_cycle385_ast_b7.py"
