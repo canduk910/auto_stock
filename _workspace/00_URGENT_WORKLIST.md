@@ -35,7 +35,10 @@
 - 돈키언: **신규 매수 중지**(설정으로는 불가 — 매수 창이 코드 고정 09:05~09:30) → 공통 `buy_paused` 파라미터 신설 후 PUT. 개조는 **(A) 전용 브랜치 `feat/donchian-kkangto-exit`** 에서 미리 완성 → 돈키언 보유 0 이 된 첫 장외 창에 합치고 배포 → `buy_paused` 해제. 청산 카드 2(돈키언 오늘 ATR)는 개조에 흡수
 1. ✅ cycle379 ⑨A · ✅ cycle380 ETF 판정 · ✅ cycle382 시장 유닛 `2590cc9` full 09-27 13:4x(CI·Deploy·`/health` 200, 4전략 `shadow`)
 2. ✅ cycle384 `ba5bea1` full 09-27 16:0x(CI·Deploy·`/health` 200) + ✅ **돈키언 `buy_paused=true` PUT 09-27 16:14** — 사전 점검 API=DB(`turtle`·5·−6.0, 설정 로드 정상) · 사후 API `true` · DB `true`(boolean) · `enabled`·비중 0.15·보유 3종목(030530·067310·095340) 그대로 · BFB `entry_end` 09:04 그대로. 09-28 확인 = 09:05 스윙 폴에서 돈키언 후보가 있으면 `[buy_paused_config] … paused=1` WARNING + 후보별 `[buy_paused_skip]`, 돈키언 BUY 0건(없으면 결함 아님 — GET·DB 가 정본). 이하 원 설명: `buy_paused`(공통 파라미터 — 신규 매수 신호만 막고 청산은 그대로) + 돈키언 매수 멈춤(09-28 09:05 전, 절차 = `red/cycle384_buy_paused_spec.md` §11: GET·DB 로 설정 로드 확인 → PUT `{"params":{"buy_paused":true}}` → GET·DB 재확인. 해제 = 같은 PUT `false` · 🔴 멈춘 동안 코드 되돌림 금지(키가 사라지면 조용히 풀린다)) → B7 분할 매도(8영역, 장 마감 뒤 배포) → B4-3 → B4-5 → B4-6 → ⑦ 18번 → 카드 E → ⑨B(MTS 시험 주문 데이터 뒤)
-   → **B7 = cycle385, 브랜치 `feat/cycle385-b7-partial-sell`(워크트리 `../auto_stock_c385`)에서 개발 중** — 배포는 09-28 실측 뒤 장외 창
+   → **B7 = cycle385 완료·미배포** — 브랜치 `feat/cycle385-b7-partial-sell` 커밋 `c825433`(원격에도 push, CI 는 main 만 돈다) · 워크트리 `../auto_stock_c385`. 4차례 검토 끝에 tester PASS·검토 GO: 전체 13,616 passed, 무작위 체결 탐침 안전 지표 전부 ≤ B7 1차, 돌연변이 94/94. 명세 = 그 브랜치 `_workspace/red/cycle385_b7_partial_sell_spec.md`(부록 R~R4).
+     - **배포 전 확인(09-28 실매도 행으로, 읽기 전용)**: F-R1 체결통보 `order_no` 와 TTTC0081R `odno` 가 `_odno_key` 뒤 같은가(SOR·NXT 주문 포함) · F-R3 SOR 주문에 부모·합계 행이 따로 오는가(오면 합산이 이중이 된다) · F-R3-1 실전 **매도** 행에 `ord_dt`·`ord_tmd` 가 실리는가(비면 재시작 뒤 동결 방지가 무력화 — 돈은 안 잃는 방향)
+     - 셋이 맞으면 main 으로 합치고 장외 창에 full 배포(8영역 `order_engine.py`). 🔴 그 전까지 봇 보유 종목의 **수량보다 적은 수동·MTS 매도 금지**(지금 코드는 남은 주식을 추적에서 지운다)
+     - 알려진 한계(문서화됨): 운영자가 같은 종목을 따로 더 들고 있을 때의 좁은 경합 몇 가지(LOW #3·R4-1·R4-7·N2), 재시작 직후 첫 재대조의 과대 추적
 3. 병행(코드 무관): KRX ETF 5년치 수집(cycle383) — 도구 `f5df838` 완료, **KRX ETP 이용 승인 대기**(사용자 09-27 신청 · ETN·ELW 불필요 · 범위 2020-10-01~승인 시점 최근 거래일, 재개 명령 = `domain_consult/cycle383_krx_etf_archive_build.md` §5·§9) → 재측정 → 문턱 T1~T6 판정
 4. 실측 뒤: cycle364 S2 · 청산 카드 3·4(BFB 보유 소진 뒤, 10-03~04)
 5. 돈키언 개조(브랜치 → 보유 0 에 합침)
