@@ -387,8 +387,10 @@ _BASE_SHA = {
     "src/engine/scheduler.py":
         "b1aaa4816267adb49207fd043a3d640144f4eb493980fcd1302ffb02ef086d54",
     # 🔁 cycle369 R2 재핀 — buy-block 게이트(`_status_buy_blocked` 승격) + STATUS_EXIT Signal + Q7 edge-baseline clear 배선(전략 7파일은 무변경, 배선은 이 파일)
+    # 🔁 cycle382 리뷰 재핀(값만) — `_market_unit_tally_roll` 을 `tally.date != day`
+    # 에서 `tally.date < day`(더 늦은 날짜에서만 롤)로 시정(§8, 사용자 승인 범위 밖 무접촉).
     "src/engine/strategy_base.py":
-        "e9b379dcae6e4db664b2f159442b11bac3bf00be6e4481680332da494b61bf8e",
+        "448c03026e576d9a520e1863a382e35f2f35574c695458c8054e9d3e60a9821f",
     # 🔁 cycle296(2026-09-17) 재핀 — 사용자 승인 `issue()` 매니저 단위 in-flight 합류(`src/auth/**`). 같은 값을 10곳 동시 갱신했다.
     "src/auth/token.py":
         "4125c271b4147e59922f4f000e523429fb4bbef37058dc754fd92b9475ec58f1",
@@ -419,13 +421,13 @@ _BASE_SHA = {
     "src/engine/strategies/momentum.py":
         "38743ab1ecdb4aa9bcd6ac37e5d28f75501d2d4eceb2e70f3aace44d00d502a1",
     "src/engine/strategies/donchian_swing.py":
-        "abcb1fbe2402aa4bcd0eefd8f44c2b1ed3ac395e8e5dce589fdd66928d0e3854",
+        "553f2d623e6559ef1ff7d88758da0306fc6037047d7d661f8e38c42a64d306a1",
     "src/engine/strategies/kojiro.py":
-        "ee2498d3980a1e2e5fdfabd0738eb78573558525122628a3f1905e06a519044e",
+        "180b0c36ebb9c49363b20c2aed134910c9f5cdb54224f1488a5a93d58db4b1c2",
     "src/engine/strategies/vcp_breakout.py":
-        "fdf0c5fea093b1b3bd9ebc6a5a785c59b04ddbf36a09ff8389db461b73221f22",
+        "de3a7342310a72d296636196f97e3c337e662962b9eacae6704aab7f43d7c1ed",
     "src/engine/strategies/bull_flag_breakout.py":
-        "d02a953e95c4f036eb60d7cf05eb0258dddc883dbe97e4325f8846165942204c",
+        "6d7a38f28d24d2c20cff195916c5641565310376a405ce4e23c48db3ed919165",
 }
 
 # cycle272 시점 = cycle274 배선 **이전**의 메서드 세그먼트 sha. C11 은 이 값으로의

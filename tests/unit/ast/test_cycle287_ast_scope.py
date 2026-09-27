@@ -135,8 +135,11 @@ _BASE_SHA = {
     # 🔁 cycle364(2026-09-26) 재핀 — `prepare(as_of=)` A1 미리보기 + PV-1 헬퍼 추가(사용자 승인 D3).
     # 🔁 cycle369 R2 재핀 — buy-block 게이트(`_status_buy_blocked` 승격) + STATUS_EXIT Signal + Q7 edge-baseline clear 배선(전략 7파일은 무변경, 배선은 이 파일). 직전 값(cycle364) =
     # `e7cc4965ce8d1e2e35bb04b427799b0898f744754415a7942fd546d6d22ca89e`.
+    # 🔁 cycle382 리뷰 재핀(값만) — `_market_unit_tally_roll` 을 `tally.date != day`
+    # 에서 `tally.date < day`(더 늦은 날짜에서만 롤)로 시정(§8, 사용자 승인 범위 밖 무접촉).
+    # 직전 값 = `4516f1a94f2d05de24dfed24d165b62b11a230374795c593247f9906803d085f`.
     "src/engine/strategy_base.py":
-        "e9b379dcae6e4db664b2f159442b11bac3bf00be6e4481680332da494b61bf8e",
+        "448c03026e576d9a520e1863a382e35f2f35574c695458c8054e9d3e60a9821f",
     # 시각 표의 **유일 정본** — cycle287 은 읽기만 했다. 바꾸면 픽스처 동기 사슬
     # (`tools/test_fixtures/gen_market_state_fixture.py` + 프론트/E2E 픽스처 2)이
     # 통째로 딸려 오고, cycle282 `test_i1/i2/i3` 가 즉시 RED 다(실증: cycle289 가
@@ -165,17 +168,17 @@ _BASE_SHA = {
     "src/engine/strategies/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "src/engine/strategies/bull_flag_breakout.py":
-        "d02a953e95c4f036eb60d7cf05eb0258dddc883dbe97e4325f8846165942204c",
+        "6d7a38f28d24d2c20cff195916c5641565310376a405ce4e23c48db3ed919165",
     "src/engine/strategies/donchian_swing.py":
-        "abcb1fbe2402aa4bcd0eefd8f44c2b1ed3ac395e8e5dce589fdd66928d0e3854",
+        "553f2d623e6559ef1ff7d88758da0306fc6037047d7d661f8e38c42a64d306a1",
     "src/engine/strategies/kojiro.py":
-        "ee2498d3980a1e2e5fdfabd0738eb78573558525122628a3f1905e06a519044e",
+        "180b0c36ebb9c49363b20c2aed134910c9f5cdb54224f1488a5a93d58db4b1c2",
     "src/engine/strategies/long_tail_volatility.py":
         "04f8a74767c6114147d78aa4d2b2ff10e59ac10266df2267a2565679ba940317",
     "src/engine/strategies/momentum.py":
         "38743ab1ecdb4aa9bcd6ac37e5d28f75501d2d4eceb2e70f3aace44d00d502a1",
     "src/engine/strategies/vcp_breakout.py":
-        "fdf0c5fea093b1b3bd9ebc6a5a785c59b04ddbf36a09ff8389db461b73221f22",
+        "de3a7342310a72d296636196f97e3c337e662962b9eacae6704aab7f43d7c1ed",
     "src/engine/strategies/volatility_breakout.py":
         "45d860c693f83b995f959d4b88c024cba2b885a9267514a746e23372db8721d5",
 }
@@ -221,7 +224,10 @@ _BASE_SHA = {
 #: 🔁 cycle380 재핀 — 신규 leaf `src/engine/etf_like.py`(ETF 판정 증권그룹코드 전환,
 #: 사용자 승인) 추가로 160 → **161**. `scanner.py`(8영역) + 6전략 + `db/stock_master.py`
 #: 도 이 사이클에 함께 바뀌지만 파일 수는 신규 1개뿐이다.
-_SRC_TREE_FILES = 161
+#: 🔁 cycle382 재핀 — 신규 leaf `src/engine/market_unit.py`(시장 유닛 단계형,
+#: 사용자 결정 09-27) 추가로 161 → **162**. `strategy_base.py` + 터틀 4전략 +
+#: `param_catalog.py` 도 이 사이클에 함께 바뀌지만 파일 수는 신규 1개뿐이다.
+_SRC_TREE_FILES = 162
 #: ⚠️ 값은 **cycle285 적대 검증 반영** 기준선이다. 그 직전(초판 cycle285 배포)
 #: digest 는 `97483c5114a1d00dc8f7ca7c1ed08e1b3dc1d0b585065b14176dc227da9bed8c` 였다.
 #: cycle287b 배포분의 digest 는
@@ -590,8 +596,17 @@ _SRC_TREE_FILES = 161
 # (VB·LTV·donchian·BFB·VCP·kojiro) + `db/stock_master.py` 가 움직여 파일 수
 # 160 → **161**(신규 1). 직전 값 =
 # `0b40e6373438fc3dc1126691352650d14490be0bcc84e7850dca75f2424ac8fe`.
+# 🔁 cycle382(2026-09-27) 재핀 — 시장 유닛(단계형, 사용자 결정). 신규 leaf
+# `src/engine/market_unit.py` + `strategy_base.py` + 터틀 4전략 +
+# `param_catalog.py` 가 움직여 파일 수 161 → **162**(신규 1). 직전 값 =
+# `ff6d3f1292391601a9a5b3720ac65b2c3f0d6ceb8ef4143989586ba2804aa60f`.
+# 🔁 cycle382 리뷰 재핀(값만, 파일 수 불변 162) — `strategy_base.py`
+# (`_market_unit_tally_roll` §8 시정) + `param_catalog.py`(`market_unit_mode`
+# 「off」 텍스트 정정) + `market_regime.py`(주석만 — E-2 계획 폐기, 시장 유닛으로
+# 대체) 내용만 바뀌었다. 직전 값 =
+# `b5e721dc55d70ce9351d8b97108b3be9a59f4f04e73abed30293c46e6597f5ba`.
 _SRC_TREE_DIGEST = (
-    "ff6d3f1292391601a9a5b3720ac65b2c3f0d6ceb8ef4143989586ba2804aa60f"
+    "e90e5020620ada1c87378508178b2b97fbb6613e68b8caecafc4b5935bf1045e"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
@@ -618,7 +633,8 @@ _PINNED_DIR_FILE_COUNTS = {
     # cycle369 — 신규 leaf `status_exit_watch.py` 로 80 → 81.
     # cycle379 — 신규 leaf `buying_reconcile.py` 로 81 → 82.
     # cycle380 — 신규 leaf `etf_like.py` 로 82 → 83.
-    "src/engine": 83,
+    # cycle382 — 신규 leaf `market_unit.py` 로 83 → 84.
+    "src/engine": 84,
 }
 
 #: `scheduler.py` 정확 라인 수 + cycle257 영구 상한.

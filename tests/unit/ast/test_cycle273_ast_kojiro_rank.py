@@ -65,11 +65,13 @@ def _call_names(tree: ast.AST) -> list[str]:
 # C10 (G-273-7) — 진입/수량/청산 소스 세그먼트 sha 불변 (영구)
 # ===========================================================================
 
+#: 🔁 cycle382 재핀 — 시장 유닛(단계형) 신호 필터(`check_buy_signal`) + 사이징
+#: 진입 훅(`calc_buy_quantity`), 사용자 결정 09-27. `check_exit_signal` 은 무접촉.
 _KOJIRO_PINS = {
     "check_buy_signal":
-        "dda6c6fc318afec8db576826f4cfc16d03fdc6dbdd544e7accc3f8a41de9e74f",
+        "0299d9fdf96c9773659989c9b88bb7a2a67050c96f5a6e065d403258071eef87",
     "calc_buy_quantity":
-        "f3491400f38b3295d37767b008c8821883f8443e76efe6ca26e792bf00e3c17e",
+        "c144f15de94a9f7069ac6cf650066dc12472cffdc3280a63e840b31aa544f84d",
     "check_exit_signal":
         "067a60219099b081c64172986f46528a2836b1ad457c081ac06784c4ab9af7fc",
 }

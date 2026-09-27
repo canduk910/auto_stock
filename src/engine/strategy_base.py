@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta, timezone
 from enum import Enum
-from typing import ClassVar
+from typing import Any, ClassVar, NamedTuple
 
 from src.engine.daily_emit_cap import KstDailyEmitCap
 from src.engine.observer_trace import trace_observer_failure
@@ -209,6 +209,39 @@ class StrategyConfig:
     params: dict = field(default_factory=dict)
 
 
+class MarketUnitView(NamedTuple):
+    """cycle382 — 시장 유닛 현재 view (매 호출 즉시 재평가, 캐시 없음)."""
+
+    mode: str
+    m: float
+    state: str
+    reason: str
+
+
+class MarketUnitLots(NamedTuple):
+    """cycle382 — 시장 유닛 설계 랏 계산 결과 (`StrategyBase._market_unit_lots`)."""
+
+    path: str
+    atr: float
+    design_before: int
+    design_after: int
+    lot_before: int
+    lot_after: int
+    remaining_qty: int
+    fallback: str
+
+
+class _MarketUnitCaps:
+    """cycle382 — 전략 인스턴스별 시장 유닛 emit cap 3개(state·attempt·warn)."""
+
+    __slots__ = ("state", "attempt", "warn")
+
+    def __init__(self) -> None:
+        self.state: KstDailyEmitCap[str] = KstDailyEmitCap[str]()
+        self.attempt: KstDailyEmitCap[str] = KstDailyEmitCap[str]()
+        self.warn: KstDailyEmitCap[str] = KstDailyEmitCap[str]()
+
+
 def _resolve_ticker_name(ticker: str) -> str:
     """사이클 41 (2026-05-22) — funnel 단계별 캡처용 종목명 lookup 헬퍼.
 
@@ -250,6 +283,11 @@ class StrategyBase(ABC):
     # 상호 배타). 두 키가 서로 다른 값을 동시에 가지면 채택하지 않는다(ambiguous).
     _SIZING_ATR_KEYS: ClassVar[tuple[str, ...]] = ("atr", "atr14")
 
+    # cycle382 — 시장 유닛 ATR 소스 키. 터틀 4전략(kojiro/donchian/BFB/VCP)이
+    # 각자 실제로 읽는 후보 ATR 키로 override 한다(kojiro·donchian="atr" /
+    # BFB·VCP="atr14"). 그 밖 3전략은 시장 유닛 헬퍼를 부르지 않는다(AST A04).
+    _MARKET_UNIT_ATR_KEY: ClassVar[str | None] = None
+
     def __init__(self, config: StrategyConfig):
         self.config = config
         self.state = StrategyState(strategy_id=config.strategy_id)
@@ -273,6 +311,11 @@ class StrategyBase(ABC):
         # **별개 인스턴스** — 한 사이클의 키 폭주·날짜 리셋이 다른 사이클 관측을
         # 지우지 않게 한다(cycle236 "별개 cap 가드" 선례). 날짜 키 자기 리셋(KstDailyEmitCap 내장).
         self._ratio_cap_logged: KstDailyEmitCap[str] = KstDailyEmitCap[str]()
+        # cycle382 — 시장 유닛(단계형) 스냅샷은 거래일별로 담는다(오늘 · 다음
+        # 거래일 최대 두 칸). caps 3개(state·attempt·warn) + 일일 집계 tally.
+        self._market_unit_snaps: dict[date, Any] = {}
+        self._market_unit_caps = _MarketUnitCaps()
+        self._market_unit_tally: dict | None = None
 
     @property
     def strategy_id(self) -> str:
@@ -1769,3 +1812,396 @@ class StrategyBase(ABC):
             expected_head.isoformat() if expected_head else "None",
         )
         return expected_head
+
+    # ──────────── cycle382 — 시장 유닛(단계형, 터틀 4전략 한정) ────────────
+    #
+    # 명세 = `_workspace/red/cycle382_market_unit_spec.md`. KODEX200(069500) 60일선
+    # 계단(1/¾/½/0)으로 그날 신규 진입의 **설계 랏만** 줄인다. 예산·잔여·K축·ρ축·
+    # 보유분·청산은 전부 무접촉(A06/A07). 관문(`_apply_budget_limit`) 본문은 byte
+    # 무변경(A12) — 여기 헬퍼들은 관문 **앞**에서 0 을 돌려주거나 관문에 줄인 수량을
+    # 넘길 뿐이다.
+
+    async def _refresh_market_unit(self, *, as_of_date: date, preview: bool) -> None:
+        """4 터틀 전략 `prepare()` 가 `_resolve_prepare_as_of` 직후 정확히 1회 부른다.
+
+        leaf `market_unit.compute_snapshot`(never-raise)을 부르고 한 번 더 감싼다.
+        같은 날짜에 `ok=True` 스냅샷이 이미 있으면 새 실패가 덮지 않는다(보존
+        규칙) — 새 것이 `ok=True` 면 항상 덮는다. 오늘(KST)보다 과거 키는 지운다.
+        모드가 `off` 여도 계산한다(그래야 `enforce` PUT 이 재시작 없이 먹는다).
+        """
+        from src.engine import market_unit
+
+        try:
+            snap = await market_unit.compute_snapshot(as_of_date, preview=preview)
+        except Exception:
+            snap = market_unit.Snapshot(
+                as_of=as_of_date, preview=preview, ok=False, state="unavailable",
+                m=1.0, reason="exception", bar_date=None, expected_head=None,
+                rows=0, close=None, sma60=None, sma60_prev=None, above=None,
+                rising=None,
+            )
+
+        try:
+            self._market_unit_tally_roll(as_of_date)
+            mode, _valid = market_unit.normalize_mode(
+                self.config.params.get(market_unit.MODE_KEY)
+            )
+            self._market_unit_tally["modes"].add(mode)
+
+            existing = self._market_unit_snaps.get(as_of_date)
+            kept = existing is not None and existing.ok and not snap.ok
+            if not kept:
+                self._market_unit_snaps[as_of_date] = snap
+
+            today = datetime.now(_KST).date()
+            for stale_key in [d for d in self._market_unit_snaps if d < today]:
+                del self._market_unit_snaps[stale_key]
+
+            if snap.ok:
+                self._market_unit_tally["state"] = snap.state
+                self._market_unit_tally["m"] = snap.m
+                self._emit_market_unit_state(snap, mode)
+            else:
+                self._emit_market_unit_unavailable(
+                    as_of=snap.as_of, preview=snap.preview, reason=snap.reason,
+                    rows=snap.rows, head=snap.bar_date, expected_head=snap.expected_head,
+                    kept=kept, where="refresh",
+                )
+        except Exception:
+            logger.debug(
+                "[market_unit_refresh_failed] strategy=%s", self.strategy_id,
+                exc_info=True,
+            )
+
+    def _market_unit_view(self) -> MarketUnitView:
+        """현재 모드·오늘 스냅샷을 매 호출 재평가한다(캐시 없음 — PUT 즉시 반영).
+
+        순수 메모리 읽기 · `await` 0. 오늘 스냅샷이 없으면(아직 계산 안 됨)
+        `[market_unit_unavailable] where=view reason=not_computed` 1회/일 —
+        기존 스냅샷이 있는데 `ok=False` 면 그 경보는 refresh 가 이미 냈으므로
+        여기서는 조용히 `unavailable` 을 돌려준다.
+        """
+        from src.engine import market_unit
+
+        raw = self.config.params.get(market_unit.MODE_KEY)
+        mode, valid = market_unit.normalize_mode(raw)
+        if not valid:
+            self._emit_market_unit_config(raw)
+            mode = "off"
+        if mode == "off":
+            return MarketUnitView(mode="off", m=1.0, state="-", reason="off")
+
+        today = datetime.now(_KST).date()
+        snap = self._market_unit_snaps.get(today)
+        if snap is None:
+            self._emit_market_unit_unavailable(
+                as_of=today, preview=False, reason="not_computed", rows=0,
+                head=None, expected_head=None, kept=False, where="view",
+            )
+            return MarketUnitView(mode=mode, m=1.0, state="unavailable", reason="not_computed")
+        if not snap.ok:
+            return MarketUnitView(mode=mode, m=1.0, state="unavailable", reason=snap.reason)
+        return MarketUnitView(mode=mode, m=snap.m, state=snap.state, reason="ok")
+
+    def _market_unit_lots(
+        self, current_price: int, ticker: "str | None", m: float,
+    ) -> MarketUnitLots:
+        """설계 랏(§5.2) — 줄이지 않은 예산·잔여로 터틀/비중 두 경로를 계산한다.
+
+        `design_before` = `m=1.0` 기준 설계 랏, `design_after` = `m` 기준. 잔여는
+        절대 `m` 으로 줄이지 않는다(예산 경로 재현 차단). 순수 · `await` 0.
+        """
+        from src.engine.turtle_sizing import compute_unit_qty_guarded
+
+        budget = int(self.state.total_investment)
+        remaining = max(0, budget - self._calc_used_funds())
+        remaining_qty = remaining // current_price if current_price > 0 else 0
+
+        params = self.config.params
+        is_turtle = params.get("sizing_mode") == "turtle" and ticker is not None
+
+        def sizing_budget(fraction: float) -> int:
+            return int(budget * fraction)
+
+        if is_turtle:
+            atr_key = self._MARKET_UNIT_ATR_KEY
+            atr = float((self._candidates.get(ticker) or {}).get(atr_key) or 0)
+            risk_pct = float(params.get("risk_pct") or 0)
+            position_ratio = float(params.get("position_ratio") or 0)
+            min_vol_pct = float(params.get("min_vol_floor_pct", 1.0))
+
+            def design(fraction: float) -> int:
+                return compute_unit_qty_guarded(
+                    sizing_budget(fraction), atr, current_price, risk_pct,
+                    remaining_budget=remaining, min_vol_pct=min_vol_pct,
+                    position_ratio=position_ratio,
+                )
+
+            path = "turtle"
+        else:
+            position_ratio = float(params.get("position_ratio") or 0)
+            atr = 0.0
+
+            def design(fraction: float) -> int:
+                if current_price <= 0:
+                    return 0
+                return int(sizing_budget(fraction) * position_ratio) // current_price
+
+            path = "ratio"
+
+        design_before = design(1.0)
+        design_after = 0 if m <= 0 else design(m)
+        lot_before = min(design_before, remaining_qty)
+        lot_after = min(design_after, remaining_qty)
+
+        if design_before == 0:
+            fallback = "pr" if path == "turtle" else "one_share"
+        else:
+            fallback = "-"
+
+        return MarketUnitLots(
+            path=path, atr=atr, design_before=design_before, design_after=design_after,
+            lot_before=lot_before, lot_after=lot_after, remaining_qty=remaining_qty,
+            fallback=fallback,
+        )
+
+    def _market_unit_skip_reason(self, m: float, lots: MarketUnitLots) -> "str | None":
+        """§5.3 — 줄인 랏으로 못 사는 이유. `None` = 살 수 있다(줄여서든 그대로든)."""
+        if m <= 0:
+            return "zero_state"
+        if lots.lot_after > 0:
+            return None
+        if lots.remaining_qty < 1:
+            return "funds"
+        if lots.design_before > 0:
+            return "rounds_to_zero"
+        return "no_fallback"
+
+    def _market_unit_sizing(
+        self, current_price: int, ticker: "str | None",
+    ) -> "MarketUnitLots | None":
+        """calc 진입점 — `mode ∈ {shadow, enforce}` ∧ `m < 1` 일 때만 값을 돌려준다.
+
+        shadow 는 기록만 하고 `None` 을 돌려줘 수량을 바꾸지 않는다. 어떤 예외든
+        `[market_unit_error] where=calc` + `None`(= m=1 경로, fail-open).
+        """
+        try:
+            view = self._market_unit_view()
+            if view.mode not in ("shadow", "enforce") or view.m >= 1.0:
+                return None
+            lots = self._market_unit_lots(current_price, ticker, view.m)
+            reason = self._market_unit_skip_reason(view.m, lots)
+            self._emit_market_unit_calc(view, lots, reason, ticker, current_price)
+            if view.mode == "shadow":
+                return None
+            return lots
+        except Exception:
+            self._emit_market_unit_error("calc", ticker)
+            return None
+
+    def _market_unit_blocks_entry(self, ticker: str, current_price: int) -> bool:
+        """신호 진입점(§6) — `enforce` ∧ 줄인 랏으로 못 살 때만 True.
+
+        `funds`(잔여 부족)는 거르지 않는다(기존 자금 경로가 맞는 귀인이다). 부작용
+        0 — `_bought_today`/`buy_signals`/래치 무엇도 건드리지 않는다(다음 평가부터
+        킬스위치가 먹는다). 예외는 fail-open(현행 BUY 경로 유지).
+        """
+        try:
+            view = self._market_unit_view()
+            if view.mode != "enforce" or view.m >= 1.0:
+                return False
+            lots = self._market_unit_lots(current_price, ticker, view.m)
+            reason = self._market_unit_skip_reason(view.m, lots)
+            if reason in (None, "funds"):
+                return False
+            self._emit_market_unit_signal(view, lots, reason, ticker, current_price)
+            return True
+        except Exception:
+            self._emit_market_unit_error("signal", ticker)
+            return False
+
+    def _market_unit_tally_roll(self, day: date) -> None:
+        """§8 — 일일 집계 롤. 열려 있는 tally 의 날짜가 `day` 보다 **이전**이면 그
+        날짜의 `[market_unit_daily]` 1줄을 내보내고 `day` 로 새로 연다. 같은 날이거나
+        `day` 가 tally 날짜보다 **이전**(과거로의 refresh)이면 no-op 이다 — 저녁
+        미리보기가 연 다음 거래일 tally 를 같은 저녁의 더 이른 날짜 refresh 가
+        조기 종료·리셋하지 않게 한다(§8, cycle382 review).
+        """
+        tally = self._market_unit_tally
+        if tally is not None and tally["date"] < day:
+            self._emit_market_unit_daily(tally)
+            tally = None
+        if tally is None:
+            self._market_unit_tally = {
+                "date": day, "state": "-", "m": 1.0, "modes": set(),
+                "calc_attempts": 0, "would_skip": 0, "reduced": 0,
+                "signal_skips": 0, "lot_before_sum": 0, "lot_after_sum": 0,
+            }
+
+    def _emit_market_unit_state(self, snap: Any, mode: str) -> None:
+        """`[market_unit_state]` — refresh 성공. cap = (as_of,preview,state,m) 조합당 1회."""
+        from src.engine import market_unit
+
+        key = f"state|{snap.as_of.isoformat()}|{int(snap.preview)}|{snap.state}|{snap.m}"
+        if not self._market_unit_caps.state.should_emit(key):
+            return
+        try:
+            market_unit.logger.info(
+                "[market_unit_state] strategy=%s as_of=%s preview=%d source=%s bar=%s "
+                "close=%.2f sma60=%.2f sma60_prev=%.2f above=%d rising=%d state=%s "
+                "m=%.2f mode=%s rows=%d expected_head=%s",
+                self.strategy_id, snap.as_of.isoformat(), int(snap.preview),
+                market_unit.SOURCE_TICKER,
+                snap.bar_date.isoformat() if snap.bar_date else "-",
+                snap.close or 0.0, snap.sma60 or 0.0, snap.sma60_prev or 0.0,
+                int(bool(snap.above)), int(bool(snap.rising)), snap.state, snap.m,
+                mode, snap.rows,
+                snap.expected_head.isoformat() if snap.expected_head else "-",
+            )
+        except Exception:
+            pass
+        self._market_unit_caps.state.mark_emitted(key)
+
+    def _emit_market_unit_unavailable(
+        self, *, as_of: date, preview: bool, reason: str, rows: int,
+        head: "date | None", expected_head: "date | None", kept: bool, where: str,
+    ) -> None:
+        """`[market_unit_unavailable]` — refresh 실패 · view 에 오늘 스냅샷 없음.
+
+        cap = (as_of, reason, where)/일.
+        """
+        from src.engine import market_unit
+
+        key = f"unavail|{as_of.isoformat()}|{reason}|{where}"
+        if not self._market_unit_caps.warn.should_emit(key):
+            return
+        try:
+            market_unit.logger.warning(
+                "[market_unit_unavailable] strategy=%s as_of=%s preview=%d reason=%s "
+                "rows=%s head=%s expected_head=%s kept=%d where=%s → m=1.00",
+                self.strategy_id, as_of.isoformat(), int(preview), reason, rows,
+                head.isoformat() if head else "-",
+                expected_head.isoformat() if expected_head else "-",
+                int(kept), where,
+            )
+        except Exception:
+            pass
+        self._market_unit_caps.warn.mark_emitted(key)
+
+    def _emit_market_unit_config(self, raw: Any) -> None:
+        """`[market_unit_config]` — 모드 값이 오타·비문자열. 1회/일."""
+        from src.engine import market_unit
+
+        key = "config"
+        if not self._market_unit_caps.warn.should_emit(key):
+            return
+        try:
+            market_unit.logger.warning(
+                "[market_unit_config] strategy=%s raw=%r → off",
+                self.strategy_id, raw,
+            )
+        except Exception:
+            pass
+        self._market_unit_caps.warn.mark_emitted(key)
+
+    def _emit_market_unit_error(self, where: str, ticker: "str | None") -> None:
+        """`[market_unit_error]` — calc·signal 헬퍼 예외(fail-open). cap = (where)/일."""
+        from src.engine import market_unit
+
+        key = f"error|{where}"
+        if not self._market_unit_caps.warn.should_emit(key):
+            return
+        try:
+            market_unit.logger.warning(
+                "[market_unit_error] strategy=%s where=%s ticker=%s → m=1.00",
+                self.strategy_id, where, ticker or "-",
+            )
+        except Exception:
+            pass
+        self._market_unit_caps.warn.mark_emitted(key)
+
+    def _emit_market_unit_calc(
+        self, view: MarketUnitView, lots: MarketUnitLots, reason: "str | None",
+        ticker: "str | None", current_price: int,
+    ) -> None:
+        """`[market_unit] where=calc` — 매수 시도 1건. 집계는 cap 무관 전수,
+        로그 줄은 1회/(ticker,where)/일.
+        """
+        day = datetime.now(_KST).date()
+        self._market_unit_tally_roll(day)
+        tally = self._market_unit_tally
+        tally["modes"].add(view.mode)
+        tally["calc_attempts"] += 1
+        tally["lot_before_sum"] += lots.lot_before
+        tally["lot_after_sum"] += lots.lot_after
+        if lots.lot_after <= 0:
+            tally["would_skip"] += 1
+        elif lots.lot_after < lots.lot_before:
+            tally["reduced"] += 1
+
+        key = f"{ticker}|calc"
+        if not self._market_unit_caps.attempt.should_emit(key):
+            return
+        from src.engine import market_unit
+
+        try:
+            market_unit.logger.info(
+                "[market_unit] strategy=%s state=%s m=%.2f lot_before=%d lot_after=%d "
+                "mode=%s ticker=%s path=%s price=%d fallback=%s skip=%d reason=%s "
+                "where=calc",
+                self.strategy_id, view.state, view.m, lots.lot_before, lots.lot_after,
+                view.mode, ticker, lots.path, current_price, lots.fallback,
+                0 if reason is None else 1, reason or "-",
+            )
+        except Exception:
+            pass
+        self._market_unit_caps.attempt.mark_emitted(key)
+
+    def _emit_market_unit_signal(
+        self, view: MarketUnitView, lots: MarketUnitLots, reason: str,
+        ticker: str, current_price: int,
+    ) -> None:
+        """`[market_unit] where=signal` — enforce 스킵. 1회/(ticker,where)/일.
+
+        `signal_skips` 집계도 같은 cap 기준(처음 1회만)으로 늘린다.
+        """
+        day = datetime.now(_KST).date()
+        self._market_unit_tally_roll(day)
+        tally = self._market_unit_tally
+        tally["modes"].add(view.mode)
+
+        key = f"{ticker}|signal"
+        if not self._market_unit_caps.attempt.should_emit(key):
+            return
+        tally["signal_skips"] += 1
+        from src.engine import market_unit
+
+        try:
+            market_unit.logger.info(
+                "[market_unit] strategy=%s state=%s m=%.2f lot_before=%d lot_after=%d "
+                "mode=%s ticker=%s path=%s price=%d fallback=%s skip=1 reason=%s "
+                "where=signal",
+                self.strategy_id, view.state, view.m, lots.lot_before, lots.lot_after,
+                view.mode, ticker, lots.path, current_price, lots.fallback, reason,
+            )
+        except Exception:
+            pass
+        self._market_unit_caps.attempt.mark_emitted(key)
+
+    def _emit_market_unit_daily(self, tally: dict) -> None:
+        """`[market_unit_daily]` — 거래일마다 전략당 1줄(§8)."""
+        from src.engine import market_unit
+
+        try:
+            modes = ",".join(sorted(tally["modes"])) or "-"
+            market_unit.logger.info(
+                "[market_unit_daily] strategy=%s date=%s state=%s m=%.2f modes=%s "
+                "calc_attempts=%d would_skip=%d reduced=%d signal_skips=%d "
+                "lot_before_sum=%d lot_after_sum=%d",
+                self.strategy_id, tally["date"].isoformat(), tally["state"],
+                tally["m"], modes, tally["calc_attempts"], tally["would_skip"],
+                tally["reduced"], tally["signal_skips"], tally["lot_before_sum"],
+                tally["lot_after_sum"],
+            )
+        except Exception:
+            pass

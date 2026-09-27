@@ -111,6 +111,12 @@
   - "tests/unit/ast/test_cycle363_ast_business_day_gate.py"
   # cycle380 — ETF 판정 단일 출처 가드(G1~G4)가 전략 소스를 파일로 읽는다(import 없음)
   - "tests/unit/ast/test_cycle380_ast_etf_like.py"
+  # cycle382 — 시장 유닛: 테스트가 전략 클래스를 지원 모듈(importlib)·cycle364 하네스로 지연 로드하고,
+  # AST 가드(A02·A04·A06~A11)는 전략 소스를 파일로 읽는다(import 없음)
+  - "tests/unit/engine/strategies/test_cycle382_market_unit_*.py"
+  - "tests/unit/engine/test_cycle382_market_unit_refresh.py"
+  - "tests/unit/ast/test_cycle382_ast_market_unit.py"
+  - "tests/contract/test_cycle382_market_unit_params_route.py"
 "src/engine/llm_buy_gate.py":
   - "tests/unit/ast/test_cycle363_ast_business_day_gate.py"
 
@@ -133,6 +139,10 @@
 # cycle369 — `_account_soft_gate_blocked` 첫 문장·`_status_buy_blocked` 를 AST 가드가 파일로 읽는다.
 "src/engine/strategy_base.py":
   - "tests/unit/ast/test_cycle369_ast_status_exit.py"
+  # cycle382 — 시장 유닛 헬퍼(`_market_unit_*`)는 leaf 판정 테스트가 전략 객체로 부르고(지원 모듈 경유),
+  # AST 가드가 관문 본문 sha(A12)·헬퍼 순수성(A05)을 파일로 읽는다
+  - "tests/unit/engine/test_cycle382_market_unit_leaf.py"
+  - "tests/unit/engine/test_cycle382_market_unit_refresh.py"
   - "tests/unit/engine/test_cycle369_status_buy_wiring.py"
   # cycle369 R2 Q7 — 게이트가 막을 때 edge 기준가를 비운다(전략 클래스는 importlib 로 지연 로드)
   - "tests/unit/engine/test_cycle369_r2_edge_baseline.py"
@@ -168,3 +178,14 @@
   - "tests/unit/ast/test_cycle380_ast_etf_like.py"
 "src/engine/order_engine.py":
   - "tests/unit/ast/test_cycle380_ast_etf_like.py"
+# cycle382 — 시장 유닛 leaf. 테스트는 `tests/unit/engine/_cycle382_support.mu()` 로 **지연 참조**하고
+# (미구현 단계 FAIL 관례), 전략 prepare 는 `market_unit.compute_snapshot` 을 모듈 속성으로 부른다.
+# AST 가드(A01·A02)는 leaf 소스를 파일로 읽는다 — 정적 분석이 못 잇는다.
+"src/engine/market_unit.py":
+  - "tests/unit/engine/test_cycle382_market_unit_*.py"
+  - "tests/unit/engine/strategies/test_cycle382_market_unit_*.py"
+  - "tests/unit/ast/test_cycle382_ast_market_unit.py"
+  - "tests/integration/test_cycle382_market_unit_pg.py"
+# cycle382 — `market_unit_mode` 카탈로그 행(선택지·identity·applies_to)을 PUT 라우트 계약이 본다(import 없음).
+"src/engine/param_catalog.py":
+  - "tests/contract/test_cycle382_market_unit_params_route.py"

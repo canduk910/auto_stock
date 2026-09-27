@@ -166,8 +166,12 @@ _BASE_SHA: dict[str, str] = {
     "src/engine/scheduler.py":
         "b1aaa4816267adb49207fd043a3d640144f4eb493980fcd1302ffb02ef086d54",
     # 🔁 cycle369 R2 재핀 — buy-block 게이트(`_status_buy_blocked` 승격) + STATUS_EXIT Signal + Q7 edge-baseline clear 배선(전략 7파일은 무변경, 배선은 이 파일)
+    # 🔁 cycle382 재핀 — 시장 유닛 `_market_unit_*` 헬퍼 추가(사용자 결정 09-27).
+    # 🔁 cycle382 리뷰 재핀(값만) — `_market_unit_tally_roll` 을 `tally.date != day`
+    # 에서 `tally.date < day`(더 늦은 날짜에서만 롤)로 시정(§8). 직전 값 =
+    # `4516f1a94f2d05de24dfed24d165b62b11a230374795c593247f9906803d085f`.
     "src/engine/strategy_base.py":
-        "e9b379dcae6e4db664b2f159442b11bac3bf00be6e4481680332da494b61bf8e",
+        "448c03026e576d9a520e1863a382e35f2f35574c695458c8054e9d3e60a9821f",
     # 🔴 등재만으로 판정이 통해야 한다 — 검증 로직을 고쳐 통과시키면 안 된다.
     "src/engine/param_validation.py":
         "b4c5c029800191523bcc511919d6de3774e9ab49ca2fc0a0558ee3907868ee17",
@@ -246,37 +250,47 @@ _SEGMENT_SHA: dict[tuple[str, str], str] = {
     # 🔁 cycle364 재핀 — `prepare(as_of=)` 시그니처 확장.
     ("long_tail_volatility", "prepare"):
         "8837076acd413ed97127a7a74ebbb4e62b7000fa9495727ad268bfedcd13b73a",
+    # 🔁 cycle382 재핀 — 시장 유닛(단계형) 신호 필터 삽입(추격 상한 블록 뒤 ·
+    # `_breakout_high` 스탬프 앞, 사용자 결정 09-27).
     ("donchian_swing", "check_buy_signal"):
-        "c872af3dcc790942c4d954e47f2c2a9a64983b92fc0647c2e3605ab743a91ebc",
+        "dd32b75a918491c48d18b7da0abe7f60d1bf7fa6d88a6a87a16b92c296e721f0",
     ("donchian_swing", "check_exit_signal"):
         "86ae465f87a03bac0b3a418338f7a01e40c2f6992ef609791f915590dd5b85f4",
+    # 🔁 cycle382 재핀 — 시장 유닛(단계형) `_market_unit_sizing` 진입 훅.
     ("donchian_swing", "calc_buy_quantity"):
-        "35c9046669290d945e78282e50b87ee04bae9d6b276e3648004b3b89f95b4c5b",
+        "cc3e622d232ff38adff20d03f3efa89c99b93337b5b4dd08bd26e68c059a9ef5",
     # 🔁 cycle364 재핀 — `prepare(as_of=)` + PV-1(보유·익일청산 종목 보존).
     # 🔁 cycle364 round 2 재핀 — keep(자기 보유∪자기 익일청산) / skip(자기 ∪ 전 전략
     # 보호 종목) 두 집합으로 분리(R1) — 남의 보유 엔트리를 보존·재구성 어느 쪽도 하지
     # 않는다.
+    # 🔁 cycle382 재핀 — `_refresh_market_unit` 호출 삽입(`_resolve_prepare_as_of` 직후).
     ("donchian_swing", "prepare"):
-        "18869f2f5562c577dde0912878005512db6279e3c1399b38cd22b797af46bbb9",
+        "a2c018d3fa4e416bb7c92325d325d9fad7c88f86a62328500e410c3c455d930a",
     ("bull_flag_breakout", "check_buy_signal"):
         "b39b26fb398ca352edaf91816b4aed04cd50f47aef29d13a8b82af0f6580ed7d",
     ("bull_flag_breakout", "check_exit_signal"):
         "eacb8a79407a37fb80227f977c54a7faac247ce525d3bfa10e54341965fd8796",
+    # 🔁 cycle382 재핀 — 시장 유닛(단계형) `_market_unit_sizing` 진입 훅.
     ("bull_flag_breakout", "calc_buy_quantity"):
-        "7b66c61590c8ccf51583c3121bf6519ff24c3529811ee856c730fbd8de7a850a",
+        "772cf9ffda83e9abfaeb44f4f8e4a67eb8543fab58a961d3919d4b41bdd0f1ad",
     # 🔁 cycle364 재핀 — `prepare(as_of=)` 시그니처 확장.
     # 🔁 cycle364 round 2 재핀 — PV-1 을 BFB 로 확대(keep/skip 분리, R1) — 미리보기가
     # 보유 종목의 `_candidates`(청산 입력 `atr14`·구조 레벨)를 더 이상 지우지 않는다.
+    # 🔁 cycle382 재핀 — `_refresh_market_unit` 호출 삽입(`_resolve_prepare_as_of` 직후).
     ("bull_flag_breakout", "prepare"):
-        "a7f51dba952b610bbe6cda95e6bada182024327c0bdb67fd4fb2376818f8a392",
+        "6427201942a700b6409918f62c1a41d3e5f463c4036b7a70e2202a96dca35db3",
+    # 🔁 cycle382 재핀 — 시장 유닛(단계형) 신호 필터는 `_evaluate_vol_gate` 안(추격
+    # 상한 거부 블록 뒤 · `latch_age_sec = 0` 앞)이라 `check_buy_signal` 세그먼트
+    # 자체는 무변경이다.
     ("vcp_breakout", "check_buy_signal"):
         # cycle349 재핀 — VCP 관측 ①③(돌파선 거리 줄 · 틱 관측 훅 · watch). 매매 경로 diff 0
         # = 확장 전 HEAD 산출 골든 G1(prepare)·G2(check_buy_signal) 완전 일치로 확인.
         "e50969e3ffcdd8f7b5f8ce0bd61e67852436e4ead7130c54006a2f22c11adb6f",
     ("vcp_breakout", "check_exit_signal"):
         "2fc8da7094dfa43a3baa824fb0c5d5864fd4ef89bd6786f5ff790216a00eabad",
+    # 🔁 cycle382 재핀 — 시장 유닛(단계형) `_market_unit_sizing` 진입 훅.
     ("vcp_breakout", "calc_buy_quantity"):
-        "2678212b154c25f00d8cb3a14ad819ad9e92a12787ff42b3635ac32399685e56",
+        "43d2e682051cd9a4653b972aab6c3706dc2144b082ae73e34c8c38f5cb3f8010",
     ("vcp_breakout", "prepare"):
         # cycle349 재핀 — VCP 관측 ①③(돌파선 거리 줄 · 틱 관측 훅 · watch). 매매 경로 diff 0
         # = 확장 전 HEAD 산출 골든 G1(prepare)·G2(check_buy_signal) 완전 일치로 확인.
@@ -284,13 +298,17 @@ _SEGMENT_SHA: dict[tuple[str, str], str] = {
         # 🔁 cycle364 round 2 재핀 — PV-1 을 VCP 로 확대(keep/skip 분리, R1) — 미리보기가
         # 보유 종목의 `_candidates`(청산 입력 `atr14`·`ema50`·`base_low`)를 더 이상
         # 지우지 않는다(round-1 적대 검토 trading-safety medium 반영).
-        "466ebfcf83dc5781b3cb25fb9da943238fcc229a65306800c020a1edf69b0803",
+        # 🔁 cycle382 재핀 — `_refresh_market_unit` 호출 삽입(`_resolve_prepare_as_of` 직후).
+        "29280134b44040ae4187fb7eb95d0308885ff904a61f60e1ca4b6a061f1d416e",
+    # 🔁 cycle382 재핀 — 시장 유닛(단계형) 신호 필터(`observe_gap(...,"pass",...)`
+    # 뒤 · `_bought_today.add` 앞).
     ("kojiro", "check_buy_signal"):
-        "dda6c6fc318afec8db576826f4cfc16d03fdc6dbdd544e7accc3f8a41de9e74f",
+        "0299d9fdf96c9773659989c9b88bb7a2a67050c96f5a6e065d403258071eef87",
     ("kojiro", "check_exit_signal"):
         "067a60219099b081c64172986f46528a2836b1ad457c081ac06784c4ab9af7fc",
+    # 🔁 cycle382 재핀 — 시장 유닛(단계형) `_market_unit_sizing` 진입 훅.
     ("kojiro", "calc_buy_quantity"):
-        "f3491400f38b3295d37767b008c8821883f8443e76efe6ca26e792bf00e3c17e",
+        "c144f15de94a9f7069ac6cf650066dc12472cffdc3280a63e840b31aa544f84d",
     ("kojiro", "prepare"):
         # cycle348 재핀 — `[kojiro_macd_observe]` role=stage6_gc 확장(step6 직후
         # 자기 try 수집 + observe_macd 뒤 별도 try emit). 매매 경로 diff 0.
@@ -298,7 +316,8 @@ _SEGMENT_SHA: dict[tuple[str, str], str] = {
         # P3(미리보기에서 observe_band/observe_macd/observe_macd_stage6 생략).
         # 🔁 cycle364 round 2 재핀 — keep/skip 분리(R1) — 남의 보유가 `held_only` 로
         # 새지 않는다(round-1 적대 검토 low 반영).
-        "9e1907df75b62db14339bac63f9039ec3aff527d9271b12ad74035d9cd718ea9",
+        # 🔁 cycle382 재핀 — `_refresh_market_unit` 호출 삽입(`_resolve_prepare_as_of` 직후).
+        "d07d25c094d47bb81e2b14194bf3ed7818e9b63397794e01bfa11af0fda0f7a0",
 }
 
 
@@ -371,6 +390,10 @@ _ENGINE_PY_FILES: dict[str, tuple[str, ...]] = {
         # "다음 신규 파일"은 여전히 붉어진다.
         "market_op_subscribe.py",
         "market_operation_monitor.py", "market_regime.py", "market_state.py",
+        # cycle382 — 시장 유닛(단계형, KODEX200 60일선) 판정 leaf. 표준 라이브러리만
+        # import(A01). 이름을 등재해도 "다음 신규 파일" 은 여전히 붉어진다(이름 축
+        # 가드는 변경 없음).
+        "market_unit.py",
         "metrics_collector.py", "no_feed_registry.py", "observer_trace.py",
         "open_price_observe.py", "open_price_rest.py", "order_engine.py",
         "param_catalog.py", "param_drift.py", "param_validation.py", "portfolio_risk.py",

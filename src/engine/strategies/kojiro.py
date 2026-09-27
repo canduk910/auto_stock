@@ -238,7 +238,13 @@ class KojiroStrategy(StrategyBase):
         "llm_gate_min_score": 70,
         "llm_gate_daily_call_cap": 20,
         "llm_gate_timeout_secs": 20,
+        # cycle382 — 시장 유닛(단계형, KODEX200 60일선). 부재·오타 = off. 기본
+        # shadow(계산·기록만). PARAM_RANGES/INT_PARAMS 편입 금지. 킬스위치 = PUT.
+        "market_unit_mode": "shadow",
     }
+
+    # cycle382 — 시장 유닛 ATR 소스 키(터틀 사이징이 읽는 키와 동일 — AST A09).
+    _MARKET_UNIT_ATR_KEY = "atr"
 
     def __init__(self, config: StrategyConfig):
         merged = {**self.DEFAULT_PARAMS, **config.params}
@@ -288,6 +294,7 @@ class KojiroStrategy(StrategyBase):
         from src.db.stock_master_daily import get_recent_daily_normalized
 
         as_of_date, preview = self._resolve_prepare_as_of(as_of)
+        await self._refresh_market_unit(as_of_date=as_of_date, preview=preview)
         keep = self._preview_keep_tickers() if preview else set()
         skip = self._preview_skip_tickers() if preview else set()
         self._candidates = {t: v for t, v in self._candidates.items() if t in keep}
@@ -994,6 +1001,14 @@ class KojiroStrategy(StrategyBase):
                         current_price=current_price, params=self.config.params)
         except Exception:
             absorb_call_failure(ticker)
+
+        # cycle382 — 시장 유닛(단계형): enforce ∧ 줄인 랏으로 못 사는 종목은
+        # 여기서 거른다. `observe_gap(...,"pass",...)` 뒤 · `_bought_today.add`
+        # 앞 — 갭 코호트가 흔들리지 않고, 이후 스탬프(_position_atr/_position_sectors)
+        # 전에 멈춘다.
+        if self._market_unit_blocks_entry(ticker, current_price):
+            return Signal.NONE
+
         self._bought_today.add(ticker)
         # 당일 매수분 ATR 영속화 — 재-prepare 와이프 후에도 2ATR 손절이 살아 있어야 한다.
         try:
@@ -1252,6 +1267,13 @@ class KojiroStrategy(StrategyBase):
         """터틀 유닛(sizing_mode='turtle') 또는 position_ratio(기본). 어떤 실패든 fail-open."""
         if current_price <= 0:
             return 0
+        # cycle382 — 시장 유닛(단계형): enforce ∧ m<1 일 때만 값을 돌려준다(shadow
+        # 는 기록만 하고 None). 축소일 1주 폴백·터틀→비중 낙하는 없다(원인 불문).
+        lots = self._market_unit_sizing(current_price, ticker)
+        if lots is not None:
+            if lots.lot_after <= 0:
+                return 0
+            return self._apply_budget_limit(lots.design_after, current_price, ticker)
         params = self.config.params
         # ── 터틀 유닛 sizing (opt-in) — 실패 시 아래 position_ratio 로 fail-open ──
         if params.get("sizing_mode") == "turtle" and ticker is not None:

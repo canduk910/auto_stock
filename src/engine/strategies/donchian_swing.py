@@ -146,7 +146,13 @@ class DonchianSwingStrategy(StrategyBase):
         "llm_gate_min_score": 70,
         "llm_gate_daily_call_cap": 20,
         "llm_gate_timeout_secs": 20,
+        # cycle382 — 시장 유닛(단계형, KODEX200 60일선). 부재·오타 = off. 기본
+        # shadow(계산·기록만). PARAM_RANGES/INT_PARAMS 편입 금지. 킬스위치 = PUT.
+        "market_unit_mode": "shadow",
     }
+
+    # cycle382 — 시장 유닛 ATR 소스 키(터틀 사이징이 읽는 키와 동일 — AST A09).
+    _MARKET_UNIT_ATR_KEY = "atr"
 
     def __init__(self, config: StrategyConfig):
         merged = {**self.DEFAULT_PARAMS, **config.params}
@@ -313,6 +319,7 @@ class DonchianSwingStrategy(StrategyBase):
         import asyncio
 
         as_of_date, preview = self._resolve_prepare_as_of(as_of)
+        await self._refresh_market_unit(as_of_date=as_of_date, preview=preview)
         keep = self._preview_keep_tickers() if preview else set()
         skip = self._preview_skip_tickers() if preview else set()
 
@@ -1677,6 +1684,11 @@ class DonchianSwingStrategy(StrategyBase):
                     )
                     return Signal.NONE
 
+        # cycle382 — 시장 유닛(단계형): enforce ∧ 줄인 랏으로 못 사는 종목은
+        # 여기서 거른다. 추격 상한 블록 뒤 · `_breakout_high` 스탬프 앞.
+        if self._market_unit_blocks_entry(ticker, current_price):
+            return Signal.NONE
+
         self._bought_today.add(ticker)
         # 사이클 23 P2-2 — 매수 신호 발사 시 진입 돌파선 등록
         self._breakout_high[ticker] = info["donchian_high"]
@@ -1869,6 +1881,15 @@ class DonchianSwingStrategy(StrategyBase):
         """
         if current_price <= 0:
             return 0
+        # cycle382 — 시장 유닛(단계형): enforce ∧ m<1 일 때만 값을 돌려준다
+        # (shadow 는 기록만). 축소일 1주 폴백·터틀→비중 낙하는 없다(원인 불문).
+        lots = self._market_unit_sizing(current_price, ticker)
+        if lots is not None:
+            if lots.lot_after <= 0:
+                return 0
+            if lots.path == "turtle":
+                self._entry_atr[ticker] = lots.atr
+            return self._apply_budget_limit(lots.design_after, current_price, ticker)
         params = self.config.params
         if params.get("sizing_mode") == "turtle" and ticker is not None:
             turtle_qty = self._turtle_buy_quantity(current_price, ticker)

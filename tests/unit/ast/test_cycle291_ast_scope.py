@@ -131,22 +131,24 @@ _BASE_SHA: dict[str, str] = {
         "b1aaa4816267adb49207fd043a3d640144f4eb493980fcd1302ffb02ef086d54",
     # 🔴 cycle290 이 방금 `DEFAULT_PARAMS` 를 건드렸다 — 또 건드리면 그 증명이 무너진다.
     # 🔁 cycle369 R2 재핀 — buy-block 게이트(`_status_buy_blocked` 승격) + STATUS_EXIT Signal + Q7 edge-baseline clear 배선(전략 7파일은 무변경, 배선은 이 파일)
+    # 🔁 cycle382 리뷰 재핀(값만) — `_market_unit_tally_roll` 을 `tally.date != day`
+    # 에서 `tally.date < day`(더 늦은 날짜에서만 롤)로 시정(§8, 사용자 승인 범위 밖 무접촉).
     "src/engine/strategy_base.py":
-        "e9b379dcae6e4db664b2f159442b11bac3bf00be6e4481680332da494b61bf8e",
+        "448c03026e576d9a520e1863a382e35f2f35574c695458c8054e9d3e60a9821f",
     "src/engine/strategies/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "src/engine/strategies/bull_flag_breakout.py":
-        "d02a953e95c4f036eb60d7cf05eb0258dddc883dbe97e4325f8846165942204c",
+        "6d7a38f28d24d2c20cff195916c5641565310376a405ce4e23c48db3ed919165",
     "src/engine/strategies/donchian_swing.py":
-        "abcb1fbe2402aa4bcd0eefd8f44c2b1ed3ac395e8e5dce589fdd66928d0e3854",
+        "553f2d623e6559ef1ff7d88758da0306fc6037047d7d661f8e38c42a64d306a1",
     "src/engine/strategies/kojiro.py":
-        "ee2498d3980a1e2e5fdfabd0738eb78573558525122628a3f1905e06a519044e",
+        "180b0c36ebb9c49363b20c2aed134910c9f5cdb54224f1488a5a93d58db4b1c2",
     "src/engine/strategies/long_tail_volatility.py":
         "04f8a74767c6114147d78aa4d2b2ff10e59ac10266df2267a2565679ba940317",
     "src/engine/strategies/momentum.py":
         "38743ab1ecdb4aa9bcd6ac37e5d28f75501d2d4eceb2e70f3aace44d00d502a1",
     "src/engine/strategies/vcp_breakout.py":
-        "fdf0c5fea093b1b3bd9ebc6a5a785c59b04ddbf36a09ff8389db461b73221f22",
+        "de3a7342310a72d296636196f97e3c337e662962b9eacae6704aab7f43d7c1ed",
     "src/engine/strategies/volatility_breakout.py":
         "45d860c693f83b995f959d4b88c024cba2b885a9267514a746e23372db8721d5",
     # 파라미터 축 — 킬스위치를 임의로 추가하지 않는다(자문 §5: 파라미터 없음).
@@ -154,8 +156,11 @@ _BASE_SHA: dict[str, str] = {
     # trailing_stop_rate 도움말에 적용 범위 명시 + max_scan_stocks range_src
     # none→param_ranges 전환(PARAM_RANGES 상한 500→4000). 값 변경이 이 사이클의
     # 정당한 목적이라 재핀했다.
+    # 🔁 cycle382 리뷰 재핀(값만) — `market_unit_mode` 「off」 선택지·도움말 텍스트
+    # 정정("계산·기록 없음" → "매수 수량·신호에 관여하지 않는다. 장세 계산·기록은
+    # 계속된다", prepare 가 off 에서도 `_refresh_market_unit` 을 부르는 실제 계약과 정합).
     "src/engine/param_catalog.py":
-        "654460a97497094cec243104062252dbdd881a7a7f8d305790b964b306c7b484",
+        "a5f1ad4091e68d8ee6e75db98baa148ddd6a11619c278577d9f55ba9764907da",
     "src/engine/param_validation.py":
         "b4c5c029800191523bcc511919d6de3774e9ab49ca2fc0a0558ee3907868ee17",
     # 시각·호가유형 표의 유일 정본 — GTP 게이트는 이 표를 **읽는다**(수정 금지).
@@ -406,9 +411,14 @@ def test_a8_no_new_leaf_in_src_engine() -> None:
     72 → **73** 이 됐다 — 표준 라이브러리만 import 하는 순수 판정 함수
     `is_etf_like(raw, name)` + `ETF_GROUP_CODES`/`ETF_KEYWORDS`. `scanner.py`(8영역,
     사용자 승인)와 `db/stock_master.py` 가 공유한다. `scheduler.py` 무접촉.
+
+    ⚠️ cycle382(시장 유닛 단계형, 사용자 결정 09-27)이 leaf 1개 `market_unit.py` 를
+    신설해 73 → **74** 가 됐다 — 표준 라이브러리만 import 하는 순수 판정
+    leaf(`classify`/`normalize_mode`/`compute_snapshot`). `strategy_base.py` + 터틀
+    4전략 + `param_catalog.py` 가 그 헬퍼를 호출한다. `scheduler.py` 무접촉.
     """
     got = len(list((_ROOT / "src" / "engine").glob("*.py")))
-    assert got == 73, f"`src/engine/*.py` 파일 수 {got} (cycle380 기준선 73)"
+    assert got == 74, f"`src/engine/*.py` 파일 수 {got} (cycle382 기준선 74)"
 
 
 # ===========================================================================

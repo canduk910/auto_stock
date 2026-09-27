@@ -396,3 +396,19 @@ VCP universe(KOSPI200∪KOSDAQ150) backfill target **120일** · retention `DAIL
 경위: cycle380(사용자 결정 2026-09-27 「운영db 조회 허용 및 판정 변경 채택」)이 ETF/ETN 판정을 이름 키워드에서 증권그룹코드 `scty_grp_id_cd ∈ {EF,EN,FE}` 로 바꿨다. 판정은 leaf `src/engine/etf_like.py::is_etf_like` 하나로 모였고, 코드가 없을 때만 이름 키워드로 떨어진다. 「ETF… 자동매매 차단」 은 사실이 아니었다 — ETF 코드도 6자리 숫자라 `isdigit()` 를 통과한다(`stock_master` 3,583행 전부 6자리 숫자, EF 873행 포함, 2026-09-27 읽기 전용 조회). 이 규칙이 실제로 막는 것은 영숫자 코드와 7자리 ETN 코드다(`docs/kis/domestic-stock-order.md` `PDNO` 「ETN의 경우 7자리」).
 
 → CHANGELOG: cycle380 행
+
+## 외부 통합 (백테스트 + 매크로 레짐) · 디렉토리 역할
+
+### 2026-09-27 cycle382 — 「레짐은 매수를 차단·축소하지 않는다」 를 매크로 레짐 한정으로
+
+정본 원문(「외부 통합」 목록 행):
+
+- 매크로 레짐 (**우리 `macro` 컨테이너**, cycle315) — `regime/vix/fear_greed` 관찰 + `cash_usage_ratio` 자동 조정 (`auto_regime_adjust`, `clamp((100-cash_min)/100)`). **레짐은 관찰 지표다 — 매수를 차단·축소하지 않는다**(`buy_block_mode` 는 표시 전용, `get_buy_block_state` 는 대시보드/자문 payload 만 소비). ETF 레짐·포트폴리오 리스크 관찰 활성
+
+정본 원문(「디렉토리 역할」 `macro/` 행):
+
+- `macro/` — **매크로 API 별도 컨테이너** (경기사이클·투자체제·금리차·하이일드·환율·원자재 5섹션 = `GET /api/macro/*`). 자체 `Dockerfile`·`requirements.txt`(pandas/numpy/yfinance)·`main.py` 를 갖고 매매 이미지와 완전 분리된다 — **`src/` 아래로 옮기지 않는다**(옮기면 macro 변경마다 매매 backend 가 재시작된다). `macro/macro_lite/` 는 stock-manager 추출 패키지의 **무수정 vendor** 라 재이식 시 통째로 덮어쓴다. 캐시는 `MACRO_LITE_CACHE_DIR` 영속 bind mount 필수(FRED 가 OAS 를 3년치만 주므로 누적 store 가 유실되면 하이일드 **차트**의 10년·5년 구간이 3년으로 영구 퇴행). **매매 레짐의 출처이기도 하다**(cycle315) — `src/engine/market_regime.py` 가 `src/services/macro_client.py` 로 이 컨테이너를 부른다. 다만 레짐은 여전히 **관찰 지표**라 매수를 차단·축소하지 않는다. 운영 가이드 = [`docs/macro-lite.md`](docs/macro-lite.md)
+
+경위: cycle382(사용자 결정 2026-09-27 「시장유닛 단계형 권고대로 채택」)가 터틀 4전략(kojiro·donchian_swing·bull_flag_breakout·vcp_breakout)의 신규 진입 설계 랏을 KODEX 200(`069500`) 60일선 계단(1 / 0.75 / 0.5 / 0)으로 줄이는 **시장 유닛**을 넣었다(4전략 기본 `market_unit_mode="shadow"` = 계산·기록만). 시장 유닛은 매수를 줄이므로 「레짐은 … 축소하지 않는다」 가 전체 문장으로는 더 이상 참이 아니다. 자문 `_workspace/domain_consult/cycle376_market_unit.md` §8 충돌 1 의 선택지 (a) — 매크로 레짐 교리는 그대로 두고 시장 유닛을 별개 사이징 규칙으로 적는다 — 를 따랐다. 시장 유닛 규칙은 「자금 관리」 절 새 항목에 적었다. 같은 결정으로 E-2 계획(ETF 스테이지를 `block_reason`·매수 가드로 통합)을 닫았다(자문 §8 · §12 질문 5).
+
+→ CHANGELOG: cycle382 행

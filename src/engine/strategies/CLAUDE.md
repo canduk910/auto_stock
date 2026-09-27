@@ -94,6 +94,21 @@
 - **청산 파라미터는 `_position_setup` 영속 맵 + `_effective_setup` 리졸버 경유**(VCP·BFB 공통). `_candidates` 는 `prepare()` 마다 와이프되고 **보유 종목은 셋업이 무너져 후보 자격을 잃는 게 정상**이라, 청산이 거기 단독 의존하면 **T+1 아침부터 매일** 죽는다(재시작 사고가 아니다). 죽는 범위는 트레일링 하나가 아니라 — VCP = §1.5 래치·**§2 `base_low` 손절**·§3 트레일링·§4 `ema50` 이탈 / BFB = §1.5 래치·**§2 `flag_low` 손절**·**§3 measured-move 익절 전체**·§4 트레일링이다. **필드별 갱신 규약이 다르다** — 구조 레벨(`base_low`/`flag_low`/`pole_*`/`flag_high`)은 BUY 직전 stamp 후 **불변**, 지표(`atr14`/`ema50`)는 boot 훅이 **이미 fetch 하는 일봉으로 매일 갱신**한다(`ema50` 을 박제하면 상승 추세에서 뒤처져 이탈 청산이 늦어진다). BFB §3 은 `.get()` 방어 + **키 결손 시 미발화**(과잉 청산 금지)가 계약이다. ⚠️ `_reset_daily_state` 에서 clear **금지**(밤샘 소멸, AST 봉인). VCP 는 `recompute_high_since_buy` 의 **기존 일봉 fetch 응답을 재사용**해 `_rederive_entry_atr` 를 호출한다(추가 KIS 호출 0, BFB 와 같은 turtle 게이트).
 - **트레일링 기준점(`high_since_buy`) 영속은 전략 책임** — `risk.on_tick` 은 메모리만 올린다(hot path 라 DB 쓰기 금지). DB 되쓰기 경로가 없으면 `_boot()`(매 영업일 기동 직후)이 DB row 로 Position 을 재생성할 때 **트레일링 기준점이 매수가로 리셋**된다. 보정 헬퍼 `StrategyBase._apply_high_since_buy_from_candles` 가 **단일 진실원**이고 전략별 복사본은 금지다. 신규 보유형 전략은 이 헬퍼를 **이미 fetch 한 일봉 응답으로** 호출할 것 — 추가 KIS 호출 0 + `scheduler.py`(8영역) 무접촉.
 
+### 시장 유닛 — 터틀 4전략 (cycle382)
+
+`market_unit_mode ∈ off|shadow|enforce` 는 `kojiro`·`donchian_swing`·`bull_flag_breakout`·`vcp_breakout` 네 전략의 `DEFAULT_PARAMS` 에만 있다(기본 `"shadow"`, 부재·오타 = `off`). VB·LTV·momentum 에는 키가 없고 헬퍼도 부르지 않는다 — 설계 랏이 1주 언저리라 ½ 이 「안 산다」 로만 바뀌고, 당일 청산이라 약세장 오버나잇 노출을 줄이는 목적도 약하다(자문 `_workspace/domain_consult/cycle376_market_unit.md` §4.4). 규칙·배수 = 루트 [`CLAUDE.md`](../../../CLAUDE.md) 「자금 관리」 절 · 헬퍼 계약 = [`src/engine/CLAUDE.md`](../CLAUDE.md) `strategy_base.py` 절.
+
+| 전략 | `_MARKET_UNIT_ATR_KEY` | 신호 필터 자리 (`_market_unit_blocks_entry`) | 축소 매수의 스탬프 |
+|---|---|---|---|
+| `kojiro` | `"atr"` | `check_buy_signal` — `observe_gap(…, "pass", …)` 블록 뒤, `_bought_today.add` 앞 | 없음(`_position_atr` 을 신호 시점에 찍는다) |
+| `donchian_swing` | `"atr"` | `check_buy_signal` — 추격 상한 `[donchian_extension_skip]` 블록 뒤, `_bought_today.add`·`_breakout_high` 스탬프 앞 | `_entry_atr`(터틀 경로) |
+| `bull_flag_breakout` | `"atr14"` | `_evaluate_vol_gate` — 추격 상한 거부 블록 뒤, `latch_age_sec = 0` 앞 | `_entry_atr`(터틀 경로) |
+| `vcp_breakout` | `"atr14"` | `_evaluate_vol_gate` — BFB 와 같은 자리 | `_entry_atr`(터틀 경로) |
+
+- **자리가 계약인 이유** — 다른 매수 게이트를 전부 지난 뒤라 거르는 사유가 시장 유닛뿐이다. 필터는 `_bought_today`·`buy_signals`·래치·스탬프를 건드리지 않는다 — 그래서 PUT `off` 가 다음 평가부터 먹는다. BFB·VCP 는 edge-crossing 기준가 `_prev_price` 가 이미 이번 틱 값으로 갱신된 뒤라, 모드를 끈 뒤 첫 틱이 거짓 교차가 되지 않는다. 계좌 SOFT 게이트 `_account_soft_gate_blocked` 는 그대로 첫 문장이다.
+- **축소일(`enforce` ∧ m<1) 규칙** — `calc_buy_quantity` 첫머리가 줄인 설계 랏만 관문에 넘긴다. 1주 폴백도, 터틀→`position_ratio` 낙하도 없다(원인 불문 — ATR 결측·저변동 floor 도 같다). 낙하 랏은 `_entry_atr` 미스탬프라 고정% 손절을 타고, 명목이 줄인 유닛보다 커질 수 있기 때문이다. m=1 인 날의 데이터 결손 낙하는 현행 그대로다.
+- ⚠️ `enforce` ∧ m=0 인 날에도 donchian·kojiro 스윙 폴은 후보마다 `fetch_stock_detail` 을 부른 뒤 신호에서 거른다 — 필터가 `_bought_today` 를 쓰지 않으므로 09:05~09:30 매분 다시 평가한다.
+
 ## 공통 패턴
 
 ### funnel (깔때기)
@@ -167,7 +182,7 @@
 
 ### 1주 폴백
 
-- 비중 기준 0주일 때 관문이 위임하는 `StrategyBase._fallback_one_share(current_price)` 가 1주 폴백이다. 이 랏에도 위 「자금관리」 관문 순서대로 K축·ρ축 캡이 뒤따르고 캡이 0 이면 **매수하지 않는다** — 두 캡의 **실효 대상이 사실상 이 랏**이다.
+- 비중 기준 0주일 때 관문이 위임하는 `StrategyBase._fallback_one_share(current_price)` 가 1주 폴백이다. 이 랏에도 위 「자금관리」 관문 순서대로 K축·ρ축 캡이 뒤따르고 캡이 0 이면 **매수하지 않는다** — 두 캡의 **실효 대상이 사실상 이 랏**이다. 시장 유닛 축소일(`enforce` ∧ m<1)에는 터틀 4전략이 이 폴백에 닿지 않는다(위 「시장 유닛」 절).
 
 ## 멀티데이 보유 전략
 
@@ -235,7 +250,7 @@
 ### PARAM_RANGES 편입 목록
 
 - 전략 진입 품질 키 = VCP `base_depth_pct(0.10,0.50)` / `volume_contraction_ratio(0.30,1.00)` / `breakout_volume_mult(1.0,5.0)`(BFB 공용) / `last_pullback_max(0.03,0.15)` + BFB `breakout_retention_minutes(1,30)`(`INT_PARAMS` 동행).
-- **편입 금지** = `breakout_fail_n_days` · `max_breakout_extension_pct` · `box_contraction_period` · `max_box_volatility_pct` · `atr_trail_mult`(donchian·VCP·BFB 공유 키) · `max_positions`.
+- **편입 금지** = `breakout_fail_n_days` · `max_breakout_extension_pct` · `box_contraction_period` · `max_box_volatility_pct` · `atr_trail_mult`(donchian·VCP·BFB 공유 키) · `max_positions` · `market_unit_mode`(터틀 4전략, 리스크 정체성 — AST A03).
 - 정본은 `recommendation_engine.PARAM_RANGES`/`INT_PARAMS` 이고 **`INT_PARAMS` ⊆ `PARAM_RANGES`** 규약을 유지한다.
 
 ## 새 전략 추가

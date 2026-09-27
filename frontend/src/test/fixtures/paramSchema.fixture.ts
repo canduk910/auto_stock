@@ -1,7 +1,7 @@
 /**
  * cycle278 Red — `GET /api/strategies/params-schema` 응답 **골든 픽스처**.
  *
- * ⚠️ 손으로 쓰지 않는다. `src/engine/param_catalog.py` 의 103 스펙과 7 전략
+ * ⚠️ 손으로 쓰지 않는다. `src/engine/param_catalog.py` 의 104 스펙과 7 전략
  * `DEFAULT_PARAMS` 에서 **기계 생성**했다 (생성기:
  * `_workspace/red/cycle278_param_catalog_ui_spec.md` §7.4 · 생성 스크립트는 사이클 산출물).
  *
@@ -101,7 +101,7 @@ export interface ParamSchemaData {
 }
 
 export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
-  "catalog_version": "cycle365.1",
+  "catalog_version": "cycle382.1",
   "groups": [
     {
       "id": "entry",
@@ -2153,6 +2153,52 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
       "help": "보유 포지션들의 합산 오픈리스크가 전략 예산의 이 퍼센트를 넘으면 신규 매수를 멈춘다. **퍼센트 저장**(4.5 = 4.5%). **0 = 비활성.** 계산 예외는 전부 흡수하고 통과시킨다(fail-open)."
     },
     {
+      "key": "market_unit_mode",
+      "label_ko": "시장 유닛 모드",
+      "group": "sizing_risk",
+      "type": "enum",
+      "min": null,
+      "max": null,
+      "step": null,
+      "unit": "",
+      "editable": true,
+      "risk": "identity",
+      "auto_tunable": false,
+      "deprecated": false,
+      "deprecated_for": [],
+      "range_src": "enum",
+      "pattern": null,
+      "min_items": 0,
+      "forbidden_choices": [],
+      "choices": [
+        {
+          "value": "off",
+          "label_ko": "끄기 (부재·오타 포함 — 매수 수량·신호에 관여하지 않는다. 장세 계산·기록(prepare)은 계속된다)",
+          "deprecated": false,
+          "help": ""
+        },
+        {
+          "value": "shadow",
+          "label_ko": "섀도 (기본 — 계산·기록만, 수량 불변)",
+          "deprecated": false,
+          "help": ""
+        },
+        {
+          "value": "enforce",
+          "label_ko": "적용 (설계 랏을 실제로 줄인다)",
+          "deprecated": false,
+          "help": ""
+        }
+      ],
+      "applies_to": [
+        "donchian_swing",
+        "bull_flag_breakout",
+        "vcp_breakout",
+        "kojiro"
+      ],
+      "help": "cycle382 — KODEX 200(069500) 60일선 계단(위·상승 1 / 위·하락 ¾ / 아래·상승 ½ / 아래·하락 0)으로 터틀 4전략 신규 진입의 **설계 랏만** 줄인다. `off`(부재·오타 포함) = 매수 수량·신호에 관여하지 않는다(설계 랏 그대로) — 장세 계산·기록(`prepare()` 의 `[market_unit_state]`/`[market_unit_unavailable]`)은 모드와 무관하게 계속된다. `shadow`(기본) = 계산·기록에 더해 그 계산으로 줄었을 수량을 한 줄(`[market_unit] where=calc`)로 기록만 하고 수량은 그대로 둔다. `enforce` = 실제로 줄인다 — m=0 인 날은 그 종목 신규 진입 자체가 신호 단계에서 걸러진다(「매수 수량 0 → 900s cooldown(투자금 부족)」 으로 오귀인되지 않는다). 축소일에는 1주 폴백·터틀→비중 낙하 어느 것도 하지 않는다(원인 불문). 예산(`total_investment`)·잔여·K축(`max_lot_units`)·ρ축(`max_lot_ratio_mult`)·오픈리스크 캡·보유분·청산 규약은 전부 무접촉이다. 결측·stale·예외는 `m=1.0`(현행 그대로) + WARNING — 결측이 매수를 조용히 줄이지 않는다. `PUT /api/strategies/{id}/params` 로 즉시 반영되는 킬스위치다. AI 자동 튜닝 대상이 아니다(`PARAM_RANGES`/`INT_PARAMS` 편입 금지 — 리스크 정체성 상수)."
+    },
+    {
       "key": "min_market_cap",
       "label_ko": "최소 시가총액",
       "group": "scan_universe",
@@ -3274,6 +3320,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "min_vol_floor_pct",
         "max_lot_units",
         "max_lot_ratio_mult",
+        "market_unit_mode",
         "min_market_cap",
         "min_trade_amount",
         "max_scan_stocks",
@@ -3311,6 +3358,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "min_vol_floor_pct": 1.0,
         "max_lot_units": 2.0,
         "max_lot_ratio_mult": 2.5,
+        "market_unit_mode": "shadow",
         "min_market_cap": 50000000000,
         "min_trade_amount": 1000000000,
         "max_scan_stocks": 400,
@@ -3350,6 +3398,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "min_vol_floor_pct": 1.0,
         "max_lot_units": 2.0,
         "max_lot_ratio_mult": 2.5,
+        "market_unit_mode": "shadow",
         "min_market_cap": 50000000000,
         "min_trade_amount": 1000000000,
         "max_scan_stocks": 400,
@@ -3401,6 +3450,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "min_vol_floor_pct",
         "max_lot_units",
         "max_lot_ratio_mult",
+        "market_unit_mode",
         "min_market_cap",
         "min_trade_amount",
         "max_scan_stocks",
@@ -3444,6 +3494,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "min_vol_floor_pct": 1.0,
         "max_lot_units": 2.0,
         "max_lot_ratio_mult": 2.5,
+        "market_unit_mode": "shadow",
         "min_market_cap": 10000000000,
         "min_trade_amount": 1500000000,
         "max_scan_stocks": 4000,
@@ -3489,6 +3540,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "min_vol_floor_pct": 1.0,
         "max_lot_units": 2.0,
         "max_lot_ratio_mult": 2.5,
+        "market_unit_mode": "shadow",
         "min_market_cap": 10000000000,
         "min_trade_amount": 1500000000,
         "max_scan_stocks": 4000,
@@ -3543,6 +3595,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "min_vol_floor_pct",
         "max_lot_units",
         "max_lot_ratio_mult",
+        "market_unit_mode",
         "min_market_cap",
         "min_trade_amount",
         "max_scan_stocks",
@@ -3589,6 +3642,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "min_vol_floor_pct": 1.0,
         "max_lot_units": 2.0,
         "max_lot_ratio_mult": 2.5,
+        "market_unit_mode": "shadow",
         "min_market_cap": 10000000000,
         "min_trade_amount": 1000000000,
         "max_scan_stocks": 4000,
@@ -3637,6 +3691,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "min_vol_floor_pct": 1.0,
         "max_lot_units": 2.0,
         "max_lot_ratio_mult": 2.5,
+        "market_unit_mode": "shadow",
         "min_market_cap": 10000000000,
         "min_trade_amount": 1000000000,
         "max_scan_stocks": 4000,
@@ -3688,6 +3743,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "max_lot_units",
         "max_lot_ratio_mult",
         "max_open_risk_pct",
+        "market_unit_mode",
         "min_market_cap",
         "min_trade_amount",
         "max_scan_stocks",
@@ -3733,6 +3789,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "max_lot_units": 2.0,
         "max_lot_ratio_mult": 2.5,
         "max_open_risk_pct": 4.5,
+        "market_unit_mode": "shadow",
         "min_market_cap": 50000000000,
         "min_trade_amount": 1000000000,
         "max_scan_stocks": 4000,
@@ -3780,6 +3837,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "max_lot_units": 2.0,
         "max_lot_ratio_mult": 2.5,
         "max_open_risk_pct": 4.5,
+        "market_unit_mode": "shadow",
         "min_market_cap": 50000000000,
         "min_trade_amount": 1000000000,
         "max_scan_stocks": 4000,

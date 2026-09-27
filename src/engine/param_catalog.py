@@ -131,7 +131,7 @@ __all__ = [
     "forbidden_choices_for",
 ]
 
-CATALOG_VERSION = "cycle365.1"
+CATALOG_VERSION = "cycle382.1"
 
 #: 전략 id 의 정본 순서(레지스트리 등록 순서).
 STRATEGY_IDS: tuple[str, ...] = (
@@ -397,6 +397,14 @@ _AFTER_EXIT_DIVISION_CHOICES: tuple[Choice, ...] = (
     Choice("41", "지정가 5호가 아래 (⚠️ 현재가 있는 종목만)", False,
            "가격을 우리가 통제한다. 현재가를 못 받는 종목에서는 변환이 취소되고 "
            "시장가가 그대로 나가며 거부 관측·TTL·포기 래치가 전부 꺼진다"),
+)
+
+#: cycle382 — 시장 유닛(단계형). 값 집합의 정본은 `market_unit.MODES`.
+_MARKET_UNIT_MODE_CHOICES: tuple[Choice, ...] = (
+    Choice("off", "끄기 (부재·오타 포함 — 매수 수량·신호에 관여하지 않는다. "
+                  "장세 계산·기록(prepare)은 계속된다)"),
+    Choice("shadow", "섀도 (기본 — 계산·기록만, 수량 불변)"),
+    Choice("enforce", "적용 (설계 랏을 실제로 줄인다)"),
 )
 
 _SIZING_MODE_CHOICES: tuple[Choice, ...] = (
@@ -1110,6 +1118,29 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         help="보유 포지션들의 합산 오픈리스크가 전략 예산의 이 퍼센트를 넘으면 신규 매수를"
              " 멈춘다. **퍼센트 저장**(4.5 = 4.5%). **0 = 비활성.**"
              " 계산 예외는 전부 흡수하고 통과시킨다(fail-open).",
+    ),
+    _s(
+        key="market_unit_mode", label_ko="시장 유닛 모드", group="sizing_risk",
+        type="enum", min=None, max=None, step=None, unit="",
+        editable=True, risk="identity", auto_tunable=False, deprecated=False,
+        applies_to=_TURTLE4, range_src="enum", choices=_MARKET_UNIT_MODE_CHOICES,
+        help="cycle382 — KODEX 200(069500) 60일선 계단(위·상승 1 / 위·하락 ¾ /"
+             " 아래·상승 ½ / 아래·하락 0)으로 터틀 4전략 신규 진입의 **설계 랏만**"
+             " 줄인다. `off`(부재·오타 포함) = 매수 수량·신호에 관여하지 않는다"
+             "(설계 랏 그대로) — 장세 계산·기록(`prepare()` 의 `[market_unit_state]`"
+             "/`[market_unit_unavailable]`)은 모드와 무관하게 계속된다. `shadow`"
+             "(기본) = 계산·기록에 더해 그 계산으로 줄었을 수량을 한 줄"
+             "(`[market_unit] where=calc`)로 기록만 하고 수량은 그대로 둔다."
+             " `enforce` = 실제로 줄인다 — m=0 인 날은"
+             " 그 종목 신규 진입 자체가 신호 단계에서 걸러진다(「매수 수량 0 →"
+             " 900s cooldown(투자금 부족)」 으로 오귀인되지 않는다). 축소일에는"
+             " 1주 폴백·터틀→비중 낙하 어느 것도 하지 않는다(원인 불문). 예산"
+             "(`total_investment`)·잔여·K축(`max_lot_units`)·ρ축"
+             "(`max_lot_ratio_mult`)·오픈리스크 캡·보유분·청산 규약은 전부 무접촉"
+             "이다. 결측·stale·예외는 `m=1.0`(현행 그대로) + WARNING — 결측이"
+             " 매수를 조용히 줄이지 않는다. `PUT /api/strategies/{id}/params` 로"
+             " 즉시 반영되는 킬스위치다. AI 자동 튜닝 대상이 아니다(`PARAM_RANGES`"
+             "/`INT_PARAMS` 편입 금지 — 리스크 정체성 상수).",
     ),
 
     # ── 스캔·유니버스 (5) ───────────────────────────────────────────────────

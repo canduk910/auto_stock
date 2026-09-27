@@ -94,6 +94,9 @@ GAP_DOWN_LOG = "고지로 갭다운 스킵: %s 갭률 %.1f%% ≤ %.1f%%"
 # 사용자 결정 "결정 2 진행"(매매 파라미터 신규 키 승인 완료)에 해당하는 예외. 4키는
 # `shadow` 모드 기록만(주문 경로 byte 동일, `check_buy_signal`/`check_exit_signal`
 # 세그먼트 무변경 — 명세 `_workspace/red/cycle297_llm_gate_all_strategies_spec.md`).
+# ⚠️ cycle382(2026-09-27, 시장 유닛 단계형)가 43→44 로 갱신했다 — 사용자 결정
+# "시장유닛 단계형 권고대로 채택"에 해당하는 예외. 1키는 기본 `shadow` 모드
+# 기록만(주문 경로는 `mode ∈ {shadow, enforce} ∧ m < 1` 일 때만 갈린다).
 KOJIRO_PARAM_KEYS = (
     "atr_period", "atr_ratio_max", "atr_ratio_min", "after_market_exit_division",
     "breakeven_promote_atr",
@@ -101,7 +104,8 @@ KOJIRO_PARAM_KEYS = (
     "exclude_tickers", "gap_down_skip_pct", "gap_up_skip_pct", "hard_stop_pct",
     "llm_gate_daily_call_cap", "llm_gate_min_score", "llm_gate_mode",
     "llm_gate_timeout_secs",
-    "macd_signal", "max_lot_ratio_mult", "max_lot_units", "max_open_risk_pct",
+    "macd_signal", "market_unit_mode", "max_lot_ratio_mult", "max_lot_units",
+    "max_open_risk_pct",
     "max_positions", "max_positions_per_sector", "max_scan_stocks",
     "max_units_per_stock", "max_units_total", "min_market_cap",
     "min_trade_amount", "min_vol_floor_pct", "nxt_tradable",

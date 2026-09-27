@@ -2539,3 +2539,19 @@ kojiro 신규 진입 8%·donchian 20% 를 없앤다(설계안 §5). 상세 경�
 경위: cycle380(사용자 결정 2026-09-27 「운영db 조회 허용 및 판정 변경 채택」)이 ETF/ETN 판정을 이름 키워드에서 증권그룹코드 `scty_grp_id_cd ∈ {EF,EN,FE}` 로 바꿨다. 판정은 leaf `src/engine/etf_like.py::is_etf_like` 하나로 모였고, 코드가 없을 때만 이름 키워드로 떨어진다. ETF 코드도 6자리 숫자라 `isdigit` 는 ETF 를 막지 못한다. BFB 를 포함한 6 전략은 `list_by_filter(exclude_etf_like=True)` 로 후보 수 절단 전에 ETF 를 뺀다. 공통 규칙은 「매수 안전장치」 절 「ETF/ETN 제외」 행 하나에 적었다.
 
 → CHANGELOG: cycle380 행
+
+## 8-3. 시장 레짐 — **관찰 전용**
+
+### 2026-09-27 cycle382 — 레짐 교리를 매크로 레짐 한정으로 · 출처 문장 정정
+
+정본 원문(절 첫 문단):
+
+`dkstock.cloud` 매크로를 `_boot()` 에서 1회 fetch 해 `market_regime_snapshots` 에 1행 남긴다.
+
+정본 원문(첫 목록 행):
+
+- **레짐은 매수를 차단하거나 축소하지 않는다.** `risk.on_tick`/`_swing_buy_poll_loop` 의 게이트는 존재하지 않는다. 레짐 대응은 **`cash_usage_ratio` 하나로만** 한다.
+
+경위: cycle382(사용자 결정 2026-09-27 「시장유닛 단계형 권고대로 채택」)가 터틀 4전략 신규 진입 설계 랏을 KODEX 200(`069500`) 60일선 계단(1 / 0.75 / 0.5 / 0)으로 줄이는 **시장 유닛**을 넣었다. 매수를 줄이는 규칙이 생겼으므로 「레짐은 … 축소하지 않는다」 를 매크로 레짐 한정으로 좁히고, 시장 유닛은 §2 「전략별 자금 비중」 에 별개 사이징 규칙으로 적었다(자문 `_workspace/domain_consult/cycle376_market_unit.md` §8 충돌 1 (a)). 같은 결정으로 E-2 계획(ETF 스테이지를 매수 가드로 통합)을 닫았다. 첫 문단의 출처 `dkstock.cloud` 는 cycle315 에서 우리 `macro` 컨테이너로 바뀐 뒤 남아 있던 옛 표기라 같이 고쳤다(`dkstock.cloud` 는 2026-08-18 철거).
+
+→ CHANGELOG: cycle382 행

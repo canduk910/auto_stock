@@ -446,6 +446,10 @@ def test_g348_b10_helper_is_sync_and_awaitless():
     await self._resolve_expected_daily_head()` 1건을 gather 전에 더해 **8**이 됐다
     (①′ 일봉 신선도를 직전 영업일 기준으로 — `_workspace/red/cycle363_business_day_freshness_spec.md`
     §2.5). 관측 확장이 아니라 별도 승인 사이클의 신규 await 이다.
+
+    🔁 cycle382 재핀 — 시장 유닛(단계형) `await self._refresh_market_unit(...)` 1건이
+    `_resolve_prepare_as_of` 직후에 더해 8 → **9**(사용자 결정 09-27). 이 역시 관측
+    확장이 아니라 별도 승인 사이클의 신규 await 이다.
     """
     tree = ast.parse(_KOJIRO_PY.read_text(encoding="utf-8"))
     fns = {n.name: n for n in ast.walk(tree)
@@ -455,15 +459,18 @@ def test_g348_b10_helper_is_sync_and_awaitless():
     assert isinstance(h, ast.FunctionDef), "수집 헬퍼가 async 다"
     assert not any(isinstance(x, ast.Await) for x in ast.walk(h))
     prep = fns["prepare"]
-    assert sum(isinstance(x, ast.Await) for x in ast.walk(prep)) == 8, (
+    assert sum(isinstance(x, ast.Await) for x in ast.walk(prep)) == 9, (
         "prepare 의 await 수가 바뀌었다 — 관측 확장에 I/O 가 끼었다 "
-        "(cycle363 의 `_resolve_expected_daily_head` 1건은 예외로 반영됨)")
+        "(cycle363 의 `_resolve_expected_daily_head` 1건 + cycle382 의 "
+        "`_refresh_market_unit` 1건은 예외로 반영됨)")
 
 
 def test_g348_b10_no_new_default_params():
     from src.engine.strategies.kojiro import KojiroStrategy
     keys = set(KojiroStrategy.DEFAULT_PARAMS)
-    assert len(keys) == 43, f"DEFAULT_PARAMS 키 수가 {len(keys)} — 관측 확장은 키를 더하지 않는다"
+    # 🔁 cycle382 재핀 — 시장 유닛(단계형) `market_unit_mode` 1키(사용자 결정
+    # 09-27)로 43 → 44. 관측 확장(이 파일의 범위)은 여전히 키를 더하지 않는다.
+    assert len(keys) == 44, f"DEFAULT_PARAMS 키 수가 {len(keys)} — 관측 확장은 키를 더하지 않는다"
     assert not any("stage6" in k or "observe" in k for k in keys)
 
 

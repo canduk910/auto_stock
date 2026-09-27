@@ -617,9 +617,11 @@ async def persist_snapshot(regime: MarketRegime, target_date: date) -> None:
 # ---------------------------------------------------------------------------
 # 자문: `_workspace/domain_consult/cycle_etf_kojiro_regime_20260731.md` (GO).
 # dkstock 매크로와 별개로 지수ETF(KODEX200/코스닥150)의 고지로 대순환 스테이지를
-# 관찰 — E-1 범위는 계산 + 로그 + API 노출까지. block_reason 통합/SOFT 상한/reasons
-# 태깅은 E-2(2주 관찰 후) 인계 — 매수 가드 행위(blocked/soft_multiplier/reasons)는
-# 본 절과 무관하게 완전 보존.
+# 관찰 — E-1 범위는 계산 + 로그 + API 노출까지. E-2(block_reason 통합/SOFT 상한/
+# reasons 태깅)는 폐기됐다(사용자 결정 2026-09-27, cycle382) — 장세에 따른 신규
+# 진입 축소는 매크로 레짐이 아니라 시장 유닛(`src/engine/market_unit.py`)이 전략
+# 사이징에서 한다. 매수 가드 행위(blocked/soft_multiplier/reasons)는 본 절과
+# 무관하게 완전 보존.
 
 # 방어집합 = 하락 사분면 전체 (자문 §Q2 정본). kojiro_indicators._STAGE_MAP 참조:
 # 1 안정상승 / 2 상승후조정 / 3 하락전환 / 4 안정하락 / 5 하락후반등 / 6 상승전환.

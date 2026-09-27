@@ -70,6 +70,14 @@ KIS OpenAPI 기반 국내주식 자동매매시스템. 다중 전략 아키텍�
   - **롤백** = 해당 전략 `max_lot_ratio_mult = 20.0`. **PUT 은 즉시 / SQL UPDATE 는 다음 재시작에서만** 반영되고, 보유 중 장중 재시작은 금지(cycle232 D6)이므로 **장중 실효 수단은 PUT 뿐**이다. ⚠️ 키가 배포되기 **전**에는 PUT 이 무음 실패(미지 키 탈락) + `params` 통째 덮어쓰기로 SQL 값까지 지운다.
   - `compute_unit_qty_guarded` 의 notional 상한이 `position_ratio × 예산` 이라 **터틀 수량 ≤ 비중 수량**이 항상 성립 = 전환은 **순수 축소 방향**.
   - race 가드: `pending_buys`는 `place_order` 응답 직후 동기 영역에서 즉시 등록 — 기존 매핑 등록 규약과 동일하게 합산 일관성 보장
+- **시장 유닛(단계형) `market_unit_mode` (cycle382, 사용자 결정 2026-09-27)** — 터틀 4전략(`donchian_swing`·`bull_flag_breakout`·`vcp_breakout`·`kojiro`) 한정. KODEX 200(`069500`) 60일선으로 그날 신규 진입의 **설계 랏만** 계단형으로 줄인다 — 위·상승 = 1.0(그대로) · 위·하락 = 0.75 · 아래·상승 = 0.5 · 아래·하락 = **0.0**(신규 진입 없음). 상승 = 60일선이 20봉 전 60일선보다 높다. 동률(종가 = 60일선, 60일선 = 20봉 전 값)은 약한 쪽으로 판정한다. 판정은 D-1(전 영업일) 종가 기준이라 07:45 부팅 시점에 이미 안다.
+  - **적용 자리 = 설계 랏뿐이다.** `cash_usage_ratio`·`total_investment`·잔여 클램프·K축(`max_lot_units`)·ρ축(`max_lot_ratio_mult`)·오픈리스크 캡·보유분·청산 규약은 전부 무접촉. 예산 경로(`cash_usage_ratio`·`total_investment` 축소)는 재현에서 조금 더 좋았지만(샤프 변화 +0.29 대 +0.23, MA60 ½ 기준) 택하지 않았다 — 7전략 전부와 일일 손실 분모·정산 기준선·비중 하한선 검증이 함께 흔들리고, 매크로 자동 조정과 같은 손잡이라 두 효과를 로그로 가를 수 없다(자문 §7.4).
+  - **축소일(m<1)에는 1주 폴백도, 터틀→비중 경로 낙하도 하지 않는다**(원인 불문 — ATR 결측이든 저변동 floor 든 동일). 폴백을 허용하면 donchian·VCP 는 0.5 조차 실현되지 않는다(재현 실측 — 폴백 유지 시 실현배수 0.70·0.61, 폴백 금지 시 0.45~0.48).
+  - **줄인 랏으로 못 사는 종목은 신호 단계에서 거른다**(`enforce` 만) — m=0(`zero_state`) · 줄였더니 0주(`rounds_to_zero`) · m=1 이었다면 폴백·낙하로 샀을 종목(`no_fallback`). 수량 0 을 관문까지 흘리면 「매수 수량 0 → 900s cooldown(투자금 부족)」으로 오귀인된다(cycle316 재현 차단). 잔여 부족(`funds`)은 거르지 않는다 — 기존 자금 경로가 맞는 귀인이다.
+  - **결측·stale·예외 → m=1.0**(fail-open, 현행 그대로) — 장세 데이터 결손이 매수를 조용히 줄이면 안 된다.
+  - **모드 3단계** `off|shadow|enforce` — 부재·오타 = `off`. 4전략 기본값은 **`shadow`**(계산·기록만, 수량 불변) — 1주 섀도 관찰 뒤 `enforce` 전환은 별도 사용자 승인. `PARAM_RANGES`/`INT_PARAMS` **편입 금지**(리스크 정체성 상수, AI 자동 튜닝 대상 아님). 킬스위치·`enforce` 전환 = 전략마다 `PUT /api/strategies/{id}/params {"params":{"market_unit_mode":"off"}}` **즉시**(모드를 매 호출 읽는다). 🔴 전략 끄기(`enabled`·`weight=0`)로 되돌리지 않는다 — 보유분 손절이 멈춘다.
+  - **매크로 레짐과는 다른 축이다** — 매크로 레짐(`cash_usage_ratio` 자동 조정)은 관찰 지표라 매수를 차단·축소하지 않는다(§8-3). 시장 유닛은 그와 별개로 전략 사이징에서만 작동하는 규칙이다.
+  - 근거 = `_workspace/domain_consult/cycle376_market_unit.md`(계좌 재현 — 6년 낙폭 −61.5%→−27.5%, 샤프 −0.40→+0.18) · 명세 = `_workspace/red/cycle382_market_unit_spec.md`.
 
 ### WebSocket 시세 구독 — 한도·우선순위·거절 감지
 
@@ -629,6 +637,9 @@ DEFAULT_PARAMS = {
     # 장중 킬스위치 — 값은 order_engine 코드 상수와 동일(행위 변경 0).
     "order_exchange_clock_mode": "enforce",
     "after_market_exit_division": "44",
+    # cycle382 — 시장 유닛(단계형, KODEX200 60일선). 부재·오타=off, 기본 shadow
+    # (계산·기록만). PARAM_RANGES/INT_PARAMS 미편입. 킬스위치 = PUT 즉시.
+    "market_unit_mode": "shadow",
 }
 ```
 
@@ -779,6 +790,9 @@ DEFAULT_PARAMS = {
     # 장중 킬스위치 — 값은 order_engine 코드 상수와 동일(행위 변경 0).
     "order_exchange_clock_mode": "enforce",
     "after_market_exit_division": "44",
+    # cycle382 — 시장 유닛(단계형, KODEX200 60일선). 부재·오타=off, 기본 shadow
+    # (계산·기록만). PARAM_RANGES/INT_PARAMS 미편입. 킬스위치 = PUT 즉시.
+    "market_unit_mode": "shadow",
 }
 ```
 
@@ -971,15 +985,15 @@ BFB/VCP 매수 신호는 (donchian 의 폴링 루프와 달리) `risk.on_tick`(W
 
 `recommendation_engine.PARAM_RANGES` 에 있는 키만 AI 자문이 추천할 수 있고, `INT_PARAMS ⊆ PARAM_RANGES` 가 규약이다(정수 캐스트 대상).
 
-- **편입 금지 = 정체성 상수.** 진입 임계(`max_positions` · `buy_threshold` · `donchian_period` · `max_breakout_extension_pct` · `open_entry_hold_secs` · `open_price_scope_mode`)와 청산 임계(`atr_trail_mult` · `breakout_fail_n_days` · `breakeven_promote_atr` · `channel_exit_period`), 리스크 정체성 상수(`max_lot_units` K · `max_lot_ratio_mult` K_ρ · `rank_w_*`), 킬스위치·LLM 키가 여기 해당한다.
+- **편입 금지 = 정체성 상수.** 진입 임계(`max_positions` · `buy_threshold` · `donchian_period` · `max_breakout_extension_pct` · `open_entry_hold_secs` · `open_price_scope_mode`)와 청산 임계(`atr_trail_mult` · `breakout_fail_n_days` · `breakeven_promote_atr` · `channel_exit_period`), 리스크 정체성 상수(`max_lot_units` K · `max_lot_ratio_mult` K_ρ · `rank_w_*` · `market_unit_mode`), 킬스위치·LLM 키가 여기 해당한다.
 - **왜**: 최근 손실을 목적함수로 삼는 튜너는 표본이 적을 때 "최근 손실 거래를 지우는 값" 으로 수렴한다 — 청산 임계를 조이면 추세추종이 데이트레이딩으로 변태하고, 진입 임계를 조이면 신호가 말라붙는다. 라이브 값이 허용 범위의 **하한에 정확히 붙어 있으면** 그건 과튜닝 서명이다.
 - **`atr_trail_mult` 는 3전략 공유 키**(`donchian_swing`·`vcp_breakout`·`bull_flag_breakout`, 전부 DEFAULT 2.0)라 제외가 세 전략에 함께 걸린다. 근거 표본은 donchian 뿐이므로 **VCP 또는 BFB 의 청산 왕복이 ≥20 쌓이면 그 전략에 한해 재편입 여부를 독립 판정**한다. 키를 전략별로 나눠야 하면 kojiro 의 `stop_atr`/`trail_atr` 고유명 선례를 따른다.
 
 ### 8-3. 시장 레짐 — **관찰 전용**
 
-`dkstock.cloud` 매크로를 `_boot()` 에서 1회 fetch 해 `market_regime_snapshots` 에 1행 남긴다.
+우리 `macro` 컨테이너(cycle315)의 매크로 레짐을 `_boot()` 에서 1회 fetch 해 `market_regime_snapshots` 에 1행 남긴다.
 
-- **레짐은 매수를 차단하거나 축소하지 않는다.** `risk.on_tick`/`_swing_buy_poll_loop` 의 게이트는 존재하지 않는다. 레짐 대응은 **`cash_usage_ratio` 하나로만** 한다.
+- **매크로 레짐은 매수를 차단하거나 축소하지 않는다.** `risk.on_tick`/`_swing_buy_poll_loop` 의 게이트는 존재하지 않는다. 매크로 레짐 대응은 **`cash_usage_ratio` 하나로만** 한다. (⚠️ 장세에 따른 터틀 4전략 신규 진입 축소는 이 레짐이 아니라 **시장 유닛**(§2 「전략별 자금 비중」의 `market_unit_mode`, cycle382)이 별개 사이징 규칙으로 담당한다 — 둘을 섞지 않는다.)
 - **`cash_usage_ratio` 자동 조정**: `clamp((100 − regime.params.cash_min) / 100, 0.0, 1.0)` — defensive(75)→0.25 / neutral(50)→0.5 / aggressive(20)→0.8. `auto_regime_adjust=true`(기본)일 때만 갱신하고 `false` 면 운영자 수동값을 보존한다.
 - **외부 실패 graceful**: fetch 실패·timeout·토큰 만료·토글 OFF → `MarketRegime.empty()` → `cash_usage_ratio` 자동 갱신 안 함(수동값 유지), 자동매매 본 흐름 영향 0.
 - `get_current_regime()` 는 `_boot()` 1회 호출을 가정한 모듈 싱글톤이다(동시성 lock 없음 — 단일 워커 전제). 소비처는 대시보드 `/current` 와 AI 자문 payload **표시 전용**이다.

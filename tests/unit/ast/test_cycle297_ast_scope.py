@@ -64,6 +64,20 @@ _KEY_VALUES = {
 }
 
 _NEW_FIVE = ("momentum", "donchian_swing", "bull_flag_breakout", "vcp_breakout", "kojiro")
+
+#: cycle382(2026-09-27) — 시장 유닛(단계형) 모드. 4키(llm_gate_*) **뒤**에 붙는
+#: 또 다른 축(사용자 결정 09-27) — 터틀 4전략에만 붙는다("momentum" 은 제외).
+_CYCLE382_KEY = ("market_unit_mode",)
+_CYCLE382_AFFECTED_SIDS = frozenset({
+    "donchian_swing", "bull_flag_breakout", "vcp_breakout", "kojiro",
+})
+
+
+def _expected_keys_g2(sid: str) -> tuple[str, ...]:
+    expected = _BASELINE_KEYS[sid] + _KEYS
+    if sid in _CYCLE382_AFFECTED_SIDS:
+        expected += _CYCLE382_KEY
+    return expected
 _ALL_SEVEN_RELS = tuple(
     f"src/engine/strategies/{sid}.py"
     for sid in ("momentum", "volatility_breakout", "long_tail_volatility",
@@ -241,7 +255,7 @@ def test_g2_2a_five_strategies_keep_every_baseline_key_and_add_exactly_four(sid:
     """
     path = _STRATEGY_DIR / f"{sid}.py"
     got = _default_params_keys(path)
-    expected = _BASELINE_KEYS[sid] + _KEYS
+    expected = _expected_keys_g2(sid)
     assert got == expected, (
         f"{sid}: DEFAULT_PARAMS 키 순서/구성이 다르다\n"
         f"  추가됨: {sorted(set(got) - set(expected))}\n"
@@ -536,8 +550,10 @@ _BASE_SHA: dict[str, str] = {
     "src/engine/scheduler.py":
         "b1aaa4816267adb49207fd043a3d640144f4eb493980fcd1302ffb02ef086d54",
     # 🔁 cycle369 R2 재핀 — buy-block 게이트(`_status_buy_blocked` 승격) + STATUS_EXIT Signal + Q7 edge-baseline clear 배선(전략 7파일은 무변경, 배선은 이 파일)
+    # 🔁 cycle382 리뷰 재핀(값만) — `_market_unit_tally_roll` 을 `tally.date != day`
+    # 에서 `tally.date < day`(더 늦은 날짜에서만 롤)로 시정(§8, 사용자 승인 범위 밖 무접촉).
     "src/engine/strategy_base.py":
-        "e9b379dcae6e4db664b2f159442b11bac3bf00be6e4481680332da494b61bf8e",
+        "448c03026e576d9a520e1863a382e35f2f35574c695458c8054e9d3e60a9821f",
     "src/engine/strategies/volatility_breakout.py":
         "45d860c693f83b995f959d4b88c024cba2b885a9267514a746e23372db8721d5",
     "src/engine/strategies/long_tail_volatility.py":
