@@ -102,6 +102,11 @@ def mock_env(monkeypatch: pytest.MonkeyPatch):
         "src.engine.order_engine.OrderEngine._strategy_exchange_async",
         AsyncMock(return_value="KRX"),
     )
+    # cycle385 부록 R-1-3 — #1.5 재대조가 TTTC0081R(주문 목록)을 한 번 더 읽는다. 패치하지
+    # 않으면 실제 KIS 경로를 탄다. 빈 목록 = 크레딧 0 → 이 파일의 기대값(`[3, 2]`)은 불변.
+    from src.api import balance as _balance_mod
+    mocks.get_daily_orders = AsyncMock(return_value=[])
+    monkeypatch.setattr(_balance_mod, "get_daily_orders", mocks.get_daily_orders)
     return mocks
 
 
@@ -166,16 +171,49 @@ class TestR2SelfHeal257720:
         assert mock_env.save_position.await_count >= 1  # DB 수량 보정 동행
 
     @pytest.mark.asyncio
-    async def test_partial_lock_with_accurate_position_not_downgraded(
+    async def test_partial_lock_with_accurate_position_sells_unlocked_remainder(
         self, engine, registry, mock_env, monkeypatch, caplog,
     ):
-        """C236-F1 — held == positions(정확)인데 sellable 만 작으면 **잠김이지 오염이 아니다**.
+        """C236-F1 + cycle385 부록 R-2(F-3) — held == positions(정확)인데 sellable 만 작으면
+        **잠김이지 오염이 아니다** → 하향 보정 금지는 그대로.
 
-        하향 보정하면 외부 주문 취소 시 잠겼던 주식이 손절 감시 밖에 남는다.
-        보정 금지 + 보존 + 중단(place 1회) + `_selling` 유지가 계약.
+        기대값 변경(R-10, 사유 = 사용자 전제 「잔여보유수량에 대한 추가매도가 가능하도록」):
+        예전 계약은 「보존 + 중단(place 1회)」 이었다 — 그 동안 안 잠긴 1주의 손절이 걸린 외부
+        주문이 끝날 때까지 멈췄다. 이제 `fire = sellable − (held − positions) = 1` 을 판다
+        (place `[3, 1]`). 추적은 3 그대로 · DB 보정 0 · `_selling` 유지(우리 1주 주문이 걸림).
         """
         import src.engine.order_engine as _oe
         _patch_balance(monkeypatch, quantity=3, sellable=1)
+        calls: list[int] = []
+
+        async def _place(*, ticker, side, quantity, price, order_division, exchange):
+            calls.append(quantity)
+            if len(calls) == 1:
+                raise _qty_exceeded_error()
+            return OrderResult(order_no="S003", org_no="1", order_time="150001")
+
+        monkeypatch.setattr(_oe, "place_order", _place)
+        strat = registry.get("volatility_breakout")
+        with caplog.at_level(logging.WARNING):
+            await engine.execute_sell("257720", Signal.FORCE_CLEAR,
+                                      "volatility_breakout")
+        assert calls == [3, 1], f"안 잠긴 잔여 1주를 팔지 않았다: {calls}"
+        assert strat.state.positions["257720"].quantity == 3  # 하향 보정 금지
+        assert mock_env.save_position.await_count == 0
+        assert any("[sell_qty_partial_sellable]" in r.message for r in caplog.records)
+        assert "257720" in engine._selling  # 우리 주문이 걸렸다
+        assert "257720" not in engine._selling_locked_wait
+
+    @pytest.mark.asyncio
+    async def test_partial_lock_covered_by_surplus_is_preserved_and_frozen(
+        self, engine, registry, mock_env, monkeypatch, caplog,
+    ):
+        """C236-F1 원 계약(cycle385 부록 R-2 뒤) — held 5 · sellable 1 · positions 3 →
+        `fire = 1 − (5 − 3) = −1` = 걸린 매도를 운영자 초과분이 덮는다 → 보정 없이 보존 + 중단
+        (place 1회) + `_selling` 유지 + 동결 표식. 운영자 몫을 우리가 팔지 않는다(R-INV-2).
+        """
+        import src.engine.order_engine as _oe
+        _patch_balance(monkeypatch, quantity=5, sellable=1)
         place = AsyncMock(side_effect=_qty_exceeded_error())
         monkeypatch.setattr(_oe, "place_order", place)
         strat = registry.get("volatility_breakout")
@@ -187,6 +225,7 @@ class TestR2SelfHeal257720:
         assert mock_env.save_position.await_count == 0
         assert any("[sell_qty_partial_locked]" in r.message for r in caplog.records)
         assert "257720" in engine._selling  # (b) 와 동일 유지 계약
+        assert "257720" in engine._selling_locked_wait
 
     @pytest.mark.asyncio
     async def test_contamination_corrects_to_held_not_sellable(
@@ -240,6 +279,11 @@ class TestR2SelfHeal257720:
         # 유지가 on_tick 재진입 폭주를 막고, stale 은 [selling_reconcile] 180s
         # 재대조(열린주문 존재 검사)가 수습한다. discard 로 바꾸는 뮤테이션 검출.
         assert "257720" in engine._selling
+        # cycle385 부록 R2-5 · R3 K3 — 동결 표식 = 우리 `execute_sell` 이 주문 없이 멈춰 세운
+        # `_selling` 이라는 표시. 주문 종료는 표식과 무관하게 `_selling` 을 풀고(R2-2), 표식은
+        # 지키던 보유가 닫힐 때(R2-5)와 원주문 취소 뒤 재주문이 안 걸렸을 때(R3 K3 — 손님 manual
+        # 포함) 푸는 근거다.
+        assert "257720" in engine._selling_locked_wait
 
     @pytest.mark.asyncio
     async def test_zero_holding_falls_to_insufficient_path(

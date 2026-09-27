@@ -198,6 +198,27 @@ def _classify_after_exit_rejection(e: KisApiError) -> str:
     return "unclassified"
 
 
+def _sell_not_placed_reason(exc: BaseException) -> "str | None":
+    """cycle385 부록 R4 D2 — 이 발사 예외가 「우리 매도 주문이 거래소에 걸리지 않았다」를 확정하는가.
+
+    (a) APBK0400 — 부록 R3-2-3 부등식. (b) 주문 자체의 결정적 거부 — 같은 본문의 첫 전송 시도도 똑같이
+    거부됐을 것: 시장가 불가(APBK1943·APBK3013 계열) · 장운영시간 외(APBK0918 + 장운영시간 문구).
+    그 밖은 None = 「전송 중」. 분류는 `src.api.balance` 의 기존 판정 함수만 쓴다. never-raise.
+    """
+    try:
+        if not isinstance(exc, KisApiError):
+            return None
+        if is_sell_qty_exceeded(exc):
+            return "qty_exceeded"
+        if is_market_closed_rejection(exc):
+            return "market_closed"
+        if is_market_order_disallowed(exc):
+            return "market_order_disallowed"
+        return None
+    except Exception:
+        return None
+
+
 def _market_rest_now(now: datetime) -> tuple[bool, str]:
     """cycle295 (B) — 순수·never-raise 술어, 모듈 레벨. 시각 리터럴 0건.
 
@@ -304,6 +325,79 @@ def pending_cancel_tickers(engine) -> list[str]:
         return sorted({tk for tk, _ in engine._pending_cancel_tasks.keys()})
     except Exception:
         return []
+
+
+def _odno_key(s) -> str:
+    """주문번호 정규화 — 세 경로(REST·체결통보·TTTC0081R)의 0-패딩 차이를 흡수한다."""
+    return str(s).strip().lstrip("0") or "0"
+
+
+SELL_ORDERS_QUERY_TIMEOUT = 2.0
+_DAILY_ORDERS_PAGE_REAL = 100
+_DAILY_ORDERS_PAGE_VTS = 15
+
+
+def _sell_fills_by_order(rows, ticker: str, page_size: int) -> "dict[str, int] | None":
+    """TTTC0081R `output1` → {정규화 주문번호: 그 종목 매도 누적 체결}. 못 믿으면 None."""
+    try:
+        if not isinstance(rows, list) or len(rows) >= page_size:
+            return None
+        out: dict[str, int] = {}
+        for row in rows:
+            if str(row.get("pdno", "")).strip() != ticker:
+                continue
+            if str(row.get("sll_buy_dvsn_cd", "")).strip() != "01":
+                continue
+            odno = str(row.get("odno", "")).strip()
+            qty = str(row.get("tot_ccld_qty", "")).strip()
+            if not odno or not qty.isdigit():
+                return None
+            k = _odno_key(odno)
+            out[k] = out.get(k, 0) + int(qty)
+        return out
+    except Exception:
+        return None
+
+
+def _ord_datetime(ord_dt, ord_tmd) -> "datetime | None":
+    """TTTC0081R `ord_dt`(YYYYMMDD) + `ord_tmd`(HHMMSS) → KST datetime. 못 읽으면 None."""
+    try:
+        d = str(ord_dt).strip() if ord_dt is not None else ""
+        s = str(ord_tmd).strip() if ord_tmd is not None else ""
+        if len(d) != 8 or not d.isdigit() or len(s) != 6 or not s.isdigit():
+            return None
+        return datetime(int(d[0:4]), int(d[4:6]), int(d[6:8]),
+                        int(s[0:2]), int(s[2:4]), int(s[4:6]), tzinfo=_KST_TZ)
+    except Exception:
+        return None
+
+
+def _sell_orders_placed_before(rows, ticker: str, since) -> "frozenset[str]":
+    """부록 R3 K1 — 이 종목 매도 주문 중 **원장 시작(`since`) 전에 접수된** 것(정규화 주문번호).
+
+    한 주문의 행이 전부 `ord_dt`+`ord_tmd` 로 읽히고 그 가장 늦은 값이 `since` 앞일 때만 넣는다.
+    하나라도 못 읽으면 넣지 않는다(= pending 에 센다 — 덜 쏘는 쪽). never-raise(예외 = 빈 집합).
+    """
+    try:
+        latest: dict = {}
+        bad: set = set()
+        for row in rows:
+            if str(row.get("pdno", "")).strip() != ticker:
+                continue
+            if str(row.get("sll_buy_dvsn_cd", "")).strip() != "01":
+                continue
+            k = _odno_key(str(row.get("odno", "")).strip())
+            dt = _ord_datetime(row.get("ord_dt"), row.get("ord_tmd"))
+            if dt is None:
+                bad.add(k)
+                continue
+            if k not in latest or dt > latest[k]:
+                latest[k] = dt
+        return frozenset(k for k, v in latest.items() if k not in bad and v < since)
+    except Exception:
+        return frozenset()
+
+
 SELL_MAX_RETRIES = 3     # 매도 실패 시 최대 재시도 횟수
 SELL_RETRY_DELAY = 1.0   # 재시도 간격(초)
 BUYABLE_CACHE_TTL = 60.0  # get_buyable 캐시 유효시간(초)
@@ -394,6 +488,13 @@ class OrderEngine:
         # PARTIAL/CANCELLED 에서 `affected==0` 이어도 아무 흔적이 없던 결함.
         # 매매·상태전이 로직은 무변경 — 로그 호출만 추가한다. 키 = (order_no, status).
         self._trade_status_update_miss_logged: "_KstDailyEmitCap[tuple]" = _KstDailyEmitCap()
+        # cycle385 부록 R/R2 — 재대조·통보 차감 멱등 / 동결 표식(R2-5) / manual 표식.
+        self._sell_notice_seen: dict[str, int] = {}
+        self._sell_reflected_credit: dict[str, int] = {}
+        self._sell_blind_credit: dict[str, int] = {}
+        self._selling_locked_wait: set[str] = set()
+        self._manual_sell_orders: dict[str, bool] = {}
+        self._sell_ledger_since: datetime = datetime.now(_KST_TZ)
 
     # ──────────────────────────── 사이클 52 호환 layer (사이클 55 R-1)
 
@@ -1635,6 +1736,7 @@ class OrderEngine:
             logger.debug("매도 진행 중 — 중복 차단: %s", t(ticker))
             return
         self._selling.add(ticker)
+        self._selling_locked_wait.discard(ticker)
         self._selling_since[ticker] = datetime.now(_KST_TZ)
 
         # 사이클 55 R-1 (2026-06-03) — SellRejectionTracker 진입 게이트 위임.
@@ -1669,6 +1771,7 @@ class OrderEngine:
 
         last_error: Exception | None = None
         insufficient_qty = False
+        sell_cap: int | None = None
         # 지정가 매도 분기 (P1(B))
         order_division = (
             OrderDivision.LIMIT if limit_price > 0 else OrderDivision.MARKET
@@ -1816,11 +1919,19 @@ class OrderEngine:
                 )
                 self._selling.discard(ticker)
                 return
+            # 🔴 cycle385 §a-2 — 발사 수량을 여기서 **고정**한다. B7 뒤로는
+            # `await place_order` 가 걸린 동안 착지한 체결통보가 `pos.quantity`
+            # 를 이미 줄여 놓을 수 있다(보유 축이 체결량만큼 즉시 뺀다). 발사 뒤
+            # `pos.quantity` 를 다시 읽으면 그 깎인 값이 매핑·PENDING 에 적혀,
+            # 잔여 통보가 overrun 클램프에 잘리고 유령 보유가 남는다.
+            send_qty = pos.quantity
+            if sell_cap is not None:
+                send_qty = min(send_qty, sell_cap)
             try:
                 result = await place_order(
                     ticker=ticker,
                     side=OrderSide.SELL,
-                    quantity=pos.quantity,
+                    quantity=send_qty,
                     price=order_unpr,
                     order_division=order_division,
                     exchange=target_exchange,
@@ -1828,7 +1939,7 @@ class OrderEngine:
 
                 # 주문번호 매핑 즉시 등록 — await insert_trade 진입 전 동기 영역에서 처리.
                 # 시장가 즉시체결 시 체결통보가 insert_trade await 도중 도착해도 매핑이 보장된다.
-                self._order_qty[result.order_no] = pos.quantity
+                self._order_qty[result.order_no] = send_qty
                 self._order_strategy[result.order_no] = strategy_id
                 self._order_ticker[result.order_no] = ticker
                 self._order_exchange[result.order_no] = target_exchange
@@ -1843,13 +1954,13 @@ class OrderEngine:
                     order_no=result.order_no,
                     strategy_id=strategy_id,
                     record_price=pos.buy_price,
-                    quantity=pos.quantity,
+                    quantity=send_qty,
                     path="market",
                 )
 
                 logger.info(
                     "%s 매도 주문 접수: %s %d주 (주문번호: %s, 전략: %s)",
-                    signal.value, t(ticker), pos.quantity, result.order_no, strategy_id,
+                    signal.value, t(ticker), send_qty, result.order_no, strategy_id,
                 )
                 return  # 성공 — _selling은 체결통보에서 제거
 
@@ -1987,32 +2098,122 @@ class OrderEngine:
                         )
                     if sellable is None:
                         pass  # 재대조 불가 — 아래 일반 재시도 흐름
-                    elif 0 < sellable < pos.quantity and held_qty >= pos.quantity:
-                        # 적대 검증 C236-F1 — positions 는 **정확**(held == positions)한데
-                        # sellable 만 작다 = 외부(수동) 부분 매도주문 잠김. 오염이 아니므로
-                        # 하향 보정 금지(잠긴 주식이 손절 감시 밖으로 떨어진다) — 보존+중단.
-                        # `_selling` 유지 규약은 (b) 전량 잠김과 동일(열린 기주문 실재).
-                        logger.warning(
-                            "[sell_qty_partial_locked] ticker=%s strategy=%s held=%d "
-                            "sellable=%d positions=%d — 외부 부분 매도주문 잠김, 보정 "
-                            "없이 보존 + 중단 (기주문 체결통보/selling_reconcile 대기)",
-                            ticker, strategy_id, held_qty, sellable, pos.quantity,
-                        )
-                        return
                     elif 0 < sellable < pos.quantity:
-                        # 진짜 오염(held < positions) — 보정 목표는 sellable 이 아니라
-                        # **held(보유 실체)** 다(C236-F1): 잠긴 주식도 보유는 보유라
-                        # 손절 감시 수량은 held 가 정합. 재발사가 sellable 부족으로 다시
-                        # 거부되면 그땐 held == positions 라 위 부분 잠김 분기가 흡수한다.
+                        # 부록 R2-8 — 주문 조회 1건(재대조·F-3 공유) → 동일성 재검증 → eff.
+                        fills, _reason, _pre = await self._sell_orders_snapshot(ticker)
+                        if strategy.state.positions.get(ticker) is not pos:
+                            logger.info(
+                                "[sell_qty_reconcile_skipped] ticker=%s reason=position_replaced",
+                                ticker,
+                            )
+                            continue
+                        pending = self._sell_pending_dec(fills, _pre) if fills is not None else None
+                        eff = pos.quantity - pending if pending is not None else pos.quantity
+                        if held_qty >= eff:
+                            surplus = held_qty - eff
+                            fire = sellable - surplus if fills is not None else 0
+                            if fire >= 1:
+                                sell_cap = fire
+                                logger.warning(
+                                    "[sell_qty_partial_sellable] ticker=%s strategy=%s held=%d "
+                                    "sellable=%d positions=%d surplus=%d fire=%d pending=%d",
+                                    ticker, strategy_id, held_qty, sellable, pos.quantity,
+                                    surplus, fire, pending or 0,
+                                )
+                                continue
+                            if held_qty > sellable:
+                                logger.warning(
+                                    "[sell_qty_partial_locked] ticker=%s strategy=%s held=%d "
+                                    "sellable=%d positions=%d — 외부 부분 매도주문 잠김, 보정 "
+                                    "없이 보존 + 중단 (기주문 체결통보/selling_reconcile 대기) "
+                                    "surplus=%d fire=%d pending=%s orders=%s",
+                                    ticker, strategy_id, held_qty, sellable, pos.quantity,
+                                    surplus, fire, pending if pending is not None else "?", _reason,
+                                )
+                            elif fills is None:
+                                # 부록 R4 D4 — 조회를 못 믿는데 걸린 매도가 없다(조회 await 중 통보가
+                                # 추적을 줄였다). 거래소가 확인한 미통보 체결이 있는지 모른다.
+                                logger.warning(
+                                    "[sell_qty_hold_orders_unavailable] ticker=%s strategy=%s "
+                                    "held=%d sellable=%d positions=%d orders=%s — 걸린 매도 없음 · "
+                                    "주문 조회 실패로 미통보 체결 여부를 알 수 없어 발사 없이 보류"
+                                    "(종료 통보·보유 닫힘·selling_reconcile 이 푼다)",
+                                    ticker, strategy_id, held_qty, sellable, pos.quantity, _reason,
+                                )
+                            else:
+                                logger.warning(
+                                    "[sell_qty_unnoticed_fills] ticker=%s strategy=%s held=%d "
+                                    "sellable=%d positions=%d pending=%d eff=%d — 걸린 매도 없음, "
+                                    "거래소가 확인한 미통보 체결이 추적 전부를 덮는다 — 발사 없이 "
+                                    "통보 대기(종료 통보·보유 닫힘·selling_reconcile 이 푼다)",
+                                    ticker, strategy_id, held_qty, sellable, pos.quantity,
+                                    pending or 0, eff,
+                                )
+                            self._selling_locked_wait.add(ticker)
+                            return
                         target_qty = held_qty if 0 < held_qty < pos.quantity else sellable
+                        _credit_orders = 0
+                        _credit_qty = 0
+                        _pre_orders = 0
+                        _pre_cap = 0
+                        if fills is not None:
+                            # 부록 R3 K1 — 원장 시작 뒤 주문 = 정확한 크레딧(부록 R-1-3 ⑥ 그대로).
+                            # 원장 시작 전 주문 = 「이번 재대조가 내리는 폭 + 남은 크레딧 − 뒤 주문
+                            # 크레딧」 을 넘지 않게. 남은 크레딧은 덮어쓰기 **전에** 센다.
+                            _old_credit = sum(
+                                self._sell_reflected_credit.get(_o, 0) for _o in fills
+                            ) + self._sell_blind_credit.get(ticker, 0)
+                            _post_credit = 0
+                            for _o, _filled in fills.items():
+                                if _o in _pre:
+                                    continue
+                                _c = _filled - self._sell_notice_seen.get(_o, 0)
+                                if _c > 0:
+                                    self._sell_reflected_credit[_o] = _c
+                                    _credit_orders += 1
+                                    _credit_qty += _c
+                                    _post_credit += _c
+                                else:
+                                    self._sell_reflected_credit.pop(_o, None)
+                            _pre_cap = max(
+                                0, pos.quantity - target_qty - _post_credit + _old_credit
+                            )
+                            for _o, _filled in fills.items():
+                                if _o not in _pre:
+                                    continue
+                                _pre_orders += 1
+                                _c = min(_filled - self._sell_notice_seen.get(_o, 0), _pre_cap)
+                                if _c > 0:
+                                    self._sell_reflected_credit[_o] = _c
+                                    _credit_orders += 1
+                                    _credit_qty += _c
+                                else:
+                                    self._sell_reflected_credit.pop(_o, None)
+                            self._sell_blind_credit.pop(ticker, None)
+                            _credit_src = "orders"
+                        else:
+                            _blind = max(0, pos.quantity - target_qty)
+                            self._sell_blind_credit[ticker] = (
+                                self._sell_blind_credit.get(ticker, 0) + _blind
+                            )
+                            _credit_qty = _blind
+                            _credit_src = "blind"
+                            logger.warning(
+                                "[sell_qty_reconcile_orders_unavailable] ticker=%s reason=%s "
+                                "blind_credit=%d",
+                                ticker, _reason, _blind,
+                            )
                         logger.warning(
                             "[sell_qty_reconciled] ticker=%s strategy=%s positions=%d → "
                             "%d 로 수량 보정 후 재시도 (%d/%d) — APBK0400 오염 자기 치유 "
-                            "(held=%d sellable=%d)",
+                            "(held=%d sellable=%d) credit_src=%s credit_orders=%d credit_qty=%d "
+                            "pre_orders=%d pre_cap=%d",
                             ticker, strategy_id, pos.quantity, target_qty,
                             attempt, SELL_MAX_RETRIES, held_qty, sellable,
+                            _credit_src, _credit_orders, _credit_qty, _pre_orders, _pre_cap,
                         )
                         pos.quantity = target_qty
+                        sell_cap = None
                         try:
                             from src.db.positions import save_position
                             await save_position(
@@ -2048,6 +2249,7 @@ class OrderEngine:
                             "체결통보 또는 selling_reconcile 대기)", ticker, strategy_id,
                             held_qty,
                         )
+                        self._selling_locked_wait.add(ticker)
                         return
                     elif sellable == 0 and held_qty == 0:
                         # 실보유 0 — 기존 insufficient 경로 재사용 (삭제 + reconciliation)
@@ -2149,14 +2351,16 @@ class OrderEngine:
                             fb_result = await place_order(
                                 ticker=ticker,
                                 side=OrderSide.SELL,
-                                quantity=pos.quantity,
+                                quantity=send_qty,
                                 price=fallback_price,
                                 order_division=fallback_div,
                                 exchange=target_exchange,
                             )
 
                             # 주문번호 매핑 즉시 등록 — await insert_trade 진입 전 동기 영역 (매수 패턴 동일).
-                            self._order_qty[fb_result.order_no] = pos.quantity
+                            # 🔴 cycle385 §a-2 — 같은 회차의 `send_qty`(루프 상단 값) 그대로.
+                            # 1차 주문은 거부돼 체결이 없으므로 이 값이 여전히 유효하다.
+                            self._order_qty[fb_result.order_no] = send_qty
                             self._order_strategy[fb_result.order_no] = strategy_id
                             self._order_ticker[fb_result.order_no] = ticker
                             self._order_exchange[fb_result.order_no] = target_exchange
@@ -2171,7 +2375,7 @@ class OrderEngine:
                                 order_no=fb_result.order_no,
                                 strategy_id=strategy_id,
                                 record_price=fallback_price,
-                                quantity=pos.quantity,
+                                quantity=send_qty,
                                 path="fallback",
                             )
 
@@ -2334,8 +2538,9 @@ class OrderEngine:
         """체결통보를 처리한다.
 
         매수: 체결통보 수신 시 포지션 등록 (주문 시점이 아닌 체결 시점)
-        매도: 체결 수량만큼 손익 계산, 포지션 제거
-        부분 체결: PARTIAL 상태 기록 + 30초 후 잔여 취소
+        매도: 체결 수량만큼 손익 계산 + 보유 수량 차감 — 보유가 0 이 될 때만 포지션 제거
+              (cycle385 B7 두 축: 주문 축 = 장부·매핑·타이머·`_selling`, 보유 축 = 수량·삭제)
+        부분 체결: PARTIAL 상태 기록 + 30초 후 잔여 취소(손절 잔여는 보유 재조회 뒤 재주문)
         """
         # 주문번호로 정확한 종목코드를 조회 (체결통보의 ticker는 신뢰하지 않음)
         known_ticker = self._order_ticker.get(order_no)
@@ -2815,15 +3020,24 @@ class OrderEngine:
         quantity: int, total_filled: int, ordered_qty: int,
         *, qty_src: str = "map",
     ) -> None:
-        """매도 체결 처리 — 올바른 전략에서 포지션 제거.
+        """매도 체결 처리 — 판정을 **두 축**으로 나눈다(cycle385 B7).
 
         호출 chain (사이클 165 명문화):
           H0STCNI0 수신 → handler._handle_execution → OrderEngine.handle_execution_notice
             → _handle_sell_fill (본 함수, side=="SELL" + exec_type="2" 체결 분기)
 
+        - **주문 축**(`total_filled >= ordered_qty` — 그 주문이 끝났나): 장부(sid)·
+          매핑·타이머·`_selling`. 보유가 남아도 주문이 끝나면 `_selling` 은 해제한다
+          (남기면 잔여 보유의 손절이 마비된다).
+        - **보유 축**(`pos.quantity` 를 체결량만큼 빼고 0 이 됐나): 삭제·DB 갱신·
+          `on_position_closed`·`sold_today`·구독 해제. 출처(map/payload/increment)
+          게이트가 **없다**(cycle329 금기 그대로) — 전략 매도는 항상 보유 전량을
+          내므로 두 축이 같았지만, 사람이 일부만 팔면 갈라진다(§b).
+
         가드 매트릭스:
           - strategy 복구 (사이클 147): `_order_strategy` 매핑 dict miss 시
-            trade_history PENDING row 영역 lookup 폴백 → momentum 하드코딩 최후 폴백.
+            trade_history PENDING row 영역 lookup 폴백 → (cycle385) registry 전수
+            보유자가 정확히 1 이면 그 전략 → 그래도 없으면 momentum 최후 폴백.
             005940 NH투자증권 LTV SELL trade_history PENDING ~6h 잔존 사고
             (2026-06-16 08:00→09:18) 영구 차단.
           - 체결가 정합: `update_trade_status(SELL, COMPLETED, price=price)` 인자 명시.
@@ -2831,69 +3045,187 @@ class OrderEngine:
           - UniqueViolation: 보정 INSERT 영역 try/except + `_update_trade_status_by_order_no`
             강제 UPDATE 폴백.
           - WS 구독 정리 (사이클 15-A): `_unsubscribe_if_no_other_strategy(ticker)` —
-            모든 전략에서 보유/익일청산/scanned 부재 시만 unsubscribe.
+            보유가 0 이 됐을 때만(주문 종료 + 보유 축 닫힘).
           - sold_today 등록: 당일 동일 ticker 재매수 차단 (`is_ticker_blocked_for_buy`).
 
         영속 의무:
           사이클 19 `_selling` 가드 / 사이클 30 trade_history 부분 UNIQUE /
           사이클 38 명문화 / 사이클 102 G-REJECT-1 callback exception raise /
-          사이클 147 strategy fallback / 사이클 161 price 정합 / 사이클 163 DB 격리 chain.
+          사이클 147 strategy fallback / 사이클 161 price 정합 / 사이클 163 DB 격리 chain /
+          cycle385 B7 보유 축 분리.
         """
-        strategy_id = self._order_strategy.get(order_no)
-        if strategy_id is None:
+        sid = self._order_strategy.get(order_no)
+        if sid is None:
             # 매핑 dict miss — boot/reboot race (005940 사고 영역 정합).
             # trade_history PENDING row 영역 strategy 복구 → update_trade_status 영역 영구 정합.
-            strategy_id = await _lookup_strategy_from_trade_history(
+            sid = await _lookup_strategy_from_trade_history(
                 ticker, order_no, TradeType.SELL,
             )
-            if strategy_id is None:
+            if sid is not None:
+                logger.info(
+                    "[sell_fill_strategy_lookup_recovered] order_no=%s ticker=%s strategy=%s — 매핑 dict miss + trade_history 복구",
+                    order_no, ticker, sid,
+                )
+
+        # 🔴 cycle385 §e-3 — registry 전수 보유자 조회를 여기서 **한 번만** 한다.
+        # sid 가 아직 없을 때의 momentum 폴백 회피(바로 아래)와 보유 축 소유자
+        # 해석(아래 owner 판정)이 이 결과를 함께 쓴다.
+        holders = self._ticker_holders(ticker)
+
+        if sid is None:
+            if holders is not None and len(holders) == 1:
+                sid = holders[0].strategy_id
+                logger.warning(
+                    "[sell_fill_owner_from_holding] order_no=%s ticker=%s from=none to=%s src=%s",
+                    order_no, t(ticker), sid, qty_src,
+                )
+            else:
                 logger.warning(
                     "[sell_fill_strategy_lookup_fallback] order_no=%s ticker=%s — 매핑 dict miss + trade_history miss → momentum 폴백",
                     order_no, ticker,
                 )
-                strategy_id = "momentum"
-            else:
-                logger.info(
-                    "[sell_fill_strategy_lookup_recovered] order_no=%s ticker=%s strategy=%s — 매핑 dict miss + trade_history 복구",
-                    order_no, ticker, strategy_id,
-                )
-        strategy = self.registry.get(strategy_id)
+                sid = "momentum"
+        strategy = self.registry.get(sid)
         if not strategy:
-            logger.error("매도 체결: 전략 찾을 수 없음: %s (order_no: %s)", strategy_id, order_no)
+            logger.error("매도 체결: 전략 찾을 수 없음: %s (order_no: %s)", sid, order_no)
             self._selling.discard(ticker)
             return
 
-        state = strategy.state
-        pos = state.positions.get(ticker)
-        if not pos:
+        # 🔴 cycle385 §e-3 ④ — 보유 축 소유자 해석. 장부 축(sid, 아래 update_trade_status/
+        # 보정 INSERT)은 이 해석과 무관하게 그대로 sid 를 쓴다.
+        ambiguous = False
+        if ticker in strategy.state.positions:
+            owner = strategy
+        elif holders is not None and len(holders) == 1:
+            owner = holders[0]
+            logger.warning(
+                "[sell_fill_owner_from_holding] order_no=%s ticker=%s from=%s to=%s src=%s",
+                order_no, t(ticker), sid, owner.strategy_id, qty_src,
+            )
+        elif holders is None or len(holders) >= 2:
+            owner = None
+            ambiguous = True
+            holders_repr = "error" if holders is None else ",".join(h.strategy_id for h in holders)
+            logger.error(
+                "[sell_fill_owner_ambiguous] order_no=%s ticker=%s sid=%s holders=%s src=%s",
+                order_no, t(ticker), sid, holders_repr, qty_src,
+            )
+        else:
+            owner = None  # holders == [] — 추적 보유 없음(현행 의미)
+
+        pos_strategy = owner or strategy
+        pos = pos_strategy.state.positions.get(ticker)
+        if pos is not None:
+            buy_price = pos.buy_price
+        else:
             logger.warning("매도 체결: 포지션 없음 — 손익 계산 생략: %s (order_no: %s)", t(ticker), order_no)
             buy_price = price  # 손익 0으로 처리
-        else:
-            buy_price = pos.buy_price
         profit_loss = (price - buy_price) * quantity
-        state.daily_realized_pnl += profit_loss
+        pos_strategy.state.daily_realized_pnl += profit_loss
 
-        if total_filled >= ordered_qty:
-            # 전량 체결 → 포지션 제거 + DB 삭제 + 매도 잠금 해제 + 당일 재매수 차단
-            if pos:
-                del state.positions[ticker]
+        # 🔴 cycle385 §a/§c — 보유 축(동기, await 없음): 체결량만큼 차감하고 0 이면
+        # 닫는다. 출처(map/payload/increment) 게이트는 두지 않는다(cycle329 금기).
+        # 부록 R-1-5 — 재대조 스냅샷에 이미 반영된 체결은 크레딧으로 흡수한다.
+        _k = _odno_key(order_no)
+        self._sell_notice_seen[_k] = self._sell_notice_seen.get(_k, 0) + quantity
+        a_order = min(quantity, self._sell_reflected_credit.get(_k, 0))
+        if a_order:
+            _left = self._sell_reflected_credit[_k] - a_order
+            if _left > 0:
+                self._sell_reflected_credit[_k] = _left
+            else:
+                self._sell_reflected_credit.pop(_k, None)
+        rest = quantity - a_order
+        a_blind = min(rest, self._sell_blind_credit.get(ticker, 0))
+        if a_blind:
+            _left = self._sell_blind_credit[ticker] - a_blind
+            if _left > 0:
+                self._sell_blind_credit[ticker] = _left
+            else:
+                self._sell_blind_credit.pop(ticker, None)
+        hold_dec = rest - a_blind
+        if a_order or a_blind:
+            logger.warning(
+                "[sell_fill_credit_absorbed] order_no=%s ticker=%s fill=%d absorbed_order=%d "
+                "absorbed_blind=%d hold_dec=%d src=%s",
+                order_no, ticker, quantity, a_order, a_blind, hold_dec, qty_src,
+            )
+        if pos is not None:
+            held_before = pos.quantity
+            if hold_dec > held_before:
+                logger.warning(
+                    "[sell_fill_exceeds_holding] order_no=%s ticker=%s owner=%s held_before=%d "
+                    "fill=%d src=%s",
+                    order_no, t(ticker), pos_strategy.strategy_id, held_before, hold_dec, qty_src,
+                )
+            pos.quantity = max(0, held_before - hold_dec)
+            close_position = pos.quantity == 0
+        elif ambiguous:
+            # 보유 전략이 둘 이상(또는 판정 예외) — 어느 쪽 수량도 건드리지 않는다.
+            close_position = False
+        else:
+            # 추적 보유 전략이 하나도 없다 — 현행 멱등 정리 의미 그대로.
+            close_position = total_filled >= ordered_qty
+
+        if close_position:
+            # 보유가 0 이 됐다 → 포지션 제거 + DB 삭제 + 훅 + 당일 재매수 차단
+            if pos is not None:
+                del pos_strategy.state.positions[ticker]
+            self._sell_blind_credit.pop(ticker, None)
+            if ticker in self._selling_locked_wait:
+                self._selling.discard(ticker)
+                self._selling_since.pop(ticker, None)
+                self._selling_locked_wait.discard(ticker)
+                logger.info(
+                    "[selling_freeze_released] ticker=%s order_no=%s reason=position_closed",
+                    ticker, order_no,
+                )
             # 사이클 185 클러스터 ① 메커니즘 2 — 보유결합 상태 정리 훅
             try:
-                strategy.on_position_closed(ticker)
+                pos_strategy.on_position_closed(ticker)
             except Exception as exc:
                 logger.error(
                     "[on_position_closed_skip] ticker=%s strategy=%s err=%r",
-                    ticker, strategy_id, exc,
+                    ticker, pos_strategy.strategy_id, exc,
                 )
-            state.sold_today.add(ticker)
+            pos_strategy.state.sold_today.add(ticker)
             from src.db.positions import delete_position
             await delete_position(ticker)
+        elif pos is not None:
+            # 🔴 cycle385 §h — 보유가 남았다. 차감 수량으로 upsert(한 필드라도
+            # 빠지면 다른 값이 덮인다). 저장 실패는 콜백 예외로 전파하지 않는다
+            # (전파하면 handler.py 의 WS 재연결을 부른다) — 메모리는 이미
+            # 차감됐고, DB 는 다음 재시작 뒤 매도 시점 #1.5 재대조가 자기 치유한다.
+            try:
+                from src.db.positions import save_position
+                from src.engine.scanner import ticker_names as _sell_tn
+                await save_position(
+                    ticker=ticker, ticker_name=_sell_tn.get(ticker, ""),
+                    buy_price=pos.buy_price, quantity=pos.quantity, order_no=pos.order_no,
+                    strategy_id=pos_strategy.strategy_id, buy_date=pos.buy_date,
+                    high_since_buy=pos.high_since_buy,
+                )
+            except Exception as exc:
+                logger.error(
+                    "[sell_fill_db_error] step=save_position ticker=%s order_no=%s owner=%s "
+                    "held_after=%d err=%r",
+                    ticker, order_no, pos_strategy.strategy_id, pos.quantity, exc,
+                )
+
+        if total_filled >= ordered_qty:
+            # 주문 축 종료 — 장부·매핑·타이머·`_selling` 은 보유 축과 무관하게 정리한다.
+            # 🔴 cycle385 §g — 보유가 남아도 `_selling` 은 해제한다(남기면 잔여
+            # 보유의 손절 평가가 마비된다). 주문이 끝났다 = 진행 중 표식은 거짓 —
+            # 어느 주문의 종료든 조건 없이 푼다(B7 해제 의미로 복귀, 부록 R2-2).
+            # LOW #3(알려진 한계) = 무관한 주문의 종료가 우리 손절 주문 옆의
+            # `_selling` 을 같이 풀 수 있다 — B7 과 같은 성질, §n F-385-5 후속.
             self._selling.discard(ticker)
+            self._selling_locked_wait.discard(ticker)
             # cycle273a (D2-가-b) — match_partial=True: 부분 체결로 이미 PARTIAL 이 된
             # 행도 이 1차 UPDATE 로 직접 잡는다(매수 축과 동일 계약, §3.2).
             affected = await update_trade_status(
                 ticker, TradeType.SELL, TradeStatus.COMPLETED,
-                strategy=strategy_id, price=price, profit_loss=profit_loss,
+                strategy=sid, price=price, profit_loss=profit_loss,
                 order_no=order_no, match_partial=True,
             )
             if affected == 0:
@@ -2910,7 +3242,7 @@ class OrderEngine:
                         quantity=total_filled,
                         profit_loss=profit_loss,
                         status=TradeStatus.COMPLETED,
-                        strategy=strategy_id,
+                        strategy=sid,
                         order_no=order_no,
                     ))
                     logger.warning(
@@ -2923,7 +3255,7 @@ class OrderEngine:
                     # 잔존 PENDING row 영역 충돌). strategy 무관 order_no 단일 키 강제 UPDATE.
                     logger.warning(
                         "[sell_fill_correction_unique_violation] ticker=%s order_no=%s strategy_attempted=%s err=%r → strategy 무관 강제 COMPLETED UPDATE",
-                        ticker, order_no, strategy_id, exc,
+                        ticker, order_no, sid, exc,
                     )
                     forced_affected = await _update_trade_status_by_order_no(
                         order_no, TradeType.SELL, TradeStatus.COMPLETED,
@@ -2940,7 +3272,19 @@ class OrderEngine:
             self._order_ticker.pop(order_no, None)
             self._order_exchange.pop(order_no, None)
             self._order_division.pop(order_no, None)  # cycle291 — 선례와 같은 자리
-            logger.info("매도 전량 체결: %s %d주 @ %d (손익: %d, 전략: %s)", t(ticker), total_filled, price, profit_loss, strategy_id)
+            if close_position:
+                logger.info(
+                    "매도 전량 체결: %s %d주 @ %d (손익: %d, 전략: %s)",
+                    t(ticker), total_filled, price, profit_loss, pos_strategy.strategy_id,
+                )
+            elif not ambiguous:
+                # 🔴 cycle385 §b 성공 서명 — 주문은 끝났는데 보유가 남았다 = 분할 매도.
+                logger.warning(
+                    "[sell_fill_holding_remains] order_no=%s ticker=%s owner=%s sold=%d "
+                    "held_after=%d ordered=%d src=%s",
+                    order_no, t(ticker), pos_strategy.strategy_id, total_filled,
+                    pos.quantity if pos is not None else 0, ordered_qty, qty_src,
+                )
             # cycle273a (D2-가-a) — 자기 order_no 의 잔여취소/재주문 타이머 해제(매수 축과
             # 동일 게이트, §1.4). 해제하지 않으면 `_cancel_and_reorder` 가 30초 뒤 잔량 0 인
             # 주문을 취소하려다 APBK0927 로 거부되거나, 더 나쁘면 낡은 `remaining` 으로
@@ -2953,12 +3297,13 @@ class OrderEngine:
                 if _cancel_task is not None and not _cancel_task.done():
                     _cancel_task.cancel()
                 logger.info("[partial_cancel_timer_cleared] ticker=%s order_no=%s", t(ticker), order_no)
-            # 사이클 15-A (2026-05-19) — 매도 전량 체결 후 WS 구독 정리 (KIS 정상 패턴).
-            # 다른 전략이 보유하지 않고, 익일청산 대기 X, 다른 전략 스캔 후보 X 인 경우만 unsubscribe.
-            await self._unsubscribe_if_no_other_strategy(ticker)
+            if close_position:
+                # 사이클 15-A (2026-05-19) — 매도 전량 체결 후 WS 구독 정리 (KIS 정상 패턴).
+                # 다른 전략이 보유하지 않고, 익일청산 대기 X, 다른 전략 스캔 후보 X 인 경우만 unsubscribe.
+                await self._unsubscribe_if_no_other_strategy(ticker)
         else:
             # 부분 체결 → PARTIAL, 30초 후 잔여 취소 + 손절 시 재주문
-            _partial_affected = await update_trade_status(ticker, TradeType.SELL, TradeStatus.PARTIAL, strategy=strategy_id, price=price, profit_loss=profit_loss, order_no=order_no)
+            _partial_affected = await update_trade_status(ticker, TradeType.SELL, TradeStatus.PARTIAL, strategy=sid, price=price, profit_loss=profit_loss, order_no=order_no)
             if _partial_affected == 0:
                 # cycle358 카드 D(관측 전용) — 장부 행이 없으면 부분체결이 한 글자도 안 남는다.
                 self._emit_trade_status_update_miss(
@@ -2981,7 +3326,58 @@ class OrderEngine:
                     "remaining=%d — 매핑 확정 전 통보라 재주문 보류",
                     t(ticker), order_no, qty_src, remaining,
                 )
-            logger.info("매도 부분 체결: %s %d/%d주 @ %d (전략: %s)", t(ticker), total_filled, ordered_qty, price, strategy_id)
+            # 🔴 cycle385 §a-1 6 — 끝에 `held_after=` 를 덧붙인다(부분 체결마다 보유 잔량).
+            logger.info(
+                "매도 부분 체결: %s %d/%d주 @ %d (전략: %s) held_after=%d",
+                t(ticker), total_filled, ordered_qty, price, sid,
+                pos.quantity if pos is not None else 0,
+            )
+
+    async def _sell_orders_snapshot(self, ticker: str) -> "tuple[dict | None, str, frozenset]":
+        """부록 R2-8 — TTTC0081R 1건. 유일한 await = wait_for. 예외를 밖으로 내지 않는다."""
+        try:
+            from src.api.balance import get_daily_orders
+            rows = await asyncio.wait_for(
+                get_daily_orders(exchange="ALL", pdno=ticker),
+                timeout=SELL_ORDERS_QUERY_TIMEOUT,
+            )
+        except asyncio.TimeoutError:
+            return None, "timeout", frozenset()
+        except Exception:
+            return None, "error", frozenset()
+        from src.config import settings
+        page = _DAILY_ORDERS_PAGE_REAL if settings.is_production else _DAILY_ORDERS_PAGE_VTS
+        if isinstance(rows, list) and len(rows) >= page:
+            return None, "page_full", frozenset()
+        fills = _sell_fills_by_order(rows, ticker, page)
+        if fills is None:
+            return None, "bad_row", frozenset()
+        return fills, "ok", _sell_orders_placed_before(rows, ticker, self._sell_ledger_since)
+
+    def _sell_pending_dec(self, fills, pre) -> int:
+        """부록 R2-8·R3 K1 — 거래소 체결 중 아직 보유에서 안 빠진(통보 대기) 수량.
+        종목 크레딧은 안 뺀다. 원장 시작 전 주문(`pre`)은 세지 않는다 — 그 체결은 복원 수량에
+        이미 들어 있거나(정상 저장) 들어 있지 않아도 이 프로세스의 원장이 알 수 없다."""
+        return sum(
+            max(0, f - self._sell_notice_seen.get(o, 0) - self._sell_reflected_credit.get(o, 0))
+            for o, f in fills.items()
+            if o not in pre
+        )
+
+    def _ticker_holders(self, ticker: str) -> "list[StrategyBase] | None":
+        """`ticker` 를 실제로 보유(추적)하는 전략 전부(cycle385 §e-2).
+
+        `self.registry.all()`(비활성 전략 포함) 를 전수 스캔한다 — `enabled()` 로
+        좁히면 꺼진 전략의 실보유를 놓치고(루트 금기 「보유 전략 끄기」와 같은
+        이유), `get(strategy_id)` 로 좁히면 그 자체가 `"momentum"` 기본값 함정이다
+        (`_cancel_and_reorder` 의 `.get(order_no, "momentum")`). 동기 · await 0 ·
+        never-raise(판정 예외 = None) — `_handle_sell_fill`/`_reorder_requery` 가
+        보유 축 판정과 원자적으로 맞물리려면 양보점이 없어야 한다.
+        """
+        try:
+            return [s for s in self.registry.all() if ticker in s.state.positions]
+        except Exception:
+            return None
 
     def _schedule_cancel(self, ticker: str, order_no: str, original_qty: int, strategy_id: str = "momentum") -> None:
         """30초 후 미체결 잔량을 취소하는 태스크를 등록한다."""
@@ -3071,6 +3467,74 @@ class OrderEngine:
         )
         self._pending_cancel_order_no[_key] = order_no
 
+    def _reorder_requery(self, ticker: str, order_no: str, remaining: int) -> int:
+        """`_cancel_and_reorder` 재주문 직전 보유 재조회(cycle385 J-2).
+
+        반환 = 발사 수량(0 = 발사하지 않는다). 동기 · await 0 ·
+        never-raise(판정 예외 = `remaining` — 손절 잔여를 버리는 쪽이 더 비싸다).
+
+        | 보유자(`_ticker_holders`) | verdict | 반환 |
+        |---|---|---|
+        | 정확히 1, 보유 ≥ remaining | `same` | `remaining` |
+        | 정확히 1, 0 < 보유 < remaining | `shrunk` | 보유(**상한이지 증액이 아니다**) |
+        | 0 개(또는 보유 ≤ 0) | `gone` | 0 |
+        | 2 개 이상 · 판정 예외 | `ambiguous`/`error` | `remaining`(현행 행위) |
+        """
+        try:
+            if order_no in self._manual_sell_orders:
+                holders = self._ticker_holders(ticker)
+                if holders is None:
+                    held_repr, ok = "?", False
+                elif len(holders) == 1:
+                    _h = holders[0].state.positions[ticker].quantity
+                    held_repr, ok = str(_h), _h >= remaining
+                else:
+                    held_repr = ",".join(
+                        str(h.state.positions[ticker].quantity) for h in holders
+                    ) or "0"
+                    ok = False
+                logger.log(
+                    logging.INFO if ok else logging.WARNING,
+                    "[reorder_requery] verdict=manual ticker=%s order_no=%s remaining=%d "
+                    "held=%s fire_qty=%d",
+                    t(ticker), order_no, remaining, held_repr, remaining,
+                )
+                return remaining
+            holders = self._ticker_holders(ticker)
+            if holders is None:
+                verdict, fire_qty, held_repr = "error", remaining, "?"
+            elif len(holders) >= 2:
+                held_repr = ",".join(
+                    str(h.state.positions[ticker].quantity) for h in holders
+                )
+                verdict, fire_qty = "ambiguous", remaining
+            elif len(holders) == 0:
+                verdict, fire_qty, held_repr = "gone", 0, "0"
+            else:
+                held = holders[0].state.positions[ticker].quantity
+                held_repr = str(held)
+                if held <= 0:
+                    verdict, fire_qty = "gone", 0
+                elif held >= remaining:
+                    verdict, fire_qty = "same", remaining
+                else:
+                    verdict, fire_qty = "shrunk", held
+            level = logging.INFO if verdict == "same" else logging.WARNING
+            logger.log(
+                level,
+                "[reorder_requery] verdict=%s ticker=%s order_no=%s remaining=%d held=%s "
+                "fire_qty=%d",
+                verdict, t(ticker), order_no, remaining, held_repr, fire_qty,
+            )
+            return fire_qty
+        except Exception:
+            logger.warning(
+                "[reorder_requery] verdict=error ticker=%s order_no=%s remaining=%d held=? "
+                "fire_qty=%d — 재조회 자체가 실패, 손절 잔여를 버리지 않는다",
+                t(ticker), order_no, remaining, remaining,
+            )
+            return remaining
+
     async def _cancel_and_reorder(
         self, ticker: str, order_no: str, remaining: int, *, is_stop_loss: bool
     ) -> None:
@@ -3079,6 +3543,9 @@ class OrderEngine:
         cycle287 §S6e — 예전엔 `_schedule_cancel_and_reorder` 안의 nested
         closure 였다(승격 사유는 `_cancel_after_wait` 와 동일).
         """
+        _cancel_ok = False
+        _place_state = "none"
+        _place_reject: "str | None" = None
         try:
             await asyncio.sleep(PARTIAL_FILL_WAIT)
             strategy_id = self._order_strategy.get(order_no, "momentum")
@@ -3086,8 +3553,13 @@ class OrderEngine:
             # cycle295 (B) — 쌍 게이트(§3-5③). 이 함수만 취소 3경로 중 유일하게
             # `sleep(30) → cancel_order → place_order` 의 atomic replace 다.
             # 절반만 막으면 "호가창의 손절을 우리가 빼고 아무것도 안 넣은" 상태가
-            # 된다 — 컷이면 취소도 하지 않고 작동 중인 주문을 그대로 둔다(16:00
-            # 이후 `cancel_remaining` 또는 `risk.on_tick` 재평가에 위임한다).
+            # 된다 — 컷이면 취소도 하지 않고 작동 중인 주문을 그대로 둔다.
+            # 🔴 그 잔량을 우리가 거두는 경로는 없다 — `cancel_remaining` 은 호출자가
+            # 0 이고(배선해도 매수 주문번호를 취소한다), `risk.on_tick` 재평가는 새
+            # 매도를 낼 뿐 걸린 주문을 취소하지 않는다. KRX 잔량은 정규장 마감 뒤
+            # 거래소가 자동 취소한다. NXT 잔량은 20:00 까지 남는데, 그런 매도는
+            # 프리장 `pre_nxt_keep` · `order_exchange_clock_mode="off"` · `probe_error`
+            # 로 base 를 유지했을 때만 생긴다. 정본 = `src/engine/CLAUDE.md` 규칙 3.
             if self._market_rest_gate(
                 side="sell", ticker=ticker, strategy_id=strategy_id,
                 base=(
@@ -3109,7 +3581,6 @@ class OrderEngine:
                 )
             # cycle291 — Stage A 관측(`_cancel_after_wait` 와 동일 규약).
             _orig_div = self._order_division.get(order_no)
-            _cancel_ok = False
             _cancel_err = ""
             try:
                 await cancel_order(order_no, 0, cancel_all=True, exchange=ex)
@@ -3135,6 +3606,18 @@ class OrderEngine:
             logger.info("매도 잔여 취소: %s %d주", t(ticker), remaining)
 
             if is_stop_loss and remaining > 0:
+                # 🔴 cycle385 J-2 — 30초 전 스냅샷 `remaining` 을 그대로 쏘지 않는다.
+                # 마지막 await(위 CANCELLED 장부) 뒤 · `place_order` 앞(동기)에서
+                # registry 전수로 재조회해 「보유에 맞춘다」(상한이지 증액이 아니다 —
+                # 운영자가 남기려던 수량까지 팔면 분할 매도 허용 결정의 정면 위반).
+                fire_qty = self._reorder_requery(ticker, order_no, remaining)
+                if fire_qty <= 0:
+                    # 원주문은 방금 취소됐고 새 주문도 없다 — 진행 중 표식은 거짓이다.
+                    self._selling.discard(ticker)
+                    self._selling_since.pop(ticker, None)
+                    self._selling_locked_wait.discard(ticker)
+                    return  # finally 가 자기 타이머 키를 pop (무변경)
+
                 # 손절 잔여분 재주문 — cycle287 §4-C3. 시장가(price=0)는
                 # KRX 애프터마켓(16:00~20:00)에서 100% 거부되므로(§1-A "시장가
                 # 없음") 그 창에서만 창 호가쌍으로 교체한다. 그 밖은 순수
@@ -3172,7 +3655,7 @@ class OrderEngine:
                     )
 
                 place_kwargs = dict(
-                    ticker=ticker, side=OrderSide.SELL, quantity=remaining,
+                    ticker=ticker, side=OrderSide.SELL, quantity=fire_qty,
                     price=reorder_price, exchange=ex,
                 )
                 if reorder_division is not None:
@@ -3180,26 +3663,52 @@ class OrderEngine:
                 # cycle295 (D, §2-0b) — 나머지 4곳(매수 주 경로·매수 지정가 폴백·
                 # 매도 주 경로·매도 폴백)과 같은 모양으로 결과를 받아 매핑을
                 # 등록한다. 필요한 값은 전부 이미 스코프에 있다(`strategy_id`·
-                # `ex`·`ticker`·`remaining`·`reorder_division`). 매핑이 없으면
+                # `ex`·`ticker`·`fire_qty`·`reorder_division`). 매핑이 없으면
                 # 이 재주문의 체결통보가
                 # `_order_strategy` miss → `trade_history` miss →
                 # `"momentum"` 오귀속으로 흐르고, `_order_qty` 부재로 부분체결이
                 # 전량체결로 읽힌다(§2-0b 실측).
-                result = await place_order(**place_kwargs)
+                _place_state = "sending"
+                try:
+                    result = await place_order(**place_kwargs)
+                except KisApiError as _place_exc:
+                    # 부록 R3 K2 · R4 D2 — 「안 걸렸다」 = APBK0400 · 주문 자체의 결정적 거부뿐.
+                    _place_reject = _sell_not_placed_reason(_place_exc)
+                    if _place_reject is not None:
+                        _place_state = "rejected"
+                    raise
+                _place_state = "accepted"
                 if result is not None and getattr(result, "order_no", None):
-                    self._order_qty[result.order_no] = remaining
+                    self._order_qty[result.order_no] = fire_qty
                     self._order_strategy[result.order_no] = strategy_id
                     self._order_ticker[result.order_no] = ticker
                     self._order_exchange[result.order_no] = ex
                     if reorder_division is not None:
                         self._order_division[result.order_no] = reorder_division.value
                     self._completed_orders.discard(result.order_no)
-                logger.info("손절 잔여 재주문: %s %d주", t(ticker), remaining)
+                    if order_no in self._manual_sell_orders:
+                        self._manual_sell_orders[result.order_no] = self._manual_sell_orders[order_no]
+                logger.info("손절 잔여 재주문: %s %d주", t(ticker), fire_qty)
         except asyncio.CancelledError:
             pass  # 새 task로 교체됨 — pop은 새 task가 관리
         except Exception:
             logger.exception("매도 잔여 취소/재주문 실패: %s", ticker)
         finally:
+            if (
+                _cancel_ok and _place_state in ("none", "rejected")
+                and ticker in self._selling
+                and (
+                    ticker in self._selling_locked_wait
+                    or self._manual_sell_orders.get(order_no, True)
+                )
+            ):
+                self._selling.discard(ticker)
+                self._selling_since.pop(ticker, None)
+                self._selling_locked_wait.discard(ticker)
+                logger.warning(
+                    "[reorder_selling_released] ticker=%s order_no=%s place=%s reject=%s",
+                    ticker, order_no, _place_state, _place_reject or "-",
+                )
             # cancel-replace race 방어 — 본인이 dict에 있을 때만 pop
             _k = (ticker, CANCEL_AXIS_SELL)
             if self._pending_cancel_tasks.get(_k) is asyncio.current_task():
@@ -3228,6 +3737,12 @@ class OrderEngine:
         self._order_exchange.clear()  # cycle287 적대 검증 시정 — order_no 는 하루 단위로만 유일
         self._order_division.clear()  # cycle291 — 선례와 같은 정리 주기
         self._pre_nxt_division_config_logged.clear()  # cycle291 B5 카나리아 일일 정리
+        self._sell_notice_seen.clear()  # cycle385 부록 R
+        self._sell_reflected_credit.clear()
+        self._sell_blind_credit.clear()
+        self._manual_sell_orders.clear()
+        self._selling_locked_wait.clear()
+        self._sell_ledger_since = datetime.now(_KST_TZ)
 
     async def cancel_remaining(self, ticker: str, strategy_id: str) -> None:
         """미체결 잔량을 취소한다."""

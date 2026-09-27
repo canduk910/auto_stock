@@ -36,7 +36,7 @@ async def save_position(
             strategy_id, buy_date, high_since_buy
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         ON CONFLICT (ticker) DO UPDATE SET
-            ticker_name = EXCLUDED.ticker_name,
+            ticker_name = COALESCE(NULLIF(EXCLUDED.ticker_name, ''), positions.ticker_name),
             buy_price = EXCLUDED.buy_price,
             quantity = EXCLUDED.quantity,
             order_no = EXCLUDED.order_no,

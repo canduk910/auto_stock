@@ -157,8 +157,13 @@ _BASE_SHA = {
     # 🔁 cycle379(2026-09-27) 재핀 — `get_daily_orders` 에 keyword-only `odno=""` 추가
     #    (buying_reconcile 의 자기 주문 행 조회, 사용자 승인). 기본값 호출 params 는
     #    byte 동일(D1 회귀 가드). 직전 값 = `d8f3da874b3e2623695935d768cf5a502a3756e3425c41185e42576c27f6aa35`.
+    # 🔁 cycle385 부록 R(2026-09-27) 재핀 — `get_daily_orders` 에 keyword-only
+    #    `pdno=""` 추가(F-1 재대조 크레딧이 TTTC0081R 을 종목 한정 조회 — 비8영역,
+    #    `src/api/balance.py` 는 8영역 목록 `_EIGHT_AREAS` 에 없다). 기본값 호출
+    #    params 는 byte 동일. 직전 값 =
+    #    `ac9a74d4f04c514a75ab56fc99f5b7a6582960da52ac74bab3a1363418af5003`.
     "src/api/balance.py":
-        "ac9a74d4f04c514a75ab56fc99f5b7a6582960da52ac74bab3a1363418af5003",
+        "cce7de0ee57a6fd095075943475dedf3e0e8f6ed441aa65c1834b4a907a404e7",
     # 전략 7파일 (+ 패키지) — cycle287 당시 "전원 diff 0" 이었으나 **cycle290(킬스위치
     # 등재) 이 정당하게 갱신**했다 — `DEFAULT_PARAMS` 말미에 `order_exchange_clock_mode`
     # `after_market_exit_division` 2키 추가뿐, 그 외 한 글자도 안 바뀌었다는 증거는
@@ -616,8 +621,31 @@ _SRC_TREE_FILES = 162
 # 평가했을 때만 남는다 + 키 부재는 INFO) + 그룹 헤더 주석 카운트 정정(entry
 # 47→49·sizing_risk 8→9). 매매 행위·값 변경 없음. 직전 값 =
 # `ebffb3a8c2fc0a6efc1da870555ebe0587b91a70e004c180dd836e1b3da67de9`.
+# 🔁 cycle385(2026-09-27) 재핀(값만, 파일 수 불변 162) — B7(사용자 승인, 8영역
+# `order_engine.py` — 이 파일은 `_CHANGED` 제외 대상이라 트리 다이제스트 자체엔
+# 안 잡힌다) 의 비8영역 동반 변경 `routes/trading.py`(manual-sell `_selling` 을
+# `place_order` 앞으로) 만 이 다이제스트에 걸린다. 직전 값 =
+# `dc10a109c238be270993c3e5ac72428e714db21539a6b18f030047dad02dab22`.
+# 🔁 cycle385 부록 R(2026-09-27) 재핀(값만, 파일 수 불변 162) — 리뷰 반영으로
+# `routes/trading.py`(manual 표식·`_selling_locked_wait` 정리) · `src/api/balance.py`
+# (`pdno=`, `_BASE_SHA` 재핀과 짝) · `src/db/positions.py`(`save_position` 빈 이름 무시
+# COALESCE/NULLIF) 가 더 바뀌어 이 다이제스트에 다시 걸린다(셋 다 `_CHANGED` 제외
+# 대상이 아니다). 직전 값 =
+# `c477541e03fc0bfb5ff556458d8d55594747adc28ed218f5216a777adeb3a8ce`.
+# 🔁 cycle385 부록 R2(2026-09-27) 재핀(값만, 파일 수 불변 162) — 2차 검토 반영으로
+# `routes/trading.py` 의 `_sell_placed` 호출 삭제(R-3 소유 규칙 제거, 8영역
+# `order_engine.py` 동반 변경은 `_CHANGED` 제외 대상이라 여기 안 잡힌다). 직전 값 =
+# `d77b1be6a4f1c957c465d44a83a1bca6359dad4de26446384b26c201b74db2d1`.
+# 🔁 cycle385 부록 R3(2026-09-28) 재핀(값만, 파일 수 불변 162) — routes/trading.py
+# manual_sell 발사 실패 되돌림을 APBK0400 으로 좁힘(K2). 직전 값 =
+# `5e2bc1d27a3228fbafe17e8c7b7aff34279762f697a92c5db9e5e3bb51151021`.
+# 🔁 cycle385 부록 R4(2026-09-28) 재핀(값만, 파일 수 불변 162) — routes/trading.py
+# manual_sell 발사 실패 되돌림 판정을 `_sell_not_placed_reason`(APBK0400 · 시장가
+# 불가 · 장운영시간 외, D2)으로 넓히고 실패 줄에 `selling_released=` 칸을 더함
+# (8영역 `order_engine.py` 동반 변경은 `_CHANGED` 제외 대상이라 여기 안 잡힌다).
+# 직전 값 = `1342f4b1c8f53e3417190e385e8e6576653021cbe33e22cb7a3139378f17d088`.
 _SRC_TREE_DIGEST = (
-    "dc10a109c238be270993c3e5ac72428e714db21539a6b18f030047dad02dab22"
+    "a36a9229bb7d716672df936a3129c8a85ee14ab96b3389899bb674f164a0e870"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

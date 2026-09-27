@@ -966,3 +966,15 @@ target 220 → 마진 34 영업일(사이클196 의 34 와 같다). `fetch_daily
 경위: cycle380(사용자 결정 2026-09-27 「운영db 조회 허용 및 판정 변경 채택」)이 ETF/ETN 판정을 이름 키워드에서 증권그룹코드 `scty_grp_id_cd ∈ {EF,EN,FE}` 로 바꿨다. 판정은 leaf `src/engine/etf_like.py::is_etf_like` 하나로 모였고, 코드가 없을 때만 이름 키워드로 떨어진다. `list_by_filter` 에 keyword-only `exclude_etf_like=False` 가 생겼고, `True` 면 `ORDER BY … LIMIT` 앞 WHERE 절에서 ETF 를 뺀다. 호출자가 LIMIT 뒤에 이름으로 거르던 때는 VB·LTV 의 100칸 일부를 ETF 가 차지한 뒤 버려졌다(cycle378 자문 §2.2, 추정). 6자리 ticker 검증은 그대로 호출자 몫이다.
 
 → CHANGELOG: cycle380 행
+
+## positions.py — 보유 포지션 영속화
+
+### 2026-09-27 cycle385 부록 R — `save_position` 의 종목명 갱신
+
+정본 원문(`save_position` 행 계약 첫 두 문장):
+
+`ON CONFLICT (ticker) DO UPDATE` upsert. **ticker 가 PK** = 한 종목은 한 포지션.
+
+경위: 그때 SQL 은 `ticker_name = EXCLUDED.ticker_name` 이라 빈 이름이 저장된 이름을 지웠다. cycle385 의 분할 매도 뒤 잔여 저장과 #1.5 재대조가 이름 캐시가 비면 빈 이름을 넘긴다(적대 검토 INFO). 부록 R 이 `COALESCE(NULLIF(EXCLUDED.ticker_name, ''), positions.ticker_name)` 로 바꿨다. 호출부 인자는 그대로다 — 이름을 따로 조회하느라 `await` 를 더하지 않는다.
+
+→ CHANGELOG: cycle385 행

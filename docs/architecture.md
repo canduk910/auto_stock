@@ -363,9 +363,13 @@ sequenceDiagram
         Note over O: _handle_buy_fill()<br/>Position 등록 (메모리)
         O->>D: save_position()
     else SELL
-        Note over O: _handle_sell_fill()<br/>Position 제거 (메모리)
-        O->>D: delete_position()
-        Note over O: sold_today.add(ticker)
+        Note over O: _handle_sell_fill()<br/>보유에서 체결량만큼 차감 (메모리)
+        alt 보유 0
+            O->>D: delete_position()
+            Note over O: sold_today.add(ticker)
+        else 보유 남음 (분할 매도)
+            O->>D: save_position(차감 수량)
+        end
     end
 
     Note over S,X: 15:20 KRX 메인 신규 매수 중단 + 강제 청산 (TIME_KRX_MAIN_BUY_STOP)
@@ -457,7 +461,7 @@ sequenceDiagram
         alt BUY
             Note over O: _handle_buy_fill()<br/>Position 생성/갱신<br/>pending_buys 제거<br/>DB positions 저장<br/>trade_history COMPLETED
         else SELL
-            Note over O: _handle_sell_fill()<br/>손익 계산 (체결가 - 매수가) × 수량<br/>Position 삭제<br/>DB positions 삭제<br/>sold_today 등록<br/>_selling 해제<br/>trade_history COMPLETED<br/>(UPDATE 0건이면 → COMPLETED 직접 INSERT<br/>+ _completed_orders.add(order_no))
+            Note over O: _handle_sell_fill()<br/>손익 계산 (체결가 - 매수가) × 수량<br/>보유 축 — 보유에서 체결량만큼 차감<br/>0 이면 Position·DB positions 삭제 + sold_today 등록<br/>남으면 DB positions 에 차감 수량 저장<br/>주문 축(주문이 끝났을 때) — _selling 해제<br/>trade_history COMPLETED<br/>(UPDATE 0건이면 → COMPLETED 직접 INSERT<br/>+ _completed_orders.add(order_no))
         end
     else 그 밖의 값
         Note over H: DEBUG 한 줄 → return
@@ -1660,7 +1664,7 @@ flowchart TB
 | T4 `order.request` | 2 → R | `{req_id, kind: place\|cancel, ticker, side, quantity, price, ORD_DVSN, EXCG_ID_DVSN_CD, ORGN_ODNO?}` | `place_order`/`cancel_order` body 조립 직전 값(`src/api/order.py:69-88`, `:147-158`). 계좌·hashkey·TR_ID 는 R 이 채운다 |
 | T5 `order.result` | R → 2 | 성공 `{req_id, order_no, order_time}` / 실패 `{req_id, rt_cd, msg_cd, msg1, http_status}` — **분류하지 않은 원문** | 15.5.4 |
 | T6 `fill.applied` | 3 → 1 | `{ticker, order_no, strategy_id, side, fill_price, total_filled, ordered_qty, is_full}` | `_handle_buy_fill`/`_handle_sell_fill` 이 지금 메모리에 반영하는 것의 데이터화 |
-| T7 `sub.control` | 3 → W | `{op: subscribe\|unsubscribe, ticker, priority}` | 매도 전량 체결 뒤 `_handle_sell_fill` 이 부르는 `OrderEngine._unsubscribe_if_no_other_strategy`. **사용자 도식에 없는 화살표다** |
+| T7 `sub.control` | 3 → W | `{op: subscribe\|unsubscribe, ticker, priority}` | 매도 주문이 끝나고 보유가 0 이 된 뒤 `_handle_sell_fill` 이 부르는 `OrderEngine._unsubscribe_if_no_other_strategy`. **사용자 도식에 없는 화살표다** |
 
 **지금 경계는 데이터가 아니라 살아 있는 객체를 넘긴다.** "1 → 2" 에 해당하는 코드는
 `order_engine.execute_buy(ticker, current_price, strategy)`(`risk.on_tick` 이 부르고, donchian·kojiro
@@ -1856,10 +1860,13 @@ race 를 흡수하는 장치가 셋이나 있다(`_completed_orders` 선행 가�
   `SellRejectionTracker` TTL 차단 · 전략/포지션 없음 · 장운영시간 외 거부 · 수량 락). 오늘도
   부분적으로 틀렸고(완충 = 다음 날 `_execute_next_day_clear` 가 재수집) **4단계에서는 100% 틀린다**
   — 메시지를 큐에 넣은 시점에서 반환하므로 거부·차단이 원리적으로 반환값에 담기지 않는다.
-  따라야 할 규율의 원형은 이미 있다 — `_selling` 은 `execute_sell` 진입에 add 된다. 주문이
-  접수된 뒤 그것을 푸는 곳은 셋뿐이다 — 체결통보(`_handle_sell_fill` 의 전량 체결 분기 · 전략 미발견
-  분기) · KIS 재대조(`_sync_positions_from_balance` → `reconcile_stale_selling` — 보유 잔존 ∧ 열린
-  매도주문 없음 ∧ `SELLING_RECONCILE_MIN_AGE_S` 경과) · 21:30 `_reset_daily_state`.
+  따라야 할 규율의 원형은 이미 있다 — `_selling` 은 `execute_sell` 진입에 add 된다(수동 매도
+  라우트는 `place_order` 앞에서). 주문이 접수된 뒤 그것을 푸는 곳은 넷뿐이다 — 체결통보
+  (`_handle_sell_fill` 의 주문 종료 분기 — 어느 주문이든, 보유가 남아도 푼다 · 동결이 지키던
+  보유가 닫힌 때 · 전략 미발견 분기) · 손절 잔여 재주문 태스크(`_cancel_and_reorder` — 재조회가
+  보유 0 을 본 때 · 원주문을 취소했는데 재주문이 확정적으로 안 걸린 때) · KIS 재대조
+  (`_sync_positions_from_balance` → `reconcile_stale_selling` — 보유 잔존 ∧ 열린 매도주문 없음 ∧
+  `SELLING_RECONCILE_MIN_AGE_S` 경과) · 21:30 `_reset_daily_state`.
 
 #### 15.5.7 scheduler.py 는 여섯 번째 프로세스가 아니다
 

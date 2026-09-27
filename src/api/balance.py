@@ -223,7 +223,9 @@ async def get_balance(afhr_flpr: str = "N") -> tuple[list[StockHolding], Account
     return holdings, summary
 
 
-async def get_daily_orders(target_date: str = "", exchange: str = "ALL", *, odno: str = "") -> list[dict]:
+async def get_daily_orders(
+    target_date: str = "", exchange: str = "ALL", *, odno: str = "", pdno: str = "",
+) -> list[dict]:
     """당일(또는 지정일) 주문체결내역을 조회한다.
 
     KIS 주식일별주문체결조회 API (TTTC0081R).
@@ -245,7 +247,7 @@ async def get_daily_orders(target_date: str = "", exchange: str = "ALL", *, odno
         "INQR_END_DT": target_date,
         "SLL_BUY_DVSN_CD": "00",  # 전체
         "INQR_DVSN": "00",
-        "PDNO": "",
+        "PDNO": pdno,
         "CCLD_DVSN": "00",  # 전체
         "ORD_GNO_BRNO": "",
         "ODNO": odno,

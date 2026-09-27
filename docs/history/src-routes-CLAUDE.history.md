@@ -369,3 +369,15 @@ Phase 1 산출 — 실행/조회 엔드포인트는 미구현
 경위: 전략 비활성화는 보유분의 손절까지 멈춘다(루트 `CLAUDE.md` 금기). cycle384(사용자 결정 2026-09-27 「돈키언 신규매수 중지」)가 신규 매수 신호만 멈추는 `buy_paused` 를 두었으므로 정당한 수단을 그것으로 바꿨다. 같은 사이클이 카탈로그를 105키 · identity 18키(`CATALOG_VERSION="cycle384.1"`)로 늘렸다. identity 15키 표기는 cycle300(`daily_fetch_depth_mode`)·cycle382(`market_unit_mode`)가 identity 키를 더할 때 따라오지 못한 수였다.
 
 → CHANGELOG: cycle384 행
+
+## 엔드포인트 목록
+
+### 2026-09-27 cycle385 — `POST /api/trading/manual-sell` 행의 「stale `_selling` 이 남는다」
+
+정본 원문(같은 행 「알려진 한계」 중 한 구절):
+
+⚠️ **알려진 한계** — 16:00~20:00 KRX 애프터에 누르면 44/41 변환도 KRX 라우팅도 없이 시장가가 나가 APBK3013 로 거부되고, 실패 경로에 `_selling.discard` 가 없어 stale `_selling` 이 남는다.
+
+경위: cycle385(분할 매도 허용)가 이 라우트의 `_selling.add` 를 `place_order` **앞**으로 옮겼다. 뒤에 두면 시장가가 REST 응답보다 먼저 체결될 때 주문 종료의 `_selling.discard` 가 먼저 돌고 그 뒤에 선 표식이 잔여 보유의 손절을 막는 좀비가 된다(보유 축 분리 전에는 포지션이 통째로 지워져 무해했던 순서다). 발사 실패로 표식을 되돌리는 것은 발사되지 않은 것이 확정된 실패뿐이다(부록 R3 K2 — `src/api/base.py::_request` 가 주문 POST 도 전송 오류·5xx 에 재시도해 앞 전송이 접수됐을 수 있다). 부록 R3 는 그 실패를 APBK0400(`is_sell_qty_exceeded`)으로 한정했고, 그러면 APBK3013·APBK0918 장운영외처럼 같은 요청의 앞 전송도 똑같이 거부됐을 거부까지 표식을 남겨 손절이 `selling_reconcile` 까지 멈췄다(3차 돈 렌즈 NO-GO). 부록 R4 D2(2026-09-28, 루트 규칙 「NXT 매도 거부 좀비 차단」 — 보존하면 stale `_selling` 좀비 — 을 따른 결정)가 판정을 `order_engine._sell_not_placed_reason` 으로 모아 장운영시간 외 · 시장가 불가 거부도 되돌리게 했다. 그래서 애프터 시장가 거부는 문구가 시장가 불가 키워드에 걸리면 표식을 되돌리고(`selling_released=market_order_disallowed`), 걸리지 않거나 EGW00201·전송 예외면 표식을 남기되 `[manual_sell_selling_kept]` WARNING 으로 드러나고, 열린 주문이 없으면 `selling_reconcile` 이 푼다 — 원문의 「조용히 남는 stale `_selling`」 과 다르다.
+
+→ CHANGELOG: cycle385 행

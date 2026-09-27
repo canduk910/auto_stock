@@ -189,3 +189,6 @@
 # cycle382 — `market_unit_mode` 카탈로그 행(선택지·identity·applies_to)을 PUT 라우트 계약이 본다(import 없음).
 "src/engine/param_catalog.py":
   - "tests/contract/test_cycle382_market_unit_params_route.py"
+# cycle385 부록 R — AST 가드(A8·AR8·AR2-2·AR3-7)가 manual-sell 라우트 소스를 파일로 읽는다(import 없음).
+"src/routes/trading.py":
+  - "tests/unit/ast/test_cycle385_ast_b7.py"
