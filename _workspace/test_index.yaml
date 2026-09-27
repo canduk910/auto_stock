@@ -1167,6 +1167,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/api/balance.py:
     direct_tests:
@@ -2327,6 +2328,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/api/base.py:
     direct_tests:
@@ -3487,6 +3489,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/api/condition.py:
     direct_tests:
@@ -4647,6 +4650,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/api/finance.py:
     direct_tests:
@@ -5807,6 +5811,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/api/kis_master.py:
     direct_tests:
@@ -6967,6 +6972,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/api/krx.py:
     direct_tests:
@@ -8127,6 +8133,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/api/market_operation.py:
     direct_tests:
@@ -9287,6 +9294,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/api/order.py:
     direct_tests:
@@ -10447,6 +10455,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/api/quotation.py:
     direct_tests:
@@ -11607,6 +11616,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/auth/__init__.py:
     direct_tests:
@@ -12785,6 +12795,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/auth/token.py:
     direct_tests:
@@ -13945,6 +13956,7 @@ backend:
     - tests/unit/services/test_quote_session_health.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/config.py:
     direct_tests:
@@ -15105,6 +15117,7 @@ backend:
     - tests/unit/services/test_quote_session_health.py
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/__init__.py:
     direct_tests:
@@ -16264,6 +16277,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
     transitive_tests: []
   src/db/_kst.py:
@@ -17425,6 +17439,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/backtest_runs.py:
     direct_tests:
@@ -18585,6 +18600,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/daily_performance.py:
     direct_tests:
@@ -19745,6 +19761,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/kis_quote_accounts.py:
     direct_tests:
@@ -20905,6 +20922,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/llm_buy_evaluations.py:
     direct_tests:
@@ -22065,6 +22083,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/log_reports.py:
     direct_tests:
@@ -23225,6 +23244,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/market_regime_snapshots.py:
     direct_tests:
@@ -24385,6 +24405,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/parameter_recommendations.py:
     direct_tests:
@@ -25545,6 +25566,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/pending_next_day_clear.py:
     direct_tests:
@@ -26705,6 +26727,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/pg.py:
     direct_tests:
@@ -27865,6 +27888,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/positions.py:
     direct_tests:
@@ -29025,6 +29049,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/stock_master.py:
     direct_tests:
@@ -30185,6 +30210,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/stock_master_daily.py:
     direct_tests:
@@ -31345,6 +31371,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/stock_master_financial.py:
     direct_tests:
@@ -32505,6 +32532,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/strategy_config.py:
     direct_tests:
@@ -33665,6 +33693,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/strategy_funnel.py:
     direct_tests:
@@ -34825,6 +34854,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/supabase.py:
     direct_tests:
@@ -35989,6 +36019,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
     transitive_tests: []
   src/db/system_logs.py:
@@ -37150,6 +37181,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/trade_history.py:
     direct_tests:
@@ -38310,6 +38342,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/__init__.py:
     direct_tests:
@@ -39469,6 +39502,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
     transitive_tests: []
   src/engine/account_risk_guard.py:
@@ -40630,6 +40664,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/account_risk_watcher.py:
     direct_tests:
@@ -41790,6 +41825,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/backtest_engine.py:
     direct_tests:
@@ -42950,6 +42986,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/backtest_orchestration.py:
     direct_tests:
@@ -44110,6 +44147,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/backtest_yaml.py:
     direct_tests:
@@ -45270,6 +45308,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/boot_manager.py:
     direct_tests:
@@ -46430,6 +46469,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/buying_reconcile.py:
     direct_tests: []
@@ -47590,6 +47630,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/daily_emit_cap.py:
     direct_tests:
@@ -48750,6 +48791,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/daily_metrics_snapshot.py:
     direct_tests:
@@ -49910,6 +49952,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/data_load_tasks.py:
     direct_tests:
@@ -51070,6 +51113,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/etf_like.py:
     direct_tests:
@@ -52230,6 +52274,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/funnel_capture.py:
     direct_tests:
@@ -53390,6 +53435,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/kojiro_band_observe.py:
     direct_tests:
@@ -54550,6 +54596,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/kojiro_gap_observe.py:
     direct_tests:
@@ -55710,6 +55757,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/kojiro_indicators.py:
     direct_tests:
@@ -56870,6 +56918,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/llm_buy_gate.py:
     direct_tests:
@@ -58030,6 +58079,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/llm_features.py:
     direct_tests:
@@ -59190,6 +59240,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/llm_retrospective.py:
     direct_tests: []
@@ -60413,6 +60464,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/log_metrics_collector.py:
     direct_tests:
@@ -61573,6 +61625,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/market_op_subscribe.py:
     direct_tests:
@@ -62733,6 +62786,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/market_operation_monitor.py:
     direct_tests:
@@ -63893,6 +63947,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/market_regime.py:
     direct_tests:
@@ -65053,6 +65108,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/market_state.py:
     direct_tests:
@@ -66213,6 +66269,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/market_unit.py:
     direct_tests:
@@ -67373,6 +67430,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/metrics_collector.py:
     direct_tests:
@@ -68533,6 +68591,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/no_feed_registry.py:
     direct_tests:
@@ -69693,6 +69752,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/observer_trace.py:
     direct_tests:
@@ -70853,6 +70913,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/open_price_observe.py:
     direct_tests:
@@ -72013,6 +72074,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/open_price_rest.py:
     direct_tests:
@@ -73173,6 +73235,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/order_engine.py:
     direct_tests:
@@ -74332,6 +74395,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
     transitive_tests: []
   src/engine/param_catalog.py:
@@ -75575,6 +75639,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/param_validation.py:
     direct_tests:
@@ -76808,6 +76873,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/position_exit_lines.py:
     direct_tests:
@@ -78032,6 +78098,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/quant_score.py:
     direct_tests:
@@ -79192,6 +79259,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/quote_token_refresh.py:
     direct_tests:
@@ -80352,6 +80420,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/recommendation_engine.py:
     direct_tests:
@@ -81512,6 +81581,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/recommendation_metrics.py:
     direct_tests:
@@ -82672,6 +82742,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/refresh_progress.py:
     direct_tests:
@@ -83832,6 +83903,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/risk.py:
     direct_tests:
@@ -84991,6 +85063,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
     transitive_tests: []
   src/engine/scanner.py:
@@ -86152,6 +86225,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/scheduler.py:
     direct_tests:
@@ -87312,6 +87386,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/sector_naming.py:
     direct_tests:
@@ -88472,6 +88547,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/sell_rejection.py:
     direct_tests:
@@ -89632,6 +89708,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/selling_reconcile.py:
     direct_tests:
@@ -90792,6 +90869,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/session.py:
     direct_tests:
@@ -91951,6 +92029,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
     transitive_tests: []
   src/engine/stale_diagnostics.py:
@@ -93112,6 +93191,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/stale_manager.py:
     direct_tests:
@@ -94272,6 +94352,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/stale_session_recovery.py:
     direct_tests:
@@ -95432,6 +95513,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/stale_tracker.py:
     direct_tests:
@@ -96592,6 +96674,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/stale_universe_guard.py:
     direct_tests:
@@ -97752,6 +97835,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/stale_watcher_core.py:
     direct_tests:
@@ -98912,6 +98996,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/status_exit_watch.py:
     direct_tests:
@@ -100071,6 +100156,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
     transitive_tests: []
   src/engine/stock_master_basics_metrics.py:
@@ -101232,6 +101318,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/stock_master_daily_metrics.py:
     direct_tests:
@@ -102392,6 +102479,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/stock_master_master_metrics.py:
     direct_tests:
@@ -103552,6 +103640,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/stock_master_metrics.py:
     direct_tests:
@@ -104712,6 +104801,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/strategies/__init__.py:
     direct_tests:
@@ -105900,6 +105990,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/strategies/donchian_swing.py:
     direct_tests:
@@ -107060,6 +107151,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/strategies/kojiro.py:
     direct_tests:
@@ -108220,6 +108312,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/strategies/long_tail_volatility.py:
     direct_tests:
@@ -109380,6 +109473,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/strategies/momentum.py:
     direct_tests:
@@ -110540,6 +110634,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/strategies/vcp_breakout.py:
     direct_tests:
@@ -111700,6 +111795,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/strategies/volatility_breakout.py:
     direct_tests:
@@ -112860,6 +112956,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/strategy.py:
     direct_tests: []
@@ -114023,6 +114120,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/strategy_registry.py:
     direct_tests:
@@ -115183,6 +115281,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/ta_indicators.py:
     direct_tests:
@@ -116343,6 +116442,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/task_loop_helper.py:
     direct_tests:
@@ -117503,6 +117603,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/te_metrics.py:
     direct_tests:
@@ -118734,6 +118835,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/tick_channel_mode.py:
     direct_tests:
@@ -119894,6 +119996,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/tick_channel_switch.py:
     direct_tests:
@@ -121054,6 +121157,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/tick_volume.py:
     direct_tests:
@@ -122214,6 +122318,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/trading_calendar.py:
     direct_tests:
@@ -123373,6 +123478,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
     transitive_tests: []
   src/engine/turtle_sizing.py:
@@ -124534,6 +124640,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/uptime_monitor.py:
     direct_tests:
@@ -125694,6 +125801,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/util/__init__.py:
     direct_tests: []
@@ -126857,6 +126965,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/main.py:
     direct_tests:
@@ -128079,6 +128188,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
     transitive_tests: []
   src/middleware/api_auth.py:
@@ -129239,6 +129349,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
     transitive_tests: []
   src/models/__init__.py:
@@ -130403,6 +130514,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/models/balance.py:
     direct_tests:
@@ -131563,6 +131675,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/models/kis_quote_account.py:
     direct_tests:
@@ -132723,6 +132836,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/models/krx_open_api.py:
     direct_tests:
@@ -133883,6 +133997,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/models/market_regime.py:
     direct_tests: []
@@ -135106,6 +135221,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/models/recommendation.py:
     direct_tests: []
@@ -136428,6 +136544,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/models/system_integrations.py:
     direct_tests:
@@ -137655,6 +137772,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/realtime/__init__.py:
     direct_tests:
@@ -138815,6 +138933,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/realtime/handler.py:
     direct_tests:
@@ -139975,6 +140094,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/realtime/websocket.py:
     direct_tests:
@@ -141135,6 +141255,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/realtime/websocket_pool.py:
     direct_tests:
@@ -142295,6 +142416,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/routes/__init__.py:
     direct_tests:
@@ -144914,6 +145036,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/services/macro_client.py:
     direct_tests:
@@ -146074,6 +146197,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/services/mcp_client.py:
     direct_tests:
@@ -147234,6 +147358,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/services/quote_session_health.py:
     direct_tests:
@@ -148394,6 +148519,7 @@ backend:
     - tests/unit/test_c2_suite_isolation.py
     - tests/unit/test_cycle243_auth_fixture.py
     - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
+    - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
 frontend:
   frontend/src/App.tsx:
@@ -149921,10 +150047,10 @@ frontend:
     - frontend/src/pages/__tests__/MarketState.test.tsx
     - frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
     - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
-generated_at: '2026-09-27T13:23:03.315552+09:00'
+generated_at: '2026-09-27T13:26:11.492184+09:00'
 stats:
   backend_modules: 165
-  backend_tests: 1157
+  backend_tests: 1158
   frontend_modules: 120
   frontend_tests: 100
   unmapped_modules:
