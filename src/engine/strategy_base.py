@@ -44,6 +44,12 @@ _MAX_LOT_RATIO_MULT_MAX = 20.0      # 09-04 예산에서 K=20 컷오프가 비�
 # 멤버십으로 판정한다 — 그래야 skip 카운트가 "어느 전략이 사려 했는지" 를 말한다.
 _ALWAYS_STATUS_GATE_CANDIDATE_SIDS = frozenset({"momentum", "volatility_breakout"})
 
+#: cycle384 — 신규 매수 멈춤 키. PARAM_RANGES/INT_PARAMS 편입 금지(AI 가 켜고 끄면 안 된다).
+BUY_PAUSED_KEY = "buy_paused"
+_BUY_PAUSED_ABSENT = object()
+#: 멈춘 종목에서 지우는 진입 래치 — 이 두 이름뿐(명세 §4). 모양으로 판정(dict 일 때만).
+_PAUSE_ENTRY_LATCH_ATTRS: tuple[str, ...] = ("_breakout_first_seen", "_vol_latch")
+
 
 class Signal(str, Enum):
     """매매 신호."""
@@ -316,6 +322,9 @@ class StrategyBase(ABC):
         self._market_unit_snaps: dict[date, Any] = {}
         self._market_unit_caps = _MarketUnitCaps()
         self._market_unit_tally: dict | None = None
+        # cycle384 — buy_paused 관측 cap (키: "cfg|p|v" / "skip|{ticker}").
+        # 날짜 키 자기 리셋(KstDailyEmitCap 내장).
+        self._buy_paused_logged: KstDailyEmitCap[str] = KstDailyEmitCap[str]()
 
     @property
     def strategy_id(self) -> str:
@@ -1344,8 +1353,15 @@ class StrategyBase(ABC):
         cycle369 — 첫 문장이 종목상태(관리·단기과열) 당일 매수 차단을 먼저 본다
         (`_status_buy_blocked`). 7전략 `check_buy_signal` 배선을 공통 게이트가
         대신하므로 새 전략도 이 차단이 자동으로 따라온다(AST 가드 J25).
+
+        cycle384 — 순서 = 상태 차단(J25) → `buy_paused`(운영자가 정한 신규 매수
+        멈춤) → 계좌 SOFT. 멈춤이 계좌 SOFT 보다 먼저인 이유는 멈춘 전략에서
+        `[account_gate_skip]` 이 찍히면 원인이 「계좌 오픈리스크」로 오귀인되기
+        때문이다 — 멈춤은 운영자가 정한 결정적 상태라 먼저 판정한다.
         """
         if self._status_buy_blocked(ticker):
+            return True
+        if self._buy_paused_blocked(ticker):
             return True
         try:
             from src.engine import account_risk_watcher
@@ -1450,6 +1466,108 @@ class StrategyBase(ABC):
                 rate.pop(ticker, None)
         except Exception:
             logger.debug("[status_block_baseline_clear_failed] ticker=%s", ticker, exc_info=True)
+
+    def _buy_paused_blocked(self, ticker: str | None) -> bool:
+        """cycle384 — `buy_paused` 신규 매수 멈춤(순수 메모리 · 매 호출 읽기 · never-raise).
+
+        `self.config.params` 를 **매 호출** 읽는다 — 인스턴스에 캐시하지 않는다
+        (`PUT /api/strategies/{id}/params` 가 같은 dict 를 고치므로, 캐시하면
+        다음 재시작까지 반영이 안 된다). `is True` 일 때만 멈춘다 — 부재·`False`·
+        그 밖의 모양(`"true"`·`1`·`None` 등)은 멈추지 않고, 모양이 틀리면
+        `_emit_buy_paused_config` 가 WARNING 을 남긴다.
+
+        신호 단계에서 막는다 — 수량 0 반환·`buy_disabled`·`enabled`·`weight`
+        어느 것도 쓰지 않는다(그 축들은 보유분의 손절·트레일링까지 멈춘다).
+        """
+        try:
+            raw = self.config.params.get(BUY_PAUSED_KEY, _BUY_PAUSED_ABSENT)
+        except Exception:
+            logger.debug("[buy_paused_gate_failed] strategy=%s", self.strategy_id, exc_info=True)
+            return False
+        paused = raw is True
+        valid = raw is _BUY_PAUSED_ABSENT or isinstance(raw, bool)
+        self._emit_buy_paused_config(raw, paused, valid)
+        if not paused:
+            return False
+        if ticker:
+            self._clear_edge_baseline_on_block(ticker)
+            dropped = self._clear_entry_latches_on_pause(ticker)
+            self._emit_buy_paused_skip(ticker, dropped)
+        return True
+
+    def _clear_entry_latches_on_pause(self, ticker: str) -> tuple[str, ...]:
+        """cycle384 — 멈춘 종목의 진입 래치(`_PAUSE_ENTRY_LATCH_ATTRS`)만 pop.
+
+        BFB `_breakout_first_seen`(유지 대기) · BFB/VCP `_vol_latch`(거래량 대기
+        래치)만 지운다. 멈춘 사이 셋업이 죽었다 되살아나도 해제 첫 틱이 그 낡은
+        래치로 사지 않게 한다(§4). 평평한 `_prev_price`·`_position_setup`·
+        `_entry_atr`·`_bought_today` 등 청산·진입 상태는 절대 건드리지 않는다.
+        """
+        dropped: list[str] = []
+        try:
+            for attr in _PAUSE_ENTRY_LATCH_ATTRS:
+                d = getattr(self, attr, None)
+                if isinstance(d, dict) and ticker in d:
+                    d.pop(ticker, None)
+                    dropped.append(attr.lstrip("_"))
+        except Exception:
+            logger.debug("[buy_paused_latch_clear_failed] ticker=%s", ticker, exc_info=True)
+        return tuple(dropped)
+
+    def _emit_buy_paused_config(self, raw: Any, paused: bool, valid: bool) -> None:
+        """`[buy_paused_config]` 설정 카나리아 — 1회/(전략, 값)/일. never-raise.
+
+        `paused=1`(멈춤)은 **WARNING** — 21:30 일일 분석의 상위 WARNING 에 매일
+        올라, 몇 주 걸리는 개조 동안 「돈키언은 왜 안 사지」가 결함으로 오진되는
+        것을 막는다. `valid=0`(모양 오류)도 WARNING. `paused=0 ∧ valid=1` 은 INFO.
+        """
+        key = f"cfg|{int(paused)}|{int(valid)}"
+        try:
+            if not self._buy_paused_logged.should_emit(key):
+                return
+            raw_s = "absent" if raw is _BUY_PAUSED_ABSENT else repr(raw)[:40]
+            if not valid:
+                logger.warning(
+                    "[buy_paused_config] strategy=%s paused=%d valid=%d raw=%s note='%s'",
+                    self.strategy_id, int(paused), int(valid), raw_s,
+                    "참/거짓이 아닌 값 — 멈추지 않음으로 읽음(PUT 은 거부하므로 DB 직접 수정 흔적)",
+                )
+            elif paused:
+                logger.warning(
+                    "[buy_paused_config] strategy=%s paused=%d valid=%d raw=%s note='%s'",
+                    self.strategy_id, int(paused), int(valid), raw_s,
+                    "신규 매수 신호만 멈춤 — 손절·트레일링·익일청산·강제청산·종목상태 청산은 그대로",
+                )
+            else:
+                logger.info(
+                    "[buy_paused_config] strategy=%s paused=%d valid=%d raw=%s note='%s'",
+                    self.strategy_id, int(paused), int(valid), raw_s, "멈춤 아님",
+                )
+            self._buy_paused_logged.mark_emitted(key)
+        except Exception:
+            trace_observer_failure("[buy_paused_config]", self.strategy_id, self._buy_paused_logged)
+
+    def _emit_buy_paused_skip(self, ticker: str, dropped: tuple[str, ...]) -> None:
+        """`[buy_paused_skip]` — 멈춘 동안 평가된 후보. 1회/(종목, 전략)/일 · INFO.
+
+        peek → 후보 판정 → 로그 → mark 순서 — **후보가 아니면 mark 하지 않는다**
+        (장중 `prepare()` 재실행으로 뒤늦게 후보가 된 종목도 기록되게). 후보
+        판정은 cycle369 `_is_status_gate_candidate` 재사용.
+        """
+        key = f"skip|{ticker}"
+        try:
+            if not self._buy_paused_logged.should_emit(key):
+                return
+            if not self._is_status_gate_candidate(ticker):
+                return
+            logger.info(
+                "[buy_paused_skip] strategy=%s ticker=%s cand=1 dropped=%s "
+                "note='buy_paused — 신규 매수 신호 보류(청산·손절 무관)'",
+                self.strategy_id, ticker, ",".join(dropped) or "-",
+            )
+            self._buy_paused_logged.mark_emitted(key)
+        except Exception:
+            trace_observer_failure("[buy_paused_skip]", ticker, self._buy_paused_logged)
 
     def _emit_budget_clamp(
         self, ticker: str | None, requested: int, clamped: int, remaining: int,

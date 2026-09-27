@@ -128,6 +128,7 @@ class VolatilityBreakoutStrategy(StrategyBase):
         "rsi_filter_enabled": False,
         "rsi_extreme_max": 85,
         "max_lot_ratio_mult": 2.5,   # cycle245 — 랏 명목 ρ축 상한(K_ρ). 명목 ≤ K_ρ×position_ratio×예산, 1주도 못 사면 미매수. 터틀 모드에선 K축(max_lot_units)이 우선하고 그것이 fail-open 할 때만 백스톱. PARAM_RANGES 미편입. 롤백 = DB 20.0
+        "buy_paused": False,   # cycle384 — 신규 매수 신호만 멈춤(청산 무관). 부재·비bool = 멈추지 않음. PARAM_RANGES/INT_PARAMS 편입 금지. 켜고 끄기 = PUT 즉시
         # cycle262 (2026-09-06) — KRX 09:00 개장 후 이 초 동안 신규 매수 신호를
         # 발사하지 않는다(0 = OFF = 현행 행위). 목표가의 기준가가 KRX 09:00 시가가
         # 아니라 통합 채널 H0UNCNT0 `fields[7]`(세션 시가 = 프리장 체결이 있었으면

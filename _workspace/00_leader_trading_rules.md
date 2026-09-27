@@ -470,6 +470,7 @@ VB와 동일.
   - `risk.on_tick` 매수 평가 직전에 `if strategy_id == "donchian_swing": continue` 가드 (이중 안전망)
   - `donchian_swing.check_buy_signal` 의 09:05~09:30 시간 가드 + `_bought_today` set 그대로 유지 (Pull 폴링도 중복 진입 방지)
   - `[swing_poll] candidates=N filtered=M bought=K elapsed=T.Ts` INFO 로그 1행 / 사이클
+- **신규 매수 멈춤** (사용자 결정 2026-09-27 「돈키언 신규매수 중지」) — 운영 결정 = `buy_paused=true` 로 신규 매수 신호를 멈춘다. 보유분은 아래 청산 규약대로 나간다. 해제 = 돈키언 개조(전용 브랜치)를 합친 뒤. 규칙 = §7 「신규 매수 멈춤」
 
 ### 청산
 - **하드 손절**: 매수가 대비 **-6%** (운영 DB, 사이클 210 복원). 코드 DEFAULT -7. **⚠️ 사이클 210 (2026-07-14)**: AI 자문 수동 apply 누적으로 `stop_loss_rate -3.2` / `daily_loss_limit -0.8`(배정자금 -0.8% 손실=당일 매수 중단)까지 과조임 방치돼 208/209로 신호가 나와도 진입 직후 죽던 상태 → **stop -6.0 / daily_loss -6.0 복원**. 재조임 방지 = auto_apply `_CONSERVATIVE_KEYS` 제거(engine/CLAUDE.md 참조).
@@ -627,6 +628,7 @@ DEFAULT_PARAMS = {
     "max_lot_units": 2.0,      # cycle242 — 랏당 최대 유닛(K). PARAM_RANGES/INT_PARAMS 미편입
     "max_lot_ratio_mult": 2.5, # cycle245 — 랏 명목 ρ축 상한(K_ρ). 명목 ≤ K_ρ×position_ratio×예산, 1주도 못 사면 미매수.
                                # K축과 `min` 합성(cycle254). PARAM_RANGES 미편입. 롤백 = 20.0
+    "buy_paused": False,       # cycle384 — 신규 매수 신호만 멈춤(청산 무관). PARAM_RANGES/INT_PARAMS 미편입. 켜고 끄기 = PUT 즉시
     "turtle_min_stop_pct": -4.0,
     # 유니버스 — 전체 상장 ∩ 시총≥100억 ∩ 거래대금≥15억
     "min_market_cap": 10_000_000_000,
@@ -780,6 +782,7 @@ DEFAULT_PARAMS = {
     "max_lot_units": 2.0,      # cycle242 — 랏당 최대 유닛(K). PARAM_RANGES/INT_PARAMS 미편입
     "max_lot_ratio_mult": 2.5, # cycle245 — 랏 명목 ρ축 상한(K_ρ). 명목 ≤ K_ρ×position_ratio×예산, 1주도 못 사면 미매수.
                                # K축과 `min` 합성(cycle254). PARAM_RANGES 미편입. 롤백 = 20.0
+    "buy_paused": False,       # cycle384 — 신규 매수 신호만 멈춤(청산 무관). PARAM_RANGES/INT_PARAMS 미편입. 켜고 끄기 = PUT 즉시
     "turtle_min_stop_pct": -5.0,
     # 유니버스 — 전체 상장 ∩ 시총≥100억 ∩ 거래대금≥10억 (지수 제약 없음)
     "min_market_cap": 10_000_000_000,
@@ -866,6 +869,28 @@ BFB/VCP 매수 신호는 (donchian 의 폴링 루프와 달리) `risk.on_tick`(W
 | 특별 개장일 | 발사 창은 고정 시계라 지연 개장일(수능일 등)을 모른다 — 개장 전 거부로 하루 3회가 소진될 수 있다. 그날은 **개장 전에** `sell_mode` 를 `off`(또는 `observe`)로 내리고, 정규장이 열린 뒤 `enforce` 로 되돌린다 |
 
 구현·마커 상세 = `src/engine/CLAUDE.md` 「종목상태 청산·당일 매수 차단」 절.
+
+### 신규 매수 멈춤 `buy_paused` (7 전략 공통)
+
+사용자 결정 원문: 2026-09-27 「돈키언 신규매수 중지」 — 보유분은 원래 청산 규약대로 자연히 나가게 두고, 개조는 전용 브랜치에서 뒤에 한다.
+설정으로는 할 수 없어서(돈키언 매수 창 09:05~09:30 은 코드 고정) 7 전략 공통 파라미터를 새로 두었다(cycle384).
+
+| 규칙 | 값 |
+|---|---|
+| 키 | `DEFAULT_PARAMS["buy_paused"]` — 7 전략 전부 기본 `False` |
+| 막는 것 | 그 전략의 **신규 매수 신호만**(`Signal.NONE`) |
+| 막지 않는 것 | 손절 · 트레일링 · 익일청산 · 15:20 강제청산 · 종목상태 청산 · 시간 청산 · 후보 준비 · 퍼널 기록 · 시세 구독 |
+| 막는 자리 | 공통 게이트 `StrategyBase._account_soft_gate_blocked` 의 둘째 문장(첫 문장 = 종목상태 차단 · 셋째 = 계좌 SOFT) |
+| 쓰지 않는 수단 | 수량 0 반환(900초 「투자금 부족」 오귀인) · `buy_disabled`(일일 손실 래치) · `enabled` · `weight`(보유분 손절이 멈춘다) |
+| 값 해석 | `true`(JSON bool)일 때만 멈춘다. 키 부재·`false`·그 밖의 모양은 멈추지 않는다(모양이 틀리면 WARNING) |
+| 켜고 끄기 | `PUT /api/strategies/{id}/params {"params":{"buy_paused":true}}` — **즉시**, DB 저장, 재시작 뒤 유지. 끄기 = 같은 PUT 에 `false`. SQL UPDATE 는 다음 재시작에서만 반영돼 쓰지 않는다 |
+| AI 자문 | `PARAM_RANGES`/`INT_PARAMS` 편입 금지 — 수동·자동 적용 경로가 둘 다 이 키를 거른다 |
+| 해제 첫 틱 | 막는 순간 그 종목의 edge 기준가와 진입 래치를 비운다 — 해제 뒤 첫 틱이 거짓 돌파·낡은 래치 매수가 되지 않는다. donchian·kojiro 는 창 중간 해제가 창 중간 재기동과 같다 |
+| 함께 멈추는 관측 | 그 전략의 시장 유닛 신호·수량 기록(`[market_unit] where=signal\|calc`) · LLM 매수평가 · 갭/돌파 관측 |
+| 운영 결정 | `donchian_swing` 만 켠다(위 사용자 결정). 나머지 6 전략은 `false` |
+| 로그 | `[buy_paused_config]` 멈춘 전략 WARNING 1줄/일 · `[buy_paused_skip]` 후보 종목 INFO 1줄/(종목, 전략)/일 |
+
+🔴 멈춰 둔 동안 키를 지운 코드를 배포하지 않는다 — DB 의 `true` 가 버려져 조용히 풀린다. 구현·마커 상세 = `src/engine/CLAUDE.md` `strategy_base.py` 절.
 
 ### 스케줄 — KRX/NXT 통합 운영 (08:00~20:00)
 
@@ -985,7 +1010,7 @@ BFB/VCP 매수 신호는 (donchian 의 폴링 루프와 달리) `risk.on_tick`(W
 
 `recommendation_engine.PARAM_RANGES` 에 있는 키만 AI 자문이 추천할 수 있고, `INT_PARAMS ⊆ PARAM_RANGES` 가 규약이다(정수 캐스트 대상).
 
-- **편입 금지 = 정체성 상수.** 진입 임계(`max_positions` · `buy_threshold` · `donchian_period` · `max_breakout_extension_pct` · `open_entry_hold_secs` · `open_price_scope_mode`)와 청산 임계(`atr_trail_mult` · `breakout_fail_n_days` · `breakeven_promote_atr` · `channel_exit_period`), 리스크 정체성 상수(`max_lot_units` K · `max_lot_ratio_mult` K_ρ · `rank_w_*` · `market_unit_mode`), 킬스위치·LLM 키가 여기 해당한다.
+- **편입 금지 = 정체성 상수.** 진입 임계(`max_positions` · `buy_threshold` · `donchian_period` · `max_breakout_extension_pct` · `open_entry_hold_secs` · `open_price_scope_mode`)와 청산 임계(`atr_trail_mult` · `breakout_fail_n_days` · `breakeven_promote_atr` · `channel_exit_period`), 리스크 정체성 상수(`max_lot_units` K · `max_lot_ratio_mult` K_ρ · `rank_w_*` · `market_unit_mode`), 신규 매수 멈춤 `buy_paused`, 킬스위치·LLM 키가 여기 해당한다.
 - **왜**: 최근 손실을 목적함수로 삼는 튜너는 표본이 적을 때 "최근 손실 거래를 지우는 값" 으로 수렴한다 — 청산 임계를 조이면 추세추종이 데이트레이딩으로 변태하고, 진입 임계를 조이면 신호가 말라붙는다. 라이브 값이 허용 범위의 **하한에 정확히 붙어 있으면** 그건 과튜닝 서명이다.
 - **`atr_trail_mult` 는 3전략 공유 키**(`donchian_swing`·`vcp_breakout`·`bull_flag_breakout`, 전부 DEFAULT 2.0)라 제외가 세 전략에 함께 걸린다. 근거 표본은 donchian 뿐이므로 **VCP 또는 BFB 의 청산 왕복이 ≥20 쌓이면 그 전략에 한해 재편입 여부를 독립 판정**한다. 키를 전략별로 나눠야 하면 kojiro 의 `stop_atr`/`trail_atr` 고유명 선례를 따른다.
 

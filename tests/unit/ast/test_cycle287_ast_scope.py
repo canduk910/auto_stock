@@ -138,8 +138,9 @@ _BASE_SHA = {
     # 🔁 cycle382 리뷰 재핀(값만) — `_market_unit_tally_roll` 을 `tally.date != day`
     # 에서 `tally.date < day`(더 늦은 날짜에서만 롤)로 시정(§8, 사용자 승인 범위 밖 무접촉).
     # 직전 값 = `4516f1a94f2d05de24dfed24d165b62b11a230374795c593247f9906803d085f`.
+    # 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27). 게이트 2번째 문장 + 헬퍼 4개 + `__init__` cap 1개 추가. 값만 이동.
     "src/engine/strategy_base.py":
-        "448c03026e576d9a520e1863a382e35f2f35574c695458c8054e9d3e60a9821f",
+        "d5257d3a8a6c4744663aa7af6e89e3a683ccdb2e63ae062284e5e702079dddfb",
     # 시각 표의 **유일 정본** — cycle287 은 읽기만 했다. 바꾸면 픽스처 동기 사슬
     # (`tools/test_fixtures/gen_market_state_fixture.py` + 프론트/E2E 픽스처 2)이
     # 통째로 딸려 오고, cycle282 `test_i1/i2/i3` 가 즉시 RED 다(실증: cycle289 가
@@ -168,19 +169,19 @@ _BASE_SHA = {
     "src/engine/strategies/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "src/engine/strategies/bull_flag_breakout.py":
-        "6d7a38f28d24d2c20cff195916c5641565310376a405ce4e23c48db3ed919165",
+        "320815b44a259c577184d3b9fbaf6ae31eb2b0dda142e1ab4361541e1c4defd4",
     "src/engine/strategies/donchian_swing.py":
-        "553f2d623e6559ef1ff7d88758da0306fc6037047d7d661f8e38c42a64d306a1",
+        "9548ca4f12e20c733506662fa9ad11b5803a594fb5ab0679d20f87e6f5890f2f",
     "src/engine/strategies/kojiro.py":
-        "180b0c36ebb9c49363b20c2aed134910c9f5cdb54224f1488a5a93d58db4b1c2",
+        "fac754faaa1ae65a4a484c02abd46e4de73494bd165ead1f5f0790e10734b4ea",
     "src/engine/strategies/long_tail_volatility.py":
-        "04f8a74767c6114147d78aa4d2b2ff10e59ac10266df2267a2565679ba940317",
+        "42211d78f9d347436a3e33349c6058877b1e6c033ebde28d3b6abd0ac5e835a9",
     "src/engine/strategies/momentum.py":
-        "38743ab1ecdb4aa9bcd6ac37e5d28f75501d2d4eceb2e70f3aace44d00d502a1",
+        "5aad47791126b66a4febe3f7496cc355059db7cbdadcd106095094f9cb2a3145",
     "src/engine/strategies/vcp_breakout.py":
-        "de3a7342310a72d296636196f97e3c337e662962b9eacae6704aab7f43d7c1ed",
+        "440336ceba6005ced9409b0b1998f273b038950f093d171c668e8d5eb979a48a",
     "src/engine/strategies/volatility_breakout.py":
-        "45d860c693f83b995f959d4b88c024cba2b885a9267514a746e23372db8721d5",
+        "c480b0f97212150c6887e2b5203e39e551ec122653ba7f6664d0e4437a3d6afd",
 }
 
 #: `src/**/*.py` 전수(세 변경 파일 제외)의 (경로, 내용sha) 누적 digest.
@@ -605,8 +606,18 @@ _SRC_TREE_FILES = 162
 # 「off」 텍스트 정정) + `market_regime.py`(주석만 — E-2 계획 폐기, 시장 유닛으로
 # 대체) 내용만 바뀌었다. 직전 값 =
 # `b5e721dc55d70ce9351d8b97108b3be9a59f4f04e73abed30293c46e6597f5ba`.
+# 🔁 cycle384 재핀(값만, 파일 수 불변 162) — buy_paused 공통 파라미터(사용자 결정
+# 09-27). `strategy_base.py`(게이트 2번째 문장 + 헬퍼 4개 + cap 1개) + 전략 7파일
+# (`DEFAULT_PARAMS` 1키씩) + `param_catalog.py`(카탈로그 행 + `CATALOG_VERSION`)
+# 내용만 바뀌었다. 직전 값 =
+# `e90e5020620ada1c87378508178b2b97fbb6613e68b8caecafc4b5935bf1045e`.
+# 🔁 cycle384 리뷰 재핀(값만, 파일 수 불변 162) — `param_catalog.py` 만 다시
+# 움직였다: `buy_paused` 도움말 두 문장 정정(WARNING 은 매일이 아니라 그날 매수를
+# 평가했을 때만 남는다 + 키 부재는 INFO) + 그룹 헤더 주석 카운트 정정(entry
+# 47→49·sizing_risk 8→9). 매매 행위·값 변경 없음. 직전 값 =
+# `ebffb3a8c2fc0a6efc1da870555ebe0587b91a70e004c180dd836e1b3da67de9`.
 _SRC_TREE_DIGEST = (
-    "e90e5020620ada1c87378508178b2b97fbb6613e68b8caecafc4b5935bf1045e"
+    "dc10a109c238be270993c3e5ac72428e714db21539a6b18f030047dad02dab22"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

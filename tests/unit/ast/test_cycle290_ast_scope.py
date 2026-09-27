@@ -170,8 +170,9 @@ _BASE_SHA: dict[str, str] = {
     # 🔁 cycle382 리뷰 재핀(값만) — `_market_unit_tally_roll` 을 `tally.date != day`
     # 에서 `tally.date < day`(더 늦은 날짜에서만 롤)로 시정(§8). 직전 값 =
     # `4516f1a94f2d05de24dfed24d165b62b11a230374795c593247f9906803d085f`.
+    # 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27). 게이트 2번째 문장 + 헬퍼 4개 + `__init__` cap 1개 추가. 값만 이동.
     "src/engine/strategy_base.py":
-        "448c03026e576d9a520e1863a382e35f2f35574c695458c8054e9d3e60a9821f",
+        "d5257d3a8a6c4744663aa7af6e89e3a683ccdb2e63ae062284e5e702079dddfb",
     # 🔴 등재만으로 판정이 통해야 한다 — 검증 로직을 고쳐 통과시키면 안 된다.
     "src/engine/param_validation.py":
         "b4c5c029800191523bcc511919d6de3774e9ab49ca2fc0a0558ee3907868ee17",

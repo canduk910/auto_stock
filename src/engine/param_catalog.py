@@ -1,4 +1,4 @@
-"""전략 파라미터 카탈로그 — 7 전략 `DEFAULT_PARAMS` 합집합 103 키의 **단일 진실원**.
+"""전략 파라미터 카탈로그 — 7 전략 `DEFAULT_PARAMS` 합집합 105 키의 **단일 진실원**.
 
 사이클 278. 이 모듈은 **순수 데이터**다.
 
@@ -65,12 +65,13 @@
 ``normal``    일반.
 ``high``      코드/문서가 "정체성 상수"라 부르거나, 청산 임계이거나, 잘못된 값이
               **무증상**으로 매매를 바꾸는 키. 화면에서 강조한다.
-``identity``  리스크 정체성 상수 16 키. 화면 저장 시 **2단계 확인**을 요구한다.
+``identity``  리스크 정체성 상수 18 키. 화면 저장 시 **2단계 확인**을 요구한다.
               (`max_positions` · `max_lot_units` · `max_lot_ratio_mult` · `risk_pct` ·
                `max_open_risk_pct` · `sizing_mode` · `tradable_boards` ·
                `open_entry_hold_secs` · `open_price_scope_mode` · `llm_gate_*` 4키 ·
                `order_exchange_clock_mode`(cycle290) · `after_market_exit_division`(cycle290) ·
-               `daily_fetch_depth_mode`(cycle300))
+               `daily_fetch_depth_mode`(cycle300) · `market_unit_mode`(cycle382) ·
+               `buy_paused`(cycle384))
 
 ────────────────────────────────────────────────────────────────────────────
 `deprecated` / `deprecated_for`
@@ -131,7 +132,7 @@ __all__ = [
     "forbidden_choices_for",
 ]
 
-CATALOG_VERSION = "cycle382.1"
+CATALOG_VERSION = "cycle384.1"
 
 #: 전략 id 의 정본 순서(레지스트리 등록 순서).
 STRATEGY_IDS: tuple[str, ...] = (
@@ -439,10 +440,10 @@ def _s(**kw: Any) -> ParamSpec:
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# 103 키
+# 105 키
 # ═══════════════════════════════════════════════════════════════════════════
 PARAM_SPECS: tuple[ParamSpec, ...] = (
-    # ── 진입 (47) ───────────────────────────────────────────────────────────
+    # ── 진입 (49) ───────────────────────────────────────────────────────────
     _s(
         key="buy_threshold", label_ko="매수 등락률 임계", group="entry",
         type="float", min=-30.0, max=30.0, step=0.5, unit="%",
@@ -838,6 +839,25 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         applies_to=("bull_flag_breakout",), range_src="param_ranges",
         help="돌파가가 이 시간만큼 유지돼야 진짜 돌파로 인정(가짜 돌파 흡수).",
     ),
+    _s(
+        key="buy_paused", label_ko="신규 매수 멈춤", group="entry",
+        type="bool", min=None, max=None, step=None, unit="",
+        editable=True, risk="identity", auto_tunable=False, deprecated=False,
+        applies_to=_ALL7, range_src="enum",
+        help="cycle384 — 켜면(true) 이 전략의 **신규 매수 신호만** 멈춘다. 보유 종목의"
+             " 손절·트레일링·익일청산·15:20 강제청산·종목상태 청산·시간 청산은 그대로 돈다."
+             " 전략을 끄거나 비중을 0 으로 하는 것과 다르다 — 그 둘은 보유분의 손절까지"
+             " 멈춘다. 후보 준비·퍼널 기록·시세 구독도 계속된다. 멈춘 동안 그 전략의 매수"
+             " 신호 뒤쪽 관측(시장 유닛 기록·LLM 매수평가·갭/돌파 관측)은 함께 멈춘다."
+             " 기본 false. 키 부재는 멈추지 않음으로 읽고 INFO 로 남는다 — 참/거짓이 아닌"
+             " 값만 멈추지 않음 + **WARNING** 이다(모양이 틀렸다는 뜻)."
+             " `PUT /api/strategies/{id}/params` 로 즉시 반영되고 DB 에도 저장돼 재시작 뒤에도"
+             " 유지된다. `[buy_paused_config]` WARNING 은 그 전략이 그날 매수 신호를 실제로"
+             " 평가한 날에만 남는다(돈키언은 09:05~09:30 폴에 후보가 있어야, momentum/VB 는"
+             " 기준선 크로싱이 있어야 게이트에 닿는다) — 멈춤 여부는 이 WARNING 이 아니라"
+             " `GET /api/strategies` 응답 또는 DB `strategy_config.params` 로 확인한다."
+             " AI 자동 튜닝 대상이 아니다(`PARAM_RANGES`/`INT_PARAMS` 편입 금지).",
+    ),
 
     # ── 청산 (22) ───────────────────────────────────────────────────────────
     _s(
@@ -1041,7 +1061,7 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         help="연속 몇 틱 동안 조건이 유지돼야 실패로 확정하는가(노이즈 흡수).",
     ),
 
-    # ── 사이징·리스크 (8) ───────────────────────────────────────────────────
+    # ── 사이징·리스크 (9) ───────────────────────────────────────────────────
     _s(
         key="position_ratio", label_ko="종목당 비중", group="sizing_risk",
         type="percent", min=0.01, max=1.0, step=0.01, unit="",

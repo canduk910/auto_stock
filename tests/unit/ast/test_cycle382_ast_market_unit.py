@@ -612,4 +612,5 @@ def test_a12_catalog_row():
     assert spec.applies_to == pc._TURTLE4
     assert spec.editable is True, "킬스위치 = PUT — 편집 가능해야 한다"
     assert "market_unit_mode" in pc.identity_keys()
-    assert pc.CATALOG_VERSION == "cycle382.1"
+    # 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27 「돈키언 신규매수 중지」) — 카탈로그 버전 cycle382.1 → cycle384.1.
+    assert pc.CATALOG_VERSION == "cycle384.1"

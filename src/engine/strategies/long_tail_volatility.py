@@ -123,6 +123,7 @@ class LongTailVolatilityStrategy(StrategyBase):
         "max_positions": 6,
         "daily_loss_limit": -5.0,
         "max_lot_ratio_mult": 2.5,   # cycle245 — 랏 명목 ρ축 상한(K_ρ). 명목 ≤ K_ρ×position_ratio×예산, 1주도 못 사면 미매수. 터틀 모드에선 K축(max_lot_units)이 우선하고 그것이 fail-open 할 때만 백스톱. PARAM_RANGES 미편입. 롤백 = DB 20.0
+        "buy_paused": False,   # cycle384 — 신규 매수 신호만 멈춤(청산 무관). 부재·비bool = 멈추지 않음. PARAM_RANGES/INT_PARAMS 편입 금지. 켜고 끄기 = PUT 즉시
         # cycle262 (2026-09-06) — KRX 09:00 개장 후 이 초 동안 신규 매수 신호를
         # 발사하지 않는다(0 = OFF = 현행 행위). LTV 는 08:00~09:00 pre_nxt 에서
         # **그 보드의 올바른 시가**로 정상 판정하지만, 09:00 에 보드가 main 으로

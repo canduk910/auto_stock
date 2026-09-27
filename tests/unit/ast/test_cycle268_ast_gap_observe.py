@@ -97,9 +97,11 @@ GAP_DOWN_LOG = "고지로 갭다운 스킵: %s 갭률 %.1f%% ≤ %.1f%%"
 # ⚠️ cycle382(2026-09-27, 시장 유닛 단계형)가 43→44 로 갱신했다 — 사용자 결정
 # "시장유닛 단계형 권고대로 채택"에 해당하는 예외. 1키는 기본 `shadow` 모드
 # 기록만(주문 경로는 `mode ∈ {shadow, enforce} ∧ m < 1` 일 때만 갈린다).
+# 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27 「돈키언 신규매수 중지」) — 44→45.
+# 신규 매수 신호만 멈추는 스위치(기본 false = 행위 변경 0). 7전략 공통.
 KOJIRO_PARAM_KEYS = (
     "atr_period", "atr_ratio_max", "atr_ratio_min", "after_market_exit_division",
-    "breakeven_promote_atr",
+    "breakeven_promote_atr", "buy_paused",
     "daily_loss_limit", "ema_long", "ema_mid", "ema_short", "exchange",
     "exclude_tickers", "gap_down_skip_pct", "gap_up_skip_pct", "hard_stop_pct",
     "llm_gate_daily_call_cap", "llm_gate_min_score", "llm_gate_mode",

@@ -350,3 +350,22 @@ Phase 1 산출 — 실행/조회 엔드포인트는 미구현
 행 순서에서 저녁 funnel 이 일봉 적재(20:30)와 정산(21:30) 사이로 옮겨졌다. 수동 캡처는 라벨 가드(카드3 (가))가 기준일이 다른 전략을 건너뛰고 message 로 알린다.
 
 → CHANGELOG: cycle364 S1 행
+
+## 엔드포인트 목록
+
+### 2026-09-27 cycle384 — `PUT /api/strategies/{id}/params` 행의 「매수를 멈추는 정당한 수단」 · 카탈로그 수
+
+정본 원문(`PUT /api/strategies/{id}/params` 행 중 한 구절):
+
+어느 쪽도 운영자가 의도한 것이 아니다. 매수를 멈추는 정당한 수단은 전략 비활성화다.
+
+정본 원문(같은 행 · `GET /api/strategies/params-schema` 행 · 「인증」 절의 수):
+
+- identity(리스크 정체성 상수 15키)는 **서버가 막지 않는다**
+- 파라미터 카탈로그(`src/engine/param_catalog.py` 104키) 전체
+- `params`(104, `ParamSpec` 전 필드
+- (identity 15키)과 운영 기록이 그 자리를 메운다.
+
+경위: 전략 비활성화는 보유분의 손절까지 멈춘다(루트 `CLAUDE.md` 금기). cycle384(사용자 결정 2026-09-27 「돈키언 신규매수 중지」)가 신규 매수 신호만 멈추는 `buy_paused` 를 두었으므로 정당한 수단을 그것으로 바꿨다. 같은 사이클이 카탈로그를 105키 · identity 18키(`CATALOG_VERSION="cycle384.1"`)로 늘렸다. identity 15키 표기는 cycle300(`daily_fetch_depth_mode`)·cycle382(`market_unit_mode`)가 identity 키를 더할 때 따라오지 못한 수였다.
+
+→ CHANGELOG: cycle384 행

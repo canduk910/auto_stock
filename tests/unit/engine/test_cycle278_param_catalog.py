@@ -91,6 +91,8 @@ _BRIEF_IDENTITY_KEYS = frozenset({
     # cycle382 — 시장 유닛(단계형). 매매 행위(사이징)를 바꾸는 킬스위치라
     # 화면에서 바꾸려면 2단계 확인을 받아야 한다(리스크 정체성 축).
     "market_unit_mode",
+    # cycle384 — 신규 매수 멈춤. 매수 행위를 바꾸는 스위치라 2단계 확인.
+    "buy_paused",
 })
 
 #: 명세 §1.3 — **어느 전략에서도** 행위 참조 0건인 잔존 키 8개.
@@ -199,13 +201,13 @@ def test_catalog_when_compared_to_default_params_then_key_sets_identical():
 
 def test_catalog_when_counted_then_102_specs_no_duplicates():
     """B02/C2 — 스펙 104개(cycle290 킬스위치 2키로 99→101, cycle300 깊이 스위치로 101→102,
-    cycle352 15:20 상한가 유지 확인 킬스위치로 102→103, cycle382 시장 유닛 모드로 103→104),
-    키 중복 0."""
-    assert len(pc.PARAM_SPECS) == 104, f"스펙 {len(pc.PARAM_SPECS)}개 (기대 104)"
+    cycle352 15:20 상한가 유지 확인 킬스위치로 102→103, cycle382 시장 유닛 모드로 103→104,
+    cycle384 신규 매수 멈춤 `buy_paused` 로 104→105), 키 중복 0."""
+    assert len(pc.PARAM_SPECS) == 105, f"스펙 {len(pc.PARAM_SPECS)}개 (기대 105)"
     keys = [s.key for s in pc.PARAM_SPECS]
     dupes = sorted({k for k in keys if keys.count(k) > 1})
     assert not dupes, f"중복 키: {dupes}"
-    assert len(pc.SPEC_BY_KEY) == 104
+    assert len(pc.SPEC_BY_KEY) == 105
 
 
 def test_catalog_when_key_missing_from_default_params_then_fails():
@@ -483,8 +485,8 @@ def test_k_value_nxt_post_when_read_then_not_globally_deprecated_but_inactive_fo
 
 
 def test_identity_when_listed_then_exactly_sixteen_brief_keys():
-    """B20/C7b — `risk="identity"` 는 브리프의 17키(cycle290 이 13→15, cycle300 이 15→16,
-    cycle382 가 16→17)와 정확히 일치한다.
+    """B20/C7b — `risk="identity"` 는 브리프의 18키(cycle290 이 13→15, cycle300 이 15→16,
+    cycle382 가 16→17, cycle384 가 17→18)와 정확히 일치한다.
 
     화면의 2단계 확인 대상을 카탈로그가 임의로 넓히거나 좁히지 못한다.
     """

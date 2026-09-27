@@ -140,35 +140,39 @@ _SEGMENT_SHA: dict[tuple[str, str, str | None], str] = {
 #: `ema_mid` 60→150 · `ema_long` 120→200 · `min_swing_atr_mult` 0.5→1.0 (운영 DB
 #: 실측 정합, 미너비니 원설계 복귀). 값 변경이 이 사이클의 **정당한 목적**이라
 #: 재핀했다 — 나머지 6전략 핀은 불변이다.
+#: 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27 「돈키언 신규매수
+#: 중지」). 7 전략 전부 `DEFAULT_PARAMS` 말미(정확히는 `max_lot_ratio_mult` 다음
+#: 줄)에 `"buy_paused": False` 1키 추가. 값 자체는 매매 행위를 바꾸지 않는다
+#: (기본 false — 게이트가 읽어 멈추지 않는 것과 byte 동일). 나머지 서술은 그대로다.
 _DEFAULT_PARAMS_SHA: dict[str, tuple[str, str, str]] = {
-    # 전략 id: (파일, 클래스, cycle290 기준 세그먼트 sha256 — 구 base 34ba9e6 값은 git 이력)
+    # 전략 id: (파일, 클래스, cycle384 기준 세그먼트 sha256 — 구 cycle290/352/382 값은 git 이력)
     "momentum": (
         "src/engine/strategies/momentum.py", "MomentumStrategy",
-        "a7a6b610b339b24fb0c87b9d5784c0b5384771834014ae7cf024ebdac4dbc1bc"),
+        "a112522c67269a1bbec90c78bdeab940ad4999fdfd2d5cb3e71a542356baca02"),
     "volatility_breakout": (
         "src/engine/strategies/volatility_breakout.py", "VolatilityBreakoutStrategy",
-        "f91b1acc5ebf7278e7a4a85419a415b8cb4c6ec70cc19d8fac8e789e4e3751a0"),
+        "49e3fb8cfdafca86f02e10b7f4be7eb9f27682de1bf07252e278fda2ab4685e1"),
     # 🔁 cycle352 재핀 — 15:20 상한가 유지 확인 킬스위치 `limit_up_close_hold_mode`
     #    1키 추가(사용자 승인). 구 값(cycle290 기준선)은 git 이력에 남는다.
     "long_tail_volatility": (
         "src/engine/strategies/long_tail_volatility.py", "LongTailVolatilityStrategy",
-        "979cb31c47de0c20bcdc5ff9f6fd6d2655bac4b06edb1f18f43320f3a6b1f954"),
+        "50b70e23c9142c5ae14e0bc0a4f7e520fce4a3b0a43ac9fb194ef4f5c4787cd3"),
     # 🔁 cycle382 재핀(사용자 결정 09-27) — `DEFAULT_PARAMS` 말미에 `market_unit_mode`
     # 1키 추가(4전략 전부). 값은 코드 기본값 "shadow" — 매매 행위는 배선(별도
     # 헬퍼 호출)이 아니라 이 키의 값 자체로는 바뀌지 않는다(모드가 off/shadow
     # 인 동안은 현행 byte 동일, R17 로 검증).
     "donchian_swing": (
         "src/engine/strategies/donchian_swing.py", "DonchianSwingStrategy",
-        "72c38a9fc2b6eabe790c8552a864afa37bb60986cc793e4166fd39d01a8981f3"),
+        "99c98254d170414ff37307418cc3d6454c9eee4d7958db4909f71af7879eeac8"),
     "bull_flag_breakout": (
         "src/engine/strategies/bull_flag_breakout.py", "BullFlagBreakoutStrategy",
-        "867e0a303f0bf9bc3724d32403a40e16cc2785232d755892d153c099a6013581"),
+        "a0e8c70cfaf0a090c8d64d07e343e0e0b7b75873b6be8074ec2349fb832a4f87"),
     "vcp_breakout": (
         "src/engine/strategies/vcp_breakout.py", "VcpBreakoutStrategy",
-        "1662d4c789a5911a0771875fce8de8b91524c60d03236f4bb255c3ccc4cdbfe3"),
+        "e467d0ec5860839b863f362704dd400442b3843107c2f7f6c84eb5a4f81676a4"),
     "kojiro": (
         "src/engine/strategies/kojiro.py", "KojiroStrategy",
-        "5fc5f43155c0a2eaf22802775bddd5ddcca25af164973efd8d5aa4752b0b93a1"),
+        "7b7be455c74a06d02a42052ac5c7bea51aad3784d768c1fb50f24975a7f51281"),
 }
 
 
@@ -283,24 +287,30 @@ _BASE_SHA = {
     # 시정(§8). 같은 저녁 안의 미리보기(NEXT) 뒤 더 이른 날짜로의 refresh 가
     # `[market_unit_daily]` 를 조기 발화하고 누적 카운트를 되돌리던 결함 제거.
     # 직전 값 = `4516f1a94f2d05de24dfed24d165b62b11a230374795c593247f9906803d085f`.
+    # 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27 「돈키언 신규매수
+    # 중지」). `strategy_base.py`(`_account_soft_gate_blocked` 둘째 문장 +
+    # `_buy_paused_blocked`/`_emit_buy_paused_config`/`_emit_buy_paused_skip`/
+    # `_clear_entry_latches_on_pause` 4헬퍼 + `_buy_paused_logged` 캡 1개 추가)와
+    # 아래 전략 7파일(`DEFAULT_PARAMS` 말미 `"buy_paused": False` 1키씩)이 같은
+    # 이유로 함께 재핀됐다 — 값 변경이 이 사이클의 정당한 목적이다.
     "src/engine/strategy_base.py":
-        "448c03026e576d9a520e1863a382e35f2f35574c695458c8054e9d3e60a9821f",
+        "d5257d3a8a6c4744663aa7af6e89e3a683ccdb2e63ae062284e5e702079dddfb",
     # 🔁 cycle290(킬스위치 등재, 2026-09-13) 재핀 — `DEFAULT_PARAMS` 말미 2키 추가뿐.
     "src/engine/strategies/momentum.py":
-        "38743ab1ecdb4aa9bcd6ac37e5d28f75501d2d4eceb2e70f3aace44d00d502a1",
-    "src/engine/strategies/volatility_breakout.py": "45d860c693f83b995f959d4b88c024cba2b885a9267514a746e23372db8721d5",
-    "src/engine/strategies/long_tail_volatility.py": "04f8a74767c6114147d78aa4d2b2ff10e59ac10266df2267a2565679ba940317",
+        "5aad47791126b66a4febe3f7496cc355059db7cbdadcd106095094f9cb2a3145",
+    "src/engine/strategies/volatility_breakout.py": "c480b0f97212150c6887e2b5203e39e551ec122653ba7f6664d0e4437a3d6afd",
+    "src/engine/strategies/long_tail_volatility.py": "42211d78f9d347436a3e33349c6058877b1e6c033ebde28d3b6abd0ac5e835a9",
     # 🔁 cycle382 재핀 — 시장 유닛(단계형) `market_unit_mode` DEFAULT_PARAMS 키
     # + `_MARKET_UNIT_ATR_KEY` 클래스 상수 + `prepare()`/`check_buy_signal()`(또는
     # `_evaluate_vol_gate()`)/`calc_buy_quantity()` 배선(사용자 결정 09-27).
     "src/engine/strategies/donchian_swing.py":
-        "553f2d623e6559ef1ff7d88758da0306fc6037047d7d661f8e38c42a64d306a1",
+        "9548ca4f12e20c733506662fa9ad11b5803a594fb5ab0679d20f87e6f5890f2f",
     "src/engine/strategies/bull_flag_breakout.py":
-        "6d7a38f28d24d2c20cff195916c5641565310376a405ce4e23c48db3ed919165",
+        "320815b44a259c577184d3b9fbaf6ae31eb2b0dda142e1ab4361541e1c4defd4",
     "src/engine/strategies/vcp_breakout.py":
-        "de3a7342310a72d296636196f97e3c337e662962b9eacae6704aab7f43d7c1ed",
+        "440336ceba6005ced9409b0b1998f273b038950f093d171c668e8d5eb979a48a",
     "src/engine/strategies/kojiro.py":
-        "180b0c36ebb9c49363b20c2aed134910c9f5cdb54224f1488a5a93d58db4b1c2",
+        "fac754faaa1ae65a4a484c02abd46e4de73494bd165ead1f5f0790e10734b4ea",
 }
 
 

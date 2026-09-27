@@ -73,11 +73,19 @@ _CYCLE382_AFFECTED_SIDS = frozenset({
 })
 
 
+#: 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27 「돈키언 신규매수 중지」).
+#: 7전략 공통 1키 — 말미가 아니라 `max_lot_ratio_mult` **바로 다음 줄**이 계약이다(명세 §8.1:
+#: 「`"max_lot_ratio_mult": 2.5,` 다음 줄에 `"buy_paused": False,`」). 기본 false = 행위 변경 0.
+_CYCLE384_KEY = "buy_paused"
+_CYCLE384_AFTER = "max_lot_ratio_mult"
+
+
 def _expected_keys_g2(sid: str) -> tuple[str, ...]:
     expected = _BASELINE_KEYS[sid] + _KEYS
     if sid in _CYCLE382_AFFECTED_SIDS:
         expected += _CYCLE382_KEY
-    return expected
+    i = expected.index(_CYCLE384_AFTER) + 1
+    return expected[:i] + (_CYCLE384_KEY,) + expected[i:]
 _ALL_SEVEN_RELS = tuple(
     f"src/engine/strategies/{sid}.py"
     for sid in ("momentum", "volatility_breakout", "long_tail_volatility",
@@ -552,12 +560,19 @@ _BASE_SHA: dict[str, str] = {
     # 🔁 cycle369 R2 재핀 — buy-block 게이트(`_status_buy_blocked` 승격) + STATUS_EXIT Signal + Q7 edge-baseline clear 배선(전략 7파일은 무변경, 배선은 이 파일)
     # 🔁 cycle382 리뷰 재핀(값만) — `_market_unit_tally_roll` 을 `tally.date != day`
     # 에서 `tally.date < day`(더 늦은 날짜에서만 롤)로 시정(§8, 사용자 승인 범위 밖 무접촉).
+    # 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27 「돈키언 신규매수 중지」).
+    # 게이트 2번째 문장(`_buy_paused_blocked`) + 헬퍼 4개 + `__init__` cap 1개 추가.
+    # 청산 경로·계좌 SOFT 본문·8영역 무접촉. 값만 이동.
     "src/engine/strategy_base.py":
-        "448c03026e576d9a520e1863a382e35f2f35574c695458c8054e9d3e60a9821f",
+        "d5257d3a8a6c4744663aa7af6e89e3a683ccdb2e63ae062284e5e702079dddfb",
+    # 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27) — `DEFAULT_PARAMS` 에
+    # `"buy_paused": False,` 1줄 추가(`max_lot_ratio_mult` 다음 줄). 그 밖 무변경.
     "src/engine/strategies/volatility_breakout.py":
-        "45d860c693f83b995f959d4b88c024cba2b885a9267514a746e23372db8721d5",
+        "c480b0f97212150c6887e2b5203e39e551ec122653ba7f6664d0e4437a3d6afd",
+    # 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27) — `DEFAULT_PARAMS` 에
+    # `"buy_paused": False,` 1줄 추가(`max_lot_ratio_mult` 다음 줄). 그 밖 무변경.
     "src/engine/strategies/long_tail_volatility.py":
-        "04f8a74767c6114147d78aa4d2b2ff10e59ac10266df2267a2565679ba940317",
+        "42211d78f9d347436a3e33349c6058877b1e6c033ebde28d3b6abd0ac5e835a9",
 }
 
 

@@ -412,3 +412,17 @@ VCP universe(KOSPI200∪KOSDAQ150) backfill target **120일** · retention `DAIL
 경위: cycle382(사용자 결정 2026-09-27 「시장유닛 단계형 권고대로 채택」)가 터틀 4전략(kojiro·donchian_swing·bull_flag_breakout·vcp_breakout)의 신규 진입 설계 랏을 KODEX 200(`069500`) 60일선 계단(1 / 0.75 / 0.5 / 0)으로 줄이는 **시장 유닛**을 넣었다(4전략 기본 `market_unit_mode="shadow"` = 계산·기록만). 시장 유닛은 매수를 줄이므로 「레짐은 … 축소하지 않는다」 가 전체 문장으로는 더 이상 참이 아니다. 자문 `_workspace/domain_consult/cycle376_market_unit.md` §8 충돌 1 의 선택지 (a) — 매크로 레짐 교리는 그대로 두고 시장 유닛을 별개 사이징 규칙으로 적는다 — 를 따랐다. 시장 유닛 규칙은 「자금 관리」 절 새 항목에 적었다. 같은 결정으로 E-2 계획(ETF 스테이지를 `block_reason`·매수 가드로 통합)을 닫았다(자문 §8 · §12 질문 5).
 
 → CHANGELOG: cycle382 행
+
+## 핵심 안전 규칙 (절대 깨지 말 것)
+
+### 2026-09-27 cycle384 — 「보유한 채로 멈추는 수단은 없다」 교체
+
+정본 원문(「보유 포지션이 있는 전략을 끄지 않는다」 항목 중 바뀐 세 문장):
+
+- 🔴 **한 전략을 「보유한 채로」 멈추는 수단은 없다. `weight=0` 은 더 나쁘다**
+- 지금 할 수 있는 것은 **그 전략 보유를 먼저 비우고** 끄는 것뿐이다.
+- 보유한 채로 신규 유입만 줄이려면 **`position_ratio`·`max_positions`(PUT params — `enabled` 를 건드리지 않고 하한선 검증도 없다)** 를 쓴다.
+
+경위: 사용자 결정 2026-09-27 「돈키언 신규매수 중지」 — 돈키언 보유분은 원래 청산 규약대로 나가게 두고, 개조 전까지 새 매수만 멈춘다. 설정으로는 할 수 없었다(돈키언 매수 창 09:05~09:30 이 코드 고정). 전략 끄기·`weight=0` 은 보유분 손절을 멈추고, 수량 0 반환은 900초 「투자금 부족」 으로 오귀인되고, `buy_disabled` 는 일일 손실 래치라 밤에 풀린다. 그래서 cycle384 가 7 전략 공통 `DEFAULT_PARAMS["buy_paused"]=False` 를 두고 공통 매수 게이트 `_account_soft_gate_blocked` 둘째 문장에서 신호를 막게 했다. 「보유한 채로 멈추는 수단은 없다」 는 사실이 아니게 됐다. `weight=0` 경고와 「끄려면 보유를 먼저 비운다」 는 그대로다. 명세 = `_workspace/red/cycle384_buy_paused_spec.md`.
+
+→ CHANGELOG: cycle384 행

@@ -187,24 +187,25 @@ _BASE_SHA: dict[str, str] = {
     # 🔁 cycle369 R2 재핀 — buy-block 게이트(`_status_buy_blocked` 승격) + STATUS_EXIT Signal + Q7 edge-baseline clear 배선(전략 7파일은 무변경, 배선은 이 파일)
     # 🔁 cycle382 리뷰 재핀(값만) — `_market_unit_tally_roll` 을 `tally.date != day`
     # 에서 `tally.date < day`(더 늦은 날짜에서만 롤)로 시정(§8, 사용자 승인 범위 밖 무접촉).
+    # 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27). 게이트 2번째 문장 + 헬퍼 4개 + `__init__` cap 1개 추가. 값만 이동.
     "src/engine/strategy_base.py":
-        "448c03026e576d9a520e1863a382e35f2f35574c695458c8054e9d3e60a9821f",
+        "d5257d3a8a6c4744663aa7af6e89e3a683ccdb2e63ae062284e5e702079dddfb",
     "src/engine/strategies/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "src/engine/strategies/bull_flag_breakout.py":
-        "6d7a38f28d24d2c20cff195916c5641565310376a405ce4e23c48db3ed919165",
+        "320815b44a259c577184d3b9fbaf6ae31eb2b0dda142e1ab4361541e1c4defd4",
     "src/engine/strategies/donchian_swing.py":
-        "553f2d623e6559ef1ff7d88758da0306fc6037047d7d661f8e38c42a64d306a1",
+        "9548ca4f12e20c733506662fa9ad11b5803a594fb5ab0679d20f87e6f5890f2f",
     "src/engine/strategies/kojiro.py":
-        "180b0c36ebb9c49363b20c2aed134910c9f5cdb54224f1488a5a93d58db4b1c2",
+        "fac754faaa1ae65a4a484c02abd46e4de73494bd165ead1f5f0790e10734b4ea",
     "src/engine/strategies/long_tail_volatility.py":
-        "04f8a74767c6114147d78aa4d2b2ff10e59ac10266df2267a2565679ba940317",
+        "42211d78f9d347436a3e33349c6058877b1e6c033ebde28d3b6abd0ac5e835a9",
     "src/engine/strategies/momentum.py":
-        "38743ab1ecdb4aa9bcd6ac37e5d28f75501d2d4eceb2e70f3aace44d00d502a1",
+        "5aad47791126b66a4febe3f7496cc355059db7cbdadcd106095094f9cb2a3145",
     "src/engine/strategies/vcp_breakout.py":
-        "de3a7342310a72d296636196f97e3c337e662962b9eacae6704aab7f43d7c1ed",
+        "440336ceba6005ced9409b0b1998f273b038950f093d171c668e8d5eb979a48a",
     "src/engine/strategies/volatility_breakout.py":
-        "45d860c693f83b995f959d4b88c024cba2b885a9267514a746e23372db8721d5",
+        "c480b0f97212150c6887e2b5203e39e551ec122653ba7f6664d0e4437a3d6afd",
     # 파라미터 축 — 킬스위치는 `system_config` 다(§8-B). 전략 파라미터로 새지 않는다.
     # 🔁 cycle365(2026-09-25) 재핀 — 사용자 승인 P5a·P5b:
     # trailing_stop_rate 도움말에 적용 범위 명시 + max_scan_stocks range_src
@@ -213,8 +214,14 @@ _BASE_SHA: dict[str, str] = {
     # 🔁 cycle382 리뷰 재핀(값만) — `market_unit_mode` 「off」 선택지·도움말 텍스트
     # 정정("계산·기록 없음" → "매수 수량·신호에 관여하지 않는다. 장세 계산·기록은
     # 계속된다", prepare 가 off 에서도 `_refresh_market_unit` 을 부르는 실제 계약과 정합).
+    # 🔁 cycle384 재핀 — buy_paused 카탈로그 행 추가(사용자 결정 09-27) + `CATALOG_VERSION` cycle382.1→cycle384.1. 값만 이동.
+    # 🔁 cycle384 리뷰 재핀(값만) — `buy_paused` 도움말 두 문장 정정(WARNING 은
+    # 매일이 아니라 그 전략이 그날 매수를 평가한 날에만 남는다 + 키 부재는 INFO,
+    # 모양 오류만 WARNING) + 그룹 헤더 주석 카운트 정정(entry 47→49·sizing_risk
+    # 8→9, 실제 `group=` 값 전수 재계산). 매매 행위·값 변경 없음 — 주석·도움말
+    # 텍스트만 바뀌었다.
     "src/engine/param_catalog.py":
-        "a5f1ad4091e68d8ee6e75db98baa148ddd6a11619c278577d9f55ba9764907da",
+        "7120d37ff2ab392c7f59519ede3c19cd80e9dea80db6ec3146de74dd575f4326",
     "src/engine/param_validation.py":
         "b4c5c029800191523bcc511919d6de3774e9ab49ca2fc0a0558ee3907868ee17",
     # 시각·거래소 표의 유일 정본 — 리졸버는 **속성축**이라 이 표를 읽지 않는다.

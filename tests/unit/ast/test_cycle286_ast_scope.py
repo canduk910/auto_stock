@@ -121,8 +121,9 @@ _BASE_SHA = {
     # 🔁 cycle369 R2 재핀 — buy-block 게이트(`_status_buy_blocked` 승격) + STATUS_EXIT Signal + Q7 edge-baseline clear 배선(전략 7파일은 무변경, 배선은 이 파일)
     # 🔁 cycle382 리뷰 재핀(값만) — `_market_unit_tally_roll` 을 `tally.date != day`
     # 에서 `tally.date < day`(더 늦은 날짜에서만 롤)로 시정(§8, 사용자 승인 범위 밖 무접촉).
+    # 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27). 게이트 2번째 문장 + 헬퍼 4개 + `__init__` cap 1개 추가. 값만 이동.
     "src/engine/strategy_base.py":
-        "448c03026e576d9a520e1863a382e35f2f35574c695458c8054e9d3e60a9821f",
+        "d5257d3a8a6c4744663aa7af6e89e3a683ccdb2e63ae062284e5e702079dddfb",
     # 나머지 전략 6파일 (LTV 만 변경 대상) — 🔁 cycle290(킬스위치 등재, 2026-09-13)
     # 재핀. `DEFAULT_PARAMS` 말미 2키 추가뿐.
     # 🔁 cycle364 재핀 — `prepare(as_of=)` 시그니처 확장(+ donchian·kojiro PV-1, vcp P3).
@@ -130,17 +131,17 @@ _BASE_SHA = {
     "src/engine/strategies/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "src/engine/strategies/bull_flag_breakout.py":
-        "6d7a38f28d24d2c20cff195916c5641565310376a405ce4e23c48db3ed919165",
+        "320815b44a259c577184d3b9fbaf6ae31eb2b0dda142e1ab4361541e1c4defd4",
     "src/engine/strategies/donchian_swing.py":
-        "553f2d623e6559ef1ff7d88758da0306fc6037047d7d661f8e38c42a64d306a1",
+        "9548ca4f12e20c733506662fa9ad11b5803a594fb5ab0679d20f87e6f5890f2f",
     "src/engine/strategies/kojiro.py":
-        "180b0c36ebb9c49363b20c2aed134910c9f5cdb54224f1488a5a93d58db4b1c2",
+        "fac754faaa1ae65a4a484c02abd46e4de73494bd165ead1f5f0790e10734b4ea",
     "src/engine/strategies/momentum.py":
-        "38743ab1ecdb4aa9bcd6ac37e5d28f75501d2d4eceb2e70f3aace44d00d502a1",
+        "5aad47791126b66a4febe3f7496cc355059db7cbdadcd106095094f9cb2a3145",
     "src/engine/strategies/vcp_breakout.py":
-        "de3a7342310a72d296636196f97e3c337e662962b9eacae6704aab7f43d7c1ed",
+        "440336ceba6005ced9409b0b1998f273b038950f093d171c668e8d5eb979a48a",
     "src/engine/strategies/volatility_breakout.py":
-        "45d860c693f83b995f959d4b88c024cba2b885a9267514a746e23372db8721d5",
+        "c480b0f97212150c6887e2b5203e39e551ec122653ba7f6664d0e4437a3d6afd",
 }
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
