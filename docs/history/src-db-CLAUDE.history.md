@@ -954,3 +954,15 @@ target 220 → 마진 34 영업일(사이클196 의 34 와 같다). `fetch_daily
 저녁 쓰기가 다음 거래일 키로 가면서 없어졌다.
 
 → CHANGELOG: cycle364 S1 행
+
+## stock_master.py — 종목 마스터 캐시
+
+### 2026-09-27 cycle380 — `list_by_filter()` 의 ETF 제외 책임
+
+정본 원문(목록 행):
+
+- **ETF 키워드 제외와 6자리 ticker 검증은 이 함수가 아니라 호출자 `_scan_universe` 가 한다**(`ETF_KEYWORDS`).
+
+경위: cycle380(사용자 결정 2026-09-27 「운영db 조회 허용 및 판정 변경 채택」)이 ETF/ETN 판정을 이름 키워드에서 증권그룹코드 `scty_grp_id_cd ∈ {EF,EN,FE}` 로 바꿨다. 판정은 leaf `src/engine/etf_like.py::is_etf_like` 하나로 모였고, 코드가 없을 때만 이름 키워드로 떨어진다. `list_by_filter` 에 keyword-only `exclude_etf_like=False` 가 생겼고, `True` 면 `ORDER BY … LIMIT` 앞 WHERE 절에서 ETF 를 뺀다. 호출자가 LIMIT 뒤에 이름으로 거르던 때는 VB·LTV 의 100칸 일부를 ETF 가 차지한 뒤 버려졌다(cycle378 자문 §2.2, 추정). 6자리 ticker 검증은 그대로 호출자 몫이다.
+
+→ CHANGELOG: cycle380 행

@@ -80,6 +80,13 @@
   > `exchange` 의 `SOR` 은 `Choice(deprecated=True)` + 라벨 `"SOR (폐기 — 주문에 쓰이지 않음)"` 로 어휘에 남아 있다(운영 DB 7 전략은 전부 `NXT`, SOR 잔여 0). 어휘에서 지우는 것은 `test_cycle287_sor_retired.py::test_n3b` 가 강제하는 순서(코드 → D+1 → 카탈로그/프론트 → DB)를 따르는 별도 작업이다. 🔴 `exchange` 는 `editable=True` 로 남는다 — `editable=False` 로 만들면 그 키를 보내는 모든 PUT 이 422 다. `<select>` 의 `<option>` 은 브라우저가 스타일을 제한해 `choice.deprecated` 회색 처리가 닿지 않으므로 **라벨 자체가 유일한 폐기 신호**이고 프론트 회귀 가드가 그 문자열을 봉인한다. 두 PUT 클라이언트(`Settings.tsx`·`StrategyParamsEditor`)는 변경분만 보낸다.
 - **`param_validation.py`** — 파라미터 검증 순수 함수(`param_catalog` 만 import). `validate_params(strategy_id, current_params, incoming) -> ValidationResult(errors, warnings, accepted)`. 판정 순서 = 키 존재 → `editable` → 자료형 → `choices`/`pattern` → 금지 선택지(`forbidden_choice`) → min/max · 최소 항목 수(`too_few_items`) → 예산 불변식(병합 결과) → 순서 불변식(경고). 🔴 **첫 오류에서 멈추지 않는다** — 한 저장에 여러 필드를 고치는 화면이라, 멈추면 운영자가 오류를 하나씩 왕복하고 그 왕복마다 all-or-nothing 이 다시 걸린다. 예산 불변식 `position_ratio × max_positions <= 1.0` 은 EPS=1e-9 로 경계 1.0 을 **통과**시키고(7 전략 중 6 전략 기본값이 정확히 1.0), **이미 위반 중인 상태를 악화시키지 않는 편집은 통과 + `budget_invariant_preexisting` 경고**다(막으면 그 전략이 영구 편집 불가 = 복구 수단이 DB 직접 UPDATE 뿐이다). 빈 `tradable_boards` 는 **422** 다 — 효과가 전략마다 정반대라(momentum·VB·LTV·donchian 은 `session._DEFAULT_TRADABLE_BOARDS` 폴백으로 매수를 계속하고, BFB·VCP·kojiro 는 공집합 = 매수 전면 중단) 어느 쪽도 운영자의 의도가 아니고, 매수를 멈추는 정당한 수단은 전략 비활성화다. VB + `post_nxt` 도 **422**. ⚠️ `applies_to` 는 PUT 의 관문이 **아니다**(의도된 fail-open) — 미지 키 판정이 `key in current_params` 라 DB 드리프트로 들어온 소관 밖 키는 저장된다. 그 전략이 읽지 않는 키라 매매 영향이 0 이고, 조이면 비상 `curl` 롤백 경로가 좁아진다. 소비처 = `routes/strategies.py::update_params`. AI 자문 수동 적용 경로(`routes/recommendations.py`)는 아직 이 함수를 거치지 않는다 — 검증 비대칭이 남아 있다.
 - **`param_drift.py`** — 운영 DB params ↔ 코드 `DEFAULT_PARAMS` 드리프트 **관측 전용** 순수 함수 leaf(`src.*` import 0 · I/O 0). 왜 있나 — `_load_strategy_config` 가 DB params 를 키별로 덮으므로 한 번 박힌 DB 값이 계속 살고, 코드 기본값만 읽으면 운영값을 오판한다(LTV 상한가 손절을 코드값으로 읽어 반대 방향으로 보고한 사례). `collect_param_drift(strategies) -> list[{strategy_id, key, live, code}]` — 실행 params(`config.params`) 와 `DEFAULT_PARAMS` 를 키별로 비교한다. 수치는 `4` 와 `4.0` 을 같다고 보고(`_same`, 오차 1e-9), bool 은 `is` 로 비교한다. **코드에 없는 키는 차이로 세지 않는다**(운영 전용 키를 세면 매일 경고가 나 배경 소음이 된다). 판정 불가·예외는 조용히 건너뛰고 예외를 올리지 않는다. 소비처 = `boot_manager.boot` 가 `_load_strategy_config` 직후 1회 부른다 — 차이가 있으면 `[param_drift] count=N` WARNING(예시 5건), 없으면 INFO, 호출 실패는 `logger.exception` 후 부팅 계속. 🔴 **값을 바꾸지 않는다** — DB 가 정본이고, 차이 대부분은 운영자가 의도로 넣은 값이라 코드값으로 되돌리는 것이 곧 사고다. 회귀 = `tests/unit/engine/test_cycle326_param_drift_visibility.py`.
+- **`etf_like.py`** — ETF/ETN(류) 판정 **단일 진실원**. 표준 라이브러리만 import 한다 — `db/stock_master.py` SQL 빌더가 같은 상수를 읽어야 하는데, `scanner.py` 에 두면 8영역의 무거운 import 가 SQL 빌더까지 끌려온다.
+  - 공개 = `ETF_GROUP_CODES = frozenset({"EF", "EN", "FE"})`(KIS CTPF1002R #7 `scty_grp_id_cd` — ETF·ETN·해외ETF) · `ETF_KEYWORDS`(이름 키워드 25개, **폴백 전용**) · `is_etf_like(raw, name) -> bool`.
+  - 판정 = `raw` 가 Mapping 이고 `scty_grp_id_cd` 가 strip 후 비어 있지 않으면 **코드만** 본다(strip+upper 가 `ETF_GROUP_CODES` 에 드는가). 이름은 보지 않는다. 코드가 없으면(`raw` 가 None·Mapping 아님·키 없음·None·빈 값·공백) 이름 키워드 부분일치(대소문자 구분)로 떨어진다. `raw` 를 바꾸지 않는다.
+  - 소비처 셋 = `stock_master.list_by_filter(exclude_etf_like=True)` 의 SQL 판정(상수를 여기서 가져간다) · 6 전략 `_scan_universe` 루프(SQL 뒤 방어 겹) · `scanner.scan_stocks`(momentum).
+  - 🔴 **momentum 은 이름 폴백만 탄다** — 원천인 KIS 등락률 순위(`FHPST01700000`) 행에 `scty_grp_id_cd` 가 없다. 이름이 키워드에 걸리지 않는 ETF(KIWOOM·TIME·1Q 등)는 이 경로에서 막히지 않는다.
+  - RT·FS·DR·IF·MF 는 ETF 로 보지 않는다 — 시총·거래대금 컷을 넘으면 유니버스에 든다.
+  - 🔴 판정을 다른 자리에 다시 쓰지 않는다. `ETF_KEYWORDS` 순회는 이 파일과 `stock_master.py` SQL 빌더 두 곳뿐이다(G1). 전략 파일은 `ETF_KEYWORDS` 를 참조하지 않는다(G2). `stock_master.py` 는 코드·키워드 문자열을 다시 적지 않는다(G6). `order_engine._observe_after_exit_etp` 의 코드 집합과 같아야 한다(G7 — 표류 감시). 가드 = `tests/unit/ast/test_cycle380_ast_etf_like.py`.
 - **`backtest_yaml.py`** — 6 전략 → 외부 MCP 백테스트 서버 YAML DSL 변환. 소비 = `backtest_engine.py`(20:00 자문 직후 12 job fire-and-forget) + `routes/backtest.py`. 매매 hot path 무관.
 
 ### 시세 채널 (통합 채널 소멸 후)
@@ -189,7 +196,7 @@ run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, recor
 ### 유니버스 선정
 
 - 게이트 = `if is_index or is_qualifier or is_protected:`.
-- `is_protected` = 공통 헬퍼 `_collect_protected_tickers_for_scanner()` 가 돌려준 보유·익일청산 종목 중 **6자리 숫자 ticker 만**(진입 게이트 비대칭 규약과 동일 — ETF·신주인수권·오염 문자열 제외). 헬퍼 예외는 **fail-open**(`protected_tickers = set()` 로 index/qualifier 만 진행).
+- `is_protected` = 공통 헬퍼 `_collect_protected_tickers_for_scanner()` 가 돌려준 보유·익일청산 종목 중 **6자리 숫자 ticker 만**(진입 게이트 비대칭 규약과 동일 — 영숫자 코드·오염 문자열 제외. ETF 코드는 6자리 숫자라 여기서 빠지지 않는다). 헬퍼 예외는 **fail-open**(`protected_tickers = set()` 로 index/qualifier 만 진행).
 - 🔴 근거 = purge(`_evaluate_universe_guard` 계열)는 보유·익일청산 종목을 절대 보호하는데 load 가 자격 미달 종목을 건너뛰면 "지우는 쪽은 보호, 채우는 쪽은 방치" 가 되어 그날 봉이 영구 결손된다(004690 삼천리 실사례).
 - 페이징 루프가 끝난 뒤 `protected_tickers - set(all_tickers)` 차집합을 `all_tickers` 에 append 한다(어느 페이지에도 안 실린 보호 종목까지 커버).
 - 보호 종목도 분할 backfill 대상이다 — 깊이 축은 이 게이트를 통과한 **적재 대상 전부**에 똑같이 적용된다(아래 절).
@@ -845,7 +852,7 @@ run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, recor
 
 ## scanner.py
 
-- `scan_stocks()`: 모멘텀 등락률 순위
+- `scan_stocks()`: 모멘텀 등락률 순위. ETF/ETN 제외 = `is_etf_like(item, name)` — 원천 행에 코드가 없어 이름 폴백만 탄다(모듈 맵 `etf_like.py`)
 - `subscribe_filtered_stocks(tickers, extra_tickers, source_counts=None, *, priority_groups=None)`: 합집합 구독
  - `priority_groups` 분기: `kis_ws_pool.subscribe(tr_id, t, priority='HIGH'|'LOW', bypass_limit=...)` 위임. `positions`/`next_day_clear` → HIGH + `bypass_limit=True` (메인 절대 보장), `breakout`/`momentum`/`swing` → LOW + `bypass_limit=False` (보조 라운드로빈 우선, 보조 가득 시 메인 fallback)
  - **2-pass**: 1차 `breakout[:BREAKOUT_LOW_CAP=25]` + momentum + swing 잔여 슬롯 add → 2차 `MAX - len(_subscriptions) > 0` 면 breakout overflow 흡수 add. 최종 drop = `max(0, len(overflow) - absorbed_overflow)`. drop>0 시 `[priority_drop]` INFO + WARNING `system_logs`. 중복은 HIGH 1회만, HIGH 단독 41 초과 시 ERROR. **로그 필드** = `breakout/momentum/swing/total_subscribed/max/high_count/low_remaining/pool_sessions/pool_slots` + **cc68119(2026-08-13) `pool_subscribed`(현 풀 실제 구독량 `len(kis_ws_pool._subscriptions)`) + `pool_remaining`(잔여 = `max(0, pool_slots − pool_subscribed)`)** 병기 — 포화가 41-cap(메인)인지 풀 전체(`pool_slots=41×세션수`)인지 진단

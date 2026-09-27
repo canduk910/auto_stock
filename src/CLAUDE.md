@@ -31,6 +31,8 @@ engine/tick_channel_switch.py ← engine/stale_watcher_core.py (120초 트리거
 engine/market_op_subscribe.py ← engine/scheduler.py (5줄 위임 wrapper)
 engine/trading_calendar.py ← engine/{task_loop_helper,strategy_base,funnel_capture,status_exit_watch}.py   (휴장일 판정 leaf — api/condition.is_trading_day 를 지연 import)
 engine/funnel_capture.py ← engine/{scheduler,boot_manager}.py   (라이브 prepare 단일 입구 · 저녁 미리보기 — 8영역 import 0)
+engine/etf_like.py ← db/stock_master.py · engine/scanner.py(모듈 상단) + strategies/{volatility_breakout,long_tail_volatility,donchian_swing,bull_flag_breakout,vcp_breakout,kojiro}.py(함수 안 import)
+                     (ETF/ETN 판정 leaf — 표준 라이브러리만 import. db → engine 역방향은 SQL 빌더가 같은 상수를 읽어야 해서다)
 engine/status_exit_watch.py ← engine/scheduler.py(모듈 상단) + engine/strategy_base.py · api/condition.py · routes/system_integrations.py(함수 안 지연 import)
                               (관리종목·단기과열 보유 청산 + 당일 매수 차단 leaf — 최상위 import 는 표준 라이브러리뿐. condition.py 관측 훅의
                                api → engine 역방향은 같은 파일 fetch_rising_stocks 의 scanner 지연 import 와 같은 선례다)

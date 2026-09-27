@@ -1680,3 +1680,15 @@ cycle359 조사). cycle368 이 파서 기준점을 고치고, VI 수명 600초(�
 경위: cycle379 의 `buying_reconcile` 이 그날 첫 잔고 sync(≈09:45)에서 자동취소된 매수의 `pending_buys`·`pending_buy_amounts`·`_pending_buy_orders` 를 풀고 `trade_history` PENDING 행을 CANCELLED 로 적는다. 「장중에 정리하는 경로가 없다」 와 「`trade_history` 행은 영구로 남고」 는 사실이 아니게 됐다. 주문번호 매핑 5종은 늦은 체결통보 안전망이라 일부러 21:30 까지 남긴다. 통보(`CNTG_YN=="1"`)로 정리하는 경로는 여전히 없지만, 그 경로가 줄이는 것은 08:50~≈09:45 의 점유뿐이라 「시정 경로」 가 아니라 「통보로 즉시 정리하는 경로」 로 이름을 바꿨다.
 
 → CHANGELOG: cycle379 행
+
+## 저녁 데이터 적재 (scanner + data_load_tasks)
+
+### 2026-09-27 cycle380 — 「유니버스 선정」 `is_protected` 의 괄호 설명
+
+정본 원문(목록 행):
+
+- `is_protected` = 공통 헬퍼 `_collect_protected_tickers_for_scanner()` 가 돌려준 보유·익일청산 종목 중 **6자리 숫자 ticker 만**(진입 게이트 비대칭 규약과 동일 — ETF·신주인수권·오염 문자열 제외). 헬퍼 예외는 **fail-open**(`protected_tickers = set()` 로 index/qualifier 만 진행).
+
+경위: cycle380 이 ETF 코드도 6자리 숫자임을 확인했다(`stock_master` 3,583행 전부 6자리 숫자, 2026-09-27 읽기 전용 조회). 6자리 숫자 필터는 ETF 를 빼지 않는다. 필터 동작은 바뀌지 않았고 괄호 설명만 사실에 맞췄다.
+
+→ CHANGELOG: cycle380 행

@@ -235,7 +235,8 @@ KIS 공식 일일 마스터 파일(`kospi_code.mst` / `kosdaq_code.mst`) 영역�
 list_by_filter(*, market=None, min_market_cap=0, min_trade_amount=0,
                exclude_tickers=None, nxt_tradable=None,
                is_kospi200=None, is_kosdaq150=None,
-               limit=500, return_stage_counts=False, sort_by=None)
+               limit=500, return_stage_counts=False, sort_by=None,
+               exclude_etf_like=False)
     -> list[dict] | tuple[list[dict], dict[str, list[str]]]
 ```
 
@@ -247,11 +248,15 @@ list_by_filter(*, market=None, min_market_cap=0, min_trade_amount=0,
   - `exclude_tickers`: `ticker <> ALL($n::text[])`
   - `nxt_tradable`: `None` 무필터 / True·False 등가 비교
   - `is_kospi200`·`is_kosdaq150`: **둘 다 True 면 `(is_kospi200 = true OR is_kosdaq150 = true)` OR 합집합**(donchian_swing `FUNNEL_STAGES[0]` "코스피200+코스닥150 합집합" 의무 정합), 한쪽만 주면 그 컬럼 AND, 둘 다 None 이면 무필터
-  - 정렬 `ORDER BY refreshed_at DESC`, `LIMIT` 은 요청 `limit` 그대로다(오버페치 없음)
+  - `exclude_etf_like`: `False`(기본)면 SQL 이 바뀌지 않는다. `True` 면 ETF/ETN(류)를 뺀다 — `NOT (CASE WHEN 코드 <> '' THEN 코드 = ANY(ETF_GROUP_CODES) ELSE 이름 LIKE ANY('%kw%'…) END)`. 코드 = `UPPER(BTRIM(raw->>'scty_grp_id_cd', E' \t\r\n'))`, 이름 = 아래 SELECT 와 같은 COALESCE 이름이다.
+    - `src.engine.etf_like.is_etf_like` 와 **행 단위로 같다**(PG 차등 테스트 `tests/integration/test_cycle380_list_by_filter_etf_pg.py`). 상수는 그 leaf 에서 모듈 상단 import 로 가져오고 여기 다시 적지 않는다(AST G6).
+    - 코드·`raw`·이름이 NULL 이어도 `COALESCE` 가 `''` 로 받는다 — `NOT (...)` 이 NULL 이 되어 행이 우연히 빠지는 일이 없다.
+    - 6 전략 `_scan_universe` 만 `True` 를 넘긴다. 전략 밖 호출자(재무 적재 `scanner._stock_master_financial_load_once` · `tools/validate_turtle_sizing.py`)는 기본값이다.
+  - 정렬 `ORDER BY refreshed_at DESC`, `LIMIT` 은 요청 `limit` 그대로다(오버페치 없음). 위 필터는 전부 이 `LIMIT` **앞**이다 — `exclude_etf_like=True` 면 ETF 가 후보 칸을 먼저 차지하지 않는다
 - SELECT 의 종목명은 `COALESCE(NULLIF(name, ''), NULLIF(TRIM(master_raw->>'hts_kor_isnm'), ''), '') AS name` 다 — ① CTPF1002R 이름 → ② 마스터파일 한글명(고정폭 패딩 TRIM) → ③ 둘 다 없으면 `''`(호출자 `row.get("name","")` 의 None 회귀 차단). `AS name` 별칭이라 반환 dict 키는 그대로다.
-- `return_stage_counts=True` 면 `(filtered, {"union_tickers", "mcap_tickers", "trade_tickers"})` 튜플을 돌려준다 — union(시총·거래대금 컷 전) → mcap(시총 컷 후) → trade(거래대금 컷 후 = 최종 filtered) 3쿼리다. funnel 관찰성 전용이고 **필터 로직·임계·순서는 바뀌지 않는다**(`True` 의 filtered 가 `False` 의 결과와 원소·순서까지 같아야 한다는 것이 가드 계약이다).
+- `return_stage_counts=True` 면 `(filtered, {"union_tickers", "mcap_tickers", "trade_tickers"})` 튜플을 돌려준다 — union(시총·거래대금 컷 전) → mcap(시총 컷 후) → trade(거래대금 컷 후 = 최종 filtered) 3쿼리다. 셋 다 같은 SQL 빌더를 거치므로 `exclude_etf_like=True` 면 union 단계부터 ETF 가 빠진다. funnel 관찰성 전용이고 **필터 로직·임계·순서는 바뀌지 않는다**(`True` 의 filtered 가 `False` 의 결과와 원소·순서까지 같아야 한다는 것이 가드 계약이다).
 - `sort_by`: 정렬 훅. `None`(기본)이면 `refreshed_at DESC` 를 그대로 쓴다. 실사용은 별도 사이클에 인계돼 있다.
-- **ETF 키워드 제외와 6자리 ticker 검증은 이 함수가 아니라 호출자 `_scan_universe` 가 한다**(`ETF_KEYWORDS`).
+- ETF/ETN 제외는 `exclude_etf_like=True` 일 때 이 함수가 SQL 에서 한다. **6자리 ticker 검증은 이 함수가 아니라 호출자 `_scan_universe` 가 한다**.
 - `raw` 의 `acml_tr_pbmn` / `lstn_stcn` / `acml_vol` 은 `inquire_stock_basics` 가 CTPF1002R 뒤에 FHKST01010100 을 덧붙여 merge 로 채운다. 🔴 **CTPF1002R 기존 키를 덮어쓰지 않는다**(`bfdy_clpr` 정합, AST G-AST1).
 
 ### `list_paged_by_filter()` — UI 종목목록 조회

@@ -140,7 +140,10 @@
 
 ### 유니버스
 
-- VB/LTV/BFB `_scan_universe` = `stock_master.list_by_filter(min_market_cap, min_trade_amount, exclude_tickers, nxt_tradable)` **DB 단일 조회**, KIS 호출 0건. 시총(`raw.hts_avls`)·거래대금(`raw.acml_tr_pbmn`) 필터만 수행하고 **전일 확정치** 기준이다 — 당일 `acml_vol` 금지(boot 시점 0 + 오후 편중 왜곡). ETF 키워드 제외·6자리 ticker 검증은 호출자 책임이고, `list_by_filter()` 예외 시 빈 list + `_scan_stats["universe_candidates"]=0` 으로 graceful 처리한다.
+- VB/LTV/BFB `_scan_universe` = `stock_master.list_by_filter(min_market_cap, min_trade_amount, exclude_tickers, nxt_tradable)` **DB 단일 조회**, KIS 호출 0건. 시총(`raw.hts_avls`)·거래대금(`raw.acml_tr_pbmn`) 필터만 수행하고 **전일 확정치** 기준이다 — 당일 `acml_vol` 금지(boot 시점 0 + 오후 편중 왜곡). 6자리 ticker 검증은 호출자 책임이고, `list_by_filter()` 예외 시 빈 list + `_scan_stats["universe_candidates"]=0` 으로 graceful 처리한다.
+- **ETF/ETN 제외 = 증권그룹코드 판정, LIMIT 전** — 6 전략(VB·LTV·donchian·BFB·VCP·kojiro)의 모든 `list_by_filter(...)` 호출이 `exclude_etf_like=True` 를 넘긴다(AST G4). SQL 이 `ORDER BY … LIMIT` 앞 WHERE 절에서 ETF 를 빼므로 ETF 가 `max_scan_stocks` 칸을 차지하지 않는다. 호출자 루프는 `is_etf_like(row.get("raw"), name)` 로 한 번 더 본다(방어 겹, G3). 판정 규약 = `src/engine/CLAUDE.md` 모듈 맵 `etf_like.py`.
+  - momentum 은 `list_by_filter` 를 쓰지 않는다 — 등락률 순위 행에 코드가 없어 이름 폴백만 탄다.
+  - ⚠️ ETF 를 사는 전략을 새로 만들면 그 파일을 G4(`tests/unit/ast/test_cycle380_ast_etf_like.py`) 허용 목록에 이유와 함께 올린다.
 - **거래량순위 API(`FHPST01710000` volume-rank)는 쓰지 않는다** — AST 가드 `test_cycle108_ast_no_kis_volume_rank.py` + `test_cycle97_ast_no_volume_rank.py` 가 `_scan_universe` 재도입을 영구 차단한다. momentum 만 **등락률순위**(`/ranking/fluctuation` `FHPST01700000`, `condition.py:299`)를 쓴다 — 거래량순위와 **다른 TR** 이고 VB/LTV/BFB 와 무관하다.
 - VCP 는 `list_by_filter(is_kospi200=None, is_kosdaq150=None)`(지수 제약 없음), donchian 은 `is_kospi200=True, is_kosdaq150=True`(코스피200∪코스닥150) 이다. hardcoded ticker list 는 쓰지 않는다.
 

@@ -112,8 +112,9 @@ _BASE_SHA: dict[str, str] = {
     #    목표 깊이 상수는 불변). 값만 옮긴다 — 단언은 그대로다.
     #    구 값은 cycle299 기준선(3b7366cc…)이다.
     # 🔁 2026-09-25 (cycle363 F-1) 재핀 — `_scan_pool_eager_refresh_loop` upsert 전 기존 raw 머지(사이클 176 basics 경로 답습, 사용자 승인 8영역). 장전 0값 키(acml_tr_pbmn 등)가 raw 통째 교체로 지워지던 결함 시정. 나머지 7영역 diff 0.
+    # 🔁 cycle380(2026-09-27) 재핀 — ETF 판정을 이름 키워드에서 증권그룹코드(`scty_grp_id_cd`)로 전환(사용자 승인, 8영역). ETF_KEYWORDS 를 정본 leaf `src/engine/etf_like.py` 로 이전 + import, `scan_stocks` 판정 자리를 `is_etf_like` 로 교체. 값만 이동, 값 자체는 유일값.
     "src/engine/scanner.py":
-        "2c104fba38dd1e942b091bfac14cb7d152d766676405e9fd66fe27e75cb3f5a6",
+        "611568c078c6f3779344e05b3dfa308c792c64e1c5e02480de6313200282f54f",
     "src/engine/strategy_registry.py":
         "d794696e54ffdc36efa6df917879d780e86bc1f373bb3b5d8dcbc0beac8cef8b",
     # 8영역 — api/order
@@ -349,6 +350,11 @@ _ENGINE_PY_FILES: dict[str, tuple[str, ...]] = {
         "buying_reconcile.py",
         "daily_emit_cap.py", "daily_metrics_snapshot.py",
         "data_load_tasks.py",
+        # cycle380 — ETF/ETN(류) 판정 단일 leaf(표준 라이브러리만 import). 판정 정본
+        # `is_etf_like(raw, name)` + `ETF_GROUP_CODES`/`ETF_KEYWORDS` 상수를 scanner.py
+        # 와 db/stock_master.py 가 공유한다(사용자 승인, 8영역 scanner.py 변경 포함).
+        # 등재해도 "다음 신규 파일" 은 여전히 붉어진다(이름 축 가드는 변경 없음).
+        "etf_like.py",
         # cycle364 — 저녁 A1 미리보기(`prepare(as_of=)`) 라이브 준비 wrapper + 잠금 +
         # meta + `resolve_as_of`/`capture_skip_reason` leaf. 등재해도 "다음 신규 파일"
         # 은 여전히 붉어진다(이름 축 가드는 변경 없음).

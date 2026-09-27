@@ -192,7 +192,7 @@ KIS OpenAPI 기반 국내주식 자동매매시스템. 다중 전략 아키텍�
 - 09:30 이후 등락률 순위 API로 5분 주기 필터링
 - 1차 필터: 전일종가 대비 등락률 +15% 이상 상승 종목
 - 2차 필터: 시가총액 1,000억 원 이상 AND 당일 거래대금 200억 원 이상
-- ETF/ETN 제외 (KODEX, TIGER, 인버스, 레버리지 등 + RISE/KoAct/PLUS/TIMEFOLIO/WOORI/FOCUS 키워드)
+- ETF/ETN 제외 (KODEX, TIGER, 인버스, 레버리지 등 + RISE/KoAct/PLUS/TIMEFOLIO/WOORI/FOCUS 키워드 — 등락률 순위 행에 증권그룹코드가 없어 이름 키워드로만 판정한다)
 - 최대 40개 종목으로 제한
 
 ### 매수 규칙
@@ -514,7 +514,7 @@ donchian_swing 은 멀티데이 보유 + ATR×2 Chandelier + 하드 손절 전�
 - **유니버스 소스 = `stock_master.list_by_filter`(사전 적재 DB)** — 스캔 시점에 KIS 를 직접 호출하지 않는다. 거래대금 컷은 **전일 확정치**여야 한다(당일 누적 거래량으로 재면 `_boot()` prepare 에서 항상 0이 되어 유니버스가 매일 0종목이 된다).
 - **시가총액 ≥ 100억** (`min_market_cap`, 기본 10_000_000_000 — 사용자 결정: kojiro 500억보다 낮게 유지해 소형주 포함, 라이브 DB 값 정합)
 - **거래대금 ≥ 15억** (`min_trade_amount`, 기본 1_500_000_000 — 2026-08-08 확대 20억→15억. 도메인 B2: BFB 는 장중 돌파 추격이라 전 전략 중 슬리피지 최대 노출 → kojiro 10억까지 내리지 않고 완만한 15억으로 유동성 바닥 보존. 추격도 BFB>VCP>kojiro 에 비례한 차등)
-- ETF/ETN 제외 (기존 키워드 컨벤션 재사용 — KODEX/TIGER/RISE/KoAct/PLUS/TIMEFOLIO/WOORI/FOCUS/인버스/레버리지)
+- ETF/ETN 제외 (증권그룹코드 판정 — 「매수 안전장치」 절 「ETF/ETN 제외」)
 - 최대 4000종목 (`max_scan_stocks`, 100→확대 — 전체 filtered 커버, `refreshed_at DESC` 임의 절단 소멸. BFB 는 이미 지수 무제약이라 실질 확대의 핵심 레버)
 
 ### 데이터 준비 (`_boot()` prepare)
@@ -821,7 +821,8 @@ BFB/VCP 매수 신호는 (donchian 의 폴링 루프와 달리) `risk.on_tick`(W
 - 매수일자(buy_date) 기반 익일 청산 판정 (시간 기준이 아님)
 
 ### 매수 안전장치
-- **종목코드 형식 비대칭**: 진입은 6자리 숫자만(`isdigit`) — ETF·신주인수권 차단. 사후처리(체결통보·잔고 sync)는 6자리 영숫자(`isalnum`) 허용
+- **종목코드 형식 비대칭**: 진입은 6자리 숫자만(`isdigit`) — 영숫자 코드(신주인수권 등)·7자리 ETN 코드 차단. 사후처리(체결통보·잔고 sync)는 6자리 영숫자(`isalnum`) 허용. ETF 는 코드가 6자리 숫자라 이 규칙으로 막히지 않는다
+- **ETF/ETN 제외**: 증권그룹코드 `scty_grp_id_cd ∈ {EF,EN,FE}` 로 판정하고, 코드가 없을 때만 이름 키워드로 판정한다(`src/engine/etf_like.py::is_etf_like`). 6 전략은 `list_by_filter(exclude_etf_like=True)` 로 후보 수 절단(`max_scan_stocks`) **전에** 뺀다. momentum 은 등락률 순위 행에 코드가 없어 이름 키워드로만 판정한다
 - **매수가능 캐시**: 60초 TTL — KIS `get_buyable()` 호출을 매 틱 → 분당 1회로 축소
 - **잔고부족 매수 락**: 900초 — `is_insufficient_cash` 응답 또는 `max_buy_quantity≤0` 시 다음 잔고 sync까지 매수 차단
 - **per-ticker low_funds cooldown**: 900초 — `calc_buy_quantity()<=0`인 종목 매 틱 반복 호출 차단

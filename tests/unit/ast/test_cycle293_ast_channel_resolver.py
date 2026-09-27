@@ -190,19 +190,19 @@ _BASE_SHA: dict[str, str] = {
     "src/engine/strategies/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "src/engine/strategies/bull_flag_breakout.py":
-        "f44c3757db0c9bced8754f34723cc94e7956057b4405903900d519fb4e5b28d8",
+        "d02a953e95c4f036eb60d7cf05eb0258dddc883dbe97e4325f8846165942204c",
     "src/engine/strategies/donchian_swing.py":
-        "31bd41bb0e435a0185649dee3aa309622d2044d9978cf3d9ddb687a778327ea7",
+        "abcb1fbe2402aa4bcd0eefd8f44c2b1ed3ac395e8e5dce589fdd66928d0e3854",
     "src/engine/strategies/kojiro.py":
-        "66758fb3fce62d509d6d6750cb8ff903df09f1671e8b2d11c139e1cde9da6038",
+        "ee2498d3980a1e2e5fdfabd0738eb78573558525122628a3f1905e06a519044e",
     "src/engine/strategies/long_tail_volatility.py":
-        "0e6d14bbb013ccb76b4a5d2944eb97becd34165554c74c0de314233423a0fdc5",
+        "04f8a74767c6114147d78aa4d2b2ff10e59ac10266df2267a2565679ba940317",
     "src/engine/strategies/momentum.py":
         "38743ab1ecdb4aa9bcd6ac37e5d28f75501d2d4eceb2e70f3aace44d00d502a1",
     "src/engine/strategies/vcp_breakout.py":
-        "a609ded41a916563c6706aac16fe1867845687233c195b7dab478d336cc94b37",
+        "fdf0c5fea093b1b3bd9ebc6a5a785c59b04ddbf36a09ff8389db461b73221f22",
     "src/engine/strategies/volatility_breakout.py":
-        "b5febd0420f4e087673b46daee0c9298c13ec3d1d30e18b6a5f1ed8db56c20dc",
+        "45d860c693f83b995f959d4b88c024cba2b885a9267514a746e23372db8721d5",
     # 파라미터 축 — 킬스위치는 `system_config` 다(§8-B). 전략 파라미터로 새지 않는다.
     # 🔁 cycle365(2026-09-25) 재핀 — 사용자 승인 P5a·P5b:
     # trailing_stop_rate 도움말에 적용 범위 명시 + max_scan_stocks range_src

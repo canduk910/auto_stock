@@ -844,3 +844,15 @@ VCP·BFB `_effective_setup` 이 live `_candidates` 의 `atr14`/`ema50` 를 먼�
 와 donchian `get_targets_status` 를 다른 전략 보유로 오염시켰다.
 
 → CHANGELOG: cycle364 S1 행
+
+## 공통 패턴
+
+### 2026-09-27 cycle380 — 「유니버스」 절의 ETF 제외 책임
+
+정본 원문(목록 행):
+
+- VB/LTV/BFB `_scan_universe` = `stock_master.list_by_filter(min_market_cap, min_trade_amount, exclude_tickers, nxt_tradable)` **DB 단일 조회**, KIS 호출 0건. 시총(`raw.hts_avls`)·거래대금(`raw.acml_tr_pbmn`) 필터만 수행하고 **전일 확정치** 기준이다 — 당일 `acml_vol` 금지(boot 시점 0 + 오후 편중 왜곡). ETF 키워드 제외·6자리 ticker 검증은 호출자 책임이고, `list_by_filter()` 예외 시 빈 list + `_scan_stats["universe_candidates"]=0` 으로 graceful 처리한다.
+
+경위: cycle380(사용자 결정 2026-09-27 「운영db 조회 허용 및 판정 변경 채택」)이 ETF/ETN 판정을 이름 키워드에서 증권그룹코드 `scty_grp_id_cd ∈ {EF,EN,FE}` 로 바꿨다. 판정은 leaf `src/engine/etf_like.py::is_etf_like` 하나로 모였고, 코드가 없을 때만 이름 키워드로 떨어진다. 6 전략의 모든 `list_by_filter(...)` 호출이 `exclude_etf_like=True` 를 넘기고(AST G4), 루프 안 이름 판정은 `is_etf_like(row.get("raw"), name)` 방어 겹으로 바뀌었다. 「ETF 키워드 제외는 호출자 책임」 은 사실이 아니게 됐다. 6자리 ticker 검증은 그대로 호출자 몫이다.
+
+→ CHANGELOG: cycle380 행

@@ -506,8 +506,9 @@ _BASE_SHA: dict[str, str] = {
     #    목표 깊이 상수는 불변). 값만 옮긴다 — 단언은 그대로다.
     #    구 값은 cycle299 기준선(3b7366cc…)이다.
     # 🔁 2026-09-25 (cycle363 F-1) 재핀 — `_scan_pool_eager_refresh_loop` upsert 전 기존 raw 머지(사이클 176 basics 경로 답습, 사용자 승인 8영역). 장전 0값 키(acml_tr_pbmn 등)가 raw 통째 교체로 지워지던 결함 시정. 나머지 7영역 diff 0.
+    # 🔁 cycle380(2026-09-27) 재핀 — ETF 판정을 이름 키워드에서 증권그룹코드(`scty_grp_id_cd`)로 전환(사용자 승인, 8영역). ETF_KEYWORDS 를 정본 leaf `src/engine/etf_like.py` 로 이전 + import, `scan_stocks` 판정 자리를 `is_etf_like` 로 교체. 값만 이동, 값 자체는 유일값.
     "src/engine/scanner.py":
-        "2c104fba38dd1e942b091bfac14cb7d152d766676405e9fd66fe27e75cb3f5a6",
+        "611568c078c6f3779344e05b3dfa308c792c64e1c5e02480de6313200282f54f",
     "src/engine/strategy_registry.py":
         "d794696e54ffdc36efa6df917879d780e86bc1f373bb3b5d8dcbc0beac8cef8b",
     "src/api/order.py":
@@ -538,9 +539,9 @@ _BASE_SHA: dict[str, str] = {
     "src/engine/strategy_base.py":
         "e9b379dcae6e4db664b2f159442b11bac3bf00be6e4481680332da494b61bf8e",
     "src/engine/strategies/volatility_breakout.py":
-        "b5febd0420f4e087673b46daee0c9298c13ec3d1d30e18b6a5f1ed8db56c20dc",
+        "45d860c693f83b995f959d4b88c024cba2b885a9267514a746e23372db8721d5",
     "src/engine/strategies/long_tail_volatility.py":
-        "0e6d14bbb013ccb76b4a5d2944eb97becd34165554c74c0de314233423a0fdc5",
+        "04f8a74767c6114147d78aa4d2b2ff10e59ac10266df2267a2565679ba940317",
 }
 
 

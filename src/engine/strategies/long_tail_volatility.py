@@ -515,17 +515,21 @@ class LongTailVolatilityStrategy(StrategyBase):
         KIS API 직접 호출 0건.
         """
         from src.db import stock_master as _sm_mod
-        from src.engine.scanner import ETF_KEYWORDS, ticker_names
+        from src.engine.etf_like import is_etf_like
+        from src.engine.scanner import ticker_names
 
         min_mcap = self.config.params.get("min_market_cap", 100_000_000_000)
         min_trade = self.config.params.get("min_trade_amount", 20_000_000_000)
         max_stocks = self.config.params.get("max_scan_stocks", 100)
 
         # 사이클 156 Q0 — nxt_tradable 강제 필터 제거 (주문 시점 분기용으로만 활용).
+        # cycle380 — exclude_etf_like=True 로 LIMIT *전* SQL 단계에서 ETF 를 거른다
+        # (100칸 자르기 전에 걸러야 ETF 가 칸을 먹지 않는다).
         rows = await _sm_mod.list_by_filter(
             min_market_cap=min_mcap,
             min_trade_amount=min_trade,
             limit=max_stocks,
+            exclude_etf_like=True,
         )
 
         # 사이클 21 — 후보 수
@@ -538,7 +542,9 @@ class LongTailVolatilityStrategy(StrategyBase):
             if not ticker or not (len(ticker) == 6 and ticker.isdigit()):
                 continue
             name = row.get("name", "") or (row.get("raw") or {}).get("prdt_abrv_name", "")
-            if any(kw in name for kw in ETF_KEYWORDS):
+            # cycle380 — 증권그룹코드 우선 판정(코드 없으면 이름 폴백). SQL 이 이미
+            # 걸렀어야 하지만 방어 겹(mock 환경·SQL 이 못 본 행 대비)으로 다시 본다.
+            if is_etf_like(row.get("raw"), name):
                 continue
             if name:
                 ticker_names[ticker] = name

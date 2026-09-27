@@ -109,6 +109,8 @@
   - "tests/unit/ast/test_cycle363_ast_business_day_gate.py"
 "src/engine/strategies/*.py":
   - "tests/unit/ast/test_cycle363_ast_business_day_gate.py"
+  # cycle380 — ETF 판정 단일 출처 가드(G1~G4)가 전략 소스를 파일로 읽는다(import 없음)
+  - "tests/unit/ast/test_cycle380_ast_etf_like.py"
 "src/engine/llm_buy_gate.py":
   - "tests/unit/ast/test_cycle363_ast_business_day_gate.py"
 
@@ -158,3 +160,11 @@
 "src/api/balance.py":
   - "tests/unit/engine/test_cycle379_buying_reconcile.py"
   - "tests/integration/test_cycle379_buying_reconcile_pg.py"
+# cycle380 — ETF 판정 단일 출처 가드가 소스를 파일로 읽는다(import 없음): scan_stocks 호출(G5)·
+# SQL 빌더의 상수 재기입 금지(G6)·order_engine 관측 집합 표류(G7)·키워드 순회 자리(G1).
+"src/engine/scanner.py":
+  - "tests/unit/ast/test_cycle380_ast_etf_like.py"
+"src/db/stock_master.py":
+  - "tests/unit/ast/test_cycle380_ast_etf_like.py"
+"src/engine/order_engine.py":
+  - "tests/unit/ast/test_cycle380_ast_etf_like.py"

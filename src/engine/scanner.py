@@ -490,11 +490,11 @@ MAX_STOCKS = 40                        # 최대 구독 종목 수
 # 능동적 손해였다. subscribe pass-1 이 breakout 전체를 최우선 처리, 순서는
 # `_collect_breakout_tickers`(BFB→VCP→VB→LTV, 2026-08-08 tail 편중 해소).
 
-# ETF/ETN 제외 키워드
-ETF_KEYWORDS = ("KODEX", "TIGER", "KBSTAR", "KOSEF", "ARIRANG", "SOL", "ACE",
-                "RISE", "KoAct", "PLUS", "TIMEFOLIO", "WOORI", "FOCUS",
-                "HANARO", "히어로즈", "마이티", "BNK", "MASTER", "WON",
-                "ETN", "선물", "인버스", "레버리지", "채권", "혼합")
+# ETF/ETN 판정 — cycle380: 정본 leaf `engine.etf_like` 로 이전(증권그룹코드 `scty_grp_id_cd`
+# 우선, 코드 없을 때만 구 이름 키워드 폴백). 이름 키워드 값은 이번 사이클에 한 글자도
+# 바뀌지 않았다 — `src/engine/etf_like.py::ETF_KEYWORDS` 가 정본이고 여기서는 판정
+# 함수만 쓴다.
+from src.engine.etf_like import is_etf_like  # noqa: E402
 
 # 실시간 체결가 TR_ID — TICK_TR_ID = 현행 유일 활성 채널(통합). 시간대별 전환(사이클 26,
 # 2026-05-20 f7f0766, 시간 경계 판정 함수 + 경계 상수 7 + 미사용 시간 alias import)은
@@ -1253,8 +1253,9 @@ async def scan_stocks() -> list[str]:
         # 사이클 21 — 등락률 통과 단독 카운트
         scan_filter_stats["rate_pass"] += 1
 
-        # ETF/ETN 제외
-        if any(kw in name for kw in ETF_KEYWORDS):
+        # ETF/ETN 제외 — cycle380: 판정 자리를 is_etf_like 로 모은다. 원천(KIS 등락률
+        # 순위) 행 `item` 에는 `scty_grp_id_cd` 가 없어 결과는 기존 이름 규칙과 같다.
+        if is_etf_like(item, name):
             continue
 
         # 시총/거래대금 필터 (데이터 없으면 = 거래량 순위에 미포함 = 소형주 → 제외)

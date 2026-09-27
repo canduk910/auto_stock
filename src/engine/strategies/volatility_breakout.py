@@ -444,7 +444,8 @@ class VolatilityBreakoutStrategy(StrategyBase):
         사이클 32 R4 답습 — 보유 종목 절대 보호. 매매 안전성 무영향 (사이클 38 명문화).
         """
         from src.db import stock_master as _sm_mod
-        from src.engine.scanner import ETF_KEYWORDS, ticker_names
+        from src.engine.etf_like import is_etf_like
+        from src.engine.scanner import ticker_names
 
         p = self.config.params
         min_mcap = p.get("min_market_cap", 100_000_000_000)
@@ -454,10 +455,13 @@ class VolatilityBreakoutStrategy(StrategyBase):
         # 사이클 156 Q0 — nxt_tradable 강제 필터 제거.
         # nxt_tradable 값은 주문 시점 NXT/KRX 분기용 (사이클 54 _strategy_exchange_async).
         # 유니버스 스캔 영역에서 강제 적용은 후보 풀 83% 영구 축소 silent 결함이었음.
+        # cycle380 — exclude_etf_like=True 로 LIMIT *전* SQL 단계에서 ETF 를 거른다
+        # (100칸 자르기 전에 걸러야 ETF 가 칸을 먹지 않는다).
         rows = await _sm_mod.list_by_filter(
             min_market_cap=min_mcap,
             min_trade_amount=min_trade,
             limit=max_stocks,
+            exclude_etf_like=True,
         )
 
         # 사이클 21 — 후보 수
@@ -470,7 +474,9 @@ class VolatilityBreakoutStrategy(StrategyBase):
             if not ticker or not (len(ticker) == 6 and ticker.isdigit()):
                 continue
             name = row.get("name", "") or (row.get("raw") or {}).get("prdt_abrv_name", "")
-            if any(kw in name for kw in ETF_KEYWORDS):
+            # cycle380 — 증권그룹코드 우선 판정(코드 없으면 이름 폴백). SQL 이 이미
+            # 걸렀어야 하지만 방어 겹(mock 환경·SQL 이 못 본 행 대비)으로 다시 본다.
+            if is_etf_like(row.get("raw"), name):
                 continue
             if name:
                 ticker_names[ticker] = name

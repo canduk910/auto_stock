@@ -439,7 +439,8 @@ momentum 은 MAIN 보드가 열리는 09:00 부터 틱이 오는 종목을 평�
 | 주문번호 매핑 (제거 금지) | `_order_qty`/`_order_strategy`/`_order_ticker`/`_order_exchange`/`_pending_buy_orders` 등록은 `place_order` 응답 직후 **동기 영역**에서 끝난다(`await insert_trade` 진입 전). 시장가 즉시체결로 체결통보가 REST 응답보다 먼저 와도 매핑이 보장된다 — 누락되면 그 거래가 기본값 전략("momentum")으로 잘못 기록된다 |
 | WebSocket 구독 한도 | `MAX_SUBSCRIPTIONS = 41`(KIS 공식 한도, 세션당). 보유·익일청산 종목(HIGH)은 `bypass_limit=True` 로 한도 검사를 건너뛰어 **절대 보장**하고, 후순위(LOW)만 drop 하면서 `[priority_drop]` 로 남긴다. HIGH 단독으로 41 을 넘으면 ERROR |
 | 일일 상태 초기화 (제거 금지) | 정산 뒤 `_reset_daily_state()` 가 전 전략의 positions·pending_buys·pending_buy_amounts·sold_today 와 주문번호 매핑·매도 거부 트래커를 일괄 clear 한다. 빠뜨리면 그 상태가 다음 날까지 잔류한다 |
-| 종목코드 형식 비대칭 | 진입 단계는 6자리 숫자만(`isdigit`) — ETF·신주인수권·임시 코드 매수 차단. 사후처리(체결통보·잔고 sync)는 6자리 영숫자(`isalnum`) 허용 — 외부 경로로 들어와도 좀비 포지션 방지 |
+| 종목코드 형식 비대칭 | 진입 단계는 6자리 숫자만(`isdigit`) — 신주인수권·ETN·임시 코드처럼 영숫자이거나 7자리인 코드 매수 차단. 사후처리(체결통보·잔고 sync)는 6자리 영숫자(`isalnum`) 허용 — 외부 경로로 들어와도 좀비 포지션 방지. ETF 는 코드가 6자리 숫자라 이 규칙으로 막히지 않는다(아래 행) |
+| ETF/ETN 제외 | 증권그룹코드(`scty_grp_id_cd` = EF·EN·FE)로 가른다. 코드가 없을 때만 이름 키워드로 판단한다. 6 전략은 DB 조회 단계에서, 후보 수를 자르기 **전에** 뺀다. momentum 은 등락률 순위 응답에 코드가 없어 이름 키워드로만 가른다 |
 | 매수가능 캐시 | 60초 TTL — KIS `get_buyable()` 호출을 매 틱 → 분당 1회로 축소 |
 | 잔고부족 매수 락 | 900초 — `is_insufficient_cash` 응답 또는 `max_buy_quantity≤0` 시 다음 잔고 sync까지 매수 차단 |
 | 매도 잔고부족 즉시 break | `is_insufficient_quantity` 응답 시 3회 재시도 생략 + 메모리·DB positions 정리 |

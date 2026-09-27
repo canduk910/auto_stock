@@ -27,6 +27,7 @@ from typing import Optional
 
 import src.db.pg as pg
 from src.db._kst import KST, now_kst_iso
+from src.engine.etf_like import ETF_GROUP_CODES, ETF_KEYWORDS
 from src.models.stock import StockBasics
 
 logger = logging.getLogger(__name__)
@@ -521,6 +522,7 @@ async def list_by_filter(
     limit: int = 500,
     return_stage_counts: bool = False,
     sort_by: str | None = None,
+    exclude_etf_like: bool = False,
 ) -> list[dict] | tuple[list[dict], dict[str, list[str]]]:
     """시총·거래대금·시장·NXT/KOSPI200/KOSDAQ150 필터로 stock_master 를 조회 (사이클 108 + 153 + 205).
 
@@ -556,6 +558,10 @@ async def list_by_filter(
             사이클 205 — DB-side 전환으로 3쿼리(union/mcap/trade) 구조 (phase 1).
         sort_by: 사이클 205 phase 2 훅. None (기본) = 현행 `refreshed_at DESC` 정렬 유지
             (phase 1 은 정렬 무변경). phase 2 실사용은 별도 사이클 인계.
+        exclude_etf_like: cycle380 — True 면 ETF/ETN(류)를 **LIMIT 전** WHERE 절에서
+            제외한다(증권그룹코드 `scty_grp_id_cd ∈ {EF,EN,FE}` 우선, 코드 없는 행은
+            이름 키워드 폴백 — `src.engine.etf_like.is_etf_like` 와 행 단위로 같다).
+            기본 False = 현행 SQL 그대로(전략 밖 호출자 무변경).
 
     Returns:
         return_stage_counts=False (기본): 기존 호출자 회귀 보존.
@@ -625,6 +631,25 @@ async def list_by_filter(
         if with_trade and acml_tr_pbmn_threshold > 0:
             args.append(acml_tr_pbmn_threshold)
             clauses.append(f"acml_tr_pbmn_won >= ${len(args)}")
+
+        # cycle380 — ETF/ETN(류) 를 LIMIT *전* WHERE 절에서 제외. 상수는 정본 leaf
+        # `src.engine.etf_like` 에서 가져온다(코드·키워드를 여기 다시 적지 않는다, G6).
+        # 헬퍼 `is_etf_like(raw, name)` 와 행 단위로 같아야 한다: 코드가 있으면 코드만,
+        # 없으면 이름 폴백(SELECT 와 같은 COALESCE 이름).
+        if exclude_etf_like:
+            grp_expr = "UPPER(BTRIM(raw->>'scty_grp_id_cd', E' \\t\\r\\n'))"
+            args.append(sorted(ETF_GROUP_CODES))
+            grp_idx = len(args)
+            args.append([f"%{kw}%" for kw in ETF_KEYWORDS])
+            kw_idx = len(args)
+            name_expr = (
+                "COALESCE(NULLIF(name, ''), NULLIF(TRIM(master_raw->>'hts_kor_isnm'), ''), '')"
+            )
+            clauses.append(
+                f"NOT (CASE WHEN COALESCE({grp_expr}, '') <> '' "
+                f"THEN {grp_expr} = ANY(${grp_idx}::text[]) "
+                f"ELSE {name_expr} LIKE ANY(${kw_idx}::text[]) END)"
+            )
 
         where_sql = f" WHERE {' AND '.join(clauses)}" if clauses else ""
         args.append(limit)

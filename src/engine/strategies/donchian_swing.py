@@ -685,7 +685,8 @@ class DonchianSwingStrategy(StrategyBase):
         """
         from src.db import stock_master as _sm_mod
         from src.db.system_logs import write_log
-        from src.engine.scanner import ETF_KEYWORDS, ticker_names
+        from src.engine.etf_like import is_etf_like
+        from src.engine.scanner import ticker_names
 
         p = self.config.params
         min_mcap = p.get("min_market_cap", 50_000_000_000)
@@ -708,6 +709,7 @@ class DonchianSwingStrategy(StrategyBase):
                 is_kosdaq150=True,
                 limit=max_stocks,
                 return_stage_counts=True,
+                exclude_etf_like=True,
             )
             self._scan_stage_counts = stage
         except Exception:
@@ -732,7 +734,9 @@ class DonchianSwingStrategy(StrategyBase):
             if not ticker or not (len(ticker) == 6 and ticker.isdigit()):
                 continue
             name = row.get("name", "") or (row.get("raw") or {}).get("prdt_abrv_name", "")
-            if any(kw in name for kw in ETF_KEYWORDS):
+            # cycle380 — 증권그룹코드 우선 판정(코드 없으면 이름 폴백). SQL 이 이미
+            # 걸렀어야 하지만 방어 겹(mock 환경·SQL 이 못 본 행 대비)으로 다시 본다.
+            if is_etf_like(row.get("raw"), name):
                 continue
             if name:
                 ticker_names[ticker] = name

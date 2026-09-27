@@ -384,3 +384,15 @@ VCP universe(KOSPI200∪KOSDAQ150) backfill target **120일** · retention `DAIL
 
 같은 서술을 함께 고친 곳 = `_workspace/00_leader_trading_rules.md` · `docs/trading_base/{피라미딩,자금관리,리스크관리,README}.md`
 · `_workspace/00_URGENT_WORKLIST.md`(결정 완료 3번 · R6 행 폐기 표시).
+
+## 핵심 안전 규칙 (절대 깨지 말 것)
+
+### 2026-09-27 cycle380 — 「종목코드 형식 비대칭」 의 차단 대상
+
+정본 원문(목록 행):
+
+- **종목코드 형식 비대칭** — 진입은 6자리 숫자만 (`isdigit()`), 사후처리는 6자리 영숫자 (`isalnum()`) — ETF·신주인수권 자동매매 차단 + 좀비 포지션 방지
+
+경위: cycle380(사용자 결정 2026-09-27 「운영db 조회 허용 및 판정 변경 채택」)이 ETF/ETN 판정을 이름 키워드에서 증권그룹코드 `scty_grp_id_cd ∈ {EF,EN,FE}` 로 바꿨다. 판정은 leaf `src/engine/etf_like.py::is_etf_like` 하나로 모였고, 코드가 없을 때만 이름 키워드로 떨어진다. 「ETF… 자동매매 차단」 은 사실이 아니었다 — ETF 코드도 6자리 숫자라 `isdigit()` 를 통과한다(`stock_master` 3,583행 전부 6자리 숫자, EF 873행 포함, 2026-09-27 읽기 전용 조회). 이 규칙이 실제로 막는 것은 영숫자 코드와 7자리 ETN 코드다(`docs/kis/domestic-stock-order.md` `PDNO` 「ETN의 경우 7자리」).
+
+→ CHANGELOG: cycle380 행

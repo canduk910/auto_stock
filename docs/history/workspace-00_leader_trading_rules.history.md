@@ -2523,3 +2523,19 @@ kojiro 신규 진입 8%·donchian 20% 를 없앤다(설계안 §5). 상세 경�
 | `TIME_EVENING_FUNNEL_CAPTURE` | 16:20 | 저녁 잠정 funnel 캡처 |
 
 → CHANGELOG: cycle364 S1 행
+
+## 매수 안전장치 · 6-E 종목군
+
+### 2026-09-27 cycle380 — 종목코드 형식 비대칭의 차단 대상 · BFB 의 ETF 제외 방식
+
+정본 원문(「매수 안전장치」 목록 행):
+
+- **종목코드 형식 비대칭**: 진입은 6자리 숫자만(`isdigit`) — ETF·신주인수권 차단. 사후처리(체결통보·잔고 sync)는 6자리 영숫자(`isalnum`) 허용
+
+정본 원문(「6-E. 전략 E」 「종목군」 목록 행):
+
+- ETF/ETN 제외 (기존 키워드 컨벤션 재사용 — KODEX/TIGER/RISE/KoAct/PLUS/TIMEFOLIO/WOORI/FOCUS/인버스/레버리지)
+
+경위: cycle380(사용자 결정 2026-09-27 「운영db 조회 허용 및 판정 변경 채택」)이 ETF/ETN 판정을 이름 키워드에서 증권그룹코드 `scty_grp_id_cd ∈ {EF,EN,FE}` 로 바꿨다. 판정은 leaf `src/engine/etf_like.py::is_etf_like` 하나로 모였고, 코드가 없을 때만 이름 키워드로 떨어진다. ETF 코드도 6자리 숫자라 `isdigit` 는 ETF 를 막지 못한다. BFB 를 포함한 6 전략은 `list_by_filter(exclude_etf_like=True)` 로 후보 수 절단 전에 ETF 를 뺀다. 공통 규칙은 「매수 안전장치」 절 「ETF/ETN 제외」 행 하나에 적었다.
+
+→ CHANGELOG: cycle380 행
