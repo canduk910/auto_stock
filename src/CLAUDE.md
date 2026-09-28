@@ -36,6 +36,10 @@ engine/etf_like.py ← db/stock_master.py · engine/scanner.py(모듈 상단) + 
 engine/status_exit_watch.py ← engine/scheduler.py(모듈 상단) + engine/strategy_base.py · api/condition.py · routes/system_integrations.py(함수 안 지연 import)
                               (관리종목·단기과열 보유 청산 + 당일 매수 차단 leaf — 최상위 import 는 표준 라이브러리뿐. condition.py 관측 훅의
                                api → engine 역방향은 같은 파일 fetch_rising_stocks 의 scanner 지연 import 와 같은 선례다)
+engine/daily_bar_finalize.py ← engine/boot_manager.py(함수 안 import)
+                              (전일 잠정 봉 확정 leaf — 최상위 import 는 db/{positions,stock_master_daily,system_config}·db/_kst 뿐,
+                               api/condition 은 함수 안 지연 import. 8영역·scheduler·scanner·strategies import 0)
+engine/daily_emit_cap.py ← api/condition.py(함수 안 지연 import — `[prev_close_overwrite]` 1회/일 cap. api → engine 역방향만 적는다)
 ```
 
 > **시세 채널 리졸버 (cycle293·294, 2026-09-14)** — 어느 종목을 어느 WebSocket 채널로 구독할지는

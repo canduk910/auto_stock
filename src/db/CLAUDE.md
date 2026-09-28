@@ -283,14 +283,21 @@ list_paged_by_filter(*, market=None, min_market_cap=0, min_trade_amount=0,
 - CRUD:
   - `upsert_daily(ticker, bas_dd, ohlcv)` — KIS row 단건 정규화 후 upsert
   - `upsert_batch(ticker, candles) -> int` — `_BATCH_SIZE = 100` 건 chunk 배치 upsert
-  - `get_recent_daily(ticker, days=20)` — 최근 N일(DESC). donchian/VCP 입력. 🔴 **`days` 를 `max(1, min(days, _MAX_DAILY_ROWS))` 로 하드 클램프**한다. 행을 돌려주는 읽기 4함수(`get_donchian_high`·`get_atr`·`get_recent_daily_with_fallback`·`get_recent_daily_normalized`)가 전부 이 함수를 경유하므로 **어느 소비처도 상한을 넘겨 읽을 수 없다**(구조적 보장). 나머지 소비처는 스칼라 집계뿐이다(`max_bas_dd`·`count_all`·`count_by_ticker`·`routes/market_ops.py`).
+  - `get_recent_daily(ticker, days=20)` — 최근 N일(DESC). donchian/VCP 입력. 🔴 **`days` 를 `max(1, min(days, _MAX_DAILY_ROWS))` 로 하드 클램프**한다. 행을 돌려주는 읽기 4함수(`get_donchian_high`·`get_atr`·`get_recent_daily_with_fallback`·`get_recent_daily_normalized`)가 전부 이 함수를 경유하므로 **어느 소비처도 상한을 넘겨 읽을 수 없다**(구조적 보장). 나머지 소비처는 스칼라 집계뿐이다(`max_bas_dd`·`max_bas_dd_before`·`count_all`·`count_by_ticker`·`routes/market_ops.py`). 예외 하나 = `list_provisional_rows`(아래)는 종목별 깊이 읽기가 아니라 전 종목의 날짜 창 `[since, head]` 조회라 이 관문을 거치지 않는다. 창 폭은 호출자가 정한다(`daily_bar_finalize.WINDOW_CAL_DAYS` = 21일).
     - **`_MAX_DAILY_ROWS = 400`(cycle300)** — 위아래 두 경계 사이다. 위: retention 390달력일이 보유하는 약 261 영업일과 VCP full 요청 `ema_long(200) + base_max_days(75) + 10 = 285` 가 둘 다 400 아래라 관문이 실데이터도 요청도 자르지 않는다. 아래: 무한대로 두지 않는다 — 오염된 파라미터나 호출 버그가 그대로 `LIMIT` 에 실려 한 종목 조회가 전체 스캔이 되는 것을 막는 폭주 방어선이다.
     - 🔴 **`min()` 구조 자체를 지우지 않는다** — 상한 값은 사이클마다 바뀔 수 있어도 클램프는 그 방어선이다. 가드 `tests/unit/db/test_cycle299_retention_expansion.py::test_g299_7a_get_recent_daily_keeps_days_clamp`(구조) + `tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py`(숫자의 근거).
     - ⚠️ 상한을 올린 것이 **곧 더 읽는다는 뜻은 아니다** — 소비처는 각자 요청한 만큼만 받는다. 100 이하를 요청하는 소비처(donchian 20 · ATR 15 · 매크로 ETF 90 · LLM 60 · kojiro 100 · UI 라우트 `le=100`)는 상향 전후로 **받는 행 수가 1행도 바뀌지 않는다**. 실제로 더 읽는 것은 VCP 가 `daily_fetch_depth_mode="full"` 일 때뿐이다.
   - `get_donchian_high(ticker, days=20)` — 직전 N일 최고가(당일 제외)
   - `get_atr(ticker, days=14)` — 14일 ATR. True Range 는 웰스 와일더 3-way `max(고−저, |고−전종|, |저−전종|)` 이고 평활은 **단순평균(SMA) baseline** 이다 — Wilder 지수평활은 호출자 책임이고, 실제 Wilder ATR 은 `kojiro_indicators.atr`(ewm α=1/N) 뿐이다
   - `count_all()` / `count_by_ticker(ticker)` — 적재 진단
-  - `max_bas_dd(ticker=None)` — 백필 vs 증분 분기 키(스캐너 사용)
+  - `max_bas_dd(ticker=None)` — 백필 vs 증분 분기 키(스캐너 사용). `None` 이면 테이블 전체 최대값이다. DB 예외는 삼키고 `None` 을 돌려준다(ERROR 로그만 남긴다)
+  - **`max_bas_dd_before(today) -> date | None`**(cycle386) — 전일 잠정 봉 확정의 헤드다. SQL = `SELECT max(bas_dd) FROM stock_master_daily WHERE bas_dd < $1`. 소비처 = `src/engine/daily_bar_finalize.py` 하나. `today` 는 호출자가 KST 로 정한 `date` 다. 오늘·미래 날짜 봉은 조건에서 빠진다. 행이 없으면 `None`.
+    - 🔴 **예외를 삼키지 않는다** — `max_bas_dd(None)` 과 다르다. 삼켜서 `None` 을 돌려주면 조회 실패가 「오늘 앞 봉 없음」과 같아져 확정 요약이 `result=noop`(INFO)으로 찍힌다. 실패는 호출자가 `result=error stage=head` 로 남긴다. 연결 계열 재시도는 `pg.fetchval` 이 안에서 한다.
+  - **`list_provisional_rows(*, since, head, today_boundary) -> list[dict]`**(cycle386) — 전일 「잠정 봉」 조회. 소비처 = `src/engine/daily_bar_finalize.py` 하나(계약 = `src/engine/CLAUDE.md` 「저녁 데이터 적재」 절). `bas_dd` 가 `[since, head]` 안이면서 아래 조건인 행의 `ticker, bas_dd, open_price, high_price, low_price, close_price` 를 `ticker, bas_dd` 순으로 돌려준다.
+    - 헤드 행(`bas_dd = head`) = `updated_at < today_boundary`(호출자가 오늘 06:00 KST 를 넘긴다)
+    - 그 밖(`bas_dd < head`) = `updated_at < ((bas_dd + 1)::timestamp AT TIME ZONE 'Asia/Seoul') + interval '6 hours'`
+    - SQL 안에서 `'Asia/Seoul'` 을 명시한다. 세션 시간대에 기대면 연결이 UTC 로 돌던 사고(`pg.py::_init_conn`)를 다시 만든다.
+    - 🔴 **예외를 삼키지 않는다** — 이 모듈의 다른 read 헬퍼와 다르다. 조회 실패를 빈 목록으로 접으면 「대상 조회 실패」가 「고칠 것 없음」으로 둔갑한다. 연결 계열 재시도는 `pg.fetch` 가 안에서 한다.
   - `get_recent_daily_with_fallback(ticker, n)` — DB miss 시 `fetch_daily_candles` 폴백
   - **`get_recent_daily_normalized(ticker, days, *, min_required=None, expected_head: date | None = None)`** — DB일봉 어댑터. DB row 의 `raw` JSONB(KIS 원본 키 `stck_clpr`/`stck_oprc` 등 보존)를 **그대로 반환**해 prepare 의 `c.get("stck_clpr")` 를 무변경으로 쓰게 한다. raw 키가 없는 row 는 row 자체를 돌려준다(graceful)
   - `purge_old_rows(cutoff_date, *, protected_tickers=None) -> dict[str, int]` — 아래 retention 항목 참조
@@ -306,6 +313,9 @@ list_paged_by_filter(*, market=None, min_market_cap=0, min_trade_amount=0,
   - 상수 `DAILY_STALENESS_DAYS = 4`(달력일 — 주말 2일 + 공휴일 마진, 거짓 폴백 차단)는 `expected_head` 가 없을 때만 쓴다. 달력일이라 5일 이상 연휴 뒤에는 전 종목을 낡음으로 센다 — 그것을 막는 것이 `expected_head` 다. 전략별 `days`/`min_required` = VB/LTV 22 · donchian 63 · BFB 35 · VCP 100 · kojiro 80
 - **retention `DAILY_RETENTION_DAYS = 390`(달력일 ≈ 261 영업일, cycle299)**. 실효 장기선이 정확히 200 이 되려면 일봉이 225 영업일 필요하고(`effective_ema_long = min(ema_long, 보유 − uptrend_days(20) − 5)`), 그 깊이를 담아 둘 자리가 이 값이다. 일봉 적재 대상 전부에 적용되는 backfill target 225 위로 **36 영업일 마진**이 남는다(환산 앵커 = 사이클196 실측 230cal ⇄ 154영업일). 🔴 **이 값과 target 은 함께 움직인다** — target 이 보유 영업일을 넘으면 `existing_count` 가 영원히 target 에 못 닿아 매일 밤 전량 재backfill(churn)이 된다(사이클 196 이 시정한 결함). 그 깊이를 실제로 읽으려면 위 `get_recent_daily` 의 상한(`_MAX_DAILY_ROWS`)과 전략 쪽 요청(VCP `daily_fetch_depth_mode`)이 둘 다 열려 있어야 한다. 가드 `tests/unit/db/test_cycle299_retention_expansion.py`.
 - **`purge_old_rows` 는 날짜 슬라이스 루프다** — `PURGE_MAX_DATE_ITERATIONS = 500` cap 안에서 ① cutoff 이전의 가장 오래된 `bas_dd` 를 **protected 를 뺀 채** SELECT(없으면 drained break) ② 그 날짜 전체를 **protected 를 뺀 채** DELETE ③ deleted 누적. 🔴 **SELECT 쪽 protected 제외를 빼지 않는다** — 빼면 protected 만 남은 날짜를 무한히 다시 고르는 never-drain 이 된다. 예외는 부분 누적 deleted 를 반환하고 `logger.exception` 에 `type(exc).__name__: str(exc)[:150]` 를 남긴다
+- 🔴 **`updated_at` 은 「KIS 값을 받아 그 행에 쓴 순간」 하나만 뜻한다.** `_candle_to_row` 가 `now_kst_iso()` 로 찍고, `_UPSERT_DAILY_SQL` 이 충돌 때도 `updated_at = EXCLUDED.updated_at` 으로 다시 찍는다. 전일 잠정 봉 판정(`list_provisional_rows`)이 이 칼럼 하나에 기댄다.
+  - 🔴 `_UPSERT_DAILY_SQL` 말고 이 테이블의 `updated_at` 을 바꾸는 쓰기를 두지 않는다 — UPDATE 문 · 트리거 · 마이그레이션 전부다. 두면 잠정 봉이 확정으로 분류돼 다음 부팅이 고치지 않는다. 1회 백필(예: `change_rate`)도 `updated_at` 을 건드리지 않는다.
+  - 가드 = `tests/unit/ast/test_cycle386_ast_finalize.py` G5(c1~c4 — `src/` 의 쓰기 SQL · 찍는 자리 · 마이그레이션) + 실 Postgres `tests/integration/test_cycle386_provisional_predicate_pg.py`(충돌 때 다시 찍기 · 트리거 없음).
 - DB 호출은 `pg.fetch`/`pg.execute`/`pg.executemany` 다. read 는 `_with_retry` 를 내장하고 쓰기 3함수(`upsert_daily`/`upsert_batch`/`purge_old_rows`)는 경유하지 않는다(AST G-187-A2 영구 불변식)
 - 영속 의무: KST timestamp `_kst.now_kst_iso()` · raw JSONB 덮어쓰기 금지(G-AST1) · DATE 바인딩 `_kst.to_date()` 강제
 - **UI 동기화 의무**: `stock_master_daily` 컬럼을 추가하면 UI 도 함께 고친다 — `GET /api/stock-master/{ticker}/daily?days=N`(`src/routes/stock_master.py`) + `frontend/src/pages/StockMaster.tsx::DailyTab` 30 row 테이블, 그리고 `get_stats()` 응답의 `total_daily_rows`/`last_daily_load_at`. 절차 상세는 `frontend/CLAUDE.md`

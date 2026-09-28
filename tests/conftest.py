@@ -640,6 +640,40 @@ def _neutralize_status_watch(
 
 
 # ---------------------------------------------------------------------------
+# cycle386 — 부팅 「잠정 봉 확정」 leaf 중립화 (cycle295·317·363 교훈: 부팅 경로에 DB·KIS 를
+# 끼워 넣는 사이클이 중립화 픽스처를 같이 만든다)
+#
+# `boot_manager.boot()` 가 토큰 발급 직후 `daily_bar_finalize.spawn(phase="boot")` 로 태스크를
+# 띄우고 prepare 직전에 `wait_for_boot(..., budget_secs=BOOT_BUDGET_SECS)` 로 기다린다. 그 태스크의
+# 본체 `finalize_once` 는 `stock_master_daily` 헤드·잠정 행 조회(DB) → KIS 일봉(FHKST03010100) →
+# upsert 를 한다. 그대로 두면 `boot()` 를 도는 기존 테스트 40여 파일이 실제 DB 풀을 찾거나
+# (미초기화 풀 예외) 외부 네트워크 차단에 걸려 결과가 흔들리고, 최악은 90초 예산만큼 기다린다.
+#
+# 시정 = `finalize_once` 를 **즉시 끝나는 빈 코루틴**으로 바꾼다. `spawn`·`wait_for_boot` 는 그대로
+# 둔다 — 배선(띄우고 기다린다)은 그대로 돌고 DB·KIS 만 빠진다. 그래서 leaf 는 `spawn` 안에서
+# `finalize_once` 를 **모듈 전역 이름으로** 불러야 한다(`_neutralize_api_auth` 의 `authorize` 와 같은 구조).
+# leaf 를 직접 검증하는 테스트는 `@pytest.mark.real_daily_bar_finalize` 로 옵트아웃한다. 메타 가드 =
+# `tests/unit/engine/test_cycle386_finalize_neutralization.py`(미부착 테스트의 `boot()` 가 DB·KIS 0).
+# Red 단계(leaf 미존재)에서는 import 가 실패하므로 아무것도 하지 않는다. `raising=False` 도 같은 이유다.
+# ---------------------------------------------------------------------------
+@pytest.fixture(autouse=True)
+def _neutralize_daily_bar_finalize(
+    request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch
+):
+    if request.node.get_closest_marker("real_daily_bar_finalize"):
+        return  # leaf 자체를 검증하는 테스트 — 중립화 금지
+    try:
+        from src.engine import daily_bar_finalize as _dbf_mod
+    except Exception:
+        return
+
+    async def _inert_finalize_once(*_a: Any, **_k: Any) -> None:
+        return None
+
+    monkeypatch.setattr(_dbf_mod, "finalize_once", _inert_finalize_once, raising=False)
+
+
+# ---------------------------------------------------------------------------
 # 2026-09-26 C2(테스트 위생) — 실제 외부 네트워크 차단
 #
 # 2026-09-25 08:10 KST CI 첫 시도가 부팅 테스트 2개의 60초 타임아웃으로 취소됐다(재실행 초록).

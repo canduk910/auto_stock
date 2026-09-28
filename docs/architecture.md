@@ -312,9 +312,11 @@ sequenceDiagram
 
     Note over S,X: 07:45 run_daily() 기상 (TIME_AUTO_START) → _boot()
     S->>K: get_token() → POST /oauth2/tokenP
+    Note over S: daily_bar_finalize.spawn() — 전일 잠정 봉 확정 태스크<br/>(KIS 일봉 재조회 → stock_master_daily 덮기, 아래와 겹쳐 돈다)
     D-->>S: _load_strategy_config() ← DB strategy_config
     S->>K: get_balance() → GET inquire-balance
     Note over S: allocate_funds()
+    Note over S: wait_for_boot() — 확정 대기(최대 90초, 넘기면 나머지는 배경)
     S->>K: strategy.prepare() → GET daily-price (일봉)
     Note over S: ticker_prev_close 사전 등록 (전일 종가)
     D-->>S: DB positions 복구 ← DB positions
@@ -417,7 +419,7 @@ sequenceDiagram
 
 | 시각 | 상수 | 세부 |
 |------|------|------|
-| 07:45 | `TIME_AUTO_START` | `_boot()` 는 `start()` 안에서 즉시 돈다 — 07:45 자동 기동이면 그 직후. `TIME_BOOT`(07:55) 는 런타임 미사용 상수다. `_load_strategy_config()` 는 `tradable_boards` / `k_value_*` / `exchange` 를 포함해 읽는다 |
+| 07:45 | `TIME_AUTO_START` | `_boot()` 는 `start()` 안에서 즉시 돈다 — 07:45 자동 기동이면 그 직후. `TIME_BOOT`(07:55) 는 런타임 미사용 상수다. `_load_strategy_config()` 는 `tradable_boards` / `k_value_*` / `exchange` 를 포함해 읽는다. 토큰 발급 직후 전일 잠정 봉 확정(`daily_bar_finalize`)을 띄우고, prepare 직전에 최대 90초 기다린다 — 전일 봉의 종가·고저를 정규장 값으로 바꾼 뒤 전략이 읽게 한다(정본 = `src/engine/CLAUDE.md` 「저녁 데이터 적재」) |
 | 07:59 | `TIME_PRESUBSCRIBE` | `subscribe(H0NXMKO0, "")` 는 실전 한정(NXT 장운영정보). `tick_tr_id_for(t)` 채널 = cycle294 — 프리장 NXT 전용 `H0NXCNT0` / 정규장+애프터 KRX 전용 `H0STCNT0`. 통합 `H0UNCNT0` 는 킬스위치 off 에서만. 유니버스가 비었을 때의 `prepare()` 재실행은 KIS API 일시장애 대비다 |
 | 08:00 | `TIME_PRE_NXT_OPEN` | `_execute_next_day_clear()` 는 비차단이다. NXT 프리 시가를 받고 `NEXT_DAY_STABILIZE_SECS`(30초) 안정화한 뒤 판정한다 — 갭이 `gap_up_threshold` 이상이면 트레일링 모드, 미달·시가 미수신·`nxt_tradable=False` 면 `_pending_next_day_clear` 에 보류했다가 09:00 KRX 시장가로 판다. 프리장 지정가 청산은 내지 않는다. 시가 확정은 0.5초/5초 폴링. LTV 는 `k_value_nxt_pre` 적용. VB 는 `DEFAULT_TRADABLE_BOARDS=("main",)` — 프리장 매수 없음 |
 | 08:45 · 09:00:05 · 09:00:30~15:28 | `status_exit_watch` 패스 | 관리종목·단기과열 조회. 08:45 는 장 전 기록만 한다(`pre_nxt` 매수 전략이 있으면 07:59). 09:00:05 에 매수 후보를 한 번에 읽어 그날 매수 차단을 정한다(5초 캐시가 장 전 값을 돌려주지 않게 5초 늦춘다. 스윙 donchian·kojiro 는 09:05 스윙 폴 조회가 덮으므로 뺀다). 09:00:30 부터 15:28 전까지 5분마다 보유를 읽어 전용 플래그가 `Y` 면 시장가로 판다. 휴장일로 확정된 날은 돌지 않는다. scheduler `TIME_*` 상수가 아니라 leaf 상수다 — 14.9 |
@@ -431,8 +433,8 @@ sequenceDiagram
 | 20:00 | `TIME_NXT_POST_CLOSE` · `TIME_RECOMMENDATION` | 애프터 종료와 구독 해제, 이어서 전략수정 AI자문 |
 | 20:00:05 | `TIME_FULL_UNIVERSE_LOAD` | AI자문 직후 5초 마진. 같은 20:00 이 기동 거부 경계(`TIME_SESSION_START_CUTOFF`, cycle283 D4)다 — 이 시각 이후 `start()` 는 거부된다. 20:00~21:30 재기동은 그날 20:30 일봉 적재를 통째로 잃는다(다음 영업일 아침 immediate 가 보정하지만 `_boot()` 의 prepare 보다 늦다 → `[daily_head_stale]` WARNING) |
 | 20:05 | `TIME_METRICS_SNAPSHOT` (cycle283 D5) | `api_metrics`·`strategy_funnel` 은 프로세스 메모리 전용 — 유실 노출 90분 → 5분 |
-| 20:30 | `TIME_STOCK_MASTER_DAILY_LOAD` (cycle283 D2) | 09-14 KRX 애프터마켓(16:00~20:00) 종료 후 = 그날 거래량이 확정된 뒤 |
-| 21:00 | `TIME_EVENING_FUNNEL_CAPTURE` (cycle364) | 다음 거래일 후보 미리보기. 20:30 적재 뒤 · 20:45 보조 계정 토큰 재발급 체인 뒤 · 정산 전이라 이 시각이다. 적재 성공 마커가 21:15 까지 없으면 건너뛴다. 결과는 다음 거래일 날짜의 잠정 행이고, 그날 09:35 확정 행을 덮지 않는다 |
+| 20:30 | `TIME_STOCK_MASTER_DAILY_LOAD` (cycle283 D2) | 09-14 KRX 애프터마켓(16:00~20:00) 종료 후 = 그날 거래량이 확정된 뒤. 종가·고저는 이 시각에도 KIS 가 애프터마켓 값을 주므로 잠정이다 — 다음 거래일 아침 부팅이 확정한다(cycle386) |
+| 21:00 | `TIME_EVENING_FUNNEL_CAPTURE` (cycle364) | 다음 거래일 후보 미리보기(20:30 잠정 봉 기준 — 정본은 다음 날 부팅 목록). 20:30 적재 뒤 · 20:45 보조 계정 토큰 재발급 체인 뒤 · 정산 전이라 이 시각이다. 적재 성공 마커가 21:15 까지 없으면 건너뛴다. 결과는 다음 거래일 날짜의 잠정 행이고, 그날 09:35 확정 행을 덮지 않는다 |
 | 21:30 | `TIME_SETTLEMENT` (cycle283 D3) | 일일 로그 보고서 완전판(OpenAI)이 20:05 1차 행을 upsert 로 덮어쓴다 |
 
 ---
@@ -978,7 +980,7 @@ flowchart TD
 | `trade_history` 부분 UNIQUE | 029 | `(ticker, order_no, trade_type) WHERE order_no IS NOT NULL AND order_no != ''` — 핑퐁 INSERT 영구 차단 (사이클 30) |
 | `strategy_funnel_snapshots` | 030 (+035, 040) | 전략별 조건검색 단계별 후보/탈락 영구 추적 — UNIQUE `(target_date, strategy_id, step_no)` + UPSERT. 잠정(`is_provisional`) 쓰기는 확정 행을 덮지 못한다 |
 | `stock_master_history` | 032 (+036) | stock_master 갱신 이력 — PK (ticker, seq=0/1) + trigger |
-| `stock_master_daily` | 033 | KIS FHKST03010100 일봉 정규화 — PK (ticker, bas_dd) + OHLCV + change_rate + raw JSONB. 매일 **20:30** KST 적재(`TIME_STOCK_MASTER_DAILY_LOAD`, T-100 백필 → D-1 증분) |
+| `stock_master_daily` | 033 | KIS FHKST03010100 일봉 정규화 — PK (ticker, bas_dd) + OHLCV + change_rate + raw JSONB. 매일 **20:30** KST 적재(`TIME_STOCK_MASTER_DAILY_LOAD`, T-100 백필 → D-1 증분). 그 시각 그날 봉의 종가·고저는 잠정이고 다음 거래일 부팅이 확정한다(`daily_bar_finalize`, 판정 = `updated_at`) |
 | `stock_master.master_raw` | 034 | KIS 공식 일일 마스터 파일 raw JSONB + master_raw_updated_at + is_kospi200/is_kosdaq150 BOOLEAN (037, 사이클 153) |
 | `pending_next_day_clear` | 038 | 익일청산큐 DB 영속화 — PK (target_date, ticker, strategy_id). 재기동 시 메모리 휘발 차단 |
 | `llm_buy_evaluations` | 043 | AI 매수평가(LLM)를 주문 발화 시점에 기록 — PK (trade_date, account_no, ticker, order_no) + eval_kind('order'|'blocked'). 주문 1건 = 1행(성공·실패 모두), 매매 hot path 무관한 관측 계층. 열 정의 정본 = 루트 `CLAUDE.md` DB 스키마 표 (cycle276). 프로세스 분리 1단계가 이 테이블을 큐로 재사용한다 → 15.2 |

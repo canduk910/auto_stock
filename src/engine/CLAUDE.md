@@ -18,7 +18,7 @@
 - **`strategies/`** — 7 전략(`momentum` · `volatility_breakout` · `long_tail_volatility` · `donchian_swing` · `bull_flag_breakout` · `vcp_breakout` · `kojiro`). 매수·청산·보드 명세 = `strategies/CLAUDE.md`.
 - **`session.py`** — `MarketBoard` · `SessionTracker`. `is_call_auction_now(now=None) -> bool` = H0UNMKO0 `MKOP_CLS_CODE`(110 장전 / 121 장후) **AND** 명목창 ±5분(110: 08:25~09:05 / 121: 15:15~15:35) 게이트 + 시간 기반 폴백, `now or datetime.now(_KST)` KST 강제. 🔴 코드 단독으로 판정하지 않는다 — KIS 가 코드 의미·push 트리거를 문서화하지 않아 전환 코드가 안 오면 `_last_nxt_mkop_code` 가 고착하고, 고착하면 보유 종목 stale 탐지가 꺼져 손절이 누락된다. 가드 `test_cycle182_call_auction_time_gate.py` · `test_cycle182_call_auction_ast_gate.py`. 시간표는 하단 `session.py` 절.
 - **`risk.py`** → **`order_engine.py`** → **`scheduler.py`** — 틱 판정 → 체결통보·DB 영속화 → 시간 가드·run/settle. 각 전용 절은 하단.
-- **`boot_manager.py`** — `_boot` 본체. `_load_strategy_config` 직후 `portfolio_risk.check_budget_invariant` 를 불러 `[budget_invariant_violation]` WARNING 을 남긴다. 활성 전략 준비는 `funnel_capture.live_prepare_one(strategy, phase="boot")` 로 부른다(wrapper 가 never-raise 라 호출부에 try 가 없다). 익일청산 복구 직후 `funnel_capture.spawn_funnel_boot_vs_evening(scheduler, phase="boot")` 를 **await 없이** 1회 부른다(④ 대조 — 하단 「funnel 스냅샷 캡처」 절).
+- **`boot_manager.py`** — `_boot` 본체. 토큰 발급(`token_manager.get_token()`) 직후 `daily_bar_finalize.spawn(phase="boot")` 로 전일 잠정 봉 확정 태스크를 **await 없이** 띄운다(함수 안 import). 설정 로드·잔고·레짐과 겹쳐 돌고, prepare 직전(`emit_daily_head_staleness` 앞)에 `daily_bar_finalize.wait_for_boot(…, budget_secs=daily_bar_finalize.BOOT_BUDGET_SECS)` 로 최대 90초 기다린다(하단 「저녁 데이터 적재」 절의 「전일 잠정 봉 확정」). `_load_strategy_config` 직후 `portfolio_risk.check_budget_invariant` 를 불러 `[budget_invariant_violation]` WARNING 을 남긴다. 활성 전략 준비는 `funnel_capture.live_prepare_one(strategy, phase="boot")` 로 부른다(wrapper 가 never-raise 라 호출부에 try 가 없다). 익일청산 복구 직후 `funnel_capture.spawn_funnel_boot_vs_evening(scheduler, phase="boot")` 를 **await 없이** 1회 부른다(④ 대조 — 하단 「funnel 스냅샷 캡처」 절).
 - **`scanner.py`** — 종목 스캔·구독·`STATIC_TICKER_NAMES` + 적재 함수 4종(`_stock_master_daily_load_once` · `_stock_master_basics_refresh_once` · `_stock_master_master_load_once` · `_stock_master_financial_load_once`) + 매수 진입 차단 `_is_master_blocked_for_entry` + 시세 채널 리졸버 `tick_tr_id_for`. 적재 규약은 하단 「저녁 데이터 적재」 절, 구독 규약은 하단 `scanner.py` 절.
 
 ### stale 계열 (K stale watcher)
@@ -116,6 +116,7 @@
 - **`status_exit_watch.py`** — 관리종목(51)·단기과열(59) **보유 청산 + 당일 매수 차단** leaf(cycle369). 보유 종목을 REST `FHKST01010100` 으로 읽고, KRX 정규장 창 **09:00:30~15:28** 안에서 전용 플래그가 `Y` 면 `order_engine.execute_sell(t, Signal.STATUS_EXIT, sid)` 를 시장가로 낸다. 같은 조회 결과로 그날 그 종목의 신규 매수 신호를 공통 게이트 `StrategyBase._account_soft_gate_blocked` 첫 문장에서 막는다. 모듈 최상위 import 는 표준 라이브러리뿐이다(`condition`·`strategy_base` 가 이 모듈을 지연 import 하므로 최상위에서 `src.*` 를 끌어오면 순환이다). 8영역 파일은 고치지 않는다. 8영역 객체에서 부르거나 읽는 것 = `order_engine.execute_sell`(호출) · `order_engine._selling`(읽기) · `registry.all()`·`registry.enabled()`·`registry.is_ticker_blocked_for_buy`(호출) · `scanner.ticker_prev_close`·`scanner.ticker_prices`(읽기). 계약 상세 = 하단 「종목상태 청산·당일 매수 차단」 절.
 - **`open_price_rest.py`** — VB·LTV `main` 목표가 기준가를 KRX REST 로 확정한다. 좁은 목 `on_open_price_confirmed(ticker, open_price, board="main", *, source="ws")` — `reject_untrusted_main_basis(params, board, source, …)` 가 `board=="main"` ∧ `source ∉ ("rest",)` ∧ `resolve_mode(params)=="enforce"`(전략별 `DEFAULT_PARAMS["open_price_scope_mode"]`, 기본 `enforce`, `"off"` 만 롤백)일 때 조용히 거부한다. 🔴 `source` 기본값이 불신 `"ws"` 라 WS 3 호출부(스케줄러 1차 폴링·전략 인라인 확정)는 한 글자도 바뀌지 않는다(`_STRATEGY_PINS` 6개 불변). 일정(`round_schedule()` 순수 함수) = 09:00:35 R1 → 30초 간격 **fast 19라운드**(마지막 09:09:35) → 300초 간격 slow 라운드 15:20 까지(slow 라운드 대상은 `_pending_main_tickers` 뿐이다). `main_rest_basis_task_loop(sched)` 가 `run_main_rest_basis_round(sched, round_no=, total_rounds=, kind=)` 를 호출한다. 대상 `select_strategies(registry)` = `main ∈ tradable_boards ∧ mode=="enforce"`(`config.enabled` 미고려 — 비활성 전략으로도 REST 확보·게이트·부하를 검증한다). 종목 간 `sleep(0.05)`, 라운드 벽시계 상한 45초(`truncated=1`). 확정 시 `on_open_price_confirmed(..., source="rest")` **와** `open_price_observe.mark_confirmed_via_rest` 를 둘 다 부른다. `owns_board(strategy, board, *, now=None)` = `board=="main" ∧ mode=="enforce" ∧ now < 09:05:00`(예외 fail-open False) — 그 창 동안 `scheduler._confirm_breakout_open_prices` 는 그 전략을 대상에서 빼고, 09:05:00 이후는 스케줄러의 2차 REST 폴백이 `source="rest"` 로 백스톱한다. 마커 4종(`[main_rest_basis_config|round|confirmed|unresolved]`, `KstDailyEmitCap` + `observer_trace`) — `config` 1회/(전략,모드,emitter)/일 · `round` 전략별(fast 항상, slow 는 pending>0 일 때만) · `confirmed` 1회/(전략,종목)/일로 REST 조회 **직전** shadow 병기(`ws_open`/`ws_src`/`delta_bp`/`target_rest`/`target_ws` = 오염 규모의 정본) · `unresolved` 1회/(전략,종목)/일로 마지막 fast 라운드 직후(= 커버리지 손실의 정본). `scanner.ticker_prices` 는 **읽기 전용**(8영역 무접촉). 자문 = `_workspace/domain_consult/cycle272_rest_open_basis_20260910.md`.
 - **`quote_token_refresh.py`** — 보조 시세 계정 접근토큰을 매일 `TIME_QUOTE_TOKEN_REFRESH`(**20:45 KST**)에 계정별 `TokenManager.revoke()` → `issue()` 순차로 재발급하는 leaf. `refresh_quote_tokens_once()` 가 `kis_quote_accounts.list_accounts(active_only=True)` 를 순회하고, `task_loop()` 는 `run_periodic_task_loop(immediate_first_run=False)` 에 위임한다(부팅 시각이 앵커가 되면 설계가 무너진다). 고치는 것 = `TokenManager._is_valid()` 의 10분 선제 갱신 마진이 종일 REST 를 쓰는 보조 계정의 재발급 시각을 매일 10분씩 앞당기는 **단조 드리프트**다. 🔴 `revoke()` 가 선행해야 한다 — KIS `/oauth2/tokenP` 는 유효 토큰이 살아 있으면 **같은 토큰·같은 만료**를 돌려주므로 폐기 없이는 만료 앵커가 이동하지 않는다. `revoke()` 실패는 WARNING 1행 뒤 `issue()` 를 계속 시도하고(무토큰 방치 금지), `failed` 카운터는 issue 실패 전용이며, `revoke()` 는 전역 issue lock 과 61초 gap 을 소모도 우회도 하지 않는다. **시각 불변식 3** = (a) T 와 T−10분이 모두 KRX 장중(09:00~15:30) 밖 — 필요조건이지 충분조건이 아니다 (b) 7계정 × 61s ≈ 7분의 직렬화 창이 REST 를 많이 쓰는 예정 작업과 겹치지 않을 것 (c) **T 는 스케줄러 task 루프의 생존 창 안**일 것 — `run_daily` 의 `finally` 가 정산(`TIME_SETTLEMENT`) 뒤 백그라운드 task 를 전부 cancel 하므로 그 뒤 시각은 매일 0회 발화한다(로그에는 부팅 시 `scheduled at=` 한 줄만 남아 배선이 살아 있는 것처럼 보인다). 🔴 **진짜 요건은 "장중 밖" 이 아니라 "보조 풀 REST 가 없는 창"** 이다 — T−10분 문턱이 REST 창 한복판이면 자연 재발급이 항상 강제보다 먼저 난다. 20:45 는 20:00 자문·20:00:05 유니버스·20:05 metrics·20:30 일봉(≈20:32 종료)·21:30 정산을 전부 `[T−10, T+8]` 창 밖에 둔다(가드 `test_c9`·`test_c10` 이 전수 스캔으로 잠근다). 대상은 보조 계정뿐이고 주계정(`label=None`)은 무접촉이다. **WS 무영향** — WS 는 별도 엔드포인트 `/oauth2/Approval` 의 `approval_key` 로 접속·구독하며 `issue()` 는 그것을 건드리지 않는다. 마커 `[quote_token_refresh]` 3종 = `scheduled at=`(배선 카나리아) · `label=… issued expired=… revoked=True|False`(계정별, `revoked=False` = 그 계정은 이번 회차에 앵커 미이동) · `accounts=%d issued=%d failed=%d elapsed_s=%d window_issues_total=%d`(회차 요약 — `elapsed_s` 는 체인 총 소요 ≈420s = 7계정 × 61s, `window_issues_total` 은 체인 시작 **−15분**부터 종료까지 그 회차 매니저들의 발급 횟수). 성공 서명 = 장중 자연 재발급 0건 · `window_issues_total=7`. `scheduler.py` 배선은 2줄(import + `create_task`) + cancel 목록 3곳이고 본체가 leaf 인 이유는 라인 상한이다.
+- **`daily_bar_finalize.py`** — 부팅 prepare 직전에 전일 「잠정 봉」을 KIS 정규장 확정값으로 덮는 leaf(cycle386). 잠정 봉 = 20:30 적재가 쓴, 종가·고저에 애프터마켓 값이 섞인 봉이다. 공개 API = `spawn(*, phase) -> asyncio.Task` · `wait_for_boot(task, *, budget_secs)` · `finalize_once(*, now_kst=None, phase)` + 상수 8개. 최상위 import 는 `src.db.{positions,stock_master_daily,system_config}` · `src.db._kst` 뿐이고, `src.api.condition` 은 함수 안에서 지연 import 한다. 🔴 8영역·`scheduler`·`scanner`·`boot_manager`·strategies import 0(AST G5 b). 계약 상세 = 하단 「저녁 데이터 적재」 절의 「전일 잠정 봉 확정」.
 - **`llm_buy_gate.py`** — **매수 주문 접수 시점** LLM 평가 shadow leaf(매매 행위 변경 0). 진입점 `observe_order(*, strategy_id, ticker, order_no, order_kst, order_price_won, ordered_qty, order_division, order_path, exchange, current_price_won, budget_total_won, budget_remaining_after_won, open_positions_n, params_snapshot, buy_signals_tail)` — **키워드 전용 · 동기 · never-raise · `await`/DB/HTTP 0 · 반환 항상 `None`**. 전략 파일에는 훅이 없다. 소비처는 `order_engine.execute_buy` 의 매수 `place_order` 성공 직후 매핑 등록 블록 끝 **2곳**(주 경로 · 시장가 거부 지정가 5호가 폴백)이며 `_insert_pending_or_absorb_race` **앞**이다. 순서 = `mode(off|shadow, 그 외 off)` → `[llm_gate_config]` 카나리아(off-return 앞) → off 즉시 return → `order_no` 유효성(빈 값이면 `[llm_eval_persist] reason=empty_order_no` 1행 후 return) → 래치 peek(키 = **주문번호**/일 — 같은 종목을 하루 두 번 사면 두 번 평가한다) → 일일 cap peek(`[llm_gate_daily_cap]` WARNING 1회/전략/일 + `[llm_eval_persist] reason=cap_exceeded` 주문별 1행) → 값 복사 payload → 래치 mark + cap 증가 → `asyncio.create_task(_evaluate)` 정확 1회. `_evaluate` 는 `_evaluate_core` 의 outcome 을 받아 **단 1곳**에서 `_persist_evaluation` 한다(성공·실패 **모두** `llm_buy_evaluations` 1행 — 실패도 `input_payload` 를 담고 `score=NULL`). `_evaluate_core` 는 세마포어 2 안에서 `db.stock_master_daily.get_recent_daily_normalized`(캐시 `(ticker, KST date)` 상한 400, 당일 봉 폐기, 60봉 fetch → 프롬프트에는 30봉) → `llm_features.compute_technicals`/`build_messages` → `AsyncOpenAI.chat.completions.create`(`settings.openai_buy_gate_model`, `response_format=json_object`, `asyncio.wait_for`) → 출력 검증(클램프 금지, `int(inf)` OverflowError 흡수) 순으로 돈다. `_MAX_COMPLETION_TOKENS = 2000` — 추론 모델은 추론 토큰이 이 한도를 함께 소비하고 과금은 실사용량이라 **비용은 오르지 않는다**. 한도 소진은 파싱이 실패한 경우에만 `reason=truncated` 로 분류한다(완전한 JSON 이면 점수를 살린다). `asyncio.CancelledError` 는 re-raise. 마커 5종 = `[llm_gate_config]` · `[llm_buy_score]`(`order_no=`·`order_kst=`·`order_price=`·`post_order_drift_bp=` — **+ 는 주문 뒤 상승 = 이득**) · `[llm_buy_score_failed] reason=` 10종(timeout / api_error / parse_error / schema_error / no_bars / no_key / cap_exceeded / disabled_model / payload_error / truncated, `finish=` 는 OpenAI `finish_reason` 원문이고 LLM 호출 전 실패는 `-`) · `[llm_gate_daily_cap]` · `[llm_eval_persist] order_no= result=ok|error [reason=]`(DB 무음을 깨는 유일 채널). 🔴 `empty_order_no` 와 `cap_exceeded` 는 **persist 어휘**이지 평가 실패 어휘가 아니다 — 섞으면 일일 리포트의 실패 분류가 오염된다. 보드는 세션 트래커가 아니라 **시계**(`_board_by_clock`)로 푼다(leaf 는 8영역을 참조하지 않고, 트래커의 활성 보드는 30초 stale 이라 09:00:0x 에 `pre_nxt` 로 굳는다). 계좌번호는 leaf 가 `settings` 에서 읽는다. 회고 층화 2열 = `_prompt_version()`(SYSTEM 프롬프트 + user 프리앰블 + `llm_features` 스냅샷 키의 sha256 앞 12자) / `_feature_version()`(`compute_technicals` 출력 키 집합), 계산 실패는 `""` fail-open. `src.*` import 는 허용 목록(`daily_emit_cap`·`observer_trace`·`llm_features`·`config`·`db.stock_master_daily`)만 **모듈 최상단**에 두고 `scanner`·`tick_volume`·`log_analysis_engine`·`db.llm_buy_evaluations` 는 함수 내 **지연 import** 다(순환 차단). 8영역 중 `order_engine.py` 만 접촉하고 A-ATOMIC 구간은 byte 동일. 킬스위치 `llm_gate_mode=off`(PUT 즉시). 영속 = `src/db/llm_buy_evaluations.py` + migration 043, 조회 = `src/routes/llm_evaluations.py`.
 - **`market_unit.py`** — 시장 유닛(단계형) 판정 leaf(cycle382). KODEX 200(`SOURCE_TICKER="069500"`) 일봉 종가로 그 거래일의 장세를 4단계로 나눈다. `MULTIPLIERS` = `up_rising` 1.0 · `up_falling` 0.75 · `down_rising` 0.5 · `down_falling` 0.0. 창 `w` = `bas_dd < as_of_date` 인 행을 오름차순으로 세운 마지막 `MIN_ROWS`(80)개다. `above = w[-1] × 60 > sum(w[20:80])` · `rising = sum(w[20:80]) > sum(w[0:60])`(60일선이 20봉 전 60일선보다 높다). 평균 대신 합으로 비교해 부동소수 동률 흔들림을 없앴고, 동률은 약한 쪽(엄격 부등호)이다. 상수(`MA_WINDOW=60`·`SLOPE_LOOKBACK=20`·배수 4개)는 이 파일 한 곳에만 있고 파라미터로 열지 않는다(AST A02). 공개 함수 = 순수 `classify(closes)` · `normalize_mode(raw)`(부재 = `("off", True)`, 오타·비문자열 = `("off", False)`) + never-raise 로더 `async compute_snapshot(as_of_date, *, preview) -> Snapshot`. 로더는 `stock_master_daily.get_recent_daily("069500", FETCH_ROWS=120)` 와 `trading_calendar.previous_trading_day(as_of_date)` 를 **함수 안 지연 import** 로 부른다(테스트 monkeypatch seam · DB 전용 · KIS 폴백 없음). 판정 순서 = 행 수(`rows_short`) → 신선도(`stale_head` = `head < previous_trading_day(as_of_date)`, 달력을 모르면 `(as_of_date − head).days > STALE_FALLBACK_MAX_CALENDAR_DAYS`(10)) → 종가 품질(`bad_close` = 창 안 결측·비수치·비유한·0 이하) → 그 밖 `exception`. 실패는 전부 `ok=False, state="unavailable", m=1.0` 이다 — 🔴 실패를 m=0(fail-closed)으로 바꾸지 않는다. 최상위 import 는 표준 라이브러리뿐이고 8영역·`scheduler`·`boot_manager`·`market_regime` 을 import 하지 않는다(AST A01). 모든 시장 유닛 마커는 이 모듈의 `logger`(`"src.engine.market_unit"`) 하나로 나가고, 부르는 쪽과 cap 판정은 `StrategyBase` 헬퍼다(하단 `strategy_base.py` 절). ⚠️ `069500` 은 지수 편입이 아니라 시총·거래대금 자격(`scanner._is_daily_load_universe`)으로 일봉 적재 대상에 든다 — 그 자격을 잃으면 매일 `stale_head` 로 m=1 이 된다.
 
@@ -194,6 +195,11 @@ run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, recor
 
 `TIME_STOCK_MASTER_DAILY_LOAD = time(20, 30)` 인 이유 = KRX 애프터마켓 종료(20:00) 뒤라야 그날 거래량이 확정된 값이고, 16:1x~16:40 마스터 작업보다 뒤라야 유니버스 판정이 오늘치 raw 를 본다. 매수 진입과 무관한 데이터 계층이다.
 
+🔴 **20:30 에 쓴 D 봉의 종가·고가·저가는 확정값이 아니다(잠정 봉).** KIS 일봉(FHKST03010100, 시장 `J`)은 D일 20:00 뒤에도 종가를 19:59 애프터마켓 마지막 체결가로, 고저를 애프터마켓까지 넣은 범위로 준다. 정규장 값(15:30 종가·정규장 고저)으로 바뀌는 것은 D일 23:12 뒤 ~ D+1일 05:28 전이다(cycle386 실측, 09-23 봉 종가 불일치 모집단 약 60%). 시가·거래량·거래대금은 잠정 봉과 확정 봉이 같다 — 거래량·거래대금은 확정 봉도 애프터마켓을 포함한다. 잠정 봉은 다음 거래일 아침 부팅이 prepare 직전에 확정한다(아래 「전일 잠정 봉 확정」 절).
+
+- 🔴 **적재 시각을 뒤로 미는 것으로는 못 고친다** — KIS 확정은 23:12 뒤인데 스케줄러 task 는 21:30 정산 뒤 `run_daily` 의 `finally` 에서 전부 cancel 된다. `scanner.py` 의 `_DAILY_LOAD_TODAY_BAR_CUTOFF` 주석에 있는 두 문장 「일봉 OHLC 는 15:30 에 확정되지만」 · 「어긋나면 이 상수와 scheduler 의 일봉 적재 시각을 함께 뒤로 민다」는 사실이 아니다. `scanner.py` 가 8영역이라 이 문서가 정본이다.
+- 21:00 저녁 미리보기는 이 잠정 D 봉을 읽는다(다른 길이 없다 — 확정은 23:12 뒤이고 루프는 21:30 에 끝난다). 그래서 미리보기 목록은 **잠정 종가 기준**이고 다음 날 부팅 목록이 정본이다.
+
 ### 유니버스 선정
 
 - 게이트 = `if is_index or is_qualifier or is_protected:`.
@@ -223,13 +229,13 @@ run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, recor
 
 `_stock_master_daily_load_once` 는 `fetched += 1` **뒤** · `upsert_batch` **앞**에서 `_drop_today_bars(candles, now_kst=load_now_kst, today=today)` 로 확정 전 오늘봉을 폐기한다. 그 자리가 유일하게 안전하다 — 두 fetch 분기(`fetch_daily_candles` / `fetch_daily_candles_backfill`)의 **합류점**이고 `fetched`("KIS 응답을 받았다")·`failed`(KIS 실패 전용) 카운터의 의미가 보존된다.
 
-- **판정 기준 = 시각 단독.** `load_now_kst`(= `datetime.now(KST_TZ)`, **함수 진입 시 1회** — `stock_master.list_all` 페이징 *앞*, tz-aware 필수)가 `_DAILY_LOAD_TODAY_BAR_CUTOFF`(= `time(20, 0)` — KRX 애프터마켓 종료 시각. 그 전에는 당일 거래량이 부분값이다) **이전**이면 `bas_dd >= today` 를 폐기하고, 이후면 `bas_dd > today`(시계 왜곡 방어)만 폐기한다. `bas_dd` 파싱 불가·부재는 **보존**한다.
+- **판정 기준 = 시각 단독.** `load_now_kst`(= `datetime.now(KST_TZ)`, **함수 진입 시 1회** — `stock_master.list_all` 페이징 *앞*, tz-aware 필수)가 `_DAILY_LOAD_TODAY_BAR_CUTOFF`(= `time(20, 0)` — KRX 애프터마켓 종료 시각. 그 전에는 당일 거래량이 부분값이다) **이전**이면 `bas_dd >= today` 를 폐기하고, 이후면 `bas_dd > today`(시계 왜곡 방어)만 폐기한다. `bas_dd` 파싱 불가·부재는 **보존**한다. 20:00 뒤에 남긴 오늘(D) 봉은 거래량은 확정이지만 종가·고저는 잠정 봉이다(위 「시각과 순서」).
 - 🔴 **커트오프는 scanner 전용 상수다.** 값이 같아 보여도 scheduler 의 매매·보드 시각 상수를 재사용하지 않는다 — 매수 보드 시각 변경이 적재 규약을 딸려 바꾸는 커플링을 끊는다(`tradable_boards` ↔ 청산 규약 커플링을 끊어 둔 원칙과 같은 이유). `scanner` 가 `scheduler` 를 import 하면 값의 일치가 **우연**이 아니라 **커플링**이 된다.
 - ⚠️ **데이터 기준(거래량 0 ∧ OHLC 평탄) 금지** — 반증 2건: (a) 장중 재시작이 만드는 **부분봉**은 거래량>0·비평탄이라 데이터 기준을 확정봉인 척 통과한다(껍데기보다 나쁘다 — 평탄하지 않아 눈에 안 띈다) (b) 거래정지 종목의 **진짜 평탄 확정봉**을 저녁 적재에서 죽여 그 날짜 행을 영영 못 갖게 한다. 시각 기준은 둘 다 자동 처리하고 진짜 무거래봉을 정의상 100% 보존한다.
 - **fail-open** — 판정 예외는 전량 upsert 유지(현행 행위) + `[daily_load_today_filter_skipped]` WARNING **실행당 1행**. fail-closed 는 유령 키가 두 전략을 전 기간 체결 0건으로 만든 그 방향이라 금지. 판정 실패는 **캔들 단위**이지 종목 단위가 아니다(`isinstance(candle, dict)` 방어 — 이상 원소 하나가 그 종목의 필터 전체를 무력화하면 오늘 껍데기까지 함께 샌다).
 - **`force=True`(수동 `POST /api/stock-master/refresh-daily`)도 필터를 통과한다** — `force` 는 `latest >= today` 멱등 skip **만** 우회한다. 주말·20:00 이후 수동 보정은 오늘 날짜 봉 자체가 없거나 확정봉이라 무접촉이고, 장중·시간외 수동 실행만 잠정봉을 버린다(설계 의도).
 - **관측 = `[daily_load_today_bar_filter]` 실행당 1행 INFO**(`mode` / `cutoff` / `now` / `today` / `dropped_rows` / `tickers_affected` / `filter_errors`). 종목당 emit 은 하루 1,000행 폭주다. `dropped_rows`(행) ≠ `tickers_affected`(종목)이고, `filter_errors > 0` 이 fail-open 발생을 뜻한다 — 이게 없으면 `dropped_rows=0` 이 "버릴 봉이 없었다" 와 "필터가 전량 죽었다" 를 구분하지 못한다. 유니버스가 비면(`candidates=0` 조기 return) 이 마커가 0행이므로, 안 보이면 `[stock_master_daily_load_begin] candidates=` 를 먼저 본다. `mode=` 는 20:00 을 경계로 keep/drop 이 갈린다.
-- **D 봉의 최종값 보정 담지자 = D+1 정기 실행(20:30)의 7일 증분 창**(`fetch_days=7` → `ON CONFLICT DO UPDATE`). 🔴 그 창을 1~2일로 줄이면 D 봉이 그날 스냅샷에 영구 고정된다(가드 = cycle263 G2 의 "보정 창 존치" 단언).
+- **D 봉을 최종값으로 바꾸는 곳은 둘이다.** 1차 = 다음 거래일 아침 부팅의 `daily_bar_finalize`(prepare 직전, 아래 「전일 잠정 봉 확정」 절). 2차 = D+1 정기 실행(20:30)의 7일 증분 창(`fetch_days=7` → `ON CONFLICT DO UPDATE`). 2차는 그날 유니버스 안 종목만 덮고, 1차는 유니버스가 아니라 DB 행을 보고 고른다 — 유니버스에서 빠진 종목의 잠정 봉도 1차가 고친다. 🔴 7일 창을 1~2일로 줄이지 않는다 — 1차가 꺼졌거나(`daily_bar_finalize_mode=off`) 그 종목에서 실패한 날의 안전망이다(가드 = cycle263 G2 의 "보정 창 존치" 단언).
 - **부작용** — 신규 상장·유니버스 진입 종목의 backfill 은 같은 날 20:30 에 이뤄진다(그 사이 `get_recent_daily_normalized` 는 `reason="miss"` KIS 폴백 = 데이터는 더 정확하지만 장중 KIS 호출이 는다). 최종 커버리지 손실은 0. UI `last_daily_load_at` 은 낮 동안 어제 날짜로 보인다(의미상 정확).
 - 가드 `tests/unit/engine/test_cycle263_daily_load_stub_filter.py` + `tests/unit/ast/test_cycle193_ast_fresh_gate.py`.
 
@@ -242,6 +248,116 @@ run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, recor
 - graceful — KIS 거부·타임아웃이면 그 ticker 를 skip 하고 다음으로 간다.
 - emit `[stock_master_daily_load_summary]` 1행 INFO(`tickers_total` / `inserted` / `skipped` / `failed` / `elapsed_ms`) + `db_write_failures` 카운터.
 - 어댑터 `get_recent_daily_normalized`(`src/db/stock_master_daily.py`)는 전략 6파일의 `prepare()`(`expected_head` 전달) · kojiro `recompute_held_atr` · `llm_buy_gate`(뒤의 둘은 인자 없이 달력 판정)가 쓴다. 신선도 판정 계약 = `src/db/CLAUDE.md` `stock_master_daily.py` 절.
+
+### 전일 잠정 봉 확정 (`daily_bar_finalize.py`, 부팅 prepare 직전)
+
+20:30 적재가 쓴 D 봉은 종가·고저가 잠정이다(위 「시각과 순서」). 그래서 다음 거래일 아침 부팅이 prepare 직전에 잠정 봉만 골라 KIS 에서 다시 받아 덮는다. 20:30 적재는 그대로다. 새 컬럼도 새 KIS API 도 없다 — 받는 TR 은 적재와 같은 FHKST03010100 시장 `J` 다. 명세 = `_workspace/domain_consult/cycle386_daily_close_after_market.md` §8.
+
+**배선** — `boot_manager.boot()` 안 두 자리다. `scheduler.py`·`scanner.py` 는 이 기능에 0줄이다.
+- 토큰 발급 직후 = `daily_bar_finalize.spawn(phase="boot")`. 태스크를 띄우기만 한다. 설정 로드·잔고·레짐(최대 25초)·자금 배분·`count_active` 대기와 겹쳐 돈다.
+- `emit_daily_head_staleness()` 바로 앞 = `wait_for_boot(task, budget_secs=BOOT_BUDGET_SECS)`. 그 뒤 prepare 루프가 확정된 봉을 읽는다.
+- 순서 `get_token` < `spawn` < `wait_for_boot` < `emit_daily_head_staleness` < prepare 는 AST G5(a) 가 잠근다.
+
+**상수**
+
+| 상수 | 값 | 뜻 |
+|---|---|---|
+| `FINAL_BOUNDARY_TIME` | `time(6, 0)` | 확정 경계 = 봉 다음 날 06:00 KST. 관측된 가장 늦은 「아직 바뀌는 중」(05:28)에 32분 여유 |
+| `WINDOW_CAL_DAYS` | 21 | 대상 조회 창 — `since = 오늘 − 21일` |
+| `MAX_SPAN_CAL_DAYS` | 130 | 종목당 1회 호출 구간 상한(KIS 100봉 한도 안) |
+| `RANGE_PAD_CAL_DAYS` | 10 | 받는 구간 앞 여유 — 교차검증에 헤드 앞 봉이 필요하다 |
+| `BOOT_WORKERS` | 3 | 부팅 대기 중 동시 일꾼 수 |
+| `BOOT_BUDGET_SECS` | 90 | 부팅이 기다리는 상한 |
+| `BG_SLEEP_SECS` | 0.05 | 예산을 넘긴 뒤 배경 일꾼이 종목 사이에 쉬는 시간(약 7건/초) |
+| `HARD_CAP_SECS` | 600 | 확정 시작부터 이 시간이 지나면 멈춘다 |
+
+- 관계(AST G6) = `WINDOW_CAL_DAYS + RANGE_PAD_CAL_DAYS ≤ MAX_SPAN_CAL_DAYS ≤ 140` · `1 ≤ BOOT_WORKERS ≤ 20` · `0 < BOOT_BUDGET_SECS < HARD_CAP_SECS`.
+- 배경 일꾼 수는 상수가 없다. 전환 뒤 `_run_workers` 가 0번 일꾼 하나만 남긴다.
+
+**잠정 판정 — `updated_at` 하나로 한다.** `stock_master_daily.list_provisional_rows(*, since, head, today_boundary)` 가 SQL 로 고른다. `updated_at` 규약 = `src/db/CLAUDE.md` `stock_master_daily.py` 절.
+- 헤드 `head` = `stock_master_daily.max_bas_dd_before(오늘)` = `max(bas_dd) WHERE bas_dd < 오늘`(오늘 = KST 날짜). 오늘·미래 날짜 봉은 조건에서 빠진다(오늘 껍데기 봉 방어). 휴장일 달력은 쓰지 않는다.
+- 헤드 조회는 예외를 삼키지 않는다. 실패하면 `result=error stage=head` 로 끝난다. 결과가 `None`(오늘 앞 봉이 하나도 없음)이면 `result=noop` 이고 `head=` 는 빈 값이다.
+- 헤드 행 = `updated_at < 오늘 06:00` 이면 잠정.
+- 헤드보다 옛 행 = `updated_at < (bas_dd + 1일) 06:00 KST` 이면 잠정.
+- 헤드에 더 보수적인 기준을 쓰는 이유 = 주말·연휴 중 쓰기가 확정인지 모른다(KIS 야간 처리가 비영업일에도 도는지 모른다). 헤드는 prepare 가 직접 읽는 행이라 한 번 더 받는 비용이 싸다.
+- 같은 날 재기동은 대상이 0 이다. 아침에 덮은 행은 `updated_at` 이 06:00 뒤다.
+- 00:00~06:00 에 수동 기동해도 안전하다. 그때 쓴 행은 06:00 전이라 잠정으로 남고 다음 부팅이 다시 받는다(`start()` 는 20:00 이후만 거부한다).
+
+**흐름 — `finalize_once(*, now_kst=None, phase)`**
+1. 모드를 읽는다(아래 킬스위치). `off` 면 `result=noop` 1행을 남기고 끝난다.
+2. 대상을 조회해 종목별로 `oldest`·`newest` 로 묶는다. 헤드보다 뒤 행은 버린다.
+3. 순서 = ① `069500`·`229200`(시장 유닛·ETF 레짐 입력) ② DB `positions` 보유 종목(청산 입력 ATR·스테이지) ③ 나머지를 `newest` 내림차순 → 종목코드순. 예산을 넘겨도 prepare 가 가장 많이 읽는 헤드가 먼저 확정된다. 보유 조회가 실패하면 ② 없이 진행한다.
+4. 받기 = `condition.fetch_daily_chart_ranged_with_summary(ticker, start, end)`. `start = oldest − 10일`, `end = newest` 다. `end` 는 항상 헤드 이하라 **오늘 봉을 받지 않는다**(AST G5 d). 구간이 130일을 넘으면 `start` 를 `newest − 130일` 로 자르고 `span_clipped` 로 센다. 응답에서 `[start, newest]` 밖 봉은 버린다.
+5. 교차검증 — 그 종목의 `newest` 가 헤드일 때만 한다. `prdy` = `output1.stck_prdy_clpr`.
+   - `prdy` == 헤드 봉 종가 → `verified`
+   - `prdy` == 헤드 앞 봉 종가 → `unrolled`. KIS 요약이 아직 날짜를 넘기지 않은 것이다. 시각 기준으로 받아들여 쓴다
+   - 그 밖 → `mismatch` → **그 종목은 쓰지 않는다**
+   - 응답에 헤드 봉이 없음 → `missing` → 쓰지 않는다
+   - 응답이 비었거나 KIS 예외 → `failed` → 쓰지 않는다
+6. 쓰기(`enforce`) = 기존 `stock_master_daily.upsert_batch(ticker, 받은 봉 전부)`. 새 쓰기 SQL 은 없다. 쓰기 전 DB 값과 비교해, 잠정이던 행 중 값이 바뀐 행을 `close_changed`·`hl_changed` 로 센다. upsert 가 예외이거나 돌려준 수가 보낸 수보다 적으면 `db_write_failures` 다. `observe` 는 받고 비교만 하고 쓰지 않는다.
+
+**예산과 배경**
+- `wait_for_boot` = `asyncio.wait_for(asyncio.shield(task), timeout=budget_secs)`. 예산을 넘겨도 태스크를 **취소하지 않는다**. 배경 전환 신호만 켜고 돌아오고, 부팅은 prepare 로 간다.
+- 전환 뒤 첫 일꾼이 `result=budget_exceeded` WARNING 1행을 남긴다. 그 뒤로 0번 일꾼 하나만 `BG_SLEEP_SECS` 간격으로 나머지를 처리하고, 끝에 `phase=background` 요약 1행을 더 남긴다.
+- 확정 시작부터 `HARD_CAP_SECS` 가 지나면 멈추고 `result=hard_cap` 을 남긴다. 판정은 종목 사이에서 한다.
+- 태스크 참조는 모듈 전역 `_BG_TASKS` 가 붙든다(`funnel_capture._BG_TASKS` 관례).
+- `wait_for_boot` 는 부팅을 멈추지 않는다. 태스크가 없으면 바로 돌아오고, 예산을 넘기면 위처럼 배경으로 돌린 뒤 돌아온다. 태스크의 예외는 WARNING 을 남기고 흡수한다.
+- `CancelledError` 는 부팅 자신에게 취소 요청이 걸렸을 때만 전파한다(`asyncio.current_task().cancelling() > 0`). 확정 태스크만 밖에서 취소됐으면 WARNING `wait_for_boot 확정 태스크가 외부에서 취소됐다` 를 남기고 부팅을 계속한다. `shield` 는 부팅이 취소될 때 확정 태스크를 지킬 뿐, 확정 태스크 자신의 취소는 그대로 올려 보내기 때문이다.
+- 호출은 `kis_get_quote`(시세 풀)로 나가 전역 한도 20건/초(`src/api/base.py` `_rate_limit`)를 주문과 함께 쓴다. 부팅 대기 중(주문 없음)은 3 일꾼으로 한도까지 쓰고, 배경은 1 일꾼 + 0.05초로 약 7건/초만 쓴다(20:30 적재와 같은 보폭).
+
+**실패 방향 — 매수를 막지 않는다(fail-open). 잠정 값을 조용히 쓰지도 않는다(개수 + 표본을 마커에).**
+- 🔴 종목 단위로 매수 후보에서 빼지 않는다. 유령 키가 두 전략을 전 기간 체결 0건으로 만든 fail-closed 방향이다.
+- `finalize_once` 는 `CancelledError` 말고는 예외를 밖으로 내지 않는다. 단계별 `try` 밖 예외는 바깥 `try` 가 받는다(`stage=unexpected`).
+- 일꾼 하나가 못 잡은 예외로 죽으면 `_run_workers` 가 나머지 일꾼을 취소하고, 멈출 때까지 기다린 뒤 다시 던진다. 그래서 `stage=processing` 요약이 찍힌 뒤에는 어떤 일꾼도 쓰지 않는다.
+- 실패한 종목은 잠정 상태로 남는다. 다음 부팅(창 21일)과 D+1 20:30 7일 창이 다시 받는다.
+
+**킬스위치 `system_config.daily_bar_finalize_mode`**
+- 키 없음 = `enforce` · `observe`(받고 비교만) · `off`(아무것도 안 함) · 행은 있는데 모양이 틀림 = `observe` · 조회 실패 = `enforce`(요약에 `mode=enforce(db_error)`).
+- 조회 실패를 `enforce` 로 두는 이유 = 쓰는 값이 KIS 확정값이라 고치는 것 자체가 안전하다.
+- 판정은 `system_config._select_value`·`_string_from_raw` 를 재사용한다(cycle369 `status_exit_mode` 와 같은 판정).
+- 읽는 때 = `finalize_once` 시작마다. 그래서 바꾼 값은 **다음 부팅부터** 먹는다. 🔴 운영 DB 쓰기라 승인 대상이다.
+
+**마커**
+- `[daily_bar_finalize] phase=boot|background mode= result=ok|noop|budget_exceeded|hard_cap|error [stage=] head= since= targets= fetched= upserted_rows= close_changed= hl_changed= verified= unrolled= mismatch= missing= failed= db_write_failures= span_clipped= pending= elapsed_ms= [sample_failed=<≤5>] [sample_mismatch=<≤5>]` — 실행당 1행. 예산을 넘긴 날은 `budget_exceeded` 1행 + `phase=background` 1행이다.
+- **INFO 는 `result` 가 `ok`·`noop` 이고 `failed`·`missing`·`mismatch`·`db_write_failures` 가 전부 0 일 때뿐이다.** 나머지는 WARNING 이다. `noop`(대상 0)도 1행을 남긴다 — 「안 돌았다」와 「고칠 것이 없었다」를 가른다.
+- `stage=`(`result=error` 일 때만) = `head`(헤드 조회 실패) · `select`(대상 조회 실패) · `processing`(일꾼 단계 예외 — 나머지 일꾼을 멈춘 뒤 찍는다. traceback 을 함께 남긴다) · `unexpected`(그 밖 예외 — 대상 묶기·순서 정하기 등. traceback 을 함께 남긴다). `head`·`select` 는 아무것도 고치지 않은 것이다.
+- `mode=off` 가 아닌데 `result=noop head=`(빈 값)이면 테이블에 오늘 앞 봉이 하나도 없는 것이다. 헤드 조회 실패는 `stage=head` 로 따로 찍힌다.
+- 요약 마커를 남기지 않는 경로는 취소(`CancelledError`) 하나다.
+- `unrolled` 는 실패가 아니다. 그 개수는 「`stck_prdy_clpr` 가 D 로 넘어가는 시각」을 운영 중에 모으는 표본이다.
+- 두 번째 눈 = `[prev_close_overwrite]`(`src/api/CLAUDE.md` `condition.py` 절). 09:30 급등 스캔이 `ticker_prev_close` 를 기준가로 덮을 때 값이 달랐던 종목을 남긴다.
+- 성공 서명 = 07:45 기동이면 07:46~07:47 에 `phase=boot result=ok` 1행 · `close_changed` 가 `targets` 의 약 40~60%(예상 — 09-23 봉 실측 비율. `targets` 는 종목 수, `close_changed` 는 행 수라 세는 단위가 다르다. 평시엔 종목당 잠정 행이 1개라 견줄 수 있다) · `[prev_close_overwrite]` 는 권리락·배당락 종목 말고 0.
+- 판독 = `unrolled` 가 대부분인데 `close_changed` 가 거의 0 이면, 그날 부팅 시각까지 KIS 가 아직 정규장 값으로 바꾸지 않은 것이다(아래 한계 1).
+
+**시각 불변식(AST G7)** — `TIME_SESSION_START_CUTOFF`(20:00) + `HARD_CAP_SECS` ≤ `TIME_STOCK_MASTER_DAILY_LOAD`(20:30) < `quote_token_refresh.TIME_QUOTE_TOKEN_REFRESH` − 10분. 가장 늦은 부팅(19:59)도 20:10 전에 끝나 20:30 적재와 20:35~ 보조 토큰 창에 겹칠 수 없다.
+
+**부팅 시간** — 늘어나는 시간 = 확정 소요 − 겹친 시간(설정·잔고·레짐). 평시 약 +20~45초(예상), 최악은 예산만큼 +90초다. 그만큼 +600초 레거시 재준비(「funnel 스냅샷 캡처」 절)의 시작도 밀린다. 07:45 기동의 최악이면 레거시 재준비가 ≈07:59:45 에 끝나 08:00 NXT 프리장까지 여유가 얇다. 요약의 `elapsed_ms` 로 본다.
+
+**다른 장치와의 관계**
+- 예산을 넘긴 날은 부팅 prepare 가 확정 전 종목을 읽는다. 그날 후보는 +600초 레거시 재준비가 확정된 DB 로 다시 만든다. 배경은 확정 시작 + 600초에 반드시 끝나고, 레거시 재준비 task 는 `_boot()` 뒤에 만들어져 +600초에 시작하므로 항상 그 뒤다. 🔴 S2 가 레거시 분기를 없앨 때 이 역할을 넘겨받아야 한다.
+- 전략 객체(`_candidates`·`_held_stage3`·`_entry_atr` …)는 읽지도 쓰지도 않는다 — DB 만 쓴다(cycle364 PV-1 과 교집합 0). 보유 종목의 진입 ATR 스탬프는 그대로다. 부팅 prepare 가 확정 봉으로 트레일링 ATR·kojiro 스테이지를 다시 계산하는 것은 원래 부팅의 일이다. 애프터마켓이 넓힌 고저가 걷혀 ATR 이 조금 줄 수 있다.
+- 시장 유닛은 4전략 prepare 안에서 계산하므로 확정값을 읽는다(`069500` 이 순서 ①). ETF 레짐(관찰 전용)은 prepare **앞**(`_refresh_market_regime_and_persist`)에서 계산돼 확정 전 잠정 종가를 읽을 수 있다.
+- 부팅 즉시 일봉 적재(`start()` + 240초, 전날 20:30 결손 날만)와 배경이 겹쳐도 결과는 같다. 둘 다 같은 아침의 KIS 값을 같은 upsert 로 쓴다.
+- `_drop_today_bars`·cycle363 `expected_head` 는 무변경이다. 헤드 날짜는 그대로이고 값만 바뀐다.
+- ④ `[funnel_boot_vs_evening]` 에 주는 영향 = 「funnel 스냅샷 캡처」 절 ④ 항목.
+
+**알려진 한계**
+1. 06:00 경계는 표본 두 묶음(05:28 적재 11종목 · 07:56 적재 25종목)으로 정했다. KIS 야간 처리가 부팅보다 늦는 날은 잠정 값을 받아 쓰고, 그 행은 06:00 뒤에 쓴 것이라 확정으로 분류된다. `output1` 이 이미 넘어가 있으면 `mismatch` 로 잡힌다. 둘 다 안 넘어간 날(`unrolled` 대부분)은 못 잡고, D+1 20:30 7일 창이 다시 덮는다.
+2. 권리락·배당락일은 전일종가와 기준가가 달라 `mismatch` 가 날 수 있다. 그 종목은 락 게이트(`_row_has_lock`)가 prepare 에서 KIS 로 폴백시키고, D+1 20:30 7일 창이 덮는다.
+3. 수정주가(`FID_ORG_ADJ_PRC="0"`) 값으로 구간을 덮는다. 그 사이 액면분할 등이 있었으면 덮은 구간과 그 앞 DB 봉의 기준이 다를 수 있다. 창을 21일로 묶은 이유다.
+4. 21일보다 옛 잠정 봉은 대상이 아니다.
+
+**롤백** — 즉시(다음 부팅부터) = `daily_bar_finalize_mode = 'off'`(승인 대상). 코드 = 커밋 되돌리기. 이 leaf 가 쓴 데이터는 KIS 확정값이라 되돌릴 필요가 없다.
+
+**테스트 격리** — 루트 `tests/conftest.py` autouse `_neutralize_daily_bar_finalize` 가 `finalize_once` 를 즉시 끝나는 빈 코루틴으로 바꾼다. `spawn`·`wait_for_boot` 는 실물이라 배선은 그대로 돈다.
+- 🔴 그래서 `spawn` 은 `finalize_once` 를 **모듈 전역 이름으로** 불러야 한다. 이름을 미리 묶으면 중립화가 새어 테스트가 실제 DB·KIS 에 닿는다(G9-5).
+- leaf 를 직접 검증하는 테스트만 마커 `real_daily_bar_finalize` 로 옵트아웃한다. 마커 사용처는 허용 목록으로 묶는다(G9-6).
+
+**가드·회귀**
+- `tests/unit/ast/test_cycle386_ast_finalize.py` — G5(부팅 순서 · import 제약 · `stock_master_daily` 쓰기는 `_UPSERT_DAILY_SQL` 하나 · naive 벽시계 0) · G6(상수) · G7(시각).
+- `tests/unit/engine/test_cycle386_daily_bar_finalize.py` — G2(쓰기·비교·교차검증·모드) · G3(실패 경로) · G4(예산·배경·하드캡).
+- `tests/unit/engine/strategies/test_cycle386_prev_close_regression.py` — G8. 394800 가짜 전일종가 5,520 이면 momentum BUY, 확정 5,800 이면 NONE. 393210(momentum NONE) · 441270(LTV `min_prdy_rate` 에 막힘) · 323350(VB `prev_range` 1,660 → 1,050)도 확정 뒤 정규장 기준 판정으로 돌아온다.
+- `tests/unit/engine/test_cycle386_finalize_neutralization.py`(G9) · `tests/unit/db/test_cycle386_list_provisional_rows.py` · `tests/unit/api/test_cycle386_daily_chart_summary.py`.
+- 실 Postgres `tests/integration/test_cycle386_provisional_predicate_pg.py` — G1 경계 · 세션 시간대 무관 · `updated_at` 을 다시 쓰는 트리거 없음 · 왕복 뒤 같은 날 재기동 noop · 오늘·미래 행이 있어도 헤드는 오늘 앞 최신 봉(`max_bas_dd_before` 실 SQL — 단위 하네스는 그 SQL 을 가짜로 둔다).
 
 ### basics 갱신 (`_stock_master_basics_refresh_once`)
 
@@ -324,7 +440,7 @@ run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, recor
   - **보충 적재가 도는 날**(직전 영업일 정기 실행 결손 = `reason=stale` · 휴장일 모름 = `calendar_unknown` · full_universe 행 수 미달 = `below_floor`)에는 그 적재가 바꾼 입력을 라이브 후보에 반영하는 경로가 이 재준비다. 이 반영은 순서 보장이 아니라 경합에 기댄다 — 레거시 재준비는 아무것도 기다리지 않아 +240초 일봉 보충 적재의 **완료**를 기다리지 않는다.
   - 🔴 **이 즉시 1회에 게이트를 걸지 않는다** — 재준비의 `self._candidates = {}` 가 donchian 보유 종목을 후보에서 지워, 그날 트레일링 ATR 이 `_entry_atr`(매수 시점 ATR)로 떨어진다. 재준비를 건너뛰면 그 기준이 부팅 recompute 의 오늘 ATR 로 바뀐다. 청산 규약 변화라 그 결정(cycle360 카드 3)이 게이트보다 먼저다(근거 = `_workspace/domain_consult/cycle360_boot_reprepare_4a_proposal.md` §1.4·§5).
   - ✅ **「같은 입력」을 깨던 예외 경로(F-1) — cycle363 배포 전 보강으로 시정(사용자 승인 8영역).** 월요일·연휴 뒤 장전에는 `scanner._scan_pool_eager_refresh_loop`(5분 주기)가 24h 를 넘긴 풀 종목을 갱신하는데, 그 갱신과 +600초 재준비가 **같은 시각(T+600)에 시작하는 것 자체는 여전하다**(독립 검증 finding #1/#5, 09-28 에 실제로 겹칠 것으로 추정). 바뀐 것은 그 갱신이 더 이상 raw 를 통째로 지우지 않는다는 것이다 — `upsert_one` 전에 basics 경로(cycle176)와 같은 `{**기존 raw, **신규 raw}` 머지를 넣어, 장전 0 값 키(`_ZERO_VALUE_SKIP_KEYS` — `acml_tr_pbmn` 등)가 사라지지 않고 기존 값에서 보존된다. 그래서 재준비가 그 갱신과 겹쳐도 `list_by_filter` 거래대금 임계(`acml_tr_pbmn_won`)가 더 이상 NULL 로 떨어지지 않는다. 판별 마커 = `[scan_pool_eager_refresh] refreshed=N`(N>0 이면 그 사이클이 실제로 돌았다는 뜻, 결함 여부와 무관) + `select count(*) from stock_master where not raw ? 'acml_tr_pbmn'`(머지가 살아 있으면 이 값이 늘지 않아야 한다). 회귀 = `tests/unit/engine/test_cycle363_scan_pool_eager_refresh_raw_merge.py`.
-  - ⚠️ **07:59 사전 구독 재준비가 이 분기 뒤에서 기다릴 수 있다.** 두 준비는 같은 잠금을 쓰고, 07:45 기동이면 레거시(≈07:57 시작, 60~75초)가 `TIME_PRESUBSCRIBE`(07:59)에 걸친다. 사전 구독 재준비는 부팅 뒤 VB/LTV 후보나 스윙 후보가 빈 날에만 돈다(부팅 준비 실패 회복). `asyncio.Lock` 은 들어온 순서대로 넘기므로 기다림은 호출 하나당 전략 하나의 준비(VCP 약 35초)까지다. 그 사이 뒤에 이어지는 사전 구독(보유 포함)과 08:00 프리장 진입이 그만큼 밀린다.
+  - ⚠️ **07:59 사전 구독 재준비가 이 분기 뒤에서 기다릴 수 있다.** 두 준비는 같은 잠금을 쓰고, 07:45 기동이면 레거시(≈07:57 시작, 60~75초)가 `TIME_PRESUBSCRIBE`(07:59)에 걸친다. 부팅이 전일 잠정 봉 확정 대기로 길어진 날은 레거시 시작도 그만큼 늦다(평시 +20~45초, 최악 +90초 — 「저녁 데이터 적재」 절). 사전 구독 재준비는 부팅 뒤 VB/LTV 후보나 스윙 후보가 빈 날에만 돈다(부팅 준비 실패 회복). `asyncio.Lock` 은 들어온 순서대로 넘기므로 기다림은 호출 하나당 전략 하나의 준비(VCP 약 35초)까지다. 그 사이 뒤에 이어지는 사전 구독(보유 포함)과 08:00 프리장 진입이 그만큼 밀린다.
 - 🔴 **S2 가 이 분기를 없앤다** — 아침 재준비를 「입력이 실제로 바뀐 날만」으로 바꾸는 판정(②)·완료 대기와 조용한 창(③)·비상 캡처는 **아직 코드가 없다**(설계 = `_workspace/domain_consult/cycle364_a1_as_of_design.md` §4·§5). S2 착수 근거는 아래 ④ 의 평시 `same=1` 실측이다.
 
 ### 하루 쓰기 순서와 확정 행 보호
@@ -348,6 +464,7 @@ run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, recor
   - 못 구한 축은 `None`(모름)이다. 한 호출 안에서 첫 쿼리 실패가 나면 `[funnel_boot_vs_evening] phase=boot hint_error=<축>` WARNING 1행을 남긴다(세 쿼리가 다 실패해도 1행). 힌트가 `None` 이면 아래 WARNING 판정이 서지 않으므로, 이 행이 「꺼진 판정」과 「깨끗한 결과」를 가른다. 이 행은 ④ 실패(`error=`)가 아니다.
   - PG 왕복 = `tests/integration/test_cycle364_boot_vs_evening_hints_pg.py` — 창 안·밖 행을 심고 세 개수가 정확한 정수인지, `head_now` 가 `max(bas_dd)` 인지 본다.
 - 행 = 전략마다 `[funnel_boot_vs_evening] phase=boot strategy= as_of= evening_at= evening_n= boot_n= same= added= removed= sample_added=<≤5> sample_removed=<≤5> held_excluded= params_changed= bars_changed_after= sm_refreshed_after= head_now=`. 기본은 INFO 다. `same=0` 이면서 세 힌트가 **전부 0** 일 때만 WARNING(설명 안 되는 차이)이다 — 힌트가 `None` 이면 WARNING 이 아니다.
+- ⚠️ **전일 잠정 봉 확정이 켜진 날은 `bars_changed_after` 가 평일마다 수백 이상이다** — `daily_bar_finalize` 가 부팅 prepare 앞에서 헤드 봉 약 970행을 다시 쓰기 때문이다(「저녁 데이터 적재」 절). 틀린 값이 아니라 아침에 입력이 실제로 바뀐 것이다. 그래서 「세 힌트 전부 0 인데 목록이 다르다」 WARNING 은 평일에 거의 나지 않는다. 🔴 S2 착수 근거로 모으는 평시 `same=1` 표본은 이 leaf 배포 전후를 합산하지 않는다. S2 가 쓸 입력 변화 신호는 `updated_at` 이 아니라 `[daily_bar_finalize]` 의 `close_changed`·`hl_changed` 다.
 - 🔴 **실패는 조용히 사라지지 않는다** — 이 대조가 S2 착수의 판정 근거라서다. 전략 한 줄의 예외는 그 전략만 격리하고 끝에 `[funnel_boot_vs_evening] phase=boot error=strategy_failed strategies=<…>` WARNING 1행. `list_snapshots` 실패는 `error=list_snapshots_failed strategies=<활성 전부>` WARNING 1행이다(`evening=absent` 로 보고하지 않는다). 타임아웃과 그 밖 예외는 `error=timeout_or_exception strategies=<아직 못 낸 전략>` WARNING 1행. WebSocket 단계가 120초 안에 안 생기면 `error=ws_not_started`(위).
 
 ### 기타

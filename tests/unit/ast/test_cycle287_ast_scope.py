@@ -228,7 +228,19 @@ _BASE_SHA = {
 #: 🔁 cycle382 재핀 — 신규 leaf `src/engine/market_unit.py`(시장 유닛 단계형,
 #: 사용자 결정 09-27) 추가로 161 → **162**. `strategy_base.py` + 터틀 4전략 +
 #: `param_catalog.py` 도 이 사이클에 함께 바뀌지만 파일 수는 신규 1개뿐이다.
-_SRC_TREE_FILES = 162
+#: 🔁 cycle386 재핀 — 신규 leaf `src/engine/daily_bar_finalize.py`(부팅 prepare 직전
+#: 전일 「잠정 봉」 확정, 8영역·scheduler·scanner·boot_manager·strategies import 0)
+#: 추가로 162 → **163**. `boot_manager.py`(spawn·wait_for_boot 배선 2줄) +
+#: `condition.py`(`fetch_daily_chart_ranged_with_summary` + `[prev_close_overwrite]`
+#: 관측) + `db/stock_master_daily.py`(`list_provisional_rows`)도 이 사이클에 함께
+#: 바뀌지만 파일 수는 신규 1개뿐이다. 사용자 결정 2026-09-28 「지금 최우선」.
+#: 🔁 cycle386(backend-dev 리뷰 반영) 재핀(값만, 파일 수 불변 163) — R1(바깥 try
+#: + `stage=unexpected`) · F1+F2(헤드 조회를 삼키지 않는 `max_bas_dd_before` 신설,
+#: `stock_master_daily.py`) · R3(`_run_workers` 형제 취소) · R4(`wait_for_boot` 의
+#: 자기-취소 판별) · `BG_WORKERS` 제거로 `daily_bar_finalize.py`·`db/stock_master_daily.py`
+#: 내용만 바뀌었다(둘 다 이미 이 digest 안에 있던 파일 — 신규 파일 0). 직전 값 =
+#: `ff762eccb539f487045d133e9fc75f9a03f0d985a37037fd073f67d60208786c`.
+_SRC_TREE_FILES = 163
 #: ⚠️ 값은 **cycle285 적대 검증 반영** 기준선이다. 그 직전(초판 cycle285 배포)
 #: digest 는 `97483c5114a1d00dc8f7ca7c1ed08e1b3dc1d0b585065b14176dc227da9bed8c` 였다.
 #: cycle287b 배포분의 digest 는
@@ -616,8 +628,15 @@ _SRC_TREE_FILES = 162
 # 평가했을 때만 남는다 + 키 부재는 INFO) + 그룹 헤더 주석 카운트 정정(entry
 # 47→49·sizing_risk 8→9). 매매 행위·값 변경 없음. 직전 값 =
 # `ebffb3a8c2fc0a6efc1da870555ebe0587b91a70e004c180dd836e1b3da67de9`.
+# 🔁 cycle386 재핀(파일 수 162 → 163) — 신규 leaf `daily_bar_finalize.py` +
+# `boot_manager.py`(spawn/wait_for_boot 배선) + `condition.py`(요약 조회 함수 +
+# 관측 마커) + `db/stock_master_daily.py`(`list_provisional_rows`)가 바뀌었다.
+# 직전 값 = `dc10a109c238be270993c3e5ac72428e714db21539a6b18f030047dad02dab22`.
+# 🔁 cycle386 마무리 재핀(값만) — `daily_bar_finalize.py` 의 `stage=processing` WARNING 에
+# traceback(exc_info) 추가(설계 §8-6). 매매 행위 변경 없음. 직전 값 =
+# `08d10c7cde9ff00816c86c70a9363fb4c6c0a50e73b9fc76f9075771c68c7b80`.
 _SRC_TREE_DIGEST = (
-    "dc10a109c238be270993c3e5ac72428e714db21539a6b18f030047dad02dab22"
+    "09bf5172aa7dde199fcab116470a4f4ad18d33e28d2265a8c29623e50762a354"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
@@ -645,7 +664,8 @@ _PINNED_DIR_FILE_COUNTS = {
     # cycle379 — 신규 leaf `buying_reconcile.py` 로 81 → 82.
     # cycle380 — 신규 leaf `etf_like.py` 로 82 → 83.
     # cycle382 — 신규 leaf `market_unit.py` 로 83 → 84.
-    "src/engine": 84,
+    # cycle386 — 신규 leaf `daily_bar_finalize.py` 로 84 → 85.
+    "src/engine": 85,
 }
 
 #: `scheduler.py` 정확 라인 수 + cycle257 영구 상한.

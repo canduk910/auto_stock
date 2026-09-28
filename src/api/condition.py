@@ -462,6 +462,43 @@ async def inquire_stock_basics(pdno: str) -> "StockBasics":
     )
 
 
+def _prev_close_overwrite_cap():
+    """`KstDailyEmitCap` 지연 import(cycle369 관측 훅과 같은 api→engine 선례)."""
+    from src.engine.daily_emit_cap import KstDailyEmitCap
+
+    global _PREV_CLOSE_OVERWRITE_LOGGED
+    if _PREV_CLOSE_OVERWRITE_LOGGED is None:
+        _PREV_CLOSE_OVERWRITE_LOGGED = KstDailyEmitCap()
+    return _PREV_CLOSE_OVERWRITE_LOGGED
+
+
+_PREV_CLOSE_OVERWRITE_LOGGED = None
+
+
+def _observe_prev_close_overwrite(ticker: str, old: int, new: int) -> None:
+    """cycle386 — `[prev_close_overwrite]` (INFO, 종목당 하루 1회, 행위 0).
+
+    09:30 등락률 스캔이 `ticker_prev_close` 를 `stck_sdpr`(기준가)로 덮을 때,
+    기존 값이 0 보다 크고 새 값과 **다르면** 1행 남긴다 — cycle386 확정 leaf 가
+    실패한 종목을 운영 중에 보여 주는 두 번째 눈이다. 값 대입 자체는 그대로다
+    (이 함수는 로그만 남기고 어떤 것도 바꾸지 않는다).
+    """
+    if old <= 0 or new <= 0 or old == new:
+        return
+    try:
+        cap = _prev_close_overwrite_cap()
+        if not cap.should_emit(ticker):
+            return
+        diff_pct = (new - old) / old * 100
+        logger.info(
+            "[prev_close_overwrite] ticker=%s old=%d new=%d diff_pct=%.2f%%",
+            ticker, old, new, diff_pct,
+        )
+        cap.mark_emitted(ticker)
+    except Exception:
+        logger.debug("[prev_close_overwrite_failed] ticker=%s", ticker, exc_info=True)
+
+
 def _notify_status_observer(ticker: str, output) -> None:
     """cycle369 — 종목상태(관리·단기과열) 관측 훅. 매수 차단 레지스트리에 기록만
     한다. never-raise.
@@ -727,6 +764,45 @@ async def fetch_daily_candles_ranged(
     return [c for c in output if c.get("stck_bsop_date")]
 
 
+async def fetch_daily_chart_ranged_with_summary(
+    ticker: str, start_yyyymmdd: str, end_yyyymmdd: str,
+) -> tuple[dict, list[dict]]:
+    """cycle386 — `fetch_daily_candles_ranged` 형제 + `output1`(단건 요약) 동봉.
+
+    원천 = 지금 쓰는 TR 그대로(FHKST03010100, 시장 `J`, 일봉 `D`, 수정주가 `0`) —
+    신규 KIS API 0, 형제 함수와 같은 파라미터·6자리 가드. 차이는 `output1` 을
+    함께 돌려주는 것뿐이다 — `stck_prdy_clpr`(오늘 기준 전일종가)로 헤드 봉의
+    교차검증을 한다(`daily_bar_finalize.finalize_once` §8-4 ⑥).
+
+    형제 `fetch_daily_candles_ranged` 는 무변경(반환형 `list` 그대로, 호출자
+    `fetch_daily_candles_backfill` 영향 0). 캐시·single-flight 없음(부팅 1회
+    호출용) — 두 번 부르면 KIS 두 번이다.
+
+    Returns:
+        (output1, output2) — output1 은 단건 요약 dict(빈 응답이면 `{}`), output2 는
+        `stck_bsop_date` 빈 placeholder 를 제거한 리스트(빈 응답이면 `[]`).
+
+    Raises:
+        ValueError: ticker 6자리 미준수.
+    """
+    if not (isinstance(ticker, str) and len(ticker) == 6 and ticker.isdigit()):
+        raise ValueError(f"ticker 는 6자리 숫자여야 합니다: {ticker!r}")
+
+    params = {
+        "FID_COND_MRKT_DIV_CODE": "J",
+        "FID_INPUT_ISCD": ticker,
+        "FID_INPUT_DATE_1": start_yyyymmdd,
+        "FID_INPUT_DATE_2": end_yyyymmdd,
+        "FID_PERIOD_DIV_CODE": "D",
+        "FID_ORG_ADJ_PRC": "0",
+    }
+    data = await kis_get_quote(DAILY_PRICE_URL, "FHKST03010100", params)
+    output1 = data.get("output1") or {}
+    output2 = data.get("output2") or data.get("output") or []
+    output2 = [c for c in output2 if c.get("stck_bsop_date")]
+    return output1, output2
+
+
 async def fetch_daily_candles_backfill(
     ticker: str, total_days: int = 120, *, window: int = 100
 ) -> list[dict]:
@@ -850,6 +926,7 @@ async def fetch_rising_stocks() -> list[dict]:
             # 전일종가 저장 (실시간 등락률 계산용)
             prev_close = int(detail.get("stck_sdpr", "0"))
             if prev_close > 0:
+                _observe_prev_close_overwrite(ticker, ticker_prev_close.get(ticker, 0), prev_close)
                 ticker_prev_close[ticker] = prev_close
             enriched.append(merged)
         except Exception:

@@ -869,7 +869,7 @@ gantt
 | 시각 | 동작 |
 |------|------|
 | 07:45 | 자동 매매 시작 (AUTO_START 활성 시, 주말+공휴일 자동 건너뜀 — KIS chk-holiday API) |
-| 07:45 직후 | `_boot()` — `start()` 안에서 즉시 돈다(자동 기동이면 07:45 직후, 수동 재기동이면 그 시각). 토큰 사전 순차 발급 (cycle20: 메인+보조 N 분당 1개 한도 직렬화) → DB 포지션 복구 → KIS 잔고 교차 검증 → 미체결 복구 → `stock_master` eager 갱신 (보유+익일청산) → 매크로 fetch + `market_regime_snapshots` INSERT → `cash_usage_ratio` 자동 조정 → 전략 prepare |
+| 07:45 직후 | `_boot()` — `start()` 안에서 즉시 돈다(자동 기동이면 07:45 직후, 수동 재기동이면 그 시각). 토큰 사전 순차 발급 (cycle20: 메인+보조 N 분당 1개 한도 직렬화) → DB 포지션 복구 → KIS 잔고 교차 검증 → 미체결 복구 → `stock_master` eager 갱신 (보유+익일청산) → 매크로 fetch + `market_regime_snapshots` INSERT → `cash_usage_ratio` 자동 조정 → 전일 잠정 봉 확정 대기(최대 90초 — 토큰 발급 직후 띄운 `daily_bar_finalize` 가 전일 봉의 종가·고저를 KIS 정규장 값으로 덮는다) → 전략 prepare |
 | 07:59 | 사전 구독 — 돌파(VB/LTV) + 스윙(donchian) 스캔 종목 + 보유 포지션. WebSocket 연결 + 체결통보 + (실전) `H0UNMKO0` 구독. 유니버스 비어있으면 prepare 재실행 |
 | 08:00 | NXT 프리 진입 — 익일 청산 백그라운드 (`NEXT_DAY_STABILIZE_SECS=30s` 안정화 후 NXT 시가 청산) + `_confirm_breakout_open_prices(board="pre_nxt")` 로 NXT 프리 시가 확정(후보가 있으면 phase `pre_nxt_trading`). 프리장에서 신규 매수하는 전략은 **LTV 하나**다(`tradable_boards=("pre_nxt","main","post_nxt")`) |
 | 09:00:05 | KRX 메인 시가 확정 — `_confirm_breakout_open_prices(board="main")` VB/LTV target_price 계산 (KRX 09:00 시가 + 전일Range × `k_value_krx_main`). 직후 `_drain_pending_next_day_clear()` — 08:00 보류 종목 KRX 시장가 일괄 청산 |
@@ -887,7 +887,7 @@ gantt
 | 20:00 | NXT 애프터 종료 + WebSocket 구독 해제(`unsubscribe_all`) → 전략수정 AI 자문 생성 (OpenAI → `parameter_recommendations`, `TIME_RECOMMENDATION`) → 직후 `auto_apply_recommendations()` (cycle23, 감액만 + 50% cap, `auto_apply_enabled=true` 시) |
 | 20:00:05 | 전체 유니버스 적재 (`TIME_FULL_UNIVERSE_LOAD` — 전략수정 AI자문 직후 5초 마진) |
 | 20:05 | metrics 1차 스냅샷 (`TIME_METRICS_SNAPSHOT` → `daily_metrics_snapshot.run_daily_metrics_snapshot`, OpenAI 미호출). `api_metrics`·`strategy_funnel` 은 프로세스 메모리 전용이라, 21:30 정산 전에 재시작이 나면 통째로 사라진다. 이 스냅샷이 그 유실 노출을 5분으로 줄인다 |
-| 20:30 | `stock_master_daily` 일봉 적재 (`TIME_STOCK_MASTER_DAILY_LOAD` — KRX 애프터마켓(16:00~20:00) 동안 일봉 거래량이 계속 늘어 그 뒤에 적재한다) |
+| 20:30 | `stock_master_daily` 일봉 적재 (`TIME_STOCK_MASTER_DAILY_LOAD` — KRX 애프터마켓(16:00~20:00) 동안 일봉 거래량이 계속 늘어 그 뒤에 적재한다). 이때 받은 그날 봉의 종가·고저는 KIS 가 아직 애프터마켓 값을 주는 잠정 값이라, 다음 거래일 아침 부팅이 정규장 값으로 확정한다 |
 | 21:00 | 저녁 funnel 미리보기 (`TIME_EVENING_FUNNEL_CAPTURE`) — 다음 거래일 후보를 오늘 봉까지 넣어 미리 뽑고 **다음 거래일 날짜**의 잠정 행으로 저장한다. 20:30 일봉 적재가 끝났다는 표식을 21:15 까지 기다리고, 없으면 건너뛴다. 보유 종목의 청산 입력은 건드리지 않는다. 운영자 밤 후보 확인용 |
 | 21:30 | 전략별 + 합산 일일 정산 (`TIME_SETTLEMENT` — 일봉 적재 20:30 뒤), DB 실적 기록. 직후 일일 로그 분석 리포트 생성 (OpenAI → `daily_log_reports`). 직후 `purge_old_logs()` (INFO 2일 / WARNING+ 30일 retention 자동 정리, cycle6) |
 

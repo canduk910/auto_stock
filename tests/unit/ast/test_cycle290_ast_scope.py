@@ -368,6 +368,10 @@ _ENGINE_PY_FILES: dict[str, tuple[str, ...]] = {
         # 대칭, 8영역 import 0). 등재해도 "다음 신규 파일" 은 여전히 붉어진다(이름 축 가드는
         # 변경 없음).
         "buying_reconcile.py",
+        # cycle386 — 부팅 prepare 직전 전일 「잠정 봉」(20:30 적재의 애프터마켓 종가·고저)을
+        # KIS 확정값으로 덮는 leaf. 8영역·scheduler·scanner·boot_manager·strategies import 0.
+        # 등재해도 "다음 신규 파일" 은 여전히 붉어진다(이름 축 가드는 변경 없음).
+        "daily_bar_finalize.py",
         "daily_emit_cap.py", "daily_metrics_snapshot.py",
         "data_load_tasks.py",
         # cycle380 — ETF/ETN(류) 판정 단일 leaf(표준 라이브러리만 import). 판정 정본

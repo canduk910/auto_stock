@@ -144,6 +144,12 @@ async def boot(scheduler: "TradingScheduler") -> None:
 
     await token_manager.get_token()
 
+    # cycle386 — 전일 「잠정 봉」(20:30 적재의 애프터마켓 종가·고저) 확정 태스크를
+    # 여기서 띄운다(await 없음 — 보조 풀이 준비된 직후라 설정 로드·잔고·레짐과
+    # 겹쳐 돈다). 대기는 prepare 직전(`emit_daily_head_staleness` 앞)이다.
+    from src.engine import daily_bar_finalize
+    _daily_bar_finalize_task = daily_bar_finalize.spawn(phase="boot")
+
     # DB에서 전략 설정(비중/파라미터) 로드
     await scheduler._load_strategy_config()
 
@@ -249,6 +255,12 @@ async def boot(scheduler: "TradingScheduler") -> None:
             "[boot_prepare_wait_timeout] stock_master 0건 — %ds 대기 후 prepare 진행 (graceful)",
             BOOT_PREPARE_STOCK_MASTER_WAIT_SECS,
         )
+
+    # cycle386 — 확정 태스크를 예산(`BOOT_BUDGET_SECS`) 안에서 기다린다. 예산을
+    # 넘겨도 부팅은 여기서 더 기다리지 않는다(fail-open) — 배경이 저속으로 계속한다.
+    await daily_bar_finalize.wait_for_boot(
+        _daily_bar_finalize_task, budget_secs=daily_bar_finalize.BOOT_BUDGET_SECS,
+    )
 
     # cycle283 — prepare **앞** 관측 1행 `[daily_head_stale]` (행위 0, never-raise).
     # 20:00~21:30 재기동으로 그날 저녁 적재를 잃으면 이 prepare 가 하루 밀린 전일봉을

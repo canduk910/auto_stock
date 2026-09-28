@@ -480,6 +480,59 @@ async def max_bas_dd(ticker: str | None = None) -> Optional[date]:
         return None
 
 
+async def max_bas_dd_before(today: date) -> Optional[date]:
+    """cycle386 §8-3 헤드 — `bas_dd < $today` 인 최댓값. **예외를 삼키지 않는다**.
+
+    `max_bas_dd(None)` 은 DB 예외를 삼켜 `None` 을 돌려주므로(스칼라 조회 실패가
+    「빈 테이블」과 구분되지 않는다), `daily_bar_finalize.finalize_once` 가 헤드 조회
+    실패를 `result=error stage=head` 로 구분하지 못하고 `result=noop`(INFO, "깨끗하다")
+    로 착각했다(F1+F2 시정). 이 함수는 그 실패를 그대로 전파한다 — 호출자가 흡수한다.
+
+    `today` 는 호출자가 이미 KST 로 확정한 `date` 다(`_kst.to_date()` 계약은 호출자 책임).
+    `bas_dd < $1` 조건 자체가 §8-3 의 "헤드가 오늘 이상이면 어제로 내린다" 클램프를
+    대신한다 — 오늘·미래 봉은 애초에 이 쿼리에 잡히지 않는다.
+    """
+    result = await pg.fetchval(
+        "SELECT max(bas_dd) FROM stock_master_daily WHERE bas_dd < $1", today,
+    )
+    if result is None:
+        return None
+    return _parse_bas_dd(result)
+
+
+_PROVISIONAL_ROWS_SQL = """
+    SELECT ticker, bas_dd, open_price, high_price, low_price, close_price
+    FROM stock_master_daily
+    WHERE bas_dd >= $1 AND bas_dd <= $2
+      AND (
+           (bas_dd = $2 AND updated_at < $3)
+        OR (bas_dd < $2 AND updated_at <
+              ((bas_dd + 1)::timestamp AT TIME ZONE 'Asia/Seoul') + interval '6 hours')
+      )
+    ORDER BY ticker, bas_dd
+"""
+
+
+async def list_provisional_rows(
+    *, since: date, head: date, today_boundary: datetime,
+) -> list[dict]:
+    """cycle386 §8-3 — 「잠정 봉」 판정. 헤드는 `today_boundary`(T 06:00 KST) 기준,
+
+    그 밖은 `(bas_dd+1) 06:00 KST` 기준으로 `updated_at` 을 비교한다. `updated_at`
+    은 `_UPSERT_DAILY_SQL` 이 쓰는 순간을 찍는 값이라(§8-3 불변식), 그 시각이
+    경계보다 이르면 「아직 KIS 확정값을 받기 전에 쓴 행」이다.
+
+    SQL 안에서 `'Asia/Seoul'` 을 명시한다 — 세션 시간대에 기대면 연결이 UTC 로
+    돌아간 사고(`src/db/pg.py::_init_conn`)를 다시 만든다.
+
+    🔴 **예외를 삼키지 않는다** — 이 모듈의 다른 read 헬퍼와 달리, 조회 실패를
+    빈 목록으로 접으면 「대상 조회 실패」가 「고칠 것 없음」으로 둔갑한다
+    (`daily_bar_finalize.finalize_once` 가 `result=error stage=select` 로 구분해야
+    한다).
+    """
+    return await pg.fetch(_PROVISIONAL_ROWS_SQL, since, head, today_boundary)
+
+
 async def get_recent_daily_with_fallback(
     ticker: str, days: int = 100, *, min_required: int | None = None
 ) -> list[dict]:

@@ -423,9 +423,14 @@ def test_a8_no_new_leaf_in_src_engine() -> None:
     신설해 73 → **74** 가 됐다 — 표준 라이브러리만 import 하는 순수 판정
     leaf(`classify`/`normalize_mode`/`compute_snapshot`). `strategy_base.py` + 터틀
     4전략 + `param_catalog.py` 가 그 헬퍼를 호출한다. `scheduler.py` 무접촉.
+
+    ⚠️ cycle386(2026-09-28, 전일 「잠정 봉」 확정)이 leaf 1개 `daily_bar_finalize.py` 를
+    신설해 74 → **75** 가 됐다 — 8영역·`scheduler`·`scanner`·`boot_manager`·strategies
+    import 0 인 부팅 prepare 직전 확정 leaf. `boot_manager.py` 는 spawn/wait_for_boot
+    배선 2줄만 접촉한다(사용자 결정 2026-09-28 「지금 최우선」).
     """
     got = len(list((_ROOT / "src" / "engine").glob("*.py")))
-    assert got == 74, f"`src/engine/*.py` 파일 수 {got} (cycle382 기준선 74)"
+    assert got == 75, f"`src/engine/*.py` 파일 수 {got} (cycle386 기준선 75)"
 
 
 # ===========================================================================
