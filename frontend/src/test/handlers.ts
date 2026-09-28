@@ -1,5 +1,5 @@
 /**
- * MSW 기본 핸들러 — 46개 라우트 기본 응답(2026-09-11 실측).
+ * MSW 기본 핸들러 — 46개 라우트 기본 응답(2026-09-11 실측) + cycle387 종목 차트.
  *
  * 각 테스트는 `server.use(http.get('/api/...', ...))`로 시나리오별 오버라이드.
  *
@@ -23,6 +23,8 @@ import {
 import { PARAM_SCHEMA_FIXTURE } from "./fixtures/paramSchema.fixture";
 // cycle282 — 장운영상태(표 + 커서) 골든 픽스처(market_state.py 에서 기계 생성).
 import { MARKET_STATE_FIXTURE } from "./fixtures/marketState.fixture";
+// cycle387 — 종목 차트(일봉·주봉·월봉) 응답 리터럴(참조 라우트를 실제로 태워 나온 JSON).
+import { STOCK_CHART_RESPONSES } from "./fixtures/stockChart.fixture";
 
 const base = "/api";
 
@@ -858,4 +860,31 @@ export const handlers = [
   http.put(`${base}/market-regime/auto-adjust`, () =>
     HttpResponse.json(wrap({ auto_regime_adjust: false }, "수동 모드"))
   ),
+
+  // ── cycle387 (2026-09-28) — 종목 차트 (잔고·체결·손익 행 더블클릭 모달) ────────────
+  // 기간(`period`)에 맞는 응답 리터럴을 돌려준다. 값은 참조 라우트를 실제로 태워 나온 JSON 이다
+  // (`test/fixtures/stockChart.fixture.ts` 머리말). 종목코드·기간 검증은 백엔드처럼 422 로 막는다 —
+  // 모달이 6자리 숫자가 아닌 코드로는 요청하지 않아야 하므로 여기까지 오면 그 자체가 결함이다.
+  http.get(`${base}/stock-chart/candles`, ({ request }) => {
+    const url = new URL(request.url);
+    const ticker = url.searchParams.get("ticker") ?? "";
+    const period = (url.searchParams.get("period") ?? "D") as "D" | "W" | "M";
+    const body = STOCK_CHART_RESPONSES[period];
+    if (!/^\d{6}$/.test(ticker) || !body) {
+      return HttpResponse.json(
+        {
+          detail: [
+            {
+              type: "string_pattern_mismatch",
+              loc: ["query", "ticker"],
+              msg: "String should match pattern '^\\d{6}$'",
+              input: ticker,
+            },
+          ],
+        },
+        { status: 422 },
+      );
+    }
+    return HttpResponse.json(body);
+  }),
 ];

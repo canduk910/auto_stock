@@ -240,7 +240,11 @@ _BASE_SHA = {
 #: 자기-취소 판별) · `BG_WORKERS` 제거로 `daily_bar_finalize.py`·`db/stock_master_daily.py`
 #: 내용만 바뀌었다(둘 다 이미 이 digest 안에 있던 파일 — 신규 파일 0). 직전 값 =
 #: `ff762eccb539f487045d133e9fc75f9a03f0d985a37037fd073f67d60208786c`.
-_SRC_TREE_FILES = 163
+#: 🔁 cycle387 재핀 — 종목 차트(KLineChart, 최근 5년 일/주/월봉) 신규 `src/api/period_chart.py`·
+#: `src/models/candle_chart.py`·`src/routes/stock_chart.py` + `src/main.py` 등록 2줄로
+#: 163 → **166**. 읽기 전용 KIS 시세 조회 하나뿐 — 8영역·scheduler.py·매매 행위 변경 없음.
+#: 직전 값 = 163.
+_SRC_TREE_FILES = 166
 #: ⚠️ 값은 **cycle285 적대 검증 반영** 기준선이다. 그 직전(초판 cycle285 배포)
 #: digest 는 `97483c5114a1d00dc8f7ca7c1ed08e1b3dc1d0b585065b14176dc227da9bed8c` 였다.
 #: cycle287b 배포분의 digest 는
@@ -635,8 +639,19 @@ _SRC_TREE_FILES = 163
 # 🔁 cycle386 마무리 재핀(값만) — `daily_bar_finalize.py` 의 `stage=processing` WARNING 에
 # traceback(exc_info) 추가(설계 §8-6). 매매 행위 변경 없음. 직전 값 =
 # `08d10c7cde9ff00816c86c70a9363fb4c6c0a50e73b9fc76f9075771c68c7b80`.
+# 🔁 cycle387 재핀 — 종목 차트 신규 3파일 + `src/main.py` 등록 2줄(파일 수 163 → 166,
+# 위 `_SRC_TREE_FILES` 주석 참조). 읽기 전용 KIS 시세 조회 하나뿐 — 매매 행위 변경 없음.
+# 직전 값 = `09bf5172aa7dde199fcab116470a4f4ad18d33e28d2265a8c29623e50762a354`.
+# 🔁 cycle387 마무리 재핀(값만) — `period_chart.py` 의 미사용 `KisApiError` import 제거
+# (flake8 F401, G1 허용 목록은 그대로 부분집합). 매매 행위 변경 없음. 직전 값 =
+# `3602db4139907c88eb3f06827357641a07b28cf4531f77549f36712ebeb00eb2`.
+# 🔁 cycle387 적대 검토 반영 재핀(값만) — `period_chart.py`: 차트 KIS 호출 간격 0.25초를
+# 조회 경계를 넘어서도 모든 호출 앞에서 지킴(F1) · ticker ASCII 검사(F3) · 캐시 저장 시
+# 만료 항목 제거(F7) / `routes/stock_chart.py`: ticker 정규식 `^[0-9]{6}$`(F3). 파일 수 무변경,
+# 두 파일 모두 이미 이 digest 안에 있던 차트 전용 파일 — 매매 행위 변경 없음. 직전 값 =
+# `6ddc5724112e33471b8e6dd4a53a1c5aef7c8035f9041a66b198cb09e68ecaef`.
 _SRC_TREE_DIGEST = (
-    "09bf5172aa7dde199fcab116470a4f4ad18d33e28d2265a8c29623e50762a354"
+    "e7bbb4683ac238af6f32b3793bd4ebdea5fe017d98d17646b47bb3d979912670"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

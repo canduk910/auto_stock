@@ -368,6 +368,37 @@ describe('사이클 75 카드 #19\' — e2e api-mocks 7 endpoint group 영구 �
     })
   })
 
+  // cycle387 (2026-09-28) — 종목 차트(KLineChart, 최근 5년 일·주·월봉) endpoint.
+  // 거래기록 두 그리드와 대시보드 잔고 표의 행 더블클릭이 모달을 열고 이 경로를 부른다.
+  // e2e `history.spec.ts`(F32·F33)가 실브라우저로 밟으므로 목 누락 = vite proxy → ECONNREFUSED.
+  // ⚠️ `**/api/stock-chart/candles*` 글롭은 vite 모듈 요청(`/src/api/stock-chart.ts`)과 겹치지 않지만
+  //    다른 라우트들과 같은 규약으로 경로 가드(`/api/` 로 시작) + resourceType 가드를 둔다.
+  describe('G-AST13 (cycle387): 종목 차트 endpoint 등록', () => {
+    it('api-mocks.ts 에 /api/stock-chart/candles 라우트 등록 의무', () => {
+      const apiSource = readFileSync(path.join(FRONTEND_API_DIR, 'stock-chart.ts'), 'utf-8')
+      // 방어 가드 — 클라이언트가 그 리터럴을 부르지 않으면 본 케이스는 무효다.
+      expect(
+        apiSource.includes("'/stock-chart/candles'"),
+        '방어 가드: api/stock-chart.ts 가 /stock-chart/candles 를 호출하지 않음 — 본 가드 갱신 의무.',
+      ).toBe(true)
+
+      const source = loadApiMocksSource()
+      expect(
+        isRouteRegistered(source, '/api/stock-chart/candles'),
+        'e2e api-mocks.ts 에 /api/stock-chart/candles 라우트 누락 — ' +
+          '행 더블클릭으로 차트 모달이 뜨는 순간 ECONNREFUSED.',
+      ).toBe(true)
+    })
+
+    it('차트 모달이 getStockChart 를 실제로 쓴다 (방어 가드)', () => {
+      const source = readFileSync(path.join(FRONTEND_COMPONENTS_DIR, 'StockChartModal.tsx'), 'utf-8')
+      expect(
+        source.includes('getStockChart'),
+        '방어 가드: StockChartModal.tsx 가 getStockChart 를 더 이상 호출하지 않음 — cycle387 영역 변경 시 본 가드 갱신 의무.',
+      ).toBe(true)
+    })
+  })
+
   describe('G-AST4: 3 컴포넌트 useQuery `retry:` 옵션 명시 (Q4 확장)', () => {
     const TARGET_COMPONENTS = [
       'IntegrationToggleCard.tsx',

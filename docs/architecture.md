@@ -116,8 +116,10 @@ src/
 │   ├── base.py          # kis_get/kis_post (Rate Limit, 재시도, 토큰갱신)
 │   ├── order.py         # place_order, cancel_order
 │   ├── balance.py       # get_balance, get_buyable, get_daily_orders
-│   └── condition.py     # fetch_rising_stocks, fetch_stock_detail, fetch_daily_candles,
-│                        # inquire_stock_basics(CTPF1002R — NXT 거래가능 사전 판별)
+│   ├── condition.py     # fetch_rising_stocks, fetch_stock_detail, fetch_daily_candles,
+│   │                    # inquire_stock_basics(CTPF1002R — NXT 거래가능 사전 판별)
+│   └── period_chart.py  # 종목 차트용 기간별시세(FHKST03010100) 날짜 창 페이징 — 읽기 전용,
+│                        # 캐시 + single-flight + 전역 1건 직렬 (매매 경로와 무관)
 │
 ├── realtime/            # KIS WebSocket
 │   ├── websocket.py     # KisWebSocket (연결/구독/재연결/Heartbeat)
@@ -156,13 +158,15 @@ src/
 │   ├── history.py       # 거래 내역
 │   ├── performance.py   # 실적 차트
 │   ├── strategies.py    # 전략 설정/비중/자동시작
-│   └── logs.py          # 로그 조회
+│   ├── logs.py          # 로그 조회
+│   └── stock_chart.py   # 종목 차트 (GET /api/stock-chart/candles — 행 더블클릭 모달)
 │
 └── models/              # Pydantic 데이터 모델
     ├── order.py         # OrderSide, OrderResult
     ├── balance.py       # StockHolding, AccountSummary
     ├── trade.py         # TradeRecord, TradeStatus
     ├── stock.py         # StockBasics (CTPF1002R 응답 + nxt_tradable 파생)
+    ├── candle_chart.py  # CandleBar, CandleChart (종목 차트 응답)
     └── response.py      # ApiResponse 공통 래퍼
 ```
 
@@ -1013,19 +1017,24 @@ frontend/src/
 │   ├── ProfitChart.tsx     # 일별/월별 수익률 차트
 │   ├── TradeHistoryGrid.tsx# 거래 내역 테이블 (KST, 주문번호)
 │   ├── LogViewer.tsx       # 실시간 로그 뷰어
-│   └── ConfirmModal.tsx    # 확인 모달 (매매/매도 안전장치)
+│   ├── ConfirmModal.tsx    # 확인 모달 (매매/매도 안전장치)
+│   ├── useStockChartOpener.tsx # 잔고·체결·손익 행 더블클릭 → 종목 차트 (공용 훅)
+│   ├── LazyStockChartModal.tsx # 차트 모달 분리 청크 래퍼 (React.lazy)
+│   └── StockChartModal.tsx # 종목 차트 (KLineChart, 최근 5년 일·주·월봉)
 │
 ├── api/
 │   ├── client.ts           # axios 인스턴스 (baseURL: /api)
 │   ├── trading.ts          # 매매 제어 + 수동매도 + 전략설정
 │   ├── balance.ts          # 잔고 조회
 │   ├── history.ts          # 거래 내역
-│   └── performance.ts      # 실적 데이터
+│   ├── performance.ts      # 실적 데이터
+│   └── stock-chart.ts      # 종목 차트 (GET /api/stock-chart/candles)
 │
 └── types/
     ├── trading.ts          # TradingStatusData, StrategyInfo, TradeRecord
     ├── balance.ts          # Holding, BalanceSummary
     ├── strategy.ts         # STRATEGY_COLORS, getStrategyColor()
+    ├── stock-chart.ts      # StockChartData, StockChartBar (백엔드 CandleChart 1:1)
     └── common.ts           # ApiResponse<T>
 ```
 
@@ -1182,7 +1191,7 @@ GitHub Secrets: `EC2_HOST`, `EC2_USERNAME`, `EC2_SSH_KEY`, `SUPABASE_DB_URL`(값
   - LOW 우선순위 (스캐닝) → 보조 라운드로빈, 보조 가득 시 메인 fallback
   - 체결통보 (H0STCNI0/H0STCNI9) → **메인 단일 강제** (보조 시도 시 `QuoteSessionExecutionNoticeError`)
   - 총 슬롯 = 41 × (1 + N). 보조 0개면 메인 단독
-- `src/api/base.py::kis_get_quote / kis_post_quote` — REST 시세성 호출 풀 (path 화이트리스트 5개)
+- `src/api/base.py::kis_get_quote / kis_post_quote` — REST 시세성 호출 풀 (path 화이트리스트 13개 — 목록 = `src/api/CLAUDE.md`)
 - `src/services/quote_session_health.py` — 보조 세션 health monitor (5xx/토큰 발급 실패 누적 → 자동 비활성 + DB `active=false`)
 - `GET /api/realtime/subscriptions` 응답에 `sessions[]` 배열 (label/subscribed/acked/fresh/stale/limit/ws_connected/reconnect_count)
 - Frontend: `KisQuoteAccountsCard` (Settings) + `KisAccountPoolCard` (Dashboard) 30s 폴링

@@ -18,6 +18,7 @@ import type { LlmEvaluationSummaryMap } from '../types/llm-evaluation'
 import LlmEvaluationModal from './LlmEvaluationModal'
 import LlmScoreBadge from './LlmScoreBadge'
 import ScrollPane from './ScrollPane'
+import { useStockChartOpener } from './useStockChartOpener'
 
 const STRATEGY_NAMES: Record<string, string> = {
   momentum: '모멘텀',
@@ -235,6 +236,7 @@ export default function TradePnLGrid() {
   const [selected, setSelected] = useState<
     { orderNos: string[]; tradeDate?: string } | null
   >(null)
+  const { openChart, chartModal } = useStockChartOpener()
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['tradePnL', page, strategyFilter],
@@ -371,6 +373,9 @@ export default function TradePnLGrid() {
                 return (
                   <tr
                     key={row.id}
+                    data-testid={`pnl-row-${row.index}`}
+                    title="더블클릭 — 종목 차트"
+                    onDoubleClick={(e) => openChart(e, row.original.ticker, row.original.ticker_name)}
                     className={`border-b hover:bg-gray-50 ${isOpen ? 'bg-emerald-50/40' : ''}`}
                   >
                     {row.getVisibleCells().map((cell) => (
@@ -415,6 +420,7 @@ export default function TradePnLGrid() {
           onClose={() => setSelected(null)}
         />
       )}
+      {chartModal}
     </div>
   )
 }

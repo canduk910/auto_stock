@@ -18,6 +18,7 @@ import type { LlmEvaluationSummaryMap } from '../types/llm-evaluation'
 import LlmEvaluationModal from './LlmEvaluationModal'
 import LlmScoreBadge from './LlmScoreBadge'
 import ScrollPane from './ScrollPane'
+import { useStockChartOpener } from './useStockChartOpener'
 
 const columnHelper = createColumnHelper<TradeRecord>()
 
@@ -303,6 +304,7 @@ export default function TradeHistoryGrid() {
   const [selected, setSelected] = useState<
     { orderNos: string[]; tradeDate?: string } | null
   >(null)
+  const { openChart, chartModal } = useStockChartOpener()
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['tradeHistory', page],
@@ -383,7 +385,13 @@ export default function TradeHistoryGrid() {
               </tr>
             ) : (
               table.getRowModel().rows.map((row) => (
-                <tr key={row.id} className="border-b hover:bg-gray-50">
+                <tr
+                  key={row.id}
+                  data-testid={`trade-row-${row.index}`}
+                  title="더블클릭 — 종목 차트"
+                  onDoubleClick={(e) => openChart(e, row.original.ticker, row.original.ticker_name)}
+                  className="border-b hover:bg-gray-50"
+                >
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="px-3 py-2.5 text-gray-700 whitespace-nowrap">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -425,6 +433,7 @@ export default function TradeHistoryGrid() {
           onClose={() => setSelected(null)}
         />
       )}
+      {chartModal}
     </div>
   )
 }

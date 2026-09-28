@@ -13,7 +13,7 @@ Pydantic 기반 데이터 모델. API 요청/응답, DB 레코드, 내부 데이
 
 ### balance.py — 잔고 모델
 - `Holding`: 보유종목 정보 (종목명, 수량, 매입가, 현재가, 손익)
-- `BalanceSummary`: 계좌 요약 (예수��, 평가금, 총손익)
+- `BalanceSummary`: 계좌 요약 (예수금, 평가금, 총손익)
 
 ### trade.py — 거래 기록 모델
 - `TradeStatus`: PENDING, COMPLETED, PARTIAL, CANCELLED
@@ -51,6 +51,16 @@ Pydantic 기반 데이터 모델. API 요청/응답, DB 레코드, 내부 데이
 ### backtest.py — 외부 MCP 백테스트 (Phase 1~2)
 - `backtest_runs` 테이블 매핑 + MCP job 요청/응답. 소비 = `engine/backtest_engine.py` · `routes/backtest.py`
 - 매매 hot path 무관
+
+### candle_chart.py — 종목 차트 응답 (cycle387)
+- `GET /api/stock-chart/candles` 응답 `data` 이자 `src/api/period_chart.py::fetch_candle_chart` 의 반환형
+- `CandleBar{date, open, high, low, close, volume, amount}` — `date` 는 `YYYY-MM-DD`(KRX 영업일 = KST 날짜), 숫자 6칸은
+  전부 `int` 라 JSON 정수로 나간다(문자열로 나가면 프론트 수치 렌더가 깨진다 — cycle266 계열)
+- `CandleChart`(16필드) = `ticker` · `name`(Optional) · `period`(`Literal["D","W","M"]`) · `years` · `adjusted` · `market` ·
+  `start_date` · `end_date`(요청 구간이지 첫 봉 날짜가 아니다) · `bars` · `complete` · `incomplete_reason` · `last_bar_provisional` ·
+  `dropped_bars` · `kis_calls` · `cached` · `fetched_at`(`+09:00`)
+- `IncompleteReason = Literal["call_cap", "time_budget", "window_error", "no_progress"]` — 뜻은 `src/api/CLAUDE.md` 「period_chart.py」 절
+- 프론트 짝 = `frontend/src/types/stock-chart.ts`(`StockChartBar` · `StockChartData`, 필드명 1:1)
 
 ### krx_open_api.py — KRX 정식 OPEN API 키 관리 (사이클 112, 2026-06-12)
 - ⚠️ 이 키는 `scanner._full_universe_load_krx_primary`(20:00/07:48 전체 유니버스 적재 **주 소스**)가 쓴다.

@@ -233,3 +233,116 @@ test.describe("G-E2E-10 (HIGH) — 거래기록 AI 자문 팝업", () => {
     });
   });
 });
+
+// =======================================================================
+// cycle387 (2026-09-28) — 행 더블클릭 → 종목 차트 모달 (G-E2E-11)
+//
+// 사용자 요청 = 「잔고내역과 거래내역(주문체결내역, 매매손익)에서 종목을 더블클릭하면
+// KLineChart를 사용한 주식차트조회를 최근 5년치에 대해 일봉/주봉/월봉으로 제공」.
+// 명세 = `_workspace/red/cycle387_stock_chart_spec.md` §3.3(F32·F33).
+//
+// 왜 E2E 가 필요한가 — 단위 테스트는 jsdom 에 canvas 가 없어 `klinecharts` 를 가짜로 바꿔 끼운다.
+// 실제 라이브러리가 모달 안에 캔버스를 세우고, lazy 청크가 로드되고, 기간 토글이 새 요청을 내는지는
+// 실브라우저에서만 잰다. 잔고 표(대시보드)는 vitest O1·O2 가 맡는다.
+//
+// RED: 행 testid·더블클릭·모달·목 라우트가 없다 → 두 케이스 전부 실패.
+// =======================================================================
+
+test.describe("G-E2E-11 (cycle387) — 거래기록 행 더블클릭 종목 차트", () => {
+  test("F32 체결 행 더블클릭 → 캔버스 · 메타 · 주봉 요청 · ESC 닫기", async ({ page }) => {
+    await installApiMocks(page, { trades: [trade()] });
+    await page.goto("/history");
+
+    const row = page.getByTestId("trade-row-0");
+    await expect(row).toBeVisible({ timeout: 20000 });
+    await row.getByText("삼성전자").dblclick();
+
+    const modal = page.getByTestId("stock-chart-modal");
+    await expect(modal).toBeVisible({ timeout: 20000 });
+    await expect(modal.locator("canvas").first()).toBeVisible({ timeout: 20000 });
+    await expect(page.getByTestId("stock-chart-meta")).toContainText("수정주가", { timeout: 20000 });
+    await expect(page.getByTestId("stock-chart-title")).toContainText("005930", { timeout: 20000 });
+
+    const weekly = page.waitForRequest((req) => {
+      if (!req.url().includes("/api/stock-chart/candles")) return false;
+      const u = new URL(req.url());
+      return u.searchParams.get("period") === "W" && u.searchParams.get("ticker") === "005930";
+    });
+    await page.getByTestId("stock-chart-period-W").click();
+    await weekly;
+    await expect(page.getByTestId("stock-chart-period-W")).toHaveAttribute("aria-pressed", "true", {
+      timeout: 20000,
+    });
+
+    await expect(modal).not.toContainText("NaN");
+    await page.keyboard.press("Escape");
+    await expect(modal).toBeHidden({ timeout: 20000 });
+  });
+
+  test("F33 매매손익 탭 행 더블클릭 → 그 행의 종목 차트", async ({ page }) => {
+    await installApiMocks(page);
+    // LIFO — installApiMocks 의 pnl 라우트를 **나중 등록**으로 덮는다(F30 과 같은 방식).
+    await page.route("**/api/history/pnl*", (route) => {
+      if (!new URL(route.request().url()).pathname.startsWith("/api/")) return route.continue();
+      return route.fulfill({
+        json: {
+          success: true,
+          message: "",
+          data: {
+            pairs: [
+              {
+                buy_date: "2026-09-11",
+                buy_time: "09:01:33",
+                sell_date: "2026-09-11",
+                sell_time: "14:22:10",
+                ticker: "042700",
+                ticker_name: "한미반도체",
+                buy_price: 90000,
+                buy_qty: 4,
+                sell_price: 91000,
+                sell_qty: 4,
+                profit_loss: 4000,
+                profit_rate: 1.11,
+                status: "closed",
+                strategy: "volatility_breakout",
+                buy_order_nos: [PAIR_BUY_1],
+                sell_order_nos: ["0000200099"],
+                pair_key: `volatility_breakout:042700:${PAIR_BUY_1}`,
+              },
+            ],
+            page: 1,
+            size: 30,
+            total: 1,
+            total_pages: 1,
+            summary: {
+              realized_total_krw: 4000,
+              realized_rate_pct: 1.11,
+              win_count: 1,
+              loss_count: 0,
+              even_count: 0,
+              win_rate_pct: 100,
+              closed_count: 1,
+            },
+          },
+        },
+      });
+    });
+
+    await page.goto("/history");
+    await page.getByRole("button", { name: "매매손익" }).click();
+
+    const row = page.getByTestId("pnl-row-0");
+    await expect(row).toBeVisible({ timeout: 20000 });
+    const request = page.waitForRequest(
+      (req) =>
+        req.url().includes("/api/stock-chart/candles") &&
+        new URL(req.url()).searchParams.get("ticker") === "042700",
+    );
+    await row.getByText("한미반도체").dblclick();
+    await request;
+
+    await expect(page.getByTestId("stock-chart-modal")).toBeVisible({ timeout: 20000 });
+    await expect(page.getByTestId("stock-chart-title")).toContainText("한미반도체", { timeout: 20000 });
+    await expect(page.getByTestId("stock-chart-title")).toContainText("042700", { timeout: 20000 });
+  });
+});

@@ -121,3 +121,35 @@ export function isKrxMainSession(now?: Date): boolean {
   const minutes = kstMinutesOfDay(now)
   return minutes >= KRX_MAIN_OPEN_MINUTE && minutes < KRX_MAIN_CLOSE_MINUTE
 }
+
+// ── cycle387 — 종목 차트(KLineChart) 날짜 헬퍼 ──────────────────────────────
+// KLineChart 는 봉 시각을 epoch ms 로 다룬다. 백엔드 봉 날짜는 `YYYY-MM-DD`(KRX 영업일 =
+// KST 날짜)이므로 KST 자정 epoch 로 바꿔 넘기고, 축·툴팁은 그 epoch 를 KST 로 다시 읽는다.
+// `StockChartModal.tsx`·`utils/stockChart.ts` 는 K4 가드의 위임 대상이라 `Intl.DateTimeFormat`
+// 을 직접 만들지 않는다 — 이 세 헬퍼 + `KST_TIME_ZONE` 이 그 파일들의 유일한 날짜 출처다.
+
+/** 차트 라이브러리(`klinecharts` `init({ timezone })`)에 넘길 tz. 리터럴 금지 파일의 유일한 출처. */
+export const KST_TIME_ZONE = 'Asia/Seoul'
+
+/** KST `YYYY-MM-DD` (epoch ms → KST 날짜). 잘못된 입력(NaN·Infinity·null 등) → `'—'`. */
+export function formatKstDateFromEpochMs(ms: number): string {
+  if (typeof ms !== 'number' || !Number.isFinite(ms)) return '—'
+  const parts = partsToMap(DATE_PART_FORMATTER.formatToParts(new Date(ms)))
+  return `${parts.year}-${parts.month}-${parts.day}`
+}
+
+/** KST `YYYY-MM` (월봉 x축용). 잘못된 입력 → `'—'`. */
+export function formatKstYearMonthFromEpochMs(ms: number): string {
+  if (typeof ms !== 'number' || !Number.isFinite(ms)) return '—'
+  const parts = partsToMap(DATE_PART_FORMATTER.formatToParts(new Date(ms)))
+  return `${parts.year}-${parts.month}`
+}
+
+const YMD_RE = /^\d{4}-\d{2}-\d{2}$/
+
+/** `YYYY-MM-DD` → KST 자정 epoch ms. 형식이 그 정규식과 다르면(시각 포함·구분자 다름 등) `null`. */
+export function kstDateToEpochMs(ymd: string | null | undefined): number | null {
+  if (typeof ymd !== 'string' || !YMD_RE.test(ymd)) return null
+  const ms = Date.parse(`${ymd}T00:00:00+09:00`)
+  return Number.isNaN(ms) ? null : ms
+}

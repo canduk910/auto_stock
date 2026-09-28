@@ -54,6 +54,10 @@ const TARGET_FILES = [
   // 발화한다. retry 미명시 시 e2e/백엔드 미기동 환경에서 기본 retry(3회 backoff) 가 누적돼
   // 패널이 뜨지 않는다 — 사이클 65 H3 패턴 답습.
   'StrategyParamsEditor.tsx',
+  // cycle387 (2026-09-28) — 종목 차트 모달. 잔고·주문체결내역·매매손익 행 더블클릭으로 열리고
+  // `GET /api/stock-chart/candles` 를 기간(일·주·월봉)마다 부른다. e2e `history.spec.ts`(F32·F33)
+  // 진입 경로라 retry 미명시 시 ECONNREFUSED 재시도가 누적돼 spec 이 timeout 된다.
+  'StockChartModal.tsx',
 ]
 
 // 사이클 80 hotfix — Settings.tsx 본체 useQuery 도 retry:1 명시 의무 (사이클 79 e2e

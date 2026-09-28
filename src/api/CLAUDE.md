@@ -28,7 +28,7 @@ KIS OpenAPI REST 호출 모듈. 모든 호출은 `base.py` 공통 래퍼를 통�
 
 **자금 안전 절대 원칙**:
 - 매매 (`place_order`/`cancel_order`) / 잔고 (`get_balance`/`get_buyable`) / 체결조회 (`get_daily_orders`) / 체결통보 → 메인 단일 (`kis_request` 그대로)
-- 시세성 호출만 본 풀에 라우트: `condition.py` 함수 전부(`is_market_open` · `next_trading_day` · `is_trading_day` · `add_business_days` · `_fetch_fluctuation_rank` · `inquire_stock_basics` · `fetch_stock_detail` · `fetch_daily_candles` · `fetch_daily_candles_ranged` · `fetch_daily_chart_ranged_with_summary`) · `quotation.py`(`inquire_ccnl` · `inquire_acml_vol`) · `finance.fetch_financial_tr` · `market_operation.inquire_vi_status_today` · `scanner._fetch_market_cap_page`. `krx.py` 는 KIS 밖 시스템이라 무관
+- 시세성 호출만 본 풀에 라우트: `condition.py` 함수 전부(`is_market_open` · `next_trading_day` · `is_trading_day` · `add_business_days` · `_fetch_fluctuation_rank` · `inquire_stock_basics` · `fetch_stock_detail` · `fetch_daily_candles` · `fetch_daily_candles_ranged` · `fetch_daily_chart_ranged_with_summary`) · `quotation.py`(`inquire_ccnl` · `inquire_acml_vol`) · `finance.fetch_financial_tr` · `market_operation.inquire_vi_status_today` · `period_chart.fetch_candle_chart` · `scanner._fetch_market_cap_page`. `krx.py` 는 KIS 밖 시스템이라 무관
 
 **Public API**:
 - `kis_get_quote(path, tr_id, params, *, hashkey="")` — 시세 GET (보조 라운드로빈 + 메인 fallback)
@@ -323,6 +323,55 @@ KIS 부하 + 5xx 노출 면적 축소:
 - **사용 범위 안전 가드**: 스캐닝/조건검사 한정. `execute_buy/execute_sell` 의 체결가/주문가 결정 경로는 절대 사용 금지 (WebSocket tick 또는 직접 호출 유지)
 - **종목상태 관측 훅 `_notify_status_observer(ticker, output)` (cycle369)** — `_fetch_stock_detail_and_cache` 가 KIS 응답의 `output` 대입 **직후** · 캐시 lock **앞**에서 한 번 부른다. 훅은 `src.engine.status_exit_watch.observe_fhkst` 를 함수 안에서 지연 import 해 부르고, 관리종목·단기과열 당일 매수 차단 레지스트리에 기록만 한다. 캐시 적중·inflight 합류 경로는 부르지 않는다(첫 조회가 이미 기록했다). leaf 자신의 패스가 부른 조회는 leaf 가 기록을 건너뛴다(패스가 직접 기록한다 — 한 조회 한 기록). 🔴 **본문 전체의 `try/except Exception` 을 걷지 않는다**(DEBUG `[status_observer_failed]`, never-raise) — 훅이 예외를 흘리면 모든 `fetch_stock_detail` 소비자(VB·LTV 기준가 REST · 스윙 폴 · 급등 스캔)가 깨진다. 호출 자리·이중 try 는 AST J16 이 잠근다
 - **`_PRICE_CACHE_TTL` 을 leaf 가 읽는다** — `status_exit_watch` 의 P1 은 09:00 + 이 TTL(5초)에 시작한다. 장 전에 캐시된 값이 「장중 clean」 으로 봉인되지 않게 하려는 것이다. TTL 을 바꾸면 P1 시각도 함께 바뀐다
+
+## period_chart.py — 종목 차트용 기간별시세 (cycle387)
+
+종목 차트 모달(`GET /api/stock-chart/candles`)의 데이터를 KIS 에서 직접 받는다. `stock_master_daily` 는
+390일만 보관해 5년 차트를 채우지 못하기 때문이다. **매매 경로와 섞이지 않는 읽기 전용 조회 하나**다.
+
+- 진입점 `fetch_candle_chart(ticker, period="D", years=5, *, now_kst=None) -> CandleChart`(`src/models/candle_chart.py`).
+  인자 검사(방어선 2 — 라우트 FastAPI 검증이 방어선 1): `ticker` 6자리 **ASCII** 숫자(`isascii()` ∧ `isdigit()` — `isdigit()` 만으로는 아랍-인도·전각 숫자가 통과한다) · `period` ∈ `D`/`W`/`M` · `years` 1~5 정수(`bool` 거부). 위반은 `ValueError`
+- **KIS 호출은 한 곳** — `kis_get_quote(DAILY_PRICE_URL, "FHKST03010100", params)`(AST G2). `DAILY_PRICE_URL` 은 `condition.py` 상수를
+  import 하고, 이미 시세 풀 화이트리스트에 있어 `base.py` 는 무변경이다(G5). params:
+  - `FID_COND_MRKT_DIV_CODE="J"` — KRX 정규. `UN`/`NX` 는 쓰지 않는다(정규장 종가가 없다)
+  - `FID_INPUT_DATE_1` = 시작일(모든 창에서 고정) · `FID_INPUT_DATE_2` = 커서(창마다 과거로 당긴다)
+  - `FID_PERIOD_DIV_CODE` = `D`/`W`/`M` · `FID_ORG_ADJ_PRC="0"`(수정주가 — `condition.py` 의 일봉 함수들과 같은 값)
+- 🔴 `kis_get`·`kis_post`·`kis_request`·`_request` 를 참조하지 않고 매매·인증 모듈을 import 하지 않는다(G1·G1b).
+  반대로 `src/engine`·`src/realtime`·`src/auth` 도 이 모듈을 import 하지 않는다(G7) — 차트 캐시·세마포어가 매매 경로에 끼지 않게 한다
+- **구간** = 오늘(KST)부터 `years` 년 전 같은 날(2/29 → 2/28)까지. 시작일을 봉 단위에 맞춘다 — `W` 는 그 주 월요일, `M` 은 그달 1일
+- **날짜 창 페이징** — 이 TR 은 `tr_cont` 다음 조회가 없고 한 번에 최대 `_KIS_MAX_ROWS=100` 봉을 준다. 그래서 시작일을 고정하고
+  종료일 커서만 당긴다. 다음 커서 = `D` 는 가장 오래된 봉 −1일, `W`·`M` 은 그 봉 기간의 첫날 −1일. 같은 기간의 봉이 두 창에서 오면
+  **먼저 받은(더 최신 창) 값**이 남는다. 멈추는 조건:
+  - 정상 종료(`complete=true`) — 빈 창 · 100봉 미만 · 시작일 도달
+  - 부분 결과(`complete=false` + `incomplete_reason`) — 커서가 앞으로 가지 않음 `no_progress` · 호출 상한 `call_cap` ·
+    시간 예산 초과 `time_budget` · 둘째 창 이후 예외 `window_error`
+  - 🔴 **첫 창 예외는 그대로 전파하고 캐시하지 않는다**(라우트가 `success=false` 로 바꾼다)
+- **상수**(AST G4 가 값을 잠근다): `_MAX_CALLS_PER_FETCH = {"D": 15, "W": 4, "M": 2}` · `_WINDOW_SLEEP_SECS = 0.25`(이름과 달리
+  창 사이만이 아니라 **모든** 차트 KIS 호출 사이 간격 — 아래 넷째 겹) ·
+  `_FETCH_CONCURRENCY = 1` · `_QUEUE_WAIT_SECS = 20.0` · `_FETCH_TIME_BUDGET_SECS = 25.0` · `_CACHE_TTL_SECS = 600` ·
+  `_PARTIAL_CACHE_TTL_SECS = 60` · `_CACHE_MAX_ENTRIES = 32` · `_PROVISIONAL_CUTOFF = timedelta(hours=6)`
+- **KIS 폭주 방지 — 순서대로 네 겹**:
+  1. 캐시 — 키 `(ticker, period, years)`, LRU 32개. 완전 결과 600초 · 부분 결과 60초. 적중하면 `cached=true` 사본을 준다.
+     저장할 때 이미 만료된 항목을 걷어낸다
+  2. single-flight — 같은 키가 진행 중이면 `_inflight` task 에 `asyncio.shield` 로 합류한다(KIS 호출 추가 0)
+  3. 모듈 전역 세마포어 1개 — 종목이 달라도 **한 번에 한 조회만** KIS 를 부른다. 나머지는 줄을 서고, 20초를 넘기면
+     `ChartBusyError` + `[stock_chart_busy]` WARNING
+  4. 호출 간격 0.25초 — 세마포어 안의 **모든** `kis_get_quote` 호출 바로 앞에서 모듈 전역 「마지막 차트 호출 시작 시각」
+     (`_last_call_at`)으로부터 0.25초가 될 때까지만 쉰다(`_pace_chart_call`). 조회 경계를 넘어서도 지키므로 줄 선 다음 조회의
+     첫 호출과 월봉(1회 호출)도 쉰다 → 이 기능의 KIS 호출은 **어느 1초에도 4건 이하**다. 이 호출들은 `base.py` 의 전역
+     초당 20건 한도를 주문·잔고 호출과 함께 쓴다. 🔴 간격을 조회 하나 안의 창 사이로 좁히지 않는다 — 좁히면 세마포어를 놓는
+     순간 다음 조회가 곧바로 KIS 를 부르고, 가짜 지연 50ms 재현에서 월봉 40종목 연속 조회가 첫 1초에 20건(전역 한도 전부)을 쓴다
+- **정규화** — 가격 4칸 중 하나라도 0 이하이거나 구간 밖(끝날 뒤 · 봉 기간 첫날이 시작일 앞)인 행은 버리고 `dropped_bars` 로 센다.
+  결과는 오래된 것부터(오름차순). 숫자 6칸(`open`·`high`·`low`·`close`·`volume`=`acml_vol`·`amount`=`acml_tr_pbmn`)은 JSON 정수다.
+  `name` 은 첫 창 `output1.hts_kor_isnm`(비면 `None`)
+- **잠정 봉 표시** `last_bar_provisional` — 마지막 봉 기간의 마지막 평일이 `(now − 6시간).date()` 이상이면 참이다.
+  KIS `J` 일봉은 D일 20:00 뒤에도 애프터마켓 값을 싣고 D+1일 새벽에야 정규장 값으로 바뀐다(cycle386 실측). **값은 고치지 않는다 —
+  화면이 「잠정」 문구만 단다.** 06:00 경계는 `src/engine/daily_bar_finalize.py` 와 같은 값이다
+- **로그** — `[stock_chart_fetch]` INFO(KIS 를 부른 조회마다 1행: `calls`·`bars`·`dropped`·`complete`·`reason`·`elapsed_ms`) ·
+  `[stock_chart_partial]` WARNING(부분 결과) · `[stock_chart_busy]` WARNING(대기 초과). 캐시 적중은 로그를 남기지 않는다
+- 테스트 seam — `_monotonic`(시계)을 모듈 전역으로 다시 읽고, `_reset_state_for_tests()` 가 캐시·inflight·세마포어·마지막 호출 시각을 새로 만든다
+  (asyncio 프리미티브는 처음 기다린 이벤트 루프에 묶인다). 가드 `tests/unit/api/test_cycle387_period_chart_fetch.py` ·
+  `tests/unit/ast/test_cycle387_ast_stock_chart_scope.py`(G1~G7)
 
 ## 새 API 추가 절차
 

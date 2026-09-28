@@ -158,8 +158,10 @@
 "src/db/system_config.py":
   - "tests/unit/engine/test_cycle369_r2_kill_switch.py"
 # cycle369 R3 F3 — 발사·giveup·would_fire 의 영속은 루트 `_DbLogHandler` 한 줄이다. 그 핸들러를 importlib 로 지연 참조한다(정적 import 면 src.main 전이 의존 전체로 번진다)
+# cycle387 — R9 가 `main.py` 를 AST 로 읽어(신규 import·include_router 등록) 실제 `app.routes` 도 확인한다.
 "src/main.py":
   - "tests/unit/engine/test_cycle369_r2_sell_safety.py"
+  - "tests/unit/routes/test_cycle387_stock_chart_route.py"
 # cycle379 — ⑨A 체결 0 매수 pending 회수 leaf. 테스트는 importlib 로 **지연 참조**하고(미구현 단계 FAIL 관례)
 # scheduler 도 함수 안에서 지연 import 한다 — 정적 분석이 못 잇는다. AST 가드는 소스를 파일로 읽는다.
 "src/engine/buying_reconcile.py":
@@ -189,3 +191,43 @@
 # cycle382 — `market_unit_mode` 카탈로그 행(선택지·identity·applies_to)을 PUT 라우트 계약이 본다(import 없음).
 "src/engine/param_catalog.py":
   - "tests/contract/test_cycle382_market_unit_params_route.py"
+
+# cycle387 — 종목 차트(KLineChart, 최근 5년 일/주/월봉). AST 가드(G1~G3·G6·G7)는 신규 3파일을
+# `Path.read_text()` + `ast.parse()` 로 읽는다(import 없음) — G4·G5 만 실제 import 라 정적 분석이
+# 나머지를 못 잇는다.
+"src/api/period_chart.py":
+  - "tests/unit/ast/test_cycle387_ast_stock_chart_scope.py"
+  - "tests/unit/routes/test_cycle387_stock_chart_route.py"
+  # S1~S26 는 `importlib` 로 지연 참조한다(Red 관례) — 정적 분석이 못 잇는 이 파일의 유일한 행위 테스트.
+  - "tests/unit/api/test_cycle387_period_chart_fetch.py"
+"src/routes/stock_chart.py":
+  - "tests/unit/ast/test_cycle387_ast_stock_chart_scope.py"
+  - "tests/unit/routes/test_cycle387_stock_chart_route.py"
+"src/models/candle_chart.py":
+  - "tests/unit/ast/test_cycle387_ast_stock_chart_scope.py"
+  - "tests/unit/routes/test_cycle387_stock_chart_route.py"
+  - "tests/unit/api/test_cycle387_period_chart_fetch.py"
+
+# cycle387 — 종목 차트 모달은 세 그리드에서 `React.lazy(() => import('./LazyStockChartModal'))`
+# 경유로 열린다(동적 import, 정적 분석이 못 잇는다). 모달 자체를 바꾸면 그 모달을 실제로
+# 여는 세 그리드 테스트 + 더블클릭 배선 테스트까지 함께 돈다.
+"frontend/src/components/StockChartModal.tsx":
+  - "frontend/src/components/__tests__/StockChartModal.cycle387.test.tsx"
+  - "frontend/src/components/__tests__/stockChartOpen.cycle387.test.tsx"
+  - "frontend/src/components/__tests__/BalanceTable.sector.test.tsx"
+  - "e2e/history.spec.ts"
+"frontend/src/components/LazyStockChartModal.tsx":
+  - "frontend/src/components/__tests__/StockChartModal.cycle387.test.tsx"
+  - "frontend/src/components/__tests__/stockChartOpen.cycle387.test.tsx"
+"frontend/src/components/useStockChartOpener.tsx":
+  - "frontend/src/components/__tests__/stockChartOpen.cycle387.test.tsx"
+  - "frontend/src/components/__tests__/StockChartModal.cycle387.test.tsx"
+# cycle387 — API 클라이언트·순수 함수는 lazy 모달 안에서만 쓰이고, 순수 함수 테스트는 동적
+# `await import('../stockChart')` 라 정적 분석이 둘 다 못 잇는다.
+"frontend/src/api/stock-chart.ts":
+  - "frontend/src/components/__tests__/StockChartModal.cycle387.test.tsx"
+  - "frontend/src/components/__tests__/stockChartOpen.cycle387.test.tsx"
+"frontend/src/utils/stockChart.ts":
+  - "frontend/src/utils/__tests__/stockChart.cycle387.test.ts"
+  - "frontend/src/components/__tests__/StockChartModal.cycle387.test.tsx"
+  - "frontend/src/components/__tests__/stockChartOpen.cycle387.test.tsx"

@@ -10,6 +10,8 @@ import type { Page } from "@playwright/test";
 import { PARAM_SCHEMA_FIXTURE } from "./param-schema.fixture";
 // cycle282 — 장운영상태(표 + 커서) 골든 픽스처(market_state.py 에서 기계 생성).
 import { MARKET_STATE_FIXTURE } from "./market-state.fixture";
+// cycle387 — 종목 차트(일봉·주봉·월봉) 응답 리터럴. MSW 목(`frontend/src/test/fixtures/stockChart.fixture.ts`)과 같은 값.
+import { STOCK_CHART_RESPONSES, type StockChartPeriodKey } from "./stock-chart.fixture";
 
 type AnyJson = Record<string, unknown>;
 
@@ -89,6 +91,8 @@ export interface MockOptions {
   logReports?: AnyJson[];
   // 사이클 F — TE(트레이딩 예지치)/RR(손익비) 성과 mock override (tester-cycleF 인계: e2e 표본 게이트 3분기 커버리지 갭)
   teMetrics?: AnyJson[];
+  // cycle387 — 종목 차트 응답 덮어쓰기(기간별 `{success, data, message}` 전문). 없으면 기본 리터럴.
+  stockChart?: Partial<Record<StockChartPeriodKey, AnyJson>>;
 }
 
 export async function installApiMocks(page: Page, opts: MockOptions = {}) {
@@ -266,6 +270,21 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
       });
     }
     return route.fulfill({ json: envelope(rec) });
+  });
+
+  // cycle387 — 종목 차트(잔고·체결·손익 행 더블클릭 모달). 기간(`period`)별 리터럴을 돌려준다.
+  // 경로 가드 + resourceType 가드는 `**/api/history*` 계열과 같은 규약(규약 4) — vite 모듈 요청
+  // (`/src/api/stock-chart.ts`)에 JSON 을 돌려주면 MIME 불일치로 모듈 로드가 죽는다.
+  await page.route("**/api/stock-chart/candles*", (route) => {
+    if (!isRealApiCall(route.request().url())) return route.continue();
+    if (route.request().resourceType() === "script") return route.continue();
+    const url = new URL(route.request().url());
+    const period = (url.searchParams.get("period") ?? "D") as StockChartPeriodKey;
+    const body = opts.stockChart?.[period] ?? STOCK_CHART_RESPONSES[period];
+    if (!body || !/^\d{6}$/.test(url.searchParams.get("ticker") ?? "")) {
+      return route.fulfill({ status: 422, json: { detail: [{ msg: "invalid query", loc: ["query"] }] } });
+    }
+    return route.fulfill({ json: body });
   });
 
   await page.route("**/api/recommendations", (route) =>

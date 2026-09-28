@@ -28,6 +28,12 @@
  * 기존 두 항목의 검사 의미(K4-a/b/c)는 무변경이다. 서식 계약은
  * `pages/__tests__/Recommendations.format.test.tsx` 가 소유한다.
  *
+ * ## 범위 확장 4 (cycle387, 2026-09-28) — 종목 차트(KLineChart) 두 파일도 위임한다
+ * 새 파일 `components/StockChartModal.tsx`·`utils/stockChart.ts` 는 처음부터 위임 목록에 넣는다
+ * (명세 `_workspace/red/cycle387_stock_chart_spec.md` §2.5). 차트 축·툴팁 날짜는 epoch ms 로
+ * 오므로 헬퍼 3개(K6~K8)를 이 유틸에 더한다. ⚠️ K4-c 가 두 파일의 `'Asia/Seoul'` 리터럴을
+ * 금지하므로 KLineChart `init({ timezone })` 에 넘길 값은 이 유틸의 `KST_TIME_ZONE` 을 쓴다(K9).
+ *
  * ## 범위 정정 (Verify F1, 2026-09-05) — ⚠️ 위 "범위 정정 2" 가 이 절을 대체했다(맥락 보존)
  * 명세 §1 은 `DailyReportTab.formatDateTime` 도 위임 대상으로 적었지만, HEAD 의
  * `toLocaleString('ko-KR', { timeZone, hour12: false })` 출력(브라우저 `2026. 9. 7.
@@ -103,10 +109,13 @@ const THIS_TEST_PATH = path.join(__dirname, 'kst.test.ts')
 //   cycle256   = PortfolioRiskCard (출력 byte 동일)
 //   cycle256-F = DailyReportTab    (09-05 결정 "바꾸자" — `2026-09-07 09:05:00` 서식)
 //   cycle256-G = pages/Recommendations (09-05 결정 "바꿔" — HEAD 는 timeZone 자체가 없었다)
+//   cycle387   = components/StockChartModal + utils/stockChart (신규 — 처음부터 위임)
 const DELEGATING_FILES = [
   'components/PortfolioRiskCard.tsx',
   'components/DailyReportTab.tsx',
   'pages/Recommendations.tsx',
+  'components/StockChartModal.tsx',
+  'utils/stockChart.ts',
 ] as const
 
 function readSourceFile(relPath: string): string {
@@ -339,6 +348,86 @@ describe('K4: 텍스트 가드 — KST 포맷 소유권이 utils/kst.ts 로 이�
     const code = stripComments(source)
     expect(code.includes('getHours('), '로컬타임 추출(getHours) 사용 금지').toBe(false)
     expect(code.includes('getMinutes('), '로컬타임 추출(getMinutes) 사용 금지').toBe(false)
+  })
+})
+
+// ── cycle387 — 종목 차트 날짜(epoch ms) 헬퍼 ─────────────────────────────────
+// KLineChart 는 봉 시각을 epoch ms 로 다룬다. 백엔드 봉 날짜는 `YYYY-MM-DD`(KRX 영업일 = KST 날짜)
+// 이므로 KST 자정 epoch 로 바꿔 넘기고, 축·툴팁은 그 epoch 를 KST 로 다시 읽는다.
+// 이 파일은 TZ=UTC 라 브라우저 로컬타임으로 읽는 구현은 하루 앞(전날) 날짜를 낸다.
+
+/** KST 자정(= 전날 15:00 UTC). */
+const KST_MIDNIGHT_0925 = Date.UTC(2026, 8, 24, 15)
+
+describe('K6: formatKstDateFromEpochMs — KST YYYY-MM-DD', () => {
+  it('K6-a: KST 자정 epoch → "2026-09-25" (UTC 로 읽으면 09-24)', () => {
+    expect(kst.formatKstDateFromEpochMs(KST_MIDNIGHT_0925)).toBe('2026-09-25')
+  })
+
+  it('K6-b: KST 23:59:59 는 아직 그날 — "2026-09-25"', () => {
+    expect(kst.formatKstDateFromEpochMs(Date.UTC(2026, 8, 25, 14, 59, 59))).toBe('2026-09-25')
+  })
+
+  it.each([
+    ['NaN', Number.NaN],
+    ['Infinity', Number.POSITIVE_INFINITY],
+    ['null', null],
+    ['undefined', undefined],
+  ])('K6-c: 잘못된 입력(%s) → "—"', (_label, value) => {
+    expect(kst.formatKstDateFromEpochMs(value as unknown as number)).toBe('—')
+  })
+})
+
+describe('K7: formatKstYearMonthFromEpochMs — KST YYYY-MM (월봉 x축)', () => {
+  it('K7-a: KST 자정 epoch → "2026-09"', () => {
+    expect(kst.formatKstYearMonthFromEpochMs(KST_MIDNIGHT_0925)).toBe('2026-09')
+  })
+
+  it('K7-b: KST 10-01 00:00 (= 09-30 15:00 UTC) 는 "2026-10" (UTC 로 읽으면 09)', () => {
+    expect(kst.formatKstYearMonthFromEpochMs(Date.UTC(2026, 8, 30, 15))).toBe('2026-10')
+  })
+
+  it.each([
+    ['NaN', Number.NaN],
+    ['null', null],
+  ])('K7-c: 잘못된 입력(%s) → "—"', (_label, value) => {
+    expect(kst.formatKstYearMonthFromEpochMs(value as unknown as number)).toBe('—')
+  })
+})
+
+describe('K8: kstDateToEpochMs — YYYY-MM-DD → KST 자정 epoch ms', () => {
+  it('K8-a: "2026-09-25" → Date.UTC(2026,8,24,15)', () => {
+    expect(kst.kstDateToEpochMs('2026-09-25')).toBe(KST_MIDNIGHT_0925)
+  })
+
+  it('K8-b: 왕복 — K6 로 다시 읽으면 같은 날짜', () => {
+    for (const ymd of ['2021-09-28', '2024-02-29', '2026-01-01', '2026-12-31']) {
+      const ms = kst.kstDateToEpochMs(ymd)
+      expect(ms).not.toBeNull()
+      expect(kst.formatKstDateFromEpochMs(ms as number)).toBe(ymd)
+    }
+  })
+
+  it.each([
+    ['빈 문자열', ''],
+    ['슬래시', '2026/09/25'],
+    ['압축형', '20260925'],
+    ['시각 포함', '2026-09-25T00:00:00+09:00'],
+    ['null', null],
+    ['undefined', undefined],
+    ['숫자', 20260925],
+  ])('K8-c: `^\\d{4}-\\d{2}-\\d{2}$` 아님(%s) → null', (_label, value) => {
+    expect(kst.kstDateToEpochMs(value as unknown as string)).toBeNull()
+  })
+})
+
+describe('K9: KST_TIME_ZONE — 차트 라이브러리에 넘길 tz 도 이 유틸이 소유한다', () => {
+  it('K9-a: `KST_TIME_ZONE === "Asia/Seoul"`', () => {
+    expect(kst.KST_TIME_ZONE).toBe('Asia/Seoul')
+  })
+
+  it('K9-b: StockChartModal.tsx 가 `KST_TIME_ZONE` 을 쓴다 (K4-c 가 리터럴을 금지하므로)', () => {
+    expect(stripComments(readSourceFile('components/StockChartModal.tsx'))).toContain('KST_TIME_ZONE')
   })
 })
 

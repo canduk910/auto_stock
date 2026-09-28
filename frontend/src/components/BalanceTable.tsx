@@ -8,6 +8,7 @@ import type { Holding } from '../types/balance'
 import ConfirmModal from './ConfirmModal'
 import { pnlColorClass as profitColor } from '../utils/pnlColor'
 import ScrollPane from './ScrollPane'
+import { useStockChartOpener } from './useStockChartOpener'
 
 const STRATEGY_NAMES: Record<string, string> = {
   momentum: '모멘텀',
@@ -107,6 +108,7 @@ interface Props {
 
 export default function BalanceTable({ selectedStrategy }: Props) {
   const queryClient = useQueryClient()
+  const { openChart, chartModal } = useStockChartOpener()
   const [sellTarget, setSellTarget] = useState<{ ticker: string; name: string; quantity: number } | null>(null)
   const [sellResult, setSellResult] = useState<string | null>(null)
   // setTimeout id 보존 — unmount 시 cleanup으로 고아 setState 경고 방지
@@ -259,7 +261,13 @@ export default function BalanceTable({ selectedStrategy }: Props) {
                 const color = stratKey ? getStrategyColor(stratKey) : null
                 const market = marketBadgeProps(h)
                 return (
-                  <tr key={h.ticker} className="border-b hover:bg-gray-50">
+                  <tr
+                    key={h.ticker}
+                    data-testid={`balance-row-${h.ticker}`}
+                    title="더블클릭 — 종목 차트"
+                    onDoubleClick={(e) => openChart(e, h.ticker, h.name)}
+                    className="border-b hover:bg-gray-50"
+                  >
                     <td className="px-4 py-3 text-gray-700">{h.name}</td>
                     <td
                       data-testid={`sector-${h.ticker}`}
@@ -358,6 +366,7 @@ export default function BalanceTable({ selectedStrategy }: Props) {
           loading={sellMutation.isPending}
         />
       )}
+      {chartModal}
     </div>
   )
 }

@@ -29,7 +29,7 @@ src/
 
 ## 핵심 라이브러리
 
-TanStack Query (서버 상태) · TanStack Table (그리드) · Recharts (차트) · Tailwind v4 · React Router
+TanStack Query (서버 상태) · TanStack Table (그리드) · Recharts (차트) · KLineChart (`klinecharts` **`10.0.3` 정확 고정** — 종목 차트 모달 전용, 분리 청크. 「종목 차트 모달」 절) · Tailwind v4 · React Router
 
 ## 단일 polling owner
 
@@ -104,7 +104,7 @@ Dashboard 만 즉시 import. 나머지 9 페이지(History · Recommendations ·
 - 금액: 천 단위 콤마 / 수익률: 소수 2자리 + %
 - 환경 배너: 실전=빨강(`bg-red-600`) "실전 매매 환경" / 모의=`bg-sky-600` "모의투자 환경"
 - 슬라이더 accent 색은 리터럴 hex 대신 `'var(--color-navy-600)'`(Tailwind v4 `@theme` 가 `:root` 에 노출하는 CSS 변수) 를 쓴다 — `components/NavBar.tsx`(폭 슬라이더) + `CashUsageRatioCard.tsx` + `TradeAmountFilterCard.tsx` + `PriceFilterCard.tsx`(최소/최대 2곳) 5곳 동일. 신규 슬라이더 추가 시도 같은 값으로 맞춘다.
-- **시각 표시는 KST 강제** — 단일 진실원 `src/utils/kst.ts`: `formatKstHHMM(iso)`(HH:mm, `hour12:false`) · `formatKstDateTime(iso)`(`yyyy-MM-dd HH:mm:ss`, `formatToParts` 조립) · `kstTodayISO(now?)`. 잘못된 입력은 `'—'`. **새 KST 표기는 이 유틸에 위임한다** — 신규 `Intl.DateTimeFormat`/`toLocale*String` 생성 금지(`utils/__tests__/kst.test.ts` K4 텍스트 가드가 위임 대상 `DELEGATING_FILES`(`src/` 기준 상대 경로)로 잠근다). 위임 완료 = `PortfolioRiskCard` · `DailyReportTab` · `pages/Recommendations`(서식 `yyyy-MM-dd HH:mm:ss`, 빈 값 `'-'`). 나머지 사이트는 **사이트별 출력 스냅샷 승인 후 점진 이관**. `new Date(iso).getHours()/getFullYear()` 등 브라우저 로컬타임 추출 금지(도커 빌드 UTC / 다른 TZ 환경 어긋남). 백엔드 `_to_kst` 헬퍼와 동일 컨벤션.
+- **시각 표시는 KST 강제** — 단일 진실원 `src/utils/kst.ts`: `formatKstHHMM(iso)`(HH:mm, `hour12:false`) · `formatKstDateTime(iso)`(`yyyy-MM-dd HH:mm:ss`, `formatToParts` 조립) · `kstTodayISO(now?)` · 차트용 epoch ms 헬퍼 `formatKstDateFromEpochMs(ms)`(`YYYY-MM-DD`) · `formatKstYearMonthFromEpochMs(ms)`(`YYYY-MM`) · `kstDateToEpochMs(ymd)`(`YYYY-MM-DD` → KST 자정 epoch ms, 형식이 다르면 `null`) · 상수 `KST_TIME_ZONE`. 잘못된 입력은 `'—'`. **새 KST 표기는 이 유틸에 위임한다** — 신규 `Intl.DateTimeFormat`/`toLocale*String` 생성 금지(`utils/__tests__/kst.test.ts` K4 텍스트 가드가 위임 대상 `DELEGATING_FILES`(`src/` 기준 상대 경로)로 잠근다). 위임 완료 = `PortfolioRiskCard` · `DailyReportTab` · `pages/Recommendations`(서식 `yyyy-MM-dd HH:mm:ss`, 빈 값 `'-'`) · `components/StockChartModal` · `utils/stockChart`(두 파일은 `'Asia/Seoul'` 리터럴도 금지 — 차트 라이브러리에 넘길 tz 는 `KST_TIME_ZONE`). 나머지 사이트는 **사이트별 출력 스냅샷 승인 후 점진 이관**. `new Date(iso).getHours()/getFullYear()` 등 브라우저 로컬타임 추출 금지(도커 빌드 UTC / 다른 TZ 환경 어긋남). 백엔드 `_to_kst` 헬퍼와 동일 컨벤션.
 - ⚠️ **타입 검사는 `npx tsc -b`** — 루트 `tsconfig.json` 이 `files: []` 솔루션 형식이라 `npx tsc --noEmit` 은 파일을 **0개** 검사한다. `GateLevel` 유니온 등 타입 계약은 `tsc -b`(= `npm run build` 1단계)만 잰다.
 
 ## 테스트 규약 (공통)
@@ -347,7 +347,7 @@ Dashboard 만 즉시 import. 나머지 9 페이지(History · Recommendations ·
 
 ## History (`/history`)
 
-두 탭:
+두 탭(두 그리드 모두 행 더블클릭 → 종목 차트, 「종목 차트 모달」 절):
 - 주문체결내역: `TradeHistoryGrid` (raw 행)
 - 매매손익: `TradePnLGrid` (`/api/history/pnl` — 매수·매도 페어, closed/open 사이클). 12 컬럼 + 전략 뱃지. open 행은 매도 컬럼 "—" + "(미실현)" 라벨, emerald-50 배경. 시세 미수신 "(미실현 시세 대기)". 전략 select 7종(kojiro `고지로 대순환` 포함). 그리드 상단 실현손익 요약 바(`pnl-summary`) — `data.summary`(슬라이스 전 전체 closed 페어 집계) 기반 실현 합계(`pnl-summary-realized`, 이익 red/손실 blue)·손익율·승/패/보합·승률·현재 전략 필터 라벨. summary 부재 시 0 graceful
 
@@ -363,6 +363,50 @@ Dashboard 만 즉시 import. 나머지 9 페이지(History · Recommendations ·
 - 팝업 내용 = 점수/임계/차단여부(`would_block`) · 사유(rationale) · 핵심 위험 · 무효화 조건 · 지표 요약 · 주문 스냅샷(주문가·수량·목표가·보드) · 모델/토큰/비용/지연 · 원문 입력 payload(접기). **`result==='failed'` 기록은 오류가 아니라 정상 기록**이며 실패 사유를 크게 보여 준다(`llm-eval-failed`) — "평가 안 함" 과 "평가 실패" 를 구별하는 것이 목적이다.
 - 계좌번호는 **마스킹된 값만**(`account_no_masked`, 앞 4자리 + `****`) 화면에 오르고 타입에 원문 키가 없다 — 이 표면은 리포터 키로도 읽힌다. 숫자는 전부 방어 변환(`toSafeNumber`), 시각은 전부 `timeZone:'Asia/Seoul'` 명시.
 - 목 3곳 모두 배치 응답을 **복합 키**로 만든다 — 주문번호 단독 키로 만들면 목이 실제 응답 형태를 담지 않아 화면이 전부 비활성인데도 초록이 된다. 헬퍼 가드 = `src/components/__tests__/llmEvalKey.cycle276.test.ts`(키 형식·날짜별 구분·두 그리드의 직접 인덱싱 0건).
+
+## 종목 차트 모달 — 행 더블클릭 (cycle387)
+
+잔고(`BalanceTable`) · 주문체결내역(`TradeHistoryGrid`) · 매매손익(`TradePnLGrid`) 세 그리드에서 **행을 더블클릭**하면 그 종목의
+최근 5년 캔들 차트(일봉/주봉/월봉)가 모달로 뜬다. 백엔드는 `GET /api/stock-chart/candles` 하나다(`src/routes/CLAUDE.md`).
+
+- **여는 규칙** — 세 그리드가 공용 훅 `components/useStockChartOpener.tsx` 를 쓴다. 행 `onDoubleClick={(e) => openChart(e, ticker, name)}`,
+  `title="더블클릭 — 종목 차트"`. 행 testid = `balance-row-{ticker}` · `trade-row-{index}` · `pnl-row-{index}`.
+  - 🔴 버튼·링크·입력·라벨(`button, a, input, select, textarea, label`)과 그 자손 위의 더블클릭은 **무시한다**(`utils/stockChart.ts::isInteractiveTarget`).
+    「매도」·「AI 자문」 두 번 누름이 매도 확인창·AI 팝업과 차트를 함께 띄우면 안 된다
+  - 더블클릭이 남긴 텍스트 선택을 지운다
+  - 종목코드가 6자리 숫자가 아니면(`isChartableTicker`) 모달은 열되 `stock-chart-unsupported` 로 안내하고 **요청을 보내지 않는다**
+- **분리 청크** — `components/LazyStockChartModal.tsx` 가 `React.lazy(() => import('./StockChartModal'))` 로 감싼다. `klinecharts` 를
+  세 그리드의 첫 로딩에 싣지 않기 위해서다. 래퍼를 훅과 다른 파일에 둔 이유 = Fast Refresh 가드 `react-refresh/only-export-components`
+  (훅 파일이 컴포넌트까지 담으면 깨진다). 청크 로딩 중 폴백 testid = `stock-chart-chunk-loading`.
+  그 바깥을 오류 경계(`ChunkErrorBoundary`)가 감싼다 — 프론트 재배포 뒤 옛 탭에서 청크 동적 import 가 실패해도 앱 전체가 내려가지
+  않고 모달 자리에 안내 `stock-chart-chunk-error`(새로고침 안내) + 닫기 `stock-chart-chunk-error-close` 를 띄운다
+- **라이브러리** — `klinecharts` `10.0.3`(`^` 없이 정확 고정, 타입은 패키지 동봉). 가져오는 것은 `init` · `dispose` · `registerLocale` 과
+  타입 `Chart` 뿐이다. 기간 전환 = `chart.setPeriod({ type, span: 1 })`(`PERIOD_TO_KLINE` D→`day` · W→`week` · M→`month`),
+  데이터 = `chart.setDataLoader({ getBars })`, 거래량 패널 = `createIndicator('VOL')`, 로케일 `ko-KR` 은 모듈 최상위에서 한 번 등록한다.
+  캔들·거래량 색은 `utils/pnlColor.ts` 의 `PROFIT_HEX`·`LOSS_HEX`·`NEUTRAL_HEX` 다(새 hex 리터럴 0). 모달이 닫히면 `dispose` 한다
+- **조회** — `api/stock-chart.ts::getStockChart(ticker, period, years = 5)`. 본문이 `success:false` 면 `Error(message)` 로 바꿔 던진다.
+  axios 오류(422·네트워크)는 **잡지 않고** 흘려 모달이 422 `detail` 을 꺼내 보여 준다. 타임아웃 `STOCK_CHART_TIMEOUT_MS = 60_000`
+  (백엔드 대기 20초 + 조회 예산 25초 + 마지막 호출 — nginx `location /api/` 의 기본 `proxy_read_timeout` 60초와 같다. 120초는
+  `/api/macro/` 전용). `useQuery` 키 = `['stockChart', ticker, period, 5]`, `retry: 1`, `staleTime` = 부분 결과(`complete=false`)
+  1분 · 그 밖 10분(서버 캐시와 같은 값 — 부분 안내 「1분 뒤 다시 열면 다시 받습니다」 가 참이 되는 조건)
+- **날짜** — 백엔드 봉 날짜 `YYYY-MM-DD` → `kstDateToEpochMs`(KST 자정 epoch ms) → 축·툴팁은 `formatKstDateFromEpochMs`,
+  월봉 x축만 `formatKstYearMonthFromEpochMs`. `init({ timezone: KST_TIME_ZONE })`. 두 파일(`StockChartModal.tsx`·`utils/stockChart.ts`)은
+  K4 위임 대상이다(「시각적 컨벤션」 절)
+- **봉 변환** `toKLineData(bars)` — 숫자는 방어 변환(숫자 문자열도 받는다), 날짜·OHLC·거래량·거래대금 중 하나라도 변환에 실패한 봉은
+  버리고, 결과는 항상 오름차순이다. `turnover` = `amount`
+- **상태는 전부 따로 보여 준다 — 값을 고치거나 숨기지 않는다.** 로딩 `stock-chart-loading` · 오류 `stock-chart-error`(+ 다시 시도
+  `stock-chart-retry`) · 빈 결과 `stock-chart-empty` · 부분 결과 `stock-chart-partial`(`complete=false`) · 잠정 봉 `stock-chart-provisional`
+  (`last_bar_provisional=true` — 일봉은 날짜, 주·월봉은 「이번 주」/「이번 달」 문구) · 지원 안 함 `stock-chart-unsupported`.
+  메타 줄 `stock-chart-meta` = 요청 구간(`start_date ~ end_date`) · 봉 수 · 수정주가 · KRX
+- **셸** — `LlmEvaluationModal` 관용구를 따른다. 루트 testid `stock-chart-modal`, 패널 `role="dialog" aria-modal aria-labelledby`,
+  × · ESC · 바깥 클릭으로 닫고, 닫힌 뒤 연 요소로 포커스를 돌려준다. 기간 버튼 = `stock-chart-period-{D|W|M}`(`aria-pressed`)
+- **목** — MSW `test/handlers.ts` 와 e2e `fixtures/api-mocks.ts`(`**/api/stock-chart/candles*`, 경로 가드 + resourceType 가드)가
+  같은 응답 리터럴(`test/fixtures/stockChart.fixture.ts` · `e2e/fixtures/stock-chart.fixture.ts`)을 기간별로 돌려주고, 종목코드가
+  6자리 숫자가 아니면 422 를 낸다. jsdom 은 canvas 가 없어 단위 테스트는 `vi.mock('klinecharts', …)` 로 `test/fakeKlinecharts.ts`
+  (호출 기록용 가짜)를 쓴다 — 실제 라이브러리는 e2e 만 돌린다
+- 회귀 = `components/__tests__/StockChartModal.cycle387.test.tsx` · `stockChartOpen.cycle387.test.tsx`(세 그리드 배선) ·
+  `LazyStockChartModal.cycle387.test.tsx`(청크 로딩 실패) ·
+  `utils/__tests__/stockChart.cycle387.test.ts` · `utils/__tests__/kst.test.ts`(K6~K9) · `e2e/history.spec.ts`(F32·F33)
 
 ## Logs (`/logs`) — 통합 메뉴
 
@@ -397,6 +441,8 @@ Dashboard 만 즉시 import. 나머지 9 페이지(History · Recommendations ·
 - **`BacktestComparisonCard`** (`backtest_summary != null` 시 자산 배정 카드 *위*): (a) 외부 MCP YAML DSL 지원 3종(momentum/VB/donchian)은 좌(현재)/우(추천) 메트릭 8종 비교 + 차이값 칩(이익색/손실색) + `data-testid="backtest-card-{strategy}"`. (b) 폴백 4종(LTV/bull_flag/vcp/kojiro)은 "외부 MCP YAML DSL 미지원 — 로컬 백테스트 어댑터 적용 대기" 안내. `status=running` 시 로딩 스피너. **`max_drawdown` 양수(절대값) 컨벤션**: `METRIC_SPECS.max_drawdown.diffSignInverted=true` — 양수 diff(추천 MDD 더 큼) = 손실 악화 → 손실색, 음수 diff = 손실 완화 → 이익색
 
 ## BalanceTable
+
+**행 더블클릭 → 종목 차트** — 「종목 차트 모달」 절. 행 testid `balance-row-{ticker}`.
 
 **섹터 컬럼**: 헤더 순서 `종목명 → 섹터 → 거래시장 → (전략) → …`. `Holding.sector` 표시, 값 없으면 `-`(열 밀림 방지). `data-testid="sector-{ticker}"`. 데이터는 백엔드 `/api/balance` 가 **이미 조회한 stock_master basics 를 재사용**해 산출(추가 DB 호출 0) — `sector_naming` 단일 진실원(`bstp_kor_isnm` → `_kojiro_sector_key(master_raw)` → `미분류-{ticker}`). ⚠️ 컬럼 추가 시 빈 상태 행의 `colSpan`(현재 `isAll ? 11 : 10`) 동반 갱신 의무.
 
