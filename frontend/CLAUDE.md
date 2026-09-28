@@ -382,8 +382,23 @@ Dashboard 만 즉시 import. 나머지 9 페이지(History · Recommendations ·
   않고 모달 자리에 안내 `stock-chart-chunk-error`(새로고침 안내) + 닫기 `stock-chart-chunk-error-close` 를 띄운다
 - **라이브러리** — `klinecharts` `10.0.3`(`^` 없이 정확 고정, 타입은 패키지 동봉). 가져오는 것은 `init` · `dispose` · `registerLocale` 과
   타입 `Chart` 뿐이다. 기간 전환 = `chart.setPeriod({ type, span: 1 })`(`PERIOD_TO_KLINE` D→`day` · W→`week` · M→`month`),
-  데이터 = `chart.setDataLoader({ getBars })`, 거래량 패널 = `createIndicator('VOL')`, 로케일 `ko-KR` 은 모듈 최상위에서 한 번 등록한다.
-  캔들·거래량 색은 `utils/pnlColor.ts` 의 `PROFIT_HEX`·`LOSS_HEX`·`NEUTRAL_HEX` 다(새 hex 리터럴 0). 모달이 닫히면 `dispose` 한다
+  데이터 = `chart.setDataLoader({ getBars })`, 로케일 `ko-KR` 은 모듈 최상위에서 한 번 등록한다.
+  캔들·거래량 막대·MACD 막대 색은 `utils/pnlColor.ts` 의 `PROFIT_HEX`·`LOSS_HEX`·`NEUTRAL_HEX` 다(`init` 의 `styles.candle.bar` ·
+  `styles.indicator.bars` — 새 hex 리터럴 0). 모달이 닫히면 `dispose` 한다
+- **지표 배치 (cycle388)** — 이동평균은 가격 축에 겹쳐야 읽힌다. 그래서 캔들 패널에 EMA 를 겹치고, 아래 패널에는 가격 축이 아닌 지표만 둔다.
+  - 캔들 패널 = `createIndicator({ name: 'EMA', paneId: CANDLE_PANE_ID, calcParams: [5, 20, 60, 120] }, true)`.
+    `CANDLE_PANE_ID = 'candle_pane'` 은 라이브러리 `PaneIdConstants.CANDLE` 과 같은 값이다. 둘째 인자 `true`(`isStack`)는 캔들 패널에 있던 것을 지우지 않고 겹친다
+  - 아래 패널은 위에서부터 거래량 · RSI · MACD 다. 이 순서로 만든다 — `VOL_PANE = { id: 'stock_chart_vol', height: 64 }` ·
+    `RSI_PANE = { id: 'stock_chart_rsi', height: 80 }` · `MACD_PANE = { id: 'stock_chart_macd', height: 90 }`
+  - 거래량 = `{ name: 'VOL', calcParams: [] }` — 막대만 그린다. `VOL` 기본값(`calcParams` 5·10·20)은 거래량 이동평균선 셋을 같이 그려
+    화면에서 EMA 처럼 보인다
+  - RSI = `{ name: 'RSI', calcParams: [14], precision: 2, figures: [{ key: 'rsi1', title: 'RSI14: ', type: 'line' }] }`.
+    라이브러리 기본 툴팁 제목은 기간이 아니라 순번(`RSI1: `)이라 `figures` 로 제목을 준다
+  - MACD = `{ name: 'MACD', calcParams: [12, 26, 9], precision: 2 }`
+  - `precision: 2` 를 빼면 라이브러리 기본값(4)이라 RSI·MACD 가 소수 넷째 자리까지 찍힌다
+  - 아래 패널 셋은 `chart.setPaneOptions({ id, height })` 로 높이를 정한다. 정하지 않으면 셋 다 라이브러리 기본 100px 라 캔들이 눌린다.
+    캔들 패널 높이는 정하지 않는다 — 남는 높이를 캔들이 가져간다. 차트 자리 높이 = `h-[72vh] min-h-[460px]`
+  - 🔴 이동평균 계열(`EMA`·`MA`·`SMA`·`BOLL`)은 캔들 패널에만 둔다
 - **조회** — `api/stock-chart.ts::getStockChart(ticker, period, years = 5)`. 본문이 `success:false` 면 `Error(message)` 로 바꿔 던진다.
   axios 오류(422·네트워크)는 **잡지 않고** 흘려 모달이 422 `detail` 을 꺼내 보여 준다. 타임아웃 `STOCK_CHART_TIMEOUT_MS = 60_000`
   (백엔드 대기 20초 + 조회 예산 25초 + 마지막 호출 — nginx `location /api/` 의 기본 `proxy_read_timeout` 60초와 같다. 120초는
@@ -404,8 +419,12 @@ Dashboard 만 즉시 import. 나머지 9 페이지(History · Recommendations ·
   같은 응답 리터럴(`test/fixtures/stockChart.fixture.ts` · `e2e/fixtures/stock-chart.fixture.ts`)을 기간별로 돌려주고, 종목코드가
   6자리 숫자가 아니면 422 를 낸다. jsdom 은 canvas 가 없어 단위 테스트는 `vi.mock('klinecharts', …)` 로 `test/fakeKlinecharts.ts`
   (호출 기록용 가짜)를 쓴다 — 실제 라이브러리는 e2e 만 돌린다
-- 회귀 = `components/__tests__/StockChartModal.cycle387.test.tsx` · `stockChartOpen.cycle387.test.tsx`(세 그리드 배선) ·
-  `LazyStockChartModal.cycle387.test.tsx`(청크 로딩 실패) ·
+- **실제 라이브러리의 지표 거부는 e2e F32 가 본다** — 가짜는 지표 이름·인자가 틀려도 기록만 하고 통과한다. 실제 라이브러리는
+  지표 생성을 거부해도 화면은 조용하고 콘솔에만 남긴다. 그런데 klinecharts 는 경고·오류를 `console.log` 로, 그것도 개발 모드
+  (`process.env.NODE_ENV === 'development'`)에서만 찍는다. 그래서 F32 는 콘솔 타입(`warning`/`error`)이 아니라 문구
+  `/klinecharts (warning|error)/i` 로 모아 `[]` 인지 단언한다. e2e 는 `npm run dev`(개발 모드)로 뜨므로 이 경고가 찍힌다
+- 회귀 = `components/__tests__/StockChartModal.cycle387.test.tsx` · `StockChartModal.cycle388.test.tsx`(지표 배치) ·
+  `stockChartOpen.cycle387.test.tsx`(세 그리드 배선) · `LazyStockChartModal.cycle387.test.tsx`(청크 로딩 실패) ·
   `utils/__tests__/stockChart.cycle387.test.ts` · `utils/__tests__/kst.test.ts`(K6~K9) · `e2e/history.spec.ts`(F32·F33)
 
 ## Logs (`/logs`) — 통합 메뉴

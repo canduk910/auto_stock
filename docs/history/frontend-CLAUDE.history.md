@@ -989,3 +989,23 @@ await page.route("**/api/logs*", (route) => {
 잠정 행은 다음 거래일 날짜로 저장되므로 날짜 picker 로 그 날짜를 골라야 보인다.
 
 → CHANGELOG: cycle364 S1 행
+
+---
+
+## 종목 차트 모달 — 행 더블클릭 (cycle387)
+
+### 2026-09-28 cycle388 — 「거래량 패널 = `createIndicator('VOL')`」 를 지표 배치로 교체
+
+정본 원문(「라이브러리」 항목):
+
+- **라이브러리** — `klinecharts` `10.0.3`(`^` 없이 정확 고정, 타입은 패키지 동봉). 가져오는 것은 `init` · `dispose` · `registerLocale` 과
+  타입 `Chart` 뿐이다. 기간 전환 = `chart.setPeriod({ type, span: 1 })`(`PERIOD_TO_KLINE` D→`day` · W→`week` · M→`month`),
+  데이터 = `chart.setDataLoader({ getBars })`, 거래량 패널 = `createIndicator('VOL')`, 로케일 `ko-KR` 은 모듈 최상위에서 한 번 등록한다.
+  캔들·거래량 색은 `utils/pnlColor.ts` 의 `PROFIT_HEX`·`LOSS_HEX`·`NEUTRAL_HEX` 다(새 hex 리터럴 0). 모달이 닫히면 `dispose` 한다
+
+경위: 사용자가 실제 차트를 보고 「EMA 가 아래 거래량 쪽에 표시된다」고 알려 왔다.
+그 선은 EMA 가 아니었다. `VOL` 을 인자 없이 만들면 라이브러리 기본값(`calcParams` 5·10·20)대로 거래량 이동평균선 셋이 같이 그려진다.
+요청대로 이동평균은 캔들 패널(EMA 5·20·60·120)로 옮기고, 거래량은 막대만 남기고, 아래에 RSI(14)·MACD(12·26·9) 패널을 더했다.
+MACD 막대도 `styles.indicator.bars` 색을 쓰게 되어 색 문장의 대상이 「캔들·거래량」 에서 「캔들·거래량 막대·MACD 막대」 로 넓어졌다.
+
+→ CHANGELOG: cycle388 행

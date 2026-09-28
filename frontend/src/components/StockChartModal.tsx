@@ -10,6 +10,8 @@
  *   패널은 `role="dialog" aria-modal aria-labelledby`, ESC·바깥 클릭 닫기, 닫힌 뒤 포커스 복귀.
  * - `klinecharts@10.0.3` v10 API — `init`/`dispose`/`registerLocale` 셋만 이 라이브러리에서 가져온다.
  *   기간(일/주/월) 전환은 `chart.setPeriod()`, 데이터는 `chart.setDataLoader().getBars` 로 흐른다.
+ * - 지표 배치(cycle388) — 캔들 패널에 EMA(5·20·60·120), 아래 패널은 위에서부터 거래량(막대만) ·
+ *   RSI(14) · MACD(12·26·9). 이동평균 계열은 캔들 패널에만 둔다.
  * - KST 는 전부 `utils/kst.ts` 위임 — 이 파일에 `Intl.DateTimeFormat`/`'Asia/Seoul'` 리터럴을
  *   두지 않는다(K4 가드). 차트 라이브러리에 넘길 tz 는 `KST_TIME_ZONE` 하나뿐이다.
  * - 상태(로딩/오류/빈/부분/잠정/지원안함)를 전부 구분해 보여 준다 — 값을 고치거나 숨기지 않는다.
@@ -30,6 +32,13 @@ import { LOSS_HEX, NEUTRAL_HEX, PROFIT_HEX } from '../utils/pnlColor'
 
 const TITLE_ID = 'stock-chart-modal-title'
 const PERIODS: ChartPeriod[] = ['D', 'W', 'M']
+
+/** 가격(캔들) 패널 id — 라이브러리 `PaneIdConstants.CANDLE` 과 같은 값. */
+const CANDLE_PANE_ID = 'candle_pane'
+/** 아래 보조 패널 — 위에서부터 거래량 · RSI · MACD. 높이(px)를 정하지 않으면 셋 다 기본 100px 라 캔들이 눌린다. */
+const VOL_PANE = { id: 'stock_chart_vol', height: 64 }
+const RSI_PANE = { id: 'stock_chart_rsi', height: 80 }
+const MACD_PANE = { id: 'stock_chart_macd', height: 90 }
 
 // 모듈 최상위 1회 — KLineChart 기본 로케일(영문)을 한글로 덮는다.
 registerLocale('ko-KR', {
@@ -170,7 +179,20 @@ export default function StockChartModal({ ticker, name, onClose }: Props) {
 
     if (chart) {
       chart.setSymbol({ ticker, pricePrecision: 0, volumePrecision: 0 })
-      chart.createIndicator('VOL')
+      // 이동평균은 가격 축에 겹쳐야 읽힌다 — 캔들 패널에 EMA(5·20·60·120).
+      chart.createIndicator({ name: 'EMA', paneId: CANDLE_PANE_ID, calcParams: [5, 20, 60, 120] }, true)
+      // 거래량은 막대만 — VOL 기본값은 거래량 이동평균선(MA5·10·20)을 같이 그려 EMA 처럼 보인다.
+      chart.createIndicator({ name: 'VOL', paneId: VOL_PANE.id, calcParams: [] })
+      // precision 을 주지 않으면 라이브러리가 소수 넷째 자리까지 찍는다.
+      chart.createIndicator({
+        name: 'RSI',
+        paneId: RSI_PANE.id,
+        calcParams: [14],
+        precision: 2,
+        figures: [{ key: 'rsi1', title: 'RSI14: ', type: 'line' }],
+      })
+      chart.createIndicator({ name: 'MACD', paneId: MACD_PANE.id, calcParams: [12, 26, 9], precision: 2 })
+      for (const pane of [VOL_PANE, RSI_PANE, MACD_PANE]) chart.setPaneOptions(pane)
       chart.setDataLoader({
         getBars: ({ type, callback }) => {
           callback(type === 'init' ? barsRef.current : [], false)
@@ -330,7 +352,7 @@ export default function StockChartModal({ ticker, name, onClose }: Props) {
             <div
               ref={hostRef}
               data-testid="stock-chart-canvas-host"
-              className="h-[55vh] min-h-[280px] w-full"
+              className="h-[72vh] min-h-[460px] w-full"
             />
           </div>
         )}

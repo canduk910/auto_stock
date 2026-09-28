@@ -250,6 +250,12 @@ test.describe("G-E2E-10 (HIGH) — 거래기록 AI 자문 팝업", () => {
 
 test.describe("G-E2E-11 (cycle387) — 거래기록 행 더블클릭 종목 차트", () => {
   test("F32 체결 행 더블클릭 → 캔버스 · 메타 · 주봉 요청 · ESC 닫기", async ({ page }) => {
+    // cycle388 — 실제 라이브러리가 지표(EMA·VOL·RSI·MACD) 생성을 거부하면 화면은 조용하고 콘솔에만 남는다.
+    // klinecharts 는 경고를 `console.log`(개발 모드 한정)로 찍으므로 타입이 아니라 문구로 거른다.
+    const chartWarnings: string[] = [];
+    page.on("console", (m) => {
+      if (/klinecharts (warning|error)/i.test(m.text())) chartWarnings.push(m.text());
+    });
     await installApiMocks(page, { trades: [trade()] });
     await page.goto("/history");
 
@@ -275,6 +281,7 @@ test.describe("G-E2E-11 (cycle387) — 거래기록 행 더블클릭 종목 차�
     });
 
     await expect(modal).not.toContainText("NaN");
+    expect(chartWarnings).toEqual([]);
     await page.keyboard.press("Escape");
     await expect(modal).toBeHidden({ timeout: 20000 });
   });
