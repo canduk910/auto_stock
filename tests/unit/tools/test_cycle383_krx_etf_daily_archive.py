@@ -191,6 +191,45 @@ def test_normalize_etf_jsonl_skips_blank_lines(mod, tmp_path):
     assert json.loads(lines[0])["rows"] == []
 
 
+def test_normalize_etf_jsonl_drops_blank_price_rows_on_holidays(mod, tmp_path):
+    """휴장일 응답은 종목 목록만 오고 가격 칸이 전부 빈 값이다(2020-10-01 실측).
+
+    빈 종가를 0 으로 바꿔 넣으면 휴장일마다 가격 0 행이 원장에 들어가므로, 종가가 빈 행은
+    버린다. 날짜 줄은 남기고 행만 비운다(`rows: []` — 기존 빈 날짜 규약과 같다).
+    """
+    raw_path = tmp_path / "raw.jsonl"
+    out_path = tmp_path / "normalized.jsonl"
+    blank = dict(TDD_CLSPRC="", TDD_OPNPRC="", TDD_HGPRC="", TDD_LWPRC="",
+                 ACC_TRDVOL="", ACC_TRDVAL="", CMPPREVDD_PRC="")
+    holiday = {"bas_dd": "20201001", "n_rows": 2,
+               "rows": [_sample_etf_row(**blank), _sample_etf_row(ISU_CD="102110", **blank)]}
+    raw_path.write_text(json.dumps(holiday, ensure_ascii=False) + "\n", encoding="utf-8")
+
+    mod.normalize_etf_jsonl(str(raw_path), str(out_path))
+
+    lines = [ln for ln in out_path.read_text(encoding="utf-8").split("\n") if ln]
+    assert len(lines) == 1
+    assert json.loads(lines[0]) == {"bas_dd": "20201001", "rows": []}
+
+
+def test_normalize_etf_jsonl_drops_only_blank_close_rows(mod, tmp_path):
+    """같은 날 종가가 빈 행(`""`·`"-"`)만 빠지고 가격이 있는 행은 남는다."""
+    raw_path = tmp_path / "raw.jsonl"
+    out_path = tmp_path / "normalized.jsonl"
+    day = {"bas_dd": "20260923", "n_rows": 3, "rows": [
+        _sample_etf_row(),
+        _sample_etf_row(ISU_CD="102110", TDD_CLSPRC=""),
+        _sample_etf_row(ISU_CD="114800", TDD_CLSPRC="-"),
+    ]}
+    raw_path.write_text(json.dumps(day, ensure_ascii=False) + "\n", encoding="utf-8")
+
+    mod.normalize_etf_jsonl(str(raw_path), str(out_path))
+
+    rows = json.loads(out_path.read_text(encoding="utf-8").strip())["rows"]
+    assert [r[0] for r in rows] == ["069500"]
+    assert rows[0][5] > 0  # close
+
+
 def test_normalize_etf_jsonl_propagates_bad_row_error(mod, tmp_path):
     """가설이 틀린 행이 섞여 있으면 정규화 전체가 멈춘다 — 부분 변환본을 남기지 않는다."""
     raw_path = tmp_path / "raw.jsonl"

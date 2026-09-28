@@ -227,3 +227,15 @@ python tools/archive/krx_daily_archive.py export_dump \
 - 실제 응답 키: `ACC_TRDVAL` · `ACC_TRDVOL` · `BAS_DD` · `CMPPREVDD_IDX` · `CMPPREVDD_PRC` · `FLUC_RT` · `FLUC_RT_IDX` · `IDX_IND_NM` · `INVSTASST_NETASST_TOTAMT` · `ISU_CD`(6자리 단축코드, 예 `451060`) · `ISU_NM` · `LIST_SHRS` · `MKTCAP` · `NAV` · `OBJ_STKPRC_IDX` · `TDD_CLSPRC` · `TDD_HGPRC` · `TDD_LWPRC` · `TDD_OPNPRC`.
 - `_ETF_*_KEYS` 후보와 전부 일치 — 코드 수정 없음. 원문 JSONL 에는 `NAV`·`IDX_IND_NM`(기초지수명)·`OBJ_STKPRC_IDX` 도 남는다(국내주식형 1배 판정 재료).
 - 본 수집은 장 마감 뒤 15:31 에 `stream_etf 2020-10-01 2026-09-23` 로 돌린다(세션 예약).
+
+## 11. 본 수집 결과 (2026-09-28 15:31~16:02, 읽기 전용)
+
+- **수집**: `stream_etf 2020-10-01 2026-09-23 --sleep 0.7` — 평일 1,560일 · 호출 1,560 · 원본 1,201,546행 · 오류 0 · 1,711초. 원본 `data/archive/krx_etf_daily/raw_2020_2026.jsonl`(602MB, git 밖).
+- **휴장일 처리(도구 수정)**: KRX ETF 응답은 휴장일에도 종목 목록을 주고 가격 칸이 전부 빈 값이다(2020-10-01 등 **95일**). 기존 `normalize_etf_jsonl` 은 빈 값을 0 으로 넣어 원장에 가격 0 행을 만들었을 것이다 → 종가가 빈(`""`·`"-"`) 행은 버리고 날짜 줄은 `rows: []` 로 남기도록 고쳤다(테스트 2건 추가). 버린 행 74,482(휴장일 목록 + 평일 무거래 종목).
+- **원장**: 거래일 **1,465일** · 종목 **1,349** · 1,127,064행(2020-10-05~2026-09-23). 마지막 봉이 09-23 이전인 종목(상장폐지·합병) **174** · 시작일 뒤 상장 902. 연도별 parquet `data/archive/krx_etf_daily/parquet/krx_daily_{2020..2026}.parquet`, 덤프 `krx_etf_dump.json.gz`(25MB).
+- **검증**(운영 `stock_master_daily` 2025-10-10~2026-09-23, 읽기 전용 덤프 1,903종목):
+  - 분배락 보정본(`close_adj`) vs KIS: 82,153건 · 일치 44.1% · **0.5% 이내 98.62%** · 0.5% 초과 72종목(7~8월 분배 시즌 집중).
+  - 원본 종가 vs KIS: **09-21~09-23 791건 100% 일치**(보정 이벤트가 없는 최근 구간) — 수집 값은 KRX 원본 그대로 맞다. 그 이전 구간 차이는 KIS 수정주가의 분배금 보정과 우리 추정 보정(`_adjust_one`)의 방식 차이다.
+  - 최대 불일치 326240(2026-07-31, 22%)은 **우리 DB 쪽 봉이 틀린 경우**다 — DB 07-31 봉이 전날 종가 복사(껍데기 봉)이고 08-03·08-04 봉이 없다. 원장 값(종가 40,535, 전일비 +7,300)이 맞다.
+- ETF 는 애프터마켓 대상이 아니라 cycle386(일봉 종가가 애프터 마지막 가격) 결함의 영향이 없다.
+- 다음 단계(계획): 재측정 → 문턱 T1~T6 판정(설계 `design/2026-09-27_etf_trend_strategy.md`).

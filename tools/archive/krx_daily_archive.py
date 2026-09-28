@@ -557,6 +557,8 @@ def normalize_etf_jsonl(raw_jsonl_path: str, out_jsonl_path: str) -> None:
     """
     n_dates = 0
     n_rows = 0
+    n_blank_rows = 0  # 종가가 빈 행(휴장일 목록·거래 없는 종목) — 0 으로 채우지 않고 버린다
+    n_empty_dates = 0  # 가격 있는 행이 하나도 없는 날(휴장일)
     with _open_maybe_gz(raw_jsonl_path) as fin, open(out_jsonl_path, "wt", encoding="utf-8") as fout:
         for line in fin:
             line = line.strip()
@@ -564,11 +566,25 @@ def normalize_etf_jsonl(raw_jsonl_path: str, out_jsonl_path: str) -> None:
                 continue
             payload = json.loads(line)
             bas_dd = payload["bas_dd"]
-            out_rows = [_extract_etf_row(r) for r in payload["rows"] if r]
+            out_rows = []
+            for r in payload["rows"]:
+                if not r:
+                    continue
+                close_raw = _first_present(r, _ETF_CLOSE_KEYS)
+                # 키 자체가 없으면 _extract_etf_row 가 ValueError 로 멈춘다(필드 가설 검증 유지).
+                if close_raw is not None and str(close_raw).strip() in ("", "-"):
+                    n_blank_rows += 1
+                    continue
+                out_rows.append(_extract_etf_row(r))
+            if payload["rows"] and not out_rows:
+                n_empty_dates += 1
             fout.write(json.dumps({"bas_dd": bas_dd, "rows": out_rows}, ensure_ascii=False) + "\n")
             n_dates += 1
             n_rows += len(out_rows)
-    print(f"[normalize_etf_jsonl] dates={n_dates} rows={n_rows} -> {out_jsonl_path}")
+    print(
+        f"[normalize_etf_jsonl] dates={n_dates} rows={n_rows} blank_close_rows={n_blank_rows} "
+        f"no_price_dates={n_empty_dates} -> {out_jsonl_path}"
+    )
 
 
 def merge_jsonl(jsonl_path: str, out_dir: str) -> None:
