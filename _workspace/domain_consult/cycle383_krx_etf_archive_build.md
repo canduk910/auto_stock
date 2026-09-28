@@ -220,3 +220,10 @@ python tools/archive/krx_daily_archive.py export_dump \
   기존 전략의 ETF·ETN 제외(cycle380)는 `stock_master` 증권그룹코드로 판정해 이 API 와 무관하다. §5 의 「(선택) ETN·ELW 도 같이 신청」은 적용하지 않는다.
 - **수집 범위** — `2020-10-01` ~ 승인 시점의 가장 최근 거래일. 위 §5·§8 의 범위 불일치는 이것으로 닫는다
   (앞 구간은 cycle362 보관소와 같은 시작일, 뒤 구간은 최근 장세를 포함해야 문턱 T1~T6 재측정이 의미가 있다).
+
+## 10. 승인 확인 (2026-09-28 09:0x)
+
+- 사용자 확인 「API승인됐네」. `probe_etf 20260923` → **rows=1175**, `KrxApiError` 없음.
+- 실제 응답 키: `ACC_TRDVAL` · `ACC_TRDVOL` · `BAS_DD` · `CMPPREVDD_IDX` · `CMPPREVDD_PRC` · `FLUC_RT` · `FLUC_RT_IDX` · `IDX_IND_NM` · `INVSTASST_NETASST_TOTAMT` · `ISU_CD`(6자리 단축코드, 예 `451060`) · `ISU_NM` · `LIST_SHRS` · `MKTCAP` · `NAV` · `OBJ_STKPRC_IDX` · `TDD_CLSPRC` · `TDD_HGPRC` · `TDD_LWPRC` · `TDD_OPNPRC`.
+- `_ETF_*_KEYS` 후보와 전부 일치 — 코드 수정 없음. 원문 JSONL 에는 `NAV`·`IDX_IND_NM`(기초지수명)·`OBJ_STKPRC_IDX` 도 남는다(국내주식형 1배 판정 재료).
+- 본 수집은 장 마감 뒤 15:31 에 `stream_etf 2020-10-01 2026-09-23` 로 돌린다(세션 예약).
