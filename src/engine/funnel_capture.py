@@ -473,6 +473,9 @@ async def _emit(scheduler, phase: str, emitted: set[str]) -> None:
         sid = getattr(s, "strategy_id", "?")
         if sid not in evening:
             continue
+        # momentum 처럼 후보 목록 메서드가 없는 전략은 비교할 것이 없다 — 실패가 아니라 건너뛴다.
+        if not callable(getattr(s, "get_scanned_tickers", None)):
+            continue
         try:
             eset, eat = evening[sid]
             bset = set(s.get_scanned_tickers())

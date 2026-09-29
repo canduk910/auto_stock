@@ -908,3 +908,25 @@ async def test_boot4_26_when_ws_starts_just_before_120s_then_emits_without_give_
     mine = [r for r in caplog.records if r.getMessage().startswith(_MARK)]
     assert not any("ws_not_started" in r.getMessage() for r in mine), [r.getMessage() for r in mine]
     assert list_calls and set(_by_strategy(mine)) == {"volatility_breakout", "kojiro"}
+
+
+class _NoScan(_S):
+    """momentum 흉내 — `get_scanned_tickers` 가 없는 전략(cycle390)."""
+
+    get_scanned_tickers = None  # type: ignore[assignment]
+
+
+async def test_boot4_23_when_strategy_has_no_scanned_list_then_skipped_without_failure(monkeypatch, caplog):
+    """cycle390 — momentum 은 후보 목록 메서드가 없다. 저녁 행(통과 0)이 있어도 대조 대상이 아니다.
+
+    09-29 첫 실전 부팅에서 `AttributeError` 가 `error=strategy_failed strategies=momentum` WARNING 이
+    되어 거래일마다 반복됐다. 없는 목록은 비교할 것이 없으므로 실패가 아니라 건너뛴다.
+    """
+    ms = _NoScan("momentum", [])
+    del ms._scanned
+    recs = await _emit(monkeypatch, caplog, strategies=[
+        _S("volatility_breakout", ["990101"]), ms,
+    ], rows=[_row("volatility_breakout", ["990101"]), _row("momentum", [])])
+    assert set(_by_strategy(recs)) == {"volatility_breakout"}, sorted(_by_strategy(recs))
+    errs = [r.getMessage() for r in recs if "error=" in r.getMessage()]
+    assert errs == [], errs

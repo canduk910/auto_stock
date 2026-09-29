@@ -289,8 +289,10 @@ _BASE_SHA: dict[str, str] = {
     # 모양 오류만 WARNING) + 그룹 헤더 주석 카운트 정정(entry 47→49·sizing_risk
     # 8→9, 실제 `group=` 값 전수 재계산). 매매 행위·값 변경 없음 — 주석·도움말
     # 텍스트만 바뀌었다.
+    # cycle390(2026-09-29) — `sizing_mode` 도움말 정정(보유 중 전환 시 기보유분도 새 손절을 탄다).
+    # 도움말 텍스트만 바뀌었고 키·범위·값 무변경. 직전 값 = `7120d37ff2ab392c7f59519ede3c19cd80e9dea80db6ec3146de74dd575f4326`.
     "src/engine/param_catalog.py":
-        "7120d37ff2ab392c7f59519ede3c19cd80e9dea80db6ec3146de74dd575f4326",
+        "e986348c9b27fdbc8965a2acf8fc10cb905446ea4ad4b91ddf3a5767c6e64422",
     "src/engine/param_validation.py":
         "b4c5c029800191523bcc511919d6de3774e9ab49ca2fc0a0558ee3907868ee17",
     # 🔴 시각·거래소 표의 유일 정본 — 3단계는 이 표를 **읽기만** 한다(§1-A).

@@ -1087,9 +1087,9 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         editable=True, risk="identity", auto_tunable=False, deprecated=False,
         applies_to=_TURTLE4, range_src="enum", choices=_SIZING_MODE_CHOICES,
         help="`turtle` 만 특별 취급하고 그 밖의 값은 전부 `position_ratio` 로 낙하한다."
-             " ⚠️ 이 값을 바꿔도 **이미 보유 중인 포지션의 손절 규약은 바뀌지 않는다**"
-             " — 청산 분기는 `sizing_mode` 가 아니라 매수 시 찍힌 `_entry_atr` 스탬프로"
-             " 갈린다.",
+             " 🔴 **보유 중에 바꾸지 않는다** — 랏별 사이징 기록이 없어 이미 보유 중인"
+             " 포지션도 새 설정의 손절을 탄다(position_ratio→turtle 은 다음 아침 부팅부터,"
+             " turtle→position_ratio 는 다음 재시작부터). 전환은 그 전략 보유 0 에서 한다.",
     ),
     _s(
         key="risk_pct", label_ko="유닛당 리스크 비율", group="sizing_risk",

@@ -154161,6 +154161,7 @@ frontend:
     transitive_tests:
     - frontend/src/api/__tests__/trading.params.test.ts
     - frontend/src/components/__tests__/StockChartModal.cycle387.test.tsx
+    - frontend/src/components/__tests__/StockChartModal.cycle388.test.tsx
     - frontend/src/components/__tests__/handlers.honesty.cycle276.test.ts
     - frontend/src/macro/__tests__/MacroPage.test.tsx
     - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
@@ -154173,6 +154174,7 @@ frontend:
   frontend/src/test/fakeKlinecharts.ts:
     direct_tests:
     - frontend/src/components/__tests__/StockChartModal.cycle387.test.tsx
+    - frontend/src/components/__tests__/StockChartModal.cycle388.test.tsx
     - frontend/src/components/__tests__/stockChartOpen.cycle387.test.tsx
     transitive_tests: []
   frontend/src/test/fixtures/marketState.fixture.ts:
@@ -154217,6 +154219,7 @@ frontend:
     - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
     - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
     - frontend/src/components/__tests__/StockChartModal.cycle387.test.tsx
+    - frontend/src/components/__tests__/StockChartModal.cycle388.test.tsx
     - frontend/src/components/__tests__/StrategyParamsEditor.test.tsx
     - frontend/src/components/__tests__/SystemLogsTab.test.tsx
     - frontend/src/components/__tests__/TradeAmountFilterCard.test.tsx
@@ -154289,6 +154292,7 @@ frontend:
     - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
     - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
     - frontend/src/components/__tests__/StockChartModal.cycle387.test.tsx
+    - frontend/src/components/__tests__/StockChartModal.cycle388.test.tsx
     - frontend/src/components/__tests__/SystemLogsTab.test.tsx
     - frontend/src/components/__tests__/TradeAmountFilterCard.test.tsx
     - frontend/src/components/__tests__/TradeHistoryGrid.test.tsx
@@ -154320,6 +154324,7 @@ frontend:
   frontend/src/test/fixtures/stockChart.fixture.ts:
     direct_tests:
     - frontend/src/components/__tests__/StockChartModal.cycle387.test.tsx
+    - frontend/src/components/__tests__/StockChartModal.cycle388.test.tsx
     - frontend/src/components/__tests__/stockChartOpen.cycle387.test.tsx
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
@@ -154427,6 +154432,7 @@ frontend:
     - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
     - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
     - frontend/src/components/__tests__/StockChartModal.cycle387.test.tsx
+    - frontend/src/components/__tests__/StockChartModal.cycle388.test.tsx
     - frontend/src/components/__tests__/StrategyParamsEditor.test.tsx
     - frontend/src/components/__tests__/SystemLogsTab.test.tsx
     - frontend/src/components/__tests__/TradeAmountFilterCard.test.tsx
@@ -154486,6 +154492,7 @@ frontend:
     - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
     - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
     - frontend/src/components/__tests__/StockChartModal.cycle387.test.tsx
+    - frontend/src/components/__tests__/StockChartModal.cycle388.test.tsx
     - frontend/src/components/__tests__/SystemLogsTab.test.tsx
     - frontend/src/components/__tests__/TradeAmountFilterCard.test.tsx
     - frontend/src/components/__tests__/TradeHistoryGrid.test.tsx
@@ -154541,6 +154548,7 @@ frontend:
     - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
     - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
     - frontend/src/components/__tests__/StockChartModal.cycle387.test.tsx
+    - frontend/src/components/__tests__/StockChartModal.cycle388.test.tsx
     - frontend/src/components/__tests__/StrategyParamsEditor.test.tsx
     - frontend/src/components/__tests__/SystemLogsTab.test.tsx
     - frontend/src/components/__tests__/TradeAmountFilterCard.test.tsx
@@ -154723,6 +154731,7 @@ frontend:
     - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
     - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
     - frontend/src/components/__tests__/StockChartModal.cycle387.test.tsx
+    - frontend/src/components/__tests__/StockChartModal.cycle388.test.tsx
     - frontend/src/components/__tests__/StrategyParamsEditor.test.tsx
     - frontend/src/components/__tests__/SystemLogsTab.test.tsx
     - frontend/src/components/__tests__/TradeAmountFilterCard.test.tsx
@@ -154936,6 +154945,7 @@ frontend:
     - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
     - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
     - frontend/src/components/__tests__/StockChartModal.cycle387.test.tsx
+    - frontend/src/components/__tests__/StockChartModal.cycle388.test.tsx
     - frontend/src/components/__tests__/StrategyParamsEditor.test.tsx
     - frontend/src/components/__tests__/SystemLogsTab.test.tsx
     - frontend/src/components/__tests__/TradeAmountFilterCard.test.tsx
@@ -155080,12 +155090,12 @@ frontend:
     - frontend/src/pages/__tests__/MarketState.test.tsx
     - frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
     - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
-generated_at: '2026-09-28T22:40:07.401320+09:00'
+generated_at: '2026-09-29T14:36:01.619515+09:00'
 stats:
   backend_modules: 169
   backend_tests: 1185
   frontend_modules: 128
-  frontend_tests: 104
+  frontend_tests: 105
   unmapped_modules:
   - frontend/src/api/backtest.ts
   - frontend/src/api/stock-chart.ts

@@ -664,8 +664,10 @@ _SRC_TREE_FILES = 166
 # COALESCE/NULLIF) 가 이 다이제스트에 걸린다(셋 다 `_CHANGED` 제외 대상이 아니다). 리베이스
 # 자체는 파일 내용을 바꾸지 않으므로 값만 새 기준선(cycle387 적대 검토 반영분) 위로 옮긴다.
 # 직전 값 = `e7bbb4683ac238af6f32b3793bd4ebdea5fe017d98d17646b47bb3d979912670`.
+# cycle390(2026-09-29) — `funnel_capture.py`(부팅 대조에서 후보 목록 메서드가 없는 전략 건너뛰기)·
+# `param_catalog.py`(`sizing_mode` 도움말). 직전 값 = `e3e6f3ebb24ed4fa2709c2bbccf6a384c18f6b42d474570cf6e148947b221bc2`.
 _SRC_TREE_DIGEST = (
-    "e3e6f3ebb24ed4fa2709c2bbccf6a384c18f6b42d474570cf6e148947b221bc2"
+    "ce5ac7b26c0e698af85f0660c17d4cd49ca9c242fa8b2077ab0029463c5f3d79"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
