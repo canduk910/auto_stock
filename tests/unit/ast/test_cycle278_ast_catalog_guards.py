@@ -243,7 +243,9 @@ _BASE_SHA = {
     #    _sell_not_placed_reason(APBK0400 · 시장가 불가 · 장운영시간 외, D2) · 재주문
     #    해제 로그 reject= 칸 · 조회 실패 걸린 것 없음 보류 문구 분리(D4). 사용자
     #    승인(8영역), 나머지 7영역 diff 0.
-    "src/engine/order_engine.py": "6de1d2be7db2c03925d99f245ad581118c752e69cc25462b1c70b1f33316c37c",
+    # 🔁 2026-10-02 (cycle392) 재핀 — 다건 체결통보 매도의 장부 손익·가격을 주문 누적(증분
+    #    합·체결 가중평균)으로 기록. 사용자 승인(8영역, 결정 4), 나머지 7영역 diff 0.
+    "src/engine/order_engine.py": "d8581527fdf43d3b2d48328672c0b5399b0b78f53ed05c3db5ef70c0d912a80f",
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
     # 🔁 cycle302(2026-09-18) 재핀 — 사용자 승인 일봉 backfill **대상** 확대

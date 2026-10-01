@@ -121,7 +121,9 @@ _BASE_SHA: dict[str, str] = {
     #    pending 에서 빼고 그 재대조 크레딧에 상한(K1) · 걸린 것 없는 보류 문구
     #    분리 · 재주문 거부는 APBK0400 만 해제(K2) · 동결이면 손님 manual 재주문
     #    거부도 해제(K3). 사용자 승인(8영역), 나머지 7영역 diff 0.
-        "6de1d2be7db2c03925d99f245ad581118c752e69cc25462b1c70b1f33316c37c",
+    # 🔁 2026-10-02 (cycle392) 재핀 — 다건 체결통보 매도의 장부 손익·가격을 주문 누적(증분
+    #    합·체결 가중평균)으로 기록. 사용자 승인(8영역, 결정 4), 나머지 7영역 diff 0.
+        "d8581527fdf43d3b2d48328672c0b5399b0b78f53ed05c3db5ef70c0d912a80f",
     "src/engine/risk.py":
         "79fddbec8cf9315c5172fc6634c4f4ea77f525d9ff9a3aba48f321affeb4d3e8",
     "src/engine/session.py":

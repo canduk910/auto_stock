@@ -310,6 +310,7 @@ backend:
     - tests/unit/ast/test_cycle384_ast_buy_paused.py
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -903,6 +904,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -1488,6 +1490,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -2087,6 +2090,7 @@ backend:
     - tests/unit/engine/test_cycle385_reorder_requery.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -2695,6 +2699,7 @@ backend:
     - tests/unit/ast/test_cycle384_ast_buy_paused.py
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -3280,6 +3285,7 @@ backend:
     - tests/unit/engine/test_cycle385_reorder_requery.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -3871,6 +3877,7 @@ backend:
     - tests/unit/ast/test_cycle384_ast_buy_paused.py
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -4466,6 +4473,7 @@ backend:
     - tests/unit/engine/test_cycle385r4_round4.py
     - tests/unit/engine/test_cycle385r_partial_locked_sell.py
     - tests/unit/engine/test_cycle385r_recount_credit.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -5039,6 +5047,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -5653,6 +5662,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -6229,6 +6239,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -6842,6 +6853,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -7418,6 +7430,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -8031,6 +8044,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -8615,6 +8629,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -9225,6 +9240,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -9801,6 +9817,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -10410,6 +10427,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -11055,6 +11073,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -11666,6 +11685,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -12257,6 +12277,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -12871,6 +12892,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -13456,6 +13478,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -14061,6 +14084,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -14655,6 +14679,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -15258,6 +15283,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -15823,6 +15849,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -16437,6 +16464,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -17028,6 +17056,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -17629,6 +17658,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -18205,6 +18235,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -18816,6 +18847,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -19393,6 +19425,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -20005,6 +20038,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -20590,6 +20624,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -21194,6 +21229,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -21770,6 +21806,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -22383,6 +22420,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -22965,6 +23003,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -23574,6 +23613,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -24151,6 +24191,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -24761,6 +24802,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -25342,6 +25384,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -25950,6 +25993,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -26528,6 +26572,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -27139,6 +27184,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -27727,6 +27773,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -28328,6 +28375,7 @@ backend:
     - tests/unit/engine/test_cycle385r_partial_locked_sell.py
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -28724,6 +28772,7 @@ backend:
     - tests/unit/engine/test_cycle385_b7_partial_sell.py
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
     - tests/unit/routes/test_cycle385_manual_sell_selling.py
@@ -28931,6 +28980,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -29874,6 +29924,7 @@ backend:
     - tests/unit/engine/test_cycle295_stop_loss_reorder_mapping.py
     - tests/unit/engine/test_cycle385_b7_partial_sell.py
     - tests/unit/engine/test_cycle385_reorder_requery.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
     - tests/unit/routes/test_cycle84_api_response_envelope.py
     - tests/unit/routes/test_cycle84_route_404.py
@@ -30143,6 +30194,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -31309,6 +31361,7 @@ backend:
     - tests/unit/ast/test_cycle384_ast_buy_paused.py
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -31896,6 +31949,7 @@ backend:
     - tests/unit/engine/test_cycle385r4_round4.py
     - tests/unit/engine/test_cycle385r_partial_locked_sell.py
     - tests/unit/engine/test_cycle385r_recount_credit.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -32473,6 +32527,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -33084,6 +33139,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -33662,6 +33718,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -34275,6 +34332,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -34860,6 +34918,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -35463,6 +35522,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -36041,6 +36101,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -36655,6 +36716,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -37246,6 +37308,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -37847,6 +37910,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -38439,6 +38503,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -39037,6 +39102,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -39608,6 +39674,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -40222,6 +40289,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -40799,6 +40867,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -41412,6 +41481,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -42003,6 +42073,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -42602,6 +42673,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -43182,6 +43254,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -43790,6 +43863,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -44368,6 +44442,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -44980,6 +45055,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -45556,6 +45632,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -46168,6 +46245,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -46754,6 +46832,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -47357,6 +47436,7 @@ backend:
     - tests/unit/engine/test_cycle385r4_round4.py
     - tests/unit/engine/test_cycle385r_partial_locked_sell.py
     - tests/unit/engine/test_cycle385r_recount_credit.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -47932,6 +48012,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -48546,6 +48627,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -49120,6 +49202,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -49734,6 +49817,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -50328,6 +50412,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -50928,6 +51013,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -51500,6 +51586,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -52113,6 +52200,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -52693,6 +52781,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -53302,6 +53391,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -53878,6 +53968,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -54491,6 +54582,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -55071,6 +55163,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -55680,6 +55773,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -56259,6 +56353,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -56869,6 +56964,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -57448,6 +57544,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -58058,6 +58155,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -58635,6 +58733,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -59248,6 +59347,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -59823,6 +59923,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -60437,6 +60538,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -61012,6 +61114,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -61625,6 +61728,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -62281,6 +62385,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -62887,6 +62992,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -63468,6 +63574,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -64073,6 +64180,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -64644,6 +64752,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -65258,6 +65367,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -65840,6 +65950,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -66451,6 +66562,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -67037,6 +67149,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -67647,6 +67760,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -68219,6 +68333,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -68824,6 +68939,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -69399,6 +69515,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -70013,6 +70130,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -70589,6 +70707,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -71202,6 +71321,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -71785,6 +71905,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -72391,6 +72512,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -72969,6 +73091,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -73580,6 +73703,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -74157,6 +74281,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -74769,6 +74894,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -75348,6 +75474,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -75958,6 +76085,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -76532,6 +76660,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -77146,6 +77275,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -77808,6 +77938,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -78421,6 +78552,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -79075,6 +79207,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -79686,6 +79819,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -80328,6 +80462,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -80940,6 +81075,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -81516,6 +81652,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -82130,6 +82267,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -82711,6 +82849,7 @@ backend:
     - tests/unit/ast/test_cycle384_ast_buy_paused.py
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -83319,6 +83458,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -83929,6 +84069,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -84517,6 +84658,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -85085,6 +85227,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -85699,6 +85842,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -86276,6 +86420,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -86889,6 +87034,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -87459,6 +87605,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -88073,6 +88220,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -88672,6 +88820,7 @@ backend:
     - tests/unit/engine/test_cycle384_buy_paused_gate.py
     - tests/unit/engine/test_cycle385_b7_partial_sell.py
     - tests/unit/engine/test_cycle385_reorder_requery.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle64_price_filter_scanner_apply.py
@@ -88911,6 +89060,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -90003,6 +90153,7 @@ backend:
     - tests/unit/ast/test_cycle384_ast_buy_paused.py
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -90541,6 +90692,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle61_phase2A2_dataclass_completeness.py
@@ -91031,6 +91183,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -91643,6 +91796,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -92219,6 +92373,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -92832,6 +92987,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -93406,6 +93562,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -94019,6 +94176,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -94593,6 +94751,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -95207,6 +95366,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -95789,6 +95949,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -96398,6 +96559,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -97002,6 +97164,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -97606,6 +97769,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -98164,6 +98328,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -98775,6 +98940,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -99375,6 +99541,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -99982,6 +100149,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -100542,6 +100710,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -101154,6 +101323,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -101740,6 +101910,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -102345,6 +102516,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -102916,6 +103088,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -103530,6 +103703,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -104107,6 +104281,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -104720,6 +104895,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -105296,6 +105472,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -105909,6 +106086,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -106485,6 +106663,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -107098,6 +107277,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -107682,6 +107862,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -108291,6 +108472,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -108932,6 +109114,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -109507,6 +109690,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -110130,6 +110314,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -110699,6 +110884,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -111306,6 +111492,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -111886,6 +112073,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -112493,6 +112681,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -113074,6 +113263,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -113672,6 +113862,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -114263,6 +114454,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -114876,6 +115068,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -115453,6 +115646,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -116065,6 +116259,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -116643,6 +116838,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -117210,6 +117406,7 @@ backend:
     - tests/unit/engine/test_cycle385r4_round4.py
     - tests/unit/engine/test_cycle385r_partial_locked_sell.py
     - tests/unit/engine/test_cycle385r_recount_credit.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -117437,6 +117634,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -118252,6 +118450,7 @@ backend:
     - tests/unit/engine/test_cycle385_b7_partial_sell.py
     - tests/unit/engine/test_cycle385_reorder_requery.py
     - tests/unit/engine/test_cycle385r_recount_credit.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_kojiro_wiring.py
     - tests/unit/engine/test_observability_logs.py
@@ -118476,6 +118675,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -119595,6 +119795,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -120209,6 +120410,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -120789,6 +120991,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -121397,6 +121600,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -122049,6 +122253,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -122660,6 +122865,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -123240,6 +123446,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -123850,6 +124057,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -124424,6 +124632,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -125037,6 +125246,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -125630,6 +125840,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -126228,6 +126439,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -126800,6 +127012,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -127414,6 +127627,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -127993,6 +128207,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -128605,6 +128820,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -129181,6 +129397,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -129793,6 +130010,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -130381,6 +130599,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -130989,6 +131208,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -131624,6 +131844,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -132238,6 +132459,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -132813,6 +133035,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -133427,6 +133650,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -134008,6 +134232,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -134620,6 +134845,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -135198,6 +135424,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -135810,6 +136037,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -136454,6 +136682,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -137064,6 +137293,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -137641,6 +137871,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -138254,6 +138485,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -138914,6 +139146,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -139510,6 +139743,7 @@ backend:
     - tests/unit/engine/test_cycle385_reorder_requery.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -140279,6 +140513,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -140870,6 +141105,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -141257,6 +141493,7 @@ backend:
     - tests/unit/engine/test_cycle379_buying_reconcile.py
     - tests/unit/engine/test_cycle385_b7_partial_sell.py
     - tests/unit/engine/test_cycle385r2_round2.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/engine/test_order_engine_sell_fallback.py
     - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
@@ -141528,6 +141765,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -142736,6 +142974,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -143345,6 +143584,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -143904,6 +144144,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -144516,6 +144757,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -145112,6 +145354,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -145722,6 +145965,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -146308,6 +146552,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -146910,6 +147155,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -149033,6 +149279,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -149643,6 +149890,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -150216,6 +150464,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -150829,6 +151078,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -151409,6 +151659,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -152021,6 +152272,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -152593,6 +152845,7 @@ backend:
     - tests/unit/ast/test_cycle385_ast_b7.py
     - tests/unit/ast/test_cycle386_ast_finalize.py
     - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
+    - tests/unit/ast/test_cycle392_ast_sell_book.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -153207,6 +153460,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -155217,10 +155471,10 @@ frontend:
     - frontend/src/pages/__tests__/MarketState.test.tsx
     - frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
     - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
-generated_at: '2026-10-02T02:07:57.308884+09:00'
+generated_at: '2026-10-02T07:28:44.178487+09:00'
 stats:
   backend_modules: 169
-  backend_tests: 1186
+  backend_tests: 1188
   frontend_modules: 128
   frontend_tests: 105
   unmapped_modules:

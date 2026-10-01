@@ -327,6 +327,19 @@ def pending_cancel_tickers(engine) -> list[str]:
         return []
 
 
+def _vwap_2dp(value, qty, fallback):
+    """체결 가중평균(Σ가격×수량 ÷ Σ수량), 소수 둘째 자리 ROUND_HALF_UP.
+
+    cycle392 — `float`/기본 `Decimal`(은행가 반올림)은 `100.005` 를 `100.0`/`100.00`
+    으로 내린다. 여기서만 `quantize(Decimal("0.01"), ROUND_HALF_UP)` 로 올림 규약을
+    지킨다(명세 §4.2). 순수 동기 함수 — `await`·DB·HTTP 금지(AST A7).
+    """
+    from decimal import ROUND_HALF_UP, Decimal
+    if qty <= 0:
+        return fallback
+    return float((Decimal(value) / Decimal(qty)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+
+
 def _odno_key(s) -> str:
     """주문번호 정규화 — 세 경로(REST·체결통보·TTTC0081R)의 0-패딩 차이를 흡수한다."""
     return str(s).strip().lstrip("0") or "0"
@@ -424,6 +437,10 @@ class OrderEngine:
         # 위한 게이트 값이다(§1.4 — pop(ticker) 단독은 남의 타이머를 실종시킨다).
         self._pending_cancel_order_no: dict[tuple[str, str], str] = {}  # (ticker, side) -> 그 타이머가 지키는 order_no
         self._filled_qty: dict[str, int] = {}  # order_no -> 누적 체결 수량
+        # cycle392 — order_no -> (체결수량 합, 체결금액 합 Σ가격×수량, 손익 증분 합).
+        # 키는 raw order_no(`_filled_qty` 와 같은 체계, `_odno_key` 정규화 금지).
+        # 수명 = `_filled_qty` 와 같음(종료 분기 pop · `reset_daily_state` clear).
+        self._sell_fill_book: dict[str, tuple] = {}
         self._order_qty: dict[str, int] = {}   # order_no -> 원래 주문 수량
         self._pending_buy_orders: dict[str, dict] = {}  # order_no -> {ticker, price, quantity, strategy_id}
         self._order_strategy: dict[str, str] = {}  # order_no -> strategy_id
@@ -3122,6 +3139,15 @@ class OrderEngine:
             buy_price = price  # 손익 0으로 처리
         profit_loss = (price - buy_price) * quantity
         pos_strategy.state.daily_realized_pnl += profit_loss
+        # cycle392 — 매도 주문 단위 누적(동기 영역, await 0 — I4). 장부 쓰기 네 곳이
+        # 이 통보만의 `profit_loss`/`price` 대신 아래 `book_pnl`/`book_price`(그 주문
+        # 전체 누적·체결 가중평균)를 쓴다 — 다건 통보 주문의 마지막 통보 덮어쓰기 시정.
+        _book_q, _book_v, _book_p = self._sell_fill_book.get(order_no, (0, 0, 0))
+        self._sell_fill_book[order_no] = (
+            _book_q + quantity, _book_v + price * quantity, _book_p + profit_loss,
+        )
+        book_qty, book_value, book_pnl = self._sell_fill_book[order_no]
+        book_price = _vwap_2dp(book_value, book_qty, price)
 
         # 🔴 cycle385 §a/§c — 보유 축(동기, await 없음): 체결량만큼 차감하고 0 이면
         # 닫는다. 출처(map/payload/increment) 게이트는 두지 않는다(cycle329 금기).
@@ -3225,7 +3251,7 @@ class OrderEngine:
             # 행도 이 1차 UPDATE 로 직접 잡는다(매수 축과 동일 계약, §3.2).
             affected = await update_trade_status(
                 ticker, TradeType.SELL, TradeStatus.COMPLETED,
-                strategy=sid, price=price, profit_loss=profit_loss,
+                strategy=sid, price=book_price, profit_loss=book_pnl,
                 order_no=order_no, match_partial=True,
             )
             if affected == 0:
@@ -3238,16 +3264,16 @@ class OrderEngine:
                         ticker=ticker,
                         ticker_name=_tn.get(ticker, ""),
                         trade_type=TradeType.SELL,
-                        price=price,
+                        price=book_price,
                         quantity=total_filled,
-                        profit_loss=profit_loss,
+                        profit_loss=book_pnl,
                         status=TradeStatus.COMPLETED,
                         strategy=sid,
                         order_no=order_no,
                     ))
                     logger.warning(
                         "체결통보 선행 race — COMPLETED 직접 INSERT: 매도 %s (주문번호: %s, 손익: %d)",
-                        t(ticker), order_no, profit_loss,
+                        t(ticker), order_no, book_pnl,
                     )
                 except Exception as exc:
                     # 사이클 147 (2026-06-16): 사이클 30 UNIQUE 인덱스 (ticker, order_no, trade_type)
@@ -3259,7 +3285,7 @@ class OrderEngine:
                     )
                     forced_affected = await _update_trade_status_by_order_no(
                         order_no, TradeType.SELL, TradeStatus.COMPLETED,
-                        price=price, profit_loss=profit_loss,
+                        price=book_price, profit_loss=book_pnl,
                     )
                     if forced_affected == 0:
                         logger.error(
@@ -3267,6 +3293,7 @@ class OrderEngine:
                             ticker, order_no,
                         )
             self._filled_qty.pop(order_no, None)
+            self._sell_fill_book.pop(order_no, None)
             self._order_qty.pop(order_no, None)
             self._order_strategy.pop(order_no, None)
             self._order_ticker.pop(order_no, None)
@@ -3274,8 +3301,8 @@ class OrderEngine:
             self._order_division.pop(order_no, None)  # cycle291 — 선례와 같은 자리
             if close_position:
                 logger.info(
-                    "매도 전량 체결: %s %d주 @ %d (손익: %d, 전략: %s)",
-                    t(ticker), total_filled, price, profit_loss, pos_strategy.strategy_id,
+                    "매도 전량 체결: %s %d주 @ %d (손익: %d, 전략: %s) avg=%.2f",
+                    t(ticker), total_filled, price, book_pnl, pos_strategy.strategy_id, book_price,
                 )
             elif not ambiguous:
                 # 🔴 cycle385 §b 성공 서명 — 주문은 끝났는데 보유가 남았다 = 분할 매도.
@@ -3303,7 +3330,7 @@ class OrderEngine:
                 await self._unsubscribe_if_no_other_strategy(ticker)
         else:
             # 부분 체결 → PARTIAL, 30초 후 잔여 취소 + 손절 시 재주문
-            _partial_affected = await update_trade_status(ticker, TradeType.SELL, TradeStatus.PARTIAL, strategy=sid, price=price, profit_loss=profit_loss, order_no=order_no)
+            _partial_affected = await update_trade_status(ticker, TradeType.SELL, TradeStatus.PARTIAL, strategy=sid, price=book_price, profit_loss=book_pnl, order_no=order_no)
             if _partial_affected == 0:
                 # cycle358 카드 D(관측 전용) — 장부 행이 없으면 부분체결이 한 글자도 안 남는다.
                 self._emit_trade_status_update_miss(
@@ -3741,6 +3768,7 @@ class OrderEngine:
         self._sell_reflected_credit.clear()
         self._sell_blind_credit.clear()
         self._manual_sell_orders.clear()
+        self._sell_fill_book.clear()  # cycle392
         self._selling_locked_wait.clear()
         self._sell_ledger_since = datetime.now(_KST_TZ)
 

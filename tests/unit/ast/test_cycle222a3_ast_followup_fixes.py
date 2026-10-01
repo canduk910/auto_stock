@@ -507,8 +507,10 @@ _APPROVED_CONTENT_SHA: dict[str, str] = {
     #    _sell_not_placed_reason(APBK0400 · 시장가 불가 · 장운영시간 외, D2) · 재주문
     #    해제 로그 reject= 칸 · 조회 실패 걸린 것 없음 보류 문구 분리(D4). 사용자
     #    승인(8영역), 나머지 7영역 diff 0.
+    # 🔁 2026-10-02 (cycle392) 재핀 — 다건 체결통보 매도의 장부 손익·가격을 주문 누적(증분
+    #    합·체결 가중평균)으로 기록. 사용자 승인(8영역, 결정 4), 나머지 7영역 diff 0.
     "src/engine/order_engine.py":
-        "6de1d2be7db2c03925d99f245ad581118c752e69cc25462b1c70b1f33316c37c",
+        "d8581527fdf43d3b2d48328672c0b5399b0b78f53ed05c3db5ef70c0d912a80f",
     "src/api/order.py":
         "08c5cafd7b8678ec0d0fa85f856fdea3cce38ad92488c6d74c03cd13faa415bb",
     # ✅ 2026-09-14 (cycle293) — 시세 채널 리졸버 2단계(속성축 배관). 사용자 승인

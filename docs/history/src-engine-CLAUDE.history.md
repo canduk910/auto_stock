@@ -3138,3 +3138,8 @@ cycle359 조사). cycle368 이 파서 기준점을 고치고, VI 수명 600초(�
 - `src/engine/strategies/momentum.py` 의 손절 로그는 임계(`stop_loss`)를 함께 찍는다 — 운영 DB `strategy_config.momentum.params.stop_loss_rate` 가 코드 기본값과 다를 때 운영자가 로그 한 줄로 실제 임계를 확인하는 유일한 장치다(임계 인자 제거 금지)
 - `src/engine/strategy.py` 의 모듈 함수 `check_buy_signal` / `check_stop_loss` / `check_next_day_clear` 는 삭제됐다 — **재도입 금지**(AST `tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py`). 그 파일에 남은 것은 `Signal` · `Position` · `StrategyState` · `calc_buy_quantity` + 모듈 상수 7종(`BUY_THRESHOLD`·`STOP_LOSS_RATE`·`GAP_UP_THRESHOLD`·`TRAILING_STOP_RATE`·`POSITION_RATIO`·`MAX_POSITIONS`·`DAILY_LOSS_LIMIT`)이다
 - `_swing_rest_poll_loop` / `_swing_buy_poll_loop` 제거 금지 — 09:30~15:20 60s REST 폴링으로 멀티데이 보유 손절 평가 보강 + 09:05~09:30 매수 평가. **공유 순차 대상 `_SWING_POLL_STRATEGIES = ("donchian_swing", "kojiro")`**(순차 처리로 동일 종목 double-buy race 차단, 전용 task 신설 금지). 🔴 buy poll 은 레짐을 읽지 않는다 — 레짐 매수 게이트를 복원하지 마라(관찰 전용, `risk.py` 절 참조). **`_SWING_POLL_STRATEGIES` 는 매수 평가 소스(poll)를 정하고, `risk.py::_TICK_BUY_EVAL_SKIP_STRATEGIES` 는 WS 틱(`on_tick`) 경로에서 같은 두 전략의 매수 평가를 skip 시켜 그 소스를 배타적으로 만든다 — 두 상수의 멤버는 항상 같이 움직인다**(한쪽에만 전략을 추가하면 그 전략이 틱·폴 이중 평가되거나 아예 평가되지 않는다). skip 은 `check_exit_signal`·보드 가드·중복 가드·자금 가드 **뒤**, `check_buy_signal` **바로 앞**에서만 발생하므로 청산·트레일링·익일청산은 on_tick 에서 두 전략 모두 여전히 정상 평가된다. 킬스위치 없음(1행 revert 로만 롤백)
+
+### 출처 절: 매도 체결 — 주문 축과 보유 축 (cycle385)
+
+- `trade_history.profit_loss` = 여러 통보 주문에서 마지막 증분으로 덮인다(`update_trade_status` SET). `daily_realized_pnl`(메모리) = 증분 합이라 정확.
+→ CHANGELOG: cycle392 행 (시정 — 장부도 주문 누적으로 바뀜, 정본 「체결단가 정합」 절)

@@ -36,7 +36,7 @@ AWS RDS PostgreSQL CRUD 모듈. DB 클라이언트 정본 = **`pg.py` (asyncpg �
 ## trade_history.py — 거래 내역
 
 - `insert_trade(record)`: 주문 시 INSERT (status: PENDING)
-- **`update_trade_status(ticker, trade_type, status, strategy="momentum", price=None, profit_loss=None, *, order_no=None, match_partial=False) -> int`**: 진행 중 행의 status 변경, 영향 행 수 반환. COMPLETED 0건이면 호출자(OrderEngine)가 체결통보 선행 race 로 보고 보정 INSERT 한다. **PARTIAL·CANCELLED 에는 흡수 경로가 없다** — `OrderEngine` 4 호출부(매수·매도 × PARTIAL·CANCELLED)가 0건이면 `[trade_status_update_miss] status= order_no= ticker= side=` WARNING(cycle358, 관측 전용, 1회/(order_no, status)/일 `KstDailyEmitCap`, 로그 실패 흡수).
+- **`update_trade_status(ticker, trade_type, status, strategy="momentum", price=None, profit_loss=None, *, order_no=None, match_partial=False) -> int`**: 진행 중 행의 status 변경, 영향 행 수 반환. COMPLETED 0건이면 호출자(OrderEngine)가 체결통보 선행 race 로 보고 보정 INSERT 한다. **PARTIAL·CANCELLED 에는 흡수 경로가 없다** — `OrderEngine` 4 호출부(매수·매도 × PARTIAL·CANCELLED)가 0건이면 `[trade_status_update_miss] status= order_no= ticker= side=` WARNING(cycle358, 관측 전용, 1회/(order_no, status)/일 `KstDailyEmitCap`, 로그 실패 흡수). SELL 행의 `price`·`profit_loss` 값의 뜻(주문 단위 누적·체결 가중평균) = `src/engine/CLAUDE.md` 「체결단가 정합」 절(cycle392).
   - `match_partial=True`(opt-in) = `status = ANY(...)` 로 PENDING ∪ PARTIAL. **기본을 넓히지 않는다** — `_cancel_after_wait`/`_cancel_and_reorder` 의 CANCELLED 까지 넓어져 부분 체결 사실이 정산·sync 에서 사라진다. 넘기는 호출부는 COMPLETED 2곳뿐(AST 봉인).
   - 같은 인자가 `AND timestamp >= (KST 오늘 00:00)` 하한도 켠다. 하한은 **`datetime` 바인딩**(str 이면 실 PG `DataError` 로 체결 경로 전건 예외 — AST5).
   - `order_no`(keyword-only, 기본 `None`, 빈 문자열도 필터) → `AND order_no = $n`. **order_engine 호출 6곳은 전부 넘긴다** — 빠지면 같은 `(ticker, trade_type, strategy)` 의 다른 `order_no` 행까지 덮는다(필옵틱스 161580 사건).
