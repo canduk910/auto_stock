@@ -239,19 +239,51 @@ async def test_t7_full_cycle_pre_market_no_false_alarm(monkeypatch, caplog):
 
 
 async def test_t8_full_cycle_post_open_genuine_alarm_preserved(monkeypatch, caplog):
-    """09:00 이후 — HIGH∩no_feed 종목이 있으면 여전히 1행 발화(진짜 경보 보존)."""
+    """09:00 이후 — HIGH∩no_feed 종목이 있으면 여전히 1행 발화(진짜 경보 보존).
+
+    cycle393 재기준 — 증거 주입. 진짜 무송출 = WS 체결 기록 0 인 채 구독 중 REST
+    누적거래량이 늘었다(09:05 기준 1000 → 09:15 1500) → 60s 확인 뒤(09:16) 1행.
+    """
+    from src.engine import tick_volume
+
     core = _core()
     caplog.set_level(logging.DEBUG)
-    with freeze_time("2026-09-23 09:05:00+09:00"):
-        now = datetime(2026, 9, 23, 9, 5, 0, tzinfo=KST)
-        _make_pool(monkeypatch, ["003490", "006340"])
-        _setup_ticks(monkeypatch, fresh=["006340"], now=now)
-        monkeypatch.setattr(core, "asyncio", _SleepSpy())
-        _patch_registry(monkeypatch, no_feed={"003490"})
-        sched = _make_sched(positions=["003490"])
+    vols = {"v": 1000}
 
-        await core.check_and_resubscribe_stale(sched)
+    async def _probe(t, *a, **k):
+        return vols["v"] if t == "003490" else None
 
+    monkeypatch.setattr(core, "_probe_krx_acml_vol", _probe, raising=False)
+    reset_probe = getattr(core, "reset_no_feed_held_probe_for_test", None)
+    if callable(reset_probe):
+        reset_probe()
+
+    rows_per_cycle: list[int] = []
+    with freeze_time("2026-09-23 09:05:00+09:00") as frozen:
+        for iso, v in (("2026-09-23 09:05:00+09:00", 1000),
+                       ("2026-09-23 09:15:00+09:00", 1500),
+                       ("2026-09-23 09:16:00+09:00", 1600)):
+            frozen.move_to(iso)
+            vols["v"] = v
+            now = datetime.fromisoformat(iso)
+            tick_volume.reset_for_test()
+            _make_pool(monkeypatch, ["003490", "006340"])
+            _setup_ticks(monkeypatch, fresh=["006340"], now=now)
+            monkeypatch.setattr(core, "asyncio", _SleepSpy())
+            _patch_registry(monkeypatch, no_feed={"003490"})
+            sched = _make_sched(positions=["003490"])
+            before = len([r for r in caplog.records
+                          if _HELD in r.getMessage() and r.levelno >= logging.WARNING])
+
+            await core.check_and_resubscribe_stale(sched)
+
+            rows_per_cycle.append(len([r for r in caplog.records
+                                       if _HELD in r.getMessage() and r.levelno >= logging.WARNING])
+                                  - before)
+
+    assert rows_per_cycle == [0, 0, 1], (
+        f"기준·증분 사이클은 말하지 않고 확정 사이클에서 1행 — 사이클별={rows_per_cycle!r}"
+    )
     held = [r for r in caplog.records if _HELD in r.getMessage() and r.levelno >= logging.WARNING]
     assert len(held) == 1, (
         f"09:00 이후 진짜 무송출 보유는 여전히 발화 — actual={[r.getMessage() for r in caplog.records]}"

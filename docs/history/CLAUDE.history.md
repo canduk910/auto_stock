@@ -1476,3 +1476,22 @@ VCP universe(KOSPI200∪KOSDAQ150) backfill target **120일** · retention `DAIL
 - 매도 재조회 — `strategy.state.positions.get(ticker)` 와 이유(옛 `pos` 로 이미 판 것을 다시 판다)를 되살리고 `order_engine.py` 절 링크를 더했다.
 - 코호트 게이트 — 금지 패턴 식별자 `if chan_buy_blocked: continue` 를 되살렸다.
 - ρ축 — 「K_ρ 도 리스크 정체성 상수」 분류를 되살렸다.
+
+### 2026-10-02 cycle393 — `[no_feed_held]` 거짓 경보 판정 시정 (사용자 결정 7)
+
+종전(cycle252~357) 판정식은 `no_feed_high = {t ∈ high_tickers : is_no_feed(t)}` 하나였다.
+`is_no_feed` 는 `stock_master.nxt_tradable == False`(KRX 전용) **정적 집합**뿐이라 프레임
+수신 여부를 보지 않았고, KRX 전용 보유 종목을 하나라도 들고 있으면 09:00 뒤 첫 사이클에
+**반드시** 떴다 — 운영 `system_logs` 30일 실측 5회(09-28 09:01:24 · 09-29 09:00:18 ·
+09-29 16:02:30(재기동 후 cap 초기화, 애프터마켓) · 09-30 09:01:53 · 10-01 09:01:50).
+
+10-01 운영 재조회로 반증 — 대상 4종목(003490·232140·417200·425040) 전부가 마커(09:01:50)
+보다 먼저 MAIN 체결 틱을 받았다(417200 09:00:06 · 003490 09:00:18 · 425040 09:00:22 ·
+232140 09:00:29, 425040 `[day_high_adopted]` 09:00:31) — 거짓 경보였다. 메시지 문구
+「KRX 채널인데 WS 프레임 0(연속체결 미수신)」·「REST 폴(… 09:05~15:20)」도 당시 이미
+낡아 있었다(실제 보유 폴 시작 = `SWING_REST_POLL_EARLY_START` 09:00:30).
+
+시정 = 판정을 "측정했을 때만 말한다"로 바꿨다 — W(오늘 WS 체결 기록 부재,
+`tick_volume.get_observed_acml_vol`) + R(구독 중 KRX 누적거래량 증가, `inquire_acml_vol`
+을 600초 간격 두 번 읽어 확인 + 60초 더 대기) 두 증거 다리가 모두 서야 확정한다.
+상세 규약 = `src/engine/CLAUDE.md` `stale_watcher_core.py` 절(현재형).

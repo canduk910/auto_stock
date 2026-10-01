@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from asyncio import wait_for as _wait_for
 from datetime import datetime, timedelta
 from typing import Any
 
@@ -189,34 +190,237 @@ def _is_before_krx_continuous_open(now: datetime) -> bool:
         return False
 
 
-def _maybe_emit_no_feed_held(tickers: set, now: datetime) -> None:
-    """HIGH(보유/익일청산) ∩ no_feed 가 비어있지 않으면 WARNING 1회/일.
+# cycle393 — `[no_feed_held]` 는 **측정했을 때만** 말한다 (사용자 결정 7, 2026-10-02).
+#
+# 종전(cycle252~357) 판정은 `is_no_feed(t)`(stock_master.nxt_tradable==False, 정적
+# 분류) 하나였다 — 프레임 수신 여부를 보지 않아 KRX 전용 보유 종목을 하나라도 들고
+# 있으면 09:00 뒤 첫 사이클에 **반드시** 떴다(운영 09-28·09-29·09-30·10-01 5회 실측,
+# 10-01 은 대상 4종목 전부가 마커보다 먼저 MAIN 체결 틱을 받은 거짓 경보였다).
+#
+# 이제 두 증거 다리가 **모두 측정됐을 때만** 확정한다:
+#   W — WS 체결 기록 부재: `tick_volume.get_observed_acml_vol(t) is None`(오늘 KST).
+#       REST 폴(`_run_swing_rest_poll_once` → `on_tick`)은 `acml_vol` 을 넘기지 않아
+#       기록하지 않으므로 `ticker_last_tick` 과 달리 거짓 음성·양성을 만들지 않는다.
+#   R — 구독 중 KRX 체결 발생: `inquire_acml_vol(t, market="J")` 를 600초 간격으로
+#       두 번 읽어 늘었는가. 한 번만 읽으면 재기동·장전 누적이 "체결" 로 둔갑한다.
+# 증분이 보인 뒤 60초(W 가 여전히 참이어야) 더 지나야 확정 — 그 사이 WS 기록이
+# 생기거나(E4) 구독이 빠지면(E4b) 증거를 버리고 처음부터 다시 쌓는다.
+#
+# 판정 창 = KRX 정규장 K3 `[개장 + NO_FEED_OPEN_GRACE_SECS, 종료)`. 창 경계는
+# `market_state.get_market_table` 에서만 읽는다(시각 리터럴 신설 0, G-252-6 승계) —
+# 표 조회 실패는 **창 안으로** 본다(cycle357 "시각 게이트 실패는 억제하지 않는다"),
+# 반대로 증거 다리 실패(REST 실패·타임아웃·예외)는 **말하지 않는다**(측정 없이
+# 말하는 것이 이번 결함 그 자체였다). 두 실패가 다른 방향인 이유는 이 한 줄 때문
+# 이다 — 시각 게이트는 REST 호출 수를 줄이는 장치일 뿐이고, 증거 다리는 메시지의
+# 진실성 그 자체다.
+NO_FEED_OPEN_GRACE_SECS = 180
+NO_FEED_PROBE_INTERVAL_SECS = 600
+NO_FEED_CONFIRM_SECS = STALE_FRESHNESS_SECS
+NO_FEED_PROBE_TIMEOUT_SECS = 3.0
+NO_FEED_PROBES_PER_CYCLE = 4
+
+# 종목별 증거 상태(모듈 전역, KST 날짜 자기 리셋) — `{ticker: {"vol0":, "t0":, "vol1":,
+# "t1":}}`. `"vol1"/"t1"` 은 증분이 확인된 뒤에만 생긴다(§3.5). 테스트 전용 리셋은
+# `reset_no_feed_held_probe_for_test()`.
+_no_feed_probe_state: dict = {}
+_no_feed_probe_day = ""
+
+
+def reset_no_feed_held_probe_for_test() -> None:
+    """테스트 전용 — 종목별 증거 상태 + 날짜 키를 모두 비운다."""
+    global _no_feed_probe_day
+    _no_feed_probe_state.clear()
+    _no_feed_probe_day = ""
+
+
+async def _probe_krx_acml_vol(ticker: str):
+    """REST 증거 다리(R) 의 유일한 KIS 호출 지점 — KRX 누적거래량 1회 조회.
+
+    `quotation` 은 함수 안 lazy import(A3) — 테스트가 `core._probe_krx_acml_vol`
+    자체를 통째로 갈아끼우는 것이 정상 seam 이고(conftest autouse 가 기본 None
+    스텁으로 중립화한다), 이 함수는 그 seam 의 **실물**(`real_no_feed_probe`
+    마커 테스트가 검증)이다. `market="J"` 를 명시한다 — KRX 외 누적은 이 판정의
+    증거가 아니다.
+    """
+    from src.api import quotation
+
+    return await quotation.inquire_acml_vol(ticker, market="J")
+
+
+def _ws_tick_recorded_today(ticker: str) -> bool:
+    """증거 다리(W) — 오늘(KST) WS 체결 프레임을 이 프로세스가 한 번이라도 받았나.
+
+    `tick_volume.get_observed_acml_vol` 은 `risk.on_tick` 이 WS 체결(`fields[13]
+    ACML_VOL`)에서만 기록한다 — 멀티데이 REST 폴 경로는 그 체결량 인자를 넘기지
+    않아 기록하지 않으므로 `ticker_last_tick`(§3.2 기각 대안)과 달리 donchian·
+    kojiro 보유분의 REST 폴이 이 값을 거짓으로 만들지 않는다.
+    """
+    from src.engine import tick_volume
+
+    return tick_volume.get_observed_acml_vol(ticker) is not None
+
+
+def _in_no_feed_probe_window(now: datetime) -> bool:
+    """지금이 판정 창 K3 `[개장+grace, 종료)` 안인가 — 표 조회 실패는 창 안으로 본다.
+
+    경계는 `market_state.get_market_table(now.date())` 의 KRX·REGULAR 행에서만
+    얻는다(시각 리터럴 신설 0, A2). 실패·행 없음은 fail-open(판정 억제 방향이
+    아니라 **진행** 방향 — W·R 두 증거 다리가 거짓 경보를 따로 막으므로 이 창은
+    REST 호출 수를 줄이는 장치일 뿐이다).
+    """
+    try:
+        from src.engine.market_state import MarketPhase, get_market_table
+
+        rows = [
+            r for r in get_market_table(now.date())
+            if r.market == "KRX" and r.phase is MarketPhase.REGULAR
+        ]
+        if not rows:
+            return True
+        start = min(r.start for r in rows)
+        end = max(r.end for r in rows)
+        open_dt = datetime.combine(now.date(), start, tzinfo=now.tzinfo) + timedelta(
+            seconds=NO_FEED_OPEN_GRACE_SECS
+        )
+        end_dt = datetime.combine(now.date(), end, tzinfo=now.tzinfo)
+        return open_dt <= now < end_dt
+    except Exception:
+        return True
+
+
+async def _read_krx_acml_vol(ticker: str):
+    """`_probe_krx_acml_vol` 을 타임아웃 아래 실행 — 실패·비정수는 전부 `None`.
+
+    타임아웃은 **호출 시점에** 모듈 전역 `NO_FEED_PROBE_TIMEOUT_SECS` 을 읽는다
+    (기본 인자로 박으면 테스트가 줄인 값이 반영되지 않는다). `asyncio.wait_for`
+    가 아니라 import 시점에 묶은 `_wait_for` 를 쓴다 — 많은 테스트가 `core.asyncio`
+    를 `_SleepSpy` 로 바꿔치기하므로(A8), 모듈 `asyncio` 이름에 기대면 그 대역이
+    타임아웃까지 집어삼킨다.
+    """
+    try:
+        v = await _wait_for(_probe_krx_acml_vol(ticker), NO_FEED_PROBE_TIMEOUT_SECS)
+    except Exception:
+        return None
+    return v if isinstance(v, int) and not isinstance(v, bool) else None
+
+
+async def _observe_no_feed_held(cohort: set, subscribed, now: datetime) -> None:
+    """`[no_feed_held]` 증거 상태 기계 — cohort(HIGH∩no_feed) 중 구독 중인 종목만 평가.
+
+    종목별로: W(오늘 WS 기록)가 참이면 증거를 지우고 넘어간다(명세 §3.5-5). W 가
+    거짓이고 증분 확인 대기 중이면 `NO_FEED_CONFIRM_SECS` 경과 후 확정 후보에
+    넣는다. 기준이 없거나 `NO_FEED_PROBE_INTERVAL_SECS` 가 지났으면(사이클당
+    `NO_FEED_PROBES_PER_CYCLE` 상한, 정렬 순) REST 를 읽어 기준→증분→확정 전이를
+    진행한다(§3.5). 확정된 종목 전부를 한 번에 `_maybe_emit_no_feed_held` 로 넘긴다.
+
+    cohort·subscribed 이탈도 증거 삭제 사유다(구독 공백이 끼면 "구독 중 체결" 증명이
+    깨진다, E4b). 날짜가 바뀌면 전체 상태를 버린다(E10) — 전날 기준을 오늘 증거로
+    쓰면 안 된다.
+
+    본문 전체가 하나의 `try/except Exception` 이다(A5) — 이 함수는 재등록 루프의
+    두 출구에서 불리므로(A4) 여기서 던지면 HIGH 재등록이 끊긴다. 흡수 흔적은
+    `observer_trace.trace_observer_failure("[no_feed_held_observe_failed]", ...)`
+    (debug) 뿐이다 — `CancelledError` 는 막지 않는다(`except Exception` 한정).
+    """
+    if not cohort:
+        return
+    try:
+        global _no_feed_probe_day
+        if not _no_feed_held_logged.should_emit(_NO_FEED_HELD_KEY, now=now):
+            return
+
+        day = now.date().isoformat()
+        if _no_feed_probe_day != day:
+            _no_feed_probe_day = day
+            _no_feed_probe_state.clear()
+
+        targets = sorted(t for t in cohort if t in subscribed)
+        for stale_ticker in list(_no_feed_probe_state):
+            if stale_ticker not in targets:
+                del _no_feed_probe_state[stale_ticker]
+
+        in_window = _in_no_feed_probe_window(now)
+        budget = NO_FEED_PROBES_PER_CYCLE
+        confirmed: set[str] = set()
+        evidence: list[str] = []
+
+        for ticker in targets:
+            try:
+                recorded = _ws_tick_recorded_today(ticker)
+            except Exception:
+                continue  # W 판정 자체가 예외면 그 종목은 모른다 — 건너뛴다
+            if recorded:
+                _no_feed_probe_state.pop(ticker, None)
+                continue
+
+            state = _no_feed_probe_state.get(ticker)
+            if state is not None and "t1" in state:
+                # 증분 확인됨 — 확인 대기(창 밖이어도 같은 날이면 진행, E6b).
+                if (now - state["t1"]).total_seconds() >= NO_FEED_CONFIRM_SECS:
+                    confirmed.add(ticker)
+                    evidence.append(
+                        f"{ticker}:{state['vol0']}->{state['vol1']}"
+                        f"@{state['t0']:%H:%M:%S}->{state['t1']:%H:%M:%S}"
+                    )
+                continue
+            if not in_window:
+                continue
+            if state is not None and (now - state["t0"]).total_seconds() < NO_FEED_PROBE_INTERVAL_SECS:
+                continue
+            if budget <= 0:
+                continue
+            budget -= 1
+
+            vol = await _read_krx_acml_vol(ticker)
+            if vol is None:
+                phase = "failed"  # 실패는 기준을 바꾸지 않는다 — 다음 사이클 재시도
+            elif state is None:
+                _no_feed_probe_state[ticker] = {"vol0": vol, "t0": now}
+                phase = "baseline"
+            elif vol > state["vol0"]:
+                state["vol1"] = vol
+                state["t1"] = now
+                phase = "traded"
+            else:
+                # vol <= vol0(동일 또는 감소) — 기준은 **내리지 않는다**(F1, cycle393
+                # 리뷰). 누적거래량이 일중에 줄어드는 것은 하루 안에서는 있을 수 없는
+                # 이상값(응답 결측 시 "0" 폴백·지연 시세 서버의 낮은 스냅샷)이고, 기준을
+                # 그 값으로 내리면 다음 정상 읽기가 "증가"로 오판돼 이번 사이클이 없애려던
+                # 바로 그 거짓 경보가 되살아난다. vol0 은 `max(vol0, vol)` 로 유지하고
+                # 시각만 옮겨 간격을 재기 시작한다(정상 저유동 무체결은 vol==vol0 이라
+                # max 가 그대로 vol0 이다).
+                _no_feed_probe_state[ticker] = {"vol0": state["vol0"], "t0": now}
+                phase = "flat" if vol == state["vol0"] else "decreased"
+            logger.info(
+                "[no_feed_held_probe] ticker=%s phase=%s vol=%s prev_vol=%s",
+                ticker, phase, vol, None if state is None else state.get("vol0"),
+            )
+
+        if confirmed:
+            _maybe_emit_no_feed_held(confirmed, now, evidence=evidence)
+    except Exception:
+        trace_observer_failure("[no_feed_held_observe_failed]", _NO_FEED_HELD_KEY, None)
+
+
+def _maybe_emit_no_feed_held(tickers: set, now: datetime, *, evidence: list | None = None) -> None:
+    """두 증거 다리가 모두 선 종목 집합을 WARNING 1회/일로 알린다.
 
     peek→로그→mark(cycle226 D-3 순서 답습) — mark 를 먼저 하면 로그 자기실패가
-    그날 관측을 지운다. 판정 자체(호출부의 `high_tickers` 계산)는 cap 밖 —
-    cap 은 로그 빈도만 조절한다.
+    그날 관측을 지운다. 호출자(`_observe_no_feed_held`)가 증거 상태 기계를
+    책임지고, 이 함수는 메시지 조립 + cap + 프리장 억제만 한다.
 
     관측기 자기 예외는 **여기서 흡수**한다(tester F-1, cycle237/242 "emit 헬퍼는
-    예외 흡수 · 행위는 cap 밖" 계약). 호출부는 `if not stale_tickers: return` 과
-    stale 루프 **앞**이라, 여기서 던지면 그 사이클의 HIGH 재등록까지 통째로 빠진다
-    (`_stale_watcher_loop` 이 흡수해 프로세스는 살지만 결함 지속 시 120s 마다 반복).
+    예외 흡수 · 행위는 cap 밖" 계약).
 
-    사이클 258 — 이중 try(자기 실패 debug 흔적을 또 try 로 감싸던 것)를
-    `observer_trace.trace_observer_failure` 단일 호출로 흡수한다(cap=None —
-    이 사이트는 폭주 차단 cap 이 없던 자리이므로 WARNING 승격 없이 debug
-    스택만 남긴다, 기존 계약 그대로).
-
-    🔴 **cycle293 §9-B 의미 전환 — 배포 전후 합산 금지.** cycle252 계약에서 이
-    행은 "보유 종목이 WS blind, 손절은 REST 폴만" 을 **매일 알리는** 것이었다.
-    cycle293 S2(`enforce`) 이후에는 **0 이 되는 것이 정상**이고, 0 이 아니면
-    판정 실패(출처 미확인·미분류) 또는 전환 실패다. ⚠️ 단 배포 **직후**에는
-    계속 비영인 것이 정상이다 — 기본 모드가 `observe`(행위 0)이고, `enforce_low`
-    는 HIGH 를 스코프 밖에 두기 때문이다.
+    🔴 **cycle393 — 이 WARNING 은 이제 측정됐을 때만 뜬다.** W(오늘 WS 체결 기록
+    없음) + R(구독 중 KRX 누적거래량 증가, 600s 간격 두 읽기 + 60s 확인) 두 다리가
+    모두 선 경우뿐이다(명세 §2). 종전(cycle252~357)의 `is_no_feed` 정적 분류만으로는
+    더 이상 뜨지 않는다 — **배포 전후 건수를 합산하지 않는다**(판정 기준 자체가
+    다른 것을 잰다).
 
     🔴 **cycle357 — KRX 연속체결 창(09:00~) 이전은 판정 자체를 억제한다**
     (`_is_before_krx_continuous_open`). cap **앞**에 두어 프리장 호출이 cap 을
-    소비하지 않는다 — 09:00 이후 같은 날 진짜 무송출이면 그때 1회/일 cap 이
-    정상 소비된다. 이 게이트는 판정 시점만 좁힐 뿐 HIGH 재등록 등 구독 행위는
+    소비하지 않는다. 이 게이트는 판정 시점만 좁힐 뿐 HIGH 재등록 등 구독 행위는
     한 글자도 바꾸지 않는다(호출부·재등록 경로 무접촉).
     """
     try:
@@ -224,10 +428,13 @@ def _maybe_emit_no_feed_held(tickers: set, now: datetime) -> None:
             return
         if not _no_feed_held_logged.should_emit(_NO_FEED_HELD_KEY, now=now):
             return
+        ev = "" if not evidence else " evidence=[" + ", ".join(evidence) + "]"
         logger.warning(
-            "[no_feed_held] tickers=%s — KRX 채널인데 WS 프레임 0(연속체결 미수신). "
-            "손절 평가는 REST 폴(donchian/kojiro 60s 09:05~15:20)만. tick 전략 보유면 사각",
-            sorted(tickers),
+            "[no_feed_held] tickers=%s%s — KRX 전용 보유 종목이 구독 중 KRX 체결"
+            "(REST 누적거래량 증가)이 있었는데 오늘 WS 체결 기록이 0건이다. 손절 평가는 "
+            "donchian·kojiro 보유분만 REST 폴(60초)로 받는다 — 다른 전략 보유분은 손절 "
+            "평가가 멈춘다",
+            sorted(tickers), ev,
         )
         _no_feed_held_logged.mark_emitted(_NO_FEED_HELD_KEY, now=now)
     except Exception:
@@ -494,13 +701,14 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
             return
         stale_tickers = sorted(high_stale)
 
-    # cycle252(c) — HIGH ∩ no_feed 관측. `is_no_feed` 호출은 동시호가 LOW-scoped
-    # skip 이 HIGH stale 없이 조기 반환하는 경로의 **뒤**(위)이므로 W9(HIGH 없는
-    # 동시호가 사이클에서 판정 0회)를 만족한다.
+    # cycle252(c)/cycle393 — HIGH ∩ no_feed 코호트(순수 계산만, I/O·로그 0). `is_no_feed`
+    # 호출은 동시호가 LOW-scoped skip 이 HIGH stale 없이 조기 반환하는 경로의 **뒤**(위)
+    # 이므로 W9(HIGH 없는 동시호가 사이클에서 판정 0회)를 만족한다. 실제 측정·emit 은
+    # `_observe_no_feed_held` 가 두 출구에서 한다(cycle393 §4 — REST 대기가 이 사이클의
+    # HIGH 재등록을 늦추면 안 된다).
+    no_feed_held_cohort: set[str] = set()
     if high_tickers:
-        no_feed_high = {t for t in high_tickers if no_feed_registry.is_no_feed(t)}
-        if no_feed_high:
-            _maybe_emit_no_feed_held(no_feed_high, now)
+        no_feed_held_cohort = {t for t in high_tickers if no_feed_registry.is_no_feed(t)}
 
     if not stale_tickers:
         # 모두 fresh — 누적 retry 카운터 리셋 (회복 케이스)
@@ -509,6 +717,7 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
         # getattr 폴백으로 사전 init 누락 인스턴스(테스트 `__new__` 호출 등) 보호.
         if hasattr(scheduler, "_stale_last_resubscribe_at"):
             scheduler._stale_last_resubscribe_at.clear()
+        await _observe_no_feed_held(no_feed_held_cohort, subscribed, _dt_mod.now(_KST_TZ))
         return
 
     force_reregistered = 0
@@ -684,6 +893,7 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
     # 사이클 28 — [stale_watcher_detail] 세션별 분포 + 종목 cap 20 (별도 행, G1 호환)
     # Q4=B (사이클 60 답습하지 않는 유일 영역) — 직접 호출 (1 hop 단축, wrapper 우회)
     emit_stale_session_detail(scheduler, stale_tickers, now)
+    await _observe_no_feed_held(no_feed_held_cohort, subscribed, _dt_mod.now(_KST_TZ))
 
 
 def _collect_low_desired(scheduler: Any) -> tuple[set[str], set[str]]:

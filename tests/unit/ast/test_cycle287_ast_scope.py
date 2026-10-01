@@ -666,8 +666,15 @@ _SRC_TREE_FILES = 166
 # 직전 값 = `e7bbb4683ac238af6f32b3793bd4ebdea5fe017d98d17646b47bb3d979912670`.
 # cycle390(2026-09-29) — `funnel_capture.py`(부팅 대조에서 후보 목록 메서드가 없는 전략 건너뛰기)·
 # `param_catalog.py`(`sizing_mode` 도움말). 직전 값 = `e3e6f3ebb24ed4fa2709c2bbccf6a384c18f6b42d474570cf6e148947b221bc2`.
+# 🔁 cycle393(2026-10-02) 재핀 — `stale_watcher_core.py`(`[no_feed_held]` 판정을 WS 기록
+# 부재(`tick_volume.get_observed_acml_vol`) + 구독 중 REST 누적거래량 증가(`inquire_acml_vol`
+# 두 번, 600s 간격 + 60s 확인) 증거로, 8영역 밖·사용자 결정 7). 파일 수 불변(166) — 새
+# 함수·상수는 기존 파일 안에 추가됐을 뿐 신규 파일 0. 3차 재핀(독립 검토 F1 — 누적거래량이
+# 일중에 줄어든 읽기를 새 기준으로 삼지 않는다, `stale_watcher_core.py` else 분기만) 직전
+# 값 = `41740a36d4bdbc0cd615da4b0bce0b960fe3ae3fd3dd2e552352b2f0be02aafd`(2차, day_high
+# 문구 수정 후). 1차 값 = `ce5ac7b26c0e698af85f0660c17d4cd49ca9c242fa8b2077ab0029463c5f3d79`.
 _SRC_TREE_DIGEST = (
-    "ce5ac7b26c0e698af85f0660c17d4cd49ca9c242fa8b2077ab0029463c5f3d79"
+    "bf486d64cb9ff561fc4224713a86d18dfaf492581fa77dbe4eda3bdeaf64bcf9"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

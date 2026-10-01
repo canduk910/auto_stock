@@ -98,6 +98,37 @@ def _reset_held_cap(core):
     core._no_feed_held_logged.reset_daily()
 
 
+async def _inject_no_feed_evidence(core, monkeypatch, *, ticker, base_iso, traded_iso):
+    """cycle393 — `[no_feed_held]` 확정 직전 상태를 만든다(증거 두 다리 주입).
+
+    `base_iso` 에 REST 기준(1000), `traded_iso`(≥ base+600s)에 증분(1500)을 읽힌다.
+    두 사이클 모두 그 종목 WS 체결 기록 0 · 구독 중. 호출자는 `traded_iso`+60s 이후
+    사이클에서 확정(emit 시도)을 본다. 준비 사이클은 별도 pool/sched 를 쓴다.
+    """
+    from src.engine import tick_volume
+
+    vols = {"v": 1000}
+
+    async def _probe(t, *a, **k):
+        return vols["v"] if t == ticker else None
+
+    monkeypatch.setattr(core, "_probe_krx_acml_vol", _probe, raising=False)
+    reset_probe = getattr(core, "reset_no_feed_held_probe_for_test", None)
+    if callable(reset_probe):
+        reset_probe()
+    for iso, v in ((base_iso, 1000), (traded_iso, 1500)):
+        with freeze_time(iso):
+            vols["v"] = v
+            now = datetime.fromisoformat(iso)
+            tick_volume.reset_for_test()
+            _make_pool(monkeypatch, [ticker, "006340"])
+            _setup_ticks(monkeypatch, stale=[ticker, "006340"], now=now)
+            monkeypatch.setattr(core, "asyncio", _SleepSpy())
+            _patch_registry(monkeypatch, no_feed={ticker})
+            await core.check_and_resubscribe_stale(_make_sched(positions=[ticker]))
+    core._stale_watcher_collector.clear()
+
+
 # ===========================================================================
 # T1 — stale=∅ 사이클에도 [no_feed_held] 발화 (§2(c) "stale 여부와 무관하게 매 사이클 계산")
 # ===========================================================================
@@ -105,10 +136,21 @@ async def test_t1_no_feed_held_emits_when_all_fresh(monkeypatch, caplog):
     """보유 no_feed 종목이 REST 폴로 `ticker_last_tick` 을 갱신받아 stale 로 안 잡히는
     날(포렌식 ③ "003490 리셋은 REST 폴 때문")에도 'WS blind' 사실은 기록돼야 한다.
     held 판정을 `if not stale_tickers: return` 뒤로 옮기면 그런 날은 0행이 된다.
+
+    cycle393 재기준 — 증거 주입. 확정 직전 상태(09:48 기준·09:58 증분, WS 기록 0)를
+    만든 뒤 10:00 「모두 fresh」 조기 반환 사이클에서 1행을 본다(= E3b 와 같은 성질).
     """
     core = _core()
     _reset_held_cap(core)
     caplog.set_level(logging.DEBUG)
+    await _inject_no_feed_evidence(
+        core, monkeypatch, ticker="003490",
+        base_iso="2026-09-07 09:48:00+09:00", traded_iso="2026-09-07 09:58:00+09:00",
+    )
+    assert [r for r in caplog.records if _HELD in r.getMessage()] == [], (
+        "증거 준비 사이클(기준·증분)은 아직 말하지 않는다"
+    )
+    caplog.clear()
     with freeze_time("2026-09-07 10:00:00+09:00"):
         now = datetime(2026, 9, 7, 10, 0, tzinfo=KST)
         pool = _make_pool(monkeypatch, ["003490", "006340"])
@@ -305,13 +347,23 @@ def test_t4_no_feed_held_helper_absorbs_its_own_exception(monkeypatch, caplog):
 async def test_t4b_high_reregistration_survives_no_feed_held_failure(monkeypatch):
     """F-1 의 실제 피해 시나리오 — 관측 실패가 **보유 종목 HIGH 재등록**을 끊으면 안 된다.
 
-    호출부 `if high_tickers: … _maybe_emit_no_feed_held(...)` 는 `if not stale_tickers:
-    return` 과 stale 루프 **앞**에 있다. 헬퍼가 던지면 `_stale_watcher_loop` 이 예외를
-    흡수해 프로세스는 살지만 그 사이클의 모든 재등록(HIGH 포함)이 생략되고, 결함이
-    지속되면 120s 마다 반복 = 관측 개선이 손절 시세 복구를 막는 최악의 교환.
+    헬퍼가 던지면 `_stale_watcher_loop` 이 예외를 흡수해 프로세스는 살지만 그 사이클의
+    남은 재등록(HIGH 포함)이 생략되고, 결함이 지속되면 120s 마다 반복 = 관측 개선이 손절
+    시세 복구를 막는 최악의 교환. (cycle393 부터 관측기 호출 위치는 HIGH 루프 **뒤**다 —
+    위치 자체는 `test_cycle393_*` E12·A4 가 잠근다. 이 테스트는 emit 실패 흡수를 잠근다.)
+
+    cycle393 재기준 — 증거 주입. 확정 직전 상태(09:48 기준·09:58 증분, WS 기록 0)를
+    만든 뒤 10:00 사이클에서 emit 시도가 일어나게 한다(그 시도가 로거 폭발로 실패한다).
     """
     core = _core()
     _reset_held_cap(core)
+    await _inject_no_feed_evidence(
+        core, monkeypatch, ticker="003490",
+        base_iso="2026-09-07 09:48:00+09:00", traded_iso="2026-09-07 09:58:00+09:00",
+    )
+    assert core._no_feed_held_logged.should_emit(
+        core._NO_FEED_HELD_KEY, now=datetime(2026, 9, 7, 9, 59, tzinfo=KST)
+    ) is True, "증거 준비 사이클(기준·증분)은 아직 말하지 않는다(cap 미소비)"
     calls = {"n": 0}
     with freeze_time("2026-09-07 10:00:00+09:00"):
         now = datetime(2026, 9, 7, 10, 0, tzinfo=KST)

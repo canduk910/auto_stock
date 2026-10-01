@@ -3143,3 +3143,25 @@ cycle359 조사). cycle368 이 파서 기준점을 고치고, VI 수명 600초(�
 
 - `trade_history.profit_loss` = 여러 통보 주문에서 마지막 증분으로 덮인다(`update_trade_status` SET). `daily_realized_pnl`(메모리) = 증분 합이라 정확.
 → CHANGELOG: cycle392 행 (시정 — 장부도 주문 누적으로 바뀜, 정본 「체결단가 정합」 절)
+## 모듈 맵
+
+### 2026-10-02 cycle393 — `[no_feed_held]` 정적 분류 판정(거짓 경보) 원문
+
+(교체 전 원문 — `check_and_resubscribe_stale` 판정 순서 항목 중 두 줄)
+
+```
+  - `[no_feed_held] tickers=[…]` WARNING 1회/일 — `high_tickers` 를 `if not stale_tickers: return` **앞**에서 계산(매 사이클 판정, 예외 흡수 — HIGH 재등록을 끊지 않는다). KRX 연속체결 창 전(`_is_before_krx_continuous_open` — `tick_channel_clock._windows()` 의 `krx_regular_open` 재사용, 시각 리터럴 0)엔 판정 억제·cap 미소비(cycle357 — 프리장 `nxt_tradable=False` 는 연속체결 프레임이 정의상 0). 경계 판정 실패 = 억제 안 함(fail-open).
+  - `[stale_watcher_summary]` 끝 필드 ` no_feed_skipped=%d`. 판독 = `no_feed_skipped`·`[stale_force_retry]` **감소** = 성공, `[no_feed_held]` **0** = 정상. 🔴 이 마커들과 `[tick_coverage] stale` 은 2026-09-14 채널 분리 배포 전후 로그를 합산하지 않는다.
+```
+
+판정식은 `no_feed_high = {t ∈ high_tickers : is_no_feed(t)}` 하나였다 — `is_no_feed`
+(`stock_master.nxt_tradable == False`, KRX 전용 정적 집합)뿐이라 프레임 수신 여부를 보지
+않았다. 운영 `system_logs` 30일 실측 5회(09-28 09:01:24 · 09-29 09:00:18 · 09-29 16:02:30
+(재기동 후 cap 초기화, 애프터마켓) · 09-30 09:01:53 · 10-01 09:01:50) 전부 09:00 뒤 첫
+사이클에 KRX 전용 보유 종목이 있기만 하면 발화했다. 10-01 운영 재조회 반증 — 대상
+4종목(003490·232140·417200·425040) 전부가 마커(09:01:50)보다 먼저 MAIN 체결 틱을
+받았다(417200 09:00:06 · 003490 09:00:18 · 425040 09:00:22 · 232140 09:00:29). 메시지
+문구 「KRX 채널인데 WS 프레임 0(연속체결 미수신)」·「REST 폴(… 09:05~15:20)」도 당시
+이미 낡아 있었다(실제 보유 폴 시작 = `SWING_REST_POLL_EARLY_START` 09:00:30).
+
+→ CHANGELOG: cycle393 행

@@ -674,6 +674,52 @@ def _neutralize_daily_bar_finalize(
 
 
 # ---------------------------------------------------------------------------
+# cycle393 — `[no_feed_held]` REST 증거 seam 중립화
+#
+# `stale_watcher_core` 의 `[no_feed_held]` 판정이 KRX 전용 보유 종목의 누적거래량을
+# `_probe_krx_acml_vol(ticker)` → `quotation.inquire_acml_vol(t, market="J")` 로 읽는다.
+# K stale watcher 사이클을 도는 기존 테스트 수십 파일이 그대로 두면 실 KIS 로 새거나(외부
+# 네트워크 차단에 걸려 결과가 흔들림) 한 테스트가 남긴 관측 상태가 다음 테스트의 판정을 바꾼다.
+#
+# 시정 = seam 을 **None(측정 실패)** 반환 스텁으로 바꾸고 관측 상태를 테스트 전·후로 비운다.
+# 측정 실패는 「말하지 않음」 방향이라(명세 §6) 미부착 테스트에서 `[no_feed_held]` 는 뜨지 않는다.
+# seam 자체를 검증하는 테스트는 `@pytest.mark.real_no_feed_probe` 로 옵트아웃하고, 판정을 검증하는
+# 테스트는 이 픽스처보다 뒤에 도는 `monkeypatch.setattr(core, "_probe_krx_acml_vol", ...)` 로
+# 값을 명시한다(후자가 이긴다). Red 단계(seam 미존재)에서도 스위트가 죽지 않게 `raising=False`.
+# ---------------------------------------------------------------------------
+def _reset_no_feed_held_probe_state() -> None:
+    try:
+        from src.engine import stale_watcher_core as _swc_mod
+    except Exception:
+        return
+    reset = getattr(_swc_mod, "reset_no_feed_held_probe_for_test", None)
+    if callable(reset):
+        try:
+            reset()
+        except Exception:
+            pass
+
+
+@pytest.fixture(autouse=True)
+def _neutralize_no_feed_probe(
+    request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch
+):
+    _reset_no_feed_held_probe_state()
+    if not request.node.get_closest_marker("real_no_feed_probe"):
+        try:
+            from src.engine import stale_watcher_core as _swc_mod
+
+            async def _unmeasured(*_a: Any, **_k: Any) -> None:
+                return None
+
+            monkeypatch.setattr(_swc_mod, "_probe_krx_acml_vol", _unmeasured, raising=False)
+        except Exception:
+            pass
+    yield
+    _reset_no_feed_held_probe_state()
+
+
+# ---------------------------------------------------------------------------
 # 2026-09-26 C2(테스트 위생) — 실제 외부 네트워크 차단
 #
 # 2026-09-25 08:10 KST CI 첫 시도가 부팅 테스트 2개의 60초 타임아웃으로 취소됐다(재실행 초록).

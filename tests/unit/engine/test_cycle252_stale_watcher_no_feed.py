@@ -603,20 +603,38 @@ async def test_w6_ensure_fresh_exception_does_not_break_cycle(monkeypatch, caplo
 async def test_w7_no_feed_held_warns_once_per_day(monkeypatch, caplog):
     """보유 종목이 WS blind 라는 사실을 **매일 1행** 남긴다.
 
+    cycle393 재기준 — 증거 주입. 판정은 정적 분류(KRX 전용)만으로 말하지 않는다 —
+    WS 체결 기록 부재(W) + 구독 중 REST 누적거래량 증가(R, 600s 간격 두 읽기) 뒤 60s
+    확인이 서야 확정한다. 그래서 같은 날 여러 사이클·시각 진행으로 증거를 만든 뒤 단언한다.
+
     - HIGH∩no_feed 판정은 stale 여부와 무관(포렌식 ①: 보유 003490·000815 는 종일
       프레임 0 이고, 그 사실 자체가 기록 대상이다).
     - 120s 주기 × 종일 = 360행이 되지 않도록 cap 1회/일.
-    - 날짜 키 자기 리셋 — 다음 영업일에 다시 1행.
+    - 날짜 키 자기 리셋 — 다음 영업일에 새 증거로 다시 1행.
     """
+    from src.engine import tick_volume
+
     core = _core()
     caplog.set_level(logging.DEBUG)
+    vols: dict[str, int] = {}
 
-    def _run_cycle(day_iso: str):
-        return day_iso
+    async def _probe(ticker, *a, **k):
+        return vols.get(ticker)
 
-    # --- day 1, cycle 1 ---
-    with freeze_time("2026-09-07 10:00:00+09:00"):
-        now = datetime(2026, 9, 7, 10, 0, tzinfo=KST)
+    monkeypatch.setattr(core, "_probe_krx_acml_vol", _probe, raising=False)
+    reset_probe = getattr(core, "reset_no_feed_held_probe_for_test", None)
+    if callable(reset_probe):
+        reset_probe()
+
+    def _held_warnings():
+        return [r for r in caplog.records
+                if r.levelno >= logging.WARNING and r.getMessage().startswith(_HELD_MARKER + " ")]
+
+    async def _cycle_at(frozen, iso: str, vol: int):
+        frozen.move_to(iso)
+        now = datetime.fromisoformat(iso)
+        vols.update({"003490": vol, "000815": vol + 7})
+        tick_volume.reset_for_test()  # 오늘 WS 체결 기록 0
         _make_pool(monkeypatch, ["003490", "000815", "006340"])
         _setup_ticks(monkeypatch, stale=["006340"],
                      fresh=["003490", "000815"], now=now)
@@ -625,6 +643,13 @@ async def test_w7_no_feed_held_warns_once_per_day(monkeypatch, caplog):
         sched = _make_sched(positions=["003490"],
                             next_day_clear={("000815", "kojiro")})
         await core.check_and_resubscribe_stale(sched)
+
+    with freeze_time("2026-09-07 10:00:00+09:00") as frozen:
+        # --- day 1: 기준 → 증분 → 확정 ---
+        await _cycle_at(frozen, "2026-09-07 10:00:00+09:00", 1000)
+        await _cycle_at(frozen, "2026-09-07 10:10:00+09:00", 1500)
+        assert _held_warnings() == [], "증분 확인 사이클은 아직 말하지 않는다(60s 확인 대기)"
+        await _cycle_at(frozen, "2026-09-07 10:11:00+09:00", 1600)
 
         held = [r for r in caplog.records if _HELD_MARKER in r.getMessage()]
         assert len(held) == 1, (
@@ -640,25 +665,20 @@ async def test_w7_no_feed_held_warns_once_per_day(monkeypatch, caplog):
             f"보유·익일청산 both 가 나열돼야 한다 — {msg!r}"
         )
 
-        # --- day 1, cycle 2 → 무로그 ---
+        # --- day 1, 이후 사이클 → 무로그 (새 증분이 와도) ---
         caplog.clear()
-        await core.check_and_resubscribe_stale(sched)
+        await _cycle_at(frozen, "2026-09-07 10:21:00+09:00", 2500)
+        await _cycle_at(frozen, "2026-09-07 10:31:00+09:00", 3500)
+        await _cycle_at(frozen, "2026-09-07 10:32:00+09:00", 3600)
         assert [r for r in caplog.records if _HELD_MARKER in r.getMessage()] == [], (
-            "같은 날 두 번째 사이클은 무로그 (cap 1회/일)"
+            "같은 날 두 번째 확정은 무로그 (cap 1회/일)"
         )
 
-    # --- day 2 → 다시 1행 ---
-    caplog.clear()
-    with freeze_time("2026-09-08 09:30:00+09:00"):
-        now2 = datetime(2026, 9, 8, 9, 30, tzinfo=KST)
-        _make_pool(monkeypatch, ["003490", "000815", "006340"])
-        _setup_ticks(monkeypatch, stale=["006340"],
-                     fresh=["003490", "000815"], now=now2)
-        _patch_no_sleep(monkeypatch, core)
-        _patch_registry(monkeypatch, no_feed={"003490", "000815"})
-        sched2 = _make_sched(positions=["003490"],
-                             next_day_clear={("000815", "kojiro")})
-        await core.check_and_resubscribe_stale(sched2)
+        # --- day 2 → 새 증거로 다시 1행 ---
+        caplog.clear()
+        await _cycle_at(frozen, "2026-09-08 09:30:00+09:00", 100)
+        await _cycle_at(frozen, "2026-09-08 09:40:00+09:00", 400)
+        await _cycle_at(frozen, "2026-09-08 09:41:00+09:00", 500)
 
         held2 = [r for r in caplog.records if _HELD_MARKER in r.getMessage()]
         assert len(held2) == 1, (

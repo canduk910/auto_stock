@@ -40,6 +40,11 @@ markers = [
     # 즉시 실패시키는 차단을 푼다. 실제 외부 호출이 꼭 필요한 테스트만 붙인다(현재 0건 —
     # 부착 = 그 테스트 결과가 외부 서버 속도에 묶인다는 뜻이다).
     "real_network: 외부 네트워크 차단 픽스처 옵트아웃 (실제 외부 호출)",
+    # cycle393 — autouse `_neutralize_no_feed_probe` 옵트아웃. `[no_feed_held]` 판정의 REST 증거
+    # seam(`stale_watcher_core._probe_krx_acml_vol`)을 실제로 타야 하는 테스트만 붙인다. 미부착
+    # 테스트는 seam 이 None(측정 실패)을 돌려준다 = 판정이 말하지 않는다. `filterwarnings = error` 라
+    # Red 와 같은 커밋에 등재한다.
+    "real_no_feed_probe: [no_feed_held] REST 증거 seam 중립화 픽스처 옵트아웃 (seam 직접 검증)",
 ]
 filterwarnings = [
     "error",
