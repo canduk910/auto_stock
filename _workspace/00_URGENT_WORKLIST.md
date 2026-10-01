@@ -25,6 +25,7 @@
 - **ETF 전략**(A1~8 권고대로): KRX ETF 5년치 수집 · 국내주식형 1배 · 진입형은 5년치 뒤 미리 정한 규칙으로 자동 판정 · 문턱 T1~T6 고정 · 시장 유닛 적용 · 1주 폴백 금지 · 비중 0 shadow 4주·10건 · 과세코드 01 만 · **비중 출처 = 퇴출분(LTV 0.05 지금, VB 퇴출 시 VB 몫) — kojiro 는 안 건드림**
 - **돈키언**: 개조 (a) 진입 유지 + 깡토식 청산·사이징 · 피라미딩·연승연패 크기조절 제외 · 11번 개조 전 **신규 매수 중지 확정**(09-27) → 공통 `buy_paused`(cycle384)
 - **피라미딩**: 같은 종목 검토 종료 · 후지모토 1:2:6 닫음 · 책 터틀 지켜봄 · VCP 느슨한 청산은 **리팩터링 뒤 청산 규약 자문**
+- **평균회귀(OU) 전략(10-01 사용자 결정 8건)** — 지시서 `design/2026-10-01_mean_reversion_handoff.md`(오프라인 세션 전달용). **연구만 병행**(트랙 R = `tools/replay/` 첫 입주, 5년 보관소 주 데이터) + **실비용 산출·관리 기능**(트랙 C — 아래 09-06 「수수료·세금 비용 반영 사이클」 1단계를 대신함). 롱 전용 · 시장 잔차 · 시장 유닛 0 신규 진입 차단 · 재난 손절+회귀 깨짐 청산 필수 · Leung 경계는 사전 고정 판정 규칙(§3.6)으로 z 경계를 이길 때만. 🔴 **도입 시 비중 = kojiro 에서 0.05** — 09-27 「kojiro 는 안 건드림」(ETF 전략 비중 출처 맥락)을 **이 전략에 한해** 사용자가 바꿨다. 전략 코드는 연구 문턱 통과 뒤, ETF 전략 뒤 순번
 - **퇴출**: 「퇴출」 = 코드 삭제가 아니라 **비중을 반영구 0**. **LTV 퇴출** · **VB 12-31 까지 시한부 유지**(청산 25건 또는 12-31 에 비용 뺀 평균 ≤0 → 비중 0, 그 전 누적 손실 약 2.5만 원 초과 즉시) · **momentum 유지**
 - ✅ **LTV 퇴출 실행 완료(09-28 21:42 KST)** — 사전 점검: 21:30 정산 끝 · LTV 보유 DB 0 · KIS 잔고 11종목 = DB 보유 11종목(수량 일치, LTV 몫 없음) · 오늘 비중 변경 0. ① `PUT /api/strategies/weights` LTV 0.05→**0.0**(나머지 그대로, Σ 1.0→0.95) → API·DB `long_tail_volatility enabled=False weight=0.0` ② `PUT /api/strategies/system/cash-usage-ratio` 1.0→**0.95**(다음 영업일 부팅부터) → DB `{"value": 0.95}` ③ LTV 대기 AI 자문 `c2653a2f-32b3-4319-b176-d064103f6c0c` → **rejected**(처음 한 번 틀린 ID 로 「없음」 응답, 다른 레코드 무변경). 원 결정 문구: **LTV 퇴출 실행 = 09-28(월) 21:35 이후 한 번에**: PUT `/api/strategies/weights`(LTV 0) + `cash_usage_ratio` 0.95(LTV 몫 현금 보류 → ETF 소액 때 이관) + LTV 대기 AI 자문 거절. SQL 금지 · 장중 금지 · 같은 날 두 번 변경 금지
 - ✅ **09-29 cycle390 배포 + BFB 터틀 전환** — cycle390 `318fc78`(부팅 대조에서 momentum 건너뛰기 · `sizing_mode` 도움말 정정) full, push 15:43 → 백엔드 재기동 15:58:51~16:00:28(`[tick_blind_boot] downtime_secs=96 after_market_blind_secs=28`, 🔴 16:00 애프터마켓 28초 겹침 — 30분 창 안 push 가 CI 대기로 늦었다), CI·Deploy·`/health` 200. BFB PUT 16:05:45 `{sizing_mode:turtle, risk_pct:0.01, entry_end:14:30}` → API·DB 확인, BFB 보유 0. 09-30 확인 = BFB 매수 시 `_entry_atr` 스탬프·시장 유닛 `[market_unit] where=calc` 줄
@@ -61,6 +62,7 @@
 5. 돈키언 개조(브랜치 → 보유 0 에 합침)
 6. 리팩터링 1단계 중 **테스트 전략 명부 + 안전 가드 3종 전환**(src 무접촉) → **ETF 전략 신설(shadow)** — 지금 가드는 7개 고정 목록만 봐서 8번째 전략이 검사를 피한다
 7. 리팩터링 본체(등록·역할 분리 · 13 `risk.py:88` 선언 기반 · 14 시드 기본값 · 15 표시명 · 16 `tools/replay/` · 같은 날 비중 두 번 변경 예산 부풂)
+   - 10-01 추가 입력(리팩토링 메모 §11): 카드 #3 에 `MARKET_UNIT_POLICY`(`scale`·`block_zero`·`none`) · 청산 사유는 cycle367 카드 4-1 이 덮음(`Signal` 가산형 유지) · 카드 #8 포지션 진입 메타(평균회귀 연구 통과 뒤) · 카드 #9 공통 섀도 모드(🔴 **ETF 전략 shadow 직전** — 설계서의 「비중 0 shadow」 는 `enabled=False` 자동 토글 = 손절 정지 금기와 충돌하므로 이 카드로 대체)
 - 작은 것: `sizing_mode` 도움말 정정(BFB 전환 전) · momentum 급등 순위 ETF 이름 판정(cycle380 후속, 8영역)
 - 남은 후속: momentum 급등 순위 행은 그룹코드가 없어 ETF 를 이름으로 판정(cycle380 검토 MEDIUM)
 
@@ -4188,6 +4190,8 @@ find . -name __pycache__ -prune -exec rm -rf {} + ; python -m pytest -q
 | ③ '전략수정 AI자문' 페이지 시각 표기 | "바꿔" | **구현·커밋·배포 완료(cycle256-G, `413676b`, vitest 579 PASS·`tsc -b` clean·`npm run build` 성공)** — `pages/Recommendations.tsx` `formatDateTime` 을 `utils/kst.ts` `formatKstDateTime` 로 위임(KST 강제 + `2026-09-07 09:05:00`, export 추가로 단위 테스트화), 배포 = frontend 모드 |
 
 ## 2026-09-06 사용자 결정 — 수수료·세금 비용 반영 사이클
+
+> 2026-10-01: 1단계(관측)는 평균회귀 지시서 트랙 C(`design/2026-10-01_mean_reversion_handoff.md` §4 — KIS `TTTC8715R` 정산값 사후 대사, 8영역 회피)로 이관. 2단계(`daily_loss_limit` net 기준)는 그대로 별도 결정.
 
 - 사용자(09-06 새벽): "화요일부터 하자". 09-03 결정 항목 9(수수료·세금 관측 배선, 권고안대로)의 착수일 확정 = **화 09-08**(D10 과 같은 날 — D10 아침 승인 뒤 이어서 또는 D10 배포 뒤).
 - 1단계(관측): 매도 체결마다 수수료·거래세 **추정액**과 순손익(net)을 기록(`trade_history` 가산형 컬럼 — NULL 허용 ADD COLUMN), 일일 실적·20:10 리포트·대시보드에 gross/net 병기. 손익 계산 지점 `order_engine.py:1389`(8영역) 1곳 = 승인 필요. 비용률 = KIS 계좌 실제 수수료율 확인(잔고/체결 조회 TR 의 수수료 필드 또는 계좌 약정) → 확인 불가 시 설계서 가정(수수료 0.015%/편도, 거래세 0.15% 매도 시). 슬리피지는 비용 모델 밖(관측만).
