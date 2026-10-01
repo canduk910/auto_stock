@@ -856,3 +856,330 @@ VCP·BFB `_effective_setup` 이 live `_candidates` 의 `atr14`/`ema50` 를 먼�
 경위: cycle380(사용자 결정 2026-09-27 「운영db 조회 허용 및 판정 변경 채택」)이 ETF/ETN 판정을 이름 키워드에서 증권그룹코드 `scty_grp_id_cd ∈ {EF,EN,FE}` 로 바꿨다. 판정은 leaf `src/engine/etf_like.py::is_etf_like` 하나로 모였고, 코드가 없을 때만 이름 키워드로 떨어진다. 6 전략의 모든 `list_by_filter(...)` 호출이 `exclude_etf_like=True` 를 넘기고(AST G4), 루프 안 이름 판정은 `is_etf_like(row.get("raw"), name)` 방어 겹으로 바뀌었다. 「ETF 키워드 제외는 호출자 책임」 은 사실이 아니게 됐다. 6자리 ticker 검증은 그대로 호출자 몫이다.
 
 → CHANGELOG: cycle380 행
+
+## 2026-10-01 sync-docs 압축 — 정본에서 이관
+
+원본: `src/engine/strategies/CLAUDE.md` · 이관: 2026-10-01 (sync-docs 모드 B — CLAUDE.md 전반 점검). 정본은 코드 기본값만 적고, 운영 DB 값·운영 결정·실측 서사는 여기로 옮겼다. 운영값의 정본 = `GET /api/strategies` · `_workspace/00_URGENT_WORKLIST.md`.
+
+### CLAUDE.md — src/engine/strategies/ (머리말)
+
+정본 원문:
+
+각 전략의 **활성 여부·비중은 운영 DB `strategy_config` 가 정본**이고 코드 등록 기본값과 다를 수 있다 — kojiro 는 코드 `enabled=False`·`weight=0.0` 이지만 운영 DB 에서 활성이다.
+
+경위: 코드 등록 기본값(`scheduler.py` `__init__`)은 momentum 만 `enabled=True`·`weight=1.0` 이고 나머지 6전략 전부 `enabled=False`·`weight=0.0` 이다. kojiro 만 특별한 것처럼 읽혀 일반화했다.
+
+## 전략 카탈로그
+
+### 2026-10-01 sync-docs — 표 행의 운영 DB 값·운영 결정·낡은 수치
+
+정본 원문(momentum·LTV·donchian·kojiro 행):
+
+| `momentum` | `momentum.py` | 전일종가 +29% 돌파 (상한가 30% 제외, 돌파 순간만). 각주 ④ | -7.5% / 익일 청산: 갭+10%↑ → 트레일링 -2% / 그 외 즉시 매도 | KRX_OPEN+MAIN / KRX·NXT·SOR (실전 SOR 권장, 모의는 KRX 강제) |
+| `long_tail_volatility` | `long_tail_volatility.py` | VB 방식 + 전일대비 `min_prdy_rate%`↑. `_limit_up_reached` set 으로 모드 관리. **`_cooldown_until` 2영업일 재진입 쿨다운** — `on_position_closed` 훅에서 `was_limit_up`(discard 전 판정)이면 면제, **당일 모드 손절 종목만** 등록(상한가 익일보유 정상 재진입 보존). `reentry_cooldown_days=2` 는 `PARAM_RANGES` 미등록, 일일 리셋 금지. 각주 ②③④⑤⑦ | 당일 모드 −3%(운영 DB −5) / 상한가 모드 −5%(**운영 DB −3.5** — 코드 기본값만 보면 상한가 전환이 손절을 느슨하게 만드는 것처럼 읽히지만 실제 운영값은 반대로 조인다) + 익일 갭/트레일링(갭 ≥ `gap_up_threshold` 면 트레일링, **미달·시가 미수신·`nxt_tradable=False` 는 09:00 KRX 시장가 청산** — NXT 프리 즉시 체결이 아니다). **15:20 상한가 미도달 일괄 청산** / 상한가 모드는 **15:20 시점 확인**(각주 ⑦, `limit_up_close_hold_mode`)에서 가격이 `limit_up_threshold` 미만이면 그날 청산, 이상이면 보존 + POST_NXT 손절 모니터링. `_next_day_clear_pending` 가드 | **PRE_NXT + MAIN + POST_NXT 3보드**(코드 기본값) — 연속 상한가 익일 청산 + 야간 매수. 매수 진입 전용(보유 손절·Trailing·익일청산은 보드 가드 무관 항상 작동). **운영 DB는 `["main"]` 단독**(코드 기본값과 다르다 — 당일 상한가 모드는 09:01:30~15:20 매수에서만 생긴다) |
+| `donchian_swing` | `donchian_swing.py` | 코스피200+코스닥150 고정 유니버스(`list_by_filter(is_kospi200=True, is_kosdaq150=True)`) → 시총 컷 → 60일 일봉 → 20일 신고가 + 60일 EMA 우상향 + 거래대금 1.5×. `prepare` 부분봉 가드(`candles[0]==오늘` 이면 [1] 부터). 09:05~09:30 매수, 갭 +3%↑ 스킵, 1회만. **터틀 sizing opt-in**(`sizing_mode="turtle"`, 기본 `position_ratio`) — `compute_unit_qty_guarded`(변동성 floor 1% + notional 클램프) 유닛 sizing + `_entry_atr` 원자 스탬프. 각주 ④ · 운영 결정 = 신규 매수 멈춤(각주 ⑨) | ATR(14)×2 샹들리에 트레일링 + **하드손절**: 터틀(`_entry_atr` 스탬프) → `buy − stop_atr(2.0)×entry_atr` + `-9%` backstop(ATR 독립 최후 방어) / `position_ratio`(미스탬프) → **-7%**. `_entry_atr` 은 `recompute_held_atr` 이 재시작 시 buy_date 이전 봉으로 재도출(loosen 차단). **시간·15:20 청산 없음** — 멀티데이 보유(DB positions 영속화) | MAIN |
+| `kojiro` | `kojiro.py` | **고지로 대순환 스윙**. EMA 5/20/40 대순환. 전체 상장(`is_kospi200/is_kosdaq150=None`, `max_scan_stocks≥3577`) → 시총/거래대금 컷 → 일봉 100일(`min_required=80`, EMA40 seed <2%) → **ATR/종가 변동성 밴드 1.0~6.0%**(비협상 판별 필터) → 스테이지 판별(EMA 동가 None 제외) → **strict entry**: 스테이지1 + 최근 5영업일 6→1 전환 인접(`stage1_freshness=5`) + EMA 3선 우상향 + 전일종가>EMA5. **후보 점수 랭킹** = `0.4×(MACD3 3봉기울기/3/종가) + 0.3×(띠폭/직전5봉평균 − 1) + 0.3×6→1신선도`(후보풀 min-max 정규화, 지표는 순수모듈 `kojiro_indicators.py` pandas Wilder ATR `ewm(1/20)`) → `get_scanned_tickers()` score DESC 정렬 → 매수 폴루프가 최적 셋업 먼저 처리. **매수 후보 정렬만 — 자격/청산 무변경**(`rank_w_*` 는 `PARAM_RANGES` 제외, fail-safe) + shadow 관측 **2종** `[kojiro_band_observe]`·`[kojiro_macd_observe]`(leaf `src/engine/kojiro_band_observe.py`, 둘 다 관측 전용 — 매수 후보·순서·청산 어느 것도 바꾸지 않는다. MACD 는 cycle344 배선, `enriched` 재사용이라 추가 I/O 0). `[kojiro_macd_observe]` 는 role **3종** — `held`(보유 stamp 직후)·`candidate`(strict entry 최종 후보)·`stage6_gc`(cycle348, step6 직후 ATR밴드∧국면6∧gc3 종목 — strict entry 를 못 넘는 국면6 크로스를 앞으로 재기 위한 별도 표본, 행 끝에 `bar=`/`close=`/`atr=` 를 덧붙인다). `stage6_gc` 는 하루 60줄 상한 + 초과 시 요약 1줄(`cap_reached=1 limit=60 suppressed=N`). 🔴 이 마커의 줄 수·`rule6=1` 합계는 `role=` 로 나눠 집계한다 — 읽는 법 넷(운영 100봉 창 B6 · 보유 종목 두 줄 · role 별 집계 · 예상 기록량)의 정본 = `src/engine/CLAUDE.md` 의 `kojiro_band_observe.py` 절. 09:05~09:30 매수(**갭업 ≥5% / 갭다운 ≤-4% / 장중 붕괴(현재가<시가) 스킵**), 1회만. 각주 ④ | **고정% backstop(-8%, ATR 독립) → 2ATR tighten-only floor(`_stop_floor`) → 스테이지3 진입 TRAILING_STOP(익일 아침 발화, precompute `_held_stage3`) → 2.5ATR 샹들리에 트레일링**. 브레이크이븐 플로어 `breakeven_promote_atr`(기본 **0=비활성**, 활성 권장 1.5, `PARAM_RANGES` 미편입) — 활성 시 `high_since_buy ≥ buy + mult×ATR`(live `_effective_atr`) 도달이면 `eff = max(eff, buy)` 승격 → `_stop_floor` tighten-only 래칫 영속. `_position_stop_price` 는 be_line 포함 **4선 max** read-only 미러(`_stop_floor` 무변조 독트린 = 커플링 불변식). **샹들리에 2.5 조임 금기**(RR 훼손 — fat-tail 랠리는 트레일링이 담당, 자문 `kojiro_exit_loss_review.md`). **시간·15:20 청산 없음** — 멀티데이, `_MULTIDAY_STRATEGIES` 멤버 + `check_force_clear()==[]`. 공유 순차 폴루프 `_SWING_POLL_STRATEGIES=("donchian_swing","kojiro")`(double-buy 차단) | MAIN / KRX |
+
+경위: (1) momentum `exchange` — SOR 은 cycle287 에서 폐기(`param_catalog` `Choice(deprecated=True)`), 7전략 코드 기본값은 전부 `KRX`. `tradable_boards` 기본 `("krx_open","main")` 의 `krx_open` 은 `session._BOARD_SCHEDULE` 에 없다(비활성). (2) LTV 행의 `운영 DB −5`·`운영 DB −3.5`·`운영 DB는 ["main"] 단독` 은 운영 스냅샷이고, 「안전 규칙」 의 「DB `strategy_config` 도 3보드다」 와 서로 어긋났다. LTV 는 2026-09-28 운영 비중 0 으로 퇴출됐다(워크리스트). (3) donchian 행 — 「고정 유니버스」·「60일 일봉」(실제 `fetch_days = max(long_ma+5, donchian+5)+1 = 66`, `min_required=63`)을 고치고, 코드에 있는 브레이크이븐 승격(`breakeven_promote_atr=1.5`)·10일 저가 채널 이탈(`channel_exit_period=10`)·시간청산을 청산 열에 보탰다. 「운영 결정 = 신규 매수 멈춤」 은 운영 상태라 워크리스트로. (4) kojiro `max_scan_stocks≥3577` → 코드 기본 4000. MACD 관측 role 상세는 `src/engine/CLAUDE.md` `kojiro_band_observe.py` 절과 중복이라 링크로 줄였다.
+
+### 2026-10-01 sync-docs — kojiro 리스크 통제의 실측 서사·근거 수치
+
+정본 원문(발췌):
+
+4.5% 는 `max_positions 6 × 유닛 1.0% = 6.0%` 보다 낮게 잡아 저리스크 포지션은 6개까지, full-size 유닛은 4~5개에서 정지시킨다.
+
+— 2026-08-04 실증: 보유 6종목 중 삼영무역(002810)만 `_candidates` 부재 → `atr=0` → 2ATR 손절 분기 통째 skip → 손절선 21,674 관통에도 미발화.
+
+**조기진입(스테이지6)·피라미딩 = Phase 2 연기.**
+
+경위: kojiro 코드 `max_positions` 는 5 다(`DEFAULT_PARAMS` 주석의 「max_positions 6」 은 낡은 근거). 삼영무역 사례는 리졸버 규칙의 근거로 한 문장만 정본에 남겼다. 피라미딩은 설계(`_workspace/design/2026-09-24_three_stage_sizing_pyramiding.md`)가 나왔고 코드는 없다.
+
+### 2026-10-01 sync-docs — 각주 ② 「DB 선반영 금지」 의 근거 문장
+
+정본 원문(발췌):
+
+⚠️ **DB 선반영 금지** — `_load_strategy_config`·`PUT /params` 둘 다 "코드에 이미 있는 키만 덮는" 오버레이라 배포 전 PUT 은 무음 실패하고 `params` JSONB 를 통째로 덮는다.
+
+경위: cycle278 의 `param_validation` 뒤로 코드에 없는 키를 보내는 PUT 은 무음 실패가 아니라 `unknown_key` 422 다. 금기는 그대로이고 근거 문장만 고쳤다(SQL 선반영 키는 `_load_strategy_config` 의 `if key in strategy.config.params` 가 버리고, 다음 PUT 의 `save_params` 가 메모리 dict 전체로 덮는다).
+
+### 2026-10-01 sync-docs — 각주 ⑨ 운영 결정
+
+정본 원문:
+
+- **운영 결정** — `donchian_swing` 만 켠다(사용자 결정 2026-09-27 「돈키언 신규매수 중지」). 보유분은 원래 청산 규약대로 나가게 두고, 개조(전용 브랜치)를 합친 뒤 끈다. 켜는 절차·확인 쿼리 = `_workspace/red/cycle384_buy_paused_spec.md` §11 · 해제·롤백 = 같은 문서 §12.
+
+경위: 돈키언 `buy_paused=true` 는 2026-09-27 16:14 PUT 으로 켜졌다. 어느 전략이 멈춰 있는지는 운영 상태라 워크리스트가 정본이다. 절차 문서 포인터(§11·§12)는 정본에 남겼다.
+
+## 자금관리 — 사이징 방식 × 손절 기준 매트릭스
+
+### 2026-10-01 sync-docs — 「터틀 상태」 열·활성화 게이트·로드맵 트리거
+
+정본 원문(매트릭스 표):
+
+| 전략 | sizing_mode 기본 | 하드손절 | 터틀 상태 |
+|---|---|---|---|
+| `momentum` | (키 없음) | 고정 % | **영구 제외** — `prepare` 빈 stub·일봉 0건 → ATR 산출 구조적 불가 |
+| `volatility_breakout` | (키 없음) | 보드별 고정 % | **영구 제외** — 15:20 전량 강제청산, 보유기간 ≤1일이라 유닛 정규화 실익 낮음 |
+| `long_tail_volatility` | (키 없음) | 일중 −3% / 오버나잇 −5% | **조건부 보류** — 상한가 2모드 손절 ATR화 재설계 선행 필요 |
+| `donchian_swing` | `position_ratio` | entry_atr 스탬프 시 `buy − 2.0×entry_atr` + `−9%` backstop / 미스탬프 −7% | **라이브**(운영 DB `turtle`) · **K=2.0 랏 유닛 캡 라이브**(cycle242) |
+| `kojiro` | `position_ratio` | `−8%` backstop → `2×ATR` tighten-only floor(`_stop_floor`) | **guarded 전환 완료** — `_entry_atr` 미도입(live ATR + `_stop_floor` 단일 메커니즘 유지) · **K=2.0 랏 유닛 캡 라이브**(cycle242) |
+| `vcp_breakout` | `position_ratio` | entry_atr 스탬프 시 3단 밴드 / 미스탬프 −7% | **다크런치** — 활성화는 백테스트 게이트 |
+| `bull_flag_breakout` | `position_ratio` | entry_atr 스탬프 시 3단 밴드 / 미스탬프 −5% | **다크런치** — 활성화는 백테스트 게이트 |
+
+정본 원문(규약 발췌):
+
+(2026-08-04 실측: "6포지션(=6유닛)"이 실제로는 **3.2유닛**, 포지션별 편차 8.3배)
+
+흡수 검토는 로드맵의 마지막 단계다(자문 `_workspace/domain_consult/kojiro_position_count_vs_unit_cap.md`). 피라미딩·`max_open_risk_pct` 상향·상관군 캡은 **net 500만 도달 시 재개**한다 — 피라미딩 해상도 임계(1유닛 ≥ 10주)가 그 자본에서 교차하기 때문이다. ②명목 개수 천장 = `1/position_ratio`(자본 무관)이라 성장하며 ratio 를 낮추면 저ATR 종목이 실제로 쌓여 한국 중소형 폭락일 상관=1 수렴 위험이 생기고, ③Σ리스크 캡은 **규모 불변**(항상 4.5 full유닛에서 물린다)이라 더 담으려면 `max_open_risk_pct` 상향이 필요하며 그건 **상관군 캡이 전제**다.
+
+활성은 자본이 아니라 **체결+백테스트 게이트**다.
+
+`turtle_min_stop_pct`(VCP −5.0 / BFB −4.0)가 유일한 방어선이며 **실제 활성화 전 백테스트 스윕 필수**.
+
+경위: 표의 「라이브(운영 DB turtle)」·「다크런치 — 활성화는 백테스트 게이트」 는 운영 상태였고 낡았다 — VCP 는 2026-09-26, BFB 는 2026-09-29 사용자 결정으로 운영 DB `sizing_mode=turtle`·`risk_pct=0.01` 로 전환됐다(백테스트 서버 부재 상태, 워크리스트). 열은 코드 배선 사실로 바꿨다. 「net 500만 도달 시 재개」 는 2026-09-20 입금으로 순자산 약 500만이 되어 조건이 찼고, 피라미딩 설계가 2026-09-24 나왔다.
+
+## 공통 패턴
+
+### 2026-10-01 sync-docs — funnel 자동 캡처 시각·prepare 공통 정정 전 원문
+
+정본 원문:
+
+- 09:30 `_scan_loop` 첫 진입에서 `scheduler._auto_capture_funnel_snapshots` 가 자동 발화 → DB `strategy_funnel_snapshots` 단계별 INSERT. `_reset_daily_state` 동행 reset.
+- **1단계 진입 차단 hook**(`_is_master_blocked_for_entry`) = 공통 헬퍼 `scanner.apply_master_block_filter(tickers, protected_tickers)` + 5 전략 wrapper `_apply_master_block_filter_in_prepare` + momentum 은 `scan_stocks` 내부 hook. 거래정지·관리종목·단기과열·투자유의 등 13건을 차단하고 **보유 종목은 절대 보호**한다.
+- prepare 0건이면 자동 재시도 hook(cap 3회 + sleep 30초) — VB/BFB/VCP. BFB/VCP 는 `scheduler._reprepare_breakout_if_empty` 대상이기도 하다(후보가 비었을 때만, 전략당 5분 1회).
+- VB prepare 후처리 3종 = **가격 필터**(`_apply_price_filter_in_prepare`, `system_config.get_price_filter` **단일 소스** — 비활성(min=0, max=0)이면 전체 통과, 보유 종목은 무조건 통과, `raw.bfdy_clpr` 결측은 graceful 통과. scanner `_apply_price_filter` 는 이중 안전망으로 남는다) · **퀀트 재무 게이트 관찰**(`_apply_quant_filter_in_prepare`, `quant_filter_enabled=False`/`quant_min_f_score=0`/`quant_max_mf_rank=0`, `src/engine/quant_score.py` F-Score-7 + 마법공식, **배제 0**) · **RS/RSI 관찰**(`_apply_rs_rsi_observe_in_prepare`, `rs_filter_enabled=False`/`rsi_filter_enabled=False`/`rsi_extreme_max=85`, `ta_indicators.rsi/relative_strength` + `get_recent_daily`(DESC→ASC), 지수 KODEX200(069500), **배제 0**) — 세 관찰 키 묶음 전부 `PARAM_RANGES` 미편입이고 결측·보유는 fail-open 이다.
+
+경위: (1) 09:30 자동 캡처는 `_scan_loop` 첫 패스라 첫 대기 뒤 ≈09:35 에 돈다 — 상세는 `src/engine/CLAUDE.md` 「funnel 스냅샷 캡처」 절로 링크. (2) `_is_master_blocked_for_entry` 는 master_raw 7건 + FHKST raw 4건 = 11건이다(`scanner.py`, 「투자유의」 라는 항목은 없다 — 투자주의환기 `invt_alrm_yn`). wrapper `_apply_master_block_filter_in_prepare` 는 kojiro 를 포함한 6전략에 있다. (3) `stock_master` 0건 재시도(cap 3회 + 30초)는 VB·LTV·donchian·BFB·VCP·kojiro 6전략에 있다. `_reprepare_breakout_if_empty` 대상은 VB·LTV·BFB·VCP 다. (4) 가격 필터 `_apply_price_filter_in_prepare` 는 `StrategyBase` 공통(kojiro 자체 override)이고 6전략이 부른다 — VB 전용 후처리가 아니다.
+
+### 2026-10-01 sync-docs — 「유니버스」 의 줄번호 인용
+
+정본 원문:
+
+- **거래량순위 API(`FHPST01710000` volume-rank)는 쓰지 않는다** — AST 가드 `test_cycle108_ast_no_kis_volume_rank.py` + `test_cycle97_ast_no_volume_rank.py` 가 `_scan_universe` 재도입을 영구 차단한다. momentum 만 **등락률순위**(`/ranking/fluctuation` `FHPST01700000`, `condition.py:299`)를 쓴다 — 거래량순위와 **다른 TR** 이고 VB/LTV/BFB 와 무관하다.
+
+경위: `condition.py:299` 는 표류했다. 등락률순위 호출은 `src/api/condition.py::_fetch_fluctuation_rank` 다.
+
+### 2026-10-01 sync-docs — 「임계」 의 VCP 운영 모드 서술
+
+정본 원문(발췌):
+
+🔴 **운영 DB 는 2026-09-18 06:00 부터 `"full"` 이다**(사용자 결정 D1, 라이브 실측 `fetch_days=285` · VCP 유니버스 348종목 전부 232봉) — 따라서 **운영의 실효 정렬은 50/150/200** 이고, 아래 표의 `cap100` 행은 코드 기본값의 산식이지 운영 상태가 아니다.
+
+경위: 운영 DB 값(`daily_fetch_depth_mode="full"`)과 그 실측(`fetch_days=285` · 348종목 232봉)은 운영 스냅샷이라 정본에서 걷었다. 정본은 코드 기본값과 두 모드의 실효 정렬 표만 적는다.
+
+## 안전 규칙
+
+### 2026-10-01 sync-docs — BFB 목표가 미러 실측·LTV DB 보드
+
+정본 원문(발췌):
+
+(실측 09-14~09-21: 036800 은 매수 다음 날부터 **5영업일 내내** 부재, 003160 은 계속 잔류. ⚠️ 잔류하는 날에도 값이 **live 재검출 구조** 기준이라 엔진 §3 과 갈릴 수 있다)
+
+DB `strategy_config` 도 3보드다.
+
+경위: 036800·003160 실측은 「`_candidates` 로 목표가를 읽으면 간헐적으로 빈 칸이 된다」 의 근거라 규칙 문장만 정본에 남겼다. LTV DB 보드 서술은 카탈로그 표의 「운영 DB는 ["main"] 단독」 과 어긋나는 운영 스냅샷이었다.
+
+## 2026-10-02 sync-docs 압축 2차 — 정본에서 이관
+
+원본: `src/engine/strategies/CLAUDE.md` · 이관: 2026-10-02 (sync-docs 2차 압축 패스, 사용자 요청 「유지해야할 내용도 전반적으로 압축하자」). 정본에는 규칙·조건·예외·금기의 한 문장 이유만 남기고, 유도 수치·경위·대안 비교·같은 파일 안 반복 설명을 원문 그대로 옮겼다. 아래 「정본 원문」 은 2차 직전 정본(1차 반영본)의 해당 줄 또는 그 줄의 발췌다.
+
+## 전략 카탈로그
+
+### 2026-10-02 sync-docs 압축 2차 — kojiro 행의 권장값·관측 마커 서술
+
+정본 원문(발췌):
+
+브레이크이븐 `breakeven_promote_atr`(기본 0 = 비활성, 활성 권장 1.5, `PARAM_RANGES` 미편입)
+
+관측 `[kojiro_band_observe]`·`[kojiro_macd_observe]`(leaf `kojiro_band_observe.py`, 행위 0) — `[kojiro_macd_observe]` 집계는 `role=` 로 나눈다(`src/engine/CLAUDE.md` `kojiro_band_observe.py` 절).
+
+**샹들리에 2.5 조임 금기**(RR 훼손 — fat-tail 은 트레일링이 맡는다, 자문 `kojiro_exit_loss_review.md`).
+
+재시작 시 `recompute_held_atr` 가 buy_date 이전 봉으로 `_entry_atr` 재도출(`sizing_mode="turtle"` 일 때만).
+
+경위: 「활성 권장 1.5」 는 운영 권고라 코드 기본값만 적는 정본에서 뺐다. 관측 마커와 `role=` 집계 규칙은 `src/engine/CLAUDE.md` `kojiro_band_observe.py` 절이 정본이라 링크만 남겼다. 샹들리에 금기는 「조이지 않는다 — RR 훼손」 한 문장으로 줄였다. donchian 행의 재시작 재도출 문장은 「자금관리」 ATR 손절 게이트 항목과 같은 내용이라 그쪽을 가리킨다.
+
+### 2026-10-02 sync-docs 압축 2차 — kojiro 리스크 통제의 유도 수치·반복 설명
+
+정본 원문(발췌):
+
+- **Σ 오픈리스크 캡** `max_open_risk_pct=4.5`(예산 대비 %, 개수 캡과 **병존**). 포지션 리스크 = `qty×(매수가−실효손절선)`, 실효손절선 = `max(buy×(1+hard_stop_pct/100), _stop_floor 또는 buy−stop_atr×ATR, high_since_buy−trail_atr×ATR)` — 청산 세 가격선과 같은 산식·같은 ATR 리졸버. ⚠️ 샹들리에는 tighten-only 가 아니라(ATR 팽창 시 내려간다) 이 값은 「최악 보장」이 아니라 평가 시점 손절선이고 매수 시도마다 다시 잰다. `stop ≥ buy_price` 는 **0 으로 계상**(음수 금지 — 확정 이익이 다른 종목 노출을 상쇄하면 캡이 무력화된다). `_stop_floor` 는 **읽기만**(매수 게이트가 청산 규약을 바꾸면 안 된다). ATR 결측 → 고정% 추정, 예외·예산 0·cap 0 → fail-open. 매수 게이트 전용 — 청산 미차단(AST). 4.5% 는 `max_positions × 유닛 1.0%`(코드 기본 5 → 5.0%)보다 낮아 full-size 유닛은 4~5개에서 멈춘다.
+
+- **ATR 리졸버 `_effective_atr(ticker)`** = `_candidates` live 우선 → `_position_atr` 영속 폴백. 손절·리스크캡 **양쪽이 같은 리졸버**다. `_candidates` 는 `prepare()` 마다 와이프되므로 손절이 거기 단독 의존하면 후보에서 빠진 보유 종목이 `atr=0` 으로 2ATR 손절을 건너뛴다. `_position_atr` stamp 3지점 = recompute / BUY 직전 / `on_position_closed` pop. ⚠️ `_reset_daily_state` override 금지.
+
+- **`max_units_per_stock=2`/`max_units_total=10` 은 소비처 0건 = 미강제**(`param_catalog` 「미사용」). 피라미딩이 없어 1포지션=1유닛이라 `max_units_total`≡`max_positions`, `max_units_per_stock=2` 는 도달 불가. 리스크 한도로 오인 금지. 조기진입(스테이지6)·피라미딩은 코드가 없다(「자금관리」).
+
+경위: 「4.5% 는 `max_positions × 유닛 1.0%` 보다 낮아 full-size 유닛은 4~5개에서 멈춘다」 는 상수에서 유도되는 설명이다. 「`max_units_per_stock=2` 는 도달 불가」 와 두 번 적힌 `_reset_daily_state` override 금지는 한 문장으로 합쳤다.
+
+### 2026-10-02 sync-docs 압축 2차 — 각주 ② 의 예외 연쇄·카나리아 0행 근거·DB 선반영
+
+정본 원문(발췌):
+
+- **fail-open** — 키 부재·`None`·`""`·파싱 실패(`inf`/`nan` 포함) = 0 = OFF. `[0, 600]` 클램프의 `except` 는 **bare `Exception`** 이다(`1e400` → `int(inf)` `OverflowError` 가 `check_buy_signal` → `risk.on_tick` → `handler.py` re-raise 로 WS 재연결 폭주).
+
+- 관측 = `[open_entry_hold_config]`(카나리아 1회/**(전략, 값)**/일 — 값-민감 cap 이라 장중 PUT 롤백 확인 채널. `source` 는 값 동등성 추론) + `[open_entry_hold_blocked]`(**would_buy 정본**, 1회/(ticker, 전략)/일). ⚠️ 계좌 SOFT 게이트 활성일엔 **LTV 카나리아 0행**(LTV 는 `GATE_FIRST_FILES` 라 게이트 앞에 로그를 둘 수 없다. VB 무영향). peek→로그→mark + bare `except` 흡수, 행위는 관측 밖. 두 cap 은 **별개 인스턴스**(공유하면 config 1행이 그날 blocked 표본을 지운다). release 마커는 없다 — 사후 평가는 `trade_history` 조인.
+
+- `PARAM_RANGES`/`INT_PARAMS` **편입 금지**(AST G-262-1). 롤백 = `PUT {"open_entry_hold_secs": 0}` **즉시**, SQL 은 재시작에서만(cycle232 D6 — 장중은 PUT 뿐).
+
+- ⚠️ **DB 선반영 금지** — 배포 전 PUT 은 `unknown_key` 422, SQL 로 먼저 넣은 키는 `_load_strategy_config` 가 버리고 다음 PUT 의 `save_params` 가 메모리 dict 전체로 `params` JSONB 를 덮는다.
+
+경위: bare `Exception` 의 이유(`1e400` → … → WS 재연결 폭주)는 한 문장으로 줄였다. DB 선반영 금지는 이 키가 배포된 뒤라 각주에서는 경위가 됐고, 일반 규칙(새 키를 코드 배포 전에 DB 에 넣지 않는다)은 「새 전략 추가」 5단계로 옮겼다. 절차 원문은 `_workspace/00_leader_trading_rules.md` 에 있다.
+
+### 2026-10-02 sync-docs 압축 2차 — 각주 ④ 의 PK 근거·지연 지표 세부
+
+정본 원문(발췌):
+
+`order_engine.execute_buy` 가 `place_order` 성공 직후(두 매수 경로의 매핑 등록 끝, PENDING INSERT 앞) `llm_buy_gate.observe_order(...)` 로 접수한다(주문번호가 있어야 PK `(trade_date, account_no, ticker, order_no)` 가 선다).
+
+같은 줄의 `latency_ms`(LLM 호출 구간만)와 `verdict_lag_ms`(접수→판정 전체, 세마포어 대기·DB fetch 포함)는 다른 값이다.
+
+경위: PK 와 두 접수 경로는 루트 `CLAUDE.md` DB 표 · `src/engine/CLAUDE.md` 모듈 맵 `llm_buy_gate.py` 가 정본이다.
+
+### 2026-10-02 sync-docs 압축 2차 — 각주 ⑤ 의 15:30~15:40 근거·프리장 경계 주석
+
+정본 원문(발췌):
+
+- 이유 — `session._BOARD_SCHEDULE` MAIN 이 09:00~15:39:59 라 컷이 없으면 연속체결 뒤에도 `board="main"` 매수가 나간다. 15:20~15:30(K4)은 시장가가 **접수되어** `_limit_up_reached` 미도달로 오버나이트에 남고(익일청산·갭가드·트레일링은 상한가 모드 전용), 15:30~15:40(K5/N5) 「돌파」는 종가 고정·다른 시장 가격이라 정보가 없다.
+
+- **`board=="main"` 전용** — `pre_nxt`(보드 08:00~09:00, NXT 프리 실질 종료 08:50 = `market_state` N1.end 는 별개 축)·`post_nxt`(15:40~19:50) 무접촉.
+
+경위: 컷의 근거는 「15:20~15:30 시장가가 접수돼 상한가 미도달 오버나이트로 남는다」 한 문장으로 줄였다. 15:30~15:40 의 정보 없음 근거와 NXT 프리 실질 종료(08:50, `market_state` N1.end)가 별개 축이라는 주석은 여기로 옮겼다.
+
+### 2026-10-02 sync-docs 압축 2차 — 각주 ⑥ 의 동기·생략 근거·기록량·골든 출처
+
+정본 원문(발췌):
+
+**각주 ⑥ VCP 돌파 관측 (cycle349, 관측 전용 — 매매 행위 0)** — 「그날 돌파 사건이 있었나」를 사후에 판정한다. 퍼널 스냅샷은 캡처 시각(≈09:35) 목록 한 장뿐이라 prepare 실행(run)별 후보가 남지 않는다(`src/engine/CLAUDE.md` 「funnel 스냅샷 캡처」 절). 후보 집합·순서·매수 판정·`DEFAULT_PARAMS` 무변경.
+
+같은 KST 날짜 **직전** 요약과 내용이 같으면 생략(후보 0 인 날 5분 재준비 대비 — 직전 1개만 비교라 A→B→A 는 세 줄).
+
+watch 만 읽고 쓰고 반환값 없음(`_prev_price`·`_vol_latch`·`_bought_today`·`_scan_stats`·`_candidates`·`state` 무접촉).
+
+`observed` = 창 안 틱 ≥ 1 인 종목 수이지 창 전체가 아니다
+
+- 예외 경계 — 틱 훅·요약은 본체 전체 `try`, ① 헬퍼는 종목 계산·요약 줄만 자기 `try`(나머지는 호출부 `try`) — prepare 는 어느 경우에도 관측이 없을 때와 같은 상태로 끝난다. `_candidates` 엔트리에 키를 더하지 않는다(UI `get_targets_status` 누출 방지) · KIS·DB·`await` 추가 0 · 기록량 ≈ 하루 14~16줄. 명세 `_workspace/red/cycle349_vcp_observe_spec.md` · 회귀 `test_cycle349_vcp_breakout_observe.py`(매매 무변경 = 확장 전 `2ef289b` 로 뜬 골든 `fixtures/cycle349_golden.json` 과의 일치. 골든이 지나지 않는 게이트는 그 테스트 파일 머리말 「적용 범위」 절) · `test_cycle349_vcp_breakout_events_metrics.py`.
+
+경위: 퍼널 스냅샷이 run 별 후보를 남기지 않는다는 동기는 run 요약 항목의 괄호 한 마디로 줄였다. 무접촉 상태 열거는 「watch 밖 상태는 무접촉」 으로 합쳤다. 기록량(하루 14~16줄)은 추정치이고, 골든을 뜬 커밋(`2ef289b`)과 적용 범위 안내는 회귀 테스트 파일 머리말이 정본이다.
+
+### 2026-10-02 sync-docs 압축 2차 — 각주 ⑨ AST 의 부가 설명
+
+정본 원문(발췌):
+
+(`test_cycle384_ast_buy_paused.py` A12 — 8번째 전략도 잡힌다)
+
+경위: AST 가 `DEFAULT_PARAMS` 를 가진 모든 전략 파일에 요구한다는 문장이 같은 뜻이다.
+
+## 자금관리 — 사이징 방식 × 손절 기준 매트릭스
+
+### 2026-10-02 sync-docs 압축 2차 — 규약의 유도·대안 비교 문단
+
+정본 원문(발췌):
+
+- **제한 축은 셋** — ① 개수 `max_positions` ② 명목 `Σ매수금액 ≤ total_investment` ③ **리스크 `Σ오픈리스크 ≤ max_open_risk_pct × 예산`**(kojiro 한정). 유닛 캡이 통제하려던 값은 ③이고 유닛 **개수는 프록시**다 — (a) 소액 수량 절삭 (b) `hard_stop_pct` 가 `atr_ratio>4%` 에서 2ATR 을 자름 (c) 사이징 혼재로 헐거워진다. ⚠️ **개수 캡을 리스크 캡으로 대체하지 않는다**(저ATR 종목으로 포지션 수가 무한정 는다 — 터틀도 유닛 캡과 시장군 캡을 병행했다).
+
+- **`max_positions` 는 걷어내지 않는다** — 소액에선 ②와 중복이지만 무해하고, 계좌가 커지면 유일한 상관·운영 통제축이다(흡수 검토는 로드맵 마지막 — 자문 `_workspace/domain_consult/kojiro_position_count_vs_unit_cap.md`). ② 개수 천장 `1/position_ratio` 는 자본 무관이라 ratio 를 낮추면 저ATR 종목이 쌓여 중소형 폭락일 상관=1 수렴 위험이 생긴다. ③은 규모 불변(항상 4.5 full유닛에서 물린다)이라 더 담으려면 `max_open_risk_pct` 상향이 필요하고, 그것은 **상관군 캡이 전제**다.
+
+- **피라미딩(사다리 증량)은 코드가 없다** — 설계 `_workspace/design/2026-09-24_three_stage_sizing_pyramiding.md`. 정해진 제약 = K 는 2.0 유지, **1주 폴백 랏에는 사다리를 걸지 않는다**(설계안 D-2 — 유닛 상한 재위반(R15)은 K=2 폴백 랏 위의 사다리에서만 생기고, K→1.0 은 사다리와 무관하게 진입 일부를 없앤다). 사다리 위험 합계는 kojiro `max_open_risk_pct` 가 지킨다. ⚠️ **VCP/BFB 는 피라미딩 부적합**(VCP = 수축 진입이라 entry ATR 국소 최소·2N 손절 과도 타이트, BFB = measured-move 목표 확정) — 유닛 사이징까지만 태우므로 `max_units_total`≡`max_positions` 가 영구히 성립하고 **개수 캡이 영구 load-bearing** 이다.
+
+- **매수 수량은 `StrategyBase._apply_budget_limit()` 관문을 반드시 지난다**(AST A-GATE — 7전략 모든 `return`). **순서 = 잔여 클램프 → K축 → `[oversized_fallback]` 관측 → ρ축 → `return`** 이 계약이다(ρ축이 관측 앞이면 차단 랏 관측이 `final_qty < 1` 로 사라지고, K축 앞이면 조기탈출이 K축 마커 3종을 지운다). 헬퍼·마커·순수성(A-PURE·A-ATOMIC) = `src/engine/CLAUDE.md` `strategy_base.py` 절.
+
+1주도 못 사면 **매수하지 않는다**(1주 폴백 랏 크기가 설계가 아니라 주가로 정해지던 결함 시정, 줄이는 방향뿐).
+
+- `position_ratio` 결측·예산 0·초소액·판정 예외 = fail-open + `[ratio_cap_skipped]`. **키 부재 = 캡 OFF**(K축과 반대 — 매수를 막는 통제라 fail-closed 는 P0-1 유령 키 재현 경로). `[ratio_cap_config]` 라벨 `off|on`.
+
+경위: 개수 캡이 헐거워지는 세 경로((a) 소액 절삭 (b) `atr_ratio>4%` 의 `hard_stop_pct` 절단 (c) 사이징 혼재)와 「터틀도 유닛 캡과 시장군 캡을 병행했다」, `max_positions` 를 남기는 비교(소액 중복·`1/position_ratio` 천장·③ 의 규모 불변), 사다리 D-2 의 R15 근거, 관문 순서의 이유(정본 = `src/engine/CLAUDE.md` `strategy_base.py` 절), ρ축이 시정한 결함 서술, `[ratio_cap_config]` 라벨(정본 = 엔진 문서)을 옮겼다. 규칙 문장(대체 금지·걷어내지 않음·폴백 랏 사다리 금지·키 부재 OFF 와 그 이유)은 정본에 그대로 있다.
+
+## 시장 유닛 — 터틀 4전략 (cycle382)
+
+### 2026-10-02 sync-docs 압축 2차 — 제외 전략 근거·자리 근거
+
+정본 원문(발췌):
+
+VB·LTV·momentum 에는 키·헬퍼 호출이 없다(설계 랏이 1주 언저리라 ½ 이 「안 산다」로만 바뀌고, 당일 청산이라 오버나잇 노출 축소 목적도 약하다 — 같은 자문 §4.4).
+
+BFB·VCP 는 `_prev_price` 가 이미 이번 틱으로 갱신된 뒤라 끈 뒤 첫 틱이 거짓 교차가 아니다.
+
+경위: 제외 근거와 자리 근거의 부연을 옮겼다. 자리 표와 「다른 매수 게이트를 전부 지난 뒤」 계약은 정본에 있다.
+
+## prepare 공통
+
+### 2026-10-02 sync-docs 압축 2차 — PV-1 대상 네 전략의 사례 서술
+
+정본 원문(발췌):
+
+- 네 전략인 이유 = 청산이 `_candidates` 보유 엔트리를 읽는다. kojiro `_held_stage3 = (오늘, D 종가 판정)` 이면 `check_exit_signal` 이 가격 무관 `TRAILING_STOP` 을 낸다(21:00~21:30 틱 하나로 야간 청산). donchian 은 보유 ATR 엔트리가 지워져 트레일링·손절선 미러가 매수 시점 ATR 로 떨어진다. VCP·BFB `_effective_setup` 은 `atr14`·VCP `ema50` 을 live 에서 먼저 읽는다. 20:00 뒤에도 stale watcher 가 보유를 HIGH 로 재구독하므로 틱 부재는 보장이 아니다.
+
+경위: PV-1 의 이유는 「바뀌면 야간 틱 하나로 청산이 나갈 수 있다」 한 문장과 kojiro `_held_stage3` 사례로 줄였다. donchian 보유 ATR 하락 경로는 비미리보기 항목에, VCP·BFB live 지표 우선은 「자금관리」 `_effective_setup` 항목에 있다.
+
+## 임계
+
+### 2026-10-02 sync-docs 압축 2차 — VCP `cap100` 주석의 KIS 총량 설명
+
+정본 원문(발췌):
+
+- ⚠️ `cap100` 의 100봉은 KIS 한도가 아니다 — `vcp_breakout.py` `KIS_DAILY_CANDLES_MAX = 100` 과 `get_recent_daily` 클램프(`_MAX_DAILY_ROWS`=400)가 묶는다. KIS 100일은 **호출당** 한도이고 총량은 날짜 윈도우 분할로 는다(`src/api/CLAUDE.md`). 적재 깊이 225영업일.
+
+경위: KIS 총량이 날짜 윈도우 분할로 는다는 설명은 `src/api/CLAUDE.md` 가 정본이라 링크만 남겼다.
+
+## 안전 규칙
+
+### 2026-10-02 sync-docs 압축 2차 — 매수 컷·구독·보드 항목의 부연
+
+정본 원문(발췌):
+
+남아 있는 날에도 live 재검출 값이라 엔진 §3 과 갈린다.
+
+- **VB·momentum 매수 컷 15:20 (`BUY_CUTOFF_KST` 모듈 상수)** — 15:20~15:30 KRX 장후 동시호가는 **시장가가 접수**되므로(15:20 강제청산 매도가 방증) VB 매수가 체결되면 오버나잇이 확정되고, 15:30 랜덤엔드 종가 틱은 허위 edge-crossing(+29% = 잠금 실패 마감 표본)을 만든다. `check_buy_signal` **최상단·상태 무갱신·KST 명시**(naive 금지). **DB override 불가 — `DEFAULT_PARAMS`/`PARAM_RANGES` 편입 금지**. 관측 `[vb_buy_cutoff]`/`[momentum_buy_cutoff]` 1회/일. `[단일가매매]` msg1 변형은 `balance.py` 분류기가 `is_market_order_disallowed` 로 흡수한다(매도 step_down 폴백).
+
+- **돌파 후보 구독 우선순위** — `scheduler._collect_breakout_tickers()` 가 VB/LTV/BFB/VCP 후보를 `subscribe_filtered_stocks(priority_groups=...)` 의 `breakout` 그룹(LOW + `bypass_limit=False`, 보조 세션 분산)에 넣는다. **BFB/VCP 는 폴링 루프가 없어 `risk.on_tick` 이 유일한 매수 평가 경로**라 구독이 없으면 매수 0건. `_resubscribe_stale_priority` 도 보유·익일청산이 아닌 후보는 LOW. 후보를 HIGH 로 메인에 몰면 과부하 → silent inactive.
+
+- **`tradable_boards` 는 매수 진입 전용** — 매도/손절/Trailing/익일청산/15:20 강제청산/상한가 손절 모니터링은 보드 가드 없이 항상 작동한다(`risk.on_tick` 의 `check_exit_signal` 분기가 `session_tracker.is_tradable` 검사 *전* 진입). 7전략 공통. **유일한 예외 = NXT 프리장(08:00~09:00) 청산 평가 보류** — `risk._PRE_MARKET_EXIT_EVAL_STRATEGIES`(LTV 단독) 밖 전략은 프리장 단독 구간에 청산 평가와 `high_since_buy` 갱신을 미루고 09:00 KRX 시세로 다시 평가한다(평가 보류이지 주문 보류가 아니다, 판정은 `tradable_boards` 가 아닌 명시 상수 — AST). 상세 = `src/engine/CLAUDE.md` 「risk.py」 절.
+
+경위: VB·momentum 15:20 컷은 「시장가가 접수돼 오버나잇이 확정된다」 한 문장만 남기고 랜덤엔드 종가 틱 근거를 옮겼다. `_resubscribe_stale_priority` 의 LOW 규칙은 `src/engine/CLAUDE.md` `scheduler.py` 절이 정본이다. `tradable_boards` 매수 진입 전용의 상세(프리장 평가 보류 화이트리스트·주문 보류 아님·명시 상수 판정)는 루트 「핵심 안전 규칙」 금기와 엔진 「risk.py」 절이 정본이라 링크로 줄였다.
+
+## donchian·BFB·VCP 개별 파라미터 규약
+
+### 2026-10-02 sync-docs 압축 2차 — `breakout_fail_n_days` 관측·방어의 부연
+
+정본 원문(발췌):
+
+(어긋나면 재시작 전후 임계가 달라진다)
+
+시간청산 게이트(`breakout_high > 0`)·관측기와 같은 축.
+
+- 판독 — 두 마커 동시 = 같은 사건(고가 결손). D-3 단독 = 다른 전략 쪽 일봉 열화. D-1 의 실제 표면은 「종가는 살고 고가만 결손」 row 뿐(완전 정규화 row 는 `prev_close <= 0` 가드가 먼저 잡는다).
+
+(`fetch_daily_candles` 는 빈 `output2` 에 `[]` 를 돌려주고 5분 캐시에 박는다)
+
+(§1 하드손절 앞 — 안쪽이면 하드손절이 발화하는 날 못 닿고, 매도 거부로 포지션이 살면 영구 억제)
+
+(kojiro 는 `_stop_floor` 영속이라 자연 1회, 무접촉)
+
+(날짜 자기 리셋 — `_x_day` 필드 없음)
+
+경위: 규칙(같은 창 · 값 기준 게이트 · 마커 자리 · cap 은 로그에만)은 정본에 남기고 그 부연을 옮겼다.
+
+### 2026-10-02 sync-docs 압축 2차 — 박스 수축 재도입 금지의 대안 비교
+
+정본 원문(발췌):
+
+- `box_contraction_period`·`max_box_volatility_pct` 를 **다시 넣지 않는다** — 「20일 신고가 돌파」(최근 박스가 넓다)와 「초압축 횡보 요구」는 반대 종목을 선호해 교집합이 공집합이고 후보가 상시 0 이 된다(자문 `_workspace/domain_consult/cycle_donchian_box_contraction.md`). VCP/BFB 와 역할도 겹친다. 페이크 돌파 방어는 **청산 규칙**(ATR×2 트레일링 / −7% / `breakout_fail_n_days` / `max_breakout_extension_pct`)이 맡는다.
+
+경위: 금기 이유는 「교집합이 공집합이라 후보가 상시 0」 한 문장으로 줄였다. 「최근 박스가 넓다」 설명과 VCP/BFB 와의 역할 중복은 여기로 옮겼다.
+
+## 2026-10-02 sync-docs 압축 2차 검증 — 정본으로 되살림
+
+원본: `src/engine/strategies/CLAUDE.md` · 2차 검증 지적 반영. 위 「압축 2차 — 정본에서 이관」 의 원문 가운데 아래 것은 경위가 아니라 현재 상태·조건이라 정본에 다시 넣었다. 위 원문은 고치지 않는다(append-only).
+
+- 각주 ② 의 「DB 선반영 금지」 — 무조건 금지가 아니라 조건부 금기로 되살려 문서 머리(`_load_strategy_config` 문단)에 두었다. 새 키를 배포 전에 SQL 로 넣었다면(승인된 선반영 포함) 배포 전까지 그 전략의 `params` 를 저장하지 않는다. 위 경위의 「일반 규칙(새 키를 코드 배포 전에 DB 에 넣지 않는다)은 「새 전략 추가」 5단계로 옮겼다」 는 이 정정으로 대체된다 — 루트 「자율 진행과 승인 빈도」 가 승인된 사이클 명세의 배포 전 DB 선반영을 허용하고(선례 cycle245 §7.1 K=20), 위험은 선반영과 배포 사이에 끼는 `save_params` 저장뿐이다.
+- 「안전 규칙」 VB·momentum 15:20 컷의 15:30 랜덤엔드 종가 틱 근거 — momentum 컷의 유일한 근거라 빠지면 「momentum 은 어차피 오버나잇이니 컷이 불필요」 로 읽힌다.
+- 「안전 규칙」 `get_effective_target_price` 금기의 「후보 자격을 잃은」 과 「남아 있어도 live 재검출 값이라 엔진 §3 과 갈린다」.
+- 각주 ⑤ 의 「15:30~15:40 은 종가 고정·다른 시장 가격이라 돌파 정보가 없다」.
+- 「자금관리」 `max_positions` 항목의 개수 천장(`1/position_ratio`)·③ 규모 불변(full 유닛 4.5개).
+- 각주 ⑧ 의 LTV 한정어(「첫 문장 게이트인 LTV 는 차단 동안 기준가가 언다」).
+- 시장 유닛 「자리가 계약이다」 의 BFB·VCP `_prev_price` 근거, 그리고 표 앞 빈 줄(빠지면 markdown-it 에서 표가 목록 안 텍스트로 렌더된다).
+- donchian `breakout_fail_n_days` 의 D-1 표면 · 「시간청산 게이트·관측기와 같은 축」 · `no_candles` 5분 캐시 · 「매도 거부로 포지션이 살면 영구 억제」.
+- 「자금관리」 트레일링 기준점 항목의 「신규 보유형 전략은」 한정어, 그리고 「새 전략 추가」 5단계의 고점 복구 배선 의무.
+- 각주 ⑥ 의 `observed` 판독 한정어(「창 전체가 아니다」 · 「`observed` 에 포함된다」).
+
+「안전 규칙」 `tradable_boards` 항목의 링크는 `src/engine/CLAUDE.md` 「risk.py」 하나로 두었다. 루트 「핵심 안전 규칙」 이 이 절을 가리키고 이 절이 다시 루트를 가리키던 순환을 이쪽에서 끊었다.

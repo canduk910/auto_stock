@@ -1009,3 +1009,591 @@ await page.route("**/api/logs*", (route) => {
 MACD 막대도 `styles.indicator.bars` 색을 쓰게 되어 색 문장의 대상이 「캔들·거래량」 에서 「캔들·거래량 막대·MACD 막대」 로 넓어졌다.
 
 → CHANGELOG: cycle388 행
+
+## 2026-10-01 sync-docs 압축 — 정본에서 이관
+
+모드 B 전반 점검(「CLAUDE.md 중복·낡은 서술 삭제 + 압축」)에서 정본에서 걷어낸 원문이다. 소제목은 출처 절 표제다.
+
+### 「표 스크롤 — `ScrollPane` 단일 진실원」 — 실측 수치·적용 목록·spec 경위
+
+정본에는 규칙만 남겼다. 적용 위치는 `grep -rn '<ScrollPane' frontend/src` 로 센다.
+
+원문(`frontend/CLAUDE.md:87·92·94·95`, 2026-10-01 이관):
+
+---
+
+- 🔴 **`top` 은 화면 안(`0 ≤ top < viewport`)일 때만 뺀다.** 두 바깥 경우는 **창 전체**가 예산이다 — (a) `top < 0`(페이지가 스크롤돼 요소가 화면 위로 올라감)을 그대로 빼면 예산이 창보다 커져 pane 이 뷰포트를 넘고 **가로 스크롤바가 다시 화면 밖으로 밀린다**(실측: 창 800px 인데 pane 바닥 1420.5px) (b) `top >= viewport`(아직 화면 아래, 대시보드 하단 카드)를 그대로 빼면 음수라 `minHeight` 220px 로 떨어져 **스크롤해서 도달해도 220px 짜리 표만 보인다**(실측: 대시보드 잔고표 top=1387). ⚠️ 이 두 경우는 **스크롤 리스너로 풀지 않는다** — pane 이 커지며 아래 내용이 밀려 내려가는 점프가 생긴다.
+- **적용 24곳** — 기존 `overflow-x-auto` 표 래퍼 21곳(`TradePnLGrid`·`TradeHistoryGrid`·`BalanceTable`·`StockMaster`×3·`OrderMonitor`×2·`ScanMonitor`×4·`KojiroMonitor`×2·`MarketState`×2·`BreakoutCandidateMonitor`·`KisAccountPoolCard`·`KisQuoteAccountsCard`·`MarketStateOps`·`Strategies`) + 래퍼가 없던 3곳(`StrategyFunnel`·`BacktestComparisonCard`·`PortfolioRiskCard`).
+- 회귀 = `components/__tests__/ScrollPane.test.tsx`(14, **값 검사** — 실제 `maxHeight` 픽셀·floor·창 확대 추종·음수 top·화면 밖 top·vh 폴백·두 축 overflow). 돌연변이 실측 = 상한 제거 6 RED · `overflow-x-auto` 회귀 1 RED · floor 제거 1 RED · 화면 안 판정 제거 1 RED.
+- **E2E `e2e/scroll-pane.spec.ts`(4)가 지키는 불변식 넷** = ① 상한이 반드시 걸린다 ② 상한이 **창 높이를 넘지 않는다** ③ 상한이 **`minHeight` 에 갇히지 않는다** ④ 화면 안 표는 바닥도 화면 안이다. ⚠️ **모든 pane 에 「바닥 ≤ 창높이」를 요구하면 안 된다** — 대시보드처럼 긴 페이지에서는 표가 화면 아래에 있는 것이 정상이다(spec 초판이 그렇게 틀렸고, 그 실패가 위 (b) 결함을 찾아냈다). ⚠️ 창 축소 검증은 **`max-height`** 로 한다 — 내용이 짧으면 실제 높이가 상한보다 작아 창을 줄여도 안 변한다. ⚠️ `/history` 탭은 `role="tab"` 이 아니라 평범한 `<button>` 이다.
+
+---
+
+### 「테스트 규약 (공통)」 5 — 세 화면이 망가져 있던 경위
+
+정본에는 원인(NUMERIC → `Decimal` → JSON 문자열)과 "목이 유일한 방어선" 한 문장만 남겼다.
+
+원문(`frontend/CLAUDE.md:130`, 2026-10-01 이관):
+
+---
+
+   같은 원인(PG NUMERIC → asyncpg `Decimal` → pydantic v2 가 JSON **문자열**로 직렬화)으로 세 화면이 각각 오래 망가져 있었고, 매번 **모든 층의 목이 숫자를 먹여** 전 스위트가 초록이었다: 종목마스터 일봉 탭(`change_rate`, 흰 화면) · 거래내역 '가격'·'매매손익'(전 행 `-`) · 대시보드 '최근 자산'(천단위 구분 소실). 뒤의 둘은 예외조차 나지 않아 **화면만 조용히 빈다** — 로그에 아무것도 안 남으므로 목이 유일한 방어선이다.
+
+---
+
+### 「VCP/BFB 탭 (`BreakoutCandidateMonitor.tsx`)」 — 폐기된 `BREAKOUT_LOW_CAP`
+
+`BREAKOUT_LOW_CAP = 25` 는 `src/engine/scanner.py:487` 주석이 2026-08-08 제거를 기록한다(코드 정의 0건 — `grep -rn BREAKOUT_LOW_CAP src --include=*.py` 는 그 주석 1줄뿐).
+
+원문(`frontend/CLAUDE.md:178`, 2026-10-01 이관):
+
+---
+
+- ① **구독 커버리지**(`breakout-subscription-coverage`) — `scan.subscribed_tickers` ∖ `scanned_tickers` 차집합. 미수신 종목은 `on_tick` 미발화 → `check_buy_signal` 자체가 호출되지 않는다(슬롯은 `BREAKOUT_LOW_CAP=25` 를 VB/LTV/BFB/VCP 4전략이 나눠 쓴다).
+
+---
+
+### 「`IntegrationToggleCard`」 — 매수 가드 제거 경위
+
+정본은 "표시·관찰 전용" 규칙 + 루트 「외부 통합」 절 링크로 줄였다.
+
+원문(`frontend/CLAUDE.md:246`, 2026-10-01 이관):
+
+---
+
+**`BuyBlockSection`** — 🔴 **표시·관찰 전용이다.** 레짐은 매수를 차단하거나 축소하지 않는다(매수 가드는 사이클 I 에서 제거됐고 `buy_block_mode` 는 표시용으로만 남았다). 화면의 "매수 차단 중" 문구는 관찰 판정일 뿐 실제 차단이 아니다.
+
+---
+
+### 「AI 매수평가 점수 배지 + 상세 팝업」 — 점수 배지 문단
+
+덧칠 패턴 후보(`당시`)를 피해 "평가 시점엔" 으로 고치고 하위 bullet 넷으로 나눴다.
+
+원문(`frontend/CLAUDE.md:358`, 2026-10-01 이관):
+
+---
+
+- **점수 배지** (`components/LlmScoreBadge.tsx`) — `resolveLlmScoreTone(summary)` 순수 함수가 `{tone, text}` 를 내고 배지가 그것을 `data-tone` 으로 노출한다. 🔴 **판정의 정본은 서버가 그때 기록한 `would_block` 이고 화면이 `score >= min_score` 를 다시 계산하지 않는다** — 임계(`min_score`)는 전략 파라미터라 나중에 바뀌고, 재계산하면 평가 당시엔 통과였던 기록이 오늘 임계로 재판정돼 **과거를 거짓으로** 말한다. `would_block` 이 `null`/부재인 옛 기록만 점수 비교로 폴백한다. 🔴 **세 결측 상태를 접지 않는다** — 기록 없음 `·`(`tone='none'`) / 평가 실패 `–`(`tone='failed'`, `result==='failed'` 또는 `score==null`) / 점수 있음(`pass`|`block`). "평가 안 함" 과 "평가 실패" 를 한 칸으로 접으면 migration 043 이 실패 행을 남기는 이유가 화면에서 사라진다. 🔴 **0점을 결측으로 접지 않는다**(`if (!score)` 로 짜면 0점 = 가장 나쁜 평가가 "기록 없음"이 된다). `title` 에 점수와 기준을 **둘 다** 담는다 — 하나만 담으면 맞바꿈이 드러나지 않는다. `matchedCount > 1` 이면 `+n` 과 "첫 매수 기준" 을 밝힌다(안 밝히면 운영자가 그 숫자를 페어 전체의 대표값으로 읽는다). **네트워크 호출 추가 0** — 이미 배치로 받아 둔 `summary` 를 렌더할 뿐이다.
+
+---
+
+### 「BalanceTable」 — colSpan 서술 두 곳
+
+섹터 절의 `isAll ? 11 : 10` 은 옛 값이었다. 정본은 현재 값 `isAll ? 13 : 12` 하나로 합쳤다.
+
+원문(`frontend/CLAUDE.md:466·478`, 2026-10-01 이관):
+
+---
+
+**섹터 컬럼**: 헤더 순서 `종목명 → 섹터 → 거래시장 → (전략) → …`. `Holding.sector` 표시, 값 없으면 `-`(열 밀림 방지). `data-testid="sector-{ticker}"`. 데이터는 백엔드 `/api/balance` 가 **이미 조회한 stock_master basics 를 재사용**해 산출(추가 DB 호출 0) — `sector_naming` 단일 진실원(`bstp_kor_isnm` → `_kojiro_sector_key(master_raw)` → `미분류-{ticker}`). ⚠️ 컬럼 추가 시 빈 상태 행의 `colSpan`(현재 `isAll ? 11 : 10`) 동반 갱신 의무.
+- ⚠️ 컬럼 2개가 늘었으므로 빈 상태 행 `colSpan` 은 **`isAll ? 13 : 12`** 다. 회귀가 헤더 수와 대조한다.
+
+---
+
+### 「Macro (`/macro`) — cycle303 매크로 분석」 — 시점 꼬리표
+
+"cycle315 부터" 를 출처 표기 "(cycle315)" 로 바꿨다.
+
+원문(`frontend/CLAUDE.md:549`, 2026-10-01 이관):
+
+---
+
+🔴 cycle315 부터 `src/engine/market_regime.py` 가 이 컨테이너를 본다 — 그래도 레짐은 **관찰 지표**라 매수를 차단·축소하지 않는다.
+
+---
+
+### 「인증」 — nginx 계약 중복 · 폴링 개수
+
+nginx 계약(`auth_basic off;` 금지 · 옛 `nginx.conf` 부활 금지)은 루트 「Docker / 배포」 절이 정본이라 링크로 줄였다. "18곳" 은 폴링 개수 스냅샷이었다(2026-10-01 `refetchInterval` 21곳).
+
+원문(`frontend/CLAUDE.md:600·604`, 2026-10-01 이관):
+
+---
+
+- **프로덕션은 nginx Basic Auth 뒤에 있다.** `frontend/nginx.conf.template`(구 `nginx.conf` 는 삭제 — 되살리면 인증 없는 구버전이 조용히 서빙되는 fail-open)이 server 레벨 `auth_basic` 으로 SPA·`/api/` 를 모두 덮고, `/api/` 프록시가 백엔드 키를 **서버 측에서** 주입한다 — 키는 번들·브라우저 어디에도 실리지 않는다. 🔴 `auth_basic off;` 는 이 파일에 절대 쓰지 않는다(한 줄로 Basic Auth 와 백엔드 인증이 동시에 열린다 — AST 가드가 금지). nginx·백엔드 쪽 계약의 정본은 루트 [`CLAUDE.md`](../CLAUDE.md) 「Docker / 배포」 절과 [`src/routes/CLAUDE.md`](../src/routes/CLAUDE.md) 다.
+- **알려진 한계 (후속 F4)** — `client.ts` 에 **401 인터셉터가 없다**. 자격 만료·키 교체 시 폴링(18곳, 최단 3초)이 재인증 유도 없이 조용히 실패한다.
+
+---
+
+→ CHANGELOG: 해당 없음(문서 정리)
+
+## 2026-10-02 sync-docs 압축 2차 — 정본에서 이관
+
+사용자 요청 「유지해야할 내용도 전반적으로 압축하자」에 따른 2차 패스에서 정본에서 걷어낸 원문이다. 소제목은 출처 절 표제다.
+정본에는 식별자·상수·임계값·금기의 조건과 예외, 금기마다 한 문장 이유를 남겼다. 아래는 그 밖의 결정 근거·실측 예시·가드 세부 설명이다.
+
+### 「AppShell 레이아웃 — 화면 폭 슬라이더」 — 렌더 방식·레벨 예시·가드 세부
+
+정본에는 상태·슬라이더·적용식·나브 고정 금기와 가드 T6·T7 만 남겼다.
+
+원문(`frontend/CLAUDE.md:55·57·59`, 2026-10-02 이관):
+
+---
+
+- **상태**: `useContentWidth()` 훅 — localStorage 키 `autostock.contentWidth`(정수 level 0~100, **기본 100=전체폭**). lazy `useState` 초기화가 mount 시 복원한다(vite CSR, SSR 없음). `setLevel` 은 state 와 localStorage 를 함께 쓰고, 저장 실패(프라이빗 모드)는 try/catch 로 넘긴다.
+
+- **적용**: **`<main>` 만** 슬라이더 값에 반응한다 — `App.tsx` 의 `<main style={{ maxWidth: contentMaxWidth(level) }}>`. `contentMaxWidth(level) = max(1024px, {60 + level*0.4}%)`(level 100→전체폭 / level 0→`max(1024px, 60%)`). `max()` 는 **상한**이라 소화면에서 넘치지 않는다.
+
+- 회귀 가드 `src/__tests__/ContentWidthSlider.test.tsx` — aria-label/role · 기본 100% · 저장·복원 · AppShell 구조 + **T6**(나브 고정 ∧ main 반응을 한 케이스에서 함께 단언 — 나브만 얼리는 오시정도 잡는다) + **T7**(슬라이더가 `nav-inner` 안에 있음 = 깜박임의 구조적 원인 봉인).
+
+---
+
+### 「나브 2단 카테고리 구조」 — 결정 근거 문장
+
+정본에는 규칙과 금기의 한 문장 이유만 남겼다.
+
+원문(`frontend/CLAUDE.md:78-79·81`, 2026-10-02 이관):
+
+---
+
+- 자료구조 `NavEntry = leaf{to,label} | group{id,label,children}` — **드롭다운 유무가 데이터로 결정된다**(컴포넌트에 분기를 흩뿌리지 않는다). 단독 항목에 드롭다운을 만들지 않는다(하위가 하나뿐인 드롭다운은 클릭을 한 번 더 요구해 더 난잡해진다).
+- **활성 표시**: 세부 경로에 있으면 상위 트리거도 활성(`bg-gray-100`). 현재 위치를 잃지 않는 것이 계약이다.
+
+- 키보드: Enter/Space 열기 · ArrowDown/Up 이동 · Escape 로 닫고 트리거 포커스 복귀 · 항목 선택 후에도 트리거로 포커스 복원(패널 언마운트로 `<body>` 로 떨어지는 회귀 차단). 포커스 트랩은 두지 않는다.
+
+---
+
+### 「표 스크롤 — `ScrollPane` 단일 진실원」 — 결과 서술·적용 스냅샷·가드 세부
+
+정본에는 식·금기·폴백·가드 이름과 E2E 불변식 넷만 남겼다. 적용 위치는 `grep -rn '<ScrollPane' frontend/src` 로 센다.
+
+원문(`frontend/CLAUDE.md:93-97·100-102`, 2026-10-02 이관):
+
+---
+
+- **`maxHeight` = 창 높이 − 그 요소의 화면상 top − `bottomGutter`(24)**. 위에 무엇이 쌓여 있든(나브·배너·필터·요약 바) 남은 공간을 정확히 쓴다. 하한 `minHeight`(220) 아래로는 줄지 않는다.
+- 🔴 **`top` 은 화면 안(`0 ≤ top < viewport`)일 때만 뺀다.** 두 바깥 경우는 **창 전체**가 예산이다 — (a) `top < 0`(스크롤로 요소가 화면 위로 올라감)을 그대로 빼면 예산이 창보다 커져 **가로 스크롤바가 다시 화면 밖으로 밀린다** (b) `top >= viewport`(아직 화면 아래, 대시보드 하단 카드)를 그대로 빼면 음수라 `minHeight` 220px 로 떨어져 **스크롤해서 도달해도 220px 짜리 표만 보인다**. ⚠️ 이 두 경우는 **스크롤 리스너로 풀지 않는다** — pane 이 커지며 아래 내용이 밀려 내려가는 점프가 생긴다.
+- 🔴 **측정은 `resize` 와 `ResizeObserver(document.body)` 만 듣고 `scroll` 은 듣지 않는다** — 스크롤마다 재면 「pane 이 커짐 → 문서가 길어짐 → 다시 잼」 되먹임이 된다. 갱신에 `TOLERANCE_PX`(8) 문턱을 두어 1px 진동이 observer 를 다시 깨우는 무한 루프를 막는다(브라우저가 루프를 끊으면 콘솔에 `ResizeObserver loop` 만 남고 화면은 조용히 떤다).
+- **측정 불가(jsdom·SSR·`ResizeObserver` 부재)는 `70vh` 폴백**이다 — **상한 없는 상태로 돌아가지 않는다**(그러면 고치려는 결함이 그대로 재현된다). `data-measured` 가 `px|vh` 로 어느 쪽인지 드러낸다.
+- 머리글은 기본 고정(`stickyHeader`, Tailwind arbitrary variant `[&_thead_th]:sticky`)이라 표마다 `thead` 를 고쳐 다니지 않는다. 표가 아닌 콘텐츠는 `stickyHeader={false}`.
+
+- ⚠️ **일부러 적용하지 않은 곳 2** — `pages/Recommendations.tsx` 파라미터 표는 **표 안에 `InfoTooltip`** 이 있고, 그 툴팁이 `absolute bottom-full` 이라 overflow 컨테이너가 위로 나가는 부분을 **자른다**. `macro/components/MacroCycleSection.tsx` 는 30줄짜리 지표표라 이득 없이 클리핑 맥락만 생긴다. 🔴 **표 안에 `InfoTooltip`(또는 다른 `absolute` 팝오버)이 있으면 `ScrollPane` 을 씌우기 전에 잘림을 먼저 확인한다** — 적용 24곳은 툴팁 0건이다.
+- 회귀 = `components/__tests__/ScrollPane.test.tsx`(**값 검사** — 실제 `maxHeight` 픽셀·floor·창 확대 추종·음수 top·화면 밖 top·vh 폴백·두 축 overflow).
+- **E2E `e2e/scroll-pane.spec.ts` 가 지키는 불변식 넷** = ① 상한이 반드시 걸린다 ② 상한이 **창 높이를 넘지 않는다** ③ 상한이 **`minHeight` 에 갇히지 않는다** ④ 화면 안 표는 바닥도 화면 안이다. ⚠️ **모든 pane 에 「바닥 ≤ 창높이」를 요구하면 안 된다** — 긴 페이지(대시보드)에서는 표가 화면 아래에 있는 것이 정상이다. ⚠️ 창 축소 검증은 **`max-height`** 로 한다 — 내용이 짧으면 실제 높이가 상한보다 작아 창을 줄여도 안 변한다. ⚠️ `/history` 탭은 `role="tab"` 이 아니라 평범한 `<button>` 이다.
+
+---
+
+### 「시각적 컨벤션」 — shade 제외 이유·서체 캐시 경위·CSS 변수 설명
+
+정본에는 값·금기·가드만 남겼다.
+
+원문(`frontend/CLAUDE.md:109·112·115`, 2026-10-02 이관):
+
+---
+
+- **손익색 (`utils/pnlColor.ts` 단일 진실원)**: 이익 `PROFIT_HEX '#c34a36'`(rust, red-500) / 손실 `LOSS_HEX '#3d73b7'`(slate-blue, blue-500) / 보합 `NEUTRAL_HEX '#41403b'`(gray-700). `pnlColorClass(value)` 는 시맨틱 클래스 `text-pnl-profit` / `text-pnl-loss` / `text-pnl-flat` 를 반환하고, `@theme` 의 `--color-pnl-{profit,loss,flat}` 이 이 상수와 같은 값이다(어긋나면 `designSystem.v2.test.ts` 가 붉어진다). `pnlColorHex(value)` 는 인라인 style 용 hex(undefined/null/NaN → NEUTRAL). ⚠️ `TradePnLGrid`/`BreakoutCandidateMonitor` 의 `text-red-600`/`text-blue-600` 은 별개 shade 라 이 상수에 넣지 않는다(픽셀 변경 방지).
+
+- **자체 호스팅 서체 nginx 캐시**: `nginx.conf.template`/`nginx.tls.conf.template` 에 `location ^~ /fonts/ { expires 30d; add_header Cache-Control "public, max-age=2592000"; default_type font/ttf; }` — 정적자산 정규식에 `ttf` 가 없으면 `/fonts/*.ttf` 가 SPA fallback 으로 떨어져 `no-store` 를 받는다. 파일명에 해시가 없어 `immutable` 대신 유한 TTL. 회귀 가드 `tests/unit/ast/test_cycle261_font_cache_headers.py`.
+
+- 슬라이더 accent 색은 리터럴 hex 대신 `'var(--color-navy-600)'`(Tailwind v4 `@theme` 가 `:root` 에 노출하는 CSS 변수) 를 쓴다 — `components/NavBar.tsx`(폭 슬라이더) + `CashUsageRatioCard.tsx` + `TradeAmountFilterCard.tsx` + `PriceFilterCard.tsx`(최소/최대 2곳) 5곳 동일. 신규 슬라이더 추가 시도 같은 값으로 맞춘다.
+
+---
+
+### 「테스트 규약 (공통)」 — 규약 4·5 의 근거 문장
+
+정본에는 규약 1~6 번호 체계와 각 규약의 한 문장 이유만 남겼다.
+
+원문(`frontend/CLAUDE.md:128·133`, 2026-10-02 이관):
+
+---
+
+4. **Playwright glob 이 Vite 모듈 경로(`/src/api/*.ts`)와 겹치면 resourceType 가드 의무.** `**/api/logs*` 같은 glob 은 스크립트 요청까지 intercept 해 MIME 불일치로 모듈 로딩을 깨뜨린다. 핸들러 첫 줄에 `if (route.request().resourceType() === "script") return route.continue();` 를 둔다.
+
+   이유: PG NUMERIC 은 asyncpg `Decimal` 을 거쳐 pydantic v2 가 JSON **문자열**로 직렬화한다. 목이 숫자를 먹이면 전 스위트가 초록인 채로 화면이 깨지거나(흰 화면) **조용히 빈다**. 조용히 비는 쪽은 예외도 로그도 없어 목이 유일한 방어선이다(세 화면 사례 = `docs/history/frontend-CLAUDE.history.md` 「테스트 규약 (공통)」 5).
+
+---
+
+### 「ScanMonitor」 — fallback·소관 설명
+
+정본에는 판정 규칙과 소관 경계만 남겼다.
+
+원문(`frontend/CLAUDE.md:156-157`, 2026-10-02 이관):
+
+---
+
+- **"돌파" 라벨의 매매 컨텍스트** (`BREAKOUT_KEYS` 4종): `curPrice >= targetPrice` 분기에서 활성 보드 ∩ 전략 `tradable_boards` 검사. 교집합 ∋ → 빨강 "돌파". 교집합 ∅ → 회색 "돌파 (대기 — {보드라벨})" + `title` 툴팁 "이 전략은 X 에서만 매매". `tradable_boards` 미존재(백엔드 미반영) → 빨강 "돌파" fallback(안전 회귀). BFB/VCP 는 전용 컴포넌트가 진입 게이트로 대체한다.
+- 인프라 표시(구독 커버리지·재구독·끊김 종목)는 **`KisAccountPoolCard` 소관**이다. ScanMonitor 는 필터링 가시성에 집중하고 `subscribed_count` 단순 카운트만 보존한다.
+
+---
+
+### 「STAGES 계약」 — 가드 세부
+
+정본에는 가드 이름만 남겼다.
+
+원문(`frontend/CLAUDE.md:166`, 2026-10-02 이관):
+
+---
+
+- 회귀 가드 `ScanMonitor.cycle175.test.tsx` · `ScanMonitor.cycle178.test.tsx`(정적 source 검증 — VB/LTV 죽은 키 0건 + step1 라벨 + VB 5키/LTV 6키 카운트).
+
+---
+
+### 「VCP/BFB 탭 (`BreakoutCandidateMonitor.tsx`)」 — 승인 대상 설명
+
+정본에는 VB 호환 5키 제거 금지와 루트 링크만 남겼다.
+
+원문(`frontend/CLAUDE.md:189`, 2026-10-02 이관):
+
+---
+
+백엔드는 `get_targets_status` 에 키 **추가만** 한다(`name`/`prev_close`/`stop_line`/`measured_target`/`volume_threshold`/`bought_today`/`in_cooldown`/`cooldown_until`/`breakout_seen_at`/`retention_minutes`) — `strategy_registry` 가 덕타이핑 제네릭이라 registry·route 수정 0. ⚠️ **VB 호환 5키는 `scheduler._confirm_breakout_open_prices` 가 소비하므로 제거 금지**(`scheduler.py` 는 8영역은 아니지만 같은 승인 대상 — 루트 「자율 진행과 승인 빈도」 절). 회귀 가드 `BreakoutCandidateMonitor.test.tsx`.
+
+---
+
+### 「StrategyFunnel (`/strategy-funnel`)」 — 잠정 배지 목적·병목 판정의 실측 예시
+
+정본에는 「감소'율'로 잡지 않는다」 금기와 한 문장 이유만 남겼다.
+
+원문(`frontend/CLAUDE.md:196-197`, 2026-10-02 이관):
+
+---
+
+- `FunnelSnapshot.is_provisional === true` 행은 단계명 옆 amber "잠정" 배지(`funnel-provisional-badge-{sid}-{step_no}`, title="21:00 저녁 잠정 캡처 — 익일 아침 마스터 델타 반영 전 (후보가 바뀔 수 있음)"). 운영자가 "밤에 본 후보 ≠ 아침 확정 후보" 를 인지하게 하는 것이 목적이다. 저녁 잠정 행은 **다음 거래일 날짜**로 저장되므로 날짜 picker 로 그 날짜를 골라야 보인다(기본 날짜는 오늘 그대로다). 회귀 가드 `StrategyFunnel.cycle171.test.tsx` · 문구 가드 `tests/unit/ast/test_cycle364_frontend_evening_wording.py`.
+- **병목 강조 + 추이**: ① `funnel-bottleneck-banner` — 직전 단계 대비 **절대 감소 수** 최대 단계(⚠️ 감소'율'로 잡으면 막판 `7→0`(100%)이 `329→7`(97.9%)을 이겨 진짜 병목을 가린다. rows 순서는 DB `ORDER BY step_no` 가 보장) ② `funnel-bar-{sid}-{step_no}` 단계별 상대 막대 ③ `funnel-recent-trend` — `getRecentFunnel(strategy_id, 14)` 로 최종 단계 일자별 스파크라인 + 연속 0 배지. `target_date` 는 `Date()` 파싱 없이 slice 만 하므로 KST 규약과 무관하게 안전하다. 로딩/에러/빈 데이터는 그 섹션 안에서만 처리한다(실패해도 단계별 테이블은 정상). 회귀 가드 `StrategyFunnel.bottleneckTrend.test.tsx`.
+
+---
+
+### 「비중 슬라이더」 — 판정 소스·422 처리의 결정 근거
+
+정본에는 단위·판정 소스·임계·접두사 규칙과 한 문장 이유만 남겼다.
+
+원문(`frontend/CLAUDE.md:205-208`, 2026-10-02 이관):
+
+---
+
+- **비중 단위 = 비율 `0.0~1.0`**: 로드는 `Math.round(s.weight * 100)` **단일 경로**다. 값 크기·합계로 단위를 추론하는 분기는 금지(금기와 이유는 루트 `CLAUDE.md` 「비중 단위 추론 변환 금지」). 저장은 퍼센트가 아니라 **비율 송신**(`weights[key] / totalWeight` 4dp + 잔차 `1 − Σ` 를 최대 항목에 흡수해 Σ=1.0 보장 → 백엔드 Σ≤1.0 가드 정합)
+- **합계 경고 배너** `data-testid="weight-sum-warning"` — 판정 소스는 편집 중 퍼센트 합이 아니라 **서버 저장값 비율 합**(`strategies.reduce(s.weight)`)이다. 편집 중 값을 쓰면 (a) 슬라이더를 내리는 정상 조작과 (b) 4dp→정수% 반올림 누적오차(전략 n개면 최대 ±n/2 %p)를 오염으로 오인한다. `|Σ−1| > 0.01` 이면 배너, **초과**면 비중 저장 버튼 `disabled` — 오염 상태에서 저장하면 overflow 재분배가 잘못된 비율을 보존한 채 Σ=1.0 으로 재정규화해 백엔드 `[weight_config_anomaly]` 탐지기를 **영구 침묵**시킨다. Σ<1 은 차단하지 않는다(운영자 고립 방지)
+- **422 한글 노출** (`api/trading.ts::updateStrategyWeights`): 범위 위반은 axios 가 throw 하므로 2xx 본문 해석 경로가 못 잡는다 → `axios.isAxiosError && status===422` 분기가 `detail`(문자열 또는 배열 `[0].msg`)에서 메시지를 뽑고 pydantic 접두사(`Value error, ` / `Assertion failed, `)**만** 제거한다(`^[A-Za-z ]+, ` 같은 일반 패턴 금지 — 한글 본문이 잘린다). 미처리 시 "Request failed with status code 422" opaque. `!data.success` 가 던진 일반 Error 는 재포장 금지
+- ⚠️ overflow 임계는 `serverWeightSum - 1 > 0.01` 형태로만 쓴다 — 동치인 `1.01` 리터럴은 AST 가드가 단위 추론 휴리스틱 부활로 간주해 금지한다. 가드 `_ast_weight_unit_guard.test.ts`(`1.01` 리터럴 0건 + `Math.round(s.weight)` 0건) / 회귀 `Settings.weightUnits.test.tsx` · `api/__tests__/trading.test.ts`
+
+---
+
+### 「`StrategyParamsEditor` — 파라미터 편집기 (카탈로그 기반, 유일한 구현)」 — 키 비보유 근거
+
+정본에는 규칙만 남겼다.
+
+원문(`frontend/CLAUDE.md:212`, 2026-10-02 이관):
+
+---
+
+`GET /api/strategies/params-schema` 응답만으로 렌더한다. **화면은 파라미터 키를 하나도 모른다** — 라벨·단위·범위·선택지·위험도를 전부 응답에서 읽는다. 키를 화면이 들고 있으면 백엔드가 키를 늘려도 화면은 모른다. 회귀 가드 `components/__tests__/_ast_param_key_hardcode.test.ts`(키 리터럴 0건).
+
+---
+
+### 「`ExchangeBoardRow`」 — 폐기 값 표시 근거
+
+정본에는 KRX·NXT 두 선택지 규칙과 `SOR` 보존 규칙만 남겼다.
+
+원문(`frontend/CLAUDE.md:223`, 2026-10-02 이관):
+
+---
+
+- **`exchange` 선택지는 KRX·NXT 둘뿐이다.** 09:00~15:30(정규장)·16:00~20:00(애프터)은 백엔드 시각 라우팅(`order_engine.py::_route_exchange_by_clock`)이 거래소를 정하므로, 이 선택지는 그 라우팅 밖 구간(프리장 08:00~09:00 등)에만 실제로 적용된다. **이미 `SOR` 로 저장된 전략은 값을 지우지 않고** 폐기 값임을 알리는 회색 안내로 보여준다(`isRetiredExchangeValue`) — 값이 바뀌어도 매매가 안 바뀌는 입력란은 운영자를 속인다.
+
+---
+
+### 「`CashUsageRatioCard`」 — 하한 0 · 0% 경고 근거
+
+정본에는 하한 0 금기와 한 문장 이유만 남겼다.
+
+원문(`frontend/CLAUDE.md:229`, 2026-10-02 이관):
+
+---
+
+비중 슬라이더 하단. range **0~100**, step 5 + `data-testid="cash-usage-ratio-percent"` % 표시. 🔴 **하한 0 은 백엔드 수용 범위(`_CASH_USAGE_RATIO_MIN = 0.0`)와 맞춘 값이다** — 화면 하한이 백엔드보다 높으면 자동 조정이나 curl 이 저장한 값(예: 레짐 defensive 의 0.25)을 화면이 표현하지 못해 **UI 로 되돌릴 수 없는 상태**가 생긴다. 0% 선택 시 `data-testid="cash-usage-ratio-zero-warning"` 인라인 경고 — 0% 는 신규 매수 전면 중단이라 실수와 의도를 구분해야 한다. GET `/api/strategies/system/cash-usage-ratio` 로 초기 로드하고, 저장 버튼에서만 PUT 한다(debounce 없음). 응답 ratio(서버 5% 보정)로 동기화한다. 안내 "다음 영업일부터 반영"(text-amber-700). queryKey `['cashUsageRatio']`.
+
+---
+
+### 「`IntegrationToggleCard`」 — 무력 배너 강조 설명
+
+정본에는 배너 조건·위치·클래스만 남겼다.
+
+원문(`frontend/CLAUDE.md:260`, 2026-10-02 이관):
+
+---
+
+- **무력 배너 `buy-block-guard-inert`**: `data.guard_inert === true` 시 mode 행 직후·reasons 위에 red 배너(`bg-red-100 text-red-800 border-red-300`, amber 사유보다 강조). `BuyBlockState` 타입에 `data_available`/`guard_inert`. 매크로 데이터 미유입으로 가드가 설정만 되고 무력화된 상태(false sense of protection)를 가시화한다
+
+---
+
+### 「`PriceFilterCard`」 — 가드 세부
+
+정본에는 가드 이름만 남겼다.
+
+원문(`frontend/CLAUDE.md:275`, 2026-10-02 이관):
+
+---
+
+- 회귀 가드 `PriceFilterCard.test.tsx`(렌더 + mode select 미존재 / 슬라이더 / 저장+toast / max<min)
+
+---
+
+### 「`TradeAmountFilterCard`」 — 가드 세부
+
+정본에는 가드 이름만 남겼다.
+
+원문(`frontend/CLAUDE.md:287`, 2026-10-02 이관):
+
+---
+
+- 회귀 가드 `TradeAmountFilterCard.test.tsx`: 렌더 / 슬라이더+저장 PUT body / 권장값 마커 / 안내 배너 문구
+
+---
+
+### 「(4) detail 모달 — 상세 / 일봉 2 탭」 — 방어 변환 금기 중복·14 필드 근거
+
+「미검증 값에 `toFixed`/`toLocaleString` 직접 호출 금지」는 같은 파일 「테스트 규약 (공통)」 5 가 정본이라 이 절에서는 지웠다.
+
+원문(`frontend/CLAUDE.md:326·328`, 2026-10-02 이관):
+
+---
+
+- 🔴 **방어 변환 3 헬퍼**(`StockMaster.tsx`) — `toSafeNumber(unknown): number | null`(숫자·숫자형 문자열 → 유한 number, `null`/`undefined`/**빈 문자열**/비숫자/`NaN`/무한대 → `null`. 빈 문자열 가드가 `Number("")===0` 오판을 막는다) · `formatSafeCount`(OHLCV 셀, 실패 시 `'—'`) · `formatSafeChangeRate`(색상 분기도 변환 **후** 값 기준, 클래스 `text-red-600`/`text-blue-600`/`text-gray-500`). **미검증 값에 `toFixed`/`toLocaleString` 직접 호출 금지** — 렌더는 항상 이 세 헬퍼가 돌려준 값에만 건다
+
+- 타입(`types/stock-master.ts::StockMasterDailyRow`) — `change_rate: number | string`, `prtt_rate?: number | string`(같은 `NUMERIC(8,4)` 계열이라 문자열로 올 수 있다). migration 033 컬럼 **14 필드 전수**를 타입에 명시한다(렌더는 8개만 쓰지만, 타입이 나머지를 숨기면 "응답에 없는 필드"로 오해돼 다음 사람이 또 목을 실제와 다르게 만든다). `bas_dd` 는 `DATE` 컬럼이라 직렬화가 `YYYY-MM-DD` 다
+
+---
+
+### 「(7) 회귀 가드」 — 가드 세부
+
+정본에는 가드 이름만 남겼다.
+
+원문(`frontend/CLAUDE.md:354`, 2026-10-02 이관):
+
+---
+
+`StockMaster.test.tsx`(8 카드 · 신규 매핑 키 라벨 · highlight · stats 응답 정합 · 일봉 탭 · 변경이력 seq/raw · 가이드라인 영속) · `StockMaster.dailyTab.cycle266.test.tsx`(방어 변환 3 헬퍼 단위 + 404/500 렌더 분기) · `test_cycle266_daily_route_serialization.py`(백엔드, **직렬화된 JSON 본문**의 타입을 잰다) · `test_cycle266_mock_string_change_rate.py`(목 5행이 문자열·숫자 혼합 + `YYYY-MM-DD` 인지 정적 대조) · `e2e/stock-master.spec.ts::G-E2E-9`(실브라우저 일봉 탭 + 문자열 등락률 `+1.20%` 변환 + `NaN`/`—` 부재).
+
+---
+
+### 「AI 매수평가 점수 배지 + 상세 팝업」 — 결정 근거·요청 수 추정·가드 세부
+
+정본에는 금기와 한 문장 이유, 키 규약만 남겼다.
+
+원문(`frontend/CLAUDE.md:367-369·371·373·376`, 2026-10-02 이관):
+
+---
+
+  - 🔴 **판정의 정본은 서버가 기록한 `would_block` 이다. 화면이 `score >= min_score` 를 다시 계산하지 않는다** — `min_score` 는 나중에 바뀌는 전략 파라미터라, 재계산하면 평가 시점엔 통과였던 기록이 오늘 임계로 재판정돼 **과거를 거짓으로** 말한다. `would_block` 이 `null`/부재인 옛 기록만 점수 비교로 폴백한다.
+  - 🔴 **세 결측 상태를 접지 않는다** — 기록 없음 `·`(`tone='none'`) / 평가 실패 `–`(`tone='failed'`, `result==='failed'` 또는 `score==null`) / 점수 있음(`pass`|`block`). 접으면 migration 043 이 실패 행을 남기는 이유가 화면에서 사라진다. 🔴 **0점을 결측으로 접지 않는다**(`if (!score)` 로 짜면 가장 나쁜 평가가 "기록 없음"이 된다).
+  - `title` 에 점수와 기준을 **둘 다** 담는다(하나만 담으면 맞바꿈이 드러나지 않는다). `matchedCount > 1` 이면 `+n` 과 "첫 매수 기준" 을 밝힌다(안 밝히면 그 숫자를 페어 전체의 대표값으로 읽는다).
+
+- **버튼 활성 판정은 배치 1요청**이다 — 행마다 개별 조회하면 페이지당 20~30 요청이 나간다. 요약 맵의 키는 **`"<trade_date>|<order_no>"` 복합 키**(라우트 `summary_key()` 와 같은 규약)이고 조회는 `findLlmSummary(summaries, tradeDate, orderNo)` 로 한다. 그 조합의 키가 있으면 활성, 없으면 비활성(회색) + 툴팁 — 사유는 `llmSummaryDatesFor(summaries, orderNo)` 로 갈린다("평가 기록 없음" vs "다른 날짜(…)의 평가 기록"). 기록 없는 조합은 응답에 **키 자체가 없다**(`null` 값 아님).
+
+- ⚠️ **KIS 주문번호(ODNO)는 하루 단위로만 유일하다** — 활성 근거는 **그 행의 매수일로 조회한 키가 있는가** 하나이고, 상세도 반드시 날짜와 함께 묻는다(빼면 라우트가 "가장 최근 1건" 을 골라 같은 번호가 재사용된 **다른 거래의 평가**를 띄운다 — 회귀 가드 F25b).
+
+- 목 3곳 모두 배치 응답을 **복합 키**로 만든다 — 주문번호 단독 키로 만들면 목이 실제 응답 형태를 담지 않아 화면이 전부 비활성인데도 초록이 된다. 헬퍼 가드 = `src/components/__tests__/llmEvalKey.cycle276.test.ts`(키 형식·날짜별 구분·두 그리드의 직접 인덱싱 0건).
+
+---
+
+### 「종목 차트 모달 — 행 더블클릭 (cycle387)」 — 청크 분리·지표 인자·타임아웃·F32 의 근거
+
+정본에는 값·순서·금기와 한 문장 이유만 남겼다.
+
+원문(`frontend/CLAUDE.md:386·389-393·404-407·409-411·413-417·433-436`, 2026-10-02 이관):
+
+---
+
+    「매도」·「AI 자문」 두 번 누름이 매도 확인창·AI 팝업과 차트를 함께 띄우면 안 된다
+
+- **분리 청크** — `components/LazyStockChartModal.tsx` 가 `React.lazy(() => import('./StockChartModal'))` 로 감싼다. `klinecharts` 를
+  세 그리드의 첫 로딩에 싣지 않기 위해서다. 래퍼를 훅과 다른 파일에 둔 이유 = Fast Refresh 가드 `react-refresh/only-export-components`
+  (훅 파일이 컴포넌트까지 담으면 깨진다). 청크 로딩 중 폴백 testid = `stock-chart-chunk-loading`.
+  그 바깥을 오류 경계(`ChunkErrorBoundary`)가 감싼다 — 프론트 재배포 뒤 옛 탭에서 청크 동적 import 가 실패해도 앱 전체가 내려가지
+  않고 모달 자리에 안내 `stock-chart-chunk-error`(새로고침 안내) + 닫기 `stock-chart-chunk-error-close` 를 띄운다
+
+  - 거래량 = `{ name: 'VOL', calcParams: [] }` — 막대만 그린다. `VOL` 기본값(`calcParams` 5·10·20)은 거래량 이동평균선 셋을 같이 그려
+    화면에서 EMA 처럼 보인다
+  - RSI = `{ name: 'RSI', calcParams: [14], precision: 2, figures: [{ key: 'rsi1', title: 'RSI14: ', type: 'line' }] }`.
+    라이브러리 기본 툴팁 제목은 기간이 아니라 순번(`RSI1: `)이라 `figures` 로 제목을 준다
+
+  - `precision: 2` 를 빼면 라이브러리 기본값(4)이라 RSI·MACD 가 소수 넷째 자리까지 찍힌다
+  - 아래 패널 셋은 `chart.setPaneOptions({ id, height })` 로 높이를 정한다. 정하지 않으면 셋 다 라이브러리 기본 100px 라 캔들이 눌린다.
+    캔들 패널 높이는 정하지 않는다 — 남는 높이를 캔들이 가져간다. 차트 자리 높이 = `h-[72vh] min-h-[460px]`
+
+- **조회** — `api/stock-chart.ts::getStockChart(ticker, period, years = 5)`. 본문이 `success:false` 면 `Error(message)` 로 바꿔 던진다.
+  axios 오류(422·네트워크)는 **잡지 않고** 흘려 모달이 422 `detail` 을 꺼내 보여 준다. 타임아웃 `STOCK_CHART_TIMEOUT_MS = 60_000`
+  (백엔드 대기 20초 + 조회 예산 25초 + 마지막 호출 — nginx `location /api/` 의 기본 `proxy_read_timeout` 60초와 같다. 120초는
+  `/api/macro/` 전용). `useQuery` 키 = `['stockChart', ticker, period, 5]`, `retry: 1`, `staleTime` = 부분 결과(`complete=false`)
+  1분 · 그 밖 10분(서버 캐시와 같은 값 — 부분 안내 「1분 뒤 다시 열면 다시 받습니다」 가 참이 되는 조건)
+
+- **실제 라이브러리의 지표 거부는 e2e F32 가 본다** — 가짜는 지표 이름·인자가 틀려도 기록만 하고 통과한다. 실제 라이브러리는
+  지표 생성을 거부해도 화면은 조용하고 콘솔에만 남긴다. 그런데 klinecharts 는 경고·오류를 `console.log` 로, 그것도 개발 모드
+  (`process.env.NODE_ENV === 'development'`)에서만 찍는다. 그래서 F32 는 콘솔 타입(`warning`/`error`)이 아니라 문구
+  `/klinecharts (warning|error)/i` 로 모아 `[]` 인지 단언한다. e2e 는 `npm run dev`(개발 모드)로 뜨므로 이 경고가 찍힌다
+
+---
+
+### 「일일 로그 분석 (`DailyReportTab.tsx`)」 — 의존성 금지·error boundary 근거·가드 세부
+
+정본에는 규칙과 한 문장 이유만 남겼다.
+
+원문(`frontend/CLAUDE.md:457·460-462`, 2026-10-02 이관):
+
+---
+
+- 🔴 **마크다운 렌더 라이브러리 추가 금지**(의존성 0) — 운영 리포트는 신뢰 출처 고정 텍스트라 원문이 감사에 유리하고, `<pre>` 는 XSS 표면(`dangerouslySetInnerHTML`)을 열지 않는다.
+
+- **레거시 `findings` 는 정규화하지 않는다**(백엔드 `log_analysis_engine._validate_report` 가 이미 검증). 대신 `ReportCard` 를 `ReportCardBoundary`(같은 파일, class error boundary, `key={report.id}` 로 리포트 전환 시 리셋)로 감싸 예외가 나도 `data-testid="report-card-error"` 카드 하나만 대체된다 — 좌측 날짜 목록·탭은 살아남는다.
+- **휴장일 배지 (cycle366)**: `report.metrics?.report_accuracy?.market_closed === true` 일 때만 총평 카드 헤더에 회색 배지(`data-testid="report-holiday-badge"`, "휴장일" + 툴팁 "거래·로그 0건은 결함이 아니라 정상")를 그린다. `report_accuracy` 가 없는 옛 행·`trading_day: null`("모름")·`market_closed: false` 는 그리지 않는다. `LogReportMetrics.report_accuracy`(`types/log_reports.ts::LogReportAccuracy`)는 옵셔널이라 부재해도 크래시하지 않는다.
+- 회귀 = `components/__tests__/DailyReportTab.ext.test.tsx`(파리티·렌더·토글·배지·타입 가드 + severity 정렬 뮤테이션 가드 + 정규화 3 + error boundary) + `DailyReportTab.holiday.test.tsx`(휴장일 배지 4케이스)
+
+---
+
+### 「Recommendations (`/recommendations`)」 — 자문 카드·비교 카드 설명
+
+정본에는 카드 조건·문구·부호 규약만 남겼다.
+
+원문(`frontend/CLAUDE.md:470-471`, 2026-10-02 이관):
+
+---
+
+- **로직/파라미터 자문 카드** (`data-testid="code-review-card-{id}"`, `code_review_notes != null` 시): 자유 텍스트 (whitespace-pre-wrap, max-h-64 + overflow-y-auto). 자동 적용 없음. 적용 버튼은 params 키 0개여도 weight 체크박스 ON 이면 활성 — 단독 weight 적용 가능
+- **`BacktestComparisonCard`** (자산 배정 카드 *아래*, 항상 렌더, `data-testid="backtest-comparison-card-{strategy_id}"`) — 세 경우를 가른다: (A) `backtest_summary` 가 null → "백테스트 미실행 — 진행중이거나 외부 MCP 비활성" 안내 (B) 자기 전략의 current·recommended 가 둘 다 null → "외부 MCP YAML DSL 미지원 — 로컬 백테스트 어댑터 적용 대기" 안내(외부 제출 대상은 `backtest_orchestration.py` 의 momentum·volatility_breakout·donchian_swing 3종) (C) 그 밖 → 좌(현재)/우(추천) 메트릭 8종 비교(`metric-{current|recommended|diff}-{key}`) + 차이값 칩(이익색/손실색) + 접이식 다른 전략 요약 `backtest-peer-{strategy_id}`. **`max_drawdown` 양수(절대값) 컨벤션**: `METRIC_SPECS.max_drawdown.diffSignInverted=true` — 양수 diff(추천 MDD 더 큼) = 손실 악화 → 손실색, 음수 diff = 손실 완화 → 이익색
+
+---
+
+### 「BalanceTable」 — 청산선 칸들의 결정 근거·실측 예시
+
+정본에는 표시 규칙·금기와 한 문장 이유만 남겼다.
+
+원문(`frontend/CLAUDE.md:477·484-491`, 2026-10-02 이관):
+
+---
+
+**섹터 컬럼**: 헤더 순서 `종목명 → 섹터 → 거래시장 → (전략) → …`. `Holding.sector` 표시, 값 없으면 `-`(열 밀림 방지). `data-testid="sector-{ticker}"`. 데이터는 백엔드 `/api/balance` 가 **이미 조회한 stock_master basics 를 재사용**해 산출한다(추가 DB 호출 0) — `sector_naming` 단일 진실원(`bstp_kor_isnm` → `_kojiro_sector_key(master_raw)` → `미분류-{ticker}`).
+
+- 🔴 **값이 없으면 `—` 다. 0 이 아니다.** 이 화면은 운영자가 "여기까지는 버틴다" 를 판단하는 곳이라 **틀린 손절가는 없는 것보다 나쁘다** — 판정 불가는 숫자를 지어내지 않는다.
+- `stop_source === 'hard_pct'` 는 회색 + **「근사」** 꼬리표다(고정% 손절 전략의 `매입가 × (1 + 하드손절%)`). `'effective'` 는 그 전략이 실제로 쓰는 선이라 꼬리표가 없다 — **같은 칸에 정확도가 다른 두 값이 섞이는데 화면이 구분 못 하면 둘 다 못 믿는다.**
+- 🔴 툴팁이 **「가격 무관 청산(15:20 일괄매도 · 스테이지 종료 · 익일청산)은 이 값에 담기지 않는다」**를 말한다. 안 밝히면 운영자가 그 가격까지 안 팔린다고 읽는다.
+- **`stop_source === 'mode_dependent'`** 는 `—` + 회색 **「모드별」** 꼬리표다 — 롱테일은 보유 중 손절 기준이 당일/상한가 모드로 갈려 하나의 값으로 접으면 한쪽이 틀린다(−5 로 보이는데 실제 −3.5). 숫자를 지어내지 않는다.
+- **`target_source === 'measured_move_hit'`** 은 **「도달」** 꼬리표 + 「이미 도달해 익절 신호가 나갔다」 툴팁이다 — 발화한 목표를 숫자만 보이면 「아직 안 닿았다」로 읽힌다.
+- 🔴 손절가 툴팁은 「이 가격에 닿기 전에 팔리는 경로」를 **둘로 갈라** 말한다 — **보유일수만으로**(눌림목 돌파 5영업일 · 15:20 일괄매도 · 익일청산) / **다른 조건이 함께 붙는 것**(20일 신고가 스윙은 2영업일 뒤 **돌파고점 아래일 때만** · 대순환 스테이지 종료). ⚠️ **뭉뚱그려 「가격 무관」이라 적지 않는다** — donchian 의 2영업일 청산은 `days_held ≥ n ∧ current_price < breakout_high` 라 가격 조건부이고, 뭉치면 운영자가 위험을 과대평가한다.
+- **목표가는 거의 다 `—` 가 정상이다** — 7전략 중 `bull_flag_breakout` 만 `measured_target`(깃대폭 + 깃발고점)을 갖고 그마저 **부분 익절 트리거**다. 툴팁이 "전량 청산선이 아니다" 를 밝힌다. ⚠️ **VB·LTV 의 `target_price` 를 이 칸에 넣지 않는다**(매수 트리거 가격이다).
+- 회귀 = `components/__tests__/BalanceTable.exitLines.test.tsx`(**값 검사** — 두 칸 값 맞바꿈·결측 `—`·근사 꼬리표·툴팁 문구·colSpan↔헤더 수).
+
+---
+
+### 「KisAccountPoolCard」 — 폴링 큐 설명
+
+정본에는 계약만 남겼다.
+
+원문(`frontend/CLAUDE.md:507`, 2026-10-02 이관):
+
+---
+
+- API: `getSubscriptions()`, `/api/realtime/subscriptions` sessions 배열. queryKey `['realtime-subscriptions']`, `staleTime: 5_000`, `refetchInterval: 30_000`(Trading Status 5s 와 별개 큐로 부하 격리). 에러 시 `pool-error-message` graceful
+
+---
+
+### 「RealtimeHealth (`/realtime-health`)」 — 집합 정의 설명
+
+정본에는 표시 집합·행 집합·58 제외 규칙만 남겼다.
+
+원문(`frontend/CLAUDE.md:526·528-529`, 2026-10-02 이관):
+
+---
+
+- 「종목상태 이상」 = `iscd_stat_active_count`. 백엔드가 **표시 집합** 51~54·58·59(관리·시장경고·거래정지·단기과열)로 센다 — 55(신용가능)·57(증거금100%)·00 은 세지 않는다. 「거래정지」 = `TRHT_YN=="Y"` 또는 종목상태 `58` 인 종목만. 범위가 달라서 두 배지 숫자가 달라도 정상이다.
+
+- 행 목록 = 백엔드 `details`(VI ∪ 거래정지 ∪ 종목상태(51·52·53·54·59), cycle371) — 51·59 만인 종목도 행이 있다. 58 은 거래정지 TTL(600초)이 이미 관리하므로 `details` 합집합에서 뺀다(따로 넣으면 TTL 만료 뒤에도 영구 잔존).
+- 헤더 「종목상태 이상 N건」(58 포함 6종)과 행 배지 수(5종 + 58 은 거래정지 배지로 흡수)는 보통 같지만 갈릴 수 있다 — 헤더는 마지막 이벤트 기준으로 58 을 계속 세고, 58 행은 거래정지 600초 수명이 지나면 빠진다. 회귀 가드 `RealtimeHealth.cycle370.test.tsx`.
+
+---
+
+### 「TE/RR 성과 섹션」 — 오독 방지 목적
+
+정본에는 색 규약만 남겼다.
+
+원문(`frontend/CLAUDE.md:544`, 2026-10-02 이관):
+
+---
+
+- **오독 방지**: verdict 와 structure_tag 는 독립이다(verdict=TE 부호 · structure_tag=사분면). **verdict 배지가 지배 색**이고 **structure_tag 는 중립 회색**(`text-gray-600`) + 형태 병기("견고형 (저승률·고RR)") — "견고형=우량" 오독 차단
+
+---
+
+### 「MarketState (`/market-state`) — 장운영상태」 — 캐시 공유·배지 색 근거
+
+정본에는 규칙만 남겼다.
+
+원문(`frontend/CLAUDE.md:553·561`, 2026-10-02 이관):
+
+---
+
+- 조회 3: `fetchMarketState`(표·커서, 단일 `useQuery`) · `GET /api/realtime/market-operation`(RealtimeHealth 5번째 카드와 **같은 응답·같은 쿼리키** — 두 화면을 같이 열어도 캐시를 공유한다) · `GET /api/market-ops`(섹션 B 전용, 별도 실패 도메인이라 독립 쿼리)
+
+- (1-B) **오늘 야간작업** (`MarketStateOps.tsx`, `market-state-ops-section`) — `GET /api/market-ops` 를 시각순 타임라인으로. 예정 시각은 전부 라우트가 `scheduler.TIME_*`(+ 보조계좌 토큰은 `quote_token_refresh.TIME_QUOTE_TOKEN_REFRESH`)에서 읽어 보낸 문자열이다. 상태 어휘 10종을 있는 그대로 보여준다 — `scheduled` / `running` / `done` / `overwritten`(20:05 metrics 1차 스냅샷을 21:30 정산 완전판이 정상적으로 덮어썼다는 뜻이라 **결함이 아니다**, `failed` 와 다른 색) / `failed` / `skipped_fresh` / `skipped_weekly` / `not_fired`(증거 자체가 없다 — 점선 테두리) / `holiday` / `unknown`(마커가 영구 결측인 작업. **없는 증거를 실패로 위장하지 않는다**). 배지 색은 실패(red)와 미발화(gray)를 sRGB 거리로 벌려 둔다 — 라벨 두 글자로만 갈리게 하지 않는다
+
+---
+
+### 「Macro (`/macro`) — cycle303 매크로 분석」 — 점수 상한 실측·화살표·접두사 사고·타임아웃 근거
+
+정본에는 「확률이 아니다」·「지지율을 쓰지 않는다」·접두사 금기와 한 문장 이유만 남겼다.
+
+원문(`frontend/CLAUDE.md:580-599·605-609`, 2026-10-02 이관):
+
+---
+
+- 🔴 **두 단계이동 스트립은 각자의 카드 안 같은 자리에 있다** — 국면·체제 카드 모두
+  「제목 → 큰 배지 → 부제 → 4칸 스트립(`grid-cols-4 gap-1.5`) → 상세」 순서를 공유한다.
+  한쪽만 옮기면 위치가 어긋나므로 순서를 바꿀 땐 두 카드를 같이 바꾼다. 국면 쪽 화살표(→)는
+  두지 않는다(반쪽 폭 카드에서 60px 를 먹어 4칸 라벨이 찌그러진다). 가드 = `MacroPage.test.tsx`
+  의 「각자의 카드 안 같은 자리」 케이스(두 스트립의 카드 내 자식 인덱스가 같은지까지 잰다).
+- 🔴 **`confidence` 는 「1·2위 점수차」로 보여 준다 — 확률이 아니다.** 값은
+  `cycle.py` 의 `(1위 총점 − 2위 총점) × 200` 이고 과거 적중률로 교정한 적이 없다.
+  블록 `macro-cycle-gap` 이 지키는 것 넷: (a) 라벨에 「신뢰」를 쓰지 않는다 (b) 단위는 `%` 가
+  아니라 `점` (c) 눈금은 **1위를 100% 로 잡은 상대 막대** — 0~1.00 공통 눈금 금지(국면별
+  도달 가능 최대 총점이 회복기 0.61 · 확장기 0.60 · 과열기 0.45 · 수축기 0.97 로 달라
+  1.00 은 거짓 분모다) (d) 2위 국면의 **이름은 응답에 없으므로**(`final_scores` 미반환)
+  지어내지 않고 「이름 없음」으로 둔다. 구간 배지(팽팽/보통/뚜렷)는 고정 컷이 아니라
+  `2 × 기여 > 격차`(한 지표가 1·2위를 갈아타면 격차가 기여의 2배만큼 움직인다)에서 끌어낸다.
+- 🔴 **지표 카드는 `score`(당선 국면 기여)만 쓰고 `score / weight`(지지율)는 쓰지 않는다** —
+  지표마다 한 국면에 줄 수 있는 상한이 달라서(과열기 기준 금리차 0.80 · 나머지 넷 0.30)
+  지지율을 나란히 세우면 거짓 비교가 된다. 기여는 같은 국면에 보탠 가중값이라 비교되고
+  **다 더하면 그 국면 총점**이다. testid = `macro-cycle-contrib-{key}`.
+- ⚠️ **새 testid 에 `macro-cycle-phase-` · `macro-cycle-indicator-` 접두사를 물려주지 않는다** —
+  보존 가드가 그 두 접두사를 정규식으로 세어 「국면 4칸」·「지표 카드 5종」을 단언하므로,
+  물려받는 순간 4칸이 11칸이 되고 5종이 10종이 된다(cycle306 실측).
+
+- `api/macro.ts` 는 우리 `api/client.ts`(axios, `baseURL:'/api'`) 를 쓴다 — `X-API-Key` 는 붙이지 않는다
+  (nginx 가 주입·치환). macro 콜드 캐시가 기본 10초 타임아웃보다 길어질 수 있어(yfinance 약 27건)
+  요청마다 `{ timeout: 60000 }` 오버라이드를 준다.
+- 이 5개 응답은 **우리 `ApiResponse<T>` 래퍼를 쓰지 않는다** — macro 서비스가 독립 FastAPI 프로세스라
+  원본 계약(`{ <section>, updated_at, errors }`)을 그대로 반환한다.
+
+---
+
+### 「인증」 — 다이얼로그·가드 설계 근거
+
+정본에는 금기와 한 문장 이유, 가드 이름만 남겼다.
+
+원문(`frontend/CLAUDE.md:623-625`, 2026-10-02 이관):
+
+---
+
+- **`client.ts` 는 `withCredentials: true` 다.** SPA 의 XHR 이 자격 없이 나가면 401 을 받아 브라우저가 로그인 다이얼로그를 **두 번** 띄운다. 동일 출처(`baseURL: '/api'`)라 CORS 파급 0. 회귀 가드 `tests/unit/ast/test_cycle246_nginx_template_no_key_leak.py::G-246-5`(주석을 걷어낸 뒤 검사 — 설명 주석이 같은 문자열을 담고 있어 순진한 검색은 실제 설정을 주석 처리해도 통과한다).
+- **아이콘 경로는 `return 204;` 로 단락한다** — `/favicon.ico`·`/favicon.svg`·apple-touch 정규식(크기 변형 포함). Safari 의 네트워킹 프로세스가 아이콘을 페이지 자격 없이 따로 가져오고 그 401 의 `WWW-Authenticate` 가 두 번째 다이얼로그가 된다. `return` 은 rewrite 단계라 access 단계의 `auth_basic` 에 도달하지 않아 `auth_basic off` 없이 닫힌다. **블록엔 `return 204;` 외 지시자를 두지 않는다**(proxy_pass/root 가 들어오면 무자격 제공). 실제 아이콘은 `index.html` 이 **data URI** 로 품어 서버 요청 자체가 없다(`/favicon.svg` 서버 경로로 되돌리면 재발). 가드 `tests/unit/ast/test_cycle247_icon_probe_no_second_prompt.py` G-247-1~5.
+- **dev 는 nginx 를 거치지 않는다.** `vite.config.ts` proxy 가 `X-API-Key`(= `process.env.API_AUTH_KEY`)와 `Origin: apiTarget` 을 함께 넣는다. Origin 정규화가 빠지면 `changeOrigin: true` 가 Host 만 바꾸는 탓에 백엔드 CSRF 검사가 **상태변경만** 401 로 막아 "화면은 멀쩡한데 버튼만 죽는" 형태가 된다.
+
+---
+
+→ CHANGELOG: 해당 없음(문서 정리)
+
+## 2026-10-02 sync-docs 압축 2차 — 검증 지적 반영
+
+2차 압축본을 검증한 결과, 조건·한정어·금기 이유가 빠진 곳 14군데를 정본에 되살렸다. 이 절은 그 기록과 위 2차 절의 인용 기준 정정이다.
+
+### 위 「2026-10-02 sync-docs 압축 2차 — 정본에서 이관」 절의 줄번호 기준
+
+그 절의 「원문(frontend/CLAUDE.md:N, 2026-10-02 이관)」 줄번호는 전부 **2차 압축 직전본(= 1차 반영본, 2026-10-02 커밋 전 스테이징본)** 기준이다. 지금 파일에서 같은 줄을 열면 다른 내용이 나온다.
+같은 절의 「### 「테스트 규약 (공통)」 — 규약 4·5 의 근거 문장」 은 근거 문장 이관분이다. 세 화면 사례는 1차 절의 「### 「테스트 규약 (공통)」 5 — 세 화면이 망가져 있던 경위」 에 있다. 정본 인용도 이 표제 전체로 바꿨다.
+
+### 정본에 되살린 것
+
+- `BuyBlockSection` — 「실제 동작이 아니다」 목록에 모드 설명(`MODE_DESCRIPTIONS`) 복원.
+- 테스트 규약 6 — 재생성 조건 「카탈로그나 `DEFAULT_PARAMS` 중 하나라도 바뀌면」 복원.
+- 종목 차트 모달 — 패널 생성 순서(`createIndicator` 호출 순서, 가드 C388-2c) · import 배타 한정 「뿐」 · `STOCK_CHART_TIMEOUT_MS` 와 백엔드 `_QUEUE_WAIT_SECS`+`_FETCH_TIME_BUDGET_SECS` 결합 복원.
+- 금기 이유 한 문장 4건 — `StrategyParamsEditor` 키 비보유 · `ScrollPane` 상한 · Macro 국면 화살표 · `ExchangeBoardRow` `SOR` 회색 안내.
+- AI 매수평가 — 가드가 잠그는 「두 그리드의 요약 맵 직접 인덱싱 0건」 · 숫자·시각의 전칭 「전부」 복원.
+- 서체 캐시 — 원인 조건 「정적자산 정규식에 `ttf` 가 없어」 복원. kojiro 탭 — 백엔드 추가 한정 「`atr_ratio` 1키만」 복원.

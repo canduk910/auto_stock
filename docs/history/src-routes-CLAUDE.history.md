@@ -381,3 +381,333 @@ Phase 1 산출 — 실행/조회 엔드포인트는 미구현
 경위: cycle385(분할 매도 허용)가 이 라우트의 `_selling.add` 를 `place_order` **앞**으로 옮겼다. 뒤에 두면 시장가가 REST 응답보다 먼저 체결될 때 주문 종료의 `_selling.discard` 가 먼저 돌고 그 뒤에 선 표식이 잔여 보유의 손절을 막는 좀비가 된다(보유 축 분리 전에는 포지션이 통째로 지워져 무해했던 순서다). 발사 실패로 표식을 되돌리는 것은 발사되지 않은 것이 확정된 실패뿐이다(부록 R3 K2 — `src/api/base.py::_request` 가 주문 POST 도 전송 오류·5xx 에 재시도해 앞 전송이 접수됐을 수 있다). 부록 R3 는 그 실패를 APBK0400(`is_sell_qty_exceeded`)으로 한정했고, 그러면 APBK3013·APBK0918 장운영외처럼 같은 요청의 앞 전송도 똑같이 거부됐을 거부까지 표식을 남겨 손절이 `selling_reconcile` 까지 멈췄다(3차 돈 렌즈 NO-GO). 부록 R4 D2(2026-09-28, 루트 규칙 「NXT 매도 거부 좀비 차단」 — 보존하면 stale `_selling` 좀비 — 을 따른 결정)가 판정을 `order_engine._sell_not_placed_reason` 으로 모아 장운영시간 외 · 시장가 불가 거부도 되돌리게 했다. 그래서 애프터 시장가 거부는 문구가 시장가 불가 키워드에 걸리면 표식을 되돌리고(`selling_released=market_order_disallowed`), 걸리지 않거나 EGW00201·전송 예외면 표식을 남기되 `[manual_sell_selling_kept]` WARNING 으로 드러나고, 열린 주문이 없으면 `selling_reconcile` 이 푼다 — 원문의 「조용히 남는 stale `_selling`」 과 다르다.
 
 → CHANGELOG: cycle385 행
+
+---
+
+## 2026-10-01 sync-docs 압축 — 정본에서 이관
+
+출처 = `src/routes/CLAUDE.md`(이관 직전 HEAD `fe7b081e`). 절 제목은 이관 시점의 정본 절 제목이다.
+
+### 인증 — deny-by-default — 엔드포인트 수 · fail-closed bullet · 「401 단일」
+
+```
+잡으면 78개 엔드포인트 스키마가 그대로 열린다)
+* **fail-closed** — `API_AUTH_KEY` 미설정·빈 문자열이면 전부 401 이다(조용히 열지 않는다).
+  매매 엔진은 in-process 라 API 가 잠겨도 매매 영향은 0이고, 대시보드만 멈춘다.
+* **응답은 401 단일** + `{"success": false, "data": null, "message": "unauthorized"}`.
+```
+
+사유: 라우트 데코레이터는 2026-10-01 기준 94개라 「78개」 는 낡은 수다(수 없이 「스키마 전체」로 바꿨다). fail-closed bullet 은 루트 「핵심 안전 규칙」 API 인증 항목과 같은 문장이라 링크로 줄였다. `reporter_scope` 사유는 cycle249 부터 403(`message="forbidden"`)이라 「401 단일」 은 코드와 다르다(`src/middleware/api_auth.py` `_FORBIDDEN_BODY`).
+
+### 엔드포인트 목록 — `POST /api/trading/start` — 응답 성격 표기
+
+```
+(응답은 202 성격, 로그에 `장 종료 후 시작 시도 — 거부됨`)
+```
+
+사유: 라우트는 `asyncio.create_task(start())` 뒤 즉시 200 `success=True` 를 돌려준다. 「결과를 기다리지 않는다」로 바꿨다.
+
+### 엔드포인트 목록 — `POST /api/trading/restart` — 저녁 블록 서술 · 복구 ③ · immediate 시각
+
+```
+넷 다 `TIME_SETTLEMENT` 뒤에 있어 `start()` 가 거부되면 하나도 실행되지 않는다.
+③ 리포트 `POST /api/log-reports/run`(21:30 이후 실행은 `api_metrics`/`strategy_funnel` 이 이미 0 이라 그 두 축은 복구되지 않는다 — **20:05 1차 스냅샷 행이 그날 metrics 의 유일한 생존본**이므로 덮어쓰지 않도록 `force` 없이 쓴다)
+일봉 결손 자체는 다음 영업일 07:59 immediate 가 7일 증분으로 보정하지만
+```
+
+사유: 코드 대조(2026-10-01): 20:30 일봉 적재는 `TIME_SETTLEMENT`(21:30) 앞이다 — 넷의 공통점은 `start()` 가 띄우는 경로라는 것이다(`scheduler.py` 일봉 task 생성 · `_settle` · `generate_daily_log_report` · `purge_old_logs`). `_is_complete_report` 는 `metrics.snapshot_pass` 가 있는 1차 스냅샷 행을 완성본으로 보지 않으므로 `force` 없이도 재실행이 그 행을 덮어쓴다 — 「force 없이 쓰면 덮어쓰지 않는다」 는 코드와 다르고 같은 문서의 `/run` 행과도 어긋났다. immediate 실행 시각은 상수가 아니라 기동 + `initial_delay_secs=240`(`data_load_tasks.stock_master_daily_load_task_loop`)이다.
+
+### 엔드포인트 목록 — `GET /api/balance` — 섹터 조회 · 청산선 필드 수
+
+```
+섹터명은 그 loop 가 이미 조회한 `basics.raw` 를 `sector_naming.resolve_sector_name(ticker, basics_raw=...)` 에 주입해 **추가 DB 호출 0** 으로 산출한다
+**cycle339 — 청산선 4필드**(`strategy_id`/`stop_price`/`stop_source`/`target_price`/`target_source`)
+```
+
+사유: `resolve_sector_name` 은 `bstp_kor_isnm` 이 비면 `stock_master.get_master_raw` 를 1회 부른다 — 「추가 DB 호출 0」 이 아니라 `stock_master.get` 재조회 생략이다. 열거된 키는 5개(`strategy_id` + 청산선 4필드)다.
+
+### 엔드포인트 목록 — `GET /api/history/pnl` — 실측 건수
+
+```
+(리스트 — 한 페어가 매수 주문 2건 이상인 실측 9건이 있어 **단수 금지**)
+```
+
+사유: 실측 건수는 시점 수치라 정본에서 뺐다. 규칙(단수 금지)은 남는다.
+
+### 엔드포인트 목록 — `GET /api/performance/summary` — 증상 설명
+
+```
+`PerformanceCard` 의 `toLocaleString('ko-KR')` 이 `String` 에 자체 구현이 없어 `Object.prototype` 쪽으로 떨어져 **예외 없이 천단위 구분만 사라진다**(`10720000.00원`). 같은 dict 의 `total_profit_rate`·`avg_daily_profit_rate` 는 이미 `float` 라 한 카드 줄에서 한 칸만 어긋나 눈에 잘 띄지 않는다.
+```
+
+사유: 결함 메커니즘 서술을 한 문장으로 줄였다.
+
+### 엔드포인트 목록 — `PUT /api/strategies/weights` — 날짜 꼬리 · 비중 0 가드 누락
+
+```
+**요청 바디 `weights` 단위 = 비율(0.0~1.0). 퍼센트(0~100) 금지** (2026-08-18 확정)
+```
+
+사유: 날짜 꼬리를 뺐다. 이 행은 cycle325 비중 0 가드(`[weight_zero_guard]` · `[weight_zero_probe_degraded]`)를 적지 않았다 — 정본 「전략 설정 쓰기 경로」 절에 보강했다.
+
+### 엔드포인트 목록 — `PUT /api/realtime/tick-channel-mode` — 코호트 매수 게이트 · 다이얼 분리 근거
+
+```
+그동안 매수 축 게이트는 그날 심긴 **코호트 스탬프**를 읽으므로 계속 닫혀 있다(술어가 채널 축이 아니라 코호트 축이고 **모드를 보지 않는다**).
+(재시작·폴링 대기 없음 — 킬스위치가 `param_catalog` 미등재라 장중에 못 껐던 실패를 반복하지 않는다. D6·D8 때문에 "다음 재시작에만 반영" 은 사실상 "영원히 못 끔" 이다)
+「채널이 문제」와 「전환이 문제」는 다른 결정이라 모드 enum 을 늘리지 않았다(사고 중에 쓸 카드가 `off` 하나뿐이면 운영자가 장중 146종목 대량 전환을 실행하게 된다).
+```
+
+사유: cycle336(사용자 결정 2026-09-21)이 `risk.on_tick` 의 `if chan_buy_blocked: continue` 를 걷었다 — 코호트 판정은 계측기로만 남아 매수를 막지 않는다(`src/engine/risk.py` 매수 분기 주석). 다이얼 분리 근거는 `src/realtime/CLAUDE.md` 「시세 채널」 절에 같은 문장이 있어 링크로 줄였다.
+
+### 엔드포인트 목록 — `GET /api/market-regime/current` — 조회 실패 기본값
+
+```
+`auto_regime_adjust`·`cash_usage_ratio`·`etf_regime_enabled` 조회 실패는 전부 graceful 기본값(`True`/`1.0`/`False`)
+```
+
+사유: `db.system_config.get_auto_regime_adjust` 는 예외를 내지 않고 판독 불가를 `False` 로 돌려준다(cycle316). 라우트의 `except: auto = True` 는 도달하지 않는다.
+
+### 엔드포인트 목록 — `/api/integrations/dkstock-regime` — 출처 표기
+
+```
+외부 매크로 서버 활성 여부 조회
+외부 매크로 서버 활성 토글
+```
+
+사유: 매크로 레짐의 출처는 cycle315 부터 우리 `macro` 컨테이너다(`src/services/macro_client.py`).
+
+### 엔드포인트 목록 — `PUT /api/integrations/status-exit` — 순서의 이유
+
+```
+이유 = `pg.execute` 는 커넥션 획득에 상한이 없어 RDS 가 멈추면 `off` 가 30초 넘게 메모리에 닿지 못했다 — 사고 중에는 `off` 가 먼저다.
+```
+
+사유: `src/engine/CLAUDE.md` 「종목상태 청산·당일 매수 차단」 절에 같은 근거가 있어 링크로 줄였다.
+
+### 엔드포인트 목록 — `POST /api/stock-master/*` — 소요 시간 실측 · 근거
+
+```
+2,697 종목 × ~100ms ≈ 13분 소요.
+(axios 디폴트 timeout silent 결함 영구 차단)
+```
+
+사유: 소요 시간은 시점 실측이다. 네 POST 의 공통 규약(fire-and-forget · 409 · `force` 기본 True)은 표 아래 한 단락으로 모았다.
+
+### 엔드포인트 목록 — `POST /api/log-reports/run` — 완성 리포트 정의
+
+```
+완성 리포트(= `summary`·`model` 둘 다 채워진 행)
+```
+
+사유: 실제 판정은 `_is_complete_report` 4축이다(행 존재 · `metrics.snapshot_pass` 없음 · `summary` 가 비지 않고 `OPENAI_EMPTY_RESPONSE_SUMMARY` 도 아님 · `model` 있음).
+
+### market_state.py / market_ops.py — 장운영상태 화면 — `GET /api/market-ops` — 판정 규칙의 근거 문장
+
+```
+— 안 돈 작업을 실패로 그리지 않는 것이지 이미 증명된 사실을 지우는 게 아니다.
+(둘 다 "이미 없는 증거" 또는 "순수 시계 사실" 이라 휴장 승격 대상이 아니다)
+— 그러지 않으면 boot 즉시실행이 남긴 07:5x 증거가 저녁 예정 실행을 하루 종일 거짓 "완료" 로 보이게 한다.
+DB 조회는 단일 `fetchrow` 집계(≈3ms) + `system_config` 마커 일괄 조회(`get_task_last_success_bulk`) + `refresh_progress`(메모리) + `daily_log_reports` 1행 — 폴링 비용 무시 가능.
+```
+
+사유: 표 셀 하나(약 4KB)를 판정 규칙 목록으로 나누면서 근거 문장을 줄였다. 실측 지연(≈3ms)은 시점 수치다.
+
+---
+
+## 2026-10-02 sync-docs 압축 2차 — 정본에서 이관
+
+출처 = `src/routes/CLAUDE.md`(1차 반영본). 절 제목은 이관 시점의 정본 절 제목이다. 정본에는 규칙·식별자·조건을 남기고, 아래 원문(경위·근거 서술·다른 정본과 겹치는 열거·화면 소비처 서술)만 옮겼다.
+
+### 인증 — deny-by-default — 포트별 인증 · 실수 방어 bullet — 접근 예시·보완 수단
+
+````
+Basic Auth `-u <USER>:<PASS>`(X-API-Key 는 nginx 가 주입)
+— 화면의 2단계 확인(identity 18키)과
+  운영 기록이 메운다.
+````
+
+사유: curl 자격 표기는 사용 예시라 정본 규칙이 아니다. 「2단계 확인이 메운다」 는 화면 절차 설명이고 정본은 frontend 문서다.
+
+### 엔드포인트 목록 — 숫자 열 사영 이유(행마다 반복)
+
+````
+`get_trades` 의 `SELECT t.*` 는 NUMERIC(`price`·`profit_loss`)을 `Decimal` 로 주고 pydantic v2 는 그것을 JSON **문자열**로 내보내, `TradeHistoryGrid` 가 그 열을 예외 없이 전 행 `-` 로 떨군다.
+`Decimal` 6필드는 `float` 로 사영한다(문자열이면 프론트 `toFixed` 가 죽는다).
+— 빠지면 `PerformanceCard` 의 `toLocaleString('ko-KR')` 이 예외 없이 천단위 구분만 잃는다(`10720000.00원`).
+`change_rate`/`prtt_rate`(`NUMERIC(8,4)`)가 `Decimal` 문자열로 나가면 프론트 `.toFixed(2)` 가 `TypeError`.
+— `except Exception: rows=[]` 식 fail-silent 금지.
+````
+
+사유: 같은 이유(NUMERIC → `Decimal` → JSON 문자열)를 행마다 다시 적었다. 표 머리 한 단락(「숫자 열 공통」)으로 모았다.
+
+### 엔드포인트 목록 — `POST /api/trading/restart` — 경위·보정 경로
+
+````
+(정산 뒤 `run_daily` 가 익일 대기로 진입)
+넷 다 `start()` 가 띄우는 경로라 거부되면 하나도 돌지 않는다.
+일봉 결손은 다음 영업일 부팅의 immediate 실행(기동 + 240초, 7일 증분)이 메우지만 `_boot()` 의 prepare 보다 늦다 — `[daily_head_stale]` WARNING 이 알린다
+````
+
+사유: 일봉 결손의 자동 보정 경로는 `src/engine/CLAUDE.md` 「scheduler.py」 절 `TIME_SESSION_START_CUTOFF` 행과 루트 운영 가이드에 같은 내용이 있어 링크로 줄였다. 복구 3종은 정본에 그대로 남는다.
+
+### 엔드포인트 목록 — `GET /api/trading/status` · `GET /api/balance` — 소비처·섹터 해석 순서
+
+````
+— ScanMonitor "돌파 (대기)" 라벨 분기 근거
+섹터는 이미 읽은 `basics.raw` 를 `sector_naming.resolve_sector_name(ticker, basics_raw=...)` 에 넘겨 재조회를 생략한다(`bstp_kor_isnm` → 없으면 `get_master_raw` 1회 후 `_kojiro_sector_key` → `미분류-{ticker}`).
+````
+
+사유: 화면 소비처는 frontend 문서 몫이다. 섹터 해석 순서의 정본은 `src/engine/CLAUDE.md` 모듈 맵 `sector_naming.py` 항목이다.
+
+### 엔드포인트 목록 — `GET /api/history/pnl` · `GET /api/llm-evaluations` — 필드 열거·상한 근거
+
+````
+`data.summary` = 슬라이스 전 closed 페어 집계: `realized_total_krw`(float) · `realized_rate_pct`(가중, round2) · `win_count`·`loss_count`·`even_count`(int) · `win_rate_pct`(round1) · `closed_count`(int). 분모 0 이면 비율은 0.0
+(0개·초과 = 422, 손익 그리드 size 상한)
+````
+
+사유: 요약 필드는 `frontend/src/types/trading.ts` `TradePnLSummary` 로 가리킨다(반올림·분모 0 규칙은 정본에 남긴다). 200 의 출처는 경위다.
+
+### 엔드포인트 목록 — `GET /api/strategies/params-schema` — data 필드 열거
+
+````
+`data` = `catalog_version` · `groups`(7) · `types`/`risks`/`units`(닫힌 어휘) · `params`(105, `ParamSpec` 전 필드 — `min_items`·`forbidden_choices` 포함) · `strategies[]`(`keys`/`params`/`defaults`/`deprecated_for_keys`) · `invariants.budget`(강제) + `invariants.order`(12건, 경고). `defaults` = `DEFAULT_PARAMS` **깊은 복사본**. 현재값을 함께 싣는 이유 = `GET /api/strategies`(staleTime 15s)와 따로 받으면 diff 미리보기 기준값이 낡는다
+````
+
+사유: 모양은 `frontend/src/types/strategy-params.ts` `ParamsSchemaData` 가 정본이라 가리키고, 개수·강제/경고 구분·이유 한 문장만 남겼다.
+
+### 엔드포인트 목록 — `POST /api/log-reports/run` · `/external` — 정산 내부 호출·비교 서술
+
+````
+21:30 정산이 `reset_request_metrics()` + `_reset_daily_state()` 를 돌린 뒤 재실행하면 `api_metrics`·`strategy_funnel` 0 으로 **완성 리포트를 덮어쓰므로**(`insert_log_report` = upsert)
+두 경로를 나란히 비교할 수 있다
+````
+
+사유: 정산이 무엇을 리셋하는지는 engine 정본 몫이다. 비교 가능성은 무접촉 규칙의 귀결이라 규칙만 남겼다.
+
+### 엔드포인트 목록 — `/api/realtime/*` — 필드 열거·화면 소비처·구현 사유
+
+````
+`total/acked/fresh_60s/stale_60s/limit/tickers(subscribed/acked/fresh/stale, sorted)/reconnect_count/ws_connected/sessions[]`
+UI 가 WS tick 시각과 KIS 체결시각을 비교해 "WS 구독 의심" 을 표시한다(5분+ 차이 amber). KIS 에 슬롯 조회 API 가 없어 우리 측 추적을 노출한다.
+`get_market_op_state_summary()` 카운트·샘플 + `circuit_breaker` 휴리스틱(`{suspected,reasons,halt_ratio,halted,observed,representative_mkop_cls_code,halt_reasons_sample}`, CB 전용 필드가 없어 best-effort) + `details`(cap 200, `{ticker,vi_code,ovtm_vi_code,halt_yn,halt_reason,iscd_stat,mkop_cls_code,exch_code,received_at}`).
+소스 `H0UNMKO0`. RealtimeHealth 5번째 카드
+(프로브 중 그 종목이 매수돼 HIGH 로 승격되면 그 함수는 보조 세션 고아 튜플을 못 지우면서 라이브 라우팅을 pop 한다)
+— 화면 없이 오늘 전환 시각을 보는 유일한 채널
+**DB 저장 후 같은 요청에서 엔진 메모리까지 덮는다**(재시작·폴링 대기 없음).
+폴링 백업 2곳(`scanner.subscribe_filtered_stocks` 5분 · `stale_watcher_core` 120초)이라 라우트를 못 써도 ≤2분.
+`switch_enabled` 생략 = 현행 값 무접촉, `false` = 살아 있는 구독의 전환만 멈춘다. ⚠️ 선택 필드 밖의 키는 **422 가 아니라 조용히 무시**된다(pydantic `extra=ignore` — 같은 요청의 `mode` 킬스위치가 막히면 안 된다).
+````
+
+사유: 세션 집계 필드는 `src/realtime/CLAUDE.md` 「라우트 응답」 절, 장운영 응답 모양은 `frontend/src/types/market-operation.ts` `MarketOperationStatus`, 폴링 백업 2곳은 `src/engine/CLAUDE.md` `tick_channel_mode.py` 항목, `switch_enabled`·미지 필드 처리는 `src/realtime/CLAUDE.md` 「시세 채널」 절이 정본이라 링크로 줄였다. 화면 카드·배지 서술은 frontend 문서 몫이다.
+
+### 엔드포인트 목록 — `/api/market-regime/*` · `/api/integrations/*` — 필드 열거·화면 소비처
+
+````
+`auto_regime_adjust` 는 db 게터가 판독 불가를 `False` 로 돌려준다
+MarketRegimeCard ETF 스테이지 표시 근거
+`{mode: 'OFF'\|'WARN'\|'SOFT'\|'HARD', thresholds:{vix_threshold, fg_high_threshold, fg_low_threshold, defensive_enabled}, blocked, reasons:[], soft_multiplier, data_available, guard_inert}`
+`armed` 에는 전용 플래그가 없어 쏘지 않는 `fallback_only` 종목도 보인다.
+🔴 **저장에 실패한 축은 고정된 채 남는다**(그 축의 다음 성공 PUT 이나 재시작까지 refresh 가 되돌리지 않는다).
+실패 `message` = 「DB 저장에 실패했습니다 — 메모리에는 즉시 반영했고, 그 축을 고정했습니다(다음 성공 저장 또는 재시작까지 유지 — refresh 가 되돌리지 않습니다).」
+`{accounts:[{id,label,app_key,app_secret_masked,kis_env,active,created_at,updated_at}]}`
+````
+
+사유: 응답 모양은 `frontend/src/types/integrations.ts` `BuyBlockState` · `frontend/src/types/kis-quote-accounts.ts` `KisQuoteAccount` 로 가리킨다. 고정 해제 조건과 이유는 `src/engine/CLAUDE.md` 「종목상태 청산·당일 매수 차단」 절이 정본이다. 실패 message 원문은 `src/routes/system_integrations.py` 에 있다.
+
+### 엔드포인트 목록 — `POST /api/strategy-funnel/snapshot` — message 꼬리 원문·자정 규칙
+
+````
+헬퍼의 라벨 가드가 메모리 목록 기준일이 오늘과 다른 전략(21:00 저녁 미리보기 · 준비 중 · 준비 실패)을 건너뛴다. `message` = 「<N>개 snapshot 저장」 + 꼬리 둘(응답 키 불변): ① 기준일이 다른 전략이 있으면 「 — 메모리 목록은 <as_of,…> 기준이라 오늘 날짜로 저장하지 않았다」 ② 건너뛴 전략이 있으면 「 (건너뜀: <sid>:<사유>, …)」 — 사유 = `in_progress` · `prepare_failed` · `as_of_mismatch` · `evening_preview_reject` · `no_meta`. 자정이 지나 저녁 목록의 기준일이 오늘이 돼도 저녁 미리보기는 확정 저장하지 않는다(`evening_preview_reject`).
+````
+
+사유: 판정 순서와 자정 규칙(`evening_preview_reject`)의 정본은 `src/engine/CLAUDE.md` 「캡처 라벨 가드 — `capture_skip_reason`」 절이다. message 원문은 `src/routes/strategy_funnel.py` 에 있다. 사유 5종 이름은 정본에 남긴다.
+
+### 엔드포인트 목록 — `/api/stock-master/*` — 컬럼·필드 열거·트리거 정의·화면 주기
+
+````
+KOSPI 70 컬럼 + KOSDAQ 64 컬럼(KOSDAQ 전용 `invt_alrm_yn` 투자주의환기 / 벤처기업 / KOSDAQ150)
+각 10키 `{status: idle\|running\|completed\|failed, total, processed, updated, skipped, failed, started_at, finished_at, elapsed_ms, error_message}`. RefreshProgressBanner `refetchInterval: running 5_000 / 그 외 60_000`.
+집계 8키 `{count_all, bfdy_clpr_present, nxt_tradable_count, with_hts_avls, with_acml_tr_pbmn, total_daily_rows, last_daily_load_at, top_10_recent:[{ticker,name,refreshed_at}]}`
+`stock_master_history` PK `(ticker, seq)` — `seq INT`(0=최신본 / 1=직전본) + `raw JSONB`. `[{ticker, seq, change_type, raw, changed_at}]`, `change_type` = INSERT/UPDATE/DELETE(trigger `OLD.raw IS DISTINCT FROM NEW.raw`, 'TTL_REFRESH' 미발화)
+근본 시정 자리(그 db 모듈)는 전략 `prepare()`·터틀 ATR·`get_donchian_high`·수정주가 락 게이트·`compute_etf_stage_signal` 이 공유해 매매 행위 변경 = **사용자 승인 + `domain-consult` 선행** 대상이다(`_workspace/00_URGENT_WORKLIST.md` 등재).
+````
+
+사유: 마스터 컬럼은 `src/api/CLAUDE.md` 「kis_master.py」 절, 진행·집계 응답 모양은 `frontend/src/types/stock-master.ts` `RefreshProgress`·`StockMasterStats`, `stock_master_history` 표 정의는 `src/db/CLAUDE.md` 「DB 스키마」 절이 정본이다. F-1 의 공유 소비처 전체 목록은 워크리스트 항목이 갖고, 정본에는 「매매 행위 변경 = 승인 대상」 한 문장만 남겼다.
+
+### 엔드포인트 목록 — `GET /api/stock-chart/candles` — 화면 진입·message 원문
+
+````
+종목 차트 모달(잔고·주문체결내역·매매손익 행 더블클릭)
+(ASCII 숫자만 — `\d` 는 전각 숫자도 통과)
+`data` = `CandleChart`(16필드, `src/models/candle_chart.py`). `message` = `"{일봉\|주봉\|월봉} {N:,}개"` · 부분 `"… — 일부 구간만({incomplete_reason})"` · 0봉 `"표시할 봉이 없습니다"`. 실패는 전부 **HTTP 200 + `success=false`, `data=null`**: 첫 창 `KisApiError` → `"KIS 조회 실패 [{msg_cd}] {msg1}"` + `[stock_chart_error] stage=first_window` / `ChartBusyError` → 「다른 차트 조회가 진행 중입니다 — 잠시 후 다시 시도하세요」(로그는 `period_chart` 의 `[stock_chart_busy]` 한 줄뿐) / 그 밖 → 「차트 조회 실패 — 서버 로그 [stock_chart_error] 확인」 + `stage=unexpected`(예외 문자열은 응답에 싣지 않는다).
+````
+
+사유: 화면 진입은 frontend 문서, 모델 경로는 `src/api/CLAUDE.md` 「period_chart.py」 절이 갖는다. message 원문은 `src/routes/stock_chart.py` 에 있어 정본에는 실패 분류(200 + `success=false` · 로그 마커)만 남겼다.
+
+### 수동 매도 — `POST /api/trading/manual-sell` — 컷 면제 · 표식 · 되돌림 · 알려진 한계 — 구현 경로·근거 서술
+
+````
+- 🔴 **컷 면제 경로** — `place_order` 를 직접 불러 `execute_sell`·`_apply_clock`·`_route_exchange_by_clock` 을 거치지 않아
+  `order_engine._market_rest_gate` 에 닿을 경로가 없다. **15:30~16:00 「완전 휴식」 구간에도 주문이 나간다**(운영자 수동
+  조작은 막지 않기로 한 결정). 그 구간엔 응답 message 에 면제 경고가, 접수 로그에 `[market_rest_manual_exempt]` 가
+  붙는다. D+1 판독에서 그 구간 주문이 나오면 **이 라우트를 먼저 본다**.
+체결되면 `_handle_sell_fill` 이 그만큼만 빼고, 남은 보유는 손절·
+이유 셋 =
+  `qty_exceeded`(APBK0400 수량 초과) · `market_closed`(장운영시간 외) · `market_order_disallowed`(시장가 불가 — APBK1943 ·
+  APBK3013 계열). 손절 잔여 재주문과 같은 판정이고 msg1 문구 기반이라, 문구가 키워드에 없으면 되돌리지 않는다.
+표식이 선 주문은 손절 잔여 재주문(J-2)에서
+  보유와 무관하게 남은 수량을 다시 낸다(운영자가 누른 수량의 대상은 추적 밖 주식일 수 있다). 표식이 `_selling` 해제를
+  바꾸는 규칙(손님 주문 · 동결 표식)의 정본 = `src/engine/CLAUDE.md` 「매도 체결 — 주문 축과 보유 축」. `strategy_id` 로
+  수동 주문을 추론하지 않는다 — 이 라우트는 보유 전략 id 를 적는다.
+`[애프터마켓]지정가 및 최유리/최우선지정가 주문만 가능합니다.` 는 걸린다(`src/api/balance.py`). KRX 애프터 거부 msg1
+    원문은 아직 모른다(`src/engine/CLAUDE.md` 규칙 2)
+분할 매도에서는 **다시 누르면 추가 매도**다
+````
+
+사유: 컷 면제 경고·마커는 `src/engine/CLAUDE.md` 「order_engine.py」 절, 「안 걸렸다」 판정과 J-2 재주문 효과는 같은 문서 「매도 체결 — 주문 축과 보유 축」 절이 정본이라 링크로 줄였다. 이유 이름 3종과 금기 문장은 정본에 남긴다.
+
+### 전략 설정 쓰기 경로 — 비중 · 파라미터 · AI 자문 적용 — `PUT /api/strategies/weights` · `/params` — 이유 서술·중복 안내
+
+````
+`registry.update_weights` 가 `config.enabled = weight > 0` 을 자동 토글해 비중 0 = 그 전략 보유분의
+  손절 정지이기 때문이다
+(화면 비활성은 안내일 뿐 정본이 아니다)
+매수를 멈추는
+  정당한 수단은 `buy_paused` 다(`{"params":{"buy_paused":true}}` — 신규 매수 신호만 멈추고 청산은 그대로. 전략
+  비활성화는 보유분의 손절까지 멈춘다).
+- ⚠️ 미지 키·범위 밖 값을 보내는 운영자 `curl` 스크립트는 422 를 받는다.
+````
+
+사유: `config.enabled = weight > 0` 자동 토글과 「비활성화 = 손절 정지」 금기는 루트 `CLAUDE.md` 「핵심 안전 규칙」 이 정본이다. curl 안내는 422 코드 표가 이미 말한다.
+
+### 장운영상태 화면 — `market_state.py` · `market_ops.py` — `GET /api/market-ops` 행 판정 — 조건의 근거·행 순서
+
+````
+— 아침 증거가 저녁 예정 실행을
+  하루 종일 "완료" 로 보이게 하지 않는다.
+「오늘 저녁(19:00
+  이후)에 쓴 **다음 세션** 잠정 행」이다(키 이름은 계약이라 유지). `is_provisional=TRUE` 는 09:30 자동 캡처·스캐너 필터 훅
+  (둘 다 `False`)을, 날짜 조건은 오늘 날짜 잠정 행(부팅 +600초 레거시 재준비)을 뺀다.
+행 순서에서 저녁
+  funnel 은 일봉 적재(20:30)와 정산(21:30) 사이다.
+````
+
+사유: 조건 자체(evidence-time 2시간 · `target_date > 오늘` ∧ `is_provisional=TRUE` ∧ 하한 19:00)는 정본에 남기고, 각 조건이 무엇을 빼려는지의 설명과 행 순서 서술만 옮겼다.
+
+
+---
+
+## 2026-10-02 sync-docs 압축 2차 검증 — 이관 사유 정정
+
+출처 = 2차 검증 지적 7건. 위 「압축 2차 — 정본에서 이관」 절의 사유 가운데 사실과 다른 것을 정정하고, 정본에 되살린 것을 적는다(위 절은 고치지 않는다).
+
+- **숫자 열 공통 단락** — 「`except Exception: rows=[]` 금지」 는 원래 `/api/llm-evaluations/{order_no}` · `/api/stock-master/{ticker}/daily` 두 라우트에 걸린 금기였다. 표 머리로 올리며 한정어가 빠져 표 전체 규칙처럼 읽혔고, graceful 로 명시한 관찰 라우트(`/api/portfolio/risk` — `src/routes/portfolio.py` 의 `except Exception: … strategies = []` · bundle · balance 청산선 · strategy-funnel · market-regime/current)와 충돌했다. 정본에 범위(`/api/llm-evaluations/*` · `/api/stock-master/{ticker}/daily`)와 예외(graceful 관찰 라우트)를 되살렸다.
+- **증상 두 갈래** — 「프론트 숫자 포맷이 예외 없이 깨진다」 는 절반만 맞았다. history 그리드 `-`·`PerformanceCard` 천단위 상실은 조용히 깨지고, llm 단건 모달·stock-master 일봉 탭은 `toFixed` 의 `TypeError` 로 렌더가 무너진다. 정본에 두 갈래를 적었다.
+- **수동 매도 알려진 한계 ②** — 「분할 매도에서는」 한정어가 빠져 무조건 문장이 됐다. 전량이 실제로 체결됐다면 재발사는 보유 0 이라 KIS 가 거부한다. 정본에 「보유보다 적은 수량을 판 경우(분할 매도)」 를 되살렸다.
+- **llm 배치 상한 200** — 위 절 사유 「200 의 출처는 경위다」 는 틀렸다. `_MAX_ORDER_NOS = 200`(`src/routes/llm_evaluations.py`)은 `/api/history/pnl` `size` 상한과 함께 움직이는 결합 불변식이다(pnl 페이지만 키우면 그 페이지의 버튼 판정 배치가 422). 정본 배치 행에 되살렸다.
+- **`/api/balance` 섹터 주입** — 위 절 사유 「섹터 해석 순서의 정본은 engine」 은 해석 순서에는 맞지만, 이 라우트가 `basics_raw=basics.raw` 를 주입해 재조회를 막는다는 라우트 쪽 사실(`src/routes/balance.py` 의 `resolve_sector_name` 호출)은 engine 문서에 없다. 정본 행에 주입 사실 한 구절을 되살렸다.
+- **인증 절 보완 수단** — 위 절 사유 「2단계 확인은 화면 절차이고 정본은 frontend 문서다」 는 틀렸다. `frontend/CLAUDE.md` 에는 identity 배지 한 줄뿐이고 「2단계 확인」 서술이 없다. 남은 곳은 이 정본 「전략 설정 쓰기 경로」 의 identity 항목 하나다(앞으로의 압축에서 지우지 않는다). 인증 절에 「보완 = 화면의 2단계 확인(identity 18키) · 운영 기록」 한 구절과 그 항목 링크를 되살렸다.
+- **응답 모양의 정본 방향** — `src/models/CLAUDE.md` 머리는 「응답 칸의 뜻은 routes 가 정본」 이라 하는데, 2차 압축은 응답 모양을 프론트 TS 사본에 맡겼다. TS 는 소비자 사본이라 어긋날 수 있다 — 실례로 `BuyBlockState` 에는 ETF 키가 없다. 정본 표 머리에 「응답 모양의 정본 = 백엔드 모델·생산 함수, TS 는 사본」 을 적고, TS 링크 옆에 백엔드 이름을 붙였다(`BuyBlockStatusResponse` · `KisQuoteAccount` · `_build_pnl_summary` · `_build_params_schema` · `get_market_op_state_summary()` · `refresh_progress.get_all_progress()` · `stock_master.get_stats()`). 같은 행의 「ETF 관찰 3키」 는 이름을 넷 나열하고 있었고 모델 docstring 도 「관찰 필드 4종」 이라 「4키」 로 고쳤다. `src/models/CLAUDE.md` 의 문장은 이 담당 범위 밖이라 손대지 않았다.
+- **되살리지 않은 것** — funnel snapshot · stock-chart 의 `message` 원문. 응답 키는 불변이고 문구는 계약이 아니다. 원문은 소스(`src/routes/strategy_funnel.py` · `src/routes/stock_chart.py`)와 위 이관 절에 남아 있다.

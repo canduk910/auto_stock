@@ -978,3 +978,274 @@ target 220 → 마진 34 영업일(사이클196 의 34 와 같다). `fetch_daily
 경위: 그때 SQL 은 `ticker_name = EXCLUDED.ticker_name` 이라 빈 이름이 저장된 이름을 지웠다. cycle385 의 분할 매도 뒤 잔여 저장과 #1.5 재대조가 이름 캐시가 비면 빈 이름을 넘긴다(적대 검토 INFO). 부록 R 이 `COALESCE(NULLIF(EXCLUDED.ticker_name, ''), positions.ticker_name)` 로 바꿨다. 호출부 인자는 그대로다 — 이름을 따로 조회하느라 `await` 를 더하지 않는다.
 
 → CHANGELOG: cycle385 행
+
+## 2026-10-01 sync-docs 압축 — 정본에서 이관
+
+모드 B 전반 점검(사용자 요청 「CLAUDE.md 파일들 전반 점검 — 중복·낡은 부분 삭제, 유지할 내용 압축」). 아래는 정본에서 걷어내거나 정정한 줄의 **원문**이다. 문장만 다듬은 줄은 옮기지 않았다.
+
+### pg.py — asyncpg 연결 풀 + 쿼리 헬퍼 (DB 클라이언트 정본)
+
+정본 원문:
+
+- **KST 타임존은 `init_pool()` 의 `server_settings={"timezone": "Asia/Seoul"}`(연결 핸드셰이크 파라미터)로 지정한다.** `init=` 훅 안의 `SET TIME ZONE`(세션 레벨)로 쓰면 안 된다 — 풀이 release 때 RESET 해 UTC 로 되돌아가고, 그 상태에서 `to_char(..., '+09:00')` 가 UTC 를 렌더해 KST 날짜가 하루 밀린다(M2a 통합 검증에서 실제로 걸린 결함이다).
+
+사유: KST 타임존 결함의 발견 경위(「M2a 통합 검증에서 실제로 걸린 결함」)를 걷어냈다. 규칙(`server_settings` 로 지정 · `SET TIME ZONE` 금지)은 정본에 그대로 있다.
+
+### _kst.py — KST 공용 헬퍼
+
+정본 원문:
+
+- 🔴 **DB 시각 컬럼에 `datetime.utcnow()` · `date.today()` · `src/db/` payload 의 `datetime.now(timezone.utc)` 를 쓰지 않는다** — AST 영구 가드 `tests/unit/db/test_cycle68_*.py`. 예외는 `system_logs.py` 와 `main.py` 의 인라인 `datetime.now(KST).isoformat()` 둘뿐이고 행위는 헬퍼와 같다.
+
+사유: 예외 서술 정정 — `write_log` 는 `datetime.fromisoformat(now_kst_iso())`(헬퍼)를 쓰고, `main.py::_insert_log_to_db` 는 `datetime.now(KST)` 를 바인딩한다(`.isoformat()` 없음). `trade_history.insert_trade` · `parameter_recommendations` 도 aware `datetime.now(KST)` 를 직접 바인딩한다. G-10 가드의 예외 집합(`_G10_EXEMPT_FILES`)은 비어 있다 — 금지 대상은 `utcnow`·`date.today`·`now(timezone.utc)` 뿐이다.
+
+### trade_history.py — 거래 내역
+
+정본 원문:
+
+- **`update_trade_status(ticker, trade_type, status, strategy="momentum", price=None, profit_loss=None, *, order_no=None, match_partial=False) -> int`**: 진행 중 거래 행의 status 를 갱신하고 영향 행 수를 돌려준다. COMPLETED 는 0건이면 호출자(OrderEngine)가 체결통보 선행 race 로 판단해 보정 INSERT 를 한다. **PARTIAL·CANCELLED 는 그런 흡수 경로가 없다** — 0건이면 장부 행이 없다는 뜻인데도 이전에는 아무 흔적이 없었다. `OrderEngine` 의 4 호출부(매수 PARTIAL·매도 PARTIAL·매수 CANCELLED·매도 CANCELLED)가 반환값을 받아 0건일 때 `[trade_status_update_miss] status= order_no= ticker= side=` WARNING 1줄을 낸다(cycle358 카드 D, 관측 전용 — 매매·상태전이 로직 무변경). 1회/(order_no, status)/일(`KstDailyEmitCap`), 로그 실패는 흡수해 주문 흐름을 끊지 않는다.
+  - `affected > 1` 이면 `[trade_status_multi_update]` WARNING 1행. 부분 UNIQUE 인덱스 때문에 `order_no` 를 넘긴 호출은 구조적으로 발화할 수 없다 — 이 마커는 과거를 재는 측정기가 아니라 WHERE·인덱스가 뒤로 물러나는 것을 잡는 감시자다.
+- `get_trade_pairs(strategy=None, ticker=None)`: 매매손익 뷰용 매수/매도 페어. 같은 `(ticker, strategy)` 그룹을 timestamp ASC 로 훑어 누적 보유수량이 0 으로 돌아올 때마다 closed 페어를 emit 하고(매수가·매도가는 가중평균, Decimal 보존), 잔여 보유는 open 페어로 emit 한다(미실현 손익은 `scanner.ticker_prices` 폴백, 시세 미수신이면 None). 응답 키 = buy_date / buy_time / sell_date / sell_time / ticker / ticker_name / buy_price / buy_qty / sell_price / sell_qty / profit_loss / profit_rate / status('closed'|'open') / strategy **+ `buy_order_nos: list[str]` / `sell_order_nos: list[str]` / `pair_key: str|None`**. `pair_key` 는 `strategy:ticker:첫 매수 order_no` 다 — 페어는 어디에도 저장되지 않으므로 그 사이클을 가리키는 유일한 안정 식별자다. **단수 필드는 불가하다**(운영 DB 실측에서 한 페어가 매수 주문 2건 이상인 사례가 9건). 빈 `order_no` 체결은 목록에서만 빠지고 행 자체는 그대로 만든다 → `pair_key=None` 이면 UI 버튼이 비활성이다. 시각은 `_to_kst()` 헬퍼가 ISO(UTC/KST/tz-naive 전부)를 `astimezone(KST).strftime()` 으로 명시 변환한다.
+- `get_today_buy_trades / get_today_sell_trades / get_today_pending_buys`: 당일 조회. 기준점은 `f"{today}T00:00:00+09:00"` KST 명시. **ticker 별 dedupe 가 걸려 있다 — 포지션 복구용이라 최신 1건만 돌려준다.**
+
+사유: `[trade_status_update_miss]` 도입 경위(「이전에는 아무 흔적이 없었다」·카드 D)와 `[trade_status_multi_update]` 의 성격 설명 문장, `get_trade_pairs` 의 실측 수치(한 페어 매수 주문 2건 이상 9건)를 걷어냈다. `get_today_pending_buys` 는 코드에 없다(`grep -rn get_today_pending_buys src tests tools` 0건) — 목록에서 뺐다.
+
+### system_logs.py — 시스템 로그
+
+정본 원문:
+
+- INSERT 페이로드의 `timestamp` 는 `datetime.now(KST).isoformat()` 으로 강제한다(DB default `now()` 에 기대지 않는다). 표준 logging 을 타고 오는 `_DbLogHandler` 경로(`src/main.py::_insert_log_to_db`)도 같은 KST 강제를 거친다 — 호출 빈도는 이쪽이 더 높다. AST 영구 가드 `tests/unit/db/test_system_logs_kst_timestamp.py` 2 케이스(`src/` 전체 rglob INSERT 호출처 + `write_log` 함수 단위).
+- 🔴 **같은 사이트에서 `logger.*` 와 `write_log` 를 함께 부르지 않는다** — `_DbLogHandler` 가 `record.name.startswith("src.")` 인 emit 을 이미 `system_logs` 에 적으므로 둘을 함께 부르면 이중 INSERT 다(운영 실측 평균 2.89배). AST 가드 `tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py` 가 `write_log` 호출 ±5줄의 `logger.*` 동시 호출을 0건으로 묶는다.
+- **`safe_write_log(level, message, *, fallback_debug=None)`**: `write_log` 의 graceful 변형. 예외를 전파하지 않고 `logger.debug` 만 남긴다. `fallback_debug` 를 주면 그 문자열을, 없으면 `"[safe_write_log] {message[:80]} 실패: level={level}"` 을 쓴다. `order_engine.py` 의 동형 패턴 4곳(`[stock_master_miss]` / `[stock_master_miss stale]` / `[market_closed_blocked]` / `[positions_reconciliation]`)이 공유한다.
+  - 내부 헬퍼 `_purge_by_cutoff(cutoff_iso, level_filter)` 는 `cutoff_iso=None` 이면 `RuntimeError("cutoff must not be None")` 를 raise 한다 — **WHERE 누락 삭제 절대 차단**이다.
+
+사유: `timestamp` 강제 형태 정정(`write_log` = `datetime.fromisoformat(now_kst_iso())` · `main.py::_insert_log_to_db` = `datetime.now(KST)`), 이중 INSERT 실측 배율(평균 2.89배) 이관, `safe_write_log` 소비처 정정(`[stock_master_miss stale]` 라는 마커는 없고 `[stock_master_miss] … reason=stale` 이다 · `sell_rejection.py` 알람도 쓴다), `_purge_by_cutoff` 시그니처 정정(keyword-only).
+
+### system_config.py — 시스템 설정 키-값 헬퍼
+
+정본 원문:
+
+- 🔴 **`tick_channel_gap_hold_enabled` 는 소비처가 없는 폐기 키다(cycle295)** — getter/setter 도 함께 삭제됐다. 운영 DB 에 값 `false` 가 남아 있다(읽는 코드가 없어 지우지 않았다 — DELETE 는 되돌리기 어려운 운영 조치라 승인 대상이고 얻는 것이 0행이다). ⚠️ **이 키 이름을 재사용하지 않는다** — 같은 이름을 반대 의미로 되살리면 저장된 `false` 가 조용히 적용된다.
+- `get_auto_regime_adjust() -> bool` / `set_auto_regime_adjust(value)`: 키 `auto_regime_adjust`, 기본 True
+- `get_krx_open_api_config()` / `set_krx_open_api_config(...)`: 키 `krx_open_api_enabled` / `krx_open_api_base_url` / `krx_open_api_key`. 🔴 **끄기 전에 소비처를 전수 확인한다** — 2026-08-08 에 이 토글을 "무효 키" 로 오판해 끈 결과 주 소스 `scanner._full_universe_load_krx_primary` 가 폴백으로 밀려 `full_universe_load` 가 3,577→60종목으로 degrade 했다. 키 값은 자격이므로 응답·로그에 노출하지 않는다
+- **외부 통합 토글 (DB 우선, `.env` 폴백)**: `get_dkstock_regime_enabled() -> bool | None` / `set_dkstock_regime_enabled(value)`(키 `dkstock_regime_enabled`) · `get_kis_mcp_enabled() -> bool | None` / `set_kis_mcp_enabled(value)`(키 `kis_mcp_enabled`). 기본값이 `None` 인 것이 `cash_usage_ratio`/`auto_regime_adjust` 와 다른 점이다 — 호출자가 `settings.*` 환경변수로 폴백한다(`.env` 호환 보존). 내부 헬퍼 `_get_bool_or_none(key)` / `_set_bool(key, value)` 가 JSONB `{"value": bool}` 과 과거 형식(직저장 bool, `'true'`/`'false'` 문자열)을 모두 흡수한다
+- ⚠️ **이 값들은 매수를 차단하지 않는다** — 매크로 레짐은 사이클 I 에서 관찰 지표가 됐고 이 키들은 대시보드·자문 payload 표시 전용이다.
+
+사유: `tick_channel_gap_hold_enabled` 폐기 경위(getter/setter 동반 삭제·운영 DB 잔존 행) 이관 — 이름 재사용 금지 금기는 정본에 남았다. `auto_regime_adjust` 기본값 정정 — 코드 `_AUTO_REGIME_ADJUST_DEFAULT = False`(cycle316, 판독 불가는 전부 False + `[auto_regime_adjust] default_used`). `krx_open_api` 토글 사고 경위(2026-08-08 3,577→60)는 루트 「핵심 안전 규칙」 비활성화 심층 검증 의무가 정본이라 링크로 줄였다. 레짐 표시 설정의 「사이클 I 에서 관찰 지표가 됐고」 경위를 걷어냈다.
+
+### strategy_funnel.py — 조건검색 단계별 추적
+
+정본 원문:
+
+  - `is_provisional=True` = 저녁 잠정 캡처 — 21:00 미리보기는 `target_date` 가 **다음 거래일**이고(오늘 봉 포함 목록), 부팅 +600초 레거시 재준비만 오늘 날짜를 쓴다. `False`(기본) = 09:30 자동·수동 trigger(확정, 오늘 날짜).
+  - 🔴 **잠정 쓰기는 확정 행을 덮지 못한다(③-b)** — `ON CONFLICT (target_date, strategy_id, step_no) DO UPDATE SET … WHERE NOT (strategy_funnel_snapshots.is_provisional = FALSE AND EXCLUDED.is_provisional = TRUE)`. 그 조합이면 `RETURNING` 이 비어 **`None` 을 돌려주고** 기존 확정 행(`snapshot_at` 포함)은 그대로다. 나머지 세 조합 — 잠정 쓰기가 잠정 행을 · 확정 쓰기가 잠정 행을 · 확정 쓰기가 확정 행을 덮는 경우 — 는 갱신된다. 그중 확정 쓰기가 잠정 행을 덮는 것은 매 거래일 09:35 자동 캡처가 그날 날짜 잠정 행(전날 21:00 미리보기 · 부팅 +600초 레거시)을 확정으로 바꾸는 정상 경로다. 반환 `None` 은 이 거부와 DB 예외 실패 둘 다다. 마이그레이션은 없다(SQL 한 줄). 가드 = `tests/unit/db/test_cycle364_funnel_protect_confirmed.py` · PG 왕복 `tests/integration/test_cycle364_funnel_protect_confirmed_pg.py`.
+- **호출은 공통 헬퍼 `scheduler.capture_funnel_snapshots(registry, *, is_provisional=False, target_date=None, skipped_out=None)` 하나로 모인다** — 호출처 3 = 09:30 `_scan_loop` 첫 진입의 자동 캡처(`_auto_capture_funnel_snapshots`, `is_provisional=False`, 오늘) / 21:00 저녁 미리보기 잠정 캡처(`_evening_funnel_capture_once` → `funnel_capture.evening_capture_once`, `is_provisional=True`, 다음 거래일) / 수동 trigger `POST /api/strategy-funnel/snapshot`(오늘). 헬퍼는 전략마다 라벨 가드(`funnel_capture.capture_skip_reason`)를 먼저 묻는다(`src/engine/CLAUDE.md` 「funnel 스냅샷 캡처」 절). 세 경로 모두 **단계별 + 최종(`step_no=99`)** 을 캡처한다. 단계 수집은 BFB/VCP/donchian `prepare()` 의 8단계 `_record_funnel_step` hook 이 하고, `_reset_daily_state` 가 동행 reset 한다.
+
+사유: 호출처·시각 서술을 `src/engine/CLAUDE.md` 「funnel 스냅샷 캡처」 절 링크로 줄였다. 원문의 「BFB/VCP/donchian `prepare()` 의 8단계」는 지금 코드와 다르다(단계 수 = BFB·VCP·donchian·kojiro·VB 9, LTV 7 — 정본 `src/engine/strategies/CLAUDE.md`). 「09:35 자동 캡처」 표기를 다른 줄과 같은 09:30(`TIME_SCAN_START`, 실행은 `_scan_loop` 첫 패스)으로 맞췄다.
+
+### stock_master.py — 종목 마스터 캐시
+
+정본 원문:
+
+- **eager 사전 갱신**: `scheduler._boot()` 마지막의 `_eager_refresh_stock_master_for_held_positions()` 가 보유 + `_pending_next_day_clear` 합집합을 sequential upsert 한다(24h fresh 는 skip). lazy 만 두면 첫 사이클 캐시 miss → SOR/NXT 발사 → KIS 거부로 이어진다
+
+사유: eager 갱신 위치 정정 — `_boot` 본체는 `boot_manager.boot` 이고, eager 갱신은 잔고 복구 뒤에 돈다(마지막 단계가 아니다 — 그 뒤에 익일청산 DB 복구·④ 대조가 있다).
+
+### `master_raw` 컬럼 (migration 034)
+
+정본 원문:
+
+- **`get_nxt_provenance_map(tickers) -> dict[str, bool]`**: 그 종목 행의 `raw` 에 KIS CTPF1002R 키 `cptt_trad_tr_psbl_yn` 이 **존재하는가**(값이 아니라 키 존재 — `raw ? 'cptt_trad_tr_psbl_yn'`). 형제 `get_nxt_tradable_map(tickers) -> dict[str, bool | None]` 과 같은 `= ANY($1::text[])` 1회 왕복 형태다. 용도 = 시세 채널 리졸버가 `nxt_tradable` 값을 **믿어도 되는지**의 판정이다. `_full_universe_load_krx_primary` 가 KRX raw 로 `nxt_tradable=False` 를 2,674종목에 도장하는데 그 raw 엔 이 키가 **없고**(09-14 실측 2,674/2,674 정확 일치) 16:1x basics_refresh(부팅 날은 07:53~08:08)가 진실을 복원한다 — 그 오염 창 안에 `TIME_PRESUBSCRIBE`(07:59)가 들어 있다. ⚠️ 소비처(`engine/no_feed_registry.ensure_fresh`)는 이 조회를 `get_nxt_tradable_map` 과 **독립 try** 로 감싼다 — 한 try 로 묶으면 출처 쿼리가 실패하는 날 cycle252 의 churn 차단까지 함께 죽는다
+- **`count_missing_kis_provenance_key() -> int`(cycle363 F-4)**: 위와 같은 판별자(`raw ? 'cptt_trad_tr_psbl_yn'`)의 **전체 카운트**다. `data_load_tasks._stock_master_basics_kis_keys_missing_above_threshold`(basics 강제 재실행 판정, `> 100` 이면 RUN)의 재료. 🔴 **`count_active()` 류의 "예외 시 0" 관례와 정반대다** — 이 함수는 **예외를 삼키지 않는다**. 여기서 0 으로 흡수하면 쿼리 실패가 "결측 0건"(SKIP 방향)으로 읽혀 사용자 결정("쿼리 실패는 RUN 쪽 fail-safe")과 반대로 움직인다. 예외는 그대로 전파해 `task_loop_helper._evaluate_slot_gate` 의 force_check 예외 처리(`reason=force_check_error`, RUN)가 흡수한다
+- 호출자: `src/engine/scanner.py::_stock_master_master_load_once()`(16:30 KST 매스 적재) · `src/engine/scanner.py::_is_master_blocked_for_entry(ticker)`(1단계 차단 7건 hook)
+
+사유: `get_nxt_provenance_map` 의 실측 수치(2,674종목 · 09-14 실측 2,674/2,674 정확 일치)를 걷어냈다. `count_missing_kis_provenance_key` 의 라벨 「F-4」 를 걷어냈다. 호출자 정정 — `_is_master_blocked_for_entry` 의 인자는 `(master_raw, raw)` 이고 차단은 11건(master_raw 7 + raw 4)이다. 조회 진입점은 `scanner.apply_master_block_filter`, 그 밖에 `sector_naming` · kojiro 섹터가 `get_master_raw` 를 읽는다.
+
+### stock_master_daily.py — KIS 일봉 정규화
+
+정본 원문:
+
+- **`change_rate` 는 `prdy_vrss` 로 후처리 산출한다(cycle365 P4)** — output2(일봉)에는 `prdy_ctrt`(전일 대비율)가 없다(`output1` 단건 요약 전용, KIS MCP `chk_inquire_daily_itemchartprice.py` COLUMN_MAPPING·`docs/kis/domestic-stock-quote.md:5514-5518` 확인). `_derive_change_rate(candle)` = `prdy_ctrt` 가 있으면(미래 호환) 그대로 쓰고, 없으면 `prdy_vrss ÷ (stck_clpr − prdy_vrss) × 100`(전일종가 = 종가 − prdy_vrss, `scanner._trade_amount_key` 의 `prdy_close = stck_prpr - prdy_vrss` 와 같은 부호 규약)로 계산한다. `prdy_vrss_sign`(1상한/2상승/3보합/4하한/5하락)으로 부호를 교차검증해 원본 문자열에 부호가 빠진 경우를 보정한다. 분모 0·`prdy_vrss` 결측은 0.0(graceful). 과거 적재 행도 같은 `_derive_change_rate` 로 채워져 있다(2026-09-26 1회 백필, 경위 = history). 권리락·액면변경일은 연속 종가 비율이 아니라 이 칸이 실제 등락률이다. 매매 코드는 이 칼럼을 읽지 않는다(소비처는 UI `StockMaster.tsx` 일봉 탭뿐, `grep` 전수 확인).
+    - ⚠️ 상한을 올린 것이 **곧 더 읽는다는 뜻은 아니다** — 소비처는 각자 요청한 만큼만 받는다. 100 이하를 요청하는 소비처(donchian 20 · ATR 15 · 매크로 ETF 90 · LLM 60 · kojiro 100 · UI 라우트 `le=100`)는 상향 전후로 **받는 행 수가 1행도 바뀌지 않는다**. 실제로 더 읽는 것은 VCP 가 `daily_fetch_depth_mode="full"` 일 때뿐이다.
+  1. **락 게이트(최우선)** — 윈도우 안 1 row 라도 `_row_has_lock` 이 참이면(`flng_cls_code not in ("", "00")` 또는 `abs(float(prtt_rate)) > 0`) DB 를 버리고 `fetch_daily_candles` 로 강제 폴백한다. 근거 = 수정주가는 조회 시점에 달린 값이라 DB 에 박제된 과거봉(락 전)과 KIS 재조정봉(락 후)이 어긋난다. 검사는 정규화 컬럼 `flng_cls_code`/`prtt_rate` 만 보므로 **KIS 추가 호출이 0건**이다. ⚠️ 판정 기준은 "기본값이 아니면 락 의심" 이다 — 운영 DB 실측으로 `flng_cls_code` 는 99.6% 가 `"00"`, `prtt_rate` 는 99.7% 가 `"0.0000"` 이고, `prtt_rate != 1.0` 을 기준으로 삼으면 전 종목이 폴백한다
+     - ⚠️ **알려진 부작용(단, 아래 F-3 예외 있음)** — `expected_head` 갈래는 원칙적으로 **하루치 결손도 폴백**으로 잡는다(`latest` 가 `expected_head` 보다 1영업일 이르면 폴백). 그래서 저녁 적재가 결손된 다음 날에는 전 종목이 KIS 로 폴백해 값은 맞아지지만 prepare 가 느려진다. `[daily_head_stale]`(`boot_manager.emit_daily_head_staleness`)가 같은 아침 결손을 알린다.
+     - 🔴 **cycle363 F-3(독립 검증 반영) — 깊은 요청(`days > _KIS_SINGLE_CALL_MAX_DAYS`=100) 예외.** KIS 는 1회 호출에 최대 100봉만 준다 — 위 원칙대로 그냥 폴백하면 VCP `daily_fetch_depth_mode="full"`(~250봉 요청)이 100봉으로 깎여 200 EMA 가 75 EMA 로 퇴화한다(연휴와 무관하게 **평상시 요일에도** 헤드가 하루 밀린 종목마다 발생). 그래서 `days > 100` 이면 **① 현행 달력 판정으로 신선(`_legacy_calendar_fresh` — 4일 이내)하거나 ② `latest` 가 `expected_head` 의 정확히 1영업일 전**(`_is_exactly_one_business_day_behind`, `trading_calendar.previous_trading_day` 지연 import, never-raise — 조회 실패·모름은 False)이면 폴백하지 않고 DB 행을 그대로 쓴다. 깊은 읽기의 평일 행위는 현행과 같고(사용자 결정 「깊은 읽기는 DB 유지」), 연휴 뒤 1영업일 결손도 250봉을 지킨다. **둘 다 아니거나(연휴 뒤 2영업일 이상 결손 등) 얕은 요청(≤100봉)은 원칙대로 폴백**한다. 회귀 = `tests/unit/db/test_cycle363_expected_head.py`(F3 절).
+  - 상수 `DAILY_STALENESS_DAYS = 4`(달력일 — 주말 2일 + 공휴일 마진, 거짓 폴백 차단)는 `expected_head` 가 없을 때만 쓴다. 달력일이라 5일 이상 연휴 뒤에는 전 종목을 낡음으로 센다 — 그것을 막는 것이 `expected_head` 다. 전략별 `days`/`min_required` = VB/LTV 22 · donchian 63 · BFB 35 · VCP 100 · kojiro 80
+- **retention `DAILY_RETENTION_DAYS = 390`(달력일 ≈ 261 영업일, cycle299)**. 실효 장기선이 정확히 200 이 되려면 일봉이 225 영업일 필요하고(`effective_ema_long = min(ema_long, 보유 − uptrend_days(20) − 5)`), 그 깊이를 담아 둘 자리가 이 값이다. 일봉 적재 대상 전부에 적용되는 backfill target 225 위로 **36 영업일 마진**이 남는다(환산 앵커 = 사이클196 실측 230cal ⇄ 154영업일). 🔴 **이 값과 target 은 함께 움직인다** — target 이 보유 영업일을 넘으면 `existing_count` 가 영원히 target 에 못 닿아 매일 밤 전량 재backfill(churn)이 된다(사이클 196 이 시정한 결함). 그 깊이를 실제로 읽으려면 위 `get_recent_daily` 의 상한(`_MAX_DAILY_ROWS`)과 전략 쪽 요청(VCP `daily_fetch_depth_mode`)이 둘 다 열려 있어야 한다. 가드 `tests/unit/db/test_cycle299_retention_expansion.py`.
+
+사유: `change_rate` 근거 문서 줄번호·백필 날짜, 락 게이트 실측 비율(99.6%·99.7%), 깊은 요청 예외의 라벨(F-3·독립 검증)과 사용자 결정 인용, retention 환산 앵커(사이클196 230cal ⇄ 154영업일)를 걷어냈다. 의미 정정 — 100행 넘게 읽는 소비처는 VCP full 하나가 아니라 `market_unit`(`FETCH_ROWS = 120`) · `pyramid_shadow`(400)까지 셋이다. 「전략별 `days`/`min_required`」 의 수치는 `min_required` 값이다. 225 의 근거(`effective_ema_long`)는 `src/engine/CLAUDE.md` 「저녁 데이터 적재」 절이 정본이라 링크로 줄였다.
+
+### pending_next_day_clear.py — 익일청산 큐 영속화
+
+정본 원문:
+
+- 테이블 `pending_next_day_clear`(migration 038). 복합 PK `(target_date DATE, ticker TEXT, strategy_id TEXT)` + `created_at TIMESTAMPTZ` + `reason VARCHAR(50) NOT NULL DEFAULT 'unknown'`(진단용 — `nxt_not_tradable` / `nxt_open_missing` / `market_order_disallowed_fallback`)
+  - `save_pending_ndc(target_date, ticker, strategy_id, reason="unknown")` — 1행 UPSERT. 등록 사이트 4 = `_execute_next_day_clear` 의 `nxt_tradable=False` 분기 · `_execute_next_day_clear` 의 NXT 시가 미수신 분기 · sell_rejection 의 NXT 익일 전환 · order_engine 매도 거부 NXT 폴백
+  - `delete_pending_ndc(ticker)` — `_drain_pending_next_day_clear` 의 finally 에서 호출
+  - `load_pending_ndc(target_date) -> set[tuple[str, str]]` — `boot()` 마지막 단계에서 메모리 set 복구
+
+사유: 코드 사실 정정 — `save_pending_ndc` 호출은 `scheduler._execute_next_day_clear` 의 3분기뿐이고 `reason` 값은 `nxt_not_tradable` · `nxt_open_missing` · `nxt_underthreshold` 다(`market_order_disallowed_fallback` 은 docstring 에만 있다). order_engine 의 NXT 폴백 실패 익일 전환(sell_rejection 판정)은 메모리 set 에만 넣고 이 테이블에 쓰지 않는다. `delete_pending_ndc` 의 인자는 `(target_date, ticker, strategy_id)` 다.
+
+### backtest_runs.py — 외부 MCP 백테스트 실행 이력
+
+정본 원문:
+
+20:00 AI 자문 직후 6 전략 × 2 kind = 12 job 을 fire-and-forget 으로 띄운 기록이다.
+| `update_status(run_id, status, *, mcp_job_id=None, error_message=None, metrics=None)` | `running`=mcp_job_id 부여 / `completed`=metrics + `completed_at` / `failed`=error_message + `completed_at` / `skipped`=로컬 실행기 없음(외부 MCP 서버 철거 2026-08-18), `completed_at` 기록 |
+
+사유: 「6 전략 × 2 kind = 12 job」 을 「활성 전략마다 2 kind」 로 바꿨다(활성 전략 수는 운영 DB 가 정한다). `skipped` 의 날짜 꼬리(외부 MCP 서버 철거 2026-08-18)를 걷어냈다.
+
+### market_regime_snapshots.py — 매크로 레짐 일일 스냅샷 (출처 = 자체 `macro` 컨테이너)
+
+정본 원문:
+
+`_boot()` 시점에 1행. 매크로 레짐은 **관찰 지표**이고 매수를 차단하지 않는다(사이클 I) —
+
+사유: 「(사이클 I)」 경위 꼬리를 걷어냈다.
+
+
+## 2026-10-02 sync-docs 압축 2차 — 정본에서 이관
+
+사용자 요청 「유지해야할 내용도 전반적으로 압축하자」에 따른 2차 압축 패스다. 아래는 정본(`src/db/CLAUDE.md`)에서 경위·설명·다른 정본과 겹친 서술을 걷어내거나 줄인 줄의 **원문**이다. 문장만 다듬은 줄은 옮기지 않았다.
+
+### pg.py — asyncpg 연결 풀 + 쿼리 헬퍼 (DB 클라이언트 정본)
+
+정본 원문:
+
+- **KST 타임존은 `init_pool()` 의 `server_settings={"timezone": "Asia/Seoul"}`(연결 핸드셰이크 파라미터)로 지정한다.** `init=` 훅 안의 `SET TIME ZONE`(세션 레벨)으로 쓰지 않는다 — 풀이 release 때 RESET 해 UTC 로 돌아가고, `to_char(..., '+09:00')` 가 UTC 를 렌더해 KST 날짜가 하루 밀린다.
+- **`_with_retry(coro_factory, *, op="")`** — 연결 계열 예외를 1회 재시도한다. `_RETRY_EXCEPTIONS = (asyncpg.PostgresConnectionError, asyncpg.InterfaceError, asyncpg.exceptions.ConnectionDoesNotExistError, asyncio.TimeoutError)`, 시도 사이 `_RETRY_BACKOFF_SECS = 0.2`, 소진하면 마지막 예외를 raise 한다(호출자의 graceful 분기 보존). 로그는 `logger.warning("[pg_retry] op=…")` 단독이고 `write_log` 는 부르지 않는다(사이클 72 이중 INSERT 차단). **read 전용** — `fetch`/`fetchrow`/`fetchval` 만 경유하고, 멱등이 보장되지 않는 쓰기(`execute`/`executemany`)는 경유하지 않는다.
+
+사유: `to_char` 가 UTC 를 렌더하던 메커니즘 설명과 「사이클 72 이중 INSERT 차단」 경위 꼬리를 걷어냈다. 금기(`SET TIME ZONE` 금지 · `write_log` 동반 금지 · read 전용)는 정본에 남았다.
+
+### trade_history.py — 거래 내역
+
+정본 원문:
+
+- **`get_trades_in_range(start_date, end_date, strategy=None)`**: `[start_date, end_date]` KST inclusive 조회. 경계 `f"{date}T00:00:00+09:00"` / `f"{date}T23:59:59.999999+09:00"` 에 **`+09:00` 을 반드시 명시**한다 — 없으면 UTC 로 해석돼 KST 00:00~09:00 거래가 빠진다. `recommendation_engine` 과 `log_analysis_engine` 이 공유한다.
+  - `pair_key` = `strategy:ticker:첫 매수 order_no` — 저장되지 않는 페어의 유일한 안정 식별자다. 한 페어에 매수 주문이 여럿일 수 있어 주문번호는 **목록**이다. 빈 `order_no` 체결은 목록에서만 빠지고 행은 남는다 → `pair_key=None` 이면 UI 버튼이 비활성이다.
+
+사유: `+09:00` 누락 시 KST 00:00~09:00 이 빠진다는 이유는 같은 파일 「TIMESTAMPTZ 계약」 절과 겹쳐 지웠다. `pair_key=None` 의 UI 버튼 비활성은 `src/routes/CLAUDE.md` `/api/history/pnl` 행·`frontend/CLAUDE.md` 가 적는다.
+
+### llm_buy_evaluations.py — AI 매수평가 기록
+
+정본 원문:
+
+- `list_by_order_nos([...], *, trade_date=None)`: 존재하는 **`(trade_date, order_no)` 쌍 전부**를 `trade_date DESC` 로 돌려준다(빈 목록은 **쿼리 없이** `[]`). 🔴 **주문번호당 1행으로 접지 않는다** — 접으면 옛 날짜 평가가 목록에서 사라지는데 `get_by_order(..., trade_date=…)` 로는 읽히는 비대칭이 생긴다. 대조는 라우트가 `"<trade_date>|<order_no>"` 복합 키로 한다.
+- 회고 층화 열 — `prompt_version`/`feature_version`(전후 행을 **섞어서 회귀 금지**) · `budget_total_won`/`budget_remaining_after_won`/`open_positions_n`(차단의 반사실은 "손익 소멸" 이 아니라 "다른 종목 매수로 대체" 일 수 있다) · `raw_response`(파싱 전 원문) · `input_payload`(`build_messages` 3인자 전체, 요약·절단 금지 = 오프라인 재채점의 유일한 다리). 분석 시 `trade_history.status` 로 **체결/부분체결/미체결/취소 4분류를 반드시 분리**한다(미체결을 손익 0 으로 섞으면 통째로 오염된다).
+
+사유: 접지 않는 이유의 상세(`get_by_order(..., trade_date=…)` 와의 비대칭)와 예산 3열의 근거(차단의 반사실 = 다른 종목 매수로 대체)를 걷어냈다. 금기 문장은 정본에 남았다.
+
+### system_logs.py — 시스템 로그
+
+정본 원문:
+
+- `get_logs(limit=100, log_level=None, *, from_date=None, to_date=None, page=1, size=None)` → `{"items": list[dict], "total": int, "total_pages": int}`. `size` 미지정 시 `limit` 을 흡수한다. 기간 필터는 `timestamp >= "{date}T00:00:00+09:00"` / `<= "{date}T23:59:59.999999+09:00"` 로 KST 를 강제한다. `total` 은 별도 `SELECT count(*)`, `total_pages = ceil(total / size)`.
+- **`search_logs(q, *, level=None, start=None, end=None, limit=200) -> {logs, total, has_more}`**: `message ILIKE '%q%'`. `level` 이 None·`"ALL"` 이면 무필터. `start`/`end` 는 ISO 8601 `>=`/`<=`. `limit` 1~1000 clamp. 빈 `q` 는 `ValueError`. `has_more = total > len(logs)`(UI 의 "키워드 좁히기" 안내 근거). 라우트 `/api/logs/search` 와 1:1.
+
+사유: `/api/logs`·`/api/logs/search` 파라미터 뜻(`level` ALL·None · ISO 8601 `start`/`end` · UI 안내)은 `src/routes/CLAUDE.md` 해당 행이 적는다.
+
+### log_reports.py — 일일 로그 분석 리포트
+
+정본 원문:
+
+  - `POST /api/log-reports/run` 의 비파괴는 **라우트 선조회 가드**(`_is_complete_report` = `metrics.snapshot_pass` 아님 ∧ `summary` 가 비지 않음 ∧ OpenAI 실패 placeholder 아님 ∧ `model` 채워짐)가 혼자 담당한다. 라우트가 `"nothing"` 을 쓰지 않는 이유 = 20:05~21:30 에는 1차 스냅샷 행이 있어 `DO NOTHING` 이면 수동 복구의 완전판이 조용히 버려진다.
+
+사유: `_is_complete_report` 4축은 `src/routes/CLAUDE.md` `/api/log-reports/run` 행이 정본이다. 라우트가 `"nothing"` 을 쓰지 않는 이유는 정본에 한 문장으로 남겼다.
+
+### system_config.py — 시스템 설정 키-값 헬퍼
+
+정본 원문:
+
+- **전환 다이얼 4키** — `get_tick_channel_switch_enabled()` / `set_tick_channel_switch_enabled(enabled)`(`tick_channel_switch_enabled`, bool — **살아 있는 구독의 전환만** 끈다) · `get_tick_channel_switch_offset_secs()`(`tick_channel_switch_offset_secs`, float — 프리장 종료 뒤 전환까지) · `get_tick_channel_switch_ack_timeout_secs()`(`tick_channel_switch_ack_timeout_secs`, float — HIGH make-before-break ACK 대기) · `get_tick_channel_revert_probe_secs()`(`tick_channel_revert_probe_secs`, float — 자동 원복 측정 시점. 기본값은 `stale_diagnostics.SUBSCRIBE_GRACE_SECS` 재사용이고 단일 정의처는 거기다). 클램프는 읽는 쪽이 한다.
+- `get_krx_open_api_config()` / `set_krx_open_api_config(...)`: 키 `krx_open_api_enabled` / `krx_open_api_base_url` / `krx_open_api_key`. 🔴 **끄기 전에 소비처를 전수 확인한다** — `src/api/krx.py` 가 이 토글을 읽고, 꺼져 있으면 `KrxApiError` 를 던진다. 그러면 주 소스 `scanner._full_universe_load_krx_primary` 가 KIS 폴백으로 밀려 전 종목 적재가 줄어든다(루트 `CLAUDE.md` 「핵심 안전 규칙」 비활성화 심층 검증 의무). 키 값은 자격이라 응답·로그에 노출하지 않는다
+- **task 신선도 마커**: `get_task_last_success(task_label) -> str | None`(키 `task_last_success_<label>`) / `set_task_last_success(task_label, iso_ts)`, 값은 KST ISO(`now_kst_iso()`). `task_loop_helper.run_periodic_task_loop` 의 부팅 즉시 실행 게이트 두 갈래가 읽는다 — **시간 게이트** `immediate_skip_if_fresh_hours`(master·financial)와 **영업일 슬롯 게이트** `immediate_skip_if_fresh_since_trading_slot`(basics·daily_load·full_universe). 두 게이트 모두 `once()` 성공 직후에만 기록한다(판정 순서 = `src/engine/CLAUDE.md` 「정기 task 루프」 절). 같은 키 공간을 60초 하트비트 `engine_alive_heartbeat`(`uptime_monitor.py`)도 쓴다. **`get_task_last_success_bulk(task_labels) -> dict`** 은 `key = ANY($1)` **단일 쿼리**다(`GET /api/market-ops` 용). 결측 라벨은 **키 자체가 없고**(빈 문자열이 아니다), 쿼리 실패는 빈 dict(fail-open)
+- **적용 위치** = `src/engine/scanner.py::subscribe_filtered_stocks` 진입 hook, 가격 → 거래대금 순. 60s TTL 캐시는 scanner 모듈 전역(`_get_price_filter_for_scanner` / `_get_trade_amount_filter_for_scanner`)이고 `invalidate_price_filter_cache_scanner()` / `invalidate_trade_amount_filter_cache_scanner()` 가 PUT 직후 무효화한다 — **무효화가 unsubscribe 를 발화시키지 않는다**(KIS LMS chain 차단)
+- 거래대금 소스 = `scanner.ticker_market_info["trade_amount_raw"]`(원) 1순위, `stock_master.raw.acml_tr_pbmn` 2순위. 양쪽이 없거나 0 이면 **통과**시킨다(KIS 추가 호출 0건, 09:00 race 에서 통째로 매매 불능이 되지 않게)
+
+사유: 전환 다이얼 4키의 뜻·기본값은 `src/realtime/CLAUDE.md` 「시세 채널 — 시간축 전환 + 프리 창 속성축 보정」 절 운영 다이얼 표, 신선도 게이트 대상(master·financial / basics·daily_load·full_universe)은 `src/engine/CLAUDE.md` 「정기 task 루프」 절, scanner 필터의 거래대금 소스·보호 처리는 `src/engine/CLAUDE.md` 「risk.py」 절이 적는다. krx_open_api 비활성화 결과의 「전 종목 적재가 줄어든다」 서술은 루트 비활성화 심층 검증 의무 항목과 겹쳐 줄였다.
+
+### `master_raw` 컬럼 (migration 034)
+
+정본 원문:
+
+- **`get_nxt_provenance_map(tickers) -> dict[str, bool]`**: 그 행의 `raw` 에 KIS CTPF1002R 키 `cptt_trad_tr_psbl_yn` 이 **존재하는가**(값이 아니라 키 존재 — `raw ? 'cptt_trad_tr_psbl_yn'`). 형제 `get_nxt_tradable_map(tickers) -> dict[str, bool | None]` 과 같은 `= ANY($1::text[])` 1회 왕복이다. 용도 = 시세 채널 리졸버가 `nxt_tradable` 값을 **믿어도 되는지** 판정 — `_full_universe_load_krx_primary` 가 이 키 없는 KRX raw 로 `nxt_tradable=False` 를 도장하고, 16:1x basics_refresh(부팅 날은 07:53~08:08)가 진실을 복원한다. 그 오염 창 안에 `TIME_PRESUBSCRIBE`(07:59)가 있다. ⚠️ 소비처(`engine/no_feed_registry.ensure_fresh`)는 이 조회를 `get_nxt_tradable_map` 과 **독립 try** 로 감싼다 — 한 try 로 묶으면 출처 쿼리가 실패하는 날 cycle252 의 churn 차단까지 죽는다
+- **`count_missing_kis_provenance_key() -> int`(cycle363)**: 같은 판별자(`raw ? 'cptt_trad_tr_psbl_yn'`)의 **전체 카운트** — `data_load_tasks._stock_master_basics_kis_keys_missing_above_threshold`(basics 강제 재실행 판정, `> 100` 이면 RUN)의 재료다. 🔴 **`count_active()` 류의 "예외 시 0" 관례와 반대로 예외를 삼키지 않는다** — 0 으로 흡수하면 쿼리 실패가 "결측 0건"(SKIP)으로 읽혀 사용자 결정("쿼리 실패는 RUN 쪽 fail-safe")과 반대로 움직인다. 예외는 `task_loop_helper._evaluate_slot_gate` 의 force_check 예외 처리(`reason=force_check_error`, RUN)가 흡수한다
+
+사유: 출처 판별이 왜 필요한가(16:1x basics_refresh 가 진실을 복원하기 전, 부팅 날 07:53~08:08 오염 창 안에 `TIME_PRESUBSCRIBE`(07:59)가 있다)와 소비처의 독립 try 금기는 `src/engine/CLAUDE.md` `no_feed_registry.py` 항목이, basics 강제 재실행 판정 세부(`> 100` · `_evaluate_slot_gate`)는 「정기 task 루프」 절이 적는다. `count_missing_kis_provenance_key` 의 예외 비흡수 금기는 정본에 남았다.
+
+### `get_stats()` — 운영 진단 집계 8키
+
+정본 원문:
+
+- `count_all` / `bfdy_clpr_present` / `nxt_tradable_count` / `with_hts_avls` / `with_acml_tr_pbmn` / `top_10_recent` / `total_daily_rows` / `last_daily_load_at`(뒤 둘은 `stock_master_daily` 연동)
+
+사유: 8키 목록은 `src/routes/CLAUDE.md` `/api/stock-master/stats` 행이 적는다.
+
+### `list_by_filter()` — scanner 유니버스 조회
+
+정본 원문:
+
+  - `is_kospi200`·`is_kosdaq150`: **둘 다 True 면 `(is_kospi200 = true OR is_kosdaq150 = true)` OR 합집합**(donchian_swing `FUNNEL_STAGES[0]` "코스피200+코스닥150 합집합" 의무 정합), 한쪽만 주면 그 컬럼 AND, 둘 다 None 이면 무필터
+  - `exclude_etf_like`: `False`(기본)면 SQL 이 바뀌지 않는다. `True` 면 `NOT (CASE WHEN 코드 <> '' THEN 코드 = ANY(ETF_GROUP_CODES) ELSE 이름 LIKE ANY('%kw%'…) END)` 로 ETF/ETN(류)를 뺀다. 코드 = `UPPER(BTRIM(raw->>'scty_grp_id_cd', E' \t\r\n'))`, 이름 = 아래 SELECT 의 COALESCE 이름. `src.engine.etf_like.is_etf_like` 와 **행 단위로 같다**(PG 차등 테스트 `tests/integration/test_cycle380_list_by_filter_etf_pg.py`). 상수는 그 leaf 에서 모듈 상단 import 로 가져오고 여기 다시 적지 않는다(AST G6). 코드·`raw`·이름이 NULL 이어도 `COALESCE` 가 `''` 로 받아 `NOT (...)` 이 NULL 이 되는 일이 없다. 6 전략 `_scan_universe` 만 `True` 를 넘기고 전략 밖 호출자(`scanner._stock_master_financial_load_once` · `tools/validate_turtle_sizing.py`)는 기본값이다.
+- SELECT 의 종목명 = `COALESCE(NULLIF(name, ''), NULLIF(TRIM(master_raw->>'hts_kor_isnm'), ''), '') AS name` — ① CTPF1002R 이름 → ② 마스터파일 한글명(고정폭 패딩 TRIM) → ③ `''`(호출자 `row.get("name","")` 의 None 회귀 차단). 별칭이라 반환 dict 키는 그대로다.
+- `sort_by`: 정렬 훅. `None`(기본)이면 `refreshed_at DESC`. 실사용은 별도 사이클에 인계돼 있다.
+
+사유: `FUNNEL_STAGES[0]` 정합 문구는 정본에 남겼다. NULL 처리 설명·「고정폭 패딩 TRIM」·「별칭이라 반환 dict 키는 그대로」·`sort_by` 실사용 인계 상태를 걷어냈다.
+
+### `list_paged_by_filter()` — UI 종목목록 조회
+
+정본 원문:
+
+- 🔴 **시총·거래대금 비교는 반드시 생성 컬럼(migration 039)으로 한다** — `raw` 의 두 값은 jsonb *문자열*이라 `raw->'hts_avls' >= N::jsonb` 비교가 **항상 false** 다(어떤 임계든 0건이고 market·name 필터만 동작해 결함이 보이지 않는다). 생성 컬럼은 `CASE WHEN raw->>'…' ~ '^[0-9]+$' THEN (raw->>'…')::bigint END STORED` 라 비숫자는 NULL 로 빠진다. AST 가드 `tests/unit/db/test_cycle168_list_paged_generated_cols.py` 가 본체의 jsonb gte 잔존을 0건으로 묶는다
+
+사유: 「어떤 임계든 0건이고 market·name 필터만 동작해」 설명을 한 구절로 줄였다.
+
+### stock_master_daily.py — KIS 일봉 정규화
+
+정본 원문:
+
+- **`change_rate` 는 `_derive_change_rate(candle)` 가 산출한다(cycle365)** — 일봉 output2 에는 `prdy_ctrt` 가 없다(`output1` 전용). `prdy_ctrt` 가 있으면(미래 호환) 그대로, 없으면 `prdy_vrss ÷ (stck_clpr − prdy_vrss) × 100`(`scanner._trade_amount_key` 의 `prdy_close = stck_prpr - prdy_vrss` 와 같은 부호 규약). `prdy_vrss_sign`(1상한/2상승/3보합/4하한/5하락)으로 부호를 교차검증해 보정하고, 분모 0·`prdy_vrss` 결측은 0.0. 과거 행도 같은 함수로 채워져 있다. 권리락·액면변경일에는 연속 종가 비율이 아니라 이 칸이 실제 등락률이다. 매매 코드는 읽지 않는다(소비처 = UI `StockMaster.tsx` 일봉 탭).
+  - `get_recent_daily(ticker, days=20)` — 최근 N일(DESC). 🔴 **`days` 를 `max(1, min(days, _MAX_DAILY_ROWS))` 로 하드 클램프**한다. 행을 돌려주는 읽기 4함수(`get_donchian_high`·`get_atr`·`get_recent_daily_with_fallback`·`get_recent_daily_normalized`)가 전부 이 함수를 경유해 **어느 소비처도 상한을 넘겨 읽을 수 없다**. 나머지 소비처는 스칼라 집계다(`max_bas_dd`·`max_bas_dd_before`·`count_all`·`count_by_ticker`·`routes/market_ops.py`). 예외 = `list_provisional_rows` 는 전 종목 날짜 창 `[since, head]` 조회라 이 관문 밖이다(창 폭 = `daily_bar_finalize.WINDOW_CAL_DAYS` 21일).
+    - **`_MAX_DAILY_ROWS = 400`(cycle300)** — 보유 약 261 영업일(retention 390달력일)과 VCP full 요청 `ema_long(200) + base_max_days(75) + 10 = 285` 를 자르지 않는 높이이면서, 오염된 파라미터·호출 버그가 `LIMIT` 에 실려 한 종목 조회가 전체 스캔이 되는 것을 막는 폭주 방어선이다.
+    - ⚠️ 상한은 관문이지 읽는 양이 아니다. 100행 넘게 요청하는 소비처 = VCP `daily_fetch_depth_mode="full"` · `market_unit`(`FETCH_ROWS = 120`) · 야간 `pyramid_shadow`(400). 나머지(donchian 20 · ATR 15 · 매크로 ETF 90 · LLM 60 · kojiro 100 · UI 라우트 `le=100`)는 100 이하다.
+  1. **락 게이트(최우선)** — 윈도우 안 1 row 라도 `_row_has_lock`(`flng_cls_code not in ("", "00")` 또는 `abs(float(prtt_rate)) > 0`)이면 `fetch_daily_candles` 로 강제 폴백한다. 수정주가는 조회 시점에 달린 값이라 DB 의 락 전 과거봉과 KIS 재조정봉이 어긋나기 때문이다. 정규화 컬럼만 보므로 **KIS 추가 호출 0건**이다. ⚠️ 판정 기준은 "기본값이 아니면 락 의심" 이다 — 정상 행은 거의 전부 `"00"`·`"0.0000"` 이고, `prtt_rate != 1.0` 을 기준으로 삼으면 전 종목이 폴백한다
+     - 🔴 **깊은 요청(`days > _KIS_SINGLE_CALL_MAX_DAYS`=100) 예외(cycle363)** — KIS 는 1회 최대 100봉이라, 그냥 폴백하면 VCP `daily_fetch_depth_mode="full"`(~250봉)이 100봉으로 깎여 200 EMA 가 75 EMA 로 퇴화한다. 그래서 `days > 100` 이면 **① `_legacy_calendar_fresh`(달력 4일 이내) 또는 ② `latest` 가 `expected_head` 의 정확히 1영업일 전**(`_is_exactly_one_business_day_behind`, `trading_calendar.previous_trading_day` 지연 import, never-raise — 조회 실패·모름은 False)이면 DB 행을 그대로 쓴다. **둘 다 아니거나(연휴 뒤 2영업일 이상 결손 등) 얕은 요청(≤100봉)은 원칙대로 폴백**한다. 회귀 = `tests/unit/db/test_cycle363_expected_head.py`(F3 절).
+  - `DAILY_STALENESS_DAYS = 4`(달력일 — 주말 2일 + 공휴일 마진)는 `expected_head` 가 없을 때만 쓴다. 5일 이상 연휴 뒤 전 종목을 낡음으로 세는 것을 `expected_head` 가 막는다. 전략별 `min_required` = VB/LTV 22 · donchian 63 · BFB 35 · VCP 100 · kojiro 80
+- **retention `DAILY_RETENTION_DAYS = 390`(달력일 ≈ 261 영업일, cycle299)** — 일봉 backfill target 225 영업일(실효 장기선 200 의 근거 = `src/engine/CLAUDE.md` 「저녁 데이터 적재」 절) 위로 **36 영업일 마진**이다. 🔴 **이 값과 target 은 함께 움직인다** — target 이 보유 영업일을 넘으면 `existing_count` 가 target 에 영원히 못 닿아 매일 밤 전량 재backfill(churn)이 된다. 그 깊이를 실제로 읽으려면 `get_recent_daily` 상한(`_MAX_DAILY_ROWS`)과 VCP `daily_fetch_depth_mode` 가 둘 다 열려 있어야 한다. 가드 `tests/unit/db/test_cycle299_retention_expansion.py`.
+- 🔴 **`updated_at` 은 「KIS 값을 받아 그 행에 쓴 순간」 하나만 뜻한다** — `_candle_to_row` 가 `now_kst_iso()` 로 찍고, `_UPSERT_DAILY_SQL` 이 충돌 때도 `updated_at = EXCLUDED.updated_at` 으로 다시 찍는다. 전일 잠정 봉 판정(`list_provisional_rows`)이 이 칼럼 하나에 기댄다. 20:30 적재가 쓴 그날 봉의 종가·고가·저가는 잠정이고(KIS 가 그 시각엔 애프터마켓 값을 주고 D+1 새벽에 정규장 값으로 바꾼다), 다음 거래일 아침 부팅이 prepare 직전에 `daily_bar_finalize` 로 확정한다(흐름 = `src/engine/CLAUDE.md` 「저녁 데이터 적재」 절).
+
+사유: `change_rate` 부호 규약의 출처(`scanner._trade_amount_key`)와 과거 행 백필 사실, `_MAX_DAILY_ROWS` 의 285 산식(`ema_long(200) + base_max_days(75) + 10`), 100행 이하 소비처 목록(donchian 20 · ATR 15 · 매크로 ETF 90 · LLM 60 · kojiro 100 · UI 라우트 `le=100`), 락 게이트·깊은 요청 예외의 경위 서술, 5일 연휴 낡음 판정 설명, 전략별 `min_required` 값(정본 = `src/engine/strategies/CLAUDE.md` 「prepare 공통」 절), retention 깊이를 읽기 위한 조건, `updated_at` 잠정 봉 설명(정본 = `src/engine/CLAUDE.md` 「저녁 데이터 적재」 절)을 걷어냈다. 금기와 가드 경로는 정본에 남았다.
+
+### pending_next_day_clear.py — 익일청산 큐 영속화
+
+정본 원문:
+
+메모리 `_pending_next_day_clear: set[tuple]` 만 두면 EC2 재기동이 큐를 통째로 잃는다 —
+6/17 알테오젠·알지노믹스 15:20 강제청산 누락이 그 사고다. 이 테이블이 그 큐의 복구 원천이다.
+
+사유: 사고 문장을 금기 이유 한 구절로 줄였다.
+
+### TIMESTAMPTZ 계약
+
+정본 원문:
+
+우리 규약은 두 가지뿐이다.
+
+- **표시 형식** — ISO 문자열이 필요하면 SQL 에서 `to_char(...,'+09:00')` 로 KST 를 렌더한다.
+- **비교 경계** — 조회 경계 문자열에 `+09:00` 을 명시한다(`get_trades_in_range` / `get_logs` / `_fetch_logs_in_range`). 빠뜨리면 UTC 로 해석돼 KST 00:00~09:00 이 잘린다.
+
+풀 세션 timezone 은 `init_pool(server_settings={"timezone": "Asia/Seoul"})` 이 정한다.
+
+사유: 표시 형식은 「asyncpg 계약 패턴」 절과, 풀 세션 timezone 은 「pg.py」 절과 겹쳐 한 문단으로 합쳤다.
+
+### 2차 검증 정정 — 압축에서 빠진 조건 7건을 정본에 되살림
+
+2차 압축본을 코드와 대조한 검증에서 조건·한정어가 빠진 곳 7건이 나왔다. 모두 정본에 되살렸다. 위 이관 기록의 「사유」 중 틀린 것은 여기서 바로잡는다(위 기록은 고치지 않는다).
+
+- **`eval_kind` 의 「들어올 자리」** — 압축본은 `'blocked'` 를 현재 동작처럼 적었다. 실제로 enforce 는 미구현이고(`src/engine/llm_buy_gate.py:10`) 쓰는 곳은 `llm_buy_gate.py:1486` 의 `eval_kind="order"` 하나다. migration 043 COMMENT 도 「''blocked'' = (미래 enforce)」 다. 정본에 「미구현 enforce 를 받을 예약 값 · 지금은 `'order'` 뿐」 을 되살렸다.
+- **`"nothing"` 의 조건** — 압축본은 「`DO NOTHING` 이면」 을 빠뜨려 수동 복구의 완전판이 지금 버려지는 것처럼 읽혔다. 위 log_reports.py 기록의 「한 문장으로 남겼다」 는 조건 없이 남아 정정한다. 정본에 「`"nothing"` 이면」 을 되살렸다.
+- **`boot_manager` 전용 3함수의 `+09:00`** — 원문 「당일 조회는 `+09:00` 을 명시한다」 를 지웠는데 이관 기록이 없었다. 「TIMESTAMPTZ 계약」 절의 목록이 완결처럼 읽혀 그 목록에 `trade_history._today_kst_iso()` 당일 조회(`boot_manager` 전용 3함수 포함)를 넣었다. 근거 = `src/db/trade_history.py:375` `_today_kst_iso()`.
+- **`search_logs` 의 포함 경계** — 「파라미터 뜻 = routes 행」 으로 넘겼으나 routes 행에는 `>=`/`<=` 포함 경계가 없다. 정본 db 행에 「`start`/`end` = 포함 경계(`>=`/`<=`)」 를 되살렸다. 근거 = `src/db/system_logs.py` `search_logs` docstring.
+- **`get_stats()` 8키 목록** — 위 「`get_stats()`」 기록의 사유 「8키 목록은 `src/routes/CLAUDE.md` `/api/stock-master/stats` 행이 적는다」 는 **틀렸다**. 그 행은 키를 적지 않고 `frontend/src/types/stock-master.ts` `StockMasterStats` 를 가리킬 뿐이다. 그래서 `count_all`·`nxt_tradable_count` 가 어느 문서에도 없었다. 정본에 8키 이름을 한 줄로 되살리고 타입 위치를 함께 적었다.
+- **`tick_channel_revert_probe_secs` 의 단일 정의처** — 「단일 정의처는 거기다」(여기서 재정의하지 않는다)가 본문에서 빠졌고, 「미설정 = …」 표현은 다음 줄 「키 부재 = `None` → 현재 값 유지」 와 부딪혀 읽혔다. 정본을 「기본값 = `stale_diagnostics.SUBSCRIBE_GRACE_SECS` 재사용 — 단일 정의처는 거기, 여기서 재정의하지 않는다」 로 고쳤다. 근거 = `src/db/system_config.py:906-908` docstring.
+- **`exclude_etf_like` 의 COALESCE 이유** — 압축본은 기제(「NULL 은 `COALESCE` 가 `''` 로 받는다」)만 남기고 지키는 불변식을 뺐다. 정본에 「`NOT (...)` 이 NULL 이 되어 행이 조용히 빠지지 않게」 를 되살렸다.
