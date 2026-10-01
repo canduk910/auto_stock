@@ -37,6 +37,8 @@ from pathlib import Path
 
 import pytest
 
+from tests import _strategy_census as census
+
 pytestmark = pytest.mark.unit
 
 _ROOT = Path(__file__).resolve().parents[3]
@@ -86,11 +88,11 @@ def _expected_keys_g2(sid: str) -> tuple[str, ...]:
         expected += _CYCLE382_KEY
     i = expected.index(_CYCLE384_AFTER) + 1
     return expected[:i] + (_CYCLE384_KEY,) + expected[i:]
-_ALL_SEVEN_RELS = tuple(
-    f"src/engine/strategies/{sid}.py"
-    for sid in ("momentum", "volatility_breakout", "long_tail_volatility",
-                "donchian_swing", "bull_flag_breakout", "vcp_breakout", "kojiro")
-)
+
+
+#: 리팩토링 카드 #1 — 소유 기대값 = **전략 명부 전부**(`tests/_strategy_census.py`).
+#: 7개 고정 목록이면 규약을 지켜 4키를 가진 여덟째 전략이 거짓으로 붉는다.
+_ALL_STRATEGY_RELS = tuple(sorted(census.STRATEGY_RELS))
 
 
 def _sha(text: str) -> str:
@@ -137,11 +139,11 @@ def _default_params_items(path: Path) -> dict:
 
 
 # ===========================================================================
-# G2-1 — 4키 소유 전략 파일 = **정확히 7** (cycle274 C10-3 · cycle276 C6-3a 의 반전)
+# G2-1 — 4키 소유 전략 파일 = **정확히 명부 전부** (cycle274 C10-3 · cycle276 C6-3a 의 반전)
 # ===========================================================================
 @pytest.mark.parametrize("key", _KEYS)
 def test_g2_1_four_keys_live_in_exactly_seven_strategy_files(key: str) -> None:
-    """G2-1 — glob 전수에서 그 키를 `DEFAULT_PARAMS` 에 가진 파일 = 7전략 전부.
+    """G2-1 — glob 전수에서 그 키를 `DEFAULT_PARAMS` 에 가진 파일 = 전략 명부 전부.
 
     cycle274/276 은 같은 축을 `{VB, LTV}` 로 잠갔다 — 이 사이클이 그 두 단언을 **반전**한다
     (삭제·skip 금지, 명세 §5.2). 여기서 '정확히' 인 이유 =
@@ -153,8 +155,12 @@ def test_g2_1_four_keys_live_in_exactly_seven_strategy_files(key: str) -> None:
         for k in _default_params_keys(path):
             if k == key:
                 owners.append(path.relative_to(_ROOT).as_posix())
-    assert sorted(set(owners)) == sorted(_ALL_SEVEN_RELS), (
-        f"`{key}` 보유 전략 {sorted(set(owners))} (기대 = 7전략 전부)"
+    assert sorted(set(owners)) == sorted(_ALL_STRATEGY_RELS), (
+        f"`{key}` 보유 전략 {sorted(set(owners))} (기대 = 명부 전부, "
+        f"빠짐 {sorted(set(_ALL_STRATEGY_RELS) - set(owners))}). "
+        "새 전략이면 그 파일의 `DEFAULT_PARAMS` 에 4키(`llm_gate_mode`·`llm_gate_min_score`·"
+        "`llm_gate_daily_call_cap`·`llm_gate_timeout_secs`)를 다른 전략과 같은 값으로 넣어라. "
+        "전략이 아닌 파일이 갖고 있으면 지워라"
     )
 
 

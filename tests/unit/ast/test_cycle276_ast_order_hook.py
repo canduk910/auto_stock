@@ -49,6 +49,8 @@ from pathlib import Path
 
 import pytest
 
+from tests import _strategy_census as census
+
 pytestmark = pytest.mark.unit
 
 _ROOT = Path(__file__).resolve().parents[3]
@@ -882,18 +884,14 @@ def test_c6_2_strategies_have_no_llm_buy_gate_import_or_call(kind: str) -> None:
 #: cycle297(2026-09-17) — 5전략 LLM 매수평가 shadow 확대로 소유 축이 {VB, LTV} →
 #: **7전략 전부**로 뒤집혔다(사용자 결정 "결정 2 진행"). 가드는 삭제·skip 하지 않고
 #: 기대값만 반전한다(명세 §5.2 — cycle297 자체 가드 `test_g2_1b` 가 존재·무회피를 잠근다).
-_ALL_SEVEN_STRATEGY_RELS = frozenset(
-    f"src/engine/strategies/{name}.py"
-    for name in (
-        "momentum", "volatility_breakout", "long_tail_volatility",
-        "donchian_swing", "bull_flag_breakout", "vcp_breakout", "kojiro",
-    )
-)
+#: 리팩토링 카드 #1 — 기대값은 「7개 고정 목록」 이 아니라 **전략 명부 전부**
+#: (`tests/_strategy_census.py`)다. 규약을 지켜 4키를 가진 여덟째 전략을 거짓으로 붉히지 않는다.
+_ALL_STRATEGY_RELS = census.STRATEGY_RELS
 
 
 @pytest.mark.parametrize("key", _KEYS)
 def test_c6_3a_four_keys_live_in_exactly_vb_and_ltv(key: str) -> None:
-    """C12 — 4키를 `DEFAULT_PARAMS` 에 가진 전략 파일 = **7전략 전부**.
+    """C12 — 4키를 `DEFAULT_PARAMS` 에 가진 전략 파일 = **전략 명부 전부**.
 
     🔁 cycle297 반전 — 원래 {VB, LTV} 였다(명세 §6 스코프). 사용자 결정으로 5전략이
     추가됐고, 함수명·존재는 유지한 채 기대값만 뒤집는다(삭제·skip 금지).
@@ -911,8 +909,12 @@ def test_c6_3a_four_keys_live_in_exactly_vb_and_ltv(key: str) -> None:
             for k in node.value.keys:
                 if isinstance(k, ast.Constant) and k.value == key:
                     owners.append(path.relative_to(_ROOT).as_posix())
-    assert sorted(set(owners)) == sorted(_ALL_SEVEN_STRATEGY_RELS), (
-        f"`{key}` 보유 전략 {sorted(set(owners))} (기대 = 7전략 전부)"
+    assert sorted(set(owners)) == sorted(_ALL_STRATEGY_RELS), (
+        f"`{key}` 보유 전략 {sorted(set(owners))} (기대 = 명부 전부, "
+        f"빠짐 {sorted(_ALL_STRATEGY_RELS - set(owners))}). "
+        "새 전략이면 그 파일의 `DEFAULT_PARAMS` 에 4키(`llm_gate_mode`·`llm_gate_min_score`·"
+        "`llm_gate_daily_call_cap`·`llm_gate_timeout_secs`)를 다른 전략과 같은 값으로 넣어라. "
+        "전략이 아닌 파일이 갖고 있으면 지워라"
     )
 
 

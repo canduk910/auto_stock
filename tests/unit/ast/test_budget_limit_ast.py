@@ -8,10 +8,14 @@
   두 코루틴이 같은 잔여를 보고 각자 매수해 예산 클램프가 조용히 무력화된다.
   **8영역(order_engine)을 건드리지 않으면서 8영역을 보호하는 가드.**
 - **A-PURE**: 관문 자체가 `await`/DB/HTTP 를 쓰지 않는다 (원자성 유지 조건).
-- **A-GATE**: 7 전략 `calc_buy_quantity` 의 모든 `return` 이 관문을 경유한다
+- **A-GATE**: 전략 명부(`tests/_strategy_census.py` — 전략 디렉터리의 파일 전부) 각 전략
+  `calc_buy_quantity` 의 모든 `return` 이 관문을 경유한다
   (상수 0 반환 및 관문에 위임하는 내부 헬퍼 호출만 예외).
 - **C-MAXPOS**: `max_positions` 는 AI 자동튜닝 대상이 아니다 (리스크 정체성 상수).
-- **C-DEFAULT**: 코드 기본값의 `position_ratio × max_positions ≤ 1.0` 불변식.
+- **C-DEFAULT**: 코드 기본값의 `position_ratio × max_positions ≤ 1.0` 불변식(명부 전 전략).
+
+A-GATE·C-DEFAULT 는 7개 고정 목록을 돌다가 명부로 바뀌었다(리팩토링 카드 #1) — 고정 목록일 때는
+관문을 안 거치는 여덟째 전략과 곱이 2.0 인 기본값이 둘 다 조용히 통과했다.
 """
 
 from __future__ import annotations
@@ -25,20 +29,14 @@ import pytest
 from src.engine import order_engine as order_engine_mod
 from src.engine import recommendation_engine as rec_mod
 from src.engine.strategy_base import StrategyBase
+from tests import _strategy_census as census
 
 pytestmark = pytest.mark.unit
 
 _STRATEGY_DIR = Path(__file__).resolve().parents[3] / "src" / "engine" / "strategies"
 
-STRATEGY_FILES = [
-    "momentum.py",
-    "volatility_breakout.py",
-    "long_tail_volatility.py",
-    "donchian_swing.py",
-    "bull_flag_breakout.py",
-    "vcp_breakout.py",
-    "kojiro.py",
-]
+#: 전략 명부 — 전략 디렉터리의 파일 전부(파일 이름순). 새 전략 파일은 두는 순간 A-GATE·C-DEFAULT 대상이다.
+STRATEGY_FILES = list(census.STRATEGY_FILES)
 
 GATE = "_apply_budget_limit"
 
@@ -117,7 +115,7 @@ def test_budget_gate_is_pure_sync():
 
 
 # ---------------------------------------------------------------------------
-# A-GATE — 7 전략 calc_buy_quantity 의 모든 return 이 관문 경유
+# A-GATE — 명부 전 전략 calc_buy_quantity 의 모든 return 이 관문 경유
 # ---------------------------------------------------------------------------
 @pytest.mark.parametrize("filename", STRATEGY_FILES)
 def test_calc_buy_quantity_returns_pass_through_gate(filename):
@@ -138,13 +136,18 @@ def test_calc_buy_quantity_returns_pass_through_gate(filename):
             continue
         assert isinstance(node.value, ast.Call), (
             f"{filename}:{node.lineno} calc_buy_quantity 가 관문을 거치지 않고 "
-            "수량을 직접 반환합니다 — 전략 예산 초과 매수 경로"
+            "수량을 직접 반환합니다 — 전략 예산 초과 매수 경로. "
+            f"수량을 `return self.{GATE}(qty, current_price, ticker)` 로 돌려줘라"
         )
         assert getattr(node.value.func, "attr", None) == GATE, (
-            f"{filename}:{node.lineno} return 이 {GATE} 를 경유하지 않습니다"
+            f"{filename}:{node.lineno} return 이 {GATE} 를 경유하지 않습니다 — "
+            f"`return self.{GATE}(qty, current_price, ticker)` 로 감싸라"
         )
         gated += 1
-    assert gated >= 1, f"{filename} calc_buy_quantity 에 {GATE} 경유 return 이 없습니다"
+    assert gated >= 1, (
+        f"{filename} calc_buy_quantity 에 {GATE} 경유 return 이 없습니다 — "
+        f"수량을 `return self.{GATE}(qty, current_price, ticker)` 로 돌려줘라"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -182,12 +185,14 @@ def test_default_params_respect_budget_invariant(filename):
     ratio = params.get("position_ratio")
     max_pos = params.get("max_positions")
     assert ratio is not None and max_pos is not None, (
-        f"{filename} DEFAULT_PARAMS 에 position_ratio / max_positions 가 필요합니다"
+        f"{filename} DEFAULT_PARAMS 에 position_ratio / max_positions 가 필요합니다 "
+        "(클래스 본문의 `DEFAULT_PARAMS = {...}` dict 리터럴에 숫자 리터럴로 적어라)"
     )
     assert ratio * max_pos <= 1.0 + 1e-9, (
         f"{filename}: position_ratio({ratio}) × max_positions({max_pos}) = "
         f"{ratio * max_pos:.2f} > 1.0 — 전략 예산 초과 조합. "
-        "런타임 관문이 흡수하지만 기본값은 불변식을 지켜야 한다."
+        "런타임 관문이 흡수하지만 기본값은 불변식을 지켜야 한다. "
+        "곱이 1.0 이하가 되게 position_ratio 를 낮추거나 max_positions 를 줄여라."
     )
 
 

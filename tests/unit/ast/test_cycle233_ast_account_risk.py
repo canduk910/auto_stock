@@ -1,7 +1,12 @@
 """cycle233 R11 — 계좌 리스크 패키지 구조 봉인 (AST/소스 정적 가드).
 
 봉인 목록:
-- G-1: 7전략 `check_buy_signal` 본문에 `_account_soft_gate_blocked` 호출 존재
+- G-0: 전략 명부(`tests/_strategy_census.py` — 전략 디렉터리의 파일 전부)의 모든 전략이
+  두 원형 목록(`GATE_FIRST_FILES`·`GATE_PRE_BUY_FILES`) 중 **정확히 하나**에 있다.
+  원형 목록은 손으로 고른다(어느 위치가 맞는지는 전략의 성격이 정한다) — 새 전략 파일은
+  원형을 고르기 전까지 여기서 붉는다. 고른 뒤에는 G-1 이 그 원형의 게이트 위치를 잰다
+  (리팩토링 카드 #1 — 그 전에는 두 목록 밖 파일을 아무도 안 봐서 게이트 없는 전략이 통과했다).
+- G-1: 명부 전 전략 `check_buy_signal` 본문에 `_account_soft_gate_blocked` 호출 존재
   (신규 전략 추가 시 배선 누락 영구 차단 — 자문 안 1-C-β AST 의무).
 - G-2: 8영역 파일에 `account_risk` 토큰 0 (8영역 diff 0 의 정적 절반).
 - G-3: `account_risk_guard.py` = 순수 leaf — src 내부 import 금지
@@ -19,6 +24,8 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
+from tests import _strategy_census as census
+
 SRC = Path(__file__).resolve().parents[3] / "src"
 
 # 게이트 위치 규약 (적대 검증 C233-F1):
@@ -30,7 +37,6 @@ GATE_FIRST_FILES = [
     "bull_flag_breakout.py", "vcp_breakout.py", "kojiro.py",
 ]
 GATE_PRE_BUY_FILES = ["momentum.py", "volatility_breakout.py"]
-STRATEGY_FILES = GATE_FIRST_FILES + GATE_PRE_BUY_FILES
 
 EIGHT_AREAS = [
     SRC / "engine" / "risk.py",
@@ -78,6 +84,31 @@ def _stmt_blocks(fn: ast.FunctionDef):
             block = getattr(node, field, None)
             if isinstance(block, list) and block:
                 yield block
+
+
+class TestG0ArchetypeCoverage:
+    """G-0 — 명부의 모든 전략이 두 원형 중 정확히 하나로 분류돼 있다."""
+
+    def test_archetype_lists_are_disjoint(self):
+        both = sorted(set(GATE_FIRST_FILES) & set(GATE_PRE_BUY_FILES))
+        assert not both, (
+            f"{both} 가 GATE_FIRST_FILES·GATE_PRE_BUY_FILES 양쪽에 있다 — 게이트 위치는 하나다. "
+            "한쪽에서 지워라"
+        )
+
+    def test_every_census_strategy_has_an_archetype(self):
+        classified = set(GATE_FIRST_FILES) | set(GATE_PRE_BUY_FILES)
+        unclassified = sorted(set(census.STRATEGY_FILES) - classified)
+        assert not unclassified, (
+            f"새 전략 {unclassified}: 이 파일 위쪽의 원형 목록 중 하나를 골라 파일 이름을 적어라 — "
+            "`GATE_FIRST_FILES`(폴·래치형: baseline 상태가 없다 → 게이트 If 가 check_buy_signal 첫 문장) "
+            "또는 `GATE_PRE_BUY_FILES`(edge-crossing형: 직전 값과 비교해 돌파를 잰다 → 게이트는 "
+            "baseline 갱신 뒤·`return Signal.BUY` 직전). 고르면 G-1 이 그 위치를 잰다"
+        )
+        ghost = sorted(classified - set(census.STRATEGY_FILES))
+        assert not ghost, (
+            f"원형 목록의 {ghost} 가 전략 디렉터리에 없다 — 전략을 뺐으면 원형 목록에서도 지워라"
+        )
 
 
 class TestG1SevenStrategyWiring:

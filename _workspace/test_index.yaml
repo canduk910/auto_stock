@@ -341,6 +341,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -1518,6 +1519,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -2724,6 +2726,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -3899,6 +3902,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -5066,6 +5070,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -6255,6 +6260,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -7443,6 +7449,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -8639,6 +8646,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -9824,6 +9832,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -11077,6 +11086,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -12278,6 +12288,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -13476,6 +13487,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/db/test_backtest_runs.py
     - tests/unit/db/test_cycle100_count_eager_refresh_three_prefix.py
     - tests/unit/db/test_cycle101_84_history_trigger.py
@@ -14674,6 +14686,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -15841,6 +15854,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -17045,6 +17059,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -18221,6 +18236,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -19408,6 +19424,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -20604,6 +20621,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -21783,6 +21801,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -22977,6 +22996,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -24162,6 +24182,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -25352,6 +25373,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -26537,6 +26559,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -27734,6 +27757,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -28938,6 +28962,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -30149,6 +30174,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -31314,6 +31340,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -32477,6 +32504,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -33665,6 +33693,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -34862,6 +34891,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -36042,6 +36072,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -37246,6 +37277,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -38438,6 +38470,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -39606,6 +39639,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -40796,6 +40830,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -41999,6 +42034,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -43177,6 +43213,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -44362,6 +44399,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -45549,6 +45587,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -46746,6 +46785,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -47923,6 +47963,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -49110,6 +49151,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -50317,6 +50359,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -51488,6 +51531,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -52680,6 +52724,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -53864,6 +53909,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -55056,6 +55102,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -56243,6 +56290,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -57431,6 +57479,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -58617,6 +58666,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -59804,6 +59854,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -60992,6 +61043,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -62260,6 +62312,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -63446,6 +63499,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -64621,6 +64675,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -65816,6 +65871,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -67012,6 +67068,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -68193,6 +68250,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -69372,6 +69430,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -70561,6 +70620,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -71756,6 +71816,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -72939,6 +73000,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -74126,6 +74188,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -75316,6 +75379,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -76499,6 +76563,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -77774,6 +77839,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -79040,6 +79106,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -80292,6 +80359,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -81479,6 +81547,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -82673,6 +82742,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -83890,6 +83960,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -85045,6 +85116,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -86235,6 +86307,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -87417,6 +87490,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -88860,6 +88934,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -89959,6 +90034,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -90986,6 +91062,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -92173,6 +92250,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -93359,6 +93437,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -94545,6 +94624,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -95740,6 +95820,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -96952,6 +97033,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -98113,6 +98195,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -99323,6 +99406,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -100489,6 +100573,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -101686,6 +101771,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -102861,6 +102947,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -104051,6 +104138,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -105239,6 +105327,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -106427,6 +106516,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -107623,6 +107713,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -108562,10 +108653,8 @@ backend:
     - tests/unit/engine/strategies/test_vcp_bfb_exit_persistence.py
     - tests/unit/engine/strategies/test_vcp_bfb_targets_payload.py
     - tests/unit/engine/strategies/test_vcp_bfb_universe_expansion.py
-    - tests/unit/engine/test_budget_limit_gate.py
     - tests/unit/engine/test_cycle185_cluster1_reset.py
     - tests/unit/engine/test_cycle242_fallback_notional_cap.py
-    - tests/unit/engine/test_cycle278_param_catalog.py
     - tests/unit/engine/test_cycle290_killswitch_registration.py
     - tests/unit/engine/test_cycle297_gate_wiring.py
     - tests/unit/engine/test_cycle297_llm_strategy_context.py
@@ -108874,6 +108963,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -109226,6 +109316,7 @@ backend:
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
     - tests/unit/engine/test_budget_invariant_runtime_guard.py
+    - tests/unit/engine/test_budget_limit_gate.py
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
@@ -109338,6 +109429,7 @@ backend:
     - tests/unit/engine/test_cycle274_llm_buy_gate_leaf.py
     - tests/unit/engine/test_cycle274_llm_features.py
     - tests/unit/engine/test_cycle276_order_time_hook.py
+    - tests/unit/engine/test_cycle278_param_catalog.py
     - tests/unit/engine/test_cycle282_market_state.py
     - tests/unit/engine/test_cycle283_daily_head_stale.py
     - tests/unit/engine/test_cycle283_daily_load_cutoff_sim.py
@@ -109825,7 +109917,6 @@ backend:
     - tests/unit/engine/test_cycle239_gate_freshness.py
     - tests/unit/engine/test_cycle242_fallback_notional_cap.py
     - tests/unit/engine/test_cycle245_ratio_notional_cap.py
-    - tests/unit/engine/test_cycle278_param_catalog.py
     - tests/unit/engine/test_cycle290_killswitch_registration.py
     - tests/unit/engine/test_cycle297_gate_wiring.py
     - tests/unit/engine/test_cycle297_llm_strategy_context.py
@@ -110070,6 +110161,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -110528,6 +110620,7 @@ backend:
     - tests/unit/engine/test_cycle274_llm_buy_gate_leaf.py
     - tests/unit/engine/test_cycle274_llm_features.py
     - tests/unit/engine/test_cycle276_order_time_hook.py
+    - tests/unit/engine/test_cycle278_param_catalog.py
     - tests/unit/engine/test_cycle282_market_state.py
     - tests/unit/engine/test_cycle283_daily_head_stale.py
     - tests/unit/engine/test_cycle283_daily_load_cutoff_sim.py
@@ -110935,7 +111028,6 @@ backend:
     - tests/unit/engine/test_cycle245_ratio_notional_cap.py
     - tests/unit/engine/test_cycle268_tester_real_call_paths.py
     - tests/unit/engine/test_cycle273_kojiro_band_observe.py
-    - tests/unit/engine/test_cycle278_param_catalog.py
     - tests/unit/engine/test_cycle290_killswitch_registration.py
     - tests/unit/engine/test_cycle297_gate_wiring.py
     - tests/unit/engine/test_cycle297_llm_strategy_context.py
@@ -111244,6 +111336,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -111714,6 +111807,7 @@ backend:
     - tests/unit/engine/test_cycle274_llm_buy_gate_leaf.py
     - tests/unit/engine/test_cycle274_llm_features.py
     - tests/unit/engine/test_cycle276_order_time_hook.py
+    - tests/unit/engine/test_cycle278_param_catalog.py
     - tests/unit/engine/test_cycle282_market_state.py
     - tests/unit/engine/test_cycle283_daily_head_stale.py
     - tests/unit/engine/test_cycle283_daily_load_cutoff_sim.py
@@ -112186,13 +112280,11 @@ backend:
     - tests/unit/engine/strategies/test_refactor_a1a2_prepare_filters_base.py
     - tests/unit/engine/strategies/test_refactor_a3_cooldown_base.py
     - tests/unit/engine/strategies/test_scan_universe_blng_multicall.py
-    - tests/unit/engine/test_budget_limit_gate.py
     - tests/unit/engine/test_cycle142_ltv_defect_fix.py
     - tests/unit/engine/test_cycle185_cluster1_reset.py
     - tests/unit/engine/test_cycle222a2_regression_guards.py
     - tests/unit/engine/test_cycle264_open_source_compare.py
     - tests/unit/engine/test_cycle272_open_price_rest_leaf.py
-    - tests/unit/engine/test_cycle278_param_catalog.py
     - tests/unit/engine/test_cycle290_killswitch_registration.py
     - tests/unit/engine/test_cycle297_gate_wiring.py
     - tests/unit/engine/test_cycle297_llm_strategy_context.py
@@ -112432,6 +112524,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -112793,6 +112886,7 @@ backend:
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
     - tests/unit/engine/test_budget_invariant_runtime_guard.py
+    - tests/unit/engine/test_budget_limit_gate.py
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
@@ -112902,6 +112996,7 @@ backend:
     - tests/unit/engine/test_cycle274_llm_buy_gate_leaf.py
     - tests/unit/engine/test_cycle274_llm_features.py
     - tests/unit/engine/test_cycle276_order_time_hook.py
+    - tests/unit/engine/test_cycle278_param_catalog.py
     - tests/unit/engine/test_cycle282_market_state.py
     - tests/unit/engine/test_cycle283_daily_head_stale.py
     - tests/unit/engine/test_cycle283_daily_load_cutoff_sim.py
@@ -113359,12 +113454,10 @@ backend:
     - tests/unit/engine/strategies/test_momentum.py
     - tests/unit/engine/strategies/test_momentum_scan_stats.py
     - tests/unit/engine/strategies/test_refactor_a3_cooldown_base.py
-    - tests/unit/engine/test_budget_limit_gate.py
     - tests/unit/engine/test_cycle185_cluster1_reset.py
     - tests/unit/engine/test_cycle233_watcher_gate.py
     - tests/unit/engine/test_cycle271_execute_buy_fill_during_insert.py
     - tests/unit/engine/test_cycle276_order_time_hook.py
-    - tests/unit/engine/test_cycle278_param_catalog.py
     - tests/unit/engine/test_cycle290_killswitch_registration.py
     - tests/unit/engine/test_cycle297_gate_wiring.py
     - tests/unit/engine/test_cycle297_llm_strategy_context.py
@@ -113610,6 +113703,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -113984,6 +114078,7 @@ backend:
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
     - tests/unit/engine/test_budget_invariant_runtime_guard.py
+    - tests/unit/engine/test_budget_limit_gate.py
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
@@ -114094,6 +114189,7 @@ backend:
     - tests/unit/engine/test_cycle273pre_kojiro_gap_observe_ws_collapse.py
     - tests/unit/engine/test_cycle274_llm_buy_gate_leaf.py
     - tests/unit/engine/test_cycle274_llm_features.py
+    - tests/unit/engine/test_cycle278_param_catalog.py
     - tests/unit/engine/test_cycle282_market_state.py
     - tests/unit/engine/test_cycle283_daily_head_stale.py
     - tests/unit/engine/test_cycle283_daily_load_cutoff_sim.py
@@ -114502,7 +114598,6 @@ backend:
     - tests/unit/engine/strategies/test_vcp_turtle_sizing.py
     - tests/unit/engine/test_budget_limit_gate.py
     - tests/unit/engine/test_cycle242_fallback_notional_cap.py
-    - tests/unit/engine/test_cycle278_param_catalog.py
     - tests/unit/engine/test_cycle290_killswitch_registration.py
     - tests/unit/engine/test_cycle297_gate_wiring.py
     - tests/unit/engine/test_cycle297_llm_strategy_context.py
@@ -114812,6 +114907,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -115279,6 +115375,7 @@ backend:
     - tests/unit/engine/test_cycle274_llm_buy_gate_leaf.py
     - tests/unit/engine/test_cycle274_llm_features.py
     - tests/unit/engine/test_cycle276_order_time_hook.py
+    - tests/unit/engine/test_cycle278_param_catalog.py
     - tests/unit/engine/test_cycle282_market_state.py
     - tests/unit/engine/test_cycle283_daily_head_stale.py
     - tests/unit/engine/test_cycle283_daily_load_cutoff_sim.py
@@ -115756,10 +115853,8 @@ backend:
     - tests/unit/engine/strategies/test_volatility_breakout_board_stop_loss.py
     - tests/unit/engine/strategies/test_volatility_breakout_krx_only.py
     - tests/unit/engine/strategies/test_volatility_breakout_scan_stats.py
-    - tests/unit/engine/test_budget_limit_gate.py
     - tests/unit/engine/test_cycle264_open_source_compare.py
     - tests/unit/engine/test_cycle272_open_price_rest_leaf.py
-    - tests/unit/engine/test_cycle278_param_catalog.py
     - tests/unit/engine/test_cycle290_killswitch_registration.py
     - tests/unit/engine/test_cycle297_gate_wiring.py
     - tests/unit/engine/test_cycle297_llm_strategy_context.py
@@ -116001,6 +116096,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -116356,6 +116452,7 @@ backend:
     - tests/unit/engine/test_boot_preissue_tokens.py
     - tests/unit/engine/test_breakout_candidate_low_priority.py
     - tests/unit/engine/test_budget_invariant_runtime_guard.py
+    - tests/unit/engine/test_budget_limit_gate.py
     - tests/unit/engine/test_cycle100_sell_rejection_persistence.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_buy.py
     - tests/unit/engine/test_cycle100_strategy_exchange_persistence_sell.py
@@ -116468,6 +116565,7 @@ backend:
     - tests/unit/engine/test_cycle274_llm_buy_gate_leaf.py
     - tests/unit/engine/test_cycle274_llm_features.py
     - tests/unit/engine/test_cycle276_order_time_hook.py
+    - tests/unit/engine/test_cycle278_param_catalog.py
     - tests/unit/engine/test_cycle282_market_state.py
     - tests/unit/engine/test_cycle283_daily_head_stale.py
     - tests/unit/engine/test_cycle283_daily_load_cutoff_sim.py
@@ -116924,6 +117022,7 @@ backend:
     - tests/unit/ast/test_cycle369_ast_status_exit.py
     - tests/unit/ast/test_cycle382_ast_market_unit.py
     - tests/unit/ast/test_cycle384_ast_buy_paused.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/db/test_cycle170_card_a_stage_counts.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
     - tests/unit/engine/strategies/test_bfb_restart_recovery.py
@@ -118408,6 +118507,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -119526,6 +119626,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -120719,6 +120820,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -121978,6 +122080,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -123168,6 +123271,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -124351,6 +124455,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -125556,6 +125661,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -126725,6 +126831,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -127917,6 +128024,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -129104,6 +129212,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -130303,6 +130412,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -131545,6 +131655,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -132733,6 +132844,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -133927,6 +134039,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -135116,6 +135229,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -136371,6 +136485,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -137557,6 +137672,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -138829,6 +138945,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -140193,6 +140310,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -141441,6 +141559,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -142648,6 +142767,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -143815,6 +143935,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -145022,6 +145143,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -146217,6 +146339,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -148941,6 +149064,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -150123,6 +150247,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -151315,6 +151440,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -152498,6 +152624,7 @@ backend:
     - tests/unit/ast/test_external_llm_reject_patterns.py
     - tests/unit/ast/test_market_op_subscribe_import_path_guard.py
     - tests/unit/ast/test_realtime_callable_surface_pin.py
+    - tests/unit/ast/test_strategy_census.py
     - tests/unit/auth/test_cycle296_token_issue_coalesce.py
     - tests/unit/auth/test_cycle330_orphan_token_future.py
     - tests/unit/auth/test_token.py
@@ -155090,10 +155217,10 @@ frontend:
     - frontend/src/pages/__tests__/MarketState.test.tsx
     - frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
     - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
-generated_at: '2026-09-29T14:36:01.619515+09:00'
+generated_at: '2026-10-02T02:07:57.308884+09:00'
 stats:
   backend_modules: 169
-  backend_tests: 1185
+  backend_tests: 1186
   frontend_modules: 128
   frontend_tests: 105
   unmapped_modules:

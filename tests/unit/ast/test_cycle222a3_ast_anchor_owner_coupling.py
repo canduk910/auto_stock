@@ -54,9 +54,12 @@
 from __future__ import annotations
 
 import ast
+from collections import Counter
 from pathlib import Path
 
 import pytest
+
+from tests import _strategy_census as census
 
 pytestmark = pytest.mark.unit
 
@@ -456,11 +459,29 @@ def test_h1_max_without_previous_anchor_is_not_auto_passed(name):
     )
 
 
+#: 현 트리에서 `max(...)` 앵커 갱신을 가진 곳 — 탐지기가 이 셋을 여전히 보는지(무효화 방지).
+_KNOWN_MAX_ANCHOR_FILES = frozenset({
+    "src/engine/strategies/long_tail_volatility.py",
+    "src/engine/strategies/momentum.py",
+    "src/engine/risk.py",
+})
+#: 전략 명부 **밖** `max(...)` 앵커 갱신의 파일별 건수(정확히 이것뿐). 명부 밖에서는 예전 `== 3`
+#: 핀의 엄격함을 그대로 둔다 — 같은 파일 안의 두 번째 writer 도 사람 확인 대상이다.
+_NON_STRATEGY_MAX_ANCHOR_COUNTS = {"src/engine/risk.py": 1}
+
+
 def test_h1_live_max_assigns_are_all_anchor_raising():
-    """현 트리의 `max(...)` 앵커 갱신 3건이 **전부** 이전 앵커를 피연산자로 갖는다.
+    """현 트리의 `max(...)` 앵커 갱신이 **전부** 이전 앵커를 피연산자로 갖는다.
 
     (LTV `:741` / momentum `:193` = 직접 피연산자, `risk.on_tick` = `prev_anchor`
     단일 바인딩 별칭.) 라이브 결함이 없다는 판정의 근거를 코드로 고정한다.
+
+    리팩토링 카드 #1 — 원래는 전체 개수(`== 3`)를 핀하고 「늘었다면 사람이 확인하라」 고 했다.
+    그러면 momentum 을 베껴 같은 올리기 전용 대입을 가진 새 전략이 거짓으로 붉는다. 이제
+    ① 알려진 세 곳이 여전히 탐지되는지 ② 전략 명부 **밖** 건수가 파일별로 정확히
+    `_NON_STRATEGY_MAX_ANCHOR_COUNTS` 인지(새 비전략 파일도, `risk.py` 안의 두 번째 writer 도 붉다)
+    ③ 전부 올리기 전용인지를 잰다. **명부 안**(전략 파일)의 개수는 핀하지 않는다 — 거기서 늘어난 건은
+    사람 대신 ③ 이 확인한다(카드 #1 의 의도된 완화).
     """
     max_assigns = [
         (rel, node.lineno, _is_raising_max_call(node, fnode))
@@ -469,9 +490,17 @@ def test_h1_live_max_assigns_are_all_anchor_raising():
         and isinstance(node.value.func, ast.Name)
         and node.value.func.id == "max"
     ]
-    assert len(max_assigns) == 3, (
-        f"`max(...)` 앵커 갱신이 3건이 아니다: {max_assigns} — 늘었다면 새 건이 "
-        "이전 앵커를 피연산자로 갖는지 확인하고 이 핀을 갱신하라"
+    found = {rel for rel, _ln, _ok in max_assigns}
+    assert _KNOWN_MAX_ANCHOR_FILES <= found, (
+        f"알려진 `max(...)` 앵커 갱신 {sorted(_KNOWN_MAX_ANCHOR_FILES - found)} 가 탐지되지 않는다: "
+        f"{max_assigns} — 탐지기가 좁아졌거나 그 갱신이 사라졌다. 사라졌다면 그 이유를 확인하고 "
+        "_KNOWN_MAX_ANCHOR_FILES 를 고쳐라"
+    )
+    outside = Counter(rel for rel, _ln, _ok in max_assigns if rel not in census.STRATEGY_RELS)
+    assert dict(outside) == _NON_STRATEGY_MAX_ANCHOR_COUNTS, (
+        f"전략 명부 밖 `max(...)` 앵커 갱신이 {dict(outside)} 다(기대 {_NON_STRATEGY_MAX_ANCHOR_COUNTS}): "
+        f"{[a for a in max_assigns if a[0] not in census.STRATEGY_RELS]} — 늘었다면 새 건이 이전 앵커를 "
+        "피연산자로 갖는지 확인하고 _NON_STRATEGY_MAX_ANCHOR_COUNTS 를 갱신하라"
     )
     bad = [(rel, ln) for rel, ln, ok in max_assigns if not ok]
     assert bad == [], (

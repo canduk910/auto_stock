@@ -117,6 +117,19 @@
   - "tests/unit/engine/test_cycle382_market_unit_refresh.py"
   - "tests/unit/ast/test_cycle382_ast_market_unit.py"
   - "tests/contract/test_cycle382_market_unit_params_route.py"
+  # 리팩토링 카드 #1 — 전략 명부(`tests/_strategy_census.py`)를 도는 가드는 전략 파일을 glob·AST 로 읽고
+  # 클래스는 importlib 로 지연 로드한다(정적 import 0). 신규 전략 파일은 인덱스에 키가 없어 이 항목이 유일한 연결이다
+  - "tests/unit/ast/test_strategy_census.py"
+  - "tests/unit/ast/test_budget_limit_ast.py"
+  - "tests/unit/ast/test_cycle233_ast_account_risk.py"
+  - "tests/unit/engine/test_budget_limit_gate.py"
+  - "tests/unit/engine/test_cycle278_param_catalog.py"
+  - "tests/unit/ast/test_cycle384_ast_buy_paused.py"
+  - "tests/unit/ast/test_cycle274_ast_llm_gate.py"
+  - "tests/unit/ast/test_cycle276_ast_order_hook.py"
+  - "tests/unit/ast/test_cycle297_ast_scope.py"
+  - "tests/unit/ast/test_cycle222a3_ast_anchor_owner_coupling.py"
+  - "tests/unit/routes/test_cycleF_te_endpoint.py"
 "src/engine/llm_buy_gate.py":
   - "tests/unit/ast/test_cycle363_ast_business_day_gate.py"
 

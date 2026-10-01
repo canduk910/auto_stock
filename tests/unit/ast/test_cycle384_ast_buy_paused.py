@@ -7,9 +7,9 @@
 | A01 | J25 그대로 — 게이트 첫 문장 = `if self._status_buy_blocked(ticker): return True` |
 | A02 | 두 번째 문장 = `if self._buy_paused_blocked(ticker): return True`(orelse 없음), 세 번째 = 기존 `Try` |
 | A03 | 헬퍼 4개 = 동기 · `await`/`write_log`/`kis_*`/`fetch_*`/`create_task`/`pg.` 0 · 모듈 최상위 import 추가 0 |
-| A04 | 문자열 `"buy_paused"`(정확히 그 값) = strategy_base 1 · 전략 7파일 각 1(`DEFAULT_PARAMS` 키) · param_catalog 1 · 그 밖 src 0 |
+| A04 | 문자열 `"buy_paused"`(정확히 그 값) = strategy_base 1 · 전략 명부 파일 각 1(`DEFAULT_PARAMS` 키) · param_catalog 1 · 그 밖 src 0 |
 | A05 | `BUY_PAUSED_KEY` 참조 = 정의 + `_buy_paused_blocked` 안뿐 |
-| A06 | `_buy_paused_blocked` 호출 = src 전체 1곳(게이트) · 게이트 호출 = 전략 7파일 `check_buy_signal` 안 7곳 · `_clear_entry_latches_on_pause` 호출 = 멈춤 헬퍼 1곳(상태 차단 경로 무변경) |
+| A06 | `_buy_paused_blocked` 호출 = src 전체 1곳(게이트) · 게이트 호출 = 전략 명부 파일마다 `check_buy_signal` 안 1곳 · `_clear_entry_latches_on_pause` 호출 = 멈춤 헬퍼 1곳(상태 차단 경로 무변경) |
 | A07 | 캐시 금지 — `self.<…paused…>` 대입은 `__init__` 의 `_buy_paused_logged` 하나 · `self.config.params` 사슬 존재 |
 | A08 | 헬퍼에 `buy_disabled`·`enabled`·`weight`·`pending_buys`·`_bought_today`·`low_funds`·`calc_buy_quantity`·`total_investment` 0 |
 | A09 | `_PAUSE_ENTRY_LATCH_ATTRS` 리터럴 튜플 · 정리는 `.pop(ticker, None)` 만 · `_clear_edge_baseline_on_block` 무변경(래치 토큰 0) |
@@ -24,6 +24,13 @@
 
 `Path.read_text` + AST(호출·정의·상수 — 주석 제외, docstring 은 명시적으로 뺀다). `git grep`/`git ls-files`
 금지(미추적 신규 파일을 못 본다). `ast.dump` sha 핀 금지.
+
+## 전략 명부 (리팩토링 카드 #1)
+
+A04·A06·A07 의 「전략 파일」 은 7개 고정 목록이 아니라 전략 명부(`tests/_strategy_census.py` — 전략
+디렉터리의 파일 전부)다. 고정 목록일 때는 규약을 지켜 복사한 여덟째 전략(키·게이트 다 있음)이 A04·A06
+에서 거짓으로 붉었고, 게이트가 없는 여덟째 전략은 A06 을 조용히 지나갔다. 이제 새 전략 파일은 두는
+순간 이 가드들의 대상이고, 빠진 것이 있으면 메시지가 무엇을 넣을지 말한다.
 """
 from __future__ import annotations
 
@@ -34,6 +41,8 @@ from pathlib import Path
 
 import pytest
 
+from tests import _strategy_census as census
+
 pytestmark = pytest.mark.unit
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -42,10 +51,8 @@ SB = SRC / "engine" / "strategy_base.py"
 CATALOG = SRC / "engine" / "param_catalog.py"
 RECO = SRC / "engine" / "recommendation_engine.py"
 STRATEGY_DIR = SRC / "engine" / "strategies"
-STRATEGY_FILES = (
-    "momentum.py", "volatility_breakout.py", "long_tail_volatility.py", "donchian_swing.py",
-    "bull_flag_breakout.py", "vcp_breakout.py", "kojiro.py",
-)
+#: 전략 명부 — 전략 디렉터리의 파일 전부(파일 이름순). 새 전략 파일은 두는 순간 A04·A06·A07 대상이다.
+STRATEGY_FILES = census.STRATEGY_FILES
 KEY = "buy_paused"
 HELPERS = ("_buy_paused_blocked", "_clear_entry_latches_on_pause",
            "_emit_buy_paused_config", "_emit_buy_paused_skip")
@@ -232,6 +239,13 @@ def _default_params_dict(tree: ast.AST) -> ast.Dict | None:
     return None
 
 
+#: 새 전략 파일에 키가 빠졌을 때 무엇을 하라는 안내(A04 두 가드 공용).
+_ADD_KEY_HINT = (
+    "새 전략이면 클래스 본문 `DEFAULT_PARAMS = {...}` dict 리터럴에 `\"buy_paused\": False,` 한 줄을 넣어라"
+    "(기존 전략 파일과 같은 모양 — 멈춤 판정은 공통 게이트가 하므로 전략 파일에는 키만 둔다)"
+)
+
+
 def test_a04_key_string_appears_only_where_expected():
     where: dict[str, int] = {}
     for p in _src_files():
@@ -240,9 +254,11 @@ def test_a04_key_string_appears_only_where_expected():
             where[str(p.relative_to(ROOT))] = n
     expected = {"src/engine/strategy_base.py": 1, "src/engine/param_catalog.py": 1}
     expected.update({f"src/engine/strategies/{f}": 1 for f in STRATEGY_FILES})
+    missing = sorted(f for f in STRATEGY_FILES if f"src/engine/strategies/{f}" not in where)
     assert where == expected, (
         f"`\"buy_paused\"` 문자열 위치가 명세와 다르다 — 전략 파일에 멈춤 판정을 넣었거나(M26·M29) "
         f"라우트·스케줄러가 키를 읽는다: {where}"
+        + (f" · 키가 없는 파일 {missing} — {_ADD_KEY_HINT}" if missing else "")
     )
 
 
@@ -252,7 +268,7 @@ def test_a04_strategy_file_key_lives_in_default_params_only(fname):
     d = _default_params_dict(tree)
     assert d is not None, f"{fname}: DEFAULT_PARAMS dict 리터럴 부재"
     hits = [(k, v) for k, v in zip(d.keys, d.values) if isinstance(k, ast.Constant) and k.value == KEY]
-    assert len(hits) == 1, f"[Red] {fname}: DEFAULT_PARAMS 에 `buy_paused` 키 {len(hits)}개"
+    assert len(hits) == 1, f"[Red] {fname}: DEFAULT_PARAMS 에 `buy_paused` 키 {len(hits)}개 — {_ADD_KEY_HINT}"
     v = hits[0][1]
     assert isinstance(v, ast.Constant) and v.value is False, f"{fname}: 값이 상수 False 가 아니다(M10)"
 
@@ -316,6 +332,11 @@ def test_a06_pause_helper_called_only_from_gate():
 
 
 def test_a06_gate_called_only_from_seven_check_buy_signal():
+    """공통 게이트 호출부 = 전략 명부 파일마다 `check_buy_signal` 안 1곳(이름의 「seven」 은 7전략 시절 그대로).
+
+    게이트 호출이 없는 새 전략은 여기서 붉다 — 그 전략은 종목상태 차단(J25)·`buy_paused`·계좌 SOFT 를
+    전부 건너뛰고 매수 신호를 낸다.
+    """
     sites = []
     for p in _src_files():
         tree = _tree(p)
@@ -323,8 +344,13 @@ def test_a06_gate_called_only_from_seven_check_buy_signal():
         for n in ast.walk(tree):
             if isinstance(n, ast.Call) and _call_name(n) == "_account_soft_gate_blocked":
                 sites.append((p.name, owner.get(id(n))))
+    missing = sorted(f for f in STRATEGY_FILES if (f, "check_buy_signal") not in sites)
     assert sorted(sites) == sorted((f, "check_buy_signal") for f in STRATEGY_FILES), (
-        f"공통 게이트 호출부가 7전략 check_buy_signal 이 아니다(청산 경로 혼입 금지): {sites}"
+        f"공통 게이트 호출부가 전략 명부의 check_buy_signal 이 아니다(청산 경로 혼입 금지): {sites}"
+        + (f" · 게이트 호출이 없는 전략 {missing} — check_buy_signal 에 "
+           "`if self._account_soft_gate_blocked(ticker): return Signal.NONE` 을 넣어라. 자리는 "
+           "tests/unit/ast/test_cycle233_ast_account_risk.py 의 원형 목록을 따른다(GATE_FIRST_FILES = 첫 문장 · "
+           "GATE_PRE_BUY_FILES = baseline 갱신 뒤·BUY 직전)" if missing else "")
     )
 
 

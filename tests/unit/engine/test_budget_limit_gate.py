@@ -16,6 +16,9 @@
 
 원자성: `order_engine.execute_buy` 는 `calc_buy_quantity` ~ `pending_buys.add` 사이
 `await` 0건이라 관문의 read 가 pending 등록까지 원자적이다 (AST 가드가 영구 고정).
+
+대상 = 전략 명부(`tests/_strategy_census.py` — 전략 디렉터리의 파일 전부). 새 전략 파일은
+두는 순간 이 행위 계약 전부를 받는다(리팩토링 카드 #1 — 그 전에는 7개 고정 목록이었다).
 """
 
 from __future__ import annotations
@@ -24,27 +27,27 @@ from unittest.mock import patch
 
 import pytest
 
-from src.engine.strategies.bull_flag_breakout import BullFlagBreakoutStrategy
 from src.engine.strategies.donchian_swing import DonchianSwingStrategy
 from src.engine.strategies.kojiro import KojiroStrategy
-from src.engine.strategies.long_tail_volatility import LongTailVolatilityStrategy
-from src.engine.strategies.momentum import MomentumStrategy
 from src.engine.strategies.vcp_breakout import VcpBreakoutStrategy
-from src.engine.strategies.volatility_breakout import VolatilityBreakoutStrategy
 from src.engine.strategy_base import Position, StrategyBase, StrategyConfig
+from tests._strategy_census import strategy_classes
 
 pytestmark = pytest.mark.unit
 
 
-ALL_STRATEGIES = [
-    ("momentum", MomentumStrategy),
-    ("volatility_breakout", VolatilityBreakoutStrategy),
-    ("long_tail_volatility", LongTailVolatilityStrategy),
-    ("donchian_swing", DonchianSwingStrategy),
-    ("bull_flag_breakout", BullFlagBreakoutStrategy),
-    ("vcp_breakout", VcpBreakoutStrategy),
-    ("kojiro", KojiroStrategy),
-]
+#: `[(전략 id, 클래스)]` — 전략 명부 전부(파일 이름순).
+ALL_STRATEGIES = list(strategy_classes().items())
+
+#: 새 전략이 아래 행위 계약에서 붉을 때 할 일. 원인이 둘이라 순서대로 본다.
+_GATE_HINT = (
+    "먼저 A-GATE(`tests/unit/ast/test_budget_limit_ast.py::test_calc_buy_quantity_returns_pass_through_gate`)를 "
+    "본다 — 붉으면 calc_buy_quantity 의 모든 return 을 `self._apply_budget_limit(qty, current_price, ticker)` "
+    "로 돌려줘라(잔여 클램프·1주 폴백 위임·K축/ρ축 캡이 그 관문에 있다). A-GATE 가 초록이면 관문 누락이 "
+    "아니다 — 이 테스트의 전제(코드 기본값 DEFAULT_PARAMS 로 `position_ratio` 비중 사이징을 타고, "
+    "`sizing_mode`=turtle·`market_unit_mode`=enforce 처럼 수량을 바꾸는 장치가 기본으로 켜져 있지 않다)를 "
+    "그 전략이 따르는지 확인하라"
+)
 
 TOTAL = 1_000_000
 PRICE = 10_000
@@ -78,7 +81,7 @@ def test_no_clamp_when_budget_available(strategy_id, cls):
     s = _build(strategy_id, cls)
     expected = _ratio_qty(s)
     assert expected > 0, "테스트 전제: 비중 수량 > 0"
-    assert s.calc_buy_quantity(PRICE, "005930") == expected
+    assert s.calc_buy_quantity(PRICE, "005930") == expected, _GATE_HINT
 
 
 # ---------------------------------------------------------------------------
@@ -89,7 +92,7 @@ def test_clamped_to_remaining_budget(strategy_id, cls):
     s = _build(strategy_id, cls)
     _consume(s, 950_000)          # 잔여 50,000 → 5주
     assert _ratio_qty(s) > 5, "테스트 전제: 비중 수량이 잔여 수량보다 커야 클램프가 관측됨"
-    assert s.calc_buy_quantity(PRICE, "005930") == 5
+    assert s.calc_buy_quantity(PRICE, "005930") == 5, _GATE_HINT
 
 
 # ---------------------------------------------------------------------------
@@ -99,7 +102,7 @@ def test_clamped_to_remaining_budget(strategy_id, cls):
 def test_zero_when_remaining_below_one_share(strategy_id, cls):
     s = _build(strategy_id, cls)
     _consume(s, 995_000)          # 잔여 5,000 < 10,000
-    assert s.calc_buy_quantity(PRICE, "005930") == 0
+    assert s.calc_buy_quantity(PRICE, "005930") == 0, _GATE_HINT
 
 
 # ---------------------------------------------------------------------------
@@ -109,7 +112,7 @@ def test_zero_when_remaining_below_one_share(strategy_id, cls):
 def test_zero_when_remaining_negative(strategy_id, cls):
     s = _build(strategy_id, cls)
     _consume(s, 1_500_000)        # 잔여 −500,000
-    assert s.calc_buy_quantity(PRICE, "005930") == 0
+    assert s.calc_buy_quantity(PRICE, "005930") == 0, _GATE_HINT
 
 
 # ---------------------------------------------------------------------------
@@ -120,7 +123,7 @@ def test_pending_amounts_count_as_used(strategy_id, cls):
     s = _build(strategy_id, cls)
     s.state.pending_buys.add("000002")
     s.state.pending_buy_amounts["000002"] = 950_000
-    assert s.calc_buy_quantity(PRICE, "005930") == 5
+    assert s.calc_buy_quantity(PRICE, "005930") == 5, _GATE_HINT
 
 
 # ---------------------------------------------------------------------------
@@ -142,7 +145,7 @@ def test_invariant_never_exceeds_strategy_budget(strategy_id, cls, price):
             order_no=f"O{i}", strategy_id=strategy_id,
         )
     assert spent <= s.state.total_investment, (
-        f"{strategy_id} 예산 초과: spent={spent} > budget={s.state.total_investment}"
+        f"{strategy_id} 예산 초과: spent={spent} > budget={s.state.total_investment} — {_GATE_HINT}"
     )
 
 
@@ -174,7 +177,7 @@ def test_fallback_helper_still_invoked_for_zero_ratio_qty(strategy_id, cls):
     # F-14 가 캡 비바인딩 조건에서 강하게 검증한다. 이 테스트의 진짜 계약은
     # **분기 순서/위임**(아래 assert_called_once_with)이므로 그것은 무변경.
     assert sentinel == 42
-    assert result == 0
+    assert result == 0, _GATE_HINT
     mock_helper.assert_called_once_with(100_000_000)
 
 
@@ -184,8 +187,8 @@ def test_fallback_helper_still_invoked_for_zero_ratio_qty(strategy_id, cls):
 @pytest.mark.parametrize("strategy_id,cls", ALL_STRATEGIES)
 def test_zero_price_returns_zero(strategy_id, cls):
     s = _build(strategy_id, cls)
-    assert s.calc_buy_quantity(0, "005930") == 0
-    assert s.calc_buy_quantity(-100, "005930") == 0
+    assert s.calc_buy_quantity(0, "005930") == 0, "current_price <= 0 이면 0 을 돌려줘라(조기 return 0)"
+    assert s.calc_buy_quantity(-100, "005930") == 0, "current_price <= 0 이면 0 을 돌려줘라(조기 return 0)"
 
 
 # ---------------------------------------------------------------------------

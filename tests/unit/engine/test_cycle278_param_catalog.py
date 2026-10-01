@@ -10,8 +10,10 @@ cycle300 이 101→102 · cycle352 가 102→103).
 
 ## 이 파일이 잠그는 것
 
-* **C1** 7 전략 `DEFAULT_PARAMS` 키 합집합 ≡ 카탈로그 키 집합 (어느 쪽에만 있어도 실패).
-  신규 전략·신규 키가 조용히 화면 밖으로 새어 나가는 것이 이 사이클이 고치는 결함이다.
+* **C1** 전략 명부(`tests/_strategy_census.py` — 전략 디렉터리의 파일 전부) `DEFAULT_PARAMS` 키
+  합집합 ≡ 카탈로그 키 집합 (어느 쪽에만 있어도 실패). 명부 = `STRATEGY_IDS` 도 잰다.
+  신규 전략·신규 키가 조용히 화면 밖으로 새어 나가는 것이 이 사이클이 고치는 결함이다
+  (리팩토링 카드 #1 전에는 7개 고정 목록이라 여덟째 전략의 새 키가 보이지 않았다).
 * **C3** `applies_to` 는 그 키를 실제로 가진 전략 집합과 **정확히** 같고 순서는
   `STRATEGY_IDS` 순이며, 빈 `applies_to`(유령 키)는 0건이다.
 * **C4/C5** `auto_tunable` ⊆ `PARAM_RANGES` — 카탈로그가 AI 자동 튜닝 집합을 **넓히지 못한다**.
@@ -46,6 +48,7 @@ from pathlib import Path
 import pytest
 
 from src.engine import param_catalog as pc
+from tests import _strategy_census as census
 
 pytestmark = pytest.mark.unit
 
@@ -53,15 +56,11 @@ _ROOT = Path(__file__).resolve().parents[3]
 _CATALOG_PATH = _ROOT / "src" / "engine" / "param_catalog.py"
 _STRATEGY_DIR = _ROOT / "src" / "engine" / "strategies"
 
-#: (전략 id, 파일명, 클래스명) — `STRATEGY_IDS` 와 같은 순서.
-_STRATEGY_META: tuple[tuple[str, str, str], ...] = (
-    ("momentum", "momentum.py", "MomentumStrategy"),
-    ("volatility_breakout", "volatility_breakout.py", "VolatilityBreakoutStrategy"),
-    ("long_tail_volatility", "long_tail_volatility.py", "LongTailVolatilityStrategy"),
-    ("donchian_swing", "donchian_swing.py", "DonchianSwingStrategy"),
-    ("bull_flag_breakout", "bull_flag_breakout.py", "BullFlagBreakoutStrategy"),
-    ("vcp_breakout", "vcp_breakout.py", "VcpBreakoutStrategy"),
-    ("kojiro", "kojiro.py", "KojiroStrategy"),
+#: (전략 id, 파일명, 클래스명) — 전략 명부 전부(파일 이름순). 순서가 계약인 판정(C3 의
+#: `applies_to` 순서)은 이것이 아니라 `pc.STRATEGY_IDS` 를 돈다.
+_STRATEGY_META: tuple[tuple[str, str, str], ...] = tuple(
+    (sid, fname, census.strategy_class_name_ast(fname))
+    for sid, fname in zip(census.STRATEGY_IDS, census.STRATEGY_FILES)
 )
 
 #: 브리프 3-1 이 못 박은 리스크 정체성 상수 13키. 카탈로그가 2단계 확인 대상을
@@ -148,25 +147,8 @@ def _ast_keys() -> dict[str, tuple[str, ...]]:
 
 @lru_cache(maxsize=1)
 def _defaults() -> dict[str, dict]:
-    """전략 클래스의 `DEFAULT_PARAMS` **값**(읽기 전용으로만 쓴다)."""
-    from src.engine.strategies.bull_flag_breakout import BullFlagBreakoutStrategy
-    from src.engine.strategies.donchian_swing import DonchianSwingStrategy
-    from src.engine.strategies.kojiro import KojiroStrategy
-    from src.engine.strategies.long_tail_volatility import LongTailVolatilityStrategy
-    from src.engine.strategies.momentum import MomentumStrategy
-    from src.engine.strategies.vcp_breakout import VcpBreakoutStrategy
-    from src.engine.strategies.volatility_breakout import VolatilityBreakoutStrategy
-
-    classes = {
-        "momentum": MomentumStrategy,
-        "volatility_breakout": VolatilityBreakoutStrategy,
-        "long_tail_volatility": LongTailVolatilityStrategy,
-        "donchian_swing": DonchianSwingStrategy,
-        "bull_flag_breakout": BullFlagBreakoutStrategy,
-        "vcp_breakout": VcpBreakoutStrategy,
-        "kojiro": KojiroStrategy,
-    }
-    return {sid: dict(cls.DEFAULT_PARAMS) for sid, cls in classes.items()}
+    """전략 클래스의 `DEFAULT_PARAMS` **값**(읽기 전용으로만 쓴다) — 전략 명부 전부."""
+    return {sid: dict(cls.DEFAULT_PARAMS) for sid, cls in census.strategy_classes().items()}
 
 
 def _key_set_mismatch(
@@ -186,7 +168,7 @@ def _param_ranges() -> dict:
 # C1 · C2 — 키 집합 동일성 (M1 을 죽인다)
 # ===========================================================================
 def test_catalog_when_compared_to_default_params_then_key_sets_identical():
-    """B01/C1 — 7 전략 `DEFAULT_PARAMS` 키 합집합 ≡ `all_keys()`.
+    """B01/C1 — 전략 명부 전부의 `DEFAULT_PARAMS` 키 합집합 ≡ `all_keys()`.
 
     한쪽 방향(부분집합)만 보면 신규 키 누락이나 유령 키 중 하나를 놓친다.
     """
@@ -195,8 +177,35 @@ def test_catalog_when_compared_to_default_params_then_key_sets_identical():
         union |= set(keys)
 
     missing, ghost = _key_set_mismatch(frozenset(union), frozenset(pc.all_keys()))
-    assert not missing, f"카탈로그에 없는 DEFAULT_PARAMS 키: {sorted(missing)} — 화면에서 편집 불가"
+    by_file = {
+        fname: sorted(set(_ast_keys()[sid]) & missing)
+        for sid, fname, _c in _STRATEGY_META if set(_ast_keys()[sid]) & missing
+    }
+    assert not missing, (
+        f"카탈로그에 없는 DEFAULT_PARAMS 키: {sorted(missing)} — 화면에서 편집 불가 "
+        f"(파일별 {by_file}). `src/engine/param_catalog.py` 의 PARAM_SPECS 에 ParamSpec 을 추가하라"
+    )
     assert not ghost, f"어느 전략에도 없는 유령 키: {sorted(ghost)}"
+
+
+def test_catalog_strategy_ids_when_compared_to_census_then_identical():
+    """B01c/C1 — 전략 명부(전략 디렉터리의 파일 전부) ≡ `pc.STRATEGY_IDS`.
+
+    카탈로그에 등재되지 않은 전략은 화면 스키마에 키가 0개다(`keys_for_strategy` 가
+    `applies_to` 로만 찾는다). 아래 C3·C12 는 `pc.STRATEGY_IDS` 를 돌므로, 미등재 전략은
+    키마다 수십 건으로 흩어지는 대신 **여기 한 건**으로 붉는다. 전략 id ≠ 파일 이름 드리프트도
+    여기서 드러난다(명부 규약: 전략 id == 파일 stem).
+    """
+    only_census = sorted(set(census.STRATEGY_IDS) - set(pc.STRATEGY_IDS))
+    only_catalog = sorted(set(pc.STRATEGY_IDS) - set(census.STRATEGY_IDS))
+    assert not only_census, (
+        f"새 전략 {only_census} 가 `src/engine/param_catalog.py` 의 STRATEGY_IDS 에 없다 — "
+        "등록 순서 자리에 id 를 적고, 그 전략이 가진 키의 ParamSpec.applies_to 에도 id 를 넣어라"
+    )
+    assert not only_catalog, (
+        f"`param_catalog.STRATEGY_IDS` 의 {only_catalog} 에 해당하는 파일이 전략 디렉터리에 없다 — "
+        "전략을 뺐으면 카탈로그에서도 지워라(전략 id 는 파일 이름과 같아야 한다)"
+    )
 
 
 def test_catalog_when_counted_then_102_specs_no_duplicates():
@@ -241,7 +250,7 @@ def test_ast_extracted_keys_match_imported_default_params():
 def test_applies_to_when_compared_then_matches_default_params_exactly(key: str):
     """B04/C3 — 101키(cycle290 이후) 전수: `applies_to` ≡ 그 키를 가진 전략 집합."""
     spec = pc.get_spec(key)
-    expected = tuple(sid for sid, _f, _c in _STRATEGY_META if key in _ast_keys()[sid])
+    expected = tuple(sid for sid in pc.STRATEGY_IDS if key in _ast_keys().get(sid, ()))
     assert spec.applies_to == expected, (
         f"{key}: applies_to={spec.applies_to} 기대={expected} — "
         "화면에서 그 전략의 키가 사라지거나 없는 키가 나타난다"
@@ -266,9 +275,11 @@ def test_applies_to_when_empty_then_none():
 def test_keys_for_strategy_when_called_then_matches_default_params():
     """C12 전제 — `keys_for_strategy(sid)` ≡ 그 전략의 `DEFAULT_PARAMS` 키 집합.
 
-    스키마 응답의 전략별 `keys` 가 이 헬퍼에서 나온다.
+    스키마 응답의 전략별 `keys` 가 이 헬퍼에서 나온다. 카탈로그 등재 전략만 돈다 —
+    미등재 전략은 `test_catalog_strategy_ids_when_compared_to_census_then_identical` 이 잡는다.
     """
-    for sid, keys in _ast_keys().items():
+    for sid in pc.STRATEGY_IDS:
+        keys = _ast_keys().get(sid, ())
         assert set(pc.keys_for_strategy(sid)) == set(keys), f"{sid}: keys_for_strategy 불일치"
 
 

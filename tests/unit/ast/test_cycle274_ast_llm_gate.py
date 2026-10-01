@@ -42,6 +42,8 @@ from pathlib import Path
 
 import pytest
 
+from tests import _strategy_census as census
+
 pytestmark = pytest.mark.unit
 
 _ROOT = Path(__file__).resolve().parents[3]
@@ -446,18 +448,14 @@ def test_c10_2_recommendation_engine_source_has_no_key_literal(key: str) -> None
 #: 소유 축이 {VB, LTV} → **7전략 전부**로 뒤집혔다. 이 가드는 삭제·skip 되지 않고
 #: 기대값만 반전된다(cycle297 명세 §5.2 — cycle297 자체 가드 `test_g2_1b` 가 이 함수의
 #: 존재와 무회피 마커를 별도로 잠근다).
-_ALL_SEVEN_STRATEGY_RELS = frozenset(
-    f"src/engine/strategies/{name}.py"
-    for name in (
-        "momentum", "volatility_breakout", "long_tail_volatility",
-        "donchian_swing", "bull_flag_breakout", "vcp_breakout", "kojiro",
-    )
-)
+#: 리팩토링 카드 #1 — 기대값은 「7개 고정 목록」 이 아니라 **전략 명부 전부**
+#: (`tests/_strategy_census.py`)다. 규약을 지켜 4키를 가진 여덟째 전략을 거짓으로 붉히지 않는다.
+_ALL_STRATEGY_RELS = census.STRATEGY_RELS
 
 
 @pytest.mark.parametrize("key", _KEYS)
 def test_c10_3_key_lives_in_exactly_vb_and_ltv_default_params(key: str) -> None:
-    """C10/§6.2 — 전략 glob 전수에서 이 키를 `DEFAULT_PARAMS` 에 가진 파일 = **7전략 전부**.
+    """C10/§6.2 — 전략 glob 전수에서 이 키를 `DEFAULT_PARAMS` 에 가진 파일 = **전략 명부 전부**.
 
     🔁 cycle297(2026-09-17) 반전 — 원래 이 가드는 소유를 {VB, LTV} 로 잠갔다(§11 Q8).
     사용자 결정 "결정 2 진행" 으로 5전략이 추가됐고, 그 소유 축 가드는 지우지 않고
@@ -477,8 +475,12 @@ def test_c10_3_key_lives_in_exactly_vb_and_ltv_default_params(key: str) -> None:
             for k, v in zip(node.value.keys, node.value.values):
                 if isinstance(k, ast.Constant) and k.value == key:
                     owners[path.relative_to(_ROOT).as_posix()] = getattr(v, "value", v)
-    assert set(owners) == _ALL_SEVEN_STRATEGY_RELS, (
-        f"`{key}` 소유 전략이 7전략 전부가 아니다 — 실측 {sorted(owners)}"
+    assert set(owners) == _ALL_STRATEGY_RELS, (
+        f"`{key}` 소유 전략이 명부 전부가 아니다 — 실측 {sorted(owners)}, "
+        f"빠짐 {sorted(_ALL_STRATEGY_RELS - set(owners))}, 명부 밖 {sorted(set(owners) - _ALL_STRATEGY_RELS)}. "
+        "새 전략이면 그 파일의 `DEFAULT_PARAMS` 에 4키(`llm_gate_mode`·`llm_gate_min_score`·"
+        "`llm_gate_daily_call_cap`·`llm_gate_timeout_secs`)를 다른 전략과 같은 값으로 넣어라. "
+        "전략이 아닌 파일이 갖고 있으면 지워라"
     )
 
 
