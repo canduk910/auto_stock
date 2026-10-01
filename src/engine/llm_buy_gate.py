@@ -119,8 +119,8 @@ _BARS_CACHE_MAX = 400
 _BARS_FETCH_DAYS = 60
 _BARS_MIN_REQUIRED = 30
 _PROMPT_BAR_COUNT = 30
-# `gpt-5.6-luna` 는 **추론 모델**이라 추론 토큰이 `max_completion_tokens` 를 함께
-# 소비한다. 09-11 운영 컨테이너 실측(같은 프롬프트, 한도만 바꿔 재현) —
+# 추론 모델은 추론 토큰이 `max_completion_tokens` 를 함께 소비한다. 09-11 운영
+# 컨테이너에서 추론 모델 `gpt-5.6-luna` 로 잰 값(같은 프롬프트, 한도만 바꿔 재현) —
 #
 #   한도   finish_reason   content 길이   reasoning_tokens   결과
 #   3000   stop            218            202                score 43 정상
@@ -131,6 +131,10 @@ _PROMPT_BAR_COUNT = 30
 # 400 은 실측 여유가 30 토큰뿐이라 추론이 조금만 길어지면 전건 실패한다(09-11 09:0x
 # 실전 2건이 `reason=schema_error latency_ms=10047/5514` 로 끝난 그 경로). 2000 은
 # 실측 최대 소비(≈470)의 4배 여유다.
+#
+# 기본 모델 `gpt-6-luna` 는 10-02 운영 프로브(한도 400)에서 `reasoning_tokens=0`·
+# `finish_reason=stop` 이었다. 그래도 한도는 줄이지 않는다 — `.env` 의
+# `OPENAI_BUY_GATE_MODEL` 로 추론 모델을 다시 고르면 같은 함정이 돌아온다.
 #
 # ⚠️ **비용은 오르지 않는다** — 과금은 실제 사용 토큰이고 이 상수는 상한일 뿐이다.
 # 한도를 올려도 모델이 더 쓰지 않는다(위 표의 3000 행이 218자·202 추론토큰).

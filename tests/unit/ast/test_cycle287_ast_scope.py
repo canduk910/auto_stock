@@ -673,8 +673,11 @@ _SRC_TREE_FILES = 166
 # 일중에 줄어든 읽기를 새 기준으로 삼지 않는다, `stale_watcher_core.py` else 분기만) 직전
 # 값 = `41740a36d4bdbc0cd615da4b0bce0b960fe3ae3fd3dd2e552352b2f0be02aafd`(2차, day_high
 # 문구 수정 후). 1차 값 = `ce5ac7b26c0e698af85f0660c17d4cd49ca9c242fa8b2077ab0029463c5f3d79`.
+# 🔁 cycle394(2026-10-02) 재핀 — cycle393 위에 LLM 기본 모델 `gpt-6-luna` 전환(사용자 요청). `config.py`(기본값 2키) ·
+# `log_analysis_engine.py`(`_OPENAI_PRICING` 1행 + 주석) · `llm_buy_gate.py`(주석만). 파일 수 불변 166, 매매 행위 변경 없음.
+# 직전 값 = cycle393 3차 `bf486d64cb9ff561fc4224713a86d18dfaf492581fa77dbe4eda3bdeaf64bcf9`.
 _SRC_TREE_DIGEST = (
-    "bf486d64cb9ff561fc4224713a86d18dfaf492581fa77dbe4eda3bdeaf64bcf9"
+    "b20e67639d14d1d4437ab3982733e1c428313d165476084ee391f956064b84ea"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

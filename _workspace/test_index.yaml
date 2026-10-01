@@ -907,6 +907,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -2095,6 +2096,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -3292,6 +3294,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -4482,6 +4485,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -5673,6 +5677,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -6866,6 +6871,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -8059,6 +8065,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -9257,6 +9264,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -10446,6 +10454,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -11706,6 +11715,7 @@ backend:
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -12915,6 +12925,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -14109,6 +14120,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -14433,6 +14445,7 @@ backend:
     - tests/unit/engine/test_cycle369_status_sell_pass.py
     - tests/unit/engine/test_cycle385_b7_partial_sell.py
     - tests/unit/engine/test_cycle385_reorder_requery.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_recommendation_backtest_hook.py
     - tests/unit/middleware/test_cycle243_api_auth.py
     - tests/unit/realtime/test_cycle235_execution_qty_parse.py
@@ -16493,6 +16506,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -17689,6 +17703,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -18880,6 +18895,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -20073,6 +20089,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -21266,6 +21283,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -22459,6 +22477,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -23654,6 +23673,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -24845,6 +24865,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -26038,6 +26059,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -27231,6 +27253,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -28424,6 +28447,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -29620,6 +29644,7 @@ backend:
     - tests/unit/engine/test_cycle385r_partial_locked_sell.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -30815,6 +30840,7 @@ backend:
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -32004,6 +32030,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -33196,6 +33223,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -34391,6 +34419,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -35583,6 +35612,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -36779,6 +36809,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -37975,6 +38006,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -39169,6 +39201,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -40358,6 +40391,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -41552,6 +41586,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -42746,6 +42781,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -43938,6 +43974,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -45132,6 +45169,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -46324,6 +46362,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -47517,6 +47556,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -48710,6 +48750,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -49902,6 +49943,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -51100,6 +51142,7 @@ backend:
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -52289,6 +52332,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -53482,6 +53526,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -54675,6 +54720,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -55868,6 +55914,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -57061,6 +57108,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -58254,6 +58302,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -59448,6 +59497,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -59749,6 +59799,7 @@ backend:
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/llm_buy_gate.py:
     direct_tests:
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
@@ -61833,6 +61884,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -62208,6 +62260,7 @@ backend:
     - tests/unit/engine/test_cycle259_gate_snapshot.py
     - tests/unit/engine/test_cycle283_metrics_snapshot.py
     - tests/unit/engine/test_cycle366_report_accuracy.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycleH_log_analysis_snapshot.py
     - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
     - tests/unit/engine/test_log_analysis_metrics.py
@@ -64289,6 +64342,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -65478,6 +65532,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -66675,6 +66730,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -67875,6 +67931,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -69056,6 +69113,7 @@ backend:
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -70249,6 +70307,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -71442,6 +71501,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -72635,6 +72695,7 @@ backend:
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -73828,6 +73889,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -75021,6 +75083,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -76214,6 +76277,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -77406,6 +77470,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -78685,6 +78750,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -79954,6 +80020,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -81212,6 +81279,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -82406,6 +82474,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -83599,6 +83668,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -84801,6 +84871,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -85987,6 +86058,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -87181,6 +87253,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -88369,6 +88442,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -89636,6 +89710,7 @@ backend:
     - tests/unit/engine/test_cycle385r_recount_credit.py
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -90845,6 +90920,7 @@ backend:
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle61_phase2A2_dataclass_completeness.py
@@ -91951,6 +92027,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -93144,6 +93221,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -94335,6 +94413,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -95527,6 +95606,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -96722,6 +96802,7 @@ backend:
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -97934,6 +98015,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -99107,6 +99189,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -100318,6 +100401,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -101494,6 +101578,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -102685,6 +102770,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -103878,6 +103964,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -105072,6 +105159,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -106265,6 +106353,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -107458,6 +107547,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -108655,6 +108745,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -109875,6 +109966,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -111071,6 +111163,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -112262,6 +112355,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -113454,6 +113548,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -114647,6 +114742,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -115841,6 +115937,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -117035,6 +117132,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -118259,6 +118357,7 @@ backend:
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
@@ -119439,6 +119538,7 @@ backend:
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -120613,6 +120713,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -121805,6 +121906,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -123072,6 +123174,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -124266,6 +124369,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -125457,6 +125561,7 @@ backend:
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -126652,6 +126757,7 @@ backend:
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -127842,6 +127948,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -129037,6 +129144,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -130229,6 +130337,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -131429,6 +131538,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -132682,6 +132792,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -133875,6 +133986,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -135072,6 +135184,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -136266,6 +136379,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -137524,6 +137638,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -138718,6 +138833,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -139978,6 +140094,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -141342,6 +141459,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -142602,6 +142720,7 @@ backend:
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -143825,6 +143944,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -145000,6 +145120,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -146210,6 +146331,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -147402,6 +147524,7 @@ backend:
     - tests/unit/engine/test_cycle386_daily_bar_finalize.py
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -150139,6 +150262,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -151329,6 +151453,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -152525,6 +152650,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -153715,6 +153841,7 @@ backend:
     - tests/unit/engine/test_cycle386_finalize_neutralization.py
     - tests/unit/engine/test_cycle392_sell_book_cumulative.py
     - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+    - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle41_funnel_name_reason.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -155725,10 +155852,10 @@ frontend:
     - frontend/src/pages/__tests__/MarketState.test.tsx
     - frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
     - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
-generated_at: '2026-10-02T08:35:28.641052+09:00'
+generated_at: '2026-10-02T08:36:15.054889+09:00'
 stats:
   backend_modules: 169
-  backend_tests: 1190
+  backend_tests: 1191
   frontend_modules: 128
   frontend_tests: 105
   unmapped_modules:

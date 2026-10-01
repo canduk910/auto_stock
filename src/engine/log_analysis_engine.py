@@ -71,7 +71,11 @@ OPENAI_EMPTY_RESPONSE_SUMMARY = (
 # 사이클 58 V-2 (2026-06-04) — OpenAI 모델별 토큰 단가 (USD per 1K tokens)
 # (input_per_1k, output_per_1k)
 # 미등록 모델 → cost_estimate_usd=None + WARNING [openai_pricing_miss]
+# 기본 모델(`config.openai_*_model`)은 반드시 이 표에 있어야 한다 — 없으면 21:30 분석은
+# 비용 None, AI 매수평가(`llm_buy_gate._cost_usd`)는 -1.0 으로 기록이 끊긴다.
+# 이전 기본 모델 행은 지우지 않는다(과거 행 비용 재계산 · `.env` 롤백용).
 _OPENAI_PRICING: dict[str, tuple[float, float]] = {
+    "gpt-6-luna": (0.0001, 0.0005),
     "gpt-5.6-luna": (0.0010, 0.0060),
     "gpt-5.4": (0.0050, 0.0150),
     "gpt-4o": (0.0025, 0.0100),

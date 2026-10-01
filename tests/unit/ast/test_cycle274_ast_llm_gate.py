@@ -485,16 +485,16 @@ def test_c10_3_key_lives_in_exactly_vb_and_ltv_default_params(key: str) -> None:
 
 
 def test_c10_4_config_declares_buy_gate_model() -> None:
-    """C10 자매/§6.3 — `src/config.py` 에 `openai_buy_gate_model` 1키(기본 `gpt-5.6-luna`).
+    """C10 자매/§6.3 — `src/config.py` 에 `openai_buy_gate_model` 1키(기본 `gpt-6-luna`, cycle394).
 
     20:00 자문 모델(`openai_recommend_model`)과 **분리**한다 — 한쪽을 더 싼 모델로
     옮기고 싶을 때 다른 쪽이 딸려가면 안 된다. `openai_api_key` 는 재사용.
     """
     from src.config import settings
 
-    assert getattr(settings, "openai_buy_gate_model", None) == "gpt-5.6-luna"
+    assert getattr(settings, "openai_buy_gate_model", None) == "gpt-6-luna"
     assert hasattr(settings, "openai_recommend_model")
-    assert settings.openai_recommend_model == "gpt-5.6-luna"
+    assert settings.openai_recommend_model == "gpt-6-luna"
 
 
 def test_c10_5_no_new_killswitch_boolean_param() -> None:

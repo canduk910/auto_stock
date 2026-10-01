@@ -55,7 +55,7 @@
 - **키 부재** = `mode` **off** · `daily_call_cap` **0**(호출 안 함) · `min_score`/`timeout` 70/20 — 돈을 쓰는 기능이라 설정이 없으면 하지 않는다(각주 ③ 의 부재 = enforce 와 반대).
 - **기록만 한다**(행위 변경 없음). `enforce` 는 미구현, `shadow` 외 값은 `off`. 킬스위치 = `PUT {"llm_gate_mode":"off"}` **즉시**(SQL 은 재시작 뒤).
 - 채점 문맥 = `llm_features._STRATEGY_META`(7전략) + `snapshot_keys_for`. LTV `pre_nxt` 주문도 평가한다(`board_note` + `vol_ratio_time_norm=null`). `[llm_buy_score]` 의 `rationale` 은 60자 절단(`system_logs` 500자 컷 — 전문은 docker 로그), `latency_ms`(LLM 호출만) ≠ `verdict_lag_ms`(접수→판정 전체).
-- 호출 = 재시도 0(`AsyncOpenAI(max_retries=0)`) · `score` 가 bool 이어도 `schema_error` · 모델 기본 `gpt-5.6-luna`(`openai_buy_gate_model` — 20:00 자문 `openai_recommend_model` 과 별도) · 키 `openai_api_key` 재사용 · temperature 미지정. 조회 `GET /api/llm-evaluations/{order_no}` · 회고 `.../retrospective`.
+- 호출 = 재시도 0(`AsyncOpenAI(max_retries=0)`) · `score` 가 bool 이어도 `schema_error` · 모델 기본 `gpt-6-luna`(`openai_buy_gate_model` — 20:00 자문 `openai_recommend_model` 과 별도) · 키 `openai_api_key` 재사용 · temperature 미지정. 조회 `GET /api/llm-evaluations/{order_no}` · 회고 `.../retrospective`.
 - 자문 `_workspace/domain_consult/cycle274_llm_buy_gate_20260910.md`(enforce 설계는 사용자 결정) · `cycle276_order_time_llm_20260911.md` · 명세 `_workspace/red/cycle276_order_time_llm_eval_spec.md`.
 
 **각주 ⑤ LTV `main` 보드 신규 매수 15:20 컷** — `board=="main"` 신규 매수는 `MAIN_BUY_CUTOFF_KST = time(15, 20)` 이후 내지 않는다. **모듈 상수**다 — `DEFAULT_PARAMS`/`PARAM_RANGES`/`INT_PARAMS` **편입 금지**(오버나이트 금지가 DB 토글로 뚫리면 안 된다).

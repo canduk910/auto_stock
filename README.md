@@ -87,8 +87,8 @@ API_REPORTER_KEY=              # 빈 값 = 리포터 역할 비활성. 운영 �
 
 # OpenAI (20:00 전략수정 AI자문 · 21:30 일일 로그 분석 · AI 매수평가 공용 키, 모델은 축이 둘)
 OPENAI_API_KEY=
-OPENAI_RECOMMEND_MODEL=gpt-5.6-luna    # 20:00 전략수정 AI자문
-OPENAI_BUY_GATE_MODEL=gpt-5.6-luna     # AI 매수평가 (한쪽만 싼 모델로 옮길 수 있게 분리)
+OPENAI_RECOMMEND_MODEL=gpt-6-luna      # 20:00 전략수정 AI자문
+OPENAI_BUY_GATE_MODEL=gpt-6-luna       # AI 매수평가 (한쪽만 싼 모델로 옮길 수 있게 분리)
 ```
 
 - ⚠️ **접미사 없는 키에 실제 값을 넣으면 무시된다.** `src/config.py` 가
