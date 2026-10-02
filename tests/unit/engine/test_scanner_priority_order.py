@@ -441,15 +441,26 @@ def test_collect_breakout_order_bfb_vcp_first():
 
     dedup 순서 보존 → pool 압박 시 tail(VB/LTV)부터 잘려 BFB/VCP 우선 구독.
     종전 VB→LTV→BFB→VCP 는 BFB/VCP 를 tail 로 밀었다(60% 미구독 실측).
+
+    cycle398 PR2(카드 #3) — 등록 순서 리터럴이 `strategy_manifest.BREAKOUT_SUBSCRIBE_ORDER`
+    파생으로 바뀌어 소스 grep(`inspect.getsource` 문자열 위치)이 더는 유효하지 않다.
+    약화가 아니라 **실제 배선을 호출해 병합 순서를 단언**하는 행위 단언으로 전환한다
+    (설계 §4.2-5 · `test_cycle398_strategy_wiring_golden.py::test_g4b_key_orders_literal` 와 같은 방식).
     """
-    import inspect
     from src.engine.scheduler import TradingScheduler
 
-    src = inspect.getsource(TradingScheduler._collect_breakout_tickers)
-    i_bfb = src.find('"bull_flag_breakout"')
-    i_vcp = src.find('"vcp_breakout"')
-    i_vb = src.find('"volatility_breakout"')
-    i_ltv = src.find('"long_tail_volatility"')
-    assert 0 < i_bfb < i_vcp < i_vb < i_ltv, (
-        f"BFB→VCP→VB→LTV 순이어야 함 (bfb={i_bfb} vcp={i_vcp} vb={i_vb} ltv={i_ltv})"
+    ts = TradingScheduler()
+    stub_tickers = {
+        "bull_flag_breakout": ["BFB1"],
+        "vcp_breakout": ["VCP1"],
+        "volatility_breakout": ["VB1"],
+        "long_tail_volatility": ["LTV1"],
+    }
+    for sid, tickers in stub_tickers.items():
+        strategy = ts.registry.get(sid)
+        strategy.config.enabled = True
+        strategy.get_scanned_tickers = lambda c=tickers: list(c)
+
+    assert ts._collect_breakout_tickers() == ["BFB1", "VCP1", "VB1", "LTV1"], (
+        "BFB→VCP→VB→LTV 순 병합이어야 한다(2026-08-08 사용자 결정)"
     )

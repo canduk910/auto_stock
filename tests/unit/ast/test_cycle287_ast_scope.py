@@ -690,8 +690,11 @@ _SRC_TREE_FILES = 168  # cycle398 PR1 — 신규 leaf `strategy_manifest.py` 로
 # 읽기 전용 조회 조합 — 매매 행위 변경 없음. 직전 값 = cycle396 `67d48b35e5b2759b67d6a0957d1e09b7e50d2e61c68b2e0b3ca3df13988360de`.
 # cycle398 PR1(리팩토링 카드 #2, 사용자 승인 10-02) — 신규 leaf `strategy_manifest.py` 추가 +
 # `scheduler.py` 등록 블록을 그 명부 순회로 교체(행위 동일, PR0 골든 증명) 167 → 168.
+# cycle398 PR2(리팩토링 카드 #3, 같은 승인) — `strategy_manifest.py` 에 원형 선언 칸
+# (eval_driver·breakout_rank·open_price_target·close_at_1520·market_unit_policy) 추가 +
+# `scheduler.py` 리터럴 7자리를 그 파생으로 교체(행위 동일, PR0 골든 증명) — 파일 수 168 그대로.
 _SRC_TREE_DIGEST = (
-    "d779b04adc9e91545f68784121ce4281df693f4ec3da3d864be6513fe678181c"
+    "9b9d0f77470018f39e259889dfc60dff1b5acfcbbd979101ef6593caf513e460"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
@@ -730,7 +733,7 @@ _PINNED_DIR_FILE_COUNTS = {
 #: 신규 leaf `src/engine/market_op_subscribe.py` 로 추출해(행위 변경 0 · 5줄
 #: 위임 wrapper) 3,897 → 3,726 이 됐다. 값만 옮긴다 — 정확 핀을 상한 핀으로
 #: 완화하면 cycle287 의 무접촉 대리 지표가 사라진다.
-_SCHEDULER_LINES = 3732  # cycle398 재핀 — 전략 등록 명부 추출(PR1 카드 #2, 사용자 승인 10-02, -54)
+_SCHEDULER_LINES = 3730  # cycle398 재핀 — 전략 등록 명부 추출(PR1 카드 #2) + 원형 선언 명부 칸 추출(PR2 카드 #3, 사용자 승인 10-02, 합산 -56)
 _SCHEDULER_LINE_CAP = 3900
 
 #: 손대지 않기로 한 **원문 구간**의 sha256 (base `a42f519`).

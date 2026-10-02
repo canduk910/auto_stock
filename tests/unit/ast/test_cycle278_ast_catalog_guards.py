@@ -301,7 +301,7 @@ _BASE_SHA = {
     # 않는다.
     # 🔁 cycle369 재핀 — 관리종목51·단기과열59 청산·매수차단 leaf 배선(값만 이동)
     "src/engine/scheduler.py":
-        "db33826565830b61ca3ea8178f5c4054bae1e04b546421273f43fb286079c816",
+        "2cecfd485df87dbcf9098bf8ed11408f3da36e6ca665b4919f0f9c25852ea2fe",
     # 🔁 cycle382 재핀 — 시장 유닛(사용자 결정 09-27). `strategy_base.py` 에
     # `_market_unit_*` 헬퍼 + `MarketUnitView`/`MarketUnitLots`/`_MarketUnitCaps`
     # 추가(관문 `_apply_budget_limit` 등 본문은 byte 무변경, A12 가 별도로 핀).

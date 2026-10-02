@@ -291,7 +291,7 @@
 ## 새 전략 추가
 
 1. 이 디렉토리에 `StrategyBase` 서브클래스(`prepare(self, *, as_of=None)`/`check_buy_signal`/`check_exit_signal`/`calc_buy_quantity`).
-2. `src/engine/strategy_manifest.py` 의 `STRATEGY_MANIFEST` 에 행 하나(클래스·id·이름·초기 켜짐·비중) — 등록 순서 = `risk.on_tick` 평가 순서 = 같은 틱 매수 우선순위다(cycle398 카드 #2). `scheduler.__init__` 는 이 명부를 순회할 뿐이라 **무접촉**(8영역·라인 상한과 무관). 다만 새 전략 추가 자체는 「매매 행위를 바꾸는 코드 변경」이라 파일 위치와 무관하게 승인 + `domain-consult` 선행이다(루트 `CLAUDE.md` 「자율 진행과 승인 빈도」).
+2. `src/engine/strategy_manifest.py` 의 `STRATEGY_MANIFEST` 에 행 하나 — 등록 칸(클래스·id·이름·초기 켜짐·비중, cycle398 카드 #2) + 원형 칸(`eval_driver`·`breakout_rank`·`open_price_target`·`close_at_1520`·`market_unit_policy`, cycle398 카드 #3) **전부 필수**(기본값 없음 — 하나라도 빠뜨리면 import 시 `TypeError` 또는 `_validate_manifest()` 의 `ValueError`). 등록 순서 = `risk.on_tick` 평가 순서 = 같은 틱 매수 우선순위다. 새 전략은 **끝에** 붙인다(기존 실전 전략의 종목을 선점하지 않는다, 자문 §2.3). `scheduler.__init__`·`_collect_breakout_tickers`·`_reprepare_breakout_if_empty`·`_confirm_breakout_open_prices*`·`_force_clear_main_only` 는 이 명부(와 거기서 파생한 `SWING_POLL_IDS`·`BREAKOUT_IDS`·`BREAKOUT_SUBSCRIBE_ORDER`·`OPEN_PRICE_TARGET_IDS`·`CLOSE_AT_1520_IDS`·`MARKET_UNIT_SCALE_IDS`)를 순회할 뿐이라 **무접촉**(8영역·라인 상한과 무관). `risk.py:88` `_TICK_BUY_EVAL_SKIP_STRATEGIES` 는 리터럴로 유지하고 명부와 교차 검사만 한다(사용자 결정 B, `test_cycle398_strategy_manifest.py`) — 폴형(`eval_driver="swing_poll"`) 전략을 추가했는데 이 리터럴을 깜빡하면 그 교차 검사가 붉어진다. `eval_driver` 축 하나가 전부를 정하지 않는다 — `tick_breakout` 이어도 `open_price_target`·`close_at_1520`·`market_unit_policy` 는 전략마다 따로 켠다(원형은 조합의 이름표일 뿐, 자문 §2.1). 다만 새 전략 추가 자체는 「매매 행위를 바꾸는 코드 변경」이라 파일 위치와 무관하게 승인 + `domain-consult` 선행이다(루트 `CLAUDE.md` 「자율 진행과 승인 빈도」).
 3. 필요하면 `scanner.py` 에 스캔 함수(8영역 — 승인 대상).
 4. 이 문서 표(파일명 열 포함) + `_workspace/00_leader_trading_rules.md` 명세.
 5. 배선 의무:

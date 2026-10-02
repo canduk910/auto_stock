@@ -89,7 +89,7 @@ _MARKERS = (
 _LOGGER_NAME = "src.engine.scheduler"
 
 #: `scheduler.py` 정확 라인 수 + cycle257 이 세운 영구 상한.
-_SCHEDULER_LINES = 3732  # cycle398 재핀 — 전략 등록 명부 추출(PR1 카드 #2, 사용자 승인 10-02, -54)
+_SCHEDULER_LINES = 3730  # cycle398 재핀 — 전략 등록 명부 추출(PR1 카드 #2) + 원형 선언 명부 칸 추출(PR2 카드 #3, 사용자 승인 10-02, 합산 -56)
 _SCHEDULER_LINE_CAP = 3_900
 
 #: cycle292 가 만진 **전부**인 프로덕션 3파일의 내용 sha. 붉어지면 핀을 갱신하기 전에
@@ -101,7 +101,7 @@ _BASE_SHA = {
     # 🔁 cycle364(2026-09-26) 재핀 — 저녁 A1 미리보기 도입 + 저녁 캡처 본체 leaf 이관.
     # 🔁 cycle369 재핀 — 관리종목51·단기과열59 청산·매수차단 leaf 배선(값만 이동)
     "src/engine/scheduler.py":
-        "db33826565830b61ca3ea8178f5c4054bae1e04b546421273f43fb286079c816",
+        "2cecfd485df87dbcf9098bf8ed11408f3da36e6ca665b4919f0f9c25852ea2fe",
     "src/engine/market_op_subscribe.py":
         "7d58f9464c1ed35e4fa8706d801beb5a6b5c062d5a2941f0db6482d028d3d4ac",
     # 🔁 cycle368(2026-09-25) 재핀 — halt 판정을 `_is_code_active` → `is_iscd_stat_blocking`

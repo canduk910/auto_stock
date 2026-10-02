@@ -143,14 +143,28 @@ class TestDefect1ForceClearMainOnly:
         """G-142-DEFECT1-5: `_force_clear_main_only` for sid loop 영역 영속 영역.
 
         VB + LTV 두 전략 모두 영역.
+
+        cycle398 PR2(리팩토링 카드 #3) — 반복 대상 리터럴이 `strategy_manifest.CLOSE_AT_1520_IDS`
+        파생으로 바뀌어 `ast.unparse` 소스 문자열 포함 검사가 더는 유효하지 않다(이름 참조만
+        남는다). 약화가 아니라 **그 이름이 가리키는 실제 값**을 단언하는 행위 단언으로 전환한다
+        (설계 §4.2-5 · `test_cycle398_strategy_wiring_golden.py::test_g4b_key_orders_literal` 와
+        같은 방식 — 이 집합은 그 골든의 `force_clear_1520` 묶음과도 같은 사실이다).
         """
         source = read_module_source(_SCHEDULER_PY)
         node = find_function_def(source, "_force_clear_main_only")
         assert node is not None
 
-        body_src = ast.unparse(node)
-        assert "volatility_breakout" in body_src
-        assert "long_tail_volatility" in body_src
+        # for 문의 반복 대상이 전략 id 상수 이름인지(리터럴이든 파생이든) 확인한 뒤
+        # 그 이름이 가리키는 실제 값에 VB·LTV 둘 다 있는지 본다.
+        for_node = next(n for n in ast.walk(node) if isinstance(n, (ast.For, ast.AsyncFor)))
+        assert isinstance(for_node.iter, (ast.Name, ast.Tuple, ast.List)), (
+            "반복 대상이 이름/리터럴이 아니다 — 행위 단언으로 추적할 수 없다"
+        )
+
+        from src.engine.strategy_manifest import CLOSE_AT_1520_IDS
+
+        assert "volatility_breakout" in CLOSE_AT_1520_IDS
+        assert "long_tail_volatility" in CLOSE_AT_1520_IDS
 
 
 # =============================================================================

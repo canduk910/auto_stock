@@ -30,7 +30,10 @@ from src.engine.scanner import scan_stocks, subscribe_filtered_stocks, unsubscri
 from src.engine.session import MarketBoard, session_tracker
 from src.engine.daily_emit_cap import DailyEmitCap
 from src.engine.strategy_base import Signal, StrategyConfig
-from src.engine.strategy_manifest import STRATEGY_MANIFEST
+from src.engine.strategy_manifest import (
+    BREAKOUT_IDS, BREAKOUT_SUBSCRIBE_ORDER, CLOSE_AT_1520_IDS, OPEN_PRICE_TARGET_IDS,
+    STRATEGY_MANIFEST, SWING_POLL_IDS,
+)
 from src.engine.strategy_registry import StrategyRegistry
 from src.engine import data_load_tasks, funnel_capture  # refactor-review B1 위임 모듈 · cycle364 라이브 준비 leaf
 from src.engine import open_price_observe, open_price_rest  # cycle264 관측 leaf / cycle272 기준가 leaf (라인 상한 보호)
@@ -136,7 +139,8 @@ SWING_REST_POLL_WINDOW_END = time(15, 20)   # 15:20 (KRX 메인 매수 중단 �
 # 공유 순차 폴링 대상 = 일봉 멀티데이 스윙 전략 (donchian + kojiro, 2026-07).
 # 순차(sequential) 처리 = 동일 종목 double-buy race 차단 (전략 A execute_buy → pending_buys
 # 등록 후 전략 B is_ticker_blocked_for_buy 가 차단). 전용 task 신설 금지.
-_SWING_POLL_STRATEGIES = ("donchian_swing", "kojiro")
+# cycle398 PR2 — 명부 파생(카드 #3, `eval_driver=="swing_poll"`). 이름은 유지(3곳이 이 이름으로 import).
+_SWING_POLL_STRATEGIES = SWING_POLL_IDS
 
 # Backwards-compat aliases — 기존 코드 참조 호환
 TIME_NEXT_DAY_CLEAR = TIME_PRE_NXT_OPEN
@@ -725,7 +729,7 @@ class TradingScheduler:
                 if not self._collect_breakout_tickers():
                     logger.info("돌파 전략 유니버스 비어있음 → prepare 재실행")
                     await write_log("INFO", "돌파 유니버스 비어있어 prepare 재실행")
-                    for sid in ("volatility_breakout", "long_tail_volatility"):
+                    for sid in OPEN_PRICE_TARGET_IDS:  # cycle398 PR2 — 명부 파생(카드 #3)
                         strategy = self.registry.get(sid)
                         if strategy and strategy.config.enabled:
                             # wrapper 는 never-raise(cycle364 R7) — 실패 로그는
@@ -1614,7 +1618,7 @@ class TradingScheduler:
         # 대상 전략 + 종목 수집 — 해당 board를 활성화한 전략만
         from src.engine.session import get_tradable_boards, MarketBoard
         targets: list[tuple[str, object, list[str]]] = []
-        for sid in ("volatility_breakout", "long_tail_volatility"):
+        for sid in OPEN_PRICE_TARGET_IDS:  # cycle398 PR2 — 명부 파생(카드 #3)
             strategy = self.registry.get(sid)
             if not strategy or not strategy.config.enabled:
                 continue
@@ -1764,12 +1768,7 @@ class TradingScheduler:
         # BFB/VCP 는 폴링 루프 없이 risk.on_tick(tick)으로만 매수 평가하므로 구독
         # 우선순위가 곧 매수 기회다. VB/LTV 는 15:20 당일청산·후순위 감내 가능.
         tickers: list[str] = []
-        for sid in (
-            "bull_flag_breakout",
-            "vcp_breakout",
-            "volatility_breakout",
-            "long_tail_volatility",
-        ):
+        for sid in BREAKOUT_SUBSCRIBE_ORDER:  # cycle398 PR2 — 명부 파생(카드 #3, breakout_rank 오름차순)
             strategy = self.registry.get(sid)
             if strategy and strategy.config.enabled and hasattr(strategy, 'get_scanned_tickers'):
                 tickers.extend(strategy.get_scanned_tickers())
@@ -1981,7 +1980,7 @@ class TradingScheduler:
         from src.engine.scanner import t
         from src.engine.session import MarketBoard, get_tradable_boards
 
-        for sid in ("volatility_breakout", "long_tail_volatility"):
+        for sid in CLOSE_AT_1520_IDS:  # cycle398 PR2 — 명부 파생(카드 #3). OPEN_PRICE_TARGET_IDS 와 값이 우연히 같지만 독립된 사실(합치지 않는다)
             strategy = self.registry.get(sid)
             if not strategy or not strategy.config.enabled:
                 continue
@@ -2567,7 +2566,7 @@ class TradingScheduler:
                 active_board = "post_nxt"
 
         # VB + LTV 합집합 — 한쪽이라도 미확정 종목 존재 시 재시도
-        for sid in ("volatility_breakout", "long_tail_volatility"):
+        for sid in OPEN_PRICE_TARGET_IDS:  # cycle398 PR2 — 명부 파생(카드 #3)
             strategy = self.registry.get(sid)
             if strategy is None or not strategy.config.enabled:
                 continue
@@ -2608,8 +2607,7 @@ class TradingScheduler:
           오류 회복용 안전망 (주 메커니즘은 prdy 기반 시간무관 유니버스). 후보가 비었을 때만
           호출되므로 KIS rate limit 부담 미미 (전략당 5분 1회)
         """
-        for sid in ("volatility_breakout", "long_tail_volatility",
-                    "bull_flag_breakout", "vcp_breakout"):
+        for sid in BREAKOUT_IDS:  # cycle398 PR2 — 명부 파생(카드 #3). 등록 순서(X2 — 구독 순서와 다르다)
             strategy = self.registry.get(sid)
             if strategy is None or not strategy.config.enabled:
                 continue
