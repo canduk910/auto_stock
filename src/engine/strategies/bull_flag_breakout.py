@@ -1332,7 +1332,7 @@ class BullFlagBreakoutStrategy(StrategyBase):
                     ticker, current_price, measured_target,
                 )
                 # 1차 구현: 전량 청산 신호 (부분 매도 헬퍼는 향후 도입)
-                return Signal.TRAILING_STOP
+                return Signal.TAKE_PROFIT
 
         # 4) ATR×2 트레일링
         if info and pos.high_since_buy > 0:
@@ -1356,7 +1356,7 @@ class BullFlagBreakoutStrategy(StrategyBase):
                 "눌림목 시간 청산: %s buy_date=%s today=%s 보유일수 초과",
                 ticker, pos.buy_date, today,
             )
-            return Signal.TRAILING_STOP
+            return Signal.TIME_EXIT
 
         return Signal.NONE
 

@@ -1107,7 +1107,7 @@ class KojiroStrategy(StrategyBase):
                     "[kojiro_stage3_exit] %s 스테이지3 진입 (추세 종료) judged_on=%s",
                     ticker, _judged_on,
                 )
-                return Signal.TRAILING_STOP
+                return Signal.TREND_EXIT
             if _flagged and isinstance(_judged_on, date) and _judged_on < _today_kst:
                 self._emit_stage3_stale_skip(ticker, _judged_on, _today_kst)
 

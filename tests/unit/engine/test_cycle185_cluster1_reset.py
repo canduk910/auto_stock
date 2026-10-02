@@ -529,7 +529,7 @@ class TestMechanism2OnPositionClosed:
 
         # measured_target = flag_high(12000) + (pole_high - pole_start)(2000) = 14000
         sig = bfb.check_exit_signal("005930", 14_000, 14_000)
-        assert sig == Signal.TRAILING_STOP, (
+        assert sig == Signal.TAKE_PROFIT, (
             "재진입 measured-move 재발화 (per-holding-period once-only, 영구 억제 아님)"
         )
 

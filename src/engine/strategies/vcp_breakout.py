@@ -1720,7 +1720,7 @@ class VcpBreakoutStrategy(StrategyBase):
                     "VCP 50일 EMA 이탈: %s 현재가(%d) < ema50(%d)",
                     ticker, current_price, ema50,
                 )
-                return Signal.TRAILING_STOP
+                return Signal.TREND_EXIT
 
         return Signal.NONE
 

@@ -182,7 +182,7 @@ def test_b1_bfb_measured_move_uses_stamped_pole_and_flag():
 
     sig = strat.check_exit_signal(TICKER, 13_100, BUY_PRICE)
 
-    assert sig == Signal.TRAILING_STOP, (
+    assert sig == Signal.TAKE_PROFIT, (
         f"{sig} — §3 익절 타겟이 재검출된 폴/플래그로 밀려 진입 근거와 무관한 "
         "목표가 됐다 (측정된 이동은 진입 시점 폴 폭이 정의다)"
     )
@@ -221,7 +221,7 @@ def test_b2_vcp_indicator_ema50_still_comes_from_live():
         live={"base_low": 8_500, "atr14": 300, "ema50": 10_500},
     )
 
-    assert strat.check_exit_signal(TICKER, CURRENT, BUY_PRICE) == Signal.TRAILING_STOP
+    assert strat.check_exit_signal(TICKER, CURRENT, BUY_PRICE) == Signal.TREND_EXIT
 
 
 # ###########################################################################

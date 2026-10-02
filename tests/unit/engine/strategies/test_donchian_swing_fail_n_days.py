@@ -73,7 +73,7 @@ def test_fail_n_days_triggers_stop_loss_after_n_days():
     # 현재가 < 돌파선 (10,500 < 11,000)
     # 하드 손절 -7% 미발동 (매수가 10,000 → 손절선 9,300 > 10,500)
     sig = strat.check_exit_signal(ticker, 10_500, 10_200)
-    assert sig == Signal.STOP_LOSS
+    assert sig == Signal.TIME_EXIT
 
 
 # ---------------------------------------------------------------------------

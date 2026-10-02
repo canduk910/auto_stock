@@ -936,6 +936,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -2155,6 +2156,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -3383,6 +3385,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -4604,6 +4607,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -5826,6 +5830,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -7050,6 +7055,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -8274,6 +8280,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -9503,6 +9510,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -10723,6 +10731,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -12016,6 +12025,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -13256,6 +13266,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -14481,6 +14492,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -15713,6 +15725,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -16927,6 +16940,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -18154,6 +18168,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -19376,6 +19391,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -20600,6 +20616,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -21824,6 +21841,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -23048,6 +23066,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -24274,6 +24293,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -25496,6 +25516,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -26720,6 +26741,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -27944,6 +27966,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -29168,6 +29191,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -30395,6 +30419,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -31621,6 +31646,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -32841,6 +32867,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -34064,6 +34091,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -35290,6 +35318,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_manifest.py
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -36513,6 +36542,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -37740,6 +37770,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -38967,6 +38998,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -40192,6 +40224,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -41412,6 +41445,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -42637,6 +42671,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -43862,6 +43897,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_manifest.py
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -45085,6 +45121,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -46310,6 +46347,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -47533,6 +47571,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -48757,6 +48796,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_manifest.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -49981,6 +50021,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -51204,6 +51245,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -52433,6 +52475,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -53653,6 +53696,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -54877,6 +54921,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -56101,6 +56146,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -57325,6 +57371,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_manifest.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -58549,6 +58596,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -59773,6 +59821,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -60998,6 +61047,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -62222,6 +62272,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -63445,6 +63496,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -64744,6 +64796,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -65965,6 +66018,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -67185,6 +67239,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -68413,6 +68468,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -69644,6 +69700,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -70856,6 +70913,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -72080,6 +72138,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -73304,6 +73363,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -74528,6 +74588,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -75752,6 +75813,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -76976,6 +77038,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_manifest.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -78200,6 +78263,7 @@ backend:
       - tests/unit/engine/test_cycle397_position_buy_date.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -79423,6 +79487,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -80739,6 +80804,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -82042,6 +82108,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -83401,6 +83468,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -84626,6 +84694,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -85850,6 +85919,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -87083,6 +87153,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -88300,6 +88371,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -89525,6 +89597,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -90744,6 +90817,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -92042,6 +92116,7 @@ backend:
       - tests/unit/engine/test_cycle397_position_buy_date.py
       - tests/unit/engine/test_cycle398_strategy_manifest.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -92466,6 +92541,7 @@ backend:
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle398_strategy_manifest.py
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -94419,6 +94495,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -95643,6 +95720,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -96865,6 +96943,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -98088,6 +98167,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -99314,6 +99394,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -100558,6 +100639,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -101761,6 +101843,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -103004,6 +103087,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -104210,6 +104294,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -105432,6 +105517,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -106656,6 +106742,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -107881,6 +107968,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -109105,6 +109193,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -110329,6 +110418,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -111557,6 +111647,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -111930,6 +112021,7 @@ backend:
       - tests/unit/engine/test_cycle297_gate_wiring.py
       - tests/unit/engine/test_cycle297_llm_strategy_context.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/routes/test_cycle278_params_validation.py
       - tests/unit/routes/test_cycle290_killswitch_put.py
@@ -113229,6 +113321,7 @@ backend:
       - tests/unit/engine/test_cycle290_killswitch_registration.py
       - tests/unit/engine/test_cycle297_gate_wiring.py
       - tests/unit/engine/test_cycle297_llm_strategy_context.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_high_since_buy_recovery.py
       - tests/unit/engine/test_strategy_fallback_budget.py
@@ -114371,6 +114464,7 @@ backend:
       - tests/unit/engine/test_cycle290_killswitch_registration.py
       - tests/unit/engine/test_cycle297_gate_wiring.py
       - tests/unit/engine/test_cycle297_llm_strategy_context.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
       - tests/unit/engine/test_kojiro_wiring.py
       - tests/unit/routes/test_cycle278_params_validation.py
@@ -116482,6 +116576,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -117706,6 +117801,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -118048,6 +118144,7 @@ backend:
       - tests/unit/engine/test_cycle297_gate_wiring.py
       - tests/unit/engine/test_cycle297_llm_strategy_context.py
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_multiday_strategies_registry.py
       - tests/unit/routes/test_cycle278_params_validation.py
@@ -119341,6 +119438,7 @@ backend:
       - tests/unit/engine/test_cycle297_gate_wiring.py
       - tests/unit/engine/test_cycle297_llm_strategy_context.py
       - tests/unit/engine/test_cycle369_status_buy_wiring.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_strategy_fallback_budget.py
       - tests/unit/engine/test_vb_force_clear_at_15_20.py
       - tests/unit/engine/test_vb_next_day_clear_safety_net.py
@@ -120736,6 +120834,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -122603,6 +122702,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -123846,6 +123946,7 @@ backend:
       - tests/unit/engine/test_cycle397_position_buy_date.py
       - tests/unit/engine/test_cycle398_strategy_manifest.py
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -125051,6 +125152,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -126274,6 +126376,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -127575,6 +127678,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -128800,6 +128904,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -130022,6 +130127,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -131248,6 +131354,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_manifest.py
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -132469,6 +132576,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -133695,6 +133803,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -134918,6 +135027,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -136149,6 +136259,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -137435,6 +137546,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -138659,6 +138771,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -139887,6 +140000,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -141112,6 +141226,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -142403,6 +142518,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -143628,6 +143744,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -144921,6 +145038,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -146321,6 +146439,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -147614,6 +147733,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -148868,6 +148988,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -150074,6 +150195,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -151315,6 +151437,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -152538,6 +152661,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -155354,6 +155478,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -156575,6 +156700,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -157802,6 +157928,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -159023,6 +159150,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -161229,10 +161357,10 @@ frontend:
       - frontend/src/pages/__tests__/StrategiesParams.test.tsx
       - frontend/src/pages/__tests__/StrategiesTeRr.test.tsx
       - frontend/src/pages/__tests__/StrategyFunnel.bottleneckTrend.test.tsx
-generated_at: '2026-10-02T16:07:39.541Z'
+generated_at: '2026-10-02T16:52:39.435Z'
 stats:
   backend_modules: 171
-  backend_tests: 1205
+  backend_tests: 1206
   frontend_modules: 129
   frontend_tests: 108
   unmapped_modules:

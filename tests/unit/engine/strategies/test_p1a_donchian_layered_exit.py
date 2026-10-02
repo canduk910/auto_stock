@@ -242,9 +242,9 @@ def test_A5_regression_time_based_exit_preserved():
     s._breakout_high["011200"] = 62_000
     with patch("src.engine.strategies.donchian_swing.datetime") as _dtmock:
         _dtmock.now.return_value = _dt.datetime(2026, 7, 29, 10, 0, tzinfo=KST)  # 9일 보유 ≥ 5
-        # 현재가 61000 < 돌파선 62000, -1.7% (하드손절 -7% 미달) → 시간청산 STOP_LOSS
+        # 현재가 61000 < 돌파선 62000, -1.7% (하드손절 -7% 미달) → 시간청산 TIME_EXIT
         sig = s.check_exit_signal("011200", 61_000, 60_000)
-    assert sig == Signal.STOP_LOSS
+    assert sig == Signal.TIME_EXIT
 
 
 # ─────────────────────────────────────────────────────────────────────────

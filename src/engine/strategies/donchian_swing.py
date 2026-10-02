@@ -217,7 +217,7 @@ class DonchianSwingStrategy(StrategyBase):
         # 승격 자체는 매 틱 올바르게 일어난다(결과 동일) — 잘못된 건 로그뿐이다.
         # 시간청산은 신호를 반환하므로 정상 흐름에선 1회지만, 매도가 거부되면
         # (034020 = 프리마켓 APBK0918) 포지션이 살아남아 매 틱 재발화한다.
-        # ⚠️ 두 cap 모두 **로그에만** 건다 — 승격 계산과 `return Signal.STOP_LOSS` 는
+        # ⚠️ 두 cap 모두 **로그에만** 건다 — 승격 계산과 `return Signal.STOP_LOSS`·`return Signal.TIME_EXIT` 는
         # cap 밖이다(cap 이 청산 재시도를 끊으면 관측 시정이 아니라 결함 주입).
         # 위 다섯 cap 과 **별개 필드**(OB-11 — 한 사실이 다른 사실을 침묵시키지 않는다).
         self._breakeven_promote_logged: "KstDailyEmitCap[str]" = KstDailyEmitCap[str]()
@@ -268,7 +268,7 @@ class DonchianSwingStrategy(StrategyBase):
 
         ## 왜
 
-        이 로그는 `Signal.STOP_LOSS` 와 짝이라 정상 흐름에선 1회다. 그런데 매도가
+        이 로그는 `Signal.TIME_EXIT` 와 짝이라 정상 흐름에선 1회다. 그런데 매도가
         거부되면(프리마켓 시장가 불가 APBK0918 등) 포지션이 그대로 남아 다음 틱에
         같은 분기가 다시 발화한다 — 034020 이 09-02 **08:00:00~08:00:29 사이 67건**을
         찍었다(DB 세션 TZ=Asia/Seoul 실측 확인 — 표기 시각이 곧 KST 다).
@@ -296,7 +296,7 @@ class DonchianSwingStrategy(StrategyBase):
 
         ## 계약
 
-        - ⚠️ 호출자는 이 메서드 **뒤에서 무조건** `return Signal.STOP_LOSS` 한다.
+        - ⚠️ 호출자는 이 메서드 **뒤에서 무조건** `return Signal.TIME_EXIT` 한다.
           cap 이 신호까지 삼키면 매도 거부 후 재시도가 끊겨 포지션이 청산되지 못한
           채 잔존한다 = 매매 결함 주입. cap 은 **로그 전용**이다.
         - peek → 로그 → mark, 예외 흡수 + debug 흔적 (위 헬퍼와 동형).
@@ -1799,7 +1799,7 @@ class DonchianSwingStrategy(StrategyBase):
                 self._emit_time_exit(
                     ticker, days_held, n_days, current_price, breakout_high, suffix,
                 )
-                return Signal.STOP_LOSS
+                return Signal.TIME_EXIT
 
         # 2.6) P1-A (2026-07-29, A-4) — 10일 저가 채널 이탈 청산 (시간청산 뒤, ATR 트레일링 앞).
         # 데이터 소스는 recompute_held_atr 가 prepare/recompute 시점 일봉으로 산출 —

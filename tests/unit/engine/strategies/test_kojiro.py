@@ -278,7 +278,7 @@ def test_exit_stage3_trailing_stop(kojiro):
     # cycle231 — 날짜 키 계약: 오늘 판정이어야 §3 발화
     kojiro._held_stage3["005930"] = (datetime.now(KST).date(), True)
     # -8%/2ATR/트레일 미도달이어도 stage3 → 청산
-    assert kojiro.check_exit_signal("005930", 9800, 0) == Signal.TRAILING_STOP
+    assert kojiro.check_exit_signal("005930", 9800, 0) == Signal.TREND_EXIT
 
 
 def test_exit_chandelier_trailing(kojiro):

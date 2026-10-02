@@ -185,7 +185,7 @@ def test_ob_2_emitted_alongside_actual_exit(caplog):
     _cache(s, _W_1721[:-1])                     # 08-17~08-20 (오늘 미포함)
     _arm(s, buy_date=D(2026, 8, 19))            # 08-20 + today = 2 영업일
 
-    assert s.check_exit_signal("005930", 9_800, 9_900) == Signal.STOP_LOSS
+    assert s.check_exit_signal("005930", 9_800, 9_900) == Signal.TIME_EXIT
     assert _lines(caplog, _EXIT), "청산 로그(기존 계약)가 사라지면 안 된다"
 
     line = _one(caplog)
@@ -252,7 +252,7 @@ def test_ob_4b_hpsp_tuesday_gate_opens(caplog):
     _arm(s, ticker="403870", buy_date=D(2026, 8, 21), buy_price=30_000,
          breakout_high=33_000)
 
-    assert s.check_exit_signal("403870", 29_500, 29_800) == Signal.STOP_LOSS
+    assert s.check_exit_signal("403870", 29_500, 29_800) == Signal.TIME_EXIT
     line = _one(caplog)
     _assert_tokens(line, "days_held=2", "calendar_days=4", "days_ok=True", "price_ok=True")
 
@@ -381,7 +381,7 @@ def test_ob_10a_observation_failure_does_not_block_exit(caplog, monkeypatch):
     _arm(s, buy_date=D(2026, 8, 19))
     monkeypatch.setattr(_mod, "logger", _PoisonLogger(_mod.logger))
 
-    assert s.check_exit_signal("005930", 9_800, 9_900) == Signal.STOP_LOSS, (
+    assert s.check_exit_signal("005930", 9_800, 9_900) == Signal.TIME_EXIT, (
         "계약 §5: 관측 실패가 청산 판정을 막으면 안 된다"
     )
     assert _lines(caplog, _EXIT), "청산 로그는 계속 나와야 한다"
@@ -464,7 +464,7 @@ def _case_time_exit():
     s = _mk(n_days=2)
     _cache(s, _W_1721[:-1])
     _arm(s, buy_date=D(2026, 8, 19))              # 08-20 + today = 2 영업일
-    return s, 9_800, 9_900, Signal.STOP_LOSS
+    return s, 9_800, 9_900, Signal.TIME_EXIT
 
 
 def _case_channel_exit():

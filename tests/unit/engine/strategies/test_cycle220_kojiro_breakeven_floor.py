@@ -370,7 +370,7 @@ def test_stage3_exit_unchanged():
     _hold(s, high=BUY)  # high < 임계 → 승격 없음
     # cycle231 — 날짜 키 계약: 오늘 판정이어야 §3 발화 (stale True 는 억제)
     s._held_stage3["111770"] = (_today(), True)
-    assert s.check_exit_signal("111770", BUY, BUY) == Signal.TRAILING_STOP
+    assert s.check_exit_signal("111770", BUY, BUY) == Signal.TREND_EXIT
 
 
 def test_chandelier_trail_atr_constant_unchanged():

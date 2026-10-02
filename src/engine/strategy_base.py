@@ -66,6 +66,10 @@ class Signal(str, Enum):
     TRAILING_STOP = "TRAILING_STOP"
     FORCE_CLEAR = "FORCE_CLEAR"
     STATUS_EXIT = "STATUS_EXIT"  # cycle369 — 관리종목(51)·단기과열(59) 보유 청산
+    # cycle402 — 가격 손절·트레일링이 아닌 청산의 이름(가산형 — 위 값은 바꾸지 않는다).
+    TIME_EXIT = "TIME_EXIT"      # 보유 기간 초과(BFB max_hold_days · donchian breakout_fail_n_days)
+    TAKE_PROFIT = "TAKE_PROFIT"  # 목표가 익절(BFB 측정된 이동)
+    TREND_EXIT = "TREND_EXIT"    # 추세 종료·이탈(kojiro 스테이지3 · VCP 50일 EMA)
 
 
 @dataclass
@@ -252,6 +256,39 @@ class _MarketUnitCaps:
         self.state: KstDailyEmitCap[str] = KstDailyEmitCap[str]()
         self.attempt: KstDailyEmitCap[str] = KstDailyEmitCap[str]()
         self.warn: KstDailyEmitCap[str] = KstDailyEmitCap[str]()
+
+
+#: 15:20 강제청산 사유로 받아 주는 신호 — 매도가 아닌 `NONE`·`BUY` 는 받지 않는다.
+_FORCE_CLEAR_REJECT = frozenset({Signal.NONE, Signal.BUY})
+
+
+def resolve_force_clear_signal(strategy: Any, ticker: str) -> Signal:
+    """15:20 강제청산 매도 사유 해석기 (cycle402) — 절대 예외를 내지 않는다.
+
+    `strategy.force_clear_signal(ticker)` 가 `NONE`·`BUY` 가 아닌 `Signal` 을 돌려주면 그것을,
+    그 밖(예외·`Signal` 아닌 값·`NONE`·`BUY`)이면 `FORCE_CLEAR` + `[force_clear_signal_invalid]`
+    WARNING. 훅이 없는 객체는 경고 없이 `FORCE_CLEAR`. 판정 불가여도 15:20 청산은 그대로 나간다 —
+    사유 표기 실패가 청산을 막거나 뒤 전략의 루프를 끊으면 안 된다.
+    """
+    bad: object = None
+    err: BaseException | None = None
+    try:
+        hook = getattr(strategy, "force_clear_signal", None)
+        if hook is None:
+            return Signal.FORCE_CLEAR
+        sig = hook(ticker)
+        if isinstance(sig, Signal) and sig not in _FORCE_CLEAR_REJECT:
+            return sig
+        bad = sig
+    except Exception as exc:  # noqa: BLE001 — never-raise 계약
+        err = exc
+    try:
+        sid = getattr(getattr(strategy, "config", None), "strategy_id", "?")
+        detail = f"error={type(err).__name__}: {err}" if err is not None else f"value={bad!r}"
+        logger.warning("[force_clear_signal_invalid] strategy=%s ticker=%s %s → FORCE_CLEAR", sid, ticker, detail)
+    except Exception:  # noqa: BLE001
+        pass
+    return Signal.FORCE_CLEAR
 
 
 def _resolve_ticker_name(ticker: str) -> str:
@@ -528,6 +565,15 @@ class StrategyBase(ABC):
     @abstractmethod
     def calc_buy_quantity(self, current_price: int, ticker: str | None = None) -> int:
         """매수 수량 계산."""
+
+    def force_clear_signal(self, ticker: str) -> Signal:
+        """15:20 `check_force_clear()` 가 고른 종목을 팔 때의 사유 (cycle402, ETF 설계 R4 (b)).
+
+        기본 = `FORCE_CLEAR`. 15:20 에 조건부 조기 청산을 하는 전략(ETF 돌파 실패 등)만
+        덮어써서 `TREND_EXIT` 같은 실제 사유를 돌려준다. 스케줄러는 이 메서드를 직접 부르지 않고
+        `resolve_force_clear_signal` 로 읽는다(never-raise).
+        """
+        return Signal.FORCE_CLEAR
 
     # ------------------------------------------------------------------
     # 사이클 185 클러스터 ① — 생명주기 훅 (기본 no-op, 서브클래스 override)

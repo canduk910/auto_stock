@@ -20,7 +20,7 @@ donchian 은 그 래칫이 없다 — `base_stop` 을 매 틱 `buy_price - stop_
 **재계산**하므로 `base_stop < buy_price` 인 한 `promoted_stop != base_stop` 이 **영원히 참**이다.
 승격 자체는 매 틱 올바르게 일어나고(결과 동일), 로그만 무한 반복된다.
 
-시간청산(`도치안 시간 기반 청산`)은 성격이 다르다 — `Signal.STOP_LOSS` 를 반환하므로
+시간청산(`도치안 시간 기반 청산`)은 성격이 다르다 — `Signal.TIME_EXIT` 를 반환하므로
 정상 흐름에선 1회지만, **매도가 거부되면**(034020 = 프리마켓 APBK0918) 포지션이 살아남아
 매 틱 재발화한다. 매도 실패 사실 자체는 `[market_closed_blocked]` 가 이미 1회/일 cap 으로
 기록하므로, 이 로그를 cap 해도 관측 손실이 없다.
@@ -29,7 +29,7 @@ donchian 은 그 래칫이 없다 — `base_stop` 을 매 틱 `buy_price - stop_
 
 1. **cap 은 로그에만 건다. 행위는 절대 cap 밖.**
    - breakeven 승격 계산(`base_stop = promoted_stop`)은 매 틱 그대로 수행된다.
-   - 시간청산 `return Signal.STOP_LOSS` 는 매 틱 그대로 반환된다.
+   - 시간청산 `return Signal.TIME_EXIT`는 매 틱 그대로 반환된다.
    이게 이 사이클의 **핵심 계약**이다. cap 이 청산을 한 번만 시도하게 만들면
    그건 관측 시정이 아니라 **매매 결함 주입**이다.
 
@@ -239,7 +239,7 @@ def test_te_1_time_exit_log_capped_once_per_day(caplog):
 def test_te_2_signal_returned_every_tick_despite_cap(caplog):
     """TE-2 (핵심 행위 가드) — 로그는 1행이어도 **신호는 매 틱** 반환된다.
 
-    cap 이 `return Signal.STOP_LOSS` 까지 막으면 매도 거부 후 재시도가 끊겨
+    cap 이 `return Signal.TIME_EXIT` 까지 막으면 매도 거부 후 재시도가 끊겨
     포지션이 청산되지 못한 채 잔존한다 = 매매 결함 주입.
     """
     s = _mk()
@@ -248,8 +248,8 @@ def test_te_2_signal_returned_every_tick_despite_cap(caplog):
     with caplog.at_level(logging.INFO, logger=_LOGGER):
         sigs = [s.check_exit_signal(pos.ticker, 79_600, 0) for _ in range(20)]
 
-    assert all(x == Signal.STOP_LOSS for x in sigs), (
-        f"20틱 모두 STOP_LOSS 여야 한다 — got {sigs.count(Signal.STOP_LOSS)}/20"
+    assert all(x == Signal.TIME_EXIT for x in sigs), (
+        f"20틱 모두 TIME_EXIT 여야 한다 — got {sigs.count(Signal.TIME_EXIT)}/20"
     )
     assert len(_lines(caplog, _EXIT)) == 1
 
@@ -307,7 +307,7 @@ def test_te_5_time_exit_log_failure_does_not_break_signal(monkeypatch):
 
     monkeypatch.setattr(_mod.logger, "info", _poison)
 
-    assert s.check_exit_signal(pos.ticker, 79_600, 0) == Signal.STOP_LOSS, (
+    assert s.check_exit_signal(pos.ticker, 79_600, 0) == Signal.TIME_EXIT, (
         "관측 실패가 시간청산 신호를 삼키면 안 된다"
     )
 
@@ -364,10 +364,10 @@ def test_te_6_failed_emit_does_not_consume_cap(monkeypatch, caplog):
 
     st = _poison_once(monkeypatch, "시간 기반 청산")
     with caplog.at_level(logging.INFO, logger=_LOGGER):
-        assert s.check_exit_signal(pos.ticker, 79_600, 0) == Signal.STOP_LOSS
+        assert s.check_exit_signal(pos.ticker, 79_600, 0) == Signal.TIME_EXIT
         assert st["fired"]
         assert not _lines(caplog, _EXIT)
-        assert s.check_exit_signal(pos.ticker, 79_600, 0) == Signal.STOP_LOSS
+        assert s.check_exit_signal(pos.ticker, 79_600, 0) == Signal.TIME_EXIT
 
     assert len(_lines(caplog, _EXIT)) == 1, "실패 시도가 cap 을 소비했다"
 

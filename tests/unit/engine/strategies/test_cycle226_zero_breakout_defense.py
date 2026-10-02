@@ -884,7 +884,7 @@ async def test_d2_10_recovery_unblocks_permanently_dead_time_exit(caplog):
         await s.recompute_held_atr()
 
     assert s._breakout_high.get("192820") == 11_000
-    assert s.check_exit_signal("192820", 9_800, 9_900) == Signal.STOP_LOSS, (
+    assert s.check_exit_signal("192820", 9_800, 9_900) == Signal.TIME_EXIT, (
         "복구 후에도 시간청산이 죽어 있다 — 게이트가 값 0 을 못 고쳤다"
     )
 

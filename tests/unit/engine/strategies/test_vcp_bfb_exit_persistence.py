@@ -170,7 +170,7 @@ def test_vcp_ema50_exit_survives_candidates_wipe():
     s = _vcp()
     _hold(s, buy=70_000)
     s._position_setup["005930"] = {"base_low": 1, "atr14": 0, "ema50": 68_000}
-    assert s.check_exit_signal("005930", 67_900, 70_000) == Signal.TRAILING_STOP
+    assert s.check_exit_signal("005930", 67_900, 70_000) == Signal.TREND_EXIT
 
 
 # ---------------------------------------------------------------------------
@@ -196,7 +196,7 @@ def test_bfb_measured_move_target_survives_candidates_wipe():
         "flag_low": 1, "atr14": 0,
         "pole_start": 60_000, "pole_high": 72_000, "flag_high": 70_500,
     }
-    assert s.check_exit_signal("005930", 82_500, 70_000) == Signal.TRAILING_STOP
+    assert s.check_exit_signal("005930", 82_500, 70_000) == Signal.TAKE_PROFIT
 
 
 def test_bfb_atr_trailing_survives_candidates_wipe():

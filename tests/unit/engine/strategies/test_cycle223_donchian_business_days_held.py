@@ -132,7 +132,7 @@ def test_s3_2_tuesday_buy_thursday_is_two_business_days_fires():
     _arm(s, buy_date=D(2026, 8, 18))
 
     assert s._business_days_held(D(2026, 8, 18), D(2026, 8, 20)) == (2, False)
-    assert s.check_exit_signal("005930", 9_800, 9_900) == Signal.STOP_LOSS
+    assert s.check_exit_signal("005930", 9_800, 9_900) == Signal.TIME_EXIT
 
 
 def test_s3_3_today_in_cache_is_not_double_counted():
@@ -210,7 +210,7 @@ def test_s3_7_exit_log_keeps_prefix_and_says_business_days(caplog):
     _cache(s, _AUG_NEXT)
     _arm(s, buy_date=D(2026, 8, 18))
 
-    assert s.check_exit_signal("005930", 9_800, 9_900) == Signal.STOP_LOSS
+    assert s.check_exit_signal("005930", 9_800, 9_900) == Signal.TIME_EXIT
     msgs = [r.getMessage() for r in caplog.records]
     assert any("도치안 시간 기반 청산" in m for m in msgs), (
         f"기존 grep 이력 prefix 유지 의무 — got {msgs}"
@@ -231,7 +231,7 @@ def test_s3_8_fallback_fact_is_logged_on_fire(caplog):
     _cache(s, [])
     _arm(s, buy_date=D(2026, 8, 10))           # weekday 폴백 9일 ≥ 2 → 발화
 
-    assert s.check_exit_signal("005930", 9_800, 9_900) == Signal.STOP_LOSS
+    assert s.check_exit_signal("005930", 9_800, 9_900) == Signal.TIME_EXIT
     msgs = [r.getMessage() for r in caplog.records]
     assert any("폴백" in m or "days_held_fallback" in m for m in msgs), (
         f"폴백 사용 사실이 로그에 드러나야 한다 — got {msgs}"

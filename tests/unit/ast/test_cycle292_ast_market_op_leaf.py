@@ -101,7 +101,7 @@ _BASE_SHA = {
     # 🔁 cycle364(2026-09-26) 재핀 — 저녁 A1 미리보기 도입 + 저녁 캡처 본체 leaf 이관.
     # 🔁 cycle369 재핀 — 관리종목51·단기과열59 청산·매수차단 leaf 배선(값만 이동)
     "src/engine/scheduler.py":
-        "2cecfd485df87dbcf9098bf8ed11408f3da36e6ca665b4919f0f9c25852ea2fe",
+        "084f114f2aa415dec16a55e5df5d89c233c37d55c5714c66b10460839435d10c",
     "src/engine/market_op_subscribe.py":
         "7d58f9464c1ed35e4fa8706d801beb5a6b5c062d5a2941f0db6482d028d3d4ac",
     # 🔁 cycle368(2026-09-25) 재핀 — halt 판정을 `_is_code_active` → `is_iscd_stat_blocking`

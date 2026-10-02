@@ -188,7 +188,7 @@ _BASE_SHA: dict[str, str] = {
     # 🔁 cycle369 재핀 — 관리종목51·단기과열59 청산·매수차단 leaf 배선(값만 이동)
     # 🔁 cycle379 재핀 — buying_reconcile leaf 4줄 위임 배선(사용자 승인, 값만 이동)
     "src/engine/scheduler.py":
-        "2cecfd485df87dbcf9098bf8ed11408f3da36e6ca665b4919f0f9c25852ea2fe",
+        "084f114f2aa415dec16a55e5df5d89c233c37d55c5714c66b10460839435d10c",
     # 🔁 cycle369 R2 재핀 — buy-block 게이트(`_status_buy_blocked` 승격) + STATUS_EXIT Signal + Q7 edge-baseline clear 배선(전략 7파일은 무변경, 배선은 이 파일)
     # 🔁 cycle382 재핀 — 시장 유닛 `_market_unit_*` 헬퍼 추가(사용자 결정 09-27).
     # 🔁 cycle382 리뷰 재핀(값만) — `_market_unit_tally_roll` 을 `tally.date != day`
@@ -197,7 +197,7 @@ _BASE_SHA: dict[str, str] = {
     # 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27). 게이트 2번째 문장 + 헬퍼 4개 + `__init__` cap 1개 추가. 값만 이동.
     # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). 섀도 관문 `_shadow_buy_intercepted` + 정적 판정 `shadow_mode_on` + 마커 헬퍼 2개 + `__init__` cap 1개 + `SHADOW_MODE_KEY` 상수. 값만 이동.
     "src/engine/strategy_base.py":
-        "e25384a3defb09564b91a5f2eebef8539baaa237375ae0422956d548b86b6673",
+        "40b6904b4811ab0f27b18c765a8cfc1cc7a7b0a9d0d4b4c5a832881f6f250468",
     # 🔴 등재만으로 판정이 통해야 한다 — 검증 로직을 고쳐 통과시키면 안 된다.
     "src/engine/param_validation.py":
         "b4c5c029800191523bcc511919d6de3774e9ab49ca2fc0a0558ee3907868ee17",
@@ -285,7 +285,7 @@ _SEGMENT_SHA: dict[tuple[str, str], str] = {
     ("donchian_swing", "check_buy_signal"):
         "124c5eb1257fdd14b58738e738cc534bd7a4ec2d25d24d2111704c88368278f6",
     ("donchian_swing", "check_exit_signal"):
-        "86ae465f87a03bac0b3a418338f7a01e40c2f6992ef609791f915590dd5b85f4",
+        "171c7654632500358cffb4c542e0ee5d8f4218c1101faf72a668f24ffd8606bd",
     # 🔁 cycle382 재핀 — 시장 유닛(단계형) `_market_unit_sizing` 진입 훅.
     ("donchian_swing", "calc_buy_quantity"):
         "cc3e622d232ff38adff20d03f3efa89c99b93337b5b4dd08bd26e68c059a9ef5",
@@ -299,7 +299,7 @@ _SEGMENT_SHA: dict[tuple[str, str], str] = {
     ("bull_flag_breakout", "check_buy_signal"):
         "b39b26fb398ca352edaf91816b4aed04cd50f47aef29d13a8b82af0f6580ed7d",
     ("bull_flag_breakout", "check_exit_signal"):
-        "eacb8a79407a37fb80227f977c54a7faac247ce525d3bfa10e54341965fd8796",
+        "850f503be242249b164d44cbb6100f2f764cfa23fa8e95a669b422c22d95daed",
     # 🔁 cycle382 재핀 — 시장 유닛(단계형) `_market_unit_sizing` 진입 훅.
     ("bull_flag_breakout", "calc_buy_quantity"):
         "772cf9ffda83e9abfaeb44f4f8e4a67eb8543fab58a961d3919d4b41bdd0f1ad",
@@ -317,7 +317,7 @@ _SEGMENT_SHA: dict[tuple[str, str], str] = {
         # = 확장 전 HEAD 산출 골든 G1(prepare)·G2(check_buy_signal) 완전 일치로 확인.
         "e50969e3ffcdd8f7b5f8ce0bd61e67852436e4ead7130c54006a2f22c11adb6f",
     ("vcp_breakout", "check_exit_signal"):
-        "2fc8da7094dfa43a3baa824fb0c5d5864fd4ef89bd6786f5ff790216a00eabad",
+        "abfb25485f91e18aa4a1297002575990ef58aa4b4f3db791efbb29bfe4cdc877",
     # 🔁 cycle382 재핀 — 시장 유닛(단계형) `_market_unit_sizing` 진입 훅.
     ("vcp_breakout", "calc_buy_quantity"):
         "43d2e682051cd9a4653b972aab6c3706dc2144b082ae73e34c8c38f5cb3f8010",
@@ -336,7 +336,7 @@ _SEGMENT_SHA: dict[tuple[str, str], str] = {
     ("kojiro", "check_buy_signal"):
         "c3dd4541133b3788d2ff46787ce5545d15cc33f4e2e51e29484b0839724f2216",
     ("kojiro", "check_exit_signal"):
-        "067a60219099b081c64172986f46528a2836b1ad457c081ac06784c4ab9af7fc",
+        "84220e4133cf76f9ea1c74335919d22a245a899b0833057f20f24a27f38913e6",
     # 🔁 cycle382 재핀 — 시장 유닛(단계형) `_market_unit_sizing` 진입 훅.
     ("kojiro", "calc_buy_quantity"):
         "c144f15de94a9f7069ac6cf650066dc12472cffdc3280a63e840b31aa544f84d",

@@ -152,7 +152,7 @@ async def test_pv1a_control_non_preview_when_held_hits_stage3_then_restamped_and
     k, seeded, _, _ = await _kojiro_run(monkeypatch, as_of=as_of)
     assert k._held_stage3.get(H.HELD) == (_D, True), k._held_stage3.get(H.HELD)
     with freeze_time("2026-09-22T21:05:00+09:00"):
-        assert k.check_exit_signal(H.HELD, 54_000, 54_000) == Signal.TRAILING_STOP
+        assert k.check_exit_signal(H.HELD, 54_000, 54_000) == Signal.TREND_EXIT
 
 
 # ══════════════════════════════════════════════════════════════════════

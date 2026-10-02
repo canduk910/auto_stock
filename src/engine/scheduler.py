@@ -29,7 +29,7 @@ from src.engine.risk import RiskManager
 from src.engine.scanner import scan_stocks, subscribe_filtered_stocks, unsubscribe_all
 from src.engine.session import MarketBoard, session_tracker
 from src.engine.daily_emit_cap import DailyEmitCap
-from src.engine.strategy_base import Signal, StrategyConfig
+from src.engine.strategy_base import Signal, StrategyConfig, resolve_force_clear_signal
 from src.engine.strategy_manifest import (
     BREAKOUT_IDS, BREAKOUT_SUBSCRIBE_ORDER, CLOSE_AT_1520_IDS, OPEN_PRICE_TARGET_IDS,
     STRATEGY_MANIFEST, SWING_POLL_IDS,
@@ -2008,7 +2008,7 @@ class TradingScheduler:
             await write_log("INFO", f"{strategy.config.name} 15:20 강제 청산 대상: {clear_tickers}")
             for ticker in clear_tickers:
                 if ticker in strategy.state.positions:
-                    await self.order_engine.execute_sell(ticker, Signal.FORCE_CLEAR, sid)
+                    await self.order_engine.execute_sell(ticker, resolve_force_clear_signal(strategy, ticker), sid)
                     logger.info("%s 강제 청산: %s", strategy.config.name, t(ticker))
 
     async def _preissue_all_tokens(self) -> None:

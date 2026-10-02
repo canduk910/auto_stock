@@ -36,7 +36,7 @@ KIS OpenAPI 기반 국내주식 자동매매시스템. 다중 전략 아키텍�
 - **동시보유 리스크 캡**: `max_positions=5` + **동일섹터 동시보유 ≤ `max_positions_per_sector=2`** (매수 게이트 전용·fail-open·청산 미차단). 섹터 프록시 = KRX 산업지수 플래그 + 업종 대분류 폴백. **동일섹터 카운트는 전일 보유를 포함한다** — `_position_sectors` 영속 맵이 `_candidates` 와이프·ATR 밴드(<1%)·유니버스 이탈과 무관하게 held 섹터를 집계하므로 이 캡은 "포트폴리오 누적 섹터 노출 상한"이다(stamp = recompute / BUY 반환 직전, pop = `on_position_closed`). ⚠️ **kojiro `_reset_daily_state` override 추가 금지** — 멀티데이 held 섹터가 밤에 소멸한다.
 - **후보 점수 랭킹**: 후보가 슬롯/섹터캡에서 경합하면 `0.4×(MACD3 3봉기울기/3/종가) + 0.3×(띠폭/직전5봉평균 − 1) + 0.3×6→1신선도`(후보풀 min-max 정규화 가중합)로 최적 셋업을 먼저 산다. **매수 후보 정렬만** — strict entry 자격·청산 임계 무변경이고 `rank_w_*` 가중치는 정체성 상수라 `PARAM_RANGES` 제외다. 성분①은 `/3/종가` 로 나눠야 주가 순위표가 되지 않고(누락 시 ρ=+0.853), 성분②의 분모는 **직전 5봉 평균**이어야 6→1 전환 직후 폭발하지 않는다. shadow 관측 `[kojiro_band_observe]` (leaf `src/engine/kojiro_band_observe.py`)가 두 식을 한 행에 남겨 대조한다.
 - **매수(strict entry, 4조건 AND)**: ① 현재 스테이지 1(단기>중기>장기) ② 최근 5영업일 내 6→1 전환 인접(신선도, `stage1_freshness=5`) ③ EMA 3선 우상향 ④ 전일 종가 > EMA5. **KRX 메인 09:05~09:30 시장가**, 갭업 ≥5% / 갭다운 ≤-4% / 장중 붕괴(현재가<시가) 스킵, 1회만.
-- **청산(우선순위)**: 고정% 하드손절 -8%(ATR 독립 backstop) → 2ATR 하드손절(tighten-only) → 스테이지3 진입(추세 종료, 익일 아침 발화) → 2.5ATR 샹들리에 트레일링. **시간·15:20 청산 없음(멀티데이)**.
+- **청산(우선순위)**: 고정% 하드손절 -8%(ATR 독립 backstop) → 2ATR 하드손절(tighten-only) → 스테이지3 진입(추세 종료, 익일 아침 발화, `TREND_EXIT`) → 2.5ATR 샹들리에 트레일링. **시간·15:20 청산 없음(멀티데이)**.
 - **브레이크이븐 플로어**: `breakeven_promote_atr`(기본 **0=비활성**, 활성 권장 1.5 — donchian P1 선례). 활성 시 `high_since_buy ≥ 매수가 + mult×ATR` 도달 이력이 있으면 2ATR 손절선을 `max(현행선, 매수가)` 로 승격해 기존 `_stop_floor` tighten-only 래칫에 영속한다(ATR 팽창해도 유지, 재시작 시 `recompute_held_atr` 이 H-1 복구 고점으로 재도출). **플로어일 뿐 트레일이 아니다** — 샹들리에 2.5ATR(조임 금기, `_workspace/domain_consult/kojiro_exit_loss_review.md`)가 위쪽 추세 청산을 계속 담당해 fat-tail 랠리를 자르지 않는다. Σ리스크캡 `_position_stop_price` 도 같은 산식을 미러한다(4선 max). **활성화 = DB `strategy_config.kojiro.params.breakeven_promote_atr=1.5` UPDATE + 재부팅**(`PARAM_RANGES` 미편입 = AI 튜닝 제외).
 - **Phase 1 = position_ratio 자금관리**. 조기진입(스테이지6)·터틀 유닛 sizing·피라미딩 = **Phase 2 연기**.
 - **⚠️ "돌파 순간 절대규칙" 명시적 승인 예외**: kojiro 진입은 전일 종가에 확정되는 *완성 일봉 상태조건*이라 장중 목표가 교차(돌파 순간)가 아니다 — VB/LTV 같은 intraday breakout 클래스 전용 규칙(이전틱<기준가 AND 현재틱≥기준가)은 적용하지 않는다. donchian 과 같은 "일봉 확정 → 익일 시가 집행" 클래스다. **단 kojiro 는 donchian 보다 장중 확증이 약하다**(donchian 은 장중 신고가 재돌파 확인을 유지하고 kojiro 는 장중 검증이 0이다) → 이 약화를 **방어선 4중**으로 보상한다: 09:05~09:30 창 + 갭업 스킵 + 갭다운 스킵 + 비붕괴(현재가≥시가) 확인.
@@ -478,7 +478,7 @@ VB와 동일.
 - **브레이크이븐 승격** (`breakeven_promote_atr`=1.5, **기본 활성**): 고점이 매수가 + 1.5 × `_entry_atr` 도달 이력이 있으면 2ATR 하드손절선을 매수가로 승격(tighten-only, P1-A 2026-07-29)
 - **10일 채널 이탈 청산** (`channel_exit_period`=10, **기본 활성**): 현재가 < 최근 10영업일 저가 채널이면 TRAILING_STOP. ATR 트레일링 **앞**에서 평가 (P1-A 2026-07-29)
 - **ATR×2 Chandelier 트레일링**: `high_since_buy − ATR(14) × 2` 이하로 떨어지면 매도
-- **15:20 강제 청산 없음** (`check_force_clear()` 빈 리스트). 단 **시간 기반 청산은 있다** — `breakout_fail_n_days`(기본 5): 보유 5영업일 경과 + 현재가 < 돌파선이면 STOP_LOSS (사이클 23 P2-2)
+- **15:20 강제 청산 없음** (`check_force_clear()` 빈 리스트). 단 **시간 기반 청산은 있다** — `breakout_fail_n_days`(기본 5): 보유 5영업일 경과 + 현재가 < 돌파선이면 TIME_EXIT (사이클 23 P2-2 · 이름 cycle402)
 - 평균 5~15 영업일 보유 → DB `positions` 영속화로 일자 넘어 유지
 
 #### high_since_buy 일봉 폴백
@@ -569,10 +569,10 @@ donchian_swing 은 멀티데이 보유 + ATR×2 Chandelier + 하드 손절 전�
 2. **플래그 하단 이탈 손절**: `current_price < flag_low` → Signal.STOP_LOSS
 3. **측정된 이동(measured move) — 절반 익절**:
    - **타겟가** = `flag_high + (pole_high - pole_start)` (플래그 상단에서 폴 폭만큼 상승)
-   - 현재가 ≥ 타겟가 도달 순간 → **보유 수량의 50% 시장가 매도** (Signal.TRAILING_STOP 으로 보고 + 별도 부분 매도 라우팅)
-   - 절반 익절 처리 시 `_partial_exit[ticker]=True` 로 마킹 → 잔여 ATR 트레일링
-4. **잔여 ATR×2 트레일링**: `_partial_exit[ticker]==True` 분기에서 `current_price <= high_since_buy - ATR×2` → Signal.TRAILING_STOP (donchian 컨벤션 재사용)
-5. **시간 청산**: 진입 후 **5영업일 경과** 시 잔량 시장가 (`max_hold_days=5`) — `pos.buy_date + 5영업일 ≤ today` 판정
+   - 현재가 ≥ 타겟가 도달 순간 → **보유 전량 시장가 매도** (Signal.TAKE_PROFIT). 부분 매도 라우팅은 없다
+   - 발화 시 `_partial_exit[ticker]=True` 로 마킹(보유 기간 1회)
+4. **ATR×2 트레일링**: `current_price <= high_since_buy - ATR×2`(`_partial_exit` 와 무관) → Signal.TRAILING_STOP (donchian 컨벤션 재사용)
+5. **시간 청산**: 진입 후 **5영업일 경과** 시 잔량 시장가 (`max_hold_days=5`) — `pos.buy_date + 5영업일 ≤ today` 판정 → Signal.TIME_EXIT
 
 > ⚠️ **BFB 는 익일 청산 전략이 아니다.** `_execute_next_day_clear`·`_force_clear_main_only` 어느 목록에도 없고 `check_force_clear()==[]` 이라 위 5번까지 **실질 멀티데이 보유**다(`_MULTIDAY_STRATEGIES` 비멤버라는 사실은 `is_next_day` 배지 표시에만 영향한다). 그래서 재시작 복구가 필요하다 — `_rederive_entry_atr`(**`sizing_mode="turtle"` 일 때만** — position_ratio 랏은 −5% 고정 손절 유지, cycle355) + `recompute_high_since_buy` 를 `boot_manager` 에 배선한다(`scheduler.py` 는 8영역이라 무접촉, `_SWING_POLL_STRATEGIES` 편입은 매수 폴루프·구독까지 바꾸므로 금지).
 >
@@ -719,7 +719,7 @@ donchian_swing 의 정공법(신고가 직진 추격)을 보강하는 추세추�
 1. **하드 손절**: 매수가 -7% (`stop_loss_rate=-7.0`) → Signal.STOP_LOSS
 2. **베이스 하단 이탈**: `current_price < base_low` → Signal.STOP_LOSS
 3. **ATR×2 트레일링 (Chandelier)**: `current_price <= high_since_buy - ATR×2` → Signal.TRAILING_STOP (donchian 컨벤션 재사용 — `_atr()` 헬퍼)
-4. **50일 EMA 이탈**: `current_price < ema50` → Signal.TRAILING_STOP. `ema50` 은 **매일 갱신**한다(boot 훅이 이미 fetch 하는 일봉으로 재계산) — 진입 시점 스냅샷을 박제하면 상승 추세에서 `ema50` 이 뒤처져 이탈 청산이 늦어진다.
+4. **50일 EMA 이탈**: `current_price < ema50` → Signal.TREND_EXIT. `ema50` 은 **매일 갱신**한다(boot 훅이 이미 fetch 하는 일봉으로 재계산) — 진입 시점 스냅샷을 박제하면 상승 추세에서 `ema50` 이 뒤처져 이탈 청산이 늦어진다.
 5. **시간 청산 없음 + 15:20 강제 청산 없음** — `check_force_clear() = []` (donchian 컨벤션, 멀티데이 보유)
 
 > ⚠️ **청산 2~4번은 `_candidates` 단독 의존 금지** (P1, 2026-08-06). `prepare()` 는 매 실행마다 `_candidates` 를 와이프하고 **보유 종목은 돌파 후 셋업이 무너져 후보 자격을 잃는 게 정상**이라, 거기 단독 의존하면 **T+1 아침부터 매일** 2~4번이 통째로 침묵하고 1번 하드손절만 남는다(재시작 사고가 아니다 — 2026-08-04 kojiro 삼영무역과 동일 클래스). 전부 `_effective_setup(ticker)` 리졸버 경유(`_candidates` live → `_position_setup` 영속 폴백). **구조 레벨**(`base_low`)은 BUY 직전 stamp 후 불변이고 재시작 소실 시 매수일 *이전* 봉으로 재검출(실패 시 미복구 = fail-safe), **지표**(`atr14`/`ema50`)는 boot 훅이 매일 갱신. `_reset_daily_state` 에서 clear 금지(AST 봉인).

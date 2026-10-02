@@ -156,7 +156,7 @@ def test_stage3_when_judged_today_true_then_trailing_stop_with_judged_on(caplog)
     s._held_stage3[TICKER] = (D_TODAY, True)
 
     caplog.set_level(logging.INFO, logger=LOGGER_NAME)
-    assert s.check_exit_signal(TICKER, BUY, BUY) == Signal.TRAILING_STOP
+    assert s.check_exit_signal(TICKER, BUY, BUY) == Signal.TREND_EXIT
 
     exits = [m for m in _msgs(caplog) if "[kojiro_stage3_exit]" in m]
     assert len(exits) == 1, "§3 발화 시 기존 로그 1행"
@@ -469,7 +469,7 @@ async def test_evening_judgement_is_rearmed_by_next_morning_recompute(kojiro_fx,
 
         await kojiro_fx.recompute_held_atr()
         assert kojiro_fx._held_stage3[TICKER] == (D_TODAY, True), "아침 재판정이 재무장"
-        assert kojiro_fx.check_exit_signal(TICKER, BUY, BUY) == Signal.TRAILING_STOP, (
+        assert kojiro_fx.check_exit_signal(TICKER, BUY, BUY) == Signal.TREND_EXIT, (
             "익일 아침 발화 설계 보존"
         )
 

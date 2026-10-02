@@ -172,7 +172,7 @@ def test_CB3_existing_exit_stack_preserved_when_off(monkeypatch):
     s.state.positions["005930"] = _pos(ticker="005930", buy_price=100_000,
                                         high_since_buy=111_000, buy_date=date(2026, 7, 30))
     s._candidates["005930"] = _isolating_info(atr14=2_000)  # target=111000
-    assert s.check_exit_signal("005930", 111_000, 0) == Signal.TRAILING_STOP
+    assert s.check_exit_signal("005930", 111_000, 0) == Signal.TAKE_PROFIT
 
 
 # ─────────────────────────────────────────────────────────────────────────

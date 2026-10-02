@@ -383,7 +383,7 @@ momentum 은 MAIN 보드가 열리는 09:00 부터 틱이 오는 종목을 평�
 | 매수 | 다음 영업일 09:05~09:30 시장가, 1종목당 1회. **시가 갭상승 +3%↑ 시 스킵** (추격 방지) |
 | AI 매수평가 | **적용** — 매수 주문 접수 직후 `llm_buy_gate.observe_order` 가 점수를 `llm_buy_evaluations` 에 남긴다(주문 1건 = 1행, 실패도 1행). `llm_gate_mode` 기본 `"shadow"` = 기록만, 매수 차단 없음. cycle297(2026-09-17)이 **7전략 전부**로 넓혔다 |
 | 손절 | 매수가 대비 -7% 하드 손절. 터틀 매수(`_entry_atr` 스탬프가 있는 랏)는 대신 **2×ATR 하드손절 + -9% backstop**을 타고, 고점이 `매수가 + 1.5×entry_atr` 에 닿으면 손절선이 매수가로 승격된다(`breakeven_promote_atr`, 좁히는 방향만) |
-| 청산 | 코드 평가 순서대로 ① **시간 청산** — `breakout_fail_n_days`(기본 5 **영업일**) 이상 보유 + 현재가 < 돌파고점 → STOP_LOSS ② **채널 이탈** — 최근 `channel_exit_period`(기본 10)일 저가 하회 → TRAILING_STOP ③ **ATR(14)×2 Chandelier 트레일링**(`high_since_buy − ATR×2`) → TRAILING_STOP |
+| 청산 | 코드 평가 순서대로 ① **시간 청산** — `breakout_fail_n_days`(기본 5 **영업일**) 이상 보유 + 현재가 < 돌파고점 → TIME_EXIT ② **채널 이탈** — 최근 `channel_exit_period`(기본 10)일 저가 하회 → TRAILING_STOP ③ **ATR(14)×2 Chandelier 트레일링**(`high_since_buy − ATR×2`) → TRAILING_STOP |
 | 보유 기간 | 멀티데이 (평균 5~15 영업일). DB `positions` 영속화로 일자 넘어 유지 |
 | 종목명 | KIS `hts_kor_isnm` 우선 + `scanner.STATIC_TICKER_NAMES`(KOSPI200/KOSDAQ150 인라인 코멘트 자동 파싱)로 fallback |
 
@@ -396,7 +396,7 @@ momentum 은 MAIN 보드가 열리는 09:00 부터 틱이 오는 종목을 평�
 | 매수 | 종목당 1회 + 3영업일 쿨다운. 부분봉 가드(`candles[0]==오늘`이면 [1]부터) |
 | AI 매수평가 | **적용** — 매수 주문 접수 직후 `llm_buy_gate.observe_order` 가 점수를 `llm_buy_evaluations` 에 남긴다(주문 1건 = 1행, 실패도 1행). `llm_gate_mode` 기본 `"shadow"` = 기록만, 매수 차단 없음. cycle297(2026-09-17)이 **7전략 전부**로 넓혔다 |
 | 손절 | 매수가 대비 -5% / 플래그 하단(`flag_low`) 이탈 → STOP_LOSS |
-| 청산 | 측정된 이동(`flag_high + (pole_high - pole_start)`) 도달 → 1차 절반 청산(`_partial_exit` 마킹, 1차 구현은 전량) → 잔여 `high_since_buy − ATR×2` 트레일링 / 5영업일 시간 청산 (캘린더일 +2 보정) |
+| 청산 | 측정된 이동(`flag_high + (pole_high - pole_start)`) 도달 → 1차 절반 청산(`_partial_exit` 마킹, 1차 구현은 전량) → TAKE_PROFIT / `high_since_buy − ATR×2` 트레일링 → TRAILING_STOP / 5영업일 시간 청산 (캘린더일 +2 보정) → TIME_EXIT |
 | 보유 기간 | 단기 (평균 1~5 영업일) |
 
 ### 전략 F: 변동성 수축 돌파 (`vcp_breakout`, 미네르비니식)
@@ -408,7 +408,7 @@ momentum 은 MAIN 보드가 열리는 09:00 부터 틱이 오는 종목을 평�
 | 매수 | 종목당 1회 + 7영업일 쿨다운 |
 | AI 매수평가 | **적용** — 매수 주문 접수 직후 `llm_buy_gate.observe_order` 가 점수를 `llm_buy_evaluations` 에 남긴다(주문 1건 = 1행, 실패도 1행). `llm_gate_mode` 기본 `"shadow"` = 기록만, 매수 차단 없음. cycle297(2026-09-17)이 **7전략 전부**로 넓혔다 |
 | 손절 | 매수가 대비 -7% / 베이스 하단(`base_low`) 이탈 → STOP_LOSS |
-| 청산 | `high_since_buy − ATR×2` 트레일링 / 50일 EMA 이탈 → TRAILING_STOP. **시간·15:20 청산 없음** — 멀티데이 보유 (`Position._MULTIDAY_STRATEGIES` 멤버) |
+| 청산 | `high_since_buy − ATR×2` 트레일링 → TRAILING_STOP / 50일 EMA 이탈 → TREND_EXIT. **시간·15:20 청산 없음** — 멀티데이 보유 (`Position._MULTIDAY_STRATEGIES` 멤버) |
 | 보유 기간 | 멀티데이 (VCP 통상 2~6주) |
 
 ### 전략 G: 고지로 대순환 스윙 (`kojiro`, 이동평균선 대순환)
@@ -420,7 +420,7 @@ momentum 은 MAIN 보드가 열리는 09:00 부터 틱이 오는 종목을 평�
 | 매수 | 종목당 1회. **터틀 유닛 sizing 은 배선까지 완료된 opt-in** — DB `sizing_mode = "turtle"` 이면 `compute_unit_qty_guarded`(유닛 리스크 `risk_pct` 0.5%)가 수량을 정하고, 코드 기본값은 `position_ratio` 다. Phase 2 로 연기된 것은 조기진입·피라미딩뿐이며, `max_units_per_stock`/`max_units_total` 은 소비처 0건(미배선)이라 리스크 한도로 오인하면 안 된다 |
 | AI 매수평가 | **적용** — 매수 주문 접수 직후 `llm_buy_gate.observe_order` 가 점수를 `llm_buy_evaluations` 에 남긴다(주문 1건 = 1행, 실패도 1행). `llm_gate_mode` 기본 `"shadow"` = 기록만, 매수 차단 없음. cycle297(2026-09-17)이 **7전략 전부**로 넓혔다 |
 | 손절 | 고정 % -8%(ATR 독립 backstop) / 2ATR 하드손절(tighten-only) → STOP_LOSS |
-| 청산 | 스테이지3 진입(추세 종료, 익일 아침 발화) / `high_since_buy − 2.5×ATR` 트레일링 → TRAILING_STOP. **시간·15:20 청산 없음** — 멀티데이 |
+| 청산 | 스테이지3 진입(추세 종료, 익일 아침 발화) → TREND_EXIT / `high_since_buy − 2.5×ATR` 트레일링 → TRAILING_STOP. **시간·15:20 청산 없음** — 멀티데이 |
 | 보유 기간 | 멀티데이 (`_MULTIDAY_STRATEGIES` 멤버). 지표 순수모듈 `kojiro_indicators.py`(Wilder ATR ewm(1/20)) |
 
 > 프론트엔드 Settings 페이지에서 전략별 자금 비중 조절 가능. 대시보드 "조건검색 현황 → 20일 신고가 스윙" 탭에서 8단계 깔때기 통계 + 후보 종목 진입상태(보유 중 / 진입 대기 / 갭 스킵 / 장 시작 전 / 진입 시간 종료) 시각화. `bull_flag_breakout`·`vcp_breakout`·`kojiro` 는 **코드 등록 기본값**이 `enabled=False, weight=0.0` 이다 — Settings 에서 수동 활성화 권장 (백테스트/모의 검증 후). ⚠️ **가동 여부와 비중의 정본은 DB `strategy_config`(= Settings 화면)** 다. 부팅 시 `_load_strategy_config` 가 DB 행으로 `enabled`/`weight` 를 무조건 덮어쓰므로, 위 표의 코드 기본값을 현재 운영 상태로 읽으면 안 된다

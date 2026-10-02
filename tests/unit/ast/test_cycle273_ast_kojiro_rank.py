@@ -74,7 +74,7 @@ _KOJIRO_PINS = {
     "calc_buy_quantity":
         "c144f15de94a9f7069ac6cf650066dc12472cffdc3280a63e840b31aa544f84d",
     "check_exit_signal":
-        "067a60219099b081c64172986f46528a2836b1ad457c081ac06784c4ab9af7fc",
+        "84220e4133cf76f9ea1c74335919d22a245a899b0833057f20f24a27f38913e6",
 }
 
 

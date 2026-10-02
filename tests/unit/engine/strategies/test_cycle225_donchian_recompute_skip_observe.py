@@ -575,7 +575,7 @@ def _case_time_exit():
     s = _mk(breakout_fail_n_days=2)
     s._trading_days = set(_W_1721[:-1])
     _hold(s, "005930", D(2026, 8, 19), breakout_high=11_000)
-    return s, 9_800, 9_900, Signal.STOP_LOSS          # 08-20 + today = 2 영업일
+    return s, 9_800, 9_900, Signal.TIME_EXIT          # 08-20 + today = 2 영업일
 
 
 def _case_channel_exit():

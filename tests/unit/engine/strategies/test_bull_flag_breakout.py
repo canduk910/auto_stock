@@ -256,7 +256,7 @@ def test_exit_when_measured_move_reached_then_trailing_stop(strat):
     )
     # current 14_800 (타겟 정확히 도달) → 익절 신호
     result = strat.check_exit_signal("005930", 14_800, 12_300)
-    assert result in (Signal.TRAILING_STOP, Signal.FORCE_CLEAR)
+    assert result == Signal.TAKE_PROFIT  # cycle402 — 목표가 익절 이름
     # 측정된 이동 도달 마킹
     assert strat._partial_exit.get("005930") is True
 
@@ -295,8 +295,8 @@ def test_exit_when_held_over_5_days_then_force_clear(strat):
             high_since_buy=12_500,
         )
         result = strat.check_exit_signal("005930", 12_400, 12_000)
-        # 명세상 잔량 시장가 — TRAILING_STOP 또는 FORCE_CLEAR 둘 다 OK
-        assert result in (Signal.TRAILING_STOP, Signal.FORCE_CLEAR)
+        # 명세상 잔량 시장가 — cycle402 부터 사유 이름은 TIME_EXIT
+        assert result == Signal.TIME_EXIT
 
 
 def test_exit_when_no_position_then_none(strat):
