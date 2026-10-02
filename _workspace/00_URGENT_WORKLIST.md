@@ -40,6 +40,10 @@
 13. (10-02 16시대) **리팩토링 본체 카드 #2·#3 착수** — 사용자 「스케쥴러.py 수정 승인」 · 자문 = `domain_consult/cycle398_refactor_cards_2_3.md`(도메인) + `refactor/2026-10-02_cards_2_3_design.md`(구조). 결정: **A** 원형 선언 = 등록 명부(`src/engine/strategy_manifest.py`) 필수 칸(기본값 없음) · **B** `risk.py:88` = (가) 리터럴 유지 + 교차 검사(ETF·평균회귀 붙일 때 8영역 한 줄 승인) · **C** 명부에 없는 전략 파일 = 테스트 실패 · **D** PR1(카드 #2)·PR2(카드 #3) 분리 · **E** D-1 `save_params` 기본값·카드 #9 섀도는 따로 배포. 순서 = PR0(골든 배선표, 테스트만) → PR1 → PR2, full 배포는 평일 15:30 창(자문 권고)
 14. (10-02 15:30) ✅ push `09ecc59`(12커밋) — CI·Deploy success, backend 재기동 15:46:35(16:00 전), `/health` 200, 컨테이너 `OPENAI_RECOMMEND_MODEL=gpt-6-luna`(운영 `.env` 원본 백업 `.env.bak_20261002_c394`)
 
+15. (10-02 21:47) ✅ 리팩토링 PR0~PR2(cycle398 카드 #2·#3) push 21:36 `280146f` — CI·Deploy success, backend 21:47:09 재기동, `/health` 200. 첫 부팅 = 다음 거래일 07:45(부팅 점검: 등록 7·복구 훅 각 1회·돌파 구독/스윙 폴/시가 확정 대상 불변·`[no_feed_held]` 0)
+16. (10-02 21:5x) ETF 설계서 갱신(2안 진입 · 묶음 B · 15:20 판단 · 명부 구조) + **R1~R7 권고대로, R4 = (b) `scheduler.py` 사유(`TREND_EXIT`, 카드 4-1 과 함께), R5 = ETF 비중 = LTV 0.05 + VB 몫**(VB 비중 0 은 ETF S2 진입 때, VB 보유 0 확인 뒤) — 설계서 §10.2. 착수 순서 = 카드 #9 공통 섀도 → D-1 `save_params` → ETF 등록 사이클(shadow)
+17. (10-02) 칸 사용률·업종 쏠림 측정 — `_workspace/analysis/slot_utilization_20261002/notes.md`: momentum·VCP = A 칸 남음 · kojiro·BFB = B 칸 부족 · VB = B+C · 업종 쏠림 70%(전기·전자) · 계좌 오픈리스크 평균 1.8%. 다음 = 계좌 차원 리스크 예산(업종·종목 유닛 상한 + 계좌 오픈리스크 상한 + 종목 수 안전판) 도메인 자문 설계(`strategy_registry.py` 8영역)
+
 **다음**: 결정 3·4·7 진행 → 15:30 push(코드 변경이 들어가면 full — 15:30 정각 push, 16:00 애프터 전 재기동 완료) → 카드 #2·#3(`scheduler.py` 승인) → ETF 전략 신설(shadow, 카드 #9) · 평균회귀 트랙 R(`tools/replay/`)·C(실비용)는 지시서 순서대로
 
 ## 지금 상태 (2026-09-26 11시 KST — 주간 토큰 부족으로 작업 정리, 다음 거래일 09-28(월))
