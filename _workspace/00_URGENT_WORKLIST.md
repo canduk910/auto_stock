@@ -44,6 +44,9 @@
 16. (10-02 21:5x) ETF 설계서 갱신(2안 진입 · 묶음 B · 15:20 판단 · 명부 구조) + **R1~R7 권고대로, R4 = (b) `scheduler.py` 사유(`TREND_EXIT`, 카드 4-1 과 함께), R5 = ETF 비중 = LTV 0.05 + VB 몫**(VB 비중 0 은 ETF S2 진입 때, VB 보유 0 확인 뒤) — 설계서 §10.2. 착수 순서 = 카드 #9 공통 섀도 → D-1 `save_params` → ETF 등록 사이클(shadow)
 17. (10-02) 칸 사용률·업종 쏠림 측정 — `_workspace/analysis/slot_utilization_20261002/notes.md`: momentum·VCP = A 칸 남음 · kojiro·BFB = B 칸 부족 · VB = B+C · 업종 쏠림 70%(전기·전자) · 계좌 오픈리스크 평균 1.8%. 다음 = 계좌 차원 리스크 예산(업종·종목 유닛 상한 + 계좌 오픈리스크 상한 + 종목 수 안전판) 도메인 자문 설계(`strategy_registry.py` 8영역)
 
+18. (10-03 자율 구간 00:1x~07:00, 커밋만 · 배포 안 함 — 리팩토링 첫 부팅 관찰 전이라) ✅ cycle399 공통 섀도 모드 `b04b0b0` · ✅ cycle401 D-1 `save_params` `4370674` · ✅ cycle402 청산 사유 3종 + 15:20 사유 훅 `af20778` · ✅ 날짜 의존 테스트(R-19 cap 상태) 격리 · ✅ cycle400 계좌 리스크 예산 자문 · ⏳ cycle403 ETF 전략 개발(브랜치 `feat/cycle403-etf-trend`, R3 승인 전 — `risk.py:88` 한 줄·시드 적용·병합 보류)
+   - 🔴 cycle402 배포 경계 전후로 매도 사유 이름(`STOP_LOSS`·`TRAILING_STOP` 등)별 로그·trade_history 집계를 **합산하지 않는다** — BFB measured-move·max_hold, donchian breakout_fail, kojiro stage3, VCP 50EMA 의 사유 이름이 바뀐다(자문 cycle367 §4.5). 20:20·주간 루틴 프롬프트에도 같은 문장을 넣는 것은 외부 설정 변경이라 사용자 결정
+
 **다음**: 결정 3·4·7 진행 → 15:30 push(코드 변경이 들어가면 full — 15:30 정각 push, 16:00 애프터 전 재기동 완료) → 카드 #2·#3(`scheduler.py` 승인) → ETF 전략 신설(shadow, 카드 #9) · 평균회귀 트랙 R(`tools/replay/`)·C(실비용)는 지시서 순서대로
 
 ## 지금 상태 (2026-09-26 11시 KST — 주간 토큰 부족으로 작업 정리, 다음 거래일 09-28(월))
