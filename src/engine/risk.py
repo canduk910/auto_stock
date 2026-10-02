@@ -85,7 +85,8 @@ _PRE_MARKET_EXIT_EVAL_STRATEGIES = frozenset({"long_tail_volatility"})
 #   오염된다 — "일봉이라 낭비"가 아니라 경계 판정 × 노이즈 구간 × 손절폭
 #   대비 타이밍 비용이 근거다(kojiro 용은 검증된 적 없는 donchian 판단을
 #   복붙하지 않는다). 매수는 `_swing_buy_poll_loop`(REST `stck_oprc`)에서만.
-_TICK_BUY_EVAL_SKIP_STRATEGIES = frozenset({"donchian_swing", "kojiro"})
+# etf_trend = cycle403 ETF 등록 — 사용자 승인 10-03.
+_TICK_BUY_EVAL_SKIP_STRATEGIES = frozenset({"donchian_swing", "kojiro", "etf_trend"})
 
 
 def _tick_buy_eval_blocked_by_channel(ticker: str) -> bool:

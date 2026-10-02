@@ -574,7 +574,7 @@ def test_c17_4_leaf_does_not_import_eight_area_modules() -> None:
 #    또 다른 사이클(cycle286)의 사용자 명시 8영역 승인 하에 `order_engine.py` 를
 #    바꿨다. 값만 현재 워킹트리로 재산출한다(같은 승계 절차).
 _BASE_SHA = {
-    "src/engine/risk.py": "79fddbec8cf9315c5172fc6634c4f4ea77f525d9ff9a3aba48f321affeb4d3e8",
+    "src/engine/risk.py": "a2187b8270446379988d24dfbe39b902d6ab37b112d4b6ce7330ee171434e222",
     # 🔁 2026-09-25 (cycle358) 재핀 — 카드 D(관측 전용). PARTIAL/CANCELLED UPDATE
     # `affected==0` 무흔적에 `[trade_status_update_miss]` WARNING 추가(사용자 승인,
     # 워크리스트 ⑨). 매매·상태전이 로직 무변경, A-ATOMIC 구간은 byte 동일.
@@ -633,8 +633,9 @@ _BASE_SHA = {
     # 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27). 게이트 2번째
     # 문장 + 헬퍼 4개 + `__init__` cap 1개 추가. 값만 이동.
     # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). 섀도 관문 `_shadow_buy_intercepted` + 정적 판정 `shadow_mode_on` + 마커 헬퍼 2개 + `__init__` cap 1개 + `SHADOW_MODE_KEY` 상수. 값만 이동.
+    # 🔁 cycle403 재핀 — ETF 추세 전략(etf_trend) 신설. `_MULTIDAY_STRATEGIES` frozenset 에 "etf_trend" 추가. 값만 이동.
     "src/engine/strategy_base.py":
-        "40b6904b4811ab0f27b18c765a8cfc1cc7a7b0a9d0d4b4c5a832881f6f250468",
+        "f4c2c5619fb3b2f70fa0b4faab0fd38d55c83d0b9370c986c97de4f564430822",
     # 🔁 cycle296(2026-09-17) 재핀 — 사용자 승인 `issue()` 매니저 단위 in-flight 합류(`src/auth/**`). 같은 값을 10곳 동시 갱신했다.
     "src/auth/token.py":
         "4125c271b4147e59922f4f000e523429fb4bbef37058dc754fd92b9475ec58f1",

@@ -1529,6 +1529,14 @@ async def test_G2_three_day_convergence_simulation():
 # ══════════════════════════════════════════════════════════════════════
 # H. 영구 불변식 — 자문 §8-6 / §9-8 전제 보존
 # ══════════════════════════════════════════════════════════════════════
+#: cycle403 — ETF 추세(etf_trend)는 `get_recent_daily`(DB 전용, KIS raw `stck_bsop_date`
+#: 필드가 아니라 정규화 `bas_dd`)만 읽고 KIS 폴백이 없다. 일봉 적재는 20:30 이후에만
+#: 쓰이므로 "오늘의 미확정 장중봉"이 섞여 들어올 경로 자체가 없고(이 전략의 신선도
+#: 가드는 `dates[-1] != k200_head` 비교가 대신한다), `stck_bsop_date == today_str` 패턴은
+#: 애초에 쓸 필드가 없어 성립하지 않는다.
+_TODAY_BAR_GUARD_EXCEPTIONS = frozenset({"etf_trend.py"})
+
+
 def test_H1_daily_candle_strategies_keep_today_bar_guard():
     """자문 §9-8 (영구) — 일봉을 소비하는 전략은 `prev_idx` 오늘봉 가드를 갖는다.
 
@@ -1538,6 +1546,8 @@ def test_H1_daily_candle_strategies_keep_today_bar_guard():
     strat_dir = _REPO_ROOT / "src" / "engine" / "strategies"
     missing = []
     for path in sorted(strat_dir.glob("*.py")):
+        if path.name in _TODAY_BAR_GUARD_EXCEPTIONS:
+            continue
         src = path.read_text(encoding="utf-8")
         if "get_recent_daily" not in src and "fetch_daily_candles" not in src:
             continue  # 일봉 미소비 전략 (momentum)

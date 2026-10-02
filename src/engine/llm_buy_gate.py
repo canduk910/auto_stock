@@ -492,6 +492,8 @@ _BREAKOUT_LINE_KEYS: "dict[str, tuple[str, ...]]" = {
     # `target_won` 이 `None` 이고 `_SNAPSHOT_NA_KEYS` 가 그 키를 아예 뺀다.
     "momentum": (),
     "kojiro": (),
+    # cycle403 — ETF 추세. `buy_signals` 에 싣는 돌파선 키는 `line`(20일 신고가).
+    "etf_trend": ("line",),
 }
 
 

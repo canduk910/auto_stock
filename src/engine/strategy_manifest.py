@@ -45,6 +45,7 @@ from src.engine.strategies.long_tail_volatility import LongTailVolatilityStrateg
 from src.engine.strategies.vcp_breakout import VcpBreakoutStrategy
 from src.engine.strategies.volatility_breakout import VolatilityBreakoutStrategy
 from src.engine.strategy_base import StrategyBase
+from src.engine.strategies.etf_trend import EtfTrendStrategy
 
 #: 매수 평가 방식 — `tick_breakout` = 돌파 구독 그룹으로 후보를 구독하고 틱으로 평가(BFB·VCP·VB·LTV) ·
 #: `tick_scan` = 자기 스캔(`scan_stocks`) 결과로 구독하고 틱으로 평가(momentum) ·
@@ -114,6 +115,13 @@ STRATEGY_MANIFEST: tuple[StrategyEntry, ...] = (
         KojiroStrategy, "kojiro", "고지로 대순환", False, 0.0,
         eval_driver="swing_poll", breakout_rank=None, open_price_target=False,
         close_at_1520=False, market_unit_policy="scale",
+    ),
+    # ETF 추세(2026-10) — cycle403, 섀도 시작(S1, `shadow_mode=True`). 스윙 폴
+    # (donchian·kojiro 뒤) + 15:20 강제청산 대상(돌파 실패만 조건부 반환).
+    StrategyEntry(
+        EtfTrendStrategy, "etf_trend", "ETF 추세", False, 0.0,
+        eval_driver="swing_poll", breakout_rank=None, open_price_target=False,
+        close_at_1520=True, market_unit_policy="scale",
     ),
 )
 

@@ -71,7 +71,7 @@ _CHANGED = (
 _BASE_SHA = {
     # 8영역 — 엔진 4파일 (order_engine 은 승인된 변경 대상이라 제외)
     "src/engine/risk.py":
-        "79fddbec8cf9315c5172fc6634c4f4ea77f525d9ff9a3aba48f321affeb4d3e8",
+        "a2187b8270446379988d24dfbe39b902d6ab37b112d4b6ce7330ee171434e222",
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
     # 🔁 cycle302(2026-09-18) 재핀 — 사용자 승인 일봉 backfill **대상** 확대
@@ -124,8 +124,9 @@ _BASE_SHA = {
     # 에서 `tally.date < day`(더 늦은 날짜에서만 롤)로 시정(§8, 사용자 승인 범위 밖 무접촉).
     # 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27). 게이트 2번째 문장 + 헬퍼 4개 + `__init__` cap 1개 추가. 값만 이동.
     # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). 섀도 관문 `_shadow_buy_intercepted` + 정적 판정 `shadow_mode_on` + 마커 헬퍼 2개 + `__init__` cap 1개 + `SHADOW_MODE_KEY` 상수. 값만 이동.
+    # 🔁 cycle403 재핀 — ETF 추세 전략(etf_trend) 신설. `_MULTIDAY_STRATEGIES` frozenset 에 "etf_trend" 추가. 값만 이동.
     "src/engine/strategy_base.py":
-        "40b6904b4811ab0f27b18c765a8cfc1cc7a7b0a9d0d4b4c5a832881f6f250468",
+        "f4c2c5619fb3b2f70fa0b4faab0fd38d55c83d0b9370c986c97de4f564430822",
     # 나머지 전략 6파일 (LTV 만 변경 대상) — 🔁 cycle290(킬스위치 등재, 2026-09-13)
     # 재핀. `DEFAULT_PARAMS` 말미 2키 추가뿐.
     # 🔁 cycle364 재핀 — `prepare(as_of=)` 시그니처 확장(+ donchian·kojiro PV-1, vcp P3).
@@ -135,6 +136,9 @@ _BASE_SHA = {
     # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
     "src/engine/strategies/bull_flag_breakout.py":
         "879d85e779f9594ffbd9da93ce3ec41986f02abc78cc751cb22d022c20b0f298",
+    # cycle403 — ETF 추세 전략(etf_trend) 신설 — 새로 생긴 파일을 이 시점 sha 로 고정한다.
+    "src/engine/strategies/etf_trend.py":
+        "31776865ec1c206df7f61020966fa2e21be17e39939f1c9e443557834f54c318",
     # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
     "src/engine/strategies/donchian_swing.py":
         "976acaaa5bb6f0124adb484fba52dc70d815d5ded8c7132fca556c48c2f81d44",

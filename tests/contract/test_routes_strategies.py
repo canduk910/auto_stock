@@ -167,7 +167,8 @@ def test_get_params_schema_returns_catalog_and_strategy_rows(contract_env):
     # cycle382 — 시장 유닛(단계형) 모드 킬스위치로 103→104
     # cycle384 — 신규 매수 멈춤 `buy_paused`(7전략 공통)로 104→105
     # cycle399 — 섀도 모드 `shadow_mode`(7전략 공통)로 105→106
-    assert len(data["params"]) == 106
+    # cycle403 — ETF 추세 전략(etf_trend) 신설 106→119(신규 키 13개)→118(MED-3, atr_band_period 제거)
+    assert len(data["params"]) == 118
     assert {s["strategy_id"] for s in data["strategies"]} >= {"momentum", "kojiro"}
     momentum = next(s for s in data["strategies"] if s["strategy_id"] == "momentum")
     assert momentum["keys"] and set(momentum["params"]) == set(momentum["keys"])

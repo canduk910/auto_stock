@@ -27,7 +27,7 @@ from typing import Optional
 
 import src.db.pg as pg
 from src.db._kst import KST, now_kst_iso
-from src.engine.etf_like import ETF_GROUP_CODES, ETF_KEYWORDS
+from src.engine.etf_like import ETF_DOMESTIC_GROUP_CODE, ETF_GROUP_CODES, ETF_KEYWORDS
 from src.models.stock import StockBasics
 
 logger = logging.getLogger(__name__)
@@ -804,3 +804,44 @@ async def get_nxt_tradable_map(tickers: list[str]) -> dict[str, bool | None]:
         if ticker in result:
             result[ticker] = row.get("nxt_tradable")
     return result
+
+
+# cycle403 — etf_trend 유니버스 판정 코드. `etf_like.ETF_DOMESTIC_GROUP_CODE`(EF) 를 그대로
+# 가져간다 — 이 파일 어디에도 "EF" 를 다시 적지 않는다(cycle380 G6 — stock_master.py 전체에서
+# ETF_GROUP_CODES/ETF_KEYWORDS 값 재타이핑을 금지하는 전수 가드가 그 문자열을 그대로 찾는다).
+_ETF_TREND_GROUP_CODE = ETF_DOMESTIC_GROUP_CODE
+
+
+async def list_etf_trend_universe(min_market_cap_eok: int = 500) -> list[dict]:
+    """cycle403 ETF 추세 전략 유니버스 — 국내주식형 1배 ETF(명세 §4.1).
+
+    판정 = `raw.scty_grp_id_cd='EF'`(코드 그룹) ∧ `raw.etf_txtn_type_cd='01'`(국내주식형
+    과세유형) ∧ `raw.etf_chas_erng_rt_dbnb='1'`(추적배수 1배, 레버리지·인버스 제외) ∧
+    `raw.etf_etn_ivst_heed_item_yn ≠ 'Y'`(투자유의 제외) ∧ `hts_avls_eok ≥ min_market_cap_eok`
+    ∧ 종목코드 6자리 숫자(영숫자 ETF 는 운영 적재 경로가 이미 제외했다, §2.1).
+
+    한 번의 `pg.fetch` — 매수 유니버스 hot path 가 아니라(07:45 prepare 1회) 추가 쿼리
+    분해가 필요 없다.
+    """
+    sql = (
+        "SELECT ticker, "
+        "COALESCE(NULLIF(name, ''), NULLIF(TRIM(master_raw->>'hts_kor_isnm'), ''), '') AS name, "
+        "hts_avls_eok "
+        "FROM stock_master "
+        "WHERE raw->>'scty_grp_id_cd' = $1 "
+        "AND raw->>'etf_txtn_type_cd' = '01' "
+        "AND raw->>'etf_chas_erng_rt_dbnb' = '1' "
+        "AND COALESCE(raw->>'etf_etn_ivst_heed_item_yn', 'N') <> 'Y' "
+        "AND hts_avls_eok >= $2 "
+        "AND ticker ~ '^[0-9]{6}$'"
+    )
+    rows = await pg.fetch(sql, _ETF_TREND_GROUP_CODE, int(min_market_cap_eok))
+    out: list[dict] = []
+    for r in rows:
+        row = dict(r)
+        out.append({
+            "ticker": row.get("ticker"),
+            "name": row.get("name") or "",
+            "hts_avls_eok": int(row.get("hts_avls_eok") or 0),
+        })
+    return out

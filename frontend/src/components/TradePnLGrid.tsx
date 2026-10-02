@@ -310,6 +310,7 @@ export default function TradePnLGrid() {
             <option value="bull_flag_breakout">{strategyLabel('bull_flag_breakout')}</option>
             <option value="vcp_breakout">{strategyLabel('vcp_breakout')}</option>
             <option value="kojiro">{strategyLabel('kojiro')}</option>
+            <option value="etf_trend">{strategyLabel('etf_trend')}</option>
           </select>
         </div>
         <span className="text-xs text-gray-400">

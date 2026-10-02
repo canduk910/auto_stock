@@ -75,7 +75,7 @@ BUY_MODE_KEY = "status_buy_block_mode"
 _GROUP = {
     "volatility_breakout": 1, "long_tail_volatility": 1,
     "bull_flag_breakout": 2, "vcp_breakout": 2,
-    "donchian_swing": 3, "kojiro": 3,
+    "donchian_swing": 3, "kojiro": 3, "etf_trend": 3,
 }
 _SWING_GROUP = 3  # P1 은 스윙(donchian·kojiro)을 읽지 않는다 — 스윙 폴 훅이 덮는다(Q9)
 

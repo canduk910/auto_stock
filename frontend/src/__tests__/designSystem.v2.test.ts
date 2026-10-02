@@ -164,8 +164,8 @@ describe('cycle261 (c) src/**/*.{ts,tsx} — 구 팔레트 hex 4종 0건', () =>
   })
 })
 
-// ── (d) types/strategy.ts — 전략 7색 + @theme 변수 실재 ──────────────────────
-describe('cycle261 (d) STRATEGY_COLORS — 명세 hex 7키 + 클래스↔@theme 정합', () => {
+// ── (d) types/strategy.ts — 전략 8색(cycle403 etf_trend 추가) + @theme 변수 실재 ──
+describe('cycle261 (d) STRATEGY_COLORS — 명세 hex 8키 + 클래스↔@theme 정합', () => {
   const EXPECTED_HEX: Record<string, string> = {
     momentum: '#3d73b7',
     volatility_breakout: '#364c6d',
@@ -174,10 +174,11 @@ describe('cycle261 (d) STRATEGY_COLORS — 명세 hex 7키 + 클래스↔@theme 
     bull_flag_breakout: '#c34a36',
     vcp_breakout: '#9d6644',
     kojiro: '#141c2b',
+    etf_trend: '#2f6e52',
   }
   const EXPECTED_DEFAULT_HEX = '#74716a'
 
-  it('7 전략 키 전수 + hex 가 명세 값과 일치한다', () => {
+  it('8 전략 키 전수 + hex 가 명세 값과 일치한다', () => {
     expect(Object.keys(STRATEGY_COLORS).sort()).toEqual(Object.keys(EXPECTED_HEX).sort())
     for (const [key, hex] of Object.entries(EXPECTED_HEX)) {
       expect(

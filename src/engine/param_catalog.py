@@ -132,7 +132,7 @@ __all__ = [
     "forbidden_choices_for",
 ]
 
-CATALOG_VERSION = "cycle399.1"
+CATALOG_VERSION = "cycle403.2"
 
 #: 전략 id 의 정본 순서(레지스트리 등록 순서).
 STRATEGY_IDS: tuple[str, ...] = (
@@ -143,6 +143,7 @@ STRATEGY_IDS: tuple[str, ...] = (
     "bull_flag_breakout",
     "vcp_breakout",
     "kojiro",
+    "etf_trend",
 )
 
 #: 화면 아코디언 순서 — (group_id, 한글 라벨, 한 줄 설명)
@@ -423,7 +424,8 @@ _HHMM = r"^([01][0-9]|2[0-3]):[0-5][0-9]$"
 _TICKER6 = r"^[0-9]{6}$"
 
 _ALL7 = STRATEGY_IDS
-_TURTLE4 = ("donchian_swing", "bull_flag_breakout", "vcp_breakout", "kojiro")
+#: cycle403 — `_TURTLE4` 를 `_TURTLE_SIZED`(5전략, etf_trend 추가)로 개명. 별칭을 남기지 않는다.
+_TURTLE_SIZED = ("donchian_swing", "bull_flag_breakout", "vcp_breakout", "kojiro", "etf_trend")
 _VBLTV = ("volatility_breakout", "long_tail_volatility")
 _SCAN6 = (
     "volatility_breakout",
@@ -484,7 +486,7 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         key="volume_multiplier", label_ko="거래량 증가 배수", group="entry",
         type="float", min=1.0, max=5.0, step=0.1, unit="배",
         editable=True, risk="normal", auto_tunable=True, deprecated=False,
-        applies_to=("donchian_swing",), range_src="param_ranges",
+        applies_to=("donchian_swing", "etf_trend"), range_src="param_ranges",
         help="돌파일 거래량이 평균의 몇 배 이상이어야 하는가.",
     ),
     _s(
@@ -498,7 +500,7 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         key="gap_skip_threshold", label_ko="갭 상승 스킵 임계", group="entry",
         type="float", min=0.0, max=30.0, step=0.1, unit="%",
         editable=True, risk="normal", auto_tunable=False, deprecated=False,
-        applies_to=("donchian_swing",), range_src="structural",
+        applies_to=("donchian_swing", "etf_trend"), range_src="structural",
         help="시가가 전일 종가 대비 이 값 이상 갭업이면 그날 그 종목 매수를 건너뛴다."
              " 범위는 KRX 일일 가격제한.",
     ),
@@ -703,7 +705,7 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         key="atr_ratio_min", label_ko="변동성 밴드 하한", group="entry",
         type="percent", min=0.0, max=1.0, step=0.005, unit="",
         editable=True, risk="high", auto_tunable=False, deprecated=False,
-        applies_to=("kojiro",), range_src="structural",
+        applies_to=("kojiro", "etf_trend"), range_src="structural",
         help="ATR / 가격 비율의 하한. 이보다 조용한 종목은 후보에서 뺀다."
              " **비율 저장**(0.01 = 1%). `atr_ratio_min <= atr_ratio_max` 전제.",
     ),
@@ -711,10 +713,110 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         key="atr_ratio_max", label_ko="변동성 밴드 상한", group="entry",
         type="percent", min=0.0, max=1.0, step=0.005, unit="",
         editable=True, risk="high", auto_tunable=False, deprecated=False,
-        applies_to=("kojiro",), range_src="structural",
+        applies_to=("kojiro", "etf_trend"), range_src="structural",
         help="ATR / 가격 비율의 상한. 이보다 거친 종목은 후보에서 뺀다."
              " **비율 저장**(0.06 = 6%).",
     ),
+
+    # ── ETF 추세 전용 신규 키(cycle403, L12) ─────────────────────────────────
+    _s(
+        key="gap_over_line_pct", label_ko="돌파선 대비 갭 스킵", group="entry",
+        type="float", min=0.0, max=30.0, step=0.1, unit="%",
+        editable=True, risk="normal", auto_tunable=False, deprecated=False,
+        applies_to=("etf_trend",), range_src="structural",
+        help="시가가 돌파선보다 이 비율 이상 떠 있으면 그날 매수를 건너뛴다"
+             "(`gap_skip_threshold` 의 전일종가 대비 기준과 별개 축 — 묶음 B 재현 그대로).",
+    ),
+    _s(
+        key="min_trade_amount_20d", label_ko="20일 평균 거래대금 하한", group="entry",
+        type="int", min=0, max=1_000_000_000_000, step=100_000_000, unit="원",
+        editable=True, risk="high", auto_tunable=False, deprecated=False,
+        applies_to=("etf_trend",), range_src="structural",
+        help="최근 20일 평균 거래대금 하한. 진입 판정(leaf `entry_signal`)에 직접 쓰이는"
+             " 수치라 유니버스 하한(`min_market_cap`)과 별개다. **원 단위 저장.**",
+    ),
+    _s(
+        key="min_price", label_ko="최소 가격", group="entry",
+        type="int", min=0, max=1_000_000, step=100, unit="원",
+        editable=True, risk="normal", auto_tunable=False, deprecated=False,
+        applies_to=("etf_trend",), range_src="structural",
+        help="이 가격 미만 ETF 는 진입 판정에서 제외한다(호가 1원의 비중이 커지는 저가"
+             " 구간 회피). `min_price <= max_price` 전제.",
+    ),
+    _s(
+        key="max_price", label_ko="최대 가격", group="entry",
+        type="int", min=0, max=10_000_000, step=1_000, unit="원",
+        editable=True, risk="normal", auto_tunable=False, deprecated=False,
+        applies_to=("etf_trend",), range_src="structural",
+        help="이 가격 초과 ETF 는 진입 판정에서 제외한다(랏 기하 상한).",
+    ),
+    # cycle403 — `atr_band_period` 는 두지 않는다(팀장 검토 MED-3). leaf 가 ATR20 밴드
+    # 기간을 20 으로 고정해 돌리므로 PUT 해도 동작이 바뀌지 않는다.
+    _s(
+        key="min_bars", label_ko="최소 보유 일봉수", group="entry",
+        type="int", min=1, max=300, step=1, unit="봉",
+        editable=True, risk="high", auto_tunable=False, deprecated=False,
+        applies_to=("etf_trend",), range_src="structural",
+        help="진입 판정에 필요한 최소 일봉 개수(leaf `entry_signal` 의 `min_bars` 게이트)."
+             " 이보다 짧은 이력은 다른 조건이 다 맞아도 신호가 아니다.",
+    ),
+    _s(
+        key="quality_window", label_ko="일봉 품질 확인 창", group="entry",
+        type="int", min=1, max=150, step=1, unit="봉",
+        editable=True, risk="normal", auto_tunable=False, deprecated=False,
+        applies_to=("etf_trend",), range_src="structural",
+        help="KODEX 200(069500) 최근 이 봉수의 거래일이 그 종목 일봉에도 모두 있어야"
+             " 후보로 본다(일봉 결손 종목 제외).",
+    ),
+    _s(
+        key="daily_fetch_rows", label_ko="일봉 읽기 행수", group="entry",
+        type="int", min=1, max=400, step=1, unit="봉",
+        editable=True, risk="normal", auto_tunable=False, deprecated=False,
+        applies_to=("etf_trend",), range_src="clamp",
+        help="`stock_master_daily.get_recent_daily` 에서 읽을 행수. 읽기 관문 상한"
+             "(`_MAX_DAILY_ROWS`=400) 안에서 EMA60 시드 잔여를 줄이려 225(보유 backfill"
+             " 목표와 같다)로 둔다.",
+    ),
+    _s(
+        key="cluster_corr_window", label_ko="묶음 상관 산출 기간", group="entry",
+        type="int", min=1, max=250, step=1, unit="일",
+        editable=True, risk="high", auto_tunable=False, deprecated=False,
+        applies_to=("etf_trend",), range_src="structural",
+        help="같은 기초자산 묶음 판정에 쓰는 일간수익률 상관의 창 길이(영업일).",
+    ),
+    _s(
+        key="cluster_corr_min_obs", label_ko="묶음 상관 최소 관측치", group="entry",
+        type="int", min=1, max=250, step=1, unit="일",
+        editable=True, risk="normal", auto_tunable=False, deprecated=False,
+        applies_to=("etf_trend",), range_src="structural",
+        help="상관 계산에 필요한 최소 관측치. 미달이면 상관을 `None`(판정 불가 = 같은"
+             " 묶음 아님)으로 본다.",
+    ),
+    _s(
+        key="cluster_corr_threshold", label_ko="묶음 상관 임계", group="entry",
+        type="percent", min=0.0, max=1.0, step=0.01, unit="",
+        editable=True, risk="high", auto_tunable=False, deprecated=False,
+        applies_to=("etf_trend",), range_src="structural",
+        help="이 상관을 넘는 두 ETF 는 같은 묶음으로 보고 동시에 하나만 산다."
+             " **비율 저장**(0.9 = 0.9).",
+    ),
+    _s(
+        key="breakout_fail_min_bars", label_ko="돌파 실패 판정 최소 보유봉", group="exit",
+        type="int", min=0, max=60, step=1, unit="봉",
+        editable=True, risk="high", auto_tunable=False, deprecated=False,
+        applies_to=("etf_trend",), range_src="structural",
+        help="매수일 포함 완성 일봉이 이 수 이상이어야 15:20 돌파 실패 청산을 평가한다"
+             "(D+2 부터 — 매수 당일·다음 날은 판단하지 않는다).",
+    ),
+    _s(
+        key="breakout_fail_price_max_age_secs", label_ko="15:20 판단 가격 신선도 상한", group="exit",
+        type="int", min=0, max=3600, step=10, unit="초",
+        editable=True, risk="high", auto_tunable=False, deprecated=False,
+        applies_to=("etf_trend",), range_src="structural",
+        help="15:20 판단 가격의 나이가 이 초를 넘으면 팔지 않고 WARNING 만 남긴다"
+             "(조기 청산 판단이지 손절이 아니므로 판단 불가 = 보유 유지가 안전 쪽).",
+    ),
+
     _s(
         key="gap_up_skip_pct", label_ko="갭업 스킵 임계", group="entry",
         type="float", min=0.0, max=100.0, step=0.5, unit="%",
@@ -927,7 +1029,9 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         key="atr_period", label_ko="ATR 기간", group="exit",
         type="int", min=1, max=300, step=1, unit="봉",
         editable=True, risk="normal", auto_tunable=False, deprecated=False,
-        applies_to=_TURTLE4, range_src="structural",
+        # cycle403 — etf_trend 는 뺀다(팀장 검토 MED-3). leaf 가 N(TR14) 을 14 로 고정해
+        # 돌려 PUT 해도 동작이 바뀌지 않는다. `_TURTLE_SIZED` 를 그대로 쓰지 않는 이유.
+        applies_to=tuple(sid for sid in _TURTLE_SIZED if sid != "etf_trend"), range_src="structural",
         help="ATR 산출 기간. 이 값 하나가 **청산(샹들리에·ATR 손절)·사이징(터틀 유닛)·"
              "고지로 변동성 밴드** 세 곳에 동시에 영향을 준다.",
     ),
@@ -935,7 +1039,7 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         key="atr_trail_mult", label_ko="샹들리에 트레일 배수", group="exit",
         type="float", min=0.0, max=None, step=0.1, unit="배",
         editable=True, risk="high", auto_tunable=False, deprecated=False,
-        applies_to=("donchian_swing", "bull_flag_breakout", "vcp_breakout"),
+        applies_to=("donchian_swing", "bull_flag_breakout", "vcp_breakout", "etf_trend"),
         range_src="structural",
         help="최고가 − 배수 × ATR 로 트레일링 손절선을 잡는다. 사이클 223 에서"
              " '보유기간 정체성 상수'로 PARAM_RANGES 에서 제거됐다 — 단기 손실을"
@@ -946,7 +1050,7 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         key="stop_atr", label_ko="ATR 손절 배수", group="exit",
         type="float", min=0.0, max=None, step=0.1, unit="배",
         editable=True, risk="high", auto_tunable=False, deprecated=False,
-        applies_to=_TURTLE4, range_src="structural",
+        applies_to=_TURTLE_SIZED, range_src="structural",
         help="매수가 − 배수 × 진입 ATR 이 손절선. **`_entry_atr` 스탬프가 있는 포지션만**"
              " 이 경로를 탄다(스탬프 없는 포지션은 고정% 손절). 상한 근거 없음.",
     ),
@@ -961,7 +1065,7 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         key="breakeven_promote_atr", label_ko="본전 승격 배수", group="exit",
         type="float", min=0.0, max=None, step=0.1, unit="배",
         editable=True, risk="high", auto_tunable=False, deprecated=False,
-        applies_to=_TURTLE4, range_src="sign",
+        applies_to=_TURTLE_SIZED, range_src="sign",
         help="최고가가 매수가 + 배수 × ATR 을 넘으면 손절선을 매수가(본전)로 올린다."
              " **0 = 비활성**(코드가 `> 0` 으로 게이팅). 활성 권장값 1.5"
              "(`_workspace/00_leader_trading_rules.md`). 손절선은 조이는 방향으로만 움직인다.",
@@ -970,7 +1074,7 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         key="turtle_backstop_pct", label_ko="터틀 손절 최대폭", group="exit",
         type="float", min=-100.0, max=0.0, step=0.5, unit="%",
         editable=True, risk="high", auto_tunable=False, deprecated=False,
-        applies_to=("donchian_swing", "bull_flag_breakout", "vcp_breakout"),
+        applies_to=("donchian_swing", "bull_flag_breakout", "vcp_breakout", "etf_trend"),
         range_src="sign",
         help="고ATR 종목에서 ATR 손절선이 너무 멀어질 때 씌우는 % 상한."
              " **음수여야 한다** — 코드가 `if backstop < 0` 으로 게이팅하므로 0/양수는"
@@ -1105,7 +1209,7 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         key="sizing_mode", label_ko="사이징 방식", group="sizing_risk",
         type="enum", min=None, max=None, step=None, unit="",
         editable=True, risk="identity", auto_tunable=False, deprecated=False,
-        applies_to=_TURTLE4, range_src="enum", choices=_SIZING_MODE_CHOICES,
+        applies_to=_TURTLE_SIZED, range_src="enum", choices=_SIZING_MODE_CHOICES,
         help="`turtle` 만 특별 취급하고 그 밖의 값은 전부 `position_ratio` 로 낙하한다."
              " 🔴 **보유 중에 바꾸지 않는다** — 랏별 사이징 기록이 없어 이미 보유 중인"
              " 포지션도 새 설정의 손절을 탄다(position_ratio→turtle 은 다음 아침 부팅부터,"
@@ -1115,7 +1219,7 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         key="risk_pct", label_ko="유닛당 리스크 비율", group="sizing_risk",
         type="percent", min=0.0, max=1.0, step=0.001, unit="",
         editable=True, risk="identity", auto_tunable=False, deprecated=False,
-        applies_to=_TURTLE4, range_src="structural",
+        applies_to=_TURTLE_SIZED, range_src="structural",
         help="터틀 유닛 = floor(전략예산 × 이 비율 ÷ ATR). **비율 저장**"
              "(0.005 = 0.5%). 0 이하면 터틀 사이징이 꺼지고 비중 경로로 낙하한다."
              " 랏 상한 `max_lot_units` 계산에도 같은 값이 쓰인다.",
@@ -1124,7 +1228,7 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         key="min_vol_floor_pct", label_ko="최소 변동성 바닥", group="sizing_risk",
         type="float", min=0.0, max=100.0, step=0.1, unit="%",
         editable=True, risk="high", auto_tunable=False, deprecated=False,
-        applies_to=_TURTLE4, range_src="structural",
+        applies_to=_TURTLE_SIZED, range_src="structural",
         help="ATR / 가격 이 이 퍼센트 미만이면 터틀 유닛을 포기하고 비중 경로로 낙하한다"
              "(저변동 종목의 유닛 폭발 차단). **퍼센트 저장**(1.0 = 1%) — 이름이 `_pct`"
              " 라도 비율이 아니다. 0 = 비활성.",
@@ -1133,7 +1237,7 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         key="max_lot_units", label_ko="랏당 최대 유닛 (K)", group="sizing_risk",
         type="float", min=1.0, max=20.0, step=0.5, unit="유닛",
         editable=True, risk="identity", auto_tunable=False, deprecated=False,
-        applies_to=_TURTLE4, range_src="clamp",
+        applies_to=_TURTLE_SIZED, range_src="clamp",
         help="터틀 전략의 **모든** 매수 랏(유닛·비중 낙하·1주 폴백)을 이 유닛 수 이하로"
              " 자른다. 캡이 0 이면 그 종목을 사지 않는다. **하한 1.0 은 정상 터틀 랏이"
              " 캡에 걸리지 않는다는 수학적 전제**이고 상한 20.0 은 롤백 다이얼이다."
@@ -1163,7 +1267,7 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         key="market_unit_mode", label_ko="시장 유닛 모드", group="sizing_risk",
         type="enum", min=None, max=None, step=None, unit="",
         editable=True, risk="identity", auto_tunable=False, deprecated=False,
-        applies_to=_TURTLE4, range_src="enum", choices=_MARKET_UNIT_MODE_CHOICES,
+        applies_to=_TURTLE_SIZED, range_src="enum", choices=_MARKET_UNIT_MODE_CHOICES,
         help="cycle382 — KODEX 200(069500) 60일선 계단(위·상승 1 / 위·하락 ¾ /"
              " 아래·상승 ½ / 아래·하락 0)으로 터틀 4전략 신규 진입의 **설계 랏만**"
              " 줄인다. `off`(부재·오타 포함) = 매수 수량·신호에 관여하지 않는다"
@@ -1189,7 +1293,7 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         type="int", min=10_000_000_000, max=10_000_000_000_000, step=100_000_000,
         unit="원",
         editable=True, risk="normal", auto_tunable=True, deprecated=False,
-        applies_to=_SCAN6, range_src="param_ranges",
+        applies_to=_SCAN6 + ("etf_trend",), range_src="param_ranges",
         help="유니버스 필터 하한. **원 단위 저장**(100000000000 = 1,000억).",
     ),
     _s(

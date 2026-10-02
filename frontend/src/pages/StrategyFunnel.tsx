@@ -32,6 +32,8 @@ const STRATEGY_OPTIONS = [
   { id: 'momentum', label: strategyLabel('momentum') },
   { id: 'volatility_breakout', label: strategyLabel('volatility_breakout') },
   { id: 'long_tail_volatility', label: strategyLabel('long_tail_volatility') },
+  // cycle403 — ETF 추세(섀도 모드). funnel 추적 대상에 포함.
+  { id: 'etf_trend', label: strategyLabel('etf_trend') },
 ]
 
 function todayKst(): string {

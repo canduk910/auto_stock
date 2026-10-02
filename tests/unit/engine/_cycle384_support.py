@@ -49,8 +49,11 @@ ALL7: tuple[str, ...] = (
     "bull_flag_breakout",
     "vcp_breakout",
     "kojiro",
+    "etf_trend",
 )
-GATE_FIRST5 = ("long_tail_volatility", "donchian_swing", "bull_flag_breakout", "vcp_breakout", "kojiro")
+# cycle403 — etf_trend 의 게이트도 check_buy_signal 첫 문장(폴/래치형과 같은 위치).
+GATE_FIRST5 = ("long_tail_volatility", "donchian_swing", "bull_flag_breakout", "vcp_breakout", "kojiro",
+               "etf_trend")
 PRE_BUY2 = ("momentum", "volatility_breakout")
 
 _CLASSES = {
@@ -61,6 +64,7 @@ _CLASSES = {
     "bull_flag_breakout": ("src.engine.strategies.bull_flag_breakout", "BullFlagBreakoutStrategy"),
     "vcp_breakout": ("src.engine.strategies.vcp_breakout", "VcpBreakoutStrategy"),
     "kojiro": ("src.engine.strategies.kojiro", "KojiroStrategy"),
+    "etf_trend": ("src.engine.strategies.etf_trend", "EtfTrendStrategy"),
 }
 
 #: 전략별 「사는 순간」 시각 — 창 안(donchian·kojiro 09:05~09:30 · BFB/VCP 진입창 · 15:20 컷 앞)
@@ -70,6 +74,7 @@ AT = {
     "long_tail_volatility": (9, 40),
     "donchian_swing": (9, 10),
     "kojiro": (9, 10),
+    "etf_trend": (9, 10),
     "bull_flag_breakout": (10, 0),
     "vcp_breakout": (10, 0),
 }
@@ -162,6 +167,18 @@ class Buyable:
             self.s._candidates[ticker] = {"prev_close": 10_000, "donchian_high": 10_500,
                                           "ema60": 9_000, "atr": 200}
             self.prime_px, self.fire_px, self.open = None, 10_600, 10_100
+        elif sid == "etf_trend":
+            # market_unit_mode="off" — 이 전략의 L4 전용 시장 유닛 하드 게이트(결손·m=0 신호
+            # 단계 차단)는 공용 Buyable 하네스가 스냅샷을 안 심어 주므로 꺼서 우회한다
+            # (다른 터틀 전략은 이 게이트가 fail-open 이라 영향이 없다). shadow_mode=False —
+            # 이 전략만 코드 기본값이 True(S1)라 다른 6전략과 같은 "기본은 실전 매수" 베이스라인을
+            # 맞춘다(섀도 자체를 재는 t02 류는 `shadow(r.s, True)` 로 다시 켠다).
+            self.s = make(sid, market_unit_mode="off", shadow_mode=False, **params)
+            self.s._candidates[ticker] = {
+                "prev_close": 10_000, "line": 9_900, "n": 200.0, "atr": 200.0,
+                "atr20": 210.0, "tv20": 3_000_000_000.0, "ema60": 9_500, "cluster_key": None,
+            }
+            self.prime_px, self.fire_px, self.open = None, 10_100, 10_050
         elif sid == "kojiro":
             self.s = make(sid, budget=2_000_000, sizing_mode="turtle", risk_pct=0.005,
                           position_ratio=0.166, max_positions=6, **params)

@@ -39,6 +39,16 @@ pytestmark = pytest.mark.unit
 #: `[(전략 id, 클래스)]` — 전략 명부 전부(파일 이름순).
 ALL_STRATEGIES = list(strategy_classes().items())
 
+#: cycle403 — ETF 추세(etf_trend)는 코드 기본값부터 `sizing_mode="turtle"` 이고(L12,
+#: 다른 4 터틀 전략은 기본이 `position_ratio` 이고 turtle 은 DB opt-in), L5 가 1주
+#: 폴백을 명시적으로 금지한다. 그래서 "기본값이 position_ratio 비중 사이징을 타고
+#: 1주 폴백이 켜져 있다"는 이 모듈의 전제 자체가 성립하지 않는다 — 터틀 사이징·
+#: 폴백 금지 회귀는 `tests/unit/engine/test_cycle403_etf_trend_strategy.py` 가 덮는다.
+_RATIO_DEFAULT_EXCEPTIONS = frozenset({"etf_trend"})
+RATIO_DEFAULT_STRATEGIES = [
+    (sid, cls) for sid, cls in ALL_STRATEGIES if sid not in _RATIO_DEFAULT_EXCEPTIONS
+]
+
 #: 새 전략이 아래 행위 계약에서 붉을 때 할 일. 원인이 둘이라 순서대로 본다.
 _GATE_HINT = (
     "먼저 A-GATE(`tests/unit/ast/test_budget_limit_ast.py::test_calc_buy_quantity_returns_pass_through_gate`)를 "
@@ -76,7 +86,7 @@ def _ratio_qty(s, price: int = PRICE) -> int:
 # ---------------------------------------------------------------------------
 # A-CLAMP-1 — 잔여 > 요구 → 기존 비중 수량 그대로 (회귀 0)
 # ---------------------------------------------------------------------------
-@pytest.mark.parametrize("strategy_id,cls", ALL_STRATEGIES)
+@pytest.mark.parametrize("strategy_id,cls", RATIO_DEFAULT_STRATEGIES)
 def test_no_clamp_when_budget_available(strategy_id, cls):
     s = _build(strategy_id, cls)
     expected = _ratio_qty(s)
@@ -87,7 +97,7 @@ def test_no_clamp_when_budget_available(strategy_id, cls):
 # ---------------------------------------------------------------------------
 # A-CLAMP-2 — 잔여 < 요구 → 잔여//price 로 축소 (부분 매수)
 # ---------------------------------------------------------------------------
-@pytest.mark.parametrize("strategy_id,cls", ALL_STRATEGIES)
+@pytest.mark.parametrize("strategy_id,cls", RATIO_DEFAULT_STRATEGIES)
 def test_clamped_to_remaining_budget(strategy_id, cls):
     s = _build(strategy_id, cls)
     _consume(s, 950_000)          # 잔여 50,000 → 5주
@@ -118,7 +128,7 @@ def test_zero_when_remaining_negative(strategy_id, cls):
 # ---------------------------------------------------------------------------
 # A-CLAMP-5 — pending_buy_amounts 도 사용액에 포함 (체결 전 race 가드)
 # ---------------------------------------------------------------------------
-@pytest.mark.parametrize("strategy_id,cls", ALL_STRATEGIES)
+@pytest.mark.parametrize("strategy_id,cls", RATIO_DEFAULT_STRATEGIES)
 def test_pending_amounts_count_as_used(strategy_id, cls):
     s = _build(strategy_id, cls)
     s.state.pending_buys.add("000002")
@@ -163,7 +173,7 @@ def test_budget_gate_is_strategy_isolated():
 # ---------------------------------------------------------------------------
 # A-FALLBACK — qty<=0 경로는 여전히 `_fallback_one_share` 위임 (분기 순서 계약)
 # ---------------------------------------------------------------------------
-@pytest.mark.parametrize("strategy_id,cls", ALL_STRATEGIES)
+@pytest.mark.parametrize("strategy_id,cls", RATIO_DEFAULT_STRATEGIES)
 def test_fallback_helper_still_invoked_for_zero_ratio_qty(strategy_id, cls):
     s = _build(strategy_id, cls, total=10_000)   # 비중 수량 0 강제
     sentinel = 42

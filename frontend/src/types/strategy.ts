@@ -42,6 +42,16 @@ export const STRATEGY_COLORS: Record<string, { bg: string; text: string; badge: 
     badge: 'bg-navy-200 text-navy-900',
     hex: '#141c2b',
   },
+  // cycle403 (2026-10-03) — ETF 추세 전략. 기존 7색(가을 팔레트 brown/beige/navy/sky/red/
+  // blue)과 겹치지 않는 산림녹 계열을 이 전략 전용 arbitrary value 로 둔다 — @theme 에
+  // 없는 신규 hue 라 named token(bg-green-50 등)은 가을 팔레트 별칭(실제로는 sky 와 동일
+  // hex)과 충돌해 쓸 수 없다.
+  etf_trend: {
+    bg: 'bg-[#eaf4ef]',
+    text: 'text-[#2f6e52]',
+    badge: 'bg-[#d8ece1] text-[#2f6e52]',
+    hex: '#2f6e52',
+  },
 }
 
 const DEFAULT_COLOR = {

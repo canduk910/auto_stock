@@ -2,10 +2,10 @@
 
 > 이력: [`docs/history/src-engine-strategies-CLAUDE.history.md`](../../../docs/history/src-engine-strategies-CLAUDE.history.md)
 
-`StrategyBase` 서브클래스 7개. 추상 메서드: `prepare` / `check_buy_signal` / `check_exit_signal` / `calc_buy_quantity`.
+`StrategyBase` 서브클래스 8개. 추상 메서드: `prepare` / `check_buy_signal` / `check_exit_signal` / `calc_buy_quantity`.
 
 **이 문서는 코드 기본값만 적는다.** 활성 여부·비중·파라미터의 운영값은 DB `strategy_config` 가 정본이다 — 부팅 `_load_strategy_config` 가 DB 값으로 코드 값을 키별로 덮는다(`if key in strategy.config.params` — 코드에 없는 키는 버린다). 운영값 = `GET /api/strategies`, 운영 결정(멈춤·퇴출·터틀 전환) = `_workspace/00_URGENT_WORKLIST.md`.
-- 코드 등록 기본값(`scheduler.py` `__init__`)은 momentum 만 `enabled=True`·`weight=1.0`, 나머지 6전략은 `enabled=False`·`weight=0.0` 이다.
+- 코드 등록 기본값(`scheduler.py` `__init__`)은 momentum 만 `enabled=True`·`weight=1.0`, 나머지 7전략은 `enabled=False`·`weight=0.0` 이다.
 - 코드 기본값을 바꿀 때 운영 DB 값도 함께 바꾼다 — 그대로 두면 DB 값이 계속 이긴다.
 - ⚠️ 새 키를 코드 배포 **전**에 SQL 로 넣었다면(승인된 선반영 포함 — 루트 `CLAUDE.md` 「자율 진행과 승인 빈도」) 배포 전까지 그 전략의 `params` 를 저장하지 않는다(`PUT /api/strategies/{id}/params` · AI 자문 적용). 메모리에는 그 키가 없어서 `save_params` 가 메모리 dict 전체로 `params` JSONB 를 덮으면 선반영 값이 사라진다. 배포 전 PUT 으로 새 키를 넣으면 `unknown_key` 422 다.
 
@@ -23,7 +23,8 @@
 | `vcp_breakout` | `vcp_breakout.py` | **미네르비니식 VCP**. 전체 상장(`is_kospi200/is_kosdaq150=None`) → 시총 ≥ 100억 + 거래대금 ≥ 10억 + `max_scan_stocks=4000` → 일봉(깊이 = 「임계」 VCP) → **추세 필터**(50/150/200 EMA 정렬 + 장기 EMA 1개월 우상향 — 실효 장기선은 읽은 봉 수가 정한다) → **베이스**(25~75영업일, 깊이 ≤ 30%) → **pullback 점진 수축**(ATR ZigZag `min_swing_atr_mult=1.0`, 2~4회, 폭 감소, 마지막 ≤ 12%) → **거래량 수축**(마지막 5일 평균 < 베이스 직전 20일 평균 × 70%). 09:05~14:30 **`base_high` 돌파 순간** + 거래량 ≥ 20일 평균 × 1.5. `_bought_today` + `_cooldown_until` 7영업일(BFB 와 같은 2단계 산정). 각주 ①④⑥ | −7% / **`base_low` 이탈 → STOP_LOSS** / `high_since_buy − ATR×2` 트레일링 / **50일 EMA 이탈 → TREND_EXIT**. 시간·15:20 청산 없음 — 멀티데이 | MAIN |
 | `kojiro` | `kojiro.py` | **고지로 대순환 스윙**(EMA 5/20/40). 전체 상장(`max_scan_stocks=4000`) → 시총/거래대금 컷 → 일봉 100봉(`min_required=80`, EMA40 seed 잔여 < 2%) → **ATR/종가 밴드 1.0~6.0%**(비협상) → 스테이지 판별(EMA 동가 None 제외) → **strict entry** = 스테이지1 + 최근 5영업일 6→1 전환(`stage1_freshness=5`) + EMA 3선 우상향 + 전일종가 > EMA5. **점수 랭킹** `0.4×(MACD3 3봉기울기/3/종가) + 0.3×(띠폭/직전5봉평균 − 1) + 0.3×6→1신선도`(후보풀 min-max, 지표 = `kojiro_indicators.py` Wilder ATR `ewm(1/20)`) → `get_scanned_tickers()` score DESC — **정렬만, 자격·청산 무변경**(`rank_w_*` 는 `PARAM_RANGES` 제외). 관측(행위 0) = `src/engine/CLAUDE.md` `kojiro_band_observe.py` 절. 09:05~09:30 매수(**갭업 ≥5% / 갭다운 ≤−4% / 현재가<시가 스킵**), 1회만. 각주 ④ | **−8% backstop(ATR 독립) → 2ATR tighten-only floor(`_stop_floor`) → 스테이지3 진입 TREND_EXIT(익일 아침, precompute `_held_stage3`) → 2.5ATR 샹들리에**. 브레이크이븐 `breakeven_promote_atr`(기본 0 = 비활성, `PARAM_RANGES` 미편입) — `high_since_buy ≥ buy + mult×ATR`(live `_effective_atr`)이면 `eff = max(eff, buy)` → `_stop_floor` 래칫 영속. `_position_stop_price` = be_line 포함 **4선 max** read-only 미러(`_stop_floor` 무변조 = 커플링 불변식). 🔴 **샹들리에 2.5 를 조이지 않는다** — RR 이 훼손된다(fat-tail 은 트레일링 몫, 자문 `kojiro_exit_loss_review.md`). 시간·15:20 청산 없음 — `_MULTIDAY_STRATEGIES` + `check_force_clear()==[]`. 공유 순차 폴루프 `_SWING_POLL_STRATEGIES=("donchian_swing","kojiro")`(double-buy 차단) | MAIN |
 
-- `exchange` 는 7전략 모두 코드 기본 `KRX`(선택지 `KRX`·`NXT` — `SOR` 은 폐기, 모의는 KRX 만). 시각별 거래소 결정 = `src/engine/CLAUDE.md` `order_engine.py` 절.
+| `etf_trend` | `etf_trend.py` | **ETF 추세**(국내주식형 1배 ETF 20일 신고가 돌파). `db.stock_master.list_etf_trend_universe()`(증권그룹 `EF` ∧ 과세유형 `01` ∧ 추적배수 `1` ∧ 투자유의 아님 ∧ 순자산 ≥ 500억, 6자리 숫자 코드) → DB 일봉만(KIS 폴백 없음, 100봉↑·최신 봉 = KODEX 200 최신 봉·최근 60봉 결손 0) → 20일 평균 거래대금 ≥ 20억·종가 1,000~500,000원·ATR20(Wilder)/종가 1~6% → 종가 > 직전 20봉 고가(돌파선) + EMA60 상승·종가 위 + 거래대금 ≥ 직전 20봉 평균 × 1.5. 식 = 순수 leaf `src/engine/etf_trend_core.py`(재현 `_workspace/domain_consult/cycle391_etf_s0_remeasure.py` 와 동등성 테스트). `get_scanned_tickers()` = 20일 거래대금 내림차순. 09:05~09:30 매수, 갭(시가 ≥ 전일 종가×1.03 · 시가 > 돌파선×1.04) 스킵 래치, 붕괴(현재가<시가) 스킵, **묶음 캡**(이 전략 보유·주문중과 120일 수익률 상관 > 0.9 이면 거름), 시장 유닛 m=0·결손 날 거름(`market_unit_mode != "off"`), 정상 랏 0주 거름. 사이징 = 터틀 유닛(N = TR14 단순평균, `min_vol_floor_pct=0.0`), **1주 폴백·position_ratio 낙하 없음**. 코드 기본 `shadow_mode=True`(이 전략만). 각주 ④ | 하드 `max(buy − 2N, buy×0.91)` → 본전 승격(완성봉 고가 ≥ buy + 1.5N) → 트레일링 완성봉 고가 최대 − 1.8N(진입 N 고정) → 10일 저가 채널(매수 다음 날부터). 선은 **완성 일봉 고가로만** 올린다(장중 고가 무시). **15:20 돌파 실패** — `close_at_1520=True` 라 `check_force_clear()` 가 매수일 포함 완성봉 2개 이상 ∧ 15:20 가격(180초 이내) < 돌파선인 종목**만** 돌려준다(전량 반환 금지, never-raise, 가격·돌파선 결측 = 팔지 않음). 사유 = `force_clear_signal` → `TREND_EXIT`. 멀티데이(`_MULTIDAY_STRATEGIES`). 복구 = `recompute_held_atr()` 한 곳 | MAIN |
+- `exchange` 는 8전략 모두 코드 기본 `KRX`(선택지 `KRX`·`NXT` — `SOR` 은 폐기, 모의는 KRX 만). 시각별 거래소 결정 = `src/engine/CLAUDE.md` `order_engine.py` 절.
 
 **kojiro 리스크 통제**
 
@@ -116,6 +117,7 @@
 | `donchian_swing` | `position_ratio` | 스탬프 시 `buy − 2.0×entry_atr`(+ 브레이크이븐) + `−9%` backstop / 미스탬프 −7% | 배선됨 · K=2.0(cycle242) |
 | `kojiro` | `position_ratio` | `−8%` backstop → `2×ATR` tighten-only floor(`_stop_floor`) | 배선됨 — `_entry_atr` 미도입(live ATR + `_stop_floor` 단일 메커니즘) · K=2.0 |
 | `vcp_breakout` | `position_ratio` | 스탬프 시 3단 밴드 / 미스탬프 −7% | 배선됨(하드손절 ATR화 동반) · K=2.0 |
+| `etf_trend` | `turtle` | `max(buy − 2N, buy×0.91)` + 본전·트레일링·채널 | 배선됨 — 1주 폴백·position_ratio 낙하 없음(유닛 0 = 0 반환) · K=2.0 |
 | `bull_flag_breakout` | `position_ratio` | 스탬프 시 3단 밴드 / 미스탬프 −5% | 배선됨(하드손절 ATR화 동반) · K=2.0 |
 
 - VB·LTV 제외 근거는 함정 #1 이지 데이터 부재가 아니다(`prepare` 가 이미 일봉을 읽어 ATR 은 추가 I/O 0 으로 나온다).
@@ -238,14 +240,14 @@
 
 ## 멀티데이 보유 전략
 
-`Position._MULTIDAY_STRATEGIES` — `is_next_day` 항상 False, OrderMonitor 「청산」 배지 미표시. **정본 = `strategy_base.py` 의 `frozenset({"donchian_swing", "vcp_breakout", "kojiro"})` 리터럴** — import 시점 동적 추가 **금지**(import-order 독립), `Position` 시그니처 변경 금지. 추가 시 `check_force_clear()==[]` 결합 **필수**(없으면 15:20 강제청산으로 멀티데이가 소멸).
+`Position._MULTIDAY_STRATEGIES` — `is_next_day` 항상 False, OrderMonitor 「청산」 배지 미표시. **정본 = `strategy_base.py` 의 `frozenset({"donchian_swing", "vcp_breakout", "kojiro", "etf_trend"})` 리터럴** — import 시점 동적 추가 **금지**(import-order 독립), `Position` 시그니처 변경 금지. 추가할 때 명부 `close_at_1520=False` 이거나, `True` 면 `check_force_clear()` 가 **그날 끝내야 할 종목만** 돌려준다(전량 반환 금지 — 15:20 강제청산으로 멀티데이가 소멸한다). `etf_trend` 가 후자다(15:20 돌파 실패 종목만).
 
 ## 청산 사유 이름 (cycle402)
 
 `check_exit_signal` 이 돌려주는 이름은 청산 방식을 그대로 말한다 — `STOP_LOSS` = 가격 손절선(고정%·ATR 하드 손절·받침선·구조선 `flag_low`/`base_low`·브레이크이븐 승격·VB 실패 돌파) · `TRAILING_STOP` = 고점 따라가는 선(샹들리에·donchian 10일 채널) · `TIME_EXIT` = 보유 기간 초과(BFB `max_hold_days` · donchian `breakout_fail_n_days`) · `TAKE_PROFIT` = 목표가 익절(BFB 측정된 이동) · `TREND_EXIT` = 추세 종료·이탈(kojiro 스테이지3 · VCP 50일 EMA) · `NEXT_DAY_CLEAR` · `FORCE_CLEAR` · `STATUS_EXIT`.
 
 - `risk.on_tick` 은 `!= Signal.NONE` 하나로 판다 — 이름은 행위를 바꾸지 않고 「`<신호> 매도 주문 접수`」 로그의 첫 단어만 바꾼다. 새 청산 분기는 이 목록에서 맞는 이름을 고른다. 이름을 더할 때는 `Signal` 끝에 덧붙이고 기존 값은 바꾸지 않는다.
-- 15:20 `_force_clear_main_only` 의 사유는 전략의 `force_clear_signal(ticker)`(기본 `FORCE_CLEAR`)를 `strategy_base.resolve_force_clear_signal` 이 읽는다 — `NONE`·`BUY`·`Signal` 아닌 값·예외는 `FORCE_CLEAR` + `[force_clear_signal_invalid]` WARNING(15:20 청산은 그대로 나간다). VB·LTV 는 덮어쓰지 않는다.
+- 15:20 `_force_clear_main_only` 의 사유는 전략의 `force_clear_signal(ticker)`(기본 `FORCE_CLEAR`)를 `strategy_base.resolve_force_clear_signal` 이 읽는다 — `NONE`·`BUY`·`Signal` 아닌 값·예외는 `FORCE_CLEAR` + `[force_clear_signal_invalid]` WARNING(15:20 청산은 그대로 나간다). VB·LTV 는 덮어쓰지 않는다. `etf_trend` 는 `TREND_EXIT`(15:20 돌파 실패).
 - ⚠️ **배포 전 로그와 이름으로 합산하지 않는다** — 그 전의 BFB·kojiro·VCP `TRAILING_STOP` 과 donchian `STOP_LOSS` 에는 위 다섯 청산이 섞여 있다. 전략별 로그 줄(「눌림목 시간 청산」·「도치안 시간 기반 청산」·`[kojiro_stage3_exit]`·「VCP 50일 EMA 이탈」·「눌림목 측정된 이동 도달」)은 그대로라 이어서 볼 수 있다.
 
 ## 안전 규칙
@@ -317,6 +319,6 @@
    - 보유형이면 `get_effective_stop_price` read-only 미러 + boot 훅에서 `StrategyBase._apply_high_since_buy_from_candles` 호출(없으면 다음 날 아침마다 트레일링 기준점이 매수가로 돌아간다 — 「자금관리」 트레일링 기준점 항목).
    - 7전략 공통 키(`buy_paused` · `shadow_mode` · `max_lot_ratio_mult` · 장중 킬스위치 2키 · LLM 4키)를 같은 값으로 둔다 — `buy_paused`(A12)·`shadow_mode`(S08)·`max_lot_ratio_mult`(G-245-6)는 AST glob 전수. `return Signal.BUY` 마다 앞에 섀도 관문(각주 ⑩, AST S01). 새 `DEFAULT_PARAMS` 키는 `param_catalog.py` 에도 등재(없으면 PUT `unknown_key` 422). 배포 전 DB 선반영 시 PUT 금지 = 문서 머리. `DEFAULT_PARAMS` 를 바꾸면 `tests/unit/ast/test_cycle278_ast_catalog_guards.py` `_DEFAULT_PARAMS_SHA` 재핀이 따른다.
    - `list_by_filter(...)` 에 `exclude_etf_like=True`(ETF 를 사면 G4 허용 목록).
-   - 멀티데이면 `_MULTIDAY_STRATEGIES` 리터럴 + `check_force_clear()==[]`.
+   - 멀티데이면 `_MULTIDAY_STRATEGIES` 리터럴 + (`close_at_1520=False` 이거나 `check_force_clear()` 가 그날 끝낼 종목만 반환).
 
 > **장중 킬스위치 두 키** — `order_exchange_clock_mode`(기본 `"enforce"`)·`after_market_exit_division`(기본 `"44"`)는 **7 전략 전부** `DEFAULT_PARAMS` 말미 + `param_catalog` 에 코드 상수(`order_engine._ORDER_EXCHANGE_CLOCK_MODE_DEFAULT`·`_AFTER_EXIT_DIVISION_DEFAULT`)와 같은 값으로 있다(`params.get(key, DEFAULT)` 와 항등). 등재가 여는 것은 `PUT /api/strategies/{id}/params` **통로**뿐이다(없으면 `unknown_key` 422 라 장중에 끌 수단이 없다). `PARAM_RANGES`/`INT_PARAMS` 편입 금지 — AI 자문이 청산 수단을 끄는 스위치를 뒤집으면 안 된다. 사고 중 조작 순서·허용값·롤백 = `_workspace/00_leader_trading_rules.md` 「거래소 라우팅」 절 + `src/engine/CLAUDE.md` `order_engine.py` 절.

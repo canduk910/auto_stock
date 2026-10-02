@@ -523,7 +523,7 @@ def test_g2_8c_retrospective_leaf_has_no_io_and_no_await() -> None:
 #: `test_g2_9b` 가 명시적으로 문서화한다(조용한 구멍 금지).
 _BASE_SHA: dict[str, str] = {
     "src/engine/risk.py":
-        "79fddbec8cf9315c5172fc6634c4f4ea77f525d9ff9a3aba48f321affeb4d3e8",
+        "a2187b8270446379988d24dfbe39b902d6ab37b112d4b6ce7330ee171434e222",
     # 🔁 2026-09-25 (cycle358) 재핀 — 카드 D(관측 전용). PARTIAL/CANCELLED UPDATE
     # `affected==0` 무흔적에 `[trade_status_update_miss]` WARNING 추가(사용자 승인,
     # 워크리스트 ⑨). 매매·상태전이 로직 무변경.
@@ -596,8 +596,9 @@ _BASE_SHA: dict[str, str] = {
     # 게이트 2번째 문장(`_buy_paused_blocked`) + 헬퍼 4개 + `__init__` cap 1개 추가.
     # 청산 경로·계좌 SOFT 본문·8영역 무접촉. 값만 이동.
     # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). 섀도 관문 `_shadow_buy_intercepted` + 정적 판정 `shadow_mode_on` + 마커 헬퍼 2개 + `__init__` cap 1개 + `SHADOW_MODE_KEY` 상수. 값만 이동.
+    # 🔁 cycle403 재핀 — ETF 추세 전략(etf_trend) 신설. `_MULTIDAY_STRATEGIES` frozenset 에 "etf_trend" 추가. 값만 이동.
     "src/engine/strategy_base.py":
-        "40b6904b4811ab0f27b18c765a8cfc1cc7a7b0a9d0d4b4c5a832881f6f250468",
+        "f4c2c5619fb3b2f70fa0b4faab0fd38d55c83d0b9370c986c97de4f564430822",
     # 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27) — `DEFAULT_PARAMS` 에
     # `"buy_paused": False,` 1줄 추가(`max_lot_ratio_mult` 다음 줄). 그 밖 무변경.
     # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.

@@ -31,7 +31,7 @@ KST = _dt.timezone(_dt.timedelta(hours=9))
 # ── 상수/멀티데이/폴백 ──
 
 def test_swing_poll_strategies_constant():
-    assert _SWING_POLL_STRATEGIES == ("donchian_swing", "kojiro")
+    assert _SWING_POLL_STRATEGIES == ("donchian_swing", "kojiro", "etf_trend")
 
 
 def test_kojiro_multiday_and_force_clear_combined_guard():

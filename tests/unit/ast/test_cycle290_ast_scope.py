@@ -127,7 +127,7 @@ _BASE_SHA: dict[str, str] = {
     #    가격을 원 단위 내림 int 로(`_vwap_2dp`→`_vwap_floor`). 사용자 승인(8영역), 나머지 7영역 diff 0.
         "4d46edd1f863c03b5a79a4c8d23b7d5c8aae6f1cf7d8d0612bf91224db906a0e",
     "src/engine/risk.py":
-        "79fddbec8cf9315c5172fc6634c4f4ea77f525d9ff9a3aba48f321affeb4d3e8",
+        "a2187b8270446379988d24dfbe39b902d6ab37b112d4b6ce7330ee171434e222",
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
     # 🔁 cycle302(2026-09-18) 재핀 — 사용자 승인 일봉 backfill **대상** 확대
@@ -196,8 +196,9 @@ _BASE_SHA: dict[str, str] = {
     # `4516f1a94f2d05de24dfed24d165b62b11a230374795c593247f9906803d085f`.
     # 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27). 게이트 2번째 문장 + 헬퍼 4개 + `__init__` cap 1개 추가. 값만 이동.
     # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). 섀도 관문 `_shadow_buy_intercepted` + 정적 판정 `shadow_mode_on` + 마커 헬퍼 2개 + `__init__` cap 1개 + `SHADOW_MODE_KEY` 상수. 값만 이동.
+    # 🔁 cycle403 재핀 — ETF 추세 전략(etf_trend) 신설. `_MULTIDAY_STRATEGIES` frozenset 에 "etf_trend" 추가. 값만 이동.
     "src/engine/strategy_base.py":
-        "40b6904b4811ab0f27b18c765a8cfc1cc7a7b0a9d0d4b4c5a832881f6f250468",
+        "f4c2c5619fb3b2f70fa0b4faab0fd38d55c83d0b9370c986c97de4f564430822",
     # 🔴 등재만으로 판정이 통해야 한다 — 검증 로직을 고쳐 통과시키면 안 된다.
     "src/engine/param_validation.py":
         "b4c5c029800191523bcc511919d6de3774e9ab49ca2fc0a0558ee3907868ee17",
@@ -409,6 +410,9 @@ _ENGINE_PY_FILES: dict[str, tuple[str, ...]] = {
         # 와 db/stock_master.py 가 공유한다(사용자 승인, 8영역 scanner.py 변경 포함).
         # 등재해도 "다음 신규 파일" 은 여전히 붉어진다(이름 축 가드는 변경 없음).
         "etf_like.py",
+        # cycle403 — ETF 추세 전략(etf_trend) 순수 leaf(지표·신호·청산 시뮬레이션·상관).
+        # 등재해도 "다음 신규 파일" 은 여전히 붉어진다(이름 축 가드는 변경 없음).
+        "etf_trend_core.py",
         # cycle364 — 저녁 A1 미리보기(`prepare(as_of=)`) 라이브 준비 wrapper + 잠금 +
         # meta + `resolve_as_of`/`capture_skip_reason` leaf. 등재해도 "다음 신규 파일"
         # 은 여전히 붉어진다(이름 축 가드는 변경 없음).
@@ -466,7 +470,10 @@ _ENGINE_PY_FILES: dict[str, tuple[str, ...]] = {
         "turtle_sizing.py", "uptime_monitor.py",
     ),
     "src/engine/strategies": (
-        "__init__.py", "bull_flag_breakout.py", "donchian_swing.py", "kojiro.py",
+        "__init__.py", "bull_flag_breakout.py", "donchian_swing.py",
+        # cycle403 — ETF 추세 전략 신설. 등재해도 "다음 신규 파일" 은 여전히 붉어진다.
+        "etf_trend.py",
+        "kojiro.py",
         "long_tail_volatility.py", "momentum.py", "vcp_breakout.py",
         "volatility_breakout.py",
     ),

@@ -441,6 +441,7 @@ _EXPECTED_BREAKOUT_KEYS: dict[str, tuple[str, ...]] = {
     "vcp_breakout": ("base_high",),
     "momentum": (),
     "kojiro": (),
+    "etf_trend": ("line",),
 }
 
 #: "돌파선일 수 있는" 후보 키 — 빈 매핑 전략이 이 중 무엇도 싣지 않음을 잰다(양성 대조군).
@@ -454,6 +455,7 @@ _STRATEGY_FILE = {
     "bull_flag_breakout": "bull_flag_breakout.py",
     "vcp_breakout": "vcp_breakout.py",
     "kojiro": "kojiro.py",
+    "etf_trend": "etf_trend.py",
 }
 
 

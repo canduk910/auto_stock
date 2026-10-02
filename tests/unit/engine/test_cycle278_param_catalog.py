@@ -214,11 +214,11 @@ def test_catalog_when_counted_then_102_specs_no_duplicates():
     """B02/C2 — 스펙 104개(cycle290 킬스위치 2키로 99→101, cycle300 깊이 스위치로 101→102,
     cycle352 15:20 상한가 유지 확인 킬스위치로 102→103, cycle382 시장 유닛 모드로 103→104,
     cycle384 신규 매수 멈춤 `buy_paused` 로 104→105, cycle399 섀도 모드 `shadow_mode` 로 105→106), 키 중복 0."""
-    assert len(pc.PARAM_SPECS) == 106, f"스펙 {len(pc.PARAM_SPECS)}개 (기대 106)"
+    assert len(pc.PARAM_SPECS) == 118, f"스펙 {len(pc.PARAM_SPECS)}개 (기대 118)"
     keys = [s.key for s in pc.PARAM_SPECS]
     dupes = sorted({k for k in keys if keys.count(k) > 1})
     assert not dupes, f"중복 키: {dupes}"
-    assert len(pc.SPEC_BY_KEY) == 106
+    assert len(pc.SPEC_BY_KEY) == 118
 
 
 def test_catalog_when_key_missing_from_default_params_then_fails():

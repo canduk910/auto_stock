@@ -20,6 +20,11 @@ from typing import Any, Mapping
 #: (그 관측 함수는 이번 사이클에 무접촉 — 값만 여기와 같아야 한다).
 ETF_GROUP_CODES: frozenset[str] = frozenset({"EF", "EN", "FE"})
 
+#: cycle403 — `ETF_GROUP_CODES` 중 국내주식형 ETF 전용 코드 하나(EF). `etf_trend` 전략의
+#: 유니버스 SQL(`src/db/stock_master.py::list_etf_trend_universe`)이 이 상수로 가져간다 —
+#: 그 함수 안에서 "EF" 문자열을 다시 적으면 cycle380 G6(코드 재타이핑 금지) 가 붉어진다.
+ETF_DOMESTIC_GROUP_CODE: str = "EF"
+
 #: 코드가 없을 때만 쓰는 폴백 — `scanner.py:494-497` 의 25개를 순서까지 그대로 옮긴다.
 #: 이번 사이클은 이 폴백 규칙을 한 글자도 바꾸지 않는다.
 ETF_KEYWORDS: tuple[str, ...] = (

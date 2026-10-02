@@ -73,7 +73,7 @@ def _function(rel: str, name: str) -> tuple[str, ast.AST]:
 _BASE_SHA: dict[str, str] = {
     # 8영역 — 엔진 (order_engine 은 이 사이클의 접촉 대상이라 **제외**)
     "src/engine/risk.py":
-        "79fddbec8cf9315c5172fc6634c4f4ea77f525d9ff9a3aba48f321affeb4d3e8",
+        "a2187b8270446379988d24dfbe39b902d6ab37b112d4b6ce7330ee171434e222",
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
     # 🔁 cycle302(2026-09-18) 재핀 — 사용자 승인 일봉 backfill **대상** 확대
@@ -136,8 +136,9 @@ _BASE_SHA: dict[str, str] = {
     # 에서 `tally.date < day`(더 늦은 날짜에서만 롤)로 시정(§8, 사용자 승인 범위 밖 무접촉).
     # 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27). 게이트 2번째 문장 + 헬퍼 4개 + `__init__` cap 1개 추가. 값만 이동.
     # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). 섀도 관문 `_shadow_buy_intercepted` + 정적 판정 `shadow_mode_on` + 마커 헬퍼 2개 + `__init__` cap 1개 + `SHADOW_MODE_KEY` 상수. 값만 이동.
+    # 🔁 cycle403 재핀 — ETF 추세 전략(etf_trend) 신설. `_MULTIDAY_STRATEGIES` frozenset 에 "etf_trend" 추가. 값만 이동.
     "src/engine/strategy_base.py":
-        "40b6904b4811ab0f27b18c765a8cfc1cc7a7b0a9d0d4b4c5a832881f6f250468",
+        "f4c2c5619fb3b2f70fa0b4faab0fd38d55c83d0b9370c986c97de4f564430822",
     "src/engine/strategies/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
@@ -178,8 +179,9 @@ _BASE_SHA: dict[str, str] = {
     # cycle390(2026-09-29) — `sizing_mode` 도움말 정정(보유 중 전환 시 기보유분도 새 손절을 탄다).
     # 도움말 텍스트만 바뀌었고 키·범위·값 무변경. 직전 값 = `7120d37ff2ab392c7f59519ede3c19cd80e9dea80db6ec3146de74dd575f4326`.
     # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). shadow_mode 카탈로그 행 + `CATALOG_VERSION` cycle384.1→cycle399.1 + 개수 주석(106·identity 19·진입 50). 값만 이동.
+    # 🔁 cycle403 재핀 — ETF 추세 전략(etf_trend) 신설. STRATEGY_IDS·_TURTLE_SIZED(옛 _TURTLE4)·applies_to·신규 키 13개 + CATALOG_VERSION cycle399.1→cycle403.1. 값만 이동.
     "src/engine/param_catalog.py":
-        "5fab0c3ced8a0468b14002034ab24c9d014ea98b7cae662788ea7337d3890608",
+        "9fe66d4ce582446a6d54ce55564360e2c7a0a420df3940a012a59c0fbd5f08d3",
     "src/engine/param_validation.py":
         "b4c5c029800191523bcc511919d6de3774e9ab49ca2fc0a0558ee3907868ee17",
     # 시각·호가유형 표의 유일 정본 — GTP 게이트는 이 표를 **읽는다**(수정 금지).
@@ -450,9 +452,12 @@ def test_a8_no_new_leaf_in_src_engine() -> None:
     신설해 76 → **77** 이 됐다 — 전략 등록 7행(id·이름·초기 켜짐/비중·클래스·순서)의 정본.
     표준 라이브러리 + 전략 7파일 + `strategy_base` 만 import(src import 순환 0). `scheduler.py`
     는 이 명부를 순회하는 for 문 7줄로 대체된다(행위 동일, PR0 골든으로 증명).
+
+    ⚠️ cycle403(ETF 추세 전략 etf_trend 신설)이 leaf 1개 `etf_trend_core.py` 를 신설해
+    77 → **78** 이 됐다(전략 파일 `strategies/etf_trend.py` 는 이 glob 비재귀라 별도 계산).
     """
     got = len(list((_ROOT / "src" / "engine").glob("*.py")))
-    assert got == 77, f"`src/engine/*.py` 파일 수 {got} (cycle398 기준선 77)"
+    assert got == 78, f"`src/engine/*.py` 파일 수 {got} (cycle403 기준선 78)"
 
 
 # ===========================================================================

@@ -81,11 +81,22 @@ def test_t00_behaviour_matrix_covers_the_census():
 # ===========================================================================
 # t01 — 기본값
 # ===========================================================================
-@pytest.mark.parametrize("sid", ALL7)
+#: cycle403 — etf_trend 만 섀도 시작(S1, L3) 명시 예외. 기본값이 True 다.
+_SHADOW_DEFAULT_TRUE_EXCEPTIONS = frozenset({"etf_trend"})
+
+
+@pytest.mark.parametrize("sid", [s for s in ALL7 if s not in _SHADOW_DEFAULT_TRUE_EXCEPTIONS])
 def test_t01_default_params_has_shadow_mode_false(sid):
     d = strategy_class(sid).DEFAULT_PARAMS
     assert KEY in d, f"[Red] {sid} DEFAULT_PARAMS 에 shadow_mode 없음 — PUT 이 unknown_key 422 가 된다"
     assert d[KEY] is False, f"{sid} 기본값이 False(bool) 가 아니다: {d[KEY]!r}"
+
+
+@pytest.mark.parametrize("sid", sorted(_SHADOW_DEFAULT_TRUE_EXCEPTIONS))
+def test_t01_shadow_default_true_exceptions_are_explicit(sid):
+    d = strategy_class(sid).DEFAULT_PARAMS
+    assert KEY in d
+    assert d[KEY] is True, f"{sid} 기본값이 True(bool) 가 아니다: {d[KEY]!r}"
 
 
 # ===========================================================================

@@ -89,7 +89,7 @@ _CHANGED = (_MODELS_ORDER_REL, _ORDER_ENGINE_REL, _API_ORDER_REL)
 _BASE_SHA = {
     # 8영역 — 엔진 4파일 (order_engine 은 승인된 변경 대상이라 제외)
     "src/engine/risk.py":
-        "79fddbec8cf9315c5172fc6634c4f4ea77f525d9ff9a3aba48f321affeb4d3e8",
+        "a2187b8270446379988d24dfbe39b902d6ab37b112d4b6ce7330ee171434e222",
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
     # 🔁 cycle302(2026-09-18) 재핀 — 사용자 승인 일봉 backfill **대상** 확대
@@ -141,8 +141,9 @@ _BASE_SHA = {
     # 직전 값 = `4516f1a94f2d05de24dfed24d165b62b11a230374795c593247f9906803d085f`.
     # 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27). 게이트 2번째 문장 + 헬퍼 4개 + `__init__` cap 1개 추가. 값만 이동.
     # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). 섀도 관문 `_shadow_buy_intercepted` + 정적 판정 `shadow_mode_on` + 마커 헬퍼 2개 + `__init__` cap 1개 + `SHADOW_MODE_KEY` 상수. 값만 이동.
+    # 🔁 cycle403 재핀 — ETF 추세 전략(etf_trend) 신설. `_MULTIDAY_STRATEGIES` frozenset 에 "etf_trend" 추가. 값만 이동.
     "src/engine/strategy_base.py":
-        "40b6904b4811ab0f27b18c765a8cfc1cc7a7b0a9d0d4b4c5a832881f6f250468",
+        "f4c2c5619fb3b2f70fa0b4faab0fd38d55c83d0b9370c986c97de4f564430822",
     # 시각 표의 **유일 정본** — cycle287 은 읽기만 했다. 바꾸면 픽스처 동기 사슬
     # (`tools/test_fixtures/gen_market_state_fixture.py` + 프론트/E2E 픽스처 2)이
     # 통째로 딸려 오고, cycle282 `test_i1/i2/i3` 가 즉시 RED 다(실증: cycle289 가
@@ -175,6 +176,9 @@ _BASE_SHA = {
     # (+ donchian·kojiro PV-1 보유 종목 보존 · vcp `_observe_breakout_distance` P3 생략).
     "src/engine/strategies/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    # cycle403 — ETF 추세 전략(etf_trend) 신설 — 새로 생긴 파일을 이 시점 sha 로 고정한다.
+    "src/engine/strategies/etf_trend.py":
+        "31776865ec1c206df7f61020966fa2e21be17e39939f1c9e443557834f54c318",
     # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
     "src/engine/strategies/bull_flag_breakout.py":
         "879d85e779f9594ffbd9da93ce3ec41986f02abc78cc751cb22d022c20b0f298",
@@ -263,7 +267,8 @@ _BASE_SHA = {
 #: (`get_buy_dates` 신설) · `src/routes/balance.py`(매입일 병합 호출) · `src/models/balance.py`
 #: (`buy_date` 필드) 내용도 바뀌었으나 전부 이미 이 digest 안에 있던 파일이다(신규 파일
 #: 1개뿐). 읽기 전용 조회 조합 — 8영역·scheduler.py·매매 행위 변경 없음. 직전 값 = 166.
-_SRC_TREE_FILES = 168  # cycle398 PR1 — 신규 leaf `strategy_manifest.py` 로 167 → 168
+_SRC_TREE_FILES = 170  # cycle403 — ETF 추세(etf_trend) 신설: 신규 leaf `etf_trend_core.py` +
+# `strategies/etf_trend.py` 로 168 → 170. 직전 값 = 168(cycle398 PR1).
 #: ⚠️ 값은 **cycle285 적대 검증 반영** 기준선이다. 그 직전(초판 cycle285 배포)
 #: digest 는 `97483c5114a1d00dc8f7ca7c1ed08e1b3dc1d0b585065b14176dc227da9bed8c` 였다.
 #: cycle287b 배포분의 digest 는
@@ -713,8 +718,20 @@ _SRC_TREE_FILES = 168  # cycle398 PR1 — 신규 leaf `strategy_manifest.py` 로
 # 직전 값 = cycle399 `de830017b512ef7b13f957df8b01a6663fd6890bdbbf12b0ab893a2b75bbf618`.
 # 🔁 cycle402(2026-10-03) 재핀 — 청산 사유 3종 + 15:20 사유 훅(cycle401 위로 리베이스). 파일 수 168 그대로.
 # 직전 값 = cycle401 `f354f0da7bece0f8e03e35465890ef2f4a04d184608a7d90dd6b515b6055ce24`.
+# 🔁 cycle403(2026-10-03) 재핀 — ETF 추세 전략(etf_trend) 신설: 신규 leaf `src/engine/etf_trend_core.py` +
+# `src/engine/strategies/etf_trend.py` + `src/db/stock_master.py`(`list_etf_trend_universe`) +
+# `src/engine/strategy_base.py`(`_MULTIDAY_STRATEGIES`) + `src/engine/param_catalog.py`(STRATEGY_IDS·
+# `_TURTLE_SIZED`·신규 키) + `src/engine/strategy_manifest.py`(명부 8행) + `src/engine/status_exit_watch.py`
+# (`_GROUP`). 파일 수 168 → 170. 직전 값 = cycle402 `902069186da9126070a9d95862cf7cd334ac7e007c7a370a6f408b6203866194`.
+# 🔁 cycle403 재핀 3 — 팀장 2차 검토 HIGH-1·MED-1·MED-2·MED-3·LOW-2·LOW-3·LOW-4 반영
+# (보유×후보 묶음을 recompute_held_atr 에서 마저 계산·재매수 멀티데이 상태 pop·O/H/L/C≤0
+# 필터·param_catalog 미사용 키 6개 제거). 파일 수 170 그대로.
+# 직전 값(cycle403 재핀 2) = `3d7b8192fa26b3494d569824ef603b31e85bf591225ee647e886f117fb273084`.
+# 🔁 cycle403 재핀 4 — R3 승인(10-03): 8영역 `risk.py` `_TICK_BUY_EVAL_SKIP_STRATEGIES` 에
+# `etf_trend` 등록(donchian_swing·kojiro 와 같은 사유). 파일 수 170 그대로.
+# 직전 값(cycle403 재핀 3) = `016568a03b490db9f257fa8bc5fdbe1d9b5fcf632e688ff4782da54f9d3bb773`.
 _SRC_TREE_DIGEST = (
-    "902069186da9126070a9d95862cf7cd334ac7e007c7a370a6f408b6203866194"
+    "ac6d2a86b3462a7b64c38f0c1865d61827b801202ec3a7beea4aae80dad25711"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
@@ -734,7 +751,8 @@ _PINNED_DIRS = ("src/realtime", "src/auth", "src/engine/strategies", "src/engine
 _PINNED_DIR_FILE_COUNTS = {
     "src/realtime": 4,
     "src/auth": 3,
-    "src/engine/strategies": 8,
+    # cycle403 — 신규 전략 파일 `etf_trend.py` 로 8 → 9.
+    "src/engine/strategies": 9,
     # cycle351 — 신규 leaf `pyramid_shadow.py` 로 77 → 78.
     # cycle363 — 신규 leaf `trading_calendar.py` 로 78 → 79.
     # cycle364 — 신규 leaf `funnel_capture.py` 로 79 → 80.
@@ -745,7 +763,8 @@ _PINNED_DIR_FILE_COUNTS = {
     # cycle386 — 신규 leaf `daily_bar_finalize.py` 로 84 → 85.
     # cycle397 — 신규 leaf `position_buy_date.py` 로 85 → 86.
     # cycle398 PR1(리팩토링 카드 #2, 사용자 승인 10-02) — 신규 leaf `strategy_manifest.py` 로 86 → 87.
-    "src/engine": 87,
+    # cycle403 — 신규 leaf `etf_trend_core.py` + 전략 파일 `strategies/etf_trend.py`(재귀 집계) 로 87 → 89.
+    "src/engine": 89,
 }
 
 #: `scheduler.py` 정확 라인 수 + cycle257 영구 상한.

@@ -396,4 +396,4 @@ def test_swing_poll_strategies_unchanged():
     """
     from src.engine.scheduler import _SWING_POLL_STRATEGIES
 
-    assert _SWING_POLL_STRATEGIES == ("donchian_swing", "kojiro")
+    assert _SWING_POLL_STRATEGIES == ("donchian_swing", "kojiro", "etf_trend")

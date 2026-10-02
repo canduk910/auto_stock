@@ -61,7 +61,7 @@ _MOMENTUM_SCAN = ["900001", "900002"]
 #: 종목 번호가 따라 바뀌어 모든 묶음이 붉어지는 대신, 순서에 기대는 묶음만 붉어진다.
 _SID_INDEX = {
     "momentum": 0, "volatility_breakout": 1, "long_tail_volatility": 2, "donchian_swing": 3,
-    "bull_flag_breakout": 4, "vcp_breakout": 5, "kojiro": 6,
+    "bull_flag_breakout": 4, "vcp_breakout": 5, "kojiro": 6, "etf_trend": 7,
 }
 
 # 전략 id 판정용 — 등록 표와 별개로 고정(골든 대상을 고르는 체이므로 등록에서 뽑지 않는다).
@@ -198,7 +198,7 @@ def snap_constants() -> dict:
         "status_exit_watch._SWING_GROUP": status_exit_watch._SWING_GROUP,
         "session._DEFAULT_TRADABLE_BOARDS": session._DEFAULT_TRADABLE_BOARDS,
         "param_catalog.STRATEGY_IDS": param_catalog.STRATEGY_IDS,
-        "param_catalog._TURTLE4": param_catalog._TURTLE4,
+        "param_catalog._TURTLE_SIZED": param_catalog._TURTLE_SIZED,
         "param_catalog._VBLTV": param_catalog._VBLTV,
         "funnel_capture._ORDER": funnel_capture._ORDER,
         "open_price_rest._BASIS_STRATEGIES": open_price_rest._BASIS_STRATEGIES,
@@ -633,7 +633,7 @@ async def snap_boot_hooks(mask: int) -> dict:
             "restored": {s.config.strategy_id: sorted(s.state.positions.keys()) for s in real.registry.all()}}
 
 
-BOOT_MASKS = (0b0000000, 0b1111111, 0b0000001)
+BOOT_MASKS = (0, 2 ** len(_SID_INDEX) - 1, 1)
 
 
 # ---------------------------------------------------------------------------
@@ -645,7 +645,7 @@ async def build_golden() -> dict:
         head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True,
                               check=True).stdout.strip()
     combos = {}
-    for mask in range(128):
+    for mask in range(2 ** len(_SID_INDEX)):
         combos[str(mask)] = {sec: await snap_section(sec, mask) for sec in COMBO_SECTIONS}
     return {
         "_meta": {
@@ -688,7 +688,7 @@ async def test_regenerate_golden():
 # ---------------------------------------------------------------------------
 def test_g0_golden_shape():
     g = _golden()
-    assert len(g["combos"]) == 128, "켜짐 조합 128가지가 다 있어야 한다"
+    assert len(g["combos"]) == 2 ** len(_SID_INDEX), "켜짐 조합 2**N가지가 다 있어야 한다"
     assert all(set(v) == set(COMBO_SECTIONS) for v in g["combos"].values())
     assert set(g["boot_hooks"]) == {str(m) for m in BOOT_MASKS}
 
@@ -705,9 +705,9 @@ def test_g1b_registry_literal():
     """G1 의 리터럴 사본 — 골든 파일을 다시 만들어 G1 을 덮어도 이 줄은 남는다."""
     assert [r[0] for r in snap_registry()] == [
         "momentum", "volatility_breakout", "long_tail_volatility", "donchian_swing",
-        "bull_flag_breakout", "vcp_breakout", "kojiro",
+        "bull_flag_breakout", "vcp_breakout", "kojiro", "etf_trend",
     ]
-    assert [(r[2], r[3]) for r in snap_registry()] == [(True, 1.0)] + [(False, 0.0)] * 6
+    assert [(r[2], r[3]) for r in snap_registry()] == [(True, 1.0)] + [(False, 0.0)] * 7
 
 
 @pytest.mark.parametrize("name", sorted(json.loads(GOLDEN.read_text(encoding="utf-8"))["constants"])
@@ -718,11 +718,12 @@ def test_g2_wiring_constants(name):
     assert snap_constants()[name] == g[name], f"배선 상수 {name} 가 바뀌었다"
 
 
-def test_g2b_risk_tick_buy_skip_set_is_donchian_kojiro():
-    """결정 B — `risk.py:88` 리터럴은 유지한다. 지금 값은 {donchian_swing, kojiro} 이고 스윙 폴 대상과 같다."""
+def test_g2b_risk_tick_buy_skip_set_is_donchian_kojiro_etf_trend():
+    """결정 B — `risk.py:88` 리터럴은 유지한다. cycle403(R3 승인, 10-03) 으로 etf_trend 가
+    합류해 지금 값은 {donchian_swing, kojiro, etf_trend} 이고 스윙 폴 대상과 같다."""
     from src.engine import risk, scheduler
 
-    assert risk._TICK_BUY_EVAL_SKIP_STRATEGIES == frozenset({"donchian_swing", "kojiro"})
+    assert risk._TICK_BUY_EVAL_SKIP_STRATEGIES == frozenset({"donchian_swing", "kojiro", "etf_trend"})
     assert frozenset(scheduler._SWING_POLL_STRATEGIES) == risk._TICK_BUY_EVAL_SKIP_STRATEGIES, (
         "틱 매수 평가 제외(risk.py:88)와 스윙 폴 대상이 갈라졌다 — 폴형 전략을 더했으면 risk.py:88 도 함께"
     )
@@ -745,15 +746,16 @@ def test_g3b_for_loop_count_floor():
 @pytest.mark.parametrize("section", COMBO_SECTIONS)
 @pytest.mark.asyncio
 async def test_g4_combo_behavior(section):
-    """G4·G5·G6·G9 — 켜짐 조합 128가지 × 배선 함수의 결과·호출 순서가 골든과 같다."""
+    """G4·G5·G6·G9 — 켜짐 조합 2**N가지(N=등록 전략 수) × 배선 함수의 결과·호출 순서가 골든과 같다."""
     combos = _golden()["combos"]
     bad = []
-    for mask in range(128):
+    total = 2 ** len(_SID_INDEX)
+    for mask in range(total):
         got = await snap_section(section, mask)
         if got != combos[str(mask)][section]:
             bad.append((mask, combos[str(mask)][section], got))
     assert not bad, (
-        f"[{section}] {len(bad)}/128 조합이 골든과 다르다. 첫 사례 {_mask_name(bad[0][0])}\n"
+        f"[{section}] {len(bad)}/{total} 조합이 골든과 다르다. 첫 사례 {_mask_name(bad[0][0])}\n"
         f"  골든: {bad[0][1]}\n  지금: {bad[0][2]}"
     )
 
@@ -798,6 +800,7 @@ async def test_g8_boot_restore_hooks(mask):
     assert pairs == [
         ("donchian_swing", "recompute_held_atr"),
         ("kojiro", "recompute_held_atr"),
+        ("etf_trend", "recompute_held_atr"),
         ("vcp_breakout", "recompute_high_since_buy"),
         ("bull_flag_breakout", "recompute_high_since_buy"),
     ], f"복구 훅 순서·횟수가 바뀌었다(mask={mask}): {pairs}"

@@ -588,6 +588,24 @@ _STRATEGY_META = {
             "당일 남은 시간은 점수와 무관하다."
         ),
     },
+    "etf_trend": {
+        "name": "ETF 추세(국내주식형 1배 ETF 20일 신고가 돌파)",
+        "entry_rule": (
+            "국내주식형 1배 ETF 중 20일 평균 거래대금 20억 이상·ATR20 비율 1~6%인 "
+            "종목이 전일 종가로 직전 20일 고가를 돌파하고 60일 EMA가 우상향하며 "
+            "거래대금이 20일 평균의 1.5배 이상일 때, 다음 영업일 09:05~09:30 사이 "
+            "시장가로 진입한다. 시가 갭 +3%(종가 대비) 또는 +4%(돌파선 대비) 초과, "
+            "장중 붕괴(현재가<시가)는 스킵하고 같은 기초자산 묶음(상관 0.9 이상)은 "
+            "하나만 담는다."
+        ),
+        "matters": (
+            "개별 종목이 아니라 업종 바구니의 추세를 타는 전략이다. 청산은 "
+            "진입가−2×ATR(14) 하드손절(−9% 백스톱) → 본전 승격(1.5×ATR) → "
+            "고점−1.8×ATR 트레일링 → 10일 저가 채널 이탈 순이고, 매수 이틀째부터는 "
+            "15:20 가격이 돌파선 아래면 그날 마감 동시호가에서 정리한다(돌파 실패). "
+            "거래대금이 실리는가·같은 업종 중복이 아닌가가 핵심이다."
+        ),
+    },
 }
 
 # cycle297 §3.2 — 「해당 없음」 설명(5전략만, `not_applicable` 키로 strategy 블록에 싣는다).
@@ -613,6 +631,7 @@ _NOT_APPLICABLE_NOTES: dict[str, str] = {
     "donchian_swing": _NOT_APPLICABLE_NOTE_K_ONLY,
     "vcp_breakout": _NOT_APPLICABLE_NOTE_K_ONLY,
     "bull_flag_breakout": _NOT_APPLICABLE_NOTE_K_ONLY,
+    "etf_trend": _NOT_APPLICABLE_NOTE_K_ONLY,
 }
 
 _ABSENT_FIELDS = ["호가잔량", "분봉", "뉴스/공시", "외국인·기관 수급", "업종 상대강도", "지수 방향"]
@@ -670,6 +689,8 @@ _SNAPSHOT_NA_KEYS: dict[str, tuple[str, ...]] = {
     "donchian_swing": ("k",),
     "vcp_breakout": ("k",),
     "bull_flag_breakout": ("k",),
+    # cycle403 — ETF 추세. 돌파선(`line`)은 싣지만 k 값 개념은 없다.
+    "etf_trend": ("k",),
 }
 
 

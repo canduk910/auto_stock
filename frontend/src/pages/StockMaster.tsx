@@ -115,6 +115,16 @@ const CATEGORY_KEYS: Record<string, string[]> = {
     'master_raw.ksq150_nmix_yn', 'master_raw.kospi_issu_yn',
     'master_raw.krx_issu_yn', 'master_raw.vntr_issu_yn',
   ],
+  // cycle403 — ETF 추세 전략 유니버스 판정에 쓰는 4 키(src/db/stock_master.py
+  // list_etf_trend_universe 가 읽는 것과 같은 키). scty_grp_id_cd 는 ETF 판정 정본
+  // (src/engine/etf_like.py::ETF_GROUP_CODES) 과 같은 자리. 🔴 4 키 전부 `raw` JSONB
+  // 안의 키다(master_raw 컬럼 아님) — GET /{ticker} 상세 응답(StockBasics)이 애초에
+  // master_raw 를 내려보내지 않고, getCategoryItems 도 detail.raw 만 조회하므로
+  // 다른 raw 기반 키(bfdy_clpr 등)와 같은 평키 규칙을 따른다(접두사 없음).
+  'ETF분류': [
+    'scty_grp_id_cd', 'etf_txtn_type_cd',
+    'etf_chas_erng_rt_dbnb', 'etf_etn_ivst_heed_item_yn',
+  ],
   '메타': ['refreshed_at', 'master_raw_updated_at'],
 }
 
@@ -179,6 +189,11 @@ const FIELD_LABELS: Record<string, string> = {
   'master_raw.kospi_issu_yn': 'KOSPI',
   'master_raw.krx_issu_yn': 'KRX 종목',
   'master_raw.vntr_issu_yn': '벤처기업 (코스닥)',
+  // cycle403 — ETF 추세 전략 유니버스 판정 4 키 (KIS CTPF1002R, raw JSONB — master_raw 아님)
+  scty_grp_id_cd: '증권그룹코드 (EF:ETF EN:ETN FE:해외ETF)',
+  etf_txtn_type_cd: 'ETF 과세유형',
+  etf_chas_erng_rt_dbnb: 'ETF 추적배수',
+  etf_etn_ivst_heed_item_yn: 'ETF/ETN 투자유의',
 }
 
 // ────────────────────────────────────────────────────────────────────────
@@ -272,6 +287,7 @@ const CATEGORY_ICONS: Record<string, string> = {
   '시총/주식수': '🏦',
   '거래': '📊',
   '플래그': '🚩',
+  'ETF분류': '🏷️',
   '메타': '⏱️',
 }
 

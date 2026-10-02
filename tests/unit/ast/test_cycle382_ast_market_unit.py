@@ -609,9 +609,11 @@ def test_a12_catalog_row():
     assert spec.type == "enum" and spec.range_src == "enum"
     assert {c.value for c in spec.choices} == {"off", "shadow", "enforce"}
     assert spec.risk == "identity" and spec.auto_tunable is False
-    assert spec.applies_to == pc._TURTLE4
+    # cycle403 — `_TURTLE4` 를 `_TURTLE_SIZED`(5전략, etf_trend 추가)로 개명.
+    assert spec.applies_to == pc._TURTLE_SIZED
     assert spec.editable is True, "킬스위치 = PUT — 편집 가능해야 한다"
     assert "market_unit_mode" in pc.identity_keys()
     # 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27 「돈키언 신규매수 중지」) — 카탈로그 버전 cycle382.1 → cycle384.1.
     # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1) — 카탈로그 버전 cycle384.1 → cycle399.1.
-    assert pc.CATALOG_VERSION == "cycle399.1"
+    # 🔁 cycle403 재핀 — ETF 추세 전략(etf_trend) 신설 — 카탈로그 버전 cycle399.1 → cycle403.1.
+    assert pc.CATALOG_VERSION == "cycle403.2"

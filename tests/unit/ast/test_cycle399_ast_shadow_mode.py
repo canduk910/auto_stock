@@ -15,7 +15,7 @@
 | S09 | 8영역 `strategy_registry.update_weights` 의 `enabled` 대입은 정확히 `weight > 0 or (was_enabled and StrategyBase.shadow_mode_on(s))` 하나 |
 | S10 | 8영역(registry 제외)·`scheduler.py`·`boot_manager.py` 에 섀도 토큰 0 · registry 는 `shadow_mode_on` 1회 |
 | S11 | `[shadow_buy]` 는 `logger.info` 로만 · `[shadow_mode_config]` 는 `logger.warning` 로만 · `write_log` 0 |
-| S12 | 카탈로그 행(bool · identity · 7전략 · 자동튜닝 아님) · 106키 · identity 19 · `cycle399.1` |
+| S12 | 카탈로그 행(bool · identity · 8전략 · 자동튜닝 아님) · 118키(cycle403) · identity 19 · `cycle403.1` |
 | S13 | 생성 픽스처(프론트·e2e)가 카탈로그를 따른다 |
 
 스캔 규약(가드 설계 금기 2026-09-05) — `Path.read_text` + AST. `git grep`/`git ls-files` 금지, `ast.dump` sha 핀
@@ -320,8 +320,12 @@ def test_s08_census_equals_registration_manifest():
     )
 
 
-@pytest.mark.parametrize("fname", STRATEGY_FILES)
-def test_s08_default_params_has_shadow_mode_false(fname):
+#: cycle403 — ETF 추세(etf_trend)만 섀도 시작(S1, 비중 0 과 이중 안전) 명시 예외(L3).
+_SHADOW_DEFAULT_TRUE_EXCEPTIONS = frozenset({"etf_trend.py"})
+_SHADOW_DEFAULT_TRUE_EXCEPTIONS_BY_SID = frozenset({"etf_trend"})
+
+
+def _shadow_mode_literal(fname: str):
     tree = _tree(STRATEGY_DIR / fname)
     found = None
     for n in ast.walk(tree):
@@ -332,8 +336,22 @@ def test_s08_default_params_has_shadow_mode_false(fname):
                 for k, v in zip(n.value.keys, n.value.values):
                     if isinstance(k, ast.Constant) and k.value == KEY:
                         found = v
+    return found
+
+
+@pytest.mark.parametrize("fname", [f for f in STRATEGY_FILES if f not in _SHADOW_DEFAULT_TRUE_EXCEPTIONS])
+def test_s08_default_params_has_shadow_mode_false(fname):
+    found = _shadow_mode_literal(fname)
     assert found is not None, f"[Red] {fname}: DEFAULT_PARAMS 에 \"shadow_mode\" 없음"
     assert isinstance(found, ast.Constant) and found.value is False, f"{fname}: 기본값이 False 리터럴이 아니다"
+
+
+@pytest.mark.parametrize("fname", sorted(_SHADOW_DEFAULT_TRUE_EXCEPTIONS))
+def test_s08_shadow_default_true_exceptions_are_explicit(fname):
+    """cycle403 — etf_trend 만 `shadow_mode=True` 명시 예외(S1 섀도 시작, L3)."""
+    found = _shadow_mode_literal(fname)
+    assert found is not None, f"[Red] {fname}: DEFAULT_PARAMS 에 \"shadow_mode\" 없음"
+    assert isinstance(found, ast.Constant) and found.value is True, f"{fname}: 기본값이 True 리터럴이 아니다"
 
 
 # ===========================================================================
@@ -428,9 +446,10 @@ def test_s12_catalog_row_and_counts():
     for word in ("신규 매수", "손절", "주문"):
         assert word in spec.help, f"도움말에 「{word}」 없음"
     assert KEY in pc.identity_keys()
-    assert len(pc.PARAM_SPECS) == 106 and len(pc.SPEC_BY_KEY) == 106
+    assert len(pc.PARAM_SPECS) == 118 and len(pc.SPEC_BY_KEY) == 118
     assert len(pc.identity_keys()) == 19
-    assert pc.CATALOG_VERSION == "cycle399.1"
+    # 🔁 cycle403 재핀 — ETF 추세 전략(etf_trend) 신설, 신규 키 12개(atr_band_period 는 MED-3 에서 제거) — cycle399.1 → cycle403.1.
+    assert pc.CATALOG_VERSION == "cycle403.2"
 
 
 _FIXTURES = (
@@ -465,4 +484,7 @@ def test_s13_generated_fixture_carries_shadow_mode(path):
     assert len(rows) == 1, f"[Red] {path.name}: shadow_mode 스펙 행 {len(rows)}"
     assert rows[0] == _generator().spec_to_json(pc.get_spec(KEY)), "손으로 고친 픽스처"
     for s in data["strategies"]:
+        if s["strategy_id"] in _SHADOW_DEFAULT_TRUE_EXCEPTIONS_BY_SID:
+            assert s["defaults"][KEY] is True and s["params"][KEY] is True, s["strategy_id"]
+            continue
         assert s["defaults"][KEY] is False and s["params"][KEY] is False, s["strategy_id"]

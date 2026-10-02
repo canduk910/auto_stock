@@ -234,7 +234,7 @@ def test_a7_chandelier_multipliers_unchanged():
 def test_a8_swing_poll_strategies_unchanged():
     from src.engine import scheduler as sched_mod
 
-    assert sched_mod._SWING_POLL_STRATEGIES == ("donchian_swing", "kojiro")
+    assert sched_mod._SWING_POLL_STRATEGIES == ("donchian_swing", "kojiro", "etf_trend")
 
 
 # ===========================================================================

@@ -227,7 +227,7 @@ def test_seven_strategy_default_params_source_sha_unchanged(strategy_id: str):
 #    현재 워킹트리로 재산출했다.
 _BASE_SHA = {
     "src/engine/risk.py":
-        "79fddbec8cf9315c5172fc6634c4f4ea77f525d9ff9a3aba48f321affeb4d3e8",
+        "a2187b8270446379988d24dfbe39b902d6ab37b112d4b6ce7330ee171434e222",
     # 🔁 2026-09-25 (cycle358) 재핀 — 카드 D(관측 전용). PARTIAL/CANCELLED UPDATE
     # `affected==0` 무흔적에 `[trade_status_update_miss]` WARNING 추가(사용자 승인,
     # 워크리스트 ⑨). 매매·상태전이 로직 무변경.
@@ -325,8 +325,9 @@ _BASE_SHA = {
     # 아래 전략 7파일(`DEFAULT_PARAMS` 말미 `"buy_paused": False` 1키씩)이 같은
     # 이유로 함께 재핀됐다 — 값 변경이 이 사이클의 정당한 목적이다.
     # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). 섀도 관문 `_shadow_buy_intercepted` + 정적 판정 `shadow_mode_on` + 마커 헬퍼 2개 + `__init__` cap 1개 + `SHADOW_MODE_KEY` 상수. 값만 이동.
+    # 🔁 cycle403 재핀 — ETF 추세 전략(etf_trend) 신설. `_MULTIDAY_STRATEGIES` frozenset 에 "etf_trend" 추가. 값만 이동.
     "src/engine/strategy_base.py":
-        "40b6904b4811ab0f27b18c765a8cfc1cc7a7b0a9d0d4b4c5a832881f6f250468",
+        "f4c2c5619fb3b2f70fa0b4faab0fd38d55c83d0b9370c986c97de4f564430822",
     # 🔁 cycle290(킬스위치 등재, 2026-09-13) 재핀 — `DEFAULT_PARAMS` 말미 2키 추가뿐.
     # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
     "src/engine/strategies/momentum.py":

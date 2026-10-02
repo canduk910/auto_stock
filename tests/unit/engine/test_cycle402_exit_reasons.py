@@ -347,18 +347,22 @@ async def _run_force_clear(sched_mod, *, override: dict[str, Signal] | None = No
 
 async def test_force_clear_main_only_when_default_then_force_clear_for_vb_ltv(_frozen_1520):
     sells = await _run_force_clear(_frozen_1520)
+    # cycle403 — ETF 추세(etf_trend) 도 close_at_1520 대상이고 force_clear_signal 이
+    # 항상 TREND_EXIT 를 돌려준다(§12).
     assert [(t, s.name, sid) for t, s, sid in sells] == [
         ("005930", "FORCE_CLEAR", "volatility_breakout"),
         ("005930", "FORCE_CLEAR", "long_tail_volatility"),
+        ("005930", "TREND_EXIT", "etf_trend"),
     ]
 
 
 async def test_force_clear_main_only_when_strategy_picks_reason_then_that_reason(_frozen_1520):
-    """ETF 가 나중에 `TREND_EXIT` 를 돌려줄 모양 — 전략이 고른 사유로 매도한다."""
+    """ETF 가 `TREND_EXIT` 를 돌려주는 모양(§12 이미 구현) — 전략이 고른 사유로 매도한다."""
     sells = await _run_force_clear(_frozen_1520, override={"long_tail_volatility": Signal["TREND_EXIT"]})
     assert [(s.name, sid) for _t, s, sid in sells] == [
         ("FORCE_CLEAR", "volatility_breakout"),
         ("TREND_EXIT", "long_tail_volatility"),
+        ("TREND_EXIT", "etf_trend"),
     ]
 
 
@@ -385,7 +389,11 @@ async def test_force_clear_main_only_when_reason_hook_raises_then_still_sells_fo
 
     ts.order_engine.execute_sell = _sell
     await ts._force_clear_main_only()
-    assert ts_sells == [("FORCE_CLEAR", "volatility_breakout"), ("FORCE_CLEAR", "long_tail_volatility")]
+    assert ts_sells == [
+        ("FORCE_CLEAR", "volatility_breakout"),
+        ("FORCE_CLEAR", "long_tail_volatility"),
+        ("TREND_EXIT", "etf_trend"),
+    ]
 
 
 # ═══════════════════════════════════════════════════════════════════════════

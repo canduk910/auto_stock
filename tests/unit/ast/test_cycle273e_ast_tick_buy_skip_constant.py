@@ -6,7 +6,7 @@
 
 | # | 가드 | 지키는 것 | HEAD |
 |---|---|---|---|
-| R10-a | `_TICK_BUY_EVAL_SKIP_STRATEGIES` 가 **모듈 상수 frozenset** 이고 멤버 = {donchian_swing, kojiro} (런타임) | 세 번째 멤버가 조용히 들어오는 것 차단 | **RED** |
+| R10-a | `_TICK_BUY_EVAL_SKIP_STRATEGIES` 가 **모듈 상수 frozenset** 이고 멤버 = {donchian_swing, kojiro, etf_trend}(cycle403 R3 승인) (런타임) | 조용한 추가(미승인 멤버) 차단 | **RED** |
 | R10-b | 같은 사실을 **소스 리터럴**로도 확인 (런타임 dict 조작 우회 차단) | cycle262 G-262-1 의 이중 확인 관례 | **RED** |
 | R9 | skip 판정이 **`strategy_id` 문자열만** 쓴다 — `tradable_boards`/`sizing_mode`/`config.params` 참조 0건 | 설정 하나가 매수 평가 경로를 바꾸는 커플링 차단(청산 축 AST 금기와 동형) | **RED** |
 | R-pos | skip 이 `is_ticker_blocked_for_buy` **뒤** · `check_buy_signal` **바로 앞** | `[tradable_skip]`·`[risk_silent_skip]` 카운터 드리프트 차단(자문 §3.6 ⚠️) | **RED** |
@@ -35,7 +35,10 @@ _SRC = Path(_src_pkg.__file__).resolve().parent
 _RISK = _SRC / "engine" / "risk.py"
 
 _CONST = "_TICK_BUY_EVAL_SKIP_STRATEGIES"
-_EXPECTED = frozenset({"donchian_swing", "kojiro"})
+# cycle403(2026-10-03, R3 승인) — etf_trend 등록. donchian_swing·kojiro 와 같은 사유
+# (REST 폴 전략 — WS tick 매수 평가가 구조적 낭비). 조용한 추가가 아니라 승인된 세 번째
+# 멤버라 이 핀을 올린다 — 「세 번째가 조용히 들어오면」 경고는 네 번째부터 다시 산다.
+_EXPECTED = frozenset({"donchian_swing", "kojiro", "etf_trend"})
 _EXIT_CONST = "_PRE_MARKET_EXIT_EVAL_STRATEGIES"
 
 _FORBIDDEN_TOKENS = ("tradable_boards", "sizing_mode", "params", "config")

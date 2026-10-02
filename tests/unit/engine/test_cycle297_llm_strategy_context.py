@@ -364,6 +364,7 @@ def test_g1_7b_vb_ltv_never_get_not_applicable_note(sid: str) -> None:
 def _default_params(sid: str) -> dict:
     from src.engine.strategies.bull_flag_breakout import BullFlagBreakoutStrategy
     from src.engine.strategies.donchian_swing import DonchianSwingStrategy
+    from src.engine.strategies.etf_trend import EtfTrendStrategy
     from src.engine.strategies.kojiro import KojiroStrategy
     from src.engine.strategies.long_tail_volatility import LongTailVolatilityStrategy
     from src.engine.strategies.momentum import MomentumStrategy
@@ -378,6 +379,7 @@ def _default_params(sid: str) -> dict:
         "bull_flag_breakout": BullFlagBreakoutStrategy,
         "vcp_breakout": VcpBreakoutStrategy,
         "kojiro": KojiroStrategy,
+        "etf_trend": EtfTrendStrategy,
     }
     return dict(table[sid].DEFAULT_PARAMS)
 

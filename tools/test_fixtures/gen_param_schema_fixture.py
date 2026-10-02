@@ -39,6 +39,7 @@ STRAT_CLASSES = {
     "bull_flag_breakout": ("bull_flag_breakout", "BullFlagBreakoutStrategy", "불플래그 돌파"),
     "vcp_breakout": ("vcp_breakout", "VcpBreakoutStrategy", "VCP 돌파"),
     "kojiro": ("kojiro", "KojiroStrategy", "고지로 대순환"),
+    "etf_trend": ("etf_trend", "EtfTrendStrategy", "ETF 추세"),
 }
 
 # 현재값(params)이 기본값(defaults)과 **다른** 키를 전략마다 1개씩 심는다 —

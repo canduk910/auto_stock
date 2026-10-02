@@ -41,6 +41,9 @@ KIS OpenAPI 기반 국내주식 자동매매시스템. 다중 전략 아키텍�
 - **Phase 1 = position_ratio 자금관리**. 조기진입(스테이지6)·터틀 유닛 sizing·피라미딩 = **Phase 2 연기**.
 - **⚠️ "돌파 순간 절대규칙" 명시적 승인 예외**: kojiro 진입은 전일 종가에 확정되는 *완성 일봉 상태조건*이라 장중 목표가 교차(돌파 순간)가 아니다 — VB/LTV 같은 intraday breakout 클래스 전용 규칙(이전틱<기준가 AND 현재틱≥기준가)은 적용하지 않는다. donchian 과 같은 "일봉 확정 → 익일 시가 집행" 클래스다. **단 kojiro 는 donchian 보다 장중 확증이 약하다**(donchian 은 장중 신고가 재돌파 확인을 유지하고 kojiro 는 장중 검증이 0이다) → 이 약화를 **방어선 4중**으로 보상한다: 09:05~09:30 창 + 갭업 스킵 + 갭다운 스킵 + 비붕괴(현재가≥시가) 확인.
 
+### 전략 H: ETF 추세 (strategy_id: etf_trend)
+국내주식형 1배 ETF(증권그룹 `EF` ∧ 과세유형 `01` ∧ 추적배수 `1` ∧ 투자유의 아님 ∧ 순자산 500억↑) 가운데 전일 일봉이 20일 신고가 돌파 + EMA60 상승·종가 위 + 거래대금 1.5배인 ETF 를 다음 영업일 **KRX 09:05~09:30 시장가**로 산다. 같은 기초자산 묶음(120일 수익률 상관 > 0.9)은 하나만, 최대 4개. 청산 = 하드 `max(E−2N, E×0.91)` · 본전 승격 1.5N · 트레일링 고점−1.8N · 10일 저가 채널 · **15:20 돌파 실패**(매수 3번째 거래일부터 15:20 가격 < 돌파선 → 시장가, 마감 동시호가 체결). 사이징 = 터틀 유닛(N=TR14 단순평균, `risk_pct` 0.01), **1주 폴백 없음**. 시장 유닛 계단형 적용 + 결손 날 신규 진입 쉼. ETF 는 NXT·KRX 애프터에서 거래되지 않아 정규장에서만 판다. 상세 = 6-H 절 · 설계 정본 = `_workspace/design/2026-09-27_etf_trend_strategy.md`.
+
 ### 전략별 자금 비중
 - 프론트엔드 Settings 페이지에서 비중 조절. **단위 = 비율 0.0~1.0** (`PUT /api/strategies/weights` — 퍼센트 0~100 을 보내면 422). Σ > 1.0 이면 저장 전 거부(`success=false`). **진실 원천은 DB `strategy_config`**(7 전략) — 코드 기본값도 이 문서의 예시도 아니다. 마지막 실측(2026-08-18 `GET /api/strategies`) = momentum 0.05 / VB 0.15 / LTV 0.10 / donchian 0.15 / bull_flag 0.15 / vcp 0.10 / kojiro 0.30 (합 1.00, 7 전략 전부 enabled=True).
 - ⚠️ **보유 중인 전략의 weight 를 0 으로 내리지 않는다** — weight 0 은 `registry.enabled()` 에서 이탈해 그 전략 보유 종목의 손절 평가가 멈춘다(`risk.py` `on_tick` 이 `enabled()` 를 단일 순회한다). 비활성화가 목적이면 `enabled` 축을 쓴다.
@@ -813,6 +816,45 @@ BFB/VCP 매수 신호는 (donchian 의 폴링 루프와 달리) `risk.on_tick`(W
 - `_universe_excluded_today` 필터는 BFB/VCP 후보에도 동일 적용된다.
 
 ---
+
+## 6-H. 전략 H: ETF 추세 (etf_trend) 상세
+
+수치 근거·측정 = 설계 `_workspace/design/2026-09-27_etf_trend_strategy.md` · 재현 `_workspace/domain_consult/cycle391_etf_s0_remeasure.py`(진입·청산 순수 함수는 라이브 leaf `src/engine/etf_trend_core.py` 와 같은 식 — 동등성 테스트가 묶는다). 구현 분해·팀장 결정 = `_workspace/cycle403_etf_trend_spec.md`.
+
+### 등록
+- 명부 끝 1행: `eval_driver="swing_poll"` · `breakout_rank=None` · `open_price_target=False` · `close_at_1520=True` · `market_unit_policy="scale"`. 매수는 공유 스윙 폴(donchian·kojiro 뒤), 15:20 돌파 실패 판단은 `close_at_1520` 훅(`check_force_clear`)을 쓴다.
+- 멀티데이 보유 전략(`_MULTIDAY_STRATEGIES`)이다. `check_force_clear()` 는 **그날 돌파 실패 종목만** 돌려준다 — 전량 반환 금지(멀티데이가 15:20 에 소멸한다), never-raise(예외 = 빈 목록 + WARNING).
+
+### 유니버스·신호 (07:45 prepare, D−1 완성 일봉)
+- SQL: `scty_grp_id_cd='EF'` ∧ `etf_txtn_type_cd='01'` ∧ `etf_chas_erng_rt_dbnb='1'` ∧ 투자유의 `≠'Y'` ∧ `hts_avls_eok ≥ 500` ∧ 6자리 숫자 코드.
+- 일봉(DB 만, KIS 폴백 없음): 100봉 이상 · 최신 봉 = KODEX 200 최신 봉 · KODEX 200 최근 60봉 날짜 전부 보유 · 20일 평균 거래대금 ≥ 20억 · 종가 1,000~500,000원 · ATR20(Wilder)/종가 1~6%.
+- 신호: 종가 > 직전 20봉 고가(= 돌파선) ∧ EMA60 상승 ∧ 종가 > EMA60 ∧ 거래대금 ≥ 1.5 × 직전 20봉 평균 ∧ N > 0.
+- 폴 순서 = 20일 거래대금 내림차순.
+
+### 매수 (09:05~09:30, 순서가 계약)
+계좌 SOFT 게이트(첫 문장) → 보유·주문중·당일매도·당일 1회·`max_positions` 4·일일 손실 → 후보 → 시각 창 → 시가 결측(래치 없음) → 갭 스킵(시가 ≥ 전일 종가×1.03 또는 시가 > 돌파선×1.04, 그날 래치) → 장중 붕괴(현재가 < 시가, 래치 없음) → 묶음 캡(이 전략 보유·주문중·당일 매도분과 상관 > 0.9, 래치 없음) → 시장 유닛(`off` 가 아니면 m=0·결손 날 거름, 랏 축소는 `enforce` 만) → 정상 랏 0주 거름(`rounds_to_zero`, 예산 0 이면 섀도 켜짐 = 섀도 기록 / 꺼짐 = `no_budget`) → 섀도 관문 → BUY. 거른 사유는 `[etf_trend_skip] reason=` 로 남고 「투자금 부족」 과 따로 센다.
+
+### 청산
+| 선 | 식 | 시작 | 신호 |
+|---|---|---|---|
+| 하드 | `max(E − 2N, E × 0.91)` | 매수일 | `STOP_LOSS` |
+| 본전 승격 | 완성봉 고가 ≥ E + 1.5N 이면 선 = `max(현행, E)` | 그 고가 다음 날 | `STOP_LOSS` |
+| 트레일링 | 완성봉 고가 최대 − 1.8N(진입 N 고정) | 그 고가 다음 날 | `TRAILING_STOP` |
+| 10일 채널 | 직전 10봉 저가 최소 아래 | 매수 다음 날 | `TRAILING_STOP` |
+| 돌파 실패 | 15:20 가격 < 돌파선 | 매수일 포함 완성봉 2개 이상 | `check_force_clear` 가 고르고 `force_clear_signal` → `TREND_EXIT` 로 매도(`[etf_trend_exit] reason=breakout_fail_1520`) |
+
+- 선은 **완성 일봉 고가**로만 올린다(장중 고가 무시) — 재현과 같은 갱신 시점.
+- 15:20 가격 = 최신 시세(`ticker_prices`), 180초보다 낡았거나 없으면 **팔지 않는다**(조기 청산이라 판단 불가 = 보유 유지, 하드·채널·트레일링은 그대로 돈다) + WARNING. 돌파선 결측도 같다.
+- 15:30 종가 틱에서 난 신호는 장운영시간 외 거부 → 다음 날 09:00 익일 청산 경로로 간다(시각 게이트를 두지 않는다).
+- 부팅 복구 = `recompute_held_atr()` 한 곳: N(`sizing_mode="turtle"` 일 때만, 매수일 이전 봉의 TR14 평균을 소수 그대로) · 돌파선(매수일 이전 봉)은 비었을 때만 채운다. 완성봉 고가 · 보유 봉 수(KODEX 200 달력 기준) · 채널 저가는 매 부팅 다시 계산한다.
+
+### 사이징
+`unit = floor(예산 × 0.01 ÷ N)` → `compute_unit_qty_guarded`(변동성 floor 0 — ATR20 밴드가 하한) → `_apply_budget_limit` 관문. 유닛이 0 이면 **0 을 돌려준다**(position_ratio 낙하·1주 폴백 없음). `_entry_atr` = 사이징 N.
+
+### 운영 단계·킬스위치
+- 코드 기본값 `shadow_mode=True`(이 전략만) · `market_unit_mode="shadow"` · 등록 `enabled=False, weight=0`. S1 섀도 = DB `enabled=true`·`weight=0`(카드 #9 가 비중 0 에도 `enabled` 를 지킨다).
+- 신규 진입 중단 = `buy_paused` · 실전→섀도 = `shadow_mode=true` · 전략 정지는 보유 0 확인 뒤만.
+- 이 전략의 키는 `PARAM_RANGES`/`INT_PARAMS`(AI 자동 튜닝)에 하나도 넣지 않는다.
 
 ## 7. 공통 규칙
 

@@ -89,7 +89,7 @@ class Position:
     # (import-order 독립 단일 진실원). vcp_breakout 은 과거 import 시점 동적 side-effect 로
     # 자기를 추가하던 취약 패턴(리뷰어 오판 유발)을 2026-07 에 리터럴로 통합.
     _MULTIDAY_STRATEGIES: ClassVar[frozenset[str]] = frozenset(
-        {"donchian_swing", "vcp_breakout", "kojiro"}
+        {"donchian_swing", "vcp_breakout", "kojiro", "etf_trend"}
     )
 
     @property

@@ -77,12 +77,13 @@ def test_manifest_eval_driver_columns_match_current_literals():
         "bull_flag_breakout": ("tick_breakout", 0, False, False, "scale"),
         "vcp_breakout": ("tick_breakout", 1, False, False, "scale"),
         "kojiro": ("swing_poll", None, False, False, "scale"),
+        "etf_trend": ("swing_poll", None, False, True, "scale"),
     }
 
 
 def test_derived_sets_match_current_scheduler_literals():
     """파생 집합 네 개가 지금 `scheduler.py` 에 있던 리터럴과 순서까지 같다(설계 §3.3)."""
-    assert SWING_POLL_IDS == ("donchian_swing", "kojiro")
+    assert SWING_POLL_IDS == ("donchian_swing", "kojiro", "etf_trend")
     assert BREAKOUT_IDS == ("volatility_breakout", "long_tail_volatility", "bull_flag_breakout", "vcp_breakout")
     assert BREAKOUT_SUBSCRIBE_ORDER == ("bull_flag_breakout", "vcp_breakout", "volatility_breakout", "long_tail_volatility")
     assert OPEN_PRICE_TARGET_IDS == ("volatility_breakout", "long_tail_volatility")
@@ -94,14 +95,16 @@ def test_close_at_1520_ids_value_same_as_open_price_target_but_independent_field
     모듈 docstring·설계 §3.3 의 「값이 우연히 같은 다른 사실을 합치지 않는다」 규약 — 필드가
     분리돼 있어야 ETF 가 `open_price_target` 을 건드리지 않고 `close_at_1520` 만 켤 수 있다.
     """
-    assert CLOSE_AT_1520_IDS == ("volatility_breakout", "long_tail_volatility")
-    assert CLOSE_AT_1520_IDS == OPEN_PRICE_TARGET_IDS  # 지금은 값이 같다 — 우연
+    assert CLOSE_AT_1520_IDS == ("volatility_breakout", "long_tail_volatility", "etf_trend")
+    assert CLOSE_AT_1520_IDS != OPEN_PRICE_TARGET_IDS  # cycle403 — etf_trend 가 갈라놓았다(독립 축 증거)
     fields = {f.name for f in dataclasses.fields(StrategyEntry)}
     assert {"open_price_target", "close_at_1520"} <= fields, "두 축이 같은 칸으로 합쳐지면 안 된다"
 
 
 def test_market_unit_scale_ids_registration_order():
-    assert MARKET_UNIT_SCALE_IDS == ("donchian_swing", "bull_flag_breakout", "vcp_breakout", "kojiro")
+    assert MARKET_UNIT_SCALE_IDS == (
+        "donchian_swing", "bull_flag_breakout", "vcp_breakout", "kojiro", "etf_trend",
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -181,9 +184,10 @@ def test_cross_param_catalog_strategy_ids_equals_manifest_order():
 
 
 def test_cross_param_catalog_turtle4_equals_market_unit_scale_ids():
+    """cycle403 — `_TURTLE4` 를 `_TURTLE_SIZED`(5전략, etf_trend 추가)로 개명."""
     from src.engine import param_catalog
 
-    assert param_catalog._TURTLE4 == MARKET_UNIT_SCALE_IDS
+    assert param_catalog._TURTLE_SIZED == MARKET_UNIT_SCALE_IDS
 
 
 def test_cross_param_catalog_vbltv_equals_open_price_target_ids():
@@ -209,10 +213,19 @@ def test_cross_status_exit_watch_group_matches_manifest_axes():
 
 
 def test_cross_market_unit_turtle_files_matches_market_unit_scale_ids():
-    """`tests/unit/ast/test_cycle382_ast_market_unit.py::TURTLE_FILES` 와 같은 전략 집합."""
+    """`tests/unit/ast/test_cycle382_ast_market_unit.py::TURTLE_FILES` 와 같은 전략 집합.
+
+    cycle403 — `etf_trend` 는 `MARKET_UNIT_SCALE_IDS`(시장 유닛 적용 대상)에는 들지만
+    cycle382 `TURTLE_FILES` 에는 **일부러** 넣지 않는다. 그 AST 모음은 `donchian_swing`
+    의 내부 구조(별도 `_scan_universe` 메서드·`_turtle_buy_quantity` 분리 함수 등)를
+    전제로 짠 정밀 구조 검사라, 구조가 다른 `etf_trend` 를 끼워 넣으면 "시장 유닛 적용"
+    과 무관한 donchian 고유 관례(함수 이름 등)까지 강제하게 된다. 행위 검증은
+    `tests/unit/engine/test_cycle403_etf_trend_strategy.py`/`test_cycle403_etf_trend_wiring.py`
+    가 이미 전담한다.
+    """
     from tests.unit.ast.test_cycle382_ast_market_unit import TURTLE_FILES
 
-    assert set(TURTLE_FILES.values()) == set(MARKET_UNIT_SCALE_IDS)
+    assert set(TURTLE_FILES.values()) | {"etf_trend"} == set(MARKET_UNIT_SCALE_IDS)
 
 
 def test_cross_multiday_and_status_gate_sids_subset_of_manifest():
