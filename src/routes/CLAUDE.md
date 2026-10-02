@@ -179,7 +179,7 @@ body `{ticker, quantity}`, 시장가. 보유 전략이 있으면 그 전략 id·
   전(예산 합 0)에도 돈다. DB 보유 조회 실패 = 메모리로 판정 + `[weight_zero_probe_degraded]`.
 - **매수금액 하한선 검증** — 보유 매수금액 ÷ Σ`total_investment` 미만의 비중은 `success=false`(「보유 종목 매도 후 비중을
   줄여주세요」). Σ`total_investment` 가 0(부팅 전)이면 건너뛴다.
-- 통과 → `registry.update_weights` → 즉시 `allocate_funds`(Σ`total_investment` > 0 일 때) → `save_weights`.
+- 통과 → `registry.update_weights` → 즉시 `allocate_funds`(Σ`total_investment` > 0 일 때) → `save_weights`. 비중 0 인데 메모리에서 켜져 있는 전략(= 섀도 전략, `update_weights` 가 켜짐을 지켰다)은 `save_weights(weights, keep_enabled={…})` 로 DB 에도 켜짐을 적는다 — 없으면 호출 모양은 `save_weights(weights)` 그대로(cycle399).
 - Σ 검증은 **라우트 계층 전용** — `db.strategy_config.save_weights` 에 넣지 않는다(apply 라우트가 `{strategy_id: weight}` 단건
   partial dict 로 불러 Σ 불변식이 성립하지 않는다). apply 는 자체 Σ 검사(증액 한정)를 갖는다(아래).
 
@@ -191,7 +191,7 @@ body `{ticker, quantity}`, 시장가. 보유 전략이 있으면 그 전략 id·
 |---|---|
 | `unknown_key` | 미지 키 |
 | `not_editable` | 레거시 8키(`editable=False`) |
-| `type_mismatch` | 자료형. `buy_paused` 는 bool 만 — `"true"`·`1`·`null` 은 422 |
+| `type_mismatch` | 자료형. `buy_paused`·`shadow_mode` 는 bool 만 — `"true"`·`1`·`null` 은 422 |
 | `not_in_choices` / `pattern_mismatch` | enum·보드 목록·정규식. `entry_start="25:00"` 은 반드시 422(형식이 깨지면 매수 판정의 `ValueError` 가 `risk.on_tick` 으로 전파된다) |
 | `forbidden_choice` | **VB + `post_nxt`** — 루트 `CLAUDE.md` 의 VB 조항(15:20 일괄매도 전제, POST_NXT 추가 금지)을 카탈로그 `forbidden_choices` 로 서버가 강제한다(화면 비활성은 안내일 뿐) |
 | `out_of_range` | 범위 |
@@ -211,7 +211,7 @@ body `{ticker, quantity}`, 시장가. 보유 전략이 있으면 그 전략 id·
 - ⚠️ **빈 `tradable_boards` 는 422 다** — 효과가 전략마다 정반대다(momentum·VB·LTV·donchian 은 `session._DEFAULT_TRADABLE_BOARDS`
   폴백으로 매수 계속, BFB·VCP·kojiro 는 매수 전면 중단). 매수를 멈추는 수단은 `buy_paused` 다(`{"params":{"buy_paused":true}}` —
   신규 매수 신호만 멈추고 청산은 그대로).
-- identity(리스크 정체성 상수 18키)는 **서버가 막지 않는다** — 2단계 확인은 화면의 절차다(서버가 막으면 장중 긴급 롤백의 유일
+- identity(리스크 정체성 상수 19키)는 **서버가 막지 않는다** — 2단계 확인은 화면의 절차다(서버가 막으면 장중 긴급 롤백의 유일
   경로가 함께 막힌다).
 - ⚠️ **`applies_to` 는 PUT 의 관문이 아니다**(의도된 비대칭) — 미지 키 판정이 `key in strategy.config.params`(런타임 상태)라 DB
   드리프트로 들어온 소관 밖 키도 저장된다. 그 전략이 읽지 않는 키라 매매 영향 0 이고, 조이면 비상 `curl` 롤백 경로가 좁아지므로
@@ -223,7 +223,8 @@ body `{ticker, quantity}`, 시장가. 보유 전략이 있으면 그 전략 id·
 - 적용 키 = `keys` ∩ `recommended_params` ∩ **`PARAM_RANGES`**. 화이트리스트 밖 키는 `[manual_apply_safeguard_skip]` 후 빼고
   나머지만 적용한다(뺀 키는 `remaining` 에 남아 status `partial`, 응답 message 에도 실린다). 적용할 키·비중이 없으면 `success=false`.
 - `apply_weight=true` → `recommended_weight` 를 `save_weights` 로 저장 + `applied_weight` 기록(`recommended_weight=null` 이면
-  거부). weight 단독 적용 가능. `allocate_funds` 는 다시 부르지 않는다(다음 `_boot` 반영).
+  거부). weight 단독 적용 가능. `allocate_funds` 는 다시 부르지 않는다(다음 `_boot` 반영). 비중 0 을 켜진 섀도 전략에 적용하면
+  `save_weights(…, keep_enabled={sid})` 로 DB 켜짐을 지킨다(cycle399 — 안 그러면 다음 재시작에 섀도 기록이 끊긴다).
 - **증액 시 Σ 사전 검증** — `new_weight > 현재 weight` 이고 `타 전략 현재 weight 합 + new_weight > 1.0 + _WEIGHT_SUM_TOLERANCE`
   면 `[weight_sum_violation]` + `success=false`(params 적용 *전* early return — weight/params/status 무저장). **감액(`new <= 현재`)은
   Σ 상태와 무관하게 항상 통과**(Σ>1 로 오염된 상태의 복구 수단). float 변환 실패면 검사를 건너뛴다(fail-open).

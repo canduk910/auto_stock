@@ -80,6 +80,8 @@ _CYCLE382_AFFECTED_SIDS = frozenset({
 #: 「`"max_lot_ratio_mult": 2.5,` 다음 줄에 `"buy_paused": False,`」). 기본 false = 행위 변경 0.
 _CYCLE384_KEY = "buy_paused"
 _CYCLE384_AFTER = "max_lot_ratio_mult"
+#: 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). 7전략 공통 1키 — `buy_paused` **바로 다음 줄**.
+_CYCLE399_KEY = "shadow_mode"
 
 
 def _expected_keys_g2(sid: str) -> tuple[str, ...]:
@@ -87,7 +89,7 @@ def _expected_keys_g2(sid: str) -> tuple[str, ...]:
     if sid in _CYCLE382_AFFECTED_SIDS:
         expected += _CYCLE382_KEY
     i = expected.index(_CYCLE384_AFTER) + 1
-    return expected[:i] + (_CYCLE384_KEY,) + expected[i:]
+    return expected[:i] + (_CYCLE384_KEY, _CYCLE399_KEY) + expected[i:]
 
 
 #: 리팩토링 카드 #1 — 소유 기대값 = **전략 명부 전부**(`tests/_strategy_census.py`).
@@ -560,8 +562,9 @@ _BASE_SHA: dict[str, str] = {
     # 🔁 cycle380(2026-09-27) 재핀 — ETF 판정을 이름 키워드에서 증권그룹코드(`scty_grp_id_cd`)로 전환(사용자 승인, 8영역). ETF_KEYWORDS 를 정본 leaf `src/engine/etf_like.py` 로 이전 + import, `scan_stocks` 판정 자리를 `is_etf_like` 로 교체. 값만 이동, 값 자체는 유일값.
     "src/engine/scanner.py":
         "611568c078c6f3779344e05b3dfa308c792c64e1c5e02480de6313200282f54f",
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). 8영역 `update_weights` 의 enabled 대입 한 줄(섀도 전략은 비중 0 이어도 켜짐 유지). 값만 이동.
     "src/engine/strategy_registry.py":
-        "d794696e54ffdc36efa6df917879d780e86bc1f373bb3b5d8dcbc0beac8cef8b",
+        "3b6366c3cdb6e83907428435b95611880f1b8223e572c361a1cad2d00b13a067",
     "src/api/order.py":
         "08c5cafd7b8678ec0d0fa85f856fdea3cce38ad92488c6d74c03cd13faa415bb",
     # 🔁 cycle368(2026-09-25) 재핀 — 장운영정보 칸 밀림 수정 세트. USER DECISION: 칸
@@ -592,16 +595,19 @@ _BASE_SHA: dict[str, str] = {
     # 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27 「돈키언 신규매수 중지」).
     # 게이트 2번째 문장(`_buy_paused_blocked`) + 헬퍼 4개 + `__init__` cap 1개 추가.
     # 청산 경로·계좌 SOFT 본문·8영역 무접촉. 값만 이동.
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). 섀도 관문 `_shadow_buy_intercepted` + 정적 판정 `shadow_mode_on` + 마커 헬퍼 2개 + `__init__` cap 1개 + `SHADOW_MODE_KEY` 상수. 값만 이동.
     "src/engine/strategy_base.py":
-        "d5257d3a8a6c4744663aa7af6e89e3a683ccdb2e63ae062284e5e702079dddfb",
+        "e25384a3defb09564b91a5f2eebef8539baaa237375ae0422956d548b86b6673",
     # 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27) — `DEFAULT_PARAMS` 에
     # `"buy_paused": False,` 1줄 추가(`max_lot_ratio_mult` 다음 줄). 그 밖 무변경.
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
     "src/engine/strategies/volatility_breakout.py":
-        "c480b0f97212150c6887e2b5203e39e551ec122653ba7f6664d0e4437a3d6afd",
+        "c07e7298743496129601e79598b799472242d2f02b60eb2f92217b6bed1ee1b4",
     # 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27) — `DEFAULT_PARAMS` 에
     # `"buy_paused": False,` 1줄 추가(`max_lot_ratio_mult` 다음 줄). 그 밖 무변경.
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
     "src/engine/strategies/long_tail_volatility.py":
-        "42211d78f9d347436a3e33349c6058877b1e6c033ebde28d3b6abd0ac5e835a9",
+        "44f7f103b3c714522b09da7de5a4de2ec0423ffc2a3032f43540c4c70943778d",
 }
 
 

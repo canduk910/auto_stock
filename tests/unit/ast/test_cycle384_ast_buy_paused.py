@@ -634,9 +634,10 @@ def test_r06_catalog_row_and_counts():
     assert spec.deprecated_for == ()
     assert spec.label_ko and spec.help, "한글 라벨·도움말 필수"
     assert KEY in pc.identity_keys()
-    assert len(pc.PARAM_SPECS) == 105 and len(pc.SPEC_BY_KEY) == 105
-    assert len(pc.identity_keys()) == 18
-    assert pc.CATALOG_VERSION == "cycle384.1", "카탈로그 버전 미갱신(M27)"
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1) — 105→106 · identity 18→19 · cycle384.1→cycle399.1.
+    assert len(pc.PARAM_SPECS) == 106 and len(pc.SPEC_BY_KEY) == 106
+    assert len(pc.identity_keys()) == 19
+    assert pc.CATALOG_VERSION == "cycle399.1", "카탈로그 버전 미갱신(M27)"
 
 
 def test_r06_catalog_help_is_honest_about_exits():
@@ -690,4 +691,5 @@ def test_f01_generated_fixture_carries_buy_paused(path):
     for s in data["strategies"]:
         assert KEY in s["keys"], s["strategy_id"]
         assert s["defaults"][KEY] is False and s["params"][KEY] is False, s["strategy_id"]
-    assert len(data["params"]) == 105
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1) — 105→106.
+    assert len(data["params"]) == 106

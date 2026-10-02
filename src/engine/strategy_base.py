@@ -50,6 +50,12 @@ _BUY_PAUSED_ABSENT = object()
 #: 멈춘 종목에서 지우는 진입 래치 — 이 두 이름뿐(명세 §4). 모양으로 판정(dict 일 때만).
 _PAUSE_ENTRY_LATCH_ATTRS: tuple[str, ...] = ("_breakout_first_seen", "_vol_latch")
 
+#: cycle399 — 공통 섀도 모드 키. 켜면 BUY 대신 `[shadow_buy]` 기록 + `Signal.NONE`(주문·예산 무접촉).
+#: PARAM_RANGES/INT_PARAMS 편입 금지(AI 가 켜고 끄면 안 된다). 읽는 곳 = `shadow_mode_on` ·
+#: `_shadow_buy_intercepted` 두 곳뿐(캐시 금지 — PUT 즉시 반영).
+SHADOW_MODE_KEY = "shadow_mode"
+_SHADOW_MODE_ABSENT = object()
+
 
 class Signal(str, Enum):
     """매매 신호."""
@@ -325,6 +331,8 @@ class StrategyBase(ABC):
         # cycle384 — buy_paused 관측 cap (키: "cfg|p|v" / "skip|{ticker}").
         # 날짜 키 자기 리셋(KstDailyEmitCap 내장).
         self._buy_paused_logged: KstDailyEmitCap[str] = KstDailyEmitCap[str]()
+        # cycle399 — 섀도 관측 cap (키: "cfg|s|v" / "buy|{ticker}"). 날짜 키 자기 리셋.
+        self._shadow_logged: KstDailyEmitCap[str] = KstDailyEmitCap[str]()
 
     @property
     def strategy_id(self) -> str:
@@ -1568,6 +1576,118 @@ class StrategyBase(ABC):
             self._buy_paused_logged.mark_emitted(key)
         except Exception:
             trace_observer_failure("[buy_paused_skip]", ticker, self._buy_paused_logged)
+
+    @staticmethod
+    def shadow_mode_on(strategy: Any) -> bool:
+        """cycle399 — 이 전략이 섀도 모드인가(`shadow_mode is True` 만 참). never-raise.
+
+        `StrategyRegistry.update_weights` 가 비중 0 에서 `enabled` 를 지킬지 정할 때 쓴다
+        (8영역 한 줄 — 사용자 승인 10-02 R1). 정적 메서드라 레지스트리에 든 어떤 객체에도
+        안전하다 — 판정 실패는 False(= 현행 `weight > 0` 규칙).
+        """
+        try:
+            return strategy.config.params.get(SHADOW_MODE_KEY) is True
+        except Exception:
+            return False
+
+    def _shadow_buy_intercepted(
+        self, ticker: str, current_price: int, open_price: "int | None" = None,
+        *, level: Any = None, board: Any = None,
+    ) -> bool:
+        """cycle399 — 섀도 관문. True 면 호출자가 BUY 대신 `Signal.NONE` 을 돌려준다.
+
+        자리 = 7전략 `check_buy_signal` 의 `return Signal.BUY` 바로 앞 블록, **마지막 거름 뒤 ·
+        상태 변경 앞**(AST `test_cycle399_ast_shadow_mode.py` S01~S03). 앞 관문(종목상태 →
+        `buy_paused` → 계좌 SOFT → 신호 → 시장 유닛)이 이기면 여기까지 오지 않는다 —
+        섀도 기록 = 실전이 샀을 판단.
+
+        `self.config.params` 를 매 호출 읽는다(PUT 즉시). `is True` 만 켜짐 — 그 밖의
+        모양은 꺼짐(실전 그대로) + `[shadow_mode_config]` WARNING. 켜지면 `[shadow_buy]` 를
+        종목당 하루 1회 남기고, 몇 번 다시 닿아도 True 를 돌려준다(실전의 「그날 한 번」 과
+        같은 횟수). `_bought_today`·진입 스탬프·래치·`buy_signals`·주문·예산 어느 것도
+        건드리지 않는다. 관측 예외는 판정을 바꾸지 않는다.
+        """
+        try:
+            raw = self.config.params.get(SHADOW_MODE_KEY, _SHADOW_MODE_ABSENT)
+        except Exception:
+            logger.debug("[shadow_mode_gate_failed] strategy=%s", self.strategy_id, exc_info=True)
+            return False
+        on = raw is True
+        valid = raw is _SHADOW_MODE_ABSENT or isinstance(raw, bool)
+        self._emit_shadow_mode_config(raw, on, valid)
+        if not on:
+            return False
+        self._emit_shadow_buy(ticker, current_price, open_price, level, board)
+        return True
+
+    def _emit_shadow_mode_config(self, raw: Any, on: bool, valid: bool) -> None:
+        """`[shadow_mode_config]` 카나리아 — 켜짐·모양 오류만 WARNING, 1회/(전략, 값)/일.
+
+        꺼짐(False·부재)은 남기지 않는다. 켜짐을 WARNING 으로 두는 이유 = 21:30 분석이
+        「이 전략은 왜 안 사지」 를 결함으로 오진하지 않게(`[buy_paused_config]` 와 같은 규약).
+        """
+        if on is False and valid is True:
+            return
+        key = f"cfg|{int(on)}|{int(valid)}"
+        try:
+            if not self._shadow_logged.should_emit(key):
+                return
+            raw_s = "absent" if raw is _SHADOW_MODE_ABSENT else repr(raw)[:40]
+            if not valid:
+                logger.warning(
+                    "[shadow_mode_config] strategy=%s shadow=%d valid=%d raw=%s note='%s'",
+                    self.strategy_id, int(on), int(valid), raw_s,
+                    "참/거짓이 아닌 값 — 섀도 아님(실전 매수)으로 읽음(PUT 은 거부하므로 DB 직접 수정 흔적)",
+                )
+            else:
+                logger.warning(
+                    "[shadow_mode_config] strategy=%s shadow=%d valid=%d raw=%s note='%s'",
+                    self.strategy_id, int(on), int(valid), raw_s,
+                    "섀도 — 매수 신호를 [shadow_buy] 로 기록만 하고 주문하지 않음(청산·손절은 그대로)",
+                )
+            self._shadow_logged.mark_emitted(key)
+        except Exception:
+            trace_observer_failure("[shadow_mode_config]", self.strategy_id, self._shadow_logged)
+
+    def _emit_shadow_buy(
+        self, ticker: str, current_price: int, open_price: "int | None", level: Any, board: Any,
+    ) -> None:
+        """`[shadow_buy]` INFO — 1회/(종목, 전략)/일. peek → log → mark. never-raise.
+
+        가상 수량은 싣지 않는다 — 비중 0 섀도 전략은 예산 0 이라 0 이 나오고, 수량 계산은
+        사이징 관측 마커를 실전 매수처럼 남긴다. 오프라인 재현에 필요한 가격·시가·돌파선·
+        ATR·시장 유닛 m 만 남긴다(cycle398 §3(c)).
+        """
+        key = f"buy|{ticker}"
+        try:
+            if not self._shadow_logged.should_emit(key):
+                return
+            atr: Any = "-"
+            cand = getattr(self, "_candidates", None)
+            info = cand.get(ticker) if isinstance(cand, dict) else None
+            if isinstance(info, dict):
+                for k in (self._MARKET_UNIT_ATR_KEY, "atr", "atr14"):
+                    if k and info.get(k):
+                        atr = info.get(k)
+                        break
+            m: Any = "-"
+            mu_state: Any = "-"
+            try:
+                view = self._market_unit_view()
+                m, mu_state = view.m, view.state
+            except Exception:
+                pass
+            logger.info(
+                "[shadow_buy] strategy=%s ticker=%s price=%s open=%s level=%s board=%s "
+                "atr=%s m=%s mu_state=%s note='섀도 — 실전이면 매수 신호, 주문하지 않음'",
+                self.strategy_id, ticker, current_price,
+                "-" if open_price is None else open_price,
+                "-" if level is None else level, "-" if board is None else board,
+                atr, m, mu_state,
+            )
+            self._shadow_logged.mark_emitted(key)
+        except Exception:
+            trace_observer_failure("[shadow_buy]", ticker, self._shadow_logged)
 
     def _emit_budget_clamp(
         self, ticker: str | None, requested: int, clamped: int, remaining: int,

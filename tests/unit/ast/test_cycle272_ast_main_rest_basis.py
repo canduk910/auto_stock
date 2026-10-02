@@ -253,8 +253,9 @@ _RETIRED_BY_CYCLE286 = {
 }
 
 _FROZEN_PINS = {
+    # 🔁 cycle399 재핀 — 공통 섀도 모드(사용자 승인 10-02 R1) — BUY 반환 앞 섀도 관문 1문장(`if self._shadow_buy_intercepted(...): return Signal.NONE`) 삽입. 그 밖 무변경.
     ("volatility_breakout", "VolatilityBreakoutStrategy", "check_buy_signal"):
-        "e620ae0d14a71f916550ee13f57edff12e1b84c12b8a4712b29583b44b56f20a",
+        "5424dc5b23fb3b382174098b4a964c7a76a6ffb7ab3ed9597e0774b03e31c2da",
     ("volatility_breakout", "VolatilityBreakoutStrategy", "check_exit_signal"):
         "86593b038e4cf8121ae47069fb368346edc50d9692b29db4cbdcc8897421b72e",
     ("volatility_breakout", "VolatilityBreakoutStrategy", "calc_buy_quantity"):

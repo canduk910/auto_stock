@@ -468,6 +468,13 @@ _ALLOWED = {"src/engine/risk.py", "src/realtime/handler.py"}
 #    `src/engine/order_engine.py` + `src/api/order.py`(docstring 만, 본문 byte
 #    동일). 자매 가드 네 곳 전부 같은 값. TODO(cycle287 커밋 후): 아래 항목을 **삭제**한다.
 _APPROVED_CONTENT_SHA: dict[str, str] = {
+    # ✅ 2026-10-03 (cycle399) — 공통 섀도 모드. 사용자 승인(10-02 R1, 8영역 `strategy_registry.py`
+    #    `update_weights` 한 줄): `config.enabled = weight > 0 or (was_enabled and
+    #    StrategyBase.shadow_mode_on(s))` — 섀도 전략은 비중 0 이어도 켜짐 유지, 섀도가 아닌
+    #    전략은 현행 그대로. 나머지 7영역 diff 0. 자매 가드 네 곳 전부 같은 값(`test_g3_9b` 계약).
+    #    TODO(cycle399 커밋 후): 이 항목을 **삭제**한다.
+    "src/engine/strategy_registry.py":
+        "3b6366c3cdb6e83907428435b95611880f1b8223e572c361a1cad2d00b13a067",
     # ✅ 2026-09-18 (cycle302) 재핀 — 일봉 backfill 의 **대상**을 지수에서 적재 대상
     #    전부로 확대. 사용자 명시 8영역 승인("전부 담는게 좋을듯한데? VCP평가대상이
     #    어떻게 바뀔지 모르잖아"), 범위 = `src/engine/scanner.py` **단독**이고 이

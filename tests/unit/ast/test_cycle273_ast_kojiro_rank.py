@@ -68,8 +68,9 @@ def _call_names(tree: ast.AST) -> list[str]:
 #: 🔁 cycle382 재핀 — 시장 유닛(단계형) 신호 필터(`check_buy_signal`) + 사이징
 #: 진입 훅(`calc_buy_quantity`), 사용자 결정 09-27. `check_exit_signal` 은 무접촉.
 _KOJIRO_PINS = {
+    # 🔁 cycle399 재핀 — 공통 섀도 모드(사용자 승인 10-02 R1) — BUY 반환 앞 섀도 관문 1문장(`if self._shadow_buy_intercepted(...): return Signal.NONE`) 삽입. 그 밖 무변경.
     "check_buy_signal":
-        "0299d9fdf96c9773659989c9b88bb7a2a67050c96f5a6e065d403258071eef87",
+        "c3dd4541133b3788d2ff46787ce5545d15cc33f4e2e51e29484b0839724f2216",
     "calc_buy_quantity":
         "c144f15de94a9f7069ac6cf650066dc12472cffdc3280a63e840b31aa544f84d",
     "check_exit_signal":

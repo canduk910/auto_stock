@@ -51,7 +51,7 @@ class StrategyRegistry:
             if s:
                 s.config.weight = weight
                 was_enabled = s.config.enabled
-                s.config.enabled = weight > 0
+                s.config.enabled = weight > 0 or (was_enabled and StrategyBase.shadow_mode_on(s))  # cycle399 섀도 전략은 비중 0 이어도 켜짐 유지
                 if s.config.enabled != was_enabled:
                     logger.info("전략 %s: %s → %s",
                                 s.config.name,

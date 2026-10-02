@@ -215,8 +215,9 @@ _STRATEGY_PINS = {
     # 현재값으로 재핀한다 — VB `check_buy_signal` 은 이 사이클 무접촉이라 cycle272
     # 값 그대로 남는다. `test_cycle276_ast_order_hook.py::test_c6_1`/`test_c6_4a` 의
     # "cycle272 값으로 복귀" 불변식은 이 항목에 한해 자기소멸했다(그 파일 배너 참조).
+    # 🔁 cycle399 재핀 — 공통 섀도 모드(사용자 승인 10-02 R1) — BUY 반환 앞 섀도 관문 1문장(`if self._shadow_buy_intercepted(...): return Signal.NONE`) 삽입. 그 밖 무변경.
     ("volatility_breakout", "VolatilityBreakoutStrategy", "check_buy_signal"):
-        "e620ae0d14a71f916550ee13f57edff12e1b84c12b8a4712b29583b44b56f20a",
+        "5424dc5b23fb3b382174098b4a964c7a76a6ffb7ab3ed9597e0774b03e31c2da",
     ("volatility_breakout", "VolatilityBreakoutStrategy", "check_exit_signal"):
         "86593b038e4cf8121ae47069fb368346edc50d9692b29db4cbdcc8897421b72e",
     ("volatility_breakout", "VolatilityBreakoutStrategy", "calc_buy_quantity"):
@@ -224,8 +225,9 @@ _STRATEGY_PINS = {
     # 🔁 2026-09-12 (cycle286 검증 반영) — `[ltv_main_buy_cutoff]` 마커에 `now=` 필드
     # 병기(적대 검증 LOW-3/behavior)로 세그먼트가 다시 바뀌어 재핀했다. 진입 판정
     # 로직·발사점 위치·baseline 계약은 byte 동일이고 로그 포맷 1줄만 늘었다.
+    # 🔁 cycle399 재핀 — 공통 섀도 모드(사용자 승인 10-02 R1) — BUY 반환 앞 섀도 관문 1문장(`if self._shadow_buy_intercepted(...): return Signal.NONE`) 삽입. 그 밖 무변경.
     ("long_tail_volatility", "LongTailVolatilityStrategy", "check_buy_signal"):
-        "6c70101fe4abc9e5afc7f7e4a47af46ce5ebdf68fd84c2a18e22a46cb4546d1b",
+        "be76217bf4634a401bb73564d41bcb25b6bed74e7f6ec95b1775941f9676293b",
     ("long_tail_volatility", "LongTailVolatilityStrategy", "check_exit_signal"):
         "c8b0e6a8c8705d49bb6f12f82f505d426a5bdeb81413f8b2e0276eabb7dd9cad",
     ("long_tail_volatility", "LongTailVolatilityStrategy", "calc_buy_quantity"):

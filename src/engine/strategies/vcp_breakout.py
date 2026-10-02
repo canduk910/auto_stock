@@ -221,6 +221,7 @@ class VcpBreakoutStrategy(StrategyBase):
         "daily_loss_limit": -8.0,
         "max_lot_ratio_mult": 2.5,   # cycle245 — 랏 명목 ρ축 상한(K_ρ). 명목 ≤ K_ρ×position_ratio×예산, 1주도 못 사면 미매수. 터틀 모드에선 K축(max_lot_units)이 우선하고 그것이 fail-open 할 때만 백스톱. PARAM_RANGES 미편입. 롤백 = DB 20.0
         "buy_paused": False,   # cycle384 — 신규 매수 신호만 멈춤(청산 무관). 부재·비bool = 멈추지 않음. PARAM_RANGES/INT_PARAMS 편입 금지. 켜고 끄기 = PUT 즉시
+        "shadow_mode": False,  # cycle399 — 켜면 BUY 대신 [shadow_buy] 기록 + NONE(주문·예산 무접촉, 청산 무관). 부재·비bool = 끔. PARAM_RANGES/INT_PARAMS 편입 금지. 켜고 끄기 = PUT 즉시
         # cycle290 (2026-09-13) — 장중 킬스위치 등재. 값은 코드 상수와 **같은 값**이라
         # 등재 자체의 매매 행위 변경은 0 이다(`order_engine._ORDER_EXCHANGE_CLOCK_MODE_DEFAULT`
         # ·`_AFTER_EXIT_DIVISION_DEFAULT`). `PARAM_RANGES`/`INT_PARAMS` 편입 금지 —
@@ -1527,6 +1528,10 @@ class VcpBreakoutStrategy(StrategyBase):
         # 뒤 첫 틱이 거짓 교차가 되지 않는다. 래치는 무장·해제 어느 쪽도 하지
         # 않는다(부작용 0).
         if self._market_unit_blocks_entry(ticker, current_price):
+            return Signal.NONE
+
+        # cycle399 — 섀도 관문: 마지막 거름 뒤 · 래치 소비·상태 변경 앞(AST S01).
+        if self._shadow_buy_intercepted(ticker, current_price, level=base_high):  # 시가는 이 헬퍼에 없다 — '-'
             return Signal.NONE
 
         latch_age_sec = 0

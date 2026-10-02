@@ -1,7 +1,7 @@
 /**
  * cycle278 Red — `GET /api/strategies/params-schema` 응답 **골든 픽스처**.
  *
- * ⚠️ 손으로 쓰지 않는다. `src/engine/param_catalog.py` 의 105 스펙과 7 전략
+ * ⚠️ 손으로 쓰지 않는다. `src/engine/param_catalog.py` 의 106 스펙과 7 전략
  * `DEFAULT_PARAMS` 에서 **기계 생성**했다 (생성기:
  * `_workspace/red/cycle278_param_catalog_ui_spec.md` §7.4 · 생성 스크립트는 사이클 산출물).
  *
@@ -101,7 +101,7 @@ export interface ParamSchemaData {
 }
 
 export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
-  "catalog_version": "cycle384.1",
+  "catalog_version": "cycle399.1",
   "groups": [
     {
       "id": "entry",
@@ -1379,6 +1379,36 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "kojiro"
       ],
       "help": "cycle384 — 켜면(true) 이 전략의 **신규 매수 신호만** 멈춘다. 보유 종목의 손절·트레일링·익일청산·15:20 강제청산·종목상태 청산·시간 청산은 그대로 돈다. 전략을 끄거나 비중을 0 으로 하는 것과 다르다 — 그 둘은 보유분의 손절까지 멈춘다. 후보 준비·퍼널 기록·시세 구독도 계속된다. 멈춘 동안 그 전략의 매수 신호 뒤쪽 관측(시장 유닛 기록·LLM 매수평가·갭/돌파 관측)은 함께 멈춘다. 기본 false. 키 부재는 멈추지 않음으로 읽고 INFO 로 남는다 — 참/거짓이 아닌 값만 멈추지 않음 + **WARNING** 이다(모양이 틀렸다는 뜻). `PUT /api/strategies/{id}/params` 로 즉시 반영되고 DB 에도 저장돼 재시작 뒤에도 유지된다. `[buy_paused_config]` WARNING 은 그 전략이 그날 매수 신호를 실제로 평가한 날에만 남는다(돈키언은 09:05~09:30 폴에 후보가 있어야, momentum/VB 는 기준선 크로싱이 있어야 게이트에 닿는다) — 멈춤 여부는 이 WARNING 이 아니라 `GET /api/strategies` 응답 또는 DB `strategy_config.params` 로 확인한다. AI 자동 튜닝 대상이 아니다(`PARAM_RANGES`/`INT_PARAMS` 편입 금지)."
+    },
+    {
+      "key": "shadow_mode",
+      "label_ko": "섀도 모드(기록만)",
+      "group": "entry",
+      "type": "bool",
+      "min": null,
+      "max": null,
+      "step": null,
+      "unit": "",
+      "editable": true,
+      "risk": "identity",
+      "auto_tunable": false,
+      "deprecated": false,
+      "deprecated_for": [],
+      "range_src": "enum",
+      "pattern": null,
+      "min_items": 0,
+      "forbidden_choices": [],
+      "choices": [],
+      "applies_to": [
+        "momentum",
+        "volatility_breakout",
+        "long_tail_volatility",
+        "donchian_swing",
+        "bull_flag_breakout",
+        "vcp_breakout",
+        "kojiro"
+      ],
+      "help": "cycle399 — 켜면(true) 이 전략은 **신규 매수 신호가 나는 순간 주문하지 않고** `[shadow_buy]` 로그만 남긴다(종목당 하루 1번). 신호 판단은 실전과 똑같이 끝까지 하고 방아쇠만 뺀다 — 그래서 「실전이었으면 무엇을 샀을지」 가 남는다. 보유 종목의 손절·트레일링·익일청산·15:20 강제청산·종목상태 청산은 그대로 돈다. 켜져 있는 섀도 전략은 비중 0 이어도 켜짐이 유지된다(비중 저장으로 꺼지지 않는다). 섀도가 아닌 전략의 비중 0 은 여전히 전략을 끈다. 신규 매수 멈춤(buy_paused)이 켜져 있으면 그쪽이 먼저 막아 기록도 없다. 섀도는 보유·주문을 만들지 않으므로 최대 보유 수·업종 상한·예산 소진에 걸리지 않는다 — 기록은 실전보다 많을 수 있다. 🔴 끌 때는 비중을 먼저 정한다 — 비중 0 인 채로 끄면 켜진 채 예산 0 으로 남아 매수 신호가 「투자금 부족」 으로 끝난다(실전으로 올리려면 비중 > 0 을 먼저 저장). 기본 false. 참/거짓이 아닌 값은 섀도 아님 + **WARNING**. `PUT /api/strategies/{id}/params` 로 즉시 반영되고 DB 에도 저장된다. AI 자동 튜닝 대상이 아니다(`PARAM_RANGES`/`INT_PARAMS` 편입 금지)."
     },
     {
       "key": "stop_loss_rate",
@@ -3039,6 +3069,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
       "keys": [
         "buy_threshold",
         "buy_paused",
+        "shadow_mode",
         "stop_loss_rate",
         "trailing_stop_rate",
         "daily_loss_limit",
@@ -3058,6 +3089,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
       "params": {
         "buy_threshold": 27.0,
         "buy_paused": false,
+        "shadow_mode": false,
         "stop_loss_rate": -7.5,
         "trailing_stop_rate": -2.0,
         "daily_loss_limit": -5.0,
@@ -3080,6 +3112,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
       "defaults": {
         "buy_threshold": 29.0,
         "buy_paused": false,
+        "shadow_mode": false,
         "stop_loss_rate": -7.5,
         "trailing_stop_rate": -2.0,
         "daily_loss_limit": -5.0,
@@ -3112,6 +3145,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "k_value_nxt_post",
         "reentry_cooldown_days",
         "buy_paused",
+        "shadow_mode",
         "stop_loss_rate",
         "daily_loss_limit",
         "failed_breakout_exit_enabled",
@@ -3147,6 +3181,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "k_value_nxt_post": 1.0,
         "reentry_cooldown_days": 2,
         "buy_paused": false,
+        "shadow_mode": false,
         "stop_loss_rate": -3.0,
         "daily_loss_limit": -5.0,
         "failed_breakout_exit_enabled": false,
@@ -3184,6 +3219,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "k_value_nxt_post": 1.0,
         "reentry_cooldown_days": 2,
         "buy_paused": false,
+        "shadow_mode": false,
         "stop_loss_rate": -3.0,
         "daily_loss_limit": -5.0,
         "failed_breakout_exit_enabled": false,
@@ -3232,6 +3268,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "exclude_consecutive_limit",
         "reentry_cooldown_days",
         "buy_paused",
+        "shadow_mode",
         "trailing_stop_rate",
         "daily_loss_limit",
         "gap_up_threshold",
@@ -3265,6 +3302,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "exclude_consecutive_limit": 2,
         "reentry_cooldown_days": 2,
         "buy_paused": false,
+        "shadow_mode": false,
         "trailing_stop_rate": -2.0,
         "daily_loss_limit": -5.0,
         "gap_up_threshold": 10.0,
@@ -3302,6 +3340,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "exclude_consecutive_limit": 2,
         "reentry_cooldown_days": 2,
         "buy_paused": false,
+        "shadow_mode": false,
         "trailing_stop_rate": -2.0,
         "daily_loss_limit": -5.0,
         "gap_up_threshold": 10.0,
@@ -3344,6 +3383,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "gap_skip_threshold",
         "max_breakout_extension_pct",
         "buy_paused",
+        "shadow_mode",
         "stop_loss_rate",
         "daily_loss_limit",
         "atr_period",
@@ -3383,6 +3423,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "gap_skip_threshold": 3.0,
         "max_breakout_extension_pct": 4.0,
         "buy_paused": false,
+        "shadow_mode": false,
         "stop_loss_rate": -7.0,
         "daily_loss_limit": -8.0,
         "atr_period": 14,
@@ -3424,6 +3465,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "gap_skip_threshold": 3.0,
         "max_breakout_extension_pct": 4.0,
         "buy_paused": false,
+        "shadow_mode": false,
         "stop_loss_rate": -7.0,
         "daily_loss_limit": -8.0,
         "atr_period": 14,
@@ -3477,6 +3519,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "max_breakout_extension_pct",
         "breakout_retention_minutes",
         "buy_paused",
+        "shadow_mode",
         "stop_loss_rate",
         "daily_loss_limit",
         "atr_period",
@@ -3522,6 +3565,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "max_breakout_extension_pct": 5.0,
         "breakout_retention_minutes": 3,
         "buy_paused": false,
+        "shadow_mode": false,
         "stop_loss_rate": -5.0,
         "daily_loss_limit": -6.0,
         "atr_period": 14,
@@ -3569,6 +3613,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "max_breakout_extension_pct": 5.0,
         "breakout_retention_minutes": 3,
         "buy_paused": false,
+        "shadow_mode": false,
         "stop_loss_rate": -5.0,
         "daily_loss_limit": -6.0,
         "atr_period": 14,
@@ -3626,6 +3671,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "reentry_cooldown_days",
         "max_breakout_extension_pct",
         "buy_paused",
+        "shadow_mode",
         "stop_loss_rate",
         "daily_loss_limit",
         "atr_period",
@@ -3674,6 +3720,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "reentry_cooldown_days": 7,
         "max_breakout_extension_pct": 7.5,
         "buy_paused": false,
+        "shadow_mode": false,
         "stop_loss_rate": -7.0,
         "daily_loss_limit": -8.0,
         "atr_period": 14,
@@ -3724,6 +3771,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "reentry_cooldown_days": 7,
         "max_breakout_extension_pct": 7.5,
         "buy_paused": false,
+        "shadow_mode": false,
         "stop_loss_rate": -7.0,
         "daily_loss_limit": -8.0,
         "atr_period": 14,
@@ -3778,6 +3826,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "rank_w_fresh",
         "max_positions_per_sector",
         "buy_paused",
+        "shadow_mode",
         "daily_loss_limit",
         "atr_period",
         "stop_atr",
@@ -3825,6 +3874,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "rank_w_fresh": 0.3,
         "max_positions_per_sector": 2,
         "buy_paused": false,
+        "shadow_mode": false,
         "daily_loss_limit": -8.0,
         "atr_period": 20,
         "stop_atr": 2.0,
@@ -3874,6 +3924,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "rank_w_fresh": 0.3,
         "max_positions_per_sector": 2,
         "buy_paused": false,
+        "shadow_mode": false,
         "daily_loss_limit": -8.0,
         "atr_period": 20,
         "stop_atr": 2.0,

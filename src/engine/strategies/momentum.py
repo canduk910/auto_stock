@@ -64,6 +64,7 @@ class MomentumStrategy(StrategyBase):
         "daily_loss_limit": -5.0,
         "max_lot_ratio_mult": 2.5,   # cycle245 — 랏 명목 ρ축 상한(K_ρ). 명목 ≤ K_ρ×position_ratio×예산, 1주도 못 사면 미매수. 터틀 모드에선 K축(max_lot_units)이 우선하고 그것이 fail-open 할 때만 백스톱. PARAM_RANGES 미편입. 롤백 = DB 20.0
         "buy_paused": False,   # cycle384 — 신규 매수 신호만 멈춤(청산 무관). 부재·비bool = 멈추지 않음. PARAM_RANGES/INT_PARAMS 편입 금지. 켜고 끄기 = PUT 즉시
+        "shadow_mode": False,  # cycle399 — 켜면 BUY 대신 [shadow_buy] 기록 + NONE(주문·예산 무접촉, 청산 무관). 부재·비bool = 끔. PARAM_RANGES/INT_PARAMS 편입 금지. 켜고 끄기 = PUT 즉시
         # cycle290 (2026-09-13) — 장중 킬스위치 등재. 값은 코드 상수와 **같은 값**이라
         # 등재 자체의 매매 행위 변경은 0 이다(`order_engine._ORDER_EXCHANGE_CLOCK_MODE_DEFAULT`
         # ·`_AFTER_EXIT_DIVISION_DEFAULT`). `PARAM_RANGES`/`INT_PARAMS` 편입 금지 —
@@ -175,6 +176,9 @@ class MomentumStrategy(StrategyBase):
             # 최상단 게이트는 block 구간 동안 `_prev_prdy_rate` baseline 을 동결시켜
             # 해제 후 첫 틱을 거짓 돌파로 만든다 — baseline 갱신(위) 뒤 신호만 차단.
             if self._account_soft_gate_blocked(ticker):
+                return Signal.NONE
+            # cycle399 — 섀도 관문: 마지막 거름 뒤 · 화면 기록 앞(AST S01).
+            if self._shadow_buy_intercepted(ticker, current_price, open_price):
                 return Signal.NONE
             logger.info(
                 "매수 신호: %s 전일종가(%d) 대비 %.1f%% (현재가: %d, 직전: %.1f%%)",

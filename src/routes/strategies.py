@@ -339,7 +339,17 @@ async def update_weights(req: WeightsRequest):
 
     # DB 영속화 (비율 단위로 저장)
     from src.db.strategy_config import save_weights
-    await save_weights(weights)
+    # cycle399 — 비중 0 인데 메모리에서 켜져 있는 전략 = `update_weights` 가 섀도라서 켜짐을
+    # 지킨 전략이다. DB 에도 같은 켜짐을 적어야 다음 재시작에 꺼지지 않는다. 섀도가 없으면
+    # 호출 모양은 그대로다.
+    keep_enabled = {
+        sid for sid, w in weights.items()
+        if w <= 0 and (st := registry.get(sid)) is not None and st.config.enabled is True
+    }
+    if keep_enabled:
+        await save_weights(weights, keep_enabled=keep_enabled)
+    else:
+        await save_weights(weights)
 
     return ApiResponse(
         success=True,

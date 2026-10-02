@@ -100,8 +100,9 @@ _BASE_SHA = {
     # 🔁 cycle380(2026-09-27) 재핀 — ETF 판정을 이름 키워드에서 증권그룹코드(`scty_grp_id_cd`)로 전환(사용자 승인, 8영역). ETF_KEYWORDS 를 정본 leaf `src/engine/etf_like.py` 로 이전 + import, `scan_stocks` 판정 자리를 `is_etf_like` 로 교체. 값만 이동, 값 자체는 유일값.
     "src/engine/scanner.py":
         "611568c078c6f3779344e05b3dfa308c792c64e1c5e02480de6313200282f54f",
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). 8영역 `update_weights` 의 enabled 대입 한 줄(섀도 전략은 비중 0 이어도 켜짐 유지). 값만 이동.
     "src/engine/strategy_registry.py":
-        "d794696e54ffdc36efa6df917879d780e86bc1f373bb3b5d8dcbc0beac8cef8b",
+        "3b6366c3cdb6e83907428435b95611880f1b8223e572c361a1cad2d00b13a067",
     # 8영역 — realtime 전부
     "src/realtime/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -139,8 +140,9 @@ _BASE_SHA = {
     # 에서 `tally.date < day`(더 늦은 날짜에서만 롤)로 시정(§8, 사용자 승인 범위 밖 무접촉).
     # 직전 값 = `4516f1a94f2d05de24dfed24d165b62b11a230374795c593247f9906803d085f`.
     # 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27). 게이트 2번째 문장 + 헬퍼 4개 + `__init__` cap 1개 추가. 값만 이동.
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). 섀도 관문 `_shadow_buy_intercepted` + 정적 판정 `shadow_mode_on` + 마커 헬퍼 2개 + `__init__` cap 1개 + `SHADOW_MODE_KEY` 상수. 값만 이동.
     "src/engine/strategy_base.py":
-        "d5257d3a8a6c4744663aa7af6e89e3a683ccdb2e63ae062284e5e702079dddfb",
+        "e25384a3defb09564b91a5f2eebef8539baaa237375ae0422956d548b86b6673",
     # 시각 표의 **유일 정본** — cycle287 은 읽기만 했다. 바꾸면 픽스처 동기 사슬
     # (`tools/test_fixtures/gen_market_state_fixture.py` + 프론트/E2E 픽스처 2)이
     # 통째로 딸려 오고, cycle282 `test_i1/i2/i3` 가 즉시 RED 다(실증: cycle289 가
@@ -173,20 +175,27 @@ _BASE_SHA = {
     # (+ donchian·kojiro PV-1 보유 종목 보존 · vcp `_observe_breakout_distance` P3 생략).
     "src/engine/strategies/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
     "src/engine/strategies/bull_flag_breakout.py":
-        "320815b44a259c577184d3b9fbaf6ae31eb2b0dda142e1ab4361541e1c4defd4",
+        "a13ea3879240ff8f579661ea9c5f7f1d3dc1995e7e61039d5cc3ecb11c55b75e",
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
     "src/engine/strategies/donchian_swing.py":
-        "9548ca4f12e20c733506662fa9ad11b5803a594fb5ab0679d20f87e6f5890f2f",
+        "d6c6ee2bb5bf49e9b768f9959c727710b2d993be198888be4df10e89e754bdb2",
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
     "src/engine/strategies/kojiro.py":
-        "fac754faaa1ae65a4a484c02abd46e4de73494bd165ead1f5f0790e10734b4ea",
+        "812363eb730cdc074e21239e7914287ab7e637a29a98152fd5f64478081c4b53",
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
     "src/engine/strategies/long_tail_volatility.py":
-        "42211d78f9d347436a3e33349c6058877b1e6c033ebde28d3b6abd0ac5e835a9",
+        "44f7f103b3c714522b09da7de5a4de2ec0423ffc2a3032f43540c4c70943778d",
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
     "src/engine/strategies/momentum.py":
-        "5aad47791126b66a4febe3f7496cc355059db7cbdadcd106095094f9cb2a3145",
+        "686171e29ac365e8ea66f7659f2e02962f58bbac9d9ab9545095c7b3544bb403",
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
     "src/engine/strategies/vcp_breakout.py":
-        "440336ceba6005ced9409b0b1998f273b038950f093d171c668e8d5eb979a48a",
+        "545f7aa85873bec1a69d7c349eb6cc6c2db39c5d6ac00e385db2bb3e929eb7d1",
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
     "src/engine/strategies/volatility_breakout.py":
-        "c480b0f97212150c6887e2b5203e39e551ec122653ba7f6664d0e4437a3d6afd",
+        "c07e7298743496129601e79598b799472242d2f02b60eb2f92217b6bed1ee1b4",
 }
 
 #: `src/**/*.py` 전수(세 변경 파일 제외)의 (경로, 내용sha) 누적 digest.
@@ -693,8 +702,13 @@ _SRC_TREE_FILES = 168  # cycle398 PR1 — 신규 leaf `strategy_manifest.py` 로
 # cycle398 PR2(리팩토링 카드 #3, 같은 승인) — `strategy_manifest.py` 에 원형 선언 칸
 # (eval_driver·breakout_rank·open_price_target·close_at_1520·market_unit_policy) 추가 +
 # `scheduler.py` 리터럴 7자리를 그 파생으로 교체(행위 동일, PR0 골든 증명) — 파일 수 168 그대로.
+# 🔁 cycle399(2026-10-03) 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `strategy_base.py`
+# (섀도 관문·판정·마커) · 전략 7파일(`DEFAULT_PARAMS` 1줄 + BUY 앞 관문 1문장) · `param_catalog.py`(행 1개) ·
+# 8영역 `strategy_registry.py`(`update_weights` 한 줄) · `db/strategy_config.py`(`save_weights(keep_enabled=)`) ·
+# `routes/strategies.py`·`routes/recommendations.py`(섀도 전략 비중 0 의 DB 켜짐 유지). 파일 수 168 그대로.
+# 직전 값 = cycle398 PR2 `9b9d0f77470018f39e259889dfc60dff1b5acfcbbd979101ef6593caf513e460`.
 _SRC_TREE_DIGEST = (
-    "9b9d0f77470018f39e259889dfc60dff1b5acfcbbd979101ef6593caf513e460"
+    "de830017b512ef7b13f957df8b01a6663fd6890bdbbf12b0ab893a2b75bbf618"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

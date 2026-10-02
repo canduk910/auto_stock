@@ -629,6 +629,7 @@ DEFAULT_PARAMS = {
     "max_lot_ratio_mult": 2.5, # cycle245 — 랏 명목 ρ축 상한(K_ρ). 명목 ≤ K_ρ×position_ratio×예산, 1주도 못 사면 미매수.
                                # K축과 `min` 합성(cycle254). PARAM_RANGES 미편입. 롤백 = 20.0
     "buy_paused": False,       # cycle384 — 신규 매수 신호만 멈춤(청산 무관). PARAM_RANGES/INT_PARAMS 미편입. 켜고 끄기 = PUT 즉시
+    "shadow_mode": False,      # cycle399 — 켜면 BUY 대신 [shadow_buy] 기록 + NONE(주문·예산 무접촉, 청산 무관). PARAM_RANGES/INT_PARAMS 미편입. 켜고 끄기 = PUT 즉시
     "turtle_min_stop_pct": -4.0,
     # 유니버스 — 전체 상장 ∩ 시총≥100억 ∩ 거래대금≥15억
     "min_market_cap": 10_000_000_000,
@@ -783,6 +784,7 @@ DEFAULT_PARAMS = {
     "max_lot_ratio_mult": 2.5, # cycle245 — 랏 명목 ρ축 상한(K_ρ). 명목 ≤ K_ρ×position_ratio×예산, 1주도 못 사면 미매수.
                                # K축과 `min` 합성(cycle254). PARAM_RANGES 미편입. 롤백 = 20.0
     "buy_paused": False,       # cycle384 — 신규 매수 신호만 멈춤(청산 무관). PARAM_RANGES/INT_PARAMS 미편입. 켜고 끄기 = PUT 즉시
+    "shadow_mode": False,      # cycle399 — 켜면 BUY 대신 [shadow_buy] 기록 + NONE(주문·예산 무접촉, 청산 무관). PARAM_RANGES/INT_PARAMS 미편입. 켜고 끄기 = PUT 즉시
     "turtle_min_stop_pct": -5.0,
     # 유니버스 — 전체 상장 ∩ 시총≥100억 ∩ 거래대금≥10억 (지수 제약 없음)
     "min_market_cap": 10_000_000_000,
@@ -899,6 +901,27 @@ BFB/VCP 매수 신호는 (donchian 의 폴링 루프와 달리) `risk.on_tick`(W
 | 로그 | `[buy_paused_config]` 멈춘 전략 WARNING 1줄/일 · `[buy_paused_skip]` 후보 종목 INFO 1줄/(종목, 전략)/일 |
 
 🔴 멈춰 둔 동안 키를 지운 코드를 배포하지 않는다 — DB 의 `true` 가 버려져 조용히 풀린다. 구현·마커 상세 = `src/engine/CLAUDE.md` `strategy_base.py` 절.
+
+### 섀도 모드 `shadow_mode` (7 전략 공통)
+
+사용자 승인 2026-10-02 R1(ETF 설계 §10.2) — 새 전략을 「실전과 똑같이 판단하되 주문만 빼고」 몇 주 지켜보는 단계(ETF S1)를 위한 공통 키(cycle399).
+
+| 규칙 | 값 |
+|---|---|
+| 키 | `DEFAULT_PARAMS["shadow_mode"]` — 7 전략 전부 기본 `False` |
+| 하는 것 | 매수 신호가 나는 순간 주문 대신 `[shadow_buy]` INFO 1줄(종목당 하루 1번) + `Signal.NONE` |
+| 막는 자리 | 각 전략의 `return Signal.BUY` 바로 앞 — **마지막 거름 뒤 · 상태 변경 앞**. 순서 = 종목상태 차단 → `buy_paused` → 계좌 SOFT → 신호 계산 → 시장 유닛 거름 → 섀도 |
+| 바꾸지 않는 것 | 주문 · 예산 · `pending_buys` · 화면 `buy_signals` · `_bought_today` · 진입 스탬프 · 래치 · 수량 계산 · 손절·트레일링·익일청산·15:20 강제청산·종목상태 청산 |
+| 비중 | 섀도 전략은 **비중 0 + 켜짐(`enabled=True`)** 으로 둔다 — 예산 0 이라 주문이 구조적으로 나갈 수 없다. 비중 저장(`PUT /api/strategies/weights` · AI 자문 비중 적용)이 섀도 전략의 켜짐을 끄지 않는다. 꺼져 있던 섀도 전략을 켜지도 않는다 |
+| 쓰지 않는 수단 | 최소 비중(예 0.05) — Σ 정규화로 실전 전략 예산을 깎는다 · `enabled=False` — 평가가 안 돌아 기록이 0 이 되고 보유가 있으면 손절이 멈춘다 |
+| 값 해석 | `true`(JSON bool)일 때만 섀도. 키 부재·`false`·그 밖의 모양은 실전 그대로(모양이 틀리면 WARNING) |
+| 켜고 끄기 | `PUT /api/strategies/{id}/params {"params":{"shadow_mode":true}}` — **즉시**, DB 저장. 실전 → 섀도 강등은 비중을 건드리지 않고 이 키만 켠다(보유분 청산은 그대로 돈다). 🔴 끌 때는 **비중을 먼저** 정한다 — 비중 0 인 채 끄면 켜진 채 예산 0 으로 남아 매수가 「투자금 부족」 으로 끝난다. 실전으로 = 비중 > 0 저장 뒤 끄기 · 그만두기 = 끈 뒤 비중 0 재저장(보유 0 확인) |
+| 기록의 뜻 | 「그 종목을 그 순간 샀을 것」 — 섀도는 보유를 만들지 않아 최대 보유 수·업종 상한·예산 소진에 걸리지 않는다. 오프라인 재현이 그 셋을 직접 적용한다 |
+| AI 자문 | `PARAM_RANGES`/`INT_PARAMS` 편입 금지 — 수동·자동 적용 경로가 둘 다 이 키를 거른다 |
+| 가상 수량 | 엔진에서 계산하지 않는다. `[shadow_buy]` 의 가격·시가·돌파선·ATR·시장 유닛 m 으로 오프라인에서 가정 예산을 대 계산한다 |
+| 로그 | `[shadow_mode_config]` 섀도 전략 WARNING 1줄/일(그날 매수 신호가 났을 때) · `[shadow_buy]` INFO 1줄/(종목, 전략)/일 |
+
+구현·마커 상세 = `src/engine/CLAUDE.md` `strategy_base.py` 절.
 
 ### 스케줄 — KRX/NXT 통합 운영 (08:00~20:00)
 
@@ -1018,7 +1041,7 @@ BFB/VCP 매수 신호는 (donchian 의 폴링 루프와 달리) `risk.on_tick`(W
 
 `recommendation_engine.PARAM_RANGES` 에 있는 키만 AI 자문이 추천할 수 있고, `INT_PARAMS ⊆ PARAM_RANGES` 가 규약이다(정수 캐스트 대상).
 
-- **편입 금지 = 정체성 상수.** 진입 임계(`max_positions` · `buy_threshold` · `donchian_period` · `max_breakout_extension_pct` · `open_entry_hold_secs` · `open_price_scope_mode`)와 청산 임계(`atr_trail_mult` · `breakout_fail_n_days` · `breakeven_promote_atr` · `channel_exit_period`), 리스크 정체성 상수(`max_lot_units` K · `max_lot_ratio_mult` K_ρ · `rank_w_*` · `market_unit_mode`), 신규 매수 멈춤 `buy_paused`, 킬스위치·LLM 키가 여기 해당한다.
+- **편입 금지 = 정체성 상수.** 진입 임계(`max_positions` · `buy_threshold` · `donchian_period` · `max_breakout_extension_pct` · `open_entry_hold_secs` · `open_price_scope_mode`)와 청산 임계(`atr_trail_mult` · `breakout_fail_n_days` · `breakeven_promote_atr` · `channel_exit_period`), 리스크 정체성 상수(`max_lot_units` K · `max_lot_ratio_mult` K_ρ · `rank_w_*` · `market_unit_mode`), 신규 매수 멈춤 `buy_paused`, 섀도 모드 `shadow_mode`, 킬스위치·LLM 키가 여기 해당한다.
 - **왜**: 최근 손실을 목적함수로 삼는 튜너는 표본이 적을 때 "최근 손실 거래를 지우는 값" 으로 수렴한다 — 청산 임계를 조이면 추세추종이 데이트레이딩으로 변태하고, 진입 임계를 조이면 신호가 말라붙는다. 라이브 값이 허용 범위의 **하한에 정확히 붙어 있으면** 그건 과튜닝 서명이다.
 - **`atr_trail_mult` 는 3전략 공유 키**(`donchian_swing`·`vcp_breakout`·`bull_flag_breakout`, 전부 DEFAULT 2.0)라 제외가 세 전략에 함께 걸린다. 근거 표본은 donchian 뿐이므로 **VCP 또는 BFB 의 청산 왕복이 ≥20 쌓이면 그 전략에 한해 재편입 여부를 독립 판정**한다. 키를 전략별로 나눠야 하면 kojiro 의 `stop_atr`/`trail_atr` 고유명 선례를 따른다.
 

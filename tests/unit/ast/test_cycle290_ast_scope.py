@@ -138,8 +138,9 @@ _BASE_SHA: dict[str, str] = {
     # 🔁 cycle380(2026-09-27) 재핀 — ETF 판정을 이름 키워드에서 증권그룹코드(`scty_grp_id_cd`)로 전환(사용자 승인, 8영역). ETF_KEYWORDS 를 정본 leaf `src/engine/etf_like.py` 로 이전 + import, `scan_stocks` 판정 자리를 `is_etf_like` 로 교체. 값만 이동, 값 자체는 유일값.
     "src/engine/scanner.py":
         "611568c078c6f3779344e05b3dfa308c792c64e1c5e02480de6313200282f54f",
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). 8영역 `update_weights` 의 enabled 대입 한 줄(섀도 전략은 비중 0 이어도 켜짐 유지). 값만 이동.
     "src/engine/strategy_registry.py":
-        "d794696e54ffdc36efa6df917879d780e86bc1f373bb3b5d8dcbc0beac8cef8b",
+        "3b6366c3cdb6e83907428435b95611880f1b8223e572c361a1cad2d00b13a067",
     # 8영역 — api/order
     "src/api/order.py":
         "08c5cafd7b8678ec0d0fa85f856fdea3cce38ad92488c6d74c03cd13faa415bb",
@@ -194,8 +195,9 @@ _BASE_SHA: dict[str, str] = {
     # 에서 `tally.date < day`(더 늦은 날짜에서만 롤)로 시정(§8). 직전 값 =
     # `4516f1a94f2d05de24dfed24d165b62b11a230374795c593247f9906803d085f`.
     # 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27). 게이트 2번째 문장 + 헬퍼 4개 + `__init__` cap 1개 추가. 값만 이동.
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). 섀도 관문 `_shadow_buy_intercepted` + 정적 판정 `shadow_mode_on` + 마커 헬퍼 2개 + `__init__` cap 1개 + `SHADOW_MODE_KEY` 상수. 값만 이동.
     "src/engine/strategy_base.py":
-        "d5257d3a8a6c4744663aa7af6e89e3a683ccdb2e63ae062284e5e702079dddfb",
+        "e25384a3defb09564b91a5f2eebef8539baaa237375ae0422956d548b86b6673",
     # 🔴 등재만으로 판정이 통해야 한다 — 검증 로직을 고쳐 통과시키면 안 된다.
     "src/engine/param_validation.py":
         "b4c5c029800191523bcc511919d6de3774e9ab49ca2fc0a0558ee3907868ee17",
@@ -247,8 +249,9 @@ _FROZEN_METHODS: tuple[str, ...] = (
 )
 
 _SEGMENT_SHA: dict[tuple[str, str], str] = {
+    # 🔁 cycle399 재핀 — 공통 섀도 모드(사용자 승인 10-02 R1) — BUY 반환 앞 섀도 관문 1문장(`if self._shadow_buy_intercepted(...): return Signal.NONE`) 삽입. 그 밖 무변경.
     ("momentum", "check_buy_signal"):
-        "d6af3d3867266d1bec2528aff385e2801565f2cfc76356fe1b4b03cdcbe4ccc9",
+        "2e90bcb3605dba3a16917ce99e42b15aa33604ec369b30066a5a859f1bde33dc",
     ("momentum", "check_exit_signal"):
         "33c06df9546f40e91b1857300f0da8480eb671c1c8778454691248c9e90b9ef1",
     ("momentum", "calc_buy_quantity"):
@@ -256,8 +259,9 @@ _SEGMENT_SHA: dict[tuple[str, str], str] = {
     # 🔁 cycle364(2026-09-26) 재핀 — `prepare(as_of=)` 시그니처 확장(사용자 승인 D3).
     ("momentum", "prepare"):
         "eff5452d07567436585a498aedeb45deeac9c4fc913a9782b00242beef288085",
+    # 🔁 cycle399 재핀 — 공통 섀도 모드(사용자 승인 10-02 R1) — BUY 반환 앞 섀도 관문 1문장(`if self._shadow_buy_intercepted(...): return Signal.NONE`) 삽입. 그 밖 무변경.
     ("volatility_breakout", "check_buy_signal"):
-        "e620ae0d14a71f916550ee13f57edff12e1b84c12b8a4712b29583b44b56f20a",
+        "5424dc5b23fb3b382174098b4a964c7a76a6ffb7ab3ed9597e0774b03e31c2da",
     ("volatility_breakout", "check_exit_signal"):
         "86593b038e4cf8121ae47069fb368346edc50d9692b29db4cbdcc8897421b72e",
     ("volatility_breakout", "calc_buy_quantity"):
@@ -265,8 +269,9 @@ _SEGMENT_SHA: dict[tuple[str, str], str] = {
     # 🔁 cycle364 재핀 — `prepare(as_of=)` 시그니처 확장.
     ("volatility_breakout", "prepare"):
         "0a378b804169ed99843eca465f404fbe136184b436cd627aa1af2c2268e98ab7",
+    # 🔁 cycle399 재핀 — 공통 섀도 모드(사용자 승인 10-02 R1) — BUY 반환 앞 섀도 관문 1문장(`if self._shadow_buy_intercepted(...): return Signal.NONE`) 삽입. 그 밖 무변경.
     ("long_tail_volatility", "check_buy_signal"):
-        "6c70101fe4abc9e5afc7f7e4a47af46ce5ebdf68fd84c2a18e22a46cb4546d1b",
+        "be76217bf4634a401bb73564d41bcb25b6bed74e7f6ec95b1775941f9676293b",
     ("long_tail_volatility", "check_exit_signal"):
         "c8b0e6a8c8705d49bb6f12f82f505d426a5bdeb81413f8b2e0276eabb7dd9cad",
     ("long_tail_volatility", "calc_buy_quantity"):
@@ -276,8 +281,9 @@ _SEGMENT_SHA: dict[tuple[str, str], str] = {
         "8837076acd413ed97127a7a74ebbb4e62b7000fa9495727ad268bfedcd13b73a",
     # 🔁 cycle382 재핀 — 시장 유닛(단계형) 신호 필터 삽입(추격 상한 블록 뒤 ·
     # `_breakout_high` 스탬프 앞, 사용자 결정 09-27).
+    # 🔁 cycle399 재핀 — 공통 섀도 모드(사용자 승인 10-02 R1) — BUY 반환 앞 섀도 관문 1문장(`if self._shadow_buy_intercepted(...): return Signal.NONE`) 삽입. 그 밖 무변경.
     ("donchian_swing", "check_buy_signal"):
-        "dd32b75a918491c48d18b7da0abe7f60d1bf7fa6d88a6a87a16b92c296e721f0",
+        "124c5eb1257fdd14b58738e738cc534bd7a4ec2d25d24d2111704c88368278f6",
     ("donchian_swing", "check_exit_signal"):
         "86ae465f87a03bac0b3a418338f7a01e40c2f6992ef609791f915590dd5b85f4",
     # 🔁 cycle382 재핀 — 시장 유닛(단계형) `_market_unit_sizing` 진입 훅.
@@ -326,8 +332,9 @@ _SEGMENT_SHA: dict[tuple[str, str], str] = {
         "29280134b44040ae4187fb7eb95d0308885ff904a61f60e1ca4b6a061f1d416e",
     # 🔁 cycle382 재핀 — 시장 유닛(단계형) 신호 필터(`observe_gap(...,"pass",...)`
     # 뒤 · `_bought_today.add` 앞).
+    # 🔁 cycle399 재핀 — 공통 섀도 모드(사용자 승인 10-02 R1) — BUY 반환 앞 섀도 관문 1문장(`if self._shadow_buy_intercepted(...): return Signal.NONE`) 삽입. 그 밖 무변경.
     ("kojiro", "check_buy_signal"):
-        "0299d9fdf96c9773659989c9b88bb7a2a67050c96f5a6e065d403258071eef87",
+        "c3dd4541133b3788d2ff46787ce5545d15cc33f4e2e51e29484b0839724f2216",
     ("kojiro", "check_exit_signal"):
         "067a60219099b081c64172986f46528a2836b1ad457c081ac06784c4ab9af7fc",
     # 🔁 cycle382 재핀 — 시장 유닛(단계형) `_market_unit_sizing` 진입 훅.

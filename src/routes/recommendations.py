@@ -17,6 +17,7 @@ from src.db.strategy_config import save_params, save_weights
 # 정본을 참조해야 두 경로가 갈라지지 않는다 (사본 금지).
 from src.engine.recommendation_engine import PARAM_RANGES
 from src.engine.scheduler import trading_scheduler
+from src.engine.strategy_base import StrategyBase
 from src.models.recommendation import ApplyRequest
 from src.models.response import ApiResponse
 from src.routes.strategies import (
@@ -253,7 +254,13 @@ async def apply_rec(rec_id: str, req: ApplyRequest):
                     " (비중 0 = 비활성화 = 손절 정지). 보유를 먼저 비우세요."
                 )
             else:
-                await save_weights({strategy_id: new_weight})
+                # cycle399 — 섀도 전략(켜짐)의 비중 0 은 DB `enabled` 를 지킨다(다음 재시작에
+                # 꺼지면 섀도 기록이 끊긴다). 섀도가 아니면 호출 모양 그대로.
+                if new_weight <= 0 and strategy.config.enabled is True \
+                        and StrategyBase.shadow_mode_on(strategy):
+                    await save_weights({strategy_id: new_weight}, keep_enabled={strategy_id})
+                else:
+                    await save_weights({strategy_id: new_weight})
                 # 메모리 registry 반영 (다음 _boot 까지 일관성)
                 strategy.config.weight = new_weight
                 applied_weight = new_weight

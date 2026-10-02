@@ -208,6 +208,9 @@ _CYCLE382_AFFECTED_SIDS: frozenset[str] = frozenset({
 #: 신규 매수 신호만 멈추는 공통 스위치(기본 false = 행위 변경 0). 또 **다른 축**이라
 #: 위와 섞지 않는다. **7전략 전부**에 붙는다.
 _CYCLE384_NEW_KEYS: tuple[str, ...] = ("buy_paused",)
+#: 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). 실전 매수를 기록만으로 바꾸는 공통 스위치(기본 false = 행위 변경 0).
+#: 7전략 전부 — 축은 cycle384 와 같아 같은 영향 집합을 쓴다.
+_CYCLE399_NEW_KEYS: tuple[str, ...] = ("shadow_mode",)
 _CYCLE384_AFFECTED_SIDS: frozenset[str] = frozenset({
     "momentum", "volatility_breakout", "long_tail_volatility", "donchian_swing",
     "bull_flag_breakout", "vcp_breakout", "kojiro",
@@ -226,6 +229,7 @@ def _expected_new_keys(sid: str) -> set[str]:
         expected |= set(_CYCLE382_NEW_KEYS)
     if sid in _CYCLE384_AFFECTED_SIDS:
         expected |= set(_CYCLE384_NEW_KEYS)
+        expected |= set(_CYCLE399_NEW_KEYS)
     return expected
 
 
@@ -789,7 +793,7 @@ def test_g290_37_help_names_the_side_effects(key: str, phrase: str) -> None:
 def test_g290_38_catalog_spec_count_is_102() -> None:
     """카탈로그 스펙 수 99 → **101**(cycle290) → **102**(cycle300 깊이 스위치) →
     **103**(cycle352 15:20 상한가 유지 확인) → **104**(cycle382 시장 유닛 모드) →
-    **105**(cycle384 신규 매수 멈춤 `buy_paused`). 중복 없음.
+    **105**(cycle384 신규 매수 멈춤 `buy_paused`) → **106**(cycle399 섀도 모드 `shadow_mode`). 중복 없음.
 
     cycle278 계열 가드 4곳(`test_cycle278_param_catalog`·`test_cycle278_params_schema`·
     `test_routes_strategies`·프론트 `_ast_param_key_hardcode`)이 같은 숫자를 세므로
@@ -798,9 +802,10 @@ def test_g290_38_catalog_spec_count_is_102() -> None:
     from src.engine import param_catalog as pc
 
     # 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27 「돈키언 신규매수 중지」) — 104→105.
-    assert len(pc.PARAM_SPECS) == 105, len(pc.PARAM_SPECS)
-    assert len(pc.SPEC_BY_KEY) == 105, len(pc.SPEC_BY_KEY)
-    assert len({s.key for s in pc.PARAM_SPECS}) == 105, "키 중복"
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1) — 105→106.
+    assert len(pc.PARAM_SPECS) == 106, len(pc.PARAM_SPECS)
+    assert len(pc.SPEC_BY_KEY) == 106, len(pc.SPEC_BY_KEY)
+    assert len({s.key for s in pc.PARAM_SPECS}) == 106, "키 중복"
 
 
 # ===========================================================================

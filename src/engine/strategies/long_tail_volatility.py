@@ -124,6 +124,7 @@ class LongTailVolatilityStrategy(StrategyBase):
         "daily_loss_limit": -5.0,
         "max_lot_ratio_mult": 2.5,   # cycle245 — 랏 명목 ρ축 상한(K_ρ). 명목 ≤ K_ρ×position_ratio×예산, 1주도 못 사면 미매수. 터틀 모드에선 K축(max_lot_units)이 우선하고 그것이 fail-open 할 때만 백스톱. PARAM_RANGES 미편입. 롤백 = DB 20.0
         "buy_paused": False,   # cycle384 — 신규 매수 신호만 멈춤(청산 무관). 부재·비bool = 멈추지 않음. PARAM_RANGES/INT_PARAMS 편입 금지. 켜고 끄기 = PUT 즉시
+        "shadow_mode": False,  # cycle399 — 켜면 BUY 대신 [shadow_buy] 기록 + NONE(주문·예산 무접촉, 청산 무관). 부재·비bool = 끔. PARAM_RANGES/INT_PARAMS 편입 금지. 켜고 끄기 = PUT 즉시
         # cycle262 (2026-09-06) — KRX 09:00 개장 후 이 초 동안 신규 매수 신호를
         # 발사하지 않는다(0 = OFF = 현행 행위). LTV 는 08:00~09:00 pre_nxt 에서
         # **그 보드의 올바른 시가**로 정상 판정하지만, 09:00 에 보드가 main 으로
@@ -914,6 +915,10 @@ class LongTailVolatilityStrategy(StrategyBase):
                         )
                     except Exception:  # pragma: no cover — 2차 예외까지 흡수
                         pass
+                return Signal.NONE
+
+            # cycle399 — 섀도 관문: 마지막 거름(15:20 main 컷) 뒤 · 화면 기록 앞(AST S01).
+            if self._shadow_buy_intercepted(ticker, current_price, open_price, level=target, board=board):
                 return Signal.NONE
 
             board_open = board_info.get("open_price", 0)

@@ -471,7 +471,8 @@ def test_g348_b10_no_new_default_params():
     # 🔁 cycle382 재핀 — 시장 유닛(단계형) `market_unit_mode` 1키(사용자 결정
     # 09-27)로 43 → 44. 관측 확장(이 파일의 범위)은 여전히 키를 더하지 않는다.
     # 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27 「돈키언 신규매수 중지」) — 44 → 45.
-    assert len(keys) == 45, f"DEFAULT_PARAMS 키 수가 {len(keys)} — 관측 확장은 키를 더하지 않는다"
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1) — 45 → 46.
+    assert len(keys) == 46, f"DEFAULT_PARAMS 키 수가 {len(keys)} — 관측 확장은 키를 더하지 않는다"
     assert not any("stage6" in k or "observe" in k for k in keys)
 
 

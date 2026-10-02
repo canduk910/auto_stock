@@ -553,6 +553,7 @@ donchian·kojiro 만 틱 평가를 건너뛰고 1분 REST 폴 루프가 평가�
 `registry.is_ticker_blocked_for_buy`(타 전략 보유·주문중·당일매도) · 자금 사전 가드, 그리고 전략 안의
 신규 매수 멈춤 `buy_paused`(cycle384) · 계좌 SOFT 게이트 · `buy_disabled` · 보유/주문중/당일매도 · `max_positions` · 일일 손실 한도다.
 `buy_paused` 는 운영자가 PUT 으로 켜는 스위치다. 그 전략의 신규 매수 신호만 멈추고 청산은 그대로 돈다.
+`shadow_mode`(cycle399)는 거름을 다 지난 BUY 를 주문 대신 `[shadow_buy]` 기록으로 바꾼다 — 판단은 실전과 같고 방아쇠만 뺀다.
 15:30~16:00 은 주문 발사점(`execute_buy`·`execute_sell`)에서 주문이 막힌다(`order_engine._market_rest_now`).
 매수 수량은 `calc_buy_quantity` → `_apply_budget_limit` 관문을 지난다(루트 `CLAUDE.md` 「핵심 안전 규칙」).
 

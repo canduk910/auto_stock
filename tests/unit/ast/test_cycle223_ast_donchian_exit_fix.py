@@ -450,6 +450,13 @@ def _content_sha(path: str) -> str:
 #    승인, 범위 = `order_engine.py` + `api/order.py`(docstring 만). 자매 가드
 #    네 곳 전부 같은 값. TODO(cycle287 커밋 후): 아래 항목을 **삭제**한다.
 _PREEXISTING_CONTENT_SHA: dict[str, str] = {
+    # ✅ 2026-10-03 (cycle399) — 공통 섀도 모드. 사용자 승인(10-02 R1, 8영역 `strategy_registry.py`
+    #    `update_weights` 한 줄): `config.enabled = weight > 0 or (was_enabled and
+    #    StrategyBase.shadow_mode_on(s))` — 섀도 전략은 비중 0 이어도 켜짐 유지, 섀도가 아닌
+    #    전략은 현행 그대로. 나머지 7영역 diff 0. 자매 가드 네 곳 전부 같은 값(`test_g3_9b` 계약).
+    #    TODO(cycle399 커밋 후): 이 항목을 **삭제**한다.
+    "src/engine/strategy_registry.py":
+        "3b6366c3cdb6e83907428435b95611880f1b8223e572c361a1cad2d00b13a067",
     # ✅ 2026-09-18 (cycle302) 재핀 — 일봉 backfill 의 **대상**을 지수에서 적재 대상
     #    전부로 확대. 사용자 명시 8영역 승인("전부 담는게 좋을듯한데? VCP평가대상이
     #    어떻게 바뀔지 모르잖아"), 범위 = `src/engine/scanner.py` **단독**이고 이
@@ -698,18 +705,24 @@ def test_g223_11_eight_areas_have_no_donchian_exit_symbols():
 #: 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27 「돈키언 신규매수
 #: 중지」) — `DEFAULT_PARAMS` 에 `"buy_paused": False,` 1줄씩 추가. 값만 이동.
 _CYCLE228_STRATEGY_CONTENT_SHA: dict[str, str] = {
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
     "src/engine/strategies/volatility_breakout.py":
-        "c480b0f97212150c6887e2b5203e39e551ec122653ba7f6664d0e4437a3d6afd",
+        "c07e7298743496129601e79598b799472242d2f02b60eb2f92217b6bed1ee1b4",
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
     "src/engine/strategies/long_tail_volatility.py":
-        "42211d78f9d347436a3e33349c6058877b1e6c033ebde28d3b6abd0ac5e835a9",
+        "44f7f103b3c714522b09da7de5a4de2ec0423ffc2a3032f43540c4c70943778d",
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
     "src/engine/strategies/kojiro.py":
-        "fac754faaa1ae65a4a484c02abd46e4de73494bd165ead1f5f0790e10734b4ea",
+        "812363eb730cdc074e21239e7914287ab7e637a29a98152fd5f64478081c4b53",
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
     "src/engine/strategies/momentum.py":
-        "5aad47791126b66a4febe3f7496cc355059db7cbdadcd106095094f9cb2a3145",
+        "686171e29ac365e8ea66f7659f2e02962f58bbac9d9ab9545095c7b3544bb403",
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
     "src/engine/strategies/vcp_breakout.py":
-        "440336ceba6005ced9409b0b1998f273b038950f093d171c668e8d5eb979a48a",
+        "545f7aa85873bec1a69d7c349eb6cc6c2db39c5d6ac00e385db2bb3e929eb7d1",
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
     "src/engine/strategies/bull_flag_breakout.py":
-        "320815b44a259c577184d3b9fbaf6ae31eb2b0dda142e1ab4361541e1c4defd4",
+        "a13ea3879240ff8f579661ea9c5f7f1d3dc1995e7e61039d5cc3ecb11c55b75e",
 }
 
 

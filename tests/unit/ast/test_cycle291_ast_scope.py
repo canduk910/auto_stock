@@ -84,8 +84,9 @@ _BASE_SHA: dict[str, str] = {
     # 🔁 cycle380(2026-09-27) 재핀 — ETF 판정을 이름 키워드에서 증권그룹코드(`scty_grp_id_cd`)로 전환(사용자 승인, 8영역). ETF_KEYWORDS 를 정본 leaf `src/engine/etf_like.py` 로 이전 + import, `scan_stocks` 판정 자리를 `is_etf_like` 로 교체. 값만 이동, 값 자체는 유일값.
     "src/engine/scanner.py":
         "611568c078c6f3779344e05b3dfa308c792c64e1c5e02480de6313200282f54f",
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). 8영역 `update_weights` 의 enabled 대입 한 줄(섀도 전략은 비중 0 이어도 켜짐 유지). 값만 이동.
     "src/engine/strategy_registry.py":
-        "d794696e54ffdc36efa6df917879d780e86bc1f373bb3b5d8dcbc0beac8cef8b",
+        "3b6366c3cdb6e83907428435b95611880f1b8223e572c361a1cad2d00b13a067",
     # 8영역 — realtime 전부
     "src/realtime/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -134,24 +135,32 @@ _BASE_SHA: dict[str, str] = {
     # 🔁 cycle382 리뷰 재핀(값만) — `_market_unit_tally_roll` 을 `tally.date != day`
     # 에서 `tally.date < day`(더 늦은 날짜에서만 롤)로 시정(§8, 사용자 승인 범위 밖 무접촉).
     # 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27). 게이트 2번째 문장 + 헬퍼 4개 + `__init__` cap 1개 추가. 값만 이동.
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). 섀도 관문 `_shadow_buy_intercepted` + 정적 판정 `shadow_mode_on` + 마커 헬퍼 2개 + `__init__` cap 1개 + `SHADOW_MODE_KEY` 상수. 값만 이동.
     "src/engine/strategy_base.py":
-        "d5257d3a8a6c4744663aa7af6e89e3a683ccdb2e63ae062284e5e702079dddfb",
+        "e25384a3defb09564b91a5f2eebef8539baaa237375ae0422956d548b86b6673",
     "src/engine/strategies/__init__.py":
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
     "src/engine/strategies/bull_flag_breakout.py":
-        "320815b44a259c577184d3b9fbaf6ae31eb2b0dda142e1ab4361541e1c4defd4",
+        "a13ea3879240ff8f579661ea9c5f7f1d3dc1995e7e61039d5cc3ecb11c55b75e",
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
     "src/engine/strategies/donchian_swing.py":
-        "9548ca4f12e20c733506662fa9ad11b5803a594fb5ab0679d20f87e6f5890f2f",
+        "d6c6ee2bb5bf49e9b768f9959c727710b2d993be198888be4df10e89e754bdb2",
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
     "src/engine/strategies/kojiro.py":
-        "fac754faaa1ae65a4a484c02abd46e4de73494bd165ead1f5f0790e10734b4ea",
+        "812363eb730cdc074e21239e7914287ab7e637a29a98152fd5f64478081c4b53",
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
     "src/engine/strategies/long_tail_volatility.py":
-        "42211d78f9d347436a3e33349c6058877b1e6c033ebde28d3b6abd0ac5e835a9",
+        "44f7f103b3c714522b09da7de5a4de2ec0423ffc2a3032f43540c4c70943778d",
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
     "src/engine/strategies/momentum.py":
-        "5aad47791126b66a4febe3f7496cc355059db7cbdadcd106095094f9cb2a3145",
+        "686171e29ac365e8ea66f7659f2e02962f58bbac9d9ab9545095c7b3544bb403",
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
     "src/engine/strategies/vcp_breakout.py":
-        "440336ceba6005ced9409b0b1998f273b038950f093d171c668e8d5eb979a48a",
+        "545f7aa85873bec1a69d7c349eb6cc6c2db39c5d6ac00e385db2bb3e929eb7d1",
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
     "src/engine/strategies/volatility_breakout.py":
-        "c480b0f97212150c6887e2b5203e39e551ec122653ba7f6664d0e4437a3d6afd",
+        "c07e7298743496129601e79598b799472242d2f02b60eb2f92217b6bed1ee1b4",
     # 파라미터 축 — 킬스위치를 임의로 추가하지 않는다(자문 §5: 파라미터 없음).
     # 🔁 cycle365(2026-09-25) 재핀 — 사용자 승인 P5a·P5b:
     # trailing_stop_rate 도움말에 적용 범위 명시 + max_scan_stocks range_src
@@ -168,8 +177,9 @@ _BASE_SHA: dict[str, str] = {
     # 텍스트만 바뀌었다.
     # cycle390(2026-09-29) — `sizing_mode` 도움말 정정(보유 중 전환 시 기보유분도 새 손절을 탄다).
     # 도움말 텍스트만 바뀌었고 키·범위·값 무변경. 직전 값 = `7120d37ff2ab392c7f59519ede3c19cd80e9dea80db6ec3146de74dd575f4326`.
+    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). shadow_mode 카탈로그 행 + `CATALOG_VERSION` cycle384.1→cycle399.1 + 개수 주석(106·identity 19·진입 50). 값만 이동.
     "src/engine/param_catalog.py":
-        "e986348c9b27fdbc8965a2acf8fc10cb905446ea4ad4b91ddf3a5767c6e64422",
+        "5fab0c3ced8a0468b14002034ab24c9d014ea98b7cae662788ea7337d3890608",
     "src/engine/param_validation.py":
         "b4c5c029800191523bcc511919d6de3774e9ab49ca2fc0a0558ee3907868ee17",
     # 시각·호가유형 표의 유일 정본 — GTP 게이트는 이 표를 **읽는다**(수정 금지).

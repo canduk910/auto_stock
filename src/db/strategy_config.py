@@ -8,6 +8,7 @@ params(JSONB) 는 pg._init_conn 의 codec 등록으로 dict 왕복 보장.
 from __future__ import annotations
 
 import logging
+from collections.abc import Collection
 from datetime import datetime
 
 import src.db.pg as pg
@@ -58,10 +59,14 @@ async def save(strategy_id: str, enabled: bool, weight: float, params: dict) -> 
     logger.info("전략 설정 저장: %s (enabled=%s, weight=%.0f%%)", strategy_id, enabled, weight * 100)
 
 
-async def save_weights(weights: dict[str, float]) -> None:
-    """전략별 비중만 업데이트한다."""
+async def save_weights(
+    weights: dict[str, float], *, keep_enabled: Collection[str] = (),
+) -> None:
+    """전략별 비중만 업데이트한다. `enabled = weight > 0` — 단 `keep_enabled` 에 든 전략은
+    비중 0 이어도 `enabled=True` 로 쓴다(cycle399 섀도 전략 — 판정은 메모리를 가진 호출자가
+    `StrategyBase.shadow_mode_on` 으로 한다. DB 행 params 로는 코드 기본값 섀도를 못 본다)."""
     for sid, weight in weights.items():
-        enabled = weight > 0
+        enabled = weight > 0 or sid in keep_enabled
         # 기존 params 유지
         existing = await pg.fetch(
             "SELECT params FROM strategy_config WHERE strategy_id = $1", sid

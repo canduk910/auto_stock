@@ -223,6 +223,7 @@ _PREEXISTING_CAPS = frozenset({
     "_limit_up_close_config_logged",    # cycle352
     "_limit_up_close_decision_logged",  # cycle352
     "_buy_paused_logged",          # 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27 「돈키언 신규매수 중지」) — strategy_base 공통 cap
+    "_shadow_logged",              # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1) — strategy_base 공통 cap
 })
 
 
@@ -647,6 +648,8 @@ def test_s6_1_no_new_default_params_key() -> None:
         "limit_up_close_hold_mode",
         # 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27 「돈키언 신규매수 중지」) — 30→31.
         "buy_paused",
+        # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1) — 31→32.
+        "shadow_mode",
     }
     got = set(LongTailVolatilityStrategy.DEFAULT_PARAMS)
     assert got == expected, (

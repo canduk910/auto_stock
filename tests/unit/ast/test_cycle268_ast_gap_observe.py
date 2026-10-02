@@ -99,6 +99,7 @@ GAP_DOWN_LOG = "고지로 갭다운 스킵: %s 갭률 %.1f%% ≤ %.1f%%"
 # 기록만(주문 경로는 `mode ∈ {shadow, enforce} ∧ m < 1` 일 때만 갈린다).
 # 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27 「돈키언 신규매수 중지」) — 44→45.
 # 신규 매수 신호만 멈추는 스위치(기본 false = 행위 변경 0). 7전략 공통.
+# 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1) — 45→46. 기본 false = 행위 변경 0. 7전략 공통.
 KOJIRO_PARAM_KEYS = (
     "atr_period", "atr_ratio_max", "atr_ratio_min", "after_market_exit_division",
     "breakeven_promote_atr", "buy_paused",
@@ -112,7 +113,7 @@ KOJIRO_PARAM_KEYS = (
     "max_units_per_stock", "max_units_total", "min_market_cap",
     "min_trade_amount", "min_vol_floor_pct", "nxt_tradable",
     "order_exchange_clock_mode", "position_ratio",
-    "rank_w_band", "rank_w_fresh", "rank_w_macd3", "risk_pct", "sizing_mode",
+    "rank_w_band", "rank_w_fresh", "rank_w_macd3", "risk_pct", "shadow_mode", "sizing_mode",
     "slope_lookback", "stage1_freshness", "stop_atr", "tradable_boards",
     "trail_atr",
 )

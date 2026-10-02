@@ -96,6 +96,14 @@
 - 🔴 **멈춰 둔 동안 이 키를 코드에서 지우지 않는다** — 키 없는 코드가 배포되면 `_load_strategy_config` 가 DB 의 `true` 를 버려 조용히 풀린다.
 - 절차 = `_workspace/red/cycle384_buy_paused_spec.md` §11(켜기·확인) · §12(해제·롤백). 어느 전략이 멈췄는지는 운영 상태다(`GET /api/strategies`·워크리스트).
 
+**각주 ⑩ 7 전략 공통 — 섀도 모드 `shadow_mode` (cycle399)** — 전략 파일에는 `DEFAULT_PARAMS["shadow_mode"]=False` 한 줄과 BUY 반환 앞 섀도 관문 한 문장뿐이다. 관문·마커(`[shadow_mode_config]`·`[shadow_buy]`) = `src/engine/CLAUDE.md` `strategy_base.py` 절.
+- **행위** — `true` 면 BUY 가 날 순간 `[shadow_buy]` 만 남기고 `Signal.NONE`. 판단은 실전과 끝까지 같고 방아쇠만 뺀다. 보유분 청산은 그대로.
+- **자리** — `return Signal.BUY` 바로 앞, 마지막 거름 뒤 · 상태 변경 앞. 순서 = 각주 ⑧ → 각주 ⑨ → 계좌 SOFT → 신호 계산 → 시장 유닛 거름 → 섀도. 각주 ⑨ 가 켜져 있으면 그쪽이 먼저 막아 섀도 기록도 없다. AST 가 전략 명부 파일마다 강제한다(`test_cycle399_ast_shadow_mode.py` S01~S03) — 새 전략은 BUY 반환마다 이 문장을 둔다.
+- **비중** — 섀도 전략은 비중 0 + 켜짐. `update_weights` 와 비중 저장 두 라우트가 섀도 전략의 켜짐을 지킨다. 🔴 최소 비중(Σ 정규화로 실전 예산 축소)·`enabled=False`(기록 0 · 보유 손절 정지)로 두지 않는다. 실전 → 섀도 강등은 비중을 건드리지 않고 이 키만 켠다.
+- **값** — `is True` 일 때만. 부재·`False`·그 밖의 모양은 실전 그대로(모양이 틀리면 WARNING — 그날 BUY 가 관문에 닿았을 때만 찍힌다), PUT 은 bool 이 아니면 422. **즉시**. `PARAM_RANGES`/`INT_PARAMS` 편입 금지(AST S07). 🔴 켜 둔 동안 코드에서 키를 지우지 않는다(각주 ⑨ 와 같은 이유).
+- **기록 ≠ 실전 매수 목록** — 섀도는 보유·주문을 만들지 않아 `max_positions`·kojiro 업종 상한·예산 소진·`_bought_today` 에 걸리지 않는다. `[shadow_buy]` 는 「그 종목을 그 순간 샀을 것」 이지 실전 포트폴리오가 아니다 — 오프라인 재현이 최대 보유 수·업종 상한·예산을 직접 적용한다. BFB·VCP 는 거래량 래치를 소비하지 않아 같은 셋업의 `[bfb_latch_released]`·`[vcp_*]` 래치 로그와 `breakout_seen_count` 가 실전보다 늘 수 있다(관측만, 매매 영향 0).
+- 🔴 **끄는 순서** — 비중 0 인 섀도 전략에서 `shadow_mode=false` 만 하면 켜진 채 예산 0 으로 남아 BUY 가 `execute_buy` 의 수량 0 → 900초 「투자금 부족」 으로 끝난다(오귀인). 실전으로 올리려면 **비중 > 0 을 먼저** 저장하고 끈다. 그만두려면 끈 뒤 비중 0 을 다시 저장해 `update_weights` 가 끄게 한다(보유 0 확인 — 루트 금기). AI 자문 비중 적용(`/apply`)은 `allocate_funds` 를 부르지 않아 그날 예산이 남으므로, 섀도를 끄기 전 비중 PUT 으로 예산을 다시 나눈다.
+
 ## 자금관리 — 사이징 방식 × 손절 기준 매트릭스
 
 **핵심 명제**: `수량 = 예산 × risk_pct ÷ (진입가 − 손절가)`. 손절이 **고정 %** 면 명목 = `예산 × risk_pct/s` = 종목 무관 상수 = `position_ratio` 이므로 **고정% 손절 + 비율 사이징은 이미 리스크 균등**이다. ATR 유닛 사이징은 **손절도 ATR 기반일 때만** 리스크를 균등화한다 — 사이징만 바꾸면 정규화가 깨진다(**함정 #1**). ⇒ **터틀 전환은 하드손절 ATR화와 반드시 한 커밋에 묶는다.**
@@ -298,7 +306,7 @@
    - `check_buy_signal` 에 계좌 SOFT 게이트 1줄(「안전 규칙」 위치 계약) + `tests/unit/ast/test_cycle233_ast_account_risk.py` `GATE_FIRST_FILES`/`GATE_PRE_BUY_FILES` 에 파일 추가.
    - `calc_buy_quantity` 의 모든 `return` 이 `_apply_budget_limit` 경유 + `tests/unit/ast/test_budget_limit_ast.py` `STRATEGY_FILES` 에 파일 추가.
    - 보유형이면 `get_effective_stop_price` read-only 미러 + boot 훅에서 `StrategyBase._apply_high_since_buy_from_candles` 호출(없으면 다음 날 아침마다 트레일링 기준점이 매수가로 돌아간다 — 「자금관리」 트레일링 기준점 항목).
-   - 7전략 공통 키(`buy_paused` · `max_lot_ratio_mult` · 장중 킬스위치 2키 · LLM 4키)를 같은 값으로 둔다 — `buy_paused`(A12)·`max_lot_ratio_mult`(G-245-6)는 AST glob 전수. 새 `DEFAULT_PARAMS` 키는 `param_catalog.py` 에도 등재(없으면 PUT `unknown_key` 422). 배포 전 DB 선반영 시 PUT 금지 = 문서 머리. `DEFAULT_PARAMS` 를 바꾸면 `tests/unit/ast/test_cycle278_ast_catalog_guards.py` `_DEFAULT_PARAMS_SHA` 재핀이 따른다.
+   - 7전략 공통 키(`buy_paused` · `shadow_mode` · `max_lot_ratio_mult` · 장중 킬스위치 2키 · LLM 4키)를 같은 값으로 둔다 — `buy_paused`(A12)·`shadow_mode`(S08)·`max_lot_ratio_mult`(G-245-6)는 AST glob 전수. `return Signal.BUY` 마다 앞에 섀도 관문(각주 ⑩, AST S01). 새 `DEFAULT_PARAMS` 키는 `param_catalog.py` 에도 등재(없으면 PUT `unknown_key` 422). 배포 전 DB 선반영 시 PUT 금지 = 문서 머리. `DEFAULT_PARAMS` 를 바꾸면 `tests/unit/ast/test_cycle278_ast_catalog_guards.py` `_DEFAULT_PARAMS_SHA` 재핀이 따른다.
    - `list_by_filter(...)` 에 `exclude_etf_like=True`(ETF 를 사면 G4 허용 목록).
    - 멀티데이면 `_MULTIDAY_STRATEGIES` 리터럴 + `check_force_clear()==[]`.
 
