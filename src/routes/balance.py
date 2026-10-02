@@ -27,7 +27,15 @@ async def balance():
     보유 종목 수는 통상 10 미만이라 sequential await 비용 무시 가능.
     캐시 miss → None / 조회 예외 → 종목별 흡수 후 None.
     """
-    holdings, summary = await get_balance()
+    # cycle406 L2 — `get_balance()` 소진 예외(KIS 재시도 소진 등)를 ASGI 미처리 500 으로
+    # 내보내지 않는다. 내부 호출부(`portfolio.py::_net_asset_graceful` 등)는 이미 흡수하지만
+    # 이 라우트는 잔고 자체가 본문이라 200+빈 데이터로 꾸밀 수 없다 — `success=False` 로
+    # 흡수한다(루트 CLAUDE.md API 응답 래퍼 규약).
+    try:
+        holdings, summary = await get_balance()
+    except Exception as exc:  # noqa: BLE001 — 원인 불문 흡수, 메시지에 남긴다
+        logger.warning("[balance] get_balance 실패 — success=False 로 흡수: %s", exc, exc_info=True)
+        return ApiResponse(success=False, data=None, message=f"잔고 조회 실패: {exc}")
 
     # cycle339 — 종목별 청산선(손절가·목표가). in-memory registry 조회뿐이라
     # DB·KIS 왕복이 0 이다. 🔴 registry 를 못 읽어도 잔고는 그대로 나가야 하므로

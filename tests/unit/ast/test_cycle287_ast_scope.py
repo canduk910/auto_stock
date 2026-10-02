@@ -730,8 +730,12 @@ _SRC_TREE_FILES = 170  # cycle403 — ETF 추세(etf_trend) 신설: 신규 leaf 
 # 🔁 cycle403 재핀 4 — R3 승인(10-03): 8영역 `risk.py` `_TICK_BUY_EVAL_SKIP_STRATEGIES` 에
 # `etf_trend` 등록(donchian_swing·kojiro 와 같은 사유). 파일 수 170 그대로.
 # 직전 값(cycle403 재핀 3) = `016568a03b490db9f257fa8bc5fdbe1d9b5fcf632e688ff4782da54f9d3bb773`.
+# 🔁 cycle406 재핀 5 — 작은 항목 4건 중 L2·M3(매매 행위 무변경·8영역/scheduler.py
+# 무접촉): `src/routes/balance.py`(get_balance 소진 예외 → ApiResponse(success=false)
+# 흡수) + `src/api/base.py`(_request_metrics 에 `since` 노출). 파일 수 170 그대로.
+# 직전 값(cycle403 재핀 4) = `ac6d2a86b3462a7b64c38f0c1865d61827b801202ec3a7beea4aae80dad25711`.
 _SRC_TREE_DIGEST = (
-    "ac6d2a86b3462a7b64c38f0c1865d61827b801202ec3a7beea4aae80dad25711"
+    "459f4c96ba629fa111bbc89cedffb6b6bbfaca12cbc6bbf1a85ca04bb6b61846"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

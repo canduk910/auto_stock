@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { http, HttpResponse } from "msw";
 
 import { getBalance } from "../balance";
-import { wrap } from "../../test/factories";
+import { failed, wrap } from "../../test/factories";
 import { server } from "../../test/server";
 
 describe("balance API wrapper", () => {
@@ -40,5 +40,16 @@ describe("balance API wrapper", () => {
     expect(data.holdings).toHaveLength(1);
     expect(data.summary.deposit).toBe(10_000_000);
     expect(data.summary.net_asset).toBe(10_720_000);
+  });
+
+  it("cycle406 L2 — success=false 응답이면 조용히 null 을 돌려주지 않고 던진다", async () => {
+    // 백엔드가 get_balance() 소진 예외를 200 + success=false 로 흡수하게 됐다
+    // (src/routes/balance.py cycle406). 여기서 그대로 data.data(=null)를 돌려주면
+    // BalanceTable 의 `if (!data) return null` 이 아무 설명 없이 빈 화면을 그린다 —
+    // react-query 의 기존 isError 경로("잔고를 불러올 수 없습니다.")를 타도록 던진다.
+    server.use(
+      http.get("/api/balance", () => HttpResponse.json(failed("잔고 조회 실패: 소진"))),
+    );
+    await expect(getBalance()).rejects.toThrow("잔고 조회 실패: 소진");
   });
 });

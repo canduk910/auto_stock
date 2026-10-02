@@ -11,7 +11,7 @@
 
 ## 전략 카탈로그
 
-각주 ①~⑦ 은 표의 해당 행이 가리키는 게이트다. ⑧·⑨ 는 **7 전략 전부**에 걸리는 공통 청산·매수 차단이라 행마다 적지 않는다.
+각주 ①~⑦ 은 표의 해당 행이 가리키는 게이트다. ⑧·⑨ 는 **전 전략**에 걸리는 공통 청산·매수 차단이라 행마다 적지 않는다.
 
 | ID | 파일 | 핵심 동작 | 손절·청산 | tradable_boards |
 |----|------|----------|----------|-----------------|
@@ -52,10 +52,10 @@
 - `pre_nxt`/`post_nxt` 보드는 스코프 밖(LTV 프리장·야간 매수 무접촉). 마커 `[main_rest_basis_config/round/confirmed/unresolved]`. 가드 `test_cycle272_main_rest_basis.py` · `test_cycle272_open_price_rest_leaf.py` · `test_cycle272_ast_main_rest_basis.py`. 명세 `_workspace/00_leader_trading_rules.md` §5 · 자문 `_workspace/domain_consult/cycle272_rest_open_basis_20260910.md`.
 
 **각주 ④ AI 매수평가(LLM) — 주문 접수 시점 shadow** — **전략 파일에는 훅이 없다.** `order_engine.execute_buy` 가 `place_order` 성공 직후(매핑 등록 끝, PENDING INSERT 앞) `llm_buy_gate.observe_order(...)` 로 접수한다. 래치·cap·마커·영속(`llm_buy_evaluations`)·모델 = `src/engine/CLAUDE.md` 모듈 맵 `llm_buy_gate.py`.
-- 설정 = **`DEFAULT_PARAMS` 4키**(7전략 전부): `llm_gate_mode="shadow"` · `llm_gate_min_score=70`(`would_block` 반사실용) · `llm_gate_daily_call_cap=20` · `llm_gate_timeout_secs=20`. 4키 전부 `PARAM_RANGES`/`INT_PARAMS` **편입 금지**(AST 런타임 + 소스 이중).
+- 설정 = **`DEFAULT_PARAMS` 4키**(전 전략): `llm_gate_mode="shadow"` · `llm_gate_min_score=70`(`would_block` 반사실용) · `llm_gate_daily_call_cap=20` · `llm_gate_timeout_secs=20`. 4키 전부 `PARAM_RANGES`/`INT_PARAMS` **편입 금지**(AST 런타임 + 소스 이중).
 - **키 부재** = `mode` **off** · `daily_call_cap` **0**(호출 안 함) · `min_score`/`timeout` 70/20 — 돈을 쓰는 기능이라 설정이 없으면 하지 않는다(각주 ③ 의 부재 = enforce 와 반대).
 - **기록만 한다**(행위 변경 없음). `enforce` 는 미구현, `shadow` 외 값은 `off`. 킬스위치 = `PUT {"llm_gate_mode":"off"}` **즉시**(SQL 은 재시작 뒤).
-- 채점 문맥 = `llm_features._STRATEGY_META`(7전략) + `snapshot_keys_for`. LTV `pre_nxt` 주문도 평가한다(`board_note` + `vol_ratio_time_norm=null`). `[llm_buy_score]` 의 `rationale` 은 60자 절단(`system_logs` 500자 컷 — 전문은 docker 로그), `latency_ms`(LLM 호출만) ≠ `verdict_lag_ms`(접수→판정 전체).
+- 채점 문맥 = `llm_features._STRATEGY_META`(전 전략) + `snapshot_keys_for`. LTV `pre_nxt` 주문도 평가한다(`board_note` + `vol_ratio_time_norm=null`). `[llm_buy_score]` 의 `rationale` 은 60자 절단(`system_logs` 500자 컷 — 전문은 docker 로그), `latency_ms`(LLM 호출만) ≠ `verdict_lag_ms`(접수→판정 전체).
 - 호출 = 재시도 0(`AsyncOpenAI(max_retries=0)`) · `score` 가 bool 이어도 `schema_error` · 모델 기본 `gpt-6-luna`(`openai_buy_gate_model` — 20:00 자문 `openai_recommend_model` 과 별도) · 키 `openai_api_key` 재사용 · temperature 미지정. 조회 `GET /api/llm-evaluations/{order_no}` · 회고 `.../retrospective`.
 - 자문 `_workspace/domain_consult/cycle274_llm_buy_gate_20260910.md`(enforce 설계는 사용자 결정) · `cycle276_order_time_llm_20260911.md` · 명세 `_workspace/red/cycle276_order_time_llm_eval_spec.md`.
 
@@ -84,11 +84,11 @@
 - **never-raise** — `scheduler._force_clear_main_only` 가 try 없이 부르므로 실패해도 현행 목록만 반환(당일 모드 15:20 청산 보존). `check_exit_signal`·`scheduler.py`·`risk.py` 무접촉.
 - 마커 `[ltv_limit_up_close_config]`(1행/일, 보유 0 에도) · `[ltv_limit_up_close_decision]`(종목마다). 회귀 `test_cycle352_ltv_limit_up_close_hold.py`(T14 는 `test_long_tail_volatility.py` 소관) · `test_cycle352_ast_ltv_close_hold.py`(G1~G6, G3b) · `tests/integration/test_force_clear_1520.py`(I1·I2).
 
-**각주 ⑧ 7 전략 공통 — 관리종목(51)·단기과열(59) 보유 청산 + 당일 매수 차단 (cycle369)** — 전략 파일에는 코드가 없다. 창·판정·킬스위치(`status_exit_mode`·`status_buy_block_mode`)·마커 = `src/engine/CLAUDE.md` 「종목상태 청산·당일 매수 차단」 절.
+**각주 ⑧ 전 전략 공통 — 관리종목(51)·단기과열(59) 보유 청산 + 당일 매수 차단 (cycle369)** — 전략 파일에는 코드가 없다. 창·판정·킬스위치(`status_exit_mode`·`status_buy_block_mode`)·마커 = `src/engine/CLAUDE.md` 「종목상태 청산·당일 매수 차단」 절.
 - **청산** — leaf `status_exit_watch.py` 가 보유(꺼진 전략 포함)를 REST `FHKST01010100` 으로 읽고, **09:00:30~15:28** 에 전용 플래그(`mang_issu_cls_code`·`short_over_yn`)가 `Y` 면 `execute_sell(t, Signal.STATUS_EXIT, sid)` 시장가. 종목상태 코드 51·59 폴백만이면 팔지 않고 경고만. **전략 예외 없음**(LTV 상한가 모드·kojiro 멀티데이도 판다). 같은 틱 다른 청산 신호와는 `_selling` 이 하나로 합치고 표기는 먼저 쏜 쪽.
 - **당일 매수 차단** — 공통 게이트 `_account_soft_gate_blocked` **첫 문장**(AST J25)이 그날 장중 조회 해당 종목의 신규 매수를 막는다(지정 첫날 포함). 막는 순간 edge 기준가를 비운다 — VB·LTV 중첩 `_prev_price[t]` · momentum `_prev_prdy_rate[t]`(첫 문장 게이트인 LTV 는 차단 동안 기준가가 얼어, 안 비우면 해제 뒤 거짓 돌파). 🔴 BFB·VCP 평평한 `_prev_price` 는 건드리지 않는다(비우면 0 으로 읽혀 새 거짓 돌파).
 
-**각주 ⑨ 7 전략 공통 — 신규 매수 멈춤 `buy_paused` (cycle384)** — 전략 파일에는 `DEFAULT_PARAMS["buy_paused"]=False` 한 줄뿐이고, AST 가 `DEFAULT_PARAMS` 를 가진 모든 전략 파일에 요구한다(`test_cycle384_ast_buy_paused.py` A12). 게이트·마커(`[buy_paused_config]`·`[buy_paused_skip]`) = `src/engine/CLAUDE.md` `strategy_base.py` 절.
+**각주 ⑨ 전 전략 공통 — 신규 매수 멈춤 `buy_paused` (cycle384)** — 전략 파일에는 `DEFAULT_PARAMS["buy_paused"]=False` 한 줄뿐이고, AST 가 `DEFAULT_PARAMS` 를 가진 모든 전략 파일에 요구한다(`test_cycle384_ast_buy_paused.py` A12). 게이트·마커(`[buy_paused_config]`·`[buy_paused_skip]`) = `src/engine/CLAUDE.md` `strategy_base.py` 절.
 - **행위** — `true` 면 **신규 매수 신호만** `Signal.NONE`. 청산·손절·트레일링·익일청산·15:20 강제청산·종목상태 청산·시간 청산은 그대로.
 - 🔴 **신호 단계에서 막는다** — 전략 끄기·`weight=0`(보유 손절까지 멈춘다 — 루트 금기) · 수량 0 반환(900초 「투자금 부족」 오귀인) · `buy_disabled`(일일 손실 래치)로 대신하지 않는다.
 - **자리** = 공통 게이트 **둘째 문장**(첫 문장 = 각주 ⑧). 첫 문장 게이트 전략(LTV·donchian·BFB·VCP·kojiro)은 멈춘 동안 신호 본문이 안 돌고, momentum·VB 는 돌파 순간에만 닿는다.
@@ -97,7 +97,7 @@
 - 🔴 **멈춰 둔 동안 이 키를 코드에서 지우지 않는다** — 키 없는 코드가 배포되면 `_load_strategy_config` 가 DB 의 `true` 를 버려 조용히 풀린다.
 - 절차 = `_workspace/red/cycle384_buy_paused_spec.md` §11(켜기·확인) · §12(해제·롤백). 어느 전략이 멈췄는지는 운영 상태다(`GET /api/strategies`·워크리스트).
 
-**각주 ⑩ 7 전략 공통 — 섀도 모드 `shadow_mode` (cycle399)** — 전략 파일에는 `DEFAULT_PARAMS["shadow_mode"]=False` 한 줄과 BUY 반환 앞 섀도 관문 한 문장뿐이다. 관문·마커(`[shadow_mode_config]`·`[shadow_buy]`) = `src/engine/CLAUDE.md` `strategy_base.py` 절.
+**각주 ⑩ 전 전략 공통 — 섀도 모드 `shadow_mode` (cycle399)** — 전략 파일에는 `DEFAULT_PARAMS["shadow_mode"]=False` 한 줄과 BUY 반환 앞 섀도 관문 한 문장뿐이다. 관문·마커(`[shadow_mode_config]`·`[shadow_buy]`) = `src/engine/CLAUDE.md` `strategy_base.py` 절.
 - **행위** — `true` 면 BUY 가 날 순간 `[shadow_buy]` 만 남기고 `Signal.NONE`. 판단은 실전과 끝까지 같고 방아쇠만 뺀다. 보유분 청산은 그대로.
 - **자리** — `return Signal.BUY` 바로 앞, 마지막 거름 뒤 · 상태 변경 앞. 순서 = 각주 ⑧ → 각주 ⑨ → 계좌 SOFT → 신호 계산 → 시장 유닛 거름 → 섀도. 각주 ⑨ 가 켜져 있으면 그쪽이 먼저 막아 섀도 기록도 없다. AST 가 전략 명부 파일마다 강제한다(`test_cycle399_ast_shadow_mode.py` S01~S03) — 새 전략은 BUY 반환마다 이 문장을 둔다.
 - **비중** — 섀도 전략은 비중 0 + 켜짐. `update_weights` 와 비중 저장 두 라우트가 섀도 전략의 켜짐을 지킨다. 🔴 최소 비중(Σ 정규화로 실전 예산 축소)·`enabled=False`(기록 0 · 보유 손절 정지)로 두지 않는다. 실전 → 섀도 강등은 비중을 건드리지 않고 이 키만 켠다.
@@ -129,14 +129,14 @@
 - **`max_positions` 는 걷어내지 않는다** — 계좌가 커지면 유일한 상관·운영 통제축이다(자문 `_workspace/domain_consult/kojiro_position_count_vs_unit_cap.md`). `position_ratio` 를 낮추면 개수 천장(`1/position_ratio`, 자본 무관)이 올라 저ATR 종목이 쌓인다(중소형 폭락일 상관=1 수렴). ③은 규모 불변(full 유닛 4.5개에서 물린다)이라, 더 담으려고 `max_open_risk_pct` 를 올리는 것은 **상관군 캡이 전제**다.
 - **피라미딩(사다리 증량)은 코드가 없다**(설계 `_workspace/design/2026-09-24_three_stage_sizing_pyramiding.md`). 정해진 제약 = K 2.0 유지 · **1주 폴백 랏에는 사다리를 걸지 않는다**(설계안 D-2) · 사다리 위험 합계는 kojiro `max_open_risk_pct` 가 지킨다. ⚠️ **VCP/BFB 는 피라미딩 부적합**(VCP 수축 진입은 2N 손절이 과도하게 타이트, BFB 는 measured-move 목표 확정) — 그래서 `max_units_total`≡`max_positions` 가 영구히 성립하고 **개수 캡이 영구 load-bearing** 이다.
 - **유닛화는 랏 미세화를 풀지 못한다** — 정수 절삭은 유닛식에도 있다. 랏이 1주 언저리인 원인은 `q` = 설계 랏 ÷ 그 전략이 사는 종목의 중앙 주가(중앙 명목 아님)이고 `q` 는 순자산에 정비례한다. 비중·자금을 둔 채 유닛만 도입하면 `floor(예산 × risk_pct ÷ ATR) = 0` 으로 **전면 무매매**다. 고칠 대상은 사이징이 아니라 전략 간 배분이다.
-- **매수 수량은 `StrategyBase._apply_budget_limit()` 관문을 반드시 지난다**(AST A-GATE — 7전략 모든 `return`). 순서 **잔여 클램프 → K축 → `[oversized_fallback]` 관측 → ρ축 → `return`** 이 계약이다. 순서의 이유·헬퍼·마커·순수성(A-PURE·A-ATOMIC) = `src/engine/CLAUDE.md` `strategy_base.py` 절.
+- **매수 수량은 `StrategyBase._apply_budget_limit()` 관문을 반드시 지난다**(AST A-GATE — 전 전략 모든 `return`). 순서 **잔여 클램프 → K축 → `[oversized_fallback]` 관측 → ρ축 → `return`** 이 계약이다. 순서의 이유·헬퍼·마커·순수성(A-PURE·A-ATOMIC) = `src/engine/CLAUDE.md` `strategy_base.py` 절.
   - **잔여** = `total_investment - (positions buy_price×qty 합 + pending_buy_amounts 합)`. 부족하면 **부분 매수**(잔여 < 1주 → 0). 비중 기준 0주면 `_fallback_one_share` 로 위임 — **이 분기 순서가 계약**.
   - **K축 `max_lot_units`(K=2.0, cycle242)** — `sizing_mode="turtle"` 전략의 **모든 랏**(터틀 유닛·`position_ratio` 낙하·1주 폴백)을 `floor(K × 예산 × risk_pct ÷ ATR)` 주 이하로 자르고 0 이면 **매수하지 않는다**(`min` — 늘리지 않는다). 산출 = `turtle_sizing.compute_unit_qty(..., fraction=K)` 재사용(새 수식 금지), ATR = 터틀 분기와 같은 `_candidates[ticker]` read-only. ATR 결측·모호(`atr`/`atr14` 상이)·`risk_pct ≤ 0`·예외 = **fail-open**(현행 수량 + `[fallback_cap_skipped]`) — fail-closed 는 유령 키가 두 전략을 전 기간 체결 0건으로 만든 방향이다. 클램프 `[1.0, 20.0]`(하한 = 정상 터틀 랏이 캡에 안 걸리는 전제, 상한 = 롤백 다이얼).
     - ⚠️ 「K유닛 = 예산 2.0% 노출」은 `_entry_atr` 스탬프 랏(2×ATR 손절) 한정 — 폴백·낙하 랏은 미스탬프라 고정% 손절이고 실효 상한은 `cap_qty × price × |stop_loss_rate|` 다. `sizing_mode="turtle"` 이 아닌 전략은 범위 밖(함정 #1).
     - 롤백 = `max_lot_units = 20.0` — `PUT /api/strategies/{id}/params` **즉시**, SQL UPDATE 는 **다음 재시작에서만**(`_config_loaded` 프로세스당 1회, `_boot` 재호출 no-op). 보유 중 장중 재시작 금지(cycle232 D6)라 **장중은 PUT 뿐**. 당일 캡→0 으로 `_bought_today` 가 소진된 종목은 어느 수단으로도 **다음 세션부터만** 되살아난다(`cap_qty` 는 D-1 ATR 기반 일중 상수).
   - **ρ축 `max_lot_ratio_mult`(K_ρ=2.5, cycle245 — 관문을 지나는 모든 랏)** — `cutoff = int(K_ρ × int(예산 × position_ratio))` · `cap_qty = cutoff // 현재가`, 1주도 못 사면 **매수하지 않는다**(줄이는 방향뿐). 사이즈드 터틀 랏·낙하 랏은 notional 상한 덕에 항등적으로 무접촉이라 **실효는 1주 폴백 랏뿐**이다. K축이 심사한 랏도 `min` 으로 후심사한다(cycle254 — 조기탈출은 `_lot_units_cap_governs` 판정 예외 `probe_error` 뿐).
     - `position_ratio` 결측·예산 0·초소액·판정 예외 = fail-open + `[ratio_cap_skipped]`. **키 부재 = 캡 OFF**(K축과 반대 — 매수를 막는 통제라 fail-closed 는 유령 키 재현 경로).
-    - 키는 **7 전략 전부** `DEFAULT_PARAMS` 에 `2.5`(터틀 포함 — `sizing_mode` 를 되돌리면 ρ축이 받는다). 클램프 `[1.0, 20.0]` — **하한 1.0 이 「정상 비중 랏 무접촉」 전제**(미만이면 주 분기까지 잘려 전면 무매매). 롤백 K_ρ=20.0(반영 시점은 K축과 같다).
+    - 키는 **전 전략** `DEFAULT_PARAMS` 에 `2.5`(터틀 포함 — `sizing_mode` 를 되돌리면 ρ축이 받는다). 클램프 `[1.0, 20.0]` — **하한 1.0 이 「정상 비중 랏 무접촉」 전제**(미만이면 주 분기까지 잘려 전면 무매매). 롤백 K_ρ=20.0(반영 시점은 K축과 같다).
     - `PARAM_RANGES`/`INT_PARAMS`·AI 자문 자동 적용 경로 편입 금지. 가드 `tests/unit/ast/test_cycle245_ast_ratio_notional_cap.py` G-245-1(런타임 dict + 소스 리터럴) · G-245-6(전략 파일 glob 전수 — 키 존재 + 값 = `_MAX_LOT_RATIO_MULT_DEFAULT`) · G-245-7(전략 `calc_buy_quantity`·터틀 사이징에 `max_lot_ratio_mult` 토큰 0 — 캡 로직은 관문 안에만).
 - **불변식 `position_ratio × max_positions ≤ 1.0`** — DEFAULT_PARAMS 는 AST(C-DEFAULT), AI 추천은 `_validate_recommendations` 가 강제. `max_positions` 는 `PARAM_RANGES`/`INT_PARAMS` **편입 금지**(리스크 정체성 상수).
 - **ATR 손절 게이트 = `_entry_atr` 스탬프 존재** — `sizing_mode` 로 게이팅하지 않는다(DB 토글 하나로 기보유 손절 규약이 바뀌면 안 된다). 스탬프 값 = sizing 에 쓴 ATR(**커플링 불변식**). 터틀이 0 을 반환하는 모든 경로(변동성 floor / 잔여 부족 / `ticker=None` / 예외)는 **미스탬프** → % 손절.
@@ -155,7 +155,7 @@
 장세에 따라 터틀 4전략(`kojiro`·`donchian_swing`·`bull_flag_breakout`·`vcp_breakout`)의 **신규 진입 설계 랏만** 줄인다. 🔴 **매크로 레짐과 다른 축이다** — 레짐 게이트가 아니라 전략 사이징이다. 헬퍼·마커 = [`src/engine/CLAUDE.md`](../CLAUDE.md) `strategy_base.py` 절 · 판정 leaf = 같은 문서 모듈 맵 `market_unit.py`.
 
 - **장세** = KODEX 200(`069500`) 일봉 종가의 **직전 영업일 봉** — 60일선 위·상승 **1** · 위·하락 **0.75** · 아래·상승 **0.5** · 아래·하락 **0**(그날 신규 진입 없음). 상승 = 60일선 > 20봉 전 60일선. 동률은 약한 쪽. 배수·창 길이는 leaf `src/engine/market_unit.py` 한 곳의 상수이고 파라미터로 열지 않는다.
-- **무접촉** = `total_investment`·잔여 클램프·K축·ρ축·kojiro 오픈리스크 캡·`cash_usage_ratio`·보유분·청산 규약. 🔴 예산 경로(`cash_usage_ratio`·`total_investment` 축소)로 대신하지 않는다 — 7전략 전부와 일일 손실 분모·정산 기준선·비중 하한선 검증이 함께 흔들리고, 매크로 자동 조정과 같은 손잡이라 두 효과를 가를 수 없다(자문 `_workspace/domain_consult/cycle376_market_unit.md` §7.4).
+- **무접촉** = `total_investment`·잔여 클램프·K축·ρ축·kojiro 오픈리스크 캡·`cash_usage_ratio`·보유분·청산 규약. 🔴 예산 경로(`cash_usage_ratio`·`total_investment` 축소)로 대신하지 않는다 — 전 전략과 일일 손실 분모·정산 기준선·비중 하한선 검증이 함께 흔들리고, 매크로 자동 조정과 같은 손잡이라 두 효과를 가를 수 없다(자문 `_workspace/domain_consult/cycle376_market_unit.md` §7.4).
 - **모드** `market_unit_mode ∈ off|shadow|enforce` — 네 전략 `DEFAULT_PARAMS` 에만 있다(기본 `"shadow"` = 계산·기록만, 수량 불변. 부재·오타 = `off`). VB·LTV·momentum 에는 키·헬퍼 호출이 없다(설계 랏이 1주 언저리 — 같은 자문 §4.4). 전략마다 `PUT {"params":{"market_unit_mode":"off"|"shadow"|"enforce"}}` 로 **즉시** 바뀐다(매 호출 읽는다). `PARAM_RANGES`/`INT_PARAMS`·AI 자문 자동 적용 경로 **편입 금지**(AST `test_cycle382_ast_market_unit.py` A03).
 - **결측·stale·예외 = m=1**(현행) + WARNING(`[market_unit_unavailable]`·`[market_unit_error]`) — 장세 데이터 결손이 매수를 조용히 줄이면 안 된다.
 
@@ -186,7 +186,7 @@
 
 ### prepare 공통
 
-- **기준일 인자 `prepare(self, *, as_of: date | None = None)`**(7전략 공통, 해석 = `StrategyBase._resolve_prepare_as_of`) — `None`/오늘 = 현행 그대로(부팅·07:59·5분 재준비 — 골든 `tests/unit/engine/strategies/fixtures/cycle364_prepare_golden.json`) · `> 오늘` = **미리보기**(`today_str = as_of` 라 오늘 봉이 「전일」, 기대 헤드 = `previous_trading_day(as_of)`, 21:00 저녁 캡처만) · `< 오늘` = `ValueError`. momentum 은 인자만 받는다. VB·LTV 는 PV-1 밖이다(VB 보유는 15:20 에 비고, LTV 상한가 보유가 읽는 `ticker_prev_close` 는 21:30 정산이 비운 뒤 다음 부팅이 채운다).
+- **기준일 인자 `prepare(self, *, as_of: date | None = None)`**(전 전략 공통, 해석 = `StrategyBase._resolve_prepare_as_of`) — `None`/오늘 = 현행 그대로(부팅·07:59·5분 재준비 — 골든 `tests/unit/engine/strategies/fixtures/cycle364_prepare_golden.json`) · `> 오늘` = **미리보기**(`today_str = as_of` 라 오늘 봉이 「전일」, 기대 헤드 = `previous_trading_day(as_of)`, 21:00 저녁 캡처만) · `< 오늘` = `ValueError`. momentum 은 인자만 받는다. VB·LTV 는 PV-1 밖이다(VB 보유는 15:20 에 비고, LTV 상한가 보유가 읽는 `ticker_prev_close` 는 21:30 정산이 비운 뒤 다음 부팅이 채운다).
 - 🔴 **PV-1 — 미리보기 준비는 보유 종목의 청산 입력을 바꾸지 않는다** (donchian·kojiro·BFB·VCP — 청산이 `_candidates` 보유 엔트리를 읽는 네 전략)
   - 와이프 = `self._candidates = {t: v for t, v in self._candidates.items() if t in keep}`(`keep = _preview_keep_tickers()` = 자기 보유 ∪ 자기 익일청산, 남긴 엔트리는 **같은 객체**). 종목 루프는 `skip = _preview_skip_tickers()`(자기 보유 ∪ 전 전략 보유·익일청산) 종목의 fetch 결과를 버린다 — `_candidates`·`ticker_prev_close`·kojiro `_held_stage3`·관측 원자료 어느 것도 쓰지 않는다.
   - 이유 — 바뀌면 야간 틱 하나로 청산이 나갈 수 있다(kojiro `_held_stage3` 는 가격 무관 `TREND_EXIT`). 20:00 뒤에도 stale watcher 가 보유를 HIGH 로 재구독하므로 틱 부재는 보장이 아니다.
@@ -252,7 +252,7 @@
 
 ## 안전 규칙
 
-- **계좌 SOFT Σ상한 게이트 (cycle233 — 다크런치)** — 7전략 `check_buy_signal` 이 `StrategyBase._account_soft_gate_blocked(ticker)` 를 지난다(AST 전수 강제). **위치 이원화가 계약** — 폴/래치형 5전략(donchian/LTV/BFB/VCP/kojiro) = **첫 문장** / edge-crossing 2전략(momentum/VB) = **발사 직전**(`return Signal.BUY` 앞). 🔴 edge-crossing 전략은 최상단에 두지 않는다 — 차단 동안 `_prev_price`/`_prev_prdy_rate` baseline 이 얼어 해제 뒤 첫 틱이 거짓 돌파다(AST). 신규 매수만 막는다(청산류 무관 · fail-open = 판정 실패 → False · DB `account_risk_block_pct` 가 없으면 항상 False). 게이트 본문 순서 = ① 종목상태 당일 매수 차단(각주 ⑧, AST J25 — 다크런치 아님, 킬스위치 키가 없으면 `enforce`) ② `buy_paused`(각주 ⑨) ③ 계좌 SOFT 판정.
+- **계좌 SOFT Σ상한 게이트 (cycle233 — 다크런치)** — 전 전략 `check_buy_signal` 이 `StrategyBase._account_soft_gate_blocked(ticker)` 를 지난다(AST 전수 강제). **위치 이원화가 계약** — 폴/래치형 5전략(donchian/LTV/BFB/VCP/kojiro) = **첫 문장** / edge-crossing 2전략(momentum/VB) = **발사 직전**(`return Signal.BUY` 앞). 🔴 edge-crossing 전략은 최상단에 두지 않는다 — 차단 동안 `_prev_price`/`_prev_prdy_rate` baseline 이 얼어 해제 뒤 첫 틱이 거짓 돌파다(AST). 신규 매수만 막는다(청산류 무관 · fail-open = 판정 실패 → False · DB `account_risk_block_pct` 가 없으면 항상 False). 게이트 본문 순서 = ① 종목상태 당일 매수 차단(각주 ⑧, AST J25 — 다크런치 아님, 킬스위치 키가 없으면 `enforce`) ② `buy_paused`(각주 ⑨) ③ 계좌 SOFT 판정.
 - **read-only 청산선 미러** — 소비 = `engine/position_exit_lines` → `GET /api/balance`. 래치 set·`_stop_floor`·로그 무변조. VCP/BFB 는 `_effective_setup(ticker, observe=False)` 경유 — 🔴 `observe=False` 필수(10초 폴링이 5분 watcher 의 `[setup_structure_conflict]` cap 을 선소비하면 D+1 귀인이 무너진다).
   - **`get_effective_stop_price(ticker)`**(cycle233 척도 병기) — 보유형 4전략(kojiro/donchian/VCP/BFB)이 check_exit 가격선들의 max 를 낸다(가격 무관 청산 — 시간·stage3·measured-move — 은 제외).
   - **`get_effective_target_price(ticker) -> (target, already_hit)`**(cycle342 — BFB 단독) — 측정 목표가 `flag_high + (pole_high − pole_start)` 를 stamp 폴백으로 낸다(손절 미러와 같은 경로). 🔴 `get_targets_status()` 로 읽지 않는다 — `_candidates` 순회라 후보 자격을 잃은 보유 종목이 빠져 잔고 화면이 간헐적으로 빈 칸이 되고, 남아 있어도 live 재검출 값이라 엔진 §3 과 갈린다. 키 결손·폭 ≤ 0 = **미발화(`None`)**(임의 기본값 익절 = 과잉 청산). 둘째 원소는 `_partial_exit` 래치 **읽기만**(이미 발화한 목표를 「안 닿았다」로 읽지 않게). 회귀 `test_cycle342_bfb_target_mirror.py`.
@@ -260,7 +260,7 @@
 - **돌파 후보 구독 우선순위** — `scheduler._collect_breakout_tickers()` 가 VB/LTV/BFB/VCP 후보를 `subscribe_filtered_stocks(priority_groups=...)` 의 `breakout` 그룹(LOW + `bypass_limit=False`)에 넣는다. **BFB/VCP 는 `risk.on_tick` 이 유일한 매수 평가 경로**(폴링 루프 없음)라 구독이 없으면 매수 0건이다. 🔴 후보를 HIGH 로 메인에 몰지 않는다 — 과부하 → silent inactive.
 - **VB `DEFAULT_TRADABLE_BOARDS` = ("main",) 유지** — PRE_NXT 복구 금지(NXT 갭상승 위험 + SK하이닉스 시가 결함), POST_NXT 추가 금지(OVERNIGHT 보유 결함). 바꿀 때는 DB `strategy_config.params.tradable_boards` 도 함께.
 - **LTV `DEFAULT_TRADABLE_BOARDS` = ("pre_nxt", "main", "post_nxt")** — 사용자 운영 의도(연속 상한가 익일 청산 + 야간 매수).
-- **`tradable_boards` 는 매수 진입 전용**(7전략 공통 — 청산류는 보드 가드 없이 항상 작동, 유일한 예외 = NXT 프리장 청산 평가 보류). 상세 = `src/engine/CLAUDE.md` 「risk.py」 절.
+- **`tradable_boards` 는 매수 진입 전용**(전 전략 공통 — 청산류는 보드 가드 없이 항상 작동, 유일한 예외 = NXT 프리장 청산 평가 보류). 상세 = `src/engine/CLAUDE.md` 「risk.py」 절.
 - **VB 익일 청산 안전망** — `_execute_next_day_clear` 대상(시세 미수신·시장가 거부·재시작 race 회복).
 - **donchian `_swing_rest_poll_loop` 제거 금지** — 09:30~15:20 60s 주기로 보유+스캔 합집합을 폴링해 `ticker_prices` 를 갱신하고 보유 손절 평가에 쓴다(WS stale 보강).
 - 매수 신호는 반드시 **「돌파 순간」** 감지다(이전 틱 < 기준가 AND 현재 틱 ≥ 기준가).
@@ -317,8 +317,23 @@
    - `check_buy_signal` 에 계좌 SOFT 게이트 1줄(「안전 규칙」 위치 계약) + `tests/unit/ast/test_cycle233_ast_account_risk.py` `GATE_FIRST_FILES`/`GATE_PRE_BUY_FILES` 에 파일 추가.
    - `calc_buy_quantity` 의 모든 `return` 이 `_apply_budget_limit` 경유 + `tests/unit/ast/test_budget_limit_ast.py` `STRATEGY_FILES` 에 파일 추가.
    - 보유형이면 `get_effective_stop_price` read-only 미러 + boot 훅에서 `StrategyBase._apply_high_since_buy_from_candles` 호출(없으면 다음 날 아침마다 트레일링 기준점이 매수가로 돌아간다 — 「자금관리」 트레일링 기준점 항목).
-   - 7전략 공통 키(`buy_paused` · `shadow_mode` · `max_lot_ratio_mult` · 장중 킬스위치 2키 · LLM 4키)를 같은 값으로 둔다 — `buy_paused`(A12)·`shadow_mode`(S08)·`max_lot_ratio_mult`(G-245-6)는 AST glob 전수. `return Signal.BUY` 마다 앞에 섀도 관문(각주 ⑩, AST S01). 새 `DEFAULT_PARAMS` 키는 `param_catalog.py` 에도 등재(없으면 PUT `unknown_key` 422). 배포 전 DB 선반영 시 PUT 금지 = 문서 머리. `DEFAULT_PARAMS` 를 바꾸면 `tests/unit/ast/test_cycle278_ast_catalog_guards.py` `_DEFAULT_PARAMS_SHA` 재핀이 따른다.
+   - 전 전략 공통 키(`buy_paused` · `shadow_mode` · `max_lot_ratio_mult` · 장중 킬스위치 2키 · LLM 4키)를 같은 값으로 둔다 — `buy_paused`(A12)·`shadow_mode`(S08)·`max_lot_ratio_mult`(G-245-6)는 AST glob 전수. `return Signal.BUY` 마다 앞에 섀도 관문(각주 ⑩, AST S01). 새 `DEFAULT_PARAMS` 키는 `param_catalog.py` 에도 등재(없으면 PUT `unknown_key` 422). 배포 전 DB 선반영 시 PUT 금지 = 문서 머리. `DEFAULT_PARAMS` 를 바꾸면 `tests/unit/ast/test_cycle278_ast_catalog_guards.py` `_DEFAULT_PARAMS_SHA` 재핀이 따른다.
    - `list_by_filter(...)` 에 `exclude_etf_like=True`(ETF 를 사면 G4 허용 목록).
    - 멀티데이면 `_MULTIDAY_STRATEGIES` 리터럴 + (`close_at_1520=False` 이거나 `check_force_clear()` 가 그날 끝낼 종목만 반환).
+   - 공통 필수 키(`tests/_strategy_census.py` 가 명부를 대는 글롭 가드, cycle406 카드 #4)가 `DEFAULT_PARAMS` 에 다 있는지 — 키 하나라도 빠지면 이 가드가 파일 이름을 짚어 붉어진다. 카탈로그 쪽은 `applies_to=STRATEGY_IDS` 별칭이라 새 키를 더할 때만 만지면 된다.
+6. 픽스처 재생성 — `python tools/test_fixtures/gen_param_schema_fixture.py` 로 `frontend/src/test/fixtures/paramSchema.fixture.ts` · `e2e/fixtures/param-schema.fixture.ts` 를 새 전략 포함 상태로 다시 쓴다(손으로 베끼지 않는다). 프론트 표시명·색은 카드 #5(`frontend/src/utils/strategyMeta.ts`, 아직 미착수)가 없는 동안은 `BalanceTable`/`TradeHistoryGrid`/`TradePnLGrid`/`StrategyFunnel`/`strategyInfo.ts` 각자에 손으로 추가한다.
 
-> **장중 킬스위치 두 키** — `order_exchange_clock_mode`(기본 `"enforce"`)·`after_market_exit_division`(기본 `"44"`)는 **7 전략 전부** `DEFAULT_PARAMS` 말미 + `param_catalog` 에 코드 상수(`order_engine._ORDER_EXCHANGE_CLOCK_MODE_DEFAULT`·`_AFTER_EXIT_DIVISION_DEFAULT`)와 같은 값으로 있다(`params.get(key, DEFAULT)` 와 항등). 등재가 여는 것은 `PUT /api/strategies/{id}/params` **통로**뿐이다(없으면 `unknown_key` 422 라 장중에 끌 수단이 없다). `PARAM_RANGES`/`INT_PARAMS` 편입 금지 — AI 자문이 청산 수단을 끄는 스위치를 뒤집으면 안 된다. 사고 중 조작 순서·허용값·롤백 = `_workspace/00_leader_trading_rules.md` 「거래소 라우팅」 절 + `src/engine/CLAUDE.md` `order_engine.py` 절.
+## 전략 삭제
+
+제거는 추가보다 비용이 크다 — 테스트 수백 건이 7(8)전략 전제로 그 전략 클래스를 직접 import 하기 때문이다(`_workspace/refactor/2026-09-27_strategy_add_remove_structure.md` §3.2 실측, VCP 하나 제거 시뮬레이션에서 515건/61파일). 아래 순서를 건너뛰지 않는다.
+
+1. **보유 0 · 미체결 0 · `positions` 행 0**을 확인한다(운영 DB 조회) — 하나라도 남아 있으면 제거 즉시 §4.6 폴백(아래)을 탄다.
+2. `strategy_manifest.STRATEGY_MANIFEST` 에서 행을 지운다. `risk.py:88` `_TICK_BUY_EVAL_SKIP_STRATEGIES` 등 명부와 교차 검사만 하는 리터럴도 함께 지운다(명부에서 사라졌는데 리터럴에 남으면 교차 검사가 붉어진다).
+3. `tests/_strategy_census.py` 의 `MIN_STRATEGIES` 하한을 같이 내린다 — 내리지 않으면 명부 자기검사가 `RuntimeError` 로 바로 멈춘다(모듈 misconfiguration 과 전략 감소를 구별하기 위한 의도된 설계).
+4. `param_catalog.STRATEGY_IDS` 에서 id 를 빼고, 그 전략 전용 키(다른 전략과 안 겹치는 키)의 스펙도 지운다. 공용 키(`applies_to` 에 다른 전략도 있는 키)는 남긴다.
+5. `strategy_config` DB 행은 **지우지 않는다** — `_load_strategy_config` 가 미등록 전략 행을 조용히 건너뛴다(§4.1). 지우면 되돌릴 근거(과거 파라미터)가 사라진다.
+6. 문서(이 표 + `_workspace/00_leader_trading_rules.md`)에서 그 전략 행을 지운다.
+7. **§4.6 폴백을 안다** — `boot_manager.py`·`scheduler.py`·`order_engine.py`(8영역)·`db/trade_history.py`·`models/trade.py`·`routes/trading.py` 의 `registry.get(strategy_id) or registry.get("momentum")` 류 폴백은 **지운 뒤에도 momentum 규약으로 넘어간다** — 1번에서 보유 0 을 확인하지 않았다면, 제거 뒤 재시작 때 그 포지션이 momentum 의 −7.5% 손절·익일 시가 갭 청산을 대신 탄다. 이 폴백 자체를 없애는 것은 범위 밖이다(D-2, 별도 승인).
+8. 픽스처 재생성(위 「새 전략 추가」 6번과 동일 커맨드) + 프론트 표시명 자리에서 손으로 뺀다.
+
+> **장중 킬스위치 두 키** — `order_exchange_clock_mode`(기본 `"enforce"`)·`after_market_exit_division`(기본 `"44"`)는 **전 전략** `DEFAULT_PARAMS` 말미 + `param_catalog` 에 코드 상수(`order_engine._ORDER_EXCHANGE_CLOCK_MODE_DEFAULT`·`_AFTER_EXIT_DIVISION_DEFAULT`)와 같은 값으로 있다(`params.get(key, DEFAULT)` 와 항등). 등재가 여는 것은 `PUT /api/strategies/{id}/params` **통로**뿐이다(없으면 `unknown_key` 422 라 장중에 끌 수단이 없다). `PARAM_RANGES`/`INT_PARAMS` 편입 금지 — AI 자문이 청산 수단을 끄는 스위치를 뒤집으면 안 된다. 사고 중 조작 순서·허용값·롤백 = `_workspace/00_leader_trading_rules.md` 「거래소 라우팅」 절 + `src/engine/CLAUDE.md` `order_engine.py` 절.

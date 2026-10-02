@@ -76,6 +76,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -317,6 +318,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -1272,6 +1274,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -1535,6 +1538,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -2606,6 +2610,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -2782,6 +2787,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -3747,6 +3753,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -3998,6 +4005,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -4936,6 +4944,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -5206,6 +5215,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -6167,6 +6177,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -6436,6 +6447,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -7397,6 +7409,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -7666,6 +7679,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -8635,6 +8649,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -8902,6 +8917,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -9859,6 +9875,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -10128,6 +10145,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -11082,6 +11100,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -11155,6 +11174,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -11425,6 +11445,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -12395,6 +12416,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -12666,6 +12688,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -13642,6 +13665,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -13905,6 +13929,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -14884,6 +14909,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -15145,6 +15171,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -16081,6 +16108,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -16352,6 +16380,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -17332,6 +17361,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -17598,6 +17628,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -18545,6 +18576,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -18814,6 +18846,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -19773,6 +19806,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -20042,6 +20076,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -21011,6 +21046,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -21279,6 +21315,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -22228,6 +22265,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -22499,6 +22537,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -23467,6 +23506,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -23734,6 +23774,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -24692,6 +24733,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -24960,6 +25002,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -25922,6 +25965,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -26191,6 +26235,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -27148,6 +27193,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -27417,6 +27463,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -28391,6 +28438,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -28656,6 +28704,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -29700,6 +29749,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -29901,6 +29951,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -30892,6 +30943,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -31154,6 +31206,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -32094,6 +32147,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -32358,6 +32412,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -33292,6 +33347,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -33562,6 +33618,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -34516,6 +34573,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -34793,6 +34851,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -35764,6 +35823,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -36029,6 +36089,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -36979,6 +37040,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -37250,6 +37312,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -38229,6 +38292,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -38495,6 +38559,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -39460,6 +39525,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -39729,6 +39795,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -40666,6 +40733,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -40937,6 +41005,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -41897,6 +41966,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -42168,6 +42238,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -43145,6 +43216,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -43414,6 +43486,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -44360,6 +44433,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -44631,6 +44705,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -45588,6 +45663,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -45857,6 +45933,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -46814,6 +46891,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -47085,6 +47163,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -48053,6 +48132,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -48324,6 +48404,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -49270,6 +49351,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -49541,6 +49623,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -50498,6 +50581,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -50769,6 +50853,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -51751,6 +51836,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -52021,6 +52107,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -52958,6 +53045,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -53229,6 +53317,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -54193,6 +54282,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -54462,6 +54552,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -55418,6 +55509,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -55687,6 +55779,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -56644,6 +56737,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -56915,6 +57009,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -57880,6 +57975,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -58150,6 +58246,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -59106,6 +59203,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -59377,6 +59475,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -60335,6 +60434,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -60606,6 +60706,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -61562,6 +61663,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -61833,6 +61935,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -62791,6 +62894,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -63062,6 +63166,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -64019,6 +64124,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -64290,6 +64396,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -65247,6 +65354,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -65331,6 +65439,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -65602,6 +65711,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -66557,6 +66667,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -66828,6 +66939,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -67775,6 +67887,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -68044,6 +68157,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -69009,6 +69123,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -69280,6 +69395,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -70250,6 +70366,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -70517,6 +70634,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -71470,6 +71588,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -71740,6 +71859,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -72689,6 +72809,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -72959,6 +73080,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -73918,6 +74040,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -74189,6 +74312,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -75155,6 +75279,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -75426,6 +75551,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -76379,6 +76505,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -76650,6 +76777,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -77607,6 +77735,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -77878,6 +78007,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -78840,6 +78970,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -79110,6 +79241,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -80061,6 +80193,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -80332,6 +80465,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -81288,6 +81422,7 @@ backend:
       - tests/unit/ast/test_cycle382_ast_market_unit.py
       - tests/unit/ast/test_cycle384_ast_buy_paused.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/engine/strategies/test_cycle300_daily_depth_switch.py
       - tests/unit/engine/test_cycle278_param_catalog.py
       - tests/unit/engine/test_cycle287_sor_retired.py
@@ -81309,6 +81444,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -81384,6 +81520,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -81655,6 +81792,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -82616,6 +82754,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -82694,6 +82833,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -82965,6 +83105,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -83920,6 +84061,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -83988,6 +84130,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -84057,6 +84200,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -84328,6 +84472,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -85285,6 +85430,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -85556,6 +85702,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -86522,6 +86669,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -86791,6 +86939,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -87798,6 +87947,7 @@ backend:
       - tests/contract/test_cycle243_auth_wiring.py
       - tests/contract/test_cycle382_market_unit_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -88050,6 +88200,7 @@ backend:
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -88974,6 +89125,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -89245,6 +89397,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -90205,6 +90358,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -90476,6 +90630,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -91428,6 +91583,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -91699,6 +91855,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -92657,6 +92814,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -93201,6 +93359,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -93886,6 +94045,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -94332,6 +94492,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -95120,6 +95281,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -95391,6 +95553,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -96348,6 +96511,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -96619,6 +96783,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -97575,6 +97740,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -97846,6 +98012,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -98802,6 +98969,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -99073,6 +99241,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -100040,6 +100209,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -100311,6 +100481,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -101297,6 +101468,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -101568,6 +101740,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -102494,6 +102667,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -102765,6 +102939,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -103748,6 +103923,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -104019,6 +104195,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -104951,6 +105128,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -105222,6 +105400,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -106176,6 +106355,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -106447,6 +106627,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -107405,6 +107586,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -107676,6 +107858,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -108636,6 +108819,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -108907,6 +109091,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -109866,6 +110051,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -110136,6 +110322,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -111094,6 +111281,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -111365,6 +111553,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -112332,6 +112521,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -112602,6 +112792,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -113628,6 +113819,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -113896,6 +114088,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -114936,6 +115129,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -115137,6 +115331,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -116043,6 +116238,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -116314,6 +116510,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -117309,6 +117506,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -117578,6 +117776,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -118607,6 +118806,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -118805,6 +119005,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -119825,6 +120026,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -120025,6 +120227,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -121001,6 +121204,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -121269,6 +121473,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -122300,6 +122505,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -122498,6 +122704,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -123727,6 +123934,7 @@ backend:
       - tests/contract/test_cycle223f2_manual_apply_param_ranges.py
       - tests/contract/test_cycle243_auth_wiring.py
       - tests/contract/test_cycle382_market_unit_params_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -123919,6 +124127,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -124650,6 +124859,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -124920,6 +125130,7 @@ backend:
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -126018,6 +126229,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -126219,6 +126431,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -127104,6 +127317,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -127375,6 +127589,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -128339,6 +128554,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -128609,6 +128825,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -129563,6 +129780,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -129641,6 +129859,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -129912,6 +130131,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -130872,6 +131092,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -131143,6 +131364,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -132097,6 +132319,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -132368,6 +132591,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -133346,6 +133570,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -133617,6 +133842,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -134552,6 +134778,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -134823,6 +135050,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -135786,6 +136014,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -136057,6 +136286,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -137013,6 +137243,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -137284,6 +137515,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -138253,6 +138485,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -138524,6 +138757,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -139471,6 +139705,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -139538,6 +139773,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -139809,6 +140045,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -140767,6 +141004,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -141038,6 +141276,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -142004,6 +142243,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -142273,6 +142513,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -143228,6 +143469,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -143503,6 +143745,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -144459,6 +144702,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -144531,6 +144775,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -144801,6 +145046,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -145760,6 +146006,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -146028,6 +146275,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -146984,6 +147232,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -147144,6 +147393,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -147343,6 +147593,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -148280,6 +148531,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -148352,6 +148604,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -148490,6 +148743,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -148754,6 +149008,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -149685,6 +149940,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -149779,6 +150035,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -150045,6 +150302,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -151030,6 +151288,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -151292,6 +151551,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -152231,6 +152491,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -152500,6 +152761,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -153482,6 +153744,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -153748,6 +154011,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -154723,6 +154987,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -154986,6 +155251,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -155924,6 +156190,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
@@ -155984,6 +156251,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_balance_perf.py
@@ -156050,6 +156318,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -156118,6 +156387,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -156185,6 +156455,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -156252,6 +156523,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -156322,6 +156594,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -156393,6 +156666,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -156467,6 +156741,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -156533,6 +156808,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -156600,6 +156876,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -156673,6 +156950,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -156743,6 +157021,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -156820,6 +157099,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -156884,6 +157164,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -156951,6 +157232,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -157025,6 +157307,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -157097,6 +157380,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -157167,6 +157451,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -157234,6 +157519,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
@@ -157306,6 +157592,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -157375,6 +157662,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -157453,6 +157741,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
@@ -157529,6 +157818,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_balance_perf.py
@@ -157797,6 +158087,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -158749,6 +159040,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -159020,6 +159312,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -159983,6 +160276,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_quote_session_auto_disable.py
       - tests/contract/test_routes_backtest.py
@@ -160253,6 +160547,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -161208,6 +161503,7 @@ backend:
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
       - tests/contract/test_cycle64_routes_price_filter.py
       - tests/contract/test_routes_backtest.py
       - tests/contract/test_routes_balance_perf.py
@@ -161477,6 +161773,7 @@ backend:
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
       - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
+      - tests/unit/ast/test_cycle406_ast_required_common_keys.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -164343,10 +164640,10 @@ frontend:
       - frontend/src/pages/__tests__/StrategiesParams.test.tsx
       - frontend/src/pages/__tests__/StrategiesTeRr.test.tsx
       - frontend/src/pages/__tests__/StrategyFunnel.bottleneckTrend.test.tsx
-generated_at: '2026-10-02T21:15:24.955Z'
+generated_at: '2026-10-02T22:13:44.948Z'
 stats:
   backend_modules: 173
-  backend_tests: 1210
+  backend_tests: 1212
   frontend_modules: 129
   frontend_tests: 109
   unmapped_modules:

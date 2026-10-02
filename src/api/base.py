@@ -21,6 +21,7 @@ import httpx
 from src.auth.token import get_token_manager, token_manager
 from src.config import settings
 from src.db import system_logs as _system_logs
+from src.db._kst import now_kst_iso
 
 logger = logging.getLogger(__name__)
 
@@ -387,6 +388,12 @@ _request_metrics: dict = {
     "retry_recovered": 0,
     "retry_exhausted": 0,
     "by_path_5xx": defaultdict(int),
+    # cycle406 M3 — 이 누적이 언제부터 센 것인지(관측 전용). 재기동하면 이 dict 자체가
+    # 모듈 재로드로 새로 생겨 암묵적으로 "지금부터"가 되는데, 그 사실이 숫자만 봐서는
+    # 안 보여 21:30 리포트가 "재기동 전 5xx 0건"으로 읽힌다(`_workspace/reports/
+    # 2026-10-02_night_work.md` M3). 집계 로직·리셋 대상 키는 그대로 — `since` 를
+    # 노출만 한다.
+    "since": now_kst_iso(),
 }
 
 
@@ -405,6 +412,8 @@ def get_request_metrics() -> dict:
             _request_metrics["by_path_5xx"].items(),
             key=lambda x: -x[1],
         )[:5],
+        # cycle406 M3 — "이 수치는 HH:MM 이후" 를 리포트가 그대로 실을 수 있게.
+        "since": _request_metrics["since"],
     }
 
 
@@ -422,6 +431,7 @@ def reset_request_metrics() -> None:
     ):
         _request_metrics[k] = 0
     _request_metrics["by_path_5xx"].clear()
+    _request_metrics["since"] = now_kst_iso()
 
 
 class KisApiError(Exception):
