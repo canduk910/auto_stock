@@ -91,6 +91,11 @@ def _app(
 ):
     """미들웨어 + echo 하위 앱. 설정은 요청 시점 참조(cycle243 §2.3.5)라 매번 갈아끼운다."""
     mod = _mw()
+    # 거부 로그 cap 상태(`_reject_state`)는 모듈 전역 · KST 하루 단위다. 테스트마다 비우지
+    # 않으면 앞 테스트가 같은 날짜(실제 오늘 = 고정 시각의 날짜인 날)에 쌓은 카운트 때문에
+    # EMIT_AT 지점을 지나 로그가 안 나온다 — 실행 날짜에 따라 붉어지는 결함(2026-10-03 실측).
+    monkeypatch.setitem(mod._reject_state, "day", None)
+    monkeypatch.setitem(mod._reject_state, "counts", {})
     _set_settings(
         monkeypatch,
         api_auth_key=api_auth_key,
