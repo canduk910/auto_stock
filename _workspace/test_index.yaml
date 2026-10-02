@@ -1237,6 +1237,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/api/balance.py:
@@ -2468,6 +2469,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/api/base.py:
@@ -3699,6 +3701,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/api/condition.py:
@@ -4930,6 +4933,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/api/finance.py:
@@ -6161,6 +6165,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/api/kis_master.py:
@@ -7392,6 +7397,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/api/krx.py:
@@ -8623,6 +8629,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/api/market_operation.py:
@@ -9854,6 +9861,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/api/order.py:
@@ -11085,6 +11093,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/api/period_chart.py:
@@ -12385,6 +12394,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/auth/__init__.py:
@@ -13634,6 +13644,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/auth/token.py:
@@ -14865,6 +14876,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/config.py:
@@ -16096,6 +16108,7 @@ backend:
       - tests/unit/test_c2_suite_isolation.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/__init__.py:
@@ -17326,6 +17339,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
     transitive_tests: []
@@ -18558,6 +18572,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/backtest_runs.py:
@@ -19789,6 +19804,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/daily_performance.py:
@@ -21020,6 +21036,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/kis_quote_accounts.py:
@@ -22251,6 +22268,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/llm_buy_evaluations.py:
@@ -23482,6 +23500,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/log_reports.py:
@@ -24713,6 +24732,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/market_regime_snapshots.py:
@@ -25944,6 +25964,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/parameter_recommendations.py:
@@ -27175,6 +27196,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/pending_next_day_clear.py:
@@ -28406,6 +28428,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/pg.py:
@@ -29637,6 +29660,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/positions.py:
@@ -30868,6 +30892,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/stock_master.py:
@@ -32099,6 +32124,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/stock_master_daily.py:
@@ -33330,6 +33356,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/stock_master_financial.py:
@@ -34561,6 +34588,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/strategy_config.py:
@@ -35792,6 +35820,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/strategy_funnel.py:
@@ -37023,6 +37052,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/supabase.py:
@@ -38258,6 +38288,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
     transitive_tests: []
@@ -39490,6 +39521,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/db/trade_history.py:
@@ -40721,6 +40753,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/__init__.py:
@@ -41951,6 +41984,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
     transitive_tests: []
@@ -43183,6 +43217,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/account_risk_watcher.py:
@@ -44414,6 +44449,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/backtest_engine.py:
@@ -45645,6 +45681,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/backtest_orchestration.py:
@@ -46876,6 +46913,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/backtest_yaml.py:
@@ -48107,6 +48145,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/boot_manager.py:
@@ -49338,6 +49377,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/buying_reconcile.py:
@@ -50569,6 +50609,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/daily_bar_finalize.py:
@@ -51799,6 +51840,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
     transitive_tests: []
@@ -53031,6 +53073,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/daily_metrics_snapshot.py:
@@ -54262,6 +54305,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/data_load_tasks.py:
@@ -55493,6 +55537,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/etf_like.py:
@@ -56724,6 +56769,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/etf_trend_core.py:
@@ -57955,6 +58001,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/funnel_capture.py:
@@ -59186,6 +59233,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/kojiro_band_observe.py:
@@ -60417,6 +60465,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/kojiro_gap_observe.py:
@@ -61648,6 +61697,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/kojiro_indicators.py:
@@ -62879,6 +62929,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/llm_buy_gate.py:
@@ -64110,6 +64161,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/llm_features.py:
@@ -65341,6 +65393,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/llm_retrospective.py:
@@ -66640,6 +66693,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/log_metrics_collector.py:
@@ -67871,6 +67925,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/market_op_subscribe.py:
@@ -69102,6 +69157,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/market_operation_monitor.py:
@@ -70333,6 +70389,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/market_regime.py:
@@ -71564,6 +71621,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/market_state.py:
@@ -72795,6 +72853,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/market_unit.py:
@@ -74026,6 +74085,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/metrics_collector.py:
@@ -75257,6 +75317,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/no_feed_registry.py:
@@ -76488,6 +76549,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/observer_trace.py:
@@ -77719,6 +77781,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/open_price_observe.py:
@@ -78950,6 +79013,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/open_price_rest.py:
@@ -80181,6 +80245,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/order_engine.py:
@@ -81411,6 +81476,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
     transitive_tests: []
@@ -82737,6 +82803,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/param_validation.py:
@@ -84047,6 +84114,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/position_buy_date.py:
@@ -85416,6 +85484,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/quant_score.py:
@@ -86647,6 +86716,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/quote_token_refresh.py:
@@ -87878,6 +87948,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/recommendation_engine.py:
@@ -89109,6 +89180,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/recommendation_metrics.py:
@@ -90340,6 +90412,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/refresh_progress.py:
@@ -91571,6 +91644,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/risk.py:
@@ -92801,6 +92875,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
     transitive_tests: []
@@ -94033,6 +94108,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/scheduler.py:
@@ -95264,6 +95340,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/sector_naming.py:
@@ -96495,6 +96572,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/sell_rejection.py:
@@ -97726,6 +97804,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/selling_reconcile.py:
@@ -98957,6 +99036,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/session.py:
@@ -100187,6 +100267,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
     transitive_tests: []
@@ -101419,6 +101500,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/stale_manager.py:
@@ -102650,6 +102732,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/stale_session_recovery.py:
@@ -103881,6 +103964,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/stale_tracker.py:
@@ -105112,6 +105196,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/stale_universe_guard.py:
@@ -106343,6 +106428,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/stale_watcher_core.py:
@@ -107573,6 +107659,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
     transitive_tests: []
@@ -108804,6 +108891,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
     transitive_tests: []
@@ -110036,6 +110124,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/stock_master_daily_metrics.py:
@@ -111267,6 +111356,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/stock_master_master_metrics.py:
@@ -112498,6 +112588,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/stock_master_metrics.py:
@@ -113729,6 +113820,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/strategies/__init__.py:
@@ -114990,6 +115082,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/strategies/donchian_swing.py:
@@ -116221,6 +116314,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/strategies/etf_trend.py:
@@ -117452,6 +117546,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/strategies/kojiro.py:
@@ -118683,6 +118778,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/strategies/long_tail_volatility.py:
@@ -119914,6 +120010,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/strategies/momentum.py:
@@ -121145,6 +121242,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/strategies/vcp_breakout.py:
@@ -122376,6 +122474,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/strategies/volatility_breakout.py:
@@ -123607,6 +123706,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/strategy.py:
@@ -124841,6 +124941,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/strategy_manifest.py:
@@ -126072,6 +126173,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/strategy_registry.py:
@@ -127303,6 +127405,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/ta_indicators.py:
@@ -128534,6 +128637,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/task_loop_helper.py:
@@ -129765,6 +129869,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/te_metrics.py:
@@ -131073,6 +131178,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/tick_channel_mode.py:
@@ -132304,6 +132410,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/tick_channel_switch.py:
@@ -133535,6 +133642,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/tick_volume.py:
@@ -134766,6 +134874,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/trading_calendar.py:
@@ -135996,6 +136105,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
     transitive_tests: []
@@ -137228,6 +137338,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/uptime_monitor.py:
@@ -138459,6 +138570,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/util/__init__.py:
@@ -139693,6 +139805,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/main.py:
@@ -140991,6 +141104,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
     transitive_tests: []
@@ -142222,6 +142336,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
     transitive_tests: []
@@ -143457,6 +143572,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/models/balance.py:
@@ -144688,6 +144804,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/models/candle_chart.py:
@@ -145988,6 +146105,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/models/krx_open_api.py:
@@ -147219,6 +147337,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/models/market_regime.py:
@@ -148518,6 +148637,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/models/recommendation.py:
@@ -149925,6 +150045,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/models/system_integrations.py:
@@ -151228,6 +151349,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/realtime/__init__.py:
@@ -152459,6 +152581,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/realtime/handler.py:
@@ -153690,6 +153813,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/realtime/websocket.py:
@@ -154921,6 +155045,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/realtime/websocket_pool.py:
@@ -156152,6 +156277,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/routes/__init__.py:
@@ -159025,6 +159151,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/services/macro_client.py:
@@ -160256,6 +160383,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/services/mcp_client.py:
@@ -161487,6 +161615,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/services/quote_session_health.py:
@@ -162718,6 +162847,7 @@ backend:
       - tests/unit/test_cycle243_auth_fixture.py
       - tests/unit/test_cycle68_hotfix_fixture_kst_ast_guard.py
       - tests/unit/tools/test_cycle383_krx_etf_daily_archive.py
+      - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
 frontend:
@@ -164640,10 +164770,10 @@ frontend:
       - frontend/src/pages/__tests__/StrategiesParams.test.tsx
       - frontend/src/pages/__tests__/StrategiesTeRr.test.tsx
       - frontend/src/pages/__tests__/StrategyFunnel.bottleneckTrend.test.tsx
-generated_at: '2026-10-02T22:13:44.948Z'
+generated_at: '2026-10-02T23:36:42.862Z'
 stats:
   backend_modules: 173
-  backend_tests: 1212
+  backend_tests: 1213
   frontend_modules: 129
   frontend_tests: 109
   unmapped_modules:

@@ -14,12 +14,20 @@
 
 docker 도, `DATABASE_URL_TEST` 도 없으면 fixture 가 `pytest.skip` — 통합은 옵셔널.
 
+컨테이너 누수 방지(2026-10-03 사용자 지시 「테스트가 완료된 도커컨테이너는 삭제」):
+- 띄울 때 라벨 `auto_stock.pg_test=1` · `auto_stock.owner_pid=<pytest pid>` 를 붙인다.
+- 정상 종료 = fixture finally 의 `docker stop`(`--rm` 이라 곧 삭제) + `atexit` 이중 정리.
+- 강제 종료(에이전트 중단·타임아웃 kill)로 남은 것은 **다음 세션 시작 때** 쓸어 낸다 —
+  라벨이 붙었고 owner_pid 프로세스가 이미 없는 컨테이너만 `docker rm -f`(동시에 도는
+  다른 pytest 의 컨테이너는 owner 가 살아 있으므로 건드리지 않는다).
+
 ⚠️ 이 파일은 Red 단계 하네스 정의. `conftest.py` 가 fixture 를 re-export 한다.
 """
 
 from __future__ import annotations
 
 import asyncio
+import atexit
 import os
 import shutil
 import subprocess
@@ -52,13 +60,59 @@ def _docker_available() -> bool:
         return False
 
 
+_LABEL = "auto_stock.pg_test=1"
+_OWNER_KEY = "auto_stock.owner_pid"
+
+
+def _pid_alive(pid: int) -> bool:
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    except Exception:
+        return True  # 판정 불가 = 살아 있다고 본다(남의 컨테이너를 지우지 않는 쪽)
+    return True
+
+
+def _sweep_orphan_containers() -> list[str]:
+    """owner_pid 가 죽은 테스트 컨테이너만 삭제. never-raise. 지운 이름 목록 반환."""
+    removed: list[str] = []
+    try:
+        out = subprocess.run(
+            ["docker", "ps", "-a", "--filter", f"label={_LABEL}",
+             "--format", '{{.ID}} {{.Label "' + _OWNER_KEY + '"}} {{.Names}}'],
+            capture_output=True, text=True, timeout=15, check=False,
+        ).stdout
+        for line in out.splitlines():
+            parts = line.split()
+            if len(parts) < 3:
+                continue
+            cid, owner, name = parts[0], parts[1], parts[2]
+            try:
+                alive = _pid_alive(int(owner))
+            except ValueError:
+                alive = False
+            if not alive:
+                subprocess.run(["docker", "rm", "-f", cid], check=False,
+                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=30)
+                removed.append(name)
+    except Exception:
+        pass
+    return removed
+
+
 def _start_pg_container() -> tuple[str, str]:
     """postgres:15 컨테이너를 랜덤 포트로 기동. (container_id, dsn) 반환."""
+    _sweep_orphan_containers()
     name = f"auto_stock_pg_test_{uuid.uuid4().hex[:8]}"
     cid = subprocess.check_output(
         [
             "docker", "run", "-d", "--rm",
             "--name", name,
+            "--label", _LABEL,
+            "--label", f"{_OWNER_KEY}={os.getpid()}",
             "-e", f"POSTGRES_PASSWORD={_PG_PASSWORD}",
             "-e", f"POSTGRES_DB={_PG_DB}",
             "-e", f"POSTGRES_USER={_PG_USER}",
@@ -138,6 +192,7 @@ def pg_dsn() -> str:
         pytest.skip("docker/DATABASE_URL_TEST 없음 — 실 Postgres 통합 테스트 skip")
 
     cid, dsn = _start_pg_container()
+    atexit.register(_stop_pg_container, cid)
     try:
         asyncio.run(_wait_healthy(dsn))
         yield dsn

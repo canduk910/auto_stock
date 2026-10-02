@@ -84,6 +84,8 @@ KIS OpenAPI 기반 주식 자동매매시스템. FastAPI(백엔드) + React(프�
 
 ### 테스트 실행
 
+통합 테스트의 로컬 Postgres 컨테이너(`auto_stock_pg_test_*`)는 테스트가 끝나면 지운다 — `tests/integration/pg_harness.py` 가 `--rm` + 종료 시 정리 + 다음 세션 시작 때 소유 프로세스가 죽은 것을 쓸어 낸다(라벨 `auto_stock.pg_test`·`auto_stock.owner_pid`). 다른 시험용 컨테이너를 띄웠으면 끝난 뒤 직접 `docker rm -f` 한다.
+
 ```bash
 pip install -r requirements-dev.txt # 1회
 python -m pytest -q # 백엔드 전체
