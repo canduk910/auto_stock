@@ -1,0 +1,8 @@
+strategy,max_positions,position_ratio,eval_days,full_days_eod,full_days_eod_pct,full_days_intraday,full_days_intraday_pct,avg_holdings_eod,avg_holdings_pct_of_cap,zero_days,one_share_buy_pct,median_buy_qty,judgement,note
+bull_flag_breakout,4,0.25,10,3,30,5,50,2.60,65,2,11,8,B,"칸찬날 funnel 미매수평균(47.3,n=3) > 칸안찬날(42.5,n=2) — entry_end 변경 이력이 DB에 없어 09-25 저녁 09:04 축소가 이 10일 중 며칠에 실제로 걸렸는지는 재구성 불가(한계 참조). 09-28·29 는 거래 0(아래 사건표의 09-25 저녁 조정과 겹치는 구간으로 추정)"
+donchian_swing,5,0.20,5,0,0,0,0,2.80,56,0,50,2,D,"09-27 16:14 buy_paused=true 이후(09-28~10-02) 제외 — 남은 09-21~25 5일만 평가. 평균 보유 56%≥50% · 1주비율 50%(경계, 초과 아님) · 중앙수량 2(경계, 미만 아님) → A·C 어느 것도 조건을 넘지 않아 D(정상)"
+kojiro,6,0.166,10,4,40,4,40,5.00,83,0,25,3,B,"칸찬날 funnel 미매수평균(19.0,n=3) > 칸안찬날(17.0,n=2) — 전략 최대 비중(42.1%)인데도 칸 부족 신호. 평균 보유 83%로 7전략 중 최고"
+long_tail_volatility,4,0.20,0,,,,,,,,,,제외(퇴출),"09-28 21:42 weight=0 · enabled=False — 판정 대상 제외(지시서 §3.3 보강)"
+momentum,4,0.25,10,0,0,0,0,1.20,30,3,9,5,A,"칸찬날 0%<10% · 평균 30%<50% → 처방① 예시: max_positions 2·position_ratio 0.5 시 랏=73413원, stop_loss -5% 손절충격=3670원=순자산의 0.07%"
+vcp_breakout,5,0.20,10,0,0,0,0,0.70,14,5,0,5,A,"칸찬날 0%<10% · 평균 14%<50% → 처방① 예시: max_positions 3·position_ratio 0.33 시 랏=306665원, stop_loss -7% 손절충격=21467원=순자산의 0.43%"
+volatility_breakout,2,0.35,10,0,0,7,70,0.00,0,10,62,1,B+C,"당일청산이라 장마감 보유=0(§3.2 지시) — 장중 최대 기준 사용. 장중 칸찬날 70%≥30%(비스윙이라 funnel 조건 미적용, B) + 1주비율 62%>50%·중앙수량1<2(C) 동시 충족. 지시서 §8/§4 의 사전 예상(A+C)과 다른 결과 — 슬롯을 늘리면 놓치는 신호를 더 받지만 랏은 이미 position_ratio=0.35(전략 중 최대 비율)로도 1주 수준이라 처방①(슬롯↓비율↑)은 B를 악화시킨다(한계 참조)"
