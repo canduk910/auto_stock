@@ -4,12 +4,8 @@
 // get_targets_status 진단 필드(손절선/거래량컷/상태)와 구독 커버리지를 전용 패널로 노출.
 import { useMemo } from 'react'
 import type { BreakoutDiagTarget, StrategyInfo, TickerPrice } from '../types/trading'
+import { strategyLabel } from '../utils/strategyMeta'
 import ScrollPane from './ScrollPane'
-
-const STRATEGY_LABEL: Record<'vcp_breakout' | 'bull_flag_breakout', string> = {
-  vcp_breakout: 'VCP 변동성 수축',
-  bull_flag_breakout: '눌림목 돌파',
-}
 
 function num(v: unknown, dflt: number): number {
   const n = typeof v === 'number' ? v : Number(v)
@@ -127,7 +123,7 @@ export default function BreakoutCandidateMonitor({
 }) {
   const strat = strategies[strategyId]
   const isBfb = strategyId === 'bull_flag_breakout'
-  const label = STRATEGY_LABEL[strategyId]
+  const label = strategyLabel(strategyId)
   const targets = (strat?.targets ?? {}) as Record<string, BreakoutDiagTarget>
   const prices = tickerPrices ?? {}
   const subscribedSet = useMemo(() => new Set(subscribedTickers ?? []), [subscribedTickers])

@@ -78,7 +78,9 @@ describe('kojiro 시각화 정적 배선 가드', () => {
   it('StrategyFunnel STRATEGY_OPTIONS 에 kojiro', () => {
     const src = readFileSync(resolve(__dirname, '..', '..', 'pages', 'StrategyFunnel.tsx'), 'utf-8')
     expect(src).toMatch(/id:\s*'kojiro'/)
-    expect(src).toContain('고지로 대순환')
+    // cycle395 — 표시명은 utils/strategyMeta.ts 중앙 정본을 거친다(리터럴은 그쪽에 있다).
+    const metaSrc = readFileSync(resolve(__dirname, '..', '..', 'utils', 'strategyMeta.ts'), 'utf-8')
+    expect(metaSrc).toContain('고지로 대순환')
   })
 
   it('STRATEGY_INFO 에 kojiro 엔트리 (대순환 개념 + 다크런치 명시)', () => {

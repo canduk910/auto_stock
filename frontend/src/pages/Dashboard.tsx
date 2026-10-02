@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useTradingStatus } from '../contexts/TradingStatusContext'
 import { getStrategyColor } from '../types/strategy'
 import { STRATEGY_INFO, ALL_STRATEGIES_INFO } from '../utils/strategyInfo'
+import { strategyLabel } from '../utils/strategyMeta'
 import ControlPanel from '../components/ControlPanel'
 import MarketRegimeCard from '../components/MarketRegimeCard'
 import PortfolioRiskCard from '../components/PortfolioRiskCard'
@@ -90,7 +91,7 @@ export default function Dashboard() {
                       : 'text-gray-600 hover:bg-gray-100'
                   }`}
                 >
-                  {info.name}
+                  {strategyLabel(key, info.name)}
                   <span className="ml-1.5 text-xs opacity-70">
                     ({info.positions})
                   </span>

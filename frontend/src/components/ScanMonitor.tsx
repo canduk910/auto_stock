@@ -3,6 +3,7 @@ import { useTradingStatus } from '../contexts/TradingStatusContext'
 import { getStrategyColor } from '../types/strategy'
 import type { BuySignal, ScanStats } from '../types/trading'
 import { getKstMinutes } from '../utils/stale-context'
+import { strategyLabel } from '../utils/strategyMeta'
 import KojiroMonitor from './KojiroMonitor'
 import BreakoutCandidateMonitor from './BreakoutCandidateMonitor'
 import ScrollPane from './ScrollPane'
@@ -139,11 +140,11 @@ const FUNNEL_CONF: Record<
   string,
   { stages: ReadonlyArray<{ key: string; label: string }>; testId: string; title: string; theme: FunnelTheme }
 > = {
-  volatility_breakout: { stages: VB_STAGES, testId: 'vb-scan-funnel', title: '변동성 돌파 — 조건 통과 단계별 후보 수', theme: 'teal' },
-  long_tail_volatility: { stages: LTV_STAGES, testId: 'ltv-scan-funnel', title: '롱테일 변동성 — 조건 통과 단계별 후보 수', theme: 'teal' },
-  bull_flag_breakout: { stages: BFB_STAGES, testId: 'bfb-scan-funnel', title: '눌림목 돌파 — 조건 통과 단계별 후보 수', theme: 'indigo' },
-  vcp_breakout: { stages: VCP_STAGES, testId: 'vcp-scan-funnel', title: 'VCP 변동성 수축 — 조건 통과 단계별 후보 수', theme: 'indigo' },
-  momentum: { stages: MOMENTUM_STAGES, testId: 'momentum-scan-funnel', title: '상한가 모멘텀 — 조건 통과 단계별 후보 수', theme: 'emerald' },
+  volatility_breakout: { stages: VB_STAGES, testId: 'vb-scan-funnel', title: `${strategyLabel('volatility_breakout')} — 조건 통과 단계별 후보 수`, theme: 'teal' },
+  long_tail_volatility: { stages: LTV_STAGES, testId: 'ltv-scan-funnel', title: `${strategyLabel('long_tail_volatility')} — 조건 통과 단계별 후보 수`, theme: 'teal' },
+  bull_flag_breakout: { stages: BFB_STAGES, testId: 'bfb-scan-funnel', title: `${strategyLabel('bull_flag_breakout')} — 조건 통과 단계별 후보 수`, theme: 'indigo' },
+  vcp_breakout: { stages: VCP_STAGES, testId: 'vcp-scan-funnel', title: `${strategyLabel('vcp_breakout')} — 조건 통과 단계별 후보 수`, theme: 'indigo' },
+  momentum: { stages: MOMENTUM_STAGES, testId: 'momentum-scan-funnel', title: `${strategyLabel('momentum')} — 조건 통과 단계별 후보 수`, theme: 'emerald' },
 }
 
 interface ScanFunnelBarsProps {
@@ -275,12 +276,6 @@ const BREAKOUT_KEYS = [
   'bull_flag_breakout',
   'vcp_breakout',
 ] as const
-const BREAKOUT_LABELS: Record<string, string> = {
-  volatility_breakout: '변동성 돌파',
-  long_tail_volatility: '롱테일 변동성',
-  bull_flag_breakout: '눌림목 돌파',
-  vcp_breakout: 'VCP 변동성 수축',
-}
 
 // 사이클 21 — getStaleContextByKstMinutes / STALE_CONTEXT_META 는
 // utils/stale-context 로 이전. ScanMonitor 는 더 이상 끊김 영역을 노출하지 않음
@@ -326,7 +321,7 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
     if (isAll) {
       for (const [key, strat] of Object.entries(strategies)) {
         for (const sig of strat.buy_signals) {
-          signals.push({ ...sig, strategyKey: key, strategyName: strat.name })
+          signals.push({ ...sig, strategyKey: key, strategyName: strategyLabel(key, strat.name) })
         }
       }
     } else if (strategies[selectedStrategy]) {
@@ -334,7 +329,7 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
       signals = strat.buy_signals.map((sig) => ({
         ...sig,
         strategyKey: selectedStrategy,
-        strategyName: strat.name,
+        strategyName: strategyLabel(selectedStrategy, strat.name),
       }))
     }
   } else {
@@ -438,7 +433,7 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
               if (!c) return null
               return (
                 <div key={k} className="mb-2 px-2 py-1.5 bg-indigo-50 rounded text-xs text-indigo-700">
-                  {BREAKOUT_LABELS[k]} 스캔: {c}종목 (NXT 프리 08:00 / KRX 메인 09:00:05 / NXT 애프터 15:30~ 매매)
+                  {strategyLabel(k)} 스캔: {c}종목 (NXT 프리 08:00 / KRX 메인 09:00:05 / NXT 애프터 15:30~ 매매)
                 </div>
               )
             })}

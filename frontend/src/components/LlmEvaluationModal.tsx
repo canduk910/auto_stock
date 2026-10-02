@@ -28,6 +28,7 @@ import axios from 'axios'
 
 import { getLlmEvaluation } from '../api/llm-evaluations'
 import type { LlmEvaluation } from '../types/llm-evaluation'
+import { strategyLabel } from '../utils/strategyMeta'
 
 const TITLE_ID = 'llm-eval-modal-title'
 
@@ -446,7 +447,7 @@ function EvaluationBody({ evaluation }: { evaluation: LlmEvaluation }) {
                 : '없음'
             }
           />
-          <Field label="전략" value={fmtText(evaluation.strategy_id)} />
+          <Field label="전략" value={fmtText(evaluation.strategy_id && strategyLabel(evaluation.strategy_id))} />
           <Field label="잔여 예산" value={fmtInt(evaluation.budget_remaining_after_won, '원')} />
         </div>
       </Section>

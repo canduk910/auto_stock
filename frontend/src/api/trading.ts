@@ -3,6 +3,7 @@ import axios from 'axios'
 import apiClient from './client'
 import type { TradingStatusData, ActionResult, StrategiesResponse } from '../types/trading'
 import type { ApiResponse } from '../types/common'
+import { strategyLabel } from '../utils/strategyMeta'
 
 export const getTradingStatus = async (): Promise<TradingStatusData> => {
   const { data } = await apiClient.get<ApiResponse<TradingStatusData>>('/trading/status')
@@ -29,9 +30,10 @@ export const getStrategies = async (): Promise<StrategiesResponse> => {
   const raw = data.data ?? {}
   // API는 { momentum: {...}, volatility_breakout: {...} } 객체를 반환
   // 프론트용 배열로 변환
+  // cycle395 — 표시명은 strategyLabel() 중앙 정본이 API `name` 보다 우선한다.
   const strategies = Object.entries(raw).map(([key, val]) => {
     const v = val as { name: string; enabled: boolean; weight: number; params?: Record<string, unknown>; total_investment?: number; invested_amount?: number; min_weight?: number }
-    return { key, name: v.name, enabled: v.enabled, weight: v.weight, params: v.params, total_investment: v.total_investment, invested_amount: v.invested_amount, min_weight: v.min_weight }
+    return { key, name: strategyLabel(key, v.name), enabled: v.enabled, weight: v.weight, params: v.params, total_investment: v.total_investment, invested_amount: v.invested_amount, min_weight: v.min_weight }
   })
   return { strategies }
 }

@@ -13,6 +13,7 @@ import {
   llmSummaryDatesFor,
 } from '../api/llm-evaluations'
 import { getStrategyColor } from '../types/strategy'
+import { strategyLabel } from '../utils/strategyMeta'
 import type { TradeRecord } from '../types/trading'
 import type { LlmEvaluationSummaryMap } from '../types/llm-evaluation'
 import LlmEvaluationModal from './LlmEvaluationModal'
@@ -110,15 +111,6 @@ function formatTime(timestamp: string): string {
   return `${hh}:${mi}:${ss}`
 }
 
-const STRATEGY_NAMES: Record<string, string> = {
-  momentum: '모멘텀',
-  volatility_breakout: '변동성돌파',
-  long_tail_volatility: '롱테일 변동성',
-  donchian_swing: '20일 신고가 스윙',
-  bull_flag_breakout: '눌림목 돌파',
-  vcp_breakout: '변동성 수축 돌파',
-}
-
 /**
  * cycle276 — 열 정의를 모듈 상수에서 **팩토리**로 바꾼다.
  *
@@ -208,7 +200,7 @@ function makeColumns(
       cell: (info) => {
         const v = String(info.getValue() ?? '')
         const color = getStrategyColor(v)
-        const name = STRATEGY_NAMES[v] ?? v
+        const name = strategyLabel(v)
         return <span className={`px-1.5 py-0.5 rounded text-xs ${color.badge}`}>{name}</span>
       },
     }),

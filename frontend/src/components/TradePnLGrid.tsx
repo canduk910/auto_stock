@@ -13,22 +13,13 @@ import {
   llmSummaryDatesFor,
 } from '../api/llm-evaluations'
 import { getStrategyColor } from '../types/strategy'
+import { strategyLabel } from '../utils/strategyMeta'
 import type { TradePair } from '../types/trading'
 import type { LlmEvaluationSummaryMap } from '../types/llm-evaluation'
 import LlmEvaluationModal from './LlmEvaluationModal'
 import LlmScoreBadge from './LlmScoreBadge'
 import ScrollPane from './ScrollPane'
 import { useStockChartOpener } from './useStockChartOpener'
-
-const STRATEGY_NAMES: Record<string, string> = {
-  momentum: '모멘텀',
-  volatility_breakout: '변동성돌파',
-  long_tail_volatility: '롱테일 변동성',
-  donchian_swing: '20일 신고가 스윙',
-  bull_flag_breakout: '눌림목 돌파',
-  vcp_breakout: '변동성 수축 돌파',
-  kojiro: '고지로 대순환',
-}
 
 const columnHelper = createColumnHelper<TradePair>()
 
@@ -134,7 +125,7 @@ function makeColumns(
     cell: (info) => {
       const v = String(info.getValue() ?? '')
       const color = getStrategyColor(v)
-      const name = STRATEGY_NAMES[v] ?? v
+      const name = strategyLabel(v)
       return <span className={`px-1.5 py-0.5 rounded text-xs ${color.badge}`}>{name}</span>
     },
   }),
@@ -287,7 +278,7 @@ export default function TradePnLGrid() {
     win_rate_pct: 0,
     closed_count: 0,
   }
-  const strategyLabel = strategyFilter ? (STRATEGY_NAMES[strategyFilter] ?? strategyFilter) : '전체'
+  const strategyFilterLabel = strategyFilter ? strategyLabel(strategyFilter) : '전체'
 
   const table = useReactTable({
     data: pairs,
@@ -312,13 +303,13 @@ export default function TradePnLGrid() {
             className="text-sm border border-gray-300 rounded px-2 py-1"
           >
             <option value="">전체</option>
-            <option value="momentum">모멘텀</option>
-            <option value="volatility_breakout">변동성돌파</option>
-            <option value="long_tail_volatility">롱테일 변동성</option>
-            <option value="donchian_swing">20일 신고가 스윙</option>
-            <option value="bull_flag_breakout">눌림목 돌파</option>
-            <option value="vcp_breakout">변동성 수축 돌파</option>
-            <option value="kojiro">고지로 대순환</option>
+            <option value="momentum">{strategyLabel('momentum')}</option>
+            <option value="volatility_breakout">{strategyLabel('volatility_breakout')}</option>
+            <option value="long_tail_volatility">{strategyLabel('long_tail_volatility')}</option>
+            <option value="donchian_swing">{strategyLabel('donchian_swing')}</option>
+            <option value="bull_flag_breakout">{strategyLabel('bull_flag_breakout')}</option>
+            <option value="vcp_breakout">{strategyLabel('vcp_breakout')}</option>
+            <option value="kojiro">{strategyLabel('kojiro')}</option>
           </select>
         </div>
         <span className="text-xs text-gray-400">
@@ -341,7 +332,7 @@ export default function TradePnLGrid() {
           승 {summary.win_count}/패 {summary.loss_count}/보합 {summary.even_count}
         </span>
         <span>승률 {summary.win_rate_pct.toFixed(1)}%</span>
-        <span className="text-gray-400">전략: {strategyLabel}</span>
+        <span className="text-gray-400">전략: {strategyFilterLabel}</span>
       </div>
 
       <ScrollPane>

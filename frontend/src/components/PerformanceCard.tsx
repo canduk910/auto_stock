@@ -4,6 +4,7 @@ import { getStrategyTeRr } from '../api/strategies'
 import { useTradingStatus } from '../contexts/TradingStatusContext'
 import type { TeRrMetrics } from '../types/strategy'
 import { pnlColorClass as profitColor } from '../utils/pnlColor'
+import { strategyLabel } from '../utils/strategyMeta'
 
 /**
  * 백엔드 계약은 숫자(`PerformanceSummary.latest_asset: number`)이고 `src/routes/performance.py`
@@ -151,7 +152,7 @@ export default function PerformanceCard({ selectedStrategy }: Props) {
                   className="flex items-center justify-between flex-wrap gap-2 border-t border-gray-100 pt-2 first:border-t-0 first:pt-0"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-800">{info?.name ?? m.strategy_id}</span>
+                    <span className="text-sm text-gray-800">{strategyLabel(m.strategy_id, info?.name)}</span>
                     {info && (
                       <span
                         data-testid={`strategy-status-badge-${m.strategy_id}`}

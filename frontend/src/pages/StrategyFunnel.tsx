@@ -20,16 +20,18 @@ import {
   triggerFunnelSnapshot,
   type FunnelSnapshot,
 } from '../api/strategy-funnel'
+import { strategyLabel } from '../utils/strategyMeta'
 
+// cycle395 — 표시명은 utils/strategyMeta.ts 중앙 정본(strategyLabel)을 거친다.
 const STRATEGY_OPTIONS = [
   { id: '', label: '전체' },
-  { id: 'donchian_swing', label: '도치안 스윙' },
-  { id: 'kojiro', label: '고지로 대순환' },
-  { id: 'bull_flag_breakout', label: '눌림목 돌파' },
-  { id: 'vcp_breakout', label: 'VCP 변동성 수축' },
-  { id: 'momentum', label: '모멘텀' },
-  { id: 'volatility_breakout', label: '변동성 돌파' },
-  { id: 'long_tail_volatility', label: '롱테일 변동성' },
+  { id: 'donchian_swing', label: strategyLabel('donchian_swing') },
+  { id: 'kojiro', label: strategyLabel('kojiro') },
+  { id: 'bull_flag_breakout', label: strategyLabel('bull_flag_breakout') },
+  { id: 'vcp_breakout', label: strategyLabel('vcp_breakout') },
+  { id: 'momentum', label: strategyLabel('momentum') },
+  { id: 'volatility_breakout', label: strategyLabel('volatility_breakout') },
+  { id: 'long_tail_volatility', label: strategyLabel('long_tail_volatility') },
 ]
 
 function todayKst(): string {
@@ -368,7 +370,7 @@ export default function StrategyFunnel() {
           className="mb-6 bg-white border border-gray-200 rounded"
         >
           <div className="px-3 py-2 border-b border-gray-200 bg-gray-50">
-            <span className="font-medium text-gray-800">{sid}</span>
+            <span className="font-medium text-gray-800">{strategyLabel(sid)}</span>
             <span className="ml-2 text-xs text-gray-500">{rows.length} 단계</span>
           </div>
           {bottleneck && (

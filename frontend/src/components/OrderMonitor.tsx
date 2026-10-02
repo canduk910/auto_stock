@@ -1,5 +1,6 @@
 import { useTradingStatus } from '../contexts/TradingStatusContext'
 import { getStrategyColor } from '../types/strategy'
+import { strategyLabel } from '../utils/strategyMeta'
 import type { TradingStatusData, StrategyInfo, PositionDetail, OrderStatus } from '../types/trading'
 import ScrollPane from './ScrollPane'
 
@@ -57,7 +58,7 @@ export default function OrderMonitor({ selectedStrategy }: Props) {
             const color = getStrategyColor(key)
             return (
               <div key={key} className={`p-2 rounded ${color.bg} flex items-center justify-between`}>
-                <span className={`text-xs font-medium ${color.text}`}>{strat.name}</span>
+                <span className={`text-xs font-medium ${color.text}`}>{strategyLabel(key, strat.name)}</span>
                 <div className="flex gap-4 text-xs">
                   <span>투자금: {formatPrice(strat.total_investment)}원</span>
                   <span>보유: {strat.positions}종목</span>
@@ -233,7 +234,7 @@ function getAggregatedData(
           ticker,
           pos,
           strategyKey: selectedStrategy,
-          strategyName: strat.name,
+          strategyName: strategyLabel(selectedStrategy, strat.name),
         })),
     }
   }
@@ -256,7 +257,7 @@ function getAggregatedData(
     pendingBuyTickers.push(...strat.pending_buy_tickers)
     for (const [ticker, pos] of Object.entries(strat.positions_detail)) {
       if (!isValidTicker(ticker)) continue
-      positions.push({ ticker, pos, strategyKey: key, strategyName: strat.name })
+      positions.push({ ticker, pos, strategyKey: key, strategyName: strategyLabel(key, strat.name) })
     }
   }
 

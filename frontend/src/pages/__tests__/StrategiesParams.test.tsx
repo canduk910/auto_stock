@@ -90,8 +90,10 @@ describe('cycle278 F21~F22 — 전략 카드에서 편집기로', () => {
 
     await user.click(button)
     const editor = await screen.findByTestId('strategy-params-editor')
+    // cycle395 — 전략 표시명은 utils/strategyMeta.ts 중앙 정본("모멘텀")이 백엔드 스키마의
+    // `name`("상한가 모멘텀")보다 우선한다.
     expect(within(editor).getByTestId('strategy-params-title')).toHaveTextContent(
-      '상한가 모멘텀',
+      '모멘텀',
     )
     expect(screen.getByTestId('strategy-params-version')).toHaveTextContent(
       PARAM_SCHEMA_FIXTURE.catalog_version,

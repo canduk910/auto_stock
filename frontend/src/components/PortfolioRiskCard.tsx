@@ -12,6 +12,7 @@ import { useQuery } from '@tanstack/react-query'
 import { getPortfolioRisk } from '../api/portfolio'
 import type { AccountGate, GateLevel, PortfolioRiskBucket } from '../types/portfolio'
 import { formatKstHHMM } from '../utils/kst'
+import { strategyLabel } from '../utils/strategyMeta'
 import ScrollPane from './ScrollPane'
 
 const SECTOR_CONCENTRATION_WARNING_PCT = 40
@@ -151,7 +152,7 @@ export default function PortfolioRiskCard() {
               <tbody>
                 {strategyEntries.map(([sid, bucket]) => (
                   <tr key={sid} data-testid={`portfolio-risk-strategy-row-${sid}`}>
-                    <td className="py-0.5 text-gray-700">{sid}</td>
+                    <td className="py-0.5 text-gray-700">{strategyLabel(sid)}</td>
                     <td className="py-0.5 text-right font-mono">{bucket.positions}</td>
                     <td className="py-0.5 text-right font-mono">{formatWon(bucket.notional_won)}</td>
                     <td className="py-0.5 text-right font-mono">{formatWon(bucket.risk_won)}</td>

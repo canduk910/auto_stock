@@ -21,6 +21,7 @@ import { dirname, resolve } from 'node:path'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const STRATEGY_FUNNEL_SRC_PATH = resolve(__dirname, '..', 'StrategyFunnel.tsx')
 const FUNNEL_API_SRC_PATH = resolve(__dirname, '..', '..', 'api', 'strategy-funnel.ts')
+const STRATEGY_META_SRC_PATH = resolve(__dirname, '..', '..', 'utils', 'strategyMeta.ts')
 
 describe('사이클 132 — StrategyFunnel 휴장일 안내 + 정책 안내 영역', () => {
   const src = readFileSync(STRATEGY_FUNNEL_SRC_PATH, 'utf-8')
@@ -71,9 +72,14 @@ describe('사이클 132 — StrategyFunnel 휴장일 안내 + 정책 안내 영�
   it('G-FE-132-E: 안내 메시지 한글 친숙 용어 영속 (사이클 89 답습)', () => {
     // "휴장일 안내" 영구 영속 의무 (사이클 89 한글 친숙 용어 영속)
     expect(src.includes('휴장일 안내')).toBe(true)
-    // 전략 한글 라벨 영속 의무 (모멘텀 / 변동성 돌파 / 롱테일 변동성)
+    // 전략 안내 문구 ("모멘텀" 은 사이클 132 정책 안내 문구에 직접 박혀 있다 — 유지)
     expect(src.includes('모멘텀')).toBe(true)
-    expect(src.includes('변동성 돌파')).toBe(true)
-    expect(src.includes('롱테일 변동성')).toBe(true)
+    // cycle395 — 전략 선택지 한글 표시명은 utils/strategyMeta.ts 중앙 정본(strategyLabel)을
+    // 거치므로 StrategyFunnel.tsx 소스에는 더 이상 각 라벨 리터럴이 박혀 있지 않다.
+    // 정본 파일 쪽에 그 값이 있는지로 검증한다.
+    expect(src.includes("from '../utils/strategyMeta'")).toBe(true)
+    const metaSrc = readFileSync(STRATEGY_META_SRC_PATH, 'utf-8')
+    expect(metaSrc.includes('변동성 돌파')).toBe(true)
+    expect(metaSrc.includes('롱테일 변동성')).toBe(true)
   })
 })

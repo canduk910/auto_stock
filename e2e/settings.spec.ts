@@ -11,7 +11,9 @@ test.describe("Settings 페이지", () => {
     // autoStart) + integration 4 토글 + BuyBlockSection + KisQuoteAccountsCard 모두
     // mount 완료까지 10s 초과 가능성. 사이클 79/80 1차 fail 확정 후 timeout 상향.
     await expect(page.getByText(/설정|전략/).first()).toBeVisible({ timeout: 20000 });
-    // 4 전략 중 momentum 은 mock 에 있으므로 표시
-    await expect(page.getByText("상한가 모멘텀").first()).toBeVisible({ timeout: 20000 });
+    // 4 전략 중 momentum 은 mock 에 있으므로 표시.
+    // cycle395 — 전략 표시명은 utils/strategyMeta.ts 중앙 정본("모멘텀")이 mock 의
+    // 백엔드 API name("상한가 모멘텀")보다 우선한다.
+    await expect(page.getByText("모멘텀").first()).toBeVisible({ timeout: 20000 });
   });
 });

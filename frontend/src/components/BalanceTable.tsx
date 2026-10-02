@@ -4,18 +4,12 @@ import { getBalance } from '../api/balance'
 import { manualSell } from '../api/trading'
 import { useTradingStatus } from '../contexts/TradingStatusContext'
 import { getStrategyColor } from '../types/strategy'
+import { strategyLabel } from '../utils/strategyMeta'
 import type { Holding } from '../types/balance'
 import ConfirmModal from './ConfirmModal'
 import { pnlColorClass as profitColor } from '../utils/pnlColor'
 import ScrollPane from './ScrollPane'
 import { useStockChartOpener } from './useStockChartOpener'
-
-const STRATEGY_NAMES: Record<string, string> = {
-  momentum: '모멘텀',
-  volatility_breakout: '변동성돌파',
-  long_tail_volatility: '롱테일 변동성',
-  donchian_swing: '20일 신고가 스윙',
-}
 
 const MARKET_BADGE_BASE = 'inline-block px-1.5 py-0.5 rounded text-xs font-medium'
 
@@ -287,7 +281,7 @@ export default function BalanceTable({ selectedStrategy }: Props) {
                       <td className="px-4 py-3">
                         {color ? (
                           <span className={`px-1.5 py-0.5 rounded text-xs ${color.badge}`}>
-                            {STRATEGY_NAMES[stratKey] ?? stratKey}
+                            {strategyLabel(stratKey)}
                           </span>
                         ) : (
                           <span className="px-1.5 py-0.5 rounded text-xs bg-gray-100 text-gray-500">-</span>

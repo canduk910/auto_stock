@@ -37,6 +37,7 @@ import type {
   ParamsSchemaData,
 } from '../types/strategy-params'
 import { isKrxMainSession } from '../utils/kst'
+import { strategyLabel } from '../utils/strategyMeta'
 
 /** 편집 중 입력 상태. 숫자·문자열은 raw string, bool 은 boolean, 다중선택은 string[]. */
 type Draft = string | boolean | string[]
@@ -329,7 +330,7 @@ export default function StrategyParamsEditor({
     mutation.isPending
 
   const confirmMessage = (() => {
-    const head = `${strategy?.name ?? strategyId} 파라미터 ${changes.length}개를 변경합니다.`
+    const head = `${strategyLabel(strategyId, strategy?.name)} 파라미터 ${changes.length}개를 변경합니다.`
     const identityNote = needsAck
       ? ` 리스크 정체성 상수 ${identityChanges.length}개가 포함됩니다.`
       : ''
@@ -385,7 +386,7 @@ export default function StrategyParamsEditor({
                   data-testid="strategy-params-title"
                   className="text-base font-semibold text-gray-900"
                 >
-                  {strategy.name} 파라미터
+                  {strategyLabel(strategyId, strategy.name)} 파라미터
                 </h2>
                 <p className="text-xs text-gray-500">
                   설정 가능한 {specs.length}개 항목 · 카탈로그{' '}

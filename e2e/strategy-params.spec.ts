@@ -80,7 +80,9 @@ test.describe("G-E2E-278a — 편집 → diff → 정체성 2단계 확인 → �
     // 편집기 진입
     await page.getByTestId("strategy-params-open-momentum").click();
     await expect(page.getByTestId("strategy-params-editor")).toBeVisible(T);
-    await expect(page.getByTestId("strategy-params-title")).toContainText("상한가 모멘텀");
+    // cycle395 — 전략 표시명은 utils/strategyMeta.ts 중앙 정본("모멘텀")이 mock 의
+    // 백엔드 API name("상한가 모멘텀")보다 우선한다.
+    await expect(page.getByTestId("strategy-params-title")).toContainText("모멘텀");
 
     // percent 키 — 저장은 비율, 화면은 %
     await openGroup(page, "sizing_risk");

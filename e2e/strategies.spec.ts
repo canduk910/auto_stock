@@ -20,7 +20,7 @@ import { installApiMocks } from "./fixtures/api-mocks";
 // ────────────────────────────────────────────────────────────────────────
 
 test.describe("H-ST1 (HIGH) — momentum 전략 카드 testid 렌더 visible", () => {
-  test("momentum strategy-card testid + 상한가 모멘텀 이름 visible", async ({ page }) => {
+  test("momentum strategy-card testid + 모멘텀 이름 visible", async ({ page }) => {
     // 사이클 103 api-mocks /api/strategies GET LIFO 등록 영속
     await installApiMocks(page);
     await page.goto("/strategies");
@@ -30,9 +30,10 @@ test.describe("H-ST1 (HIGH) — momentum 전략 카드 testid 렌더 visible", (
       page.getByTestId("strategy-card-momentum")
     ).toBeVisible({ timeout: 20000 });
 
-    // 전략명 한글 표시 (mock: "상한가 모멘텀")
+    // 전략명 한글 표시 — cycle395 부터 utils/strategyMeta.ts 중앙 정본("모멘텀")이
+    // mock 의 백엔드 API name("상한가 모멘텀")보다 우선한다.
     const card = page.getByTestId("strategy-card-momentum");
-    await expect(card.getByText("상한가 모멘텀")).toBeVisible({ timeout: 20000 });
+    await expect(card.getByText("모멘텀")).toBeVisible({ timeout: 20000 });
   });
 });
 

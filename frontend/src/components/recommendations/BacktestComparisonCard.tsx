@@ -21,6 +21,7 @@ import type { BacktestMetrics, BacktestSummary } from '../../types/backtest'
 import { BACKTEST_METRIC_KEYS } from '../../types/backtest'
 import { getStrategyColor } from '../../types/strategy'
 import { PROFIT_HEX as PROFIT_COLOR, LOSS_HEX as LOSS_COLOR, NEUTRAL_HEX } from '../../utils/pnlColor'
+import { strategyLabel } from '../../utils/strategyMeta'
 import ScrollPane from '../ScrollPane'
 
 const NEUTRAL_COLOR = NEUTRAL_HEX
@@ -315,7 +316,7 @@ function PeerMiniCard({ strategyId, current, recommended, diff }: PeerMiniCardPr
     >
       <div className="flex items-center gap-1.5 mb-1.5">
         <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color.hex }} />
-        <span className="text-xs font-medium text-gray-700">{strategyId}</span>
+        <span className="text-xs font-medium text-gray-700">{strategyLabel(strategyId)}</span>
       </div>
       {isSkipped ? (
         <div className="text-[11px] text-amber-700">로컬 어댑터 대기</div>

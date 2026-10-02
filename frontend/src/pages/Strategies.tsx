@@ -25,6 +25,7 @@ import { getStrategyColor } from '../types/strategy'
 import type { TeRrMetrics } from '../types/strategy'
 import { getStrategyTeRr } from '../api/strategies'
 import { pnlColorClass as profitColorClass } from '../utils/pnlColor'
+import { strategyLabel } from '../utils/strategyMeta'
 import ScrollPane from '../components/ScrollPane'
 
 // 전략 응답 타입 — GET /api/strategies 영역 정합
@@ -367,7 +368,7 @@ function StrategyCard({
       {/* 카드 헤더 */}
       <div className="flex items-center justify-between mb-3">
         <div>
-          <h3 className="text-sm font-semibold text-gray-900">{strategy.name}</h3>
+          <h3 className="text-sm font-semibold text-gray-900">{strategyLabel(strategyKey, strategy.name)}</h3>
           <p className="text-xs text-gray-500">
             비중 {(strategy.weight * 100).toFixed(0)}%
             {strategy.total_investment > 0 &&
