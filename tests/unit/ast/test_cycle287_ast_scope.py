@@ -249,7 +249,12 @@ _BASE_SHA = {
 #: `src/models/candle_chart.py`·`src/routes/stock_chart.py` + `src/main.py` 등록 2줄로
 #: 163 → **166**. 읽기 전용 KIS 시세 조회 하나뿐 — 8영역·scheduler.py·매매 행위 변경 없음.
 #: 직전 값 = 163.
-_SRC_TREE_FILES = 166
+#: 🔁 cycle397 재핀 — 잔고 화면 매입일(최초 매입일) 칸(사용자 요청 2026-10-02). 신규 leaf
+#: `src/engine/position_buy_date.py` 하나로 166 → **167**. `src/db/positions.py`
+#: (`get_buy_dates` 신설) · `src/routes/balance.py`(매입일 병합 호출) · `src/models/balance.py`
+#: (`buy_date` 필드) 내용도 바뀌었으나 전부 이미 이 digest 안에 있던 파일이다(신규 파일
+#: 1개뿐). 읽기 전용 조회 조합 — 8영역·scheduler.py·매매 행위 변경 없음. 직전 값 = 166.
+_SRC_TREE_FILES = 167
 #: ⚠️ 값은 **cycle285 적대 검증 반영** 기준선이다. 그 직전(초판 cycle285 배포)
 #: digest 는 `97483c5114a1d00dc8f7ca7c1ed08e1b3dc1d0b585065b14176dc227da9bed8c` 였다.
 #: cycle287b 배포분의 digest 는
@@ -679,8 +684,12 @@ _SRC_TREE_FILES = 166
 # 🔁 cycle396(2026-10-02) 재핀 — cycle396 사용자 요청(10-02) 가중평균가 절사: `db/trade_history.py`
 # `get_trade_pairs` 가 가격을 원 단위 내림 int · closed 손익을 SELL 행 장부 손익 합으로 낸다(화면 소수 제거).
 # 파일 수 불변 166. 직전 값 = cycle394 `b20e67639d14d1d4437ab3982733e1c428313d165476084ee391f956064b84ea`.
+# 🔁 cycle397(2026-10-02) 재핀 — 잔고 화면 매입일(최초 매입일) 칸(사용자 요청). 신규 leaf
+# `src/engine/position_buy_date.py` 하나로 166 → 167. `src/db/positions.py`(`get_buy_dates`)·
+# `src/routes/balance.py`(매입일 병합)·`src/models/balance.py`(`buy_date` 필드) 내용 변경 포함.
+# 읽기 전용 조회 조합 — 매매 행위 변경 없음. 직전 값 = cycle396 `67d48b35e5b2759b67d6a0957d1e09b7e50d2e61c68b2e0b3ca3df13988360de`.
 _SRC_TREE_DIGEST = (
-    "67d48b35e5b2759b67d6a0957d1e09b7e50d2e61c68b2e0b3ca3df13988360de"
+    "3821020f8bbcadb4912f6e7adec8b4bcdcce01d677e6558713cb5d9b0a4ae0bc"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
@@ -709,7 +718,8 @@ _PINNED_DIR_FILE_COUNTS = {
     # cycle380 — 신규 leaf `etf_like.py` 로 82 → 83.
     # cycle382 — 신규 leaf `market_unit.py` 로 83 → 84.
     # cycle386 — 신규 leaf `daily_bar_finalize.py` 로 84 → 85.
-    "src/engine": 85,
+    # cycle397 — 신규 leaf `position_buy_date.py` 로 85 → 86.
+    "src/engine": 86,
 }
 
 #: `scheduler.py` 정확 라인 수 + cycle257 영구 상한.

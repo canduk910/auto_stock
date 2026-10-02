@@ -23,6 +23,10 @@ class StockHolding(BaseModel):
     nxt_tradable: Optional[bool] = None
     krx_halted: Optional[bool] = None
     excg_dvsn_cd: Optional[str] = None
+    # cycle397 — 최초 매입일(KST `YYYY-MM-DD`). routes/balance.py 가
+    # `engine/position_buy_date` 로 채운다. 판정 불가(엔진·DB 모두 모름)는
+    # None — 오늘 날짜로 채우지 않는다("모름"과 "없음"을 구분).
+    buy_date: Optional[str] = None
 
 
 class AccountSummary(BaseModel):

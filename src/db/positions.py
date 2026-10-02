@@ -70,6 +70,21 @@ async def load_all() -> list[dict]:
     return await pg.fetch("SELECT * FROM positions")
 
 
+async def get_buy_dates(tickers: list[str]) -> dict[str, date]:
+    """`tickers` 의 `buy_date` 를 `{ticker: date}` 로 돌려준다(cycle397).
+
+    잔고 화면의 매입일 칸 — 엔진 메모리 포지션이 없는 종목(엔진 정지 중·수동
+    보유)의 폴백 출처. 빈 입력은 쿼리 없이 `{}`.
+    """
+    if not tickers:
+        return {}
+    rows = await pg.fetch(
+        "SELECT ticker, buy_date FROM positions WHERE ticker = ANY($1::text[])",
+        list(tickers),
+    )
+    return {r["ticker"]: r["buy_date"] for r in rows if r.get("buy_date") is not None}
+
+
 async def update_high(ticker: str, high: int) -> None:
     """고점을 갱신한다."""
     await pg.execute(

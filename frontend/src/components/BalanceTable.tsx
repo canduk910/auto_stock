@@ -96,6 +96,19 @@ function formatKRW(value: number): string {
   return value.toLocaleString('ko-KR')
 }
 
+/**
+ * cycle397 — 매입일 칸 표시. 백엔드가 이미 KST 기준 `YYYY-MM-DD` 순수 날짜
+ * 문자열을 준다(타임존 정보가 없는 영업일 값) — `new Date(iso)` 로 다시 파싱해
+ * 로컬 타임존 getter 를 쓰면 루트 CLAUDE.md 금기(`new Date(iso).getHours()` 류)를
+ * 밟는다. 형식 검증만 하고 **문자열 그대로** 쓴다.
+ */
+const YMD_RE = /^\d{4}-\d{2}-\d{2}$/
+
+function buyDateLabel(iso: string | null | undefined): string {
+  if (typeof iso !== 'string' || !YMD_RE.test(iso)) return '—'
+  return iso
+}
+
 interface Props {
   selectedStrategy: string
 }
@@ -228,6 +241,7 @@ export default function BalanceTable({ selectedStrategy }: Props) {
               <th className="px-4 py-3 text-left font-medium text-gray-600">종목명</th>
               <th className="px-4 py-3 text-left font-medium text-gray-600">섹터</th>
               <th className="px-4 py-3 text-left font-medium text-gray-600">거래시장</th>
+              <th className="px-4 py-3 text-left font-medium text-gray-600">매입일</th>
               {isAll && (
                 <th className="px-4 py-3 text-left font-medium text-gray-600">전략</th>
               )}
@@ -245,7 +259,7 @@ export default function BalanceTable({ selectedStrategy }: Props) {
           <tbody>
             {filteredHoldings.length === 0 ? (
               <tr>
-                <td colSpan={isAll ? 13 : 12} className="px-4 py-8 text-center text-gray-400">
+                <td colSpan={isAll ? 14 : 13} className="px-4 py-8 text-center text-gray-400">
                   보유 종목이 없습니다.
                 </td>
               </tr>
@@ -276,6 +290,12 @@ export default function BalanceTable({ selectedStrategy }: Props) {
                       >
                         {market.label}
                       </span>
+                    </td>
+                    <td
+                      data-testid={`buy-date-${h.ticker}`}
+                      className="px-4 py-3 text-gray-500"
+                    >
+                      {buyDateLabel(h.buy_date)}
                     </td>
                     {isAll && (
                       <td className="px-4 py-3">

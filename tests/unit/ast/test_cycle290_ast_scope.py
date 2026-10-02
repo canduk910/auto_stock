@@ -425,6 +425,10 @@ _ENGINE_PY_FILES: dict[str, tuple[str, ...]] = {
         "metrics_collector.py", "no_feed_registry.py", "observer_trace.py",
         "open_price_observe.py", "open_price_rest.py", "order_engine.py",
         "param_catalog.py", "param_drift.py", "param_validation.py", "portfolio_risk.py",
+        # cycle397 — 잔고 화면 매입일(최초 매입일) 해석 leaf(`position_exit_lines.py`
+        # 와 같은 패턴, read-only·never-raise). 등재해도 "다음 신규 파일" 은 여전히
+        # 붉어진다(이름 축 가드는 변경 없음).
+        "position_buy_date.py",
         "position_exit_lines.py",
         # cycle351 — 피라미딩 가상 사다리(셰도) leaf. 이름을 등재해도 "다음 신규 파일" 은
         # 여전히 붉어진다(이름 축 가드는 변경 없음).

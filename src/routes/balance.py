@@ -8,6 +8,7 @@ from fastapi import APIRouter
 
 from src.api.balance import get_balance, get_buyable
 from src.db.stock_master import get as stock_master_get
+from src.engine.position_buy_date import merge_buy_date, resolve_engine_buy_dates
 from src.engine.position_exit_lines import build_exit_line_map
 from src.engine.sector_naming import resolve_sector_name
 from src.models.response import ApiResponse
@@ -43,6 +44,26 @@ async def balance():
     except Exception:
         logger.debug("[exit_lines] registry 조회 실패 graceful", exc_info=True)
 
+    # cycle397 — 매입일(최초 매입일). 1순위 = 엔진 포지션(엔진이 실제로 쓰는 값),
+    # 2순위 = DB `positions.buy_date`(수동 보유·엔진 정지 중의 폴백). 두 출처가
+    # 모두 있으면 더 이른 날짜(「최초」 규약). registry/DB 조회 실패는 모두
+    # graceful — 그 종목 칸만 `None`(화면 `—`), 잔고 자체는 그대로 나간다.
+    engine_buy_dates: dict[str, str] = {}
+    try:
+        from src.engine.scheduler import trading_scheduler
+
+        engine_buy_dates = resolve_engine_buy_dates(trading_scheduler.registry.all())
+    except Exception:
+        logger.debug("[buy_date] registry 조회 실패 graceful", exc_info=True)
+
+    db_buy_dates: dict = {}
+    try:
+        from src.db.positions import get_buy_dates
+
+        db_buy_dates = await get_buy_dates([h.ticker for h in holdings])
+    except Exception:
+        logger.debug("[buy_date] DB 조회 실패 graceful", exc_info=True)
+
     enriched_holdings: list[dict] = []
     for h in holdings:
         payload = h.model_dump()
@@ -74,6 +95,11 @@ async def balance():
                 "target_price": None,
                 "target_source": None,
             }
+        )
+        # cycle397 — 매입일(최초 매입일). 판정 불가는 None(화면 `—`) — 오늘
+        # 날짜로 채우지 않는다.
+        payload["buy_date"] = merge_buy_date(
+            engine_buy_dates.get(h.ticker), db_buy_dates.get(h.ticker)
         )
         enriched_holdings.append(payload)
 

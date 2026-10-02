@@ -430,9 +430,14 @@ def test_a8_no_new_leaf_in_src_engine() -> None:
     신설해 74 → **75** 가 됐다 — 8영역·`scheduler`·`scanner`·`boot_manager`·strategies
     import 0 인 부팅 prepare 직전 확정 leaf. `boot_manager.py` 는 spawn/wait_for_boot
     배선 2줄만 접촉한다(사용자 결정 2026-09-28 「지금 최우선」).
+
+    ⚠️ cycle397(2026-10-02, 잔고 화면 매입일)이 leaf 1개 `position_buy_date.py` 를
+    신설해 75 → **76** 이 됐다 — 보유 종목의 최초 매입일을 해석하는 순수 함수
+    (`await`/DB/HTTP 0 · read-only · never-raise, `position_exit_lines.py` 와 같은
+    패턴). `routes/balance.py` 가 소비한다. `scheduler.py` 무접촉.
     """
     got = len(list((_ROOT / "src" / "engine").glob("*.py")))
-    assert got == 75, f"`src/engine/*.py` 파일 수 {got} (cycle386 기준선 75)"
+    assert got == 76, f"`src/engine/*.py` 파일 수 {got} (cycle397 기준선 76)"
 
 
 # ===========================================================================

@@ -75,6 +75,7 @@ AWS RDS PostgreSQL CRUD 모듈. DB 클라이언트 정본 = **`pg.py` (asyncpg �
 | `load_all() -> list[dict]` | 부팅 복구용 전량 조회 |
 | `update_high(ticker, high)` | 트레일링 고점 갱신 |
 | `clear_all()` | 전량 삭제 — **운영 복구용**이지 일상 경로가 아니다 |
+| `get_buy_dates(tickers) -> dict[str, date]` | 잔고 화면 매입일 칸(cycle397)의 DB 폴백 — `{ticker: buy_date}`, 빈 입력은 쿼리 없이 `{}`. 1순위는 엔진 포지션(`engine/position_buy_date.py`) |
 
 `buy_date` 는 DATE 라 `_kst.to_date()` 계약을 따른다(익일 청산 판정 기준일).
 

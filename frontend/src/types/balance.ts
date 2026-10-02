@@ -28,6 +28,9 @@ export interface Holding {
   target_price?: number | null
   /** `measured_move` = 측정 목표(부분 익절 트리거) · `measured_move_hit` = **이미 도달**. */
   target_source?: 'measured_move' | 'measured_move_hit' | null
+  // cycle397 — 최초 매입일(KST `YYYY-MM-DD`). 여러 날짜에 걸친 매수(피라미딩)여도
+  // 최초 매입일 하나를 보인다. 판정 불가(엔진·DB 모두 모름)는 null — `—` 로 그린다.
+  buy_date?: string | null
 }
 
 export interface BalanceSummary {
