@@ -187,7 +187,7 @@ _BASE_SHA: dict[str, str] = {
     # 🔁 cycle369 재핀 — 관리종목51·단기과열59 청산·매수차단 leaf 배선(값만 이동)
     # 🔁 cycle379 재핀 — buying_reconcile leaf 4줄 위임 배선(사용자 승인, 값만 이동)
     "src/engine/scheduler.py":
-        "b1aaa4816267adb49207fd043a3d640144f4eb493980fcd1302ffb02ef086d54",
+        "db33826565830b61ca3ea8178f5c4054bae1e04b546421273f43fb286079c816",
     # 🔁 cycle369 R2 재핀 — buy-block 게이트(`_status_buy_blocked` 승격) + STATUS_EXIT Signal + Q7 edge-baseline clear 배선(전략 7파일은 무변경, 배선은 이 파일)
     # 🔁 cycle382 재핀 — 시장 유닛 `_market_unit_*` 헬퍼 추가(사용자 결정 09-27).
     # 🔁 cycle382 리뷰 재핀(값만) — `_market_unit_tally_roll` 을 `tally.date != day`
@@ -210,7 +210,7 @@ _SCHEDULER_LINE_CAP = 3900
 #: 신규 leaf `src/engine/market_op_subscribe.py` 로 추출해(행위 변경 0 · 5줄
 #: 위임 wrapper) 3,897 → 3,726 이 됐다. 값만 옮긴다 — 정확 핀을 상한 핀으로
 #: 완화하면 cycle290 의 무접촉 대리 지표가 사라진다.
-_SCHEDULER_LINES = 3786  # cycle379 재핀 — buying_reconcile leaf 위임 배선(+5)
+_SCHEDULER_LINES = 3732  # cycle398 재핀 — 전략 등록 명부 추출(PR1 카드 #2, 사용자 승인 10-02, -54)
 
 
 @pytest.mark.parametrize("rel", sorted(_BASE_SHA))
@@ -444,7 +444,11 @@ _ENGINE_PY_FILES: dict[str, tuple[str, ...]] = {
         "status_exit_watch.py",
         "stock_master_basics_metrics.py", "stock_master_daily_metrics.py",
         "stock_master_master_metrics.py", "stock_master_metrics.py", "strategy.py",
-        "strategy_base.py", "strategy_registry.py", "ta_indicators.py",
+        "strategy_base.py",
+        # cycle398 PR1(리팩토링 카드 #2, 사용자 승인 10-02) — 전략 등록 명부 leaf. 등재해도
+        # "다음 신규 파일" 은 여전히 붉어진다(이름 축 가드는 변경 없음).
+        "strategy_manifest.py",
+        "strategy_registry.py", "ta_indicators.py",
         "task_loop_helper.py", "te_metrics.py", "tick_channel_clock.py",
         "tick_channel_mode.py", "tick_channel_switch.py",
         "tick_volume.py",

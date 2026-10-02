@@ -180,7 +180,7 @@ _BASE_SHA: dict[str, str] = {
     # 캡처 본체 leaf 이관(전략 7파일 전부 + strategy_base + scheduler, 사용자 승인 D3).
     # 🔁 cycle369 재핀 — 관리종목51·단기과열59 청산·매수차단 leaf 배선(값만 이동)
     "src/engine/scheduler.py":
-        "b1aaa4816267adb49207fd043a3d640144f4eb493980fcd1302ffb02ef086d54",
+        "db33826565830b61ca3ea8178f5c4054bae1e04b546421273f43fb286079c816",
     "src/engine/market_op_subscribe.py":
         "7d58f9464c1ed35e4fa8706d801beb5a6b5c062d5a2941f0db6482d028d3d4ac",
     # 전략 7파일 + 베이스 (절대 규칙 5)
@@ -247,7 +247,7 @@ _PIN_PENDING_APPROVAL: dict[str, str] = {
         "79fddbec8cf9315c5172fc6634c4f4ea77f525d9ff9a3aba48f321affeb4d3e8",
 }
 
-_SCHEDULER_LINES = 3786  # cycle369 재핀 — 관리종목51·단기과열59 청산·매수차단 task 배선(+4)
+_SCHEDULER_LINES = 3732  # cycle398 재핀 — 전략 등록 명부 추출(PR1 카드 #2, 사용자 승인 10-02, -54)
 _SCHEDULER_LINE_CAP = 3900
 
 

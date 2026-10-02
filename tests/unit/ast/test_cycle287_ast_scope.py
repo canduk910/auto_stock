@@ -254,7 +254,7 @@ _BASE_SHA = {
 #: (`get_buy_dates` 신설) · `src/routes/balance.py`(매입일 병합 호출) · `src/models/balance.py`
 #: (`buy_date` 필드) 내용도 바뀌었으나 전부 이미 이 digest 안에 있던 파일이다(신규 파일
 #: 1개뿐). 읽기 전용 조회 조합 — 8영역·scheduler.py·매매 행위 변경 없음. 직전 값 = 166.
-_SRC_TREE_FILES = 167
+_SRC_TREE_FILES = 168  # cycle398 PR1 — 신규 leaf `strategy_manifest.py` 로 167 → 168
 #: ⚠️ 값은 **cycle285 적대 검증 반영** 기준선이다. 그 직전(초판 cycle285 배포)
 #: digest 는 `97483c5114a1d00dc8f7ca7c1ed08e1b3dc1d0b585065b14176dc227da9bed8c` 였다.
 #: cycle287b 배포분의 digest 는
@@ -688,8 +688,10 @@ _SRC_TREE_FILES = 167
 # `src/engine/position_buy_date.py` 하나로 166 → 167. `src/db/positions.py`(`get_buy_dates`)·
 # `src/routes/balance.py`(매입일 병합)·`src/models/balance.py`(`buy_date` 필드) 내용 변경 포함.
 # 읽기 전용 조회 조합 — 매매 행위 변경 없음. 직전 값 = cycle396 `67d48b35e5b2759b67d6a0957d1e09b7e50d2e61c68b2e0b3ca3df13988360de`.
+# cycle398 PR1(리팩토링 카드 #2, 사용자 승인 10-02) — 신규 leaf `strategy_manifest.py` 추가 +
+# `scheduler.py` 등록 블록을 그 명부 순회로 교체(행위 동일, PR0 골든 증명) 167 → 168.
 _SRC_TREE_DIGEST = (
-    "3821020f8bbcadb4912f6e7adec8b4bcdcce01d677e6558713cb5d9b0a4ae0bc"
+    "d779b04adc9e91545f68784121ce4281df693f4ec3da3d864be6513fe678181c"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
@@ -719,7 +721,8 @@ _PINNED_DIR_FILE_COUNTS = {
     # cycle382 — 신규 leaf `market_unit.py` 로 83 → 84.
     # cycle386 — 신규 leaf `daily_bar_finalize.py` 로 84 → 85.
     # cycle397 — 신규 leaf `position_buy_date.py` 로 85 → 86.
-    "src/engine": 86,
+    # cycle398 PR1(리팩토링 카드 #2, 사용자 승인 10-02) — 신규 leaf `strategy_manifest.py` 로 86 → 87.
+    "src/engine": 87,
 }
 
 #: `scheduler.py` 정확 라인 수 + cycle257 영구 상한.
@@ -727,7 +730,7 @@ _PINNED_DIR_FILE_COUNTS = {
 #: 신규 leaf `src/engine/market_op_subscribe.py` 로 추출해(행위 변경 0 · 5줄
 #: 위임 wrapper) 3,897 → 3,726 이 됐다. 값만 옮긴다 — 정확 핀을 상한 핀으로
 #: 완화하면 cycle287 의 무접촉 대리 지표가 사라진다.
-_SCHEDULER_LINES = 3786  # cycle379 재핀 — buying_reconcile leaf 위임 배선(+5)
+_SCHEDULER_LINES = 3732  # cycle398 재핀 — 전략 등록 명부 추출(PR1 카드 #2, 사용자 승인 10-02, -54)
 _SCHEDULER_LINE_CAP = 3900
 
 #: 손대지 않기로 한 **원문 구간**의 sha256 (base `a42f519`).

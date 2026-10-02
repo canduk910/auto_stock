@@ -30,14 +30,8 @@ from src.engine.scanner import scan_stocks, subscribe_filtered_stocks, unsubscri
 from src.engine.session import MarketBoard, session_tracker
 from src.engine.daily_emit_cap import DailyEmitCap
 from src.engine.strategy_base import Signal, StrategyConfig
+from src.engine.strategy_manifest import STRATEGY_MANIFEST
 from src.engine.strategy_registry import StrategyRegistry
-from src.engine.strategies.bull_flag_breakout import BullFlagBreakoutStrategy
-from src.engine.strategies.momentum import MomentumStrategy
-from src.engine.strategies.donchian_swing import DonchianSwingStrategy
-from src.engine.strategies.kojiro import KojiroStrategy
-from src.engine.strategies.long_tail_volatility import LongTailVolatilityStrategy
-from src.engine.strategies.vcp_breakout import VcpBreakoutStrategy
-from src.engine.strategies.volatility_breakout import VolatilityBreakoutStrategy
 from src.engine import data_load_tasks, funnel_capture  # refactor-review B1 위임 모듈 · cycle364 라이브 준비 leaf
 from src.engine import open_price_observe, open_price_rest  # cycle264 관측 leaf / cycle272 기준가 leaf (라인 상한 보호)
 from src.engine import market_op_subscribe, quote_token_refresh, status_exit_watch  # cycle292 VI 구독 leaf / cycle269 토큰 갱신 leaf / cycle369 종목상태 청산·매수차단 leaf (라인 상한 보호)
@@ -322,65 +316,17 @@ class TradingScheduler:
     """매매 스케줄러."""
 
     def __init__(self) -> None:
-        # 전략 레지스트리 생성 + 전략 등록 (기본값, DB 로드 전)
+        # 전략 레지스트리 생성 + 전략 등록 (기본값, DB 로드 전).
+        # 등록 7행(id·이름·초기 켜짐/비중·클래스·순서)의 정본 = `strategy_manifest.STRATEGY_MANIFEST`
+        # (cycle398 카드 #2 — 새 전략 추가는 이 for 문이 아니라 그 명부에 행을 더한다).
         self.registry = StrategyRegistry()
-        momentum = MomentumStrategy(StrategyConfig(
-            strategy_id="momentum",
-            name="상한가 모멘텀",
-            enabled=True,
-            weight=1.0,
-        ))
-        self.registry.register(momentum)
-
-        vb = VolatilityBreakoutStrategy(StrategyConfig(
-            strategy_id="volatility_breakout",
-            name="변동성 돌파",
-            enabled=False,
-            weight=0.0,
-        ))
-        self.registry.register(vb)
-
-        ltv = LongTailVolatilityStrategy(StrategyConfig(
-            strategy_id="long_tail_volatility",
-            name="롱테일 변동성 돌파",
-            enabled=False,
-            weight=0.0,
-        ))
-        self.registry.register(ltv)
-
-        ds = DonchianSwingStrategy(StrategyConfig(
-            strategy_id="donchian_swing",
-            name="20일 신고가 스윙",
-            enabled=False,
-            weight=0.0,
-        ))
-        self.registry.register(ds)
-
-        bull = BullFlagBreakoutStrategy(StrategyConfig(
-            strategy_id="bull_flag_breakout",
-            name="눌림목 돌파",
-            enabled=False,
-            weight=0.0,
-        ))
-        self.registry.register(bull)
-
-        vcp = VcpBreakoutStrategy(StrategyConfig(
-            strategy_id="vcp_breakout",
-            name="변동성 수축 돌파",
-            enabled=False,
-            weight=0.0,
-        ))
-        self.registry.register(vcp)
-
-        # 고지로 대순환 스윙 (2026-07) — 다크런치 (enabled=False, DB strategy_config 가 실제 값 로드).
-        # donchian 동형 멀티데이 스윙 → 공유 순차 폴루프(_SWING_POLL_STRATEGIES) 대상.
-        kojiro = KojiroStrategy(StrategyConfig(
-            strategy_id="kojiro",
-            name="고지로 대순환",
-            enabled=False,
-            weight=0.0,
-        ))
-        self.registry.register(kojiro)
+        for entry in STRATEGY_MANIFEST:
+            self.registry.register(entry.cls(StrategyConfig(
+                strategy_id=entry.strategy_id,
+                name=entry.name,
+                enabled=entry.enabled,
+                weight=entry.weight,
+            )))
 
         self.order_engine = OrderEngine(self.registry)
         # 사이클 15-A (2026-05-19) — _handle_sell_fill 의 unsubscribe hook 이

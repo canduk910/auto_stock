@@ -14,6 +14,7 @@
 
 ### 매매 흐름 축
 
+- **`strategy_manifest.py`**(cycle398 카드 #2) — 전략 등록 7행(클래스·id·이름·초기 켜짐·비중)의 **유일한 정본**. `scheduler.__init__` 는 `STRATEGY_MANIFEST` 를 순회해 등록할 뿐이고(for 문 7줄), 새 전략 추가·등록 순서 변경은 이 모듈에 행을 더하는 것이다. 순서 = `risk.on_tick` 평가 순서 = 같은 틱 매수 우선순위(golden = `tests/unit/engine/test_cycle398_strategy_wiring_golden.py`). 표준 라이브러리 + 전략 7파일 + `strategy_base` 만 import(src import 순환 0 — 이 모듈을 import 하는 곳은 `scheduler.py` 하나뿐이다).
 - **`strategy_base.py` / `strategy_registry.py`** — 전략 추상 + 등록·비중 배분·중복 매수 가드. 매수 수량 관문 `_apply_budget_limit` 계약 정본 = 루트 [`CLAUDE.md`](../../CLAUDE.md) 「핵심 안전 규칙」. 하단 전용 절.
 - **`strategies/`** — 7 전략(`momentum` · `volatility_breakout` · `long_tail_volatility` · `donchian_swing` · `bull_flag_breakout` · `vcp_breakout` · `kojiro`). 매수·청산·보드 명세 = `strategies/CLAUDE.md`.
 - **`session.py`** — `MarketBoard` · `SessionTracker`. `is_call_auction_now(now=None) -> bool` = H0UNMKO0 `MKOP_CLS_CODE`(110 장전 / 121 장후) **AND** 명목창 ±5분(110: 08:25~09:05 / 121: 15:15~15:35) + 시간 기반 폴백, `now or datetime.now(_KST)`. 🔴 코드 단독 판정 금지 — 전환 코드가 안 오면 `_last_nxt_mkop_code` 가 고착해 보유 종목 stale 탐지(손절)가 꺼진다. 가드 `test_cycle182_call_auction_time_gate.py` · `test_cycle182_call_auction_ast_gate.py`. 시간표 = 하단 `session.py` 절.

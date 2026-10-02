@@ -65,12 +65,13 @@ def test_kojiro_identity_params_excluded_from_param_ranges():
 
 
 def test_kojiro_registered_in_scheduler_source():
-    # 전체 인스턴스화(무거움) 대신 등록 블록 소스 확인.
-    import inspect
-    src = inspect.getsource(TradingScheduler)
-    assert 'strategy_id="kojiro"' in src
-    assert "KojiroStrategy(" in src
-    assert "registry.register(kojiro)" in src
+    # cycle398 PR1 — 등록 정본이 `scheduler.py` 소스 리터럴에서 명부(`strategy_manifest`)로
+    # 옮겨갔다. 소스 grep 대신 **실제 배선**을 단언한다(약화가 아니라 행위 단언으로 전환).
+    from src.engine.strategy_manifest import STRATEGY_MANIFEST
+
+    assert "kojiro" in [e.strategy_id for e in STRATEGY_MANIFEST]
+    strat = TradingScheduler().registry.get("kojiro")
+    assert isinstance(strat, KojiroStrategy)
 
 
 # ── entry-H: 공유 순차 폴루프 double-buy 차단 ──

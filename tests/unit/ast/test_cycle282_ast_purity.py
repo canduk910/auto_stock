@@ -459,7 +459,7 @@ _BASE_SHA = {
     # 본체 leaf 이관(전략 7파일 전부 + strategy_base + scheduler, 사용자 승인 D3).
     # 🔁 cycle369 재핀 — 관리종목51·단기과열59 청산·매수차단 leaf 배선(값만 이동)
     "src/engine/scheduler.py":
-        "b1aaa4816267adb49207fd043a3d640144f4eb493980fcd1302ffb02ef086d54",
+        "db33826565830b61ca3ea8178f5c4054bae1e04b546421273f43fb286079c816",
     # 🔁 cycle369 R2 재핀 — buy-block 게이트(`_status_buy_blocked` 승격) + STATUS_EXIT Signal + Q7 edge-baseline clear 배선(전략 7파일은 무변경, 배선은 이 파일)
     # 🔁 cycle382 리뷰 재핀(값만) — `_market_unit_tally_roll` 을 `tally.date != day`
     # 에서 `tally.date < day`(더 늦은 날짜에서만 롤)로 시정(§8, 사용자 승인 범위 밖 무접촉).

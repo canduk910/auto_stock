@@ -152,7 +152,7 @@ _PINNED_DIRS = ("src/realtime", "src/auth", "src/engine/strategies")
 #: 신규 leaf `src/engine/market_op_subscribe.py` 로 추출해(행위 변경 0 · 5줄
 #: 위임 wrapper) 3,897 → 3,726 이 됐다. 값만 옮긴다 — 정확 핀을 상한 핀으로
 #: 완화하면 cycle286 의 무접촉 대리 지표가 사라진다.
-_SCHEDULER_LINES = 3786  # cycle369 재핀 — 관리종목51·단기과열59 청산·매수차단 task 배선(+4)
+_SCHEDULER_LINES = 3732  # cycle398 재핀 — 전략 등록 명부 추출(PR1 카드 #2, 사용자 승인 10-02, -54)
 #: cycle257 이 세운 영구 상한 (종전 표기 4,000 은 느슨한 쪽이라 폐기 — 두 수가 갈라지면
 #: 항상 **더 조인 쪽**이 정본이다).
 _SCHEDULER_LINE_CAP = 3900

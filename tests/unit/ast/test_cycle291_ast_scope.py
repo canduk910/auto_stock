@@ -128,7 +128,7 @@ _BASE_SHA: dict[str, str] = {
     # 🔁 cycle369 재핀 — 관리종목51·단기과열59 청산·매수차단 leaf 배선(값만 이동)
     # 🔁 cycle379 재핀 — buying_reconcile leaf 4줄 위임 배선(사용자 승인, 값만 이동)
     "src/engine/scheduler.py":
-        "b1aaa4816267adb49207fd043a3d640144f4eb493980fcd1302ffb02ef086d54",
+        "db33826565830b61ca3ea8178f5c4054bae1e04b546421273f43fb286079c816",
     # 🔴 cycle290 이 방금 `DEFAULT_PARAMS` 를 건드렸다 — 또 건드리면 그 증명이 무너진다.
     # 🔁 cycle369 R2 재핀 — buy-block 게이트(`_status_buy_blocked` 승격) + STATUS_EXIT Signal + Q7 edge-baseline clear 배선(전략 7파일은 무변경, 배선은 이 파일)
     # 🔁 cycle382 리뷰 재핀(값만) — `_market_unit_tally_roll` 을 `tally.date != day`
@@ -181,7 +181,7 @@ _BASE_SHA: dict[str, str] = {
 #: 신규 leaf `src/engine/market_op_subscribe.py` 로 추출해(행위 변경 0 · 5줄
 #: 위임 wrapper) 3,897 → 3,726 이 됐다. 값만 옮긴다 — 정확 핀을 상한 핀으로
 #: 완화하면 cycle291 의 무접촉 대리 지표가 사라진다.
-_SCHEDULER_LINES = 3786  # cycle379 재핀 — buying_reconcile leaf 위임 배선(+5)
+_SCHEDULER_LINES = 3732  # cycle398 재핀 — 전략 등록 명부 추출(PR1 카드 #2, 사용자 승인 10-02, -54)
 _SCHEDULER_LINE_CAP = 3900
 
 
@@ -435,9 +435,14 @@ def test_a8_no_new_leaf_in_src_engine() -> None:
     신설해 75 → **76** 이 됐다 — 보유 종목의 최초 매입일을 해석하는 순수 함수
     (`await`/DB/HTTP 0 · read-only · never-raise, `position_exit_lines.py` 와 같은
     패턴). `routes/balance.py` 가 소비한다. `scheduler.py` 무접촉.
+
+    ⚠️ cycle398 PR1(리팩토링 카드 #2, 사용자 승인 10-02)이 신규 모듈 `strategy_manifest.py` 를
+    신설해 76 → **77** 이 됐다 — 전략 등록 7행(id·이름·초기 켜짐/비중·클래스·순서)의 정본.
+    표준 라이브러리 + 전략 7파일 + `strategy_base` 만 import(src import 순환 0). `scheduler.py`
+    는 이 명부를 순회하는 for 문 7줄로 대체된다(행위 동일, PR0 골든으로 증명).
     """
     got = len(list((_ROOT / "src" / "engine").glob("*.py")))
-    assert got == 76, f"`src/engine/*.py` 파일 수 {got} (cycle397 기준선 76)"
+    assert got == 77, f"`src/engine/*.py` 파일 수 {got} (cycle398 기준선 77)"
 
 
 # ===========================================================================
