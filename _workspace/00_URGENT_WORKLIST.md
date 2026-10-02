@@ -37,6 +37,9 @@
 
 12. (11:1x) 「모든 전략명을 한글로 보여지도록 통일」 — ✅ cycle395(리팩토링 카드 #5) `frontend/src/utils/strategyMeta.ts` `strategyLabel` 단일 정본. 프론트 1,039 · e2e 관련 4 spec 20 통과. 남은 것 = 백엔드 응답 메시지 속 옛 이름(전략 파일 `config.name`, sha 핀 다수라 별도) · ScanMonitor 「신고가 후보 (donchian)」 통계 라벨
 
+13. (10-02 16시대) **리팩토링 본체 카드 #2·#3 착수** — 사용자 「스케쥴러.py 수정 승인」 · 자문 = `domain_consult/cycle398_refactor_cards_2_3.md`(도메인) + `refactor/2026-10-02_cards_2_3_design.md`(구조). 결정: **A** 원형 선언 = 등록 명부(`src/engine/strategy_manifest.py`) 필수 칸(기본값 없음) · **B** `risk.py:88` = (가) 리터럴 유지 + 교차 검사(ETF·평균회귀 붙일 때 8영역 한 줄 승인) · **C** 명부에 없는 전략 파일 = 테스트 실패 · **D** PR1(카드 #2)·PR2(카드 #3) 분리 · **E** D-1 `save_params` 기본값·카드 #9 섀도는 따로 배포. 순서 = PR0(골든 배선표, 테스트만) → PR1 → PR2, full 배포는 평일 15:30 창(자문 권고)
+14. (10-02 15:30) ✅ push `09ecc59`(12커밋) — CI·Deploy success, backend 재기동 15:46:35(16:00 전), `/health` 200, 컨테이너 `OPENAI_RECOMMEND_MODEL=gpt-6-luna`(운영 `.env` 원본 백업 `.env.bak_20261002_c394`)
+
 **다음**: 결정 3·4·7 진행 → 15:30 push(코드 변경이 들어가면 full — 15:30 정각 push, 16:00 애프터 전 재기동 완료) → 카드 #2·#3(`scheduler.py` 승인) → ETF 전략 신설(shadow, 카드 #9) · 평균회귀 트랙 R(`tools/replay/`)·C(실비용)는 지시서 순서대로
 
 ## 지금 상태 (2026-09-26 11시 KST — 주간 토큰 부족으로 작업 정리, 다음 거래일 09-28(월))
