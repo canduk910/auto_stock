@@ -77,8 +77,19 @@ async def save_weights(
         await save(sid, enabled, weight, params)
 
 
-async def save_params(strategy_id: str, params: dict) -> None:
-    """전략 파라미터만 업데이트한다."""
+async def save_params(
+    strategy_id: str,
+    params: dict,
+    *,
+    enabled: bool | None = None,
+    weight: float | None = None,
+) -> None:
+    """전략 파라미터만 업데이트한다 — 켜고 끄기와 비중은 바꾸지 않는다.
+
+    행이 있으면 행의 `enabled`·`weight` 를 그대로 쓴다(넘긴 값은 보지 않는다).
+    행이 없으면 호출자가 넘긴 메모리 현재값을 적고, 없으면 `False`·0 이다(cycle401 —
+    시드 행 없는 새 전략이 파라미터 저장 하나로 다음 재시작에 켜지던 결함).
+    """
     existing = await pg.fetch(
         "SELECT enabled, weight FROM strategy_config WHERE strategy_id = $1",
         strategy_id,
@@ -87,4 +98,9 @@ async def save_params(strategy_id: str, params: dict) -> None:
         row = existing[0]
         await save(strategy_id, row["enabled"], float(row["weight"]), params)
     else:
-        await save(strategy_id, True, 0.5, params)
+        await save(
+            strategy_id,
+            bool(enabled) if enabled is not None else False,
+            float(weight) if weight is not None else 0.0,
+            params,
+        )

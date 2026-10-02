@@ -88,7 +88,7 @@ AWS RDS PostgreSQL CRUD 모듈. DB 클라이언트 정본 = **`pg.py` (asyncpg �
 | `load_all() -> dict[str, dict]` | `{strategy_id: {"enabled", "weight", "params"}}`. `params` 가 dict 가 아니면 `{}`(JSONB 오염이 부팅을 죽이지 않게) |
 | `save(strategy_id, enabled, weight, params)` | `ON CONFLICT (strategy_id) DO UPDATE` upsert. `updated_at` = `datetime.fromisoformat(now_kst_iso())` — **str 바인딩 불가** |
 | `save_weights(weights, *, keep_enabled=())` | 비중만 갱신. **기존 `params` 를 먼저 읽어** 다시 넣는다(안 그러면 지워진다). `enabled = weight > 0 or sid in keep_enabled` 를 함께 정한다 — `keep_enabled` 는 섀도 전략의 켜짐을 지키려고 라우트가 메모리 판정으로 넘긴다(cycle399, DB 행 params 로는 판정하지 않는다) |
-| `save_params(strategy_id, params)` | `params` JSONB 만 갱신 |
+| `save_params(strategy_id, params, *, enabled=None, weight=None)` | `params` JSONB 만 바꾼다. 켜고 끄기·비중은 바꾸지 않는다. 행이 있으면 행의 `enabled`·`weight` 를 그대로 쓰고 넘긴 값은 보지 않는다. **행이 없으면** 넘긴 메모리 현재값을 적고, 없으면 `enabled=False, weight=0`(cycle401 — 파라미터 저장 하나로 시드 없는 새 전략이 다음 재시작에 켜지지 않게). 호출자 3곳(`PUT /api/strategies/{id}/params` · `POST /api/recommendations/{id}/apply` · AI 자문 자동 적용)이 전부 `strategy.config.enabled`·`weight` 를 넘긴다 |
 
 ⚠️ **이 테이블에 쓴 값은 다음 백엔드 재시작에서만 반영된다**(`_load_strategy_config` 의 `_config_loaded` 가 프로세스당 1회, `_boot` 재호출은 no-op). 장중 즉시 반영은 `PUT /api/strategies/{id}/params`(in-memory `config.params` 를 덮는다)이고, cycle232 D6(보유 중 장중 재시작 금지) 때문에 **장중 실효 수단은 PUT 뿐**이다.
 

@@ -662,7 +662,11 @@ async def auto_apply_recommendations(target_date: date) -> dict:
                     auto_params[k] = v
 
             if auto_params:
-                await save_params(sid, strategy.config.params)
+                await save_params(
+                    sid, strategy.config.params,
+                    enabled=getattr(strategy.config, "enabled", None),
+                    weight=getattr(strategy.config, "weight", None),
+                )
                 await write_log(
                     "INFO",
                     f"[auto_params_apply] strategy={sid}"

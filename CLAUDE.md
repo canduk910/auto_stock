@@ -129,7 +129,7 @@ cd frontend && npm install && npm run dev
 상세 매수/청산/tradable_boards/exchange 는 **`src/engine/strategies/CLAUDE.md`** 참조.
 
 ### 새 전략 추가
-절차(`StrategyBase` 서브클래스 · `strategy_manifest.py` 명부에 행 추가(cycle398 카드 #2 — `scheduler.py` `registry.register()` 아님. 등록 칸 + 원형 칸(`eval_driver`·`breakout_rank`·`open_price_target`·`close_at_1520`·`market_unit_policy`, 카드 #3) 전부 필수 — 기본값 없음) · 스캔 함수 · AST 목록 등재 · 7전략 공통 키 · `param_catalog` 등재 · `_workspace/00_leader_trading_rules.md` 명세)의 정본 = `src/engine/strategies/CLAUDE.md` 「새 전략 추가」 절.
+절차(`StrategyBase` 서브클래스 · `strategy_manifest.py` 명부에 행 추가(cycle398 카드 #2 — `scheduler.py` `registry.register()` 아님. 등록 칸 + 원형 칸(`eval_driver`·`breakout_rank`·`open_price_target`·`close_at_1520`·`market_unit_policy`, 카드 #3) 전부 필수 — 기본값 없음) · 스캔 함수 · AST 목록 등재 · 7전략 공통 키 · `param_catalog` 등재 · `_workspace/00_leader_trading_rules.md` 명세 · `strategy_config` 시드 행 마이그레이션)의 정본 = `src/engine/strategies/CLAUDE.md` 「새 전략 추가」 절.
 
 ### 자금 관리
 - 프론트 Settings → `PUT /api/strategies/weights` → `StrategyRegistry.allocate_funds()`

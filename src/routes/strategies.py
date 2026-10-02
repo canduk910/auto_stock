@@ -396,7 +396,11 @@ async def update_params(strategy_id: str, req: ParamsRequest):
 
     # DB 영속화 — 병합된 전체 dict
     from src.db.strategy_config import save_params
-    await save_params(strategy_id, strategy.config.params)
+    await save_params(
+        strategy_id, strategy.config.params,
+        enabled=getattr(strategy.config, "enabled", None),
+        weight=getattr(strategy.config, "weight", None),
+    )
 
     return ApiResponse(
         success=True,

@@ -707,8 +707,12 @@ _SRC_TREE_FILES = 168  # cycle398 PR1 — 신규 leaf `strategy_manifest.py` 로
 # 8영역 `strategy_registry.py`(`update_weights` 한 줄) · `db/strategy_config.py`(`save_weights(keep_enabled=)`) ·
 # `routes/strategies.py`·`routes/recommendations.py`(섀도 전략 비중 0 의 DB 켜짐 유지). 파일 수 168 그대로.
 # 직전 값 = cycle398 PR2 `9b9d0f77470018f39e259889dfc60dff1b5acfcbbd979101ef6593caf513e460`.
+# 🔁 cycle401(2026-10-03) 재핀 — D-1(사용자 결정 10-02 R2): `db/strategy_config.py`(`save_params` 가 행이
+# 없을 때 메모리 enabled·weight, 없으면 False·0) · `routes/strategies.py`·`routes/recommendations.py`·
+# `engine/recommendation_engine.py`(호출 3곳이 메모리 값을 넘긴다). 파일 수 168 그대로.
+# 직전 값 = cycle399 `de830017b512ef7b13f957df8b01a6663fd6890bdbbf12b0ab893a2b75bbf618`.
 _SRC_TREE_DIGEST = (
-    "de830017b512ef7b13f957df8b01a6663fd6890bdbbf12b0ab893a2b75bbf618"
+    "f354f0da7bece0f8e03e35465890ef2f4a04d184608a7d90dd6b515b6055ce24"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

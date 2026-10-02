@@ -123,7 +123,7 @@ def env(monkeypatch):
         sid: _FakeStrategy(sid, copy.deepcopy(d)) for sid, d in _class_defaults().items()
     }))
 
-    async def _fake_save_params(strategy_id: str, params: dict) -> None:
+    async def _fake_save_params(strategy_id: str, params: dict, **_kw) -> None:
         e.saved.append({"strategy_id": strategy_id, "params": copy.deepcopy(params)})
 
     monkeypatch.setattr(sc, "save_params", _fake_save_params, raising=True)

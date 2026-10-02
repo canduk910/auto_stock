@@ -1210,7 +1210,7 @@ async def test_f245_21b_put_before_deploy_is_rejected_not_silently_dropped(monke
     ))
     saved: dict = {}
 
-    async def _fake_save(strategy_id, params):
+    async def _fake_save(strategy_id, params, **_kw):
         saved["strategy_id"] = strategy_id
         saved["params"] = dict(params)
 
@@ -1247,7 +1247,7 @@ async def test_f245_21b2_put_after_deploy_applies_immediately(monkeypatch):
     ))
     saved: dict = {}
 
-    async def _fake_save(strategy_id, params):
+    async def _fake_save(strategy_id, params, **_kw):
         saved["params"] = dict(params)
 
     monkeypatch.setattr("src.db.strategy_config.save_params", _fake_save)

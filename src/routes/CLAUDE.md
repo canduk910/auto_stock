@@ -201,7 +201,7 @@ body `{ticker, quantity}`, 시장가. 보유 전략이 있으면 그 전략 id·
 - **전 오류를 모아** 422 `detail`(배열, 원소 `key`/`code`/`msg`(한글)/`strategy_id`/`given`/`expected`)로 돌려준다. 하나라도
   있으면 **아무것도 저장하지 않는다**(all-or-nothing). 거부 로그 `[param_validation_rejected]` WARNING.
 - 통과 = 200 + `data.applied`(저장된 키·값) + `data.warnings`. 부분 dict **병합**(요청에 없는 키 보존), `save_params` 는 병합된
-  **전체 dict**. 알 수 없는 전략 id = 422 가 아니라 **200 + `success=false`**.
+  **전체 dict** 와 메모리의 `enabled`·`weight` 로 호출된다(행이 없을 때만 그 값이 쓰인다 — `src/db/CLAUDE.md` `save_params` 행). 알 수 없는 전략 id = 422 가 아니라 **200 + `success=false`**.
 - **반영 시점** — 이 PUT 은 **즉시**다(in-memory `config.params` 를 덮는다). `strategy_config` SQL UPDATE 는 **다음 백엔드
   재시작에서만** 반영된다(`_load_strategy_config` 의 `_config_loaded` 가 프로세스당 1회). 보유 중 장중 재시작 금지(cycle232 D6)라
   **장중 롤백의 실효 수단은 이 PUT 뿐**이다.

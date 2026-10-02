@@ -126,6 +126,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -406,6 +407,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -1314,6 +1316,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -1618,6 +1621,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -2482,6 +2486,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -2858,6 +2863,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -3772,6 +3778,7 @@ backend:
       - tests/integration/test_cycle382_market_unit_pg.py
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -4065,6 +4072,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -4958,6 +4966,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -5268,6 +5277,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -6182,6 +6192,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -6491,6 +6502,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -7405,6 +7417,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -7714,6 +7727,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -8636,6 +8650,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -8943,6 +8958,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -9853,6 +9869,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -10162,6 +10179,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -11142,6 +11160,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -11452,6 +11471,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -12375,6 +12395,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -12686,6 +12707,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -13615,6 +13637,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -13913,6 +13936,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -14846,6 +14870,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -15151,6 +15176,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -16040,6 +16066,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -16351,6 +16378,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -17280,6 +17308,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -17589,6 +17618,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -18490,6 +18520,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -18798,6 +18829,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -19711,6 +19743,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -20020,6 +20053,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -20941,6 +20975,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -21248,6 +21283,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -22152,6 +22188,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -22463,6 +22500,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -23382,6 +23420,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -23689,6 +23728,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -24601,6 +24641,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -24910,6 +24951,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -25825,6 +25867,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -26134,6 +26177,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -27044,6 +27088,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -27352,6 +27397,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -28278,6 +28324,7 @@ backend:
       - tests/integration/test_cycle382_market_unit_pg.py
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -28578,6 +28625,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -29452,6 +29500,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -29822,6 +29871,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -30764,6 +30814,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -31050,6 +31101,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -31961,6 +32013,7 @@ backend:
       - tests/integration/test_cycle382_market_unit_pg.py
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -32255,6 +32308,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -33153,6 +33207,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -33463,6 +33518,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -34343,7 +34399,9 @@ backend:
       - tests/contract/test_routes_trading.py
       - tests/contract/test_weight_unit_contract.py
       - tests/integration/test_cycle384_buy_paused_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycleM1_1_pg_roundtrip.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycleM1_1_strategy_config_pg.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
       - tests/unit/routes/test_cycle278_params_validation.py
@@ -35607,6 +35665,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -35912,6 +35971,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -36819,6 +36879,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -37130,6 +37191,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -38062,6 +38124,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -38365,6 +38428,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -39285,6 +39349,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -39589,6 +39654,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -40485,6 +40551,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -40796,6 +40863,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -41709,6 +41777,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -42020,6 +42089,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -42949,6 +43019,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -43258,6 +43329,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -44158,6 +44230,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -44469,6 +44542,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -45378,6 +45452,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -45688,6 +45763,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -46598,6 +46674,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -46909,6 +46986,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -47830,6 +47908,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -48141,6 +48220,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -49040,6 +49120,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -49351,6 +49432,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -50261,6 +50343,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -50572,6 +50655,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -51505,6 +51589,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -51815,6 +51900,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -52707,6 +52793,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -53017,6 +53104,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -53935,6 +54023,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -54244,6 +54333,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -55152,6 +55242,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -55462,6 +55553,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -56378,6 +56470,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -56689,6 +56782,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -57598,6 +57692,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -57909,6 +58004,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -58820,6 +58916,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -59131,6 +59228,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -60040,6 +60138,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -60351,6 +60450,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -61262,6 +61362,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -61573,6 +61674,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -62483,6 +62585,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -62794,6 +62897,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -63788,6 +63892,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -64098,6 +64203,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -65007,6 +65113,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -65318,6 +65425,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -66218,6 +66326,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -66527,6 +66636,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -67445,6 +67555,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -67756,6 +67867,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -68676,6 +68788,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -68986,6 +69099,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -69892,6 +70006,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -70202,6 +70317,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -71103,6 +71219,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -71414,6 +71531,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -72326,6 +72444,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -72637,6 +72756,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -73556,6 +73676,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -73867,6 +73988,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -74773,6 +74895,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -75084,6 +75207,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -75994,6 +76118,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -76305,6 +76430,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -77219,6 +77345,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -77530,6 +77657,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -78434,6 +78562,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -78745,6 +78874,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -79649,6 +79779,7 @@ backend:
       - tests/integration/test_cycle100_count_eager_refresh_integration.py
       - tests/integration/test_mcp_client_lifecycle.py
       - tests/unit/ast/test_cycle287_ast_scope.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/engine/test_cycle245_ratio_notional_cap.py
       - tests/unit/engine/test_cycle382_market_unit_refresh.py
       - tests/unit/main/test_cycle72_db_log_dedupe.py
@@ -79748,6 +79879,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -80059,6 +80191,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -80947,6 +81080,7 @@ backend:
       - tests/contract/test_weight_unit_contract.py
       - tests/integration/test_cycle100_count_eager_refresh_integration.py
       - tests/integration/test_mcp_client_lifecycle.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/engine/test_cycle245_ratio_notional_cap.py
       - tests/unit/main/test_cycle72_db_log_dedupe.py
       - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
@@ -81050,6 +81184,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -81361,6 +81496,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -82406,6 +82542,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -82717,6 +82854,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -83627,6 +83765,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -83938,6 +84077,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -84857,6 +84997,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -85166,6 +85307,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -86124,6 +86266,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -86417,6 +86560,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -87295,6 +87439,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -87606,6 +87751,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -88519,6 +88665,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -88830,6 +88977,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -89735,6 +89883,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -90046,6 +90195,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -90957,6 +91107,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -91529,6 +91680,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -92179,6 +92331,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -92661,6 +92814,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -93406,6 +93560,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -93717,6 +93872,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -94627,6 +94783,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -94938,6 +95095,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -95847,6 +96005,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -96158,6 +96317,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -97067,6 +97227,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -97378,6 +97539,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -98298,6 +98460,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -98609,6 +98772,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -99548,6 +99712,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -99859,6 +100024,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -100738,6 +100904,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -101049,6 +101216,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -101985,6 +102153,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -102296,6 +102465,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -103181,6 +103351,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -103492,6 +103663,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -104399,6 +104571,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -104710,6 +104883,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -105621,6 +105795,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -105932,6 +106107,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -106845,6 +107021,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -107156,6 +107333,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -108068,6 +108246,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -108378,6 +108557,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -109289,6 +109469,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -109600,6 +109781,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -110520,6 +110702,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -110830,6 +111013,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -111808,6 +111992,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -112116,6 +112301,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -112953,6 +113139,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -113348,6 +113535,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -114246,6 +114434,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -114554,6 +114743,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -115397,6 +115587,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -115776,6 +115967,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -116619,6 +116811,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -116989,6 +117182,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -117917,6 +118111,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -118225,6 +118420,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -119063,6 +119259,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -119447,6 +119644,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -120292,6 +120490,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -120857,6 +121056,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -121545,6 +121745,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -121855,6 +122056,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -122732,6 +122934,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -123148,6 +123351,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -123986,6 +124190,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -124297,6 +124502,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -125214,6 +125420,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -125524,6 +125731,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -126405,6 +126613,7 @@ backend:
       - tests/contract/test_weight_unit_contract.py
       - tests/integration/test_cycle100_count_eager_refresh_integration.py
       - tests/integration/test_mcp_client_lifecycle.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/engine/test_cycle245_ratio_notional_cap.py
       - tests/unit/main/test_cycle72_db_log_dedupe.py
       - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
@@ -126508,6 +126717,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -126819,6 +127029,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -127732,6 +127943,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -128043,6 +128255,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -128950,6 +129163,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -129261,6 +129475,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -130192,6 +130407,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -130503,6 +130719,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -131391,6 +131608,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -131702,6 +131920,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -132617,6 +132836,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -132928,6 +133148,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -133838,6 +134059,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -134149,6 +134371,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -135071,6 +135294,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -135382,6 +135606,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -136349,6 +136574,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -136660,6 +136886,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -137571,6 +137798,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -137882,6 +138110,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -138800,6 +139029,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -139110,6 +139340,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -140018,6 +140249,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -140333,6 +140565,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -141313,6 +141546,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -141624,6 +141858,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -142536,6 +142771,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -142843,6 +143079,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -143789,6 +144026,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -144152,6 +144390,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -145093,6 +145332,7 @@ backend:
       - tests/integration/test_mcp_client_lifecycle.py
       - tests/unit/ast/test_cycle364_frontend_evening_wording.py
       - tests/unit/db/test_cycle283_log_report_upsert.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/engine/test_cycle245_ratio_notional_cap.py
       - tests/unit/engine/test_cycle259_gate_snapshot.py
       - tests/unit/engine/test_cycle364_capture_label_guard.py
@@ -145249,6 +145489,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
       - tests/integration/test_cycle98_fluctuation_kis_api.py
       - tests/integration/test_cycle99_fluctuation_single_call.py
@@ -145555,6 +145796,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -146530,6 +146772,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -146835,6 +147078,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -147774,6 +148018,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -148079,6 +148324,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -148971,6 +149217,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -149280,6 +149527,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -150211,6 +150459,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -150521,6 +150770,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -151446,6 +151696,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -151752,6 +152003,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -152563,6 +152815,7 @@ backend:
       - tests/contract/test_routes_strategy_funnel.py
       - tests/contract/test_routes_system_integrations.py
       - tests/unit/db/test_cycle283_log_report_upsert.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/engine/test_cycle245_ratio_notional_cap.py
       - tests/unit/engine/test_sector_naming.py
       - tests/unit/routes/test_cycle110_lock_persistence.py
@@ -153749,6 +154002,7 @@ backend:
   src/routes/strategies.py:
     direct_tests:
       - tests/contract/test_routes_recommendations.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/engine/test_cycle245_ratio_notional_cap.py
       - tests/unit/routes/test_cycle278_params_schema.py
       - tests/unit/routes/test_cycle278_params_validation.py
@@ -154244,6 +154498,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -154554,6 +154809,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -155459,6 +155715,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -155770,6 +156027,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -156686,6 +156944,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -156996,6 +157255,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -157903,6 +158163,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -158213,6 +158474,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle396_trade_pairs_int.py
+      - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -160967,10 +161229,10 @@ frontend:
       - frontend/src/pages/__tests__/StrategiesParams.test.tsx
       - frontend/src/pages/__tests__/StrategiesTeRr.test.tsx
       - frontend/src/pages/__tests__/StrategyFunnel.bottleneckTrend.test.tsx
-generated_at: '2026-10-02T15:51:15.593Z'
+generated_at: '2026-10-02T16:07:39.541Z'
 stats:
   backend_modules: 171
-  backend_tests: 1203
+  backend_tests: 1205
   frontend_modules: 129
   frontend_tests: 108
   unmapped_modules:

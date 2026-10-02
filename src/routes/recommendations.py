@@ -230,7 +230,11 @@ async def apply_rec(rec_id: str, req: ApplyRequest):
             strategy.config.params[k] = recommended_params[k]
             applied_count += 1
     if valid_keys:
-        await save_params(strategy_id, strategy.config.params)
+        await save_params(
+            strategy_id, strategy.config.params,
+            enabled=getattr(strategy.config, "enabled", None),
+            weight=getattr(strategy.config, "weight", None),
+        )
 
     # applied_params 누적 머지
     prev_applied = rec.get("applied_params") or {}

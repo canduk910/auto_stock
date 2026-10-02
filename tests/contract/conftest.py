@@ -166,8 +166,8 @@ def contract_env(monkeypatch):
 
     # ---- strategy_config (DB 영속화) — strategies.py 는 함수 내부에서 lazy import,
     # recommendations.py 는 모듈 상단 import. 두 곳 모두 모킹한다.
-    async def fake_save_params(strategy_id, params):
-        calls.save_params.append({"strategy_id": strategy_id, "params": params})
+    async def fake_save_params(strategy_id, params, **kwargs):
+        calls.save_params.append({"strategy_id": strategy_id, "params": params, **kwargs})
 
     async def fake_save_weights(weights):
         calls.save_weights.append({"weights": weights})

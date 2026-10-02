@@ -153,7 +153,7 @@ async def test_save_params_preserves_existing_enabled_weight():
 
 @pytest.mark.asyncio
 async def test_save_params_missing_row_defaults():
-    """save_params 대상 미존재 → 기본 (enabled=True, weight=0.5) 저장 계약."""
+    """save_params 대상 미존재 → 행 INSERT (기본값 False·0 은 cycle401 테스트가 단언)."""
     from src.db import strategy_config
 
     with patch.object(strategy_config, "pg", create=True) as pg_mod:
