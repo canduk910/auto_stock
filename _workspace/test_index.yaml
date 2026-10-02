@@ -928,6 +928,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -2138,6 +2139,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -3357,6 +3359,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -4569,6 +4572,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -5782,6 +5786,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -6997,6 +7002,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -8212,6 +8218,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -9432,6 +9439,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -10643,6 +10651,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -11926,6 +11935,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -13157,6 +13167,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -14373,6 +14384,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -15596,6 +15608,7 @@ backend:
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -16801,6 +16814,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -18019,6 +18033,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -19232,6 +19247,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -20447,6 +20463,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -21662,6 +21679,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -22877,6 +22895,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -24094,6 +24113,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -25307,6 +25327,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -26522,6 +26543,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -27737,6 +27759,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -28952,6 +28975,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -30170,6 +30194,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -31387,6 +31412,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -32598,6 +32624,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -33812,6 +33839,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -35029,6 +35057,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -36243,6 +36272,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -37461,6 +37491,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -38679,6 +38710,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -39895,6 +39927,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -41106,6 +41139,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -42322,6 +42356,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -43538,6 +43573,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -44752,6 +44788,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -45968,6 +46005,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -47182,6 +47220,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -47496,6 +47535,7 @@ backend:
       - tests/unit/engine/test_cycle364_funnel_boot_vs_evening.py
       - tests/unit/engine/test_cycle386_daily_bar_finalize.py
       - tests/unit/engine/test_cycle386_finalize_neutralization.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -49612,6 +49652,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -50826,6 +50867,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -52046,6 +52088,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -53257,6 +53300,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -54472,6 +54516,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -55687,6 +55732,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -55996,6 +56042,7 @@ backend:
       - tests/unit/engine/test_cycle364_evening_capture.py
       - tests/unit/engine/test_cycle364_funnel_boot_vs_evening.py
       - tests/unit/engine/test_cycle364_time_invariants.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -58117,6 +58164,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -59332,6 +59380,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -60548,6 +60597,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -61763,6 +61813,7 @@ backend:
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -62977,6 +63028,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -64266,6 +64318,7 @@ backend:
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -65478,6 +65531,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -66689,6 +66743,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -67908,6 +67963,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -69130,6 +69186,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -70333,6 +70390,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -71548,6 +71606,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -72763,6 +72822,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -73978,6 +74038,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -75193,6 +75254,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -75498,6 +75560,7 @@ backend:
     direct_tests:
       - tests/unit/engine/test_cycle264_open_source_compare.py
       - tests/unit/engine/test_cycle272_open_price_rest_leaf.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -76716,6 +76779,7 @@ backend:
       - tests/unit/engine/test_cycle264_open_source_compare.py
       - tests/unit/engine/test_cycle272_open_price_rest_leaf.py
       - tests/unit/engine/test_cycle369_status_buy_wiring.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -78837,6 +78901,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -79152,6 +79217,7 @@ backend:
       - tests/unit/engine/test_cycle290_killswitch_registration.py
       - tests/unit/engine/test_cycle297_gate_wiring.py
       - tests/unit/engine/test_cycle297_llm_strategy_context.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/routes/test_cycle278_params_schema.py
       - tests/unit/routes/test_cycle278_params_validation.py
       - tests/unit/routes/test_cycle290_killswitch_put.py
@@ -80139,6 +80205,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -81431,6 +81498,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -82779,6 +82847,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -83995,6 +84064,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -85210,6 +85280,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -86434,6 +86505,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -87642,6 +87714,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -88858,6 +88931,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -90068,6 +90142,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -90675,6 +90750,7 @@ backend:
       - tests/unit/engine/test_cycle385_reorder_requery.py
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle64_price_filter_scanner_apply.py
@@ -91776,6 +91852,7 @@ backend:
       - tests/unit/engine/test_cycle382_market_unit_refresh.py
       - tests/unit/engine/test_cycle384_buy_paused_gate.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -93716,6 +93793,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -94931,6 +95009,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -96144,6 +96223,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -97358,6 +97438,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -98575,6 +98656,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -99810,6 +99892,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -101004,6 +101087,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -102238,6 +102322,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -103435,6 +103520,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -104648,6 +104734,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -105863,6 +105950,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -107079,6 +107167,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -108294,6 +108383,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -109509,6 +109599,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -110728,6 +110819,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -111972,6 +112064,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -113190,6 +113283,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -114403,6 +114497,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -115617,6 +115712,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -116832,6 +116928,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -118048,6 +118145,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -119264,6 +119362,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -119837,6 +119936,7 @@ backend:
       - tests/unit/engine/test_cycle385r_partial_locked_sell.py
       - tests/unit/engine/test_cycle385r_recount_credit.py
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -121712,6 +121812,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -122908,6 +123009,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -124122,6 +124224,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -125412,6 +125515,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -126628,6 +126732,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -127841,6 +127946,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -129058,6 +129164,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -130270,6 +130377,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -131487,6 +131595,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -132701,6 +132810,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -133923,6 +134033,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -135199,6 +135310,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -136414,6 +136526,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -137633,6 +137746,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -138849,6 +138963,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -140130,6 +140245,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -141346,6 +141462,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -142629,6 +142746,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -144017,6 +144135,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -145300,6 +145419,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -146545,6 +146665,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -147742,6 +147863,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -148974,6 +149096,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -150188,6 +150311,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -152970,6 +153094,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -154182,6 +154307,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -155400,6 +155526,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -156612,6 +156739,7 @@ backend:
       - tests/unit/engine/test_cycle394_gpt6_luna.py
       - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle397_position_buy_date.py
+      - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -158817,10 +158945,10 @@ frontend:
       - frontend/src/pages/__tests__/StrategiesParams.test.tsx
       - frontend/src/pages/__tests__/StrategiesTeRr.test.tsx
       - frontend/src/pages/__tests__/StrategyFunnel.bottleneckTrend.test.tsx
-generated_at: '2026-10-02T05:10:07.229Z'
+generated_at: '2026-10-02T07:55:05.521Z'
 stats:
   backend_modules: 170
-  backend_tests: 1196
+  backend_tests: 1197
   frontend_modules: 129
   frontend_tests: 108
   unmapped_modules:
