@@ -686,7 +686,8 @@ def test_p9_history_route_stays_untouched() -> None:
 
 
 async def test_p10_numeric_price_types_survive(monkeypatch) -> None:
-    """C41 — `price` 가 `Decimal` 로 와도 기존 float 사영이 유지된다(회귀).
+    """C41 — `price` 가 `Decimal` 로 와도 숫자 사영이 유지된다(회귀). cycle396 부터 가격·손익은
+    원 단위 `int`(매매손익 그리드에 소수를 남기지 않는다).
 
     asyncpg 는 NUMERIC 을 `Decimal` 로 준다 — 주문번호 3키를 얹으면서 이 경로가
     깨지면 매매손익 화면이 흰 화면이 된다(cycle266 계열).
@@ -697,6 +698,6 @@ async def test_p10_numeric_price_types_survive(monkeypatch) -> None:
     ]
     pairs = await _pairs(rows)
 
-    assert isinstance(pairs[0]["buy_price"], float)
-    assert isinstance(pairs[0]["profit_loss"], float)
+    assert type(pairs[0]["buy_price"]) is int and pairs[0]["buy_price"] == 10_000
+    assert type(pairs[0]["profit_loss"]) is int and pairs[0]["profit_loss"] == 1_999
     json.dumps(pairs[0])  # 직렬화 가능해야 한다

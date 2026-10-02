@@ -1315,7 +1315,7 @@ GitHub Secrets: `EC2_HOST`, `EC2_USERNAME`, `EC2_SSH_KEY`, `SUPABASE_DB_URL`(값
 
 - BUY `trade_history.price` = KIS `CNTG_UNPR`(체결단가). 주문가가 아니라 체결단가가 정본이다
 - UniqueViolation 이면 INSERT 대신 UPDATE 로 돌린다
-- SELL `trade_history.price` = 그 주문 체결 가중평균, `profit_loss` = 그 주문 손익 증분 합(cycle392) — 상세 = `src/engine/CLAUDE.md` 「체결단가 정합」 절
+- SELL `trade_history.price` = 그 주문 체결 가중평균(원 단위 절사 정수, cycle396), `profit_loss` = 그 주문 손익 증분 합(cycle392) — 상세 = `src/engine/CLAUDE.md` 「체결단가 정합」 절
 
 ### 14.6 익일청산큐 DB 영속화 + 동시호가 stale 회피
 

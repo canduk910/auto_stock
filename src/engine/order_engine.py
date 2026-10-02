@@ -327,17 +327,17 @@ def pending_cancel_tickers(engine) -> list[str]:
         return []
 
 
-def _vwap_2dp(value, qty, fallback):
-    """체결 가중평균(Σ가격×수량 ÷ Σ수량), 소수 둘째 자리 ROUND_HALF_UP.
+def _vwap_floor(value, qty, fallback):
+    """체결 가중평균(Σ가격×수량 ÷ Σ수량)을 원 단위로 절사한 `int`.
 
-    cycle392 — `float`/기본 `Decimal`(은행가 반올림)은 `100.005` 를 `100.0`/`100.00`
-    으로 내린다. 여기서만 `quantize(Decimal("0.01"), ROUND_HALF_UP)` 로 올림 규약을
-    지킨다(명세 §4.2). 순수 동기 함수 — `await`·DB·HTTP 금지(AST A7).
+    cycle396 — 장부 가격에 소수를 남기지 않는다(사용자 요청 10-02, 054920 4,826.11 → 4,826).
+    반올림·올림 없이 내림이고, `float` 이 아니라 `int` 를 돌려준다. `qty <= 0` 이면 `fallback`.
+    순수 동기 함수 — `await`·DB·HTTP 금지(AST A7).
     """
-    from decimal import ROUND_HALF_UP, Decimal
+    from decimal import ROUND_FLOOR, Decimal
     if qty <= 0:
         return fallback
-    return float((Decimal(value) / Decimal(qty)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+    return int((Decimal(value) / Decimal(qty)).to_integral_value(rounding=ROUND_FLOOR))
 
 
 def _odno_key(s) -> str:
@@ -3147,7 +3147,7 @@ class OrderEngine:
             _book_q + quantity, _book_v + price * quantity, _book_p + profit_loss,
         )
         book_qty, book_value, book_pnl = self._sell_fill_book[order_no]
-        book_price = _vwap_2dp(book_value, book_qty, price)
+        book_price = _vwap_floor(book_value, book_qty, price)
 
         # 🔴 cycle385 §a/§c — 보유 축(동기, await 없음): 체결량만큼 차감하고 0 이면
         # 닫는다. 출처(map/payload/increment) 게이트는 두지 않는다(cycle329 금기).
@@ -3301,7 +3301,7 @@ class OrderEngine:
             self._order_division.pop(order_no, None)  # cycle291 — 선례와 같은 자리
             if close_position:
                 logger.info(
-                    "매도 전량 체결: %s %d주 @ %d (손익: %d, 전략: %s) avg=%.2f",
+                    "매도 전량 체결: %s %d주 @ %d (손익: %d, 전략: %s) avg=%d",
                     t(ticker), total_filled, price, book_pnl, pos_strategy.strategy_id, book_price,
                 )
             elif not ambiguous:

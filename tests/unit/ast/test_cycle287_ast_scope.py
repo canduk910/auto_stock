@@ -676,8 +676,11 @@ _SRC_TREE_FILES = 166
 # 🔁 cycle394(2026-10-02) 재핀 — cycle393 위에 LLM 기본 모델 `gpt-6-luna` 전환(사용자 요청). `config.py`(기본값 2키) ·
 # `log_analysis_engine.py`(`_OPENAI_PRICING` 1행 + 주석) · `llm_buy_gate.py`(주석만). 파일 수 불변 166, 매매 행위 변경 없음.
 # 직전 값 = cycle393 3차 `bf486d64cb9ff561fc4224713a86d18dfaf492581fa77dbe4eda3bdeaf64bcf9`.
+# 🔁 cycle396(2026-10-02) 재핀 — cycle396 사용자 요청(10-02) 가중평균가 절사: `db/trade_history.py`
+# `get_trade_pairs` 가 가격을 원 단위 내림 int · closed 손익을 SELL 행 장부 손익 합으로 낸다(화면 소수 제거).
+# 파일 수 불변 166. 직전 값 = cycle394 `b20e67639d14d1d4437ab3982733e1c428313d165476084ee391f956064b84ea`.
 _SRC_TREE_DIGEST = (
-    "b20e67639d14d1d4437ab3982733e1c428313d165476084ee391f956064b84ea"
+    "67d48b35e5b2759b67d6a0957d1e09b7e50d2e61c68b2e0b3ca3df13988360de"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

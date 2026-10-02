@@ -626,6 +626,12 @@ async def get_trades_in_range(
     return await pg.fetch(sql, *args) or []
 
 
+def _won_floor(x) -> int:
+    """가중평균가를 원 단위 내림한 `int` — 매매손익 그리드에 소수를 남기지 않는다(cycle396)."""
+    from decimal import ROUND_FLOOR, Decimal
+    return int(Decimal(x).to_integral_value(rounding=ROUND_FLOOR))
+
+
 async def get_trade_pairs(
     strategy: str | None = None,
     ticker: str | None = None,
@@ -701,6 +707,8 @@ async def get_trade_pairs(
         # cycle276 — 주문번호 병행 리스트(버퍼 arity 불변). 빈 주문번호는 담지 않는다.
         buy_ono_buf: list[str] = []
         sell_ono_buf: list[str] = []
+        # cycle396 — SELL 행 `profit_loss` 병행 리스트(버퍼 arity 3 유지). NULL 은 None.
+        sell_pl_buf: list = []
 
         def _dedupe(seq: list[str]) -> list[str]:
             """순서(시간 오름차순)를 보존한 중복 제거."""
@@ -722,8 +730,14 @@ async def get_trade_pairs(
             sell_total_amt = sum(p * q for _, p, q in sell_buf)
             buy_avg = buy_total_amt / buy_total_qty
             sell_avg = sell_total_amt / sell_total_qty if sell_total_qty else Decimal(0)
-            pl = (sell_avg - buy_avg) * sell_total_qty
-            rate = ((sell_avg - buy_avg) / buy_avg * 100) if buy_avg else Decimal(0)
+            # cycle396 — SELL 행 전부 손익이 있으면 엔진 실현손익 합(정수, daily_performance 와
+            # 같은 출처), 하나라도 NULL 이면 가중평균 재계산을 0 쪽으로 절사.
+            if sell_pl_buf and all(v is not None for v in sell_pl_buf):
+                pl_int = int(sum(sell_pl_buf, Decimal(0)))
+            else:
+                pl_int = int((sell_avg - buy_avg) * sell_total_qty)
+            cost = buy_avg * sell_total_qty
+            rate = (Decimal(pl_int) / cost * 100) if cost else Decimal(0)
             buy_ts = buy_buf[0][0]
             sell_ts = sell_buf[-1][0] if sell_buf else None
             buy_d, buy_t = _to_kst(buy_ts)
@@ -737,11 +751,11 @@ async def get_trade_pairs(
                 "sell_time": sell_t,
                 "ticker": tkr,
                 "ticker_name": ticker_name,
-                "buy_price": float(round(buy_avg, 2)),
+                "buy_price": _won_floor(buy_avg),
                 "buy_qty": int(buy_total_qty),
-                "sell_price": float(round(sell_avg, 2)),
+                "sell_price": _won_floor(sell_avg),
                 "sell_qty": int(sell_total_qty),
-                "profit_loss": float(round(pl, 2)),
+                "profit_loss": pl_int,
                 "profit_rate": float(round(rate, 4)),
                 "status": "closed",
                 "strategy": strat,
@@ -770,11 +784,17 @@ async def get_trade_pairs(
                 sell_buf.append((ts, p, q))
                 if ono:
                     sell_ono_buf.append(ono)
+                _pl = t.get("profit_loss")
+                try:
+                    sell_pl_buf.append(None if _pl is None else Decimal(str(_pl)))
+                except Exception:
+                    sell_pl_buf.append(None)
                 position -= q
                 if position <= 0:
                     emit_closed()
                     buy_buf, sell_buf = [], []
                     buy_ono_buf, sell_ono_buf = [], []
+                    sell_pl_buf = []
                     position = 0  # 음수 케이스(데이터 이상) 방어
 
         # 그룹 끝: 잔여 보유분이 있으면 open 페어
@@ -786,9 +806,10 @@ async def get_trade_pairs(
             cur_price = ticker_prices.get(tkr, {}).get("current_price", 0) or 0
             if cur_price > 0:
                 cur_dec = Decimal(str(cur_price))
-                pl = (cur_dec - buy_avg) * position
+                # cycle396 — 나눗셈을 마지막에 한 번만(평균가 무한소수의 절사 오차 방지)
+                pl = (cur_dec * buy_total_qty - buy_total_amt) * position / buy_total_qty
                 rate = ((cur_dec - buy_avg) / buy_avg * 100) if buy_avg else Decimal(0)
-                pl_val: float | None = float(round(pl, 2))
+                pl_val: int | None = int(pl)  # cycle396 — 원 단위, 0 쪽 절사(소수 제거)
                 rate_val: float | None = float(round(rate, 4))
             else:
                 pl_val = None
@@ -802,7 +823,7 @@ async def get_trade_pairs(
                 "sell_time": None,
                 "ticker": tkr,
                 "ticker_name": ticker_name,
-                "buy_price": float(round(buy_avg, 2)),
+                "buy_price": _won_floor(buy_avg),
                 "buy_qty": int(position),
                 "sell_price": None,
                 "sell_qty": None,

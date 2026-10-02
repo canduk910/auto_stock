@@ -312,6 +312,7 @@ backend:
       - tests/unit/ast/test_cycle386_ast_finalize.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -401,6 +402,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -923,6 +925,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -1511,6 +1514,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -1601,6 +1605,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -2128,6 +2133,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -2739,6 +2745,7 @@ backend:
       - tests/unit/ast/test_cycle386_ast_finalize.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -2829,6 +2836,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -3342,6 +3350,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -3936,6 +3945,7 @@ backend:
       - tests/unit/ast/test_cycle386_ast_finalize.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -4024,6 +4034,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -4549,6 +4560,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -5125,6 +5137,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -5215,6 +5228,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -5757,6 +5771,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -6336,6 +6351,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -6426,6 +6442,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -6967,6 +6984,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -7547,6 +7565,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -7637,6 +7656,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -8177,6 +8197,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -8764,6 +8785,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -8854,6 +8876,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -9392,6 +9415,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -9971,6 +9995,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -10061,6 +10086,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -10598,6 +10624,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -11247,6 +11274,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -11337,6 +11365,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -11875,6 +11904,7 @@ backend:
       - tests/unit/engine/test_cycle386_finalize_neutralization.py
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -12469,6 +12499,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -12559,6 +12590,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -13101,6 +13133,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -13689,6 +13722,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -13774,6 +13808,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -14312,6 +14347,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -14910,6 +14946,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -15000,6 +15037,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -15530,6 +15568,7 @@ backend:
       - tests/unit/engine/test_cycle386_finalize_neutralization.py
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -16098,6 +16137,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -16188,6 +16228,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -16730,6 +16771,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -17325,6 +17367,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -17414,6 +17457,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -17943,6 +17987,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -18522,6 +18567,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -18611,6 +18657,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -19151,6 +19198,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -19731,6 +19779,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -19821,6 +19870,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -20361,6 +20411,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -20949,6 +21000,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -21037,6 +21089,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -21571,6 +21624,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -22150,6 +22204,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -22240,6 +22295,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -22781,6 +22837,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -23366,6 +23423,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -23454,6 +23512,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -23993,6 +24052,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -24573,6 +24633,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -24663,6 +24724,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -25201,6 +25263,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -25785,6 +25848,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -25875,6 +25939,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -26411,6 +26476,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -26992,6 +27058,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -27081,6 +27148,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -27621,6 +27689,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -28212,6 +28281,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -28295,6 +28365,7 @@ backend:
       - tests/unit/db/test_cycle365_change_rate.py
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -28831,6 +28902,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -29438,6 +29510,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -29527,6 +29600,7 @@ backend:
       - tests/unit/db/test_cycle369_status_mode_config.py
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -30044,6 +30118,7 @@ backend:
       - tests/unit/engine/test_cycle386_finalize_neutralization.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -30671,6 +30746,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -30743,6 +30819,7 @@ backend:
       - tests/unit/db/test_cycle369_status_mode_config.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -31256,6 +31333,7 @@ backend:
       - tests/unit/engine/test_cycle386_finalize_neutralization.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -31857,6 +31935,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -31936,6 +32015,7 @@ backend:
       - tests/unit/db/test_cycle369_status_mode_config.py
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -32462,6 +32542,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -33042,6 +33123,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -33132,6 +33214,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -33671,6 +33754,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -34252,6 +34336,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -34342,6 +34427,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -34883,6 +34969,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -35471,6 +35558,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -35557,6 +35645,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -36092,6 +36181,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -36673,6 +36763,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -36763,6 +36854,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -37305,6 +37397,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -37899,6 +37992,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -37986,6 +38080,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -38518,6 +38613,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -38826,6 +38922,7 @@ backend:
       - tests/unit/db/test_cycle273a_update_trade_status_match_partial.py
       - tests/unit/db/test_cycle273b_trade_status_order_no_and_multi_update.py
       - tests/unit/db/test_cycle276_llm_evaluations_db.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycleM2a_safety_diff0.py
       - tests/unit/db/test_cycleM2a_trade_history_pg.py
       - tests/unit/db/test_cycleM5_new_helpers.py
@@ -39113,6 +39210,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -39729,6 +39827,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -40303,6 +40402,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -40393,6 +40493,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -40935,6 +41036,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -41515,6 +41617,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -41605,6 +41708,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -42146,6 +42250,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -42740,6 +42845,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -42830,6 +42936,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -43357,6 +43464,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -43940,6 +44048,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -44030,6 +44139,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -44566,6 +44676,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -45147,6 +45258,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -45237,6 +45349,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -45777,6 +45890,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -46356,6 +46470,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -46446,6 +46561,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -46986,6 +47102,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -47575,6 +47692,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -47665,6 +47783,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -48196,6 +48315,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -48774,6 +48894,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -48864,6 +48985,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -49406,6 +49528,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -49983,6 +50106,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -50073,6 +50197,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -50615,6 +50740,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -51214,6 +51340,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -51304,6 +51431,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -51830,6 +51958,7 @@ backend:
       - tests/unit/engine/test_cycle386_finalize_neutralization.py
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -52405,6 +52534,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -52494,6 +52624,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -53036,6 +53167,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -53619,6 +53751,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -53709,6 +53842,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -54246,6 +54380,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -54825,6 +54960,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -54915,6 +55051,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -55456,6 +55593,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -56039,6 +56177,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -56129,6 +56268,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -56666,6 +56806,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -57248,6 +57389,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -57338,6 +57480,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -57876,6 +58019,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -58458,6 +58602,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -58548,6 +58693,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -59086,6 +59232,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -59666,6 +59813,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -59756,6 +59904,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -60297,6 +60446,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -60876,6 +61026,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -60966,6 +61117,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -61507,6 +61659,7 @@ backend:
       - tests/unit/engine/test_cycle386_finalize_neutralization.py
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -62085,6 +62238,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -62175,6 +62329,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -62716,6 +62871,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -63376,6 +63532,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -63465,6 +63622,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -63999,6 +64157,7 @@ backend:
       - tests/unit/engine/test_cycle386_finalize_neutralization.py
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -64583,6 +64742,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -64673,6 +64833,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -65206,6 +65367,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -65780,6 +65942,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -65870,6 +66033,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -66412,6 +66576,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -66997,6 +67162,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -67087,6 +67253,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -67626,6 +67793,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -68215,6 +68383,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -68305,6 +68474,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -68843,6 +69013,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -69419,6 +69590,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -69509,6 +69681,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -70041,6 +70214,7 @@ backend:
       - tests/unit/engine/test_cycle386_finalize_neutralization.py
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -70619,6 +70793,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -70709,6 +70884,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -71251,6 +71427,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -71830,6 +72007,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -71920,6 +72098,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -72461,6 +72640,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -73048,6 +73228,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -73138,6 +73319,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -73671,6 +73853,7 @@ backend:
       - tests/unit/engine/test_cycle386_finalize_neutralization.py
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -74253,6 +74436,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -74343,6 +74527,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -74881,6 +75066,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -75461,6 +75647,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -75551,6 +75738,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -76091,6 +76279,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -76673,6 +76862,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -76763,6 +76953,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -77301,6 +77492,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -77878,6 +78070,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -77968,6 +78161,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -78510,6 +78704,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -79175,6 +79370,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -79265,6 +79461,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -79806,6 +80003,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -80463,6 +80661,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -80553,6 +80752,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -81092,6 +81292,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -81737,6 +81938,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -81827,6 +82029,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -82367,6 +82570,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -82946,6 +83150,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -83036,6 +83241,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -83578,6 +83784,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -84162,6 +84369,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -84252,6 +84460,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -84788,6 +84997,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -85401,6 +85611,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -85491,6 +85702,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -86007,6 +86219,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -86578,6 +86791,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -86668,6 +86882,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -87210,6 +87425,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -87790,6 +88006,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -87880,6 +88097,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -88421,6 +88639,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -88994,6 +89213,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -89084,6 +89304,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -89626,6 +89847,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -90472,6 +90694,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -90553,6 +90776,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -90910,6 +91134,7 @@ backend:
       - tests/unit/engine/test_cycle386_daily_bar_finalize.py
       - tests/unit/engine/test_cycle386_finalize_neutralization.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -91585,6 +91810,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -91673,6 +91899,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -92137,6 +92364,7 @@ backend:
       - tests/unit/engine/test_cycle386_finalize_neutralization.py
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle61_phase2A2_dataclass_completeness.py
@@ -92629,6 +92857,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -92719,6 +92948,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -93259,6 +93489,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -93838,6 +94069,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -93928,6 +94160,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -94469,6 +94702,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -95046,6 +95280,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -95136,6 +95371,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -95677,6 +95913,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -96254,6 +96491,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -96344,6 +96582,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -96886,6 +97125,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -97473,6 +97713,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -97563,6 +97804,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -98098,6 +98340,7 @@ backend:
       - tests/unit/engine/test_cycle386_finalize_neutralization.py
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -98711,6 +98954,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -98801,6 +99045,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -99328,6 +99573,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -99889,6 +100135,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -99979,6 +100226,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -100517,6 +100765,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -101124,6 +101373,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -101214,6 +101464,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -101746,6 +101997,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -102308,6 +102560,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -102398,6 +102651,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -102938,6 +103192,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -103514,6 +103769,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -103604,6 +103860,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -104146,6 +104403,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -104724,6 +104982,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -104814,6 +105073,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -105356,6 +105616,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -105936,6 +106197,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -106026,6 +106288,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -106567,6 +106830,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -107146,6 +107410,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -107236,6 +107501,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -107777,6 +108043,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -108356,6 +108623,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -108446,6 +108714,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -108987,6 +109256,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -109574,6 +109844,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -109664,6 +109935,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -110201,6 +110473,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -110848,6 +111121,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -110938,6 +111212,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -111440,6 +111715,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -112069,6 +112345,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -112158,6 +112435,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -112653,6 +112931,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -113263,6 +113542,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -113352,6 +113632,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -113861,6 +114142,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -114472,6 +114754,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -114562,6 +114845,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -115070,6 +115354,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -115672,6 +115957,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -115762,6 +116048,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -116280,6 +116567,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -116897,6 +117185,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -116987,6 +117276,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -117491,6 +117781,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -118107,6 +118398,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -118197,6 +118489,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -118702,6 +118995,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -119503,6 +119797,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -119591,6 +119886,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -119943,6 +120239,7 @@ backend:
       - tests/unit/engine/test_cycle386_finalize_neutralization.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle48_stale_tracker_state.py
@@ -120560,6 +120857,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -120650,6 +120948,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -121140,6 +121439,7 @@ backend:
       - tests/unit/engine/test_cycle386_finalize_neutralization.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -121699,6 +121999,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -121789,6 +122090,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -122331,6 +122633,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -122914,6 +123217,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -123004,6 +123308,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -123540,6 +123845,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -124195,6 +124501,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -124285,6 +124592,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -124824,6 +125132,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -125407,6 +125716,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -125497,6 +125807,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -126035,6 +126346,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -126613,6 +126925,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -126703,6 +127016,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -127243,6 +127557,7 @@ backend:
       - tests/unit/engine/test_cycle386_finalize_neutralization.py
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -127842,6 +128157,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -127932,6 +128248,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -128455,6 +128772,7 @@ backend:
       - tests/unit/engine/test_cycle386_finalize_neutralization.py
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -129030,6 +129348,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -129120,6 +129439,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -129662,6 +129982,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -130244,6 +130565,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -130334,6 +130656,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -130874,6 +131197,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -131453,6 +131777,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -131543,6 +131868,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -132083,6 +132409,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -132674,6 +133001,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -132764,6 +133092,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -133300,6 +133629,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -133938,6 +134268,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -134028,6 +134359,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -134570,6 +134902,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -135148,6 +135481,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -135238,6 +135572,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -135780,6 +136115,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -136364,6 +136700,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -136454,6 +136791,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -136994,6 +137332,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -137575,6 +137914,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -137665,6 +138005,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -138205,6 +138546,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -138852,6 +139194,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -138942,6 +139285,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -139480,6 +139824,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -140060,6 +140405,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -140149,6 +140495,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -140691,6 +141038,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -141354,6 +141702,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -141444,6 +141793,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -141968,6 +142318,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -142741,6 +143092,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -142831,6 +143183,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -143349,6 +143702,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -144011,6 +144365,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -144097,6 +144452,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -144626,6 +144982,7 @@ backend:
       - tests/unit/engine/test_cycle386_finalize_neutralization.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -145239,6 +145596,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -145329,6 +145687,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -145866,6 +146225,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -146428,6 +146788,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -146518,6 +146879,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -147058,6 +147420,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -147657,6 +148020,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -147747,6 +148111,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -148285,6 +148650,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -148876,6 +149242,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -148966,6 +149333,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -149494,6 +149862,7 @@ backend:
       - tests/unit/engine/test_cycle386_finalize_neutralization.py
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -151620,6 +151989,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -151710,6 +152080,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -152248,6 +152619,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -152824,6 +153196,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -152914,6 +153287,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -153455,6 +153829,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -154038,6 +154413,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -154128,6 +154504,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -154668,6 +155045,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -155243,6 +155621,7 @@ backend:
       - tests/unit/ast/test_cycle387_ast_stock_chart_scope.py
       - tests/unit/ast/test_cycle392_ast_sell_book.py
       - tests/unit/ast/test_cycle393_ast_no_feed_held.py
+      - tests/unit/ast/test_cycle396_ast_vwap_floor.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -155333,6 +155712,7 @@ backend:
       - tests/unit/db/test_cycle380_list_by_filter_etf_sql.py
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle396_trade_pairs_int.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -155875,6 +156255,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle393_no_feed_held_evidence.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle396_vwap_floor.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -158054,10 +158435,10 @@ frontend:
       - frontend/src/pages/__tests__/StrategiesParams.test.tsx
       - frontend/src/pages/__tests__/StrategiesTeRr.test.tsx
       - frontend/src/pages/__tests__/StrategyFunnel.bottleneckTrend.test.tsx
-generated_at: '2026-10-02T04:30:07.536Z'
+generated_at: '2026-10-02T04:56:56.841Z'
 stats:
   backend_modules: 169
-  backend_tests: 1191
+  backend_tests: 1194
   frontend_modules: 129
   frontend_tests: 107
   unmapped_modules:

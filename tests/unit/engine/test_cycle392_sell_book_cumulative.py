@@ -21,7 +21,7 @@ update_trade_status(..., price=price, profit_loss=profit_loss)   # 장부는 대
 ## 시정 계약 (이 파일이 지키는 것)
 
 - 장부 `profit_loss` = 그 주문의 손익 증분 합 = 그 주문이 `daily_realized_pnl` 에 더한 합(I2)
-- 장부 `price` = 그 주문의 체결 가중평균, 소수 둘째 자리 **ROUND_HALF_UP**
+- 장부 `price` = 그 주문의 체결 가중평균, **원 단위 절사**(소수 버림, `int`) — cycle396 사용자 요청(10-02)
 - 통보 1건 주문은 결과 불변(I3) · 메모리 손익·보유 축·`_selling`·주문 축 불변(I1·I6)
 - 장부 쓰기 네 곳(COMPLETED UPDATE · PARTIAL UPDATE · 보정 INSERT · 강제 UPDATE)은 `await` 앞
   동기 영역에서 잡은 값을 쓴다 — 같은 주문의 다음 통보가 끼어들어도 섞이지 않는다(I5, T10)
@@ -45,7 +45,6 @@ import logging
 import random
 import re
 from datetime import date
-from decimal import ROUND_HALF_UP, Decimal
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
@@ -284,11 +283,11 @@ async def _notice(env, order_no: str, qty: int, price: int, *, ticker: str = TIC
     )
 
 
-def _vwap(fills: list[tuple[int, int]]) -> float:
-    """기대 가중평균 — Σ(가격×수량)/Σ수량, 소수 둘째 자리 ROUND_HALF_UP."""
+def _vwap(fills: list[tuple[int, int]]) -> int:
+    """기대 가중평균 — Σ(가격×수량)/Σ수량, 원 단위 절사(cycle396)."""
     v = sum(q * p for q, p in fills)
     n = sum(q for q, _ in fills)
-    return float((Decimal(v) / Decimal(n)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+    return v // n
 
 
 def _warns(caplog, prefix: str) -> list[str]:
@@ -328,6 +327,10 @@ async def test_t1_cj_enm_two_notices_book_is_order_cumulative(monkeypatch):
     assert row["price"] == 36_110.0, (
         f"장부 가격 {row['price']} — 체결 가중평균 180,550/5 = 36,110 이어야 한다"
     )
+    done = env.ledger.writes("update", TradeStatus.COMPLETED)
+    assert len(done) == 1 and type(done[0]["price"]) is int, (
+        f"장부 가격 인자 {done[0]['price']!r} — 정수(int)로 넘겨야 한다(cycle396 절사)"
+    )
     # I1 — 메모리는 원래 누적이다(불변).
     assert env.s["kojiro"].state.daily_realized_pnl == -16_450
 
@@ -336,8 +339,8 @@ async def test_t1_cj_enm_two_notices_book_is_order_cumulative(monkeypatch):
 # T2 — 아바텍형(09-22 BFB) · T2b 반올림 규약
 # ---------------------------------------------------------------------------
 @pytest.mark.asyncio
-async def test_t2_avatec_shape_vwap_two_decimals(monkeypatch):
-    """14주 @13,040 — 3@12,380 → 11@12,350. 장부 12,356.43 · −9,570 (기록은 12,350 · −7,590)."""
+async def test_t2_avatec_shape_vwap_floored(monkeypatch):
+    """14주 @13,040 — 3@12,380 → 11@12,350. 장부 12,356(172,990/14 = 12,356.43 절사) · −9,570."""
     env = _env(monkeypatch, holdings={"bull_flag_breakout": (14, 13_040)},
                names={TICKER: "아바텍"})
     order = "0001637700"
@@ -350,16 +353,14 @@ async def test_t2_avatec_shape_vwap_two_decimals(monkeypatch):
     row = env.ledger.row(order)
     assert row["status"] == TradeStatus.COMPLETED.value
     assert row["profit_loss"] == -9_570
-    assert row["price"] == 12_356.43
+    assert row["price"] == 12_356
+    done = env.ledger.writes("update", TradeStatus.COMPLETED)
+    assert type(done[-1]["price"]) is int, f"장부 가격 인자 {done[-1]['price']!r} — int 여야 한다"
 
 
 @pytest.mark.asyncio
-async def test_t2b_vwap_rounds_half_up_not_bankers(monkeypatch):
-    """199@100 + 1@101 → 20,001/200 = 100.005 → ROUND_HALF_UP **100.01**.
-
-    `round(100.005, 2)` 는 float 표현(100.00499…) 때문에 100.0, Decimal 은행가 반올림도
-    100.00 이다 — 명세 §4.2 의 `quantize(Decimal("0.01"), ROUND_HALF_UP)` 만 100.01 을 낸다.
-    """
+async def test_t2b_vwap_floors_never_rounds_up(monkeypatch):
+    """199@100 + 1@101 → 20,001/200 = 100.005 → 절사 **100**(cycle396 — 반올림·올림 금지)."""
     env = _env(monkeypatch, holdings={"kojiro": (200, 100)})
     order = "0000900100"
     _map(env, order, 200, "kojiro")
@@ -371,7 +372,7 @@ async def test_t2b_vwap_rounds_half_up_not_bankers(monkeypatch):
     row = env.ledger.row(order)
     assert row["status"] == TradeStatus.COMPLETED.value
     assert row["profit_loss"] == 1
-    assert row["price"] == 100.01, f"장부 가격 {row['price']} — ROUND_HALF_UP 100.01 이어야 한다"
+    assert row["price"] == 100, f"장부 가격 {row['price']} — 절사 100 이어야 한다"
 
 
 # ---------------------------------------------------------------------------
@@ -553,7 +554,7 @@ async def test_t9_two_orders_same_ticker_do_not_mix(monkeypatch):
     row_b = env.ledger.row(b)
     assert row_b["status"] == TradeStatus.COMPLETED.value
     assert row_b["profit_loss"] == -10_000
-    assert row_b["price"] == _vwap([(1, 36_100), (2, 36_050)]) == 36_066.67
+    assert row_b["price"] == _vwap([(1, 36_100), (2, 36_050)]) == 36_066
     assert env.s["kojiro"].state.daily_realized_pnl == -16_500
 
 
@@ -624,7 +625,7 @@ async def test_t11_position_vanishes_mid_order_book_equals_memory(monkeypatch):
     row = env.ledger.row(order)
     assert row["status"] == TradeStatus.COMPLETED.value
     assert row["profit_loss"] == mem
-    assert row["price"] == _vwap([(1, 36_150), (2, 36_100)]) == 36_116.67
+    assert row["price"] == _vwap([(1, 36_150), (2, 36_100)]) == 36_116
 
 
 # ---------------------------------------------------------------------------
@@ -657,7 +658,7 @@ async def test_t12a_split_sell_b7_axes_unchanged(monkeypatch, caplog):
 
 @pytest.mark.asyncio
 async def test_t12b_split_sell_book_is_four_share_cumulative(monkeypatch, caplog):
-    """장부 = 4주 누적 −13,100 · 144,500/4 = 36,125.0."""
+    """장부 = 4주 누적 −13,100 · 144,500/4 = 36,125."""
     env, order = await _t12_split(monkeypatch, caplog)
     row = env.ledger.row(order)
     assert row["status"] == TradeStatus.COMPLETED.value
@@ -695,7 +696,7 @@ async def test_t13a_ambiguous_owner_unchanged(monkeypatch, caplog):
 
 @pytest.mark.asyncio
 async def test_t13b_ambiguous_owner_book_price_is_vwap(monkeypatch, caplog):
-    """손익이 0 이어도 가격은 그 주문 체결 가중평균(36,125.0)."""
+    """손익이 0 이어도 가격은 그 주문 체결 가중평균(36,125)."""
     env, order = await _t13_ambiguous(monkeypatch, caplog)
     assert env.ledger.row(order)["price"] == 36_125.0
 
@@ -706,7 +707,8 @@ async def test_t13b_ambiguous_owner_book_price_is_vwap(monkeypatch, caplog):
 @pytest.mark.asyncio
 async def test_t14_book_equals_memory_for_random_fill_sequences(monkeypatch):
     """주문 20개 · 2~4통보 · 수량 1~5 · 가격 ±3틱(50원). 주문마다 종료 시
-    장부 손익 == 그 주문이 `daily_realized_pnl` 에 더한 합, |장부가격×수량 − Σ체결금액| ≤ 0.005×수량.
+    장부 손익 == 그 주문이 `daily_realized_pnl` 에 더한 합, 장부가격 = int 이고
+    0 ≤ Σ체결금액 − 장부가격×수량 < 수량(원 단위 절사, cycle396).
     """
     rng = random.Random(392)
     orders = []
@@ -741,7 +743,10 @@ async def test_t14_book_equals_memory_for_random_fill_sequences(monkeypatch):
             failures.append((order, "status", row["status"]))
         if row["profit_loss"] != mem:
             failures.append((order, "pnl", row["profit_loss"], mem))
-        if abs(row["price"] * total - value) > 0.005 * total + 1e-6:
+        done = [c for c in env.ledger.writes("update", TradeStatus.COMPLETED) if c["order_no"] == order]
+        if not done or type(done[-1]["price"]) is not int:
+            failures.append((order, "price_type", done[-1]["price"] if done else None))
+        if not (0 <= value - row["price"] * total < total):
             failures.append((order, "price", row["price"], value / total))
     assert failures == [], f"I2 위반 {len(failures)}건: {failures[:6]}"
 
@@ -783,4 +788,4 @@ async def test_t16_full_fill_log_reports_order_cumulative(monkeypatch, caplog):
     msg = lines[0]
     assert re.search(r"\b5주 @ 36100\b", msg), msg
     assert re.search(r"손익: -16450\b", msg), f"손익이 주문 누적이 아니다: {msg}"
-    assert re.search(r"avg=36110\.00\b", msg), f"avg= 가중평균이 없다: {msg}"
+    assert re.search(r"avg=36110(?![.\d])", msg), f"avg= 가중평균(정수, cycle396)이 없다: {msg}"
