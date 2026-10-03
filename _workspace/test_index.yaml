@@ -166658,7 +166658,7 @@ frontend:
       - frontend/src/pages/__tests__/StrategiesParams.test.tsx
       - frontend/src/pages/__tests__/StrategiesTeRr.test.tsx
       - frontend/src/pages/__tests__/StrategyFunnel.bottleneckTrend.test.tsx
-generated_at: '2026-10-03T12:50:58.418Z'
+generated_at: '2026-10-03T15:45:03.884Z'
 stats:
   backend_modules: 174
   backend_tests: 1218

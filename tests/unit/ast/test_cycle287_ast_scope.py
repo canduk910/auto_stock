@@ -185,7 +185,7 @@ _BASE_SHA = {
     # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
     # 🔁 cycle405 재핀 — 깡토식 청산·사이징 전면 재작성 + 리뷰 반영 L6(R≥0.5×가격 가드).
     "src/engine/strategies/donchian_swing.py":
-        "08235b777c04e2a827d1ad38b39c1b64f9915df86d1301c9c84f8b60d15177ce",
+        "c8c7172e8e33fa164e2d11c30641562e8ab2d6474e7a84f241320bf2fbab58f3",
     # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
     "src/engine/strategies/kojiro.py":
         "1d04d3d6dc0c72ff6c7e7d930be9da63f2408fb709e889906a133a9c5480fc74",
@@ -746,8 +746,11 @@ _SRC_TREE_FILES = 171  # cycle404 — 계좌 묶음 배정 기록(단계 0): 신
 # `stop_loss_rate` PARAM_RANGES 예외, kk_r_floor_pct 클램프, R≥0.5×가격 가드). 파일 수
 # 170 그대로. 직전 값(cycle406 재핀 5) = `459f4c96ba629fa111bbc89cedffb6b6bbfaca12cbc6bbf1a85ca04bb6b61846`.
 # 🔁 cycle405 리베이스(cycle404 위) — 파일 수 171, digest 재계산.
+# 🔁 cycle405 후속 L5 (2026-10-04) — 죽은 코드 제거(`_emit_breakeven_promote`·
+# `_emit_time_exit`·cap 필드 2종·`_turtle_buy_quantity`, 운영 코드 호출처 0 확인 후
+# donchian_swing.py 에서 삭제). 파일 수 171 그대로, digest 재계산.
 _SRC_TREE_DIGEST = (
-    "6a74f85b0f91f3904884f57610f9911e2ac4754e8fb8f98a2e0bae7a61c52ec6"
+    "0e4226c91676b44f006f7135e7bff92c628c3daa6851796e3cd459b859f08f8d"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

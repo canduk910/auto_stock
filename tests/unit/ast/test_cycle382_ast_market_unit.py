@@ -438,7 +438,9 @@ def test_a08_prepare_calls_refresh_once_before_any_return(fname):
 # ===========================================================================
 # A09 — ATR 키 = 터틀 블록이 읽는 키
 # ===========================================================================
-@pytest.mark.parametrize("fname", list(TURTLE_FILES))
+@pytest.mark.parametrize(
+    "fname", [f for f in TURTLE_FILES if f != "donchian_swing.py"]
+)
 def test_a09_market_unit_atr_key_matches_turtle_block(fname):
     from tests.unit.engine._cycle382_support import strategy_class
 
@@ -449,6 +451,20 @@ def test_a09_market_unit_atr_key_matches_turtle_block(fname):
     found = _turtle_block_keys(_read(_STRATS / fname), _TURTLE_BLOCK[fname])
     assert found, f"{fname} 터틀 블록 ATR 키 탐지 실패(탐지기 무효)"
     assert found == {key}, f"{fname} 터틀 블록 키 {found} ≠ _MARKET_UNIT_ATR_KEY {key!r}"
+
+
+def test_a09_donchian_atr_key_still_valid():
+    """donchian 은 `_turtle_buy_quantity` 가 cycle405 후속 L5 로 제거돼 위 교차검증
+    대상에서 빠졌다(죽은 코드 — 운영 코드 호출처 0 확인). `_MARKET_UNIT_ATR_KEY` 자체는
+    여전히 유효해야 한다 — 실사용처는 `_kk_design_lot`(R 기반 설계 랏)이고, 거기서는
+    `info.get(self._MARKET_UNIT_ATR_KEY)` 처럼 속성 참조로 읽어 AST 리터럴 탐지기
+    패턴에 걸리지 않는다(그래서 교체 대상이 없다)."""
+    from tests.unit.engine._cycle382_support import strategy_class
+
+    cls = strategy_class(TURTLE_FILES["donchian_swing.py"])
+    key = getattr(cls, "_MARKET_UNIT_ATR_KEY", None)
+    assert key is not None, f"[Red] {cls.__name__}._MARKET_UNIT_ATR_KEY 없음"
+    assert key in StrategyBase._SIZING_ATR_KEYS
 
 
 def test_a09_base_default_is_none():

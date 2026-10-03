@@ -439,11 +439,21 @@ def test_g242_8_sizing_atr_keys_runtime():
     assert StrategyBase._SIZING_ATR_KEYS == ("atr", "atr14")
 
 
-@pytest.mark.parametrize("filename", sorted(TURTLE_FILES))
+@pytest.mark.parametrize(
+    "filename", sorted(f for f in TURTLE_FILES if f != "donchian_swing.py")
+)
 def test_g242_8_turtle_block_atr_keys_are_subset(filename):
     """터틀 블록이 후보 dict 에서 읽는 ATR 키 ⊆ `_SIZING_ATR_KEYS`.
 
     캡 ATR 과 사이징 ATR 이 같은 키 집합을 보지 않으면 "같은 소스" 계약이 깨진다.
+
+    cycle405 후속 L5 (2026-10-04) — donchian 은 제외한다. cycle405 가 donchian 의
+    매수 경로를 `_turtle_buy_quantity`/`compute_unit_qty_guarded` 에서
+    `_kk_design_lot`(R 기반)로 바꾸며 그 함수가 운영 코드 호출처 0 인 죽은 코드가
+    됐고, L5 가 함수 자체를 제거했다. `_kk_design_lot` 은 ATR 키를
+    `info.get(self._MARKET_UNIT_ATR_KEY)` 처럼 속성 참조로 읽어(리터럴 문자열이
+    아니라서) 이 탐지기 패턴(`ast.Constant` 첫 인자)에 애초에 걸리지 않는다 —
+    다른 전략으로 교체할 대상이 없다.
     """
     src = _strategy_src(filename)
     fn = _func_node(src, TURTLE_FILES[filename])

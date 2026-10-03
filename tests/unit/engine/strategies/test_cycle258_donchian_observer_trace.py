@@ -209,7 +209,11 @@ def test_d4_every_emit_helper_except_handler_uses_trace_observer_failure():
     cls = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "DonchianSwingStrategy")
     emitters = [n for n in cls.body
                 if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n.name.startswith("_emit_")]
-    assert len(emitters) >= 8, f"`_emit_*` 관측기 {len(emitters)}개 — 대상 식별 실패"
+    # cycle405 후속 L5 (2026-10-04) — `_emit_breakeven_promote`·`_emit_time_exit`
+    # (사이클 237) 를 제거했다. cycle405 깡토식 개조가 그 둘의 호출부(옛 손절선
+    # 승격·N일 시간청산 분기)를 들어내 운영 코드 호출처 0 인 죽은 코드가 됐다.
+    # 8 → 6 은 식별 실패가 아니라 실측 축소다.
+    assert len(emitters) >= 6, f"`_emit_*` 관측기 {len(emitters)}개 — 대상 식별 실패"
 
     offenders: list[str] = []
     checked = 0
@@ -235,7 +239,8 @@ def test_d4_every_emit_helper_except_handler_uses_trace_observer_failure():
                 if not (isinstance(dl, ast.Name) and dl.id == "logger"):
                     offenders.append(f"{fn.name}:{c.lineno} dest_logger=logger 누락 "
                                      "(로거 정체성 — caplog 스코프 회귀 호환)")
-    assert checked >= 8, f"except 핸들러 {checked}개 — 검사 대상 부족"
+    # cycle405 후속 L5 — 위와 같은 이유로 8 → 6.
+    assert checked >= 6, f"except 핸들러 {checked}개 — 검사 대상 부족"
     assert not offenders, (
         "관측기 자기 실패 정책(카드 #5)이 파일 안에서 갈라졌다 — 무흔적 `pass` 또는 "
         f"무가드 `logger.debug` 핸들러: {offenders}"
