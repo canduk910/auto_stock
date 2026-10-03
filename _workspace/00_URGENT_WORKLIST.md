@@ -11,7 +11,7 @@
 | 8영역 관측 결함 L3 | 「매수 수량 0」 WARNING 꼬리 `원인: funds\|cap\|unknown, 잔여:`(`order_engine.py`, 쿨다운 불변) | `c720a8c` main |
 | 8영역 관측 결함 L1 | 09:30 자동 퍼널 캡처 `protect_confirmed=True` — 재기동해도 확정 행 보존(`scheduler.py` +6 = 3,736줄) | `664f4e9` main |
 | 1 트랙 R(평균회귀 연구) | 사전 고정 문턱 5개 중 1·2·3 실패 → **도입 접음**(뒤 40% −0.322%/거래 · 통과율 차 4.30%p · 횡보장 상관 +0.028). z 경계 채택(Leung 미검증). 원본 `_workspace/analysis/mean_reversion_20261001/` · `summary.md` 는 하위 에이전트 md 쓰기 차단으로 미작성 | `4721d12` main |
-| 2 트랙 C(실비용 대조) 백엔드 | 진행 중 — worktree `../auto_stock_trackc`. `scheduler.py` 자동 훅(Q1)·화면·운영 백필은 범위 밖 | 진행 중 |
+| 2 트랙 C(실비용 대조) 백엔드 | KIS `TTTC8715R` 래퍼 · 마이그레이션 045(`trade_cost_daily`·`trade_cost_period_totals`) · 전략 귀속·요약 · `POST /api/costs/reconcile`·`GET /api/costs/summary`. 남은 결정 Q1(scheduler 자동 훅)·Q3(경보 bp)·Q4(매도 주문가 기록, 8영역) · 화면은 다음 단계 · 배포 뒤 실측 8항목(reconcile 1회·HTS 대조 등) | `9c7a51d` main |
 
 - 🔴 10-06 15:30 push 대상에 위 main 커밋 전부가 들어간다(L1·L3·L4 = 8영역/scheduler, full 배포).
 
