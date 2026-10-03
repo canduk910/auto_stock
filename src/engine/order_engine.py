@@ -1383,10 +1383,19 @@ class OrderEngine:
         if quantity <= 0:
             # per-ticker cooldown 등록 — 다음 잔고 sync 또는 LOW_FUNDS_COOLDOWN 만료까지 같은 종목 매수 시도 차단
             state.block_low_funds(ticker, now_ts + LOW_FUNDS_COOLDOWN)
+            # cycle408-L3 — 원인 꼬리. 잔여 < 현재가 = funds(1주도 못 산다), 그 외 = cap
+            # (K축·ρ축·오픈리스크 등 사이징 상한). 동기 읽기만 — await 를 넣지 않는다(A-ATOMIC).
+            # 판정 실패는 unknown 으로 흡수한다(관측이 행위를 바꾸지 않는다).
+            try:
+                zero_remaining = state.total_investment - strategy._calc_used_funds()
+                zero_cause = "funds" if zero_remaining < current_price else "cap"
+            except Exception:
+                zero_remaining, zero_cause = -1, "unknown"
             logger.warning(
-                "매수 수량 0 → %ds cooldown: %s (투자금: %d, 현재가: %d, 전략: %s)",
+                "매수 수량 0 → %ds cooldown: %s (투자금: %d, 현재가: %d, 전략: %s, 원인: %s, 잔여: %d)",
                 int(LOW_FUNDS_COOLDOWN),
                 ticker, state.total_investment, current_price, strategy.strategy_id,
+                zero_cause, zero_remaining,
             )
             return
 

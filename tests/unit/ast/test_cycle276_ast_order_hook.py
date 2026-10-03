@@ -310,7 +310,11 @@ def _current_method_sha(kind: str, method: str) -> str:
 # ---------------------------------------------------------------------------
 
 # A-ATOMIC 구간(`calc_buy_quantity` 호출문 ~ 첫 `pending_buys.add`)의 소스 슬라이스 sha256.
-_ATOMIC_SEGMENT_SHA = "9fa886727eac9c391d4887a1fb124caffce8abb0e4d167484211c5f765f2b891"
+# 🔁 2026-10-04 (cycle408-L3) 재핀 — 사용자 승인 10-04 8영역 관측 결함 해결: 구간 안 `quantity <= 0`
+#    분기의 WARNING 에 원인 꼬리(`원인: funds|cap|unknown, 잔여:`)를 붙이는 동기 판정 try 1개 추가.
+#    await 0 그대로(`test_c3_2`), 쿨다운·return 순서 불변.
+#    직전 값 = `9fa886727eac9c391d4887a1fb124caffce8abb0e4d167484211c5f765f2b891`.
+_ATOMIC_SEGMENT_SHA = "838ca5f93969d697508b730bbec9584f679ff5fc0d9d2eaddef07d9d78953adb"
 
 # `order_engine.py` 모듈 최상단 `src.*` import 이름 집합(base). 증가분은 leaf 1건뿐이다(C10).
 _BASE_ORDER_ENGINE_SRC_IMPORTS = frozenset({

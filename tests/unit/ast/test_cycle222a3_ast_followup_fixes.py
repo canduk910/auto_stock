@@ -518,8 +518,11 @@ _APPROVED_CONTENT_SHA: dict[str, str] = {
     #    합·체결 가중평균)으로 기록. 사용자 승인(8영역, 결정 4), 나머지 7영역 diff 0.
     # 🔁 2026-10-02 (cycle396) 재핀 — cycle396 사용자 요청(10-02) 가중평균가 절사: 매도 장부
     #    가격을 원 단위 내림 int 로(`_vwap_2dp`→`_vwap_floor`). 사용자 승인(8영역), 나머지 7영역 diff 0.
+    # 🔁 2026-10-04 (cycle408-L3) 재핀 — cycle408-L3 — 사용자 승인 10-04 8영역 관측 결함 해결:
+    #    `execute_buy` 「매수 수량 0 → 900s cooldown」 WARNING 꼬리에 `원인: funds|cap|unknown, 잔여:`
+    #    추가(동기 읽기만, 쿨다운·순서 불변). 나머지 7영역 diff 0. 자매 가드 네 곳 전부 같은 값.
     "src/engine/order_engine.py":
-        "4d46edd1f863c03b5a79a4c8d23b7d5c8aae6f1cf7d8d0612bf91224db906a0e",
+        "a6d677259fe7fd1015fabd5082d45e7807446252ccee37e3ad53489b3387201c",
     "src/api/order.py":
         "08c5cafd7b8678ec0d0fa85f856fdea3cce38ad92488c6d74c03cd13faa415bb",
     # ✅ 2026-09-14 (cycle293) — 시세 채널 리졸버 2단계(속성축 배관). 사용자 승인

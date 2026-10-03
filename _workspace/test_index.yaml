@@ -946,6 +946,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -2176,6 +2177,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -3415,6 +3417,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -4647,6 +4650,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -5880,6 +5884,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -7115,6 +7120,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -8350,6 +8356,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -9590,6 +9597,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -10821,6 +10829,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -12126,6 +12135,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -13377,6 +13387,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -14613,6 +14624,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -15856,6 +15868,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -17081,6 +17094,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -18319,6 +18333,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -19552,6 +19567,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -20787,6 +20803,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -22022,6 +22039,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -23257,6 +23275,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -24494,6 +24513,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -25727,6 +25747,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -26962,6 +26983,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -28197,6 +28219,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -29432,6 +29455,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_mutation_gaps.py
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -30670,6 +30694,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -31907,6 +31932,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_mutation_gaps.py
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -33138,6 +33164,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_mutation_gaps.py
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -34372,6 +34399,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -35609,6 +35637,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -36843,6 +36872,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -38081,6 +38111,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -39319,6 +39350,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -40555,6 +40587,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -41786,6 +41819,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -43022,6 +43056,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -44257,6 +44292,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -45493,6 +45529,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_mutation_gaps.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -46727,6 +46764,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -47963,6 +48001,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -49197,6 +49236,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -50432,6 +50472,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -51667,6 +51708,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -52901,6 +52943,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -54141,6 +54184,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_core.py
       - tests/unit/engine/test_cycle403_etf_trend_mutation_gaps.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -55372,6 +55416,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -56607,6 +56652,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -57842,6 +57888,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -59077,6 +59124,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -60312,6 +60360,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -61547,6 +61596,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -62782,6 +62832,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -64018,6 +64069,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -65253,6 +65305,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -66487,6 +66540,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -67798,6 +67852,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -68104,6 +68159,7 @@ backend:
       - tests/unit/engine/test_cycle349_vcp_breakout_events_metrics.py
       - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
       - tests/unit/engine/test_cycle366_report_accuracy.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycleH_log_analysis_snapshot.py
       - tests/unit/engine/test_cycleM5_log_analysis_pg.py
       - tests/unit/engine/test_log_analysis_funnel_crosscheck.py
@@ -70261,6 +70317,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -71500,6 +71557,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -72742,6 +72800,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -73965,6 +74024,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -75200,6 +75260,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -76435,6 +76496,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -77670,6 +77732,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -78905,6 +78968,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -80140,6 +80204,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -81375,6 +81440,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -82609,6 +82675,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -83939,6 +84006,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -85254,6 +85322,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -86626,6 +86695,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -87862,6 +87932,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -89097,6 +89168,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -90341,6 +90413,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_mutation_gaps.py
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -91569,6 +91642,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -92805,6 +92879,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -94035,6 +94110,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -95344,6 +95420,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_core.py
       - tests/unit/engine/test_cycle403_etf_trend_mutation_gaps.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -96596,6 +96673,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_mutation_gaps.py
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle61_phase2A2_dataclass_completeness.py
@@ -97743,6 +97821,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -98978,6 +99057,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -100211,6 +100291,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -101445,6 +101526,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -102682,6 +102764,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -103937,6 +104020,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -105151,6 +105235,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -106405,6 +106490,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -107622,6 +107708,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -108855,6 +108942,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -110090,6 +110178,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -111326,6 +111415,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -112561,6 +112651,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -113796,6 +113887,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -115035,6 +115127,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -116299,6 +116392,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -117537,6 +117631,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_mutation_gaps.py
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -118766,6 +118861,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_core.py
       - tests/unit/engine/test_cycle403_etf_trend_mutation_gaps.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -120005,6 +120101,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -121239,6 +121336,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -122474,6 +122572,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -123710,6 +123809,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -124946,6 +125046,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -125530,6 +125631,7 @@ backend:
       - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -127415,6 +127517,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_mutation_gaps.py
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -127843,6 +127946,7 @@ backend:
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_cycle399_shadow_weights.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
       - tests/unit/engine/test_kojiro_wiring.py
       - tests/unit/engine/test_observability_logs.py
@@ -129885,6 +129989,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -131119,6 +131224,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -132432,6 +132538,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -133668,6 +133775,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -134901,6 +135009,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -136138,6 +136247,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -137370,6 +137480,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -138607,6 +138718,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_mutation_gaps.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -139841,6 +139953,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -141083,6 +141196,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -142381,6 +142495,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -143616,6 +143731,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -144855,6 +144971,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -145263,6 +145380,7 @@ backend:
       - tests/integration/test_vb_board_stop_loss_fallback.py
       - tests/unit/engine/test_cycle271_execute_buy_fill_during_insert.py
       - tests/unit/engine/test_cycle276_order_time_hook.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_order_engine_buy.py
     transitive_tests:
       - tests/unit/api/test_base.py
@@ -147394,6 +147512,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -148630,6 +148749,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -149935,6 +150055,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -151348,6 +151469,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -152653,6 +152775,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -153918,6 +154041,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -155135,6 +155259,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -156387,6 +156512,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -157621,6 +157747,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -160471,6 +160598,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -161703,6 +161831,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -162941,6 +163070,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -164173,6 +164303,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -166395,10 +166526,10 @@ frontend:
       - frontend/src/pages/__tests__/StrategiesParams.test.tsx
       - frontend/src/pages/__tests__/StrategiesTeRr.test.tsx
       - frontend/src/pages/__tests__/StrategyFunnel.bottleneckTrend.test.tsx
-generated_at: '2026-10-03T15:54:49.522Z'
+generated_at: '2026-10-03T16:06:53.786Z'
 stats:
   backend_modules: 174
-  backend_tests: 1216
+  backend_tests: 1217
   frontend_modules: 129
   frontend_tests: 109
   unmapped_modules:

@@ -388,6 +388,9 @@ _PREEXISTING_CONTENT_SHA: dict[str, str] = {
     #    _sell_not_placed_reason(APBK0400 · 시장가 불가 · 장운영시간 외, D2) · 재주문
     #    해제 로그 reject= 칸 · 조회 실패 걸린 것 없음 보류 문구 분리(D4). 사용자
     #    승인(8영역), 나머지 7영역 diff 0.
+    # 🔁 2026-10-04 (cycle408-L3) 재핀 — cycle408-L3 — 사용자 승인 10-04 8영역 관측 결함 해결:
+    #    `execute_buy` 「매수 수량 0 → 900s cooldown」 WARNING 꼬리에 `원인: funds|cap|unknown, 잔여:`
+    #    추가(동기 읽기만, 쿨다운·순서 불변). 나머지 7영역 diff 0. 자매 가드 네 곳 전부 같은 값.
     "src/engine/order_engine.py":
     # 🔁 2026-09-27 (cycle385 부록 R) 재핀 — 리뷰 반영: F-1(재대조 스냅샷·통보 차감
     #    멱등 크레딧) · F-2(manual 라우트 주문의 잔여 재주문은 보유와 무관하게
@@ -406,7 +409,7 @@ _PREEXISTING_CONTENT_SHA: dict[str, str] = {
     #    합·체결 가중평균)으로 기록. 사용자 승인(8영역, 결정 4), 나머지 7영역 diff 0.
     # 🔁 2026-10-02 (cycle396) 재핀 — cycle396 사용자 요청(10-02) 가중평균가 절사: 매도 장부
     #    가격을 원 단위 내림 int 로(`_vwap_2dp`→`_vwap_floor`). 사용자 승인(8영역), 나머지 7영역 diff 0.
-        "4d46edd1f863c03b5a79a4c8d23b7d5c8aae6f1cf7d8d0612bf91224db906a0e",
+        "a6d677259fe7fd1015fabd5082d45e7807446252ccee37e3ad53489b3387201c",
     # ✅ 2026-09-12 (cycle287) — 시각이 거래소·호가유형을 정한다. docstring 만
     # (본문 byte 동일). 자매 가드 네 곳 전부 같은 값.
     "src/api/order.py":
