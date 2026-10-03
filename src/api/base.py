@@ -461,15 +461,33 @@ async def _rate_limit() -> None:
         _call_count += 1
 
 
+def _response_tr_cont(resp) -> str:
+    """응답 헤더 `tr_cont` — 없거나 읽기 실패면 `""`(= 마지막 쪽)."""
+    try:
+        raw = resp.headers.get("tr_cont", "")
+    except Exception:
+        return ""
+    return raw if isinstance(raw, str) else ""
+
+
 async def kis_get(
     path: str,
     tr_id: str,
     params: dict | None = None,
     *,
     hashkey: str = "",
+    tr_cont: str | None = None,
 ) -> dict:
-    """KIS REST GET 요청."""
-    return await _request("GET", path, tr_id, params=params, hashkey=hashkey)
+    """KIS REST GET 요청.
+
+    `tr_cont`(트랙 C) — 연속조회가 필요한 계좌 TR 전용 opt-in. 기본 `None` 이면 요청·응답이
+    이전과 같다. 문자열을 넘기면(첫 쪽 = `""`, 다음 쪽 = `"N"`) 비어 있지 않을 때 요청 헤더에
+    싣고, 응답 헤더 `tr_cont` 를 `data["_response_headers"]["tr_cont"]` 로 돌려준다
+    (`M`/`F` = 다음 쪽 있음 — `kis_get_quote` 와 같은 키).
+    """
+    return await _request(
+        "GET", path, tr_id, params=params, hashkey=hashkey, tr_cont=tr_cont
+    )
 
 
 async def kis_post(
@@ -491,6 +509,7 @@ async def _request(
     params: dict | None = None,
     body: dict | None = None,
     hashkey: str = "",
+    tr_cont: str | None = None,
 ) -> dict:
     """공통 요청 래퍼. 재시도 + Rate Limit + 토큰 갱신."""
     url = f"{settings.kis_base_url}{path}"
@@ -501,6 +520,8 @@ async def _request(
         async with _semaphore:
             token = await token_manager.get_token()
             headers = token_manager.build_headers(tr_id, hashkey=hashkey)
+            if tr_cont:
+                headers["tr_cont"] = tr_cont
             try:
                 async with httpx.AsyncClient() as client:
                     if method == "GET":
@@ -513,6 +534,10 @@ async def _request(
                         )
                     resp.raise_for_status()
                     data = resp.json()
+                    if tr_cont is not None:
+                        data["_response_headers"] = {
+                            "tr_cont": _response_tr_cont(resp)
+                        }
             except httpx.HTTPStatusError as e:
                 status = e.response.status_code
                 if 500 <= status < 600:

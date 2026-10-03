@@ -461,9 +461,13 @@ def test_a8_no_new_leaf_in_src_engine() -> None:
     `account_cluster.py` 를 신설해 78 → **79** 가 됐다 — 표준 라이브러리 +
     `src.db.stock_master_daily`·`src.db.system_config` 만 import(8영역·scheduler·
     strategy_registry import 0, 소비처도 0 — 행위 변경 없음).
+
+    ⚠️ 트랙 C(실비용 사후 대사, 사용자 자율 구간 지시 10-04)가 leaf 1개 `trade_cost.py` 를
+    신설해 79 → **80** 이 됐다 — KIS 정산값 조회·귀속·요약·경보(관측 전용). 8영역·scheduler·
+    strategy_registry import 0, 매매 경로 소비처 0(라우트 `/api/costs/*` 만) — 행위 변경 없음.
     """
     got = len(list((_ROOT / "src" / "engine").glob("*.py")))
-    assert got == 79, f"`src/engine/*.py` 파일 수 {got} (cycle404 기준선 79)"
+    assert got == 80, f"`src/engine/*.py` 파일 수 {got} (트랙 C 기준선 80)"
 
 
 # ===========================================================================

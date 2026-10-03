@@ -470,6 +470,9 @@ _ENGINE_PY_FILES: dict[str, tuple[str, ...]] = {
         "task_loop_helper.py", "te_metrics.py", "tick_channel_clock.py",
         "tick_channel_mode.py", "tick_channel_switch.py",
         "tick_volume.py",
+        # 트랙 C — 실비용 사후 대사 leaf(KIS 정산값 조회·귀속·요약·경보, 관측 전용). 8영역·
+        # scheduler import 0. 등재해도 "다음 신규 파일" 은 여전히 붉어진다.
+        "trade_cost.py",
         # cycle363 — 휴장일 판정 공용 leaf(`src.*` import 0). 영업일 기준 신선도(①) +
         # 일봉 신선도 직전 영업일 기준(①′) 이 공유한다. 등재해도 "다음 신규 파일" 은
         # 여전히 붉어진다(이름 축 가드는 변경 없음).

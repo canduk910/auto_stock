@@ -64,6 +64,13 @@ AWS RDS PostgreSQL CRUD 모듈. DB 클라이언트 정본 = **`pg.py` (asyncpg �
 - **이 모듈은 예외를 전파한다** — 기록 실패는 leaf 의 `[llm_eval_persist] result=error`, 조회 실패는 라우트 500 이 드러낸다. `except Exception: return None` 을 넣으면 두 채널이 함께 막힌다.
 - 회고 층화 열 = `prompt_version`/`feature_version`(전후 행을 **섞어서 회귀 금지**) · `budget_total_won`/`budget_remaining_after_won`/`open_positions_n` · `raw_response`(파싱 전 원문) · `input_payload`(`build_messages` 3인자 전체 — 요약·절단 금지, 오프라인 재채점의 유일한 다리). 분석은 `trade_history.status` 로 **체결/부분체결/미체결/취소 4분류를 반드시 분리**한다(미체결을 손익 0 으로 섞지 않는다).
 
+## trade_cost.py — 실비용 정산값 (트랙 C)
+
+- 테이블 `trade_cost_daily`(migration 045, PK `(trad_dt, pdno)`) = KIS `TTTC8715R` 행을 `(매매일, 종목 뒤 6자리)` 로 접은 정산값 — `buy_qty`·`buy_amt`·`sll_qty`·`sll_amt`·`rlzt_pfls`·`fee`·`tl_tax`(NUMERIC) · `row_count` · `raw`(JSONB 원문 목록) · `fetched_at`. `trade_cost_period_totals`(PK `(from_dt, to_dt)`) = 대사 기간의 KIS output2 합계(`tot_fee`·`tot_tltx` 등 + `raw`) — 행 합계와 1원 대조용
+- 쓰기 = `upsert_daily(rows) -> int` · `upsert_period_total(from_dt, to_dt, summary)` — 같은 키 재대사는 덮어쓴다. 범위 안에서 KIS 가 더는 주지 않는 행을 지우지 않는다
+- 읽기 = `get_daily_range(start, end)` · `get_completed_trades(start, end)`(`trade_history` COMPLETED, `trade_date` = `(timestamp AT TIME ZONE 'Asia/Seoul')::date`) · `get_buy_order_prices(start, end)`(`llm_buy_evaluations.order_price_won` — AI 매수평가 shadow 전략만 있다). `trade_history`·`llm_buy_evaluations` 는 읽기만 한다
+- `trade_history.profit_loss` 의 의미(세전·비용 전 gross)는 바꾸지 않는다 — net 은 `engine/trade_cost.py` 가 계산만 한다. 예외는 전파한다
+
 ## positions.py — 보유 포지션 영속화
 
 `positions` 테이블이 메모리 `scheduler.positions` 의 복구 원천이다 — 재시작이 보유를 잃으면 손절이 통째로 사라진다.
@@ -142,6 +149,7 @@ AWS RDS PostgreSQL CRUD 모듈. DB 클라이언트 정본 = **`pg.py` (asyncpg �
 - `get_auto_regime_adjust() -> bool` / `set_auto_regime_adjust(value)`: 키 `auto_regime_adjust`, 기본 **False**(`_AUTO_REGIME_ADJUST_DEFAULT`). 🔴 **판독 불가(키 없음·`value` null·dict/bool 아닌 타입·예외)는 전부 False(수동 모드)** + `[auto_regime_adjust] default_used reason=…` WARNING — True 로 떨어지면 레짐 `cash_min` 이 `cash_usage_ratio` 로 영속돼 예산이 접힌다(`defensive` `cash_min=75` → 0.25)
 - `get_auto_apply_enabled() -> bool` / `set_auto_apply_enabled(value)`: 키 `auto_apply_enabled`, 기본 **False**(운영자가 켠 뒤에만 AI 자문 자동 적용) · `get_etf_regime_enabled() -> bool` / `set_etf_regime_enabled(value)`: 키 `etf_regime_enabled`, 부재 = False. 둘 다 `.env` 폴백 없음
 - `get_account_risk_warn_pct() -> float` / `get_account_risk_block_pct() -> float | None`: 키 `account_risk_warn_pct` / `account_risk_block_pct`. 부재·조회 실패 = warn 4.0 / block `None`(차단 비활성)
+- `get_trade_cost_alert_bp() -> float | None`: 키 `trade_cost_alert_bp`(`{"value": 숫자}` 또는 직저장 숫자) — `[trade_cost_high]` 경보 기준. **키 없음·숫자 아님·0 이하 = `None` = 경보 끔**(기준값은 사용자 결정, 코드 기본값 없음). DB 예외는 전파(호출부 `engine/trade_cost._check_alerts` 가 관측 실패로 삼킨다). 저장 함수 없음
 - `get_krx_open_api_config()` / `set_krx_open_api_config(...)`: 키 `krx_open_api_enabled` / `krx_open_api_base_url` / `krx_open_api_key`. 🔴 **끄기 전에 소비처를 전수 확인한다** — 끄면 `src/api/krx.py` 가 `KrxApiError` 를 던져 `scanner._full_universe_load_krx_primary` 가 KIS 폴백으로 밀린다(루트 「핵심 안전 규칙」 비활성화 심층 검증 의무). 키 값은 응답·로그에 노출하지 않는다
 - **외부 통합 토글 (DB 우선, `.env` 폴백)**: `get_dkstock_regime_enabled() -> bool | None` / `set_dkstock_regime_enabled(value)`(키 `dkstock_regime_enabled`) · `get_kis_mcp_enabled() -> bool | None` / `set_kis_mcp_enabled(value)`(키 `kis_mcp_enabled`). 부재·판독 불가·DB 조회 실패 = `None` → 호출자가 `settings.*` 로 폴백. 헬퍼 `_get_bool_or_none(key)` / `_set_bool(key, value)` 가 `{"value": bool}` 과 옛 형식(직저장 bool, `'true'`/`'false'` 문자열)을 모두 읽는다
 - **task 신선도 마커**: `get_task_last_success(task_label) -> str | None`(키 `task_last_success_<label>`) / `set_task_last_success(task_label, iso_ts)`, 값 = KST ISO. `task_loop_helper.run_periodic_task_loop` 의 부팅 즉시 실행 게이트 두 갈래(`immediate_skip_if_fresh_hours` · `immediate_skip_if_fresh_since_trading_slot`)가 읽고 `once()` 성공 직후에만 쓴다(대상·판정 순서 = `src/engine/CLAUDE.md` 「정기 task 루프」 절). 60초 하트비트 `engine_alive_heartbeat`(`uptime_monitor.py`)도 같은 키 공간이다. **`get_task_last_success_bulk(task_labels) -> dict`** = `key = ANY($1)` **단일 쿼리**(`GET /api/market-ops`) — 결측 라벨은 **키가 없고**(빈 문자열 아님), 쿼리 실패는 빈 dict(fail-open)
