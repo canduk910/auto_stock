@@ -392,7 +392,13 @@ def test_g290_2_strategy_entry_exit_segments_are_byte_identical(
 # ===========================================================================
 _ENGINE_PY_FILES: dict[str, tuple[str, ...]] = {
     "src/engine": (
-        "__init__.py", "account_risk_guard.py", "account_risk_watcher.py",
+        "__init__.py",
+        # cycle404 — 계좌 묶음 배정 기록(단계 0, 자문 cycle400 R1~R5) 순수 leaf.
+        # import = 표준 라이브러리 + `src.db.stock_master_daily`·`src.db.system_config`
+        # 뿐(8영역·scheduler·strategy_registry import 0, 소비처도 0). 등재해도
+        # "다음 신규 파일" 은 여전히 붉어진다(이름 축 가드는 변경 없음).
+        "account_cluster.py",
+        "account_risk_guard.py", "account_risk_watcher.py",
         "backtest_engine.py", "backtest_orchestration.py", "backtest_yaml.py",
         "boot_manager.py",
         # cycle379 — ⑨A 체결 0 으로 끝난 매수의 pending 회수 leaf(`selling_reconcile.py`

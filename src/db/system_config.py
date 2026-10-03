@@ -1050,6 +1050,24 @@ async def set_status_buy_block_mode(mode: str) -> None:
     await _upsert_value(_STATUS_BUY_BLOCK_MODE_KEY, {"value": str(mode)})
 
 
+# ---------------------------------------------------------------------------
+# cycle404 — 계좌 묶음 배정 기록(단계 0) 킬스위치
+# ---------------------------------------------------------------------------
+_ACCOUNT_CLUSTER_MODE_KEY = "account_cluster_mode"
+
+
+async def get_account_cluster_mode_raw() -> Optional[str]:
+    """계좌 묶음 배정 킬스위치 원값(cycle404). 키 없음 → None.
+
+    `_get_string_or_none` 을 쓰지 않는다 — cycle369 와 같은 이유로, DB 예외를
+    삼키면 `src/engine/account_cluster.py` 가 「키 없음」과 「DB 장애」를
+    구분하지 못해 `reason=read_error` 마커를 낼 수 없다. **DB 예외는 전파한다.**
+    쓰기 함수는 만들지 않는다 — 이 사이클은 PUT 라우트가 없다(명세 §6).
+    """
+    raw = await _select_value(_ACCOUNT_CLUSTER_MODE_KEY)
+    return _string_from_raw(raw)
+
+
 async def get_task_last_success(task_label: str) -> Optional[str]:
     """task_last_success_<label> 키 ISO 문자열 조회. 키 부재 / 실패 시 None graceful.
 

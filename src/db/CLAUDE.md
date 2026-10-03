@@ -153,6 +153,8 @@ AWS RDS PostgreSQL CRUD 모듈. DB 클라이언트 정본 = **`pg.py` (asyncpg �
 - 🔴 **getter 는 `_get_string_or_none` 이 아니라 `_select_value` 를 직접 불러 DB 예외를 전파한다** — 그 헬퍼는 예외를 `None` 으로 삼켜 「키 없음 = `enforce`」 와 「DB 장애 = 직전 값 유지」 를 가르지 못한다. 예외 처리는 `status_exit_watch.refresh_modes()` 가 한다.
 - setter 는 어휘(`enforce`/`observe`/`off`)를 검증하지 않는다(라우트 모델 `StatusExitModeRequest` 가 한다). 값의 의미 = `src/engine/CLAUDE.md` 「종목상태 청산·당일 매수 차단」 절.
 
+**계좌 묶음 배정 킬스위치 (cycle404)** — `get_account_cluster_mode_raw() -> str | None`, 키 `account_cluster_mode`. 저장 함수는 아직 없다(이번 사이클에 PUT 라우트 없음 — `src/engine/account_cluster.py` leaf 가 읽기만 한다). `status_exit_mode` 와 같은 이유로 `_get_string_or_none` 대신 `_select_value` + `_string_from_raw` 를 직접 써 DB 예외를 전파한다(leaf 가 `reason=read_error` 를 가르는 데 쓴다). 값의 의미 = `src/engine/CLAUDE.md` `account_cluster.py` 모듈 맵 항목.
+
 **레짐 표시 설정 (매매가 소비하지 않는다)** — `.env` 폴백 없음(DB 미설정이면 코드 기본값):
 
 - `get_buy_block_mode() -> str` / `set_buy_block_mode(mode)`: 키 `buy_block_mode`, 기본 `HARD`. 4 모드 밖은 `ValueError`

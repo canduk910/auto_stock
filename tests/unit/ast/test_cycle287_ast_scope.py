@@ -267,8 +267,9 @@ _BASE_SHA = {
 #: (`get_buy_dates` 신설) · `src/routes/balance.py`(매입일 병합 호출) · `src/models/balance.py`
 #: (`buy_date` 필드) 내용도 바뀌었으나 전부 이미 이 digest 안에 있던 파일이다(신규 파일
 #: 1개뿐). 읽기 전용 조회 조합 — 8영역·scheduler.py·매매 행위 변경 없음. 직전 값 = 166.
-_SRC_TREE_FILES = 170  # cycle403 — ETF 추세(etf_trend) 신설: 신규 leaf `etf_trend_core.py` +
-# `strategies/etf_trend.py` 로 168 → 170. 직전 값 = 168(cycle398 PR1).
+_SRC_TREE_FILES = 171  # cycle404 — 계좌 묶음 배정 기록(단계 0): 신규 leaf
+# `src/engine/account_cluster.py` 하나로 170 → 171. `src/db/system_config.py` 에
+# `get_account_cluster_mode_raw()` 1함수 추가(신규 파일 아님). 직전 값 = 170(cycle403).
 #: ⚠️ 값은 **cycle285 적대 검증 반영** 기준선이다. 그 직전(초판 cycle285 배포)
 #: digest 는 `97483c5114a1d00dc8f7ca7c1ed08e1b3dc1d0b585065b14176dc227da9bed8c` 였다.
 #: cycle287b 배포분의 digest 는
@@ -734,8 +735,12 @@ _SRC_TREE_FILES = 170  # cycle403 — ETF 추세(etf_trend) 신설: 신규 leaf 
 # 무접촉): `src/routes/balance.py`(get_balance 소진 예외 → ApiResponse(success=false)
 # 흡수) + `src/api/base.py`(_request_metrics 에 `since` 노출). 파일 수 170 그대로.
 # 직전 값(cycle403 재핀 4) = `ac6d2a86b3462a7b64c38f0c1865d61827b801202ec3a7beea4aae80dad25711`.
+# 🔁 cycle404 재핀 — 계좌 묶음 배정 기록(단계 0): 신규 leaf `src/engine/account_cluster.py`
+# + `src/db/system_config.py`(`get_account_cluster_mode_raw()` 1함수 추가) 로 파일 수
+# 170 → 171. 8영역·scheduler.py 무접촉, 매매 행위 변경 없음(읽기+system_logs 기록만).
+# 직전 값(cycle406 재핀 5) = `459f4c96ba629fa111bbc89cedffb6b6bbfaca12cbc6bbf1a85ca04bb6b61846`.
 _SRC_TREE_DIGEST = (
-    "459f4c96ba629fa111bbc89cedffb6b6bbfaca12cbc6bbf1a85ca04bb6b61846"
+    "bf7e8e91cf8b7a256859fb149e2adf7fc4b601bab1901166628095675435f871"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
@@ -768,7 +773,8 @@ _PINNED_DIR_FILE_COUNTS = {
     # cycle397 — 신규 leaf `position_buy_date.py` 로 85 → 86.
     # cycle398 PR1(리팩토링 카드 #2, 사용자 승인 10-02) — 신규 leaf `strategy_manifest.py` 로 86 → 87.
     # cycle403 — 신규 leaf `etf_trend_core.py` + 전략 파일 `strategies/etf_trend.py`(재귀 집계) 로 87 → 89.
-    "src/engine": 89,
+    # cycle404 — 신규 leaf `account_cluster.py` 로 89 → 90.
+    "src/engine": 90,
 }
 
 #: `scheduler.py` 정확 라인 수 + cycle257 영구 상한.

@@ -455,9 +455,14 @@ def test_a8_no_new_leaf_in_src_engine() -> None:
 
     ⚠️ cycle403(ETF 추세 전략 etf_trend 신설)이 leaf 1개 `etf_trend_core.py` 를 신설해
     77 → **78** 이 됐다(전략 파일 `strategies/etf_trend.py` 는 이 glob 비재귀라 별도 계산).
+
+    ⚠️ cycle404(계좌 묶음 배정 기록, 단계 0 — 자문 cycle400 R1~R5)이 leaf 1개
+    `account_cluster.py` 를 신설해 78 → **79** 가 됐다 — 표준 라이브러리 +
+    `src.db.stock_master_daily`·`src.db.system_config` 만 import(8영역·scheduler·
+    strategy_registry import 0, 소비처도 0 — 행위 변경 없음).
     """
     got = len(list((_ROOT / "src" / "engine").glob("*.py")))
-    assert got == 78, f"`src/engine/*.py` 파일 수 {got} (cycle403 기준선 78)"
+    assert got == 79, f"`src/engine/*.py` 파일 수 {got} (cycle404 기준선 79)"
 
 
 # ===========================================================================
