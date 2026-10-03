@@ -13,7 +13,7 @@
 | 1 트랙 R(평균회귀 연구) | 사전 고정 문턱 5개 중 1·2·3 실패 → **도입 접음**(뒤 40% −0.322%/거래 · 통과율 차 4.30%p · 횡보장 상관 +0.028). z 경계 채택(Leung 미검증). 원본 `_workspace/analysis/mean_reversion_20261001/` · `summary.md` 는 하위 에이전트 md 쓰기 차단으로 미작성 | `4721d12` main |
 | 2 트랙 C(실비용 대조) 백엔드 | KIS `TTTC8715R` 래퍼 · 마이그레이션 045(`trade_cost_daily`·`trade_cost_period_totals`) · 전략 귀속·요약 · `POST /api/costs/reconcile`·`GET /api/costs/summary`. 남은 결정 Q1(scheduler 자동 훅)·Q3(경보 bp)·Q4(매도 주문가 기록, 8영역) · 화면은 다음 단계 · 배포 뒤 실측 8항목(reconcile 1회·HTS 대조 등) | `9c7a51d` main |
 
-- 🔴 10-06 15:30 push 대상에 위 main 커밋 전부가 들어간다(L1·L3·L4 = 8영역/scheduler, full 배포).
+- 🔴 10-06 15:30 push 대상에 위 main 커밋 전부가 들어간다(L1 = `scheduler.py` · L3 = 8영역 `order_engine.py` · L4 = 둘 다 아님 `stale_watcher_core.py` — `src/` 변경이라 셋 다 full 배포. 10-03 창 미배포분 cycle399·401·402·403(마이그레이션 044)·404·406 과 트랙 C(마이그레이션 045)도 같은 push).
 
 ## 🔴 10-02(금) 새벽 작업 (10-01 23:4x ~ 10-02 07:00, 사용자 취침 중 — **커밋·배포 허용 명시 없음 → 전부 미커밋**)
 
