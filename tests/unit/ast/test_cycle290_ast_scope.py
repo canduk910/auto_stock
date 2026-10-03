@@ -283,13 +283,19 @@ _SEGMENT_SHA: dict[tuple[str, str], str] = {
     # 🔁 cycle382 재핀 — 시장 유닛(단계형) 신호 필터 삽입(추격 상한 블록 뒤 ·
     # `_breakout_high` 스탬프 앞, 사용자 결정 09-27).
     # 🔁 cycle399 재핀 — 공통 섀도 모드(사용자 승인 10-02 R1) — BUY 반환 앞 섀도 관문 1문장(`if self._shadow_buy_intercepted(...): return Signal.NONE`) 삽입. 그 밖 무변경.
+    # 🔁 cycle405 재핀 — 깡토식 신호 거름 2종(`_kk_lot_zero_blocks`·`_kk_daily_cap_blocks`)
+    # 삽입. 직전 값(cycle399) = `124c5eb1257fdd14b58738e738cc534bd7a4ec2d25d24d2111704c88368278f6`.
     ("donchian_swing", "check_buy_signal"):
-        "124c5eb1257fdd14b58738e738cc534bd7a4ec2d25d24d2111704c88368278f6",
+        "2b9659703762fdf1e5b49eb132b008829399fd1f651bb84bcc76ca8d08ca01ef",
+    # 🔁 cycle405 재핀 — 깡토식 청산 개조(§2) — R 손절·3R 본전 승격·무장 후 채널만 본다.
+    # 직전 값(cycle399) = `171c7654632500358cffb4c542e0ee5d8f4218c1101faf72a668f24ffd8606bd`.
     ("donchian_swing", "check_exit_signal"):
-        "171c7654632500358cffb4c542e0ee5d8f4218c1101faf72a668f24ffd8606bd",
+        "2bb55db9d8c6917b666d51e6a31bf2b2dfeb61257e33d1dee9fae014f5352ea7",
     # 🔁 cycle382 재핀 — 시장 유닛(단계형) `_market_unit_sizing` 진입 훅.
+    # 🔁 cycle405 재핀 — 깡토식 R 기반 설계 랏(§5) — 1주 폴백·비중 낙하 제거.
+    # 직전 값(cycle382) = `cc3e622d232ff38adff20d03f3efa89c99b93337b5b4dd08bd26e68c059a9ef5`.
     ("donchian_swing", "calc_buy_quantity"):
-        "cc3e622d232ff38adff20d03f3efa89c99b93337b5b4dd08bd26e68c059a9ef5",
+        "091bfb43b6a01ea9604d451332a4c770cf9200db22a20a1985507f122c9e36d5",
     # 🔁 cycle364 재핀 — `prepare(as_of=)` + PV-1(보유·익일청산 종목 보존).
     # 🔁 cycle364 round 2 재핀 — keep(자기 보유∪자기 익일청산) / skip(자기 ∪ 전 전략
     # 보호 종목) 두 집합으로 분리(R1) — 남의 보유 엔트리를 보존·재구성 어느 쪽도 하지

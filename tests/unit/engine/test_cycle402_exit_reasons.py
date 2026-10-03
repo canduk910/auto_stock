@@ -155,13 +155,21 @@ def _donchian_arm(s, *, buy_date, buy_price=10_000, breakout_high=11_000):
     s._breakout_high["005930"] = breakout_high
 
 
+# cycle405 — donchian 의 시간 청산은 틱 경로(`check_exit_signal` §2.5)에서 15:20 경로
+# (`check_force_clear` + `force_clear_signal` = TIME_EXIT)로 옮겨졌다. §2.5 돌파 실패 청산은
+# 없어졌다(명세 `_workspace/red/cycle405_donchian_kkangto_spec.md` §2·§3). 행위 계약은
+# `tests/unit/engine/strategies/test_cycle405_donchian_kk_force_clear.py` 가 지킨다.
 @freeze_time("2026-08-14 10:00:00+09:00")
-def test_donchian_when_breakout_fail_n_days_then_time_exit():
+def test_donchian_when_breakout_fail_n_days_then_no_tick_time_exit():
     s = _donchian(n_days=2)
     s._trading_days = {date(2026, 8, d) for d in (10, 11, 12, 13, 14)}
     _donchian_arm(s, buy_date=date(2026, 8, 10))
-    # 손실 −2% (손절 미발화) · 돌파선 11_000 아래 · 보유 4영업일 ≥ 2
-    assert s.check_exit_signal("005930", 9_800, 9_900) == Signal.TIME_EXIT
+    # 손실 −2% · 돌파선 11_000 아래 · 보유 4영업일 ≥ 2 — 옛 §2.5 TIME_EXIT 자리. 이제 NONE
+    assert s.check_exit_signal("005930", 9_800, 9_900) == Signal.NONE
+
+
+def test_donchian_force_clear_signal_is_time_exit():
+    assert _donchian().force_clear_signal("005930") == Signal.TIME_EXIT
 
 
 @freeze_time("2026-08-14 10:00:00+09:00")
@@ -169,9 +177,9 @@ def test_donchian_when_hard_stop_then_still_stop_loss():
     s = _donchian(n_days=2)
     s._trading_days = {date(2026, 8, d) for d in (10, 11, 12, 13, 14)}
     _donchian_arm(s, buy_date=date(2026, 8, 10))
-    sl = float(s.config.params["stop_loss_rate"])
-    price = int(10_000 * (1 + sl / 100.0)) - 10
-    assert s.check_exit_signal("005930", price, 9_900) == Signal.STOP_LOSS
+    # cycle405 — 스탬프 없음 → R = 8% → 손절선 9,200 (사유 STOP_LOSS 유지)
+    assert s.check_exit_signal("005930", 9_200, 9_900) == Signal.STOP_LOSS
+    assert s.check_exit_signal("005930", 9_201, 9_900) == Signal.NONE
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -352,6 +360,7 @@ async def test_force_clear_main_only_when_default_then_force_clear_for_vb_ltv(_f
     assert [(t, s.name, sid) for t, s, sid in sells] == [
         ("005930", "FORCE_CLEAR", "volatility_breakout"),
         ("005930", "FORCE_CLEAR", "long_tail_volatility"),
+        ("005930", "TIME_EXIT", "donchian_swing"),   # cycle405 — 15:20 시간 청산 대상
         ("005930", "TREND_EXIT", "etf_trend"),
     ]
 
@@ -362,6 +371,7 @@ async def test_force_clear_main_only_when_strategy_picks_reason_then_that_reason
     assert [(s.name, sid) for _t, s, sid in sells] == [
         ("FORCE_CLEAR", "volatility_breakout"),
         ("TREND_EXIT", "long_tail_volatility"),
+        ("TIME_EXIT", "donchian_swing"),   # cycle405
         ("TREND_EXIT", "etf_trend"),
     ]
 
@@ -392,6 +402,7 @@ async def test_force_clear_main_only_when_reason_hook_raises_then_still_sells_fo
     assert ts_sells == [
         ("FORCE_CLEAR", "volatility_breakout"),
         ("FORCE_CLEAR", "long_tail_volatility"),
+        ("TIME_EXIT", "donchian_swing"),   # cycle405
         ("TREND_EXIT", "etf_trend"),
     ]
 

@@ -86,8 +86,10 @@ _GRID = list(itertools.product(
 
 
 @freeze_time(_NOW)
+# cycle405 — donchian 은 옛 오라클(터틀 유닛·비중 낙하) 대상이 아니다(깡토식 설계 랏). off·shadow
+# 동치는 `test_cycle405_donchian_kk_sizing.py::test_r8_off_and_shadow_equal_kk_oracle_grid` 가 지킨다.
 @pytest.mark.parametrize("sid,sizing", [
-    ("kojiro", "turtle"), ("donchian_swing", "turtle"), ("vcp_breakout", "turtle"),
+    ("kojiro", "turtle"), ("vcp_breakout", "turtle"),
     ("bull_flag_breakout", "turtle"), ("bull_flag_breakout", "position_ratio"),
 ])
 @pytest.mark.parametrize("m", [1.0, 0.75, 0.5, 0.0])
@@ -186,13 +188,16 @@ def test_r20_remaining_budget_is_not_reduced():
     _cand(s, "donchian_swing", 500)
     s.state.pending_buy_amounts["OTHER"] = 500_000
     seed(s, 0.5)
-    assert s.calc_buy_quantity(10_000, T) == 10, "잔여를 int(예산×m) 로 계산했다(M12) — 그러면 0"
+    # cycle405 — donchian 설계 랏 = floor(1M×0.5×0.01 / max(800, 750)) = 6 (명목 상한 10)
+    assert s.calc_buy_quantity(10_000, T) == 6, "잔여를 int(예산×m) 로 계산했다(M12) — 그러면 0"
 
 
 @freeze_time(_NOW)
 @pytest.mark.parametrize("m,qty", [(1.0, 20), (0.5, 10)])
 def test_r21_notional_cap_also_scales_with_m(m, qty):
-    s = _turtle("donchian_swing")
+    # cycle405 — donchian 설계 랏은 R 이 묶는다. 명목 상한이 묶이도록 risk_pct 를 키운다
+    # (floor(1M×m×0.05/800) = 62·31 > 명목 20·10).
+    s = _turtle("donchian_swing", risk=0.05)
     _cand(s, "donchian_swing", 150)
     seed(s, m)
     assert s.calc_buy_quantity(10_000, T) == qty, "fraction=m 식이면 명목 상한이 안 줄어 20(M11)"
@@ -272,7 +277,8 @@ def test_r23_shadow_logs_one_share_but_buys_one(caplog):
 # R24 — ATR 키 동치: m=1 설계 랏 == 그 전략의 기존 터틀 수량
 # ===========================================================================
 @freeze_time(_NOW)
-@pytest.mark.parametrize("sid", TURTLE4)
+# cycle405 — donchian 의 설계 랏은 옛 터틀 유닛(`_turtle_buy_quantity`)이 아니라 R 기반이라 뺀다.
+@pytest.mark.parametrize("sid", [x for x in TURTLE4 if x != "donchian_swing"])
 def test_r24_design_before_equals_existing_turtle_qty(sid):
     need_base()
     for price, atr, used in itertools.product((9_000, 50_000, 120_000), (0, 90, 600, 2_400), (0, 400_000)):
@@ -305,20 +311,18 @@ def test_r24_design_before_equals_existing_turtle_qty(sid):
 # R25 — 터틀 → 비중 낙하 금지 (ATR 결측 · 저변동 floor)
 # ===========================================================================
 @freeze_time(_NOW)
-@pytest.mark.parametrize("atr", [None, 50], ids=["atr_missing", "low_vol_floor"])
-def test_r25_no_turtle_to_ratio_fallthrough_on_reduced_day(caplog, atr):
+@pytest.mark.parametrize("m", [1.0, 0.5])
+def test_r25_no_turtle_to_ratio_fallthrough_on_reduced_day(caplog, m):
+    """cycle405 — donchian 은 어느 날이든 비중 낙하가 없다. ATR 결측이면 m 과 무관하게 0 · 미스탬프.
+
+    (옛 계약: m=1 은 비중 낙하 20주, 축소일만 0. 깡토식 사이징은 N 없이는 사지 않는다.)
+    """
     open_info(caplog)
-    s1 = _turtle("donchian_swing")
-    _cand(s1, "donchian_swing", atr)
-    seed(s1, 1.0)
-    assert s1.calc_buy_quantity(10_000, T) == 20, "m=1 은 현행 비중 낙하(20주)"
     s = _turtle("donchian_swing")
-    _cand(s, "donchian_swing", atr)
-    seed(s, 0.5)
-    assert s.calc_buy_quantity(10_000, T) == 0, "축소일에 비중 경로로 낙하했다(M14)"
+    _cand(s, "donchian_swing", None)
+    seed(s, m)
+    assert s.calc_buy_quantity(10_000, T) == 0, "ATR 결측인데 비중 경로로 낙하했다(M14)"
     assert T not in s._entry_atr
-    ln = _calc_lines(caplog)[-1]
-    assert (field(ln, "path"), field(ln, "fallback"), field(ln, "reason")) == ("turtle", "pr", "no_fallback")
 
 
 # ===========================================================================
@@ -385,7 +389,8 @@ def test_r28_k_and_rho_caps_are_noop_on_reduced_lot(caplog, sid):
     seed(s, 0.5)
     lots = s._market_unit_lots(10_000, T, 0.5)
     qty = s.calc_buy_quantity(10_000, T)
-    assert lots.lot_after == 10
+    # cycle405 — donchian 줄인 설계 랏 = floor(500,000×0.01 / max(800, 750)) = 6
+    assert lots.lot_after == (6 if sid == "donchian_swing" else 10)
     assert qty == lots.lot_after, "최종 수량 ≠ lot_after — K·ρ 캡이나 잔여에 축소 예산이 섞였다(M22)"
     bad = [
         r.getMessage() for r in caplog.records

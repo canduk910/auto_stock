@@ -575,7 +575,7 @@ def _case_time_exit():
     s = _mk(breakout_fail_n_days=2)
     s._trading_days = set(_W_1721[:-1])
     _hold(s, "005930", D(2026, 8, 19), breakout_high=11_000)
-    return s, 9_800, 9_900, Signal.TIME_EXIT          # 08-20 + today = 2 영업일
+    return s, 9_800, 9_900, Signal.NONE               # cycle405 — 틱 경로 시간 청산 폐지
 
 
 def _case_channel_exit():
@@ -583,15 +583,15 @@ def _case_channel_exit():
     s._trading_days = set(_W_1721[:-1])
     _hold(s, "005930", D(2026, 8, 20), breakout_high=11_000)
     s._channel_low["005930"] = 9_500
-    return s, 9_400, 9_900, Signal.TRAILING_STOP
+    return s, 9_400, 9_900, Signal.NONE               # cycle405 — 3R 무장 전에는 채널을 보지 않는다
 
 
 def _case_trailing():
     s = _mk(breakout_fail_n_days=5)
     s._trading_days = set(_W_1721[:-1])
     _hold(s, "005930", D(2026, 8, 20), breakout_high=11_000)
-    s._candidates["005930"]["atr"] = 300              # 10,000 - 2.0×300 = 9,400
-    return s, 9_400, 9_900, Signal.TRAILING_STOP
+    s._candidates["005930"]["atr"] = 300              # 옛 샹들리에 9,400
+    return s, 9_400, 9_900, Signal.NONE               # cycle405 — 샹들리에 폐지
 
 
 def _case_none():
@@ -622,7 +622,10 @@ def _case_no_position():
 ], ids=["hard_stop", "turtle_stop", "time_exit", "channel_exit",
         "trailing", "none", "unarmed_same_day", "no_position"])
 def test_c10_exit_signal_behavior_unchanged(builder):
-    """`check_exit_signal` 반환은 대표 입력 전부에서 불변 — 이 사이클은 청산을 안 만진다."""
+    """`check_exit_signal` 반환은 대표 입력 전부에서 불변 — 이 사이클은 청산을 안 만진다.
+
+    cycle405 — 기대값은 깡토식 청산 기준으로 다시 썼다(시간·채널·샹들리에 행 = NONE).
+    """
     s, price, open_price, expected = builder()
     assert s.check_exit_signal("005930", price, open_price) == expected
 

@@ -183,8 +183,9 @@ _BASE_SHA = {
     "src/engine/strategies/bull_flag_breakout.py":
         "879d85e779f9594ffbd9da93ce3ec41986f02abc78cc751cb22d022c20b0f298",
     # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
+    # 🔁 cycle405 재핀 — 깡토식 청산·사이징 전면 재작성 + 리뷰 반영 L6(R≥0.5×가격 가드).
     "src/engine/strategies/donchian_swing.py":
-        "976acaaa5bb6f0124adb484fba52dc70d815d5ded8c7132fca556c48c2f81d44",
+        "08235b777c04e2a827d1ad38b39c1b64f9915df86d1301c9c84f8b60d15177ce",
     # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
     "src/engine/strategies/kojiro.py":
         "1d04d3d6dc0c72ff6c7e7d930be9da63f2408fb709e889906a133a9c5480fc74",
@@ -739,8 +740,14 @@ _SRC_TREE_FILES = 171  # cycle404 — 계좌 묶음 배정 기록(단계 0): 신
 # + `src/db/system_config.py`(`get_account_cluster_mode_raw()` 1함수 추가) 로 파일 수
 # 170 → 171. 8영역·scheduler.py 무접촉, 매매 행위 변경 없음(읽기+system_logs 기록만).
 # 직전 값(cycle406 재핀 5) = `459f4c96ba629fa111bbc89cedffb6b6bbfaca12cbc6bbf1a85ca04bb6b61846`.
+# 🔁 cycle405 재핀 — donchian 깡토식 청산·사이징 개조(donchian_swing.py 전면 재작성) +
+# 독립 검토 반영(`param_catalog.py`·`recommendation_engine.py`·`llm_buy_gate.py`·
+# `strategy_manifest.py` — 끈 키 applies_to/deprecated_for 정리, donchian 전용
+# `stop_loss_rate` PARAM_RANGES 예외, kk_r_floor_pct 클램프, R≥0.5×가격 가드). 파일 수
+# 170 그대로. 직전 값(cycle406 재핀 5) = `459f4c96ba629fa111bbc89cedffb6b6bbfaca12cbc6bbf1a85ca04bb6b61846`.
+# 🔁 cycle405 리베이스(cycle404 위) — 파일 수 171, digest 재계산.
 _SRC_TREE_DIGEST = (
-    "bf7e8e91cf8b7a256859fb149e2adf7fc4b601bab1901166628095675435f871"
+    "6a74f85b0f91f3904884f57610f9911e2ac4754e8fb8f98a2e0bae7a61c52ec6"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

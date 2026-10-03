@@ -220,10 +220,15 @@ async def test_pv1b_donchian_preview_when_run_then_new_candidates_listed_from_d_
 
 @pytest.mark.parametrize("as_of", [H._NO_ARG, _D], ids=["no_arg", "as_of_today"])
 async def test_pv1b_control_non_preview_when_held_qualifies_then_entry_replaced(monkeypatch, as_of):
-    """대조군 — 비미리보기는 현행대로 `_candidates = {}` 후 재구성(보유 엔트리 교체)."""
+    """대조군 — 비미리보기는 현행대로 `_candidates = {}` 후 재구성(보유 엔트리 교체).
+
+    cycle405 — 의미 전환: 손절선(R)은 매수 시점 값(`_entry_atr`·매수가)으로만 정해지고 `_candidates`
+    를 읽지 않는다(샹들리에 폐지). 그래서 엔트리가 교체돼도 실효 손절선은 **그대로**여야 한다 —
+    옛 `!=` 단언은 미러가 후보 ATR 을 읽던 시절의 대리 지표였다.
+    """
     d, seeded, _, _, stop_before, stop_after = await _donchian_run(monkeypatch, as_of=as_of)
     assert d._candidates.get(H.HELD) is not seeded["candidate"]
-    assert stop_after != stop_before
+    assert stop_after == stop_before, "후보 엔트리 교체가 손절선을 움직였다 — R 은 매수 시점 값이어야 한다"
 
 
 # ══════════════════════════════════════════════════════════════════════

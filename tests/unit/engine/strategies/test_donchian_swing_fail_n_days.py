@@ -1,6 +1,10 @@
 """사이클 23 P2-2 Red — donchian breakout_fail_n_days 시간 기반 청산.
 
-요구 행위:
+⚠️ cycle405 — 이 청산(돌파 실패 시간 청산)은 **없어졌다**(명세 `_workspace/red/cycle405_donchian_kkangto_spec.md`
+§2 「끄는 것」). 케이스 1 은 「옛 조건을 만들어도 NONE」 으로 바꿔 회귀 가드로 남긴다. 새 시간 청산(20봉 +1R
+미도달 · 250봉)은 15:20 경로이고 `test_cycle405_donchian_kk_force_clear.py` 가 지킨다.
+
+요구 행위(원본):
 1. N=5일 보유 + 현재가 < 돌파선 → STOP_LOSS
 2. N=5일 미달 (3일) 보유 → NONE (시간 가드 진입 안 함)
 3. `_breakout_high[ticker]` 등록 누락 (0) → graceful skip, 다른 청산 분기로 진행
@@ -52,7 +56,7 @@ def _add_position(strat, ticker, buy_date, buy_price=10_000):
 # 케이스 1: N=5일 보유 + 현재가 < 돌파선 → STOP_LOSS
 # ---------------------------------------------------------------------------
 @freeze_time("2026-05-27 10:00:00+09:00")
-def test_fail_n_days_triggers_stop_loss_after_n_days():
+def test_fail_n_days_no_longer_exits_after_n_days():
     """N=5 **영업일** 보유 + 현재가 < 돌파선 → STOP_LOSS.
 
     사이클 223 의미 전환 — `days_held` 가 달력일에서 영업일로 바뀌었다.
@@ -73,7 +77,8 @@ def test_fail_n_days_triggers_stop_loss_after_n_days():
     # 현재가 < 돌파선 (10,500 < 11,000)
     # 하드 손절 -7% 미발동 (매수가 10,000 → 손절선 9,300 > 10,500)
     sig = strat.check_exit_signal(ticker, 10_500, 10_200)
-    assert sig == Signal.TIME_EXIT
+    # cycle405 — 돌파 실패 시간 청산 폐지. 손절선(R=8% → 9,200) 위라 NONE
+    assert sig == Signal.NONE
 
 
 # ---------------------------------------------------------------------------

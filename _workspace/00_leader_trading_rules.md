@@ -464,8 +464,9 @@ VB와 동일.
 ### 매수 규칙
 - **시점**: 다음 영업일 09:05 ~ 09:30 사이 시장가 (1종목당 1회만)
 - **갭 스킵**: 시가 갭상승 +3% 이상이면 진입 스킵 (`gap_skip_threshold`, 추격 매수 회피)
-- **투자 비중**: 할당 자금의 20% (1종목당)
-- **동시 보유**: 최대 5종목
+- **투자 비중**: 할당 자금의 **15%**(`position_ratio`, cycle405 — 20%→15%) (1종목당)
+- **동시 보유**: 최대 6종목(`max_positions`, cycle405 — 5→6). `position_ratio × max_positions = 0.90 ≤ 1.0`
+- **하루 신규 진입 상한**: 이 전략의 「오늘 매수일인 보유 + 주문 중」 합이 `max_daily_entries`(기본 3) 이상이면 신규 매수를 멈춘다(cycle405, §7 참조)
 - **매매 보드**: MAIN만 (KRX 메인 한정)
 - **거래소 라우팅**: 기본 KRX
 - **매수 평가 채널 (G안)**: `scheduler._swing_buy_poll_loop()` 가 09:05~09:30 KST **1분 주기**로 `fetch_stock_detail`(KIS REST) 폴링하여 매수 평가한다. WebSocket on_tick 에서는 매수 평가하지 않는다 — 일봉 전략이라 tick 평가는 낭비이고, 후보 50~150개의 WebSocket 슬롯을 변동성 돌파(VB/LTV) 후보에 양보한다.
@@ -475,14 +476,19 @@ VB와 동일.
   - `[swing_poll] candidates=N filtered=M bought=K elapsed=T.Ts` INFO 로그 1행 / 사이클
 - **신규 매수 멈춤** (사용자 결정 2026-09-27 「돈키언 신규매수 중지」) — 운영 결정 = `buy_paused=true` 로 신규 매수 신호를 멈춘다. 보유분은 아래 청산 규약대로 나간다. 해제 = 돈키언 개조(전용 브랜치)를 합친 뒤. 규칙 = §7 「신규 매수 멈춤」
 
-### 청산
-- **하드 손절**: 매수가 대비 **-6%** (운영 DB, 사이클 210 복원). 코드 DEFAULT -7. **⚠️ 사이클 210 (2026-07-14)**: AI 자문 수동 apply 누적으로 `stop_loss_rate -3.2` / `daily_loss_limit -0.8`(배정자금 -0.8% 손실=당일 매수 중단)까지 과조임 방치돼 208/209로 신호가 나와도 진입 직후 죽던 상태 → **stop -6.0 / daily_loss -6.0 복원**. 재조임 방지 = auto_apply `_CONSERVATIVE_KEYS` 제거(engine/CLAUDE.md 참조).
-- **일일 손실 한도** (`daily_loss_limit`): 배정자금 대비 **-6%** (사이클 210 복원, 코드 DEFAULT -8). 초과 시 당일 매수 중단.
-- **브레이크이븐 승격** (`breakeven_promote_atr`=1.5, **기본 활성**): 고점이 매수가 + 1.5 × `_entry_atr` 도달 이력이 있으면 2ATR 하드손절선을 매수가로 승격(tighten-only, P1-A 2026-07-29)
-- **10일 채널 이탈 청산** (`channel_exit_period`=10, **기본 활성**): 현재가 < 최근 10영업일 저가 채널이면 TRAILING_STOP. ATR 트레일링 **앞**에서 평가 (P1-A 2026-07-29)
-- **ATR×2 Chandelier 트레일링**: `high_since_buy − ATR(14) × 2` 이하로 떨어지면 매도
-- **15:20 강제 청산 없음** (`check_force_clear()` 빈 리스트). 단 **시간 기반 청산은 있다** — `breakout_fail_n_days`(기본 5): 보유 5영업일 경과 + 현재가 < 돌파선이면 TIME_EXIT (사이클 23 P2-2 · 이름 cycle402)
+### 청산 (cycle405 — 깡토식 개조, 아래가 현행 유일 규약)
+
+- **R(1R 폭)** = `max(kk_r_floor_pct%×매수가, kk_r_atr_mult×진입ATR)` — 기본 8%·1.5배. 진입 ATR 미스탬프(N 결측)면 ATR 항이 0 으로 접혀 R 전체가 매수가의 8%. R 은 매수할 때 고정 — 보유 중 재계산하지 않는다.
+- **손절**: 현재가 ≤ `매수가 − R` 이면 STOP_LOSS. 고점이 `매수가 + kk_breakeven_r(기본 3)×R` 에 닿으면 **무장** — 손절선이 매수가(본전)로 승격(tighten-only)되고, 그때부터만 10일 저가 채널(`channel_exit_period`=10) 이탈도 함께 본다(TRAILING_STOP). 무장 전에는 채널을 보지 않는다.
+- **시간 청산은 15:20 전용**(장중 `check_exit_signal` 에는 없다) — 보유 영업일 ≥ `kk_time_exit_bars−1`(기본 19) 이고 고점이 `매수가+kk_time_exit_min_r(기본 1)×R` 미도달이면, 또는 보유 영업일 ≥ `kk_max_hold_bars−1`(기본 249) 이면 그날 15:20 TIME_EXIT(그날 끝낼 종목만 — 전량 일괄청산 아님, 멀티데이 유지).
+- **샹들리에·2×ATR 하드손절·−9% backstop·브레이크이븐(1.5×ATR)·고정% 손절·돌파 실패 시간청산(`breakout_fail_n_days`)은 더 이상 쓰지 않는다** — 전부 위 R 손절·무장·15:20 시간청산으로 통합됐다.
 - 평균 5~15 영업일 보유 → DB `positions` 영속화로 일자 넘어 유지
+
+### 사이징 (cycle405)
+
+- **설계 랏** `q = floor(예산×시장유닛m×risk_pct(0.012) ÷ R) → min(q, 예산×시장유닛m×position_ratio(0.15) // 가격)`. N(ATR) 미스탬프·q=0 이면 **1주 폴백도 비중 낙하도 없이 그 종목을 사지 않는다**(수량 0 을 주문으로 흘리지 않고 신호 단계에서 거른다 — `[donchian_kk_lot_zero]`). q>0 이면 사이징에 쓴 N 을 그대로 `_entry_atr` 에 스탬프 — **보유 중인 랏은 전부 스탬프를 받는다**(미스탬프 랏이 없다).
+- `risk_pct` 0.012(1R 손실 = 예산 1.2%), `sizing_mode` 코드 기본 `"turtle"` — 단, 이 값은 사이징·손절 산식 자체를 더 이상 가르지 않고 재시작 재도출 게이트에만 쓰인다(바로 아래).
+- **재시작 재도출**: donchian 은 `sizing_mode` 게이트 없이 항상 `_entry_atr` 를 재도출한다(보유 중인 모든 랏이 스탬프 랏이므로 "낙하 랏이라 되살릴 게 없다"는 경우가 없다). BFB·VCP 는 여전히 `sizing_mode="turtle"` 일 때만 재도출한다(다크런치라 position_ratio 랏이 섞여 있다).
 
 #### high_since_buy 일봉 폴백
 - **`recompute_held_atr()` 직후 또는 함께 `high_since_buy` 일봉 보정** — 매수일 다음 영업일~전영업일까지의 KIS 일봉 high max로 복구. 시세 미수신 누적으로 chandelier 트레일링 손절선이 매수가 부근에 동결되는 결함 차단 (2026-05-12 이마트 사례)
@@ -510,7 +516,8 @@ donchian_swing 은 멀티데이 보유 + ATR×2 Chandelier + 하드 손절 전�
   - WS 우선순위 큐와 무관 — 이 폴링은 WS 슬롯을 쓰지 않는다.
 
 ### 리스크 관리
-- 종목당 최대 투자: 할당 자금의 20%
+- 종목당 최대 투자: 할당 자금의 15%(`position_ratio`, cycle405)
+- 유닛당 리스크(1R): 전략예산의 1.2%(`risk_pct`, cycle405)
 - 일일 최대 손실 한도: 할당 자금의 8%
 
 ---

@@ -166,8 +166,10 @@ _DEFAULT_PARAMS_SHA: dict[str, tuple[str, str, str]] = {
     # 인 동안은 현행 byte 동일, R17 로 검증).
     "donchian_swing": (
         "src/engine/strategies/donchian_swing.py", "DonchianSwingStrategy",
-        # 🔁 cycle399 재핀 — 공통 섀도 모드(사용자 승인 10-02 R1) — `"shadow_mode": False` 1줄 추가(`buy_paused` 다음 줄). 그 밖 무변경.
-        "665679d3608a173e5a344ca1e37896df75635f9599be9cf7b280b04f03848802"),
+        # 🔁 cycle405 재핀 — 깡토식 청산·사이징 개조(사용자 승인) — `position_ratio`·
+        # `max_positions`·`sizing_mode`·`risk_pct` 값 변경 + `kk_*`/`max_daily_entries`
+        # 신규 7키 추가. 직전 값(cycle399) = `665679d3608a173e5a344ca1e37896df75635f9599be9cf7b280b04f03848802`.
+        "f6bba104b9f17a9bead47acb449eeb577dc881283576cf161d1730253863beb1"),
     "bull_flag_breakout": (
         "src/engine/strategies/bull_flag_breakout.py", "BullFlagBreakoutStrategy",
         # 🔁 cycle399 재핀 — 공통 섀도 모드(사용자 승인 10-02 R1) — `"shadow_mode": False` 1줄 추가(`buy_paused` 다음 줄). 그 밖 무변경.
@@ -340,8 +342,11 @@ _BASE_SHA = {
     # + `_MARKET_UNIT_ATR_KEY` 클래스 상수 + `prepare()`/`check_buy_signal()`(또는
     # `_evaluate_vol_gate()`)/`calc_buy_quantity()` 배선(사용자 결정 09-27).
     # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
+    # 🔁 cycle405 재핀 — 깡토식 청산·사이징 개조(donchian_swing.py 전면 재작성, DEFAULT_PARAMS 7키 추가 + 값 3개 변경 포함).
+    # 🔁 cycle405 재핀 2 — 독립 검토 반영(L6): `_kk_design_lot` 에 R ≥ 0.5×가격이면 0 반환
+    # 가드 추가(손절선이 매수가의 절반 이하로 내려가는 종목을 사지 않는다).
     "src/engine/strategies/donchian_swing.py":
-        "976acaaa5bb6f0124adb484fba52dc70d815d5ded8c7132fca556c48c2f81d44",
+        "08235b777c04e2a827d1ad38b39c1b64f9915df86d1301c9c84f8b60d15177ce",
     # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
     "src/engine/strategies/bull_flag_breakout.py":
         "879d85e779f9594ffbd9da93ce3ec41986f02abc78cc751cb22d022c20b0f298",

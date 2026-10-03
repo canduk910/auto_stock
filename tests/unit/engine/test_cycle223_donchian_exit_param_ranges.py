@@ -147,6 +147,39 @@ def test_s1_7_int_params_subset_of_param_ranges():
     )
 
 
+# ===========================================================================
+# cycle405 M1 — donchian 전용 `stop_loss_rate` 예외 (리뷰 지적 반영)
+# ===========================================================================
+def test_c405_m1_stop_loss_rate_excluded_for_donchian_only():
+    """`stop_loss_rate` 는 다른 전략엔 그대로 통과하고 donchian 에서만 drop 된다.
+
+    cycle405 깡토식 개조 뒤 donchian 의 모든 매수 랏은 `_entry_atr` 스탬프를 받아
+    `stop_loss_rate` 를 전혀 읽지 않는다(§2·§5). PARAM_RANGES 는 키당 범위 하나를
+    전 전략이 공유하므로 전역 제거는 momentum/VB/BFB/VCP 를 함께 막아 과잉이다 —
+    `_STRATEGY_PARAM_RANGE_EXCLUDE` 로 donchian 만 좁혀 뺀다.
+    """
+    from src.engine.recommendation_engine import _validate_recommendations
+
+    raw = {"recommended_params": {"stop_loss_rate": -5.0}, "reasoning": ""}
+    current = {"stop_loss_rate": -7.0}
+
+    validated_other, *_ = _validate_recommendations(raw, current, strategy_id="momentum")
+    assert validated_other.get("stop_loss_rate") == -5.0, (
+        "momentum 등 다른 전략은 여전히 stop_loss_rate 추천을 받아야 한다"
+    )
+
+    validated_donchian, *_ = _validate_recommendations(
+        raw, current, strategy_id="donchian_swing",
+    )
+    assert "stop_loss_rate" not in validated_donchian, (
+        "donchian_swing 은 stop_loss_rate 를 읽지 않으므로 추천이 drop 되어야 한다"
+    )
+
+    # strategy_id 생략(기본값) 은 예외 없이 기존 동작과 동일(하위 호환).
+    validated_default, *_ = _validate_recommendations(raw, current)
+    assert validated_default.get("stop_loss_rate") == -5.0
+
+
 def test_s1_8_previous_cycle_exclusions_still_absent():
     """사이클 208/209/212 + 2026-08-03 예산 제외 키가 계속 부재."""
     from src.engine.recommendation_engine import INT_PARAMS, PARAM_RANGES

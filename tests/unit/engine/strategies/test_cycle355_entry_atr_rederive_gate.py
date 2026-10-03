@@ -18,11 +18,21 @@ position_ratio 매수는 `_entry_atr` 스탬프 **없이** 시작한다(스탬�
 ## 게이트
 
 랏별 사이징 기록이 없으므로, 재도출은 **그 전략이 지금 `sizing_mode="turtle"` 일 때만** 한다.
-donchian `recompute_held_atr` 가 Phase 2A-2 부터 쓰던 게이트와 같다(그쪽은 무접촉).
 운영 BFB·VCP 는 한 번도 turtle 로 산 적이 없으므로(다크런치) 이 게이트는 두 전략의
 **모든 랏**에 대해 정확하다.
 
 in-memory 스탬프가 살아 있으면(같은 프로세스가 터틀로 산 랏) 게이트와 무관하게 미접촉이다.
+
+## cycle405 M2 — donchian 은 이 게이트 밖이다(리뷰 반영)
+
+donchian `recompute_held_atr` 는 Phase 2A-2 부터 BFB/VCP 와 같은 `sizing_mode=="turtle"`
+게이트를 썼지만, cycle405 깡토식 개조로 donchian 의 매수 경로(`calc_buy_quantity` §5)가
+"N(ATR) 미스탬프면 아예 사지 않는다"로 바뀌면서 **position_ratio 낙하 자체가 없어졌다**.
+즉 donchian 이 보유 중인 포지션은 어떤 `sizing_mode` 설정에서도 전부 스탬프된 랏이고,
+"스탬프 없음 = 원래 없었다(되살릴 것 없음)"는 이 파일의 전제가 donchian 에는 더 이상
+성립하지 않는다 — 재도출을 막을 이유가 없어 게이트를 뗐다. G6 은 donchian 을 예외로
+둔다. G7 은 "어느 `sizing_mode` 든 재도출한다"로 바뀐 동작을 검증한다. BFB·VCP 는
+여전히 position_ratio 다크런치라 이 파일의 원 게이트가 그대로 적용된다.
 """
 
 from __future__ import annotations
@@ -258,6 +268,7 @@ def _enclosing_if_tests(tree: ast.AST, target: ast.AST) -> list[str]:
 
 
 def test_g6_every_rederive_call_site_is_gated_by_turtle():
+    """BFB·VCP 는 여전히 turtle 게이트가 필수 — donchian 은 cycle405 M2 로 예외다."""
     sites = []
     for path in sorted(_STRATEGIES_DIR.glob("*.py")):
         tree = ast.parse(path.read_text(encoding="utf-8"))
@@ -277,21 +288,30 @@ def test_g6_every_rederive_call_site_is_gated_by_turtle():
     assert {"bull_flag_breakout.py", "vcp_breakout.py", "donchian_swing.py"} <= names, (
         f"탐지기 자기검증 실패 — 호출부 3곳을 못 찾았다: {sites}"
     )
-    ungated = [(n, ln) for n, ln, g in sites if not g]
+    # cycle405 M2 — donchian 은 더 이상 position_ratio 낙하가 없어(모든 랏이
+    # 스탬프됨) 이 게이트가 불필요하다. BFB·VCP 2곳만 게이트 의무로 좁힌다.
+    required = {"bull_flag_breakout.py", "vcp_breakout.py"}
+    ungated = [(n, ln) for n, ln, g in sites if not g and n in required]
     assert not ungated, (
         f"turtle 게이트 없이 `_rederive_entry_atr` 를 부르는 곳: {ungated} — "
         "position_ratio 랏이 다음 날 아침 ATR 손절로 넘어간다(cycle355 사고)"
     )
+    donchian_sites = [(n, ln, g) for n, ln, g in sites if n == "donchian_swing.py"]
+    assert donchian_sites and all(not g for _, _, g in donchian_sites), (
+        f"donchian 호출부는 cycle405 M2 로 turtle 게이트가 없어야 한다: {donchian_sites}"
+    )
 
 
 # ---------------------------------------------------------------------------
-# G7 — donchian 무접촉 확인 (이미 turtle 게이트를 갖고 있다)
+# G7 — donchian 은 cycle405 M2 로 게이트 밖(sizing_mode 무관 재도출)
 # ---------------------------------------------------------------------------
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("mode,stamped", [("turtle", True), ("position_ratio", False)])
-async def test_g7_donchian_behaviour_unchanged(mode, stamped, monkeypatch):
-    """donchian 은 이미 같은 게이트다 — turtle(운영)이면 재도출, position_ratio 면 미재도출."""
+@pytest.mark.parametrize("mode", ["turtle", "position_ratio"])
+async def test_g7_donchian_rederives_regardless_of_sizing_mode(mode, monkeypatch):
+    """cycle405 M2 — donchian 은 보유 중인 모든 랏이 스탬프된 랏이라 `sizing_mode`
+    와 무관하게 항상 재도출한다(position_ratio 낙하가 없어졌으므로 "스탬프 없음
+    = 되살릴 것 없음" 전제가 성립하지 않는다)."""
     s = DonchianSwingStrategy(
         StrategyConfig(strategy_id="donchian_swing", name="20일 신고가", weight=0.15,
                        params={"sizing_mode": mode}),
@@ -302,4 +322,4 @@ async def test_g7_donchian_behaviour_unchanged(mode, stamped, monkeypatch):
 
     await s.recompute_held_atr()
 
-    assert (s._entry_atr.get(TICKER, 0) > 0) is stamped, (mode, dict(s._entry_atr))
+    assert s._entry_atr.get(TICKER, 0) > 0, (mode, dict(s._entry_atr))

@@ -219,27 +219,23 @@ def test_g223_7b_trading_days_uses_shared_date_parser():
 # G-223-8 (HIGH) — 청산 분기 순서 불변
 # ===========================================================================
 def test_g223_8_exit_branch_order_unchanged():
-    """①하드손절/BE → ②시간청산 → ③채널이탈 → ④샹들리에. 이번엔 계산만 고친다.
+    """청산 분기 순서 — cycle405 깡토식으로 재정의(명세 `_workspace/red/cycle405_donchian_kkangto_spec.md` §2).
 
-    ⚠️ 사이클 237 의미 전환 — ② 의 마커가 로그 문장 `"도치안 시간 기반 청산"` 에서
-    헬퍼 호출 `_emit_time_exit` 로 바뀌었다. 그 문장이 1회/ticker/일 cap 헬퍼로
-    이동했기 때문이며(실측 폭주 68건/일), **분기는 같은 자리에 그대로 있다** —
-    이 가드가 지키는 것은 로그 문자열의 위치가 아니라 **청산 분기의 순서**이므로
-    마커만 갱신하면 강도가 보존된다(로그 서식 자체는 헬퍼 안에서 byte 동일).
+    옛 순서(①하드손절/BE → ②시간청산 → ③채널 → ④샹들리에)는 끝났다. 지금 지키는 것:
+    보유일 관측 → ① −1R·본전 손절(`STOP_LOSS`) → ② 3R 무장 뒤 채널(`TRAILING_STOP`).
+    시간 청산(`TIME_EXIT`)은 틱 경로에 없다(15:20 `check_force_clear` 만).
     """
     fn = _func(ast.parse(_read(_DONCHIAN)), "check_exit_signal")
     body = ast.unparse(fn)
-    markers = [
-        "donchian_turtle_stop",       # ① 하드손절(2ATR, BE 승격 내포)
-        "_emit_time_exit",            # ② 시간청산 (사이클 237 — cap 헬퍼 위임)
-        "donchian_channel_exit",      # ③ 채널 이탈
-        "도치안 스윙 트레일링",         # ④ 샹들리에
-    ]
+    markers = ["_emit_days_held_observation", "Signal.STOP_LOSS", "Signal.TRAILING_STOP"]
     idx = []
     for m in markers:
         assert m in body, f"청산 분기 마커 소실: {m}"
         idx.append(body.index(m))
     assert idx == sorted(idx), f"청산 분기 순서 변경 감지 — {list(zip(markers, idx))}"
+    assert "TIME_EXIT" not in body, "시간 청산이 틱 경로에 남아 있다(다음 날 08:00 프리장 시장가 위험)"
+    for dead in ("donchian_turtle_stop", "donchian_turtle_backstop", "도치안 스윙 트레일링", "_emit_time_exit"):
+        assert dead not in body, f"옛 청산 분기 잔존: {dead}"
 
 
 # ===========================================================================

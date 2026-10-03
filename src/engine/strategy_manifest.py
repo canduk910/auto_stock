@@ -97,7 +97,10 @@ STRATEGY_MANIFEST: tuple[StrategyEntry, ...] = (
     StrategyEntry(
         DonchianSwingStrategy, "donchian_swing", "20일 신고가 스윙", False, 0.0,
         eval_driver="swing_poll", breakout_rank=None, open_price_target=False,
-        close_at_1520=False, market_unit_policy="scale",
+        # cycle405 — 깡토식 개조가 시간 청산을 15:20 단독 경로(`check_force_clear`)로
+        # 옮겼다. `scheduler.py` 의 15:20 루프는 `CLOSE_AT_1520_IDS` 를 돌 뿐이라 이
+        # 한 칸만 바꾸면 배선이 끝난다.
+        close_at_1520=True, market_unit_policy="scale",
     ),
     StrategyEntry(
         BullFlagBreakoutStrategy, "bull_flag_breakout", "눌림목 돌파", False, 0.0,

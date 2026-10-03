@@ -62,6 +62,15 @@
 7. 기존 `_emit_days_held_fallback` 은 **무변경**. "캐시가 스테일하다"는 별개 사실이고
    사이클 223 F4/G/G1/G4 테스트가 못박고 있다. 폴백이 선 날 두 줄이 나오는 것은 정상.
 
+## ⚠️ cycle405 — 의미 전환 (명세 `_workspace/red/cycle405_donchian_kkangto_spec.md` · 자문 §2.4)
+
+옛 §2.5 돌파 실패 시간 청산이 없어지고 시간 청산은 15:20 경로(20봉 +1R 미도달 · 250봉)로
+옮겨졌다. 관측 로그는 그대로 `check_exit_signal` 맨 앞에 남되 필드 뜻이 바뀐다:
+`n_days` = `kk_time_exit_bars − 1`(기본 19 — 더는 `breakout_fail_n_days` 를 읽지 않는다, AST G-405-3) ·
+`days_ok = days_held ≥ n_days` · `price_ok` 는 없어지고 **`reached_1r`**(H ≥ E + 1R) ·
+**`armed_3r`**(H ≥ E + 3R) 가 그 자리를 잡는다. 틱 경로는 TIME_EXIT 를 내지 않는다.
+아래 테스트는 그 계약으로 고쳤다(cap·위치·폴백 독립성 계약은 그대로).
+
 ## Red 유효성 (production 미변경 시점)
 
 - OB-0 ~ OB-8, OB-11, OB-12 = FAIL (`_emit_days_held_observation` 미구현 →
@@ -172,7 +181,7 @@ def test_ob_1_emitted_even_when_days_gate_not_met(caplog):
     assert not _lines(caplog, _FB), "탐지기 self-test — 폴백 미사용 전제"
 
     line = _one(caplog)
-    _assert_tokens(line, "ticker=005930", "days_held=1", "n_days=3", "days_ok=False")
+    _assert_tokens(line, "ticker=005930", "days_held=1", "n_days=19", "days_ok=False")
 
 
 # ===========================================================================
@@ -180,16 +189,17 @@ def test_ob_1_emitted_even_when_days_gate_not_met(caplog):
 # ===========================================================================
 @freeze_time("2026-08-21 10:00:00+09:00")
 def test_ob_2_emitted_alongside_actual_exit(caplog):
+    """cycle405 — 청산 발화(−1R 손절, 스탬프 없음 → 9,200)와 관측 로그가 함께 남는다."""
     caplog.set_level(logging.INFO, logger=_LOGGER)
     s = _mk(n_days=2)
     _cache(s, _W_1721[:-1])                     # 08-17~08-20 (오늘 미포함)
     _arm(s, buy_date=D(2026, 8, 19))            # 08-20 + today = 2 영업일
 
-    assert s.check_exit_signal("005930", 9_800, 9_900) == Signal.TIME_EXIT
-    assert _lines(caplog, _EXIT), "청산 로그(기존 계약)가 사라지면 안 된다"
+    assert s.check_exit_signal("005930", 9_200, 9_900) == Signal.STOP_LOSS
 
     line = _one(caplog)
-    _assert_tokens(line, "days_held=2", "n_days=2", "days_ok=True", "price_ok=True")
+    _assert_tokens(line, "days_held=2", "n_days=19", "days_ok=False",
+                   "reached_1r=False", "armed_3r=False")
 
 
 # ===========================================================================
@@ -234,15 +244,16 @@ def test_ob_4a_hpsp_monday_observed_but_not_exited(caplog):
     _assert_tokens(
         line,
         "ticker=403870", "buy_date=2026-08-21",
-        "days_held=1", "calendar_days=3", "n_days=2",
+        "days_held=1", "calendar_days=3", "n_days=19",
         "breakout_high=33000", "current_price=29500",
-        "days_ok=False", "price_ok=True",
+        "days_ok=False", "reached_1r=False", "armed_3r=False",
     )
 
 
 @freeze_time("2026-08-25 10:30:00+09:00")
 def test_ob_4b_hpsp_tuesday_gate_opens(caplog):
-    """화 08-25 = 2영업일(달력 4) → 게이트 개방. 관측 로그가 그 전이를 기록한다.
+    """화 08-25 = 2영업일(달력 4). cycle405 — 옛 n_days=2 게이트는 없어졌고 틱 경로는 NONE.
+    관측 로그가 보유일 전이(1→2)를 기록하는 계약만 남는다.
 
     화요일 아침 prepare 가 08-24 봉을 캐시에 넣은 상태를 재현한다.
     """
@@ -252,9 +263,9 @@ def test_ob_4b_hpsp_tuesday_gate_opens(caplog):
     _arm(s, ticker="403870", buy_date=D(2026, 8, 21), buy_price=30_000,
          breakout_high=33_000)
 
-    assert s.check_exit_signal("403870", 29_500, 29_800) == Signal.TIME_EXIT
+    assert s.check_exit_signal("403870", 29_500, 29_800) == Signal.NONE
     line = _one(caplog)
-    _assert_tokens(line, "days_held=2", "calendar_days=4", "days_ok=True", "price_ok=True")
+    _assert_tokens(line, "days_held=2", "calendar_days=4", "days_ok=False", "reached_1r=False")
 
 
 # ===========================================================================
@@ -336,7 +347,7 @@ def test_ob_8_emitted_when_breakout_high_unrecovered(caplog):
     assert s.check_exit_signal("005930", 9_800, 9_900) == Signal.NONE
     line = _one(caplog)
     _assert_tokens(line, "breakout_high=0", "days_held=1", "calendar_days=3",
-                   "price_ok=False")
+                   "reached_1r=False")
 
 
 # ===========================================================================
@@ -374,17 +385,16 @@ class _PoisonLogger:
 
 @freeze_time("2026-08-21 10:00:00+09:00")
 def test_ob_10a_observation_failure_does_not_block_exit(caplog, monkeypatch):
-    """관측이 던져도 시간청산 STOP_LOSS 는 그대로 나온다."""
+    """관측이 던져도 청산(cycle405 — −1R 손절 9,200)은 그대로 나온다."""
     caplog.set_level(logging.INFO, logger=_LOGGER)
     s = _mk(n_days=2)
     _cache(s, _W_1721[:-1])
     _arm(s, buy_date=D(2026, 8, 19))
     monkeypatch.setattr(_mod, "logger", _PoisonLogger(_mod.logger))
 
-    assert s.check_exit_signal("005930", 9_800, 9_900) == Signal.TIME_EXIT, (
+    assert s.check_exit_signal("005930", 9_200, 9_900) == Signal.STOP_LOSS, (
         "계약 §5: 관측 실패가 청산 판정을 막으면 안 된다"
     )
-    assert _lines(caplog, _EXIT), "청산 로그는 계속 나와야 한다"
 
 
 @freeze_time("2026-08-24 10:30:00+09:00")
@@ -464,7 +474,7 @@ def _case_time_exit():
     s = _mk(n_days=2)
     _cache(s, _W_1721[:-1])
     _arm(s, buy_date=D(2026, 8, 19))              # 08-20 + today = 2 영업일
-    return s, 9_800, 9_900, Signal.TIME_EXIT
+    return s, 9_800, 9_900, Signal.NONE           # cycle405 — 틱 경로 시간 청산 폐지
 
 
 def _case_channel_exit():
@@ -472,15 +482,15 @@ def _case_channel_exit():
     _cache(s, _W_1721[:-1])
     _arm(s, buy_date=D(2026, 8, 20))
     s._channel_low["005930"] = 9_500
-    return s, 9_400, 9_900, Signal.TRAILING_STOP
+    return s, 9_400, 9_900, Signal.NONE           # cycle405 — 3R 무장 전에는 채널을 보지 않는다
 
 
 def _case_trailing():
     s = _mk(n_days=5)
     _cache(s, _W_1721[:-1])
     _arm(s, buy_date=D(2026, 8, 20))
-    s._candidates["005930"]["atr"] = 300          # 10,000 - 2.0×300 = 9,400
-    return s, 9_400, 9_900, Signal.TRAILING_STOP
+    s._candidates["005930"]["atr"] = 300          # 옛 샹들리에 9,400
+    return s, 9_400, 9_900, Signal.NONE           # cycle405 — 샹들리에 폐지
 
 
 def _case_none():
@@ -503,7 +513,10 @@ def _case_no_position():
 ], ids=["hard_stop", "turtle_stop", "time_exit", "channel_exit",
         "trailing", "none", "no_position"])
 def test_ob_13_exit_signal_behavior_unchanged(builder):
-    """관측 로그 도입은 순수 관찰 — 반환 시그널을 어떤 입력에서도 바꾸지 않는다."""
+    """관측 로그 도입은 순수 관찰 — 반환 시그널을 어떤 입력에서도 바꾸지 않는다.
+
+    cycle405 — 기대값은 깡토식 청산 기준(시간·채널·샹들리에 행은 NONE 으로 바뀌었다).
+    """
     s, price, open_price, expected = builder()
     assert s.check_exit_signal("005930", price, open_price) == expected
 
@@ -519,7 +532,7 @@ def _arm_hard_stop(s, ticker="005930", buy_date=None):
     """§1 하드손절이 **즉시** 발화하는 상태. 시간청산 블록에는 도달하지 못한다."""
     pos = _arm(s, ticker=ticker, buy_date=buy_date, buy_price=10_000,
                breakout_high=11_000)
-    # entry_atr 존재 = 터틀 경로 → 손절선 = buy - stop_atr×atr = 10,000 - 2×500 = 9,000
+    # cycle405 — 손절선 = E − max(8%·E, 1.5×500) = 9,200 (stop_atr 는 더 읽지 않는다)
     s._entry_atr[ticker] = 500
     s.config.params["stop_atr"] = 2.0
     return pos
@@ -539,7 +552,7 @@ def test_f1_observation_survives_hard_stop_firing_on_first_evaluation(caplog):
         sig = s.check_exit_signal("005930", 8_500, 8_500)   # 손절선 9,000 이탈
     assert sig is Signal.STOP_LOSS, "하드손절은 그대로 발화해야 한다(행위 무변경)"
     line = _one(caplog)
-    _assert_tokens(line, "days_held=1", "calendar_days=3", "n_days=2")
+    _assert_tokens(line, "days_held=1", "calendar_days=3", "n_days=19")
 
 
 def test_f1_observation_not_suppressed_forever_when_sell_is_rejected(caplog):

@@ -282,6 +282,34 @@ def _cost_usd(model: str, tokens_in: int, tokens_out: int) -> float:
         return -1.0
 
 
+# cycle405 리뷰 L8 — donchian `kk_r_floor_pct` 범위는 `donchian_swing._KK_SPECS`
+# 정본(기본 8.0, [4.0, 20.0])의 사본이다. 여기서 import 하지 않는 이유는 이 모듈이
+# 전략 클래스에 무의존이기 때문(순환 import 회피 + 관측 전용 모듈 독립성). 값이
+# 바뀌면 두 곳을 함께 고친다(회귀 가드 = test_l8_kk_r_floor_pct_clamped_in_llm_gate).
+_KK_R_FLOOR_PCT_DEFAULT = 8.0
+_KK_R_FLOOR_PCT_RANGE = (4.0, 20.0)
+
+
+def _read_kk_r_floor_pct(params) -> float:
+    """donchian `kk_r_floor_pct` 를 `_KK_SPECS` 범위로 클램프해 읽는다.
+
+    생산 사이징(`donchian_swing._kk()`)은 범위 밖 값을 기본값으로 낙하시키는데,
+    이 모듈은 그 관문을 거치지 않고 `params` 를 직접 읽어 왔다 — DB 가 오염값을
+    들고 있으면 LLM 관측(손절폭·청산 규약 문구)이 그 오염값을 그대로 보여준다.
+    비수치·범위 밖은 기본값(8.0)으로 낙하한다(조용히 — 이 모듈은 관측 전용이라
+    WARNING 은 생산 사이징 쪽(`[donchian_kk_param_invalid]`)이 이미 낸다).
+    """
+    lo, hi = _KK_R_FLOOR_PCT_RANGE
+    try:
+        raw = params.get("kk_r_floor_pct", _KK_R_FLOOR_PCT_DEFAULT)
+        v = float(raw)
+    except (TypeError, ValueError):
+        return _KK_R_FLOOR_PCT_DEFAULT
+    if not (lo <= v <= hi):
+        return _KK_R_FLOOR_PCT_DEFAULT
+    return v
+
+
 def _read_stop_loss_pct(strategy_id, params) -> float:
     """§3.3 — 관측 시점(ATR 재해석 **전**) 손절폭. 7전략 전부 `< 0`(cycle297 §1.2 F6 —
     0.0 은 SYSTEM_PROMPT 판단 기준 4 를 항상 발동시키는 거짓말이다)."""
@@ -293,7 +321,9 @@ def _read_stop_loss_pct(strategy_id, params) -> float:
         if strategy_id == "momentum":
             return float(params.get("stop_loss_rate", -7.5) or 0)
         if strategy_id == "donchian_swing":
-            return float(params.get("stop_loss_rate", -7.0) or 0)
+            # cycle405 — 깡토식 개조. R 하한(§1) 을 관측 시점 손절폭으로 쓴다.
+            # 리뷰 L8 — 범위 클램프 경유(_read_kk_r_floor_pct).
+            return -_read_kk_r_floor_pct(params)
         if strategy_id == "bull_flag_breakout":
             return float(params.get("stop_loss_rate", -5.0) or 0)
         if strategy_id == "vcp_breakout":
@@ -314,6 +344,8 @@ def _read_stop_loss_pct(strategy_id, params) -> float:
 _STOP_PARAM_KEYS = (
     "sizing_mode", "stop_atr", "turtle_backstop_pct", "turtle_min_stop_pct",
     "hard_stop_pct", "stop_loss_rate", "intraday_stop_loss",
+    # cycle405 — donchian 깡토식 R 산식(§1).
+    "kk_r_floor_pct", "kk_r_atr_mult",
 )
 
 
@@ -365,10 +397,13 @@ def _resolve_stop_loss_pct(strategy_id, params, tech) -> float:
             got = max(hard, -(stop_atr * atr))
             return got if got < 0.0 else -0.01
 
-        if strategy_id == "donchian_swing" and p.get("sizing_mode") == "turtle" and atr is not None:
-            stop_atr = float(p.get("stop_atr", 2.0) or 2.0)
-            backstop = float(p.get("turtle_backstop_pct", -9.0) or -9.0)
-            got = max(-(stop_atr * atr), backstop)
+        if strategy_id == "donchian_swing":
+            # cycle405 — R = max(kk_r_floor_pct%, kk_r_atr_mult×ATR). `sizing_mode` 는
+            # 더 이상 이 산식을 가르지 않는다(손절은 스탬프 유무만 본다, §2).
+            # 리뷰 L8 — floor 는 범위 클램프 경유(_read_kk_r_floor_pct).
+            floor = _read_kk_r_floor_pct(p)
+            mult = float(p.get("kk_r_atr_mult", 1.5) or 1.5)
+            got = -max(floor, mult * (atr or 0.0))
             return got if got < 0.0 else -0.01
 
         if (
@@ -417,16 +452,18 @@ def _read_exit_rule(strategy_id, params) -> str:
                 f"갭 +{gap}% 이상이면 트레일링 {trail}%, 아니면 즉시 매도."
             )
         if strategy_id == "donchian_swing":
-            mult = params.get("atr_trail_mult", 2.0)
-            stop_atr = params.get("stop_atr", 2.0)
-            backstop = params.get("turtle_backstop_pct", -9.0)
-            fail_n = params.get("breakout_fail_n_days", 5)
-            ch_period = params.get("channel_exit_period", 10)
+            # cycle405 — 깡토식 개조. 손절·본전 승격·시간 청산 전부 R 기준으로 바뀌었다.
+            # 리뷰 L8 — floor 는 범위 클램프 경유(_read_kk_r_floor_pct).
+            floor = _read_kk_r_floor_pct(params)
+            mult = params.get("kk_r_atr_mult", 1.5)
+            be = params.get("kk_breakeven_r", 3.0)
+            ch = params.get("channel_exit_period", 10)
+            bars = params.get("kk_time_exit_bars", 20)
+            max_bars = params.get("kk_max_hold_bars", 250)
             return (
-                f"ATR×{mult} 샹들리에 트레일링. 하드손절 = 진입ATR×{stop_atr} 또는 "
-                f"{backstop}% 백스톱(터틀 모드, 타이트한 쪽) / 비율 모드는 고정 손절. "
-                f"{fail_n}영업일 돌파 실패 청산, {ch_period}일 저가 채널 이탈 청산. "
-                "시간·15:20 청산 없음(멀티데이 보유). "
+                f"−1R 손절(R=max({floor}%, {mult}×ATR)) · {be}R 도달 시 본전 승격 · "
+                f"{be}R 뒤 {ch}일 저가 채널 이탈 청산 · {bars}봉째 15:20 에 +1R 미도달이면 "
+                f"정리 · 최대 {max_bars}봉 보유. "
                 "입력의 stop_loss_pct 는 ATR(14) 기준 근사다(실제는 진입 시점 ATR)."
             )
         if strategy_id == "bull_flag_breakout":

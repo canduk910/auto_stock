@@ -132,7 +132,7 @@ __all__ = [
     "forbidden_choices_for",
 ]
 
-CATALOG_VERSION = "cycle403.2"
+CATALOG_VERSION = "cycle405"
 
 #: 전략 id 의 정본 순서(레지스트리 등록 순서).
 STRATEGY_IDS: tuple[str, ...] = (
@@ -988,11 +988,18 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         editable=True, risk="high", auto_tunable=True, deprecated=False,
         applies_to=("momentum", "volatility_breakout", "donchian_swing",
                     "bull_flag_breakout", "vcp_breakout"),
+        # cycle405 — donchian 은 이 키를 더 이상 읽지 않는다. 개조 뒤 모든 매수 랏이
+        # `_entry_atr` 스탬프를 받으므로(§5 — N 미스탬프면 아예 사지 않는다) 이 값이
+        # 적용될 포지션이 구조적으로 없다. `recommendation_engine.py` 도 같은 이유로
+        # `_STRATEGY_PARAM_RANGE_EXCLUDE` 로 donchian 의 AI 자동 적용만 따로 막는다
+        # (applies_to 는 DEFAULT_PARAMS 에 키가 있는 전략 집합과 그대로 일치시킨다).
+        deprecated_for=("donchian_swing",),
         range_src="param_ranges",
         help="매수가 대비 이 비율 이하로 떨어지면 손절. **음수여야 한다** — VB 는"
              " `return tv if tv < 0 else 0.0` 로 양수/0 을 조용히 '손절 없음'으로 바꾼다."
-             " 터틀 전략에서는 `_entry_atr` 스탬프가 있는 포지션이 ATR 손절을 타므로"
-             " 이 값이 적용되지 않을 수 있다.",
+             " 터틀 전략(bfb/vcp)에서는 `_entry_atr` 스탬프가 있는 포지션이 ATR 손절을"
+             " 타므로 이 값이 적용되지 않을 수 있다. **donchian 은 cycle405 부터 이 키를"
+             " 전혀 읽지 않는다**(모든 랏이 스탬프되어 kk_* R 손절만 탄다 — `deprecated_for`).",
     ),
     _s(
         key="trailing_stop_rate", label_ko="트레일링 스탑", group="exit",
@@ -1040,19 +1047,26 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         type="float", min=0.0, max=None, step=0.1, unit="배",
         editable=True, risk="high", auto_tunable=False, deprecated=False,
         applies_to=("donchian_swing", "bull_flag_breakout", "vcp_breakout", "etf_trend"),
+        # cycle405 — donchian 은 샹들리에를 더 이상 읽지 않는다(§2 — 깡토식 R 손절로 대체).
+        deprecated_for=("donchian_swing",),
         range_src="structural",
         help="최고가 − 배수 × ATR 로 트레일링 손절선을 잡는다. 사이클 223 에서"
              " '보유기간 정체성 상수'로 PARAM_RANGES 에서 제거됐다 — 단기 손실을"
              " 목적함수로 삼는 튜너는 구조적으로 청산을 조여 추세추종을 데이트레이딩으로"
-             " 변태시킨다. **3 전략 공유 키**(전략별로 따로 저장된다).",
+             " 변태시킨다. **3 전략 공유 키**(전략별로 따로 저장된다). **donchian 은"
+             " cycle405 부터 무접촉**(깡토식 R 손절, kk_* 키).",
     ),
     _s(
         key="stop_atr", label_ko="ATR 손절 배수", group="exit",
         type="float", min=0.0, max=None, step=0.1, unit="배",
         editable=True, risk="high", auto_tunable=False, deprecated=False,
-        applies_to=_TURTLE_SIZED, range_src="structural",
+        applies_to=_TURTLE_SIZED,
+        # cycle405 — donchian 은 더 이상 이 키를 읽지 않는다(§2, kk_* 로 대체).
+        deprecated_for=("donchian_swing",),
+        range_src="structural",
         help="매수가 − 배수 × 진입 ATR 이 손절선. **`_entry_atr` 스탬프가 있는 포지션만**"
-             " 이 경로를 탄다(스탬프 없는 포지션은 고정% 손절). 상한 근거 없음.",
+             " 이 경로를 탄다(스탬프 없는 포지션은 고정% 손절). 상한 근거 없음."
+             " **donchian 은 cycle405 부터 무접촉**(kk_* 키, R 손절).",
     ),
     _s(
         key="trail_atr", label_ko="ATR 트레일 배수 (고지로)", group="exit",
@@ -1065,20 +1079,27 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         key="breakeven_promote_atr", label_ko="본전 승격 배수", group="exit",
         type="float", min=0.0, max=None, step=0.1, unit="배",
         editable=True, risk="high", auto_tunable=False, deprecated=False,
-        applies_to=_TURTLE_SIZED, range_src="sign",
+        applies_to=_TURTLE_SIZED,
+        # cycle405 — donchian 은 더 이상 이 키를 읽지 않는다(본전 승격은 kk_breakeven_r).
+        deprecated_for=("donchian_swing",),
+        range_src="sign",
         help="최고가가 매수가 + 배수 × ATR 을 넘으면 손절선을 매수가(본전)로 올린다."
              " **0 = 비활성**(코드가 `> 0` 으로 게이팅). 활성 권장값 1.5"
-             "(`_workspace/00_leader_trading_rules.md`). 손절선은 조이는 방향으로만 움직인다.",
+             "(`_workspace/00_leader_trading_rules.md`). 손절선은 조이는 방향으로만 움직인다."
+             " **donchian 은 cycle405 부터 무접촉**(kk_breakeven_r, 3R 도달 무장).",
     ),
     _s(
         key="turtle_backstop_pct", label_ko="터틀 손절 최대폭", group="exit",
         type="float", min=-100.0, max=0.0, step=0.5, unit="%",
         editable=True, risk="high", auto_tunable=False, deprecated=False,
         applies_to=("donchian_swing", "bull_flag_breakout", "vcp_breakout", "etf_trend"),
+        # cycle405 — donchian 은 더 이상 이 키를 읽지 않는다(§2, kk_* 로 대체).
+        deprecated_for=("donchian_swing",),
         range_src="sign",
         help="고ATR 종목에서 ATR 손절선이 너무 멀어질 때 씌우는 % 상한."
              " **음수여야 한다** — 코드가 `if backstop < 0` 으로 게이팅하므로 0/양수는"
-             " 조용히 비활성된다(무증상).",
+             " 조용히 비활성된다(무증상). **donchian 은 cycle405 부터 무접촉**(kk_* 키,"
+             " R 손절).",
     ),
     _s(
         key="turtle_min_stop_pct", label_ko="터틀 손절 최소폭", group="exit",
@@ -1104,16 +1125,28 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         editable=True, risk="high", auto_tunable=False, deprecated=False,
         applies_to=("donchian_swing",), range_src="structural",
         help="N일 신저가로 떨어지면 청산. **0 = 비활성.** 진입 채널"
-             "(`donchian_period`)보다 짧아야 추세추종이 성립한다.",
+             "(`donchian_period`)보다 짧아야 추세추종이 성립한다. cycle405 부터 **무장**"
+             "(고점이 매수가+kk_breakeven_r×R 도달)**전에는 보지 않는다** — 무장 전"
+             " 이탈은 R 손절만 본다. 🔴 **보유 중에 바꾸지 않는다** — 다음 틱부터 그"
+             " 보유의 무장 판정·채널 감시 시작점이 즉시 바뀐다. 전환은 그 전략 보유"
+             " 0 에서 한다(kk_* 키 전부 동일 원칙).",
     ),
     _s(
         key="breakout_fail_n_days", label_ko="돌파 실패 판정일", group="exit",
         type="int", min=1, max=60, step=1, unit="일",
         editable=True, risk="high", auto_tunable=False, deprecated=False,
         applies_to=("donchian_swing",), range_src="structural",
+        # cycle405 — donchian(유일한 applies_to) 이 §2.5 분기 자체를 들어냈다(TIME_EXIT 은
+        # kk_time_exit_bars/kk_max_hold_bars 로 대체). `deprecated_for` 로만 표시한다 —
+        # 전역 `deprecated=True` 로 올리면 하드코딩 8키 집합(C7)을 건드려야 하고,
+        # "어느 전략에서도 효력 없음"이 아니라 "이 전략에서만 효력 없음"이 정확하다.
+        deprecated_for=("donchian_swing",),
         help="돌파 후 이 일수 안에 진전이 없으면 실패로 보고 정리한다. 사이클 223 에서"
              " '보유기간 정체성 상수'로 PARAM_RANGES 에서 제거됐다(하한으로 밀면 20일"
-             " 신고가 추세추종이 1~2일 데이트레이딩이 된다).",
+             " 신고가 추세추종이 1~2일 데이트레이딩이 된다). **donchian 은 cycle405"
+             " 부터 무접촉** — §2.5 분기가 사라져 kk_time_exit_bars/kk_max_hold_bars 가"
+             " 대신한다(applies_to 가 donchian 하나뿐이라 사실상 전면 비활성이지만,"
+             " 키 자체는 다른 전략이 쓸 수 있어 `deprecated` 전역 플래그로 올리지 않는다).",
     ),
     _s(
         key="max_hold_days", label_ko="최대 보유일수", group="exit",
@@ -1213,7 +1246,12 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         help="`turtle` 만 특별 취급하고 그 밖의 값은 전부 `position_ratio` 로 낙하한다."
              " 🔴 **보유 중에 바꾸지 않는다** — 랏별 사이징 기록이 없어 이미 보유 중인"
              " 포지션도 새 설정의 손절을 탄다(position_ratio→turtle 은 다음 아침 부팅부터,"
-             " turtle→position_ratio 는 다음 재시작부터). 전환은 그 전략 보유 0 에서 한다.",
+             " turtle→position_ratio 는 다음 재시작부터). 전환은 그 전략 보유 0 에서 한다."
+             " **donchian 은 cycle405 부터 이 값을 사이징·손절 산식 자체가 읽지 않는다**"
+             " — 깡토식 설계 랏(§5)은 `sizing_mode` 와 무관하게 항상 R 기반이고, 재시작"
+             " 재도출 게이트(`_entry_atr_rederive_allowed`)만 이 값을 본다(= `turtle` 이어야"
+             " D-1 ATR 로 `_entry_atr` 를 되살린다). donchian 에서 이 키를 바꾸는 유일한"
+             " 효과는 그 게이트뿐이다.",
     ),
     _s(
         key="risk_pct", label_ko="유닛당 리스크 비율", group="sizing_risk",
@@ -1222,16 +1260,81 @@ PARAM_SPECS: tuple[ParamSpec, ...] = (
         applies_to=_TURTLE_SIZED, range_src="structural",
         help="터틀 유닛 = floor(전략예산 × 이 비율 ÷ ATR). **비율 저장**"
              "(0.005 = 0.5%). 0 이하면 터틀 사이징이 꺼지고 비중 경로로 낙하한다."
-             " 랏 상한 `max_lot_units` 계산에도 같은 값이 쓰인다.",
+             " 랏 상한 `max_lot_units` 계산에도 같은 값이 쓰인다."
+             " **donchian 은 cycle405 부터 다르다** — 설계 랏 = floor(예산×비율÷R)"
+             "(R = kk_r_* 참조, ATR 단독이 아니다). 0 이하이거나 설계 랏이 0 이면"
+             " `position_ratio` 로 낙하하지 않고 **그 종목을 사지 않는다**(§5·§6-1).",
+    ),
+    # cycle405 — donchian 깡토식 청산·사이징 신규 7키. 전부 리스크 정체성 상수 —
+    # PARAM_RANGES/INT_PARAMS·AI 자동 적용 경로 편입 금지(자동 튜닝 불가).
+    _s(
+        key="kk_r_floor_pct", label_ko="R 하한", group="sizing_risk",
+        type="float", min=4.0, max=20.0, step=0.5, unit="%",
+        editable=True, risk="identity", auto_tunable=False, deprecated=False,
+        applies_to=("donchian_swing",), range_src="clamp",
+        help="1R 폭(R=max(이 값%×매수가, kk_r_atr_mult×진입ATR))의 퍼센트 하한."
+             " ATR 스탬프가 없으면(미터틀 사이징 등) R 전체가 이 값이 된다.",
+    ),
+    _s(
+        key="kk_r_atr_mult", label_ko="R ATR 배수", group="sizing_risk",
+        type="float", min=0.5, max=4.0, step=0.1, unit="배",
+        editable=True, risk="identity", auto_tunable=False, deprecated=False,
+        applies_to=("donchian_swing",), range_src="clamp",
+        help="1R 폭의 ATR 배수 항. R = max(kk_r_floor_pct%×매수가, 이 값×진입ATR).",
+    ),
+    _s(
+        key="kk_breakeven_r", label_ko="본전 승격 R", group="sizing_risk",
+        type="float", min=1.0, max=10.0, step=0.5, unit="배",
+        editable=True, risk="identity", auto_tunable=False, deprecated=False,
+        applies_to=("donchian_swing",), range_src="clamp",
+        help="고점이 매수가 + 이 값×R 에 도달하면 '무장' — 손절선이 본전으로 승격되고"
+             " 그때부터 10일 저가 채널 이탈도 함께 감시한다(channel_exit_period).",
+    ),
+    _s(
+        key="kk_time_exit_bars", label_ko="시간 청산 봉수", group="sizing_risk",
+        type="int", min=5, max=60, step=1, unit="봉",
+        editable=True, risk="identity", auto_tunable=False, deprecated=False,
+        applies_to=("donchian_swing",), range_src="clamp",
+        help="이 봉수째(0-base, 매수일=0) 15:20 평가에서 kk_time_exit_min_r 를 못"
+             " 채웠으면 정리한다. 가격이 아니라 보유 영업일만 보며 15:20 전용 경로다.",
+    ),
+    _s(
+        key="kk_time_exit_min_r", label_ko="시간 청산 면제 R", group="sizing_risk",
+        type="float", min=0.0, max=3.0, step=0.1, unit="배",
+        editable=True, risk="identity", auto_tunable=False, deprecated=False,
+        applies_to=("donchian_swing",), range_src="clamp",
+        help="고점이 매수가 + 이 값×R 에 도달했으면 kk_time_exit_bars 시간 청산을 면제한다.",
+    ),
+    _s(
+        key="kk_max_hold_bars", label_ko="최대 보유 봉수", group="sizing_risk",
+        type="int", min=20, max=500, step=1, unit="봉",
+        editable=True, risk="identity", auto_tunable=False, deprecated=False,
+        applies_to=("donchian_swing",), range_src="clamp",
+        help="고점·1R 도달 여부와 무관하게 이 봉수째 15:20 에 전량 정리한다(멀티데이"
+             " 보유 상한).",
+    ),
+    _s(
+        key="max_daily_entries", label_ko="하루 신규 진입 상한", group="sizing_risk",
+        type="int", min=1, max=10, step=1, unit="개",
+        editable=True, risk="identity", auto_tunable=False, deprecated=False,
+        applies_to=("donchian_swing",), range_src="clamp",
+        help="오늘 매수일인 보유 + 주문 중(pending) 종목 수가 이 값 이상이면 그날"
+             " 신규 매수 신호를 멈춘다. 어제 이전 보유는 세지 않는다.",
     ),
     _s(
         key="min_vol_floor_pct", label_ko="최소 변동성 바닥", group="sizing_risk",
         type="float", min=0.0, max=100.0, step=0.1, unit="%",
         editable=True, risk="high", auto_tunable=False, deprecated=False,
-        applies_to=_TURTLE_SIZED, range_src="structural",
+        applies_to=_TURTLE_SIZED,
+        # cycle405 — donchian 의 매수 경로(`calc_buy_quantity`)는 더 이상
+        # `compute_unit_qty_guarded`(이 키의 유일한 소비 지점)를 부르지 않는다
+        # (`_turtle_buy_quantity` 는 죽은 코드로 남아 있을 뿐 호출되지 않는다, §5).
+        deprecated_for=("donchian_swing",),
+        range_src="structural",
         help="ATR / 가격 이 이 퍼센트 미만이면 터틀 유닛을 포기하고 비중 경로로 낙하한다"
              "(저변동 종목의 유닛 폭발 차단). **퍼센트 저장**(1.0 = 1%) — 이름이 `_pct`"
-             " 라도 비율이 아니다. 0 = 비활성.",
+             " 라도 비율이 아니다. 0 = 비활성. **donchian 은 cycle405 부터 무접촉**"
+             "(설계 랏을 R 기반으로 직접 내 이 낙하 경로를 타지 않는다).",
     ),
     _s(
         key="max_lot_units", label_ko="랏당 최대 유닛 (K)", group="sizing_risk",

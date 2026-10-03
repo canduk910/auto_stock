@@ -71,43 +71,44 @@ class TestDonchianMirror:
         return DonchianSwingStrategy(StrategyConfig(
             strategy_id="donchian_swing", name="d", params={"exchange": "KRX"}))
 
-    def test_turtle_lines_max(self):
-        """2ATR base(48,000) vs backstop(45,500) vs 샹들리에(58,000) → 58,000."""
+    # cycle405 — donchian 손절선 = E − R(R = max(8%·E, 1.5·entry_atr)), 3R 도달 시 본전,
+    # 무장 뒤에만 10일 채널. 샹들리에·2ATR·−9% 받침선·미스탬프 고정%는 없어졌다.
+    # E=50,000 · N=1,000 → R=max(4,000, 1,500)=4,000 → 손절 46,000 · 무장 고점 62,000.
+    def test_kk_unarmed_mirror_is_entry_minus_r_not_chandelier(self):
+        """고점 60,000(무장 전) — 옛 샹들리에 58,000 이 아니라 손절선 46,000."""
         s = self._make()
         s.state.positions["A"] = _pos(50_000, 1, high=60_000)
         s._entry_atr["A"] = 1_000.0
-        got = s.get_effective_stop_price("A")
-        assert got == 58_000
+        s._channel_low["A"] = 55_000          # 무장 전이라 채널은 미러에 들어가지 않는다
+        assert s.get_effective_stop_price("A") == 46_000
 
-    def test_turtle_without_high_uses_base_stop(self):
+    def test_kk_without_high_uses_entry_minus_r(self):
         s = self._make()
         pos = _pos(50_000, 1)
         pos.high_since_buy = 0
         s.state.positions["A"] = pos
         s._entry_atr["A"] = 1_000.0
-        # base 48,000 vs backstop 50,000×0.91=45,500 → 48,000
-        assert s.get_effective_stop_price("A") == 48_000
+        assert s.get_effective_stop_price("A") == 46_000
 
-    def test_unstamped_uses_fixed_pct(self):
+    def test_kk_unstamped_uses_8pct_r(self):
         s = self._make()
         pos = _pos(50_000, 1)
         pos.high_since_buy = 0
         s.state.positions["A"] = pos
-        # 미스탬프 → stop_loss_rate -7% → 46,500
-        assert s.get_effective_stop_price("A") == 46_500
+        # 미스탬프 → R = 8% → 46,000 (옛 stop_loss_rate −7% 46,500 아님)
+        assert s.get_effective_stop_price("A") == 46_000
 
-    def test_breakeven_promote_mirrored_without_log(self, caplog):
-        """고점 ≥ buy+1.5×ATR → base 가 buy 로 승격. 미러는 로그 무발화."""
+    def test_kk_armed_mirror_is_max_breakeven_channel_without_log(self, caplog):
+        """고점 ≥ E+3R → 손절선 = E. 채널 55,000 → 미러 55,000. 미러는 로그 무발화."""
         import logging
         s = self._make()
-        s.state.positions["A"] = _pos(50_000, 1, high=52_000)
+        s.state.positions["A"] = _pos(50_000, 1, high=62_000)
         s._entry_atr["A"] = 1_000.0
+        s._channel_low["A"] = 55_000
         with caplog.at_level(logging.INFO):
             got = s.get_effective_stop_price("A")
-        # 승격 base 50,000 vs 샹들리에 52,000−2,000=50,000 → 50,000
-        assert got == 50_000
-        assert not [r for r in caplog.records
-                    if "donchian_breakeven_promote" in r.message]
+        assert got == 55_000
+        assert not [r for r in caplog.records if "donchian" in r.getMessage()]
 
 
 class TestVcpMirror:

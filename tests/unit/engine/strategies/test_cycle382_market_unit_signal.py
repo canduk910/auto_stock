@@ -208,15 +208,21 @@ def test_r35_bfb_ratio_half_day_unbuyable_is_filtered(caplog, price, level, reas
 
 
 def test_r35_donchian_turtle_atr_missing_half_day_is_no_fallback(caplog):
+    """cycle405 — ATR 결측이면 설계 랏 0 → 어느 날이든 신호 단계 NONE(비중 낙하 없음).
+
+    m=1 날은 시장 유닛 필터가 아니라 설계 랏 0 거름(`[donchian_kk_lot_zero]`)이 받는다.
+    """
+    caplog.set_level(logging.INFO)
     with _clock("donchian_swing"):
         r = Ready("donchian_swing", atr=0)
         seed(r.s, 0.5)
         assert r.signal() == Signal.NONE
-        ln = _sig_lines(caplog)[0]
-        assert (field(ln, "reason"), field(ln, "fallback"), field(ln, "path")) == ("no_fallback", "pr", "turtle")
         r1 = Ready("donchian_swing", atr=0)
         seed(r1.s, 1.0)
-        assert r1.signal() == Signal.BUY, "m=1 의 데이터 결손 낙하는 현행 그대로(비중 경로로 산다)"
+        assert r1.signal() == Signal.NONE, "m=1 의 데이터 결손도 사지 않는다(깡토식 — 비중 낙하 없음)"
+        zero = [rec.getMessage() for rec in caplog.records
+                if rec.levelno >= logging.INFO and rec.getMessage().startswith("[donchian_kk_lot_zero] ")]
+        assert zero, "m=1 의 설계 랏 0 은 `[donchian_kk_lot_zero]` 로 남는다"
 
 
 # ===========================================================================
@@ -325,7 +331,10 @@ def test_r40_account_soft_gate_short_circuits_market_unit(monkeypatch, sid):
         assert len(calls) == 1, "양성 대조 — 게이트 통과 시 시장 유닛 필터가 정확히 1회 불려야 한다"
 
 
-@pytest.mark.parametrize("sid", TURTLE4)
+# cycle405 — donchian 은 설계 랏 자체가 m 을 품는다(§5). `_market_unit_lots` 를 터뜨리면 시장 유닛
+# 필터는 fail-open 하지만 m=0 설계 랏 0 거름이 그대로 NONE 을 낸다 — 옳은 동작이다. donchian 의
+# fail-open 계약은 아래 `test_r40b_donchian_view_exception_fails_open_to_m1` 이 m 원천(view) 예외로 잰다.
+@pytest.mark.parametrize("sid", [x for x in TURTLE4 if x != "donchian_swing"])
 def test_r40_signal_helper_exception_fails_open(monkeypatch, caplog, sid):
     """명세 §6 — 필터 헬퍼 예외는 `[market_unit_error] where=signal` + 거르지 않는다(현행 BUY)."""
     need_base()
@@ -340,6 +349,23 @@ def test_r40_signal_helper_exception_fails_open(monkeypatch, caplog, sid):
         assert r.signal() == Signal.BUY, "필터 예외가 매수를 막았다(fail-closed)"
         errs = lines(caplog, "[market_unit_error]", min_level=logging.WARNING)
         assert len(errs) == 1 and field(errs[0], "where") == "signal" and field(errs[0], "strategy") == sid
+
+
+def test_r40b_donchian_view_exception_fails_open_to_m1(monkeypatch, caplog):
+    """cycle405 — 시장 유닛 판정(view)이 터지면 donchian 은 m=1 로 산다(신호 BUY · 수량 = m=1 설계 랏)."""
+    need_base()
+    with _clock("donchian_swing"):
+        r = Ready("donchian_swing")
+        seed(r.s, 0.0)
+
+        def _boom(*a, **k):
+            raise RuntimeError("view failed")
+
+        monkeypatch.setattr(r.s, "_market_unit_view", _boom)
+        assert r.signal() == Signal.BUY, "m 판정 예외가 매수를 막았다(fail-closed)"
+        # 예산 1,000,000 · risk 0.01 · R = max(808, 750) → floor(10,000 / 808) = 12 (명목 상한 19)
+        r.s.state.pending_buys.clear()
+        assert r.s.calc_buy_quantity(r.price, T) == 12
 
 
 # ===========================================================================

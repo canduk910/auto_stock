@@ -232,6 +232,8 @@ def _expected_new_keys(sid: str) -> set[str]:
     if sid in _CYCLE384_AFFECTED_SIDS:
         expected |= set(_CYCLE384_NEW_KEYS)
         expected |= set(_CYCLE399_NEW_KEYS)
+    if sid in _CYCLE405_AFFECTED_SIDS:
+        expected |= set(_CYCLE405_NEW_KEYS)
     return expected
 
 
@@ -250,9 +252,22 @@ def _expected_new_keys(sid: str) -> set[str]:
 _CYCLE301_CHANGED_KEYS: tuple[str, ...] = ("ema_mid", "ema_long", "min_swing_atr_mult")
 _CYCLE301_AFFECTED_SIDS: frozenset[str] = frozenset({"vcp_breakout"})
 
+#: 🔁 cycle405 재핀 — donchian 깡토식 청산·사이징 개조(사용자 승인). 신규 키 7개는
+#: `_expected_new_keys` 가 돌보고(= `test_g290_13` 의 키 집합 축), 값이 바뀐 기존
+#: 키 4개(`risk_pct`·`position_ratio`·`max_positions`·`sizing_mode`, 명세 §7.2)는
+#: `_CYCLE301_CHANGED_KEYS` 선례를 따라 값 비교(`test_g290_14`)에서만 뺀다.
+_CYCLE405_NEW_KEYS: tuple[str, ...] = (
+    "kk_r_floor_pct", "kk_r_atr_mult", "kk_breakeven_r", "kk_time_exit_bars",
+    "kk_time_exit_min_r", "kk_max_hold_bars", "max_daily_entries",
+)
+_CYCLE405_AFFECTED_SIDS: frozenset[str] = frozenset({"donchian_swing"})
+_CYCLE405_CHANGED_KEYS: tuple[str, ...] = (
+    "risk_pct", "position_ratio", "max_positions", "sizing_mode",
+)
+
 
 def _excluded_from_value_comparison(sid: str) -> set[str]:
-    """`test_g290_14` 값 비교에서 뺄 키 = 신규 키(`_expected_new_keys`) + cycle301 값 변경분.
+    """`test_g290_14` 값 비교에서 뺄 키 = 신규 키(`_expected_new_keys`) + cycle301/405 값 변경분.
 
     `_expected_new_keys(sid)` 는 `test_g290_13` 의 키 집합 델타(`now - pre`)와 등식
     비교되므로 값만 바뀐 기존 키를 거기 섞으면 그 등식이 깨진다(위 주석 참조). 이 함수는
@@ -261,6 +276,8 @@ def _excluded_from_value_comparison(sid: str) -> set[str]:
     excluded = _expected_new_keys(sid)
     if sid in _CYCLE301_AFFECTED_SIDS:
         excluded |= set(_CYCLE301_CHANGED_KEYS)
+    if sid in _CYCLE405_AFFECTED_SIDS:
+        excluded |= set(_CYCLE405_CHANGED_KEYS)
     return excluded
 
 
@@ -796,7 +813,8 @@ def test_g290_38_catalog_spec_count_is_102() -> None:
     """카탈로그 스펙 수 99 → **101**(cycle290) → **102**(cycle300 깊이 스위치) →
     **103**(cycle352 15:20 상한가 유지 확인) → **104**(cycle382 시장 유닛 모드) →
     **105**(cycle384 신규 매수 멈춤 `buy_paused`) → **106**(cycle399 섀도 모드 `shadow_mode`) →
-    **118**(cycle403 ETF 추세 전략 etf_trend 신설, 신규 키). 중복 없음.
+    **118**(cycle403 ETF 추세 전략 etf_trend 신설, 신규 키) → **125**(cycle405 donchian
+    깡토식 청산·사이징 신규 7키). 중복 없음.
 
     cycle278 계열 가드 4곳(`test_cycle278_param_catalog`·`test_cycle278_params_schema`·
     `test_routes_strategies`·프론트 `_ast_param_key_hardcode`)이 같은 숫자를 세므로
@@ -807,9 +825,10 @@ def test_g290_38_catalog_spec_count_is_102() -> None:
     # 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27 「돈키언 신규매수 중지」) — 104→105.
     # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1) — 105→106.
     # 🔁 cycle403 재핀 — ETF 추세 전략(etf_trend) 신설 — 106→119(신규 키 13개)→118(MED-3, atr_band_period 제거).
-    assert len(pc.PARAM_SPECS) == 118, len(pc.PARAM_SPECS)
-    assert len(pc.SPEC_BY_KEY) == 118, len(pc.SPEC_BY_KEY)
-    assert len({s.key for s in pc.PARAM_SPECS}) == 118, "키 중복"
+    # 🔁 cycle405 재핀 — donchian 깡토식 청산·사이징 신규 7키 — 118→125.
+    assert len(pc.PARAM_SPECS) == 125, len(pc.PARAM_SPECS)
+    assert len(pc.SPEC_BY_KEY) == 125, len(pc.SPEC_BY_KEY)
+    assert len({s.key for s in pc.PARAM_SPECS}) == 125, "키 중복"
 
 
 # ===========================================================================

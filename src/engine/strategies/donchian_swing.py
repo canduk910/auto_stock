@@ -8,15 +8,16 @@
 - 거래대금이 20일 평균의 1.5배 이상
 - 다음 영업일 09:05 시장가 (갭 +3%↑ 시 스킵)
 
-청산:
-- ATR(14) × 2 트레일링: high_since_buy - ATR×2 이탈 시 매도
-- 하드 손절 -7%
-- 시간 손절 / 15:20 강제 청산 모두 없음 (추세 끝까지 보유)
+청산 (cycle405 — 깡토식 개조):
+- 손절 = 매수가 − R(= max(8%×매수가, 1.5×진입ATR)). 고점이 매수가+3R 도달하면
+  무장 — 손절선이 본전으로 승격되고 10일 저가 채널 이탈도 함께 본다.
+- 20봉째 15:20 에 +1R 미도달이면 정리, 그 밖은 최대 250봉 보유.
 """
 
 from __future__ import annotations
 
 import logging
+import math
 from datetime import date, datetime, time, timezone, timedelta
 
 from src.engine.daily_emit_cap import KstDailyEmitCap
@@ -103,8 +104,8 @@ class DonchianSwingStrategy(StrategyBase):
         "nxt_tradable": None,
         "gap_skip_threshold": 3.0,
         "stop_loss_rate": -7.0,
-        "position_ratio": 0.20,
-        "max_positions": 5,
+        "position_ratio": 0.15,
+        "max_positions": 6,
         "daily_loss_limit": -8.0,
         # 사이클 23 P2-2 — 시간 기반 청산 (멀티데이 약한 이탈 빠른 정리)
         "breakout_fail_n_days": 5,
@@ -112,20 +113,22 @@ class DonchianSwingStrategy(StrategyBase):
         # 사이클 209 (2026-07-14) — 0.5(AI 과튜닝)→4.0 복원. 후보=전일 이미 신고가
         # 돌파라 오늘 기준가 위 시작 → 0.5%는 상시 스킵. 4.0≥gap_skip(3.0) 불변식.
         "max_breakout_extension_pct": 4.0,
-        # Phase 2A-2 (게이트 1) — 터틀 유닛 sizing opt-in. sizing_mode="turtle" 시
-        # sizing(compute_unit_qty)+하드손절(2ATR)이 entry_atr 존재로 원자 결합.
-        # 기본 "position_ratio" = 미전환(하드손절 -7%, byte 동일). 정체성 상수 =
-        # PARAM_RANGES 미편입 (AI 자동튜닝 제외, 사이클 208/209/212 선례).
-        "sizing_mode": "position_ratio",
-        "risk_pct": 0.005,        # 유닛당 리스크 = 예산 0.5% (stop_atr 2.0 → 실효 1.0%)
-        "stop_atr": 2.0,          # 하드손절 = buy - stop_atr×entry_atr (=atr_trail_mult, dead code 방지)
-        "turtle_backstop_pct": -9.0,   # ATR독립 최후 방어 (info=None/재시작/ATR=0, 2ATR보다 넓게)
-        "min_vol_floor_pct": 1.0,      # 터틀 sizing 변동성 floor (atr/price<1% → position_ratio fallback)
+        # cycle405 — 깡토식 청산·사이징으로 개조하며 "turtle" 을 코드 기본값으로 굳힌다.
+        # 이 값 자체는 더 이상 손절 산식을 가르지 않는다(§5 — 개조 사이징은 ATR 스탬프
+        # 유무만 본다). `_entry_atr_rederive_allowed`(cycle355, 재시작 재도출 게이트)만
+        # 이 키를 읽는다. 정체성 상수 — PARAM_RANGES 미편입 (AI 자동튜닝 제외).
+        "sizing_mode": "turtle",
+        "risk_pct": 0.012,        # cycle405 — 1R 손실 = 예산 1.2%(§7.2). R 정의는 아래 kk_r_* 참조.
+        # cycle405 — 아래 넷(stop_atr·turtle_backstop_pct·min_vol_floor_pct·
+        # breakeven_promote_atr)은 donchian 청산·사이징이 더 이상 읽지 않는다(§2·§7.3).
+        # 소비처가 넓어(`portfolio_risk.py`·`llm_buy_gate.py`·프론트 fixture·AI 자문)
+        # 이번 사이클에서는 지우지 않는다 — 삭제는 별도 사이클(D7).
+        "stop_atr": 2.0,          # [legacy] 옛 하드손절 = buy - stop_atr×entry_atr. donchian 무접촉
+        "turtle_backstop_pct": -9.0,   # [legacy] 옛 ATR독립 최후 방어. donchian 무접촉
+        "min_vol_floor_pct": 1.0,      # [legacy] 옛 터틀 sizing 변동성 floor. donchian 무접촉
         "max_lot_units": 2.0,   # cycle242 — 랏당 최대 유닛(K). 터틀 모드 모든 랏 ≤ K유닛, floor(K×u*)==0 이면 미매수. PARAM_RANGES 미편입. 롤백 = DB 20.0
-        # P1-A (2026-07-29, 사이클 A) — 레이어드 청산 신규 2키. 전략 정체성 상수 —
-        # PARAM_RANGES/INT_PARAMS 미편입 (AI 자동튜닝 제외, 사이클 208/209/212 선례).
-        "breakeven_promote_atr": 1.5,   # 고점이 buy+1.5×entry_atr 도달 시 손절선 buy_price 로 승격
-        "channel_exit_period": 10,      # 10일 저가 채널 이탈 청산 (0=비활성)
+        "breakeven_promote_atr": 1.5,   # [legacy] 옛 1.5×entry_atr 본전 승격. donchian 무접촉(새 본전 승격 = kk_breakeven_r)
+        "channel_exit_period": 10,      # 10일 저가 채널 이탈 청산 (0=비활성). cycle405 — 무장(3R 도달) 뒤에만 본다(§2)
         "max_lot_ratio_mult": 2.5,   # cycle245 — 랏 명목 ρ축 상한(K_ρ). 명목 ≤ K_ρ×position_ratio×예산, 1주도 못 사면 미매수. 터틀 모드에선 K축(max_lot_units)이 우선하고 그것이 fail-open 할 때만 백스톱. PARAM_RANGES 미편입. 롤백 = DB 20.0
         "buy_paused": False,   # cycle384 — 신규 매수 신호만 멈춤(청산 무관). 부재·비bool = 멈추지 않음. PARAM_RANGES/INT_PARAMS 편입 금지. 켜고 끄기 = PUT 즉시
         "shadow_mode": False,  # cycle399 — 켜면 BUY 대신 [shadow_buy] 기록 + NONE(주문·예산 무접촉, 청산 무관). 부재·비bool = 끔. PARAM_RANGES/INT_PARAMS 편입 금지. 켜고 끄기 = PUT 즉시
@@ -151,6 +154,32 @@ class DonchianSwingStrategy(StrategyBase):
         # cycle382 — 시장 유닛(단계형, KODEX200 60일선). 부재·오타 = off. 기본
         # shadow(계산·기록만). PARAM_RANGES/INT_PARAMS 편입 금지. 킬스위치 = PUT.
         "market_unit_mode": "shadow",
+        # cycle405 — 깡토식 청산·사이징(§1·§5·§3·§6). R = max(kk_r_floor_pct%×E,
+        # kk_r_atr_mult×N). 전부 리스크 정체성 상수 — PARAM_RANGES/INT_PARAMS·AI 자동
+        # 적용 경로 편입 금지(§7.1). 범위를 벗어나거나 숫자가 아니면 기본값 + WARNING
+        # 1회/일(`_kk` 읽기 관문). 말미(`market_unit_mode` 다음)에 두는 것은 이 7키가
+        # 한 사이클의 diff 로 묶여야 리뷰에서 "그 외 무접촉"을 눈으로 확인할 수 있게 하는
+        # 계약이다(cycle290/384/399 key-order 가드 선례).
+        "kk_r_floor_pct": 8.0,       # R 하한 = 매수가의 8%(N 미스탬프 시 R 전체)
+        "kk_r_atr_mult": 1.5,        # R ATR 배수 = 1.5×N
+        "kk_breakeven_r": 3.0,       # 고점이 E+3R 도달 시 "무장"(손절선 본전 승격 + 채널 감시 시작)
+        "kk_time_exit_bars": 20,     # 20봉째 15:20 — +1R 미도달이면 정리(§3)
+        "kk_time_exit_min_r": 1.0,   # 시간 청산 면제선 = +1R
+        "kk_max_hold_bars": 250,     # 최대 보유 250봉 — 고점 무관 15:20 정리
+        "max_daily_entries": 3,      # 하루 신규 진입 상한(오늘 매수 보유 + 주문 중, §6)
+    }
+
+    # cycle405 — `_kk()` 읽기 관문의 (기본값, 하한, 상한, 정수여부). §7.1 표와 동치 —
+    # 벗어나거나 숫자가 아니면 기본값으로 낙하 + `[donchian_kk_param_invalid]` WARNING
+    # 1회/키/일.
+    _KK_SPECS: dict[str, tuple[float, float, float, bool]] = {
+        "kk_r_floor_pct": (8.0, 4.0, 20.0, False),
+        "kk_r_atr_mult": (1.5, 0.5, 4.0, False),
+        "kk_breakeven_r": (3.0, 1.0, 10.0, False),
+        "kk_time_exit_bars": (20, 5, 60, True),
+        "kk_time_exit_min_r": (1.0, 0.0, 3.0, False),
+        "kk_max_hold_bars": (250, 20, 500, True),
+        "max_daily_entries": (3, 1, 10, True),
     }
 
     # cycle382 — 시장 유닛 ATR 소스 키(터틀 사이징이 읽는 키와 동일 — AST A09).
@@ -222,6 +251,11 @@ class DonchianSwingStrategy(StrategyBase):
         # 위 다섯 cap 과 **별개 필드**(OB-11 — 한 사실이 다른 사실을 침묵시키지 않는다).
         self._breakeven_promote_logged: "KstDailyEmitCap[str]" = KstDailyEmitCap[str]()
         self._time_exit_logged: "KstDailyEmitCap[str]" = KstDailyEmitCap[str]()
+        # cycle405 — 깡토식 청산·사이징 관측 cap 4종. 위 cap 들과 **별개 필드**(OB-11).
+        self._kk_param_logged: "KstDailyEmitCap[str]" = KstDailyEmitCap[str]()
+        self._kk_lot_zero_logged: "KstDailyEmitCap[str]" = KstDailyEmitCap[str]()
+        self._kk_entry_cap_logged: "KstDailyEmitCap[str]" = KstDailyEmitCap[str]()
+        self._kk_time_exit_logged: "KstDailyEmitCap[str]" = KstDailyEmitCap[str]()
 
     def _emit_breakeven_promote(self, ticker: str, high: int, buy_price: int,
                                 mult: float, atr: float, before: int, after: int) -> None:
@@ -907,8 +941,15 @@ class DonchianSwingStrategy(StrategyBase):
             # Phase 2A-2 (게이트 1) — 터틀 entry_atr 재도출 (재시작 복구).
             # 진입 시점(buy_date 이전) ATR 재현 → 현재 팽창 ATR 로 손절선 loosen 차단.
             # in-memory _entry_atr 존재(당일 매수 미재시작) 시 미접촉 = 정확 스탬프 보존.
+            # cycle405 M2(리뷰 반영) — `sizing_mode=="turtle"` 게이트를 뺐다. 깡토식
+            # 개조 뒤 donchian 의 매수 경로(§5)는 N(ATR) 미스탬프면 아예 사지 않으므로
+            # **보유 중인 포지션은 전부 스탬프된 랏**이다 — position_ratio 낙하가 없어
+            # "스탬프 없는 랏이 소실됐나/원래 없었나"를 가를 필요가 사라졌다. BFB/VCP
+            # 공유 헬퍼 `_entry_atr_rederive_allowed`(여전히 position_ratio 낙하가
+            # 있어 sizing_mode 게이트가 유효하다)는 이 변경과 무관 — donchian 전용
+            # 게이트만 뺀다.
             if (
-                params.get("sizing_mode") == "turtle" and pos and pos.buy_date
+                pos and pos.buy_date
                 and ticker not in self._entry_atr and candles
             ):
                 self._rederive_entry_atr(ticker, pos, candles, atr_period)
@@ -1174,17 +1215,22 @@ class DonchianSwingStrategy(StrategyBase):
             if not self._days_held_observe_logged.should_emit(cap_key):
                 return
             self._days_held_observe_logged.mark_emitted(cap_key)
-            n_days = int(self.config.params.get("breakout_fail_n_days", 5))
+            # cycle405 — 시간 청산 임계는 `breakout_fail_n_days`(옛 돌파 실패 청산, 이제
+            # donchian 청산이 읽지 않는다) 가 아니라 `kk_time_exit_bars − 1`(§3)이다.
+            # `days_ok`/`price_ok`(돌파선 비교)도 소멸 — 새 판정축인 1R 도달·3R 무장으로 바꾼다.
+            n_days = int(self._kk("kk_time_exit_bars")) - 1
             days_held, _ = self._business_days_held(buy_date, today)
+            r = self._kk_r(pos.buy_price, self._entry_atr.get(ticker, 0))
             logger.info(
                 "[days_held_observe] ticker=%s strategy=%s buy_date=%s"
                 " days_held=%d calendar_days=%d n_days=%d"
-                " breakout_high=%d current_price=%d days_ok=%s price_ok=%s",
+                " breakout_high=%d current_price=%d days_ok=%s reached_1r=%s armed_3r=%s",
                 ticker, self.strategy_id, buy_date,
                 days_held, (today - buy_date).days, n_days,
                 bh, int(current_price),
                 days_held >= n_days,
-                bh > 0 and current_price < bh,
+                pos.high_since_buy >= pos.buy_price + self._kk("kk_time_exit_min_r") * r,
+                pos.high_since_buy >= pos.buy_price + self._kk("kk_breakeven_r") * r,
             )
         except Exception:
             # F3 — 흡수하되 흔적은 남긴다. 조용히 삼키면 이 관측이 영구 침묵해도
@@ -1691,6 +1737,14 @@ class DonchianSwingStrategy(StrategyBase):
         if self._market_unit_blocks_entry(ticker, current_price):
             return Signal.NONE
 
+        # cycle405 — 설계 랏 거름(§6-1). 수량 0 을 execute_buy 로 흘리면 order_engine 이
+        # "투자금 부족 900초 쿨다운" 으로 오귀인한다(cycle382 와 같은 이유).
+        if self._kk_lot_zero_blocks(ticker, current_price):
+            return Signal.NONE
+        # cycle405 — 하루 신규 상한(§6-2). 순수 메모리 조회 — await/DB/HTTP 금지(hot path).
+        if self._kk_daily_cap_blocks(ticker):
+            return Signal.NONE
+
         # cycle399 — 섀도 관문: 마지막 거름 뒤 · 상태 변경 앞(AST S01).
         if self._shadow_buy_intercepted(ticker, current_price, open_price, level=info["donchian_high"]):
             return Signal.NONE
@@ -1715,198 +1769,285 @@ class DonchianSwingStrategy(StrategyBase):
             self.state.buy_signals.pop(0)
         return Signal.BUY
 
+    def _kk(self, key: str):
+        """§7.1 읽기 관문 — 범위 밖·비수치는 기본값 + `[donchian_kk_param_invalid]`
+        WARNING 1회/키/일. 손절·시간청산·사이징이 전부 이 하나를 거친다(산식 이중화 금지)."""
+        default, lo, hi, is_int = self._KK_SPECS[key]
+        raw = self.config.params.get(key, default)
+        ok = not isinstance(raw, bool) and isinstance(raw, (int, float))
+        if ok:
+            v = float(raw)
+            ok = math.isfinite(v) and lo <= v <= hi
+        if not ok:
+            try:
+                if self._kk_param_logged.should_emit(key):
+                    logger.warning(
+                        "[donchian_kk_param_invalid] key=%s raw=%r → default=%s",
+                        key, raw, default,
+                    )
+                    self._kk_param_logged.mark_emitted(key)
+            except Exception:
+                pass
+            return default
+        return int(v) if is_int else v
+
+    def _kk_r(self, price, atr) -> float:
+        """R(1R 폭, 원) — 명세 §1. `atr`(N) 결측·0 이하는 ATR 항을 0 으로 접는다."""
+        try:
+            n = float(atr or 0)
+        except (TypeError, ValueError):
+            n = 0.0
+        if n <= 0:
+            n = 0.0
+        return max(self._kk("kk_r_floor_pct") / 100.0 * price, self._kk("kk_r_atr_mult") * n)
+
+    def _kk_exit_lines(self, ticker: str, pos) -> tuple[float, bool, float | None]:
+        """청산 가격선 — `check_exit_signal`·`get_effective_stop_price` 공통 헬퍼(§2·§4,
+        AST G-405-4). 반환 = (손절선, 무장 여부, 채널 저가 또는 None)."""
+        e = pos.buy_price
+        r = self._kk_r(e, self._entry_atr.get(ticker, 0))
+        armed = pos.high_since_buy >= e + self._kk("kk_breakeven_r") * r
+        stop = e - r
+        if armed:
+            stop = max(stop, float(e))
+        channel = None
+        if armed:
+            period = int(self.config.params.get("channel_exit_period", 0) or 0)
+            low = self._channel_low.get(ticker, 0)
+            if period > 0 and low > 0:
+                channel = float(low)
+        return stop, armed, channel
+
     def check_exit_signal(
         self, ticker: str, current_price: int, open_price: int,
     ) -> Signal:
-        """ATR 트레일링 + 하드 손절. 시간/익일 청산 없음 — 추세 끝까지 보유."""
+        """깡토식 청산(cycle405, §2) — R 손절(+ 3R 본전 승격) · 무장 후 10일 저가 채널.
+
+        시간 청산은 여기 없다(15:20 `check_force_clear` 단독, §3 — 다음 날 첫 틱
+        시장가를 막기 위해서다). 샹들리에·2N 하드손절·−9% 받침선·미스탬프 고정%·
+        1.5N 승격·돌파 실패 시간 청산은 더 이상 여기서 읽지 않는다(§7.3).
+        """
         pos = self.state.positions.get(ticker)
         if not pos:
             return Signal.NONE
 
-        # 사이클 224 (F1) — 보유일 관측은 **어떤 청산 분기보다 앞**이다.
-        # 아래 §1 하드손절이 그날 첫 평가에서 발화하면 시간청산 블록에 도달조차
-        # 못 해 그 종목의 그날 보유일이 영영 기록되지 않는다. 순수 관찰이라
-        # 반환 시그널에 어떤 영향도 주지 않고, hot path 비용은 emitter 안의
-        # cap 조회가 그날 1~2회로 한정한다.
+        # 사이클 224 (F1) — 보유일 관측은 **어떤 청산 분기보다 앞**이다. 순수 관찰이라
+        # 반환 시그널에 영향이 없다.
         self._emit_days_held_observation(ticker, pos, current_price)
 
-        # 1) 하드 손절
-        loss_rate = (current_price - pos.buy_price) / pos.buy_price * 100 if pos.buy_price > 0 else 0
-        # Phase 2A-2 (게이트 1) — entry_atr 존재 = 터틀 매수 → 2ATR 하드손절(지배) + % backstop
-        # (info=None/재시작/ATR=0 최후 방어). 미존재(position_ratio 매수/미스탬프) = 기존 % 손절
-        # (byte 동일 — sizing_mode 로 게이팅하지 않음, entry_atr 존재가 자연 게이트).
-        entry_atr = self._entry_atr.get(ticker, 0)
-        if entry_atr > 0:
-            stop_atr = float(self.config.params.get("stop_atr", 2.0))
-            base_stop = pos.buy_price - stop_atr * entry_atr
-            # P1-A (2026-07-29, A-3) — 브레이크이븐 승격: 고점이 매수가 + 1.5×entry_atr
-            # 이상 도달한 이력이 있으면 하드손절선을 매수가로 승격 (tighten-only, entry_atr
-            # 존재 시에만). 손절선을 넓히는 방향은 절대 없음(max 연산).
-            breakeven_mult = float(self.config.params.get("breakeven_promote_atr", 0) or 0)
-            if breakeven_mult > 0 and pos.high_since_buy >= pos.buy_price + breakeven_mult * entry_atr:
-                promoted_stop = max(base_stop, pos.buy_price)
-                if promoted_stop != base_stop:
-                    # 사이클 237 — 로그만 1회/ticker/일 cap. 승격 대입은 cap 밖(아래 줄).
-                    self._emit_breakeven_promote(
-                        ticker, pos.high_since_buy, pos.buy_price, breakeven_mult,
-                        entry_atr, base_stop, promoted_stop,
+        # cycle405 — 거래일 캐시 갱신 가시성(옛 §2.5 폴백 로그 자리)은 손절보다 먼저
+        # 두되 never-raise 다. 이 값은 손절 판정에 쓰이지 않는다(§2 는 R·무장만 본다).
+        try:
+            if pos.buy_date:
+                days_held, used_fallback = self._business_days_held(
+                    pos.buy_date, datetime.now(KST).date(),
+                )
+                if used_fallback:
+                    self._emit_days_held_fallback(
+                        ticker, days_held, int(self._kk("kk_time_exit_bars")) - 1,
+                        self._breakout_high.get(ticker, 0),
                     )
-                base_stop = promoted_stop
-            if base_stop > 0 and current_price <= base_stop:
-                logger.info("[donchian_turtle_stop] %s 매수가(%d) - %.1f×ATR(%d) = %d / 현재가 %d",
-                            ticker, pos.buy_price, stop_atr, int(entry_atr), int(base_stop), current_price)
-                return Signal.STOP_LOSS
-            backstop = float(self.config.params.get("turtle_backstop_pct", -9.0))
-            if loss_rate <= backstop:
-                logger.info("[donchian_turtle_backstop] %s 매수가(%d) 대비 %.1f%% ≤ %.1f%%",
-                            ticker, pos.buy_price, loss_rate, backstop)
-                return Signal.STOP_LOSS
-        else:
-            stop_loss = self.config.params["stop_loss_rate"]
-            if loss_rate <= stop_loss:
-                logger.info("도치안 스윙 손절: %s 매수가(%d) 대비 %.1f%%",
-                            ticker, pos.buy_price, loss_rate)
-                return Signal.STOP_LOSS
+        except Exception:
+            # 관측 실패가 손절 판정을 막지 않는다 — 아래가 전부 손절 판정이다.
+            pass
 
-        # 2.5) 사이클 23 P2-2 — 시간 기반 청산 (멀티데이 약한 이탈 빠른 정리)
-        # 기존 ATR 트레일링/하드 손절 보존, 추가 분기만 삽입
-        # 사이클 223 (S3, 2026-08-21) — 달력일 → **영업일**. `(today - buy_date).days` 는
-        # 주말·휴장을 보유일로 세어, n_days=2 라이브 값과 결합하면 금요일 매수가 월요일에
-        # `3 >= 2` 로 **실거래 1일** 만에 청산 자격을 얻었다(실측 13건 중 7건이 금요일 매수,
-        # 6건이 이 경로 = 상시 경로). 매매 규칙 정본도 "보유 N**영업일**"이라 계약 불일치였다
-        # (`_workspace/refactor/2026-06-27_full_review.md` strat-6 CONFIRMED 미시정).
-        # n_days 값(2)은 불변 — 이번 사이클은 **세는 방법만** 고친다.
-        n_days = int(self.config.params.get("breakout_fail_n_days", 5))
-        breakout_high = self._breakout_high.get(ticker, 0)
-        # 사이클 223 G4 — 관측 게이트를 `pos.buy_date` 레벨로 올린다. 종전엔
-        # `breakout_high > 0` 안에 있어서 **재시작 + `_breakout_high` 미복구 + 빈 캐시**
-        # = 관측이 가장 필요한 최악 상태에서 로그가 정확히 0건이었다(S2 의 길이 가드
-        # 강화 `period` → `period+1` 이 미복구 확률을 올렸다). 청산 조건은 그대로 —
-        # 발화는 여전히 `breakout_high > 0` 을 요구한다(아래 if).
-        if pos.buy_date:
-            today = datetime.now(KST).date()
-            days_held, used_fallback = self._business_days_held(pos.buy_date, today)
-            if used_fallback:
-                # 사이클 223 F4 — 폴백 사용 자체를 발화 여부와 무관하게 드러낸다.
-                # hot path 폭주는 DailyEmitCap(1회/ticker/일)이 막는다.
-                self._emit_days_held_fallback(ticker, days_held, n_days, breakout_high)
-            if breakout_high > 0 and days_held >= n_days and current_price < breakout_high:
-                # 사이클 223 G — 캐시 경로/전면 폴백을 한 문구로 덮되 과잉 주장 금지
-                # (전면 폴백만 weekday 환산, 캐시 경로는 갭을 오늘 하루로 한정).
-                suffix = " [폴백: 거래일 캐시 직전 영업일 미도달 → 근사 계상]" if used_fallback else ""
-                # 사이클 237 — 로그만 1회/ticker/일 cap. 신호 반환은 cap 밖(아래 줄) —
-                # 매도 거부 시 재시도가 끊기면 포지션이 청산되지 못한 채 잔존한다.
-                self._emit_time_exit(
-                    ticker, days_held, n_days, current_price, breakout_high, suffix,
-                )
-                return Signal.TIME_EXIT
-
-        # 2.6) P1-A (2026-07-29, A-4) — 10일 저가 채널 이탈 청산 (시간청산 뒤, ATR 트레일링 앞).
-        # 데이터 소스는 recompute_held_atr 가 prepare/recompute 시점 일봉으로 산출 —
-        # on_tick KIS 신규 호출 없음. channel_exit_period=0 이면 비활성(opt-out).
-        channel_period = int(self.config.params.get("channel_exit_period", 0) or 0)
-        channel_low = self._channel_low.get(ticker, 0)
-        if channel_period > 0 and channel_low > 0 and current_price < channel_low:
-            logger.info(
-                "[donchian_channel_exit] %s 현재가(%d) < 최근 %d일 채널 저가(%d)",
-                ticker, current_price, channel_period, channel_low,
-            )
+        if pos.buy_price <= 0:
+            return Signal.NONE
+        stop, armed, channel = self._kk_exit_lines(ticker, pos)
+        if current_price <= stop:
+            return Signal.STOP_LOSS
+        if armed and channel is not None and current_price < channel:
             return Signal.TRAILING_STOP
-
-        # 2) ATR 트레일링 — high_since_buy 기준 (RiskManager가 매 tick 갱신)
-        # P1-A (2026-07-29, A-1) — _candidates miss(후보 이탈) 시 _entry_atr 폴백.
-        # _candidates 는 매일 prepare 가 재구성 → 보유 종목이 20일 신고가 후보에서
-        # 이탈하면 info=None → atr=0 → 트레일링 영구 침묵하던 결함 시정.
-        info = self._candidates.get(ticker)
-        atr = info["atr"] if info else self._entry_atr.get(ticker, 0)
-        if atr > 0 and pos.high_since_buy > 0:
-            mult = self.config.params["atr_trail_mult"]
-            chandelier = pos.high_since_buy - atr * mult
-            if current_price <= chandelier:
-                logger.info(
-                    "도치안 스윙 트레일링: %s 고점(%d) - ATR×%.1f = %d / 현재가 %d",
-                    ticker, pos.high_since_buy, mult, int(chandelier), current_price,
-                )
-                return Signal.TRAILING_STOP
-
         return Signal.NONE
 
     def get_effective_stop_price(self, ticker: str) -> int | None:
-        """실효 손절선 read-only 미러 (cycle233 척도 병기).
+        """실효 손절선 read-only 미러 (cycle233 척도 병기, cycle405 산식 개조).
 
-        `check_exit_signal` 의 **가격선**들과 동일 산식·동일 상태 소스의 max —
-        §1 터틀(2ATR base + 브레이크이븐 승격 + backstop 선) 또는 미스탬프 고정%,
-        §2.6 채널 저가, §2 샹들리에. 시간청산(§2.5)은 가격 무관이라 모델 제외
-        (kojiro `_position_stop_price` stage3 제외 선례 — 조기 청산 방향 = 보수).
-        read-only — 로그 무발화·상태 무변조 (승격 로그는 check_exit 전용).
+        `check_exit_signal` 과 **같은 헬퍼**(`_kk_exit_lines`)의 가격선 max —
+        시간 청산(§3)은 가격 무관이라 모델 제외(kojiro `_position_stop_price`
+        stage3 제외 선례 — 조기 청산 방향 = 보수). read-only — 로그 무발화·상태 무변조.
         """
         pos = self.state.positions.get(ticker)
         if not pos or pos.buy_price <= 0:
             return None
         try:
-            params = self.config.params
-            lines: list[float] = []
-            entry_atr = self._entry_atr.get(ticker, 0)
-            if entry_atr > 0:
-                stop_atr = float(params.get("stop_atr", 2.0))
-                base_stop = pos.buy_price - stop_atr * entry_atr
-                be_mult = float(params.get("breakeven_promote_atr", 0) or 0)
-                if (be_mult > 0
-                        and pos.high_since_buy >= pos.buy_price + be_mult * entry_atr):
-                    base_stop = max(base_stop, float(pos.buy_price))
-                if base_stop > 0:
-                    lines.append(base_stop)
-                backstop = float(params.get("turtle_backstop_pct", -9.0))
-                lines.append(pos.buy_price * (1 + backstop / 100.0))
-            else:
-                stop_loss = float(params["stop_loss_rate"])
-                lines.append(pos.buy_price * (1 + stop_loss / 100.0))
-            channel_period = int(params.get("channel_exit_period", 0) or 0)
-            channel_low = self._channel_low.get(ticker, 0)
-            if channel_period > 0 and channel_low > 0:
-                lines.append(float(channel_low))
-            info = self._candidates.get(ticker)
-            atr = info["atr"] if info else self._entry_atr.get(ticker, 0)
-            if atr > 0 and pos.high_since_buy > 0:
-                mult = float(params["atr_trail_mult"])
-                lines.append(pos.high_since_buy - atr * mult)
+            stop, armed, channel = self._kk_exit_lines(ticker, pos)
+            lines = [stop] + ([channel] if channel is not None else [])
             positives = [line for line in lines if line > 0]
             return int(max(positives)) if positives else None
         except Exception:
             return None  # fail-open — 프록시 폴백
 
     def check_force_clear(self) -> list[str]:
-        """15:20 강제 청산 대상 — 스윙 전략은 강제 청산 없음."""
-        return []
+        """15:20 시간 청산 대상(cycle405, §3) — 그날 끝내야 할 종목만 돌려준다.
+
+        (a) `days_held ≥ kk_time_exit_bars − 1` ∧ +1R 미도달, 또는
+        (b) `days_held ≥ kk_max_hold_bars − 1`(고점 무관) 이면 포함한다.
+        가격 시세를 읽지 않는다(고점·보유일·스탬프만) — never-raise, 종목 하나의
+        예외는 그 종목만 건너뛰고 WARNING, 전체 예외는 `[]` + WARNING.
+        """
+        try:
+            today = datetime.now(KST).date()
+            bars = self._kk("kk_time_exit_bars")
+            max_bars = self._kk("kk_max_hold_bars")
+            min_r = self._kk("kk_time_exit_min_r")
+            out: list[str] = []
+            held = 0
+            for ticker in list(self.state.positions.keys()):
+                held += 1
+                try:
+                    pos = self.state.positions.get(ticker)
+                    if not pos or not pos.buy_date:
+                        continue
+                    days_held, _ = self._business_days_held(pos.buy_date, today)
+                    r = self._kk_r(pos.buy_price, self._entry_atr.get(ticker, 0))
+                    target = pos.buy_price + min_r * r
+                    reason = None
+                    if days_held >= max_bars - 1:
+                        reason = "max_hold"
+                    elif days_held >= bars - 1 and pos.high_since_buy < target:
+                        reason = "no_1r"
+                    if reason:
+                        out.append(ticker)
+                        if self._kk_time_exit_logged.should_emit(ticker):
+                            logger.info(
+                                "[donchian_time_exit] ticker=%s reason=%s days_held=%d"
+                                " high=%d target_1r=%d",
+                                ticker, reason, days_held,
+                                int(pos.high_since_buy), int(target),
+                            )
+                            self._kk_time_exit_logged.mark_emitted(ticker)
+                except Exception:
+                    logger.warning("[donchian_1520_error] ticker=%s", ticker, exc_info=True)
+            logger.info("[donchian_1520_check] held=%d due=%d", held, len(out))
+            return out
+        except Exception:
+            logger.warning(
+                "[donchian_1520_error] check_force_clear 예외 — 빈 목록", exc_info=True,
+            )
+            return []
+
+    def force_clear_signal(self, ticker: str) -> Signal:
+        """15:20 강제 청산 신호 — cycle405 §3. 스케줄러는 `resolve_force_clear_signal`
+        래퍼로 이 메서드를 읽는다."""
+        return Signal.TIME_EXIT
+
+    def _kk_design_lot(self, current_price: int, ticker, m: float) -> tuple[int, float]:
+        """설계 랏(§5) — `q = floor(B×m×risk_pct ÷ R) → min(q, int(B×m×position_ratio)//P)`.
+
+        N(`_candidates[ticker]["atr"]`) 결측·0 이하면 (0, 0.0) — 1주 폴백도 비중
+        낙하도 없다(어느 날이든). 반환 둘째 값은 사이징에 쓴 N(스탬프용)."""
+        if current_price <= 0 or ticker is None or m <= 0:
+            return 0, 0.0
+        info = self._candidates.get(ticker) or {}
+        try:
+            n = float(info.get(self._MARKET_UNIT_ATR_KEY) or 0)
+        except (TypeError, ValueError):
+            n = 0.0
+        if n <= 0:
+            return 0, 0.0
+        b = int(self.state.total_investment)
+        r = self._kk_r(current_price, n)
+        if r <= 0:
+            return 0, n
+        # cycle405 리뷰 L6 — R 이 가격의 절반 이상이면 손절선(`매수가 − R`)이 매수가의
+        # 절반 이하로 내려가 손절이 거의 전량 손실에 가까워진다. 이 종목을 사지 않는다
+        # (`_kk_lot_zero_blocks` 가 이 0 을 `[donchian_kk_lot_zero]` + NONE 으로 거른다 —
+        # 별도 마커를 만들지 않는다, 명세와 같은 경로).
+        if r >= 0.5 * current_price:
+            return 0, n
+        risk_pct = float(self.config.params.get("risk_pct") or 0)
+        ratio = float(self.config.params.get("position_ratio") or 0)
+        q = int(b * m * risk_pct // r)
+        q = min(q, int(b * m * ratio) // current_price)
+        return max(q, 0), n
+
+    def _market_unit_lots(self, current_price, ticker, m):
+        """cycle382 A10 훅 재정의 — 시장 유닛(§5 마지막 문단)이 donchian 의 설계 랏을
+        R 기반(`_kk_design_lot`)으로 좁혀 쓴다. 잔여는 base 와 동형으로 `m` 으로
+        줄이지 않는다(예산 경로 재현 차단)."""
+        from src.engine.strategy_base import MarketUnitLots
+
+        budget = int(self.state.total_investment)
+        remaining = max(0, budget - self._calc_used_funds())
+        remaining_qty = remaining // current_price if current_price > 0 else 0
+        before, n = self._kk_design_lot(current_price, ticker, 1.0)
+        after, _ = self._kk_design_lot(current_price, ticker, m)
+        return MarketUnitLots(
+            path="turtle", atr=n, design_before=before, design_after=after,
+            lot_before=min(before, remaining_qty), lot_after=min(after, remaining_qty),
+            remaining_qty=remaining_qty, fallback="-",
+        )
+
+    def _kk_signal_m(self) -> float:
+        """신호 단계(§6)에서 쓸 시장 유닛 배수 — enforce ∧ m<1 일 때만 줄인다(shadow/off=1.0)."""
+        try:
+            view = self._market_unit_view()
+            if view.mode == "enforce" and view.m < 1.0:
+                return view.m
+        except Exception:
+            pass
+        return 1.0
+
+    def _kk_lot_zero_blocks(self, ticker: str, current_price: int) -> bool:
+        """§6-1 — 설계 랏이 0 이면 신호 단계에서 거른다(수량 0 이 order_engine 오귀인을
+        만들지 않도록)."""
+        m = self._kk_signal_m()
+        q, n = self._kk_design_lot(current_price, ticker, m)
+        if q > 0:
+            return False
+        if self._kk_lot_zero_logged.should_emit(ticker):
+            logger.info(
+                "[donchian_kk_lot_zero] ticker=%s price=%d r=%d budget=%d m=%.2f",
+                ticker, current_price, int(self._kk_r(current_price, n)),
+                int(self.state.total_investment), m,
+            )
+            self._kk_lot_zero_logged.mark_emitted(ticker)
+        return True
+
+    def _kk_daily_cap_blocks(self, ticker: str) -> bool:
+        """§6-2 — 하루 신규 진입 상한. 오늘 매수일 보유 + 주문 중(`pending_buys`) 합이
+        `max_daily_entries` 이상이면 거른다. 어제 보유는 세지 않는다."""
+        today = datetime.now(KST).date()
+        cap = self._kk("max_daily_entries")
+        count = sum(1 for p in self.state.positions.values() if p.buy_date == today)
+        count += len(self.state.pending_buys)
+        if count < cap:
+            return False
+        if self._kk_entry_cap_logged.should_emit(ticker):
+            logger.info(
+                "[donchian_daily_entry_cap] ticker=%s count=%d cap=%d",
+                ticker, count, cap,
+            )
+            self._kk_entry_cap_logged.mark_emitted(ticker)
+        return True
 
     def calc_buy_quantity(self, current_price: int, ticker: str | None = None) -> int:
-        """할당 자금의 position_ratio 비중. 비중 기준 0주여도 잔여 자금이 1주 살 수 있으면 1주.
-
-        Phase 2A-2 (게이트 1): sizing_mode="turtle" + ticker 지정 시 터틀 유닛 sizing
-        (변동성 정규화) 우선. 터틀이 0(변동성 floor/잔여부족) 반환 시 position_ratio 낙하.
-        """
+        """깡토식 설계 랏(cycle405, §5) — R 기반 수량. q=0 이면 1주 폴백도 비중 낙하도
+        없이 그대로 0 을 돌려준다(A-GATE). q>0 이면 사이징에 쓴 N 을 `_entry_atr` 에
+        스탬프(손절 게이트, §1)하고 공통 예산 관문으로 넘긴다."""
         if current_price <= 0:
             return 0
         # cycle382 — 시장 유닛(단계형): enforce ∧ m<1 일 때만 값을 돌려준다
         # (shadow 는 기록만). 축소일 1주 폴백·터틀→비중 낙하는 없다(원인 불문).
         lots = self._market_unit_sizing(current_price, ticker)
         if lots is not None:
-            if lots.lot_after <= 0:
-                return 0
-            if lots.path == "turtle":
-                self._entry_atr[ticker] = lots.atr
-            return self._apply_budget_limit(lots.design_after, current_price, ticker)
-        params = self.config.params
-        if params.get("sizing_mode") == "turtle" and ticker is not None:
-            turtle_qty = self._turtle_buy_quantity(current_price, ticker)
-            if turtle_qty > 0:
-                return self._apply_budget_limit(turtle_qty, current_price, ticker)
-        ratio = params["position_ratio"]
-        amount = int(self.state.total_investment * ratio)
-        return self._apply_budget_limit(amount // current_price, current_price, ticker)
+            q, n = lots.design_after, lots.atr
+        else:
+            q, n = self._kk_design_lot(current_price, ticker, 1.0)
+        if q <= 0:
+            return 0
+        self._entry_atr[ticker] = n
+        return self._apply_budget_limit(q, current_price, ticker)
 
     def _turtle_buy_quantity(self, current_price: int, ticker: str) -> int:
-        """터틀 유닛 수량 + entry_atr 원자 스탬프 (Phase 2A-2 게이트 1).
+        """[legacy] 터틀 유닛 수량 + entry_atr 원자 스탬프 (Phase 2A-2 게이트 1).
+
+        cycle405 — `calc_buy_quantity` 는 이 메서드를 더 이상 부르지 않는다(§5 —
+        설계 랏은 `_kk_design_lot` 이 낸다). 다른 전략(vcp/bfb)과 이름·시그니처를
+        맞춘 교차 검증 테스트(`test_cycle245_ast_ratio_notional_cap.py` 등)가 이
+        함수를 계속 참조하므로 메서드는 남겨 둔다 — donchian 의 매수 경로에서는 죽은
+        코드다.
 
         `_candidates[ticker]["atr"]`(prepare D-1 ATR)를 sizing 과 하드손절 entry_atr
         양쪽에 동일 사용(불변식 성립 열쇠). 갭/변동성 가드는 `compute_unit_qty_guarded`.

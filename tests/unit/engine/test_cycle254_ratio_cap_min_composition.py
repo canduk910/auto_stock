@@ -62,6 +62,7 @@ from tests.unit.engine.test_cycle245_ratio_notional_cap import (
     OVERSIZED,
     RCONFIG,
     RSKIP,
+    _calc,
     _dc,
     _kj,
     _msgs,
@@ -116,7 +117,7 @@ def _head_early_exit(strategy):
 def _quote(strategy, price: int, ticker: str, atr: float | None):
     """`_candidates` 를 세팅하고 매수 수량을 뽑는다 (atr=None → 배관 끊김)."""
     strategy._candidates = {} if atr is None else {ticker: {"atr": float(atr)}}
-    return strategy.calc_buy_quantity(price, ticker)
+    return _calc(strategy, price, ticker)
 
 
 # ===========================================================================
@@ -288,7 +289,7 @@ def test_c254_f9d_probe_error_still_fails_open(caplog, monkeypatch):
     monkeypatch.setattr(s, "_resolve_sizing_atr", _boom)
     caplog.clear()
     with caplog.at_level(logging.INFO):
-        qty = s.calc_buy_quantity(300_000, "000815")
+        qty = _calc(s, 300_000, "000815")
 
     assert qty == 1, "판정 실패가 매수를 막았다 (fail-open 방향 위반)"
     hits = _msgs(caplog, RSKIP)

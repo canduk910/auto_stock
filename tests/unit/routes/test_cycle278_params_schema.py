@@ -138,7 +138,8 @@ def _strategy_row(data: dict, sid: str) -> dict:
 async def test_schema_when_requested_then_200_with_101_params(schema_env):
     """B43/C11 — 105 항목 전수(cycle290 이 킬스위치 2키 등재해 99→101, cycle300 이
     101→102, cycle352 가 102→103, cycle382 가 103→104, cycle384 가 104→105, cycle399 가 105→106,
-    cycle403(ETF 추세 전략 etf_trend 신설)가 106→119(신규 키 13개)→118(MED-3, atr_band_period 제거)).
+    cycle403(ETF 추세 전략 etf_trend 신설)가 106→119(신규 키 13개)→118(MED-3, atr_band_period 제거),
+    cycle405(donchian 깡토식 청산·사이징 신규 7키)가 118→125).
 
     부분 노출은 지금의 재드리프트(73키 화면 밖)의 재현이다.
     """
@@ -147,7 +148,7 @@ async def test_schema_when_requested_then_200_with_101_params(schema_env):
     assert data["catalog_version"] == pc.CATALOG_VERSION
     keys = [p["key"] for p in data["params"]]
     assert keys == list(pc.all_keys()), "params 순서/집합이 카탈로그 정의 순서와 다르다"
-    assert len(keys) == 118, f"{len(keys)}개 — 118 전수여야 한다"
+    assert len(keys) == 125, f"{len(keys)}개 — 125 전수여야 한다"
 
 
 async def test_schema_when_read_then_each_param_has_all_fields(schema_env):

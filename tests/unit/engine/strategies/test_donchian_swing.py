@@ -2,8 +2,8 @@
 
 추세추종 멀티데이 전략. 검증 포인트:
 - check_buy_signal: 09:05~09:30 시간 가드, 갭 +3% 스킵, 1회만 진입(_bought_today)
-- check_exit_signal: 하드 손절 -7%, ATR×2 Chandelier 트레일링
-- check_force_clear: 빈 리스트 (15:20 강제청산 없음 — 추세 끝까지 보유)
+- check_exit_signal: (cycle405) −1R 손절(R = max(8%, 1.5×진입 ATR)) · 3R 뒤 본전 · 3R 뒤 10일 저가 채널
+- check_force_clear: (cycle405) 20봉 +1R 미도달·250봉만 — 오늘 산 보유는 넣지 않는다
 """
 
 from __future__ import annotations
@@ -68,6 +68,7 @@ def test_buy_when_after_0930_then_none(donchian):
 
 def test_buy_within_time_window_and_no_gap_then_buy(donchian):
     _seed_candidate(donchian, "005930", prev_close=70000)
+    donchian.state.total_investment = 10_000_000   # cycle405 — 설계 랏 0 이면 신호 단계에서 거른다
     with freeze_time("2026-05-08 09:10:00"):
         # 시가 71400 → 갭 +2% (gap_skip 3% 미만), 진입 OK
         assert donchian.check_buy_signal("005930", 73000, 71400) == Signal.BUY
@@ -115,36 +116,39 @@ def test_buy_when_buy_disabled_then_none(donchian):
 # ---------------------------------------------------------------------------
 # check_exit_signal — 하드 손절 + ATR 트레일링
 # ---------------------------------------------------------------------------
-def test_exit_when_loss_breaches_minus_7_then_stop_loss(donchian):
+def test_exit_when_price_at_entry_minus_r_then_stop_loss(donchian):
+    """cycle405 — 스탬프 없음 → R = 8% → 손절선 92,000 (옛 −7% 고정 손절 아님)."""
     _seed_candidate(donchian, "005930", atr=1500)
     donchian.state.positions["005930"] = Position(
         ticker="005930", buy_price=100000, quantity=1,
         order_no="O1", strategy_id="donchian_swing",
     )
-    # -7% 정확히 → STOP_LOSS
-    assert donchian.check_exit_signal("005930", 93000, 100000) == Signal.STOP_LOSS
+    assert donchian.check_exit_signal("005930", 93000, 100000) == Signal.NONE
+    assert donchian.check_exit_signal("005930", 92000, 100000) == Signal.STOP_LOSS
 
 
-def test_exit_when_loss_within_threshold_then_none(donchian):
+def test_exit_when_loss_within_r_then_none_no_chandelier(donchian):
     _seed_candidate(donchian, "005930", atr=1500)
     donchian.state.positions["005930"] = Position(
         ticker="005930", buy_price=100000, quantity=1,
         order_no="O1", strategy_id="donchian_swing",
         high_since_buy=100000,
     )
-    # -6% (loss_rate=-6 > stop_loss=-7) → 손절 미발동
-    # ATR 트레일링: chandelier = 100000 - 1500*2 = 97000. current 94000 <= 97000 → TRAILING_STOP
-    assert donchian.check_exit_signal("005930", 94000, 100000) == Signal.TRAILING_STOP
+    # −6% — 손절선(92,000) 위. 옛 샹들리에(97,000)는 없어졌다 → NONE
+    assert donchian.check_exit_signal("005930", 94000, 100000) == Signal.NONE
 
 
-def test_exit_atr_trailing_when_drop_beyond_chandelier(donchian):
+def test_exit_channel_only_after_3r(donchian):
     _seed_candidate(donchian, "005930", atr=1000)
     donchian.state.positions["005930"] = Position(
         ticker="005930", buy_price=100000, quantity=1,
         order_no="O1", strategy_id="donchian_swing",
-        high_since_buy=110000,  # 매수 후 고점 갱신됐다고 가정
+        high_since_buy=110000,
     )
-    # chandelier = 110000 - 1000*2 = 108000. current 107500 <= 108000 → TRAILING_STOP
+    donchian._channel_low["005930"] = 108000
+    # 무장 전(고점 110,000 < E+3R 124,000) — 채널·샹들리에 모두 보지 않는다
+    assert donchian.check_exit_signal("005930", 107500, 100000) == Signal.NONE
+    donchian.state.positions["005930"].high_since_buy = 124000
     assert donchian.check_exit_signal("005930", 107500, 100000) == Signal.TRAILING_STOP
 
 
@@ -164,9 +168,9 @@ def test_exit_when_no_position_then_none(donchian):
 
 
 # ---------------------------------------------------------------------------
-# check_force_clear — 추세추종은 강제청산 없음
+# check_force_clear — cycle405: 20봉·250봉 시간 청산만. 오늘 산 보유는 넣지 않는다
 # ---------------------------------------------------------------------------
-def test_force_clear_returns_empty_list_even_with_positions(donchian):
+def test_force_clear_returns_empty_list_for_fresh_position(donchian):
     donchian.state.positions["005930"] = Position(
         ticker="005930", buy_price=70000, quantity=10,
         order_no="O1", strategy_id="donchian_swing",
@@ -178,8 +182,16 @@ def test_force_clear_returns_empty_list_even_with_positions(donchian):
 # calc_buy_quantity
 # ---------------------------------------------------------------------------
 def test_calc_qty_when_amount_covers_qty(donchian):
-    donchian.state.total_investment = 10_000_000  # 20% = 2M
-    assert donchian.calc_buy_quantity(current_price=100_000) == 20
+    """cycle405 — R = max(8%·100,000, 1.5×1,500) = 8,000 → floor(10M×0.012/8,000) = 15 (명목 상한 15)."""
+    donchian.state.total_investment = 10_000_000
+    _seed_candidate(donchian, "005930", atr=1500)
+    assert donchian.calc_buy_quantity(current_price=100_000, ticker="005930") == 15
+
+
+def test_calc_qty_without_ticker_or_atr_then_zero(donchian):
+    """cycle405 — ATR(N) 없이는 사지 않는다(스탬프 없는 랏 금지, 비중 낙하 없음)."""
+    donchian.state.total_investment = 10_000_000
+    assert donchian.calc_buy_quantity(current_price=100_000) == 0
 
 
 def test_calc_qty_when_total_below_share_price_then_zero(donchian):

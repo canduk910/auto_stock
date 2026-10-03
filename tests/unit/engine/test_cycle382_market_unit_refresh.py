@@ -369,8 +369,9 @@ async def test_r46_daily_summary_once_per_trading_day(monkeypatch, caplog):
     with freeze_time("2026-09-28T09:15:00+09:00"):
         for t, atr in (("990001", 500), ("990002", 500), ("990003", None)):
             s._candidates[t] = {"prev_close": 10_000, "atr": atr, "ema60": 9_000, "donchian_high": 10_000}
-        assert s.calc_buy_quantity(10_000, "990001") == 10                            # 20 → 10
-        assert s.calc_buy_quantity(10_000, "990002") == 10                            # 20 → 10
+        # cycle405 — donchian 깡토식 설계 랏: floor(1M×m×0.01 / 800) = 12 → 6
+        assert s.calc_buy_quantity(10_000, "990001") == 6                             # 12 → 6
+        assert s.calc_buy_quantity(10_000, "990002") == 6                             # 12 → 6
         assert s.calc_buy_quantity(10_000, "990003") == 0                             # no_fallback
         for t in ("990004", "990005"):
             s._candidates[t] = {"prev_close": 10_000, "atr": 0, "ema60": 9_000, "donchian_high": 10_000}
@@ -387,7 +388,7 @@ async def test_r46_daily_summary_once_per_trading_day(monkeypatch, caplog):
     assert (field(ln, "state"), fnum(ln, "m")) == ("down_rising", 0.5)
     assert (field(ln, "calc_attempts"), field(ln, "would_skip"), field(ln, "reduced"),
             field(ln, "signal_skips")) == ("3", "1", "2", "2")
-    assert (field(ln, "lot_before_sum"), field(ln, "lot_after_sum")) == ("40", "20")
+    assert (field(ln, "lot_before_sum"), field(ln, "lot_after_sum")) == ("24", "12")
 
 
 async def test_r46_without_evening_preview_next_boot_emits_the_line(caplog):

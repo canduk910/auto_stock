@@ -635,10 +635,10 @@ def test_r06_catalog_row_and_counts():
     assert spec.label_ko and spec.help, "한글 라벨·도움말 필수"
     assert KEY in pc.identity_keys()
     # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1) — 105→106 · identity 18→19 · cycle384.1→cycle399.1.
-    assert len(pc.PARAM_SPECS) == 118 and len(pc.SPEC_BY_KEY) == 118
-    assert len(pc.identity_keys()) == 19
+    assert len(pc.PARAM_SPECS) == 125 and len(pc.SPEC_BY_KEY) == 125
+    assert len(pc.identity_keys()) == 26
     # 🔁 cycle403 재핀 — ETF 추세 전략(etf_trend) 신설, 신규 키 12개(atr_band_period 는 MED-3 에서 제거) — cycle399.1 → cycle403.1.
-    assert pc.CATALOG_VERSION == "cycle403.2", "카탈로그 버전 미갱신(M27)"
+    assert pc.CATALOG_VERSION == "cycle405", "카탈로그 버전 미갱신(M27)"
 
 
 def test_r06_catalog_help_is_honest_about_exits():
@@ -693,4 +693,4 @@ def test_f01_generated_fixture_carries_buy_paused(path):
         assert KEY in s["keys"], s["strategy_id"]
         assert s["defaults"][KEY] is False and s["params"][KEY] is False, s["strategy_id"]
     # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1) — 105→106.
-    assert len(data["params"]) == 118
+    assert len(data["params"]) == 125

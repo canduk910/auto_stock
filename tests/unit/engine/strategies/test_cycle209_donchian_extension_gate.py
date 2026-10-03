@@ -41,6 +41,8 @@ def _make_strat(max_ext: float | None = None):
     )
     if max_ext is not None:
         strat.config.params["max_breakout_extension_pct"] = max_ext
+    # cycle405 — 설계 랏 0(예산 0)이면 신호 단계에서 거른다. 추격 상한만 보려고 예산을 둔다.
+    strat.state.total_investment = 10_000_000
     return strat
 
 

@@ -856,13 +856,19 @@ async def test_d2_9_fetch_count_and_exit_signals_unchanged(caplog):
         await s.recompute_held_atr()
 
     assert sorted(calls) == ["005930", "403870"], f"fetch 대상 변화 — {calls}"
-    # 하드손절은 무장 여부와 무관하게 그대로 동작 (청산 절대 미차단)
+    # cycle405 — R 손절은 무장 여부와 무관하게 그대로 동작한다(청산 절대 미차단).
+    # entry_atr=4100(재도출) → R = max(0.08×45,000=3,600, 1.5×4,100=6,150) = 6,150
+    # → 손절선 = 45,000 − 6,150 = 38,850. 38,000(< 손절선)이면 STOP_LOSS.
     s._trading_days = set(_W_1724)
-    assert s.check_exit_signal("403870", 41_000, 44_000) == Signal.STOP_LOSS
+    assert s.check_exit_signal("403870", 38_000, 44_000) == Signal.STOP_LOSS
 
 
 async def test_d2_10_recovery_unblocks_permanently_dead_time_exit(caplog):
-    """**복구의 값어치** — 값 0 이던 포지션의 시간청산이 되살아난다.
+    """**복구의 값어치** — 값 0 이던 포지션의 돌파선이 되살아난다.
+
+    ⚠️ cycle405 — 돌파선을 쓰던 §2.5 시간 청산은 없어졌다(시간 청산은 15:20 20봉·250봉).
+    재도출(`_breakout_high` 값 복구)은 남아 있으므로 복구 자체만 단언하고, 틱 경로는 NONE 이다.
+    아래 원문은 옛 게이트 서술이다.
 
     시간청산 게이트는 `breakout_high > 0 and days_held >= n_days and 현재가 < breakout_high`
     다. 값 0 이면 첫 조건에서 영구 미발화이고, 멤버십 게이트가 그 상태를 고칠 기회를
@@ -884,8 +890,8 @@ async def test_d2_10_recovery_unblocks_permanently_dead_time_exit(caplog):
         await s.recompute_held_atr()
 
     assert s._breakout_high.get("192820") == 11_000
-    assert s.check_exit_signal("192820", 9_800, 9_900) == Signal.TIME_EXIT, (
-        "복구 후에도 시간청산이 죽어 있다 — 게이트가 값 0 을 못 고쳤다"
+    assert s.check_exit_signal("192820", 9_800, 9_900) == Signal.NONE, (
+        "cycle405 — 돌파선 복구가 틱 경로 시간 청산을 되살리면 안 된다(§2.5 폐지)"
     )
 
 

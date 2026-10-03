@@ -446,10 +446,10 @@ def test_s12_catalog_row_and_counts():
     for word in ("신규 매수", "손절", "주문"):
         assert word in spec.help, f"도움말에 「{word}」 없음"
     assert KEY in pc.identity_keys()
-    assert len(pc.PARAM_SPECS) == 118 and len(pc.SPEC_BY_KEY) == 118
-    assert len(pc.identity_keys()) == 19
+    assert len(pc.PARAM_SPECS) == 125 and len(pc.SPEC_BY_KEY) == 125
+    assert len(pc.identity_keys()) == 26
     # 🔁 cycle403 재핀 — ETF 추세 전략(etf_trend) 신설, 신규 키 12개(atr_band_period 는 MED-3 에서 제거) — cycle399.1 → cycle403.1.
-    assert pc.CATALOG_VERSION == "cycle403.2"
+    assert pc.CATALOG_VERSION == "cycle405"
 
 
 _FIXTURES = (

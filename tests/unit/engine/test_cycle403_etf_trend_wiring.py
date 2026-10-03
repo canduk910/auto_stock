@@ -76,7 +76,8 @@ def test_manifest_derived_sets_include_etf_trend():
     from src.engine import strategy_manifest as sm
 
     assert sm.SWING_POLL_IDS == ("donchian_swing", "kojiro", SID), "스윙 폴 순서 = donchian·kojiro 뒤"
-    assert sm.CLOSE_AT_1520_IDS == ("volatility_breakout", "long_tail_volatility", SID)
+    # cycle405 — donchian 이 15:20 시간 청산(20봉·250봉)으로 명부 순서대로 끼어든다.
+    assert sm.CLOSE_AT_1520_IDS == ("volatility_breakout", "long_tail_volatility", "donchian_swing", SID)
     assert sm.MARKET_UNIT_SCALE_IDS[-1] == SID and len(sm.MARKET_UNIT_SCALE_IDS) == 5
     assert SID not in sm.BREAKOUT_IDS and SID not in sm.OPEN_PRICE_TARGET_IDS
 

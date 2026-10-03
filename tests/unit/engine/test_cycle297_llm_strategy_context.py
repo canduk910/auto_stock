@@ -389,7 +389,7 @@ _EXPECTED_STOP_PCT: dict[str, float] = {
     "momentum": -7.5,            # stop_loss_rate
     "volatility_breakout": -3.0,  # stop_loss_rate (기존 계약, 회귀 확인용)
     "long_tail_volatility": -3.0,  # intraday_stop_loss (기존 계약)
-    "donchian_swing": -7.0,      # stop_loss_rate
+    "donchian_swing": -8.0,      # cycle405 — −kk_r_floor_pct (−1R 하한)
     "bull_flag_breakout": -5.0,  # stop_loss_rate
     "vcp_breakout": -7.0,        # stop_loss_rate
     "kojiro": -8.0,              # hard_stop_pct
@@ -416,7 +416,7 @@ _EXIT_RULE_TOKENS: dict[str, tuple[str, ...]] = {
     "momentum": ("7.5", "10", "2"),
     "volatility_breakout": ("15:20",),
     "long_tail_volatility": ("상한가",),
-    "donchian_swing": ("9", "2", "10"),
+    "donchian_swing": ("8", "1.5", "3", "10", "20", "250"),   # cycle405 — 깡토식 청산 서술
     "bull_flag_breakout": ("5", "2"),
     "vcp_breakout": ("7", "2"),
     "kojiro": ("8", "2", "2.5"),
@@ -442,7 +442,7 @@ def test_g1_8b_read_exit_rule_is_nonempty_and_quotes_live_params(sid: str) -> No
     "sid,key,value",
     [
         ("momentum", "stop_loss_rate", -11.25),
-        ("donchian_swing", "turtle_backstop_pct", -11.25),
+        ("donchian_swing", "kk_r_floor_pct", 11.25),   # cycle405 — R 하한이 서술에 인용된다
         ("bull_flag_breakout", "stop_loss_rate", -11.25),
         ("vcp_breakout", "stop_loss_rate", -11.25),
         ("kojiro", "hard_stop_pct", -11.25),
@@ -482,10 +482,10 @@ _KOJIRO = {"sizing_mode": "position_ratio", "stop_atr": 2.0, "hard_stop_pct": -8
 @pytest.mark.parametrize(
     "sid,params,atr14_pct,expected",
     [
-        # donchian — `max(-(stop_atr×atr), backstop)` = 타이트한 쪽
-        ("donchian_swing", _TURTLE_D, 3.0, -6.0),
-        ("donchian_swing", _TURTLE_D, 6.0, -9.0),   # 2×6=12 → backstop -9 가 상한
-        ("donchian_swing", _TURTLE_D, None, -7.0),  # ATR 결측 → 고정% (0.0 위장 금지)
+        # donchian (cycle405) — −max(kk_r_floor_pct 8, kk_r_atr_mult 1.5 × atr). 옛 키(_TURTLE_D)는 무시
+        ("donchian_swing", _TURTLE_D, 3.0, -8.0),
+        ("donchian_swing", _TURTLE_D, 6.0, -9.0),
+        ("donchian_swing", _TURTLE_D, None, -8.0),  # ATR 결측 → R 하한 (0.0 위장 금지)
         # BFB — `clamp(-(stop_atr×atr), backstop, min_stop)` = [-7.0, -4.0]
         ("bull_flag_breakout", _TURTLE_BFB, 1.0, -4.0),
         ("bull_flag_breakout", _TURTLE_BFB, 3.0, -6.0),
@@ -519,9 +519,11 @@ def test_g1_9b_non_turtle_donchian_keeps_fixed_pct() -> None:
     DB 토글 하나로 손절 규약이 바뀌면 안 된다는 루트 CLAUDE.md 금기의 프롬프트 축 대응물이다
     (미스탬프 랏은 실제로 고정 -7% 를 탄다).
     """
+    # cycle405 — 의미 전환: donchian 손절은 이제 sizing_mode 와 무관하게 R 이다(스탬프가 있으면
+    # ATR 항이 살고, 없으면 8% 하한). 그래서 비-터틀도 같은 값을 돌려준다(sizing_mode 로 가르지 않는다).
     params = {**_TURTLE_D, "sizing_mode": "position_ratio"}
-    got = _gate()._resolve_stop_loss_pct("donchian_swing", params, {"atr14_pct": 3.0})
-    assert got == pytest.approx(-7.0), f"비-터틀 donchian 이 ATR 재해석을 탔다: {got}"
+    got = _gate()._resolve_stop_loss_pct("donchian_swing", params, {"atr14_pct": 6.0})
+    assert got == pytest.approx(-9.0), f"donchian 손절을 sizing_mode 로 갈랐다: {got}"
 
 
 def test_g1_9c_resolve_never_returns_zero_or_positive() -> None:
@@ -593,3 +595,37 @@ def test_g1_10c_prompt_version_changes_when_that_strategy_meta_changes(monkeypat
 
     assert after_d != before_d, "donchian META 를 고쳤는데 prompt_version 이 그대로다"
     assert after_k == before_k, "kojiro META 는 안 고쳤는데 prompt_version 이 바뀌었다"
+
+
+# ===========================================================================
+# cycle405 리뷰 L8 — `kk_r_floor_pct` 를 `_KK_SPECS` 범위로 클램프
+# ===========================================================================
+@pytest.mark.parametrize("raw", [999.0, -5.0, float("nan"), "garbage", None])
+def test_l8_kk_r_floor_pct_clamped_in_llm_gate(raw) -> None:
+    """DB 가 범위 밖·비수치 `kk_r_floor_pct` 를 들고 있어도 LLM 관측(손절폭·청산 규약
+    문구)은 기본값(8.0)으로 낙하한다 — 생산 사이징(`donchian_swing._kk()`)의 클램프를
+    거치지 않고 params 를 직접 읽던 결함(리뷰 지적)."""
+    gate = _gate()
+    params = _default_params("donchian_swing")
+    params["kk_r_floor_pct"] = raw
+
+    stop_pct = gate._read_stop_loss_pct("donchian_swing", params)
+    assert stop_pct == pytest.approx(-8.0), (
+        f"raw={raw!r} 이면 기본값(8.0)으로 낙하해야 한다 — got {stop_pct}"
+    )
+
+    exit_rule = gate._read_exit_rule("donchian_swing", params)
+    assert "8" in exit_rule, f"raw={raw!r}: exit_rule 이 기본값을 인용해야 한다 — {exit_rule!r}"
+
+    resolved = gate._resolve_stop_loss_pct("donchian_swing", params, None)
+    assert resolved == pytest.approx(-8.0), (
+        f"raw={raw!r}: _resolve_stop_loss_pct 도 기본값으로 낙하해야 한다 — got {resolved}"
+    )
+
+
+def test_l8_kk_r_floor_pct_in_range_passes_through() -> None:
+    """범위 안 값(예: 12.0)은 그대로 통과한다 — 과잉 클램프 금지."""
+    gate = _gate()
+    params = _default_params("donchian_swing")
+    params["kk_r_floor_pct"] = 12.0
+    assert gate._read_stop_loss_pct("donchian_swing", params) == pytest.approx(-12.0)

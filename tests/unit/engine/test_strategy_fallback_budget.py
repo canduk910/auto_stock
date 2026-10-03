@@ -34,7 +34,8 @@ STRATEGY_CLASSES = [
     ("momentum", MomentumStrategy),
     ("volatility_breakout", VolatilityBreakoutStrategy),
     ("long_tail_volatility", LongTailVolatilityStrategy),
-    ("donchian_swing", DonchianSwingStrategy),
+    # cycle405 — donchian 은 1주 폴백을 쓰지 않는다(깡토식 설계 랏, q=0 이면 0). 아래
+    # `test_donchian_has_no_one_share_fallback` 이 그 계약을 따로 지킨다.
 ]
 
 
@@ -128,6 +129,17 @@ def test_fallback_uses_common_helper(strategy_id, cls):
     assert sentinel == 42
     assert result == 0
     mock_helper.assert_called_once_with(100_000_000)
+
+
+def test_donchian_has_no_one_share_fallback():
+    """cycle405 — 설계 랏 0 이면 잔여가 충분해도 0 이고 `_fallback_one_share` 를 부르지 않는다."""
+    s = _build("donchian_swing", DonchianSwingStrategy)
+    s.state.total_investment = 1_000_000
+    s._candidates["005930"] = {"atr": 10.0}
+    price = 150_001                        # floor(1M × 0.012 / (0.08 × price)) = 0
+    with patch.object(StrategyBase, "_fallback_one_share", return_value=1) as helper:
+        assert s.calc_buy_quantity(current_price=price, ticker="005930") == 0
+    helper.assert_not_called()
 
 
 # ---------------------------------------------------------------------------

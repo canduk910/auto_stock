@@ -475,7 +475,16 @@ def test_a10_calc_calls_market_unit_sizing_first(fname):
         n.lineno for n in ast.walk(fn)
         if isinstance(n, ast.Constant) and n.value in ("position_ratio", "sizing_mode")
     ]
-    assert existing and line < min(existing), f"{fname} 기존 사이징 코드보다 뒤에 있다"
+    if fname == "donchian_swing.py":
+        # cycle405 — donchian 사이징은 깡토식 설계 랏(헬퍼)이라 calc 본문에 옛 사이징 토큰이 없다.
+        # 대신 시장 유닛 호출이 가격 가드 바로 다음 최상위 문장이어야 한다(첫 줄 규약).
+        stmts = [b for b in fn.body
+                 if not (isinstance(b, ast.Expr) and isinstance(getattr(b, "value", None), ast.Constant)
+                         and isinstance(b.value.value, str))]          # docstring 제외
+        assert stmts[1] is top_level[0], f"{fname} _market_unit_sizing 가 가격 가드 바로 다음이 아니다"
+        assert all(line < m for m in existing), f"{fname} 기존 사이징 코드보다 뒤에 있다"
+    else:
+        assert existing and line < min(existing), f"{fname} 기존 사이징 코드보다 뒤에 있다"
     for n in ast.walk(fn):
         if isinstance(n, ast.Call):
             assert all(k.arg != "fraction" for k in n.keywords), f"{fname} fraction= (M11 · G-242-7)"
@@ -616,4 +625,5 @@ def test_a12_catalog_row():
     # 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27 「돈키언 신규매수 중지」) — 카탈로그 버전 cycle382.1 → cycle384.1.
     # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1) — 카탈로그 버전 cycle384.1 → cycle399.1.
     # 🔁 cycle403 재핀 — ETF 추세 전략(etf_trend) 신설 — 카탈로그 버전 cycle399.1 → cycle403.1.
-    assert pc.CATALOG_VERSION == "cycle403.2"
+    # 🔁 cycle405 재핀 — donchian 깡토식 청산·사이징 신규 7키 — 카탈로그 버전 cycle403.2 → cycle405.
+    assert pc.CATALOG_VERSION == "cycle405"

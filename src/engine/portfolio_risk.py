@@ -29,21 +29,33 @@ _HARD_STOP_CANDIDATE_KEYS: tuple[str, ...] = (
     "hard_stop_pct",
 )
 
+# cycle405 — donchian 깡토식 R 하한(§1·§8). 저장값은 **양수**(8.0 = 8%)라 위 7키와
+# 부호 규약이 다르다. ATR 배수 항은 포착하지 못하지만(손절선이 더 넓어질 수 있다),
+# 범위를 넓히는 대신 R 하한으로 근사하고 그 사실을 여기 남긴다(§8).
+_HARD_STOP_POSITIVE_FLOOR_KEY = "kk_r_floor_pct"
+
 _DEFAULT_HARD_STOP_PCT = -7.0
 
 
 def extract_hard_stop_pct(
     params: Optional[dict], *, default: float = _DEFAULT_HARD_STOP_PCT
 ) -> float:
-    """전략 params 에서 하드손절% 추출 — 후보 7키 中 **음수만** → min (최대 계획 손실).
+    """전략 params 에서 하드손절% 추출 — 후보 키 中 **음수만**(부호 보정 포함) → min (최대 계획 손실).
 
     후보 0건(양수만 / 결측 / None) → default (기본 -7.0). **0.0 반환 금지** —
     손절 없음을 리스크 0 으로 오인하면 관찰 노출이 과소평가되므로 보수적 기본 적용.
     """
     if not isinstance(params, dict):
         return default
+    # cycle405 — kk_r_floor_pct 가 있으면 그 전략(donchian)은 새 R 손절 규약이라
+    # 옛 `turtle_backstop_pct`(-9.0, §7.3 미삭제 잔존)는 더 이상 실제 손절이 아니다.
+    # 더 음수라는 이유로 min() 이 잡아채지 못하게 후보에서 뺀다.
+    floor_val = params.get(_HARD_STOP_POSITIVE_FLOOR_KEY)
+    has_kk_floor = floor_val is not None
     negatives: list[float] = []
     for key in _HARD_STOP_CANDIDATE_KEYS:
+        if has_kk_floor and key == "turtle_backstop_pct":
+            continue
         val = params.get(key)
         if val is None:
             continue
@@ -53,6 +65,13 @@ def extract_hard_stop_pct(
             continue
         if fv < 0:
             negatives.append(fv)
+    if has_kk_floor:
+        try:
+            ffv = float(floor_val)
+        except (TypeError, ValueError):
+            ffv = None
+        if ffv is not None and ffv > 0:
+            negatives.append(-ffv)
     if not negatives:
         return default
     return min(negatives)

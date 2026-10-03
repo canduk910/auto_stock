@@ -44,7 +44,10 @@ ALL_STRATEGIES = list(strategy_classes().items())
 #: 폴백을 명시적으로 금지한다. 그래서 "기본값이 position_ratio 비중 사이징을 타고
 #: 1주 폴백이 켜져 있다"는 이 모듈의 전제 자체가 성립하지 않는다 — 터틀 사이징·
 #: 폴백 금지 회귀는 `tests/unit/engine/test_cycle403_etf_trend_strategy.py` 가 덮는다.
-_RATIO_DEFAULT_EXCEPTIONS = frozenset({"etf_trend"})
+#: cycle405 — donchian 도 같은 이유로 뺀다. 깡토식 설계 랏(R 기반)만 쓰고 비중 사이징·1주 폴백이
+#: 없다(명세 `_workspace/red/cycle405_donchian_kkangto_spec.md` §5). 관문 통과·잔여 클램프는
+#: `tests/unit/engine/strategies/test_cycle405_donchian_kk_sizing.py` R8·R10 이 덮는다.
+_RATIO_DEFAULT_EXCEPTIONS = frozenset({"etf_trend", "donchian_swing"})
 RATIO_DEFAULT_STRATEGIES = [
     (sid, cls) for sid, cls in ALL_STRATEGIES if sid not in _RATIO_DEFAULT_EXCEPTIONS
 ]
@@ -235,3 +238,12 @@ def test_donchian_turtle_respects_budget_gate():
     s._candidates["005930"] = {"atr": 500.0}
     _consume(s, 1_000_000)
     assert s.calc_buy_quantity(PRICE, "005930") == 0
+
+
+def test_donchian_kk_design_lot_is_clamped_by_remaining_budget():
+    """cycle405 — 설계 랏(R 기반)도 관문의 잔여 클램프를 지난다. 1M·0.012 / R 800 = 15 → 잔여 50,000 → 5."""
+    s = _build("donchian_swing", DonchianSwingStrategy)
+    s._candidates["005930"] = {"atr": 400.0}
+    assert s.calc_buy_quantity(PRICE, "005930") == 15
+    _consume(s, 950_000)
+    assert s.calc_buy_quantity(PRICE, "005930") == 5

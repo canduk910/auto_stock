@@ -199,8 +199,10 @@ _BASE_SHA: dict[str, str] = {
     "src/engine/strategies/bull_flag_breakout.py":
         "879d85e779f9594ffbd9da93ce3ec41986f02abc78cc751cb22d022c20b0f298",
     # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
+    # 🔁 cycle405 재핀 — 깡토식 청산·사이징 개조(donchian_swing.py 전면 재작성, DEFAULT_PARAMS 7키 추가 + 값 3개 변경 포함).
+    # 🔁 cycle405 재핀 2 — 독립 검토 반영(L6): `_kk_design_lot` 에 R ≥ 0.5×가격이면 0 반환 가드 추가.
     "src/engine/strategies/donchian_swing.py":
-        "976acaaa5bb6f0124adb484fba52dc70d815d5ded8c7132fca556c48c2f81d44",
+        "08235b777c04e2a827d1ad38b39c1b64f9915df86d1301c9c84f8b60d15177ce",
     # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
     "src/engine/strategies/kojiro.py":
         "1d04d3d6dc0c72ff6c7e7d930be9da63f2408fb709e889906a133a9c5480fc74",
@@ -234,8 +236,9 @@ _BASE_SHA: dict[str, str] = {
     # 도움말 텍스트만 바뀌었고 키·범위·값 무변경. 직전 값 = `7120d37ff2ab392c7f59519ede3c19cd80e9dea80db6ec3146de74dd575f4326`.
     # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). shadow_mode 카탈로그 행 + `CATALOG_VERSION` cycle384.1→cycle399.1 + 개수 주석(106·identity 19·진입 50). 값만 이동.
     # 🔁 cycle403 재핀 — ETF 추세 전략(etf_trend) 신설. STRATEGY_IDS·_TURTLE_SIZED(옛 _TURTLE4)·applies_to·신규 키 13개 + CATALOG_VERSION cycle399.1→cycle403.1. 값만 이동.
+    # 🔁 cycle405 재핀 — donchian 깡토식 신규 키 7개 등록(PARAM_SPECS 추가 + CATALOG_VERSION).
     "src/engine/param_catalog.py":
-        "9fe66d4ce582446a6d54ce55564360e2c7a0a420df3940a012a59c0fbd5f08d3",
+        "d1a8f10973942e56fec97acf8e64dd4bfb335818647cd33a435f8e53336a7463",
     "src/engine/param_validation.py":
         "b4c5c029800191523bcc511919d6de3774e9ab49ca2fc0a0558ee3907868ee17",
     # 시각·거래소 표의 유일 정본 — 리졸버는 **속성축**이라 이 표를 읽지 않는다.

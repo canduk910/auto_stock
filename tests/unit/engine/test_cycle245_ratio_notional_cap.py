@@ -155,13 +155,55 @@ def _dc(*, turtle: bool = True, budget: int = DONCHIAN_BUDGET, **extra):
     """실전략 donchian (DEFAULT_PARAMS 병합 = Green 이후 `max_lot_ratio_mult` 보유)."""
     from src.engine.strategies.donchian_swing import DonchianSwingStrategy
 
-    params = {"sizing_mode": "turtle" if turtle else "position_ratio", **extra}
+    # cycle405 — 옛 코드 기본값(position_ratio 0.20 · risk_pct 0.005)을 명시한다. 기본값이
+    # 0.15 · 0.012 로 바뀌었고, 이 모듈의 기대값(cutoff·cap·마커 문자열)은 옛 값 위에 서 있다.
+    params = {"sizing_mode": "turtle" if turtle else "position_ratio",
+              "position_ratio": 0.20, "risk_pct": 0.005, **extra}
     s = DonchianSwingStrategy(
         StrategyConfig(strategy_id="donchian_swing", name="도치안", weight=0.2,
                        params=params)
     )
     s.state.total_investment = budget
+    s._legacy_vehicle = True     # `_calc` 가 옛 사이징 운반체로 쓴다
     return s
+
+
+def _calc(s, current_price, ticker=None):
+    """매수 수량 — donchian 운반체(`_dc`)면 옛 사이징을 재현해 관문에 넘기고, 그 밖은 실전략 그대로.
+
+    cycle405 — donchian 은 깡토식 설계 랏(R 기반, 1주 폴백·비중 낙하 없음)으로 바뀌었다(명세
+    `_workspace/red/cycle405_donchian_kkangto_spec.md` §5). 이 모듈의 단언 대상은 donchian 사이징이
+    아니라 **공통 관문 `_apply_budget_limit`**(K축·ρ축·폴백·마커)이고, 관문 본문은 cycle405 에서
+    무접촉이다(AST G-405-8). 그래서 옛 donchian 경로(터틀 유닛 → 0 이면 position_ratio 낙하 →
+    관문)를 여기서 그대로 재현해 관문 계약을 같은 입력으로 계속 잰다. 새 donchian 사이징 계약은
+    `tests/unit/engine/strategies/test_cycle405_donchian_kk_sizing.py` 가 지킨다.
+    """
+    if not getattr(s, "_legacy_vehicle", False):
+        return s.calc_buy_quantity(current_price, ticker)
+    if current_price <= 0:
+        return 0
+    params = s.config.params
+    if params.get("sizing_mode") == "turtle" and ticker is not None:
+        try:
+            from src.engine.turtle_sizing import compute_unit_qty_guarded
+
+            info = s._candidates.get(ticker) or {}
+            atr = float(info.get("atr") or 0)
+            budget = int(s.state.total_investment)
+            remaining = max(0, budget - s._calc_used_funds())
+            qty = compute_unit_qty_guarded(
+                budget, atr, current_price, float(params.get("risk_pct") or 0),
+                remaining_budget=remaining,
+                min_vol_pct=float(params.get("min_vol_floor_pct", 1.0)),
+                position_ratio=float(params.get("position_ratio") or 0),
+            )
+        except Exception:
+            qty = 0
+        if qty > 0:
+            s._entry_atr[ticker] = atr
+            return s._apply_budget_limit(qty, current_price, ticker)
+    amount = int(s.state.total_investment * params["position_ratio"])
+    return s._apply_budget_limit(amount // current_price, current_price, ticker)
 
 
 def _kj(*, turtle: bool = True, budget: int = 774_640, **extra):
@@ -438,7 +480,7 @@ def test_f245_7a_turtle_capped_by_k_axis_has_no_rho_markers(caplog):
     s = _kj(budget=774_640, position_ratio=0.166, risk_pct=RISK)
     s._candidates = {"000815": {"atr": 13300}}
     with caplog.at_level(logging.INFO):
-        qty = s.calc_buy_quantity(405_500, "000815")
+        qty = _calc(s, 405_500, "000815")
 
     assert qty == 0, "cycle242 결과가 바뀌었다 — cycle245 는 K축 행위를 건드리지 않는다"
     assert len(_msgs(caplog, CAPPED)) == 1, "cycle242 마커가 사라졌다"
@@ -467,7 +509,7 @@ def test_f245_7b_turtle_over_rho_cutoff_is_not_cut(caplog):
         "prev_close": 300000, "atr": 3000, "ema60": 0, "donchian_high": 0,
     }}
     with caplog.at_level(logging.INFO):
-        qty = s.calc_buy_quantity(300_000, "000815")
+        qty = _calc(s, 300_000, "000815")
 
     assert qty == 0, (
         "K축이 심사한 1주 폴백 랏(명목 300,000 = ρ 상한의 3.84배)이 그대로 "
@@ -503,7 +545,7 @@ def test_f245_8_turtle_fail_open_lot_is_backstopped(variant, caplog):
     """
     baseline = _dc(turtle=False)
     baseline._candidates = {}
-    base_qty = baseline.calc_buy_quantity(300_000, "000815")
+    base_qty = _calc(baseline, 300_000, "000815")
     assert base_qty == 0, "baseline 전제 — 비터틀 랏은 ρ캡에 잘려 0 이어야 한다"
 
     if variant == "no_atr":
@@ -523,7 +565,7 @@ def test_f245_8_turtle_fail_open_lot_is_backstopped(variant, caplog):
     # 통과하는 순서 의존 결함이라 캡처 시작 직전에 비운다(cycle240 F-8 동형).
     caplog.clear()
     with caplog.at_level(logging.INFO):
-        qty = s.calc_buy_quantity(300_000, "000815")
+        qty = _calc(s, 300_000, "000815")
 
     assert qty == base_qty == 0, "K축이 심사하지 못한 랏이 무방비로 통과했다"
     hits = _msgs(caplog, BLOCKED)
@@ -556,7 +598,7 @@ def test_f245_9b_turtle_ticker_none_within_cutoff_unchanged(caplog):
     s = _dc(budget=387_320)
     s._candidates = {}
     with caplog.at_level(logging.INFO):
-        qty = s.calc_buy_quantity(38_000)
+        qty = _calc(s, 38_000)
     assert qty == int(387_320 * 0.20) // 38_000 == 2, "cycle242 F-7 결과가 바뀌었다"
     assert not _msgs(caplog, BLOCKED)
 
@@ -616,7 +658,7 @@ def test_f245_10d_governs_probe_error_is_fail_open(caplog, monkeypatch):
 
     monkeypatch.setattr(s, "_resolve_sizing_atr", _boom)
     with caplog.at_level(logging.INFO):
-        qty = s.calc_buy_quantity(300_000, "000815")
+        qty = _calc(s, 300_000, "000815")
     assert qty == 1, "판정 실패가 매수를 막았다 (fail-open 방향 위반)"
     hits = _msgs(caplog, RSKIP)
     assert len(hits) == 1 and "reason=k_axis_probe_error " in hits[0], hits
@@ -933,7 +975,7 @@ def test_f245_16b_config_marker_backstop_label(caplog):
     s._candidates = {"000815": {"prev_close": 300000, "atr": 3000,
                                 "ema60": 0, "donchian_high": 0}}
     with caplog.at_level(logging.INFO):
-        s.calc_buy_quantity(300_000, "000815")
+        _calc(s, 300_000, "000815")
     hits = _msgs(caplog, RCONFIG)
     assert len(hits) == 1
     assert hits[0] == (
@@ -1056,7 +1098,7 @@ def test_f245_18_cycle242_markers_still_emitted(maker, caplog):
         s = _kj(budget=774_640, position_ratio=0.166, risk_pct=RISK)
         s._candidates = {"000815": {"atr": 13300}}
     with caplog.at_level(logging.INFO):
-        s.calc_buy_quantity(405_500, "000815")
+        _calc(s, 405_500, "000815")
     assert len(_msgs(caplog, FCONFIG)) == 1, "cycle242 카나리아가 사라졌다"
     assert len(_msgs(caplog, CAPPED)) == 1, (
         "ρ캡을 `_apply_lot_units_cap` **앞**에 두면 final<1 조기탈출로 "
@@ -1068,13 +1110,15 @@ def test_f245_18_cycle242_markers_still_emitted(maker, caplog):
 # F-19 — 기존 회귀 (7 전략 정상 경로 · 관문 시그니처)
 # ===========================================================================
 @freeze_time("2026-09-04 10:00:00+09:00")
-@pytest.mark.parametrize("strategy_id", ALL_STRATEGY_IDS)
+#: cycle405 — donchian 은 비중 사이징을 쓰지 않는다(깡토식 설계 랏). 그 랏이 ρ축에 닿지 않는다는
+#: 계약은 `test_cycle405_donchian_kk_sizing.py::test_r10_k_and_rho_caps_do_not_change_design_lot` 가 지킨다.
+@pytest.mark.parametrize("strategy_id", [x for x in ALL_STRATEGY_IDS if x != "donchian_swing"])
 def test_f245_19a_normal_sized_lot_unchanged_for_all_strategies(strategy_id):
     s = _real(strategy_id, budget=1_000_000)
     ratio = s.config.params["position_ratio"]
     expected = int(1_000_000 * ratio) // 10_000
     assert expected > 0, "테스트 전제: 비중 수량 > 0"
-    assert s.calc_buy_quantity(10_000, "005930") == expected
+    assert _calc(s, 10_000, "005930") == expected
 
 
 def test_f245_19b_gate_signature_unchanged():

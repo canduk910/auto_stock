@@ -94,6 +94,15 @@ _BRIEF_IDENTITY_KEYS = frozenset({
     "buy_paused",
     # cycle399 — 섀도 모드. 실전 매수를 끄는 스위치라 2단계 확인.
     "shadow_mode",
+    # cycle405 — donchian 깡토식 청산·사이징 신규 7키. 전부 리스크 정체성 상수
+    # (R·시간청산·하루상한)라 화면에서 바꾸려면 2단계 확인을 받아야 한다.
+    "kk_r_floor_pct",
+    "kk_r_atr_mult",
+    "kk_breakeven_r",
+    "kk_time_exit_bars",
+    "kk_time_exit_min_r",
+    "kk_max_hold_bars",
+    "max_daily_entries",
 })
 
 #: 명세 §1.3 — **어느 전략에서도** 행위 참조 0건인 잔존 키 8개.
@@ -213,12 +222,13 @@ def test_catalog_strategy_ids_when_compared_to_census_then_identical():
 def test_catalog_when_counted_then_102_specs_no_duplicates():
     """B02/C2 — 스펙 104개(cycle290 킬스위치 2키로 99→101, cycle300 깊이 스위치로 101→102,
     cycle352 15:20 상한가 유지 확인 킬스위치로 102→103, cycle382 시장 유닛 모드로 103→104,
-    cycle384 신규 매수 멈춤 `buy_paused` 로 104→105, cycle399 섀도 모드 `shadow_mode` 로 105→106), 키 중복 0."""
-    assert len(pc.PARAM_SPECS) == 118, f"스펙 {len(pc.PARAM_SPECS)}개 (기대 118)"
+    cycle384 신규 매수 멈춤 `buy_paused` 로 104→105, cycle399 섀도 모드 `shadow_mode` 로 105→106,
+    cycle403 ETF 추세 전략 신설로 106→118, cycle405 donchian 깡토식 신규 7키로 118→125), 키 중복 0."""
+    assert len(pc.PARAM_SPECS) == 125, f"스펙 {len(pc.PARAM_SPECS)}개 (기대 125)"
     keys = [s.key for s in pc.PARAM_SPECS]
     dupes = sorted({k for k in keys if keys.count(k) > 1})
     assert not dupes, f"중복 키: {dupes}"
-    assert len(pc.SPEC_BY_KEY) == 118
+    assert len(pc.SPEC_BY_KEY) == 125
 
 
 def test_catalog_when_key_missing_from_default_params_then_fails():

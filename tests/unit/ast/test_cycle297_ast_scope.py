@@ -82,12 +82,21 @@ _CYCLE384_KEY = "buy_paused"
 _CYCLE384_AFTER = "max_lot_ratio_mult"
 #: 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). 7전략 공통 1키 — `buy_paused` **바로 다음 줄**.
 _CYCLE399_KEY = "shadow_mode"
+#: 🔁 cycle405 재핀 — donchian 깡토식 청산·사이징 신규 7키. donchian 단독 — **말미**
+#: (`market_unit_mode` 다음)가 계약이다(명세 §7.1 — 한 사이클 diff 를 한 덩어리로 묶는다).
+_CYCLE405_KEYS = (
+    "kk_r_floor_pct", "kk_r_atr_mult", "kk_breakeven_r", "kk_time_exit_bars",
+    "kk_time_exit_min_r", "kk_max_hold_bars", "max_daily_entries",
+)
+_CYCLE405_AFFECTED_SIDS = frozenset({"donchian_swing"})
 
 
 def _expected_keys_g2(sid: str) -> tuple[str, ...]:
     expected = _BASELINE_KEYS[sid] + _KEYS
     if sid in _CYCLE382_AFFECTED_SIDS:
         expected += _CYCLE382_KEY
+    if sid in _CYCLE405_AFFECTED_SIDS:
+        expected += _CYCLE405_KEYS
     i = expected.index(_CYCLE384_AFTER) + 1
     return expected[:i] + (_CYCLE384_KEY, _CYCLE399_KEY) + expected[i:]
 

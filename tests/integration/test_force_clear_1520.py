@@ -4,7 +4,7 @@
 - 대상: VB / LTV 중 enabled 전략
 - 각 전략의 `tradable_boards` 에 `POST_NXT` 가 포함되어 있으면 청산 보류 (NXT 애프터까지 유지)
 - POST_NXT 미활성 전략은 `check_force_clear()` 결과 ticker 들에 대해 `execute_sell(FORCE_CLEAR)` 호출
-- momentum / donchian_swing 은 이 함수의 대상이 아님 (각각 익일청산 / 추세추종)
+- momentum 은 이 함수의 대상이 아님(익일청산). donchian_swing 은 cycle405 부터 대상 — 20봉·250봉 시간 청산만 TIME_EXIT 로
 """
 
 from __future__ import annotations
@@ -135,8 +135,9 @@ async def test_force_clear_handles_multiple_strategies_independently(scheduler_e
 
 
 @pytest.mark.asyncio
-async def test_force_clear_does_not_target_momentum_or_donchian(scheduler_env):
-    """momentum / donchian_swing 보유 종목은 이 함수의 대상 아님."""
+async def test_force_clear_does_not_target_momentum_and_spares_fresh_donchian(scheduler_env):
+    """momentum 보유는 이 함수의 대상이 아니다. donchian(cycle405 — 15:20 시간 청산 대상)도
+    **오늘 산 보유는 팔지 않는다**(20봉 미만 — 전량 반환 금지, 멀티데이 소멸 차단)."""
     sched = scheduler_env.scheduler
     momentum = sched.registry.get("momentum")
     momentum.config.enabled = True
@@ -144,12 +145,41 @@ async def test_force_clear_does_not_target_momentum_or_donchian(scheduler_env):
 
     donchian = sched.registry.get("donchian_swing")
     donchian.config.enabled = True
-    _seed_pos(donchian, "000660")
+    _seed_pos(donchian, "000660")   # buy_date = 오늘(05-15)
 
     await sched._force_clear_main_only()
 
-    # momentum / donchian 은 _force_clear_main_only 의 대상 strategies 에 없음
     assert scheduler_env.calls.execute_sell == []
+    assert "000660" in donchian.state.positions
+
+
+@pytest.mark.asyncio
+async def test_force_clear_donchian_20th_bar_without_1r_sells_time_exit(scheduler_env):
+    """cycle405 — 20번째 봉(보유 19영업일)의 15:20 에 +1R 미도달이면 TIME_EXIT 로 판다."""
+    from datetime import datetime, timedelta, timezone
+
+    sched = scheduler_env.scheduler
+    donchian = sched.registry.get("donchian_swing")
+    donchian.config.enabled = True
+    # 이 모듈의 freeze 는 naive "15:20:30" 이라 KST 날짜는 다음 날이다 — 보유일은 KST 날짜로 센다.
+    today = datetime.now(timezone(timedelta(hours=9))).date()
+    days, d = [], today
+    while len(days) < 30:                       # 오늘 제외 평일 30개(캐시 = 매수일 앞까지 덮는다)
+        d -= timedelta(days=1)
+        if d.weekday() < 5:
+            days.append(d)
+    donchian._trading_days.update(days)
+    buy = next(x for x in days if donchian._business_days_held(x, today)[0] == 19)
+    pos = _seed_pos(donchian, "000660", buy_price=80000)
+    pos.buy_date = buy                          # 보유 19영업일 = 20번째 봉
+    pos.high_since_buy = 80000                  # +1R(= 6,400, 스탬프 없음 8%) 미도달
+
+    await sched._force_clear_main_only()
+
+    sells = scheduler_env.calls.execute_sell
+    assert [(c["ticker"], c["signal"], c["strategy_id"]) for c in sells] == [
+        ("000660", Signal.TIME_EXIT, "donchian_swing"),
+    ], sells
 
 
 # ---------------------------------------------------------------------------

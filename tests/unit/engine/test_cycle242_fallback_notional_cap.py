@@ -116,13 +116,55 @@ def _mini(
 def _dc(*, turtle: bool = True, budget: int = DONCHIAN_BUDGET, **extra):
     from src.engine.strategies.donchian_swing import DonchianSwingStrategy
 
-    params = {"sizing_mode": "turtle" if turtle else "position_ratio", **extra}
+    # cycle405 — 옛 코드 기본값(position_ratio 0.20 · risk_pct 0.005)을 명시한다. 기본값이
+    # 0.15 · 0.012 로 바뀌었고, 이 모듈의 기대값(cutoff·cap·마커 문자열)은 옛 값 위에 서 있다.
+    params = {"sizing_mode": "turtle" if turtle else "position_ratio",
+              "position_ratio": 0.20, "risk_pct": 0.005, **extra}
     s = DonchianSwingStrategy(
         StrategyConfig(strategy_id="donchian_swing", name="도치안", weight=0.2,
                        params=params)
     )
     s.state.total_investment = budget
+    s._legacy_vehicle = True     # `_calc` 가 옛 사이징 운반체로 쓴다
     return s
+
+
+def _calc(s, current_price, ticker=None):
+    """매수 수량 — donchian 운반체(`_dc`)면 옛 사이징을 재현해 관문에 넘기고, 그 밖은 실전략 그대로.
+
+    cycle405 — donchian 은 깡토식 설계 랏(R 기반, 1주 폴백·비중 낙하 없음)으로 바뀌었다(명세
+    `_workspace/red/cycle405_donchian_kkangto_spec.md` §5). 이 모듈의 단언 대상은 donchian 사이징이
+    아니라 **공통 관문 `_apply_budget_limit`**(K축·ρ축·폴백·마커)이고, 관문 본문은 cycle405 에서
+    무접촉이다(AST G-405-8). 그래서 옛 donchian 경로(터틀 유닛 → 0 이면 position_ratio 낙하 →
+    관문)를 여기서 그대로 재현해 관문 계약을 같은 입력으로 계속 잰다. 새 donchian 사이징 계약은
+    `tests/unit/engine/strategies/test_cycle405_donchian_kk_sizing.py` 가 지킨다.
+    """
+    if not getattr(s, "_legacy_vehicle", False):
+        return s.calc_buy_quantity(current_price, ticker)
+    if current_price <= 0:
+        return 0
+    params = s.config.params
+    if params.get("sizing_mode") == "turtle" and ticker is not None:
+        try:
+            from src.engine.turtle_sizing import compute_unit_qty_guarded
+
+            info = s._candidates.get(ticker) or {}
+            atr = float(info.get("atr") or 0)
+            budget = int(s.state.total_investment)
+            remaining = max(0, budget - s._calc_used_funds())
+            qty = compute_unit_qty_guarded(
+                budget, atr, current_price, float(params.get("risk_pct") or 0),
+                remaining_budget=remaining,
+                min_vol_pct=float(params.get("min_vol_floor_pct", 1.0)),
+                position_ratio=float(params.get("position_ratio") or 0),
+            )
+        except Exception:
+            qty = 0
+        if qty > 0:
+            s._entry_atr[ticker] = atr
+            return s._apply_budget_limit(qty, current_price, ticker)
+    amount = int(s.state.total_investment * params["position_ratio"])
+    return s._apply_budget_limit(amount // current_price, current_price, ticker)
 
 
 def _kj(*, turtle: bool = True, budget: int = KOJIRO_BUDGET, **extra):
@@ -236,7 +278,7 @@ def test_f242_3_donchian_pr_path_lot_clamped(caplog):
         "prev_close": 38000, "atr": 3593, "ema60": 0, "donchian_high": 0,
     }
     with caplog.at_level(logging.INFO):
-        qty = s.calc_buy_quantity(38_000, "124500")
+        qty = _calc(s, 38_000, "124500")
 
     assert qty == 1, "PR 낙하 랏(2주=3.71유닛)이 K=2 로 잘리지 않았다"
     hits = _msgs(caplog, CAPPED)
@@ -276,7 +318,7 @@ def test_f242_4_turtle_path_untouched(maker, caplog):
                     remaining_budget=budget, min_vol_pct=1.0, position_ratio=0.20,
                 )
                 assert expected > 0, "픽스처 오류 — T 경로가 아니다"
-                qty = s.calc_buy_quantity(price, "005930")
+                qty = _calc(s, price, "005930")
                 assert qty == expected, (
                     f"{maker} price={price} atr={atr}: 정상 터틀 랏이 변조됐다 "
                     f"({qty} != {expected})"
@@ -302,7 +344,7 @@ def test_f242_4b_sub_one_k_is_clamped_so_turtle_path_survives(caplog):
         remaining_budget=budget, min_vol_pct=1.0, position_ratio=0.20,
     )
     with caplog.at_level(logging.INFO):
-        qty = s.calc_buy_quantity(60_000, "005930")
+        qty = _calc(s, 60_000, "005930")
     assert qty == expected == 166
     assert not _msgs(caplog, CAPPED)
 
@@ -438,11 +480,11 @@ def test_f242_6c_fixed_stop_strategies_have_no_candidates(module, cls_name, capl
         s.state.total_investment = KOJIRO_BUDGET
         return s
 
-    baseline = _make({}).calc_buy_quantity(405_500, "000815")
+    baseline = _calc(_make({}), 405_500, "000815")
     s = _make({"sizing_mode": "turtle", "risk_pct": RISK})
     assert not hasattr(s, "_candidates"), f"{module} 에 _candidates 가 생겼다"
     with caplog.at_level(logging.INFO):
-        qty = s.calc_buy_quantity(405_500, "000815")
+        qty = _calc(s, 405_500, "000815")
     assert qty == baseline, "고정%손절 전략의 수량이 바뀌었다 (범위 밖 계약 위반)"
     hits = _recs(caplog, SKIPPED)
     assert len(hits) == 1
@@ -454,11 +496,11 @@ def test_f242_6c_fixed_stop_strategies_have_no_candidates(module, cls_name, capl
 def test_f242_6d_turtle_strategy_empty_candidates_fail_open(maker, caplog):
     """터틀 4전략이라도 후보가 비면 `no_atr` fail-open — 수량 동일."""
     make = {"donchian": _dc, "vcp": _vcp, "bfb": _bfb}[maker]
-    baseline = make(turtle=False, budget=KOJIRO_BUDGET).calc_buy_quantity(
+    baseline = _calc(make(turtle=False, budget=KOJIRO_BUDGET), 
         405_500, "000815")
     s = make(turtle=True, budget=KOJIRO_BUDGET)
     with caplog.at_level(logging.INFO):
-        qty = s.calc_buy_quantity(405_500, "000815")
+        qty = _calc(s, 405_500, "000815")
     assert qty == baseline
     hits = _recs(caplog, SKIPPED)
     assert len(hits) == 1
@@ -472,7 +514,7 @@ def test_f242_6d_turtle_strategy_empty_candidates_fail_open(maker, caplog):
 def test_f242_7_ticker_none_silently_off(caplog):
     s = _dc(budget=DONCHIAN_BUDGET)
     with caplog.at_level(logging.INFO):
-        qty = s.calc_buy_quantity(38_000)
+        qty = _calc(s, 38_000)
     assert qty == int(DONCHIAN_BUDGET * 0.20) // 38_000
     assert not _msgs(caplog, CAPPED)
     assert not _msgs(caplog, SKIPPED)
@@ -785,7 +827,7 @@ def test_f242_14a_donchian_resolver_matches_stamped_entry_atr():
     s._candidates["005930"] = {
         "prev_close": 60000, "atr": 3000, "ema60": 0, "donchian_high": 0,
     }
-    s.calc_buy_quantity(60_000, "005930")
+    _calc(s, 60_000, "005930")
     assert s._entry_atr["005930"] == 3000.0
     assert s._resolve_sizing_atr("005930") == (3000.0, "ok")
 
@@ -795,7 +837,7 @@ def test_f242_14a_donchian_resolver_matches_stamped_entry_atr():
 def test_f242_14b_vcp_bfb_resolver_reads_native_key(maker, key):
     s = {"vcp": _vcp, "bfb": _bfb}[maker](budget=100_000_000)
     s._candidates["005930"] = {key: 3000}
-    s.calc_buy_quantity(60_000, "005930")
+    _calc(s, 60_000, "005930")
     assert s._entry_atr["005930"] == 3000.0
     assert s._resolve_sizing_atr("005930") == (3000.0, "ok")
 
@@ -804,7 +846,7 @@ def test_f242_14b_vcp_bfb_resolver_reads_native_key(maker, key):
 def test_f242_14c_kojiro_resolver_matches_sizing_atr():
     s = _kj(budget=100_000_000)
     s._candidates["005930"] = {"atr": 3000}
-    qty = s.calc_buy_quantity(60_000, "005930")
+    qty = _calc(s, 60_000, "005930")
     assert qty == compute_unit_qty_guarded(
         100_000_000, 3000.0, 60_000, RISK,
         remaining_budget=100_000_000, min_vol_pct=1.0, position_ratio=0.20,

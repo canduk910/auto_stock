@@ -772,7 +772,9 @@ async def test_g4b_key_orders_literal():
     assert [r[0] for r in await snap_section("reprepare", full)] == [
         "volatility_breakout", "long_tail_volatility", "bull_flag_breakout", "vcp_breakout"]
     # 15:20 강제청산 VB→LTV · 익일청산 momentum→LTV→VB (자문 X3 — 등록 순서와 다르다)
-    assert [r[2] for r in await snap_section("force_clear_1520", full)] == ["volatility_breakout", "long_tail_volatility"]
+    # cycle405 — donchian 깡토식 개조로 15:20 시간 청산 경로(§3)가 생겨 CLOSE_AT_1520_IDS 에 합류.
+    assert [r[2] for r in await snap_section("force_clear_1520", full)] == [
+        "volatility_breakout", "long_tail_volatility", "donchian_swing"]
     assert [r[1] for r in (await snap_section("next_day_clear", full))["saved"]] == [
         "momentum", "long_tail_volatility", "volatility_breakout"]
     # 스윙 폴 순서 donchian→kojiro

@@ -31,88 +31,72 @@ def _mk(sizing_mode="position_ratio", **params):
     return s
 
 
-# ── sizing: 터틀 분기 + entry_atr 원자 스탬프 ──
+# ── cycle405 — 깡토식 사이징·청산으로 대체 (명세 `_workspace/red/cycle405_donchian_kkangto_spec.md` §2·§5) ──
+# 설계 랏 q = floor(B × risk_pct ÷ R) → min(q, int(B × position_ratio) // P), R = max(8%·P, 1.5·N).
+# `sizing_mode` 는 사이징이 보지 않는다(재도출 게이트만 본다). 1주 폴백·비중 낙하·변동성 floor 낙하 없음.
+# 손절 = E − R(스탬프 없으면 R = 8%·E). 2ATR·−9% 받침선·미스탬프 −7% 는 없어졌다.
+# 옛 `test_turtle_backstop_fires_when_atr_stop_naked` 는 지웠다(−9% 받침선 폐지 — §2 「끄는 것」).
 
 def test_turtle_sizing_used_and_stamps_entry_atr():
     s = _mk(sizing_mode="turtle")
     s._candidates["005930"] = {"prev_close": 60000, "atr": 3000, "ema60": 0, "donchian_high": 0}
-    # compute_unit_qty(100M,3000,0.5%)=166, notional cap=20M//60000=333>166 → 166
+    # R = max(4,800, 4,500) = 4,800 → floor(1,200,000 / 4,800) = 250 · 명목 15M//60,000 = 250
     qty = s.calc_buy_quantity(60000, "005930")
-    assert qty == 166
-    # sizing 과 동일 ATR 값으로 하드손절 entry_atr 스탬프 (원자 결합)
+    assert qty == 250
     assert s._entry_atr["005930"] == 3000.0
 
 
-def test_position_ratio_default_is_byte_identical_no_stamp():
-    s = _mk()  # sizing_mode=position_ratio (기본)
+def test_sizing_mode_position_ratio_is_not_read_by_sizing():
+    s = _mk()  # sizing_mode=position_ratio
     s._candidates["005930"] = {"prev_close": 60000, "atr": 3000, "ema60": 0, "donchian_high": 0}
-    qty = s.calc_buy_quantity(60000, "005930")
-    assert qty == int(100_000_000 * 0.20) // 60000  # 333 (기존 계산 불변)
-    assert "005930" not in s._entry_atr           # 미스탬프 → % 손절 경로
+    assert s.calc_buy_quantity(60000, "005930") == 250
+    assert s._entry_atr["005930"] == 3000.0         # 모든 랏이 스탬프된다
 
 
-def test_turtle_vol_floor_falls_back_no_stamp():
-    # atr/price = 0.5% < min_vol_floor_pct(1%) → 터틀 0 → position_ratio 낙하 + 미스탬프
+def test_low_vol_has_no_ratio_fallthrough_and_is_stamped():
+    # atr/price = 0.5% — 옛 변동성 floor 낙하 대신 R 하한(8%)이 수량을 정한다
     s = _mk(sizing_mode="turtle")
     s._candidates["005930"] = {"prev_close": 100000, "atr": 500, "ema60": 0, "donchian_high": 0}
-    qty = s.calc_buy_quantity(100000, "005930")
-    assert qty == int(100_000_000 * 0.20) // 100000  # 200 (position_ratio)
-    assert "005930" not in s._entry_atr             # 미스탬프 = 함정#1 차단
+    assert s.calc_buy_quantity(100000, "005930") == 150   # floor(1.2M / 8,000) = 150
+    assert s._entry_atr["005930"] == 500.0
 
 
-def test_turtle_no_ticker_falls_back():
-    # ticker=None (호출부 미지원 경로) → 터틀 미적용
+def test_no_ticker_buys_nothing():
     s = _mk(sizing_mode="turtle")
-    assert s.calc_buy_quantity(60000, None) == int(100_000_000 * 0.20) // 60000
+    assert s.calc_buy_quantity(60000, None) == 0
 
 
-# ── 불변식: 유닛당 리스크 = 예산×risk_pct×stop_atr (변동성 무관) ──
-
-def test_invariant_entry_atr_equals_sizing_atr():
+def test_invariant_entry_atr_equals_sizing_atr_and_r_risk_bounded():
     s = _mk(sizing_mode="turtle")
     for tk, price, atr in [("A", 60000, 3000), ("B", 30000, 900), ("C", 200000, 6000)]:
         s._candidates[tk] = {"prev_close": price, "atr": atr, "ema60": 0, "donchian_high": 0}
         qty = s.calc_buy_quantity(price, tk)
-        if qty > 0:
-            # entry_atr(하드손절) == sizing ATR → qty×stop_atr×entry_atr ≈ 예산×2×risk_pct 상수
-            assert s._entry_atr[tk] == float(atr)
-            unit_risk = qty * 2.0 * s._entry_atr[tk]
-            assert unit_risk <= 100_000_000 * 2.0 * 0.005 * 1.05  # floor 오차 + notional cap 하방만
+        assert qty > 0
+        assert s._entry_atr[tk] == float(atr)
+        r = max(0.08 * price, 1.5 * atr)
+        assert qty * r <= 100_000_000 * 0.012 + 1e-6, "1R 손실 ≤ 예산 × risk_pct"
 
-
-# ── check_exit: entry_atr 게이트 (ATR손절 / backstop / % byte 동일) ──
 
 def _pos(buy_price=60000, buy_date=None):
     return Position(ticker="005930", buy_price=buy_price, quantity=10, order_no="O",
                     strategy_id="donchian_swing", buy_date=buy_date or _dt.date(2026, 7, 1))
 
 
-def test_turtle_atr_hard_stop_fires():
+def test_stamped_stop_is_entry_minus_r():
     s = _mk(sizing_mode="turtle")
     s.state.positions["005930"] = _pos()
-    s._entry_atr["005930"] = 3000.0            # base = 60000 - 2×3000 = 54000
+    s._entry_atr["005930"] = 3000.0            # R = max(4,800, 4,500) = 4,800 → 55,200
     s._candidates["005930"] = {"atr": 3000}
-    assert s.check_exit_signal("005930", 53900, 60000) == Signal.STOP_LOSS   # ≤ 54000
-    assert s.check_exit_signal("005930", 55000, 60000) == Signal.NONE        # > 54000, 트레일 없음
+    assert s.check_exit_signal("005930", 55200, 60000) == Signal.STOP_LOSS
+    assert s.check_exit_signal("005930", 55201, 60000) == Signal.NONE
 
 
-def test_turtle_backstop_fires_when_atr_stop_naked():
-    # entry_atr 과대 → base_stop ≤ 0 (naked) → % backstop(-9%)가 최후 방어
-    s = _mk(sizing_mode="turtle")
-    s.state.positions["005930"] = _pos()
-    s._entry_atr["005930"] = 40000.0           # base = 60000-80000 <0 → ATR손절 skip
-    s._candidates["005930"] = {"atr": 40000}
-    assert s.check_exit_signal("005930", 54000, 60000) == Signal.STOP_LOSS   # -10% ≤ -9%
-    assert s.check_exit_signal("005930", 55500, 60000) == Signal.NONE        # -7.5% > -9%
-
-
-def test_position_ratio_percent_stop_byte_identical():
-    # entry_atr 미스탬프 → 기존 -7% 손절 (byte 동일). -9% backstop 미적용.
+def test_unstamped_stop_is_8pct():
     s = _mk()
     s.state.positions["005930"] = _pos()
     s._candidates["005930"] = {"atr": 3000}
-    assert s.check_exit_signal("005930", 55800, 60000) == Signal.STOP_LOSS   # -7% 정확
-    assert s.check_exit_signal("005930", 56000, 60000) == Signal.NONE        # -6.7% > -7%
+    assert s.check_exit_signal("005930", 55200, 60000) == Signal.STOP_LOSS   # −8%
+    assert s.check_exit_signal("005930", 55800, 60000) == Signal.NONE        # 옛 −7% 자리
 
 
 # ── 재시작 복구: recompute 가 buy_date 이전 봉으로 entry_atr 재도출 (loosen 차단) ──

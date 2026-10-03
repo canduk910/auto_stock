@@ -73,7 +73,7 @@ def test_manifest_eval_driver_columns_match_current_literals():
         "momentum": ("tick_scan", None, False, False, "none"),
         "volatility_breakout": ("tick_breakout", 2, True, True, "none"),
         "long_tail_volatility": ("tick_breakout", 3, True, True, "none"),
-        "donchian_swing": ("swing_poll", None, False, False, "scale"),
+        "donchian_swing": ("swing_poll", None, False, True, "scale"),   # cycle405 — 15:20 시간 청산
         "bull_flag_breakout": ("tick_breakout", 0, False, False, "scale"),
         "vcp_breakout": ("tick_breakout", 1, False, False, "scale"),
         "kojiro": ("swing_poll", None, False, False, "scale"),
@@ -95,7 +95,7 @@ def test_close_at_1520_ids_value_same_as_open_price_target_but_independent_field
     모듈 docstring·설계 §3.3 의 「값이 우연히 같은 다른 사실을 합치지 않는다」 규약 — 필드가
     분리돼 있어야 ETF 가 `open_price_target` 을 건드리지 않고 `close_at_1520` 만 켤 수 있다.
     """
-    assert CLOSE_AT_1520_IDS == ("volatility_breakout", "long_tail_volatility", "etf_trend")
+    assert CLOSE_AT_1520_IDS == ("volatility_breakout", "long_tail_volatility", "donchian_swing", "etf_trend")
     assert CLOSE_AT_1520_IDS != OPEN_PRICE_TARGET_IDS  # cycle403 — etf_trend 가 갈라놓았다(독립 축 증거)
     fields = {f.name for f in dataclasses.fields(StrategyEntry)}
     assert {"open_price_target", "close_at_1520"} <= fields, "두 축이 같은 칸으로 합쳐지면 안 된다"

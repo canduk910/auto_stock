@@ -106,7 +106,7 @@ def _boom(*a, **k):
     "cache, buy_date, expected",
     [
         (_W_1721, D(2026, 8, 21), Signal.NONE),           # 미발화 경로
-        (_W_1721[:-1], D(2026, 8, 19), Signal.TIME_EXIT),  # 시간청산 발화 경로
+        (_W_1721[:-1], D(2026, 8, 19), Signal.NONE),       # cycle405 — 옛 시간청산 자리(틱 경로 폐지)
     ],
     ids=["none_path", "time_exit_path"],
 )

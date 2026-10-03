@@ -126,13 +126,16 @@ def test_s3_1_friday_buy_monday_is_one_business_day():
 # ===========================================================================
 @freeze_time("2026-08-20 10:00:00+09:00")
 def test_s3_2_tuesday_buy_thursday_is_two_business_days_fires():
-    """화(08-18) 매수 → 목(08-20): 영업일 2 ≥ 2 → STOP_LOSS 유지."""
+    """화(08-18) 매수 → 목(08-20): 영업일 2.
+
+    cycle405 — 옛 n_days=2 돌파 실패 청산은 없어졌다. 영업일 계상(2)은 그대로이고 틱 경로는 NONE.
+    """
     s = _mk(n_days=2)
     _cache(s, _AUG_NEXT[:-1])                  # 캐시 D-1(08-19) 까지 = 오늘 미포함
     _arm(s, buy_date=D(2026, 8, 18))
 
     assert s._business_days_held(D(2026, 8, 18), D(2026, 8, 20)) == (2, False)
-    assert s.check_exit_signal("005930", 9_800, 9_900) == Signal.TIME_EXIT
+    assert s.check_exit_signal("005930", 9_800, 9_900) == Signal.NONE
 
 
 def test_s3_3_today_in_cache_is_not_double_counted():
@@ -203,21 +206,20 @@ def test_s3_6_fallback_when_cache_does_not_reach_buy_date():
 # S3-7 / S3-8 — 로그 계약 (기존 prefix 유지 + 영업일 명시 + 폴백 노출)
 # ===========================================================================
 @freeze_time("2026-08-20 10:00:00+09:00")
-def test_s3_7_exit_log_keeps_prefix_and_says_business_days(caplog):
-    """발화 로그: prefix `도치안 시간 기반 청산` 유지 + `영업일` 명시."""
+def test_s3_7_no_tick_time_exit_log_and_no_fallback_on_cache_path(caplog):
+    """cycle405 — 틱 경로 시간 청산과 그 로그(`도치안 시간 기반 청산`)는 없어졌다.
+
+    시간 청산은 15:20 `[donchian_time_exit]` 로만 남는다(`test_cycle405_donchian_kk_force_clear.py`).
+    캐시 경로에서 폴백 표기 금지 계약은 그대로다.
+    """
     caplog.set_level(logging.INFO, logger=_LOGGER)
     s = _mk(n_days=2)
     _cache(s, _AUG_NEXT)
     _arm(s, buy_date=D(2026, 8, 18))
 
-    assert s.check_exit_signal("005930", 9_800, 9_900) == Signal.TIME_EXIT
+    assert s.check_exit_signal("005930", 9_800, 9_900) == Signal.NONE
     msgs = [r.getMessage() for r in caplog.records]
-    assert any("도치안 시간 기반 청산" in m for m in msgs), (
-        f"기존 grep 이력 prefix 유지 의무 — got {msgs}"
-    )
-    assert any("도치안 시간 기반 청산" in m and "영업일" in m for m in msgs), (
-        f"일수가 영업일임이 드러나야 한다 — got {msgs}"
-    )
+    assert not any("도치안 시간 기반 청산" in m for m in msgs), msgs
     assert not any("폴백" in m or "days_held_fallback" in m for m in msgs), (
         "캐시 경로에서는 폴백 표기 금지"
     )
@@ -225,13 +227,13 @@ def test_s3_7_exit_log_keeps_prefix_and_says_business_days(caplog):
 
 @freeze_time("2026-08-21 10:00:00+09:00")
 def test_s3_8_fallback_fact_is_logged_on_fire(caplog):
-    """폴백으로 센 경우 그 사실이 로그로 드러난다."""
+    """폴백으로 센 경우 그 사실이 로그로 드러난다(cycle405 — 틱 경로는 발화하지 않아도)."""
     caplog.set_level(logging.INFO, logger=_LOGGER)
     s = _mk(n_days=2)
     _cache(s, [])
-    _arm(s, buy_date=D(2026, 8, 10))           # weekday 폴백 9일 ≥ 2 → 발화
+    _arm(s, buy_date=D(2026, 8, 10))           # weekday 폴백 9일
 
-    assert s.check_exit_signal("005930", 9_800, 9_900) == Signal.TIME_EXIT
+    assert s.check_exit_signal("005930", 9_800, 9_900) == Signal.NONE
     msgs = [r.getMessage() for r in caplog.records]
     assert any("폴백" in m or "days_held_fallback" in m for m in msgs), (
         f"폴백 사용 사실이 로그에 드러나야 한다 — got {msgs}"

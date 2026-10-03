@@ -119,6 +119,15 @@ PARAM_RANGES: dict[str, tuple[float, float]] = {
     # (위 `atr_trail_mult` 과 달리 공유 없음 — 제거가 다른 전략에 걸리지 않는다).
 }
 
+# cycle405 — PARAM_RANGES 는 키 하나에 범위 하나(전 전략 공유)라 전략별 예외를
+# 담지 못한다. donchian 은 cycle405 깡토식 개조로 모든 매수 랏이 `_entry_atr`
+# 스탬프를 받아 `stop_loss_rate` 를 전혀 읽지 않으므로(param_catalog.py 의
+# applies_to 에서도 뺐다), AI 자문이 그 값을 추천해도 적용될 곳이 없다 — 전략별
+# 화이트리스트 예외로 조용히 걸러 "추천은 왔는데 효과 없음"을 없앤다.
+_STRATEGY_PARAM_RANGE_EXCLUDE: dict[str, frozenset[str]] = {
+    "donchian_swing": frozenset({"stop_loss_rate"}),
+}
+
 # 정수형 파라미터 — 캐스트 대상
 # 2026-05-17 Phase B: donchian_period / long_ma_period 추가 (정수 일봉 개수)
 INT_PARAMS = {
@@ -176,6 +185,7 @@ WEIGHT_REASONING_FALLBACK = "(사유 미제공)"
 def _validate_recommendations(
     raw: dict,
     current_params: dict,
+    strategy_id: str = "",
 ) -> tuple[dict, str, float | None, str | None, str | None]:
     """LLM 응답을 화이트리스트로 검증한다.
 
@@ -186,6 +196,9 @@ def _validate_recommendations(
       - weight_reasoning: str, WEIGHT_REASONING_MAX_LEN(1000)자 초과 시 자름.
           weight 가 null 이면 자동 null (정리)
           weight 있는데 weight_reasoning 누락/null/빈문자열/비-str → fallback `(사유 미제공)` + WARNING
+    cycle405 — `strategy_id` 가 주어지면 `_STRATEGY_PARAM_RANGE_EXCLUDE` 로 전략별
+    키 예외를 추가 적용한다(donchian 의 `stop_loss_rate` — 읽는 코드가 없다).
+    생략 시(기본값 "") 예외 없이 기존대로 동작한다.
 
     Returns:
         (검증된 recommended_params, reasoning, recommended_weight,
@@ -196,6 +209,7 @@ def _validate_recommendations(
     validated: dict[str, Any] = {}
     if not isinstance(rec, dict):
         rec = {}
+    excluded_keys = _STRATEGY_PARAM_RANGE_EXCLUDE.get(strategy_id, frozenset())
 
     for key, val in rec.items():
         if key not in current_params:
@@ -203,6 +217,11 @@ def _validate_recommendations(
             continue
         if key not in PARAM_RANGES:
             logger.debug("추천 키 무시 (허용 키 아님): %s", key)
+            continue
+        if key in excluded_keys:
+            logger.debug(
+                "추천 키 무시 (전략별 예외): %s strategy_id=%s", key, strategy_id,
+            )
             continue
         try:
             num = float(val)
@@ -488,7 +507,7 @@ async def generate_recommendations() -> list[dict]:
                 recommended_weight,
                 code_review_notes,
                 weight_reasoning,
-            ) = _validate_recommendations(raw, current_params)
+            ) = _validate_recommendations(raw, current_params, strategy_id=strategy_id)
         except Exception as e:
             logger.exception("파라미터 추천 생성 실패: %s", strategy_id)
             # 예외 발생 시에도 빈 자문 INSERT — 신규 탭에 누락 사실을 노출

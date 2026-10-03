@@ -290,21 +290,25 @@ def _snapshot_of(h: _Harness) -> dict:
 @pytest.mark.parametrize(
     "sid,over,atr14_pct,expected",
     [
-        # donchian turtle — `max(-(stop_atr×atr), backstop)` = 타이트한 쪽
+        # cycle405 — donchian = −max(kk_r_floor_pct, kk_r_atr_mult × atr) (깡토식 −1R). 옛 키는 읽지 않는다
         ("donchian_swing",
          {"sizing_mode": "turtle", "stop_atr": 2.0, "turtle_backstop_pct": -9.0,
           "stop_loss_rate": -7.0},
-         3.0, -6.0),
-        # ATR 결측 → 고정% 로 fail-open(0.0 위장 금지)
+         3.0, -8.0),
         ("donchian_swing",
          {"sizing_mode": "turtle", "stop_atr": 2.0, "turtle_backstop_pct": -9.0,
           "stop_loss_rate": -7.0},
-         None, -7.0),
-        # 비-터틀 donchian 은 재해석을 타지 않는다(DB 토글이 손절 규약을 바꾸면 안 된다)
+         6.0, -9.0),
+        # ATR 결측 → R 하한(8%) — 0.0 위장 금지
+        ("donchian_swing",
+         {"sizing_mode": "turtle", "stop_atr": 2.0, "turtle_backstop_pct": -9.0,
+          "stop_loss_rate": -7.0},
+         None, -8.0),
+        # sizing_mode 로 손절 규약을 가르지 않는다(스탬프 게이트 원칙 — R 은 sizing_mode 무관)
         ("donchian_swing",
          {"sizing_mode": "position_ratio", "stop_atr": 2.0, "turtle_backstop_pct": -9.0,
           "stop_loss_rate": -7.0},
-         3.0, -7.0),
+         6.0, -9.0),
         # kojiro — sizing_mode 무관, 항상 `max(hard_stop_pct, -(stop_atr×atr))`
         ("kojiro", {"stop_atr": 2.0, "hard_stop_pct": -8.0}, 3.0, -6.0),
         ("kojiro", {"stop_atr": 2.0, "hard_stop_pct": -8.0}, 5.0, -8.0),
@@ -347,7 +351,7 @@ async def test_w1b_resolved_stop_loss_reaches_the_persisted_input_payload(
     나중에 "이 손절폭이 어떻게 나왔나" 를 손으로 검산할 수 있다.
     """
     mod = _gate()
-    h = _setup(monkeypatch, tech={"atr14_pct": 3.0})
+    h = _setup(monkeypatch, tech={"atr14_pct": 6.0})   # cycle405 — 1.5×6 = 9 > 8 하한
     sid = "donchian_swing"
     _observe(
         mod, strategy_id=sid,
@@ -359,8 +363,8 @@ async def test_w1b_resolved_stop_loss_reaches_the_persisted_input_payload(
 
     assert len(h.upserts) == 1, f"upsert {len(h.upserts)}회 (기대 1)"
     ip = h.upserts[0]["input_payload"]
-    assert ip["payload"]["stop_loss_pct"] == pytest.approx(-6.0)
-    assert ip["tech"]["atr14_pct"] == pytest.approx(3.0), "검산 근거(ATR)가 함께 없다"
+    assert ip["payload"]["stop_loss_pct"] == pytest.approx(-9.0)
+    assert ip["tech"]["atr14_pct"] == pytest.approx(6.0), "검산 근거(ATR)가 함께 없다"
 
 
 @pytest.mark.asyncio
@@ -705,7 +709,7 @@ def test_w3b_prompt_version_reflects_the_strategys_snapshot_keys() -> None:
         ("momentum", "stop_loss_rate"),
         ("volatility_breakout", "stop_loss_rate"),
         ("long_tail_volatility", "intraday_stop_loss"),
-        ("donchian_swing", "stop_loss_rate"),
+        # cycle405 — donchian 은 `kk_r_floor_pct`(양수 %)를 읽는다 → 아래 별도 테스트
         ("bull_flag_breakout", "stop_loss_rate"),
         ("vcp_breakout", "stop_loss_rate"),
         ("kojiro", "hard_stop_pct"),
@@ -730,3 +734,14 @@ def test_w4_stop_loss_pct_follows_the_live_param_override(sid: str, key: str) ->
     assert got == pytest.approx(-11.25), (
         f"{sid}: `{key}=-11.25` 오버라이드가 stop_loss_pct 에 반영되지 않았다 — {got}"
     )
+
+
+def test_w4b_donchian_stop_loss_pct_follows_live_r_floor() -> None:
+    """cycle405 — donchian 관측 손절폭 = −`kk_r_floor_pct`(라이브 params). 기본 −8.0, 오버라이드 11.25 → −11.25."""
+    gate = _gate()
+    params = _default_params("donchian_swing")
+    assert gate._read_stop_loss_pct("donchian_swing", params) == pytest.approx(-8.0)
+    params["kk_r_floor_pct"] = 11.25
+    assert gate._read_stop_loss_pct("donchian_swing", params) == pytest.approx(-11.25)
+    params["stop_loss_rate"] = -2.0
+    assert gate._read_stop_loss_pct("donchian_swing", params) == pytest.approx(-11.25), "옛 키를 읽었다"
