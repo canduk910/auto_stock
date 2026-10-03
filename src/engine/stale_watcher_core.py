@@ -48,6 +48,31 @@ logger = logging.getLogger("src.engine.scheduler")  # 사이클 60 I1 영속 (ca
 # 반드시 < 300s(`resubscribe_stale_priority` 5분 주기 자체) — 자기막힘/cycle215 원복 방지.
 RESUBSCRIBE_THROTTLE_SECS = 3 * STALE_FRESHNESS_SECS  # = 180
 
+# cycle408-L4 — 두 재등록 경로(K watcher 120초 · 5분 우선 재구독)의 종목 단위 진행 표식.
+# 두 task 는 공유 잠금이 없어, 한쪽이 종목을 해제(풀 매핑 pop)하고 `subscribe` 를 기다리는
+# 사이 다른 쪽이 같은 종목을 해제하면 매핑이 비어 `unsubscribe_in_pool` 이 메인 세션으로
+# 폴백한다 → 메인이 들고 있지 않은 종목에 UNSUBSCRIBE SEND → KIS `OPSP0003 not found`.
+# 해제 지점 3곳 바로 앞에서 `_claim_resub`, 실패하면 그 종목은 이번 회차를 건너뛴다
+# (다른 경로가 지금 같은 일을 하고 있다). 해제는 `finally` 의 `_release_resub` 한 곳 —
+# 완료·예외·취소(`_scan_task.cancel()`) 모두에서 푼다. 표식이 남으면 그 종목 재등록이
+# 영구 정지하므로 `finally` 를 지우지 않는다. claim 과 첫 `await`(해제 또는 구독) 사이에
+# `await` 를 두지 않는다 — 그것이 원자성의 근거다. 대기(Lock)가 아니라 건너뛰기인 이유 =
+# 120초·5분 주기 경로가 서로를 기다리면 안 된다.
+_RESUB_INFLIGHT: set[str] = set()
+
+
+def _claim_resub(ticker: str) -> bool:
+    """종목 재등록 진행 표식을 세운다. 이미 서 있으면 False (동기 — await 금지)."""
+    if ticker in _RESUB_INFLIGHT:
+        return False
+    _RESUB_INFLIGHT.add(ticker)
+    return True
+
+
+def _release_resub(ticker: str) -> None:
+    """종목 재등록 진행 표식을 푼다 (동기, 멱등)."""
+    _RESUB_INFLIGHT.discard(ticker)
+
 
 # ── cycle293 — 채널 리졸버 보조 헬퍼 ────────────────────────────────────────
 def _actual_or_desired_tick_tr_id(kis_ws_pool, ticker: str, priority: str) -> str:
@@ -825,6 +850,10 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
             # 강제 재시도 발화
             # 사이클 29-R3 — sub_priority/sub_bypass 분기 적용 (HIGH/LOW)
             age_disp = f"{age_secs:.0f}s" if age_secs != float("inf") else "inf"
+            # cycle408-L4 — 다른 경로(5분 우선 재구독)가 지금 이 종목을 재등록 중이면 건너뛴다.
+            if not _claim_resub(ticker):
+                logger.debug("[stale_resub_inflight] ticker=%s path=force_retry — 다른 경로 진행 중 skip", ticker)
+                continue
             try:
                 await kis_ws_pool.unsubscribe_in_pool(tick_tr_id, ticker)
                 await asyncio.sleep(0.05)
@@ -852,6 +881,8 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
                 # 사이클 72 hotfix A2: write_log 제거 — logger.info → _DbLogHandler 위임 단일 INSERT
             except Exception:
                 logger.exception("[stale_force_retry] 강제 재시도 실패: %s", ticker)
+            finally:
+                _release_resub(ticker)
 
             await asyncio.sleep(0.05)  # Rate Limit 보호
             continue
@@ -859,6 +890,10 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
         # 1~5회 — 첫 stale 즉시 강제 재등록 (KIS 정상 "신규 등록" 패턴, 재SEND 0건)
         # KIS 공식 답변: "기등록한 사항을 재등록하지 않도록" (LMS + 앱정보 이용중지 위험)
         # 사이클 29-R3 — sub_priority/sub_bypass 분기 적용 (사이클 25-B 패턴 K stale watcher 확장)
+        # cycle408-L4 — 다른 경로(5분 우선 재구독)가 지금 이 종목을 재등록 중이면 건너뛴다.
+        if not _claim_resub(ticker):
+            logger.debug("[stale_resub_inflight] ticker=%s path=k_watcher — 다른 경로 진행 중 skip", ticker)
+            continue
         try:
             await kis_ws_pool.unsubscribe_in_pool(tick_tr_id, ticker)
             await asyncio.sleep(0.05)
@@ -873,6 +908,8 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
                 scheduler._stale_last_resubscribe_at[ticker] = _dt_mod.now(_KST_TZ)
         except Exception:
             logger.exception("[stale_watcher] 강제 재등록 실패: %s", ticker)
+        finally:
+            _release_resub(ticker)
 
         await asyncio.sleep(0.05)  # Rate Limit 보호
 
@@ -1099,6 +1136,12 @@ async def resubscribe_stale_priority(scheduler: Any, cap: int = 10) -> list[str]
             sub_bypass = False
         # cycle293 — 해제·재등록이 같은 tr_id 를 쓴다(채널 전환 경로 아님).
         tick_tr_id = _actual_or_desired_tick_tr_id(kis_ws_pool, ticker, sub_priority)
+        # cycle408-L4 — K watcher 가 지금 이 종목을 재등록 중이면 건너뛴다. 스냅샷은
+        # 루프 진입 전 1회라 그 사이 K watcher 가 매핑을 pop 했을 수 있다(메인 폴백 OPSP0003).
+        # 건너뛴 종목은 `resubscribed`·`_stale_last_resubscribe_at` 에 넣지 않는다(한 일이 없다).
+        if not _claim_resub(ticker):
+            logger.debug("[stale_resub_inflight] ticker=%s path=priority — 다른 경로 진행 중 skip", ticker)
+            continue
         try:
             if ticker in subscribed_snapshot:
                 await kis_ws_pool.unsubscribe_in_pool(tick_tr_id, ticker)
@@ -1125,6 +1168,8 @@ async def resubscribe_stale_priority(scheduler: Any, cap: int = 10) -> list[str]
         except Exception:
             logger.exception("[stale_priority_resubscribe] 재구독 실패: %s", ticker)
             continue
+        finally:
+            _release_resub(ticker)
         await asyncio.sleep(0.05)  # Rate Limit 보호
 
     logger.info(

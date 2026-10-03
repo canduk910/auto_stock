@@ -739,8 +739,13 @@ _SRC_TREE_FILES = 171  # cycle404 — 계좌 묶음 배정 기록(단계 0): 신
 # + `src/db/system_config.py`(`get_account_cluster_mode_raw()` 1함수 추가) 로 파일 수
 # 170 → 171. 8영역·scheduler.py 무접촉, 매매 행위 변경 없음(읽기+system_logs 기록만).
 # 직전 값(cycle406 재핀 5) = `459f4c96ba629fa111bbc89cedffb6b6bbfaca12cbc6bbf1a85ca04bb6b61846`.
+# 🔁 cycle408-L4 재핀 — K stale watcher 와 5분 우선 재구독의 같은 종목 경합 차단:
+# `src/engine/stale_watcher_core.py` 한 파일(종목 단위 진행 표식 `_RESUB_INFLIGHT` +
+# 해제 지점 3곳 claim/finally 해제). 파일 수 171 그대로. 8영역·scheduler.py 무접촉,
+# 매매 행위 변경 없음(헛 UNSUBSCRIBE SEND 제거만).
+# 직전 값(cycle404) = `bf7e8e91cf8b7a256859fb149e2adf7fc4b601bab1901166628095675435f871`.
 _SRC_TREE_DIGEST = (
-    "bf7e8e91cf8b7a256859fb149e2adf7fc4b601bab1901166628095675435f871"
+    "6445e78b174d0f31f705187db0c39311af6dd2720c500d3a89c478da0ca92226"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
