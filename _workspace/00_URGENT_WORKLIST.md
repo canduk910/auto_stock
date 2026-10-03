@@ -47,6 +47,10 @@
 18. (10-03 자율 구간 00:1x~07:00, 커밋만 · 배포 안 함 — 리팩토링 첫 부팅 관찰 전이라) ✅ cycle399 공통 섀도 모드 `b04b0b0` · ✅ cycle401 D-1 `save_params` `4370674` · ✅ cycle402 청산 사유 3종 + 15:20 사유 훅 `af20778` · ✅ 날짜 의존 테스트(R-19 cap 상태) 격리 · ✅ cycle400 계좌 리스크 예산 자문 · ⏳ cycle403 ETF 전략 개발(브랜치 `feat/cycle403-etf-trend`, R3 승인 전 — `risk.py:88` 한 줄·시드 적용·병합 보류)
    - 🔴 cycle402 배포 경계 전후로 매도 사유 이름(`STOP_LOSS`·`TRAILING_STOP` 등)별 로그·trade_history 집계를 **합산하지 않는다** — BFB measured-move·max_hold, donchian breakout_fail, kojiro stage3, VCP 50EMA 의 사유 이름이 바뀐다(자문 cycle367 §4.5). 20:20·주간 루틴 프롬프트에도 같은 문장을 넣는 것은 외부 설정 변경이라 사용자 결정
 
+19. (10-03 10:3x) **돈키언 개조 = (a) 진행 + 비중 증액(고지로에서 배분)** — 사용자 「a 개조안대로 진행하고 비중을 더 주도록 변경. 고지로에서 배분 (고지로 비중 절대방어 해제)」. 🔴 09-27 「kojiro 는 안 건드림」(ETF·평균회귀 비중 출처 맥락)은 **해제**됐다. 사전 등록 판정은 미통과(3개 중 J3 수익 차 하한 0.64%p 부족, 점추정 +13%p) — 사용자가 알고 진행. 증액 크기는 자문 계산 뒤 확정(돈키언 비중별 무매수 비율·kojiro 보유 하한·반도체 묶음 영향) → 비중 PUT 은 개조 배포 + `buy_paused` 해제 때(보유 0 확인, 장외)
+
+20. (10-03 17시대) **전략 비중 확정** — 사용자 「고지로 30, 돈키언 25, VCP 20, BFB 20, 모멘텀 3, VB 2로 가자(퍼센트기준)」 → kojiro 0.30 · donchian_swing 0.25 · vcp_breakout 0.20 · bull_flag_breakout 0.20 · momentum 0.03 · volatility_breakout 0.02 · LTV 0 · etf_trend 0(Σ 1.00, cash_usage_ratio 0.95 그대로). 적용 = 돈키언 개조 배포 + `buy_paused` 해제 날 장외에 `PUT /api/strategies/weights` 한 번(직전 하한선 확인: kojiro 보유 약 96만 < 141만 OK). ETF S2 때는 VB 0.02 + 현금 5% 를 ETF 로(R5)
+
 **다음**: 결정 3·4·7 진행 → 15:30 push(코드 변경이 들어가면 full — 15:30 정각 push, 16:00 애프터 전 재기동 완료) → 카드 #2·#3(`scheduler.py` 승인) → ETF 전략 신설(shadow, 카드 #9) · 평균회귀 트랙 R(`tools/replay/`)·C(실비용)는 지시서 순서대로
 
 ## 지금 상태 (2026-09-26 11시 KST — 주간 토큰 부족으로 작업 정리, 다음 거래일 09-28(월))
