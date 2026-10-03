@@ -51,6 +51,8 @@
 
 20. (10-03 17시대) **전략 비중 확정** — 사용자 「고지로 30, 돈키언 25, VCP 20, BFB 20, 모멘텀 3, VB 2로 가자(퍼센트기준)」 → kojiro 0.30 · donchian_swing 0.25 · vcp_breakout 0.20 · bull_flag_breakout 0.20 · momentum 0.03 · volatility_breakout 0.02 · LTV 0 · etf_trend 0(Σ 1.00, cash_usage_ratio 0.95 그대로). 적용 = 돈키언 개조 배포 + `buy_paused` 해제 날 장외에 `PUT /api/strategies/weights` 한 번(직전 하한선 확인: kojiro 보유 약 96만 < 141만 OK). ETF S2 때는 VB 0.02 + 현금 5% 를 ETF 로(R5)
 
+21. 🔴 **10-06(화) 배포 계획 확정**(사용자 「바로」) — ① 07:45 첫 부팅 점검(리팩토링 cycle398 첫 부팅) ② **15:30** main 미배포분 push(cycle399 섀도 · 401 D-1 · 402 매도 사유 · 403 ETF(마이그레이션 044 시드) · 404 묶음 기록 · 406 작은 항목 · 컨테이너 정리) → CI·Deploy·`/health`·16:00 전 재기동 확인 ③ **21:35 이후 바로** 돈키언 개조(브랜치 `feat/donchian-kkangto-exit` `bea9831`) main 병합·push → 배포 확인 → donchian 보유 0 확인 → `PUT /api/strategies/donchian_swing/params {"params":{"buy_paused":false}}` → `PUT /api/strategies/weights` kojiro 0.30 · donchian 0.25 · vcp 0.20 · bfb 0.20 · momentum 0.03 · vb 0.02 (하한선 확인 후) → API·DB 확인
+
 **다음**: 결정 3·4·7 진행 → 15:30 push(코드 변경이 들어가면 full — 15:30 정각 push, 16:00 애프터 전 재기동 완료) → 카드 #2·#3(`scheduler.py` 승인) → ETF 전략 신설(shadow, 카드 #9) · 평균회귀 트랙 R(`tools/replay/`)·C(실비용)는 지시서 순서대로
 
 ## 지금 상태 (2026-09-26 11시 KST — 주간 토큰 부족으로 작업 정리, 다음 거래일 09-28(월))
