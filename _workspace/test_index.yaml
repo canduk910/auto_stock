@@ -128,6 +128,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -946,6 +947,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -1330,6 +1332,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -2177,6 +2180,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -2511,6 +2515,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -3417,6 +3422,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -3816,6 +3822,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -4650,6 +4657,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -5016,6 +5024,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -5884,6 +5893,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -6254,6 +6264,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -7120,6 +7131,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -7491,6 +7503,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -8356,6 +8369,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -8736,6 +8750,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -9597,6 +9612,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -9967,6 +9983,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -10829,6 +10846,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -11271,6 +11289,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -12135,6 +12154,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -12518,6 +12538,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -13387,6 +13408,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -13772,6 +13794,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -14624,6 +14647,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -15017,6 +15041,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -15868,6 +15893,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -16225,6 +16251,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -17094,6 +17121,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -17420,6 +17448,7 @@ backend:
       - tests/unit/engine/test_cycle273_daily_load_protected.py
       - tests/unit/engine/test_cycle363_immediate_slot_gate.py
       - tests/unit/engine/test_cycle363_trading_calendar.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycleE_etf_regime.py
       - tests/unit/engine/test_cycleF_te_rr_metrics.py
     transitive_tests:
@@ -17479,6 +17508,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -18703,6 +18733,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -19567,6 +19598,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -19938,6 +19970,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -20803,6 +20836,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -21182,6 +21216,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -22039,6 +22074,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -22407,6 +22443,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -23275,6 +23312,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -23651,6 +23689,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -24513,6 +24552,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -24884,6 +24924,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -25747,6 +25788,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -26122,6 +26164,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -26983,6 +27026,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -27355,6 +27399,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -28219,6 +28264,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -28604,6 +28650,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -29455,6 +29502,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_mutation_gaps.py
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -29790,6 +29838,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -30694,6 +30743,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -31118,6 +31168,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -31932,6 +31983,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_mutation_gaps.py
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -32329,6 +32381,7 @@ backend:
       - tests/integration/test_cycle384_buy_paused_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -33164,6 +33217,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_mutation_gaps.py
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -33534,6 +33588,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -34399,6 +34454,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -34772,6 +34828,7 @@ backend:
       - tests/integration/test_cycle382_market_unit_pg.py
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -35637,6 +35694,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -35946,6 +36004,7 @@ backend:
       - tests/integration/test_cycle285_market_ops_pg_roundtrip.py
       - tests/integration/test_cycle350_funnel_snapshot_at_pg.py
       - tests/integration/test_cycle364_funnel_protect_confirmed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycleM1_3_daily_perf_funnel_roundtrip.py
       - tests/integration/test_cycleM6_date_column_str_binding_roundtrip.py
       - tests/unit/db/test_cycle145_funnel_upsert.py
@@ -35959,6 +36018,7 @@ backend:
       - tests/unit/engine/test_cycle171_evening_funnel.py
       - tests/unit/engine/test_cycle200_funnel_capture_atomic.py
       - tests/unit/engine/test_cycle364_funnel_boot_vs_evening.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
@@ -37242,6 +37302,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -38111,6 +38172,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -38499,6 +38561,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -39350,6 +39413,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -39736,6 +39800,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -40587,6 +40652,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -40950,6 +41016,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -41819,6 +41886,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -42187,6 +42255,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -43056,6 +43125,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -43424,6 +43494,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -44292,6 +44363,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -44679,6 +44751,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -45529,6 +45602,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_mutation_gaps.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -45901,6 +45975,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -46764,6 +46839,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -47135,6 +47211,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -48001,6 +48078,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -48369,6 +48447,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -49236,6 +49315,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -49615,6 +49695,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -50472,6 +50553,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -50839,6 +50921,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -51708,6 +51791,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -52074,6 +52158,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -52943,6 +53028,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -53335,6 +53421,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -54184,6 +54271,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_core.py
       - tests/unit/engine/test_cycle403_etf_trend_mutation_gaps.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -54548,6 +54636,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -55416,6 +55505,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -55790,6 +55880,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -56652,6 +56743,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -57021,6 +57113,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -57888,6 +57981,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -58255,6 +58349,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -59124,6 +59219,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -59497,6 +59593,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -60360,6 +60457,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -60731,6 +60829,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -61596,6 +61695,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -61967,6 +62067,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -62832,6 +62933,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -63201,6 +63303,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -64069,6 +64172,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -64437,6 +64541,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -65305,6 +65410,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -65672,6 +65778,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -66540,6 +66647,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -66992,6 +67100,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -67852,6 +67961,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -68226,6 +68336,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -69086,6 +69197,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -69450,6 +69562,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -70317,6 +70430,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -70691,6 +70805,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -71557,6 +71672,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -71936,6 +72052,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -72800,6 +72917,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -73166,6 +73284,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -74024,6 +74143,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -74391,6 +74511,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -75260,6 +75381,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -75628,6 +75750,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -76496,6 +76619,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -76873,6 +76997,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -77732,6 +77857,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -78103,6 +78229,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -78968,6 +79095,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -79338,6 +79466,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -80204,6 +80333,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -80577,6 +80707,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -81440,6 +81571,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -81806,6 +81938,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -82675,6 +82808,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -83138,6 +83272,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -84006,6 +84141,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -84456,6 +84592,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -85322,6 +85459,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -85828,6 +85966,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -86695,6 +86834,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -87063,6 +87203,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -87932,6 +88073,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -88307,6 +88449,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -89168,6 +89311,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -89590,6 +89734,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -90413,6 +90558,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_mutation_gaps.py
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -90773,6 +90919,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -91642,6 +91789,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -92011,6 +92159,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -92879,6 +93028,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -93241,6 +93391,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -94110,6 +94261,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -94477,6 +94629,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -95420,6 +95573,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_core.py
       - tests/unit/engine/test_cycle403_etf_trend_mutation_gaps.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -95713,6 +95867,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -95850,6 +96005,7 @@ backend:
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
       - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -96954,6 +97110,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -97821,6 +97978,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -98189,6 +98347,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -99057,6 +99216,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -99423,6 +99583,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -100291,6 +100452,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -100657,6 +100819,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -101526,6 +101689,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -101903,6 +102067,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -102764,6 +102929,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -103166,6 +103332,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -104020,6 +104187,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -104370,6 +104538,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -105235,6 +105404,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -105631,6 +105801,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -106490,6 +106661,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -106841,6 +107013,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -107708,6 +107881,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -108073,6 +108247,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -108942,6 +109117,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -109309,6 +109485,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -110178,6 +110355,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -110547,6 +110725,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -111415,6 +111594,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -111784,6 +111964,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -112651,6 +112832,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -113019,6 +113201,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -113887,6 +114070,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -114264,6 +114448,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -115127,6 +115312,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -115567,6 +115753,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -116392,6 +116579,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -116724,6 +116912,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -117631,6 +117820,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_mutation_gaps.py
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -117996,6 +118186,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -118861,6 +119052,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_core.py
       - tests/unit/engine/test_cycle403_etf_trend_mutation_gaps.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -119269,6 +119461,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -120101,6 +120294,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -120432,6 +120626,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -121336,6 +121531,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -121668,6 +121864,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -122572,6 +122769,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -122982,6 +123180,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -123809,6 +124008,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -124140,6 +124340,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -125046,6 +125247,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -125383,6 +125585,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -126314,6 +126517,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_core.py
       - tests/unit/engine/test_cycle403_etf_trend_mutation_gaps.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle48_stale_tracker_state.py
@@ -126652,6 +126856,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -127517,6 +127722,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_mutation_gaps.py
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -127851,6 +128057,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -128773,6 +128980,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -129120,6 +129328,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -129989,6 +130198,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -130362,6 +130572,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -131224,6 +131435,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -131672,6 +131884,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -132538,6 +132751,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -132911,6 +133125,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -133775,6 +133990,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -134143,6 +134359,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -135009,6 +135226,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -135398,6 +135616,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -136247,6 +136466,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -136611,6 +136831,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -137480,6 +137701,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -137852,6 +138074,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -138718,6 +138941,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_mutation_gaps.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -139086,6 +139310,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -139953,6 +140178,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -140333,6 +140559,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -141196,6 +141423,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -141626,6 +141854,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -142495,6 +142724,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -142862,6 +143092,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -143731,6 +143962,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -144105,6 +144337,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -144971,6 +145204,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -145337,6 +145571,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -146209,6 +146444,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -146647,6 +146883,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -147512,6 +147749,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -147884,6 +148122,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -148749,6 +148988,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -149151,6 +149391,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -150055,6 +150296,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -150629,6 +150871,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
       - tests/integration/test_cycle98_fluctuation_kis_api.py
       - tests/integration/test_cycle99_fluctuation_single_call.py
@@ -151469,6 +151712,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -151925,6 +152169,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -152775,6 +153020,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -153183,6 +153429,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -154041,6 +154288,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -154394,6 +154642,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -155259,6 +155508,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -155648,6 +155898,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -156512,6 +156763,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -156898,6 +157150,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -157747,6 +158000,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -159734,6 +159988,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -160598,6 +160853,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -160963,6 +161219,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -161831,6 +162088,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -162204,6 +162462,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -163070,6 +163329,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -163435,6 +163695,7 @@ backend:
       - tests/integration/test_cycle385r_positions_name_keep_pg.py
       - tests/integration/test_cycle386_provisional_predicate_pg.py
       - tests/integration/test_cycle401_save_params_seed_pg.py
+      - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -164303,6 +164564,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
@@ -166526,10 +166788,10 @@ frontend:
       - frontend/src/pages/__tests__/StrategiesParams.test.tsx
       - frontend/src/pages/__tests__/StrategiesTeRr.test.tsx
       - frontend/src/pages/__tests__/StrategyFunnel.bottleneckTrend.test.tsx
-generated_at: '2026-10-03T16:06:53.786Z'
+generated_at: '2026-10-03T16:25:18.422Z'
 stats:
   backend_modules: 174
-  backend_tests: 1217
+  backend_tests: 1219
   frontend_modules: 129
   frontend_tests: 109
   unmapped_modules:

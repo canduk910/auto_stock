@@ -435,9 +435,9 @@ run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, recor
 
 ### 공통 헬퍼와 호출처
 
-- `capture_funnel_snapshots(registry, *, is_provisional=False, target_date=None, skipped_out=None) -> int` — `label = target_date or 오늘(KST)`. 전략마다 `funnel_capture.capture_skip_reason(strategy, label, today, is_provisional=...)` 통과분만 `_funnel_steps` 단계별 + `step_no=99` 를 `target_date=label` insert(전략별 예외 격리, momentum 영구 제외, in-place upsert). 완료 로그 `[funnel_snapshot] 캡처 완료 — target_date= saved= provisional= skipped=<sid:사유,…>`. `skipped_out` dict = `{sid: 사유}` 채움(반환값 무관, 수동 trigger 전용).
+- `capture_funnel_snapshots(registry, *, is_provisional=False, target_date=None, skipped_out=None, protect_confirmed=False) -> int` — `label = target_date or 오늘(KST)`. 전략마다 `funnel_capture.capture_skip_reason(strategy, label, today, is_provisional=...)` 통과분만 `_funnel_steps` 단계별 + `step_no=99` 를 `target_date=label` insert(전략별 예외 격리, momentum 영구 제외, in-place upsert). 완료 로그 `[funnel_snapshot] 캡처 완료 — target_date= saved= provisional= skipped=<sid:사유,…>`. `skipped_out` dict = `{sid: 사유}` 채움(반환값 무관, 수동 trigger 전용). `protect_confirmed` = 두 insert 에 그대로 전달(cycle408-L1, 아래 09:30 자동만 `True`).
 - 호출처 3:
-  - 09:30 자동 `_auto_capture_funnel_snapshots`, `is_provisional=False`, `target_date=today_kst()`(`_scan_loop` 첫 패스 = 첫 `SCAN_INTERVAL` 뒤 ≈09:35).
+  - 09:30 자동 `_auto_capture_funnel_snapshots`, `is_provisional=False`, `target_date=today_kst()`, `protect_confirmed=True`(`_scan_loop` 첫 패스 = 첫 `SCAN_INTERVAL` 뒤 ≈09:35).
   - 저녁 `_evening_funnel_capture_once` → `funnel_capture.evening_capture_once(self)`, `is_provisional=True`(21:00 정기 = `target_date=다음 거래일`, 레거시 분기 = 오늘).
   - 수동 trigger `routes/strategy_funnel.py::trigger_snapshot`, `is_provisional=False`, `target_date` 없음 = 오늘.
 
@@ -488,7 +488,7 @@ run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, recor
 
 ### 하루 쓰기 순서와 확정 행 보호
 
-- 거래일 D 쓰기 = ≈07:57 레거시 `(D, 잠정)` · ≈09:35 자동 `(D, 확정)`(잠정 덮음) · 21:00 `(다음 거래일, 잠정)` — 저녁은 다른 키라 **그날 확정 행 보존**(20:05·21:30 리포트 `strategy_funnel_stages`(D) = 09:35 확정본). ⚠️ 그날 첫 캡처 뒤 재기동하면 하루 1회 게이트(`_auto_funnel_snapshot_done_today`)가 프로세스 메모리라 다시 열리고, 확정→확정 덮어쓰기가 허용돼 09:35 확정본이 재기동 뒤 값으로 바뀐다(09:30~15:20 재기동은 부팅 +5분 뒤, 15:20~20:00 재기동은 즉시 — 09-29 실측).
+- 거래일 D 쓰기 = ≈07:57 레거시 `(D, 잠정)` · ≈09:35 자동 `(D, 확정)`(잠정 덮음) · 21:00 `(다음 거래일, 잠정)` — 저녁은 다른 키라 **그날 확정 행 보존**(20:05·21:30 리포트 `strategy_funnel_stages`(D) = 09:35 확정본). 그날 첫 캡처 뒤 재기동하면 하루 1회 게이트(`_auto_funnel_snapshot_done_today`)가 프로세스 메모리라 다시 열려 자동 캡처가 한 번 더 돈다(09:30~15:20 재기동은 부팅 +5분 뒤, 15:20~20:00 재기동은 즉시) — 자동 캡처는 `protect_confirmed=True` 라 **이미 확정된 행은 덮지 않고**(`None`, saved 에 안 셈) 오전에 확정되지 못한 전략의 행만 채운다(cycle408-L1). 수동 trigger 는 확정 행을 덮는다.
 - 같은 키 **잠정 쓰기는 확정 행을 못 덮는다**(③-b — `insert_snapshot` `None`, 계약 = `src/db/CLAUDE.md` `strategy_funnel.py` 절; 거래일 20:00 뒤 오늘 라벨 잠정 쓰기 = 장중·저녁 재기동 레거시 분기).
 - 다음 거래일 09:30 확정이 저녁 잠정 행을 덮는다(저녁 목록 영구 기록 = ④ 로그뿐). VCP 오전 prepare 별 후보 = `[vcp_breakout_distance_summary]` 로 복원(`strategies/CLAUDE.md` 각주 ⑥).
 

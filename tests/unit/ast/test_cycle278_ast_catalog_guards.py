@@ -308,8 +308,9 @@ _BASE_SHA = {
     # BFB·VCP 로 확대하고 남의 보유·익일청산 엔트리를 보존·재구성 어느 쪽도 하지
     # 않는다.
     # 🔁 cycle369 재핀 — 관리종목51·단기과열59 청산·매수차단 leaf 배선(값만 이동)
+    # 🔁 cycle408-L1 재핀 — 사용자 승인 10-04 8영역 관측 결함 해결: 09:30 자동 퍼널 캡처에 `protect_confirmed=True` 전달(+6줄, 값 없는 키워드 배선)
     "src/engine/scheduler.py":
-        "084f114f2aa415dec16a55e5df5d89c233c37d55c5714c66b10460839435d10c",
+        "2bacaa149ab6d00ca97c07c4a8ae4e2b43c992b1e1960909de06bf6d654a1f3f",
     # 🔁 cycle382 재핀 — 시장 유닛(사용자 결정 09-27). `strategy_base.py` 에
     # `_market_unit_*` 헬퍼 + `MarketUnitView`/`MarketUnitLots`/`_MarketUnitCaps`
     # 추가(관문 `_apply_budget_limit` 등 본문은 byte 무변경, A12 가 별도로 핀).

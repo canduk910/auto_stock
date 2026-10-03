@@ -185,6 +185,7 @@ def flush_swing_rest_poll_collector() -> None:
 
 async def capture_funnel_snapshots(
     registry, *, is_provisional: bool = False, target_date=None, skipped_out: dict | None = None,
+    protect_confirmed: bool = False,
 ) -> int:
     """사이클 171 — funnel snapshot 단계별 캡처 공통 헬퍼 (4 호출처 공유).
 
@@ -215,6 +216,7 @@ async def capture_funnel_snapshots(
         skipped_out: (F4) dict 를 주면 건너뛴 전략마다 `skipped_out[sid] = 사유` 를 채운다
             (사유 문자열은 완료 로그 `skipped=` 와 동일). 반환값(int)은 이 인자와 무관하게
             불변 — 09:30 자동·21:00 저녁 A1·레거시 호출자는 이 인자를 넘기지 않는다.
+        protect_confirmed: cycle408-L1 — 두 insert_snapshot 에 전달(기존 확정 행 보존). 09:30 자동만 True.
 
     Returns:
         저장된 row 수 (saved_count).
@@ -278,6 +280,7 @@ async def capture_funnel_snapshots(
                     excluded_count=int(step.get("excluded_count", 0)),
                     step_conditions=step.get("step_conditions"),  # 사이클 41
                     is_provisional=is_provisional,  # 사이클 171
+                    protect_confirmed=protect_confirmed,
                 )
                 if row:
                     saved_count += 1
@@ -302,6 +305,7 @@ async def capture_funnel_snapshots(
                 excluded_count=0,
                 excluded_sample=[],
                 is_provisional=is_provisional,  # 사이클 171
+                protect_confirmed=protect_confirmed,
             )
             if row:
                 saved_count += 1
@@ -3267,7 +3271,9 @@ class TradingScheduler:
         - 일일 1회 가드는 호출자 (`_auto_funnel_snapshot_done_today`) 가 보장
         """
         from src.db._kst import today_kst as _today_kst
-        await capture_funnel_snapshots(self.registry, is_provisional=False, target_date=_today_kst())
+        await capture_funnel_snapshots(
+            self.registry, is_provisional=False, target_date=_today_kst(), protect_confirmed=True,
+        )
 
     async def _report_tick_coverage(self) -> None:
         """현재 TICK 구독 종목 중 최근 60초 내 tick 수신 비율을 로깅한다 (Phase D + 가설 B 확장 2026-05-12).

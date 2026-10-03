@@ -180,16 +180,17 @@ AWS RDS PostgreSQL CRUD 모듈. DB 클라이언트 정본 = **`pg.py` (asyncpg �
 
 ## strategy_funnel.py — 조건검색 단계별 추적
 
-- **`insert_snapshot(*, target_date, strategy_id, step_no, step_name, survived_tickers=None, excluded_sample=None, survived_count=None, excluded_count=0, step_conditions=None, is_provisional=False) -> dict | None`** — 전부 keyword-only. `(target_date, strategy_id, step_no)` **UPSERT**(UNIQUE = migration 035) — 단계당 최신 1행.
+- **`insert_snapshot(*, target_date, strategy_id, step_no, step_name, survived_tickers=None, excluded_sample=None, survived_count=None, excluded_count=0, step_conditions=None, is_provisional=False, protect_confirmed=False) -> dict | None`** — 전부 keyword-only. `(target_date, strategy_id, step_no)` **UPSERT**(UNIQUE = migration 035) — 단계당 최신 1행.
   - `snapshot_at` = **그 행의 마지막 쓰기 시각**(생성 시각 아님). 첫 INSERT = 컬럼 기본값 `now()`(migration 030), 덮어쓰기 = `DO UPDATE SET … snapshot_at = now()` — 둘 다 DB 시계(애플리케이션 `datetime` 미바인딩). 이 값을 조건으로 쓰는 소비처는 `routes/market_ops.py` 하나(`src/routes/CLAUDE.md` `/api/market-ops` 행).
   - `survived_tickers` = `list[str]` 또는 `list[dict]`(`{ticker, name}`), `excluded_sample` = `[{ticker, name, reason}]` — 읽는 쪽이 형식을 분기한다. `survived_count` 가 `None` 이면 `len(survived_tickers)`. `step_conditions` = UI 툴팁 문자열.
   - `is_provisional=True` = 저녁 잠정 캡처(21:00 미리보기는 `target_date` = **다음 거래일**, 부팅 +600초 레거시 재준비는 오늘). `False`(기본) = 09:30 자동·수동 trigger(확정, 오늘).
   - 🔴 **잠정 쓰기는 확정 행을 덮지 못한다(③-b)** — `ON CONFLICT (target_date, strategy_id, step_no) DO UPDATE SET … WHERE NOT (strategy_funnel_snapshots.is_provisional = FALSE AND EXCLUDED.is_provisional = TRUE)`. 그 조합이면 `RETURNING` 이 비어 **`None`** 이고 확정 행(`snapshot_at` 포함)은 그대로다. 나머지 세 조합(잠정→잠정 · 확정→잠정 · 확정→확정)은 갱신된다(09:30 확정 캡처가 그날 잠정 행을 덮는 것이 정상 경로). `None` 반환 = 이 거부 또는 DB 예외. 가드 = `tests/unit/db/test_cycle364_funnel_protect_confirmed.py` · PG 왕복 `tests/integration/test_cycle364_funnel_protect_confirmed_pg.py`.
+  - **`protect_confirmed=True` 면 확정→확정도 막는다(cycle408-L1)** — 위 `WHERE NOT (…)` 뒤에 리터럴 `AND strategy_funnel_snapshots.is_provisional = TRUE` 를 붙여 기존 행이 잠정일 때만 갱신한다(행이 없으면 삽입, 기존 확정이면 `None`). 바인딩은 10개 그대로이고 기본값 `False` 면 SQL 이 byte 동일하다. 넘기는 곳은 09:30 자동 캡처 하나뿐이다 — 수동 trigger 는 확정 행을 계속 덮는다. 가드 = `tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py` · PG 왕복 `tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py`.
   - **JSONB cap**: `SURVIVED_TICKERS_CAP = 200` / `EXCLUDED_SAMPLE_CAP = 20`. `survived_count` 는 cap 과 무관하게 정확한 값.
 - `list_snapshots(*, target_date, strategy_id=None, raise_on_error=False)`: 그 영업일 + 전략의 전 단계(`step_no` ASC). 조회 예외는 기본 WARNING + `[]`, `raise_on_error=True` 면 던진다(`funnel_capture` ④ 가 DB 장애를 「저녁 캡처 없음」과 가르려고 쓴다)
 - `list_recent_by_strategy(strategy_id, days=7)`: 최근 N영업일 추이 — `target_date <= 오늘` 이라 저녁 미리보기(다음 거래일) 행은 안 나온다
 - 테이블 `strategy_funnel_snapshots`(UUID PK + 인덱스 2 = `target_date DESC` / `(strategy_id, target_date DESC)`)
-- 쓰기 = 공통 헬퍼 `scheduler.capture_funnel_snapshots(registry, *, is_provisional=False, target_date=None, skipped_out=None)` 하나. 호출처·시각·라벨 가드·쓰기 순서 = `src/engine/CLAUDE.md` 「funnel 스냅샷 캡처」 절, 단계 수집 hook(`_record_funnel_step`) = `src/engine/strategies/CLAUDE.md`.
+- 쓰기 = 공통 헬퍼 `scheduler.capture_funnel_snapshots(registry, *, is_provisional=False, target_date=None, skipped_out=None, protect_confirmed=False)` 하나. 호출처·시각·라벨 가드·쓰기 순서 = `src/engine/CLAUDE.md` 「funnel 스냅샷 캡처」 절, 단계 수집 hook(`_record_funnel_step`) = `src/engine/strategies/CLAUDE.md`.
 
 ## stock_master.py — 종목 마스터 캐시
 

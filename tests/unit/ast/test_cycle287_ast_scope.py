@@ -744,8 +744,12 @@ _SRC_TREE_FILES = 171  # cycle404 — 계좌 묶음 배정 기록(단계 0): 신
 # 해제 지점 3곳 claim/finally 해제). 파일 수 171 그대로. 8영역·scheduler.py 무접촉,
 # 매매 행위 변경 없음(헛 UNSUBSCRIBE SEND 제거만).
 # 직전 값(cycle404) = `bf7e8e91cf8b7a256859fb149e2adf7fc4b601bab1901166628095675435f871`.
+# 🔁 cycle408-L1 재핀 — 사용자 승인 10-04 8영역 관측 결함 해결: 09:30 자동 퍼널 캡처가 그날
+# 이미 확정된 행을 덮지 않게 `src/db/strategy_funnel.py`(`insert_snapshot` 키워드
+# `protect_confirmed`) + `scheduler.py` 전달 배선. 파일 수 171 그대로. 매매 행위 변경 없음.
+# 직전 값(cycle408-L4) = `6445e78b174d0f31f705187db0c39311af6dd2720c500d3a89c478da0ca92226`.
 _SRC_TREE_DIGEST = (
-    "6445e78b174d0f31f705187db0c39311af6dd2720c500d3a89c478da0ca92226"
+    "2db05b0d111617252ddd98037903892dec89d49673464b9cae633a59eb78a035"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
@@ -787,7 +791,7 @@ _PINNED_DIR_FILE_COUNTS = {
 #: 신규 leaf `src/engine/market_op_subscribe.py` 로 추출해(행위 변경 0 · 5줄
 #: 위임 wrapper) 3,897 → 3,726 이 됐다. 값만 옮긴다 — 정확 핀을 상한 핀으로
 #: 완화하면 cycle287 의 무접촉 대리 지표가 사라진다.
-_SCHEDULER_LINES = 3730  # cycle398 재핀 — 전략 등록 명부 추출(PR1 카드 #2) + 원형 선언 명부 칸 추출(PR2 카드 #3, 사용자 승인 10-02, 합산 -56)
+_SCHEDULER_LINES = 3736  # cycle408-L1 재핀 +6 — 사용자 승인 10-04 8영역 관측 결함 해결(09:30 자동 퍼널 캡처 protect_confirmed). 직전 3730 = cycle398 PR2
 _SCHEDULER_LINE_CAP = 3900
 
 #: 손대지 않기로 한 **원문 구간**의 sha256 (base `a42f519`).
