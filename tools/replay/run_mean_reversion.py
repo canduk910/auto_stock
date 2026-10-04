@@ -37,7 +37,9 @@ STOP_PCT = (5.0, 7.0, 10.0)
 K_STOP = (1.0, 1.5, 2.0)
 BASE_STOP = (7.0, 1.5)
 TRADE_COLS = ("tj", "ei", "xi", "sig_day", "entry_px", "exit_px", "gross", "reason", "z_entry",
-              "z_exit", "hl", "held", "mae", "mfe", "mu", "entry_raw")
+              "z_exit", "hl", "held", "mae", "mfe", "mu", "entry_raw", "rb_kind")
+GRID_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "_workspace", "analysis",
+                         "mean_reversion_20261004_r2", ".leung_grid_L-2.pkl")
 REASONS = ("profit", "disaster_pct", "disaster_z", "regime_break", "timeout", "leung_stop")
 
 
@@ -87,6 +89,12 @@ def build_rules(segment: str) -> "list[tuple[str, str, str, Rule]]":
 G: dict = {}
 
 
+def surrogate_series(logp: np.ndarray, logb, halt: np.ndarray, rng, kind: str):
+    """대조군 추정 — 진짜 가격의 halt 마스크(종가 결측·거래량 0·30% 점프)를 그대로 쓴다(2차 M4)."""
+    sp = _surrogate(logp, rng, kind)
+    return estimate_series(sp, logb, halt | ~np.isfinite(sp))
+
+
 def _surrogate(logp: np.ndarray, rng, kind: str) -> np.ndarray:
     out = np.full_like(logp, np.nan)
     fin = np.where(np.isfinite(logp))[0]
@@ -115,7 +123,9 @@ def _pass_stats(sig, elig) -> dict:
     usable = el & ~np.isin(codes, [REASON_CODES["warmup"], REASON_CODES["halt"], REASON_CODES["short"]])
     ok = usable & (codes == REASON_CODES["ok"])
     consec = bool(np.any(ok[1:] & ok[:-1])) if len(ok) > 1 else False
+    is_halt = codes == REASON_CODES["halt"]
     return dict(n_usable=int(usable.sum()), n_ok=int(ok.sum()),
+                n_halt=int(is_halt.sum()), n_halt_eligible=int((is_halt & el).sum()),
                 codes=np.bincount(codes[usable].astype(int), minlength=9), ever=bool(ok.any()),
                 consec=consec, any_usable=bool(usable.any()),
                 ok_days=est[ok])
@@ -135,9 +145,11 @@ def work(j: int) -> dict:
     s_price = estimate_series(logp, None, halt)
     res["pass"] = {"resid": _pass_stats(s_resid, elig_asof), "price": _pass_stats(s_price, elig_asof)}
     for kind in ("shuffle", "rw"):
-        sp = _surrogate(logp, rng, kind)
-        ss = estimate_series(sp, logb, np.zeros_like(halt) | ~np.isfinite(sp))
+        ss = surrogate_series(logp, logb, halt, rng, kind)
         res["pass"][kind] = _pass_stats(ss, elig_asof)
+    fin = np.where(np.isfinite(c))[0]
+    span = halt[fin[0]:fin[-1] + 1] if len(fin) else halt[:0]
+    res["halt_rows"] = int(span.sum())     # 상장~마지막 거래일 안의 halt 행(결측·거래량 0·30% 점프, 2차 M9)
     okd = res["pass"]["resid"]["ok_days"]
     res["hl"] = (s_resid.hl[okd], s_resid.hl_adj[okd])
     # Leung 경계 — 날짜별 (그날 적용 중인 추정)
@@ -151,6 +163,7 @@ def work(j: int) -> dict:
         cur = None
         fails = 0
         tried = 0
+        no_entry = 0
         for i in range(len(c)):
             if s_resid.is_est[i]:
                 cur = None
@@ -160,34 +173,39 @@ def work(j: int) -> dict:
                                                  r_annual / 252.0, cost)
                     if cur is None:
                         fails += 1
+                    elif not math.isfinite(cur[1]):
+                        no_entry += 1      # 근은 있으나 보상 ≤ 0 → 최적 = 안 산다(2차 M3, 실패 아님)
             arr[i] = cur if s_resid.valid[i] else None
-        lb_cache[key] = (arr, tried, fails)
+        lb_cache[key] = (arr, tried, fails, no_entry)
         return lb_cache[key]
 
     elig_today = np.full(len(c), t in G["today"])
     trades = {}
     leung_fail = {}
+    cost_blocked = {}
     for key, mode, uni, rule in G["rules"]:
         sig = s_resid if mode == "resid" else s_price
         elig = elig_asof if uni in ("asof", "db") else elig_today
         lbd = None
         if rule.kind == "leung":
             r_ann = 0.10 if "|r10|" in key else R_ANNUAL
-            lbd, tried, fails = leung_by_day(r_ann, rule.cost)
-            leung_fail[key] = (tried, fails)
-        tr = simulate_ticker(o, h, l, c, sig, elig, G["mu_exec"], rule, lbd)
+            lbd, tried, fails, no_entry = leung_by_day(r_ann, rule.cost)
+            leung_fail[key] = (tried, fails, no_entry)
+        st: dict = {}
+        tr = simulate_ticker(o, h, l, c, sig, elig, G["mu_exec"], rule, lbd, stats=st)
+        cost_blocked[key] = st.get("cost_blocked", 0)
         if tr:
             rows = [[j, x["ei"], x["xi"], x["sig_day"], x["entry_px"], x["exit_px"], x["gross"],
                      REASONS.index(x["reason"]), x["z_entry"], x["z_exit"], x["hl"], x["held"],
-                     x["mae"], x["mfe"], x["mu"], P.o_raw[x["ei"], j]] for x in tr]
+                     x["mae"], x["mfe"], x["mu"], P.o_raw[x["ei"], j], x["rb_kind"]] for x in tr]
             trades[key] = np.array(rows, dtype=float)
     res["trades"] = trades
     res["leung_fail"] = leung_fail
+    res["cost_blocked"] = cost_blocked
     return res
 
 
-def build_leung_grid(ctx, path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "_workspace", "analysis", "mean_reversion_20261001",
-                                             ".leung_grid_L-2.pkl")):
+def build_leung_grid(ctx, path=GRID_PATH):
     """표준화 Leung 경계 격자 — 한 번 풀어 파일로 둔다(입력이 상수라 재현 가능)."""
     if os.path.exists(path):
         with open(path, "rb") as fh:

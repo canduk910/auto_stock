@@ -180,7 +180,7 @@ def provisional_close_flags(p: Panel, cutoff: str = "2026-09-28") -> np.ndarray:
             break
         implied = c[i + 1] / (1.0 + chg[i + 1] / 100.0)
         tick = np.vectorize(krx_tick)(np.nan_to_num(c[i], nan=1000.0))
-        round_err = c[i + 1] * 0.00005 / 100.0 * 100.0 + 1e-9  # 4자리 반올림 → 상대 5e-7
+        round_err = c[i + 1] * 0.00005 / 100.0 * 100.0 + 1e-9  # 상대 5e-5 (4자리 반올림 5e-7 보다 넓다 — 실질 허용 오차는 1틱이 지배)
         tol = np.maximum(tick, np.abs(implied) * 5e-7 + round_err)
         bad = np.isfinite(implied) & np.isfinite(c[i]) & (np.abs(c[i] - implied) > tol)
         flags[i] = bad

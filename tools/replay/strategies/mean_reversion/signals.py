@@ -4,6 +4,7 @@
 
 - 재추정 = 전역 달력 인덱스 ``i % REEST_EVERY == 0`` 인 날(종목 공통 위상). 그날 종가까지 창 60.
 - β_e = 직전 60봉(e-60..e-1) 로그가격 수준 OLS (1봉 늦춘 창). 가격 모드는 β = 0.
+- 잔차 모드의 ADF p 는 Engle–Granger 표(MacKinnon N=2) — β 창이 ADF 창과 59/60 겹친다(2차 R1).
 - 추정일 e 의 (β, μ, σ_stat) 는 다음 추정일 전날까지 그대로 쓴다. z_t = (X_t − μ)/σ_stat.
 - 진입(``entries``)·관리(``manage``)는 그날 값만 받는 순수 함수 — 운영 leaf 로 옮길 모양.
 """
@@ -40,8 +41,14 @@ class SignalSeries:
 
 
 def estimate_series(logp: np.ndarray, logb: "np.ndarray | None", halt: np.ndarray,
-                    *, window: int = WINDOW, every: int = REEST_EVERY) -> SignalSeries:
-    """walk-forward 추정. ``logb`` 가 None 이면 가격 모드(X = log P)."""
+                    *, window: int = WINDOW, every: int = REEST_EVERY,
+                    n_series: "int | None" = None) -> SignalSeries:
+    """walk-forward 추정. ``logb`` 가 None 이면 가격 모드(X = log P).
+
+    ``n_series`` = ADF p 값 표. 기본 = 잔차 모드 2(Engle–Granger) · 가격 모드 1.
+    """
+    if n_series is None:
+        n_series = 1 if logb is None else 2
     n = len(logp)
     z = np.full(n, np.nan)
     valid = np.zeros(n, dtype=bool)
@@ -72,7 +79,7 @@ def estimate_series(logp: np.ndarray, logb: "np.ndarray | None", halt: np.ndarra
         if halt[lo:e + 1].any() or not np.all(np.isfinite(x)):
             reason[e] = REASON_CODES["halt"]
             continue
-        fit = fit_window(x)
+        fit = fit_window(x, n_series=n_series)
         reason[e] = REASON_CODES[fit.reason]
         pp[e] = fit.adf_p
         hl_adj[e] = fit.half_life_adj

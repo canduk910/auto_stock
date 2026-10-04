@@ -147,8 +147,10 @@ def test_leung_r_zero_is_rejected():
         LG._F_std(0.0, 0.0)
 
 
-@pytest.mark.xfail(strict=True, reason="문헌 그림 7 수치(d*_L=0.4978, b*_L=0.5570) 미재현 — "
-                   "우리 해 0.5048/0.5673, 같은 경로 MC 기대값은 우리 해가 높다. summary.md §4 참조")
+@pytest.mark.xfail(strict=True, reason="문헌 그림 7 수치(d*_L=0.4978, b*_L=0.5570) 미재현 — 문헌 입력(c=ĉ=0.05)에서는 "
+                   "보상이 어디서도 양수가 아니라 진입 없음이 정답이다. "
+                   "_workspace/reports/2026-10-04_mean_reversion_research.md §7.3·§10.0 M3 · "
+                   "_workspace/analysis/mean_reversion_20261004_r2/summary.md 참조")
 def test_leung_reproduces_literature_figure7():
     """§5.1-5 — 문헌 수치 예 재현 (허용 오차 0.002). 지금은 실패가 사실이라 strict xfail 로 둔다."""
     p = LG.OUParams(**_PAPER)

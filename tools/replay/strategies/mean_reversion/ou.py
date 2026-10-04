@@ -24,26 +24,29 @@ ADF_P_MAX = 0.05
 HALF_LIFE_MIN = 1.0
 HALF_LIFE_MAX = 5.0
 
-# MacKinnon (1994, 2010 개정) — regression="c", N=1 의 근사 계수.
-# statsmodels.tsa.adfvalues 의 _tau_maxs/_tau_mins/_tau_smallps/_tau_largeps["c"][0] 와 같은 값.
-_TAU_MAX_C = 2.74
-_TAU_MIN_C = -18.83
-_TAU_STAR_C = -1.61
-_TAU_SMALLP_C = (2.1659, 1.4412, 0.038269)
-_TAU_LARGEP_C = (1.7339, 0.93202, -0.12745, -0.010368)
+# MacKinnon (1994, 2010 개정) — regression="c" 의 근사 계수. 키 = I(1) 변수 개수 N.
+# statsmodels.tsa.adfvalues 의 _tau_maxs/_tau_mins/_tau_stars/_tau_smallps/_tau_largeps["c"][N-1] 와 같은 값.
+# N=1 = 일반 ADF(가격 모드) · N=2 = Engle–Granger 공적분 잔차(잔차 모드 — β 를 같은 표본에서 추정, 2차 R1).
+_TAU_C = {
+    1: dict(max=2.74, min=-18.83, star=-1.61, small=(2.1659, 1.4412, 0.038269),
+            large=(1.7339, 0.93202, -0.12745, -0.010368)),
+    2: dict(max=0.92, min=-18.86, star=-2.62, small=(2.92, 1.5012, 0.039796),
+            large=(2.1945, 0.64695, -0.29198, -0.042377)),
+}
 
 
 def _norm_cdf(x: float) -> float:
     return 0.5 * (1.0 + math.erf(x / math.sqrt(2.0)))
 
 
-def mackinnon_p(tau: float) -> float:
-    """MacKinnon 근사 p 값 (상수항, 변수 1개)."""
-    if tau > _TAU_MAX_C:
+def mackinnon_p(tau: float, n_series: int = 1) -> float:
+    """MacKinnon 근사 p 값 (상수항, I(1) 변수 ``n_series`` 개)."""
+    k = _TAU_C[n_series]
+    if tau > k["max"]:
         return 1.0
-    if tau < _TAU_MIN_C:
+    if tau < k["min"]:
         return 0.0
-    coef = _TAU_LARGEP_C if tau > _TAU_STAR_C else _TAU_SMALLP_C
+    coef = k["large"] if tau > k["star"] else k["small"]
     poly = sum(c * tau ** i for i, c in enumerate(coef))
     return _norm_cdf(poly)
 
@@ -69,8 +72,8 @@ def _lagmat_in(xdiff: np.ndarray, maxlag: int) -> np.ndarray:
 
 
 @_quiet
-def adf_c_aic(x: np.ndarray) -> "tuple[float, float, int]":
-    """ADF(상수항, 시차 AIC 자동). 반환 = (통계량, p, 쓴 시차)."""
+def adf_c_aic(x: np.ndarray, n_series: int = 1) -> "tuple[float, float, int]":
+    """ADF(상수항, 시차 AIC 자동). 반환 = (통계량, p, 쓴 시차). p 는 ``n_series`` 표(N=2 = Engle–Granger)."""
     x = np.asarray(x, dtype=float)
     nobs_all = x.shape[0]
     maxlag = int(math.ceil(12.0 * (nobs_all / 100.0) ** 0.25))
@@ -102,7 +105,7 @@ def adf_c_aic(x: np.ndarray) -> "tuple[float, float, int]":
     sigma2 = ssr / (n - k)
     cov = sigma2 * np.linalg.inv(X.T @ X)
     tau = float(beta[0] / math.sqrt(cov[0, 0]))
-    return tau, mackinnon_p(tau), bestlag
+    return tau, mackinnon_p(tau, n_series), bestlag
 
 
 @dataclass(frozen=True)
@@ -143,8 +146,8 @@ def kendall_adjust(b: float, T: int) -> float:
     return b + (1.0 + 3.0 * b) / T
 
 
-def fit_window(x: np.ndarray, *, with_adf: bool = True) -> OUFit:
-    """창 하나(오름차순, 마지막 = t)로 OU 를 추정한다 (§3.3-2)."""
+def fit_window(x: np.ndarray, *, with_adf: bool = True, n_series: int = 1) -> OUFit:
+    """창 하나(오름차순, 마지막 = t)로 OU 를 추정한다 (§3.3-2). ``n_series`` = ADF p 값 표."""
     x = np.asarray(x, dtype=float)
     nan = float("nan")
     if len(x) < 30 or not np.all(np.isfinite(x)):
@@ -152,7 +155,7 @@ def fit_window(x: np.ndarray, *, with_adf: bool = True) -> OUFit:
     p = nan
     if with_adf:
         try:
-            _tau, p, _lag = adf_c_aic(x)
+            _tau, p, _lag = adf_c_aic(x, n_series)
         except (ValueError, np.linalg.LinAlgError):
             return OUFit("adf_fail", nan, nan, nan, nan, nan, nan, nan, nan, nan)
     a, b, sd = ar1(x)

@@ -17,6 +17,7 @@ import os
 import pickle
 import sys
 from collections import defaultdict
+from datetime import datetime, timedelta, timezone
 
 import numpy as np
 
@@ -50,7 +51,13 @@ def trade_stats(a: np.ndarray, cost: float) -> dict:
     net = a[:, CI["gross"]] - cost
     pos, neg = net[net > 0].sum(), -net[net < 0].sum()
     rc = np.bincount(a[:, CI["reason"]].astype(int), minlength=len(REASONS)) / n
+    is_rb = a[:, CI["reason"]].astype(int) == REASONS.index("regime_break")
+    rbk = a[:, CI["rb_kind"]].astype(int)
     return dict(n=n, win=float(np.mean(net > 0)), mean_net=float(net.mean()),
+                regime_break_split=dict(stat=float(np.mean(is_rb & (rbk == 1))),
+                                        unmeasurable=float(np.mean(is_rb & (rbk == 2))),
+                                        stat_mean_net=float(net[is_rb & (rbk == 1)].mean()) if np.any(is_rb & (rbk == 1)) else None,
+                                        unmeasurable_mean_net=float(net[is_rb & (rbk == 2)].mean()) if np.any(is_rb & (rbk == 2)) else None),
                 median_net=float(np.median(net)), mean_gross=float(a[:, CI["gross"]].mean()),
                 pf=float(pos / neg) if neg > 0 else float("inf"), held=float(a[:, CI["held"]].mean()),
                 reasons={REASONS[i]: float(rc[i]) for i in range(len(REASONS))},
@@ -98,19 +105,22 @@ def account(a: np.ndarray, closes: np.ndarray, n_days: int, slots: int, cost: fl
 def pass_summary(payload, market=None):
     out = {}
     for m in ("resid", "price", "shuffle", "rw"):
-        u = o = ever = consec = anyu = 0
+        u = o = ever = consec = anyu = nh = nhe = 0
         codes = np.zeros(9)
         for r in payload["results"]:
             if market and payload["market"].get(r["ticker"]) != market:
                 continue
             ps = r["pass"][m]
+            nh += ps.get("n_halt", 0)
+            nhe += ps.get("n_halt_eligible", 0)
             u += ps["n_usable"]
             o += ps["n_ok"]
             codes += ps["codes"]
             anyu += ps["any_usable"]
             ever += ps["ever"]
             consec += ps["consec"]
-        out[m] = dict(windows=u, ok=o, rate=o / u if u else float("nan"),
+        out[m] = dict(windows=u, ok=o, rate=o / u if u else float("nan"), halt_windows=nh,
+                      halt_windows_eligible=nhe,
                       ever=ever / anyu if anyu else float("nan"),
                       consec=consec / anyu if anyu else float("nan"), tickers=anyu,
                       reason_share={k: float(codes[v] / u) if u else float("nan")
@@ -130,12 +140,20 @@ def hl_summary(payload):
 
 
 def leung_fail_rate(payload, key):
-    tried = fails = 0
+    tried = fails = no_entry = 0
     for r in payload["results"]:
-        t, f = r["leung_fail"].get(key, (0, 0))
+        t, f, ne = r["leung_fail"].get(key, (0, 0, 0))
         tried += t
         fails += f
-    return dict(tried=tried, fails=fails, rate=fails / tried if tried else float("nan"))
+        no_entry += ne
+    return dict(tried=tried, fails=fails, rate=fails / tried if tried else float("nan"),
+                no_entry=no_entry, no_entry_rate=no_entry / tried if tried else float("nan"))
+
+
+def record_counts(payload, key):
+    """2차 M9 — halt 총수(종목 거래 구간 안) · 비용 조건이 거른 신호 수."""
+    return dict(halt_rows=int(sum(r.get("halt_rows", 0) for r in payload["results"])),
+                cost_blocked=int(sum(r.get("cost_blocked", {}).get(key, 0) for r in payload["results"])))
 
 
 def er_series(closes):
@@ -160,53 +178,177 @@ def bucket_table(a, cost, mu_vals, er_b):
 
 
 # ── 기존 전략 일별 수익률 (DB 구간 §3.7) ─────────────────────────────────────
+# 2차(M1·M2): 날짜 = KST · 결측 종가는 직전 평가가(첫 종가 전에는 체결가) · 분모 = 전략별 그날 전략 예산
+# (앞선 가장 가까운 0 초과 daily_performance 행, 없으면 투입 원금) · 누적 수량이 음수가 되는 키는 제외.
 
-def existing_daily_returns(ext, P):
+KST = timezone(timedelta(hours=9))
+EXISTING_WINDOW_ALT_START = "2026-04-29"   # 보조 창 — 첫 입금(총자산 약 49만 → 98만) 다음부터 (판정에 안 씀)
+
+
+def kst_date(ts: str) -> str:
+    return datetime.fromisoformat(ts).astimezone(KST).date().isoformat()
+
+
+SCALE_BAND = (0.70, 1.30)   # 사후 발견 1(M11) — 같은 날 체결가 ÷ DB 종가가 가격제한폭 밖이면 가격 기준 불일치
+
+
+def existing_daily_returns(ext, P, *, scale_check: bool = False):
+    """→ (pnl[전략], budget[전략], meta). pnl = 그날 평가손익(원), budget = 그날 전략 예산(원, 없으면 NaN).
+
+    ``scale_check`` = 사후 발견 1(M11) 고친 판 — DB 종가가 뒤의 기업행위로 소급 수정돼 체결가와 기준이 다른
+    (전략, 종목) 키를 뺀다. 기본값 False = 사전 등록 판.
+    """
     cols, rows = ext["trades"]
     ix = {c: i for i, c in enumerate(cols)}
     di = {str(d): i for i, d in enumerate(P.dates)}
     tj = {t: j for j, t in enumerate(P.tickers)}
     n = len(P.dates)
-    flows = defaultdict(lambda: np.zeros(n))   # (strategy, ticker) → 매수 +수량 / 매도 −수량
-    cash = defaultdict(lambda: np.zeros(n))    # 매수 −금액 / 매도 +금액
-    skipped = 0
+    recs = []
+    skipped, skipped_dates = 0, defaultdict(int)
     for r in rows:
-        d = r[ix["timestamp"]][:10]
+        d = kst_date(r[ix["timestamp"]])
         if d not in di:
             skipped += 1
+            skipped_dates[d] += 1
             continue
-        k = (r[ix["strategy"]], r[ix["ticker"]])
-        q = float(r[ix["quantity"]])
-        px = float(r[ix["price"]])
-        sgn = 1.0 if r[ix["trade_type"]] == "BUY" else -1.0
-        flows[k][di[d]] += sgn * q
-        cash[k][di[d]] -= sgn * q * px
+        recs.append((r[ix["timestamp"]], r[ix["strategy"]], r[ix["ticker"]], di[d],
+                     1.0 if r[ix["trade_type"]] == "BUY" else -1.0, float(r[ix["quantity"]]), float(r[ix["price"]])))
+    recs.sort(key=lambda x: x[0])
+    by_key = defaultdict(list)
+    for rec in recs:
+        by_key[(rec[1], rec[2])].append(rec)
+    neg_keys, neg_rows = 0, 0
+    sc_keys, sc_rows = 0, 0
     pnl = defaultdict(lambda: np.zeros(n))
+    basis = defaultdict(lambda: np.zeros(n))     # 그날 장 마감 후 평균 매입원가 합
     missing_close = 0
-    for (strat, tk), fl in flows.items():
-        qty = np.cumsum(fl)
-        if tk in tj:
-            cl = P.c[:, tj[tk]].copy()
-            # 결측 종가는 직전 값으로 (평가가 끊기지 않게)
-            for i in range(1, n):
-                if not np.isfinite(cl[i]):
-                    cl[i] = cl[i - 1]
-        else:
+    for (strat, tk), lst in by_key.items():
+        q = 0.0
+        bad = False
+        for rec in lst:
+            q += rec[4] * rec[5]
+            if q < -1e-9:
+                bad = True
+                break
+        if bad:
+            neg_keys += 1
+            neg_rows += len(lst)
+            continue
+        if tk not in tj:
             missing_close += 1
             continue
-        val = np.nan_to_num(qty * cl)
-        pnl[strat] += np.diff(np.concatenate([[0.0], val])) + cash[(strat, tk)]
-    return pnl, dict(skipped_rows=skipped, tickers_without_close=missing_close)
+        if scale_check:
+            clk = P.c[:, tj[tk]]
+            ratios = [rec[6] / clk[rec[3]] for rec in lst if np.isfinite(clk[rec[3]]) and clk[rec[3]] > 0]
+            if any(not (SCALE_BAND[0] <= q <= SCALE_BAND[1]) for q in ratios):
+                sc_keys += 1
+                sc_rows += len(lst)
+                continue
+        flow = np.zeros(n)
+        cash = np.zeros(n)
+        last_px = np.full(n, np.nan)
+        cost_eod = np.zeros(n)
+        qty, cost = 0.0, 0.0
+        k = 0
+        for i in range(n):
+            while k < len(lst) and lst[k][3] == i:
+                _ts, _s, _t, _i, sgn, qq, px = lst[k]
+                flow[i] += sgn * qq
+                cash[i] -= sgn * qq * px
+                if sgn > 0:
+                    cost += qq * px
+                    qty += qq
+                else:
+                    avg = cost / qty if qty > 0 else 0.0
+                    cost -= avg * qq
+                    qty -= qq
+                    if qty <= 1e-9:
+                        qty, cost = 0.0, 0.0
+                last_px[i] = px
+                k += 1
+            cost_eod[i] = cost
+        hold = np.cumsum(flow)
+        cl = P.c[:, tj[tk]]
+        v = np.full(n, np.nan)
+        trade_px = np.nan
+        for i in range(n):
+            if np.isfinite(last_px[i]):
+                trade_px = last_px[i]
+            if np.isfinite(cl[i]):
+                v[i] = cl[i]
+            elif i > 0 and np.isfinite(v[i - 1]):
+                v[i] = v[i - 1]
+            else:
+                v[i] = trade_px
+        val = np.where(np.abs(hold) > 1e-9, hold * v, 0.0)
+        if not np.all(np.isfinite(val)):
+            missing_close += 1
+            val = np.nan_to_num(val)
+        pnl[strat] += np.diff(np.concatenate([[0.0], val])) + cash
+        basis[strat] += cost_eod
+    # 전략 예산 — 앞선 가장 가까운 0 초과 daily_performance 행(같은 전략), 없으면 투입 원금(전일 장 마감 원가)
+    pcols, prows = ext.get("perf_total", [None, []])
+    rows_by = defaultdict(list)
+    if pcols:
+        px = {c: i for i, c in enumerate(pcols)}
+        for r in prows:
+            sname = r[px["strategy"]]
+            if sname == "total":
+                continue
+            v = r[px["total_asset"]]
+            if v is not None and float(v) > 0:
+                rows_by[sname].append((r[px["date"]][:10], float(v)))
+    budget = {}
+    src = defaultdict(lambda: defaultdict(int))
+    for strat in pnl:
+        rb = sorted(rows_by.get(strat, []))
+        b = np.full(n, np.nan)
+        for i in range(n):
+            day = str(P.dates[i])
+            prior = [v for d, v in rb if d < day]
+            if prior:
+                b[i] = prior[-1]
+                src[strat]["perf_row"] += 1
+            elif i > 0 and basis[strat][i - 1] > 0:
+                b[i] = basis[strat][i - 1]
+                src[strat]["principal"] += 1
+        budget[strat] = b
+    meta = dict(skipped_rows=skipped, skipped_dates=dict(skipped_dates), tickers_without_close=missing_close,
+                negative_qty_keys=neg_keys, negative_qty_rows=neg_rows,
+                scale_mismatch_keys=sc_keys, scale_mismatch_rows=sc_rows,
+                n_rows_used=len(recs) - neg_rows - sc_rows,
+                budget_source={k: dict(v) for k, v in src.items()})
+    return dict(pnl), budget, meta
+
+
+def combine_existing(pnl: dict, budget: dict, window: np.ndarray):
+    """(본 판정) Σ전략 손익 ÷ Σ전략 예산, (보조) 전략 수익률 단순합. 예산 없는 전략은 그날 빠진다."""
+    n = len(window)
+    num, den, simple = np.zeros(n), np.zeros(n), np.zeros(n)
+    has = np.zeros(n, dtype=bool)
+    for s, p in pnl.items():
+        b = budget.get(s)
+        if b is None:
+            continue
+        ok = np.isfinite(b) & (b > 0)
+        num[ok] += p[ok]
+        den[ok] += b[ok]
+        simple[ok] += p[ok] / b[ok]
+        has |= ok
+    use = has & window
+    comb = np.where(use, num / np.where(den > 0, den, 1.0), np.nan)
+    return comb, np.where(use, simple, np.nan)
 
 
 def main():
     scratch, out_dir = sys.argv[1], sys.argv[2]
+    extract_path = sys.argv[3] if len(sys.argv) > 3 else os.path.join(scratch, "mr_db_extract.jsonl.gz")
     os.makedirs(out_dir, exist_ok=True)
     A = pickle.load(open(os.path.join(scratch, "mr_arch.pkl"), "rb"))
     B = pickle.load(open(os.path.join(scratch, "mr_db.pkl"), "rb"))
     B2 = pickle.load(open(os.path.join(scratch, "mr_db_noprov.pkl"), "rb"))
     P = D.load_archive()
-    ext = D.load_db_extract(os.path.join(scratch, "mr_db_extract.jsonl.gz"))
+    ext = D.load_db_extract(extract_path)
     Q = D.db_panel(ext)
     res: dict = {"meta": {"archive": A["meta"] | {"excluded": None}, "db": B["meta"] | {"excluded": None}}}
     res["meta"]["archive"]["excluded_reasons"] = _count(A["meta"]["excluded"])
@@ -249,7 +391,10 @@ def main():
     fail = leung_fail_rate(A, lkey())
     acc_z = account(za, P.c, nA, 2, MAIN_COST, cutA)
     acc_l = account(la, P.c, nA, 2, MAIN_COST, cutA)
-    lit_pass = False   # 문헌 재현 (a) — summary 의 수치 참조: b*_L 0.5673 vs 0.5570, d*_L 0.5048 vs 0.4978
+    # 문헌 재현 (a) — ``leung_check.py`` 산출(out_dir/leung_check.json). 없으면 미검증으로 본다.
+    lc_path = os.path.join(out_dir, "leung_check.json")
+    lit = json.load(open(lc_path)) if os.path.exists(lc_path) else None
+    lit_pass = bool(lit and lit["a_literature"]["passed"])
     cond = {
         "1_back_mean_higher_and_boot_lo_gt_0": bool(diff[0] > 0 and diff[1] > 0),
         "2_solver_fail_lt_10pct": bool(fail["rate"] < 0.10),
@@ -259,7 +404,9 @@ def main():
     res["z_vs_leung"] = dict(back_z=trade_stats(zb, MAIN_COST), back_leung=trade_stats(lb_, MAIN_COST),
                              diff_leung_minus_z=dict(mean=diff[0], lo90=diff[1], hi90=diff[2]),
                              solver=fail, mdd_back_slots2=dict(z=acc_z["mdd_period"], leung=acc_l["mdd_period"]),
-                             conditions=cond, adopt_leung=all(cond.values()))
+                             conditions=cond, adopt_leung=all(cond.values()),
+                             leung_label="Leung" if lit_pass else "Leung(미검증)",
+                             leung_check_b_passed=None if lit is None else lit["b_passed"])
     adopt_key_arch = lkey() if all(cond.values()) else zkey(ez, xz)
     adopt_key_db = adopt_key_arch.replace("|asof|", "|db|")
     adopted = la if all(cond.values()) else za
@@ -381,27 +528,28 @@ def main():
     erB = er_series(c200)
     erB_bounds = J.er_terciles(erB, cutB)
     erB_b = J.er_bucket(erB, erB_bounds)
-    pnl, pnl_meta = existing_daily_returns(ext, Q)
-    tot = sum(pnl.values()) if pnl else np.zeros(nB)
-    pcols, prows = ext.get("perf_total", [None, []])
-    asset = {}
-    if pcols:
-        px = {c: i for i, c in enumerate(pcols)}
-        for r in prows:
-            if r[px["strategy"]] == "total":
-                asset[r[px["date"]][:10]] = float(r[px["total_asset"]])
-    den = np.array([asset.get(str(Q.dates[i - 1]), np.nan) if i > 0 else np.nan for i in range(nB)])
-    den = np.where(np.isfinite(den) & (den > 0), den, 5_000_000.0)
-    ex_ret = tot / den
+    pnl, budget, pnl_meta = existing_daily_returns(ext, Q)
+    tcols, trows = ext["trades"]
+    tix = {c: i for i, c in enumerate(tcols)}
+    first_trade = min(kst_date(r[tix["timestamp"]]) for r in trows)
+    day_str = np.array([str(d) for d in Q.dates])
+    win_main = day_str >= first_trade
+    win_alt = day_str >= EXISTING_WINDOW_ALT_START
+    ex_ret, ex_simple = combine_existing(pnl, budget, win_main)
+    ex_ret_alt, _ = combine_existing(pnl, budget, win_alt)
+    pnl_f, budget_f, pnl_meta_f = existing_daily_returns(ext, Q, scale_check=True)   # 사후 발견 1 고친 판
+    ex_ret_f, ex_simple_f = combine_existing(pnl_f, budget_f, win_main)
+    ex_ret_f_alt, _ = combine_existing(pnl_f, budget_f, win_alt)
     accB = account(dbt, Q.c, nB, 2, MAIN_COST)
     mr_ret = accB["daily_ret"]
 
-    def corr(mask):
-        m = mask & np.isfinite(ex_ret) & np.isfinite(mr_ret)
-        if m.sum() < 5 or np.std(mr_ret[m]) == 0 or np.std(ex_ret[m]) == 0:
+    def corr(mask, ex=None):
+        ex = ex_ret if ex is None else ex
+        m = mask & np.isfinite(ex) & np.isfinite(mr_ret)
+        if m.sum() < 5 or np.std(mr_ret[m]) == 0 or np.std(ex[m]) == 0:
             return dict(n=int(m.sum()), corr=None)
-        return dict(n=int(m.sum()), corr=float(np.corrcoef(mr_ret[m], ex_ret[m])[0, 1]),
-                    mr_mean=float(mr_ret[m].mean()), ex_mean=float(ex_ret[m].mean()))
+        return dict(n=int(m.sum()), corr=float(np.corrcoef(mr_ret[m], ex[m])[0, 1]),
+                    mr_mean=float(mr_ret[m].mean()), ex_mean=float(ex[m].mean()))
 
     allm = np.ones(nB, dtype=bool)
     allm[0] = False
@@ -410,12 +558,31 @@ def main():
         vals = []
         for i in range(w, nB):
             a1, b1 = mr_ret[i - w + 1:i + 1], ex_ret[i - w + 1:i + 1]
-            if np.std(a1) > 0 and np.std(b1) > 0:
+            if np.all(np.isfinite(b1)) and np.std(a1) > 0 and np.std(b1) > 0:
                 vals.append(np.corrcoef(a1, b1)[0, 1])
         rolling[str(w)] = dict(n=len(vals), mean=float(np.mean(vals)) if vals else None,
                                min=float(np.min(vals)) if vals else None, max=float(np.max(vals)) if vals else None)
+    fin = np.isfinite(ex_ret)
     res["correlation_db"] = dict(
         existing_meta=pnl_meta, strategies=sorted(pnl.keys()),
+        existing_window=dict(main_start=first_trade, alt_start=EXISTING_WINDOW_ALT_START, end=str(Q.dates[-1]),
+                             main_days_with_data=int(fin.sum()),
+                             abs_ret_gt_50pct_days=int(np.sum(np.abs(ex_ret[fin]) > 0.5)),
+                             ex_mean=float(ex_ret[fin].mean()) if fin.any() else None,
+                             ex_min=float(ex_ret[fin].min()) if fin.any() else None,
+                             ex_max=float(ex_ret[fin].max()) if fin.any() else None),
+        er_low_simple_sum=corr(allm & (erB_b == 0), ex_simple),
+        posthoc1_scale_fixed=dict(
+            existing_meta=pnl_meta_f,
+            ex_mean=float(np.nanmean(ex_ret_f)), ex_min=float(np.nanmin(ex_ret_f)), ex_max=float(np.nanmax(ex_ret_f)),
+            abs_ret_gt_50pct_days=int(np.sum(np.abs(ex_ret_f[np.isfinite(ex_ret_f)]) > 0.5)),
+            all=corr(allm, ex_ret_f), by_er={str(b): corr(allm & (erB_b == b), ex_ret_f) for b in (0, 1, 2)},
+            by_mu={str(m): corr(allm & (mu_e == m), ex_ret_f) for m in (1.0, 0.75, 0.5, 0.0)},
+            er_low_simple_sum=corr(allm & (erB_b == 0), ex_simple_f),
+            er_low_alt_window=corr(allm & (erB_b == 0), ex_ret_f_alt),
+            T3_verdict=None),
+        er_low_alt_window=corr(allm & (erB_b == 0), ex_ret_alt),
+        all_alt_window=corr(allm, ex_ret_alt),
         mr_account=dict(n_filled=accB["n_filled"], n_signal=accB["n_signal"], net=accB["net_return"],
                         unaffordable_ratio=accB["unaffordable_ratio"]),
         all=corr(allm), rolling=rolling, er_bounds_front60=erB_bounds,
@@ -424,10 +591,19 @@ def main():
         cross={f"mu={m}|er={b}": corr(allm & (mu_e == m) & (erB_b == b)) for m in (1.0, 0.75, 0.5, 0.0) for b in (0, 1, 2)},
         back40_er_low=corr(allm & (erB_b == 0) & (np.arange(nB) >= cutB)),
     )
+    t3f = res["correlation_db"]["posthoc1_scale_fixed"]["by_er"]["0"]
+    res["correlation_db"]["posthoc1_scale_fixed"]["T3_verdict"] = (
+        "판정 불가" if t3f["corr"] is None else ("통과" if t3f["corr"] < 0 else "실패"))
     t3 = res["correlation_db"]["by_er"]["0"]
     th["T3"] = dict(er_low=t3, verdict=("판정 불가(평균회귀 일수익률 분산 0 또는 표본 < 5)" if t3["corr"] is None
                                         else ("통과" if t3["corr"] < 0 else "실패")))
     res["thresholds"] = th
+    res["records"] = dict(archive=record_counts(A, adopt_key_arch) | dict(
+                              halt_windows_resid=res["pass"]["archive"]["resid"]["halt_windows"]),
+                          db=record_counts(B, adopt_key_db) | dict(
+                              halt_windows_resid=res["pass"]["db"]["resid"]["halt_windows"]),
+                          leung_no_entry_archive=leung_fail_rate(A, lkey()),
+                          leung_no_entry_db=leung_fail_rate(B, lkey(uni="db")))
     res["adopted_key"] = dict(archive=adopt_key_arch, db=adopt_key_db)
     res["clean_exit_cards"] = dict(reasons_archive=arch_full.get("reasons"))
     with open(os.path.join(out_dir, "results.json"), "w") as fh:

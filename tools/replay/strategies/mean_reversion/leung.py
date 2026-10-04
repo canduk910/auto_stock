@@ -8,6 +8,9 @@ Stop-Loss Exit", IJTAF 18(3). arXiv:1411.5062v3. 식 번호는 그 판본을 따
 - 손절판(손절 수준 L): 청산 b*_L (정리 5.1, 식 5.5) · 진입 구간 [a*_L, d*_L] (정리 5.5,
   d*_L = 식 5.16 — 4.11 과 같은 꼴에 V_L, a*_L = 식 5.15 — F̂(V_L' − 1) = F̂'(V_L − a − ĉ))
 
+진입 존재 조건(2차 M3): 「안 사는 선택」이 늘 가능하므로 J ≥ 0 이다. 스무드 페이스팅 근 d*_L 에서 보상
+V_L(d) − d − ĉ 가 0 이하이면 진입 구간이 비어 있다(최적 = 안 산다) — 이때 d = NaN 을 돌려준다(솔버 실패 None 과 구분).
+
 수치 처리: s = σ/√(2μ) 로 표준화한 y = (x − θ)/s 에서 F(y) = ∫₀^∞ u^{a−1} e^{yu − u²/2} du
 (a = r/μ, 식 3.3), G(y) = F(−y) (식 3.4). u→0 특이점은 ∫₀¹ u^{a−1}(e^{f}−1)du + 1/a 로 뺀다.
 r = 0 이면 F 가 발산한다(문헌도 r > 0 을 요구) — 그 경우 ``ValueError``.
@@ -158,8 +161,12 @@ def V_stop(p: OUParams, L: float, b: float):
     return V, dV
 
 
-def entry_interval_stop(p: OUParams, L: float, b: float) -> "tuple[float | None, float | None]":
-    """[a*_L, d*_L] (정리 5.5). d*_L = 식 5.16, a*_L = 식 5.15."""
+def entry_interval_stop(p: OUParams, L: float, b: float, *,
+                        require_positive: bool = True) -> "tuple[float | None, float | None]":
+    """[a*_L, d*_L] (정리 5.5). d*_L = 식 5.16, a*_L = 식 5.15.
+
+    반환 d = None 이면 근 없음(솔버 실패), NaN 이면 근은 있으나 보상 ≤ 0 이라 진입 구간이 비었다.
+    """
     fg = _FG(p)
     V, dV = V_stop(p, L, b)
     lo, hi = L + 1e-6 * p.s, b - 1e-6 * p.s
@@ -167,6 +174,8 @@ def entry_interval_stop(p: OUParams, L: float, b: float) -> "tuple[float | None,
                       lo, hi, n=80)
     if d is None:
         return None, None
+    if require_positive and not (V(d) - d - p.c_hat > 0.0):
+        return float("nan"), float("nan")
     a = _bracket_root(lambda x: fg.F(x) * (dV(x) - 1.0) - fg.dF(x) * (V(x) - x - p.c_hat),
                       lo, d, n=80)
     return a, d
@@ -190,6 +199,8 @@ def _std_bounds_cached(a: float, c_s: float, ch_s: float, L_y: float):
         lo, d = entry_interval_stop(p, L_y, b)
         if d is None:
             return None
+        if math.isnan(d):
+            return (float("nan"), float("nan"), b)      # 진입 없음(최적 = 안 산다), 청산 b 는 유효
         return (lo if lo is not None else L_y, d, b)
     except (ValueError, ZeroDivisionError, OverflowError, FloatingPointError):
         return None
@@ -213,8 +224,9 @@ def std_bounds_scaled(theta_speed: float, sigma_stat: float, r_per_day: float, c
 
 # ── 표준화 격자 + 보간 (연구 속도용) ─────────────────────────────────────────
 # 경계는 (a = r/θ, c/s, ĉ/s, L_y) 의 매끄러운 함수다. 창마다 적분·근 찾기를 하면 종목당 수십 초라
-# 격자(log 간격)에서 한 번 풀고 쌍선형 보간한다. 보간 오차는 실행기가 무작위 점에서 정확해와
-# 대조해 보고한다. 네 모서리 중 하나라도 솔버 실패면 정확해로 다시 푼다(조용한 대체 없음).
+# 격자(log 간격)에서 한 번 풀고 쌍선형 보간한다. 보간 오차는 ``tools/replay/leung_check.py`` 가
+# 무작위 점에서 정확해와 대조해 보고한다. 네 모서리 중 하나라도 솔버 실패이거나 진입 없음이면 정확해로
+# 다시 푼다(조용한 대체 없음).
 
 GRID_A = np.logspace(math.log10(3e-5), math.log10(2e-2), 24)
 GRID_CS = np.logspace(math.log10(2e-3), math.log10(1.5), 40)
@@ -239,7 +251,7 @@ class BoundsGrid:
         i = min(int(np.searchsorted(self.la, x, side="right") - 1), len(GRID_A) - 2)
         k = min(int(np.searchsorted(self.lc, y, side="right") - 1), len(GRID_CS) - 2)
         corners = [self.table.get((i + di, k + dk)) for di in (0, 1) for dk in (0, 1)]
-        if any(cn is None for cn in corners):
+        if any(cn is None or not all(math.isfinite(v) for v in cn) for cn in corners):
             return _std_bounds_cached(_sig3(a), _sig3(cs), _sig3(cs), self.L_y)
         tx = (x - self.la[i]) / (self.la[i + 1] - self.la[i])
         ty = (y - self.lc[k]) / (self.lc[k + 1] - self.lc[k])
@@ -255,7 +267,7 @@ def mc_rule_values(a_disc: float, c: float, c_hat: float, L: float, rules, *, n_
                    offset: float = 0.0):
     """검증 (b) — 표준화 OU(dY = −Y dt + √2 dW, s = 1)에서 규칙별 기대 할인 이익.
 
-    ``rules`` = [(lo, d, b), ...] — Y ∈ [lo, d] 에서 진입(위에서 d 를 지나면 d 에서 체결),
+    ``rules`` = [(lo, d, b) | None, ...] — None = 안 사기(값 0). Y ∈ [lo, d] 에서 진입(위에서 d 를 지나면 d 에서 체결),
     Y ≥ b 이익 청산(b 에서 체결), Y ≤ L 손절(L 에서 체결). 만기에 보유 중이면 그때 값으로 청산,
     진입 못 했으면 0. 공통 난수(같은 경로)로 규칙을 비교한다. 반환 = (평균, 표준오차) 목록.
     ``offset`` = θ/s — 문헌처럼 수준(θ ≠ 0)이 보상에 들어가는 문제를 표준화 단위로 돌릴 때 쓴다.
@@ -272,7 +284,10 @@ def mc_rule_values(a_disc: float, c: float, c_hat: float, L: float, rules, *, n_
         y_prev = y
         y = y_prev * ea + sd * rng.standard_normal(n_paths)
         disc = math.exp(-a_disc * step * dt)
-        for k, (lo, d, b) in enumerate(rules):
+        for k, rule in enumerate(rules):
+            if rule is None:
+                continue
+            lo, d, b = rule
             st = state[k]
             w = st == 0
             enter_cross = w & (y_prev > d) & (y <= d) & (y > L)
@@ -290,6 +305,9 @@ def mc_rule_values(a_disc: float, c: float, c_hat: float, L: float, rules, *, n_
     disc = math.exp(-a_disc * horizon)
     out = []
     for k in range(R):
+        if rules[k] is None:
+            out.append((0.0, 0.0))
+            continue
         h = state[k] == 1
         val[k, h] += disc * (y[h] + offset - c)
         out.append((float(val[k].mean()), float(val[k].std(ddof=1) / math.sqrt(n_paths))))
