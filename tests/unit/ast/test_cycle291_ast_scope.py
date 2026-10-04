@@ -130,7 +130,8 @@ _BASE_SHA: dict[str, str] = {
     # 🔁 cycle379 재핀 — buying_reconcile leaf 4줄 위임 배선(사용자 승인, 값만 이동)
     # 🔁 cycle408-L1 재핀 — 사용자 승인 10-04 8영역 관측 결함 해결: 09:30 자동 퍼널 캡처에 `protect_confirmed=True` 전달(+6줄, 값 없는 키워드 배선)
     "src/engine/scheduler.py":
-        "2bacaa149ab6d00ca97c07c4a8ae4e2b43c992b1e1960909de06bf6d654a1f3f",
+        # 🔁 cycle409 재핀 — 사용자 결정 10-04 Q1·Q4: 매일 자동 대사 task 배선(leaf import · create_task 1줄 · cancel 목록 3곳, +1줄). 직전 값 = cycle408-L1 `2bacaa149ab6…`
+        "f53d41a11fe162f80e113c6ff48cf6d235581769be7979499c5782ff11d49646",
     # 🔴 cycle290 이 방금 `DEFAULT_PARAMS` 를 건드렸다 — 또 건드리면 그 증명이 무너진다.
     # 🔁 cycle369 R2 재핀 — buy-block 게이트(`_status_buy_blocked` 승격) + STATUS_EXIT Signal + Q7 edge-baseline clear 배선(전략 7파일은 무변경, 배선은 이 파일)
     # 🔁 cycle382 리뷰 재핀(값만) — `_market_unit_tally_roll` 을 `tally.date != day`
@@ -194,7 +195,7 @@ _BASE_SHA: dict[str, str] = {
 #: 신규 leaf `src/engine/market_op_subscribe.py` 로 추출해(행위 변경 0 · 5줄
 #: 위임 wrapper) 3,897 → 3,726 이 됐다. 값만 옮긴다 — 정확 핀을 상한 핀으로
 #: 완화하면 cycle291 의 무접촉 대리 지표가 사라진다.
-_SCHEDULER_LINES = 3736  # cycle408-L1 재핀 +6 — 사용자 승인 10-04 8영역 관측 결함 해결(09:30 자동 퍼널 캡처 protect_confirmed). 직전 3730 = cycle398 PR2
+_SCHEDULER_LINES = 3737  # cycle409 재핀 +1 — 사용자 결정 10-04 Q1·Q4 매일 자동 대사 task 배선. 직전 3736 = cycle408-L1
 _SCHEDULER_LINE_CAP = 3900
 
 
@@ -465,9 +466,13 @@ def test_a8_no_new_leaf_in_src_engine() -> None:
     ⚠️ 트랙 C(실비용 사후 대사, 사용자 자율 구간 지시 10-04)가 leaf 1개 `trade_cost.py` 를
     신설해 79 → **80** 이 됐다 — KIS 정산값 조회·귀속·요약·경보(관측 전용). 8영역·scheduler·
     strategy_registry import 0, 매매 경로 소비처 0(라우트 `/api/costs/*` 만) — 행위 변경 없음.
+
+    ⚠️ cycle409(사용자 결정 10-04 Q1·Q4)가 leaf 1개 `trade_cost_reconcile_task.py` 를 신설해
+    80 → **81** 이 됐다 — 매일 자동 대사 훅(시각 = `system_config.trade_cost_reconcile_time`,
+    키 없음 = 실행 안 함). 8영역·scheduler import 0, 매매 행위 변경 없음.
     """
     got = len(list((_ROOT / "src" / "engine").glob("*.py")))
-    assert got == 80, f"`src/engine/*.py` 파일 수 {got} (트랙 C 기준선 80)"
+    assert got == 81, f"`src/engine/*.py` 파일 수 {got} (cycle409 기준선 81)"
 
 
 # ===========================================================================

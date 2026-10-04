@@ -267,7 +267,8 @@ _BASE_SHA = {
 #: (`get_buy_dates` 신설) · `src/routes/balance.py`(매입일 병합 호출) · `src/models/balance.py`
 #: (`buy_date` 필드) 내용도 바뀌었으나 전부 이미 이 digest 안에 있던 파일이다(신규 파일
 #: 1개뿐). 읽기 전용 조회 조합 — 8영역·scheduler.py·매매 행위 변경 없음. 직전 값 = 166.
-_SRC_TREE_FILES = 175  # 트랙 C — 실비용 사후 대사: 신규 4파일(`api/trade_profit.py`·`db/trade_cost.py`·`engine/trade_cost.py`·`routes/costs.py`) 로 171 → 175. 직전 = cycle404 — 계좌 묶음 배정 기록(단계 0): 신규 leaf
+# cycle409(사용자 결정 10-04 Q1·Q4) — 신규 leaf `engine/trade_cost_reconcile_task.py` 로 175 → 176.
+_SRC_TREE_FILES = 176  # 직전 = 트랙 C — 실비용 사후 대사: 신규 4파일(`api/trade_profit.py`·`db/trade_cost.py`·`engine/trade_cost.py`·`routes/costs.py`) 로 171 → 175. 직전 = cycle404 — 계좌 묶음 배정 기록(단계 0): 신규 leaf
 # `src/engine/account_cluster.py` 하나로 170 → 171. `src/db/system_config.py` 에
 # `get_account_cluster_mode_raw()` 1함수 추가(신규 파일 아님). 직전 값 = 170(cycle403).
 #: ⚠️ 값은 **cycle285 적대 검증 반영** 기준선이다. 그 직전(초판 cycle285 배포)
@@ -753,8 +754,16 @@ _SRC_TREE_FILES = 175  # 트랙 C — 실비용 사후 대사: 신규 4파일(`a
 # opt-in, 기본 None = 기존 호출 무변) + `src/db/system_config.py`(`get_trade_cost_alert_bp()`)
 # + `src/main.py`(라우터 등록). 파일 수 171 → 175. 8영역·scheduler.py 무접촉, 매매 행위 변경 없음.
 # 직전 값(cycle408-L1) = `2db05b0d111617252ddd98037903892dec89d49673464b9cae633a59eb78a035`.
+# 🔁 cycle409 재핀 — 사용자 결정 10-04 Q1·Q4: 신규 leaf `src/engine/trade_cost_reconcile_task.py`
+# + `scheduler.py`(task 배선 +1줄) + `src/db/trade_history.py`(`insert_trade` 가 PENDING∧BUY 에서
+# `order_price` 기록) + `src/db/trade_cost.py`·`src/engine/trade_cost.py`(슬리피지 원천 전환) +
+# `src/db/system_config.py`(대사 시각 키 get/set) + `src/routes/costs.py`(`/api/costs/schedule`) +
+# 8영역 승인(사용자 결정 10-04 Q4) `src/engine/order_engine.py`(매도 PENDING 주문가 전달) +
+# `src/models/trade.py`(`TradeRecord.order_price`) + `src/routes/trading.py`(수동 매도 주문가).
+# 파일 수 175 → 176. 매매 행위 변경 없음(기록 칸 하나).
+# 직전 값(트랙 C) = `26ac7bcc9245cd998fab4fd17e64531a453d9ce8d58d1ade4df7fd8413792684`.
 _SRC_TREE_DIGEST = (
-    "26ac7bcc9245cd998fab4fd17e64531a453d9ce8d58d1ade4df7fd8413792684"
+    "0011ffacd49077c7360afb5e9fe518115b68733de73d553d36df0f2f95ed582e"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
@@ -789,7 +798,8 @@ _PINNED_DIR_FILE_COUNTS = {
     # cycle403 — 신규 leaf `etf_trend_core.py` + 전략 파일 `strategies/etf_trend.py`(재귀 집계) 로 87 → 89.
     # cycle404 — 신규 leaf `account_cluster.py` 로 89 → 90.
     # 트랙 C — 신규 leaf `trade_cost.py`(실비용 사후 대사) 로 90 → 91.
-    "src/engine": 91,
+    # cycle409(사용자 결정 10-04 Q1·Q4) — 신규 leaf `trade_cost_reconcile_task.py`(매일 자동 대사 훅) 로 91 → 92.
+    "src/engine": 92,
 }
 
 #: `scheduler.py` 정확 라인 수 + cycle257 영구 상한.
@@ -797,7 +807,7 @@ _PINNED_DIR_FILE_COUNTS = {
 #: 신규 leaf `src/engine/market_op_subscribe.py` 로 추출해(행위 변경 0 · 5줄
 #: 위임 wrapper) 3,897 → 3,726 이 됐다. 값만 옮긴다 — 정확 핀을 상한 핀으로
 #: 완화하면 cycle287 의 무접촉 대리 지표가 사라진다.
-_SCHEDULER_LINES = 3736  # cycle408-L1 재핀 +6 — 사용자 승인 10-04 8영역 관측 결함 해결(09:30 자동 퍼널 캡처 protect_confirmed). 직전 3730 = cycle398 PR2
+_SCHEDULER_LINES = 3737  # cycle409 재핀 +1 — 사용자 결정 10-04 Q1·Q4 매일 자동 대사 task 배선. 직전 3736 = cycle408-L1
 _SCHEDULER_LINE_CAP = 3900
 
 #: 손대지 않기로 한 **원문 구간**의 sha256 (base `a42f519`).

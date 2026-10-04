@@ -1136,3 +1136,23 @@ async def get_trade_cost_alert_bp() -> float | None:
         return None
     v = float(raw)
     return v if v > 0 else None
+
+
+# ---------------------------------------------------------------------------
+# cycle409 — 사용자 결정 10-04 Q1: 매일 자동 대사 시각
+# ---------------------------------------------------------------------------
+_TRADE_COST_RECONCILE_TIME_KEY = "trade_cost_reconcile_time"
+
+
+async def get_trade_cost_reconcile_schedule_raw() -> object:
+    """`{"value":"HH:MM","days":N}` 원값. 키 없음 → None. 해석은 `trade_cost_reconcile_task.parse_schedule`.
+
+    DB 예외는 전파한다(훅은 꺼짐으로, 라우트는 500 으로 낸다).
+    """
+    raw = await _select_value(_TRADE_COST_RECONCILE_TIME_KEY)
+    return None if raw is _MISSING else raw
+
+
+async def set_trade_cost_reconcile_schedule(value: dict) -> None:
+    """대사 시각 저장. 형식 검증은 라우트가 한다. 끄기 = `{"value": None}`."""
+    await _upsert_value(_TRADE_COST_RECONCILE_TIME_KEY, value)

@@ -164,7 +164,7 @@ _PINNED_DIRS = ("src/realtime", "src/auth", "src/engine/strategies")
 #: 신규 leaf `src/engine/market_op_subscribe.py` 로 추출해(행위 변경 0 · 5줄
 #: 위임 wrapper) 3,897 → 3,726 이 됐다. 값만 옮긴다 — 정확 핀을 상한 핀으로
 #: 완화하면 cycle286 의 무접촉 대리 지표가 사라진다.
-_SCHEDULER_LINES = 3736  # cycle408-L1 재핀 +6 — 사용자 승인 10-04 8영역 관측 결함 해결(09:30 자동 퍼널 캡처 protect_confirmed). 직전 3730 = cycle398 PR2
+_SCHEDULER_LINES = 3737  # cycle409 재핀 +1 — 사용자 결정 10-04 Q1·Q4 매일 자동 대사 task 배선. 직전 3736 = cycle408-L1
 #: cycle257 이 세운 영구 상한 (종전 표기 4,000 은 느슨한 쪽이라 폐기 — 두 수가 갈라지면
 #: 항상 **더 조인 쪽**이 정본이다).
 _SCHEDULER_LINE_CAP = 3900

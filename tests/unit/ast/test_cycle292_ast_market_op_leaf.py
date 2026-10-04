@@ -89,7 +89,7 @@ _MARKERS = (
 _LOGGER_NAME = "src.engine.scheduler"
 
 #: `scheduler.py` 정확 라인 수 + cycle257 이 세운 영구 상한.
-_SCHEDULER_LINES = 3736  # cycle408-L1 재핀 +6 — 사용자 승인 10-04 8영역 관측 결함 해결(09:30 자동 퍼널 캡처 protect_confirmed). 직전 3730 = cycle398 PR2
+_SCHEDULER_LINES = 3737  # cycle409 재핀 +1 — 사용자 결정 10-04 Q1·Q4 매일 자동 대사 task 배선. 직전 3736 = cycle408-L1
 _SCHEDULER_LINE_CAP = 3_900
 
 #: cycle292 가 만진 **전부**인 프로덕션 3파일의 내용 sha. 붉어지면 핀을 갱신하기 전에
@@ -102,7 +102,8 @@ _BASE_SHA = {
     # 🔁 cycle369 재핀 — 관리종목51·단기과열59 청산·매수차단 leaf 배선(값만 이동)
     # 🔁 cycle408-L1 재핀 — 사용자 승인 10-04 8영역 관측 결함 해결: 09:30 자동 퍼널 캡처에 `protect_confirmed=True` 전달(+6줄, 값 없는 키워드 배선)
     "src/engine/scheduler.py":
-        "2bacaa149ab6d00ca97c07c4a8ae4e2b43c992b1e1960909de06bf6d654a1f3f",
+        # 🔁 cycle409 재핀 — 사용자 결정 10-04 Q1·Q4: 매일 자동 대사 task 배선(leaf import · create_task 1줄 · cancel 목록 3곳, +1줄). 직전 값 = cycle408-L1 `2bacaa149ab6…`
+        "f53d41a11fe162f80e113c6ff48cf6d235581769be7979499c5782ff11d49646",
     "src/engine/market_op_subscribe.py":
         "7d58f9464c1ed35e4fa8706d801beb5a6b5c062d5a2941f0db6482d028d3d4ac",
     # 🔁 cycle368(2026-09-25) 재핀 — halt 판정을 `_is_code_active` → `is_iscd_stat_blocking`

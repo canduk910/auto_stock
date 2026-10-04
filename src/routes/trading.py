@@ -157,7 +157,7 @@ async def manual_sell(req: ManualSellRequest):
     from src.db.trade_history import insert_trade
     from src.models.trade import TradeRecord, TradeType, TradeStatus
     from src.engine.scanner import t, ticker_names
-    from src.engine.order_engine import _KST_TZ, _sell_not_placed_reason
+    from src.engine.order_engine import _KST_TZ, _sell_not_placed_reason, _sell_order_price
 
     registry = trading_scheduler.registry
 
@@ -212,6 +212,7 @@ async def manual_sell(req: ManualSellRequest):
             status=TradeStatus.PENDING,
             strategy=strategy_id,
             order_no=result.order_no,
+            order_price=_sell_order_price(req.ticker, 0),  # cycle409 — 시장가 주문가 = 주문 순간 현재가(없으면 None)
         )
         await insert_trade(record)
 

@@ -10,14 +10,16 @@
   비율)로 나눈다. 두 전략 이상이 나눠 가지면 `estimated=True`(「배분 추정」). 짝이 없는 KIS 행은
   `unattributed`. ⚠️ BUY 행 가격은 다건 체결통보면 마지막 체결가다(cycle392 §5.3-2) — 매수 쪽 비율에
   그 오차가 들어간다.
-- **슬리피지** = 주문가 대비 체결가, **매수만**. 주문가가 남는 곳이 `llm_buy_evaluations.order_price_won`
-  하나뿐이라(AI 매수평가 shadow 가 켜진 전략만 기록) 덮인 건수 `slippage_n` 을 함께 낸다. 시장가 주문의
-  주문가 = 주문 순간 현재가. 매도 주문가는 체결 뒤 `trade_history.price` 가 체결가로 덮여 남지 않는다.
+- **슬리피지** = `trade_history.order_price`(주문가) 대비 체결가(`price`), + 가 비용 — 매수 = (체결가 −
+  주문가) × 수량, 매도 = (주문가 − 체결가) × 수량. `order_price` 가 NULL 인 행은 빠지고 덮인 건수
+  `slippage_n` 을 함께 낸다(cycle409 — 사용자 결정 10-04 Q4). ⚠️ 한계 둘 — ① 시장가 주문의 주문가 =
+  주문 순간 현재가(호가가 아니다)라 호가 스프레드 절반이 빠지고, 매도 시장가에 현재가 캐시가 없으면
+  NULL 이다 ② 이 칸 이전 행·체결통보 선행 보정·동기화 INSERT 는 NULL 이라 덮이지 않는다.
 - **경보** `[trade_cost_high]` = 전략별 30 달력일 실효 왕복비용 bp 가 `system_config.trade_cost_alert_bp`
   를 넘을 때 WARNING. 기준이 없으면 경보도 없다(기준값은 사용자 결정). 관측 전용 — 행위 변경 없음.
 
 실효 왕복비용 bp = (수수료 + 세금) ÷ ((매수금액 + 매도금액) / 2) × 10⁴ — 한 번 사고 판 포지션 크기
-대비 비용이다. 슬리피지 bp 는 덮인 매수 주문금액 기준으로 따로 낸다(덮는 범위가 달라 합치지 않는다).
+대비 비용이다. 슬리피지 bp 는 덮인 주문금액(Σ 주문가 × 수량) 기준으로 따로 낸다(덮는 범위가 달라 합치지 않는다).
 """
 
 from __future__ import annotations
@@ -160,8 +162,7 @@ def _blank(strategy: str) -> dict:
             "slippage_base": 0.0, "slippage_n": 0, "cost_rows": 0, "estimated_rows": 0}
 
 
-def summarize(cost_rows: list[dict], trades: list[dict], slippage_rows=(),
-              strategy: str | None = None) -> dict:
+def summarize(cost_rows: list[dict], trades: list[dict], strategy: str | None = None) -> dict:
     """전략별 gross·수수료·세금·net·실효 bp·슬리피지. `strategy` 를 주면 그 전략만(total 도)."""
     accs: dict[str, dict] = {}
 
@@ -180,23 +181,20 @@ def summarize(cost_rows: list[dict], trades: list[dict], slippage_rows=(),
         a["cost_rows"] += 1
         a["estimated_rows"] += 1 if r["estimated"] else 0
 
-    buys: dict[tuple, dict] = {}
     for t in trades:
         s = t.get("strategy") or UNATTRIBUTED
         side = str(t.get("trade_type") or "").upper()
         if side == "SELL":
             acc_for(s)["gross_pnl"] += float(_dec(t.get("profit_loss")))
-        elif side == "BUY":
-            buys[(t["trade_date"], str(t.get("ticker") or ""), str(t.get("order_no") or ""))] = t
-
-    for p in slippage_rows:
-        order_price = _dec(p.get("order_price_won"))
-        t = buys.get((p.get("trade_date"), str(p.get("ticker") or ""), str(p.get("order_no") or "")))
-        if t is None or order_price <= 0:
+        if side not in ("BUY", "SELL") or t.get("order_price") is None:
+            continue
+        order_price = _dec(t.get("order_price"))
+        if order_price <= 0:
             continue
         qty = _dec(t.get("quantity"))
-        a = acc_for(t.get("strategy") or UNATTRIBUTED)
-        a["slippage_won"] += float((_dec(t.get("price")) - order_price) * qty)
+        fill = _dec(t.get("price"))
+        a = acc_for(s)
+        a["slippage_won"] += float(((fill - order_price) if side == "BUY" else (order_price - fill)) * qty)
         a["slippage_base"] += float(order_price * qty)
         a["slippage_n"] += 1
 
@@ -225,11 +223,10 @@ def cost_alerts(summary: dict, threshold_bp: float | None) -> list[dict]:
 
 
 async def build_summary(start: date, end: date, strategy: str | None = None) -> dict:
-    """DB(정산 행 · 체결 행 · 매수 주문가)를 읽어 `summarize` 한다."""
+    """DB(정산 행 · 체결 행 — 주문가 `order_price` 포함)를 읽어 `summarize` 한다."""
     cost_rows = await trade_cost_db.get_daily_range(start, end)
     trades = await trade_cost_db.get_completed_trades(start, end)
-    prices = await trade_cost_db.get_buy_order_prices(start, end)
-    out = summarize(cost_rows, trades, prices, strategy=strategy)
+    out = summarize(cost_rows, trades, strategy=strategy)
     out["from"] = start.isoformat()
     out["to"] = end.isoformat()
     return out

@@ -32,3 +32,6 @@ class TradeRecord(BaseModel):
     status: TradeStatus = TradeStatus.PENDING
     strategy: str = "momentum"
     order_no: str = ""
+    # cycle409 — 사용자 결정 10-04 Q4: 주문가. 명시하면 `insert_trade` 가 그대로 쓰고, 비우면
+    # PENDING ∧ BUY 의 `price` 를 쓴다(매도 PENDING 의 `price` 는 매수가라 호출부가 따로 넘긴다).
+    order_price: float | None = None

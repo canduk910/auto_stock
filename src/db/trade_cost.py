@@ -4,8 +4,8 @@
 
 - `trade_cost_daily` = KIS `TTTC8715R` 행을 `(trad_dt, pdno)` 로 접은 정산값. 같은 키 재대사는 덮어쓴다.
 - `trade_cost_period_totals` = 대사 실행 기간의 KIS output2 합계(행 합계와 1원 대조용).
-- `get_completed_trades` / `get_buy_order_prices` 는 `trade_history` · `llm_buy_evaluations` 를
-  **읽기만** 한다(전략 귀속·슬리피지 계산 입력).
+- `get_completed_trades` 는 `trade_history` 를 **읽기만** 한다(전략 귀속·슬리피지 계산 입력 —
+  주문가 `order_price` 포함, cycle409).
 
 바인딩 규약(`src/db/CLAUDE.md`) — DATE = `date` 객체, TIMESTAMPTZ = aware `datetime`,
 JSONB = raw dict/list(호출부 `json.dumps` 금지), NUMERIC = `Decimal`. 예외는 삼키지 않고 전파한다.
@@ -123,7 +123,8 @@ async def get_completed_trades(start: date, end: date) -> list[dict]:
         """
         SELECT (timestamp AT TIME ZONE 'Asia/Seoul')::date AS trade_date,
                ticker, trade_type, strategy, price, quantity,
-               COALESCE(profit_loss, 0) AS profit_loss, COALESCE(order_no, '') AS order_no
+               COALESCE(profit_loss, 0) AS profit_loss, COALESCE(order_no, '') AS order_no,
+               order_price
         FROM trade_history
         WHERE status = 'COMPLETED' AND timestamp >= $1 AND timestamp < $2
         ORDER BY timestamp
@@ -131,15 +132,3 @@ async def get_completed_trades(start: date, end: date) -> list[dict]:
         lo, hi,
     )
 
-
-async def get_buy_order_prices(start: date, end: date) -> list[dict]:
-    """매수 주문가 — `llm_buy_evaluations.order_price_won`(AI 매수평가 shadow 가 켜진 전략만 있다)."""
-    return await pg.fetch(
-        """
-        SELECT trade_date, ticker, order_no, order_price_won
-        FROM llm_buy_evaluations
-        WHERE trade_date BETWEEN $1 AND $2 AND order_no <> ''
-        ORDER BY trade_date, ticker, order_no
-        """,
-        to_date(start), to_date(end),
-    )

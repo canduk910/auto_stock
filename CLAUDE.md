@@ -208,7 +208,7 @@ cd frontend && npm install && npm run dev
 
 | 테이블 | 용도 |
 |--------|------|
-| `trade_history` | 거래 내역 (status: PENDING/COMPLETED/PARTIAL/CANCELLED) |
+| `trade_history` | 거래 내역 (status: PENDING/COMPLETED/PARTIAL/CANCELLED). `order_price`(migration 046) = PENDING 때 주문가 — 체결가로 덮이는 `price` 와 따로 남는 슬리피지 원천 |
 | `daily_performance` | 일일 실적 (date+strategy 복합PK, TWR 누적, 실현손익 기준) |
 | `positions` | 보유 포지션 영속화 (ticker PK) |
 | `pending_next_day_clear` | 익일청산 큐 영속화 (migration 038) — 재기동이 메모리 `_pending_next_day_clear` 를 잃지 않게 한다 |

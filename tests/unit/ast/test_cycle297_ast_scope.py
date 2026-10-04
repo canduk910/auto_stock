@@ -551,7 +551,8 @@ _BASE_SHA: dict[str, str] = {
     #    합·체결 가중평균)으로 기록. 사용자 승인(8영역, 결정 4), 나머지 7영역 diff 0.
     # 🔁 2026-10-02 (cycle396) 재핀 — cycle396 사용자 요청(10-02) 가중평균가 절사: 매도 장부
     #    가격을 원 단위 내림 int 로(`_vwap_2dp`→`_vwap_floor`). 사용자 승인(8영역), 나머지 7영역 diff 0.
-        "a6d677259fe7fd1015fabd5082d45e7807446252ccee37e3ad53489b3387201c",
+        # 🔁 cycle409 재핀 — 사용자 결정 10-04 Q4 8영역 승인: 매도 PENDING 에 주문가(`order_price`) 전달 — 모듈 함수 `_sell_order_price`(never-raise, await 0) + 매도 래퍼 `order_unpr` 키워드 + 주·폴백 호출 각 1줄. 발사·매핑·send_qty·재시도·_selling 흐름 불변, 나머지 7영역 diff 0. 직전 값 = cycle408-L3 `a6d677259fe7…`
+        "08c479841352fb579f767c109de3e8f901d1c27bdce705b39b5ba6556fc0b3e1",
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
     # 🔁 cycle302(2026-09-18) 재핀 — 사용자 승인 일봉 backfill **대상** 확대
@@ -589,7 +590,8 @@ _BASE_SHA: dict[str, str] = {
     # 🔁 cycle369 재핀 — 관리종목51·단기과열59 청산·매수차단 leaf 배선(값만 이동)
     # 🔁 cycle408-L1 재핀 — 사용자 승인 10-04 8영역 관측 결함 해결: 09:30 자동 퍼널 캡처에 `protect_confirmed=True` 전달(+6줄, 값 없는 키워드 배선)
     "src/engine/scheduler.py":
-        "2bacaa149ab6d00ca97c07c4a8ae4e2b43c992b1e1960909de06bf6d654a1f3f",
+        # 🔁 cycle409 재핀 — 사용자 결정 10-04 Q1·Q4: 매일 자동 대사 task 배선(leaf import · create_task 1줄 · cancel 목록 3곳, +1줄). 직전 값 = cycle408-L1 `2bacaa149ab6…`
+        "f53d41a11fe162f80e113c6ff48cf6d235581769be7979499c5782ff11d49646",
     # 🔁 cycle369 R2 재핀 — buy-block 게이트(`_status_buy_blocked` 승격) + STATUS_EXIT Signal + Q7 edge-baseline clear 배선(전략 7파일은 무변경, 배선은 이 파일)
     # 🔁 cycle382 리뷰 재핀(값만) — `_market_unit_tally_roll` 을 `tally.date != day`
     # 에서 `tally.date < day`(더 늦은 날짜에서만 롤)로 시정(§8, 사용자 승인 범위 밖 무접촉).
@@ -636,11 +638,11 @@ def test_g2_9b_scheduler_line_budget_and_auth_exclusion_is_explicit() -> None:
     """
     sched = _ROOT / "src/engine/scheduler.py"
     n = len(_read(sched).splitlines())
-    assert n == 3736, (
+    assert n == 3737, (
         f"`scheduler.py` {n}L (착수 시점 3,726L → cycle298 재핀 3,785L → cycle354 재핀 3,812L → "
         "cycle364 저녁 캡처 leaf 이관 재핀 3,758L → cycle364 S1 round 3(F4 skipped_out + F5 중복 "
         "ERROR 제거 + F7 docstring 정직화) 재핀 3,777L → cycle369 재핀 — 관리종목51·단기과열59 "
-        "청산·매수차단 task 배선 +4 → cycle398 재핀 — 전략 등록 명부 추출(PR1 카드 #2, 사용자 승인 10-02) -54) → cycle398 PR2 재핀(카드 #3) 3,730 → cycle408-L1 재핀(사용자 승인 10-04, 09:30 자동 퍼널 캡처 protect_confirmed) 3,736)"
+        "청산·매수차단 task 배선 +4 → cycle398 재핀 — 전략 등록 명부 추출(PR1 카드 #2, 사용자 승인 10-02) -54) → cycle398 PR2 재핀(카드 #3) 3,730 → cycle408-L1 재핀(사용자 승인 10-04, 09:30 자동 퍼널 캡처 protect_confirmed) 3,736 → cycle409 재핀(사용자 결정 10-04 Q1·Q4, 매일 자동 대사 task 배선) 3,737)"
     )
     assert n < 3900, f"`scheduler.py` 라인 상한 3,900 초과 — {n}L"
 

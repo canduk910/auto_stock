@@ -521,8 +521,9 @@ _APPROVED_CONTENT_SHA: dict[str, str] = {
     # 🔁 2026-10-04 (cycle408-L3) 재핀 — cycle408-L3 — 사용자 승인 10-04 8영역 관측 결함 해결:
     #    `execute_buy` 「매수 수량 0 → 900s cooldown」 WARNING 꼬리에 `원인: funds|cap|unknown, 잔여:`
     #    추가(동기 읽기만, 쿨다운·순서 불변). 나머지 7영역 diff 0. 자매 가드 네 곳 전부 같은 값.
+    # 🔁 cycle409 재핀 — 사용자 결정 10-04 Q4 8영역 승인: 매도 PENDING 에 주문가(`order_price`) 전달 — 모듈 함수 `_sell_order_price`(never-raise, await 0) + 매도 래퍼 `order_unpr` 키워드 + 주·폴백 호출 각 1줄. 발사·매핑·send_qty·재시도·_selling 흐름 불변, 나머지 7영역 diff 0. 직전 값 = cycle408-L3 `a6d677259fe7…`
     "src/engine/order_engine.py":
-        "a6d677259fe7fd1015fabd5082d45e7807446252ccee37e3ad53489b3387201c",
+        "08c479841352fb579f767c109de3e8f901d1c27bdce705b39b5ba6556fc0b3e1",
     "src/api/order.py":
         "08c5cafd7b8678ec0d0fa85f856fdea3cce38ad92488c6d74c03cd13faa415bb",
     # ✅ 2026-09-14 (cycle293) — 시세 채널 리졸버 2단계(속성축 배관). 사용자 승인

@@ -13,7 +13,7 @@
 | R5 | 귀속 뒤 전략 합계 = KIS 원 행 합계(수수료·세금 보존) |
 | S1 | 요약 = 전략별 gross(=`trade_history` SELL `profit_loss` 합) · 수수료 · 세금 · net = gross − 수수료 − 세금 |
 | S2 | 실효 왕복비용 bp = (수수료+세금) ÷ ((매수금액+매도금액)/2) × 10⁴ · 분모 0 이면 None |
-| S3 | 슬리피지 = 주문가(`llm_buy_evaluations.order_price_won`) 대비 체결가(`trade_history.price`), BUY 만, 덮인 건수 `slippage_n` |
+| S3 | 슬리피지 = 주문가(`trade_history.order_price`) 대비 체결가(`trade_history.price`), NULL 제외, 덮인 건수 `slippage_n` (cycle409 — 사용자 결정 10-04 Q4, 상세 = `test_cycle409_slippage_order_price.py`) |
 | S4 | `strategy=` 필터는 그 전략 행만 남기고 total 도 그 행으로 계산한다 |
 | L1 | 경보 기준이 None(설정 없음) = 경보 0 — 기준값을 코드에 두지 않는다 |
 | L2 | 기준 초과 전략만 경보 · `unattributed` 는 경보 대상이 아니다 |
@@ -205,17 +205,12 @@ def test_s1b_gross_counts_sells_even_without_cost_row():
     assert v["cost_bp"] is None
 
 
-def test_s3_slippage_from_order_price_buy_only():
-    trades = [
-        _trade("kojiro", "BUY", 39450, 5, order_no="B1"),
-        _trade("kojiro", "SELL", 36110, 5, order_no="S1"),
-    ]
-    slip = [
-        {"trade_date": D, "ticker": "035760", "order_no": "B1", "order_price_won": 39400},
-        {"trade_date": D, "ticker": "035760", "order_no": "S1", "order_price_won": 36200},
-        {"trade_date": D, "ticker": "035760", "order_no": "ZZ", "order_price_won": 1},
-    ]
-    s = _mod().summarize([], trades, slip)
+def test_s3_slippage_from_trade_history_order_price():
+    buy = _trade("kojiro", "BUY", 39450, 5, order_no="B1")
+    buy["order_price"] = Decimal(39400)
+    sell = _trade("kojiro", "SELL", 36110, 5, order_no="S1")
+    sell["order_price"] = None  # 매도 PENDING 은 주문가를 기록하지 않는다
+    s = _mod().summarize([], [buy, sell])
     (k,) = s["strategies"]
     assert k["slippage_won"] == pytest.approx(50 * 5)
     assert k["slippage_n"] == 1

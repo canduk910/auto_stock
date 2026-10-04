@@ -63,7 +63,6 @@ def env(monkeypatch):
          "price": Decimal(36110), "quantity": 5, "profit_loss": Decimal(-16450),
          "order_no": "S1"},
     ])
-    get_prices = AsyncMock(return_value=[])
     threshold = AsyncMock(return_value=None)
     write_log = AsyncMock(return_value=None)
 
@@ -72,12 +71,11 @@ def env(monkeypatch):
     monkeypatch.setattr(m.trade_cost_db, "upsert_period_total", upsert_total)
     monkeypatch.setattr(m.trade_cost_db, "get_daily_range", get_daily)
     monkeypatch.setattr(m.trade_cost_db, "get_completed_trades", get_trades)
-    monkeypatch.setattr(m.trade_cost_db, "get_buy_order_prices", get_prices)
     monkeypatch.setattr(m.system_config, "get_trade_cost_alert_bp", threshold)
     monkeypatch.setattr(m.system_logs, "write_log", write_log)
     return SimpleNamespace(m=m, fetch=fetch, upsert_daily=upsert_daily,
                            upsert_total=upsert_total, get_daily=get_daily,
-                           get_trades=get_trades, get_prices=get_prices,
+                           get_trades=get_trades,
                            threshold=threshold, write_log=write_log, fetched=fetched)
 
 
@@ -152,7 +150,6 @@ async def test_c6_build_summary_reads_db(env):
     s = await env.m.build_summary(date(2026, 9, 1), D)
     env.get_daily.assert_awaited_once_with(date(2026, 9, 1), D)
     env.get_trades.assert_awaited_once_with(date(2026, 9, 1), D)
-    env.get_prices.assert_awaited_once_with(date(2026, 9, 1), D)
     (k,) = s["strategies"]
     assert k["strategy"] == "kojiro"
     assert k["net_pnl"] == pytest.approx(-16450 - 57 - 270)

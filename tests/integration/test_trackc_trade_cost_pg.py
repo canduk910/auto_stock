@@ -8,7 +8,6 @@
 | I2 | `upsert_daily` 왕복 — DATE·NUMERIC·JSONB 가 제 타입으로 돌아온다, 같은 키 재실행 = 덮어쓰기 |
 | I3 | `upsert_period_total` 왕복 — 합계 숫자 칸 + raw JSONB |
 | I4 | `get_completed_trades` — COMPLETED 만, 날짜는 **KST** 기준(00:30 KST 체결은 그날) |
-| I5 | `get_buy_order_prices` — `llm_buy_evaluations` 의 주문가를 기간으로 읽는다 |
 
 docker/`DATABASE_URL_TEST` 없으면 `pg_harness` fixture 가 `pytest.skip`.
 """
@@ -126,18 +125,3 @@ async def test_i4_completed_trades_kst_dates(clean):
     assert r["price"] == Decimal(36110) and r["quantity"] == 5
     assert r["profit_loss"] == Decimal(-16450)
 
-
-async def test_i5_buy_order_prices(clean):
-    from src.db import trade_cost
-
-    await clean.execute(
-        "INSERT INTO llm_buy_evaluations (trade_date, account_no, ticker, order_no, eval_kind,"
-        " account_product, strategy_id, mode, result, order_kst, order_price_won, ordered_qty,"
-        " order_notional_won, order_division, min_score, order_path, board) VALUES"
-        " ($1,'12345678','035760','B1','order','01','kojiro','shadow','ok',$2,39400,5,197000,"
-        "'MARKET',70,'market','main')",
-        D, datetime(2026, 9, 30, 9, 1, tzinfo=KST),
-    )
-    rows = await trade_cost.get_buy_order_prices(D, D)
-    assert rows == [{"trade_date": D, "ticker": "035760", "order_no": "B1",
-                     "order_price_won": 39400}]
