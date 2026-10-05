@@ -1186,6 +1186,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -2437,6 +2445,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -3693,6 +3709,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -4944,6 +4968,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -6196,6 +6228,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -7449,6 +7489,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -8702,6 +8750,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -9957,6 +10013,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -11209,6 +11273,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -12530,6 +12602,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -13783,6 +13863,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -15054,6 +15142,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -16308,6 +16404,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -17565,6 +17669,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -18812,6 +18924,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -20066,6 +20186,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -21319,6 +21447,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -22572,6 +22708,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -23825,6 +23969,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -25078,6 +25230,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -26333,6 +26493,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -27584,6 +27752,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -28837,6 +29013,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -30090,6 +30274,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -31343,6 +31535,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -32597,6 +32797,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -33853,6 +34061,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -35102,6 +35318,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -36355,6 +36579,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -37610,6 +37842,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -38861,6 +39101,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -40118,6 +40366,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -41372,6 +41628,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -42625,6 +42889,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -43879,6 +44151,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -45130,6 +45410,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -46384,6 +46672,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -47637,6 +47933,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -48891,6 +49195,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -50143,6 +50455,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -51396,6 +51716,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -52649,6 +52977,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -53902,6 +54238,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -55155,6 +55499,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -56407,6 +56759,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -57661,6 +58021,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -58914,6 +59282,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -60167,6 +60543,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -61420,6 +61804,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -61498,7 +61890,8 @@ backend:
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/etf_trend_core.py:
-    direct_tests: []
+    direct_tests:
+      - tests/unit/replay/test_audit_etf.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -62673,6 +63066,13 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -63926,6 +64326,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -65179,6 +65587,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -66432,6 +66848,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -66513,6 +66937,7 @@ backend:
     direct_tests:
       - tests/unit/engine/test_cycle351_pyramid_shadow_collect.py
       - tests/unit/engine/test_kojiro_indicators.py
+      - tests/unit/replay/test_audit_kojiro.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -67685,6 +68110,13 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -68939,6 +69371,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -70191,6 +70631,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -71515,6 +71963,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -72765,6 +73221,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -74018,6 +74482,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -75273,6 +75745,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -76526,6 +77006,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -77777,6 +78265,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -77857,6 +78353,7 @@ backend:
   src/engine/market_unit.py:
     direct_tests:
       - tests/integration/test_cycle382_market_unit_pg.py
+      - tests/unit/replay/test_audit_framework.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -79030,6 +79527,13 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -80283,6 +80787,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -81536,6 +82048,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -82789,6 +83309,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -84042,6 +84570,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -85295,6 +85831,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -86547,6 +87091,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -87895,6 +88447,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -89227,6 +89787,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -90618,6 +91186,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -91871,6 +92447,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -93125,6 +93709,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -94377,6 +94969,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -95630,6 +96230,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -96886,6 +97494,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -98135,6 +98751,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -99405,6 +100029,14 @@ backend:
       - tests/unit/realtime/test_websocket_pool_stop_reset.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -100645,6 +101277,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -101896,6 +102536,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -103148,6 +103796,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -104401,6 +105057,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -105653,6 +106317,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -106907,6 +107579,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -108160,6 +108840,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -109413,6 +110101,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -110666,6 +111362,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -111919,6 +112623,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -113171,6 +113883,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -114424,6 +115144,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -115678,6 +116406,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -116931,6 +117667,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -118184,6 +118928,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -119437,6 +120189,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -119591,6 +120351,7 @@ backend:
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
+      - tests/unit/replay/test_audit_bfb.py
       - tests/unit/routes/test_cycle278_params_validation.py
       - tests/unit/routes/test_cycle290_killswitch_put.py
     transitive_tests:
@@ -120722,6 +121483,13 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -120926,6 +121694,7 @@ backend:
       - tests/unit/engine/test_high_since_buy_recovery.py
       - tests/unit/engine/test_strategy_fallback_budget.py
       - tests/unit/engine/test_swing_poll_loop.py
+      - tests/unit/replay/test_audit_framework.py
       - tests/unit/routes/test_cycle278_params_validation.py
       - tests/unit/routes/test_cycle290_killswitch_put.py
     transitive_tests:
@@ -121975,6 +122744,13 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -123226,6 +124002,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -123344,6 +124128,8 @@ backend:
       - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_kojiro_funnel_atr_band_label.py
       - tests/unit/engine/test_kojiro_wiring.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
       - tests/unit/routes/test_cycle278_params_validation.py
       - tests/unit/routes/test_cycle290_killswitch_put.py
     transitive_tests:
@@ -124481,6 +125267,12 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -125734,6 +126526,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -126987,6 +127787,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -127108,6 +127916,7 @@ backend:
       - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_multiday_strategies_registry.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/routes/test_cycle278_params_validation.py
       - tests/unit/routes/test_cycle290_killswitch_put.py
     transitive_tests:
@@ -128240,6 +129049,13 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -128434,6 +129250,7 @@ backend:
       - tests/unit/engine/test_strategy_fallback_budget.py
       - tests/unit/engine/test_vb_force_clear_at_15_20.py
       - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+      - tests/unit/replay/test_audit_vb.py
       - tests/unit/routes/test_cycle278_params_validation.py
       - tests/unit/routes/test_cycle290_killswitch_put.py
     transitive_tests:
@@ -129493,6 +130310,13 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -129890,6 +130714,9 @@ backend:
       - tests/unit/engine/test_swing_rest_poll.py
       - tests/unit/engine/test_vb_force_clear_at_15_20.py
       - tests/unit/engine/test_vb_next_day_clear_safety_net.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycleH_portfolio_route.py
     transitive_tests:
@@ -130749,6 +131576,11 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -132000,6 +132832,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -133254,6 +134094,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -134506,6 +135354,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -135759,6 +136615,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -137090,6 +137954,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -138344,6 +139216,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -139595,6 +140475,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -140849,6 +141737,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -142101,6 +142997,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -143354,6 +144258,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -144606,6 +145518,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -145860,6 +146780,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -147113,6 +148041,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -148369,6 +149305,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -149689,6 +150633,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -150942,6 +151894,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -152199,6 +153159,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -153452,6 +154420,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -154774,6 +155750,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -156028,6 +157012,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -157349,6 +158341,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -158779,6 +159779,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -160103,6 +161111,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -161356,6 +162372,14 @@ backend:
       - tests/unit/realtime/test_websocket_pool_stop_reset.py
       - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -162609,6 +163633,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -163863,6 +164895,14 @@ backend:
       - tests/unit/realtime/test_websocket_pool_stop_empty_quotes.py
       - tests/unit/realtime/test_websocket_pool_stop_reset.py
       - tests/unit/realtime/test_websocket_pool_subscribed_tickers.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -165116,6 +166156,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -168082,6 +169130,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -169333,6 +170389,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -170589,6 +171653,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -171839,6 +172911,14 @@ backend:
       - tests/unit/realtime/test_websocket_reverify.py
       - tests/unit/realtime/test_websocket_subscribe_rejection.py
       - tests/unit/realtime/test_ws_subscribe_backoff.py
+      - tests/unit/replay/test_audit_bfb.py
+      - tests/unit/replay/test_audit_donchian.py
+      - tests/unit/replay/test_audit_etf.py
+      - tests/unit/replay/test_audit_framework.py
+      - tests/unit/replay/test_audit_kojiro.py
+      - tests/unit/replay/test_audit_live_vbmom.py
+      - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_audit_vcp.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -173835,10 +174915,10 @@ frontend:
       - frontend/src/pages/__tests__/StrategiesParams.test.tsx
       - frontend/src/pages/__tests__/StrategiesTeRr.test.tsx
       - frontend/src/pages/__tests__/StrategyFunnel.bottleneckTrend.test.tsx
-generated_at: '2026-10-04T15:00:39.697Z'
+generated_at: '2026-10-05T04:46:05.823Z'
 stats:
   backend_modules: 179
-  backend_tests: 1234
+  backend_tests: 1242
   frontend_modules: 129
   frontend_tests: 109
   unmapped_modules:
