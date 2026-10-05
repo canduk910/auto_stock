@@ -5,6 +5,7 @@ import { STRATEGY_INFO, ALL_STRATEGIES_INFO } from '../utils/strategyInfo'
 import { strategyLabel } from '../utils/strategyMeta'
 import ControlPanel from '../components/ControlPanel'
 import MarketRegimeCard from '../components/MarketRegimeCard'
+import MarketRegimeLabelCard from '../components/MarketRegimeLabelCard'
 import PortfolioRiskCard from '../components/PortfolioRiskCard'
 import KisAccountPoolCard from '../components/KisAccountPoolCard'
 import ScanMonitor from '../components/ScanMonitor'
@@ -56,6 +57,9 @@ export default function Dashboard() {
 
       {/* 사이클 2 (2026-05-17): 시장 레짐 카드 — 환경 배너 직하, 전략 탭 위 */}
       <MarketRegimeCard />
+
+      {/* cycle410 (2026-10-05): 6장세 라벨 — 관찰 전용, 매매에 쓰지 않는다 */}
+      <MarketRegimeLabelCard />
 
       {/* 사이클 I (2026-08-03): 포트폴리오 리스크 관찰 카드 — 시장 레짐 직하 (관찰 전용, Phase 1) */}
       <PortfolioRiskCard />

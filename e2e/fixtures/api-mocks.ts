@@ -10,6 +10,7 @@ import type { Page } from "@playwright/test";
 import { PARAM_SCHEMA_FIXTURE } from "./param-schema.fixture";
 // cycle282 — 장운영상태(표 + 커서) 골든 픽스처(market_state.py 에서 기계 생성).
 import { MARKET_STATE_FIXTURE } from "./market-state.fixture";
+import { MARKET_REGIME_LABEL_FIXTURE } from "./market-regime-label.fixture";
 // cycle387 — 종목 차트(일봉·주봉·월봉) 응답 리터럴. MSW 목(`frontend/src/test/fixtures/stockChart.fixture.ts`)과 같은 값.
 import { STOCK_CHART_RESPONSES, type StockChartPeriodKey } from "./stock-chart.fixture";
 
@@ -452,6 +453,10 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
   );
   await page.route("**/api/market-regime/auto-adjust", (route) =>
     route.fulfill({ json: envelope({ enabled: true }) }),
+  );
+  // cycle410 — 6장세 라벨 카드(Dashboard, 관찰 전용). 실측 픽스처.
+  await page.route("**/api/market-regime-label", (route) =>
+    route.fulfill({ json: envelope(MARKET_REGIME_LABEL_FIXTURE) }),
   );
   await page.route("**/api/realtime/subscriptions", (route) =>
     route.fulfill({ json: envelope({ sessions: [], total_count: 0 }) }),

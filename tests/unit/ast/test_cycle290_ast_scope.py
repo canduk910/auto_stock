@@ -437,7 +437,11 @@ _ENGINE_PY_FILES: dict[str, tuple[str, ...]] = {
         # (이쪽은 송신·구독 배치). 이름 축을 개수 축으로 바꾸지 말 것 — 등재해도
         # "다음 신규 파일"은 여전히 붉어진다.
         "market_op_subscribe.py",
-        "market_operation_monitor.py", "market_regime.py", "market_state.py",
+        "market_operation_monitor.py", "market_regime.py",
+        # cycle410(사용자 결정 10-05) — 6장세 라벨 leaf(관찰 전용, 표준 라이브러리만). 등재해도
+        # "다음 신규 파일" 은 여전히 붉어진다(이름 축 가드는 변경 없음).
+        "market_regime_label.py",
+        "market_state.py",
         # cycle382 — 시장 유닛(단계형, KODEX200 60일선) 판정 leaf. 표준 라이브러리만
         # import(A01). 이름을 등재해도 "다음 신규 파일" 은 여전히 붉어진다(이름 축
         # 가드는 변경 없음).

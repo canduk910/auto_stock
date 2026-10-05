@@ -957,6 +957,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -1234,6 +1235,7 @@ backend:
       - tests/unit/routes/test_cycle371_market_op_status_only_details.py
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -2213,6 +2215,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -2495,6 +2498,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -3479,6 +3483,7 @@ backend:
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -3757,6 +3762,7 @@ backend:
       - tests/unit/routes/test_cycle369_status_exit_route.py
       - tests/unit/routes/test_cycle371_market_op_status_only_details.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -4736,6 +4742,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -5017,6 +5024,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -5995,6 +6003,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -6278,6 +6287,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -7256,6 +7266,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -7539,6 +7550,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -8517,6 +8529,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -8800,6 +8813,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -9783,6 +9797,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -10061,6 +10076,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -11040,6 +11056,7 @@ backend:
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -11322,6 +11339,7 @@ backend:
       - tests/unit/routes/test_cycle371_market_op_status_only_details.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -12371,6 +12389,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -12652,6 +12671,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -13630,6 +13650,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -13913,6 +13934,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -14909,6 +14931,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -15192,6 +15215,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -16171,6 +16195,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -16454,6 +16479,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -17440,6 +17466,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -17716,6 +17743,7 @@ backend:
       - tests/unit/routes/test_cycle369_status_exit_route.py
       - tests/unit/routes/test_cycle371_market_op_status_only_details.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -18691,6 +18719,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -18974,6 +19003,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -19955,6 +19985,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -20236,6 +20267,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -21214,6 +21246,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -21497,6 +21530,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -22475,6 +22509,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -22758,6 +22793,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -23736,6 +23772,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -24019,6 +24056,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -24997,6 +25035,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -25280,6 +25319,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -26260,6 +26300,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -26542,6 +26583,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -27519,6 +27561,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -27802,6 +27845,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -28780,6 +28824,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -29063,6 +29108,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -30041,6 +30087,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -30324,6 +30371,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -31302,6 +31350,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -31585,6 +31634,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -32566,6 +32616,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -32846,6 +32897,7 @@ backend:
       - tests/unit/routes/test_cycle371_market_op_status_only_details.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -33829,6 +33881,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -34111,6 +34164,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle90_concurrent_lock.py
       - tests/unit/routes/test_cycle90_emit_persistence.py
@@ -35086,6 +35140,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -35368,6 +35423,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -36346,6 +36402,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -36629,6 +36686,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -37609,6 +37667,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -37890,6 +37949,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -38869,6 +38929,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -39151,6 +39212,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -40133,6 +40195,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -40416,6 +40479,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -41397,6 +41461,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -41678,6 +41743,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -42656,6 +42722,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -42939,6 +43006,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -43920,6 +43988,7 @@ backend:
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -44200,6 +44269,7 @@ backend:
       - tests/unit/routes/test_cycle371_market_op_status_only_details.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -45177,6 +45247,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -45460,6 +45531,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -46439,6 +46511,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -46722,6 +46795,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -47700,6 +47774,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -47983,6 +48058,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -48962,6 +49038,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -49244,6 +49321,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -50222,6 +50300,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -50505,6 +50584,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -51484,6 +51564,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -51766,6 +51847,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -52744,6 +52826,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -53027,6 +53110,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -54005,6 +54089,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -54288,6 +54373,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -55266,6 +55352,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -55549,6 +55636,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -56526,6 +56614,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -56809,6 +56898,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -57792,6 +57882,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -58071,6 +58162,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -59049,6 +59141,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -59332,6 +59425,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -60310,6 +60404,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -60593,6 +60688,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -61571,6 +61667,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -61854,6 +61951,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -62833,6 +62931,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -63115,6 +63214,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -64093,6 +64193,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -64376,6 +64477,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -65354,6 +65456,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -65637,6 +65740,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -66615,6 +66719,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -66898,6 +67003,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -67878,6 +67984,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -68159,6 +68266,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -69138,6 +69246,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -69420,6 +69529,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -70398,6 +70508,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -70681,6 +70792,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -71735,6 +71847,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -72011,6 +72124,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -72993,6 +73107,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -73271,6 +73386,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -74250,6 +74366,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -74532,6 +74649,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -75515,6 +75633,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -75793,6 +75912,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -76783,6 +76903,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -77056,6 +77177,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -77089,6 +77211,75 @@ backend:
       - tests/unit/tools/test_pg_harness_container_cleanup.py
       - tests/unit/tools/test_slot_utilization_review.py
       - tests/unit/workflows/test_cycle145_deploy_migration.py
+  src/engine/market_regime_label.py:
+    direct_tests:
+      - tests/unit/engine/test_cycle410_market_regime_label.py
+    transitive_tests:
+      - tests/contract/test_backtest_mcp_health.py
+      - tests/contract/test_cycle171_snapshot_route_steps.py
+      - tests/contract/test_cycle223f2_manual_apply_param_ranges.py
+      - tests/contract/test_cycle243_auth_wiring.py
+      - tests/contract/test_cycle382_market_unit_params_route.py
+      - tests/contract/test_cycle384_buy_paused_params_route.py
+      - tests/contract/test_cycle397_balance_buy_date.py
+      - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
+      - tests/contract/test_cycle64_routes_price_filter.py
+      - tests/contract/test_quote_session_auto_disable.py
+      - tests/contract/test_routes_backtest.py
+      - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
+      - tests/contract/test_routes_history.py
+      - tests/contract/test_routes_kis_quote_accounts.py
+      - tests/contract/test_routes_log_reports.py
+      - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
+      - tests/contract/test_routes_market_regime.py
+      - tests/contract/test_routes_realtime.py
+      - tests/contract/test_routes_realtime_ccnl_fields.py
+      - tests/contract/test_routes_realtime_session_details.py
+      - tests/contract/test_routes_recommendations.py
+      - tests/contract/test_routes_strategies.py
+      - tests/contract/test_routes_strategies_cash_ratio.py
+      - tests/contract/test_routes_strategy_funnel.py
+      - tests/contract/test_routes_subscriptions_pool.py
+      - tests/contract/test_routes_system_integrations.py
+      - tests/contract/test_routes_trading.py
+      - tests/contract/test_weight_unit_contract.py
+      - tests/integration/test_cycle100_count_eager_refresh_integration.py
+      - tests/integration/test_mcp_client_lifecycle.py
+      - tests/unit/main/test_cycle72_db_log_dedupe.py
+      - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
+      - tests/unit/main/test_cycleM3b_main_seam_pg.py
+      - tests/unit/middleware/test_cycle249_websocket_scope_guard.py
+      - tests/unit/routes/test_cycle110_emit_persistence.py
+      - tests/unit/routes/test_cycle110_exception_graceful.py
+      - tests/unit/routes/test_cycle110_import_fix.py
+      - tests/unit/routes/test_cycle110_lock_persistence.py
+      - tests/unit/routes/test_cycle110_response_format.py
+      - tests/unit/routes/test_cycle112_krx_open_api_routes.py
+      - tests/unit/routes/test_cycle126_basics_daily_routes.py
+      - tests/unit/routes/test_cycle128_list_query_params.py
+      - tests/unit/routes/test_cycle249_log_reports_bundle_external.py
+      - tests/unit/routes/test_cycle253_channel_probe.py
+      - tests/unit/routes/test_cycle282_market_state_route.py
+      - tests/unit/routes/test_cycle285_market_ops_route.py
+      - tests/unit/routes/test_cycle387_stock_chart_route.py
+      - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
+      - tests/unit/routes/test_cycle84_api_response_envelope.py
+      - tests/unit/routes/test_cycle84_route_404.py
+      - tests/unit/routes/test_cycle84_route_invalid_limit.py
+      - tests/unit/routes/test_cycle84_route_invalid_offset.py
+      - tests/unit/routes/test_cycle90_concurrent_lock.py
+      - tests/unit/routes/test_cycle90_fetch_top_500_call.py
+      - tests/unit/routes/test_cycle90_kst_persistence.py
+      - tests/unit/routes/test_cycle90_lock_release.py
+      - tests/unit/routes/test_cycle90_post_route_envelope.py
+      - tests/unit/routes/test_cycle90_response_timing.py
+      - tests/unit/routes/test_cycle90_route_405_other.py
+      - tests/unit/routes/test_cycle93_route_upsert_chain.py
+      - tests/unit/routes/test_log_reports_bundle_past_date_db_overlay.py
+      - tests/unit/test_cycle243_auth_fixture.py
   src/engine/market_state.py:
     direct_tests:
       - tests/unit/ast/test_cycle287_ast_scope.py
@@ -78032,6 +78223,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -78315,6 +78507,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -79294,6 +79487,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -79576,6 +79770,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -80554,6 +80749,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -80837,6 +81033,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -81815,6 +82012,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -82098,6 +82296,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -83076,6 +83275,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -83359,6 +83559,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -84337,6 +84538,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -84620,6 +84822,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -85598,6 +85801,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -85881,6 +86085,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -86858,6 +87063,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -87141,6 +87347,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -88214,6 +88421,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -88497,6 +88705,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -89555,6 +89764,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -89837,6 +90047,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -90953,6 +91164,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -91236,6 +91448,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -92215,6 +92428,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -92497,6 +92711,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -93476,6 +93691,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -93758,6 +93974,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -94746,6 +94963,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -95019,6 +95237,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -96000,6 +96219,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -96280,6 +96500,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -97262,6 +97483,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -97541,6 +97763,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -98518,6 +98741,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -98801,6 +99025,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -99853,6 +100078,7 @@ backend:
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -100071,6 +100297,7 @@ backend:
       - tests/unit/routes/test_cycle371_market_op_status_only_details.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -101131,6 +101358,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle61_phase2A2_dataclass_completeness.py
@@ -101324,6 +101552,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -102304,6 +102533,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -102586,6 +102816,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -103565,6 +103796,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -103846,6 +104078,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -104824,6 +105057,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -105107,6 +105341,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -106084,6 +106319,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -106367,6 +106603,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -107347,6 +107584,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -107629,6 +107867,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -108628,6 +108867,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -108890,6 +109130,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -109868,6 +110109,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -110151,6 +110393,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -111148,6 +111391,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -111412,6 +111656,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -112391,6 +112636,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -112673,6 +112919,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -113650,6 +113897,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -113933,6 +114181,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -114911,6 +115160,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -115194,6 +115444,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -116173,6 +116424,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -116456,6 +116708,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -117434,6 +117687,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -117717,6 +117971,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -118695,6 +118950,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -118978,6 +119234,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -119960,6 +120217,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -120239,6 +120497,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -121251,6 +121510,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -121530,6 +121790,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -122515,6 +122776,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -122791,6 +123053,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -123769,6 +124032,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -124052,6 +124316,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -125036,6 +125301,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -125313,6 +125579,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -126294,6 +126561,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -126574,6 +126842,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -127555,6 +127824,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -127835,6 +128105,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -128818,6 +129089,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -129096,6 +129368,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -130080,6 +130353,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -130357,6 +130631,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -131374,6 +131649,7 @@ backend:
       - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle48_stale_tracker_state.py
@@ -131622,6 +131898,7 @@ backend:
       - tests/unit/routes/test_cycle371_market_op_status_only_details.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -132600,6 +132877,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -132882,6 +133160,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -133880,6 +134159,7 @@ backend:
       - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -134143,6 +134423,7 @@ backend:
       - tests/unit/routes/test_cycle371_market_op_status_only_details.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -135122,6 +135403,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -135404,6 +135686,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -136382,6 +136665,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -136665,6 +136949,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -137721,6 +138006,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -138003,6 +138289,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -138983,6 +139270,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -139264,6 +139552,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -140242,6 +140531,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -140525,6 +140815,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -141505,6 +141796,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -141786,6 +142078,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -142764,6 +143057,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -143047,6 +143341,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -144025,6 +144320,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -144308,6 +144604,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -145285,6 +145582,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -145568,6 +145866,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -146548,6 +146847,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -146830,6 +147130,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -147808,6 +148109,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -148091,6 +148393,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -149076,6 +149379,7 @@ backend:
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -149355,6 +149659,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -150400,6 +150705,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -150683,6 +150989,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -151661,6 +151968,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -151944,6 +152252,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -152926,6 +153235,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -153209,6 +153519,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -154188,6 +154499,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -154470,6 +154782,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -155517,6 +155830,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -155800,6 +156114,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -156779,6 +157094,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -157061,6 +157377,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -158110,6 +158427,7 @@ backend:
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -158390,6 +158708,7 @@ backend:
       - tests/unit/routes/test_cycle371_market_op_status_only_details.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -159550,6 +159869,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -159829,6 +160149,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_route_404.py
       - tests/unit/routes/test_cycle84_route_invalid_limit.py
@@ -160881,6 +161202,7 @@ backend:
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -161161,6 +161483,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -162172,6 +162495,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -162422,6 +162746,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -163415,6 +163740,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -163683,6 +164009,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -164693,6 +165020,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -164944,6 +165272,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -165953,6 +166282,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -166205,6 +166535,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -166952,6 +167283,74 @@ backend:
       - tests/unit/routes/test_log_reports_bundle_past_date_db_overlay.py
       - tests/unit/test_cycle243_auth_fixture.py
   src/routes/market_regime.py:
+    direct_tests: []
+    transitive_tests:
+      - tests/contract/test_backtest_mcp_health.py
+      - tests/contract/test_cycle171_snapshot_route_steps.py
+      - tests/contract/test_cycle223f2_manual_apply_param_ranges.py
+      - tests/contract/test_cycle243_auth_wiring.py
+      - tests/contract/test_cycle382_market_unit_params_route.py
+      - tests/contract/test_cycle384_buy_paused_params_route.py
+      - tests/contract/test_cycle397_balance_buy_date.py
+      - tests/contract/test_cycle399_shadow_mode_route.py
+      - tests/contract/test_cycle406_balance_exhausted_graceful.py
+      - tests/contract/test_cycle64_routes_price_filter.py
+      - tests/contract/test_quote_session_auto_disable.py
+      - tests/contract/test_routes_backtest.py
+      - tests/contract/test_routes_balance_perf.py
+      - tests/contract/test_routes_buy_block.py
+      - tests/contract/test_routes_history.py
+      - tests/contract/test_routes_kis_quote_accounts.py
+      - tests/contract/test_routes_log_reports.py
+      - tests/contract/test_routes_logs.py
+      - tests/contract/test_routes_logs_search.py
+      - tests/contract/test_routes_market_regime.py
+      - tests/contract/test_routes_realtime.py
+      - tests/contract/test_routes_realtime_ccnl_fields.py
+      - tests/contract/test_routes_realtime_session_details.py
+      - tests/contract/test_routes_recommendations.py
+      - tests/contract/test_routes_strategies.py
+      - tests/contract/test_routes_strategies_cash_ratio.py
+      - tests/contract/test_routes_strategy_funnel.py
+      - tests/contract/test_routes_subscriptions_pool.py
+      - tests/contract/test_routes_system_integrations.py
+      - tests/contract/test_routes_trading.py
+      - tests/contract/test_weight_unit_contract.py
+      - tests/integration/test_cycle100_count_eager_refresh_integration.py
+      - tests/integration/test_mcp_client_lifecycle.py
+      - tests/unit/main/test_cycle72_db_log_dedupe.py
+      - tests/unit/main/test_cycle72_insert_log_kst_persistence_ast.py
+      - tests/unit/main/test_cycleM3b_main_seam_pg.py
+      - tests/unit/middleware/test_cycle249_websocket_scope_guard.py
+      - tests/unit/routes/test_cycle110_emit_persistence.py
+      - tests/unit/routes/test_cycle110_exception_graceful.py
+      - tests/unit/routes/test_cycle110_import_fix.py
+      - tests/unit/routes/test_cycle110_lock_persistence.py
+      - tests/unit/routes/test_cycle110_response_format.py
+      - tests/unit/routes/test_cycle112_krx_open_api_routes.py
+      - tests/unit/routes/test_cycle126_basics_daily_routes.py
+      - tests/unit/routes/test_cycle128_list_query_params.py
+      - tests/unit/routes/test_cycle249_log_reports_bundle_external.py
+      - tests/unit/routes/test_cycle253_channel_probe.py
+      - tests/unit/routes/test_cycle282_market_state_route.py
+      - tests/unit/routes/test_cycle285_market_ops_route.py
+      - tests/unit/routes/test_cycle387_stock_chart_route.py
+      - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
+      - tests/unit/routes/test_cycle84_api_response_envelope.py
+      - tests/unit/routes/test_cycle84_route_404.py
+      - tests/unit/routes/test_cycle84_route_invalid_limit.py
+      - tests/unit/routes/test_cycle84_route_invalid_offset.py
+      - tests/unit/routes/test_cycle90_concurrent_lock.py
+      - tests/unit/routes/test_cycle90_fetch_top_500_call.py
+      - tests/unit/routes/test_cycle90_kst_persistence.py
+      - tests/unit/routes/test_cycle90_lock_release.py
+      - tests/unit/routes/test_cycle90_post_route_envelope.py
+      - tests/unit/routes/test_cycle90_response_timing.py
+      - tests/unit/routes/test_cycle90_route_405_other.py
+      - tests/unit/routes/test_cycle93_route_upsert_chain.py
+      - tests/unit/routes/test_log_reports_bundle_past_date_db_overlay.py
+      - tests/unit/test_cycle243_auth_fixture.py
+  src/routes/market_regime_label.py:
     direct_tests: []
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
@@ -168898,6 +169297,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -169180,6 +169580,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -170156,6 +170557,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -170439,6 +170841,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -171420,6 +171823,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -171703,6 +172107,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -172678,6 +173083,7 @@ backend:
       - tests/unit/engine/test_cycle409_reconcile_task.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle409_slippage_order_price.py
+      - tests/unit/engine/test_cycle410_market_regime_label.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -172961,6 +173367,7 @@ backend:
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
       - tests/unit/routes/test_cycle409_costs_schedule_route.py
+      - tests/unit/routes/test_cycle410_market_regime_label_route.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -173051,6 +173458,7 @@ frontend:
       - frontend/src/components/__tests__/KisQuoteAccountsCard.test.tsx
       - frontend/src/components/__tests__/KrxOpenApiCard.test.tsx
       - frontend/src/components/__tests__/MarketRegimeCard.test.tsx
+      - frontend/src/components/__tests__/MarketRegimeLabelCard.test.tsx
       - frontend/src/components/__tests__/PerformanceCard.test.tsx
       - frontend/src/components/__tests__/PortfolioRiskCard.accountGate.test.tsx
       - frontend/src/components/__tests__/PortfolioRiskCard.test.tsx
@@ -173161,6 +173569,13 @@ frontend:
     direct_tests: []
     transitive_tests:
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
+      - frontend/src/pages/__tests__/MarketState.test.tsx
+  frontend/src/api/market-regime-label.ts:
+    direct_tests: []
+    transitive_tests:
+      - frontend/src/__tests__/AppShell.test.tsx
+      - frontend/src/__tests__/ContentWidthSlider.test.tsx
+      - frontend/src/components/__tests__/MarketRegimeLabelCard.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/api/market-state.ts:
     direct_tests: []
@@ -173462,6 +173877,13 @@ frontend:
     direct_tests:
       - frontend/src/components/__tests__/MarketRegimeCard.test.tsx
       - frontend/src/components/__tests__/marketRegimeMocks.cycle315.test.tsx
+    transitive_tests:
+      - frontend/src/__tests__/AppShell.test.tsx
+      - frontend/src/__tests__/ContentWidthSlider.test.tsx
+      - frontend/src/pages/__tests__/MarketState.test.tsx
+  frontend/src/components/MarketRegimeLabelCard.tsx:
+    direct_tests:
+      - frontend/src/components/__tests__/MarketRegimeLabelCard.test.tsx
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
@@ -173808,6 +174230,7 @@ frontend:
       - frontend/src/components/__tests__/KrxOpenApiCard.test.tsx
       - frontend/src/components/__tests__/LlmEvaluationModal.test.tsx
       - frontend/src/components/__tests__/MarketRegimeCard.test.tsx
+      - frontend/src/components/__tests__/MarketRegimeLabelCard.test.tsx
       - frontend/src/components/__tests__/PerformanceCard.test.tsx
       - frontend/src/components/__tests__/PortfolioRiskCard.accountGate.test.tsx
       - frontend/src/components/__tests__/PortfolioRiskCard.test.tsx
@@ -173862,6 +174285,85 @@ frontend:
       - frontend/src/components/__tests__/StockChartModal.cycle388.test.tsx
       - frontend/src/components/__tests__/stockChartOpen.cycle387.test.tsx
     transitive_tests: []
+  frontend/src/test/fixtures/marketRegimeLabel.fixture.ts:
+    direct_tests:
+      - frontend/src/components/__tests__/MarketRegimeLabelCard.test.tsx
+    transitive_tests:
+      - frontend/src/__tests__/AppShell.test.tsx
+      - frontend/src/__tests__/ContentWidthSlider.test.tsx
+      - frontend/src/api/__tests__/balance.test.ts
+      - frontend/src/api/__tests__/cash_usage_ratio.test.ts
+      - frontend/src/api/__tests__/history.test.ts
+      - frontend/src/api/__tests__/log_reports.test.ts
+      - frontend/src/api/__tests__/performance.test.ts
+      - frontend/src/api/__tests__/recommendations.test.ts
+      - frontend/src/api/__tests__/stock-master.test.ts
+      - frontend/src/api/__tests__/trading.params.test.ts
+      - frontend/src/api/__tests__/trading.test.ts
+      - frontend/src/components/__tests__/BalanceTable.buyDate.cycle397.test.tsx
+      - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
+      - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.strategyLabel.cycle395.test.tsx
+      - frontend/src/components/__tests__/BalanceTable.test.tsx
+      - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
+      - frontend/src/components/__tests__/DailyReportTab.ext.test.tsx
+      - frontend/src/components/__tests__/DailyReportTab.format.test.tsx
+      - frontend/src/components/__tests__/DailyReportTab.holiday.test.tsx
+      - >-
+        frontend/src/components/__tests__/IntegrationToggleCard.auto_apply.test.tsx
+      - frontend/src/components/__tests__/IntegrationToggleCard.test.tsx
+      - >-
+        frontend/src/components/__tests__/KisAccountPoolCard.stale_integration.test.tsx
+      - frontend/src/components/__tests__/KisAccountPoolCard.test.tsx
+      - frontend/src/components/__tests__/KisQuoteAccountsCard.test.tsx
+      - frontend/src/components/__tests__/KrxOpenApiCard.test.tsx
+      - frontend/src/components/__tests__/LlmEvaluationModal.test.tsx
+      - frontend/src/components/__tests__/MarketRegimeCard.test.tsx
+      - frontend/src/components/__tests__/PerformanceCard.test.tsx
+      - frontend/src/components/__tests__/PortfolioRiskCard.accountGate.test.tsx
+      - frontend/src/components/__tests__/PortfolioRiskCard.test.tsx
+      - frontend/src/components/__tests__/PriceFilterCard.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.activeBoard.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.bfb_vcp.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
+      - frontend/src/components/__tests__/StockChartModal.cycle387.test.tsx
+      - frontend/src/components/__tests__/StockChartModal.cycle388.test.tsx
+      - frontend/src/components/__tests__/StrategyParamsEditor.test.tsx
+      - frontend/src/components/__tests__/SystemLogsTab.test.tsx
+      - frontend/src/components/__tests__/TradeAmountFilterCard.test.tsx
+      - frontend/src/components/__tests__/TradeHistoryGrid.test.tsx
+      - frontend/src/components/__tests__/TradePnLGrid.test.tsx
+      - frontend/src/components/__tests__/handlers.honesty.cycle276.test.ts
+      - frontend/src/components/__tests__/stockChartOpen.cycle387.test.tsx
+      - frontend/src/contexts/__tests__/TradingStatusContext.test.tsx
+      - frontend/src/macro/__tests__/MacroPage.test.tsx
+      - frontend/src/pages/__tests__/Logs.test.tsx
+      - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
+      - frontend/src/pages/__tests__/MarketState.test.tsx
+      - frontend/src/pages/__tests__/RealtimeHealth.cycle186.test.tsx
+      - frontend/src/pages/__tests__/RealtimeHealth.cycle370.test.tsx
+      - frontend/src/pages/__tests__/RealtimeHealth.test.tsx
+      - frontend/src/pages/__tests__/Recommendations.backtest.test.tsx
+      - frontend/src/pages/__tests__/Recommendations.cardOrder.test.tsx
+      - frontend/src/pages/__tests__/Recommendations.format.test.tsx
+      - frontend/src/pages/__tests__/Recommendations.test.tsx
+      - frontend/src/pages/__tests__/Recommendations.weightReasoning.test.tsx
+      - >-
+        frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
+      - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
+      - frontend/src/pages/__tests__/StockMaster.cycle128.test.tsx
+      - frontend/src/pages/__tests__/StockMaster.cycle166.test.tsx
+      - frontend/src/pages/__tests__/StockMaster.cycle403.test.tsx
+      - frontend/src/pages/__tests__/StockMaster.dailyTab.cycle266.test.tsx
+      - frontend/src/pages/__tests__/StockMaster.test.tsx
+      - frontend/src/pages/__tests__/Strategies.test.tsx
+      - frontend/src/pages/__tests__/StrategiesParams.test.tsx
+      - frontend/src/pages/__tests__/StrategiesTeRr.test.tsx
+      - frontend/src/pages/__tests__/StrategyFunnel.bottleneckTrend.test.tsx
   frontend/src/test/fixtures/marketState.fixture.ts:
     direct_tests:
       - frontend/src/pages/__tests__/MarketState.test.tsx
@@ -173898,6 +174400,7 @@ frontend:
       - frontend/src/components/__tests__/KrxOpenApiCard.test.tsx
       - frontend/src/components/__tests__/LlmEvaluationModal.test.tsx
       - frontend/src/components/__tests__/MarketRegimeCard.test.tsx
+      - frontend/src/components/__tests__/MarketRegimeLabelCard.test.tsx
       - frontend/src/components/__tests__/PerformanceCard.test.tsx
       - frontend/src/components/__tests__/PortfolioRiskCard.accountGate.test.tsx
       - frontend/src/components/__tests__/PortfolioRiskCard.test.tsx
@@ -173978,6 +174481,7 @@ frontend:
       - frontend/src/components/__tests__/KrxOpenApiCard.test.tsx
       - frontend/src/components/__tests__/LlmEvaluationModal.test.tsx
       - frontend/src/components/__tests__/MarketRegimeCard.test.tsx
+      - frontend/src/components/__tests__/MarketRegimeLabelCard.test.tsx
       - frontend/src/components/__tests__/PerformanceCard.test.tsx
       - frontend/src/components/__tests__/PortfolioRiskCard.accountGate.test.tsx
       - frontend/src/components/__tests__/PortfolioRiskCard.test.tsx
@@ -174057,6 +174561,7 @@ frontend:
       - frontend/src/components/__tests__/KrxOpenApiCard.test.tsx
       - frontend/src/components/__tests__/LlmEvaluationModal.test.tsx
       - frontend/src/components/__tests__/MarketRegimeCard.test.tsx
+      - frontend/src/components/__tests__/MarketRegimeLabelCard.test.tsx
       - frontend/src/components/__tests__/PerformanceCard.test.tsx
       - frontend/src/components/__tests__/PortfolioRiskCard.accountGate.test.tsx
       - frontend/src/components/__tests__/PortfolioRiskCard.test.tsx
@@ -174132,6 +174637,7 @@ frontend:
       - frontend/src/components/__tests__/KrxOpenApiCard.test.tsx
       - frontend/src/components/__tests__/LlmEvaluationModal.test.tsx
       - frontend/src/components/__tests__/MarketRegimeCard.test.tsx
+      - frontend/src/components/__tests__/MarketRegimeLabelCard.test.tsx
       - frontend/src/components/__tests__/PerformanceCard.test.tsx
       - frontend/src/components/__tests__/PortfolioRiskCard.accountGate.test.tsx
       - frontend/src/components/__tests__/PortfolioRiskCard.test.tsx
@@ -174199,6 +174705,7 @@ frontend:
       - frontend/src/components/__tests__/LazyStockChartModal.cycle387.test.tsx
       - frontend/src/components/__tests__/LlmEvaluationModal.test.tsx
       - frontend/src/components/__tests__/MarketRegimeCard.test.tsx
+      - frontend/src/components/__tests__/MarketRegimeLabelCard.test.tsx
       - frontend/src/components/__tests__/PerformanceCard.test.tsx
       - frontend/src/components/__tests__/PortfolioRiskCard.accountGate.test.tsx
       - frontend/src/components/__tests__/PortfolioRiskCard.test.tsx
@@ -174261,6 +174768,7 @@ frontend:
       - frontend/src/components/__tests__/KrxOpenApiCard.test.tsx
       - frontend/src/components/__tests__/LlmEvaluationModal.test.tsx
       - frontend/src/components/__tests__/MarketRegimeCard.test.tsx
+      - frontend/src/components/__tests__/MarketRegimeLabelCard.test.tsx
       - frontend/src/components/__tests__/PerformanceCard.test.tsx
       - frontend/src/components/__tests__/PortfolioRiskCard.accountGate.test.tsx
       - frontend/src/components/__tests__/PortfolioRiskCard.test.tsx
@@ -174366,6 +174874,7 @@ frontend:
       - frontend/src/components/__tests__/KisQuoteAccountsCard.test.tsx
       - frontend/src/components/__tests__/KrxOpenApiCard.test.tsx
       - frontend/src/components/__tests__/MarketRegimeCard.test.tsx
+      - frontend/src/components/__tests__/MarketRegimeLabelCard.test.tsx
       - frontend/src/components/__tests__/PerformanceCard.test.tsx
       - frontend/src/components/__tests__/PortfolioRiskCard.accountGate.test.tsx
       - frontend/src/components/__tests__/PortfolioRiskCard.test.tsx
@@ -174466,6 +174975,7 @@ frontend:
       - frontend/src/components/__tests__/KisQuoteAccountsCard.test.tsx
       - frontend/src/components/__tests__/KrxOpenApiCard.test.tsx
       - frontend/src/components/__tests__/MarketRegimeCard.test.tsx
+      - frontend/src/components/__tests__/MarketRegimeLabelCard.test.tsx
       - frontend/src/components/__tests__/PerformanceCard.test.tsx
       - frontend/src/components/__tests__/PortfolioRiskCard.accountGate.test.tsx
       - frontend/src/components/__tests__/PortfolioRiskCard.test.tsx
@@ -174537,6 +175047,85 @@ frontend:
     transitive_tests:
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
+  frontend/src/types/market-regime-label.ts:
+    direct_tests: []
+    transitive_tests:
+      - frontend/src/__tests__/AppShell.test.tsx
+      - frontend/src/__tests__/ContentWidthSlider.test.tsx
+      - frontend/src/api/__tests__/balance.test.ts
+      - frontend/src/api/__tests__/cash_usage_ratio.test.ts
+      - frontend/src/api/__tests__/history.test.ts
+      - frontend/src/api/__tests__/log_reports.test.ts
+      - frontend/src/api/__tests__/performance.test.ts
+      - frontend/src/api/__tests__/recommendations.test.ts
+      - frontend/src/api/__tests__/stock-master.test.ts
+      - frontend/src/api/__tests__/trading.params.test.ts
+      - frontend/src/api/__tests__/trading.test.ts
+      - frontend/src/components/__tests__/BalanceTable.buyDate.cycle397.test.tsx
+      - frontend/src/components/__tests__/BalanceTable.exitLines.test.tsx
+      - frontend/src/components/__tests__/BalanceTable.sector.test.tsx
+      - >-
+        frontend/src/components/__tests__/BalanceTable.strategyLabel.cycle395.test.tsx
+      - frontend/src/components/__tests__/BalanceTable.test.tsx
+      - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
+      - frontend/src/components/__tests__/DailyReportTab.ext.test.tsx
+      - frontend/src/components/__tests__/DailyReportTab.format.test.tsx
+      - frontend/src/components/__tests__/DailyReportTab.holiday.test.tsx
+      - >-
+        frontend/src/components/__tests__/IntegrationToggleCard.auto_apply.test.tsx
+      - frontend/src/components/__tests__/IntegrationToggleCard.test.tsx
+      - >-
+        frontend/src/components/__tests__/KisAccountPoolCard.stale_integration.test.tsx
+      - frontend/src/components/__tests__/KisAccountPoolCard.test.tsx
+      - frontend/src/components/__tests__/KisQuoteAccountsCard.test.tsx
+      - frontend/src/components/__tests__/KrxOpenApiCard.test.tsx
+      - frontend/src/components/__tests__/LlmEvaluationModal.test.tsx
+      - frontend/src/components/__tests__/MarketRegimeCard.test.tsx
+      - frontend/src/components/__tests__/MarketRegimeLabelCard.test.tsx
+      - frontend/src/components/__tests__/PerformanceCard.test.tsx
+      - frontend/src/components/__tests__/PortfolioRiskCard.accountGate.test.tsx
+      - frontend/src/components/__tests__/PortfolioRiskCard.test.tsx
+      - frontend/src/components/__tests__/PriceFilterCard.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.activeBoard.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.bfb_vcp.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
+      - frontend/src/components/__tests__/StockChartModal.cycle387.test.tsx
+      - frontend/src/components/__tests__/StockChartModal.cycle388.test.tsx
+      - frontend/src/components/__tests__/StrategyParamsEditor.test.tsx
+      - frontend/src/components/__tests__/SystemLogsTab.test.tsx
+      - frontend/src/components/__tests__/TradeAmountFilterCard.test.tsx
+      - frontend/src/components/__tests__/TradeHistoryGrid.test.tsx
+      - frontend/src/components/__tests__/TradePnLGrid.test.tsx
+      - frontend/src/components/__tests__/handlers.honesty.cycle276.test.ts
+      - frontend/src/components/__tests__/stockChartOpen.cycle387.test.tsx
+      - frontend/src/contexts/__tests__/TradingStatusContext.test.tsx
+      - frontend/src/macro/__tests__/MacroPage.test.tsx
+      - frontend/src/pages/__tests__/Logs.test.tsx
+      - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
+      - frontend/src/pages/__tests__/MarketState.test.tsx
+      - frontend/src/pages/__tests__/RealtimeHealth.cycle186.test.tsx
+      - frontend/src/pages/__tests__/RealtimeHealth.cycle370.test.tsx
+      - frontend/src/pages/__tests__/RealtimeHealth.test.tsx
+      - frontend/src/pages/__tests__/Recommendations.backtest.test.tsx
+      - frontend/src/pages/__tests__/Recommendations.cardOrder.test.tsx
+      - frontend/src/pages/__tests__/Recommendations.format.test.tsx
+      - frontend/src/pages/__tests__/Recommendations.test.tsx
+      - frontend/src/pages/__tests__/Recommendations.weightReasoning.test.tsx
+      - >-
+        frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
+      - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
+      - frontend/src/pages/__tests__/StockMaster.cycle128.test.tsx
+      - frontend/src/pages/__tests__/StockMaster.cycle166.test.tsx
+      - frontend/src/pages/__tests__/StockMaster.cycle403.test.tsx
+      - frontend/src/pages/__tests__/StockMaster.dailyTab.cycle266.test.tsx
+      - frontend/src/pages/__tests__/StockMaster.test.tsx
+      - frontend/src/pages/__tests__/Strategies.test.tsx
+      - frontend/src/pages/__tests__/StrategiesParams.test.tsx
+      - frontend/src/pages/__tests__/StrategiesTeRr.test.tsx
+      - frontend/src/pages/__tests__/StrategyFunnel.bottleneckTrend.test.tsx
   frontend/src/types/market-state.ts:
     direct_tests: []
     transitive_tests:
@@ -174699,6 +175288,7 @@ frontend:
       - frontend/src/components/__tests__/KrxOpenApiCard.test.tsx
       - frontend/src/components/__tests__/LlmEvaluationModal.test.tsx
       - frontend/src/components/__tests__/MarketRegimeCard.test.tsx
+      - frontend/src/components/__tests__/MarketRegimeLabelCard.test.tsx
       - frontend/src/components/__tests__/PerformanceCard.test.tsx
       - frontend/src/components/__tests__/PortfolioRiskCard.accountGate.test.tsx
       - frontend/src/components/__tests__/PortfolioRiskCard.test.tsx
@@ -174794,6 +175384,13 @@ frontend:
       - frontend/src/components/__tests__/marketRegimeMocks.cycle315.test.tsx
       - frontend/src/macro/__tests__/MacroPage.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
+  frontend/src/utils/marketRegimeLabel.ts:
+    direct_tests:
+      - frontend/src/components/__tests__/MarketRegimeLabelCard.test.tsx
+    transitive_tests:
+      - frontend/src/__tests__/AppShell.test.tsx
+      - frontend/src/__tests__/ContentWidthSlider.test.tsx
+      - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/utils/paramLabels.ts:
     direct_tests: []
     transitive_tests:
@@ -174887,6 +175484,7 @@ frontend:
       - frontend/src/components/__tests__/BalanceTable.test.tsx
       - frontend/src/components/__tests__/BreakoutCandidateMonitor.test.tsx
       - frontend/src/components/__tests__/CashUsageRatioCard.test.tsx
+      - frontend/src/components/__tests__/MarketRegimeLabelCard.test.tsx
       - frontend/src/components/__tests__/PerformanceCard.test.tsx
       - frontend/src/components/__tests__/PortfolioRiskCard.accountGate.test.tsx
       - frontend/src/components/__tests__/PortfolioRiskCard.test.tsx
@@ -174915,12 +175513,12 @@ frontend:
       - frontend/src/pages/__tests__/StrategiesParams.test.tsx
       - frontend/src/pages/__tests__/StrategiesTeRr.test.tsx
       - frontend/src/pages/__tests__/StrategyFunnel.bottleneckTrend.test.tsx
-generated_at: '2026-10-05T04:46:05.823Z'
+generated_at: '2026-10-05T10:12:00.287Z'
 stats:
-  backend_modules: 179
-  backend_tests: 1242
-  frontend_modules: 129
-  frontend_tests: 109
+  backend_modules: 181
+  backend_tests: 1244
+  frontend_modules: 134
+  frontend_tests: 110
   unmapped_modules:
     - frontend/src/api/backtest.ts
     - frontend/src/api/stock-chart.ts

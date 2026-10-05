@@ -470,9 +470,13 @@ def test_a8_no_new_leaf_in_src_engine() -> None:
     ⚠️ cycle409(사용자 결정 10-04 Q1·Q4)가 leaf 1개 `trade_cost_reconcile_task.py` 를 신설해
     80 → **81** 이 됐다 — 매일 자동 대사 훅(시각 = `system_config.trade_cost_reconcile_time`,
     키 없음 = 실행 안 함). 8영역·scheduler import 0, 매매 행위 변경 없음.
+
+    ⚠️ cycle410(사용자 결정 10-05 — 6장세 라벨 화면 표시)이 leaf 1개 `market_regime_label.py`
+    를 신설해 81 → **82** 가 됐다 — 표준 라이브러리만 import, 소비처 = 라우트
+    `/api/market-regime-label` 하나(관찰 전용, 매매 행위 변경 없음).
     """
     got = len(list((_ROOT / "src" / "engine").glob("*.py")))
-    assert got == 81, f"`src/engine/*.py` 파일 수 {got} (cycle409 기준선 81)"
+    assert got == 82, f"`src/engine/*.py` 파일 수 {got} (cycle410 기준선 82)"
 
 
 # ===========================================================================

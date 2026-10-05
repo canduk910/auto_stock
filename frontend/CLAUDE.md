@@ -451,6 +451,15 @@ Dashboard 환경 배너 직하, 전략 탭 위(`<ControlPanel />` 직후).
 - API `getMarketRegimeCurrent()`(queryKey `['marketRegime']`, staleTime 60s) + `setAutoRegimeAdjust(boolean)`. `getMarketRegimeHistory(days)` 는 호출자가 없다
 - `enabled=false`(DKSTOCK_REGIME_ENABLED=false) → "비활성" gray 배지 + 메트릭 "—"
 
+## MarketRegimeLabelCard
+
+Dashboard `MarketRegimeCard` 바로 아래. 장세와 시장 유닛을 한 카드에 나란히 둔다(cycle410). `fetchMarketRegimeLabel()` → `GET /api/market-regime-label`(래퍼째 받는다 — `success=false` 면 서버 사유를 그대로 보인다 · 네트워크 오류 = 「장세 라벨을 불러오지 못했습니다.」), queryKey `['marketRegimeLabel']`.
+
+- 왼쪽 「장세」 = 「관찰용 — 매매에 쓰지 않습니다」. 배지 `regime-label-badge` = 한글 6종(`utils/marketRegimeLabel.ts::REGIME_LABEL_KO`) · 근거 「60일선 20일 기울기 ±x.x%」·「20일 변동성 xx%」 · `regime-label-since`(`since_truncated` 면 「… 이전부터」) · `regime-label-basis`
+- 오른쪽 「시장 유닛」 = 「실제 매수 수량에 쓰임 — enforce 인 전략만」. `regime-unit-m`(×1/×0.75/×0.5/×0, 못 매기면 —) · 근거 「종가 60일선 위/아래」·「60일선 상승/하락」 · `regime-unit-basis` · `regime-unit-source`(「운영 DB 종가로 다시 계산한 값」 — 엔진 메모리 값이 아니다) · 전략별 모드 `regime-unit-mode-{sid}`(적용/기록만/꺼짐/모름) · 적용 0개면 「지금 적용 중인 전략 없음」
+- 띠 두 줄(최근 60거래일) — `regime-label-band`(장세 색) · `regime-unit-band`(m 값). 칸 title = 날짜 + 값. 날짜는 서버 `YYYY-MM-DD` 문자열을 그대로 쓴다(`Date` 변환 없음)
+- 정의 = `src/engine/CLAUDE.md` 모듈 맵 `market_regime_label.py`·`market_unit.py` · 회귀 = `components/__tests__/MarketRegimeLabelCard.test.tsx`
+
 ## RealtimeHealth (`/realtime-health`)
 
 `fetchRealtimeHealth()`(`frontend/src/api/realtime-health.ts`)가 `/api/logs/search` 로 4 prefix 를 grep 해 카드 4개 — `[dispatch_drop_summary]` · `[callback_exception]` · `[stale_force_retry]` · `[ws_auto_restart]`. 타입 `RealtimeHealthSnapshot`(`types/realtime-health.ts`).

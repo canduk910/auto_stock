@@ -268,7 +268,8 @@ _BASE_SHA = {
 #: (`buy_date` 필드) 내용도 바뀌었으나 전부 이미 이 digest 안에 있던 파일이다(신규 파일
 #: 1개뿐). 읽기 전용 조회 조합 — 8영역·scheduler.py·매매 행위 변경 없음. 직전 값 = 166.
 # cycle409(사용자 결정 10-04 Q1·Q4) — 신규 leaf `engine/trade_cost_reconcile_task.py` 로 175 → 176.
-_SRC_TREE_FILES = 176  # 직전 = 트랙 C — 실비용 사후 대사: 신규 4파일(`api/trade_profit.py`·`db/trade_cost.py`·`engine/trade_cost.py`·`routes/costs.py`) 로 171 → 175. 직전 = cycle404 — 계좌 묶음 배정 기록(단계 0): 신규 leaf
+# cycle410(사용자 결정 10-05 — 6장세 라벨 화면 표시) — 신규 `engine/market_regime_label.py`·`routes/market_regime_label.py` 로 176 → 178.
+_SRC_TREE_FILES = 178  # 직전 = 트랙 C — 실비용 사후 대사: 신규 4파일(`api/trade_profit.py`·`db/trade_cost.py`·`engine/trade_cost.py`·`routes/costs.py`) 로 171 → 175. 직전 = cycle404 — 계좌 묶음 배정 기록(단계 0): 신규 leaf
 # `src/engine/account_cluster.py` 하나로 170 → 171. `src/db/system_config.py` 에
 # `get_account_cluster_mode_raw()` 1함수 추가(신규 파일 아님). 직전 값 = 170(cycle403).
 #: ⚠️ 값은 **cycle285 적대 검증 반영** 기준선이다. 그 직전(초판 cycle285 배포)
@@ -762,8 +763,13 @@ _SRC_TREE_FILES = 176  # 직전 = 트랙 C — 실비용 사후 대사: 신규 4
 # `src/models/trade.py`(`TradeRecord.order_price`) + `src/routes/trading.py`(수동 매도 주문가).
 # 파일 수 175 → 176. 매매 행위 변경 없음(기록 칸 하나).
 # 직전 값(트랙 C) = `26ac7bcc9245cd998fab4fd17e64531a453d9ce8d58d1ade4df7fd8413792684`.
+# 🔁 cycle410 재핀 — 사용자 결정 10-05(6장세 라벨 화면 표시, 관찰 전용): 신규
+# `src/engine/market_regime_label.py`(leaf) · `src/routes/market_regime_label.py` + `src/main.py`
+# 등록 2줄(라우트는 시장 유닛을 운영 판정 `market_unit.classify` 로 함께 낸다 — 읽기 전용).
+# 파일 수 176 → 178. 8영역·scheduler.py 무접촉, 매매 행위 변경 없음.
+# 직전 값(cycle409) = `0011ffacd49077c7360afb5e9fe518115b68733de73d553d36df0f2f95ed582e`.
 _SRC_TREE_DIGEST = (
-    "0011ffacd49077c7360afb5e9fe518115b68733de73d553d36df0f2f95ed582e"
+    "a8ec8f3026d4f80aee4f168160b23b1ad8899d4326d3d6cca82065c054821642"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
@@ -799,7 +805,8 @@ _PINNED_DIR_FILE_COUNTS = {
     # cycle404 — 신규 leaf `account_cluster.py` 로 89 → 90.
     # 트랙 C — 신규 leaf `trade_cost.py`(실비용 사후 대사) 로 90 → 91.
     # cycle409(사용자 결정 10-04 Q1·Q4) — 신규 leaf `trade_cost_reconcile_task.py`(매일 자동 대사 훅) 로 91 → 92.
-    "src/engine": 92,
+    # cycle410(사용자 결정 10-05) — 신규 leaf `market_regime_label.py`(6장세 라벨, 관찰 전용) 로 92 → 93.
+    "src/engine": 93,
 }
 
 #: `scheduler.py` 정확 라인 수 + cycle257 영구 상한.
