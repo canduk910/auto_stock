@@ -1195,6 +1195,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -2463,6 +2464,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -3736,6 +3738,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -5004,6 +5007,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -6273,6 +6277,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -7543,6 +7548,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -8813,6 +8819,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -10085,6 +10092,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -11354,6 +11362,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -12692,6 +12701,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -13962,6 +13972,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -15250,6 +15261,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -16521,6 +16533,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -17795,6 +17808,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -19059,6 +19073,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -20330,6 +20345,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -21600,6 +21616,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -22870,6 +22887,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -24140,6 +24158,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -25410,6 +25429,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -26682,6 +26702,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -27950,6 +27971,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -29220,6 +29242,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -30490,6 +30513,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -31760,6 +31784,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -33031,6 +33056,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -34304,6 +34330,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -35570,6 +35597,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -36840,6 +36868,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -38112,6 +38141,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -39380,6 +39410,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -40654,6 +40685,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -41925,6 +41957,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -43195,6 +43228,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -44466,6 +44500,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -45734,6 +45769,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -47005,6 +47041,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -48275,6 +48312,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -49546,6 +49584,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -50815,6 +50854,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -52085,6 +52125,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -53355,6 +53396,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -54625,6 +54667,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -55895,6 +55938,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -57164,6 +57208,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -58435,6 +58480,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -59705,6 +59751,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -60975,6 +61022,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -62245,6 +62293,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -63515,6 +63564,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -64785,6 +64835,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -66055,6 +66106,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -67325,6 +67377,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -68595,6 +68648,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -69866,6 +69920,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -71135,6 +71190,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -72476,6 +72532,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -73743,6 +73800,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -75013,6 +75071,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -76285,6 +76344,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -77555,6 +77615,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -78892,6 +78953,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -80162,6 +80224,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -81432,6 +81495,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -82702,6 +82766,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -83972,6 +84037,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -85242,6 +85308,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -86512,6 +86579,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -87781,6 +87849,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -89146,6 +89215,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -90495,6 +90565,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -91903,6 +91974,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -93173,6 +93245,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -94444,6 +94517,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -95713,6 +95787,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -96983,6 +97058,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -98256,6 +98332,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -99522,6 +99599,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -100809,6 +100887,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -102066,6 +102145,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -103334,6 +103414,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -104603,6 +104684,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -105873,6 +105955,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -107142,6 +107225,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -108413,6 +108497,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -109683,6 +109768,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -110953,6 +111039,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -112223,6 +112310,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -113493,6 +113581,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -114762,6 +114851,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -116032,6 +116122,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -117303,6 +117394,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -118573,6 +118665,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -119843,6 +119936,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -121113,6 +121207,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -122415,6 +122510,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -123685,6 +123781,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -124953,6 +125050,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -126226,6 +126324,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -127495,6 +127594,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -128765,6 +128865,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -130035,6 +130136,7 @@ backend:
       - tests/unit/replay/test_audit_kojiro.py
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -131305,6 +131407,7 @@ backend:
       - tests/unit/replay/test_audit_kojiro.py
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -132578,6 +132681,7 @@ backend:
       - tests/unit/replay/test_audit_kojiro.py
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -133846,6 +133950,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -135117,6 +135222,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -136386,6 +136492,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -137656,6 +137763,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -139004,6 +139112,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -140275,6 +140384,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -141543,6 +141653,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -142814,6 +142925,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -144083,6 +144195,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -145353,6 +145466,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -146622,6 +146736,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -147893,6 +148008,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -149163,6 +149279,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -150436,6 +150553,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -151773,6 +151891,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -153043,6 +153162,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -154317,6 +154437,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -155587,6 +155708,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -156926,6 +157048,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -158197,6 +158320,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -159535,6 +159659,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -160982,6 +161107,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -162323,6 +162449,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -163593,6 +163720,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -164863,6 +164991,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -166134,6 +166263,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -167404,6 +167534,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -170455,6 +170586,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -171723,6 +171855,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -172996,6 +173129,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -174263,6 +174397,7 @@ backend:
       - tests/unit/replay/test_audit_live_vbmom.py
       - tests/unit/replay/test_audit_vb.py
       - tests/unit/replay/test_audit_vcp.py
+      - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -176458,10 +176593,10 @@ frontend:
       - frontend/src/pages/__tests__/StrategiesParams.test.tsx
       - frontend/src/pages/__tests__/StrategiesTeRr.test.tsx
       - frontend/src/pages/__tests__/StrategyFunnel.bottleneckTrend.test.tsx
-generated_at: '2026-10-05T10:29:28.518Z'
+generated_at: '2026-10-05T12:14:52.625Z'
 stats:
   backend_modules: 181
-  backend_tests: 1251
+  backend_tests: 1252
   frontend_modules: 134
   frontend_tests: 110
   unmapped_modules:
