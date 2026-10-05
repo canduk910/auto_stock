@@ -1,0 +1,2125 @@
+{
+ "first_label": "1995-04-14",
+ "windows": {
+  "30년": {
+   "n": 7426,
+   "BA_dir": 0.44328923607272935,
+   "BA_vol": 0.8346119004090868,
+   "S": 0.6389505682409081,
+   "acc6": 0.3965703483661896,
+   "fwd_up": 0.023289731948457328,
+   "fwd_flat": 0.0054152513269024516,
+   "fwd_dn": 0.008188631331201223,
+   "fwd_spread": 0.015101100617256105,
+   "fwd_vol_ratio": 2.146896702899431,
+   "sw_yr": 5.76892001077296,
+   "short_share": 0.03529411764705882,
+   "n_spells": 170,
+   "n_up": 2374,
+   "n_flat": 3635,
+   "n_dn": 1417,
+   "n_H": 3885,
+   "n_L": 3541,
+   "sw_per_cal_year": 5.71491026231017,
+   "days": {
+    "1 안정상승": 865,
+    "2 변동상승": 1509,
+    "3 안정횡보": 2492,
+    "4 변동횡보": 1143,
+    "5 안정하락": 184,
+    "6 변동하락": 1233
+   },
+   "spell_len_median": 27.0,
+   "spells_by_cell": {
+    "1 안정상승": 24,
+    "2 변동상승": 26,
+    "3 안정횡보": 37,
+    "4 변동횡보": 52,
+    "5 안정하락": 9,
+    "6 변동하락": 22
+   },
+   "fwd20_by_cell": {
+    "1 안정상승": 0.017488809794418126,
+    "2 변동상승": 0.02661497890885753,
+    "3 안정횡보": 0.0031573400847641213,
+    "4 변동횡보": 0.010338011445370271,
+    "5 안정하락": -0.0007006452029711831,
+    "6 변동하락": 0.009535935188110384
+   },
+   "fwd_vol_by_cell": {
+    "1 안정상승": 0.16893621783603352,
+    "2 변동상승": 0.3288833596257175,
+    "3 안정횡보": 0.1404669354385556,
+    "4 변동횡보": 0.26173456836390047,
+    "5 안정하락": 0.17413573618534872,
+    "6 변동하락": 0.3646267987022138
+   },
+   "fwd20_all": 0.0116676075091059,
+   "order_up_gt_dn": true
+  },
+  "T": {
+   "n": 4050,
+   "BA_dir": 0.39725925918423877,
+   "BA_vol": 0.809360178319969,
+   "S": 0.6033097187521039,
+   "acc6": 0.34,
+   "fwd_up": 0.016961779572352304,
+   "fwd_flat": 0.01026872889672966,
+   "fwd_dn": 0.0040242118037870835,
+   "fwd_spread": 0.01293756776856522,
+   "fwd_vol_ratio": 1.9190798523068884,
+   "sw_yr": 6.5955555555555545,
+   "short_share": 0.04716981132075472,
+   "n_spells": 106,
+   "n_up": 1653,
+   "n_flat": 1362,
+   "n_dn": 1035,
+   "n_H": 2988,
+   "n_L": 1062,
+   "sw_per_cal_year": 6.630673060455558,
+   "days": {
+    "1 안정상승": 500,
+    "2 변동상승": 1153,
+    "3 안정횡보": 545,
+    "4 변동횡보": 817,
+    "5 안정하락": 17,
+    "6 변동하락": 1018
+   },
+   "spell_len_median": 27.0,
+   "spells_by_cell": {
+    "1 안정상승": 15,
+    "2 변동상승": 20,
+    "3 안정횡보": 18,
+    "4 변동횡보": 36,
+    "5 안정하락": 2,
+    "6 변동하락": 15
+   },
+   "fwd20_by_cell": {
+    "1 안정상승": 0.005716779331861395,
+    "2 변동상승": 0.021838189043510547,
+    "3 안정횡보": 0.010797704693792215,
+    "4 변동횡보": 0.00991586254495598,
+    "5 안정하락": -0.026017531628575105,
+    "6 변동하락": 0.004525891212775451
+   },
+   "fwd_vol_by_cell": {
+    "1 안정상승": 0.1761441423128039,
+    "2 변동상승": 0.2971601965321802,
+    "3 안정횡보": 0.16456652740811198,
+    "4 변동횡보": 0.287610886903161,
+    "5 안정하락": 0.2215334956969234,
+    "6 변동하락": 0.39542308660866327
+   },
+   "fwd20_all": 0.01140466410058365,
+   "order_up_gt_dn": true
+  },
+  "V": {
+   "n": 1967,
+   "BA_dir": 0.38911099217123085,
+   "BA_vol": 0.7368788432431095,
+   "S": 0.5629949177071701,
+   "acc6": 0.5338078291814946,
+   "fwd_up": 0.015495093009803139,
+   "fwd_flat": 0.0016294900958602828,
+   "fwd_dn": 0.057845873577882026,
+   "fwd_spread": -0.04235078056807889,
+   "fwd_vol_ratio": 1.8403537939140073,
+   "sw_yr": 3.715302491103203,
+   "short_share": 0.034482758620689655,
+   "n_spells": 29,
+   "n_up": 323,
+   "n_flat": 1525,
+   "n_dn": 119,
+   "n_H": 260,
+   "n_L": 1707,
+   "sw_per_cal_year": 3.6287255909558067,
+   "days": {
+    "1 안정상승": 225,
+    "2 변동상승": 98,
+    "3 안정횡보": 1431,
+    "4 변동횡보": 94,
+    "5 안정하락": 51,
+    "6 변동하락": 68
+   },
+   "spell_len_median": 25.0,
+   "spells_by_cell": {
+    "1 안정상승": 6,
+    "2 변동상승": 4,
+    "3 안정횡보": 8,
+    "4 변동횡보": 6,
+    "5 안정하락": 3,
+    "6 변동하락": 2
+   },
+   "fwd20_by_cell": {
+    "1 안정상승": 0.02905897865317024,
+    "2 변동상승": -0.01564648117139683,
+    "3 안정횡보": 0.0006895188934300229,
+    "4 변동횡보": 0.015939051698814558,
+    "5 안정하락": 0.047702717626836366,
+    "6 변동하락": 0.06545324054116625
+   },
+   "fwd_vol_by_cell": {
+    "1 안정상승": 0.15359029021238682,
+    "2 변동상승": 0.24925264780794326,
+    "3 안정횡보": 0.11956095160413675,
+    "4 변동횡보": 0.20070633405833077,
+    "5 안정하락": 0.1414395935212004,
+    "6 변동하락": 0.24080605301142577
+   },
+   "fwd20_all": 0.007307344379319423,
+   "order_up_gt_dn": false
+  },
+  "H": {
+   "n": 1409,
+   "BA_dir": 0.44485363170130415,
+   "BA_vol": 0.7216841481117995,
+   "S": 0.5832688899065518,
+   "acc6": 0.367170626349892,
+   "fwd_up": 0.05589720344314802,
+   "fwd_flat": 0.004296066069194764,
+   "fwd_dn": 0.001635198476769337,
+   "fwd_spread": 0.05426200496637868,
+   "fwd_vol_ratio": 1.8509656557154295,
+   "sw_yr": 6.259758694109298,
+   "short_share": 0.0,
+   "n_spells": 35,
+   "n_up": 398,
+   "n_flat": 748,
+   "n_dn": 263,
+   "n_H": 637,
+   "n_L": 772,
+   "sw_per_cal_year": 6.09620886981402,
+   "days": {
+    "1 안정상승": 140,
+    "2 변동상승": 258,
+    "3 안정횡보": 516,
+    "4 변동횡보": 232,
+    "5 안정하락": 116,
+    "6 변동하락": 147
+   },
+   "spell_len_median": 29.0,
+   "spells_by_cell": {
+    "1 안정상승": 3,
+    "2 변동상승": 2,
+    "3 안정횡보": 11,
+    "4 변동횡보": 10,
+    "5 안정하락": 4,
+    "6 변동하락": 5
+   },
+   "fwd20_by_cell": {
+    "1 안정상승": 0.04093686149484054,
+    "2 변동상승": 0.06401521845385752,
+    "3 안정횡보": 0.001931474605847037,
+    "4 변동횡보": 0.00955524363422678,
+    "5 안정하락": -0.018271200677841166,
+    "6 변동하락": 0.019675372710635103
+   },
+   "fwd_vol_by_cell": {
+    "1 안정상승": 0.16785672838557159,
+    "2 변동상승": 0.5009012542187039,
+    "3 안정횡보": 0.17299055025182128,
+    "4 변동횡보": 0.19533673120074405,
+    "5 안정하락": 0.18156454104892453,
+    "6 변동하락": 0.18547984259446443
+   },
+   "fwd20_all": 0.018603980444936916,
+   "order_up_gt_dn": true
+  },
+  "1997-2001": {
+   "n": 1320,
+   "BA_dir": 0.37059600033998996,
+   "BA_vol": 0.7538152610441766,
+   "S": 0.5622056306920833,
+   "acc6": 0.3787878787878788,
+   "fwd_up": 0.021185293017246285,
+   "fwd_flat": 0.00882467752013151,
+   "fwd_dn": 0.00437141217921249,
+   "fwd_spread": 0.016813880838033795,
+   "fwd_vol_ratio": 1.9580070673795384,
+   "sw_yr": 6.109090909090909,
+   "short_share": 0.03125,
+   "n_spells": 32,
+   "n_up": 474,
+   "n_flat": 338,
+   "n_dn": 508,
+   "n_H": 1248,
+   "n_L": 72,
+   "sw_per_cal_year": 6.404383561643836,
+   "days": {
+    "1 안정상승": 18,
+    "2 변동상승": 456,
+    "3 안정횡보": 47,
+    "4 변동횡보": 291,
+    "5 안정하락": 7,
+    "6 변동하락": 501
+   },
+   "spell_len_median": 27.5,
+   "spells_by_cell": {
+    "1 안정상승": 1,
+    "2 변동상승": 7,
+    "3 안정횡보": 2,
+    "4 변동횡보": 14,
+    "5 안정하락": 1,
+    "6 변동하락": 7
+   },
+   "fwd20_by_cell": {
+    "1 안정상승": -0.03427826597687186,
+    "2 변동상승": 0.023374644030172004,
+    "3 안정횡보": -0.009999115257495523,
+    "4 변동횡보": 0.011864946456724191,
+    "5 안정하락": -0.09198999717694321,
+    "6 변동하락": 0.0057177791762046855
+   },
+   "fwd_vol_by_cell": {
+    "1 안정상승": 0.14740968586397962,
+    "2 변동상승": 0.3851709093464778,
+    "3 안정횡보": 0.2133759571268835,
+    "4 변동횡보": 0.3754705811250517,
+    "5 안정하락": 0.34482630347305554,
+    "6 변동하락": 0.45396060972842533
+   },
+   "fwd20_all": 0.01154942975683268,
+   "order_up_gt_dn": true
+  },
+  "2002-2006": {
+   "n": 1236,
+   "BA_dir": 0.35585129310344826,
+   "BA_vol": 0.8158136196242431,
+   "S": 0.5858324563638457,
+   "acc6": 0.32119741100323623,
+   "fwd_up": 0.018962213570325324,
+   "fwd_flat": 0.007747903851255691,
+   "fwd_dn": 0.010570294856731948,
+   "fwd_spread": 0.008391918713593375,
+   "fwd_vol_ratio": 1.521233716321341,
+   "sw_yr": 6.7281553398058245,
+   "short_share": 0.09090909090909091,
+   "n_spells": 33,
+   "n_up": 692,
+   "n_flat": 289,
+   "n_dn": 255,
+   "n_H": 861,
+   "n_L": 375,
+   "sw_per_cal_year": 6.604520547945205,
+   "days": {
+    "1 안정상승": 231,
+    "2 변동상승": 461,
+    "3 안정횡보": 134,
+    "4 변동횡보": 155,
+    "5 안정하락": 10,
+    "6 변동하락": 245
+   },
+   "spell_len_median": 26.0,
+   "spells_by_cell": {
+    "1 안정상승": 8,
+    "2 변동상승": 7,
+    "3 안정횡보": 5,
+    "4 변동횡보": 8,
+    "5 안정하락": 1,
+    "6 변동하락": 4
+   },
+   "fwd20_by_cell": {
+    "1 안정상승": 0.004813439860652337,
+    "2 변동상승": 0.026051946166712435,
+    "3 안정횡보": 0.024525155573877758,
+    "4 변동횡보": -0.006756300863785322,
+    "5 안정하락": 0.020163194255282568,
+    "6 변동하락": 0.010178747942505392
+   },
+   "fwd_vol_by_cell": {
+    "1 안정상승": 0.1776285489549751,
+    "2 변동상승": 0.241326473810896,
+    "3 안정횡보": 0.16924980144279317,
+    "4 변동횡보": 0.29059808424197375,
+    "5 안정하락": 0.1352285302536309,
+    "6 변동하락": 0.289624841262427
+   },
+   "fwd20_all": 0.01460875500982578,
+   "order_up_gt_dn": true
+  },
+  "2007-2011": {
+   "n": 1246,
+   "BA_dir": 0.42519411009863656,
+   "BA_vol": 0.7792189734625774,
+   "S": 0.602206541780607,
+   "acc6": 0.34430176565008025,
+   "fwd_up": 0.014826122839995359,
+   "fwd_flat": 0.011443159942140901,
+   "fwd_dn": -0.006349646085710619,
+   "fwd_spread": 0.021175768925705978,
+   "fwd_vol_ratio": 1.6721801429339243,
+   "sw_yr": 6.47191011235955,
+   "short_share": 0.03125,
+   "n_spells": 32,
+   "n_up": 436,
+   "n_flat": 562,
+   "n_dn": 248,
+   "n_H": 775,
+   "n_L": 471,
+   "sw_per_cal_year": 6.404383561643836,
+   "days": {
+    "1 안정상승": 200,
+    "2 변동상승": 236,
+    "3 안정횡보": 271,
+    "4 변동횡보": 291,
+    "5 안정하락": 0,
+    "6 변동하락": 248
+   },
+   "spell_len_median": 27.0,
+   "spells_by_cell": {
+    "1 안정상승": 5,
+    "2 변동상승": 6,
+    "3 안정횡보": 7,
+    "4 변동횡보": 11,
+    "5 안정하락": 0,
+    "6 변동하락": 3
+   },
+   "fwd20_by_cell": {
+    "1 안정상승": 0.019767712258415917,
+    "2 변동상승": 0.010638335197266069,
+    "3 안정횡보": 0.006183195399901306,
+    "4 변동횡보": 0.016341614893848565,
+    "5 안정하락": null,
+    "6 변동하락": -0.006349646085710619
+   },
+   "fwd_vol_by_cell": {
+    "1 안정상승": 0.18400530606285254,
+    "2 변동상승": 0.23617062505418127,
+    "3 안정횡보": 0.16316109626896214,
+    "4 변동횡보": 0.23086002463858155,
+    "5 안정하락": null,
+    "6 변동하락": 0.40322908093506044
+   },
+   "fwd20_all": 0.009085500173727877,
+   "order_up_gt_dn": true
+  },
+  "2012-2016": {
+   "n": 1234,
+   "BA_dir": 0.2897343208134956,
+   "BA_vol": 0.6819523575813186,
+   "S": 0.4858433391974071,
+   "acc6": 0.5388978930307942,
+   "fwd_up": -0.022114922675014283,
+   "fwd_flat": 0.0030325336553699896,
+   "fwd_dn": 0.035554769124984426,
+   "fwd_spread": -0.05766969179999871,
+   "fwd_vol_ratio": 1.2305457167959657,
+   "sw_yr": 3.8800648298217175,
+   "short_share": 0.0,
+   "n_spells": 19,
+   "n_up": 101,
+   "n_flat": 1067,
+   "n_dn": 66,
+   "n_H": 151,
+   "n_L": 1083,
+   "sw_per_cal_year": 3.8005202628696604,
+   "days": {
+    "1 안정상승": 101,
+    "2 변동상승": 0,
+    "3 안정횡보": 955,
+    "4 변동횡보": 112,
+    "5 안정하락": 27,
+    "6 변동하락": 39
+   },
+   "spell_len_median": 20.0,
+   "spells_by_cell": {
+    "1 안정상승": 2,
+    "2 변동상승": 0,
+    "3 안정횡보": 8,
+    "4 변동횡보": 5,
+    "5 안정하락": 2,
+    "6 변동하락": 2
+   },
+   "fwd20_by_cell": {
+    "1 안정상승": -0.022114922675014283,
+    "2 변동상승": null,
+    "3 안정횡보": 0.0015479769573845802,
+    "4 변동횡보": 0.015691030499799148,
+    "5 안정하락": 0.02940872864127697,
+    "6 변동하락": 0.03980972022908958
+   },
+   "fwd_vol_by_cell": {
+    "1 안정상승": 0.14179155893784695,
+    "2 변동상승": null,
+    "3 안정횡보": 0.11908911241323396,
+    "4 변동횡보": 0.151810626449227,
+    "5 안정하락": 0.1463983419101455,
+    "6 변동하락": 0.14475276427825504
+   },
+   "fwd20_all": 0.0027137123033649175,
+   "order_up_gt_dn": false
+  },
+  "2017-2021": {
+   "n": 1229,
+   "BA_dir": 0.3962724991445594,
+   "BA_vol": 0.7824198942712266,
+   "S": 0.589346196707893,
+   "acc6": 0.4401952807160293,
+   "fwd_up": 0.017199544578739588,
+   "fwd_flat": -4.002103077280442e-05,
+   "fwd_dn": 0.04150251597181325,
+   "fwd_spread": -0.024302971393073663,
+   "fwd_vol_ratio": 1.8311165936126148,
+   "sw_yr": 4.921074043938161,
+   "short_share": 0.041666666666666664,
+   "n_spells": 24,
+   "n_up": 350,
+   "n_flat": 753,
+   "n_dn": 126,
+   "n_H": 268,
+   "n_L": 961,
+   "sw_per_cal_year": 4.8032876712328765,
+   "days": {
+    "1 안정상승": 197,
+    "2 변동상승": 153,
+    "3 안정횡보": 691,
+    "4 변동횡보": 62,
+    "5 안정하락": 73,
+    "6 변동하락": 53
+   },
+   "spell_len_median": 25.5,
+   "spells_by_cell": {
+    "1 안정상승": 6,
+    "2 변동상승": 5,
+    "3 안정횡보": 6,
+    "4 변동횡보": 4,
+    "5 안정하락": 2,
+    "6 변동하락": 1
+   },
+   "fwd20_by_cell": {
+    "1 안정상승": 0.036994604807348556,
+    "2 변동상승": -0.008288212709077177,
+    "3 안정횡보": -0.001029505441363347,
+    "4 변동횡보": 0.01098794231951859,
+    "5 안정하락": 0.02064940923170392,
+    "6 변동하락": 0.07022471959498272
+   },
+   "fwd_vol_by_cell": {
+    "1 안정상승": 0.15877926445665513,
+    "2 변동상승": 0.2321119828752254,
+    "3 안정횡보": 0.12514182834247833,
+    "4 변동횡보": 0.24769016942466157,
+    "5 안정하락": 0.1506534576651596,
+    "6 변동하락": 0.28069796812100983
+   },
+   "fwd20_all": 0.009128577525496668,
+   "order_up_gt_dn": false
+  },
+  "2022-2026": {
+   "n": 1161,
+   "BA_dir": 0.46541552719531526,
+   "BA_vol": 0.6886419601083478,
+   "S": 0.5770287436518315,
+   "acc6": 0.3549517966695881,
+   "fwd_up": 0.06814866041799825,
+   "fwd_flat": 0.007709137215466483,
+   "fwd_dn": 0.0027199204106231212,
+   "fwd_spread": 0.06542874000737513,
+   "fwd_vol_ratio": 1.8114481138331615,
+   "sw_yr": 6.511627906976745,
+   "short_share": 0.0,
+   "n_spells": 30,
+   "n_up": 321,
+   "n_flat": 626,
+   "n_dn": 214,
+   "n_H": 582,
+   "n_L": 579,
+   "sw_per_cal_year": 6.004109589041096,
+   "days": {
+    "1 안정상승": 118,
+    "2 변동상승": 203,
+    "3 안정횡보": 394,
+    "4 변동횡보": 232,
+    "5 안정하락": 67,
+    "6 변동하락": 147
+   },
+   "spell_len_median": 28.5,
+   "spells_by_cell": {
+    "1 안정상승": 2,
+    "2 변동상승": 1,
+    "3 안정횡보": 9,
+    "4 변동횡보": 10,
+    "5 안정하락": 3,
+    "6 변동하락": 5
+   },
+   "fwd20_by_cell": {
+    "1 안정상승": 0.04766993426601929,
+    "2 변동상승": 0.08005255049648846,
+    "3 안정횡보": 0.0066220897810695565,
+    "4 변동횡보": 0.00955524363422678,
+    "5 안정하락": -0.02967258547596694,
+    "6 변동하락": 0.019675372710635103
+   },
+   "fwd_vol_by_cell": {
+    "1 안정상승": 0.1698536907691865,
+    "2 변동상승": 0.5820007374073624,
+    "3 안정횡보": 0.18506522057462693,
+    "4 변동횡보": 0.19533673120074405,
+    "5 안정하락": 0.19887236403172964,
+    "6 변동하락": 0.18547984259446443
+   },
+   "fwd20_all": 0.02384590575405513,
+   "order_up_gt_dn": true
+  }
+ },
+ "events": {
+  "1997 외환위기": {
+   "peak": "1997-08-11",
+   "peak_close": 5126.26,
+   "trough": "1998-06-16",
+   "trough_close": 2083.31,
+   "drop": -0.5936004026327186,
+   "peak_to_trough_sessions": 246,
+   "a_dd60_le_-10%": {
+    "lag": 16,
+    "date": "1997-08-30",
+    "already_at_peak": false,
+    "dd_at_detect": -0.07331855972970558,
+    "remaining_to_trough": -0.5614462751636174,
+    "after_trough": false
+   },
+   "b_mu_le_0.5": {
+    "lag": 5,
+    "date": "1997-08-18",
+    "already_at_peak": false,
+    "dd_at_detect": -0.019400108461139265,
+    "remaining_to_trough": -0.5855602260678243,
+    "after_trough": false
+   },
+   "c_mu_eq_0": {
+    "lag": 13,
+    "date": "1997-08-27",
+    "already_at_peak": false,
+    "dd_at_detect": -0.03867536956767703,
+    "remaining_to_trough": -0.5772504058441559,
+    "after_trough": false
+   },
+   "d_label_not_up": {
+    "lag": 6,
+    "date": "1997-08-19",
+    "already_at_peak": false,
+    "dd_at_detect": -0.021793666337641904,
+    "remaining_to_trough": -0.5845461398253877,
+    "after_trough": false
+   },
+   "e_label_down": {
+    "lag": 33,
+    "date": "1997-09-23",
+    "already_at_peak": false,
+    "dd_at_detect": -0.12698341480923714,
+    "remaining_to_trough": -0.5344881136725724,
+    "after_trough": false
+   },
+   "labels_peak_to_trough": {
+    "1 안정상승": 5,
+    "2 변동상승": 54,
+    "3 안정횡보": 27,
+    "4 변동횡보": 12,
+    "5 안정하락": 7,
+    "6 변동하락": 141
+   }
+  },
+  "2000 닷컴": {
+   "peak": "2001-01-22",
+   "peak_close": 5132.07,
+   "trough": "2001-09-27",
+   "trough_close": 3747.5,
+   "drop": -0.26978782440613625,
+   "peak_to_trough_sessions": 169,
+   "a_dd60_le_-10%": {
+    "lag": 26,
+    "date": "2001-03-05",
+    "already_at_peak": false,
+    "dd_at_detect": -0.12117722478454107,
+    "remaining_to_trough": -0.16910189837212708,
+    "after_trough": false
+   },
+   "b_mu_le_0.5": {
+    "lag": 26,
+    "date": "2001-03-05",
+    "already_at_peak": false,
+    "dd_at_detect": -0.12117722478454107,
+    "remaining_to_trough": -0.16910189837212708,
+    "after_trough": false
+   },
+   "c_mu_eq_0": {
+    "lag": 50,
+    "date": "2001-04-09",
+    "already_at_peak": false,
+    "dd_at_detect": -0.2069963971652763,
+    "remaining_to_trough": -0.07918176792186249,
+    "after_trough": false
+   },
+   "d_label_not_up": {
+    "lag": 1,
+    "date": "2001-01-26",
+    "already_at_peak": true,
+    "dd_at_detect": 0.0,
+    "remaining_to_trough": -0.26978782440613625,
+    "after_trough": false
+   },
+   "e_label_down": {
+    "lag": 63,
+    "date": "2001-04-26",
+    "already_at_peak": false,
+    "dd_at_detect": -0.10645412085182004,
+    "remaining_to_trough": -0.18279274446436122,
+    "after_trough": false
+   },
+   "labels_peak_to_trough": {
+    "1 안정상승": 0,
+    "2 변동상승": 65,
+    "3 안정횡보": 0,
+    "4 변동횡보": 73,
+    "5 안정하락": 0,
+    "6 변동하락": 31
+   }
+  },
+  "2008 금융위기": {
+   "peak": "2007-10-31",
+   "peak_close": 18943.0,
+   "trough": "2008-10-24",
+   "trough_close": 8962.0,
+   "drop": -0.5268964789104155,
+   "peak_to_trough_sessions": 242,
+   "a_dd60_le_-10%": {
+    "lag": 16,
+    "date": "2007-11-22",
+    "already_at_peak": false,
+    "dd_at_detect": -0.12421474951169298,
+    "remaining_to_trough": -0.45979505726341174,
+    "after_trough": false
+   },
+   "b_mu_le_0.5": {
+    "lag": 13,
+    "date": "2007-11-19",
+    "already_at_peak": false,
+    "dd_at_detect": -0.06720160481444337,
+    "remaining_to_trough": -0.4928126768534239,
+    "after_trough": false
+   },
+   "c_mu_eq_0": {
+    "lag": 45,
+    "date": "2008-01-08",
+    "already_at_peak": false,
+    "dd_at_detect": -0.10193739112073064,
+    "remaining_to_trough": -0.4731953914883612,
+    "after_trough": false
+   },
+   "d_label_not_up": {
+    "lag": 33,
+    "date": "2007-12-17",
+    "already_at_peak": false,
+    "dd_at_detect": -0.0743810378503933,
+    "remaining_to_trough": -0.48887874985741986,
+    "after_trough": false
+   },
+   "e_label_down": {
+    "lag": 58,
+    "date": "2008-01-25",
+    "already_at_peak": false,
+    "dd_at_detect": -0.17420683101937395,
+    "remaining_to_trough": -0.4270919900274883,
+    "after_trough": false
+   },
+   "labels_peak_to_trough": {
+    "1 안정상승": 10,
+    "2 변동상승": 58,
+    "3 안정횡보": 7,
+    "4 변동횡보": 44,
+    "5 안정하락": 0,
+    "6 변동하락": 123
+   }
+  },
+  "2020 코로나": {
+   "peak": "2020-01-22",
+   "peak_close": 27048.0,
+   "trough": "2020-03-19",
+   "trough_close": 17676.0,
+   "drop": -0.3464951197870453,
+   "peak_to_trough_sessions": 39,
+   "a_dd60_le_-10%": {
+    "lag": 26,
+    "date": "2020-03-02",
+    "already_at_peak": false,
+    "dd_at_detect": -0.12207926648920442,
+    "remaining_to_trough": -0.2556219994946517,
+    "after_trough": false
+   },
+   "b_mu_le_0.5": {
+    "lag": 6,
+    "date": "2020-02-03",
+    "already_at_peak": false,
+    "dd_at_detect": -0.0679532682638273,
+    "remaining_to_trough": -0.2988496628322095,
+    "after_trough": false
+   },
+   "c_mu_eq_0": {
+    "lag": 36,
+    "date": "2020-03-16",
+    "already_at_peak": false,
+    "dd_at_detect": -0.20788967761017452,
+    "remaining_to_trough": -0.1749824970828472,
+    "after_trough": false
+   },
+   "d_label_not_up": {
+    "lag": 33,
+    "date": "2020-03-11",
+    "already_at_peak": false,
+    "dd_at_detect": -0.1327639751552795,
+    "remaining_to_trough": -0.24645095280726437,
+    "after_trough": false
+   },
+   "e_label_down": {
+    "lag": 42,
+    "date": "2020-03-24",
+    "already_at_peak": false,
+    "dd_at_detect": -0.33762200532386866,
+    "remaining_to_trough": null,
+    "after_trough": true
+   },
+   "labels_peak_to_trough": {
+    "1 안정상승": 7,
+    "2 변동상승": 25,
+    "3 안정횡보": 0,
+    "4 변동횡보": 7,
+    "5 안정하락": 0,
+    "6 변동하락": 0
+   }
+  }
+ },
+ "events_posthoc": {
+  "2000 닷컴(사후 창 2000-01~12)": {
+   "peak": "2000-01-04",
+   "peak_close": 8631.6,
+   "trough": "2000-12-04",
+   "trough_close": 4036.17,
+   "drop": -0.5323960795217573,
+   "peak_to_trough_sessions": 225,
+   "a_dd60_le_-10%": {
+    "lag": 4,
+    "date": "2000-01-10",
+    "already_at_peak": false,
+    "dd_at_detect": -0.1089334538208444,
+    "remaining_to_trough": -0.4752312018857596,
+    "after_trough": false
+   },
+   "b_mu_le_0.5": {
+    "lag": 14,
+    "date": "2000-01-24",
+    "already_at_peak": false,
+    "dd_at_detect": -0.12516914592891248,
+    "remaining_to_trough": -0.46549219394559005,
+    "after_trough": false
+   },
+   "c_mu_eq_0": {
+    "lag": 39,
+    "date": "2000-02-29",
+    "already_at_peak": false,
+    "dd_at_detect": -0.23739399416098983,
+    "remaining_to_trough": -0.3868342015431804,
+    "after_trough": false
+   },
+   "d_label_not_up": {
+    "lag": 36,
+    "date": "2000-02-24",
+    "already_at_peak": false,
+    "dd_at_detect": -0.17222878724686042,
+    "remaining_to_trough": -0.4351048776835237,
+    "after_trough": false
+   },
+   "e_label_down": {
+    "lag": 48,
+    "date": "2000-03-14",
+    "already_at_peak": false,
+    "dd_at_detect": -0.2133775893229528,
+    "remaining_to_trough": -0.4055547946113367,
+    "after_trough": false
+   },
+   "labels_peak_to_trough": {
+    "1 안정상승": 0,
+    "2 변동상승": 35,
+    "3 안정횡보": 0,
+    "4 변동횡보": 53,
+    "5 안정하락": 0,
+    "6 변동하락": 137
+   }
+  }
+ },
+ "zigzag20_peaks": [
+  {
+   "peak": "1997-06-17",
+   "peak_close": 5360.04,
+   "trough": "1997-12-12",
+   "trough_close": 2539.24,
+   "drop": -0.5262647293676913,
+   "peak_to_trough_sessions": 147,
+   "a_dd60_le_-10%": {
+    "lag": 62,
+    "date": "1997-08-30",
+    "already_at_peak": false,
+    "dd_at_detect": -0.11373609152170505,
+    "remaining_to_trough": -0.4654692963344217,
+    "after_trough": false
+   },
+   "b_mu_le_0.5": {
+    "lag": 26,
+    "date": "1997-07-18",
+    "already_at_peak": false,
+    "dd_at_detect": -0.07735016902858938,
+    "remaining_to_trough": -0.48654922514477983,
+    "after_trough": false
+   },
+   "c_mu_eq_0": {
+    "lag": 59,
+    "date": "1997-08-27",
+    "already_at_peak": false,
+    "dd_at_detect": -0.08060387609047692,
+    "remaining_to_trough": -0.48473214285714294,
+    "after_trough": false
+   },
+   "d_label_not_up": {
+    "lag": 52,
+    "date": "1997-08-19",
+    "already_at_peak": false,
+    "dd_at_detect": -0.06445847419049111,
+    "remaining_to_trough": -0.4936245398381507,
+    "after_trough": false
+   },
+   "e_label_down": {
+    "lag": 79,
+    "date": "1997-09-23",
+    "already_at_peak": false,
+    "dd_at_detect": -0.16506033537063147,
+    "remaining_to_trough": -0.43261137217310097,
+    "after_trough": false
+   },
+   "labels_peak_to_trough": {
+    "1 안정상승": 18,
+    "2 변동상승": 33,
+    "3 안정횡보": 27,
+    "4 변동횡보": 0,
+    "5 안정하락": 7,
+    "6 변동하락": 62
+   }
+  },
+  {
+   "peak": "1998-03-02",
+   "peak_close": 4388.77,
+   "trough": "1998-06-16",
+   "trough_close": 2083.31,
+   "drop": -0.5253089134313259,
+   "peak_to_trough_sessions": 87,
+   "a_dd60_le_-10%": {
+    "lag": 5,
+    "date": "1998-03-07",
+    "already_at_peak": false,
+    "dd_at_detect": -0.10152958573814541,
+    "remaining_to_trough": -0.4716675373683169,
+    "after_trough": false
+   },
+   "b_mu_le_0.5": {
+    "lag": 19,
+    "date": "1998-03-24",
+    "already_at_peak": false,
+    "dd_at_detect": -0.13581481827482422,
+    "remaining_to_trough": -0.4507067505820377,
+    "after_trough": false
+   },
+   "c_mu_eq_0": {
+    "lag": 37,
+    "date": "1998-04-14",
+    "already_at_peak": false,
+    "dd_at_detect": -0.15406138849837203,
+    "remaining_to_trough": -0.43885870663114834,
+    "after_trough": false
+   },
+   "d_label_not_up": {
+    "lag": 35,
+    "date": "1998-04-11",
+    "already_at_peak": false,
+    "dd_at_detect": -0.20938668465196408,
+    "remaining_to_trough": -0.3995913332680082,
+    "after_trough": false
+   },
+   "e_label_down": {
+    "lag": 42,
+    "date": "1998-04-20",
+    "already_at_peak": false,
+    "dd_at_detect": -0.25132326369347224,
+    "remaining_to_trough": -0.3659598815498346,
+    "after_trough": false
+   },
+   "labels_peak_to_trough": {
+    "1 안정상승": 0,
+    "2 변동상승": 34,
+    "3 안정횡보": 0,
+    "4 변동횡보": 7,
+    "5 안정하락": 0,
+    "6 변동하락": 46
+   }
+  },
+  {
+   "peak": "1998-07-20",
+   "peak_close": 2760.1,
+   "trough": "1998-09-22",
+   "trough_close": 2142.08,
+   "drop": -0.22391217709503275,
+   "peak_to_trough_sessions": 54,
+   "a_dd60_le_-10%": {
+    "lag": 6,
+    "date": "1998-07-27",
+    "already_at_peak": false,
+    "dd_at_detect": -0.1167530161950654,
+    "remaining_to_trough": -0.12132411756260641,
+    "after_trough": false
+   },
+   "b_mu_le_0.5": {
+    "lag": 15,
+    "date": "1998-08-06",
+    "already_at_peak": false,
+    "dd_at_detect": -0.13196261005036047,
+    "remaining_to_trough": -0.10592811796967283,
+    "after_trough": false
+   },
+   "c_mu_eq_0": {
+    "lag": 15,
+    "date": "1998-08-06",
+    "already_at_peak": false,
+    "dd_at_detect": -0.13196261005036047,
+    "remaining_to_trough": -0.10592811796967283,
+    "after_trough": false
+   },
+   "d_label_not_up": {
+    "lag": 1,
+    "date": "1998-07-21",
+    "already_at_peak": true,
+    "dd_at_detect": 0.0,
+    "remaining_to_trough": -0.22391217709503275,
+    "after_trough": false
+   },
+   "e_label_down": {
+    "lag": 1,
+    "date": "1998-07-21",
+    "already_at_peak": true,
+    "dd_at_detect": 0.0,
+    "remaining_to_trough": -0.22391217709503275,
+    "after_trough": false
+   },
+   "labels_peak_to_trough": {
+    "1 안정상승": 0,
+    "2 변동상승": 0,
+    "3 안정횡보": 0,
+    "4 변동횡보": 14,
+    "5 안정하락": 0,
+    "6 변동하락": 40
+   }
+  },
+  {
+   "peak": "1999-01-07",
+   "peak_close": 4767.85,
+   "trough": "1999-02-24",
+   "trough_close": 3714.57,
+   "drop": -0.22091299013182042,
+   "peak_to_trough_sessions": 31,
+   "a_dd60_le_-10%": {
+    "lag": 12,
+    "date": "1999-01-25",
+    "already_at_peak": false,
+    "dd_at_detect": -0.1495328082888514,
+    "remaining_to_trough": -0.08393055315790765,
+    "after_trough": false
+   },
+   "b_mu_le_0.5": {
+    "lag": 24,
+    "date": "1999-02-10",
+    "already_at_peak": false,
+    "dd_at_detect": -0.1926046331155553,
+    "remaining_to_trough": -0.03506133200330419,
+    "after_trough": false
+   },
+   "c_mu_eq_0": {
+    "lag": 188,
+    "date": "1999-10-08",
+    "already_at_peak": false,
+    "dd_at_detect": 0.3942846356324128,
+    "remaining_to_trough": null,
+    "after_trough": true
+   },
+   "d_label_not_up": {
+    "lag": 186,
+    "date": "1999-10-06",
+    "already_at_peak": false,
+    "dd_at_detect": 0.29987730318697103,
+    "remaining_to_trough": null,
+    "after_trough": true
+   },
+   "e_label_down": {
+    "lag": 195,
+    "date": "1999-10-19",
+    "already_at_peak": false,
+    "dd_at_detect": 0.34525205281206395,
+    "remaining_to_trough": null,
+    "after_trough": true
+   },
+   "labels_peak_to_trough": {
+    "1 안정상승": 0,
+    "2 변동상승": 31,
+    "3 안정횡보": 0,
+    "4 변동횡보": 0,
+    "5 안정하락": 0,
+    "6 변동하락": 0
+   }
+  },
+  {
+   "peak": "1999-07-09",
+   "peak_close": 7909.61,
+   "trough": "1999-10-27",
+   "trough_close": 6138.21,
+   "drop": -0.22395541625946158,
+   "peak_to_trough_sessions": 76,
+   "a_dd60_le_-10%": {
+    "lag": 11,
+    "date": "1999-07-26",
+    "already_at_peak": false,
+    "dd_at_detect": -0.12581656996994794,
+    "remaining_to_trough": -0.11226344828583612,
+    "after_trough": false
+   },
+   "b_mu_le_0.5": {
+    "lag": 28,
+    "date": "1999-08-18",
+    "already_at_peak": false,
+    "dd_at_detect": -0.14900481818951883,
+    "remaining_to_trough": -0.08807405690651071,
+    "after_trough": false
+   },
+   "c_mu_eq_0": {
+    "lag": 63,
+    "date": "1999-10-08",
+    "already_at_peak": false,
+    "dd_at_detect": -0.15953631089269893,
+    "remaining_to_trough": -0.07664710112007989,
+    "after_trough": false
+   },
+   "d_label_not_up": {
+    "lag": 61,
+    "date": "1999-10-06",
+    "already_at_peak": false,
+    "dd_at_detect": -0.2164443000350207,
+    "remaining_to_trough": -0.009585937827746749,
+    "after_trough": false
+   },
+   "e_label_down": {
+    "lag": 70,
+    "date": "1999-10-19",
+    "already_at_peak": false,
+    "dd_at_detect": -0.18909276184287216,
+    "remaining_to_trough": -0.04299216084914781,
+    "after_trough": false
+   },
+   "labels_peak_to_trough": {
+    "1 안정상승": 0,
+    "2 변동상승": 60,
+    "3 안정횡보": 0,
+    "4 변동횡보": 9,
+    "5 안정하락": 0,
+    "6 변동하락": 7
+   }
+  },
+  {
+   "peak": "2000-01-04",
+   "peak_close": 8631.6,
+   "trough": "2000-05-29",
+   "trough_close": 5346.47,
+   "drop": -0.3805934009917049,
+   "peak_to_trough_sessions": 97,
+   "a_dd60_le_-10%": {
+    "lag": 4,
+    "date": "2000-01-10",
+    "already_at_peak": false,
+    "dd_at_detect": -0.1089334538208444,
+    "remaining_to_trough": -0.3048705490467838,
+    "after_trough": false
+   },
+   "b_mu_le_0.5": {
+    "lag": 14,
+    "date": "2000-01-24",
+    "already_at_peak": false,
+    "dd_at_detect": -0.12516914592891248,
+    "remaining_to_trough": -0.29196987494686266,
+    "after_trough": false
+   },
+   "c_mu_eq_0": {
+    "lag": 39,
+    "date": "2000-02-29",
+    "already_at_peak": false,
+    "dd_at_detect": -0.23739399416098983,
+    "remaining_to_trough": -0.1877763953264029,
+    "after_trough": false
+   },
+   "d_label_not_up": {
+    "lag": 36,
+    "date": "2000-02-24",
+    "already_at_peak": false,
+    "dd_at_detect": -0.17222878724686042,
+    "remaining_to_trough": -0.2517176371135579,
+    "after_trough": false
+   },
+   "e_label_down": {
+    "lag": 48,
+    "date": "2000-03-14",
+    "already_at_peak": false,
+    "dd_at_detect": -0.2133775893229528,
+    "remaining_to_trough": -0.21257443139056909,
+    "after_trough": false
+   },
+   "labels_peak_to_trough": {
+    "1 안정상승": 0,
+    "2 변동상승": 35,
+    "3 안정횡보": 0,
+    "4 변동횡보": 12,
+    "5 안정하락": 0,
+    "6 변동하락": 50
+   }
+  },
+  {
+   "peak": "2000-06-12",
+   "peak_close": 6962.88,
+   "trough": "2000-12-04",
+   "trough_close": 4036.17,
+   "drop": -0.4203303805321936,
+   "peak_to_trough_sessions": 119,
+   "a_dd60_le_-10%": {
+    "lag": 2,
+    "date": "2000-06-14",
+    "already_at_peak": false,
+    "dd_at_detect": -0.04906303138931012,
+    "remaining_to_trough": -0.3904226687971776,
+    "after_trough": false
+   },
+   "b_mu_le_0.5": {
+    "lag": 4,
+    "date": "2000-06-16",
+    "already_at_peak": false,
+    "dd_at_detect": -0.08681177903396298,
+    "remaining_to_trough": -0.36522437964148324,
+    "after_trough": false
+   },
+   "c_mu_eq_0": {
+    "lag": 4,
+    "date": "2000-06-16",
+    "already_at_peak": false,
+    "dd_at_detect": -0.08681177903396298,
+    "remaining_to_trough": -0.36522437964148324,
+    "after_trough": false
+   },
+   "d_label_not_up": {
+    "lag": 1,
+    "date": "2000-06-13",
+    "already_at_peak": true,
+    "dd_at_detect": 0.0,
+    "remaining_to_trough": -0.4203303805321936,
+    "after_trough": false
+   },
+   "e_label_down": {
+    "lag": 1,
+    "date": "2000-06-13",
+    "already_at_peak": true,
+    "dd_at_detect": 0.0,
+    "remaining_to_trough": -0.4203303805321936,
+    "after_trough": false
+   },
+   "labels_peak_to_trough": {
+    "1 안정상승": 0,
+    "2 변동상승": 0,
+    "3 안정횡보": 0,
+    "4 변동횡보": 41,
+    "5 안정하락": 0,
+    "6 변동하락": 78
+   }
+  },
+  {
+   "peak": "2001-01-22",
+   "peak_close": 5132.07,
+   "trough": "2001-04-10",
+   "trough_close": 3936.72,
+   "drop": -0.23291771156667773,
+   "peak_to_trough_sessions": 51,
+   "a_dd60_le_-10%": {
+    "lag": 26,
+    "date": "2001-03-05",
+    "already_at_peak": false,
+    "dd_at_detect": -0.12117722478454107,
+    "remaining_to_trough": -0.1271479187083443,
+    "after_trough": false
+   },
+   "b_mu_le_0.5": {
+    "lag": 26,
+    "date": "2001-03-05",
+    "already_at_peak": false,
+    "dd_at_detect": -0.12117722478454107,
+    "remaining_to_trough": -0.1271479187083443,
+    "after_trough": false
+   },
+   "c_mu_eq_0": {
+    "lag": 50,
+    "date": "2001-04-09",
+    "already_at_peak": false,
+    "dd_at_detect": -0.2069963971652763,
+    "remaining_to_trough": -0.03268751151790661,
+    "after_trough": false
+   },
+   "d_label_not_up": {
+    "lag": 1,
+    "date": "2001-01-26",
+    "already_at_peak": true,
+    "dd_at_detect": 0.0,
+    "remaining_to_trough": -0.23291771156667773,
+    "after_trough": false
+   },
+   "e_label_down": {
+    "lag": 63,
+    "date": "2001-04-26",
+    "already_at_peak": false,
+    "dd_at_detect": -0.10645412085182004,
+    "remaining_to_trough": null,
+    "after_trough": true
+   },
+   "labels_peak_to_trough": {
+    "1 안정상승": 0,
+    "2 변동상승": 37,
+    "3 안정횡보": 0,
+    "4 변동횡보": 14,
+    "5 안정하락": 0,
+    "6 변동하락": 0
+   }
+  },
+  {
+   "peak": "2001-05-29",
+   "peak_close": 5092.03,
+   "trough": "2001-09-27",
+   "trough_close": 3747.5,
+   "drop": -0.2640459698784178,
+   "peak_to_trough_sessions": 84,
+   "a_dd60_le_-10%": {
+    "lag": 29,
+    "date": "2001-07-10",
+    "already_at_peak": false,
+    "dd_at_detect": -0.12415873433581481,
+    "remaining_to_trough": -0.15971756644341362,
+    "after_trough": false
+   },
+   "b_mu_le_0.5": {
+    "lag": 21,
+    "date": "2001-06-28",
+    "already_at_peak": false,
+    "dd_at_detect": -0.0887759891438189,
+    "remaining_to_trough": -0.19234565666231307,
+    "after_trough": false
+   },
+   "c_mu_eq_0": {
+    "lag": 45,
+    "date": "2001-08-02",
+    "already_at_peak": false,
+    "dd_at_detect": -0.1157887915035849,
+    "remaining_to_trough": -0.16767167951528406,
+    "after_trough": false
+   },
+   "d_label_not_up": {
+    "lag": 1,
+    "date": "2001-05-30",
+    "already_at_peak": true,
+    "dd_at_detect": 0.0,
+    "remaining_to_trough": -0.2640459698784178,
+    "after_trough": false
+   },
+   "e_label_down": {
+    "lag": 72,
+    "date": "2001-09-11",
+    "already_at_peak": false,
+    "dd_at_detect": -0.1396319346115399,
+    "remaining_to_trough": -0.14460559413104723,
+    "after_trough": false
+   },
+   "labels_peak_to_trough": {
+    "1 안정상승": 0,
+    "2 변동상승": 28,
+    "3 안정횡보": 0,
+    "4 변동횡보": 43,
+    "5 안정하락": 0,
+    "6 변동하락": 13
+   }
+  },
+  {
+   "peak": "2002-04-18",
+   "peak_close": 7598.34,
+   "trough": "2002-10-10",
+   "trough_close": 4736.85,
+   "drop": -0.37659409818460343,
+   "peak_to_trough_sessions": 117,
+   "a_dd60_le_-10%": {
+    "lag": 8,
+    "date": "2002-04-30",
+    "already_at_peak": false,
+    "dd_at_detect": -0.10241447474053544,
+    "remaining_to_trough": -0.30546350818749113,
+    "after_trough": false
+   },
+   "b_mu_le_0.5": {
+    "lag": 12,
+    "date": "2002-05-07",
+    "already_at_peak": false,
+    "dd_at_detect": -0.12034733902405004,
+    "remaining_to_trough": -0.29130447792456493,
+    "after_trough": false
+   },
+   "c_mu_eq_0": {
+    "lag": 42,
+    "date": "2002-06-20",
+    "already_at_peak": false,
+    "dd_at_detect": -0.1719362387047697,
+    "remaining_to_trough": -0.24715229556684692,
+    "after_trough": false
+   },
+   "d_label_not_up": {
+    "lag": 38,
+    "date": "2002-06-14",
+    "already_at_peak": false,
+    "dd_at_detect": -0.12340721789232922,
+    "remaining_to_trough": -0.28883066967938553,
+    "after_trough": false
+   },
+   "e_label_down": {
+    "lag": 50,
+    "date": "2002-07-03",
+    "already_at_peak": false,
+    "dd_at_detect": -0.20040824706449045,
+    "remaining_to_trough": -0.22034475777581353,
+    "after_trough": false
+   },
+   "labels_peak_to_trough": {
+    "1 안정상승": 0,
+    "2 변동상승": 37,
+    "3 안정횡보": 0,
+    "4 변동횡보": 12,
+    "5 안정하락": 0,
+    "6 변동하락": 68
+   }
+  },
+  {
+   "peak": "2002-12-03",
+   "peak_close": 6027.0,
+   "trough": "2003-03-17",
+   "trough_close": 4384.0,
+   "drop": -0.2726066036170566,
+   "peak_to_trough_sessions": 69,
+   "a_dd60_le_-10%": {
+    "lag": 18,
+    "date": "2003-01-02",
+    "already_at_peak": false,
+    "dd_at_detect": -0.12941762070681928,
+    "remaining_to_trough": -0.1644749380598437,
+    "after_trough": false
+   },
+   "b_mu_le_0.5": {
+    "lag": 17,
+    "date": "2002-12-30",
+    "already_at_peak": false,
+    "dd_at_detect": -0.0944084951053592,
+    "remaining_to_trough": -0.19677537559545621,
+    "after_trough": false
+   },
+   "c_mu_eq_0": {
+    "lag": 41,
+    "date": "2003-02-05",
+    "already_at_peak": false,
+    "dd_at_detect": -0.17587522814003653,
+    "remaining_to_trough": -0.11737467284074898,
+    "after_trough": false
+   },
+   "d_label_not_up": {
+    "lag": 1,
+    "date": "2002-12-04",
+    "already_at_peak": true,
+    "dd_at_detect": 0.0,
+    "remaining_to_trough": -0.2726066036170566,
+    "after_trough": false
+   },
+   "e_label_down": {
+    "lag": 1,
+    "date": "2002-12-04",
+    "already_at_peak": true,
+    "dd_at_detect": 0.0,
+    "remaining_to_trough": -0.2726066036170566,
+    "after_trough": false
+   },
+   "labels_peak_to_trough": {
+    "1 안정상승": 0,
+    "2 변동상승": 0,
+    "3 안정횡보": 0,
+    "4 변동횡보": 45,
+    "5 안정하락": 0,
+    "6 변동하락": 24
+   }
+  },
+  {
+   "peak": "2004-04-23",
+   "peak_close": 8234.0,
+   "trough": "2004-08-02",
+   "trough_close": 6265.0,
+   "drop": -0.23913043478260865,
+   "peak_to_trough_sessions": 69,
+   "a_dd60_le_-10%": {
+    "lag": 9,
+    "date": "2004-05-07",
+    "already_at_peak": false,
+    "dd_at_detect": -0.10420208889968419,
+    "remaining_to_trough": -0.1506236442516269,
+    "after_trough": false
+   },
+   "b_mu_le_0.5": {
+    "lag": 5,
+    "date": "2004-04-30",
+    "already_at_peak": false,
+    "dd_at_detect": -0.0665533155210104,
+    "remaining_to_trough": -0.18488160291438982,
+    "after_trough": false
+   },
+   "c_mu_eq_0": {
+    "lag": 16,
+    "date": "2004-05-18",
+    "already_at_peak": false,
+    "dd_at_detect": -0.22625698324022347,
+    "remaining_to_trough": -0.01663789044106101,
+    "after_trough": false
+   },
+   "d_label_not_up": {
+    "lag": 13,
+    "date": "2004-05-13",
+    "already_at_peak": false,
+    "dd_at_detect": -0.1337138693223221,
+    "remaining_to_trough": -0.12168792934249262,
+    "after_trough": false
+   },
+   "e_label_down": {
+    "lag": 26,
+    "date": "2004-06-02",
+    "already_at_peak": false,
+    "dd_at_detect": -0.13832888025261114,
+    "remaining_to_trough": -0.11698379140239601,
+    "after_trough": false
+   },
+   "labels_peak_to_trough": {
+    "1 안정상승": 0,
+    "2 변동상승": 12,
+    "3 안정횡보": 0,
+    "4 변동횡보": 13,
+    "5 안정하락": 0,
+    "6 변동하락": 44
+   }
+  },
+  {
+   "peak": "2007-10-11",
+   "peak_close": 18946.0,
+   "trough": "2008-03-17",
+   "trough_close": 14654.0,
+   "drop": -0.22653858334213028,
+   "peak_to_trough_sessions": 105,
+   "a_dd60_le_-10%": {
+    "lag": 30,
+    "date": "2007-11-22",
+    "already_at_peak": false,
+    "dd_at_detect": -0.12435342552517681,
+    "remaining_to_trough": -0.11669680530440019,
+    "after_trough": false
+   },
+   "b_mu_le_0.5": {
+    "lag": 8,
+    "date": "2007-10-23",
+    "already_at_peak": false,
+    "dd_at_detect": -0.08497835954818955,
+    "remaining_to_trough": -0.15470696815874485,
+    "after_trough": false
+   },
+   "c_mu_eq_0": {
+    "lag": 59,
+    "date": "2008-01-08",
+    "already_at_peak": false,
+    "dd_at_detect": -0.10207959463739047,
+    "remaining_to_trough": -0.13860804138255345,
+    "after_trough": false
+   },
+   "d_label_not_up": {
+    "lag": 47,
+    "date": "2007-12-17",
+    "already_at_peak": false,
+    "dd_at_detect": -0.0745276047714557,
+    "remaining_to_trough": -0.16425230979810657,
+    "after_trough": false
+   },
+   "e_label_down": {
+    "lag": 72,
+    "date": "2008-01-25",
+    "already_at_peak": false,
+    "dd_at_detect": -0.17433759104824242,
+    "remaining_to_trough": -0.0632231669117177,
+    "after_trough": false
+   },
+   "labels_peak_to_trough": {
+    "1 안정상승": 0,
+    "2 변동상승": 46,
+    "3 안정횡보": 0,
+    "4 변동횡보": 25,
+    "5 안정하락": 0,
+    "6 변동하락": 34
+   }
+  },
+  {
+   "peak": "2008-05-16",
+   "peak_close": 17977.0,
+   "trough": "2008-10-24",
+   "trough_close": 8962.0,
+   "drop": -0.5014741058018579,
+   "peak_to_trough_sessions": 111,
+   "a_dd60_le_-10%": {
+    "lag": 26,
+    "date": "2008-06-24",
+    "already_at_peak": false,
+    "dd_at_detect": -0.10151860710908378,
+    "remaining_to_trough": -0.44514611193660225,
+    "after_trough": false
+   },
+   "b_mu_le_0.5": {
+    "lag": 17,
+    "date": "2008-06-11",
+    "already_at_peak": false,
+    "dd_at_detect": -0.07031206541692159,
+    "remaining_to_trough": -0.4637707174056124,
+    "after_trough": false
+   },
+   "c_mu_eq_0": {
+    "lag": 39,
+    "date": "2008-07-11",
+    "already_at_peak": false,
+    "dd_at_detect": -0.19029871502475382,
+    "remaining_to_trough": -0.384308876064853,
+    "after_trough": false
+   },
+   "d_label_not_up": {
+    "lag": 36,
+    "date": "2008-07-08",
+    "already_at_peak": false,
+    "dd_at_detect": -0.16521110307615283,
+    "remaining_to_trough": -0.4028120210568401,
+    "after_trough": false
+   },
+   "e_label_down": {
+    "lag": 48,
+    "date": "2008-07-24",
+    "already_at_peak": false,
+    "dd_at_detect": -0.15692273460532902,
+    "remaining_to_trough": -0.4086830298231724,
+    "after_trough": false
+   },
+   "labels_peak_to_trough": {
+    "1 안정상승": 9,
+    "2 변동상승": 26,
+    "3 안정횡보": 0,
+    "4 변동횡보": 12,
+    "5 안정하락": 0,
+    "6 변동하락": 64
+   }
+  },
+  {
+   "peak": "2008-11-05",
+   "peak_close": 11469.0,
+   "trough": "2008-11-20",
+   "trough_close": 9160.0,
+   "drop": -0.20132531170982648,
+   "peak_to_trough_sessions": 11,
+   "a_dd60_le_-10%": {
+    "lag": 1,
+    "date": "2008-11-06",
+    "already_at_peak": true,
+    "dd_at_detect": 0.0,
+    "remaining_to_trough": -0.20132531170982648,
+    "after_trough": false
+   },
+   "b_mu_le_0.5": {
+    "lag": 1,
+    "date": "2008-11-06",
+    "already_at_peak": true,
+    "dd_at_detect": 0.0,
+    "remaining_to_trough": -0.20132531170982648,
+    "after_trough": false
+   },
+   "c_mu_eq_0": {
+    "lag": 1,
+    "date": "2008-11-06",
+    "already_at_peak": true,
+    "dd_at_detect": 0.0,
+    "remaining_to_trough": -0.20132531170982648,
+    "after_trough": false
+   },
+   "d_label_not_up": {
+    "lag": 1,
+    "date": "2008-11-06",
+    "already_at_peak": true,
+    "dd_at_detect": 0.0,
+    "remaining_to_trough": -0.20132531170982648,
+    "after_trough": false
+   },
+   "e_label_down": {
+    "lag": 1,
+    "date": "2008-11-06",
+    "already_at_peak": true,
+    "dd_at_detect": 0.0,
+    "remaining_to_trough": -0.20132531170982648,
+    "after_trough": false
+   },
+   "labels_peak_to_trough": {
+    "1 안정상승": 0,
+    "2 변동상승": 0,
+    "3 안정횡보": 0,
+    "4 변동횡보": 0,
+    "5 안정하락": 0,
+    "6 변동하락": 11
+   }
+  },
+  {
+   "peak": "2011-05-02",
+   "peak_close": 22893.0,
+   "trough": "2011-09-26",
+   "trough_close": 16616.0,
+   "drop": -0.27418861660769667,
+   "peak_to_trough_sessions": 99,
+   "a_dd60_le_-10%": {
+    "lag": 33,
+    "date": "2011-06-21",
+    "already_at_peak": false,
+    "dd_at_detect": -0.10321932468440131,
+    "remaining_to_trough": -0.19064783244033123,
+    "after_trough": false
+   },
+   "b_mu_le_0.5": {
+    "lag": 14,
+    "date": "2011-05-24",
+    "already_at_peak": false,
+    "dd_at_detect": -0.07989341720176468,
+    "remaining_to_trough": -0.21116597037599694,
+    "after_trough": false
+   },
+   "c_mu_eq_0": {
+    "lag": 51,
+    "date": "2011-07-15",
+    "already_at_peak": false,
+    "dd_at_detect": -0.059406805573756216,
+    "remaining_to_trough": -0.22834718803696652,
+    "after_trough": false
+   },
+   "d_label_not_up": {
+    "lag": 1,
+    "date": "2011-05-03",
+    "already_at_peak": true,
+    "dd_at_detect": 0.0,
+    "remaining_to_trough": -0.27418861660769667,
+    "after_trough": false
+   },
+   "e_label_down": {
+    "lag": 76,
+    "date": "2011-08-22",
+    "already_at_peak": false,
+    "dd_at_detect": -0.24278163630804173,
+    "remaining_to_trough": -0.04147678107874242,
+    "after_trough": false
+   },
+   "labels_peak_to_trough": {
+    "1 안정상승": 0,
+    "2 변동상승": 0,
+    "3 안정횡보": 16,
+    "4 변동횡보": 59,
+    "5 안정하락": 0,
+    "6 변동하락": 24
+   }
+  },
+  {
+   "peak": "2018-01-29",
+   "peak_close": 28551.0,
+   "trough": "2019-08-07",
+   "trough_close": 21965.0,
+   "drop": -0.2306749325767924,
+   "peak_to_trough_sessions": 373,
+   "a_dd60_le_-10%": {
+    "lag": 179,
+    "date": "2018-10-25",
+    "already_at_peak": false,
+    "dd_at_detect": -0.18787433014605448,
+    "remaining_to_trough": -0.05270194505541903,
+    "after_trough": false
+   },
+   "b_mu_le_0.5": {
+    "lag": 5,
+    "date": "2018-02-05",
+    "already_at_peak": false,
+    "dd_at_detect": -0.03061188749956223,
+    "remaining_to_trough": -0.20638074935867323,
+    "after_trough": false
+   },
+   "c_mu_eq_0": {
+    "lag": 8,
+    "date": "2018-02-08",
+    "already_at_peak": false,
+    "dd_at_detect": -0.07831599593709504,
+    "remaining_to_trough": -0.1653049591487744,
+    "after_trough": false
+   },
+   "d_label_not_up": {
+    "lag": 1,
+    "date": "2018-01-30",
+    "already_at_peak": true,
+    "dd_at_detect": 0.0,
+    "remaining_to_trough": -0.2306749325767924,
+    "after_trough": false
+   },
+   "e_label_down": {
+    "lag": 219,
+    "date": "2018-12-20",
+    "already_at_peak": false,
+    "dd_at_detect": -0.200518370635004,
+    "remaining_to_trough": -0.03772014369578547,
+    "after_trough": false
+   },
+   "labels_peak_to_trough": {
+    "1 안정상승": 0,
+    "2 변동상승": 0,
+    "3 안정횡보": 303,
+    "4 변동횡보": 46,
+    "5 안정하락": 24,
+    "6 변동하락": 0
+   }
+  },
+  {
+   "peak": "2020-01-22",
+   "peak_close": 27048.0,
+   "trough": "2020-03-19",
+   "trough_close": 17676.0,
+   "drop": -0.3464951197870453,
+   "peak_to_trough_sessions": 39,
+   "a_dd60_le_-10%": {
+    "lag": 26,
+    "date": "2020-03-02",
+    "already_at_peak": false,
+    "dd_at_detect": -0.12207926648920442,
+    "remaining_to_trough": -0.2556219994946517,
+    "after_trough": false
+   },
+   "b_mu_le_0.5": {
+    "lag": 6,
+    "date": "2020-02-03",
+    "already_at_peak": false,
+    "dd_at_detect": -0.0679532682638273,
+    "remaining_to_trough": -0.2988496628322095,
+    "after_trough": false
+   },
+   "c_mu_eq_0": {
+    "lag": 36,
+    "date": "2020-03-16",
+    "already_at_peak": false,
+    "dd_at_detect": -0.20788967761017452,
+    "remaining_to_trough": -0.1749824970828472,
+    "after_trough": false
+   },
+   "d_label_not_up": {
+    "lag": 33,
+    "date": "2020-03-11",
+    "already_at_peak": false,
+    "dd_at_detect": -0.1327639751552795,
+    "remaining_to_trough": -0.24645095280726437,
+    "after_trough": false
+   },
+   "e_label_down": {
+    "lag": 42,
+    "date": "2020-03-24",
+    "already_at_peak": false,
+    "dd_at_detect": -0.33762200532386866,
+    "remaining_to_trough": null,
+    "after_trough": true
+   },
+   "labels_peak_to_trough": {
+    "1 안정상승": 7,
+    "2 변동상승": 25,
+    "3 안정횡보": 0,
+    "4 변동횡보": 7,
+    "5 안정하락": 0,
+    "6 변동하락": 0
+   }
+  },
+  {
+   "peak": "2021-07-06",
+   "peak_close": 39861.0,
+   "trough": "2022-09-30",
+   "trough_close": 26178.0,
+   "drop": -0.3432678557989012,
+   "peak_to_trough_sessions": 305,
+   "a_dd60_le_-10%": {
+    "lag": 60,
+    "date": "2021-10-05",
+    "already_at_peak": false,
+    "dd_at_detect": -0.10218007576327737,
+    "remaining_to_trough": -0.2685257628255281,
+    "after_trough": false
+   },
+   "b_mu_le_0.5": {
+    "lag": 4,
+    "date": "2021-07-12",
+    "already_at_peak": false,
+    "dd_at_detect": -0.02704397782293466,
+    "remaining_to_trough": -0.3250135368589331,
+    "after_trough": false
+   },
+   "c_mu_eq_0": {
+    "lag": 34,
+    "date": "2021-08-24",
+    "already_at_peak": false,
+    "dd_at_detect": -0.07804621058177164,
+    "remaining_to_trough": -0.28767346938775507,
+    "after_trough": false
+   },
+   "d_label_not_up": {
+    "lag": 1,
+    "date": "2021-07-07",
+    "already_at_peak": true,
+    "dd_at_detect": 0.0,
+    "remaining_to_trough": -0.3432678557989012,
+    "after_trough": false
+   },
+   "e_label_down": {
+    "lag": 72,
+    "date": "2021-10-22",
+    "already_at_peak": false,
+    "dd_at_detect": -0.10361004490604853,
+    "remaining_to_trough": -0.2673588760460105,
+    "after_trough": false
+   },
+   "labels_peak_to_trough": {
+    "1 안정상승": 0,
+    "2 변동상승": 0,
+    "3 안정횡보": 138,
+    "4 변동횡보": 55,
+    "5 안정하락": 76,
+    "6 변동하락": 36
+   }
+  },
+  {
+   "peak": "2024-07-11",
+   "peak_close": 38521.0,
+   "trough": "2025-04-09",
+   "trough_close": 30198.0,
+   "drop": -0.21606396510994008,
+   "peak_to_trough_sessions": 179,
+   "a_dd60_le_-10%": {
+    "lag": 18,
+    "date": "2024-08-06",
+    "already_at_peak": false,
+    "dd_at_detect": -0.1648711092650762,
+    "remaining_to_trough": -0.061299347217904865,
+    "after_trough": false
+   },
+   "b_mu_le_0.5": {
+    "lag": 11,
+    "date": "2024-07-26",
+    "already_at_peak": false,
+    "dd_at_detect": -0.0638353106097973,
+    "remaining_to_trough": -0.1626088403305418,
+    "after_trough": false
+   },
+   "c_mu_eq_0": {
+    "lag": 26,
+    "date": "2024-08-19",
+    "already_at_peak": false,
+    "dd_at_detect": -0.07364813997559772,
+    "remaining_to_trough": -0.15373837013787695,
+    "after_trough": false
+   },
+   "d_label_not_up": {
+    "lag": 1,
+    "date": "2024-07-12",
+    "already_at_peak": true,
+    "dd_at_detect": 0.0,
+    "remaining_to_trough": -0.21606396510994008,
+    "after_trough": false
+   },
+   "e_label_down": {
+    "lag": 58,
+    "date": "2024-10-10",
+    "already_at_peak": false,
+    "dd_at_detect": -0.13065600581501002,
+    "remaining_to_trough": -0.09824414715719065,
+    "after_trough": false
+   },
+   "labels_peak_to_trough": {
+    "1 안정상승": 0,
+    "2 변동상승": 0,
+    "3 안정횡보": 30,
+    "4 변동횡보": 67,
+    "5 안정하락": 40,
+    "6 변동하락": 42
+   }
+  },
+  {
+   "peak": "2026-02-26",
+   "peak_close": 94414.0,
+   "trough": "2026-03-31",
+   "trough_close": 74945.0,
+   "drop": -0.20620882496239967,
+   "peak_to_trough_sessions": 22,
+   "a_dd60_le_-10%": {
+    "lag": 4,
+    "date": "2026-03-05",
+    "already_at_peak": false,
+    "dd_at_detect": -0.20126252462558514,
+    "remaining_to_trough": -0.0061926483848724345,
+    "after_trough": false
+   },
+   "b_mu_le_0.5": {
+    "lag": 23,
+    "date": "2026-04-01",
+    "already_at_peak": false,
+    "dd_at_detect": -0.20620882496239967,
+    "remaining_to_trough": null,
+    "after_trough": true
+   },
+   "c_mu_eq_0": {
+    "lag": 113,
+    "date": "2026-08-12",
+    "already_at_peak": false,
+    "dd_at_detect": 0.05138009193551807,
+    "remaining_to_trough": null,
+    "after_trough": true
+   },
+   "d_label_not_up": {
+    "lag": 111,
+    "date": "2026-08-10",
+    "already_at_peak": false,
+    "dd_at_detect": 0.038934903721905556,
+    "remaining_to_trough": null,
+    "after_trough": true
+   },
+   "e_label_down": {
+    "lag": 120,
+    "date": "2026-08-24",
+    "already_at_peak": false,
+    "dd_at_detect": 0.1648696167941195,
+    "remaining_to_trough": null,
+    "after_trough": true
+   },
+   "labels_peak_to_trough": {
+    "1 안정상승": 0,
+    "2 변동상승": 22,
+    "3 안정횡보": 0,
+    "4 변동횡보": 0,
+    "5 안정하락": 0,
+    "6 변동하락": 0
+   }
+  },
+  {
+   "peak": "2026-06-22",
+   "peak_close": 148056.0,
+   "trough": "2026-07-30",
+   "trough_close": 87635.0,
+   "drop": -0.4080955854541525,
+   "peak_to_trough_sessions": 27,
+   "a_dd60_le_-10%": {
+    "lag": 2,
+    "date": "2026-06-24",
+    "already_at_peak": false,
+    "dd_at_detect": -0.10471037985627063,
+    "remaining_to_trough": -0.33886822629438795,
+    "after_trough": false
+   },
+   "b_mu_le_0.5": {
+    "lag": 13,
+    "date": "2026-07-09",
+    "already_at_peak": false,
+    "dd_at_detect": -0.21225752418003996,
+    "remaining_to_trough": -0.2486067049644174,
+    "after_trough": false
+   },
+   "c_mu_eq_0": {
+    "lag": 36,
+    "date": "2026-08-12",
+    "already_at_peak": false,
+    "dd_at_detect": -0.3295442265088885,
+    "remaining_to_trough": null,
+    "after_trough": true
+   },
+   "d_label_not_up": {
+    "lag": 34,
+    "date": "2026-08-10",
+    "already_at_peak": false,
+    "dd_at_detect": -0.337480412816772,
+    "remaining_to_trough": null,
+    "after_trough": true
+   },
+   "e_label_down": {
+    "lag": 43,
+    "date": "2026-08-24",
+    "already_at_peak": false,
+    "dd_at_detect": -0.2571729615821041,
+    "remaining_to_trough": null,
+    "after_trough": true
+   },
+   "labels_peak_to_trough": {
+    "1 안정상승": 0,
+    "2 변동상승": 27,
+    "3 안정횡보": 0,
+    "4 변동횡보": 0,
+    "5 안정하락": 0,
+    "6 변동하락": 0
+   }
+  }
+ ],
+ "cross_mu": {
+  "1 안정상승": {
+   "1.0": 744,
+   "0.75": 0,
+   "0.5": 121,
+   "0.0": 0
+  },
+  "2 변동상승": {
+   "1.0": 1225,
+   "0.75": 0,
+   "0.5": 284,
+   "0.0": 0
+  },
+  "3 안정횡보": {
+   "1.0": 1283,
+   "0.75": 291,
+   "0.5": 331,
+   "0.0": 587
+  },
+  "4 변동횡보": {
+   "1.0": 334,
+   "0.75": 127,
+   "0.5": 253,
+   "0.0": 429
+  },
+  "5 안정하락": {
+   "1.0": 0,
+   "0.75": 67,
+   "0.5": 0,
+   "0.0": 117
+  },
+  "6 변동하락": {
+   "1.0": 0,
+   "0.75": 317,
+   "0.5": 0,
+   "0.0": 916
+  }
+ },
+ "gate_5y": {
+  "common": 1390,
+  "mismatch": 0
+ }
+}
