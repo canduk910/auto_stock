@@ -37,7 +37,9 @@ def index_member_archive(arch: pd.DataFrame) -> pd.Series:
     return ((arch.market == "KOSPI") & (rk <= 200)) | ((arch.market == "KOSDAQ") & (rk <= 150))
 
 
-def features(b: dict, mem: np.ndarray) -> dict:
+def features(b: dict, mem: np.ndarray, turnover: str = "tv") -> dict:
+    """``turnover="tv"`` = 거래대금 열(cycle405) · ``"cv"`` = 원본 종가 × 거래량(운영 ``prepare`` 의
+    ``closes[0] * vols[0]`` 근사 — K1 차이 표 D2). 200억 문턱은 둘 다 거래대금 열(운영 ``list_by_filter``)."""
     o, h, l, c, tv = b["o"], b["h"], b["l"], b["c"], b["tv"]
     n = len(c)
     atr = IND.atr_sma(h, l, c, 14)
@@ -45,13 +47,19 @@ def features(b: dict, mem: np.ndarray) -> dict:
     ema = IND.ema_fir(c, 60)
     ema_y = np.full(n, np.nan)
     ema_y[1:] = ema[:-1]
-    avg_tv = IND.prior_mean(tv, 20)
+    if turnover == "tv":
+        tvx = tv
+    elif turnover == "cv":
+        tvx = np.asarray(b["c_raw"], float) * np.asarray(b["vol"], float)
+    else:
+        raise ValueError(turnover)
+    avg_tv = IND.prior_mean(tvx, 20)
     with np.errstate(invalid="ignore"):
         cond = ((np.arange(n) >= 62) & (c > ph) & (ph > 0) & (ema > ema_y) & (c > ema)
-                & (avg_tv > 0) & (tv >= ENTRY["vol_mult"] * avg_tv) & (atr > 0)
+                & (avg_tv > 0) & (tvx >= ENTRY["vol_mult"] * avg_tv) & (atr > 0)
                 & mem & (tv >= ENTRY["min_trade"]) & ~b["notrade"])
     return {"atr": atr, "prior_high": ph, "cond": np.nan_to_num(cond).astype(bool),
-            "chan10": IND.prior_min(l, KK["channel"])}
+            "chan10": IND.prior_min(l, KK["channel"]), "turnover": tvx, "turnover_avg20": avg_tv}
 
 
 @dataclass
@@ -112,7 +120,9 @@ class KKPos:
         if self.armed:
             ch = self.f["chan10"][self._ti]
             if np.isfinite(ch) and ch > 0:
-                ls.append(BR.Line(ch, "TRAILING_STOP"))
+                # 운영 check_exit_signal = ``current_price < channel``(엄격). cycle405 재현은 ≤ —
+                # 기본값은 관문 1 일치를 위해 c405 그대로, 운영 해석판은 ``chan_strict=True``(K1 D1)
+                ls.append(BR.Line(ch, "TRAILING_STOP", strict=bool(self.kk.get("chan_strict", False))))
         return ls
 
     def _on_up(self, px: float):
@@ -172,9 +182,9 @@ class KKPos:
         return self.k * self.last_px
 
 
-def run_path(sig: Sig, b: dict, f: dict, end_gd: int, mode: str = "color") -> KKPos:
+def run_path(sig: Sig, b: dict, f: dict, end_gd: int, mode: str = "color", kk: dict = KK) -> KKPos:
     """자금 제약 없는 한 거래(1주 연속) — P1 모집단용."""
-    ps = KKPos(sig, b, f, 1, mode=mode)
+    ps = KKPos(sig, b, f, 1, mode=mode, kk=kk)
     if ps.intraday_phase(sig.ti, sig.gd, True):
         return ps
     for t in range(sig.ti + 1, len(b["c"])):
@@ -188,7 +198,7 @@ def run_path(sig: Sig, b: dict, f: dict, end_gd: int, mode: str = "color") -> KK
 
 
 def population(sigs: "list[Sig]", bars: dict, feats: dict, start_gd: int, end_gd: int,
-               mode: str = "color") -> "list[KKPos]":
+               mode: str = "color", kk: dict = KK) -> "list[KKPos]":
     """P1 신호 모집단 — 종목마다 앞 거래 청산 뒤에만 다음 진입 · m ≤ 0 은 진입 없음 · 예산 무관."""
     out, busy = [], {}
     for s in sigs:
@@ -196,7 +206,7 @@ def population(sigs: "list[Sig]", bars: dict, feats: dict, start_gd: int, end_gd
             continue
         if busy.get(s.ticker, -1) >= s.gd:
             continue
-        ps = run_path(s, bars[s.ticker], feats[s.ticker], end_gd, mode)
+        ps = run_path(s, bars[s.ticker], feats[s.ticker], end_gd, mode, kk=kk)
         busy[s.ticker] = ps.exit_gd if ps.exit_gd is not None else 10 ** 9
         out.append(ps)
     return out
