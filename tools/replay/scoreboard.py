@@ -484,7 +484,9 @@ EXTERNAL_ENTRIES = [
     "_workspace/analysis/gold_20261006/scoreboard_entries.json",          # 금 GOLD·AU_ · 나스닥100·2배·금·현금 NQG_(global 묶음)
     "_workspace/analysis/ra_us_20261006/scoreboard_entries.json",         # (라) 장세 규칙 미국 이식 RAUS_(S&P500·나스닥100 · 한국 폭 없음)
     "_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json", # (라) 미국 이식 + 무료 시장 폭(진짜 폭 S5FI·NDFI · 상승 비율 · 동일가중) RAUSB_
+    "_workspace/analysis/hedge_nocarry_20261006/scoreboard_entries.json", # 환헤지 항목 금리차 뺀 판 <원id>__NC — 표 행이 아니라 원 행의 alt_nocarry
 ]
+ALT_SUFFIX = {"__NC": "alt_nocarry"}   # 이 꼬리로 끝나는 외부 항목은 행으로 세지 않고 원 행에 대체판으로 붙인다(판정하지 않음)
 EXTERNAL_ROOTS = (_ROOT, MAIN_REPO, "/Users/koscom/Projects/auto_stock_rgate", "/Users/koscom/Projects/auto_stock_regv2")
 EXTERNAL_FORMAT = {
     "source": "만든 연구·코드 한 줄(필수)",
@@ -883,6 +885,22 @@ def write_yearly_csv(rows: list[dict], out_dir: str) -> str:
     return path
 
 
+def attach_alts(rows: list[dict], alts: list[dict]) -> list[str]:
+    """``<원id>__NC`` 같은 대체판 행을 원 행의 ``alt_nocarry`` 칸(metrics · curves · name · source)으로 붙인다.
+    원 행이 없으면 버리고 경고. 판정·상태는 원 행 것 그대로 둔다(대체판은 판정하지 않는다)."""
+    by = {r["id"]: r for r in rows}
+    warn = []
+    for a in alts:
+        sfx = next(s for s in ALT_SUFFIX if a["id"].endswith(s))
+        base = by.get(a["id"][: -len(sfx)])
+        if base is None:
+            warn.append(f"{a['id']} 원 행 없음 — 대체판 버림")
+            continue
+        base[ALT_SUFFIX[sfx]] = {"id": a["id"], "name": a["name"], "source": a["source"], "judged": False,
+                                 "metrics": a["metrics"], "curves": a["curves"]}
+    return warn
+
+
 def build(out_dir: str, book_dir: "str | None" = None, parquet: str = GLOBAL_PARQUET,
           external: "list[str] | None" = None) -> dict:
     t0 = time.time()
@@ -901,7 +919,7 @@ def build(out_dir: str, book_dir: "str | None" = None, parquet: str = GLOBAL_PAR
     print(f"[scoreboard] external {[x['entry'].id for x in ext]} · {ext_warn}", flush=True)
     k = curves_all["K200"]
     bench = pd.Series(k.value, index=k.dates)
-    rows, missing = [], []
+    rows, missing, alts = [], [], []
     for e in REGISTRY + [x["entry"] for x in ext]:
         assert e.status in STATUSES, e.status
         c = curves_all.get(e.id)
@@ -916,15 +934,17 @@ def build(out_dir: str, book_dir: "str | None" = None, parquet: str = GLOBAL_PAR
             mt["yearly_given_diff_max"] = max((abs(mt["yearly"][str(y)]["ret"] - float(r))
                                                for y, r in c.extra["yearly_given"].items() if str(y) in mt["yearly"]),
                                               default=None)
-        rows.append({"id": e.id, "name": e.name, "desc": e.desc, "group": e.group, "status": e.status,
-                     "status_ref": e.status_ref, "tax_note": e.tax_note, "source": c.source, "note": c.note,
-                     "extra": c.extra, "metrics": mt, "curves": curves(c.dates, c.value)})
+        row = {"id": e.id, "name": e.name, "desc": e.desc, "group": e.group, "status": e.status,
+               "status_ref": e.status_ref, "tax_note": e.tax_note, "source": c.source, "note": c.note,
+               "extra": c.extra, "metrics": mt, "curves": curves(c.dates, c.value)}
+        (alts if e.id.endswith(tuple(ALT_SUFFIX)) else rows).append(row)
+    alt_warn = attach_alts(rows, alts)
     res = {"generated_kst": pd.Timestamp.now(tz="Asia/Seoul").strftime("%Y-%m-%d %H:%M"),
            "rules": {"invest": INVEST, "month_cutoff": str(MONTH_CUTOFF), "full_year_min_days": FULL_YEAR_MIN_DAYS,
                      "rf": "원화 3개월 금리(FRED IR3TIB01KRM156N, 한 달 미룸) 누적 — global_daily_krw CASH_ret",
                      "bench": "K200 행(원화 총수익 지수 모형, 1995~)"},
            "missing": missing, "external_files": list(EXTERNAL_ENTRIES if external is None else external),
-           "external_warnings": ext_warn, "rows": rows}
+           "external_warnings": ext_warn + alt_warn, "rows": rows}
     res["reconcile"] = reconcile(rows)
     res = _clean(res)
     os.makedirs(out_dir, exist_ok=True)
