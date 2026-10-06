@@ -78,31 +78,75 @@ EXTRA_KEEP = ["start_equity", "rep_seed", "n_seeds", "seed_cagr_median", "seed_c
               "seed_mdd_median", "fills_per_year", "orders_per_year", "avg_stock_share", "cost_yr", "window"]
 
 
+def _metrics(m: dict) -> dict:
+    mm = {k: (r6(m[k]) if not isinstance(m[k], str) else m[k]) for k in KEEP if k in m}
+    mm["best_year"] = {"year": m["best_year"]["year"], "ret": r6(m["best_year"]["ret"])} if m.get("best_year") else None
+    mm["worst_year"] = {"year": m["worst_year"]["year"], "ret": r6(m["worst_year"]["ret"])} if m.get("worst_year") else None
+    mm["yearly"] = {y: [r6(v["ret"]), 1 if v["full"] else 0, v["days"]] for y, v in m["yearly"].items()}
+    return mm
+
+
+def _curves(c: dict) -> dict:
+    return {"m": [s[:7] for s in c["month_end"]],
+            "c": [r6(float(f"{v:.5g}")) for v in c["cum"]],
+            "d": [round(v, 4) for v in c["dd_min"]]}
+
+
 def compress(src: dict) -> dict:
     rows = []
     for r in src["rows"]:
-        m = r["metrics"]
-        mm = {k: (r6(m[k]) if not isinstance(m[k], str) else m[k]) for k in KEEP if k in m}
-        mm["best_year"] = {"year": m["best_year"]["year"], "ret": r6(m["best_year"]["ret"])} if m.get("best_year") else None
-        mm["worst_year"] = {"year": m["worst_year"]["year"], "ret": r6(m["worst_year"]["ret"])} if m.get("worst_year") else None
-        mm["yearly"] = {y: [r6(v["ret"]), 1 if v["full"] else 0, v["days"]] for y, v in m["yearly"].items()}
         e = r["extra"]
         ex = {}
         for k in EXTRA_KEEP:
             if k in e:
                 ex[k] = r6(e[k]) if not isinstance(e[k], (str, list)) else e[k]
-        c = r["curves"]
-        rows.append({
+        row = {
             "id": r["id"], "name": r["name"], "desc": r["desc"], "group": map_group(r["id"], r["group"]),
             "status": r["status"], "status_ref": r["status_ref"], "tax_note": r["tax_note"],
-            "source": r["source"], "note": r["note"], "extra": ex, "metrics": mm,
-            "curves": {"m": [s[:7] for s in c["month_end"]],
-                       "c": [r6(float(f"{v:.5g}")) for v in c["cum"]],
-                       "d": [round(v, 4) for v in c["dd_min"]]},
-        })
+            "source": r["source"], "note": r["note"], "extra": ex, "metrics": _metrics(r["metrics"]),
+            "curves": _curves(r["curves"]),
+        }
+        alt = r.get("alt_nocarry")
+        if alt:  # 환헤지 항목의 금리차 뺀 판(scoreboard.attach_alts) — 판정하지 않는 대체판
+            row["alt"] = {"id": alt["id"], "metrics": _metrics(alt["metrics"]), "curves": _curves(alt["curves"])}
+        rows.append(row)
     return {"generated_kst": src["generated_kst"], "rules": src["rules"],
             "reconcile": {"n": len(src["reconcile"]), "match": sum(1 for x in src["reconcile"] if x["match"])},
             "rows": rows}
+
+
+# ---------- 필터 태그 ----------
+
+TAG_FIELDS = ("regime", "fx", "assets")
+
+
+def resolve_tags(ex: dict, rows: list[dict]) -> tuple[dict, list[str]]:
+    """항목마다 regime(bool) · fx(U/H/N) · assets(목록) — explain.json 의 "tags"(묶음 기본값 → 규칙 → 항목).
+    빈 칸 · 허용 밖 값 · 환헤지(H) ↔ 금리차 뺀 판(alt) 불일치는 문제 목록으로 돌려준다(빈 목록 = 통과)."""
+    spec = ex.get("tags") or {}
+    vals = spec.get("values", {})
+    rules = [(re.compile(x["re"]), x["set"]) for x in spec.get("rules", [])]
+    out, problems = {}, []
+    if not spec:
+        return out, ["explain.json 에 tags 없음"]
+    for r in rows:
+        t: dict = {}
+        t.update(spec.get("group_defaults", {}).get(r["group"], {}))
+        for rx, st in rules:
+            if rx.search(r["id"]):
+                t.update(st)
+        t.update(spec.get("ids", {}).get(r["id"], {}))
+        t = {k: t.get(k) for k in TAG_FIELDS}
+        if not isinstance(t["regime"], bool):
+            problems.append(f"{r['id']}: 태그 regime 없음·형식 오류 {t['regime']!r}")
+        if t["fx"] not in vals.get("fx", {}):
+            problems.append(f"{r['id']}: 태그 fx 없음·허용 밖 {t['fx']!r}")
+        if not t["assets"] or any(a not in vals.get("assets", {}) for a in t["assets"]):
+            problems.append(f"{r['id']}: 태그 assets 없음·허용 밖 {t['assets']!r}")
+        if (t["fx"] == "H") != bool(r.get("alt")):
+            problems.append(f"{r['id']}: 환헤지 태그(fx=H)와 금리차 뺀 판(alt) 짝이 안 맞음 — fx={t['fx']!r} · alt={bool(r.get('alt'))}")
+        out[r["id"]] = t
+    return out, problems
 
 
 # ---------- 설명 풀기 ----------
@@ -221,6 +265,11 @@ def build(src_path: Path, template_path: Path, explain_path: Path, out_path: Pat
     ex = json.loads(explain_path.read_text(encoding="utf-8"))
     explain = build_explain(ex, data["rows"])
     problems = check_explain(explain)
+    tags, tag_problems = resolve_tags(ex, data["rows"])
+    problems += tag_problems
+    for r in data["rows"]:
+        r["tags"] = tags.get(r["id"])
+    explain["tag_labels"] = (ex.get("tags") or {}).get("values", {})
     report = {"rows": len(data["rows"]), "problems": problems, "undefined": undefined_ids(explain)}
     if problems:
         return report

@@ -186,6 +186,48 @@ ul.lim{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:8px;ma
 code{font-family:var(--mono);font-size:12.5px;background:var(--surface-2);padding:1px 5px;border-radius:4px;word-break:break-all}
 footer{color:var(--muted);font-size:12px;border-top:1px solid var(--line);padding-top:14px;display:flex;flex-direction:column;gap:4px}
 
+/* carry toggle */
+.carrybox{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px;display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center}
+.swl{display:inline-flex;gap:10px;align-items:center;cursor:pointer;font-weight:700;font-size:14px}
+.swl input{position:absolute;opacity:0;width:1px;height:1px}
+.swl .track{width:38px;height:22px;border-radius:11px;background:var(--line-strong);position:relative;flex:none;transition:background .12s}
+.swl .track::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--surface);transition:transform .12s}
+.swl input:checked + .track{background:var(--accent)}
+.swl input:checked + .track::after{transform:translateX(16px)}
+.swl input:focus-visible + .track{outline:2px solid var(--accent);outline-offset:2px}
+.carrybox .cstate{font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+.carrybox .cnote{flex-basis:100%;font-size:13px;color:var(--ink-2);max-width:90ch}
+.ncb{display:inline-block;font-size:11px;font-weight:600;color:var(--warn-ink);background:var(--warn-bg);border-radius:4px;padding:0 5px;margin-left:4px}
+.nojudge{display:block;font-size:11px;color:var(--muted);white-space:normal;max-width:12em}
+/* filter */
+.fbox{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:block}
+.fbox > summary{cursor:pointer;font-weight:600;font-size:14px;list-style:none;display:flex;justify-content:space-between;gap:8px}
+.fbox > summary::-webkit-details-marker{display:none}
+@media (min-width:521px){.fbox > summary{display:none}}
+.fbody{display:flex;flex-direction:column;gap:10px}
+@media (max-width:520px){.fbox[open] .fbody{margin-top:10px}}
+.frow{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center}
+.fgrp{display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.fgrp .fl{font-size:12px;color:var(--muted);font-weight:600;margin-right:2px}
+.fsearch{font:inherit;font-size:13px;padding:6px 10px;border-radius:6px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);width:260px;max-width:100%}
+.fbtn{font:inherit;font-size:12px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink-2);padding:3px 10px;border-radius:14px;cursor:pointer}
+.fbtn:hover{color:var(--ink)}
+.fbtn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.fcount{font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+.fchips{display:flex;flex-wrap:wrap;gap:6px}
+.fchips:empty{display:none}
+details.rng summary{cursor:pointer;font-weight:600;font-size:13px;color:var(--ink-2)}
+.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px 14px;margin-top:8px}
+.rcell{display:flex;flex-direction:column;gap:3px;font-size:12px}
+.rcell .rl{font-weight:600;color:var(--ink-2)}
+.rcell .ri{display:flex;gap:6px;align-items:center;color:var(--muted)}
+.rcell input{font:inherit;font-family:var(--mono);font-size:12px;width:78px;padding:4px 6px;border-radius:5px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink)}
+.rcell input.bad{border-color:var(--up)}
+.rcell.on .rl{color:var(--accent)}
+table.sb th .fic{font-size:10px;width:15px;height:15px;border-radius:3px;border:1px solid transparent;display:inline-grid;place-items:center;color:var(--muted);background:transparent;padding:0;cursor:pointer}
+table.sb th .fic:hover{border-color:var(--line-strong);color:var(--ink)}
+table.sb th .fic.on{color:var(--accent-ink);background:var(--accent)}
+.fempty{padding:14px;border:1px dashed var(--line-strong);border-radius:8px;color:var(--ink-2);font-size:14px}
 #tip{position:fixed;z-index:50;max-width:300px;background:var(--ink);color:var(--bg);font-size:12.5px;line-height:1.5;padding:8px 10px;border-radius:6px;pointer-events:none;box-shadow:0 4px 14px rgba(0,0,0,.18)}
 @media (prefers-reduced-motion:no-preference){.tab,.seg button{transition:background .12s,color .12s}}
 </style>
@@ -196,6 +238,12 @@ footer{color:var(--muted);font-size:12px;border-top:1px solid var(--line);paddin
     <h1>30년 전략 성적표</h1>
     <p class="meta" id="genmeta"></p>
   </header>
+
+  <div class="carrybox" role="group" aria-labelledby="carryLbl">
+    <label class="swl"><input type="checkbox" id="carryTg" checked><span class="track" aria-hidden="true"></span><span id="carryLbl">환헤지 금리차 반영</span></label>
+    <span class="cstate" id="carryState" aria-live="polite"></span>
+    <p class="cnote">환헤지판 수익 = 현지 수익 + (한국 금리 − 미국 금리). 끄면 금리차를 뺀 순수 환율 제거판을 봅니다. 환노출판에는 금리차가 없어 바뀌지 않습니다. <span class="hint">닛케이225 헤지는 일본 금리, HSCEI 는 홍콩 달러가 미국 달러에 묶여 미국 금리를 씁니다. 금리차 뺀 판은 판정하지 않습니다(참고).</span></p>
+  </div>
 
   <section class="summary" aria-labelledby="sum-h">
     <h2 id="sum-h">쉬운 말 요약</h2>
@@ -215,6 +263,25 @@ footer{color:var(--muted);font-size:12px;border-top:1px solid var(--line);paddin
       <p>열 머리를 누르면 정렬합니다. 열 머리에 마우스를 올리거나 <span class="mono">?</span> 를 누르면 뜻이 나옵니다. 왼쪽 칸을 체크하면 아래 곡선에 겹쳐 그립니다. 전략 이름 아래 <b>설명</b> 을 누르면 어떤 전략이고 무엇에 투자하는지 펼쳐집니다.</p>
     </div>
     <details class="gloss" id="gloss"><summary>용어 풀이</summary><dl class="gl-list" id="glList"></dl></details>
+    <details class="fbox" id="fbox"><summary><span>필터 · 수치 조건</span><span class="fcount" id="fcountS"></span></summary>
+      <div class="fbody" role="search" aria-label="성적표 필터">
+        <div class="frow">
+          <input type="search" class="fsearch" id="fq" placeholder="전략 이름·id·설명 검색" aria-label="전략 이름·id·설명 검색">
+          <div class="fgrp" role="group" aria-label="장세 판단"><span class="fl">장세 판단</span><span id="fRegime"></span></div>
+          <div class="fgrp" role="group" aria-label="환율"><span class="fl">환율</span><span id="fFx"></span></div>
+        </div>
+        <div class="frow">
+          <div class="fgrp" role="group" aria-label="투자 상품군(여럿 고르면 하나라도 들어 있는 항목)"><span class="fl">상품군</span><span id="fAssets"></span></div>
+        </div>
+        <div class="frow">
+          <div class="fgrp" role="group" aria-label="판정"><span class="fl">판정</span><span id="fStatus"></span></div>
+          <button type="button" class="btn" id="fReset">필터 초기화</button>
+          <span class="fcount" id="fcount" aria-live="polite"></span>
+        </div>
+        <div class="fchips" id="fchips" aria-label="설정된 수치 조건"></div>
+        <details class="rng" id="rngBox"><summary>수치 조건(열마다 최소·최대)</summary><div class="rgrid" id="rgrid"></div><p class="hint" style="margin-top:6px">값은 표에 보이는 단위로 넣습니다(%, %p, 일, 년, 만 원, 배수). 최대 낙폭은 음수라 「얕은 쪽 한도」 에 −40(또는 40)을 넣으면 −40% 보다 얕은 항목만 남습니다. 「환헤지 금리차 반영」 을 끄면 환헤지 항목은 금리차 뺀 값으로 거릅니다.</p></details>
+      </div>
+    </details>
     <div>
       <div class="tabs" role="tablist" id="tabs"></div>
       <div class="panel" role="tabpanel" id="panel"></div>
@@ -328,7 +395,11 @@ const STATUS = {"통과":["pass","✓"],"실패":["fail","✕"],"보류":["hold"
 function chip(s){ const c=STATUS[s]||["ref",""]; return `<span class="chip ${c[0]}"><span aria-hidden="true">${c[1]}</span>${s}</span>`; }
 
 /* ---------- columns ---------- */
-const M = r => r.metrics, X = r => r.extra || {};
+/* 환헤지 금리차 반영 토글 — 꺼지면 금리차 뺀 판(r.alt)이 있는 항목은 그 지표·곡선으로 보인다(판정은 원판 것 그대로). */
+let carryOn = true;
+const altShown = r => !carryOn && !!r.alt;
+const VW = r => altShown(r) ? r.alt : r;
+const M = r => VW(r).metrics, X = r => r.extra || {};
 const COLS = [
   {k:"name", label:"전략", l:true, tip:"전략 이름과 내부 이름(id). 체크하면 아래 곡선에 겹쳐 그립니다.", sv:r=>r.name, html:null},
   {k:"total", label:"최종 누적", tip:"처음부터 끝까지 모두 몇 % 불었나. 마지막 평가액 ÷ 시작 평가액 − 1.", sv:r=>M(r).total_return, html:r=>`<span class="num ${cls(M(r).total_return)}">${pctAuto(M(r).total_return)}</span>`},
@@ -353,12 +424,81 @@ const COLS = [
   {k:"corr", label:"KOSPI200 상관", tip:"같은 달 수익이 KOSPI200 과 얼마나 같이 움직였나(월 상관). 1 = 똑같이, 0 = 무관, 음수 = 반대로.", sv:r=>M(r).corr_k200, html:r=>`<span class="num">${f2(M(r).corr_k200)}</span>`},
   {k:"final", label:"1천만 원 →", tip:"처음에 1천만 원을 넣었다면 끝에 얼마가 됐나. 1천만 원 × 마지막 ÷ 시작.", sv:r=>M(r).final_value_10m, html:r=>`<b class="num">${won(M(r).final_value_10m)}</b>`},
   {k:"period", label:"기간", tip:"시작일 ~ 끝일과 연수. 기간이 다르면 숫자를 그대로 비교하지 않습니다.", sv:r=>M(r).years, html:r=>`<span class="num">${ym(M(r).start)} ~ ${ym(M(r).end)}</span><span class="sub">${M(r).years.toFixed(1)}년</span>`},
-  {k:"status", label:"판정", l:true, tip:"각 결과 문서의 결론을 옮겨 적은 것입니다. 이 성적표가 새로 판정한 것이 아닙니다. 기준선 = 비교 기준 · 참고 = 판정 대상 아님.", sv:r=>r.status, html:r=>chip(r.status)},
+  {k:"status", label:"판정", l:true, tip:"각 결과 문서의 결론을 옮겨 적은 것입니다. 이 성적표가 새로 판정한 것이 아닙니다. 기준선 = 비교 기준 · 참고 = 판정 대상 아님.", sv:r=>r.status, html:r=>chip(r.status)+(altShown(r)?`<span class="nojudge">금리차 뺀 판은 판정하지 않음(참고)</span>`:"")},
   {k:"extra", label:"보충", l:true, tip:"묶음별 추가 정보. 개별 전략 = 씨앗 16개의 연평균 범위와 중앙값 · 바탕 층 = 평균 주식 비중.", sv:r=>X(r).seed_cagr_median ?? X(r).avg_stock_share ?? null, html:r=>{
       const x=X(r); if (x.seed_cagr_min!=null) return `<span class="num">${pct(x.seed_cagr_min,2)} ~ ${pct(x.seed_cagr_max,2)}</span><span class="sub">씨앗 ${x.n_seeds}개 · 중앙 ${pct(x.seed_cagr_median,2)}</span>`;
       if (x.avg_stock_share!=null) return `<span class="num">주식 비중 평균 ${pct(x.avg_stock_share,0,false)}</span>`;
       return `<span class="flat">—</span>`; }},
 ];
+
+/*__FILTER_CORE_BEGIN__*/
+/* 수치 조건 열 — k = 표 열 key(기간은 years). 값은 표에 보이는 단위(scale 을 곱한 값)로 넣고 비교한다.
+   neg = 늘 0 이하인 열(최대 낙폭): 양수를 넣어도 음수로 바꾸고, min = 얕은 쪽 한도 · max = 깊은 쪽 한도. */
+const RANGES = [
+  {k:"total", label:"최종 누적", unit:"%", scale:100, get:(m)=>m.total_return},
+  {k:"cagr", label:"연평균(CAGR)", unit:"%", scale:100, get:(m)=>m.cagr},
+  {k:"best", label:"최고 연간", unit:"%", scale:100, get:(m)=>m.best_year ? m.best_year.ret : null},
+  {k:"worst", label:"최악 연간", unit:"%", scale:100, get:(m)=>m.worst_year ? m.worst_year.ret : null},
+  {k:"mdd", label:"최대 낙폭", unit:"%", scale:100, neg:true, get:(m)=>m.mdd},
+  {k:"uw", label:"최장 회복 기간", unit:"일", scale:1, get:(m)=>m.longest_underwater_days},
+  {k:"vol", label:"변동성", unit:"%", scale:100, get:(m)=>m.vol},
+  {k:"sharpe", label:"샤프", unit:"", scale:1, get:(m)=>m.sharpe},
+  {k:"sortino", label:"소르티노", unit:"", scale:1, get:(m)=>m.sortino},
+  {k:"mar", label:"MAR", unit:"", scale:1, get:(m)=>m.mar},
+  {k:"pos", label:"플러스 해", unit:"%", scale:100, get:(m)=>m.pos_year_ratio},
+  {k:"w12", label:"최악 12개월", unit:"%", scale:100, get:(m)=>m.worst_12m},
+  {k:"ulcer", label:"울서 지수", unit:"", scale:1, get:(m)=>m.ulcer},
+  {k:"cost", label:"연 비용", unit:"%", scale:100, get:(m,x)=>m.cost_yr ?? (x ? x.cost_yr : null) ?? null},
+  {k:"tax", label:"세후 연평균", unit:"%", scale:100, get:(m)=>m.after_tax_cagr},
+  {k:"ex", label:"KOSPI200 대비 연 초과", unit:"%p", scale:100, get:(m)=>m.excess_vs_k200},
+  {k:"corr", label:"KOSPI200 상관", unit:"", scale:1, get:(m)=>m.corr_k200},
+  {k:"final", label:"1천만 원 →", unit:"만 원", scale:1e-4, get:(m)=>m.final_value_10m},
+  {k:"years", label:"기간(연수)", unit:"년", scale:1, get:(m)=>m.years},
+];
+const FDEF = {q:"", regime:"all", fx:"all", assets:[], status:[], ranges:{}};
+const RANGE_EPS = 1e-9;
+/* 입력 글자 → 수(못 읽으면 null). 유니코드 빼기 · % · 쉼표 · 공백 허용. neg 열은 양수를 음수로 바꾼다. */
+function parseBound(txt, spec){
+  if (txt==null) return null;
+  const t = String(txt).replace(/[−–—]/g,"-").replace(/%p|만\s*원|[%,\s일년]/g,"").trim();
+  if (t==="" || t==="-" ) return null;
+  const v = Number(t); if (!isFinite(v)) return null;
+  return spec && spec.neg ? -Math.abs(v) : v;
+}
+/* 표시 단위 값 = 원자료 값 × scale(소수 → %, 원 → 만 원). null·비수 = null. */
+function shownValue(spec, m, x){ const v = spec.get(m||{}, x||{}); return (v==null || !isFinite(v)) ? null : v*spec.scale; }
+/* 범위 하나 — min ≤ v ≤ max(경계 포함 · 부동소수 오차 1e-9 허용). 조건이 있는데 값이 없으면 탈락. */
+function inRange(v, rg){
+  if (!rg) return true;
+  const hasMin = rg.min!=null, hasMax = rg.max!=null;
+  if (!hasMin && !hasMax) return true;
+  if (v==null) return false;
+  if (hasMin && v < rg.min - RANGE_EPS) return false;
+  if (hasMax && v > rg.max + RANGE_EPS) return false;
+  return true;
+}
+const _norm = s => String(s==null?"":s).toLowerCase().normalize("NFC");
+/* 항목 하나가 필터를 통과하나. view = {metrics, extra}(토글 반영된 보기) · tags = {regime, fx, assets} · text = 검색 대상 글들. */
+function passFilter(row, view, f, text){
+  const t = row.tags || {};
+  if (f.q){ const hay = _norm(text); if (!_norm(f.q).split(/\s+/).filter(Boolean).every(w=>hay.includes(w))) return false; }
+  if (f.regime==="on" && t.regime!==true) return false;
+  if (f.regime==="off" && t.regime!==false) return false;
+  if (f.fx && f.fx!=="all" && t.fx!==f.fx) return false;
+  if (f.assets && f.assets.length && !(t.assets||[]).some(a=>f.assets.includes(a))) return false;
+  if (f.status && f.status.length && !f.status.includes(row.status)) return false;
+  for (const spec of RANGES){ const rg = f.ranges && f.ranges[spec.k]; if (rg && !inRange(shownValue(spec, view.metrics, view.extra), rg)) return false; }
+  return true;
+}
+/* 조건 칩 글 — 「연평균 ≥ 10%」 · 최대 낙폭은 얕은/깊은 쪽을 붙인다. */
+function rangeChipText(spec, rg){
+  const u = spec.unit==="만 원" ? "만 원" : spec.unit; const f = v => String(v).replace(/^-/,"−")+u;
+  const lo = rg.min!=null ? f(rg.min) : null, hi = rg.max!=null ? f(rg.max) : null;
+  if (spec.neg){ return [lo?`${spec.label} ≥ ${lo}(얕은 쪽)`:null, hi?`${spec.label} ≤ ${hi}(깊은 쪽)`:null].filter(Boolean).join(" · "); }
+  if (lo && hi) return `${lo} ≤ ${spec.label} ≤ ${hi}`;
+  return lo ? `${spec.label} ≥ ${lo}` : `${spec.label} ≤ ${hi}`;
+}
+/*__FILTER_CORE_END__*/
 
 /* ---------- state ---------- */
 const store = { get(k,d){ try{ const v=localStorage.getItem("sb30:"+k); return v==null?d:JSON.parse(v);}catch(e){return d;} }, set(k,v){ try{ localStorage.setItem("sb30:"+k, JSON.stringify(v)); }catch(e){} } };
@@ -371,6 +511,11 @@ let selected = store.get("sel", null); // [{id, slot}]
 if (!Array.isArray(selected)) selected = GROUPS[0].def.map((id,i)=>({id,slot:i}));
 selected = selected.filter(s=>byId[s.id]);
 let logScale = store.get("log", true);
+carryOn = store.get("carry", true) !== false;
+let flt = (()=>{ const v = store.get("flt", null); const o = Object.assign({}, FDEF, (v && typeof v==="object") ? v : {});
+  ["assets","status"].forEach(k=>{ if (!Array.isArray(o[k])) o[k]=[]; }); if (!o.ranges || typeof o.ranges!=="object") o.ranges={}; return o; })();
+const searchText = r => { const x = XI(r.id) || {}; return [r.name, r.id, r.desc, x.short, x.label, x.what, x.assets, x.rule, x.variant].join(" "); };
+const passes = r => passFilter(r, {metrics:M(r), extra:X(r)}, flt, searchText(r));
 
 /* ---------- meta ---------- */
 document.getElementById("genmeta").textContent = `원자료 생성 ${DATA.generated_kst} KST · 전략 ${DATA.rows.length}개 · 시작 금액 ${Number(DATA.rules.invest).toLocaleString("en-US")}원 기준 환산 · 마지막 월 ${DATA.rules.month_cutoff}`;
@@ -387,9 +532,10 @@ document.addEventListener("click", e=>{ if (!e.target.closest(".q")) hideTip(); 
 
 /* ---------- tabs & table ---------- */
 const tabsEl = document.getElementById("tabs"), panel = document.getElementById("panel");
-function rowsOf(key){ return DATA.rows.filter(r=>groupOf(r)===key); }
+function rowsAll(key){ return DATA.rows.filter(r=>groupOf(r)===key); }
+function rowsOf(key){ return rowsAll(key).filter(passes); }
 function renderTabs(){
-  tabsEl.innerHTML = GROUPS.map(g=>`<button class="tab" role="tab" id="tab-${g.key}" aria-controls="panel" aria-selected="${g.key===curTab}" data-k="${g.key}">${g.label}<span class="since">${g.since}</span><span class="cnt">${rowsOf(g.key).length}</span></button>`).join("");
+  tabsEl.innerHTML = GROUPS.map(g=>`<button class="tab" role="tab" id="tab-${g.key}" aria-controls="panel" aria-selected="${g.key===curTab}" data-k="${g.key}">${g.label}<span class="since">${g.since}</span><span class="cnt">${filterActive() ? rowsOf(g.key).length+"/"+rowsAll(g.key).length : rowsAll(g.key).length}</span></button>`).join("");
   tabsEl.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{ curTab=b.dataset.k; store.set("tab",curTab); try{history.replaceState(null,"","#"+curTab);}catch(e){} renderTabs(); renderPanel(); renderHeatmap(); }));
 }
 function sortRows(rows){
@@ -405,15 +551,16 @@ function renderPanel(){
   if (g.members){
     const pend = g.members.filter(m=>!DATA.rows.some(r=>r.group===m.key));
     if (pend.length) h += `<div class="empty"><b>계산 중 — 아직 비어 있습니다</b><div class="empty-grid">${pend.map(m=>`<div class="empty-card"><b>${m.label}</b><span class="s">결과 대기 · 들어오면 이 자리에 같은 표로 채웁니다</span></div>`).join("")}</div></div>`;
-    if (!rows.length){ panel.innerHTML = h; return; }
+    if (!rows.length && !rowsAll(curTab).length){ panel.innerHTML = h; return; }
   }
+  if (!rows.length){ panel.innerHTML = h + `<div class="fempty">필터에 맞는 항목이 이 묶음에 없습니다(묶음 전체 ${rowsAll(curTab).length}개). 위 필터를 풀거나 다른 묶음을 보세요.</div>`; return; }
   const s = sortState[curTab]||{};
-  h += `<div class="tscroll"><table class="sb"><thead><tr>${COLS.map((c,i)=>`<th class="${c.l?"l":""} ${i===0?"stick":""}" tabindex="0" data-k="${c.k}" aria-sort="${s.k===c.k?(s.dir>0?"ascending":"descending"):"none"}"><span class="hl">${c.label}<button type="button" class="q" data-tip="${i}" aria-label="${c.label} 뜻">?</button><span class="arr">${s.k===c.k?(s.dir>0?"▲":"▼"):""}</span></span></th>`).join("")}</tr></thead><tbody>`;
+  h += `<div class="tscroll"><table class="sb"><thead><tr>${COLS.map((c,i)=>`<th class="${c.l?"l":""} ${i===0?"stick":""}" tabindex="0" data-k="${c.k}" aria-sort="${s.k===c.k?(s.dir>0?"ascending":"descending"):"none"}"><span class="hl">${c.label}<button type="button" class="q" data-tip="${i}" aria-label="${c.label} 뜻">?</button>${rkOf(c.k)?`<button type="button" class="fic ${flt.ranges[rkOf(c.k)]?"on":""}" data-rk="${rkOf(c.k)}" aria-label="${c.label} 수치 조건">▿</button>`:""}<span class="arr">${s.k===c.k?(s.dir>0?"▲":"▼"):""}</span></span></th>`).join("")}</tr></thead><tbody>`;
   for (const r of rows){
     const on = selected.some(x=>x.id===r.id);
     const xo = openX.has(r.id), xid = "x-"+r.id;
     h += `<tr>`+COLS.map((c,i)=>{
-      if (i===0) return `<td class="l stick"><div class="nmw"><label class="nm"><input type="checkbox" data-id="${r.id}" ${on?"checked":""} aria-label="${r.name} 곡선에 겹쳐 그리기"><span><span class="t">${r.name}</span><br><span class="id">${r.id}</span></span></label><button type="button" class="xbtn" data-x="${r.id}" aria-expanded="${xo}" aria-controls="${xid}" aria-label="${esc(r.name)} 설명 ${xo?"접기":"펼치기"}">설명<span class="car" aria-hidden="true">▾</span></button></div></td>`;
+      if (i===0) return `<td class="l stick"><div class="nmw"><label class="nm"><input type="checkbox" data-id="${r.id}" ${on?"checked":""} aria-label="${r.name} 곡선에 겹쳐 그리기"><span><span class="t">${r.name}</span>${altShown(r)?`<span class="ncb">금리차 제외</span>`:""}<br><span class="id">${r.id}</span></span></label><button type="button" class="xbtn" data-x="${r.id}" aria-expanded="${xo}" aria-controls="${xid}" aria-label="${esc(r.name)} 설명 ${xo?"접기":"펼치기"}">설명<span class="car" aria-hidden="true">▾</span></button></div></td>`;
       return `<td class="${c.l?"l":""}">${c.html(r)}</td>`; }).join("")+`</tr>`;
     h += `<tr class="xrow" id="${xid}" ${xo?"":"hidden"}><td colspan="${COLS.length}">${explainPanel(r)}</td></tr>`;
   }
@@ -423,7 +570,8 @@ function renderPanel(){
   panel.innerHTML = h;
   panel.querySelectorAll("thead th").forEach(th=>{
     const sortIt = ()=>{ const k=th.dataset.k; const cur=sortState[curTab]; const dir = cur&&cur.k===k ? -cur.dir : (k==="name"||k==="status"||k==="period"?1:-1); sortState[curTab]={k,dir}; store.set("sort",sortState); renderPanel(); };
-    th.addEventListener("click", e=>{ if (e.target.closest(".q")) return; sortIt(); });
+    th.addEventListener("click", e=>{ if (e.target.closest(".q") || e.target.closest(".fic")) return; sortIt(); });
+    const fi = th.querySelector(".fic"); if (fi) fi.addEventListener("click", e=>{ e.stopPropagation(); openRange(fi.dataset.rk); });
     th.addEventListener("keydown", e=>{ if (e.key==="Enter"||e.key===" "){ e.preventDefault(); sortIt(); } });
     const q = th.querySelector(".q"); const c = COLS[+q.dataset.tip];
     const html = `<b>${c.label}</b><br>${c.tip}`;
@@ -444,7 +592,7 @@ function renderPanel(){
 }
 function explainPanel(r){
   const x = XI(r.id);
-  const rows = x ? [["어떤 전략", x.what], ["투자 자산", x.assets], ["매매 규칙", x.rule], ["이 항목의 차이", x.variant]]
+  const rows = x ? [["어떤 전략", x.what], ["투자 자산", x.assets + (altShown(r) ? " (금리차 제외 — 현지 통화 수익)" : "")], ["매매 규칙", x.rule], ["이 항목의 차이", x.variant]]
                  : [["설명", r.desc]];
   return `<dl class="xpanel">${rows.map(([k,v])=>`<dt>${k}</dt><dd>${esc(v)}</dd>`).join("")}<dt>원 id</dt><dd><span class="xid">${esc(r.id)}</span>${x?`<br><span class="xdesc">원자료 설명 · ${esc(r.desc)}</span>`:""}</dd></dl>`;
 }
@@ -484,7 +632,7 @@ document.getElementById("scLog").addEventListener("click",()=>setScale(true));
 document.getElementById("scLin").addEventListener("click",()=>setScale(false));
 
 /* ---------- charts ---------- */
-const ALL_MONTHS = [...new Set(DATA.rows.flatMap(r=>r.curves.m))].sort();
+const ALL_MONTHS = [...new Set(DATA.rows.flatMap(r=>r.curves.m.concat(r.alt ? r.alt.curves.m : [])))].sort();
 let cumChart=null, ddChart=null;
 function baseOpts(){
   const ink2=cssv("--ink-2"), muted=cssv("--axis"), grid=cssv("--grid");
@@ -496,19 +644,19 @@ function baseOpts(){
 function renderCharts(){
   if (typeof Chart==="undefined") return;
   Chart.defaults.font.family = "IBM Plex Sans KR, system-ui, sans-serif";
-  const ds = (fn, isDD) => selected.map(s=>{ const r=byId[s.id]; const mp=new Map(r.curves.m.map((m,i)=>[m, fn(r,i)])); const col=slotColor(s.slot);
-    return { label:r.name+(shortOf(r)?` (${shortOf(r)})`:""), data:ALL_MONTHS.map(m=>mp.has(m)?mp.get(m):null), borderColor:col, backgroundColor:col, borderWidth:2, pointRadius:0, pointHoverRadius:4, pointHoverBorderWidth:2, pointHoverBorderColor:cssv("--surface"), tension:0 }; });
+  const ds = (fn, isDD) => selected.map(s=>{ const r=byId[s.id]; const cv=VW(r).curves; const mp=new Map(cv.m.map((m,i)=>[m, fn(cv,i)])); const col=slotColor(s.slot);
+    return { label:r.name+(altShown(r)?" · 금리차 제외":"")+(shortOf(r)?` (${shortOf(r)})`:""), data:ALL_MONTHS.map(m=>mp.has(m)?mp.get(m):null), borderColor:col, backgroundColor:col, borderWidth:2, pointRadius:0, pointHoverRadius:4, pointHoverBorderWidth:2, pointHoverBorderColor:cssv("--surface"), tension:0 }; });
   const o1 = baseOpts();
   o1.scales.y.type = logScale ? "logarithmic" : "linear";
   o1.scales.y.ticks.callback = v => { if (logScale){ const e=Math.log10(v); const lead=v/Math.pow(10,Math.floor(e)); if (![1,2,5].some(k=>Math.abs(lead-k)<1e-6)) return null; } return won(v*1e4); };
   o1.plugins.tooltip.callbacks = { label: c => ` ${c.dataset.label}: ${won(c.parsed.y*1e4)}` };
   if (cumChart) cumChart.destroy();
-  cumChart = new Chart(document.getElementById("cumChart"), { type:"line", data:{ labels:ALL_MONTHS, datasets: ds((r,i)=>r.curves.c[i]*1000, false) }, options:o1 });
+  cumChart = new Chart(document.getElementById("cumChart"), { type:"line", data:{ labels:ALL_MONTHS, datasets: ds((cv,i)=>cv.c[i]*1000, false) }, options:o1 });
   const o2 = baseOpts();
   o2.scales.y.max = 0; o2.scales.y.ticks.callback = v => sgn(String(v))+"%";
   o2.plugins.tooltip.callbacks = { label: c => ` ${c.dataset.label}: ${sgn(c.parsed.y.toFixed(1))}%` };
   if (ddChart) ddChart.destroy();
-  ddChart = new Chart(document.getElementById("ddChart"), { type:"line", data:{ labels:ALL_MONTHS, datasets: ds((r,i)=>+(r.curves.d[i]*100).toFixed(2), true) }, options:o2 });
+  ddChart = new Chart(document.getElementById("ddChart"), { type:"line", data:{ labels:ALL_MONTHS, datasets: ds((cv,i)=>+(cv.d[i]*100).toFixed(2), true) }, options:o2 });
 }
 
 /* ---------- heatmap ---------- */
@@ -520,19 +668,19 @@ function cellColor(v){ const mid=hex2rgb(cssv("--hm-mid")), pos=hex2rgb(cssv("--
 function renderHeatmap(){
   const rows = sortRows(rowsOf(curTab)); const el=document.getElementById("hm");
   const g = GROUPS.find(x=>x.key===curTab);
-  if (!rows.length){ el.innerHTML = `<tr><td style="width:auto;padding:12px;font-family:var(--sans);color:var(--muted)">「${g.label}」 묶음은 아직 비어 있습니다.</td></tr>`; renderHmLegend(); return; }
-  const years = [...new Set(rows.flatMap(r=>Object.keys(r.metrics.yearly)))].sort();
+  if (!rows.length){ el.innerHTML = `<tr><td style="width:auto;padding:12px;font-family:var(--sans);color:var(--muted)">「${g.label}」 묶음에 ${rowsAll(curTab).length ? "필터에 맞는 항목이 없습니다" : "아직 항목이 없습니다"}.</td></tr>`; renderHmLegend(); return; }
+  const years = [...new Set(rows.flatMap(r=>Object.keys(M(r).yearly)))].sort();
   let h = `<thead><tr><th class="rn">${g.label}</th>${years.map(y=>`<th>${y}</th>`).join("")}</tr></thead><tbody>`;
   for (const r of rows){
-    h += `<tr><th class="rn" title="${esc(r.name)}${shortOf(r)?" — "+esc(shortOf(r)):""}">${r.name}</th>`;
-    for (const y of years){ const v=r.metrics.yearly[y]; if (!v || v[0]==null){ h+=`<td class="na">·</td>`; continue; }
+    h += `<tr><th class="rn" title="${esc(r.name)}${altShown(r)?" · 금리차 제외":""}${shortOf(r)?" — "+esc(shortOf(r)):""}">${r.name}${altShown(r)?" ·NC":""}</th>`;
+    for (const y of years){ const v=M(r).yearly[y]; if (!v || v[0]==null){ h+=`<td class="na">·</td>`; continue; }
       const c=cellColor(v[0]); const n=v[0]*100; const rn=Math.round(n); const txt = rn===0 ? "0" : sgn(String(rn));
       h += `<td class="${v[1]?"":"part"}" style="background:${c.bg};color:${c.fg}" data-r="${r.id}" data-y="${y}">${txt}</td>`; }
     h += `</tr>`;
   }
   el.innerHTML = h + `</tbody>`;
   el.querySelectorAll("td[data-r]").forEach(td=>{
-    const r=byId[td.dataset.r], y=td.dataset.y, v=r.metrics.yearly[y];
+    const r=byId[td.dataset.r], y=td.dataset.y, v=M(r).yearly[y];
     const html=`<b>${r.name}</b>${shortOf(r)?`<br><span>${esc(shortOf(r))}</span>`:""}<br>${y}년 <b>${pct(v[0])}</b><br>덮은 날 ${v[2]}일${v[1]?"":" · 온전한 해 아님"}`;
     td.addEventListener("mouseenter", e=>showTip(html,e.clientX,e.clientY));
     td.addEventListener("mousemove", e=>showTip(html,e.clientX,e.clientY));
@@ -568,7 +716,77 @@ document.getElementById("glList").innerHTML = ((EXPLAIN && EXPLAIN.glossary) || 
 document.querySelector("#gloss summary").textContent = `용어 풀이 (${((EXPLAIN && EXPLAIN.glossary) || []).length}개)`;
 document.getElementById("defs").innerHTML = DEFS.map(d=>`<div class="def"><b>${d[0]}</b><span>${d[1]}</span><span class="f">${d[2]}</span></div>`).join("");
 
+/* ---------- filter bar · carry toggle ---------- */
+const TL = (EXPLAIN && EXPLAIN.tag_labels) || {};
+const RK_OF_COL = {period:"years"};
+function rkOf(colKey){ const k = RK_OF_COL[colKey] || colKey; return RANGES.some(x=>x.k===k) ? k : null; }
+function filterActive(){ return !!(flt.q || flt.regime!=="all" || flt.fx!=="all" || flt.assets.length || flt.status.length || Object.keys(flt.ranges).length); }
+function segBtns(el, key, opts){
+  el.innerHTML = opts.map(([v,l])=>`<button type="button" class="fbtn" data-v="${esc(v)}" aria-pressed="${flt[key]===v}">${esc(l)}</button>`).join(" ");
+  el.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{ flt[key]=b.dataset.v; fltChanged(); }));
+}
+function multiBtns(el, key, opts){
+  el.innerHTML = opts.map(([v,l])=>`<button type="button" class="fbtn" data-v="${esc(v)}" aria-pressed="${flt[key].includes(v)}">${esc(l)}</button>`).join(" ");
+  el.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{ const v=b.dataset.v; flt[key] = flt[key].includes(v) ? flt[key].filter(x=>x!==v) : flt[key].concat([v]); fltChanged(); }));
+}
+function renderRangeGrid(){
+  document.getElementById("rgrid").innerHTML = RANGES.map(sp=>{ const rg=flt.ranges[sp.k]||{}; const u=sp.unit?`<span>${sp.unit}</span>`:"";
+    const a = sp.neg ? ["얕은 쪽 한도 ≥","깊은 쪽 한도 ≤"] : ["최소 ≥","최대 ≤"];
+    const ph = sp.neg ? ["예: −40",""] : ["",""];
+    return `<div class="rcell ${flt.ranges[sp.k]?"on":""}" data-rk="${sp.k}"><span class="rl">${sp.label}${sp.unit?` (${sp.unit})`:""}</span><span class="ri"><label>${a[0]} <input inputmode="decimal" data-rk="${sp.k}" data-b="min" value="${rg.min!=null?String(rg.min).replace(/^-/,"−"):""}" placeholder="${ph[0]}" aria-label="${sp.label} ${a[0]}"></label>${u}</span><span class="ri"><label>${a[1]} <input inputmode="decimal" data-rk="${sp.k}" data-b="max" value="${rg.max!=null?String(rg.max).replace(/^-/,"−"):""}" placeholder="${ph[1]}" aria-label="${sp.label} ${a[1]}"></label>${u}</span></div>`; }).join("");
+  document.querySelectorAll("#rgrid input").forEach(inp=>{
+    const apply = ()=>{ const sp=RANGES.find(x=>x.k===inp.dataset.rk); const raw=inp.value.trim(); const v=parseBound(raw, sp);
+      inp.classList.toggle("bad", raw!=="" && v==null);
+      const rg = Object.assign({}, flt.ranges[sp.k]||{}); if (v==null) delete rg[inp.dataset.b]; else rg[inp.dataset.b]=v;
+      if (rg.min==null && rg.max==null) delete flt.ranges[sp.k]; else flt.ranges[sp.k]={min:rg.min??null, max:rg.max??null};
+      inp.closest(".rcell").classList.toggle("on", !!flt.ranges[sp.k]); fltChanged(true); };
+    inp.addEventListener("change", apply);
+    let tm=null; inp.addEventListener("input", ()=>{ clearTimeout(tm); tm=setTimeout(apply, 350); });
+  });
+}
+function openRange(k){
+  const fb=document.getElementById("fbox"); fb.open=true; const rb=document.getElementById("rngBox"); rb.open=true;
+  const inp=document.querySelector(`#rgrid input[data-rk="${k}"][data-b="min"]`); if (inp){ inp.scrollIntoView({block:"center"}); inp.focus(); }
+}
+function renderFilterBar(){
+  document.getElementById("fq").value = flt.q;
+  segBtns(document.getElementById("fRegime"), "regime", [["all","전체"],["on","사용"],["off","미사용"]]);
+  const fx = TL.fx || {};
+  segBtns(document.getElementById("fFx"), "fx", [["all","전체"],["U",fx.U||"환노출"],["H",fx.H||"환헤지"],["N",fx.N||"해당 없음"]]);
+  multiBtns(document.getElementById("fAssets"), "assets", Object.entries(TL.assets||{}));
+  multiBtns(document.getElementById("fStatus"), "status", ["통과","실패","보류","기준선","참고"].map(s=>[s,s]));
+  renderRangeGrid(); updateFilterInfo();
+}
+function updateFilterInfo(){
+  const n = DATA.rows.length, m = DATA.rows.filter(passes).length;
+  const txt = `${n}개 중 ${m}개 표시`;
+  document.getElementById("fcount").textContent = txt;
+  document.getElementById("fcountS").textContent = filterActive() ? txt : `${n}개`;
+  document.getElementById("fchips").innerHTML = RANGES.filter(sp=>flt.ranges[sp.k]).map(sp=>`<span class="sel-chip">${esc(rangeChipText(sp, flt.ranges[sp.k]))}<button type="button" data-rk="${sp.k}" aria-label="${esc(sp.label)} 조건 해제">×</button></span>`).join("");
+  document.querySelectorAll("#fchips button").forEach(b=>b.addEventListener("click",()=>{ delete flt.ranges[b.dataset.rk]; renderRangeGrid(); fltChanged(); }));
+  document.getElementById("fReset").disabled = !filterActive();
+}
+function fltChanged(keepInputs){
+  store.set("flt", flt);
+  if (!keepInputs){ ["fRegime","fFx","fAssets","fStatus"].forEach(id=>document.querySelectorAll(`#${id} button`).forEach(b=>{
+    const key = {fRegime:"regime",fFx:"fx",fAssets:"assets",fStatus:"status"}[id]; const v=b.dataset.v;
+    b.setAttribute("aria-pressed", Array.isArray(flt[key]) ? flt[key].includes(v) : flt[key]===v); })); }
+  updateFilterInfo(); renderTabs(); renderPanel(); renderSel(); renderHeatmap();
+}
+let qTimer=null;
+document.getElementById("fq").addEventListener("input", e=>{ clearTimeout(qTimer); qTimer=setTimeout(()=>{ flt.q=e.target.value.trim(); fltChanged(true); }, 200); });
+document.getElementById("fReset").addEventListener("click", ()=>{ flt = JSON.parse(JSON.stringify(FDEF)); renderFilterBar(); fltChanged(); });
+const nAlt = DATA.rows.filter(r=>r.alt).length;
+function renderCarry(){
+  document.getElementById("carryTg").checked = carryOn;
+  document.getElementById("carryState").textContent = carryOn ? `켜짐 — 환헤지 항목 ${nAlt}개를 금리차 포함 원판으로` : `꺼짐 — 환헤지 항목 ${nAlt}개를 금리차 뺀 판으로(판정하지 않음 · 참고)`;
+}
+document.getElementById("carryTg").addEventListener("change", e=>{ carryOn = e.target.checked; store.set("carry", carryOn); renderCarry(); updateFilterInfo(); renderTabs(); renderPanel(); renderSel(); renderHeatmap(); renderCharts(); });
+try{ if (matchMedia("(min-width:521px)").matches || filterActive()) document.getElementById("fbox").open = true; }catch(e){ document.getElementById("fbox").open = true; }
+if (Object.keys(flt.ranges).length) document.getElementById("rngBox").open = true;
+
 /* ---------- boot ---------- */
+renderCarry(); renderFilterBar();
 renderTabs(); renderPanel(); renderSel(); renderHeatmap(); setScale(logScale);
 function rethemed(){ renderSel(); renderCharts(); renderHeatmap(); }
 try{ matchMedia("(prefers-color-scheme: dark)").addEventListener("change", rethemed); }catch(e){}

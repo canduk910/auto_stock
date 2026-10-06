@@ -1,6 +1,6 @@
 # 30년 전략 성적표 — 같은 잣대로 한 표에
 
-> 생성 2026-10-06 13:47 KST · `tools/replay/scoreboard.py` · 원자료 `scoreboard.json`(전략 메타 · 지표 · 연도별 · 월말 누적 · 월말 낙폭) · 연도 행렬 전체 `yearly_matrix.csv`
+> 생성 2026-10-06 13:48 KST · `tools/replay/scoreboard.py` · 원자료 `scoreboard.json`(전략 메타 · 지표 · 연도별 · 월말 누적 · 월말 낙폭) · 연도 행렬 전체 `yearly_matrix.csv`
 
 **이 문서는 판정이 아니다.** 이미 끝난 연구들의 곡선을 같은 지표 함수 하나로 다시 쟀다. 새 최적화·새 선택은 없다. 판정 칸은 각 결과 문서의 결론을 옮겨 적은 것이다.
 
@@ -1428,4 +1428,4 @@ python tools/replay/scoreboard.py <out_dir>                     # json · md · 
 - 월말 곡선만 주면 낙폭 · 회복 · 울서가 월말 해상도로 잡혀 일별 곡선 행보다 얕게 나온다 — 행 메모에 「곡선이 월말뿐」 이 붙는다. 가능하면 일별 곡선을 준다.
 - `yearly` 를 주면 성적표가 곡선에서 다시 낸 연도 수익과의 최대 차이를 `metrics.yearly_given_diff_max` 에 적는다(0 이 아니면 곡선과 표가 어긋난 것).
 - 같은 잣대를 위해 무위험 = 원화 3개월 금리, 기준 = K200 행(1995~)을 쓴다. 기간이 다르면 「KOSPI200 대비 연 초과」 칸으로 본다.
-- 이번 실행의 외부 파일: `_workspace/analysis/regime_gate_20261006/scoreboard_entries.json`, `_workspace/analysis/regime_v2_20261006/scoreboard_entries.json`, `_workspace/analysis/sb_addons_20261006/scoreboard_entries.json`, `_workspace/analysis/sector_rs_20261006/scoreboard_entries.json`, `_workspace/analysis/gold_20261006/scoreboard_entries.json`, `_workspace/analysis/ra_us_20261006/scoreboard_entries.json`, `_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json`, `_workspace/analysis/ra_gate_20261006/scoreboard_entries.json` · 경고: 없음
+- 이번 실행의 외부 파일: `_workspace/analysis/regime_gate_20261006/scoreboard_entries.json`, `_workspace/analysis/regime_v2_20261006/scoreboard_entries.json`, `_workspace/analysis/sb_addons_20261006/scoreboard_entries.json`, `_workspace/analysis/sector_rs_20261006/scoreboard_entries.json`, `_workspace/analysis/gold_20261006/scoreboard_entries.json`, `_workspace/analysis/ra_us_20261006/scoreboard_entries.json`, `_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json`, `_workspace/analysis/ra_gate_20261006/scoreboard_entries.json`, `_workspace/analysis/hedge_nocarry_20261006/scoreboard_entries.json` · 경고: 없음

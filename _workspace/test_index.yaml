@@ -1199,6 +1199,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -2490,6 +2491,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -3786,6 +3788,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -5077,6 +5080,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -6369,6 +6373,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -7662,6 +7667,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -8955,6 +8961,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -10250,6 +10257,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -11542,6 +11550,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -12903,6 +12912,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -14196,6 +14206,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -15507,6 +15518,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -16801,6 +16813,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -18098,6 +18111,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -19385,6 +19399,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -20679,6 +20694,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -21972,6 +21988,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -23265,6 +23282,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -24558,6 +24576,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -25851,6 +25870,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -27146,6 +27166,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -28437,6 +28458,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -29730,6 +29752,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -31023,6 +31046,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -32316,6 +32340,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -33610,6 +33635,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -34906,6 +34932,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -36195,6 +36222,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -37488,6 +37516,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -38783,6 +38812,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -40074,6 +40104,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -41371,6 +41402,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -42665,6 +42697,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -43958,6 +43991,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -45252,6 +45286,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -46543,6 +46578,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -47837,6 +47873,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -49130,6 +49167,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -50424,6 +50462,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -51716,6 +51755,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -53009,6 +53049,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -54302,6 +54343,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -55595,6 +55637,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -56888,6 +56931,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -58180,6 +58224,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -59474,6 +59519,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -60767,6 +60813,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -62060,6 +62107,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -63353,6 +63401,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -64646,6 +64695,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -65939,6 +65989,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -67232,6 +67283,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -68525,6 +68577,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -69818,6 +69871,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -71112,6 +71166,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -72404,6 +72459,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -73768,6 +73824,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -75058,6 +75115,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -76351,6 +76409,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -77646,6 +77705,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -78939,6 +78999,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -80299,6 +80360,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -81592,6 +81654,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -82885,6 +82948,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -84178,6 +84242,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -85471,6 +85536,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -86764,6 +86830,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -88057,6 +88124,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -89349,6 +89417,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -90737,6 +90806,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -92109,6 +92179,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -93540,6 +93611,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -94833,6 +94905,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -96127,6 +96200,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -97419,6 +97493,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -98712,6 +98787,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -100008,6 +100084,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -101297,6 +101374,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -102607,6 +102685,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -103887,6 +103966,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -105178,6 +105258,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -106470,6 +106551,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -107763,6 +107845,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -109055,6 +109138,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -110349,6 +110433,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -111642,6 +111727,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -112935,6 +113021,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -114228,6 +114315,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -115521,6 +115609,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -116813,6 +116902,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -118106,6 +118196,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -119400,6 +119491,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -120693,6 +120785,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -121986,6 +122079,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -123279,6 +123373,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -124604,6 +124699,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -125897,6 +125993,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -127188,6 +127285,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -128485,6 +128583,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -129776,6 +129875,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -131069,6 +131169,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -132362,6 +132463,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -133655,6 +133757,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -134951,6 +135054,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -136242,6 +136346,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -137536,6 +137641,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -138828,6 +138934,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -140121,6 +140228,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -141492,6 +141600,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -142786,6 +142895,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -144077,6 +144187,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -145371,6 +145482,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -146663,6 +146775,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -147956,6 +148069,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -149248,6 +149362,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -150542,6 +150657,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -151835,6 +151951,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -153131,6 +153248,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -154491,6 +154609,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -155784,6 +155903,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -157081,6 +157201,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -158374,6 +158495,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -159736,6 +159858,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -161030,6 +161153,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -162391,6 +162515,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -163861,6 +163986,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -165225,6 +165351,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -166518,6 +166645,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -167811,6 +167939,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -169105,6 +169234,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -170398,6 +170528,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -173472,6 +173603,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -174763,6 +174895,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -176059,6 +176192,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -177349,6 +177483,7 @@ backend:
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
       - tests/unit/replay/test_gold.py
+      - tests/unit/replay/test_hedge_nocarry.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -179578,10 +179713,10 @@ frontend:
       - frontend/src/pages/__tests__/StrategiesParams.test.tsx
       - frontend/src/pages/__tests__/StrategiesTeRr.test.tsx
       - frontend/src/pages/__tests__/StrategyFunnel.bottleneckTrend.test.tsx
-generated_at: '2026-10-06T04:46:55.553Z'
+generated_at: '2026-10-06T04:57:27.268Z'
 stats:
   backend_modules: 181
-  backend_tests: 1274
+  backend_tests: 1275
   frontend_modules: 135
   frontend_tests: 111
   unmapped_modules:
