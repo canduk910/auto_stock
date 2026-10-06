@@ -282,6 +282,10 @@ def test_stop_tuple_equals_finally_tuple_members():
         # 조회 task(08:45 P0 · 09:00 P1 · 60초 INC · 09:00:30~15:28 300초 청산 패스).
         # cancel 누락 시 `stop()` 뒤에도 시장가 청산(`execute_sell`)을 쏠 수 있다.
         "_status_exit_task",
+        # cycle409 추가 (2026-10-04, 사용자 결정 Q1·Q4) — 매일 자동 대사 task(시각 =
+        # system_config.trade_cost_reconcile_time, 키 없음 = 실행 안 함). 60초 폴링 루프라
+        # cancel 누락 시 `stop()` 뒤에도 KIS `TTTC8715R` 조회를 쏠 수 있다.
+        "_trade_cost_reconcile_task",
         "_ws_task",
         "_scan_task",
     }

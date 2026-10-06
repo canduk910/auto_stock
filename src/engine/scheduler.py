@@ -37,7 +37,7 @@ from src.engine.strategy_manifest import (
 from src.engine.strategy_registry import StrategyRegistry
 from src.engine import data_load_tasks, funnel_capture  # refactor-review B1 위임 모듈 · cycle364 라이브 준비 leaf
 from src.engine import open_price_observe, open_price_rest  # cycle264 관측 leaf / cycle272 기준가 leaf (라인 상한 보호)
-from src.engine import market_op_subscribe, quote_token_refresh, status_exit_watch  # cycle292 VI 구독 leaf / cycle269 토큰 갱신 leaf / cycle369 종목상태 청산·매수차단 leaf (라인 상한 보호)
+from src.engine import market_op_subscribe, quote_token_refresh, status_exit_watch, trade_cost_reconcile_task  # cycle292 VI 구독 leaf / cycle269 토큰 갱신 leaf / cycle369 종목상태 청산·매수차단 leaf / cycle409 매일 자동 대사 leaf (라인 상한 보호)
 from src.realtime.handler import (
     dispatch_message,
     flush_silent_drop_count,
@@ -185,6 +185,7 @@ def flush_swing_rest_poll_collector() -> None:
 
 async def capture_funnel_snapshots(
     registry, *, is_provisional: bool = False, target_date=None, skipped_out: dict | None = None,
+    protect_confirmed: bool = False,
 ) -> int:
     """사이클 171 — funnel snapshot 단계별 캡처 공통 헬퍼 (4 호출처 공유).
 
@@ -215,6 +216,7 @@ async def capture_funnel_snapshots(
         skipped_out: (F4) dict 를 주면 건너뛴 전략마다 `skipped_out[sid] = 사유` 를 채운다
             (사유 문자열은 완료 로그 `skipped=` 와 동일). 반환값(int)은 이 인자와 무관하게
             불변 — 09:30 자동·21:00 저녁 A1·레거시 호출자는 이 인자를 넘기지 않는다.
+        protect_confirmed: cycle408-L1 — 두 insert_snapshot 에 전달(기존 확정 행 보존). 09:30 자동만 True.
 
     Returns:
         저장된 row 수 (saved_count).
@@ -278,6 +280,7 @@ async def capture_funnel_snapshots(
                     excluded_count=int(step.get("excluded_count", 0)),
                     step_conditions=step.get("step_conditions"),  # 사이클 41
                     is_provisional=is_provisional,  # 사이클 171
+                    protect_confirmed=protect_confirmed,
                 )
                 if row:
                     saved_count += 1
@@ -302,6 +305,7 @@ async def capture_funnel_snapshots(
                 excluded_count=0,
                 excluded_sample=[],
                 is_provisional=is_provisional,  # 사이클 171
+                protect_confirmed=protect_confirmed,
             )
             if row:
                 saved_count += 1
@@ -717,6 +721,7 @@ class TradingScheduler:
             self._quote_token_refresh_task = asyncio.create_task(quote_token_refresh.task_loop(self))  # cycle269 — 매일 15:45 KST 보조 시세 계정 접근토큰 강제 재발급(만료 앵커 고정 = 장중 재발급 드리프트 차단)
             self._main_rest_basis_task = asyncio.create_task(open_price_rest.main_rest_basis_task_loop(self))  # cycle272 — main 목표가 기준가를 KRX REST 로 확정(09:00:35 R1, 09:05:00 이후 스케줄러 백스톱 인계)
             self._status_exit_task = asyncio.create_task(status_exit_watch.task_loop(self))  # cycle369 — 관리종목51·단기과열59 보유 청산 + 당일 매수차단
+            self._trade_cost_reconcile_task = asyncio.create_task(trade_cost_reconcile_task.task_loop(self))  # cycle409 — 사용자 결정 10-04 Q1·Q4: 매일 자동 대사(시각 = system_config.trade_cost_reconcile_time, 키 없음 = 실행 안 함)
 
             now = datetime.now().time()
 
@@ -1011,7 +1016,7 @@ class TradingScheduler:
                 "_stock_master_daily_purge_task",  # 사이클 150 추가 — T-150일 retention cron task
                 "_evening_funnel_capture_task",  # 사이클 171 추가 — 16:20 KST 저녁 잠정 funnel 캡처 task
                 "_open_source_compare_task", "_quote_token_refresh_task", "_main_rest_basis_task",  # cycle264 09:05:30 시가 3자 대조 shadow / cycle269 15:45 보조 토큰 강제 재발급 / cycle272 main 기준가 REST 확정
-                "_status_exit_task",  # cycle369 — 관리종목51·단기과열59 보유 청산 + 당일 매수차단
+                "_status_exit_task", "_trade_cost_reconcile_task",  # cycle369 — 관리종목51·단기과열59 보유 청산 + 당일 매수차단 / cycle409 — 사용자 결정 10-04 Q1·Q4 매일 자동 대사
                 "_ws_task", "_scan_task",
             ):
                 task = getattr(self, task_attr, None)
@@ -1139,7 +1144,7 @@ class TradingScheduler:
                 "_stock_master_daily_purge_task",  # 사이클 150 추가 — T-150일 retention cron task
                 "_evening_funnel_capture_task",  # 사이클 171 추가 — 16:20 KST 저녁 잠정 funnel 캡처 task
                 "_open_source_compare_task", "_quote_token_refresh_task", "_main_rest_basis_task",  # cycle264 09:05:30 시가 3자 대조 shadow / cycle269 15:45 보조 토큰 강제 재발급 / cycle272 main 기준가 REST 확정
-                "_status_exit_task",  # cycle369 — 관리종목51·단기과열59 보유 청산 + 당일 매수차단
+                "_status_exit_task", "_trade_cost_reconcile_task",  # cycle369 — 관리종목51·단기과열59 보유 청산 + 당일 매수차단 / cycle409 — 사용자 결정 10-04 Q1·Q4 매일 자동 대사
                     "_ws_task", "_scan_task",
                 ):
                     task = getattr(self, task_attr, None)
@@ -1176,7 +1181,7 @@ class TradingScheduler:
             "_stock_master_daily_purge_task",  # 사이클 150 추가 — T-150일 retention cron task
             "_evening_funnel_capture_task",  # 사이클 171 추가 — 16:20 KST 저녁 잠정 funnel 캡처 task
             "_open_source_compare_task", "_quote_token_refresh_task", "_main_rest_basis_task",  # cycle264 09:05:30 시가 3자 대조 shadow / cycle269 15:45 보조 토큰 강제 재발급 / cycle272 main 기준가 REST 확정
-            "_status_exit_task",  # cycle369 — 관리종목51·단기과열59 보유 청산 + 당일 매수차단
+            "_status_exit_task", "_trade_cost_reconcile_task",  # cycle369 — 관리종목51·단기과열59 보유 청산 + 당일 매수차단 / cycle409 — 사용자 결정 10-04 Q1·Q4 매일 자동 대사
             "_ws_task", "_scan_task",
         ):
             task = getattr(self, task_attr, None)
@@ -3267,7 +3272,9 @@ class TradingScheduler:
         - 일일 1회 가드는 호출자 (`_auto_funnel_snapshot_done_today`) 가 보장
         """
         from src.db._kst import today_kst as _today_kst
-        await capture_funnel_snapshots(self.registry, is_provisional=False, target_date=_today_kst())
+        await capture_funnel_snapshots(
+            self.registry, is_provisional=False, target_date=_today_kst(), protect_confirmed=True,
+        )
 
     async def _report_tick_coverage(self) -> None:
         """현재 TICK 구독 종목 중 최근 60초 내 tick 수신 비율을 로깅한다 (Phase D + 가설 B 확장 2026-05-12).

@@ -360,6 +360,99 @@ async def stream_etf(start: str, end: str, sleep_secs: float, max_retries: int =
         print(f"[stream_etf] error_dates={[e[0] for e in errors]}", file=sys.stderr, flush=True)
 
 
+# ══════════════════════════════════ 30년 보관소 (2026-10-05) ══════════════════════════════════
+#
+# 결과 보고 = `_workspace/domain_consult/2026-10-05_archive_30y_build.md`.
+# 엔드포인트를 인자로 받는 범용 probe/stream — KRX 원본 dict 를 가공 없이 내보낸다.
+# 피하는 창이 둘이다: 20:00~21:35(저녁 블록) · 07:45~09:10(아침 기동·장 시작).
+
+def _blocked_window_sleep_secs_30y(now: datetime | None = None) -> float:
+    now = now or datetime.now(KST)
+    for (h0, m0), (h1, m1) in (((20, 0), (21, 35)), ((7, 45), (9, 10))):
+        s = now.replace(hour=h0, minute=m0, second=0, microsecond=0)
+        e = now.replace(hour=h1, minute=m1, second=0, microsecond=0)
+        if s <= now < e:
+            return (e - now).total_seconds() + 5.0
+    return 0.0
+
+
+async def probe_generic(endpoint: str, dates: list[str]) -> None:
+    """엔드포인트 하나를 여러 날짜로 찔러 행 수와 키를 본다(가장 이른 제공일 탐색용)."""
+    import asyncio
+
+    conn = await _open_ro_conn()
+    await _patch_pg_for_readonly(conn)
+    from src.api.krx import KrxApiError, fetch_krx_open_api
+
+    try:
+        for i, bas_dd in enumerate(dates):
+            try:
+                data = await fetch_krx_open_api(endpoint, {"basDd": bas_dd})
+                rows = data.get("OutBlock_1", [])
+                print(f"[probe_generic] {endpoint} date={bas_dd} rows={len(rows)}", flush=True)
+                if rows and i == 0:
+                    print(f"[probe_generic] keys={sorted(rows[0].keys())}", flush=True)
+                    print(f"[probe_generic] row0={rows[0]}", flush=True)
+            except KrxApiError as e:
+                print(f"[probe_generic] {endpoint} date={bas_dd} KrxApiError: {e}", flush=True)
+            await asyncio.sleep(0.8)
+    finally:
+        await conn.close()
+
+
+async def stream_generic(endpoint: str, start: str, end: str, sleep_secs: float, max_retries: int = 2) -> None:
+    """`stream_etf` 의 엔드포인트 범용판 — 날짜당 1콜, 원본 dict 를 stdout JSONL 로."""
+    import asyncio
+
+    conn = await _open_ro_conn()
+    await _patch_pg_for_readonly(conn)
+    from src.api.krx import KrxApiError, fetch_krx_open_api
+
+    total_calls = 0
+    total_rows = 0
+    holidays = 0
+    errors: list[str] = []
+    t0 = datetime.now(KST)
+    for d in _iter_weekdays(date.fromisoformat(start), date.fromisoformat(end)):
+        wait = _blocked_window_sleep_secs_30y()
+        if wait > 0:
+            print(f"[stream_generic] 금지 창 — {wait:.0f}s 대기", file=sys.stderr, flush=True)
+            await asyncio.sleep(wait)
+        bas_dd = d.strftime("%Y%m%d")
+        rows = None
+        last_err: Exception | None = None
+        for attempt in range(max_retries + 1):
+            try:
+                data = await fetch_krx_open_api(endpoint, {"basDd": bas_dd})
+                rows = data.get("OutBlock_1", [])
+                total_calls += 1
+                break
+            except KrxApiError as e:
+                last_err = e
+                if attempt < max_retries:
+                    await asyncio.sleep(sleep_secs * (attempt + 3))
+        await asyncio.sleep(sleep_secs)
+        if rows is None:
+            errors.append(bas_dd)
+            print(f"[stream_generic] {bas_dd} ERROR {last_err}", file=sys.stderr, flush=True)
+            continue
+        if not rows:
+            holidays += 1
+        total_rows += len(rows)
+        print(json.dumps({"bas_dd": bas_dd, "endpoint": endpoint, "n_rows": len(rows), "rows": rows},
+                         ensure_ascii=False), flush=True)
+        if total_calls % 50 == 0:
+            el = (datetime.now(KST) - t0).total_seconds()
+            print(f"[stream_generic] progress date={bas_dd} calls={total_calls} rows={total_rows} "
+                  f"holidays={holidays} errors={len(errors)} elapsed_s={el:.0f}", file=sys.stderr, flush=True)
+    await conn.close()
+    el = (datetime.now(KST) - t0).total_seconds()
+    print(f"[stream_generic] DONE endpoint={endpoint} start={start} end={end} calls={total_calls} "
+          f"rows={total_rows} holidays={holidays} errors={len(errors)} elapsed_s={el:.0f}", file=sys.stderr, flush=True)
+    if errors:
+        print(f"[stream_generic] error_dates={errors}", file=sys.stderr, flush=True)
+
+
 async def collect(start: str, end: str, out_dir: str, sleep_secs: float) -> None:
     import asyncio
 
@@ -843,6 +936,17 @@ def main() -> None:
         if "--sleep" in args:
             sleep_secs = float(args[args.index("--sleep") + 1])
         asyncio.run(stream_etf(start, end, sleep_secs))
+    elif mode == "probe_generic":
+        import asyncio
+
+        asyncio.run(probe_generic(args[1], args[2:]))
+    elif mode == "stream_generic":
+        import asyncio
+
+        sleep_secs = 0.8
+        if "--sleep" in args:
+            sleep_secs = float(args[args.index("--sleep") + 1])
+        asyncio.run(stream_generic(args[1], args[2], args[3], sleep_secs))
     elif mode == "merge":
         merge(args[1], args[2])
     elif mode == "merge_jsonl":

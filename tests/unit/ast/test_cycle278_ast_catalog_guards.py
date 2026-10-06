@@ -256,7 +256,8 @@ _BASE_SHA = {
     #    합·체결 가중평균)으로 기록. 사용자 승인(8영역, 결정 4), 나머지 7영역 diff 0.
     # 🔁 2026-10-02 (cycle396) 재핀 — cycle396 사용자 요청(10-02) 가중평균가 절사: 매도 장부
     #    가격을 원 단위 내림 int 로(`_vwap_2dp`→`_vwap_floor`). 사용자 승인(8영역), 나머지 7영역 diff 0.
-    "src/engine/order_engine.py": "4d46edd1f863c03b5a79a4c8d23b7d5c8aae6f1cf7d8d0612bf91224db906a0e",
+    # 🔁 cycle409 재핀 — 사용자 결정 10-04 Q4 8영역 승인: 매도 PENDING 에 주문가(`order_price`) 전달 — 모듈 함수 `_sell_order_price`(never-raise, await 0) + 매도 래퍼 `order_unpr` 키워드 + 주·폴백 호출 각 1줄. 발사·매핑·send_qty·재시도·_selling 흐름 불변, 나머지 7영역 diff 0. 직전 값 = cycle408-L3 `a6d677259fe7…`
+    "src/engine/order_engine.py": "08c479841352fb579f767c109de3e8f901d1c27bdce705b39b5ba6556fc0b3e1",
     "src/engine/session.py":
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
     # 🔁 cycle302(2026-09-18) 재핀 — 사용자 승인 일봉 backfill **대상** 확대
@@ -310,8 +311,10 @@ _BASE_SHA = {
     # BFB·VCP 로 확대하고 남의 보유·익일청산 엔트리를 보존·재구성 어느 쪽도 하지
     # 않는다.
     # 🔁 cycle369 재핀 — 관리종목51·단기과열59 청산·매수차단 leaf 배선(값만 이동)
+    # 🔁 cycle408-L1 재핀 — 사용자 승인 10-04 8영역 관측 결함 해결: 09:30 자동 퍼널 캡처에 `protect_confirmed=True` 전달(+6줄, 값 없는 키워드 배선)
     "src/engine/scheduler.py":
-        "084f114f2aa415dec16a55e5df5d89c233c37d55c5714c66b10460839435d10c",
+        # 🔁 cycle409 재핀 — 사용자 결정 10-04 Q1·Q4: 매일 자동 대사 task 배선(leaf import · create_task 1줄 · cancel 목록 3곳, +1줄). 직전 값 = cycle408-L1 `2bacaa149ab6…`
+        "f53d41a11fe162f80e113c6ff48cf6d235581769be7979499c5782ff11d49646",
     # 🔁 cycle382 재핀 — 시장 유닛(사용자 결정 09-27). `strategy_base.py` 에
     # `_market_unit_*` 헬퍼 + `MarketUnitView`/`MarketUnitLots`/`_MarketUnitCaps`
     # 추가(관문 `_apply_budget_limit` 등 본문은 byte 무변경, A12 가 별도로 핀).

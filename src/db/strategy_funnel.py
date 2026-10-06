@@ -51,6 +51,7 @@ async def insert_snapshot(
     excluded_count: int = 0,
     step_conditions: str | None = None,  # 사이클 41 — 단계 조건 (UI 툴팁)
     is_provisional: bool = False,  # 사이클 171 — 저녁 잠정 캡처 플래그(cycle364 = 21:00 A1)
+    protect_confirmed: bool = False,  # cycle408-L1 — 09:30 자동 캡처만 True(기존 확정 행 보존)
 ) -> dict | None:
     """1단계 snapshot UPSERT (사이클 145 — UPSERT 전환 영구 영속).
 
@@ -77,6 +78,12 @@ async def insert_snapshot(
             - False (기본) = 09:30 자동 / 수동 trigger (확정, target_date=오늘). 기존
               호출자 회귀 0. ③-b(`WHERE NOT (…is_provisional=FALSE AND EXCLUDED=TRUE)`)가
               잠정 쓰기의 확정 행 덮어쓰기를 막는다 — 거부되면 이 함수는 `None` 을 돌려준다.
+        protect_confirmed: cycle408-L1 — True 면 기존 행이 **잠정일 때만** 갱신한다(WHERE 에
+            `AND strategy_funnel_snapshots.is_provisional = TRUE` 를 덧붙인다 — 바인딩은 그대로
+            10개). 09:30 자동 캡처만 True 를 넘긴다: 같은 날 재기동하면 일일 1회 플래그가 새
+            프로세스에서 False 로 다시 태어나 자동 캡처가 한 번 더 도는데, 그때 이미 확정된 행을
+            덮지 않고 거부(`None`)한다. 기본값 False 는 SQL 이 byte 동일 — 수동 trigger 의
+            확정→확정 덮어쓰기와 저녁 잠정 쓰기는 그대로다.
 
     Returns:
         upsert 된 row dict (id 포함) 또는 None — DB 예외 실패이거나, 잠정 쓰기가 이미 확정된
@@ -101,6 +108,7 @@ async def insert_snapshot(
           그중 「확정이 기존 잠정 행을 덮음」은 **매 거래일 09:35 자동 캡처가 전날 21:00
           저녁 미리보기(잠정)가 다음 거래일 라벨로 쓴 같은 `(target_date, strategy_id,
           step_no)` 행을 확정으로 교체하는 정상 경로**다(cycle364 A1 도입 이후 매일 발생).
+        - cycle408-L1 — `protect_confirmed=True` 이면 확정→확정도 거부한다(위 Args).
     """
     if not strategy_id:
         raise ValueError("strategy_id 필수")
@@ -116,6 +124,8 @@ async def insert_snapshot(
     # M6 — target_date DATE 컬럼 바인딩. 호출자가 str(예: `.isoformat()` 오적용)을
     # 넘겨도 asyncpg 가 요구하는 date 객체로 강제 변환 (str 그대로면 즉시 예외).
     bound_target_date = to_date(target_date)
+    # cycle408-L1 — 플래그는 SQL 조각 선택이지 바인딩이 아니다. 빈 문자열이면 SQL byte 동일.
+    protect_sql = " AND strategy_funnel_snapshots.is_provisional = TRUE" if protect_confirmed else ""
 
     try:
         result = await pg.fetchrow(
@@ -134,7 +144,7 @@ async def insert_snapshot(
                 excluded_sample = EXCLUDED.excluded_sample,
                 is_provisional = EXCLUDED.is_provisional,
                 snapshot_at = now()
-            WHERE NOT (strategy_funnel_snapshots.is_provisional = FALSE AND EXCLUDED.is_provisional = TRUE)
+            WHERE NOT (strategy_funnel_snapshots.is_provisional = FALSE AND EXCLUDED.is_provisional = TRUE){protect_sql}
             RETURNING *
             """,
             row_id,

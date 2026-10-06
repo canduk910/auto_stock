@@ -219,6 +219,23 @@ def _sell_not_placed_reason(exc: BaseException) -> "str | None":
         return None
 
 
+def _sell_order_price(ticker: str, order_unpr: int) -> "int | None":
+    """cycle409 — 사용자 결정 10-04 Q4 8영역 승인: 매도 주문가(`trade_history.order_price`).
+
+    지정가(`order_unpr > 0`) = 그 값 · 시장가 = 주문 순간 현재가(`scanner.ticker_prices`, 호가가
+    아니다) · 캐시 없음·0 이하·형식 이상 = None. 발사 뒤 경계 안에서 불리므로 never-raise —
+    예외가 새면 그 주문의 PENDING 기록이 빠진다.
+    """
+    try:
+        if order_unpr and order_unpr > 0:
+            return int(order_unpr)
+        from src.engine.scanner import ticker_prices as _tp_op
+        cur = int((_tp_op.get(ticker) or {}).get("current_price") or 0)
+        return cur if cur > 0 else None
+    except Exception:
+        return None
+
+
 def _market_rest_now(now: datetime) -> tuple[bool, str]:
     """cycle295 (B) — 순수·never-raise 술어, 모듈 레벨. 시각 리터럴 0건.
 
@@ -1153,6 +1170,7 @@ class OrderEngine:
     async def _persist_pending_after_send(
         self, *, trade_type: TradeType, ticker: str, order_no: str,
         strategy_id: str, record_price: int, quantity: int, path: str,
+        order_price: int | None = None,
     ) -> None:
         """접수 후 PENDING 영속화 — **매수·매도 4 경로 공용 코어** (cycle334).
 
@@ -1189,6 +1207,7 @@ class OrderEngine:
                 status=TradeStatus.PENDING,
                 strategy=strategy_id,
                 order_no=order_no,
+                order_price=order_price,  # cycle409 — 사용자 결정 10-04 Q4 8영역 승인(매수는 None → price)
             )
             await self._insert_pending_or_absorb_race(
                 record, side=side, ticker=ticker, order_no=order_no,
@@ -1263,6 +1282,7 @@ class OrderEngine:
         record_price: int,
         quantity: int,
         path: str,
+        order_unpr: int = 0,
     ) -> None:
         """🔴 cycle327 ⓑ — 호출 시점에 **주문은 이미 나갔다**.
 
@@ -1283,6 +1303,7 @@ class OrderEngine:
                 trade_type=TradeType.SELL, ticker=ticker, order_no=order_no,
                 strategy_id=strategy_id, record_price=record_price,
                 quantity=quantity, path=path,
+                order_price=_sell_order_price(ticker, order_unpr),  # cycle409 — 사용자 결정 10-04 Q4 8영역 승인
             )
         except Exception:
             logger.exception(
@@ -1383,10 +1404,19 @@ class OrderEngine:
         if quantity <= 0:
             # per-ticker cooldown 등록 — 다음 잔고 sync 또는 LOW_FUNDS_COOLDOWN 만료까지 같은 종목 매수 시도 차단
             state.block_low_funds(ticker, now_ts + LOW_FUNDS_COOLDOWN)
+            # cycle408-L3 — 원인 꼬리. 잔여 < 현재가 = funds(1주도 못 산다), 그 외 = cap
+            # (K축·ρ축·오픈리스크 등 사이징 상한). 동기 읽기만 — await 를 넣지 않는다(A-ATOMIC).
+            # 판정 실패는 unknown 으로 흡수한다(관측이 행위를 바꾸지 않는다).
+            try:
+                zero_remaining = state.total_investment - strategy._calc_used_funds()
+                zero_cause = "funds" if zero_remaining < current_price else "cap"
+            except Exception:
+                zero_remaining, zero_cause = -1, "unknown"
             logger.warning(
-                "매수 수량 0 → %ds cooldown: %s (투자금: %d, 현재가: %d, 전략: %s)",
+                "매수 수량 0 → %ds cooldown: %s (투자금: %d, 현재가: %d, 전략: %s, 원인: %s, 잔여: %d)",
                 int(LOW_FUNDS_COOLDOWN),
                 ticker, state.total_investment, current_price, strategy.strategy_id,
+                zero_cause, zero_remaining,
             )
             return
 
@@ -1973,6 +2003,7 @@ class OrderEngine:
                     record_price=pos.buy_price,
                     quantity=send_qty,
                     path="market",
+                    order_unpr=order_unpr,  # cycle409 — 주문가 = 지정가 order_unpr · 시장가는 현재가
                 )
 
                 logger.info(
@@ -2394,6 +2425,7 @@ class OrderEngine:
                                 record_price=fallback_price,
                                 quantity=send_qty,
                                 path="fallback",
+                                order_unpr=fallback_price,  # cycle409 — 주문가 = 폴백 지정가
                             )
 
                             logger.warning(

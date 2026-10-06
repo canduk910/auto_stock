@@ -125,7 +125,8 @@ _BASE_SHA: dict[str, str] = {
     #    합·체결 가중평균)으로 기록. 사용자 승인(8영역, 결정 4), 나머지 7영역 diff 0.
     # 🔁 2026-10-02 (cycle396) 재핀 — cycle396 사용자 요청(10-02) 가중평균가 절사: 매도 장부
     #    가격을 원 단위 내림 int 로(`_vwap_2dp`→`_vwap_floor`). 사용자 승인(8영역), 나머지 7영역 diff 0.
-        "4d46edd1f863c03b5a79a4c8d23b7d5c8aae6f1cf7d8d0612bf91224db906a0e",
+        # 🔁 cycle409 재핀 — 사용자 결정 10-04 Q4 8영역 승인: 매도 PENDING 에 주문가(`order_price`) 전달 — 모듈 함수 `_sell_order_price`(never-raise, await 0) + 매도 래퍼 `order_unpr` 키워드 + 주·폴백 호출 각 1줄. 발사·매핑·send_qty·재시도·_selling 흐름 불변, 나머지 7영역 diff 0. 직전 값 = cycle408-L3 `a6d677259fe7…`
+        "08c479841352fb579f767c109de3e8f901d1c27bdce705b39b5ba6556fc0b3e1",
     "src/engine/risk.py":
         "a2187b8270446379988d24dfbe39b902d6ab37b112d4b6ce7330ee171434e222",
     "src/engine/session.py":
@@ -187,8 +188,10 @@ _BASE_SHA: dict[str, str] = {
     # 보존 / 보호 종목 전부 건너뜀) 로 `_preview_protected_tickers` 를 대체했다.
     # 🔁 cycle369 재핀 — 관리종목51·단기과열59 청산·매수차단 leaf 배선(값만 이동)
     # 🔁 cycle379 재핀 — buying_reconcile leaf 4줄 위임 배선(사용자 승인, 값만 이동)
+    # 🔁 cycle408-L1 재핀 — 사용자 승인 10-04 8영역 관측 결함 해결: 09:30 자동 퍼널 캡처에 `protect_confirmed=True` 전달(+6줄, 값 없는 키워드 배선)
     "src/engine/scheduler.py":
-        "084f114f2aa415dec16a55e5df5d89c233c37d55c5714c66b10460839435d10c",
+        # 🔁 cycle409 재핀 — 사용자 결정 10-04 Q1·Q4: 매일 자동 대사 task 배선(leaf import · create_task 1줄 · cancel 목록 3곳, +1줄). 직전 값 = cycle408-L1 `2bacaa149ab6…`
+        "f53d41a11fe162f80e113c6ff48cf6d235581769be7979499c5782ff11d49646",
     # 🔁 cycle369 R2 재핀 — buy-block 게이트(`_status_buy_blocked` 승격) + STATUS_EXIT Signal + Q7 edge-baseline clear 배선(전략 7파일은 무변경, 배선은 이 파일)
     # 🔁 cycle382 재핀 — 시장 유닛 `_market_unit_*` 헬퍼 추가(사용자 결정 09-27).
     # 🔁 cycle382 리뷰 재핀(값만) — `_market_unit_tally_roll` 을 `tally.date != day`
@@ -213,7 +216,7 @@ _SCHEDULER_LINE_CAP = 3900
 #: 신규 leaf `src/engine/market_op_subscribe.py` 로 추출해(행위 변경 0 · 5줄
 #: 위임 wrapper) 3,897 → 3,726 이 됐다. 값만 옮긴다 — 정확 핀을 상한 핀으로
 #: 완화하면 cycle290 의 무접촉 대리 지표가 사라진다.
-_SCHEDULER_LINES = 3730  # cycle398 재핀 — 전략 등록 명부 추출(PR1 카드 #2) + 원형 선언 명부 칸 추출(PR2 카드 #3, 사용자 승인 10-02, 합산 -56)
+_SCHEDULER_LINES = 3737  # cycle409 재핀 +1 — 사용자 결정 10-04 Q1·Q4 매일 자동 대사 task 배선. 직전 3736 = cycle408-L1
 
 
 @pytest.mark.parametrize("rel", sorted(_BASE_SHA))
@@ -440,7 +443,11 @@ _ENGINE_PY_FILES: dict[str, tuple[str, ...]] = {
         # (이쪽은 송신·구독 배치). 이름 축을 개수 축으로 바꾸지 말 것 — 등재해도
         # "다음 신규 파일"은 여전히 붉어진다.
         "market_op_subscribe.py",
-        "market_operation_monitor.py", "market_regime.py", "market_state.py",
+        "market_operation_monitor.py", "market_regime.py",
+        # cycle410(사용자 결정 10-05) — 6장세 라벨 leaf(관찰 전용, 표준 라이브러리만). 등재해도
+        # "다음 신규 파일" 은 여전히 붉어진다(이름 축 가드는 변경 없음).
+        "market_regime_label.py",
+        "market_state.py",
         # cycle382 — 시장 유닛(단계형, KODEX200 60일선) 판정 leaf. 표준 라이브러리만
         # import(A01). 이름을 등재해도 "다음 신규 파일" 은 여전히 붉어진다(이름 축
         # 가드는 변경 없음).
@@ -475,6 +482,12 @@ _ENGINE_PY_FILES: dict[str, tuple[str, ...]] = {
         "task_loop_helper.py", "te_metrics.py", "tick_channel_clock.py",
         "tick_channel_mode.py", "tick_channel_switch.py",
         "tick_volume.py",
+        # 트랙 C — 실비용 사후 대사 leaf(KIS 정산값 조회·귀속·요약·경보, 관측 전용). 8영역·
+        # scheduler import 0. 등재해도 "다음 신규 파일" 은 여전히 붉어진다.
+        "trade_cost.py",
+        # cycle409(사용자 결정 10-04 Q1·Q4) — 매일 자동 대사 훅 leaf(시각 = system_config 키,
+        # 키 없음 = 실행 안 함). 8영역·scheduler import 0(AST `test_cycle409_ast_reconcile_hook.py`).
+        "trade_cost_reconcile_task.py",
         # cycle363 — 휴장일 판정 공용 leaf(`src.*` import 0). 영업일 기준 신선도(①) +
         # 일봉 신선도 직전 영업일 기준(①′) 이 공유한다. 등재해도 "다음 신규 파일" 은
         # 여전히 붉어진다(이름 축 가드는 변경 없음).

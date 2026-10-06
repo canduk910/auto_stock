@@ -1,0 +1,981 @@
+{
+ "strategy": "vcp_breakout",
+ "prereg_sha256": "2d7e7b42d14937963a743697fd5406242f92cd418bbe7fe4c240c48f46da98b5",
+ "inputs": {
+  "db_extract_sha256": "e31e842ba7e7f47e8f96ac6cd4dad223dcc047c23f6c99f8686606d02e2ccebf",
+  "store": {
+   "junction_rescaled": 220,
+   "tickers": 3011,
+   "cal": [
+    "2020-10-05",
+    "2026-10-02"
+   ]
+  },
+  "engine_sha256": "5949d027ca7bc458125bfb8cea9d9a9c2d53b1e97eed987daad1e32be22c5116",
+  "runner_sha256": "55570b38929a367e3e16a3e53989985a2f16bf72ccb0b0346492d550b456aa04"
+ },
+ "K1": {
+  "rows": [
+   {
+    "key": "after_market_exit_division",
+    "db": "44",
+    "code_default": "44",
+    "engine": "<not used>",
+    "engine_eq_db": null
+   },
+   {
+    "key": "atr_period",
+    "db": 14,
+    "code_default": 14,
+    "engine": 14,
+    "engine_eq_db": true
+   },
+   {
+    "key": "atr_trail_mult",
+    "db": 2,
+    "code_default": 2.0,
+    "engine": 2,
+    "engine_eq_db": true
+   },
+   {
+    "key": "base_depth_pct",
+    "db": 0.35,
+    "code_default": 0.3,
+    "engine": 0.35,
+    "engine_eq_db": true
+   },
+   {
+    "key": "base_max_days",
+    "db": 40,
+    "code_default": 75,
+    "engine": 40,
+    "engine_eq_db": true
+   },
+   {
+    "key": "base_min_days",
+    "db": 25,
+    "code_default": 25,
+    "engine": 25,
+    "engine_eq_db": true
+   },
+   {
+    "key": "breakeven_promote_atr",
+    "db": 1.5,
+    "code_default": 0.0,
+    "engine": 1.5,
+    "engine_eq_db": true
+   },
+   {
+    "key": "breakout_volume_mult",
+    "db": 1.2,
+    "code_default": 1.5,
+    "engine": 1.2,
+    "engine_eq_db": true
+   },
+   {
+    "key": "buy_paused",
+    "db": false,
+    "code_default": false,
+    "engine": "<not used>",
+    "engine_eq_db": null
+   },
+   {
+    "key": "daily_fetch_depth_mode",
+    "db": "full",
+    "code_default": "cap100",
+    "engine": "full",
+    "engine_eq_db": true
+   },
+   {
+    "key": "daily_loss_limit",
+    "db": -8,
+    "code_default": -8.0,
+    "engine": -8,
+    "engine_eq_db": true
+   },
+   {
+    "key": "ema_long",
+    "db": 200,
+    "code_default": 200,
+    "engine": 200,
+    "engine_eq_db": true
+   },
+   {
+    "key": "ema_mid",
+    "db": 150,
+    "code_default": 150,
+    "engine": 150,
+    "engine_eq_db": true
+   },
+   {
+    "key": "ema_short",
+    "db": 50,
+    "code_default": 50,
+    "engine": 50,
+    "engine_eq_db": true
+   },
+   {
+    "key": "entry_end",
+    "db": "14:30",
+    "code_default": "14:30",
+    "engine": "14:30",
+    "engine_eq_db": true
+   },
+   {
+    "key": "entry_start",
+    "db": "09:05",
+    "code_default": "09:05",
+    "engine": "09:05",
+    "engine_eq_db": true
+   },
+   {
+    "key": "exchange",
+    "db": "KRX",
+    "code_default": "KRX",
+    "engine": "<not used>",
+    "engine_eq_db": null
+   },
+   {
+    "key": "last_pullback_max",
+    "db": 0.15,
+    "code_default": 0.12,
+    "engine": 0.15,
+    "engine_eq_db": true
+   },
+   {
+    "key": "llm_gate_daily_call_cap",
+    "db": 20,
+    "code_default": 20,
+    "engine": "<not used>",
+    "engine_eq_db": null
+   },
+   {
+    "key": "llm_gate_min_score",
+    "db": 70,
+    "code_default": 70,
+    "engine": "<not used>",
+    "engine_eq_db": null
+   },
+   {
+    "key": "llm_gate_mode",
+    "db": "shadow",
+    "code_default": "shadow",
+    "engine": "<not used>",
+    "engine_eq_db": null
+   },
+   {
+    "key": "llm_gate_timeout_secs",
+    "db": 20,
+    "code_default": 20,
+    "engine": "<not used>",
+    "engine_eq_db": null
+   },
+   {
+    "key": "long_ema_uptrend_days",
+    "db": 20,
+    "code_default": 20,
+    "engine": 20,
+    "engine_eq_db": true
+   },
+   {
+    "key": "market_unit_mode",
+    "db": "enforce",
+    "code_default": "shadow",
+    "engine": "enforce",
+    "engine_eq_db": true
+   },
+   {
+    "key": "max_breakout_extension_pct",
+    "db": 7.5,
+    "code_default": 7.5,
+    "engine": 7.5,
+    "engine_eq_db": true
+   },
+   {
+    "key": "max_lot_ratio_mult",
+    "db": 2.5,
+    "code_default": 2.5,
+    "engine": 2.5,
+    "engine_eq_db": true
+   },
+   {
+    "key": "max_lot_units",
+    "db": 2.0,
+    "code_default": 2.0,
+    "engine": 2.0,
+    "engine_eq_db": true
+   },
+   {
+    "key": "max_positions",
+    "db": 5,
+    "code_default": 5,
+    "engine": 5,
+    "engine_eq_db": true
+   },
+   {
+    "key": "max_scan_stocks",
+    "db": 4000,
+    "code_default": 4000,
+    "engine": "<not used>",
+    "engine_eq_db": null
+   },
+   {
+    "key": "min_market_cap",
+    "db": 10000000000,
+    "code_default": 10000000000,
+    "engine": 10000000000,
+    "engine_eq_db": true
+   },
+   {
+    "key": "min_swing_atr_mult",
+    "db": 1.0,
+    "code_default": 1.0,
+    "engine": 1.0,
+    "engine_eq_db": true
+   },
+   {
+    "key": "min_trade_amount",
+    "db": 1000000000,
+    "code_default": 1000000000,
+    "engine": 1000000000,
+    "engine_eq_db": true
+   },
+   {
+    "key": "min_vol_floor_pct",
+    "db": 1.0,
+    "code_default": 1.0,
+    "engine": 1.0,
+    "engine_eq_db": true
+   },
+   {
+    "key": "order_exchange_clock_mode",
+    "db": "enforce",
+    "code_default": "enforce",
+    "engine": "<not used>",
+    "engine_eq_db": null
+   },
+   {
+    "key": "position_ratio",
+    "db": 0.2,
+    "code_default": 0.2,
+    "engine": 0.2,
+    "engine_eq_db": true
+   },
+   {
+    "key": "pullback_count_max",
+    "db": 4,
+    "code_default": 4,
+    "engine": 4,
+    "engine_eq_db": true
+   },
+   {
+    "key": "pullback_count_min",
+    "db": 1,
+    "code_default": 2,
+    "engine": 1,
+    "engine_eq_db": true
+   },
+   {
+    "key": "reentry_cooldown_days",
+    "db": 7,
+    "code_default": 7,
+    "engine": 7,
+    "engine_eq_db": true
+   },
+   {
+    "key": "risk_pct",
+    "db": 0.01,
+    "code_default": 0.005,
+    "engine": 0.01,
+    "engine_eq_db": true
+   },
+   {
+    "key": "sizing_mode",
+    "db": "turtle",
+    "code_default": "position_ratio",
+    "engine": "turtle",
+    "engine_eq_db": true
+   },
+   {
+    "key": "stop_atr",
+    "db": 2.0,
+    "code_default": 2.0,
+    "engine": 2.0,
+    "engine_eq_db": true
+   },
+   {
+    "key": "stop_loss_rate",
+    "db": -7,
+    "code_default": -7.0,
+    "engine": -7,
+    "engine_eq_db": true
+   },
+   {
+    "key": "tradable_boards",
+    "db": [
+     "main"
+    ],
+    "code_default": [
+     "main"
+    ],
+    "engine": "<not used>",
+    "engine_eq_db": null
+   },
+   {
+    "key": "turtle_backstop_pct",
+    "db": -9.0,
+    "code_default": -9.0,
+    "engine": -9.0,
+    "engine_eq_db": true
+   },
+   {
+    "key": "turtle_min_stop_pct",
+    "db": -5.0,
+    "code_default": -5.0,
+    "engine": -5.0,
+    "engine_eq_db": true
+   },
+   {
+    "key": "volume_contraction_ratio",
+    "db": 1.0,
+    "code_default": 0.7,
+    "engine": 1.0,
+    "engine_eq_db": true
+   }
+  ],
+  "engine_mismatch": [],
+  "db_ne_code": [
+   "base_depth_pct",
+   "base_max_days",
+   "breakeven_promote_atr",
+   "breakout_volume_mult",
+   "daily_fetch_depth_mode",
+   "last_pullback_max",
+   "market_unit_mode",
+   "pullback_count_min",
+   "risk_pct",
+   "sizing_mode",
+   "volume_contraction_ratio"
+  ]
+ },
+ "funnel_ticker_days_in_universe": {
+  "1": 308616,
+  "2": 225018,
+  "3": 79879,
+  "4": 34897,
+  "5": 34897
+ },
+ "P6": {
+  "rules_start": "2026-09-28",
+  "rules": {
+   "n": 2,
+   "label": "관문 판정 불가",
+   "pass": null,
+   "hits_even_if_small": 1
+  },
+  "all_live_reference": {
+   "n": 2,
+   "label": "관문 판정 불가",
+   "pass": null,
+   "n_total": 2
+  },
+  "detail": [
+   {
+    "ticker": "006120",
+    "date": "2026-09-28",
+    "state": "open",
+    "replay_signal": false,
+    "cand_prev_bar": false,
+    "stage_prev_bar": 0,
+    "line": null,
+    "bar": [
+     60900.0,
+     65000.0,
+     60200.0,
+     64300.0
+    ]
+   },
+   {
+    "ticker": "101160",
+    "date": "2026-10-01",
+    "state": "open",
+    "replay_signal": true,
+    "cand_prev_bar": true,
+    "stage_prev_bar": 5,
+    "line": 33000.0,
+    "bar": [
+     31950.0,
+     33250.0,
+     31650.0,
+     33200.0
+    ]
+   }
+  ]
+ },
+ "prov_rows_flagged": 321,
+ "prov_trades_touched_h": 0,
+ "P1": {
+  "n": 1692,
+  "mean": 0.010448105488346132,
+  "lo90": 0.006062319064547998,
+  "hi90": 0.015420373923885638,
+  "pass": true,
+  "label": "통과",
+  "median": -0.004752845280442482,
+  "win": 0.35224586288416077,
+  "cost_sens": {
+   "0.0028": {
+    "n": 1692,
+    "mean": 0.011448105488346134,
+    "lo90": 0.0070623190645480016,
+    "label": "통과"
+   },
+   "0.0048": {
+    "n": 1692,
+    "mean": 0.009448105488346133,
+    "lo90": 0.0050623190645479885,
+    "label": "통과"
+   }
+  }
+ },
+ "P2": {
+  "n": 361,
+  "mean": 0.012864206201416144,
+  "full_mean": 0.010448105488346132,
+  "pass": true,
+  "label": "통과"
+ },
+ "P2_prov_halt": {
+  "n": 361,
+  "mean": 0.012864206201416144,
+  "full_mean": 0.010448105488346132,
+  "pass": true,
+  "label": "통과"
+ },
+ "P5": {
+  "mean_color": 0.010448105488346132,
+  "mean_adverse": 0.000345242067230564,
+  "flip": false,
+  "label": "유지",
+  "adverse_p1": {
+   "n": 1700,
+   "mean": 0.000345242067230564,
+   "lo90": -0.003719769971196218,
+   "label": "실패"
+  }
+ },
+ "book_W4": {
+  "cagr_median": 0.23944402354522965,
+  "cagr_min": 0.10227502175989867,
+  "cagr_max": 0.38097219458260234,
+  "mdd_median": -0.18547429645958752,
+  "trades_median": 431.0,
+  "fills_per_year_median": 110.49033570701933,
+  "unaffordable_ratio_median": 0.0,
+  "recon_max_abs": 1.4901161193847656e-08,
+  "counts_seed0": {
+   "signal": 2108,
+   "zero_mu": 558,
+   "fill": 432,
+   "slot_full": 1118
+  },
+  "per_seed": [
+   {
+    "cagr": 0.19549009018894514,
+    "mdd": -0.25226023085661686,
+    "n_trades": 432
+   },
+   {
+    "cagr": 0.17010770937628816,
+    "mdd": -0.2055728691261186,
+    "n_trades": 432
+   },
+   {
+    "cagr": 0.2621095728704552,
+    "mdd": -0.18412072373916644,
+    "n_trades": 421
+   },
+   {
+    "cagr": 0.21915876773198661,
+    "mdd": -0.19940182248105542,
+    "n_trades": 432
+   },
+   {
+    "cagr": 0.2360327414007315,
+    "mdd": -0.17532242163999046,
+    "n_trades": 440
+   },
+   {
+    "cagr": 0.34297405655229873,
+    "mdd": -0.1897691079967221,
+    "n_trades": 414
+   },
+   {
+    "cagr": 0.22357128800533554,
+    "mdd": -0.18488142686882258,
+    "n_trades": 438
+   },
+   {
+    "cagr": 0.3683143419409176,
+    "mdd": -0.1518046025031934,
+    "n_trades": 417
+   },
+   {
+    "cagr": 0.10227502175989867,
+    "mdd": -0.19295518219253094,
+    "n_trades": 434
+   },
+   {
+    "cagr": 0.2768626345362277,
+    "mdd": -0.1491034309626632,
+    "n_trades": 417
+   },
+   {
+    "cagr": 0.2428553056897278,
+    "mdd": -0.2023170937455977,
+    "n_trades": 423
+   },
+   {
+    "cagr": 0.38097219458260234,
+    "mdd": -0.1428848068450428,
+    "n_trades": 420
+   },
+   {
+    "cagr": 0.12458735280510469,
+    "mdd": -0.21719823735754518,
+    "n_trades": 435
+   },
+   {
+    "cagr": 0.18618006274523502,
+    "mdd": -0.1816894376448731,
+    "n_trades": 429
+   },
+   {
+    "cagr": 0.27993311963070444,
+    "mdd": -0.18606716605035245,
+    "n_trades": 444
+   },
+   {
+    "cagr": 0.25464430027395313,
+    "mdd": -0.18308768267491993,
+    "n_trades": 430
+   }
+  ],
+  "cooldown_blocked_seed0": 59,
+  "lot_over_1pct_of_prev_day_tv_share_seed0": 0.0,
+  "seed0_exit_mix": {
+   "TRAILING_STOP": 328,
+   "STOP_LOSS": 94,
+   "TREND_EXIT": 5,
+   "END": 1,
+   "OPEN": 4
+  },
+  "seed0_trade_mean_net": 0.012020891402288068
+ },
+ "P3": {
+  "cagr_median": 0.23944402354522965,
+  "mdd_median": -0.18547429645958752,
+  "pass": true,
+  "label": "통과"
+ },
+ "P4": {
+  "fills_per_year": 110.49033570701933,
+  "unaffordable_ratio": 0.0,
+  "pass": true,
+  "label": "통과"
+ },
+ "book_W4_adverse": {
+  "cagr_median": -0.008474825347647541,
+  "mdd_median": -0.2962778973241593,
+  "fills_per_year_median": 113.18209562563581,
+  "trades_median": 441.5
+ },
+ "book_W4_slip0.01": {
+  "cagr_median": 0.09961926393546228,
+  "mdd_median": -0.26562600640685935,
+  "fills_per_year_median": 111.25940996948118,
+  "trades_median": 434.0
+ },
+ "book_W4_slip0.02": {
+  "cagr_median": -0.055476129361983595,
+  "mdd_median": -0.37164226660368743,
+  "fills_per_year_median": 112.79755849440488,
+  "trades_median": 440.0
+ },
+ "book_H_report": {
+  "cagr_median": -0.008319331028840027,
+  "mdd_median": -0.22253385221442595,
+  "trades_median": 134.5,
+  "fills_per_year_median": 140.6390041493776,
+  "unaffordable_ratio_median": 0.0,
+  "recon_max_abs": 4.6566128730773926e-09
+ },
+ "L1": {
+  "rules_window": {
+   "n": 0,
+   "label": "판정 불가",
+   "pass": null,
+   "mean": NaN
+  },
+  "all_trips_reference_pre_rules": {
+   "n": 0
+  }
+ },
+ "report": {
+  "w5y_adverse_lit": {
+   "n": 1691,
+   "mean": 0.008796309059627852,
+   "median": -0.007452597402597379,
+   "win": 0.34890597279716146,
+   "mean_ex_top1pct": 0.0020934369895644076,
+   "sum_top1pct_share": 0.7644021842867487
+  },
+  "w5y_adv_entry": {
+   "n": 1700,
+   "mean": 0.001872331792671899,
+   "median": -0.026893629343629297,
+   "win": 0.3164705882352941,
+   "mean_ex_top1pct": -0.0051017049349301015,
+   "sum_top1pct_share": 3.6975389219734622
+  },
+  "w5y_adv_later": {
+   "n": 1692,
+   "mean": 0.008896736947096726,
+   "median": -0.008250222712035656,
+   "win": 0.3475177304964539,
+   "mean_ex_top1pct": 0.0021988858598136042,
+   "sum_top1pct_share": 0.755326807128841
+  },
+  "w5y_slip0.01_p1": {
+   "n": 1691,
+   "mean": 0.003547180681761601,
+   "lo90": -0.0008333415597583059,
+   "label": "통과"
+  },
+  "h_slip0.01": {
+   "n": 360,
+   "mean": 0.005790193008374101,
+   "median": -0.03791620909838242,
+   "win": 0.32222222222222224,
+   "mean_ex_top1pct": -0.0019989790722649086,
+   "sum_top1pct_share": 1.341399361096474
+  },
+  "w5y_slip0.02_p1": {
+   "n": 1691,
+   "mean": -0.0014643264878739484,
+   "lo90": -0.005914263611370791,
+   "label": "실패"
+  },
+  "h_slip0.02": {
+   "n": 360,
+   "mean": -0.0010288181694238536,
+   "median": -0.04356271171321621,
+   "win": 0.2972222222222222,
+   "mean_ex_top1pct": -0.008707031077552425,
+   "sum_top1pct_share": -7.369104029941135
+  },
+  "w5y_slip0.03_p1": {
+   "n": 1692,
+   "mean": -0.006546854188497909,
+   "lo90": -0.010675717002276462,
+   "label": "실패"
+  },
+  "h_slip0.03": {
+   "n": 360,
+   "mean": -0.008941594822163411,
+   "median": -0.049005943842604344,
+   "win": 0.2861111111111111,
+   "mean_ex_top1pct": -0.015065804162814788,
+   "sum_top1pct_share": -0.6661911700421758
+  },
+  "live_vs_replay": {
+   "summary": {
+    "n_matched_closed": 0,
+    "live_mean": null,
+    "replay_mean": null
+   },
+   "rows": [
+    {
+     "ticker": "006120",
+     "buy": "2026-09-28",
+     "sell": null,
+     "live_open": true,
+     "replay": null
+    },
+    {
+     "ticker": "101160",
+     "buy": "2026-10-01",
+     "sell": null,
+     "live_open": true,
+     "replay": {
+      "E_raw": 33000.0,
+      "entry": "cross",
+      "exit": null,
+      "why": "END",
+      "net": -0.0007696969696970612
+     }
+    }
+   ]
+  },
+  "w5y": {
+   "n": 1692,
+   "mean": 0.010448105488346132,
+   "median": -0.004752845280442482,
+   "win": 0.35224586288416077,
+   "mean_ex_top1pct": 0.0035277976317922865,
+   "sum_top1pct_share": 0.6657429559428408
+  },
+  "w5y_adverse": {
+   "n": 1700,
+   "mean": 0.000345242067230564,
+   "median": -0.02793350121092589,
+   "win": 0.3129411764705882,
+   "mean_ex_top1pct": -0.0064071500802186055,
+   "sum_top1pct_share": 19.37284381448308
+  },
+  "w4": {
+   "n": 997,
+   "mean": 0.009353828570699984,
+   "median": -0.013179509379509376,
+   "win": 0.3340020060180542,
+   "mean_ex_top1pct": 0.001109174907839424,
+   "sum_top1pct_share": 0.8826095886739668
+  },
+  "h": {
+   "n": 361,
+   "mean": 0.012864206201416144,
+   "median": -0.024019780219780105,
+   "win": 0.33240997229916897,
+   "mean_ex_top1pct": 0.005018631533495884,
+   "sum_top1pct_share": 0.6141990146803442
+  },
+  "h_adverse": {
+   "n": 361,
+   "mean": -0.0022408717252000803,
+   "median": -0.04242660944206009,
+   "win": 0.2853185595567867,
+   "mean_ex_top1pct": -0.008757154877716437,
+   "sum_top1pct_share": -2.8646222330876596
+  },
+  "w5y_vol": {
+   "n": 1429,
+   "mean": 0.016196577302681692,
+   "median": -0.0038,
+   "win": 0.3799860041987404,
+   "mean_ex_top1pct": 0.009041967915493363,
+   "sum_top1pct_share": 0.44720523120325245
+  },
+  "h_vol": {
+   "n": 305,
+   "mean": 0.019160893491977013,
+   "median": -0.0038,
+   "win": 0.3442622950819672,
+   "mean_ex_top1pct": 0.011570669279092479,
+   "sum_top1pct_share": 0.4020707112573795
+  },
+  "w5y_latch": {
+   "n": 1700,
+   "mean": 0.010004664797988528,
+   "median": -0.0066794597251136085,
+   "win": 0.35058823529411764,
+   "mean_ex_top1pct": 0.003112772848218018,
+   "sum_top1pct_share": 0.6919791735195956
+  },
+  "w5y_today_universe": {
+   "n": 1600,
+   "mean": 0.009104297710385938,
+   "median": -0.005759982323018638,
+   "win": 0.350625,
+   "mean_ex_top1pct": 0.0027687381727826664,
+   "sum_top1pct_share": 0.6989278164829862
+  },
+  "w5y_nostruct": {
+   "n": 1692,
+   "mean": 0.010448105488346132,
+   "median": -0.004752845280442482,
+   "win": 0.35224586288416077,
+   "mean_ex_top1pct": 0.0035277976317922865,
+   "sum_top1pct_share": 0.6657429559428408
+  },
+  "h_prov_halt": {
+   "n": 361,
+   "mean": 0.012864206201416144,
+   "median": -0.024019780219780105,
+   "win": 0.33240997229916897,
+   "mean_ex_top1pct": 0.005018631533495884,
+   "sum_top1pct_share": 0.6141990146803442
+  },
+  "w5y_vol_p1": {
+   "n": 1429,
+   "mean": 0.016196577302681692,
+   "lo90": 0.010993180838903526,
+   "label": "통과"
+  },
+  "w5y_latch_p1": {
+   "n": 1700,
+   "mean": 0.010004664797988528,
+   "lo90": 0.005376572416609919,
+   "label": "통과"
+  },
+  "by_year": {
+   "2020": {
+    "n": 2,
+    "mean": 0.03635989663247999,
+    "median": 0.03635989663247999,
+    "win": 1.0,
+    "mean_ex_top1pct": 0.02430304449648715,
+    "sum_top1pct_share": 0.6657987680474118
+   },
+   "2021": {
+    "n": 706,
+    "mean": 0.011954766967218,
+    "median": -0.0038,
+    "win": 0.3781869688385269,
+    "mean_ex_top1pct": 0.007227497996216997,
+    "sum_top1pct_share": 0.4014239448719878
+   },
+   "2022": {
+    "n": 77,
+    "mean": -0.020292692292396067,
+    "median": -0.030347880114248136,
+    "win": 0.23376623376623376,
+    "mean_ex_top1pct": -0.023333451692351796,
+    "sum_top1pct_share": -0.13491199296513143
+   },
+   "2023": {
+    "n": 327,
+    "mean": 0.00959476750702541,
+    "median": -0.025589321789321804,
+    "win": 0.308868501529052,
+    "mean_ex_top1pct": 0.0010805543909393424,
+    "sum_top1pct_share": 0.8884140707818852
+   },
+   "2024": {
+    "n": 215,
+    "mean": 0.007950672815626439,
+    "median": -0.0065886224205242445,
+    "win": 0.29767441860465116,
+    "mean_ex_top1pct": -0.0021440008601732586,
+    "sum_top1pct_share": 1.2671543296248404
+   },
+   "2025": {
+    "n": 365,
+    "mean": 0.016112501069913143,
+    "median": -0.0038,
+    "win": 0.39452054794520547,
+    "mean_ex_top1pct": 0.009000236648692282,
+    "sum_top1pct_share": 0.4475343163875643
+   },
+   "H": {
+    "n": 361,
+    "mean": 0.012864206201416144,
+    "median": -0.024019780219780105,
+    "win": 0.33240997229916897,
+    "mean_ex_top1pct": 0.005018631533495884,
+    "sum_top1pct_share": 0.6141990146803442
+   }
+  },
+  "exit_mix_w5y": {
+   "TRAILING_STOP": {
+    "n": 1301,
+    "share": 0.7689125295508275,
+    "mean": 0.02230797731797542
+   },
+   "STOP_LOSS": {
+    "n": 342,
+    "share": 0.20212765957446807,
+    "mean": -0.031234453973939712
+   },
+   "TREND_EXIT": {
+    "n": 30,
+    "share": 0.01773049645390071,
+    "mean": -0.04780800473577625
+   },
+   "END": {
+    "n": 19,
+    "share": 0.011229314420803783,
+    "mean": 0.04062838930296351
+   },
+   "_hold_median": 3.0
+  },
+  "entry_mix_w5y": {
+   "cross": 1444,
+   "gap": 248
+  },
+  "vol_ok_share_w5y": 0.7423167848699763,
+  "regime": {
+   "er_bounds_front60": [
+    0.11317683563174108,
+    0.26494289471117416
+   ],
+   "cells": {
+    "mu=0.5|er=0": {
+     "n": 51,
+     "mean": 0.02234662291707318
+    },
+    "mu=0.5|er=1": {
+     "n": 70,
+     "mean": 0.0004737133177393065
+    },
+    "mu=0.5|er=2": {
+     "n": 26,
+     "mean": 0.05115203633200126
+    },
+    "mu=0.75|er=0": {
+     "n": 52,
+     "mean": 0.013295949031520853
+    },
+    "mu=0.75|er=1": {
+     "n": 48,
+     "mean": -0.006299611624632812
+    },
+    "mu=0.75|er=2": {
+     "n": 81,
+     "mean": -0.0015662364707596757
+    },
+    "mu=1.0|er=0": {
+     "n": 417,
+     "mean": 0.013309626228859244
+    },
+    "mu=1.0|er=1": {
+     "n": 322,
+     "mean": 0.012435940950856962
+    },
+    "mu=1.0|er=2": {
+     "n": 625,
+     "mean": 0.008574038207202752
+    }
+   }
+  },
+  "bench_069500_W4": {
+   "cagr": 0.08426746062578006,
+   "mdd": -0.28384415024657483,
+   "note": "069500(KODEX 200) 수정 종가 보유 — 코스피 근사 지수 대신(동결본 §1.1 시장 유닛과 같은 원천)"
+  },
+  "random_control": {
+   "reps": 5,
+   "n_per_rep": 1692,
+   "mean_of_means": 0.0007524903577077032,
+   "means": [
+    -0.001236681912914276,
+    0.0021867937484554905,
+    0.0023622051964418177,
+    0.001584585778357555,
+    -0.001134451021802071
+   ],
+   "real_nostruct_mean": 0.010448105488346132
+  },
+  "eff_long_lt200": {
+   "n": 720,
+   "w5y_excluding": {
+    "n": 972,
+    "mean": 0.008858293605123139,
+    "median": -0.013452773156966443,
+    "win": 0.32613168724279834,
+    "mean_ex_top1pct": 0.00039423069982256434,
+    "sum_top1pct_share": 0.9559537258733932
+   }
+  }
+ },
+ "elapsed_s": 28.405100107192993
+}

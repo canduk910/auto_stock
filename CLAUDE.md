@@ -208,7 +208,7 @@ cd frontend && npm install && npm run dev
 
 | 테이블 | 용도 |
 |--------|------|
-| `trade_history` | 거래 내역 (status: PENDING/COMPLETED/PARTIAL/CANCELLED) |
+| `trade_history` | 거래 내역 (status: PENDING/COMPLETED/PARTIAL/CANCELLED). `order_price`(migration 046) = PENDING 때 주문가 — 체결가로 덮이는 `price` 와 따로 남는 슬리피지 원천 |
 | `daily_performance` | 일일 실적 (date+strategy 복합PK, TWR 누적, 실현손익 기준) |
 | `positions` | 보유 포지션 영속화 (ticker PK) |
 | `pending_next_day_clear` | 익일청산 큐 영속화 (migration 038) — 재기동이 메모리 `_pending_next_day_clear` 를 잃지 않게 한다 |
@@ -221,6 +221,7 @@ cd frontend && npm install && npm run dev
 | `stock_master_history` | `stock_master` 직전본 (migration 032·036, PK `(ticker, seq)` — 트리거가 쓴다) |
 | `stock_master_daily` | KIS 일봉 정규화 (migration 033, PK `(ticker, bas_dd)`). 매일 20:30 KST 적재. 🔴 **20:30 에 쓴 그날 봉의 종가·고가·저가는 잠정이다** — 다음 거래일 아침 부팅이 prepare 직전에 `daily_bar_finalize` 로 확정한다. 적재 대상·깊이·retention = `src/engine/CLAUDE.md` 「저녁 데이터 적재 (scanner + data_load_tasks)」 절 |
 | `stock_master_financial` | KIS 재무 5 TR 정규화 (migration 041). 주1회 16:40 적재, 매매 hot path 무관 |
+| `trade_cost_daily` | KIS `TTTC8715R` 정산 수수료·제세금 사후 대사 (migration 045, PK `(trad_dt, pdno)`) + 기간 합계 `trade_cost_period_totals`. 정본 = `src/db/CLAUDE.md` 「trade_cost.py — 실비용 정산값 (트랙 C)」 절 |
 | `llm_buy_evaluations` | AI 매수평가(LLM shadow)를 주문을 낼 때 기록 (migration 043, 주문 1건 = 1행). 열 정의 = `src/db/CLAUDE.md` 「llm_buy_evaluations.py — AI 매수평가 기록」 절 |
 | `backtest_runs` | 외부 MCP 백테스트 영속화 (`(target_date, strategy_id, params_kind)` UNIQUE) |
 | `market_regime_snapshots` | 매크로 레짐 일일 스냅샷 (출처 = 우리 `macro` 컨테이너, `_boot()` 시점 1행) |
@@ -239,7 +240,7 @@ cd frontend && npm install && npm run dev
 - 타임존 `TZ=Asia/Seoul`. vite 프록시 타겟 분기 = `frontend/CLAUDE.md` 「실행」 절
 - **EC2 t4g.small (ARM, ap-northeast-2)** 서비스 경로 `~/auto_stock/`
 - 자동 배포: `git push origin main` → GitHub Actions 가 EC2 SSH → `git pull` + **선택적 재빌드**(`.github/workflows/deploy.yml` → `tools/deploy/compose_up_changed.sh`). backend 가 재생성될 때만 push → pool_start 지연 1~5분. deploy.yml 은 `supabase/migrations/*.sql` 을 EC2 psql 로 순차 적용한다(graceful skip). GitHub Secrets = `EC2_HOST`·`EC2_USERNAME`·`EC2_SSH_KEY`·`SUPABASE_DB_URL`(**이름은 유지하되 값이 RDS DSN**)
-- CI (`.github/workflows/ci.yml`): `postgres:15` service 컨테이너 + `DATABASE_URL_TEST` 로 통합 테스트 실행 (`tests/integration/pg_harness.py` 가 migration 001~043 적용)
+- CI (`.github/workflows/ci.yml`): `postgres:15` service 컨테이너 + `DATABASE_URL_TEST` 로 통합 테스트 실행 (`tests/integration/pg_harness.py` 가 migration 001~045 적용)
 - **로컬과 EC2 동시 실행 금지** — KIS 동일 계정 동시 접속 충돌
 - **선택적 배포 (cycle248)** — `tools/deploy/compose_up_changed.sh` 가 마커 `.deployed_sha`(마지막 성공 배포 SHA, git 밖)와 HEAD 의 누적 diff 로 **full**(`up --build` = **backend 재시작**) / **선택 배포**(`frontend` · `macro` · `frontend+macro` — `--no-deps`, backend 무접촉) / **none**(빌드 없는 `up -d`) 중 하나를 고른다. 판정 불가(마커 없음·미지 SHA·diff 실패)는 전부 **full**(fail-safe)이고, backend 히트가 하나라도 있으면 full 이라 **backend 가 선택 목록에 들어갈 길은 없다**. 마커는 compose 성공 뒤에만 쓴다. 분류 근거 = 루트 Dockerfile COPY 소스가 `requirements.txt`·`src/` 뿐이라는 사실(가드 D-8 · `test_cycle248_deploy_pipeline.py::G-248-2` 가 COPY 소스 ↔ 정규식 정합 강제). 모드별 경로 표 = `README.md` 「선택적 배포 (cycle248)」 절
 - ⚠️ 배포 모드 함정 넷: (a) `**.md`·`docs/**`·`_workspace/**` 만 바꾼 push 는 CI `paths-ignore` 로 **CI/Deploy 자체가 뜨지 않는다**(마커는 다음 배포의 누적 diff 가 따라잡는다) (b) `src/` 안 `.md` 는 `IMAGE_EXCLUDED_RE='^src/.*\.md$'`(`tools/deploy/compose_up_changed.sh`)가 backend 히트에서 덜어내 full 이 아니다(정합 가드 `tests/unit/ast/test_cycle322_image_excluded_paths.py`) — 🔴 `.*\.md$` 로 넓히지 않는다(`tools/deploy/` 축이 흔들린다) (c) `.env` 는 git 밖이라 스크립트가 못 본다 — 손댄 뒤 운영자가 `docker compose up -d` 로 재생성하고 **마커는 건드리지 않는다**(마커는 git SHA 의 배포 상태만 뜻한다) (d) none 모드의 `up -d` 도 구성이 어긋나 있으면 재생성한다(none ≠ 무조건 무재시작)

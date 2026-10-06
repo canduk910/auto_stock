@@ -63,13 +63,26 @@ def _today_kst_iso() -> str:
 
 
 async def insert_trade(record: TradeRecord) -> None:
-    """거래 기록을 삽입한다."""
+    """거래 기록을 삽입한다.
+
+    cycle409 — 사용자 결정 10-04 Q4: `order_price`(주문가) = `record.order_price` 명시값, 없으면
+    **PENDING ∧ BUY** 행의 `price`(지정가 = 주문가, 시장가 = 주문 순간 현재가). 체결 UPDATE 는 이 칸을
+    건드리지 않으므로 체결가로 덮인 뒤에도 남는다. 매도 PENDING 은 `price` 가 주문가가 아니라
+    매수가라(`order_engine` `record_price=pos.buy_price`) 옮겨 적지 않는다 — 매도 경로가 명시값을
+    넘긴다. 체결통보 선행 보정·동기화 INSERT(COMPLETED)의 `price` 는 체결가라 NULL.
+    """
+    if record.order_price is not None:
+        order_price = float(record.order_price)
+    elif record.status == TradeStatus.PENDING and record.trade_type == TradeType.BUY:
+        order_price = float(record.price)
+    else:
+        order_price = None
     await pg.execute(
         """
         INSERT INTO trade_history (
             ticker, ticker_name, trade_type, price, quantity,
-            profit_loss, status, strategy, order_no, timestamp
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+            profit_loss, status, strategy, order_no, timestamp, order_price
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
         """,
         record.ticker,
         record.ticker_name,
@@ -81,6 +94,7 @@ async def insert_trade(record: TradeRecord) -> None:
         record.strategy,
         record.order_no,
         datetime.now(KST),
+        order_price,
     )
     logger.debug("거래 기록 삽입: %s %s (전략: %s)", record.trade_type.value, record.ticker, record.strategy)
 

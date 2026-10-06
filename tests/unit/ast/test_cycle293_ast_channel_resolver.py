@@ -180,8 +180,10 @@ _BASE_SHA: dict[str, str] = {
     # 🔁 cycle364(2026-09-26) 재핀 — 저녁 A1 미리보기(`prepare(as_of=)`) 도입 + 저녁
     # 캡처 본체 leaf 이관(전략 7파일 전부 + strategy_base + scheduler, 사용자 승인 D3).
     # 🔁 cycle369 재핀 — 관리종목51·단기과열59 청산·매수차단 leaf 배선(값만 이동)
+    # 🔁 cycle408-L1 재핀 — 사용자 승인 10-04 8영역 관측 결함 해결: 09:30 자동 퍼널 캡처에 `protect_confirmed=True` 전달(+6줄, 값 없는 키워드 배선)
     "src/engine/scheduler.py":
-        "084f114f2aa415dec16a55e5df5d89c233c37d55c5714c66b10460839435d10c",
+        # 🔁 cycle409 재핀 — 사용자 결정 10-04 Q1·Q4: 매일 자동 대사 task 배선(leaf import · create_task 1줄 · cancel 목록 3곳, +1줄). 직전 값 = cycle408-L1 `2bacaa149ab6…`
+        "f53d41a11fe162f80e113c6ff48cf6d235581769be7979499c5782ff11d49646",
     "src/engine/market_op_subscribe.py":
         "7d58f9464c1ed35e4fa8706d801beb5a6b5c062d5a2941f0db6482d028d3d4ac",
     # 전략 7파일 + 베이스 (절대 규칙 5)
@@ -262,7 +264,7 @@ _PIN_PENDING_APPROVAL: dict[str, str] = {
         "a2187b8270446379988d24dfbe39b902d6ab37b112d4b6ce7330ee171434e222",
 }
 
-_SCHEDULER_LINES = 3730  # cycle398 재핀 — 전략 등록 명부 추출(PR1 카드 #2) + 원형 선언 명부 칸 추출(PR2 카드 #3, 사용자 승인 10-02, 합산 -56)
+_SCHEDULER_LINES = 3737  # cycle409 재핀 +1 — 사용자 결정 10-04 Q1·Q4 매일 자동 대사 task 배선. 직전 3736 = cycle408-L1
 _SCHEDULER_LINE_CAP = 3900
 
 

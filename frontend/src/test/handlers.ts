@@ -25,6 +25,8 @@ import { PARAM_SCHEMA_FIXTURE } from "./fixtures/paramSchema.fixture";
 import { MARKET_STATE_FIXTURE } from "./fixtures/marketState.fixture";
 // cycle387 — 종목 차트(일봉·주봉·월봉) 응답 리터럴(참조 라우트를 실제로 태워 나온 JSON).
 import { STOCK_CHART_RESPONSES } from "./fixtures/stockChart.fixture";
+// cycle410 — 6장세 라벨(관찰 전용) 응답(라우트를 실제로 태워 나온 JSON).
+import { MARKET_REGIME_LABEL_FIXTURE } from "./fixtures/marketRegimeLabel.fixture";
 
 const base = "/api";
 
@@ -857,6 +859,10 @@ export const handlers = [
     )
   ),
   http.get(`${base}/market-regime/history`, () => HttpResponse.json(wrap([]))),
+  // cycle410 — 6장세 라벨 카드(Dashboard, 관찰 전용).
+  http.get(`${base}/market-regime-label`, () =>
+    HttpResponse.json(wrap(MARKET_REGIME_LABEL_FIXTURE))
+  ),
   http.put(`${base}/market-regime/auto-adjust`, () =>
     HttpResponse.json(wrap({ auto_regime_adjust: false }, "수동 모드"))
   ),

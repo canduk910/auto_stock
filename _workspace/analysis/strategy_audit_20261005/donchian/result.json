@@ -1,0 +1,679 @@
+{
+ "inputs": {
+  "db_extract_sha256": "e31e842ba7e7f47e8f96ac6cd4dad223dcc047c23f6c99f8686606d02e2ccebf",
+  "branch_donchian_sha256": "c8c7172e8e33fa164e2d11c30641562e8ab2d6474e7a84f241320bf2fbab58f3",
+  "stock_parquet": "sha 6개 = config.STOCK_PARQUET_SHA 대조 통과",
+  "etf_parquet": "sha 7개 = config.ETF_PARQUET_SHA 대조 통과",
+  "cal": [
+   "2020-10-05",
+   "2026-10-02",
+   1470
+  ],
+  "store": {
+   "junction_rescaled": 220,
+   "tickers": 3451,
+   "cal": [
+    "2020-10-05",
+    "2026-10-02"
+   ]
+  },
+  "market_unit_seam": {
+   "overlap_days": 236,
+   "tail_equal_days": 39,
+   "tail_equal_from": "2026-07-30",
+   "note": "보관소는 분배 수정가 — 마지막 수정 이후 구간만 DB 원본과 같아야 한다",
+   "db_days_appended": [
+    "2026-09-28",
+    "2026-09-29",
+    "2026-09-30",
+    "2026-10-01",
+    "2026-10-02"
+   ]
+  },
+  "prov_rows_flagged": 444
+ },
+ "params": {
+  "KK": {
+   "r_floor": 0.08,
+   "r_atr": 1.5,
+   "be_r": 3.0,
+   "channel": 10,
+   "time_bars": 20,
+   "time_min_r": 1.0,
+   "max_hold": 250,
+   "risk_pct": 0.012,
+   "pr": 0.15,
+   "max_pos": 6,
+   "daily_cap": 3,
+   "K": 2.0,
+   "Krho": 2.5
+  },
+  "ENTRY": {
+   "gap_skip": 3.0,
+   "ext_pct": 4.0,
+   "min_trade": 20000000000.0,
+   "vol_mult": 1.5
+  },
+  "op_sizer_params": {
+   "market_unit_mode": "enforce",
+   "risk_pct": 0.012,
+   "position_ratio": 0.15,
+   "max_positions": 6
+  },
+  "budget": 4707820,
+  "cost_rt": 0.0038
+ },
+ "c405": {
+  "n_signals": 6569,
+  "n_r_half_dropped": 0,
+  "P1": {
+   "n": 2378,
+   "mean": 0.005846461249450412,
+   "lo90": -0.0018995150718198563,
+   "hi90": 0.013495221319934012,
+   "pass": true,
+   "label": "통과",
+   "R_mweighted": 0.09963000081274008,
+   "R_mean": 0.09182631337424882,
+   "mean_ex_top1pct": -0.00919200066916173,
+   "exit_reasons": {
+    "STOP_LOSS": 1516,
+    "TRAILING_STOP": 476,
+    "TIME_EXIT": 295,
+    "END": 91
+   },
+   "win_rate": 0.27796467619848614
+  },
+  "P1_cost_sens": {
+   "0.0028": 0.006846461249450412,
+   "0.0048": 0.0048464612494504115
+  },
+  "P5": {
+   "mean_color": 0.005846461249450412,
+   "mean_adverse": 0.005846461249450412,
+   "flip": false,
+   "label": "유지",
+   "adverse_P1": {
+    "n": 2378,
+    "mean": 0.005846461249450412,
+    "lo90": -0.0018995150718198563,
+    "hi90": 0.013495221319934012,
+    "pass": true,
+    "label": "통과",
+    "R_mweighted": 0.09963000081274008,
+    "R_mean": 0.09182631337424882,
+    "mean_ex_top1pct": -0.00919200066916173,
+    "exit_reasons": {
+     "STOP_LOSS": 1516,
+     "TRAILING_STOP": 476,
+     "TIME_EXIT": 295,
+     "END": 91
+    },
+    "win_rate": 0.27796467619848614
+   },
+   "n_trades_differ": 0
+  },
+  "W4_pop_cost035_vs_c405": {
+   "n": 1827,
+   "ret_mean_pct": 0.8616292487340416,
+   "ref": {
+    "n": 1827,
+    "ret_mean_pct": 0.8616
+   }
+  },
+  "P2": {
+   "n": 630,
+   "mean": 0.05478103541333719,
+   "full_mean": 0.005846461249450412,
+   "pass": true,
+   "label": "통과"
+  },
+  "H_population": {
+   "n": 630,
+   "mean": 0.05478103541333719,
+   "lo90": 0.032193016060917366,
+   "hi90": 0.0806970300888115,
+   "pass": true,
+   "label": "통과",
+   "R_mweighted": 0.6234778000523015,
+   "R_mean": 0.6037616547300088,
+   "mean_ex_top1pct": 0.02607924037376725,
+   "exit_reasons": {
+    "STOP_LOSS": 388,
+    "TRAILING_STOP": 200,
+    "TIME_EXIT": 23,
+    "END": 19
+   },
+   "win_rate": 0.3523809523809524
+  },
+  "P2_prov_halt": {
+   "n": 630,
+   "mean": 0.05478103541333719,
+   "full_mean": 0.005846461249450412,
+   "pass": true,
+   "label": "통과"
+  },
+  "P3P4_W4": {
+   "cagr_median": 0.05674491360061673,
+   "cagr_min": -0.07890324873854293,
+   "cagr_max": 0.24358215110786197,
+   "mdd_median": -0.2594490111780795,
+   "trades_median": 181.5,
+   "fills_per_year_median": 46.52899287894201,
+   "unaffordable_ratio_median": 0.0,
+   "slot_or_cap_ratio_ex_mu_median": 0.9393021070590823,
+   "recon_max_abs": 3.725290298461914e-09,
+   "counts_seed0": {
+    "signal": 4140,
+    "zero_mu": 1061,
+    "fill": 169,
+    "daily_cap": 26,
+    "zero_design": 5,
+    "slot_full": 2879
+   },
+   "lot_over_1pct_tv_seed0": 0.0,
+   "exit_reasons_seed0": {
+    "STOP_LOSS": 101,
+    "TRAILING_STOP": 35,
+    "TIME_EXIT": 27,
+    "OPEN": 6
+   }
+  },
+  "P3": {
+   "cagr_median": 0.05674491360061673,
+   "mdd_median": -0.2594490111780795,
+   "pass": true,
+   "label": "통과"
+  },
+  "P4": {
+   "fills_per_year": 46.52899287894201,
+   "unaffordable_ratio": 0.0,
+   "pass": true,
+   "label": "통과"
+  },
+  "P3_adverse_W4": {
+   "cagr_median": 0.05674491360061673,
+   "cagr_min": -0.07890324873854293,
+   "cagr_max": 0.24358215110786197,
+   "mdd_median": -0.2594490111780795,
+   "trades_median": 181.5,
+   "fills_per_year_median": 46.52899287894201,
+   "unaffordable_ratio_median": 0.0,
+   "slot_or_cap_ratio_ex_mu_median": 0.9393021070590823,
+   "recon_max_abs": 3.725290298461914e-09,
+   "counts_seed0": {
+    "signal": 4140,
+    "zero_mu": 1061,
+    "fill": 169,
+    "daily_cap": 26,
+    "zero_design": 5,
+    "slot_full": 2879
+   },
+   "lot_over_1pct_tv_seed0": 0.0,
+   "exit_reasons_seed0": {
+    "STOP_LOSS": 101,
+    "TRAILING_STOP": 35,
+    "TIME_EXIT": 27,
+    "OPEN": 6
+   }
+  },
+  "P3_cost_sens": {
+   "0.0028": {
+    "cagr_median": 0.06101159187539196,
+    "mdd_median": -0.24998056869379648
+   },
+   "0.0048": {
+    "cagr_median": 0.04912726796731348,
+    "mdd_median": -0.26356145028925126
+   }
+  },
+  "book_H_report": {
+   "cagr_median": 0.10620959364849869,
+   "cagr_min": -0.17174606593281816,
+   "cagr_max": 0.7103019139116491,
+   "mdd_median": -0.2814554530824981,
+   "trades_median": 78.5,
+   "fills_per_year_median": 82.08298755186722,
+   "unaffordable_ratio_median": 0.0,
+   "slot_or_cap_ratio_ex_mu_median": 0.9197300672026039,
+   "recon_max_abs": 2.7939677238464355e-09,
+   "counts_seed0": {
+    "signal": 1079,
+    "fill": 72,
+    "daily_cap": 15,
+    "slot_full": 940,
+    "zero_design": 2,
+    "zero_mu": 50
+   },
+   "lot_over_1pct_tv_seed0": 0.0,
+   "exit_reasons_seed0": {
+    "STOP_LOSS": 44,
+    "TRAILING_STOP": 21,
+    "OPEN": 6,
+    "TIME_EXIT": 1
+   }
+  },
+  "book_W5y_report": {
+   "cagr_median": 0.09895633564509332,
+   "cagr_min": 0.025029925905126316,
+   "cagr_max": 0.22853836120464477,
+   "mdd_median": -0.3261509173670366,
+   "trades_median": 219.0,
+   "fills_per_year_median": 44.90480065093572,
+   "unaffordable_ratio_median": 0.0,
+   "slot_or_cap_ratio_ex_mu_median": 0.9440187839841818,
+   "recon_max_abs": 5.587935447692871e-09,
+   "counts_seed0": {
+    "signal": 5231,
+    "fill": 229,
+    "daily_cap": 40,
+    "slot_full": 3810,
+    "zero_design": 2,
+    "zero_mu": 1150
+   },
+   "lot_over_1pct_tv_seed0": 0.0,
+   "exit_reasons_seed0": {
+    "STOP_LOSS": 145,
+    "TRAILING_STOP": 46,
+    "TIME_EXIT": 31,
+    "OPEN": 6,
+    "END": 1
+   }
+  },
+  "report_yearly": {
+   "2021": {
+    "n": 607,
+    "mean": -0.008331300654194927
+   },
+   "2022": {
+    "n": 187,
+    "mean": -0.055584738039047864
+   },
+   "2023": {
+    "n": 620,
+    "mean": 0.007364855849288395
+   },
+   "2024": {
+    "n": 392,
+    "mean": 0.019353972325037768
+   },
+   "2025": {
+    "n": 572,
+    "mean": 0.030072312209121925
+   }
+  },
+  "report_mu_er": {
+   "er_bounds": [
+    0.11317683563174108,
+    0.26494289471117416
+   ],
+   "m=1.0|er=0": {
+    "n": 525,
+    "mean": 0.003640038557307085,
+    "thin": false
+   },
+   "m=1.0|er=1": {
+    "n": 415,
+    "mean": 0.004494438240845749,
+    "thin": false
+   },
+   "m=1.0|er=2": {
+    "n": 795,
+    "mean": 0.01852388447190122,
+    "thin": false
+   },
+   "m=0.75|er=0": {
+    "n": 109,
+    "mean": 0.016339683241054642,
+    "thin": false
+   },
+   "m=0.75|er=1": {
+    "n": 132,
+    "mean": -0.015919150536164377,
+    "thin": false
+   },
+   "m=0.75|er=2": {
+    "n": 199,
+    "mean": -0.04263555147636806,
+    "thin": false
+   },
+   "m=0.5|er=0": {
+    "n": 58,
+    "mean": -0.011402694151344614,
+    "thin": false
+   },
+   "m=0.5|er=1": {
+    "n": 99,
+    "mean": 0.041445946150464305,
+    "thin": false
+   },
+   "m=0.5|er=2": {
+    "n": 46,
+    "mean": 0.016590637318965356,
+    "thin": false
+   }
+  },
+  "report_random_control": {
+   "reps": 5,
+   "mean_of_means": 0.0023811936294520276,
+   "per_rep": [
+    -0.0026165779587222276,
+    0.00012196702430818125,
+    0.005385389247454042,
+    0.005211626070880769,
+    0.0038035637633393737
+   ]
+  },
+  "report_end_open_trades": 91
+ },
+ "op": {
+  "n_signals": 6603,
+  "n_r_half_dropped": 0,
+  "P1": {
+   "n": 2379,
+   "mean": 0.006079223908955267,
+   "lo90": -0.0014246300932139247,
+   "hi90": 0.013608923757357415,
+   "pass": true,
+   "label": "통과",
+   "R_mweighted": 0.10222932924355281,
+   "R_mean": 0.09465562258984694,
+   "mean_ex_top1pct": -0.008950480147344026,
+   "exit_reasons": {
+    "STOP_LOSS": 1520,
+    "TRAILING_STOP": 474,
+    "TIME_EXIT": 293,
+    "END": 92
+   },
+   "win_rate": 0.27742749054224464
+  },
+  "P1_cost_sens": {
+   "0.0028": 0.0070792239089552695,
+   "0.0048": 0.005079223908955269
+  },
+  "P5": {
+   "mean_color": 0.006079223908955267,
+   "mean_adverse": 0.006079223908955267,
+   "flip": false,
+   "label": "유지",
+   "adverse_P1": {
+    "n": 2379,
+    "mean": 0.006079223908955267,
+    "lo90": -0.0014246300932139247,
+    "hi90": 0.013608923757357415,
+    "pass": true,
+    "label": "통과",
+    "R_mweighted": 0.10222932924355281,
+    "R_mean": 0.09465562258984694,
+    "mean_ex_top1pct": -0.008950480147344026,
+    "exit_reasons": {
+     "STOP_LOSS": 1520,
+     "TRAILING_STOP": 474,
+     "TIME_EXIT": 293,
+     "END": 92
+    },
+    "win_rate": 0.27742749054224464
+   },
+   "n_trades_differ": 0
+  },
+  "P2": {
+   "n": 632,
+   "mean": 0.05456433208970268,
+   "full_mean": 0.006079223908955267,
+   "pass": true,
+   "label": "통과"
+  },
+  "H_population": {
+   "n": 632,
+   "mean": 0.05456433208970268,
+   "lo90": 0.03199293418813681,
+   "hi90": 0.08046810039162076,
+   "pass": true,
+   "label": "통과",
+   "R_mweighted": 0.6234381838592815,
+   "R_mean": 0.6021730527893806,
+   "mean_ex_top1pct": 0.025951955717034663,
+   "exit_reasons": {
+    "STOP_LOSS": 389,
+    "TRAILING_STOP": 200,
+    "TIME_EXIT": 23,
+    "END": 20
+   },
+   "win_rate": 0.3512658227848101
+  },
+  "P2_prov_halt": {
+   "n": 632,
+   "mean": 0.05456433208970268,
+   "full_mean": 0.006079223908955267,
+   "pass": true,
+   "label": "통과"
+  },
+  "P3P4_W4": {
+   "cagr_median": 0.07412608628399742,
+   "cagr_min": -0.08615559523632255,
+   "cagr_max": 0.2057331008106822,
+   "mdd_median": -0.24618725821698106,
+   "trades_median": 180.5,
+   "fills_per_year_median": 46.272634791454735,
+   "unaffordable_ratio_median": 0.0,
+   "slot_or_cap_ratio_ex_mu_median": 0.9392473390018585,
+   "recon_max_abs": 3.725290298461914e-09,
+   "counts_seed0": {
+    "signal": 4153,
+    "zero_mu": 1055,
+    "fill": 180,
+    "daily_cap": 27,
+    "zero_design": 4,
+    "slot_full": 2887
+   },
+   "lot_over_1pct_tv_seed0": 0.0,
+   "exit_reasons_seed0": {
+    "STOP_LOSS": 107,
+    "TRAILING_STOP": 44,
+    "TIME_EXIT": 23,
+    "OPEN": 6
+   }
+  },
+  "P3": {
+   "cagr_median": 0.07412608628399742,
+   "mdd_median": -0.24618725821698106,
+   "pass": true,
+   "label": "통과"
+  },
+  "P4": {
+   "fills_per_year": 46.272634791454735,
+   "unaffordable_ratio": 0.0,
+   "pass": true,
+   "label": "통과"
+  },
+  "P3_adverse_W4": {
+   "cagr_median": 0.07412608628399742,
+   "cagr_min": -0.08615559523632255,
+   "cagr_max": 0.2057331008106822,
+   "mdd_median": -0.24618725821698106,
+   "trades_median": 180.5,
+   "fills_per_year_median": 46.272634791454735,
+   "unaffordable_ratio_median": 0.0,
+   "slot_or_cap_ratio_ex_mu_median": 0.9392473390018585,
+   "recon_max_abs": 3.725290298461914e-09,
+   "counts_seed0": {
+    "signal": 4153,
+    "zero_mu": 1055,
+    "fill": 180,
+    "daily_cap": 27,
+    "zero_design": 4,
+    "slot_full": 2887
+   },
+   "lot_over_1pct_tv_seed0": 0.0,
+   "exit_reasons_seed0": {
+    "STOP_LOSS": 107,
+    "TRAILING_STOP": 44,
+    "TIME_EXIT": 23,
+    "OPEN": 6
+   }
+  },
+  "P3_cost_sens": {
+   "0.0028": {
+    "cagr_median": 0.07877364674093212,
+    "mdd_median": -0.2411587593708408
+   },
+   "0.0048": {
+    "cagr_median": 0.06046288933950017,
+    "mdd_median": -0.24876106173320617
+   }
+  },
+  "book_H_report": {
+   "cagr_median": 0.06052508539109058,
+   "cagr_min": -0.20927331065490296,
+   "cagr_max": 0.8227804621826367,
+   "mdd_median": -0.27432193816397776,
+   "trades_median": 78.0,
+   "fills_per_year_median": 81.56016597510373,
+   "unaffordable_ratio_median": 0.0,
+   "slot_or_cap_ratio_ex_mu_median": 0.9219635072334904,
+   "recon_max_abs": 1.862645149230957e-09,
+   "counts_seed0": {
+    "signal": 1083,
+    "fill": 74,
+    "daily_cap": 15,
+    "slot_full": 943,
+    "zero_design": 2,
+    "zero_mu": 49
+   },
+   "lot_over_1pct_tv_seed0": 0.0,
+   "exit_reasons_seed0": {
+    "STOP_LOSS": 45,
+    "TRAILING_STOP": 21,
+    "OPEN": 6,
+    "TIME_EXIT": 2
+   }
+  },
+  "book_W5y_report": {
+   "cagr_median": 0.09894444480754949,
+   "cagr_min": 0.03714789212679781,
+   "cagr_max": 0.18994420026894332,
+   "mdd_median": -0.3110540828521202,
+   "trades_median": 224.0,
+   "fills_per_year_median": 45.9300244100895,
+   "unaffordable_ratio_median": 0.0,
+   "slot_or_cap_ratio_ex_mu_median": 0.943519318278367,
+   "recon_max_abs": 7.450580596923828e-09,
+   "counts_seed0": {
+    "signal": 5289,
+    "fill": 214,
+    "daily_cap": 43,
+    "slot_full": 3906,
+    "zero_design": 4,
+    "zero_mu": 1122
+   },
+   "lot_over_1pct_tv_seed0": 0.0,
+   "exit_reasons_seed0": {
+    "STOP_LOSS": 129,
+    "TRAILING_STOP": 46,
+    "TIME_EXIT": 32,
+    "OPEN": 6,
+    "END": 1
+   }
+  },
+  "report_yearly": {
+   "2021": {
+    "n": 606,
+    "mean": -0.008329712999517047
+   },
+   "2022": {
+    "n": 187,
+    "mean": -0.054399595677434916
+   },
+   "2023": {
+    "n": 622,
+    "mean": 0.007405962290903194
+   },
+   "2024": {
+    "n": 391,
+    "mean": 0.019972544941130956
+   },
+   "2025": {
+    "n": 573,
+    "mean": 0.03013478277812958
+   }
+  },
+  "report_mu_er": {
+   "er_bounds": [
+    0.11317683563174108,
+    0.26494289471117416
+   ],
+   "m=1.0|er=0": {
+    "n": 525,
+    "mean": 0.0038242740952596052,
+    "thin": false
+   },
+   "m=1.0|er=1": {
+    "n": 412,
+    "mean": 0.0038532198416869083,
+    "thin": false
+   },
+   "m=1.0|er=2": {
+    "n": 798,
+    "mean": 0.019110103937909597,
+    "thin": false
+   },
+   "m=0.75|er=0": {
+    "n": 111,
+    "mean": 0.014441022029756103,
+    "thin": false
+   },
+   "m=0.75|er=1": {
+    "n": 131,
+    "mean": -0.015816839041962637,
+    "thin": false
+   },
+   "m=0.75|er=2": {
+    "n": 199,
+    "mean": -0.04152187498580714,
+    "thin": false
+   },
+   "m=0.5|er=0": {
+    "n": 58,
+    "mean": -0.011402694151344614,
+    "thin": false
+   },
+   "m=0.5|er=1": {
+    "n": 99,
+    "mean": 0.041445946150464305,
+    "thin": false
+   },
+   "m=0.5|er=2": {
+    "n": 46,
+    "mean": 0.019727248813440092,
+    "thin": false
+   }
+  },
+  "report_random_control": {
+   "reps": 5,
+   "mean_of_means": 0.0029742700164220835,
+   "per_rep": [
+    -0.003370764148311615,
+    0.0026859374098987514,
+    0.006222938287120915,
+    0.004275972169794602,
+    0.005057266363607763
+   ]
+  },
+  "report_end_open_trades": 92
+ },
+ "report_bh_069500": {
+  "W4": {
+   "cagr": 0.08426746062578006,
+   "mdd": -0.28384415024657483
+  },
+  "W5y": {
+   "cagr": 0.12225084277027576,
+   "mdd": -0.3432179254470791
+  },
+  "H": {
+   "cagr": 1.3094681875000727,
+   "mdd": -0.40809950331284617
+  }
+ },
+ "elapsed_s": 16.97038507461548
+}

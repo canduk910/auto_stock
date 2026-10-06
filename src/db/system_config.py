@@ -1116,3 +1116,43 @@ async def get_task_last_success_bulk(task_labels: list[str]) -> dict:
         if v is not None:
             result[label] = str(v)
     return result
+
+
+_TRADE_COST_ALERT_BP_KEY = "trade_cost_alert_bp"
+
+
+async def get_trade_cost_alert_bp() -> float | None:
+    """`[trade_cost_high]` 경보 기준(전략별 30일 실효 왕복비용 bp) — 키 없음 = None = 경보 끔.
+
+    기준값은 사용자 결정(트랙 C Q3)이라 코드 기본값을 두지 않는다. 값이 숫자가 아니거나
+    0 이하이면 None. DB 예외는 전파한다(호출부가 관측 실패로 삼킨다).
+    """
+    raw = await _select_value(_TRADE_COST_ALERT_BP_KEY)
+    if raw is _MISSING:
+        return None
+    if isinstance(raw, dict):
+        raw = raw.get("value")
+    if isinstance(raw, bool) or not isinstance(raw, (int, float)):
+        return None
+    v = float(raw)
+    return v if v > 0 else None
+
+
+# ---------------------------------------------------------------------------
+# cycle409 — 사용자 결정 10-04 Q1: 매일 자동 대사 시각
+# ---------------------------------------------------------------------------
+_TRADE_COST_RECONCILE_TIME_KEY = "trade_cost_reconcile_time"
+
+
+async def get_trade_cost_reconcile_schedule_raw() -> object:
+    """`{"value":"HH:MM","days":N}` 원값. 키 없음 → None. 해석은 `trade_cost_reconcile_task.parse_schedule`.
+
+    DB 예외는 전파한다(훅은 꺼짐으로, 라우트는 500 으로 낸다).
+    """
+    raw = await _select_value(_TRADE_COST_RECONCILE_TIME_KEY)
+    return None if raw is _MISSING else raw
+
+
+async def set_trade_cost_reconcile_schedule(value: dict) -> None:
+    """대사 시각 저장. 형식 검증은 라우트가 한다. 끄기 = `{"value": None}`."""
+    await _upsert_value(_TRADE_COST_RECONCILE_TIME_KEY, value)

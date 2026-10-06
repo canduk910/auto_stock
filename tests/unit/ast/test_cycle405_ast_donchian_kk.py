@@ -263,15 +263,19 @@ def test_g405_5_buy_paused_and_budget_invariant_in_literal():
 
 # ===========================================================================
 # G-405-6 — 🔁 사이클 한정(cycle405 커밋 뒤 삭제). 착수 시점(77cfe334) 파일 내용 sha256.
+# 🔁 병합 재핀 — cycle405 × main(7431ae48): main 의 승인된 8영역 변경(cycle409 `order_engine.py`
+# 매도 PENDING 주문가 · cycle408-L1/cycle409 `scheduler.py` 배선)을 받아 두 값만 옮긴다(이 브랜치는 무접촉).
+# 직전 값 = order_engine.py `4d46edd1f863c03b5a79a4c8d23b7d5c8aae6f1cf7d8d0612bf91224db906a0e` /
+# scheduler.py `084f114f2aa415dec16a55e5df5d89c233c37d55c5714c66b10460839435d10c`.
 # ===========================================================================
 _PINNED = {
     "src/engine/risk.py": "a2187b8270446379988d24dfbe39b902d6ab37b112d4b6ce7330ee171434e222",
-    "src/engine/order_engine.py": "4d46edd1f863c03b5a79a4c8d23b7d5c8aae6f1cf7d8d0612bf91224db906a0e",
+    "src/engine/order_engine.py": "08c479841352fb579f767c109de3e8f901d1c27bdce705b39b5ba6556fc0b3e1",
     "src/engine/session.py": "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
     "src/engine/scanner.py": "611568c078c6f3779344e05b3dfa308c792c64e1c5e02480de6313200282f54f",
     "src/engine/strategy_registry.py": "3b6366c3cdb6e83907428435b95611880f1b8223e572c361a1cad2d00b13a067",
     "src/api/order.py": "08c5cafd7b8678ec0d0fa85f856fdea3cce38ad92488c6d74c03cd13faa415bb",
-    "src/engine/scheduler.py": "084f114f2aa415dec16a55e5df5d89c233c37d55c5714c66b10460839435d10c",
+    "src/engine/scheduler.py": "f53d41a11fe162f80e113c6ff48cf6d235581769be7979499c5782ff11d49646",
     "src/realtime/CLAUDE.md": "45817e18bff13cef49af02704f1fae7a5f73b7b0be49d84a42d409b7fc4237aa",
     "src/realtime/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "src/realtime/handler.py": "e1a484e9ac82d43f0fa85cba693ea5a206ecfbae1076dfee0f4e6bf6d4f2a2d4",

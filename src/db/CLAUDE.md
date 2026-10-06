@@ -35,7 +35,7 @@ AWS RDS PostgreSQL CRUD 모듈. DB 클라이언트 정본 = **`pg.py` (asyncpg �
 
 ## trade_history.py — 거래 내역
 
-- `insert_trade(record)`: 주문 시 INSERT (status: PENDING)
+- `insert_trade(record)`: 주문 시 INSERT (status: PENDING). **`order_price`(migration 046) = `TradeRecord.order_price` 명시값, 없으면 PENDING ∧ BUY 행의 `price`**(지정가 = 주문가 · 시장가 = 주문 순간 현재가). 매도 PENDING 의 `price` 는 매수가(장부 계약)라 옮겨 적지 않고 매도 경로가 명시값을 넘긴다(`order_engine._sell_order_price`) · COMPLETED 보정·sync INSERT 는 NULL. 🔴 체결 UPDATE(`update_trade_status` · `_update_trade_status_by_order_no`)는 `order_price` 를 건드리지 않는다(cycle409 — 사용자 결정 10-04 Q4, 가드 `tests/unit/db/test_cycle409_order_price.py`)
 - **`update_trade_status(ticker, trade_type, status, strategy="momentum", price=None, profit_loss=None, *, order_no=None, match_partial=False) -> int`**: 진행 중 행의 status 변경, 영향 행 수 반환. COMPLETED 0건이면 호출자(OrderEngine)가 체결통보 선행 race 로 보고 보정 INSERT 한다. **PARTIAL·CANCELLED 에는 흡수 경로가 없다** — `OrderEngine` 4 호출부(매수·매도 × PARTIAL·CANCELLED)가 0건이면 `[trade_status_update_miss] status= order_no= ticker= side=` WARNING(cycle358, 관측 전용, 1회/(order_no, status)/일 `KstDailyEmitCap`, 로그 실패 흡수). SELL 행의 `price`·`profit_loss` 값의 뜻(주문 단위 누적·체결 가중평균 원 단위 절사) = `src/engine/CLAUDE.md` 「체결단가 정합」 절(cycle392).
   - `match_partial=True`(opt-in) = `status = ANY(...)` 로 PENDING ∪ PARTIAL. **기본을 넓히지 않는다** — `_cancel_after_wait`/`_cancel_and_reorder` 의 CANCELLED 까지 넓어져 부분 체결 사실이 정산·sync 에서 사라진다. 넘기는 호출부는 COMPLETED 2곳뿐(AST 봉인).
   - 같은 인자가 `AND timestamp >= (KST 오늘 00:00)` 하한도 켠다. 하한은 **`datetime` 바인딩**(str 이면 실 PG `DataError` 로 체결 경로 전건 예외 — AST5).
@@ -63,6 +63,13 @@ AWS RDS PostgreSQL CRUD 모듈. DB 클라이언트 정본 = **`pg.py` (asyncpg �
 - **`signal_time_local`** 은 KST 를 보장하지 않는다 — 원천이 6전략 `datetime.now()`(tz 없음)·kojiro `datetime.now(KST)` 라 컨테이너 `TZ=Asia/Seoul` 전제에서만 KST 다.
 - **이 모듈은 예외를 전파한다** — 기록 실패는 leaf 의 `[llm_eval_persist] result=error`, 조회 실패는 라우트 500 이 드러낸다. `except Exception: return None` 을 넣으면 두 채널이 함께 막힌다.
 - 회고 층화 열 = `prompt_version`/`feature_version`(전후 행을 **섞어서 회귀 금지**) · `budget_total_won`/`budget_remaining_after_won`/`open_positions_n` · `raw_response`(파싱 전 원문) · `input_payload`(`build_messages` 3인자 전체 — 요약·절단 금지, 오프라인 재채점의 유일한 다리). 분석은 `trade_history.status` 로 **체결/부분체결/미체결/취소 4분류를 반드시 분리**한다(미체결을 손익 0 으로 섞지 않는다).
+
+## trade_cost.py — 실비용 정산값 (트랙 C)
+
+- 테이블 `trade_cost_daily`(migration 045, PK `(trad_dt, pdno)`) = KIS `TTTC8715R` 행을 `(매매일, 종목 뒤 6자리)` 로 접은 정산값 — `buy_qty`·`buy_amt`·`sll_qty`·`sll_amt`·`rlzt_pfls`·`fee`·`tl_tax`(NUMERIC) · `row_count` · `raw`(JSONB 원문 목록) · `fetched_at`. `trade_cost_period_totals`(PK `(from_dt, to_dt)`) = 대사 기간의 KIS output2 합계(`tot_fee`·`tot_tltx` 등 + `raw`) — 행 합계와 1원 대조용
+- 쓰기 = `upsert_daily(rows) -> int` · `upsert_period_total(from_dt, to_dt, summary)` — 같은 키 재대사는 덮어쓴다. 범위 안에서 KIS 가 더는 주지 않는 행을 지우지 않는다
+- 읽기 = `get_daily_range(start, end)` · `get_completed_trades(start, end)`(`trade_history` COMPLETED + 주문가 `order_price`, `trade_date` = `(timestamp AT TIME ZONE 'Asia/Seoul')::date`). `trade_history` 는 읽기만 한다
+- `trade_history.profit_loss` 의 의미(세전·비용 전 gross)는 바꾸지 않는다 — net 은 `engine/trade_cost.py` 가 계산만 한다. 예외는 전파한다
 
 ## positions.py — 보유 포지션 영속화
 
@@ -142,6 +149,8 @@ AWS RDS PostgreSQL CRUD 모듈. DB 클라이언트 정본 = **`pg.py` (asyncpg �
 - `get_auto_regime_adjust() -> bool` / `set_auto_regime_adjust(value)`: 키 `auto_regime_adjust`, 기본 **False**(`_AUTO_REGIME_ADJUST_DEFAULT`). 🔴 **판독 불가(키 없음·`value` null·dict/bool 아닌 타입·예외)는 전부 False(수동 모드)** + `[auto_regime_adjust] default_used reason=…` WARNING — True 로 떨어지면 레짐 `cash_min` 이 `cash_usage_ratio` 로 영속돼 예산이 접힌다(`defensive` `cash_min=75` → 0.25)
 - `get_auto_apply_enabled() -> bool` / `set_auto_apply_enabled(value)`: 키 `auto_apply_enabled`, 기본 **False**(운영자가 켠 뒤에만 AI 자문 자동 적용) · `get_etf_regime_enabled() -> bool` / `set_etf_regime_enabled(value)`: 키 `etf_regime_enabled`, 부재 = False. 둘 다 `.env` 폴백 없음
 - `get_account_risk_warn_pct() -> float` / `get_account_risk_block_pct() -> float | None`: 키 `account_risk_warn_pct` / `account_risk_block_pct`. 부재·조회 실패 = warn 4.0 / block `None`(차단 비활성)
+- `get_trade_cost_alert_bp() -> float | None`: 키 `trade_cost_alert_bp`(`{"value": 숫자}` 또는 직저장 숫자) — `[trade_cost_high]` 경보 기준. **키 없음·숫자 아님·0 이하 = `None` = 경보 끔**(기준값은 사용자 결정, 코드 기본값 없음). DB 예외는 전파(호출부 `engine/trade_cost._check_alerts` 가 관측 실패로 삼킨다). 저장 함수 없음
+- `get_trade_cost_reconcile_schedule_raw()` / `set_trade_cost_reconcile_schedule(value)`: 키 `trade_cost_reconcile_time`(`{"value":"HH:MM","days":N}`) — 매일 자동 대사 시각. **키 없음·`value` null = 실행 안 함**(코드 기본 시각 없음 — cycle409 사용자 결정 10-04 Q1). 해석 = `engine/trade_cost_reconcile_task.parse_schedule` · 형식 검증 = `PUT /api/costs/schedule`. 조회 DB 예외는 전파
 - `get_krx_open_api_config()` / `set_krx_open_api_config(...)`: 키 `krx_open_api_enabled` / `krx_open_api_base_url` / `krx_open_api_key`. 🔴 **끄기 전에 소비처를 전수 확인한다** — 끄면 `src/api/krx.py` 가 `KrxApiError` 를 던져 `scanner._full_universe_load_krx_primary` 가 KIS 폴백으로 밀린다(루트 「핵심 안전 규칙」 비활성화 심층 검증 의무). 키 값은 응답·로그에 노출하지 않는다
 - **외부 통합 토글 (DB 우선, `.env` 폴백)**: `get_dkstock_regime_enabled() -> bool | None` / `set_dkstock_regime_enabled(value)`(키 `dkstock_regime_enabled`) · `get_kis_mcp_enabled() -> bool | None` / `set_kis_mcp_enabled(value)`(키 `kis_mcp_enabled`). 부재·판독 불가·DB 조회 실패 = `None` → 호출자가 `settings.*` 로 폴백. 헬퍼 `_get_bool_or_none(key)` / `_set_bool(key, value)` 가 `{"value": bool}` 과 옛 형식(직저장 bool, `'true'`/`'false'` 문자열)을 모두 읽는다
 - **task 신선도 마커**: `get_task_last_success(task_label) -> str | None`(키 `task_last_success_<label>`) / `set_task_last_success(task_label, iso_ts)`, 값 = KST ISO. `task_loop_helper.run_periodic_task_loop` 의 부팅 즉시 실행 게이트 두 갈래(`immediate_skip_if_fresh_hours` · `immediate_skip_if_fresh_since_trading_slot`)가 읽고 `once()` 성공 직후에만 쓴다(대상·판정 순서 = `src/engine/CLAUDE.md` 「정기 task 루프」 절). 60초 하트비트 `engine_alive_heartbeat`(`uptime_monitor.py`)도 같은 키 공간이다. **`get_task_last_success_bulk(task_labels) -> dict`** = `key = ANY($1)` **단일 쿼리**(`GET /api/market-ops`) — 결측 라벨은 **키가 없고**(빈 문자열 아님), 쿼리 실패는 빈 dict(fail-open)
@@ -180,16 +189,17 @@ AWS RDS PostgreSQL CRUD 모듈. DB 클라이언트 정본 = **`pg.py` (asyncpg �
 
 ## strategy_funnel.py — 조건검색 단계별 추적
 
-- **`insert_snapshot(*, target_date, strategy_id, step_no, step_name, survived_tickers=None, excluded_sample=None, survived_count=None, excluded_count=0, step_conditions=None, is_provisional=False) -> dict | None`** — 전부 keyword-only. `(target_date, strategy_id, step_no)` **UPSERT**(UNIQUE = migration 035) — 단계당 최신 1행.
+- **`insert_snapshot(*, target_date, strategy_id, step_no, step_name, survived_tickers=None, excluded_sample=None, survived_count=None, excluded_count=0, step_conditions=None, is_provisional=False, protect_confirmed=False) -> dict | None`** — 전부 keyword-only. `(target_date, strategy_id, step_no)` **UPSERT**(UNIQUE = migration 035) — 단계당 최신 1행.
   - `snapshot_at` = **그 행의 마지막 쓰기 시각**(생성 시각 아님). 첫 INSERT = 컬럼 기본값 `now()`(migration 030), 덮어쓰기 = `DO UPDATE SET … snapshot_at = now()` — 둘 다 DB 시계(애플리케이션 `datetime` 미바인딩). 이 값을 조건으로 쓰는 소비처는 `routes/market_ops.py` 하나(`src/routes/CLAUDE.md` `/api/market-ops` 행).
   - `survived_tickers` = `list[str]` 또는 `list[dict]`(`{ticker, name}`), `excluded_sample` = `[{ticker, name, reason}]` — 읽는 쪽이 형식을 분기한다. `survived_count` 가 `None` 이면 `len(survived_tickers)`. `step_conditions` = UI 툴팁 문자열.
   - `is_provisional=True` = 저녁 잠정 캡처(21:00 미리보기는 `target_date` = **다음 거래일**, 부팅 +600초 레거시 재준비는 오늘). `False`(기본) = 09:30 자동·수동 trigger(확정, 오늘).
   - 🔴 **잠정 쓰기는 확정 행을 덮지 못한다(③-b)** — `ON CONFLICT (target_date, strategy_id, step_no) DO UPDATE SET … WHERE NOT (strategy_funnel_snapshots.is_provisional = FALSE AND EXCLUDED.is_provisional = TRUE)`. 그 조합이면 `RETURNING` 이 비어 **`None`** 이고 확정 행(`snapshot_at` 포함)은 그대로다. 나머지 세 조합(잠정→잠정 · 확정→잠정 · 확정→확정)은 갱신된다(09:30 확정 캡처가 그날 잠정 행을 덮는 것이 정상 경로). `None` 반환 = 이 거부 또는 DB 예외. 가드 = `tests/unit/db/test_cycle364_funnel_protect_confirmed.py` · PG 왕복 `tests/integration/test_cycle364_funnel_protect_confirmed_pg.py`.
+  - **`protect_confirmed=True` 면 확정→확정도 막는다(cycle408-L1)** — 위 `WHERE NOT (…)` 뒤에 리터럴 `AND strategy_funnel_snapshots.is_provisional = TRUE` 를 붙여 기존 행이 잠정일 때만 갱신한다(행이 없으면 삽입, 기존 확정이면 `None`). 바인딩은 10개 그대로이고 기본값 `False` 면 SQL 이 byte 동일하다. 넘기는 곳은 09:30 자동 캡처 하나뿐이다 — 수동 trigger 는 확정 행을 계속 덮는다. 가드 = `tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py` · PG 왕복 `tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py`.
   - **JSONB cap**: `SURVIVED_TICKERS_CAP = 200` / `EXCLUDED_SAMPLE_CAP = 20`. `survived_count` 는 cap 과 무관하게 정확한 값.
 - `list_snapshots(*, target_date, strategy_id=None, raise_on_error=False)`: 그 영업일 + 전략의 전 단계(`step_no` ASC). 조회 예외는 기본 WARNING + `[]`, `raise_on_error=True` 면 던진다(`funnel_capture` ④ 가 DB 장애를 「저녁 캡처 없음」과 가르려고 쓴다)
 - `list_recent_by_strategy(strategy_id, days=7)`: 최근 N영업일 추이 — `target_date <= 오늘` 이라 저녁 미리보기(다음 거래일) 행은 안 나온다
 - 테이블 `strategy_funnel_snapshots`(UUID PK + 인덱스 2 = `target_date DESC` / `(strategy_id, target_date DESC)`)
-- 쓰기 = 공통 헬퍼 `scheduler.capture_funnel_snapshots(registry, *, is_provisional=False, target_date=None, skipped_out=None)` 하나. 호출처·시각·라벨 가드·쓰기 순서 = `src/engine/CLAUDE.md` 「funnel 스냅샷 캡처」 절, 단계 수집 hook(`_record_funnel_step`) = `src/engine/strategies/CLAUDE.md`.
+- 쓰기 = 공통 헬퍼 `scheduler.capture_funnel_snapshots(registry, *, is_provisional=False, target_date=None, skipped_out=None, protect_confirmed=False)` 하나. 호출처·시각·라벨 가드·쓰기 순서 = `src/engine/CLAUDE.md` 「funnel 스냅샷 캡처」 절, 단계 수집 hook(`_record_funnel_step`) = `src/engine/strategies/CLAUDE.md`.
 
 ## stock_master.py — 종목 마스터 캐시
 

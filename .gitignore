@@ -79,3 +79,6 @@ data/archive/krx_daily/
 
 # cycle383 — KRX ETF 일별매매정보 별도 보관소(매매 DB 밖). 마찬가지로 git 에 넣지 않는다.
 data/archive/krx_etf_daily/
+
+# 2026-10-05 — 30년 일봉 보관소(네이버·지수 캐시, 1996~2026). 마찬가지로 git 에 넣지 않는다.
+data/archive/krx_daily_long/

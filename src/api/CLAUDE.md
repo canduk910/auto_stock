@@ -6,7 +6,8 @@ KIS OpenAPI REST 호출 모듈. 모든 호출은 `base.py` 공통 래퍼를 거�
 
 ## base.py — 공통 래퍼 (메인 단일)
 
-- 메인 진입점 = `kis_get(path, tr_id, params, *, hashkey="")` · `kis_post(path, tr_id, body, *, hashkey="")` → `_request(method, path, tr_id, ...)`. `kis_request` 함수는 없다(이름은 문자열·주석(`base.py` `QuotePoolPathError` 메시지 · `krx.py` docstring)과 AST 금지 토큰에만 있다)
+- 메인 진입점 = `kis_get(path, tr_id, params, *, hashkey="", tr_cont=None)` · `kis_post(path, tr_id, body, *, hashkey="")` → `_request(method, path, tr_id, ...)`. `kis_request` 함수는 없다(이름은 문자열·주석(`base.py` `QuotePoolPathError` 메시지 · `krx.py` docstring)과 AST 금지 토큰에만 있다)
+- 연속조회(메인) = `kis_get(..., tr_cont=…)` opt-in. 기본 `None` 이면 요청·응답이 연속조회 없는 호출과 같다. 문자열을 넘기면(첫 쪽 `""`, 다음 쪽 `"N"`) 비어 있지 않을 때 요청 헤더에 싣고 응답 헤더 `tr_cont` 를 `data["_response_headers"]["tr_cont"]` 로 돌려준다(시세 풀 `kis_get_quote` 와 같은 키). 소비처 = `trade_profit.py`
 - 헤더(`TokenManager.build_headers`) = authorization · appkey · appsecret · `tr_id`(`settings.get_tr_id(tr_id)`, 「새 API 추가 절차」 3번) · custtype("P")
 - Rate Limit = `_rate_limit()` 초당 20건(시세 풀 공용) + `asyncio.Semaphore(20)` 동시 20건
 - 재시도 = HTTP 오류(4xx·5xx)·네트워크 오류를 `MAX_RETRIES=3` 회까지. 백오프 `BACKOFF_BASE=0.5s × 2^(attempt-1)` + jitter `0~BACKOFF_JITTER=0.25s`
@@ -98,6 +99,13 @@ KIS OpenAPI REST 호출 모듈. 모든 호출은 `base.py` 공통 래퍼를 거�
 - `is_market_order_disallowed(KisApiError) -> bool` — 시장가 거부. msg1 키워드 `_MARKET_ORDER_DISALLOWED_KEYWORDS` = `시장가매매불가` / `시장가 매매 불가` / `시장가 주문 불가` / `시장가 호가 불가` / `시장가호가불가` / `최유리/최우선지정가 주문만` / `지정가 및 최유리` / `단일가매매`. `is_insufficient_*` 2종과 상호 배타. msg_cd = APBK1943 · APBK3013(NXT 애프터 매도 · 단일가 세션 변형 — closed 미매칭이라 지정가 폴백 정상 경로). `docs/kis/error-codes.md` 4-2절 / 5-4절
   - ⚠️ **`is_market_closed_rejection` 과 이중 매칭** — APBK0918 "장운영시간이 아닙니다.([프리마켓] 시장가 매매 불가 시간)" 은 양쪽에 걸린다. `execute_sell` 이 closed 를 **먼저** 보므로 보류(포지션 보존 + 다음 09:00 TTL)가 된다 — 프리장 왜곡 시세라 지정가 즉시 매도보다 보류가 안전하다는 **의도된 계약**이다. 순서 반전은 `test_rejection_classifier_pre_market_priority.py` 가 막는다
 - `order_engine._sell_not_placed_reason`(cycle385)도 세 판정을 sell_qty_exceeded → closed → disallowed 순으로 써 「안 걸렸다」를 가려 `_selling` 을 푼다(프리마켓 이중 매칭은 `market_closed`). 상세 = `src/engine/CLAUDE.md` 「매도 체결 — 주문 축과 보유 축」
+
+## trade_profit.py — 기간별매매손익현황 TTTC8715R (트랙 C 실비용)
+
+- `fetch_period_trade_profit(start_yyyymmdd, end_yyyymmdd, *, pdno="") -> PeriodTradeProfit(rows, summary, pages, truncated)` — HTS [0856] 「종목별」 화면과 같은 일자·종목별 `buy_amt`·`sll_amt`·`rlzt_pfls`·`fee`·`tl_tax`(output1) + 기간 합계(output2, 1원소 배열이면 dict 로 편다). 정본 = `docs/kis/domestic-stock-order.md` 「기간별매매손익현황조회」
+- **실전 전용** — 모의(vts)에서는 KIS 를 부르지 않고 `RealEnvRequired`. 계좌 TR 이라 메인 `kis_get` 만 쓴다(시세 풀은 다른 계좌)
+- 연속조회 = 응답 헤더 `tr_cont` 가 `M`/`F` 면 다음 쪽(헤더 `tr_cont="N"` + 본문 `ctx_area_fk100`/`ctx_area_nk100` 되돌림). `_MAX_PAGES=50` 에서 멈추면 `truncated=True`. 어느 쪽이든 `rt_cd != "0"` 은 `KisApiError` 로 올라와 부분 결과를 돌려주지 않는다
+- 소비처 = `engine/trade_cost.reconcile`. 8영역 `order.py` 와 분리한 비주문 조회 모듈이다. 가드 `tests/unit/api/test_trackc_period_trade_profit.py`
 
 ## kis_master.py — KIS 공식 일일 마스터 파일
 
