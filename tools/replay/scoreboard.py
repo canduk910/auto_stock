@@ -478,8 +478,9 @@ def load_books(book_dir: str) -> dict[str, Curve]:
 # 상대 경로는 이 작업 트리 → 아래 후보 작업 트리 순으로 찾고, 어디에도 없으면 조용히 건너뛴다.
 EXTERNAL_ENTRIES = [
     "_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",   # 장세별 매매 중단 · 60/40 안정상승 레버리지 V1~V3
+    "_workspace/analysis/regime_v2_20261006/scoreboard_entries.json",     # 장세 판단 재설계(가·나·다·라)
 ]
-EXTERNAL_ROOTS = (_ROOT, MAIN_REPO, "/Users/koscom/Projects/auto_stock_rgate")
+EXTERNAL_ROOTS = (_ROOT, MAIN_REPO, "/Users/koscom/Projects/auto_stock_rgate", "/Users/koscom/Projects/auto_stock_regv2")
 EXTERNAL_FORMAT = {
     "source": "만든 연구·코드 한 줄(필수)",
     "entries[].id": "고유 id — 기존 REGISTRY id 와 겹치면 안 된다(필수)",
