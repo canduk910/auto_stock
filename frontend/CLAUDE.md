@@ -44,7 +44,7 @@ TanStack Query (서버 상태) · TanStack Table (그리드) · Recharts (차트
 
 ## 페이지 lazy 로딩
 
-Dashboard 만 즉시 import. 나머지 10 페이지(History · Recommendations · Logs · Settings · StrategyFunnel · StockMaster · RealtimeHealth · Strategies · MarketState · `macro/MacroPage`)는 `React.lazy()` + Suspense skeleton. `/log-reports` 는 `<Navigate to="/logs?tab=daily-report" replace />` 로 북마크 호환.
+Dashboard 만 즉시 import. 나머지 11 페이지(History · Recommendations · Logs · Settings · StrategyFunnel · StockMaster · RealtimeHealth · Strategies · MarketState · `macro/MacroPage` · Backtest)는 `React.lazy()` + Suspense skeleton. `/log-reports` 는 `<Navigate to="/logs?tab=daily-report" replace />` 로 북마크 호환.
 
 ## AppShell 레이아웃 — 화면 폭 슬라이더
 
@@ -58,7 +58,7 @@ Dashboard 만 즉시 import. 나머지 10 페이지(History · Recommendations �
 
 나브 = **`src/components/NavBar.tsx`**(`App.tsx` 는 라우트·레이아웃·`useContentWidth` 소유만). 공유 상수·훅(`CONTENT_WIDTH_*`·`contentMaxWidth`·`useContentWidth`)의 단일 출처 = **`src/utils/contentWidth.ts`**.
 
-leaf 11개를 **상위 8개**로 묶는다(사용자 지정 묶음·순서 — 바꾸지 않는다):
+leaf 12개를 **상위 9개**로 묶는다(사용자 지정 묶음·순서 — 바꾸지 않는다):
 
 | 상위 | 세부 | 경로 |
 |---|---|---|
@@ -68,6 +68,7 @@ leaf 11개를 **상위 8개**로 묶는다(사용자 지정 묶음·순서 — �
 | **종목** | 조건검색 추적 · 종목마스터 | `/strategy-funnel` · `/stock-master` |
 | **전략** | 전략 현황 · 전략수정 AI자문 | `/strategies` · `/recommendations` |
 | 매크로 | (단독) | `/macro` |
+| 백테스팅 | (단독, 30년 전략 성적표 연구 보고서) | `/backtest` |
 | 설정 | (단독) | `/settings` |
 | **운영상태** | 장운영상태 · 실시간 상태 | `/market-state` · `/realtime-health` |
 
@@ -76,8 +77,8 @@ leaf 11개를 **상위 8개**로 묶는다(사용자 지정 묶음·순서 — �
 - 그룹 트리거 = **disclosure 패턴**(`aria-expanded` 만). `aria-haspopup` 을 두지 않는다 — `role=menu`/`menuitem` 이 없어 스크린리더에 거짓 약속이 된다.
 - 키보드: Enter/Space 열기 · ArrowDown/Up 이동 · Escape 로 닫고 트리거 포커스 복귀 · 항목 선택 뒤에도 트리거로 복원(`<body>` 로 떨어지지 않게). 포커스 트랩 없음.
 - 닫힘 3: 바깥 클릭 · 포커스 이탈(`onBlur`/focusout) · 라우트 이동(뒤로가기 포함). `openGroup` 단일 상태라 하나만 열린다.
-- 모바일 드로어는 **접지 않는다** — 그룹 제목(링크 아님) + 들여쓴 하위로 leaf 11개를 늘 보인다.
-- 🔴 **경로 11/11 이 메뉴에서 도달 가능해야 한다** — 묻힌 메뉴는 URL 을 직접 쳐야만 보인다. `AppShell.test.tsx` 가 href 11개 집합을 단언한다. `/log-reports` 는 구 북마크 리다이렉트라 메뉴가 아니다.
+- 모바일 드로어는 **접지 않는다** — 그룹 제목(링크 아님) + 들여쓴 하위로 leaf 12개를 늘 보인다.
+- 🔴 **경로 12/12 이 메뉴에서 도달 가능해야 한다** — 묻힌 메뉴는 URL 을 직접 쳐야만 보인다. `AppShell.test.tsx` 가 href 12개 집합을 단언한다. `/log-reports` 는 구 북마크 리다이렉트라 메뉴가 아니다.
 - 보존 testid 4: `nav-sticky-wrapper` · `content-width-slider` · `mobile-menu-button` · `mobile-menu-drawer`. 그룹용 = `nav-inner` · `nav-mobile-group-{id}` 등.
 - ⚠️ e2e: 접힌 그룹의 하위 라벨은 DOM 에 없다. 본문 제목은 `getByRole("heading", {name})`(`getByText` 는 모바일 헤더의 숨은 span 을 집는다), 그룹 트리거는 `getByRole("button", {name, exact: true})`.
 
@@ -523,6 +524,15 @@ Dashboard `MarketRegimeCard` 바로 아래. 장세와 시장 유닛을 한 카�
 - 훅은 원본 `useAsyncState` 계열이라 「테스트 규약」 1(`useQuery` `retry:1`)이 적용되지 않는다.
 - `EventLabelsOverlay` 음영 alpha 는 원본 값(약세장 0.10 · 침체 0.18) 그대로, 색 hex 리터럴은 전부 `var(--color-...)` CSS 변수로 치환(신규 hex 금지).
 - 회귀 가드 `frontend/src/macro/__tests__/MacroPage.test.tsx`.
+
+## Backtest (`/backtest`) — 2026-10-06 30년 전략 성적표
+
+연구 보고서(`_workspace/reports/*_scoreboard_30y.html`)를 게시한 독립 HTML(`frontend/public/backtest/scoreboard_30y.html`)을 iframe 으로 감싼다. **실제 매매 설정과 무관** — 이 페이지는 틀만 제공하고 숫자·판정은 보고서가 정본이다.
+
+- `pages/Backtest.tsx` — 안내문 + 생성 시각(보고서 본문의 `"generated_kst"` 를 fetch 로 뽑아 표시, 못 찾으면 생략) + `<iframe src="/backtest/scoreboard_30y.html">`(화면 높이 가득) + "새 창에서 열기" 링크. 상태 3종 = `backtest-loading` / `backtest-error`("서버 연결 끊김") / `backtest-empty`.
+- **게시 절차** — 보고서가 갱신되면 `python3 tools/replay/scoreboard_page/publish_to_frontend.py <보고서 경로>` 한 번만 돌린다. 이 스크립트가 (a) cdnjs Chart.js `<script>` 를 `frontend/node_modules/chart.js/dist/chart.umd.js` 복사본(`public/backtest/chart.umd.js`)으로 바꿔 외부 CDN 의존을 없애고 (b) 보고서가 `<!doctype>`/`<html>`/`<body>` 없는 조각(fragment)이면 독립 페이지로 감싼다. 내용·숫자는 건드리지 않는다.
+- `chart.js` 는 `frontend/package.json` 의존성(`^4.4.1`) — UMD 비압축 번들(`chart.umd.js`, 이 버전엔 min 빌드가 없다)을 그대로 게시한다.
+- nginx — `location /backtest/` 정적 파일은 `try_files $uri` 로 그대로 서빙(SPA fallback 에 먹히지 않음, 템플릿 미수정).
 
 ## 주문 안전성
 

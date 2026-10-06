@@ -50,6 +50,8 @@ const NAV_STRUCTURE: NavEntry[] = [
   },
   // cycle303 (2026-09-18) — 매크로 분석. 전략 그룹과 설정 사이(팀장 명세 §6).
   { kind: 'leaf', to: '/macro', label: '매크로' },
+  // 2026-10-06 — 30년 전략 성적표 연구 보고서(사용자 승인). 매크로와 설정 사이.
+  { kind: 'leaf', to: '/backtest', label: '백테스팅' },
   { kind: 'leaf', to: '/settings', label: '설정' },
   {
     kind: 'group',
