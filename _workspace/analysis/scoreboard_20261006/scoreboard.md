@@ -1,6 +1,6 @@
 # 30년 전략 성적표 — 같은 잣대로 한 표에
 
-> 생성 2026-10-06 13:04 KST · `tools/replay/scoreboard.py` · 원자료 `scoreboard.json`(전략 메타 · 지표 · 연도별 · 월말 누적 · 월말 낙폭) · 연도 행렬 전체 `yearly_matrix.csv`
+> 생성 2026-10-06 13:06 KST · `tools/replay/scoreboard.py` · 원자료 `scoreboard.json`(전략 메타 · 지표 · 연도별 · 월말 누적 · 월말 낙폭) · 연도 행렬 전체 `yearly_matrix.csv`
 
 **이 문서는 판정이 아니다.** 이미 끝난 연구들의 곡선을 같은 지표 함수 하나로 다시 쟀다. 새 최적화·새 선택은 없다. 판정 칸은 각 결과 문서의 결론을 옮겨 적은 것이다.
 

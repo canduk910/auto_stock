@@ -1,5 +1,5 @@
 {
- "generated_kst": "2026-10-06 13:04",
+ "generated_kst": "2026-10-06 13:06",
  "rules": {
   "invest": 10000000,
   "month_cutoff": "2026-09",
@@ -92362,7 +92362,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": 0.0649548689709607,
      "1998": 0.07553419604791123,
@@ -94041,7 +94041,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": -0.16541577507968797,
      "1998": -0.06243158703123208,
@@ -95720,7 +95720,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": -0.10224794584237828,
      "1998": -0.04741893990622448,
@@ -97399,7 +97399,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": -0.16275337082782104,
      "1998": -0.2685082982077891,
@@ -99078,7 +99078,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": -0.8613521344937874,
      "1998": -0.6774963517579053,
@@ -100757,7 +100757,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
     "yearly_given": {
      "2003": -0.024164623116431527,
      "2004": -0.0078401651561113,
@@ -102112,7 +102112,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": -0.1076377231518224,
      "1998": -0.02785322513947619,
@@ -103791,7 +103791,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": 0.001087788648550525,
      "1998": 0.547758685401792,
@@ -105472,7 +105472,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": 0.022869608083662563,
      "1998": 0.23408818655715247,
@@ -107153,7 +107153,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": 0.2121200415790261,
      "1998": 0.06452551242903137,
@@ -108834,7 +108834,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": 0.0357627622620984,
      "1998": 0.35203037212572785,
@@ -110515,7 +110515,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": 0.03407928893053347,
      "1998": 0.3520303721257272,
@@ -112196,7 +112196,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": 0.03660026888950085,
      "1998": 0.35203037212572696,
@@ -113877,7 +113877,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": -0.028084413793522223,
      "1998": 0.35203037212572674,
@@ -115558,7 +115558,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": 0.14622211830916276,
      "1998": 0.1748757284583793,
@@ -117239,7 +117239,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": 0.14435745931968036,
      "1998": 0.17487572845837684,
@@ -118920,7 +118920,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": 0.14714976674601998,
      "1998": 0.1748757284583764,
@@ -120601,7 +120601,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": 0.07556589427309568,
      "1998": 0.17487572845837795,
@@ -122282,7 +122282,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": 0.18174130280833345,
      "1998": 0.17487572845837818,
@@ -123963,7 +123963,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": 0.1798197177330736,
      "1998": 0.17487572845837662,
@@ -125644,7 +125644,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": 0.1826972679417922,
      "1998": 0.17487572845837707,
@@ -127325,7 +127325,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_gate_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": 0.10889558040413805,
      "1998": 0.17487572845837862,
@@ -129006,7 +129006,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_v2_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_v2_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": 0.024490929971308528,
      "1998": 0.542678547856932,
@@ -130687,7 +130687,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_v2_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_v2_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": -0.2592262500713425,
      "1998": 0.41756362159981064,
@@ -132368,7 +132368,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_v2_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_v2_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": -0.12764270773643605,
      "1998": 0.8842842620180331,
@@ -134049,7 +134049,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_v2_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_v2_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": -0.3785766083420702,
      "1998": 2.3763611699106644,
@@ -135730,7 +135730,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_v2_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_v2_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": -0.09176021600387085,
      "1998": 0.43658302797357007,
@@ -137409,7 +137409,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_v2_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_v2_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": -0.054771352089690084,
      "1998": 0.0,
@@ -139088,7 +139088,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_v2_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_v2_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": -0.1412884463483406,
      "1998": -0.03479573914154355,
@@ -140767,7 +140767,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_v2_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_v2_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": -0.10560527572519895,
      "1998": 0.5278142896110094,
@@ -142446,7 +142446,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_v2_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_v2_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": -0.055000696200264154,
      "1998": -0.10830846696211105,
@@ -144125,7 +144125,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_v2_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_v2_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": -0.1397733057708248,
      "1998": 0.0,
@@ -145804,7 +145804,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_v2_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_v2_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": 0.0,
      "1998": 0.0,
@@ -147483,7 +147483,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_v2_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_v2_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": 0.0,
      "1998": 0.0,
@@ -149162,7 +149162,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_v2_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_v2_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": 0.0398330738864181,
      "1998": 0.04087402803365081,
@@ -150841,7 +150841,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_v2_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_v2_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": -0.06320026022353398,
      "1998": 0.0,
@@ -152520,7 +152520,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_v2_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_v2_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": 0.027191807870557083,
      "1998": 0.07834636146175722,
@@ -154199,7 +154199,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/regime_v2_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/regime_v2_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": 0.0,
      "1998": 0.0,
@@ -155878,7 +155878,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -157525,7 +157525,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -159172,7 +159172,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -160819,7 +160819,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -162466,7 +162466,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -164113,7 +164113,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -165760,7 +165760,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -167407,7 +167407,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -168736,7 +168736,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -170383,7 +170383,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -172030,7 +172030,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -173781,7 +173781,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -175430,7 +175430,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -177181,7 +177181,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -178932,7 +178932,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -180683,7 +180683,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -182434,7 +182434,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -184081,7 +184081,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -185728,7 +185728,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -187375,7 +187375,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -189022,7 +189022,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -190669,7 +190669,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -192316,7 +192316,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -193963,7 +193963,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -195610,7 +195610,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -197257,7 +197257,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -198904,7 +198904,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -200551,7 +200551,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -202198,7 +202198,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -203845,7 +203845,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -205492,7 +205492,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -207139,7 +207139,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -208786,7 +208786,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -210433,7 +210433,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -212080,7 +212080,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -213727,7 +213727,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -215374,7 +215374,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -217021,7 +217021,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -218668,7 +218668,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -220315,7 +220315,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -221962,7 +221962,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -223079,7 +223079,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -224196,7 +224196,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -224359,7 +224359,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -225476,7 +225476,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -226593,7 +226593,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -227710,7 +227710,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -228827,7 +228827,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -229944,7 +229944,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -231591,7 +231591,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -233238,7 +233238,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -234885,7 +234885,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -236532,7 +236532,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -238179,7 +238179,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -239826,7 +239826,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -241473,7 +241473,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -243120,7 +243120,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -244767,7 +244767,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -246414,7 +246414,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -248061,7 +248061,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -249708,7 +249708,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -251355,7 +251355,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -253002,7 +253002,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -254649,7 +254649,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -256296,7 +256296,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -257943,7 +257943,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -259590,7 +259590,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -261237,7 +261237,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -262884,7 +262884,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -264531,7 +264531,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -266178,7 +266178,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -267825,7 +267825,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -269472,7 +269472,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -271119,7 +271119,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -272766,7 +272766,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -274413,7 +274413,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -276060,7 +276060,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -277707,7 +277707,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -279354,7 +279354,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -281001,7 +281001,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -282648,7 +282648,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -283977,7 +283977,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -285306,7 +285306,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -286635,7 +286635,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -287964,7 +287964,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -289293,7 +289293,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -290622,7 +290622,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -292269,7 +292269,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -293916,7 +293916,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -295563,7 +295563,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -297210,7 +297210,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -298857,7 +298857,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -300504,7 +300504,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -302151,7 +302151,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -303798,7 +303798,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -305445,7 +305445,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -307092,7 +307092,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -308739,7 +308739,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -310386,7 +310386,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -312033,7 +312033,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -313680,7 +313680,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -315327,7 +315327,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -316974,7 +316974,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -318621,7 +318621,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -320268,7 +320268,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -321915,7 +321915,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",
     "yearly_given": null
    },
    "metrics": {
@@ -323562,7 +323562,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/gold_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/gold_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.0031736257391872247,
      "1996": 0.03851086705006712,
@@ -325347,7 +325347,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/gold_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/gold_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.11218972296772334,
      "1996": 0.02172971230459697,
@@ -327132,7 +327132,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/gold_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/gold_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": -0.020938131440177532,
      "1996": -0.06598026130182,
@@ -328917,7 +328917,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/gold_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/gold_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.0854616194216542,
      "1996": -0.08103688371867379,
@@ -330702,7 +330702,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/gold_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/gold_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": -0.026952427353452935,
      "1996": -0.24884587481099585,
@@ -332487,7 +332487,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/gold_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/gold_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.043999258199009184,
      "1996": -0.14102971765360028,
@@ -334272,7 +334272,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/gold_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/gold_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.06993578566400194,
      "1996": -0.020624508587421153,
@@ -336057,7 +336057,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/gold_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/gold_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.30784220469835044,
      "1996": 0.4192020177657789,
@@ -337842,7 +337842,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/gold_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/gold_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.30784220469835044,
      "1996": 0.20487647922361907,
@@ -339627,7 +339627,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/gold_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/gold_20261006/scoreboard_entries.json",
     "yearly_given": {
      "2006": 0.14422798231206535,
      "2007": 0.4189976192755247,
@@ -340822,7 +340822,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/gold_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/gold_20261006/scoreboard_entries.json",
     "yearly_given": {
      "2006": 0.0972448682794993,
      "2007": 0.24227597920665733,
@@ -342017,7 +342017,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1997": -0.1705141041977667,
      "1998": 0.688426014177677,
@@ -343698,7 +343698,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.7133595444022098,
      "1996": 0.6133789230487781,
@@ -345482,7 +345482,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.6699742812591136,
      "1996": 0.48666785052986117,
@@ -347266,7 +347266,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.6699742812591136,
      "1996": 0.48666785052986117,
@@ -349050,7 +349050,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.7133595444022098,
      "1996": 0.4848342219307107,
@@ -350834,7 +350834,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.7133595444022098,
      "1996": 0.6133789230487781,
@@ -352618,7 +352618,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.9135294357226946,
      "1996": 0.5871120304643482,
@@ -354402,7 +354402,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.8625220765995254,
      "1996": 0.45831734027514726,
@@ -356186,7 +356186,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.8625220765995254,
      "1996": 0.45831734027514726,
@@ -357970,7 +357970,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.9135294357226946,
      "1996": 0.4597115840107,
@@ -359754,7 +359754,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.9135294357226946,
      "1996": 0.5871120304643482,
@@ -361538,7 +361538,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.9157617081808451,
      "1996": 0.6964630484638992,
@@ -363322,7 +363322,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.7199501243851436,
      "1996": 0.6538836212802754,
@@ -365106,7 +365106,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.7199501243851436,
      "1996": 0.7704875422324813,
@@ -366890,7 +366890,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.9157617081808451,
      "1996": 0.3468203547446784,
@@ -368674,7 +368674,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.9157617081808451,
      "1996": 1.0696207070327577,
@@ -370458,7 +370458,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 1.1395216202529612,
      "1996": 0.6374405092212823,
@@ -372242,7 +372242,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.9193775560573918,
      "1996": 0.5950730932546635,
@@ -374026,7 +374026,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.9193775560573918,
      "1996": 0.7218229185520872,
@@ -375810,7 +375810,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 1.1395216202529612,
      "1996": 0.299263285214588,
@@ -377594,7 +377594,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 1.1395216202529612,
      "1996": 1.0357769766527776,
@@ -379378,7 +379378,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.7133595444022098,
      "1996": 0.6133789230487781,
@@ -381162,7 +381162,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.6015486148296667,
      "1996": 0.5249701855468114,
@@ -382946,7 +382946,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.7133595444022098,
      "1996": 0.6133789230487781,
@@ -384730,7 +384730,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.7133595444022098,
      "1996": 0.6133789230487781,
@@ -386514,7 +386514,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.6015486148296667,
      "1996": 0.5249701855468114,
@@ -388298,7 +388298,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.7133595444022098,
      "1996": 0.6133789230487781,
@@ -390082,7 +390082,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.9135294357226946,
      "1996": 0.5871120304643482,
@@ -391866,7 +391866,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.7744325760659261,
      "1996": 0.503029376491118,
@@ -393650,7 +393650,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.9135294357226946,
      "1996": 0.5871120304643482,
@@ -395434,7 +395434,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.9135294357226946,
      "1996": 0.5871120304643482,
@@ -397218,7 +397218,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.9135294357226946,
      "1996": 0.5871120304643482,
@@ -399002,7 +399002,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.9135294357226946,
      "1996": 0.5871120304643482,
@@ -400786,7 +400786,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.9157617081808451,
      "1996": 0.6964630484638992,
@@ -402570,7 +402570,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.9766372748275045,
      "1996": 0.3848335652990218,
@@ -404354,7 +404354,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.9157617081808451,
      "1996": 0.6964630484638992,
@@ -406138,7 +406138,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.9157617081808451,
      "1996": 0.6964630484638992,
@@ -407922,7 +407922,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.9157617081808451,
      "1996": 0.6964630484638992,
@@ -409706,7 +409706,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 0.9157617081808451,
      "1996": 0.6964630484638992,
@@ -411490,7 +411490,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 1.1395216202529612,
      "1996": 0.6374405092212823,
@@ -413274,7 +413274,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 1.2076499788472175,
      "1996": 0.3313302097216191,
@@ -415058,7 +415058,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 1.1395216202529612,
      "1996": 0.6374405092212823,
@@ -416842,7 +416842,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 1.1395216202529612,
      "1996": 0.6374405092212823,
@@ -418626,7 +418626,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 1.1395216202529612,
      "1996": 0.6374405092212823,
@@ -420410,7 +420410,7 @@
    "note": "",
    "extra": {
     "curve_freq": "일별",
-    "file": "/Users/koscom/Projects/auto_stock/.claude/worktrees/agent-a3b36188abf3d5595/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
+    "file": "/Users/koscom/Projects/auto_stock/_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json",
     "yearly_given": {
      "1995": 1.1395216202529612,
      "1996": 0.6374405092212823,
