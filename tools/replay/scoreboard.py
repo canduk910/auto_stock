@@ -210,6 +210,8 @@ class Entry:
     extra: dict = field(default_factory=dict)
 
 
+_OL_REF = "이 성적표에서 추가(같은 2배 모형 `global_alloc_b.lev_returns` · 상품 대응표 = " + GA + "/result_b.md §4)"
+
 REGISTRY: list[Entry] = [
     # ── 단일 자산 보유(원화 총수익 · 1995~) ──
     Entry("K200", "KOSPI200 단순 보유", "KOSPI200 지수(배당 연 1.6% 근사)를 처음에 사서 끝까지 보유", "global", "기준선",
@@ -258,6 +260,33 @@ REGISTRY: list[Entry] = [
           f"{GA}/result_b.md §3", "해외 몫 차익 15.4%"),
     Entry("LK200", "KOSPI200 2배 단순 보유", "KOSPI200 일일 2배 모형(조달 = 한국 3개월 금리 + 연 0.8%)을 보유",
           "global", "참고", "이 성적표에서 추가(같은 2배 모형 `global_alloc_b.lev_returns`)", "국내 주식 지수 기반 — 도입 전 확인"),
+    # ── 해외지수 레버리지(일일 2배 리셋 모형 · U = 지수 2배 + 환 1배(환노출) · H = 지수 2배 + 금리차(환헤지)) ──
+    # 조달 = 그 나라 단기금리 + 연 0.8%(보수 포함) · 비용 왕복 0.38% · 상장 전 구간은 모형이다
+    Entry("OL_SPX_U", "S&P500 2배 단순 보유(환노출)", "일일 2배 리셋 모형 · 국내 상장 상품 없음(환노출 S&P500 2배 없음) · 전 구간 모형",
+          "global", "참고", _OL_REF, "국내 상장 해외 2배 — 차익 15.4%"),
+    Entry("OL_SPX_H", "S&P500 2배 단순 보유(환헤지)", "일일 2배 리셋 모형 · 국내 상장 = TIGER 미국S&P500레버리지(합성 H) `225040` "
+          "· 2015-07-29 상장 · 환헤지 · 상장 전 구간은 모형", "global", "참고", _OL_REF, "차익 15.4%"),
+    Entry("OL_NDX_U", "나스닥100 2배 단순 보유(환노출)", "일일 2배 리셋 모형 · 국내 상장 = TIGER 미국나스닥100레버리지(합성) `418660` "
+          "· 2022-02-22 상장 · 환노출 · 상장 전 구간은 모형", "global", "참고", _OL_REF, "차익 15.4%"),
+    Entry("OL_NDX_H", "나스닥100 2배 단순 보유(환헤지)", "일일 2배 리셋 모형 · 국내 상장 = KODEX 미국나스닥100레버리지(합성 H) `409820` "
+          "· 2021-12-09 상장 · 환헤지 · 상장 전 구간은 모형", "global", "참고", _OL_REF, "차익 15.4%"),
+    Entry("OL_NKY_U", "닛케이225 2배 단순 보유(환노출)", "일일 2배 리셋 모형 · 국내 상장 상품 없음(닛케이225 2배 없음) · 전 구간 모형",
+          "global", "참고", _OL_REF, "차익 15.4%"),
+    Entry("OL_NKY_H", "닛케이225 2배 단순 보유(환헤지)", "일일 2배 리셋 모형 · 국내 상장 상품 없음(닛케이225 2배 없음 — 가장 가까운 것은 "
+          "다른 지수인 ACE 일본TOPIX레버리지(H) `196030` · 2014-06-16 상장) · 전 구간 모형", "global", "참고", _OL_REF, "차익 15.4%"),
+    Entry("OL_HSCEI_U", "HSCEI(중국) 2배 단순 보유(환노출)", "일일 2배 리셋 모형 · 국내 상장 상품 없음(환노출 HSCEI 2배 없음) · 전 구간 모형",
+          "global", "참고", _OL_REF, "차익 15.4%"),
+    Entry("OL_HSCEI_H", "HSCEI(중국) 2배 단순 보유(환헤지)", "일일 2배 리셋 모형 · 국내 상장 = KODEX 차이나H레버리지(H) `204450` "
+          "· 2014-09-12 상장 · 환헤지 · 상장 전 구간은 모형", "global", "참고", _OL_REF, "차익 15.4%"),
+    Entry("OL_SPX_U50", "S&P500 2배 50% + 현금 50%(환노출)", "일일 2배 리셋 모형 50% + 원화 현금 50% · 월말 결정 · 다음 종가 되돌림 "
+          "(총 노출 100%) · 국내 상장 상품 없음(환노출 S&P500 2배 없음) · 전 구간 모형", "global", "참고", _OL_REF,
+          "2배 몫 차익 15.4% · 현금 이자 15.4%"),
+    Entry("OL_NDX_U50", "나스닥100 2배 50% + 현금 50%(환노출)", "일일 2배 리셋 모형 50% + 원화 현금 50% · 월말 결정 · 다음 종가 되돌림 "
+          "(총 노출 100%) · 국내 상장 = TIGER 미국나스닥100레버리지(합성) `418660` · 2022-02-22 상장 · 상장 전 구간은 모형",
+          "global", "참고", _OL_REF, "2배 몫 차익 15.4% · 현금 이자 15.4%"),
+    Entry("OL_EQ4_U", "해외 4지수 2배 동일 비중(환노출)", "S&P500·나스닥100·닛케이225·HSCEI 일일 2배 리셋 모형 각 25% · 월말 결정 · "
+          "다음 종가 되돌림(총 노출 200%) · 국내 상장 환노출 2배는 나스닥100 `418660`(2022-02-22) 하나뿐, 나머지 셋은 없음 · "
+          "상장 전·없는 상품 구간은 모형", "global", "참고", _OL_REF, "차익 15.4%"),
     # ── 1차 후보(걷기 전진 · 2006~) ──
     Entry("F1", "시계열 추세", "자산마다 최근 수익(또는 평균선 위)이면 1/7, 아니면 현금·미국채 · 해마다 직전 10년 최적 조합",
           "global_wf", "실패", f"{GA}/result.md §3", "해외 몫 차익 15.4%"),
@@ -351,12 +380,26 @@ def load_global(parquet: str = GLOBAL_PARQUET) -> "tuple[dict[str, Curve], pd.Se
     out["B-H"] = run(mh, GB.schedule(mh, "B", a, b), "B hedged")
     for asset in ("SPX", "NDX", "NKY", "HSCEI", "UST10", "USD", "CASH", "LK200"):
         out[asset] = run(m, {a: one(asset)}, f"hold {asset}")
+    dps = [int(i) for i in GB.decision_points(m.dates, "M") if a <= i < b]
     w3 = np.zeros(GB.N)
     for x in G.EQUITY:
         w3[GB.COLS.index(x)] = 0.12
     w3[GB.COLS.index("UST10")] = 0.40
-    dps = [int(i) for i in GB.decision_points(m.dates, "M") if a <= i < b]
     out["B3"] = run(m, {i: w3 for i in dps}, "B3 세계 60/40")
+    # 해외지수 2배 — m 의 L* 열 = U(환노출), mlh 의 L* 열 = H(환헤지). 1배 행(SPX·NDX …)과 같은 원천 열을 쓴다
+    mlh = GB.load(df, "H")
+    for x in ("SPX", "NDX", "NKY", "HSCEI"):
+        out[f"OL_{x}_U"] = run(m, {a: one("L" + x)}, f"hold L{x} U")
+        out[f"OL_{x}_H"] = run(mlh, {a: one("L" + x)}, f"hold L{x} H")
+    for x in ("SPX", "NDX"):
+        w = np.zeros(GB.N)
+        w[GB.COLS.index("L" + x)] = 0.5
+        w[GB.I_CASH] = 0.5
+        out[f"OL_{x}_U50"] = run(m, {i: w for i in dps}, f"L{x} U 50 + CASH 50 월")
+    w4 = np.zeros(GB.N)
+    for x in ("SPX", "NDX", "NKY", "HSCEI"):
+        w4[GB.COLS.index("L" + x)] = 0.25
+    out["OL_EQ4_U"] = run(m, {i: w4 for i in dps}, "L4지수 U 동일 월")
     rf = pd.Series(np.cumprod(1 + m.ret[:, GB.I_CASH]), index=m.dates)
     return out, rf
 

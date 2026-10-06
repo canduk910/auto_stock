@@ -181,3 +181,48 @@ def test_external_entry_loaded_and_validated(tmp_path):
     assert r["entry"].group == "external" and r["entry"].status == "참고"
     assert r["curve"].extra["curve_freq"] == "월말" and r["curve"].value[-1] == 1.21
     assert len(warn) == 2                                               # 중복 id · 필수 칸 없음
+
+
+def test_lev2x_daily_reset_volatility_drag_hand():
+    """일일 2배 리셋 — 지수 +10% → −10% 이면 지수는 −1%, 2배는 1.2 × 0.8 − 1 = −4%(2 × −1% = −2% 보다 나쁘다).
+    U = (1 + 2·현지수익 − 현지금리 − c·dt) × (1 + 환) − 1 · H = 2·현지수익 − 현지금리 − c·dt + (원화금리 − 현지금리)."""
+    from replay import global_alloc as G
+    from replay import global_alloc_b as GB
+    dates = pd.DatetimeIndex(["2001-01-01", "2001-01-02", "2001-01-03"])
+    rl = np.array([0.0, 0.10, -0.10])
+    df = pd.DataFrame(index=dates)
+    df["CASH_ret"] = 0.0
+    for a in G.RISKY:
+        df[f"{a}_ret"] = rl
+        if a not in ("K200", "USD"):
+            df[f"{a}_lret"] = rl
+            df[f"{a}_hret"] = rl                     # 헤지 수익 = 현지 수익 → 현지금리 = 원화금리 = 0
+    u = GB.lev_returns(df, "U", 0.0)["LSPX"]
+    h = GB.lev_returns(df, "H", 0.0)["LSPX"]
+    assert np.prod(1 + rl) - 1 == pytest.approx(-0.01)
+    assert np.prod(1 + u) - 1 == pytest.approx(1.2 * 0.8 - 1)          # −4% — 변동성 끌림 2%p
+    assert np.prod(1 + h) - 1 == pytest.approx(-0.04)
+
+    # 환 +5% 하루(지수 0) — U 는 환을 1배로 받고 H 는 받지 않는다 · 비용 c·dt 와 금리차
+    df2 = df.copy()
+    fx = 0.05
+    df2["CASH_ret"] = 0.0002
+    df2["SPX_lret"] = [0.0, 0.01, 0.0]
+    df2["SPX_ret"] = (1 + df2["SPX_lret"]) * (1 + np.array([0.0, 0.0, fx])) - 1
+    df2["SPX_hret"] = df2["SPX_lret"] + 0.0001         # 현지금리 = 0.0002 − 0.0001
+    c, dt = 0.008, 1 / 365
+    u2 = GB.lev_returns(df2, "U", c)["LSPX"]
+    h2 = GB.lev_returns(df2, "H", c)["LSPX"]
+    rf = 0.0001
+    assert u2[1] == pytest.approx(2 * 0.01 - rf - c * dt)
+    assert u2[2] == pytest.approx((1 - rf - c * dt) * (1 + fx) - 1)
+    assert h2[1] == pytest.approx(2 * 0.01 - rf - c * dt + (0.0002 - rf))
+    assert h2[2] == pytest.approx(-rf - c * dt + (0.0002 - rf))
+
+
+def test_overseas_lev_rows_registered():
+    ids = {e.id for e in S.REGISTRY}
+    want = {f"OL_{x}_{k}" for x in ("SPX", "NDX", "NKY", "HSCEI") for k in ("U", "H")} | {"OL_SPX_U50", "OL_NDX_U50", "OL_EQ4_U"}
+    assert want <= ids
+    assert all(e.group == "global" and e.status == "참고" and "일일 2배 리셋 모형" in e.desc
+               for e in S.REGISTRY if e.id.startswith("OL_"))
