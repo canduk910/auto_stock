@@ -51,7 +51,9 @@ def test_every_row_lands_in_a_template_group():
     ("RG_vb", "external", "regime_pause"),
     ("R2_IDX_ga", "external", "regime_v2"),
     ("GOLD_H", "external", "global"),
-    ("AU_WF", "global_wf", "global"),
+    ("AU_WF", "global_wf", "global_wf"),
+    ("NQG_WF", "external", "global_wf"),
+    ("AU_PERM", "external", "global"),
     ("NQG_EW", "external", "global"),
     ("kojiro", "strategy", "strategy"),
 ])
@@ -88,3 +90,23 @@ def test_template_has_both_placeholders_once():
     tpl = B.DEFAULT_TEMPLATE.read_text(encoding="utf-8")
     assert tpl.count("/*__DATA__*/null") == 1
     assert tpl.count("/*__EXPLAIN__*/null") == 1
+
+
+GOLD_IDS = ("GOLD", "GOLD_H", "GOLD_LEV2", "AU_LEV2_H", "AU_K80G20", "AU_B1G10", "AU_PERM",
+            "AU_WF", "NQG_EW", "NQG_IV", "NQG_WF")
+
+
+def test_gold_ids_have_their_own_entries():
+    ids = _explain()["ids"]
+    for eid in GOLD_IDS:
+        assert all(ids[eid].get(k) for k in B.FIELDS), eid
+
+
+def test_r2_learned_variants_warn_about_inflated_30y_numbers():
+    ids = _explain()["ids"]
+    for eid in ("R2_IDX_da", "R2_IDX_ra", "R2_donchian_da", "R2_vcp_da", "R2_kojiro_da",
+                "R2_donchian_ra", "R2_vcp_ra", "R2_kojiro_ra"):
+        v = ids[eid]["variant"]
+        assert "1997~2012" in v and ("부풀" in v or "판단 근거로 쓰지 않는다" in v), eid
+    ra = ids["R2_IDX_ra"]
+    assert "2010" in ra["assets"] and "145개" in ra["rule"] and "+1.1%" in ra["variant"]

@@ -43,9 +43,9 @@ EXTERNAL_GROUP_RULES = (
 
 
 def map_group(row_id: str, group: str) -> str:
-    """금 접두는 어느 묶음에서 왔든 global. 그 밖의 external 은 id 접두로, 나머지 external 은 regime_pause."""
+    """금 접두는 어느 묶음에서 왔든 global(걷기 전진 _WF 는 global_wf). 그 밖의 external 은 id 접두로, 나머지 external 은 regime_pause."""
     if row_id.startswith(GOLD_PREFIXES):
-        return "global"
+        return "global_wf" if row_id.endswith("_WF") else "global"
     if group != "external":
         return group
     for prefix, key in EXTERNAL_GROUP_RULES:
