@@ -1210,6 +1210,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -2499,6 +2500,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -3793,6 +3795,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -5082,6 +5085,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -6372,6 +6376,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -7663,6 +7668,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -8954,6 +8960,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -10247,6 +10254,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -11537,6 +11545,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -12896,6 +12905,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -14187,6 +14197,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -15496,6 +15507,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -16788,6 +16800,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -18083,6 +18096,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -19368,6 +19382,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -20660,6 +20675,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -21951,6 +21967,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -23242,6 +23259,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -24533,6 +24551,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -25824,6 +25843,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -27117,6 +27137,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -28406,6 +28427,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -29697,6 +29719,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -30988,6 +31011,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -32279,6 +32303,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -33571,6 +33596,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -34865,6 +34891,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -36152,6 +36179,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -37443,6 +37471,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -38736,6 +38765,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -40025,6 +40055,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -41320,6 +41351,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -42612,6 +42644,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -43903,6 +43936,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -45195,6 +45229,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -46484,6 +46519,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -47776,6 +47812,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -49067,6 +49104,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -50359,6 +50397,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -51649,6 +51688,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -52940,6 +52980,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -54231,6 +54272,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -55522,6 +55564,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -56813,6 +56856,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -58103,6 +58147,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -59395,6 +59440,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -60686,6 +60732,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -61977,6 +62024,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -63268,6 +63316,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -64559,6 +64608,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -65850,6 +65900,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -67141,6 +67192,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -68432,6 +68484,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -69723,6 +69776,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -71015,6 +71069,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -72305,6 +72360,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -73667,6 +73723,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -74955,6 +75012,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -76246,6 +76304,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -77539,6 +77598,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -78830,6 +78890,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -80188,6 +80249,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -81479,6 +81541,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -82770,6 +82833,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -84061,6 +84125,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -85352,6 +85417,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -86643,6 +86709,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -87934,6 +88001,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -89224,6 +89292,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -90610,6 +90679,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -91980,6 +92050,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -93409,6 +93480,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -94700,6 +94772,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -95992,6 +96065,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -97282,6 +97356,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -98573,6 +98648,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -99867,6 +99943,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -101154,6 +101231,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -102462,6 +102540,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -103740,6 +103819,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -105029,6 +105109,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -106319,6 +106400,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -107610,6 +107692,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -108900,6 +108983,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -110192,6 +110276,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -111483,6 +111568,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -112774,6 +112860,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -114065,6 +114152,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -115356,6 +115444,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -116646,6 +116735,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -117937,6 +118027,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -119229,6 +119320,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -120520,6 +120612,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -121811,6 +121904,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -123102,6 +123196,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -124425,6 +124520,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -125716,6 +125812,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -127005,6 +127102,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -128299,6 +128397,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -129589,6 +129688,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -130880,6 +130980,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -132171,6 +132272,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -133462,6 +133564,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -134756,6 +134859,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -136045,6 +136149,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -137337,6 +137442,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -138627,6 +138733,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -139918,6 +140025,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -141287,6 +141395,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -142579,6 +142688,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -143868,6 +143978,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -145160,6 +145271,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -146450,6 +146562,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -147741,6 +147854,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -149031,6 +149145,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -150323,6 +150438,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -151614,6 +151730,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -152908,6 +153025,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -154266,6 +154384,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -155557,6 +155676,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -156852,6 +156972,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -158143,6 +158264,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -159503,6 +159625,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -160795,6 +160918,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -162154,6 +162278,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -163622,6 +163747,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -164984,6 +165110,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -166275,6 +166402,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -167566,6 +167694,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -168858,6 +168987,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -170149,6 +170279,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -173221,6 +173352,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -174510,6 +174642,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -175804,6 +175937,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -177092,6 +177226,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_ra_us.py
+      - tests/unit/replay/test_ra_us_breadth.py
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_sb_addons.py
@@ -179308,10 +179443,10 @@ frontend:
       - frontend/src/pages/__tests__/StrategiesParams.test.tsx
       - frontend/src/pages/__tests__/StrategiesTeRr.test.tsx
       - frontend/src/pages/__tests__/StrategyFunnel.bottleneckTrend.test.tsx
-generated_at: '2026-10-06T03:21:05.239Z'
+generated_at: '2026-10-06T04:05:35.562Z'
 stats:
   backend_modules: 181
-  backend_tests: 1272
+  backend_tests: 1273
   frontend_modules: 135
   frontend_tests: 111
   unmapped_modules:

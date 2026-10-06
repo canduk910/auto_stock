@@ -39,6 +39,7 @@ EXTERNAL_GROUP_RULES = (
     ("WF_", "rebal"),
     ("RG_V", "lev6040"),
     ("R2_", "regime_v2"),
+    ("RAUSB_", "regime_v2"),
     ("RAUS_", "regime_v2"),
 )
 

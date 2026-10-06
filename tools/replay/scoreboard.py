@@ -483,6 +483,7 @@ EXTERNAL_ENTRIES = [
     "_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",     # 섹터 RS 하위 30% 배제 SRS(전략별 · 민감도 · 균등 병행)
     "_workspace/analysis/gold_20261006/scoreboard_entries.json",          # 금 GOLD·AU_ · 나스닥100·2배·금·현금 NQG_(global 묶음)
     "_workspace/analysis/ra_us_20261006/scoreboard_entries.json",         # (라) 장세 규칙 미국 이식 RAUS_(S&P500·나스닥100 · 한국 폭 없음)
+    "_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json", # (라) 미국 이식 + 무료 시장 폭(진짜 폭 S5FI·NDFI · 상승 비율 · 동일가중) RAUSB_
 ]
 EXTERNAL_ROOTS = (_ROOT, MAIN_REPO, "/Users/koscom/Projects/auto_stock_rgate", "/Users/koscom/Projects/auto_stock_regv2")
 EXTERNAL_FORMAT = {
