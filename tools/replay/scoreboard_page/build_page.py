@@ -41,6 +41,7 @@ EXTERNAL_GROUP_RULES = (
     ("R2_", "regime_v2"),
     ("RAUSB_", "regime_v2"),
     ("RAUS_", "regime_v2"),
+    ("RAG_", "regime_v2"),
 )
 
 
