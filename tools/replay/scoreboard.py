@@ -481,6 +481,7 @@ EXTERNAL_ENTRIES = [
     "_workspace/analysis/regime_v2_20261006/scoreboard_entries.json",     # 장세 판단 재설계(가·나·다·라)
     "_workspace/analysis/sb_addons_20261006/scoreboard_entries.json",     # 낙폭 정지 DDP · 분기 순환 QR · 상위 5 QR5 · 재조정 WF
     "_workspace/analysis/sector_rs_20261006/scoreboard_entries.json",     # 섹터 RS 하위 30% 배제 SRS(전략별 · 민감도 · 균등 병행)
+    "_workspace/analysis/gold_20261006/scoreboard_entries.json",          # 금 GOLD·AU_ · 나스닥100·2배·금·현금 NQG_(global 묶음)
 ]
 EXTERNAL_ROOTS = (_ROOT, MAIN_REPO, "/Users/koscom/Projects/auto_stock_rgate", "/Users/koscom/Projects/auto_stock_regv2")
 EXTERNAL_FORMAT = {

@@ -1198,6 +1198,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -2484,6 +2485,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -3775,6 +3777,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -5061,6 +5064,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -6348,6 +6352,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -7636,6 +7641,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -8924,6 +8930,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -10214,6 +10221,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -11501,6 +11509,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -12857,6 +12866,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -14145,6 +14155,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -15451,6 +15462,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -16740,6 +16752,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -18032,6 +18045,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -19314,6 +19328,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -20603,6 +20618,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -21891,6 +21907,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -23179,6 +23196,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -24467,6 +24485,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -25755,6 +25774,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -27045,6 +27065,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -28331,6 +28352,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -29619,6 +29641,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -30907,6 +30930,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -32195,6 +32219,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -33484,6 +33509,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -34775,6 +34801,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -36059,6 +36086,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -37347,6 +37375,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -38637,6 +38666,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -39923,6 +39953,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -41215,6 +41246,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -42504,6 +42536,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -43792,6 +43825,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -45081,6 +45115,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -46367,6 +46402,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -47656,6 +47692,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -48944,6 +48981,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -50233,6 +50271,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -51520,6 +51559,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -52808,6 +52848,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -54096,6 +54137,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -55384,6 +55426,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -56672,6 +56715,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -57959,6 +58003,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -59248,6 +59293,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -60536,6 +60582,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -61824,6 +61871,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -63112,6 +63160,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -64400,6 +64449,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -65688,6 +65738,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -66976,6 +67027,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -68264,6 +68316,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -69552,6 +69605,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -70841,6 +70895,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -72128,6 +72183,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -73487,6 +73543,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -74772,6 +74829,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -76060,6 +76118,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -77350,6 +77409,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -78638,6 +78698,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -79993,6 +80054,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -81281,6 +81343,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -82569,6 +82632,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -83857,6 +83921,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -85145,6 +85210,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -86433,6 +86499,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -87721,6 +87788,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -89008,6 +89076,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -90391,6 +90460,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -91758,6 +91828,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -93184,6 +93255,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -94472,6 +94544,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -95761,6 +95834,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -97048,6 +97122,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -98336,6 +98411,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -99627,6 +99703,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -100911,6 +100988,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -102216,6 +102294,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -103491,6 +103570,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -104777,6 +104857,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -106064,6 +106145,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -107352,6 +107434,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -108639,6 +108722,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -109928,6 +110012,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -111216,6 +111301,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -112504,6 +112590,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -113792,6 +113879,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -115080,6 +115168,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -116367,6 +116456,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -117655,6 +117745,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -118944,6 +119035,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -120232,6 +120324,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -121520,6 +121613,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -122808,6 +122902,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -124128,6 +124223,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -125416,6 +125512,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -126702,6 +126799,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -127994,6 +128092,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -129280,6 +129379,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -130568,6 +130668,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -131856,6 +131957,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -133144,6 +133246,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -134435,6 +134538,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -135721,6 +135825,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -137010,6 +137115,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -138297,6 +138403,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -139585,6 +139692,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -140951,6 +141059,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -142240,6 +142349,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -143526,6 +143636,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -144815,6 +144926,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -146102,6 +146214,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -147390,6 +147503,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -148677,6 +148791,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -149966,6 +150081,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -151254,6 +151370,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -152545,6 +152662,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -153900,6 +154018,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -155188,6 +155307,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -156480,6 +156600,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -157768,6 +157889,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -159125,6 +159247,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -160414,6 +160537,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -161770,6 +161894,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -163235,6 +163360,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -164594,6 +164720,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -165882,6 +166009,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -167170,6 +167298,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -168459,6 +168588,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -169747,6 +169877,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -172816,6 +172947,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -174102,6 +174234,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -175393,6 +175526,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -176678,6 +176812,7 @@ backend:
       - tests/unit/replay/test_base_layer.py
       - tests/unit/replay/test_global_alloc.py
       - tests/unit/replay/test_global_alloc_b.py
+      - tests/unit/replay/test_gold.py
       - tests/unit/replay/test_mr_lookahead.py
       - tests/unit/replay/test_mr_ou.py
       - tests/unit/replay/test_mr_r2_fixes.py
@@ -178903,10 +179038,10 @@ frontend:
       - frontend/src/pages/__tests__/StrategiesParams.test.tsx
       - frontend/src/pages/__tests__/StrategiesTeRr.test.tsx
       - frontend/src/pages/__tests__/StrategyFunnel.bottleneckTrend.test.tsx
-generated_at: '2026-10-06T02:57:26.438Z'
+generated_at: '2026-10-06T03:02:50.502Z'
 stats:
   backend_modules: 181
-  backend_tests: 1269
+  backend_tests: 1270
   frontend_modules: 135
   frontend_tests: 111
   unmapped_modules:
