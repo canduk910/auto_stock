@@ -1209,6 +1209,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -2491,6 +2492,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -3778,6 +3780,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -5060,6 +5063,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -6343,6 +6347,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -7627,6 +7632,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -8911,6 +8917,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -10197,6 +10204,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -11480,6 +11488,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -12832,6 +12841,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -14116,6 +14126,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -15418,6 +15429,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -16703,6 +16715,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -17991,6 +18004,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -19269,6 +19283,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -20554,6 +20569,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -21838,6 +21854,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -23122,6 +23139,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -24406,6 +24424,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -25690,6 +25709,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -26976,6 +26996,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -28258,6 +28279,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -29542,6 +29564,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -30826,6 +30849,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -32110,6 +32134,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -33395,6 +33420,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -34682,6 +34708,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -35962,6 +35989,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -37246,6 +37274,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -38532,6 +38561,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -39814,6 +39844,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -41102,6 +41133,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -42387,6 +42419,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -43671,6 +43704,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -44956,6 +44990,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -46238,6 +46273,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -47523,6 +47559,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -48807,6 +48844,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -50092,6 +50130,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -51375,6 +51414,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -52659,6 +52699,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -53943,6 +53984,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -55227,6 +55269,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -56511,6 +56554,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -57794,6 +57838,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -59079,6 +59124,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -60363,6 +60409,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -61647,6 +61694,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -62931,6 +62979,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -64215,6 +64264,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -65499,6 +65549,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -66783,6 +66834,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -68067,6 +68119,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -69351,6 +69404,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -70636,6 +70690,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -71919,6 +71974,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -73274,6 +73330,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -74555,6 +74612,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -75839,6 +75897,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -77125,6 +77184,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -78409,6 +78469,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -79760,6 +79821,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -81044,6 +81106,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -82328,6 +82391,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -83612,6 +83676,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -84896,6 +84961,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -86180,6 +86246,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -87464,6 +87531,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -88747,6 +88815,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -90126,6 +90195,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -91489,6 +91559,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -92911,6 +92982,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -94195,6 +94267,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -95480,6 +95553,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -96763,6 +96837,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -98047,6 +98122,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -99334,6 +99410,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -100614,6 +100691,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -101915,6 +101993,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -103186,6 +103265,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -104468,6 +104548,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -105751,6 +105832,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -107035,6 +107117,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -108318,6 +108401,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -109603,6 +109687,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -110887,6 +110972,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -112171,6 +112257,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -113455,6 +113542,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -114739,6 +114827,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -116022,6 +116111,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -117306,6 +117396,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -118591,6 +118682,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -119875,6 +119967,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -121159,6 +121252,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -122443,6 +122537,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -123759,6 +123854,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -125043,6 +125139,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -126325,6 +126422,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -127612,6 +127710,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -128895,6 +128994,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -130179,6 +130279,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -131463,6 +131564,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -132747,6 +132849,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -134034,6 +134137,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -135316,6 +135420,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -136601,6 +136706,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -137884,6 +137990,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -139168,6 +139275,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -140530,6 +140638,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -141815,6 +141924,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -143097,6 +143207,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -144382,6 +144493,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -145665,6 +145777,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -146949,6 +147062,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -148232,6 +148346,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -149517,6 +149632,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -150801,6 +150917,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -152088,6 +152205,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -153439,6 +153557,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -154723,6 +154842,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -156011,6 +156131,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -157295,6 +157416,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -158648,6 +158770,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -159933,6 +160056,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -161285,6 +161409,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -162746,6 +162871,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -164101,6 +164227,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -165385,6 +165512,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -166669,6 +166797,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -167954,6 +168083,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -169238,6 +169368,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -172303,6 +172434,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -173585,6 +173717,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -174872,6 +175005,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -176153,6 +176287,7 @@ backend:
       - tests/unit/replay/test_opt_regime.py
       - tests/unit/replay/test_opt_vb.py
       - tests/unit/replay/test_regime_gate.py
+      - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
@@ -178348,10 +178483,10 @@ frontend:
       - frontend/src/pages/__tests__/StrategiesParams.test.tsx
       - frontend/src/pages/__tests__/StrategiesTeRr.test.tsx
       - frontend/src/pages/__tests__/StrategyFunnel.bottleneckTrend.test.tsx
-generated_at: '2026-10-05T23:26:23.364Z'
+generated_at: '2026-10-06T00:41:30.698Z'
 stats:
   backend_modules: 181
-  backend_tests: 1265
+  backend_tests: 1266
   frontend_modules: 134
   frontend_tests: 110
   unmapped_modules:

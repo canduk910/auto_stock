@@ -272,6 +272,7 @@ const GROUPS = [
   {key:"soon", label:"곧 추가", since:"계산 중", sub:"아직 계산 중인 연구입니다. 결과가 나오면 같은 표·곡선·열지도에 들어옵니다.", members:[
      {key:"regime_pause", label:"장세별 매매 중단"},
      {key:"lev6040", label:"60/40 안정상승 레버리지 V1~V3"},
+     {key:"regime_v2", label:"장세 판단 재설계(가·나·다·라)"},
      {key:"rebal", label:"주기적 재조정"}]}
 ];
 const groupOf = r => { for (const g of GROUPS){ if (g.members ? g.members.some(m=>m.key===r.group) : g.key===r.group) return g.key; } return null; };
