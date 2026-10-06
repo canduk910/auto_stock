@@ -96,7 +96,32 @@ table.sb tbody tr:last-child td{border-bottom:none}
 table.sb .stick{position:sticky;left:0;background:var(--surface);z-index:1;border-right:1px solid var(--line)}
 table.sb thead .stick{z-index:3;background:var(--surface-2)}
 table.sb tbody tr:hover td.stick{background:var(--surface-2)}
+.nmw{display:flex;flex-direction:column;gap:4px;width:250px}
 .nm{display:flex;gap:8px;align-items:flex-start;white-space:normal;width:250px}
+.xbtn{align-self:flex-start;margin-left:21px;font:inherit;font-size:12px;font-weight:600;color:var(--accent);background:transparent;border:1px solid var(--line-strong);border-radius:12px;padding:1px 9px;cursor:pointer;display:inline-flex;gap:4px;align-items:center}
+.xbtn:hover{background:var(--accent-soft)}
+.xbtn .car{font-size:9px;transition:transform .12s}
+.xbtn[aria-expanded="true"]{background:var(--accent-soft);border-color:var(--accent)}
+.xbtn[aria-expanded="true"] .car{transform:rotate(180deg)}
+table.sb tr.xrow td{background:var(--surface-2);text-align:left;white-space:normal;padding:12px 14px 14px}
+table.sb tbody tr.xrow:hover td{background:var(--surface-2)}
+.xpanel{position:sticky;left:14px;max-width:min(820px, calc(100vw - 110px));display:grid;grid-template-columns:7.5em 1fr;gap:6px 14px;font-size:13px;line-height:1.55;color:var(--ink)}
+.xpanel dt{color:var(--muted);font-weight:600;font-size:12px;padding-top:1px}
+.xpanel dd{margin:0}
+.xpanel .xid{font-family:var(--mono);font-size:12px;color:var(--ink-2)}
+.xpanel .xdesc{color:var(--muted);font-size:12px}
+@media (max-width:520px){.xpanel{grid-template-columns:1fr;gap:2px 0}.xpanel dd{margin-bottom:6px}}
+.gintro{background:var(--accent-soft);border-radius:8px;padding:12px 14px;font-size:14px;display:flex;flex-direction:column;gap:8px;max-width:96ch}
+.gintro .gt{font-weight:700;font-size:13px;color:var(--accent)}
+.gintro details summary{cursor:pointer;font-weight:600;font-size:13px;color:var(--ink-2)}
+.gmem{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px;margin-top:8px}
+.gmem div{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;display:flex;flex-direction:column;gap:2px}
+details.gloss{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px}
+details.gloss summary{cursor:pointer;font-weight:600;font-size:14px}
+dl.gl-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px 16px;margin:12px 0 2px}
+dl.gl-list div{border-top:1px solid var(--line);padding-top:6px;font-size:13px}
+dl.gl-list dt{font-weight:700;font-size:13px}
+dl.gl-list dd{margin:2px 0 0;color:var(--ink-2)}
 .nm input{margin-top:3px;accent-color:var(--accent);flex:none}
 .nm .t{font-weight:600;color:var(--ink);font-size:13px;line-height:1.35}
 .nm .id{font-family:var(--mono);font-size:11px;color:var(--muted)}
@@ -187,8 +212,9 @@ footer{color:var(--muted);font-size:12px;border-top:1px solid var(--line);paddin
   <section aria-labelledby="tbl-h">
     <div class="sec-head">
       <h2 id="tbl-h">묶음별 성적표</h2>
-      <p>열 머리를 누르면 정렬합니다. 열 머리에 마우스를 올리거나 <span class="mono">?</span> 를 누르면 뜻이 나옵니다. 왼쪽 칸을 체크하면 아래 곡선에 겹쳐 그립니다.</p>
+      <p>열 머리를 누르면 정렬합니다. 열 머리에 마우스를 올리거나 <span class="mono">?</span> 를 누르면 뜻이 나옵니다. 왼쪽 칸을 체크하면 아래 곡선에 겹쳐 그립니다. 전략 이름 아래 <b>설명</b> 을 누르면 어떤 전략이고 무엇에 투자하는지 펼쳐집니다.</p>
     </div>
+    <details class="gloss" id="gloss"><summary>용어 풀이</summary><dl class="gl-list" id="glList"></dl></details>
     <div>
       <div class="tabs" role="tablist" id="tabs"></div>
       <div class="panel" role="tabpanel" id="panel"></div>
@@ -263,6 +289,12 @@ footer{color:var(--muted);font-size:12px;border-top:1px solid var(--line);paddin
 /* 데이터 칸 구조 = scoreboard.json 과 같은 모양(rows[].metrics · rows[].curves 를 월말 m/c/d 로 줄였다).
    「추가 연구」 묶음은 rows[].group 이 members 의 key 인 행으로 채워진다. */
 const DATA = /*__DATA__*/null;
+/* 항목 설명 = build_page.py 가 explain.json 을 풀어 넣는다. items[id] = {what, assets, rule, variant, short} */
+const EXPLAIN = /*__EXPLAIN__*/null;
+const XI = id => (EXPLAIN && EXPLAIN.items && EXPLAIN.items[id]) || null;
+const esc = s => String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const shortOf = r => { const x=XI(r.id); return x && x.short ? x.short : ""; };
+const openX = new Set();
 
 const GROUPS = [
   {key:"global", label:"ETF·자산배분", since:"1995~", sub:"여러 나라 자산배분 · 단일 자산 — 원화 총수익 지수 모형 · 1995-01 ~ 2026-10", def:["K200","SPX","B1","LEV2a","LK200"]},
@@ -369,6 +401,7 @@ function renderPanel(){
   const g = GROUPS.find(x=>x.key===curTab); const rows = sortRows(rowsOf(curTab));
   panel.setAttribute("aria-labelledby","tab-"+curTab);
   let h = `<p class="panel-sub">${g.sub}</p>`;
+  h += groupIntro(g);
   if (g.members){
     const pend = g.members.filter(m=>!DATA.rows.some(r=>r.group===m.key));
     if (pend.length) h += `<div class="empty"><b>계산 중 — 아직 비어 있습니다</b><div class="empty-grid">${pend.map(m=>`<div class="empty-card"><b>${m.label}</b><span class="s">결과 대기 · 들어오면 이 자리에 같은 표로 채웁니다</span></div>`).join("")}</div></div>`;
@@ -378,9 +411,11 @@ function renderPanel(){
   h += `<div class="tscroll"><table class="sb"><thead><tr>${COLS.map((c,i)=>`<th class="${c.l?"l":""} ${i===0?"stick":""}" tabindex="0" data-k="${c.k}" aria-sort="${s.k===c.k?(s.dir>0?"ascending":"descending"):"none"}"><span class="hl">${c.label}<button type="button" class="q" data-tip="${i}" aria-label="${c.label} 뜻">?</button><span class="arr">${s.k===c.k?(s.dir>0?"▲":"▼"):""}</span></span></th>`).join("")}</tr></thead><tbody>`;
   for (const r of rows){
     const on = selected.some(x=>x.id===r.id);
+    const xo = openX.has(r.id), xid = "x-"+r.id;
     h += `<tr>`+COLS.map((c,i)=>{
-      if (i===0) return `<td class="l stick"><label class="nm"><input type="checkbox" data-id="${r.id}" ${on?"checked":""} aria-label="${r.name} 곡선에 겹쳐 그리기"><span><span class="t">${r.name}</span><br><span class="id">${r.id}</span></span></label></td>`;
+      if (i===0) return `<td class="l stick"><div class="nmw"><label class="nm"><input type="checkbox" data-id="${r.id}" ${on?"checked":""} aria-label="${r.name} 곡선에 겹쳐 그리기"><span><span class="t">${r.name}</span><br><span class="id">${r.id}</span></span></label><button type="button" class="xbtn" data-x="${r.id}" aria-expanded="${xo}" aria-controls="${xid}" aria-label="${esc(r.name)} 설명 ${xo?"접기":"펼치기"}">설명<span class="car" aria-hidden="true">▾</span></button></div></td>`;
       return `<td class="${c.l?"l":""}">${c.html(r)}</td>`; }).join("")+`</tr>`;
+    h += `<tr class="xrow" id="${xid}" ${xo?"":"hidden"}><td colspan="${COLS.length}">${explainPanel(r)}</td></tr>`;
   }
   h += `</tbody></table></div>`;
   h += `<div class="legendnote"><span><span class="up">빨강</span> = 플러스 · <span class="down">파랑</span> = 마이너스</span><span>${chip("통과")} ${chip("실패")} ${chip("보류")} ${chip("기준선")} ${chip("참고")}</span></div>`;
@@ -400,6 +435,28 @@ function renderPanel(){
     q.addEventListener("blur", hideTip);
   });
   panel.querySelectorAll("input[type=checkbox]").forEach(cb=>cb.addEventListener("change",()=>{ toggleSel(cb.dataset.id, cb.checked); }));
+  panel.querySelectorAll(".xbtn").forEach(b=>b.addEventListener("click",()=>{
+    const id=b.dataset.x, row=document.getElementById("x-"+id), open=!openX.has(id);
+    if (open) openX.add(id); else openX.delete(id);
+    row.hidden = !open; b.setAttribute("aria-expanded", open);
+    b.setAttribute("aria-label", `${byId[id].name} 설명 ${open?"접기":"펼치기"}`);
+  }));
+}
+function explainPanel(r){
+  const x = XI(r.id);
+  const rows = x ? [["어떤 전략", x.what], ["투자 자산", x.assets], ["매매 규칙", x.rule], ["이 항목의 차이", x.variant]]
+                 : [["설명", r.desc]];
+  return `<dl class="xpanel">${rows.map(([k,v])=>`<dt>${k}</dt><dd>${esc(v)}</dd>`).join("")}<dt>원 id</dt><dd><span class="xid">${esc(r.id)}</span>${x?`<br><span class="xdesc">원자료 설명 · ${esc(r.desc)}</span>`:""}</dd></dl>`;
+}
+function groupIntro(g){
+  const G = (EXPLAIN && EXPLAIN.groups) || {}; const gi = G[g.key];
+  if (!gi) return "";
+  let h = `<div class="gintro"><span class="gt">이 묶음은 무엇인가</span><span>${esc(gi.text)}</span>`;
+  if (g.members){
+    const ms = g.members.filter(m=>G[m.key] && DATA.rows.some(r=>r.group===m.key));
+    if (ms.length) h += `<details><summary>작은 묶음 ${ms.length}개 설명</summary><div class="gmem">${ms.map(m=>`<div><b>${esc(m.label)}</b><span>${esc(G[m.key].text)}</span></div>`).join("")}</div></details>`;
+  }
+  return h + `</div>`;
 }
 
 /* ---------- selection ---------- */
@@ -415,10 +472,10 @@ const cssv = n => getComputedStyle(document.documentElement).getPropertyValue(n)
 const slotColor = i => cssv("--s"+(i+1));
 function renderSel(){
   const el = document.getElementById("selChips");
-  el.innerHTML = selected.length ? selected.map(s=>{ const r=byId[s.id]; return `<span class="sel-chip"><span class="sw" style="background:${slotColor(s.slot)}"></span>${r.name}<span class="hint">${ym(r.metrics.start).slice(0,4)}~</span><button type="button" data-id="${s.id}" aria-label="${r.name} 빼기">×</button></span>`; }).join("") : `<span class="hint">고른 전략이 없습니다. 표에서 체크하거나 위 목록에서 추가하세요.</span>`;
+  el.innerHTML = selected.length ? selected.map(s=>{ const r=byId[s.id]; return `<span class="sel-chip"><span class="sw" style="background:${slotColor(s.slot)}"></span>${r.name}<span class="hint">${shortOf(r)?esc(shortOf(r))+" · ":""}${ym(r.metrics.start).slice(0,4)}~</span><button type="button" data-id="${s.id}" aria-label="${r.name} 빼기">×</button></span>`; }).join("") : `<span class="hint">고른 전략이 없습니다. 표에서 체크하거나 위 목록에서 추가하세요.</span>`;
   el.querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>toggleSel(b.dataset.id,false)));
   const sel = document.getElementById("addSel");
-  sel.innerHTML = `<option value="">전략을 고르세요…</option>` + GROUPS.filter(g=>rowsOf(g.key).length).map(g=>`<optgroup label="${g.label} (${g.since})">${rowsOf(g.key).map(r=>`<option value="${r.id}" ${selected.some(s=>s.id===r.id)?"disabled":""}>${r.name}</option>`).join("")}</optgroup>`).join("");
+  sel.innerHTML = `<option value="">전략을 고르세요…</option>` + GROUPS.filter(g=>rowsOf(g.key).length).map(g=>`<optgroup label="${g.label} (${g.since})">${rowsOf(g.key).map(r=>`<option value="${r.id}" ${selected.some(s=>s.id===r.id)?"disabled":""}>${r.name}${shortOf(r)?" — "+esc(shortOf(r)):""}</option>`).join("")}</optgroup>`).join("");
 }
 document.getElementById("addSel").addEventListener("change", e=>{ const v=e.target.value; if (v) toggleSel(v,true); e.target.value=""; });
 document.getElementById("clearSel").addEventListener("click", ()=>{ selected=[]; store.set("sel",selected); renderSel(); renderCharts(); renderPanel(); });
@@ -440,7 +497,7 @@ function renderCharts(){
   if (typeof Chart==="undefined") return;
   Chart.defaults.font.family = "IBM Plex Sans KR, system-ui, sans-serif";
   const ds = (fn, isDD) => selected.map(s=>{ const r=byId[s.id]; const mp=new Map(r.curves.m.map((m,i)=>[m, fn(r,i)])); const col=slotColor(s.slot);
-    return { label:r.name, data:ALL_MONTHS.map(m=>mp.has(m)?mp.get(m):null), borderColor:col, backgroundColor:col, borderWidth:2, pointRadius:0, pointHoverRadius:4, pointHoverBorderWidth:2, pointHoverBorderColor:cssv("--surface"), tension:0 }; });
+    return { label:r.name+(shortOf(r)?` (${shortOf(r)})`:""), data:ALL_MONTHS.map(m=>mp.has(m)?mp.get(m):null), borderColor:col, backgroundColor:col, borderWidth:2, pointRadius:0, pointHoverRadius:4, pointHoverBorderWidth:2, pointHoverBorderColor:cssv("--surface"), tension:0 }; });
   const o1 = baseOpts();
   o1.scales.y.type = logScale ? "logarithmic" : "linear";
   o1.scales.y.ticks.callback = v => { if (logScale){ const e=Math.log10(v); const lead=v/Math.pow(10,Math.floor(e)); if (![1,2,5].some(k=>Math.abs(lead-k)<1e-6)) return null; } return won(v*1e4); };
@@ -467,7 +524,7 @@ function renderHeatmap(){
   const years = [...new Set(rows.flatMap(r=>Object.keys(r.metrics.yearly)))].sort();
   let h = `<thead><tr><th class="rn">${g.label}</th>${years.map(y=>`<th>${y}</th>`).join("")}</tr></thead><tbody>`;
   for (const r of rows){
-    h += `<tr><th class="rn" title="${r.name}">${r.name}</th>`;
+    h += `<tr><th class="rn" title="${esc(r.name)}${shortOf(r)?" — "+esc(shortOf(r)):""}">${r.name}</th>`;
     for (const y of years){ const v=r.metrics.yearly[y]; if (!v || v[0]==null){ h+=`<td class="na">·</td>`; continue; }
       const c=cellColor(v[0]); const n=v[0]*100; const rn=Math.round(n); const txt = rn===0 ? "0" : sgn(String(rn));
       h += `<td class="${v[1]?"":"part"}" style="background:${c.bg};color:${c.fg}" data-r="${r.id}" data-y="${y}">${txt}</td>`; }
@@ -476,7 +533,7 @@ function renderHeatmap(){
   el.innerHTML = h + `</tbody>`;
   el.querySelectorAll("td[data-r]").forEach(td=>{
     const r=byId[td.dataset.r], y=td.dataset.y, v=r.metrics.yearly[y];
-    const html=`<b>${r.name}</b><br>${y}년 <b>${pct(v[0])}</b><br>덮은 날 ${v[2]}일${v[1]?"":" · 온전한 해 아님"}`;
+    const html=`<b>${r.name}</b>${shortOf(r)?`<br><span>${esc(shortOf(r))}</span>`:""}<br>${y}년 <b>${pct(v[0])}</b><br>덮은 날 ${v[2]}일${v[1]?"":" · 온전한 해 아님"}`;
     td.addEventListener("mouseenter", e=>showTip(html,e.clientX,e.clientY));
     td.addEventListener("mousemove", e=>showTip(html,e.clientX,e.clientY));
     td.addEventListener("mouseleave", hideTip);
@@ -507,6 +564,8 @@ const DEFS = [
   ["KOSPI200 상관","KOSPI200 과 같이 움직인 정도.","같은 월말 날짜의 월 수익 상관(K200 행)"],
   ["1천만 원 →","1천만 원을 넣었다면 끝에 얼마.","1천만 원 × 마지막 ÷ 시작"],
 ];
+document.getElementById("glList").innerHTML = ((EXPLAIN && EXPLAIN.glossary) || []).map(t=>`<div><dt>${esc(t.term)}</dt><dd>${esc(t.def)}</dd></div>`).join("");
+document.querySelector("#gloss summary").textContent = `용어 풀이 (${((EXPLAIN && EXPLAIN.glossary) || []).length}개)`;
 document.getElementById("defs").innerHTML = DEFS.map(d=>`<div class="def"><b>${d[0]}</b><span>${d[1]}</span><span class="f">${d[2]}</span></div>`).join("");
 
 /* ---------- boot ---------- */
