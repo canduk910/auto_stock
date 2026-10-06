@@ -484,6 +484,7 @@ EXTERNAL_ENTRIES = [
     "_workspace/analysis/gold_20261006/scoreboard_entries.json",          # 금 GOLD·AU_ · 나스닥100·2배·금·현금 NQG_(global 묶음)
     "_workspace/analysis/ra_us_20261006/scoreboard_entries.json",         # (라) 장세 규칙 미국 이식 RAUS_(S&P500·나스닥100 · 한국 폭 없음)
     "_workspace/analysis/ra_us_breadth_20261006/scoreboard_entries.json", # (라) 미국 이식 + 무료 시장 폭(진짜 폭 S5FI·NDFI · 상승 비율 · 동일가중) RAUSB_
+    "_workspace/analysis/ra_gate_20261006/scoreboard_entries.json",       # (라) 장세 문을 운용 전략 신규 매수 관문으로(고정 규칙 · + 시장 유닛) RAG_
 ]
 EXTERNAL_ROOTS = (_ROOT, MAIN_REPO, "/Users/koscom/Projects/auto_stock_rgate", "/Users/koscom/Projects/auto_stock_regv2")
 EXTERNAL_FORMAT = {
