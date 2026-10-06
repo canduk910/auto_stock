@@ -1211,6 +1211,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -2494,6 +2495,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -3782,6 +3784,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -5065,6 +5068,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -6349,6 +6353,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -7634,6 +7639,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -8919,6 +8925,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -10206,6 +10213,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -11490,6 +11498,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -12843,6 +12852,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -14128,6 +14138,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -15431,6 +15442,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -16717,6 +16729,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -18006,6 +18019,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -19285,6 +19299,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -20571,6 +20586,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -21856,6 +21872,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -23141,6 +23158,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -24426,6 +24444,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -25711,6 +25730,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -26998,6 +27018,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -28281,6 +28302,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -29566,6 +29588,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -30851,6 +30874,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -32136,6 +32160,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -33422,6 +33447,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -34710,6 +34736,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -35991,6 +36018,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -37276,6 +37304,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -38563,6 +38592,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -39846,6 +39876,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -41135,6 +41166,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -42421,6 +42453,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -43706,6 +43739,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -44992,6 +45026,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -46275,6 +46310,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -47561,6 +47597,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -48846,6 +48883,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -50132,6 +50170,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -51416,6 +51455,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -52701,6 +52741,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -53986,6 +54027,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -55271,6 +55313,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -56556,6 +56599,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -57840,6 +57884,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -59126,6 +59171,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -60411,6 +60457,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -61696,6 +61743,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -62981,6 +63029,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -64266,6 +64315,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -65551,6 +65601,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -66836,6 +66887,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -68121,6 +68173,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -69406,6 +69459,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -70692,6 +70746,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -71976,6 +72031,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -73332,6 +73388,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -74614,6 +74671,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -75899,6 +75957,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -77186,6 +77245,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -78471,6 +78531,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -79823,6 +79884,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -81108,6 +81170,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -82393,6 +82456,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -83678,6 +83742,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -84963,6 +85028,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -86248,6 +86314,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -87533,6 +87600,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -88817,6 +88885,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -90197,6 +90266,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -91561,6 +91631,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -92984,6 +93055,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -94269,6 +94341,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -95555,6 +95628,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -96839,6 +96913,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -98124,6 +98199,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -99412,6 +99488,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -100693,6 +100770,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -101995,6 +102073,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -103267,6 +103346,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -104550,6 +104630,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -105834,6 +105915,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -107119,6 +107201,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -108403,6 +108486,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -109689,6 +109773,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -110974,6 +111059,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -112259,6 +112345,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -113544,6 +113631,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -114829,6 +114917,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -116113,6 +116202,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -117398,6 +117488,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -118684,6 +118775,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -119969,6 +120061,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -121254,6 +121347,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -122539,6 +122633,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -123856,6 +123951,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -125141,6 +125237,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -126424,6 +126521,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -127712,6 +127810,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -128996,6 +129095,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -130281,6 +130381,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -131566,6 +131667,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -132851,6 +132953,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -134139,6 +134242,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -135422,6 +135526,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -136708,6 +136813,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -137992,6 +138098,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -139277,6 +139384,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -140640,6 +140748,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -141926,6 +142035,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -143209,6 +143319,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -144495,6 +144606,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -145779,6 +145891,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -147064,6 +147177,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -148348,6 +148462,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -149634,6 +149749,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -150919,6 +151035,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -152207,6 +152324,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -153559,6 +153677,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -154844,6 +154963,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -156133,6 +156253,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -157418,6 +157539,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -158772,6 +158894,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -160058,6 +160181,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -161411,6 +161535,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -162873,6 +162998,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -164229,6 +164355,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -165514,6 +165641,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -166799,6 +166927,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -168085,6 +168214,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -169370,6 +169500,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -172436,6 +172567,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -173719,6 +173851,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -175007,6 +175140,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -176289,6 +176423,7 @@ backend:
       - tests/unit/replay/test_regime_gate.py
       - tests/unit/replay/test_regime_v2.py
       - tests/unit/replay/test_scoreboard.py
+      - tests/unit/replay/test_wfo_core.py
       - tests/unit/replay/test_y30_bfb.py
       - tests/unit/replay/test_y30_donchian.py
       - tests/unit/replay/test_y30_etfbase.py
@@ -178483,10 +178618,10 @@ frontend:
       - frontend/src/pages/__tests__/StrategiesParams.test.tsx
       - frontend/src/pages/__tests__/StrategiesTeRr.test.tsx
       - frontend/src/pages/__tests__/StrategyFunnel.bottleneckTrend.test.tsx
-generated_at: '2026-10-06T00:41:30.698Z'
+generated_at: '2026-10-06T01:03:28.570Z'
 stats:
   backend_modules: 181
-  backend_tests: 1266
+  backend_tests: 1267
   frontend_modules: 134
   frontend_tests: 110
   unmapped_modules:
