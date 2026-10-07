@@ -65,3 +65,14 @@
 ## 실행 결과 (Red, 2026-10-08)
 - 백엔드 새 5파일: 38 실패 / 19 통과 — 실패 사유 = `ModuleNotFoundError: src.engine.cost_overlay` · `AttributeError: allocate_rows`/`get_trades_by_status` · `KeyError: buy_trade_ids`/`te_pct_gross`/`daily_fee`/`fee`/`fee_sum`/`sell_cost_rate`/`cost_status` · `/api/costs/{today,daily}` 404 · TE net 판정 `assert 20 == 0`. 통과 19 = 범위 가드(G1~G3) · 비용 실패 시 기존 응답 유지(F1) · `get_completed_trades` 보존(B2)
 - 프론트 새 9파일: 23 실패 / 4 통과(PN3·PN5·OM4·G5 — 세전 폴백·구 응답 회귀 가드 성격), 기존 테스트 전부 통과(전체 1073 통과 중 새 4 포함)
+
+## 메인 세션 결정 (Red 모호점 1~9, 10-08)
+1. `/api/history` SELL 행 `net_profit_loss` = 그 행 `profit_loss − fee − tax` (행 단위). 매수 수수료는 BUY 행에 남는다 — 그대로 채택.
+2. 비용 조회 실패 = 기존 응답 200 유지 · 새 net 칸만 None · WARNING 로그 마커 `[cost_overlay_unavailable]` 1줄. `/api/costs/*` 자체는 기존대로 오류를 숨기지 않는다.
+3. 잔고 = 백엔드는 `sell_cost_rate`(ETF 는 수수료율만)만 싣고 화면이 곱한다. **순 평가손익 = 평가손익 − 예상 매도비용 − 이미 낸 매수 수수료(정산 실측 있으면 실측, 없으면 추정)** — 매매손익 표의 페어 net 과 같은 정의로 맞춘다. 매수 수수료를 백엔드가 종목별로 `buy_fee_paid`(+status)로 함께 싣는다.
+4. 추정 요율 창 기준일 = 서버 오늘(KST) — 채택.
+5. 보유 중 페어 예상 매도비용 = 현재가 × 보유수량 × (수수료율 + 세율, ETF 는 수수료율만).
+6. 추정 행의 `allocated` = false (배분은 정산 행이 있고 같은 날·종목 체결 2건 이상일 때만 true).
+7. TE: `realized_sum_krw` 세전 유지 + `realized_net_sum_krw` 별도 · `*_gross` 는 te_pct·te_krw_avg·win_rate 3개 + `rr_gross`·`verdict_gross` 도 둔다(판정이 바뀐 이유를 화면에서 비교할 수 있게).
+8. `/api/performance/daily` MSW 목 배열 정직화 — 채택.
+9. localStorage 키 `autostock.costBasis` — 채택.
