@@ -31,6 +31,10 @@ export interface Holding {
   // cycle397 — 최초 매입일(KST `YYYY-MM-DD`). 여러 날짜에 걸친 매수(피라미딩)여도
   // 최초 매입일 하나를 보인다. 판정 불가(엔진·DB 모두 모름)는 null — `—` 로 그린다.
   buy_date?: string | null
+  // cycle411 — 예상 매도비용 산출용 요율(수수료율+세율, ETF 는 수수료율만). 화면이
+  // (실시간 현재가로 덮인) 평가금액에 곱한다. 없으면(구 서버) 화면은 `—` 를 그린다.
+  sell_cost_rate?: number | null
+  cost_status?: 'settled' | 'estimated' | 'mixed' | null
 }
 
 export interface BalanceSummary {

@@ -504,7 +504,9 @@ describe("cycle276 — TradePnLGrid AI 자문 열 (Red)", () => {
     await screen.findByText("삼성전자", {}, { timeout: 5000 });
 
     const headers = screen.getAllByRole("columnheader").map((h) => h.textContent?.trim());
-    expect(headers.slice(0, 13)).toEqual([
+    // cycle411 — 기존 12열(손익율까지)은 그대로, 뒤에 실비용 6열(수수료~슬리피지)이 붙고
+    // 그 뒤로 기존 전략·AI 자문 열이 이어진다. 열 순서 자체는 그대로다.
+    expect(headers.slice(0, 12)).toEqual([
       "매수일",
       "매수체결시각",
       "매도일",
@@ -517,9 +519,10 @@ describe("cycle276 — TradePnLGrid AI 자문 열 (Red)", () => {
       "매도체결수량",
       "매매손익",
       "손익율",
-      "전략",
     ]);
-    expect(headers).toHaveLength(14);
+    expect(headers.slice(12, 18)).toEqual(["수수료", "세금", "순손익", "순손익율", "비용률", "슬리피지"]);
+    expect(headers[18]).toBe("전략");
+    expect(headers).toHaveLength(20);
     expect(screen.getByTestId("pnl-summary")).toBeInTheDocument();
     expect(screen.getByTestId("pnl-summary-realized")).toBeInTheDocument();
   });

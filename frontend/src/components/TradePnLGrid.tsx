@@ -40,6 +40,43 @@ function pnlClass(v: number | null | undefined): string {
   return v > 0 ? 'text-red-600 font-medium' : 'text-blue-600 font-medium'
 }
 
+// cycle411 — 순손익 "+18,366원" 형식(부호 + 천단위 + 원).
+function fmtSignedKRW(v: number | null | undefined): string {
+  if (v === null || v === undefined || !Number.isFinite(v)) return '—'
+  const sign = v > 0 ? '+' : ''
+  return sign + Math.round(v).toLocaleString() + '원'
+}
+
+// 순손익율 "+2.62%" 형식.
+function fmtSignedPct(v: number | null | undefined): string {
+  if (v === null || v === undefined || !Number.isFinite(v)) return '—'
+  const sign = v > 0 ? '+' : ''
+  return sign + v.toFixed(2) + '%'
+}
+
+// 비용률 "23.01bp" 형식.
+function fmtBp(v: number | null | undefined): string {
+  if (v === null || v === undefined || !Number.isFinite(v)) return '—'
+  return v.toFixed(2) + 'bp'
+}
+
+/** `cost_status`/`allocated` 배지 — 「추정」/「배분」, 정산·단독 행은 둘 다 없다(G3). */
+function CostBadges({ pair, rowIndex }: { pair: TradePair; rowIndex: number }) {
+  const estimated = pair.cost_status === 'estimated' || pair.cost_status === 'mixed'
+  const allocated = pair.allocated === true
+  if (!estimated && !allocated) return null
+  return (
+    <span className="ml-1 inline-flex gap-1" data-testid={`cost-badge-${rowIndex}`}>
+      {estimated && (
+        <span className="px-1 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-700">추정</span>
+      )}
+      {allocated && (
+        <span className="px-1 py-0.5 rounded text-[10px] font-medium bg-sky-100 text-sky-700">배분</span>
+      )}
+    </span>
+  )
+}
+
 /**
  * cycle276 — 열 정의를 모듈 상수에서 **팩토리**로 바꾼다.
  *
@@ -119,6 +156,37 @@ function makeColumns(
       const prefix = status === 'open' ? '(미실현) ' : ''
       return <span className={pnlClass(v)}>{prefix}{sign}{v.toFixed(2)}%</span>
     },
+  }),
+  // cycle411 — 실비용(수수료·세금) 합친 칸 6개. 기존 매매손익·손익율(세전)은 위에서 유지.
+  columnHelper.accessor('fee', {
+    header: '수수료',
+    cell: (info) => fmtNum(info.getValue()),
+  }),
+  columnHelper.accessor('tax', {
+    header: '세금',
+    cell: (info) => fmtNum(info.getValue()),
+  }),
+  columnHelper.display({
+    id: 'net_profit_loss',
+    header: '순손익',
+    cell: (info) => (
+      <span className={pnlClass(info.row.original.net_profit_loss)}>
+        {fmtSignedKRW(info.row.original.net_profit_loss)}
+        <CostBadges pair={info.row.original} rowIndex={info.row.index} />
+      </span>
+    ),
+  }),
+  columnHelper.accessor('net_profit_rate', {
+    header: '순손익율',
+    cell: (info) => <span className={pnlClass(info.getValue())}>{fmtSignedPct(info.getValue())}</span>,
+  }),
+  columnHelper.accessor('cost_bp', {
+    header: '비용률',
+    cell: (info) => fmtBp(info.getValue()),
+  }),
+  columnHelper.accessor('slippage_won', {
+    header: '슬리피지',
+    cell: (info) => fmtNum(info.getValue(), '원'),
   }),
   columnHelper.accessor('strategy', {
     header: '전략',
@@ -333,6 +401,27 @@ export default function TradePnLGrid() {
           승 {summary.win_count}/패 {summary.loss_count}/보합 {summary.even_count}
         </span>
         <span>승률 {summary.win_rate_pct.toFixed(1)}%</span>
+        {summary.realized_net_total_krw !== undefined && (
+          <span>
+            순손익 합{' '}
+            <span data-testid="pnl-summary-net" className={pnlClass(summary.realized_net_total_krw)}>
+              {fmtSignedKRW(summary.realized_net_total_krw)}
+            </span>
+          </span>
+        )}
+        {(summary.fee_sum !== undefined || summary.tax_sum !== undefined) && (
+          <span>
+            비용(수수료+세금){' '}
+            <span data-testid="pnl-summary-cost">
+              {fmtNum((summary.fee_sum ?? 0) + (summary.tax_sum ?? 0), '원')}
+            </span>
+          </span>
+        )}
+        {summary.slippage_n !== undefined && (
+          <span>
+            슬리피지 덮인 건수 <span data-testid="pnl-summary-slippage">{summary.slippage_n}건</span>
+          </span>
+        )}
         <span className="text-gray-400">전략: {strategyFilterLabel}</span>
       </div>
 

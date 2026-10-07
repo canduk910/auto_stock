@@ -179,6 +179,30 @@ function makeColumns(
         return <span className={cls}>{sign}{n.toLocaleString()}원</span>
       },
     }),
+    // cycle411 — SELL 행 순손익(fee·tax 를 뺀 세후). BUY 행은 실현손익이 없어 '-'.
+    columnHelper.display({
+      id: 'net_profit_loss',
+      header: '순손익',
+      cell: (info) => {
+        const row = info.row.original
+        if (String(row.trade_type ?? '') !== 'SELL') return '-'
+        const n = toNum(row.net_profit_loss)
+        if (n === null) return '-'
+        const cls = n > 0 ? 'text-red-600' : n < 0 ? 'text-blue-600' : 'text-gray-700'
+        const sign = n > 0 ? '+' : ''
+        const estimated = row.cost_status === 'estimated' || row.cost_status === 'mixed'
+        return (
+          <span className={cls}>
+            {sign}{n.toLocaleString()}원
+            {estimated && (
+              <span className="ml-1 px-1 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-700">
+                추정
+              </span>
+            )}
+          </span>
+        )
+      },
+    }),
     columnHelper.accessor('status', {
       header: '상태',
       cell: (info) => {

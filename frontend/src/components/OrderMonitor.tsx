@@ -1,7 +1,9 @@
+import { useQuery } from '@tanstack/react-query'
 import { useTradingStatus } from '../contexts/TradingStatusContext'
 import { getStrategyColor } from '../types/strategy'
 import { strategyLabel } from '../utils/strategyMeta'
 import type { TradingStatusData, StrategyInfo, PositionDetail, OrderStatus } from '../types/trading'
+import { getCostsToday } from '../api/costs'
 import ScrollPane from './ScrollPane'
 
 interface VBTarget {
@@ -32,6 +34,15 @@ export default function OrderMonitor({ selectedStrategy }: Props) {
 
   const formatPrice = (n: number) => n.toLocaleString()
 
+  // cycle411 — 오늘 실현 순손익(추정). scheduler 무접촉 경로(`GET /api/costs/today`).
+  // 조회 실패여도 기존 「실현 손익」(세전)은 그대로 보인다(OM4) — 이 쿼리는 그 옆에 덧붙일 뿐.
+  const { data: costsToday } = useQuery({
+    queryKey: ['costsToday', isAll ? undefined : selectedStrategy],
+    queryFn: () => getCostsToday(isAll ? undefined : selectedStrategy),
+    retry: 1,
+  })
+  const costsEstimated = costsToday?.cost_status === 'estimated' || costsToday?.cost_status === 'mixed'
+
   return (
     <div className="bg-white rounded-lg shadow p-5">
       <div className="flex items-center justify-between mb-4">
@@ -48,6 +59,22 @@ export default function OrderMonitor({ selectedStrategy }: Props) {
               {formatPrice(aggregated.dailyPnl)}원
             </span>
           </span>
+          {costsToday && (
+            <span className="text-xs text-gray-500">
+              오늘 실현 순손익(추정):{' '}
+              <span
+                data-testid="order-monitor-net-pnl"
+                className={costsToday.total.net_pnl >= 0 ? 'text-red-500' : 'text-blue-500'}
+              >
+                {formatPrice(costsToday.total.net_pnl)}원
+                {costsEstimated && (
+                  <span className="ml-1 px-1 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-700">
+                    추정
+                  </span>
+                )}
+              </span>
+            </span>
+          )}
         </div>
       </div>
 

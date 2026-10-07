@@ -5,6 +5,8 @@ import { useTradingStatus } from '../contexts/TradingStatusContext'
 import type { TeRrMetrics } from '../types/strategy'
 import { pnlColorClass as profitColor } from '../utils/pnlColor'
 import { strategyLabel } from '../utils/strategyMeta'
+import { useCostBasis } from '../utils/costBasis'
+import CostBasisToggle from './CostBasisToggle'
 
 /**
  * 백엔드 계약은 숫자(`PerformanceSummary.latest_asset: number`)이고 `src/routes/performance.py`
@@ -53,6 +55,9 @@ export default function PerformanceCard({ selectedStrategy }: Props) {
   const { data: status } = useTradingStatus()
   const strategies = status?.strategies ?? {}
 
+  // cycle411 — 세후(net) 기본 + 세전(gross) 토글. net 칸 없는(구 서버) 응답은 세전으로 폴백한다(PN5).
+  const [costBasis, setCostBasis] = useCostBasis()
+
   if (isLoading) return <div className="p-6 text-gray-500">실적 로딩 중...</div>
   if (isError) return <div className="p-6 text-red-500">실적 데이터를 불러올 수 없습니다.</div>
   if (!data) return null
@@ -61,6 +66,14 @@ export default function PerformanceCard({ selectedStrategy }: Props) {
   // (scheduler._settle 이 KIS 잔고 실측 net_asset 으로 기록) — 실제 값이라 정직.
   // 특정 전략 탭은 strategy=X row (배분 예산 + 당일 실현손익 합성값) — 오해 소지 있어 라벨링.
   const isStrategySynthetic = strategyParam !== undefined
+
+  const isNet = costBasis === 'net'
+  const totalReturn = isNet && data.net_total_profit_rate !== undefined
+    ? data.net_total_profit_rate
+    : data.total_profit_rate
+  const avgDailyReturn = isNet && data.net_avg_daily_profit_rate !== undefined
+    ? data.net_avg_daily_profit_rate
+    : data.avg_daily_profit_rate
 
   const cards = [
     { key: 'total-days', label: '운영 일수', value: `${data.total_days}일` },
@@ -72,14 +85,14 @@ export default function PerformanceCard({ selectedStrategy }: Props) {
     {
       key: 'total-return',
       label: isStrategySynthetic ? '누적 수익률(합성)' : '누적 수익률',
-      value: data.total_profit_rate.toFixed(2) + '%',
-      colorValue: data.total_profit_rate,
+      value: totalReturn.toFixed(2) + '%',
+      colorValue: totalReturn,
     },
     {
       key: 'avg-daily-return',
       label: isStrategySynthetic ? '일평균 수익률(합성)' : '일평균 수익률',
-      value: data.avg_daily_profit_rate.toFixed(2) + '%',
-      colorValue: data.avg_daily_profit_rate,
+      value: avgDailyReturn.toFixed(2) + '%',
+      colorValue: avgDailyReturn,
     },
   ]
 
@@ -91,6 +104,9 @@ export default function PerformanceCard({ selectedStrategy }: Props) {
 
   return (
     <div className="space-y-3" data-testid="performance-card">
+      <div className="flex justify-end">
+        <CostBasisToggle value={costBasis} onChange={setCostBasis} />
+      </div>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {cards.map((card) => (
           <div key={card.key} className="bg-white rounded-lg shadow p-4">
@@ -174,12 +190,21 @@ export default function PerformanceCard({ selectedStrategy }: Props) {
                     </span>
                   ) : (
                     <div className="flex items-center gap-3">
-                      <span
-                        data-testid={`realized-pnl-${m.strategy_id}`}
-                        className={`text-sm font-semibold ${profitColor(m.realized_sum_krw)}`}
-                      >
-                        {formatKRWSigned(m.realized_sum_krw)}
-                      </span>
+                      {(() => {
+                        // cycle411 PN6 — 세후 기본 = realized_net_sum_krw, 세전 = realized_sum_krw.
+                        const realized =
+                          isNet && m.realized_net_sum_krw !== undefined
+                            ? m.realized_net_sum_krw
+                            : m.realized_sum_krw
+                        return (
+                          <span
+                            data-testid={`realized-pnl-${m.strategy_id}`}
+                            className={`text-sm font-semibold ${profitColor(realized)}`}
+                          >
+                            {formatKRWSigned(realized)}
+                          </span>
+                        )
+                      })()}
                       <span data-testid={`realized-winrate-${m.strategy_id}`} className="text-xs text-gray-500">
                         승률 {(m.win_rate * 100).toFixed(0)}% (승{m.win}/패{m.loss})
                       </span>

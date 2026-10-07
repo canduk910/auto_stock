@@ -92,18 +92,44 @@ export const handlers = [
   ),
 
   // performance
+  // ⚠️ 응답 키는 실제 라우트(`src/routes/performance.py`)와 같아야 한다(cycle266 §C-3) —
+  // 구 목의 `total_asset`/`daily_profit_rate`/`cumulative_return_rate`/`deposit` 는 그
+  // 라우트가 한 번도 낸 적 없는 모양이었다. cycle411 — net(세후) 칸을 더한다.
   http.get(`${base}/performance/summary`, () =>
     HttpResponse.json(
       wrap({
-        total_asset: 10720000,
-        daily_profit_rate: 0.02,
-        cumulative_return_rate: 0.05,
-        deposit: 10000000,
+        total_days: 4,
+        total_profit_rate: 0.33,
+        avg_daily_profit_rate: 0.08,
+        latest_asset: 10_033_000,
+        strategy: 'total',
+        net_total_profit_rate: 0.29,
+        net_avg_daily_profit_rate: 0.07,
       })
     )
   ),
+  // ⚠️ 실제 응답은 **배열**(ApiResponse<DailyPerformance[]>) 이다 — 구 목의
+  //    `{ items, total }` 은 그 라우트가 한 번도 낸 적 없는 모양이었다.
   http.get(`${base}/performance/daily`, () =>
-    HttpResponse.json(wrap({ items: [], total: 0 }))
+    HttpResponse.json(
+      wrap([
+        {
+          date: '2026-10-07',
+          total_asset: 10_030_000,
+          daily_profit_rate: 0.3,
+          cumulative_return_rate: 0.3,
+          daily_realized_pnl: 30_000,
+          net_external_cashflow: 0,
+          deposit: 0,
+          daily_fee: 285,
+          daily_tax: 2448,
+          daily_net_pnl: 27_267,
+          net_daily_profit_rate: 0.27267,
+          net_cumulative_return_rate: 0.27166,
+          cost_status: 'settled',
+        },
+      ])
+    )
   ),
 
   // history
@@ -118,7 +144,21 @@ export const handlers = [
     HttpResponse.json(
       wrap({
         // cycle276 — 페어에 `buy_order_nos`/`sell_order_nos`/`pair_key` 가 실린다.
-        pairs: [makeTradePair()],
+        // cycle411 — 실비용 합친 칸(fee/tax/net_profit_loss/...)과 체결 행 id 병행 리스트.
+        pairs: [
+          makeTradePair({
+            fee: 160,
+            tax: 433,
+            net_profit_loss: 1507,
+            net_profit_rate: 0.7,
+            cost_bp: 27.44,
+            slippage_won: null,
+            cost_status: 'estimated',
+            allocated: false,
+            buy_trade_ids: [1],
+            sell_trade_ids: [2],
+          } as never),
+        ],
         page: 1,
         size: 30,
         total: 1,
@@ -131,10 +171,43 @@ export const handlers = [
           even_count: 0,
           win_rate_pct: 0,
           closed_count: 0,
+          fee_sum: 160,
+          tax_sum: 433,
+          realized_net_total_krw: 1507,
+          realized_net_rate_pct: 0.7,
+          slippage_n: 0,
         },
       })
     )
   ),
+
+  // cycle411 — 실비용 추정(scheduler 무접촉 경로). 기본 목은 두 엔드포인트 모두 등록해야
+  // 한다 — 없으면 OrderMonitor 를 그리는 기존 테스트가 전부 unhandled request 로 붉어진다.
+  http.get(`${base}/costs/today`, ({ request }) => {
+    const url = new URL(request.url)
+    const strategy = url.searchParams.get('strategy')
+    return HttpResponse.json(
+      wrap({
+        date: '2026-10-08',
+        fee_rate: 0.00142,
+        tax_rate: 0.00199,
+        rate_source: 'default',
+        cost_status: 'estimated',
+        strategies: strategy ? [{ strategy, gross_pnl: 0, fee: 0, tax: 0, net_pnl: 0 }] : [],
+        total: { gross_pnl: 0, fee: 0, tax: 0, net_pnl: 0 },
+      })
+    )
+  }),
+  http.get(`${base}/costs/daily`, ({ request }) => {
+    const url = new URL(request.url)
+    return HttpResponse.json(
+      wrap({
+        from: url.searchParams.get('from') ?? '',
+        to: url.searchParams.get('to') ?? '',
+        days: [],
+      })
+    )
+  }),
 
   // cycle276 — AI 매수평가(LLM) 기록.
   // MSW 는 **first-match** 이므로 구체 경로(단건)를 먼저, 배치를 뒤에 둔다.

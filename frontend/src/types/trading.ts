@@ -199,6 +199,9 @@ export interface PerformanceSummary {
   total_profit_rate: number
   avg_daily_profit_rate: number
   latest_asset: number
+  // cycle411 — 세후(net) 수익률. 구 서버(net 칸 없음) 는 세전 값으로 폴백한다.
+  net_total_profit_rate?: number
+  net_avg_daily_profit_rate?: number
 }
 
 export interface DailyPerformance {
@@ -209,6 +212,13 @@ export interface DailyPerformance {
   net_external_cashflow?: number
   deposit?: number
   cumulative_return_rate?: number
+  // cycle411 — 실비용(수수료·세금) 합친 세후 칸. 구 서버는 전부 undefined.
+  daily_fee?: number
+  daily_tax?: number
+  daily_net_pnl?: number
+  net_daily_profit_rate?: number
+  net_cumulative_return_rate?: number
+  cost_status?: 'settled' | 'estimated' | 'mixed'
 }
 
 export interface TradeRecord {
@@ -223,6 +233,11 @@ export interface TradeRecord {
   status: string
   strategy: string
   order_no: string
+  // cycle411 — SELL 행 fee/tax/net_profit_loss, BUY 행 fee. 구 서버는 전부 undefined.
+  fee?: number
+  tax?: number
+  net_profit_loss?: number
+  cost_status?: 'settled' | 'estimated' | 'mixed'
   [key: string]: unknown
 }
 
@@ -256,6 +271,17 @@ export interface TradePair {
   buy_order_nos: string[]
   sell_order_nos: string[]
   pair_key: string | null
+  // cycle411 — 실비용 합친 칸(배분·추정 포함). 구 서버는 전부 undefined.
+  fee?: number
+  tax?: number
+  net_profit_loss?: number
+  net_profit_rate?: number
+  cost_bp?: number
+  slippage_won?: number | null
+  cost_status?: 'settled' | 'estimated' | 'mixed'
+  allocated?: boolean
+  buy_trade_ids?: number[]
+  sell_trade_ids?: number[]
 }
 
 export interface TradePnLSummary {
@@ -266,6 +292,12 @@ export interface TradePnLSummary {
   even_count: number
   win_rate_pct: number
   closed_count: number
+  // cycle411
+  fee_sum?: number
+  tax_sum?: number
+  realized_net_total_krw?: number
+  realized_net_rate_pct?: number
+  slippage_n?: number
 }
 
 export interface TradePnLData {

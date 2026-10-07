@@ -132,6 +132,13 @@ leaf 12개를 **상위 9개**로 묶는다(사용자 지정 묶음·순서 — �
 ## OrderMonitor
 
 - `pos.is_next_day=true` 일 때만 "청산" 배지. 백엔드 `Position.is_next_day`(`strategy_base.py`)는 `_MULTIDAY_STRATEGIES`(**코드 정본 = `{donchian_swing, vcp_breakout, kojiro}`**)면 항상 False, 나머지는 `buy_date < 오늘(KST)`
+- 오늘 실현 순손익(추정, testid `order-monitor-net-pnl`) — `GET /api/costs/today?strategy=`(scheduler 무접촉). 전체 탭은 strategy 없이 조회해 `total.net_pnl`, 전략 탭은 `strategy=<id>` 조회 결과를 보인다. `cost_status` 가 `estimated`/`mixed` 면 「추정」 배지. 조회 실패여도 기존 「실현 손익」(세전, 전략별 `daily_realized_pnl` 합산)은 그대로 보인다.
+
+## 세후(net)/세전(gross) 토글 — 실적 화면 공통 (cycle411)
+
+- 모든 실적 화면의 기본 표시는 **세후**(net, 실비용 = 수수료+세금 차감)다. 공유 훅 `utils/costBasis.ts::useCostBasis()` 가 localStorage 키 `autostock.costBasis`(`net`|`gross`)에 선택을 기억하고(read/write 모두 try/catch — 사생활 모드 등 예외에서도 화면은 그려진다), `window` 커스텀 이벤트로 같은 창에 동시에 떠 있는 다른 컴포넌트의 토글도 함께 바꾼다(Context Provider 불필요). 공유 버튼은 `components/CostBasisToggle.tsx`(testid `cost-basis-toggle`, 안의 `세후`/`세전` 버튼 `aria-pressed`). `PerformanceCard`·`ProfitChart` 가 이 토글을 쓴다. net 칸이 없는(구 서버) 응답은 항상 세전 값으로 폴백한다 — 빈 칸·NaN 을 만들지 않는다.
+- `PerformanceCard` — 누적/일평균 수익률 카드는 `net_total_profit_rate`/`net_avg_daily_profit_rate`(세후, `/api/performance/summary`) 기본, 토글로 `total_profit_rate`/`avg_daily_profit_rate`(세전). 실현 성과 행(`realized-pnl-*`)도 `realized_net_sum_krw`(세후) 기본 / `realized_sum_krw`(세전).
+- `ProfitChart` — 차트 컨테이너 testid `profit-chart-daily`/`profit-chart-cumulative`(각 `data-series` 속성 = 그리는 dataKey, jsdom 에 SVG 가 안 그려져 테스트가 이 속성으로 확인한다). 세후는 `net_daily_profit_rate`/`net_cumulative_return_rate`, 세전은 `daily_profit_rate`/`cumulative_return_rate`. 제목에 지금 기준(세후/세전)을 병기.
 
 ## ScanMonitor
 
@@ -335,8 +342,8 @@ leaf 12개를 **상위 9개**로 묶는다(사용자 지정 묶음·순서 — �
 ## History (`/history`)
 
 두 탭(행 더블클릭 → 종목 차트, 「종목 차트 모달」 절):
-- 주문체결내역: `TradeHistoryGrid`(raw 행)
-- 매매손익: `TradePnLGrid`(`/api/history/pnl` — 매수·매도 페어, closed/open 사이클). 12 컬럼 + 전략 뱃지. open 행은 매도 컬럼 "—" + "(미실현)", emerald-50 배경, 시세 미수신 "(미실현 시세 대기)". 전략 select 7종(kojiro `고지로 대순환` 포함). 상단 실현손익 요약 바 `pnl-summary` — `data.summary`(슬라이스 전 전체 closed 페어 집계)의 실현 합계(`pnl-summary-realized`, 이익 red/손실 blue)·손익율·승/패/보합·승률·전략 필터 라벨. summary 부재 시 0
+- 주문체결내역: `TradeHistoryGrid`(raw 행). SELL 행만 `순손익`(`net_profit_loss`, `cost_status` 가 추정/배분이면 「추정」 배지) 칸을 보이고 BUY 행은 `-`. 기존 `매매손익`(세전) 칸은 그대로.
+- 매매손익: `TradePnLGrid`(`/api/history/pnl` — 매수·매도 페어, closed/open 사이클). 12 컬럼 + 전략 뱃지, 그 뒤로 실비용 6컬럼(수수료·세금·순손익·순손익율·비용률·슬리피지, cycle411) + 전략·AI 자문. open 행은 매도 컬럼 "—" + "(미실현)", emerald-50 배경, 시세 미수신 "(미실현 시세 대기)". 전략 select 7종(kojiro `고지로 대순환` 포함). 상단 실현손익 요약 바 `pnl-summary` — `data.summary`(슬라이스 전 전체 closed 페어 집계)의 실현 합계(`pnl-summary-realized`, 이익 red/손실 blue)·손익율·승/패/보합·승률·전략 필터 라벨 + (summary 에 net 칸이 있으면) 순손익 합(`pnl-summary-net`)·비용 합(`pnl-summary-cost`)·슬리피지 덮인 건수(`pnl-summary-slippage`, `N건`). summary 부재 시 0. 행 단위 `cost_status="estimated"/"mixed"` 는 「추정」, `allocated=true` 는 「배분」 배지(`cost-badge-<rowIndex>`) — 정산·단독 행은 둘 다 없다. 새 칸이 없는(구 서버) 페어는 `—`(NaN·undefined 금지).
 
 ### AI 매수평가 점수 배지 + 상세 팝업
 
@@ -399,6 +406,7 @@ leaf 12개를 **상위 9개**로 묶는다(사용자 지정 묶음·순서 — �
 - **레거시 `findings` 는 정규화하지 않는다**(`log_analysis_engine._validate_report` 가 검증). 대신 `ReportCard` 를 `ReportCardBoundary`(같은 파일, class error boundary, `key={report.id}` 로 전환 시 리셋)로 감싸 예외가 나도 `data-testid="report-card-error"` 카드 하나만 대체된다.
 - **휴장일 배지 (cycle366)**: `report.metrics?.report_accuracy?.market_closed === true` 일 때만 총평 헤더에 회색 배지(`data-testid="report-holiday-badge"`, "휴장일" + 툴팁 "거래·로그 0건은 결함이 아니라 정상"). `report_accuracy` 없는 옛 행·`trading_day: null`("모름")·`market_closed: false` 는 안 그린다. `LogReportMetrics.report_accuracy`(`types/log_reports.ts::LogReportAccuracy`)는 옵셔널.
 - 회귀 = `components/__tests__/DailyReportTab.ext.test.tsx`(파리티·정규화·error boundary 포함) + `DailyReportTab.holiday.test.tsx`
+- **「원본 메트릭 → 거래 통계」 실현손익 라벨 = 「실현손익(세전)」 (cycle411)** — 이 숫자는 그날 저장된 스냅샷(`metrics.trades.realized_pnl`)이라 비용을 빼지 않고 그대로 보이고, 라벨만 세전임을 밝힌다(다른 실적 화면의 net 기본과 다르다).
 
 ## Recommendations (`/recommendations`)
 
@@ -415,7 +423,9 @@ leaf 12개를 **상위 9개**로 묶는다(사용자 지정 묶음·순서 — �
 
 **섹터 컬럼**: 헤더 순서 `종목명 → 섹터 → 거래시장 → (전략) → …`. `Holding.sector`, 없으면 `-`. `data-testid="sector-{ticker}"`. `/api/balance` 가 **이미 조회한 stock_master basics 를 재사용**한다(추가 DB 호출 0) — `sector_naming` 단일 진실원(`bstp_kor_isnm` → `_kojiro_sector_key(master_raw)` → `미분류-{ticker}`).
 
-⚠️ **컬럼을 늘리면 빈 상태 행 `colSpan` 도 고친다** — 지금 `isAll ? 13 : 12`, 회귀가 헤더 수와 대조한다.
+⚠️ **컬럼을 늘리면 빈 상태 행 `colSpan` 도 고친다** — 지금 `isAll ? 16 : 15`, 회귀가 헤더 수와 대조한다.
+
+**예상 매도비용 · 순 평가손익 (cycle411)**: "수익률" 다음. 백엔드가 보유 종목마다 `sell_cost_rate`(수수료율+세율, ETF 는 수수료율만)·`cost_status="estimated"` 를 싣고, 화면이 (WS 실시간 시세로 덮인) 평가금액에 곱한다 — `round(평가금액 × sell_cost_rate)`, 순 평가손익 = 평가손익 − 예상 매도비용. testid `sell-cost-{ticker}`(「추정」 꼬리표 포함) · `net-pl-{ticker}`. `sell_cost_rate` 가 없으면(구 서버) 둘 다 `—`(숫자를 지어내지 않는다). 기존 "평가손익"(세전) 칸은 그대로.
 
 **손절가 · 목표가 컬럼 (cycle339)**: "현재가" 다음, "평가금액" 앞. 데이터 = Holding 의 `stop_price`/`stop_source`/`target_price`/`target_source`(백엔드 `position_exit_lines` 단일 진실원, 추가 DB 호출 0). testid `stop-price-{ticker}` · `target-price-{ticker}`.
 
@@ -482,7 +492,7 @@ Dashboard `MarketRegimeCard` 바로 아래. 장세와 시장 유닛을 한 카�
 
 4임계 *아래* "성과 (최근 3개월)"(`te-section-{key}`) 5행 — 서적 TE(예지치)/RR비율. 데이터 `GET /api/strategies/te?months=3`(`getStrategyTeRr`, `frontend/src/api/strategies.ts`, `useQuery(['strategy-te',3], retry:1, staleTime:5분)`, `/api/strategies` 폴링과 독립). 타입 `TeRrMetrics`(`strategy.ts`, 백엔드 1:1 19필드).
 
-- A: 배지(`te-verdict-{key}` 우위/열위/판정유보) + TE%(`te-value-{key}`) + 3개월 실현 ₩(`te-realized-{key}`)
+- A: 배지(`te-verdict-{key}` 우위/열위/판정유보) + TE%(`te-value-{key}`) + 3개월 실현 ₩(`te-realized-{key}`, cycle411 — `realized_net_sum_krw`(세후) 기본, 없으면(구 서버) `realized_sum_krw`(세전)로 폴백). 판정 지표(TE%·RR·승률)는 **net(세후) 기준**이고, 세전 값은 비교용 `*_gross`(`te_pct_gross`/`te_krw_avg_gross`/`win_rate_gross`/`rr_gross`/`verdict_gross`) 로 따로 실린다 — 화면은 아직 쓰지 않는다.
 - B: RR 게이지(`rr-gauge-{key}`/`rr-gauge-fill-{key}`/`rr-gauge-marker-{key}`) — 실제RR 채움 + 필요RR 세로 마커. 채움 ≥ 마커 = 우위(이익색) / 미만 = 열위(손실색). 색은 시맨틱 클래스 `bg-pnl-profit`/`bg-pnl-loss`(+ `pnlColorClass`)
 - C: 분해(`te-decomposition-{key}` 승률 W/L·평균수익·평균손실·N) / D: 구조태그(`te-structure-{key}`) / E: 표본캡션(`te-sample-caption-{key}`)
 - **표본 게이트 3분기**: `sample_tier='insufficient'`(N<20) → TE·배지 회색 + "판정 유보" + 게이지·구조 숨김 / `'low'`(20-49)+rr_available → amber "표본 적음" / `'low'`+!rr_available → 게이지 "RR 참고 불가" / `'normal'`(50+) → 정상(single_trade_dominant 시 "RR 과대 가능")

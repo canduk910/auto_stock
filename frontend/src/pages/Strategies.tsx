@@ -243,7 +243,8 @@ function TeRrBody({ strategyKey, metrics: m }: { strategyKey: string; metrics: T
           </span>
         </div>
         <span data-testid={`te-realized-${strategyKey}`} className="text-xs text-gray-500">
-          3개월 실현 {formatKrwSigned(m.realized_sum_krw)}
+          {/* cycle411 — 세후(net) 기본. 구 서버(realized_net_sum_krw 없음)는 세전으로 폴백(ST2). */}
+          3개월 실현 {formatKrwSigned(m.realized_net_sum_krw ?? m.realized_sum_krw)}
         </span>
       </div>
 

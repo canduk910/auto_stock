@@ -358,7 +358,9 @@ function ReportCard({ report }: { report: LogReportItem }) {
                     </span>
                   </div>
                   <div className="bg-gray-50 rounded px-3 py-2 flex justify-between items-center">
-                    <span className="text-xs text-gray-500">실현손익</span>
+                    {/* cycle411 — 저장 스냅샷이라 숫자는 그대로 두고 「세전」 라벨만 붙인다
+                        (비용을 빼지 않는다, 사용자 결정 10-08 Q3). */}
+                    <span className="text-xs text-gray-500">실현손익(세전)</span>
                     <span
                       className="text-sm font-mono font-medium"
                       style={{ color: pnlColor(trades.realized_pnl) }}

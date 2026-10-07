@@ -253,13 +253,16 @@ export default function BalanceTable({ selectedStrategy }: Props) {
               <th className="px-4 py-3 text-right font-medium text-gray-600">평가금액</th>
               <th className="px-4 py-3 text-right font-medium text-gray-600">평가손익</th>
               <th className="px-4 py-3 text-right font-medium text-gray-600">수익률</th>
+              {/* cycle411 — 예상 매도비용(추정) × 평가금액, 순 평가손익 = 평가손익 − 예상 매도비용 */}
+              <th className="px-4 py-3 text-right font-medium text-gray-600">예상 매도비용</th>
+              <th className="px-4 py-3 text-right font-medium text-gray-600">순 평가손익</th>
               <th className="px-4 py-3 text-center font-medium text-gray-600"></th>
             </tr>
           </thead>
           <tbody>
             {filteredHoldings.length === 0 ? (
               <tr>
-                <td colSpan={isAll ? 14 : 13} className="px-4 py-8 text-center text-gray-400">
+                <td colSpan={isAll ? 16 : 15} className="px-4 py-8 text-center text-gray-400">
                   보유 종목이 없습니다.
                 </td>
               </tr>
@@ -344,6 +347,29 @@ export default function BalanceTable({ selectedStrategy }: Props) {
                     </td>
                     <td className={`px-4 py-3 text-right font-medium ${profitColor(h.eval_profit_rate)}`}>
                       {h.eval_profit_rate.toFixed(2)}%
+                    </td>
+                    {/* cycle411 — sell_cost_rate 가 없는(구 서버) 응답은 숫자를 지어내지 않고 — 로 그린다 */}
+                    <td data-testid={`sell-cost-${h.ticker}`} className="px-4 py-3 text-right text-gray-500">
+                      {h.sell_cost_rate != null ? (
+                        <>
+                          {formatKRW(Math.round(h.eval_amount * h.sell_cost_rate))}원
+                          <span className="ml-1 text-[10px] text-amber-600">추정</span>
+                        </>
+                      ) : (
+                        '—'
+                      )}
+                    </td>
+                    <td
+                      data-testid={`net-pl-${h.ticker}`}
+                      className={`px-4 py-3 text-right font-medium ${
+                        h.sell_cost_rate != null
+                          ? profitColor(h.eval_profit_loss - Math.round(h.eval_amount * h.sell_cost_rate))
+                          : 'text-gray-500'
+                      }`}
+                    >
+                      {h.sell_cost_rate != null
+                        ? formatKRW(h.eval_profit_loss - Math.round(h.eval_amount * h.sell_cost_rate)) + '원'
+                        : '—'}
                     </td>
                     <td className="px-4 py-3 text-center">
                       <button
