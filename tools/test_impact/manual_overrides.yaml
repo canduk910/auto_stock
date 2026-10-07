@@ -14,12 +14,14 @@
 
 # session.py의 시각 상수는 import만으로는 의존성이 정확히 안 잡힘
 "src/engine/session.py":
+  - "tests/unit/ast/test_cycle411_ast_scope.py"  # cycle411 범위 가드(내용 sha, 머지 후 삭제)
   - "tests/integration/test_force_clear_1520.py"
   - "tests/integration/test_next_day_clear.py"
   - "tests/integration/test_board_transition.py"
 
 # scheduler 시간 분기는 통합 시나리오 전반에 영향
 "src/engine/scheduler.py":
+  - "tests/unit/ast/test_cycle411_ast_scope.py"  # cycle411 범위 가드(내용 sha, 머지 후 삭제)
   - "tests/integration/*"
   # cycle369 — task 배선(S1)을 AST 가드가 소스 파일로 읽는다(import 없음)
   - "tests/unit/ast/test_cycle369_ast_status_exit.py"
@@ -188,10 +190,12 @@
 # cycle380 — ETF 판정 단일 출처 가드가 소스를 파일로 읽는다(import 없음): scan_stocks 호출(G5)·
 # SQL 빌더의 상수 재기입 금지(G6)·order_engine 관측 집합 표류(G7)·키워드 순회 자리(G1).
 "src/engine/scanner.py":
+  - "tests/unit/ast/test_cycle411_ast_scope.py"  # cycle411 범위 가드(내용 sha, 머지 후 삭제)
   - "tests/unit/ast/test_cycle380_ast_etf_like.py"
 "src/db/stock_master.py":
   - "tests/unit/ast/test_cycle380_ast_etf_like.py"
 "src/engine/order_engine.py":
+  - "tests/unit/ast/test_cycle411_ast_scope.py"  # cycle411 범위 가드(내용 sha, 머지 후 삭제)
   - "tests/unit/ast/test_cycle380_ast_etf_like.py"
 # cycle382 — 시장 유닛 leaf. 테스트는 `tests/unit/engine/_cycle382_support.mu()` 로 **지연 참조**하고
 # (미구현 단계 FAIL 관례), 전략 prepare 는 `market_unit.compute_snapshot` 을 모듈 속성으로 부른다.
@@ -248,3 +252,22 @@
 # cycle385 부록 R — AST 가드(A8·AR8·AR2-2·AR3-7)가 manual-sell 라우트 소스를 파일로 읽는다(import 없음).
 "src/routes/trading.py":
   - "tests/unit/ast/test_cycle385_ast_b7.py"
+
+# cycle411 — MSW 기본 목의 실비용 칸·새 엔드포인트를 정직화 가드가 fetch 로 검사한다(정적 import 아님)
+"frontend/src/test/handlers.ts":
+  - "frontend/src/components/__tests__/handlers.honesty.cycle411.test.ts"
+# cycle411 — 정직화 가드(MH5)가 e2e api-mocks 소스를 파일로 읽어 `/api/costs/today` 등록을 확인한다
+"e2e/fixtures/api-mocks.ts":
+  - "frontend/src/components/__tests__/handlers.honesty.cycle411.test.ts"
+# cycle411 — 범위 가드가 8영역·scheduler.py 를 내용 sha 로 읽는다(import 없음, 머지 후 삭제).
+# session·scheduler·scanner·order_engine 은 위 기존 키에 같은 줄을 덧붙였다(YAML 키 중복 금지).
+"src/engine/risk.py":
+  - "tests/unit/ast/test_cycle411_ast_scope.py"
+"src/engine/strategy_registry.py":
+  - "tests/unit/ast/test_cycle411_ast_scope.py"
+"src/api/order.py":
+  - "tests/unit/ast/test_cycle411_ast_scope.py"
+"src/realtime/*.py":
+  - "tests/unit/ast/test_cycle411_ast_scope.py"
+"src/auth/*.py":
+  - "tests/unit/ast/test_cycle411_ast_scope.py"
