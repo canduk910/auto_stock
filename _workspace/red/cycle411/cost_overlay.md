@@ -112,3 +112,48 @@ tester 합성 시나리오 x1~x10 이 찾은 결함을 회귀 테스트로 고�
 ### 실행 결과 (보완 Red, 2026-10-08)
 - 백엔드 새 3파일: 27 실패 / 2 통과 — 통과 2 = H2b2(매도 있는 날 세금은 매도 행)·H2c(`attribute` 행위 보존) 가드 성격. 실패 사유는 각 테스트가 겨냥한 결함(창 재누적 · 페이지/필터/취소 행 배분 · 화면 범위 요율 · 이름 폴백 ETF · `0.0 is None` · `KeyError: buy_fee_paid`/`win_gross`/`partial_sell_trade_ids` · `TypeError: etf_flags` · 경고 0건)
 - 프론트 새 7파일: 9 실패 / 3 통과(PB1·PB3·BB2 — 기존 행위 가드) + 갱신한 G2 1 실패. 전체 1108 중 10 실패 · 1098 통과(기존 테스트 무손상)
+
+## 2차 보완 결정 (2차 통합 검증 결함 고정, 메인 세션 결정 10-08)
+
+2차 통합 검증 판정(보완 필요)의 「배포 전에 고칠 것」 B1~B4 와 함께 처리하기로 한 F1~F14 를 회귀 테스트로 고정한다. 작성 = tdd-engineer, 2026-10-08.
+
+### 테스트 파일
+
+| 파일 | 덮는 것 |
+|---|---|
+| `tests/unit/routes/test_cycle411c_cost_overlay_route_fixes2.py` | B1 · B2 · B4 · F1 · F2 · F3 · F4 · F6 · F8 · F11 (라우트) — 시계 freezegun **2026-10-07 12:00 KST**, DB 경계 호출 `(start, end)` 기록 |
+| `tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py` | B4(`compute_te_rr`) · F1(어댑터·DB 함수) · F5 · F6 · F8(하루 캐시) · 메모 초기화 훅 |
+| `tests/unit/routes/test_cycle411c_doc_present_tense.py` | F14 · B2/B4 문구(`src/routes/CLAUDE.md`) |
+| `frontend/src/components/__tests__/{PerformanceCard,BalanceTable,OrderMonitor}.cycle411c.test.tsx` | B3 · F3 · F7 · F10 |
+| `frontend/src/pages/__tests__/StrategiesTeRr.cycle411c.test.tsx` | F9 · B4(화면) |
+| `frontend/src/components/__tests__/costTypes.cycle411c.test.ts` | F12 |
+| `frontend/src/components/__tests__/handlers.honesty.cycle411c.test.ts` | F13 |
+| `tests/conftest.py::_reset_cost_overlay_memo` (autouse, 이 Red 가 추가) | 매 테스트 전·후 `cost_overlay._reset_cache_for_tests()` — `src.engine.cost_overlay` 가 이미 import 됐을 때만, 함수가 없으면 아무것도 안 한다 |
+| `tests/unit/routes/test_cycle411b_cost_overlay_route_fixes.py` 픽스처 | `stock_master.get_etf_group_codes` 가짜 1개 추가(`raising=False`, 같은 `stock_raw` 원천) — F1 구현 뒤에도 M3 테스트가 같은 판정을 보게 한다. 기대값 무변경 |
+
+### 기대값
+
+- **B1 현재가 모름.** 보유 중(open) 페어인데 `profit_loss is None`(21:30 이후·재기동 직후·휴장일 종일)이면 `fee`·`tax`·`net_profit_loss`·`net_profit_rate`·`cost_bp` = **None**. 이미 낸 `partial_fee`·`partial_tax` 는 그대로 숫자. `cost_status`·`allocated`·`slippage_won` 는 기존대로.
+- **B2 summary net = None.** `/api/performance/summary` 의 `net_total_profit_rate`·`net_avg_daily_profit_rate` 초기값 None — 개시 이래 net 행이 None 이 아닐 때만 채운다(세전 값을 「세후」 칸에 담지 않는다). 개시 이래 재조회(`src.routes.performance.get_performance(days>30)`)도 `_net_overlay_rows` 와 같은 try 안 — 실패 = summary·daily 모두 **200**, summary net 두 칸 None, daily net 6칸 None, WARNING `[cost_overlay_unavailable]`. 기록 없음(`records == []`) 응답의 net 0 은 그대로. `src/routes/CLAUDE.md` summary 행에서 「비용 조회 실패 = gross 값으로 폴백」 문구를 걷는다.
+- **B3 화면 null.** `PerformanceCard` 는 `!= null` 로 거른다. summary net 이 null 이면 세전 값을 보이고 **그 카드**(`performance-metric-*` 의 부모 카드)에 「세전」. TE `realized_net_sum_krw` 가 null 이면 `realized-pnl-<id>` 에 세전 `realized_sum_krw`(「0원」 금지) + `realized-row-<id>` 에 「세전」. 세후 칸이 있으면 「세전」 을 달지 않는다(가드 PC3). 타입은 F12.
+- **B4 TE 비용 모름.** `compute_te_rr(pairs, *, now, window_days=90, strategy_id="", costs_available: bool = True)` — False 면 `realized_net_sum_krw`·`fee_sum`·`tax_sum` = **None**(`TeRrMetrics` 세 칸 타입 `float | None`), 판정은 페어 값 그대로(net 칸이 없으니 세전 — `te_pct == te_pct_gross`). 기본값 True 는 기존 q4 폴백 그대로. `/api/strategies/te` 는 `overlay_pairs` 를 **별도 try** 로 감싸고 반환 None 또는 예외면 `costs_available=False` 로 계산한다(예외가 그 전략 지표를 통째로 비우지 않는다 — n·세전 값 유지). **실패 결과는 캐시하지 않는다**(또는 60초 이하 — 테스트는 61초 뒤 재조회로 잰다). 화면 `te-realized-<id>`: 세후 값이면 「세후」, `realized_net_sum_krw` 가 null/없음이면 `realized_sum_krw` + 「세전」. `src/routes/CLAUDE.md` TE 행의 「실패해도 pairs 는 gross 그대로」 문구를 걷는다.
+- **F1 ETF 판정 일괄 조회.** 새 DB 함수 `src.db.stock_master.get_etf_group_codes(tickers: list[str]) -> dict[str, str | None]` — `pg.fetch` **1회**, SQL = `SELECT ticker, raw->>'scty_grp_id_cd' AS scty_grp_id_cd FROM stock_master WHERE ticker = ANY($1::text[])`(`SELECT *` 금지), 요청 종목 **전부**를 키로(DB 미존재 = None), 빈 입력은 쿼리 생략 `{}`. `cost_overlay.stock_master_etf_flags(trades)` = 고유 종목으로 그 함수 **1회**(`stock_master.get` 호출 0) → 코드가 있는 종목만 `is_etf_like({"scty_grp_id_cd": code}, name)`, 코드 None·공백 종목은 결과에서 뺀다(이름 폴백이 받는다). 조회 예외 = `{}` + DEBUG(전부 이름 폴백 — 기존 graceful 그대로). 잔고 라우트의 종목별 `stock_master_get`(NXT 칸 join)은 이번 범위 밖.
+- **F2 잔고 여러 날 매수.** `buy_fee_paid` = open 페어 `buy_trade_ids` **전체**(날짜 무관)의 매수 체결 비용 합 × (남은 수량 ÷ 그 매수 체결 수량 합). 조회 범위는 페어 `buy_date` 부터 오늘까지(또는 같은 결과를 내는 범위). 상태 = 그 체결들 `day_cost_status`.
+- **F3 잔고 비용 모름.** 비용 DB 조회 실패(정산·체결 조회 예외)로 open 페어 매수 수수료를 모르면 `buy_fee_paid` = **None**, `buy_fee_status` = **None**(0.0·"estimated" 금지). `sell_cost_rate` 는 기존대로 기본 요율 fail-open. 화면: `buy_fee_paid === null` → `net-pl-<ticker>` 「—」(`?? 0` 금지). 칸 자체가 없는 구 응답은 기존 식(BB2).
+- **F4.** `/api/history/pnl` 비용 조회 실패(`overlay_pairs` → None) 시 summary `slippage_n` = **None**(0 아님). 성공인데 페어가 없으면(`{}`) 0.
+- **F5 「매도 없음」 = 체결 집합.** `cost_overlay.trade_costs` 는 (trad_dt, pdno) 마다 **그 키의 체결 집합**에 SELL 행(금액 > 0)이 없고 정산 `tl_tax > 0` 이면 — 정산 행 `sll_amt` 와 무관하게 — 세금을 매수 행에 몰지 않고(체결 행 `tax` = 0) `[cost_overlay_tax_unallocated] ` WARNING. 그 키의 체결이 **하나도 없는** 정산 행은 `[cost_overlay_unmatched_cost] trad_dt=YYYY-MM-DD pdno=XXXXXX …` WARNING(반환 dict 에는 아무것도 더하지 않는다 — 귀속할 체결이 없다). 정상 행(짝 있음·매도 체결 있음)은 두 경고 모두 없다.
+- **F6 경고 하루 1회.** 위 두 경고는 프로세스 메모리 dedupe — 키 (KST 오늘, trad_dt, pdno). 같은 날 같은 키의 두 번째부터는 남기지 않는다(같은 요청 2회 = 1줄), KST 날짜가 바뀌면 다시 1회. `cost_overlay._reset_cache_for_tests()` 가 dedupe 를 비운다.
+- **F7 OrderMonitor.** `/api/costs/today` 쿼리 `retry: 0`(`refetchInterval: 5000` 유지). `isError` 면 `order-monitor-net-pnl` 에 「—」(마지막 성공값을 남기지 않는다) + 오류 표시 `order-monitor-net-pnl-error`(문구 「조회 실패」, 「실현 손익」 을 담지 않는다 — OM4 `getByText(/실현 손익/)` 충돌 방지). 첫 조회부터 실패해도 같은 자리에 그린다.
+- **F8 요율 하루 캐시·중복 조회.** `cost_overlay.today_window_rates()` 결과를 KST 날짜 단위 메모리 캐시 — 같은 날 두 번째 호출은 DB 를 읽지 않고, 다음 날 다시 읽는다. 실패(예외)는 캐시하지 않는다. `_reset_cache_for_tests()` 가 비운다. 한 요청 안에서 같은 `(start, end)` 를 `get_daily_range`·`get_trades_by_status` 로 두 번 읽지 않는다(잔고: 같은 날 산 보유 여러 종목). 대사(reconcile) 뒤 캐시 무효화는 선택(테스트 없음).
+- **F9.** `te-realized-<id>` 는 세후 값에 「세후」 라벨(위 B4 화면과 같은 칸).
+- **F10.** `BalanceTable` 「예상 매도비용」·「순 평가손익」 머리칸(`columnheader`)과 `sell-cost-<ticker>`·`net-pl-<ticker>` 칸 class 에 `whitespace-nowrap`. `OrderMonitor` 제목 「주문처리 현황」 class 에 `whitespace-nowrap`, 머리줄(제목의 부모) 텍스트에 「추정」 은 **한 번**(라벨 「(추정)」 과 배지 「추정」 중복 금지 — 배지는 `order-monitor-net-pnl` 안에 남는다, OM1).
+- **F11 배분 배지 = 페어 밖과 나눴을 때만 (결정 6 갱신).** 페어 `allocated` = 그 페어 체결 행(`buy_trade_ids` + `sell_trade_ids` + `partial_sell_trade_ids`)이 받은 정산 행 중 **하나라도 이 페어 밖의 체결 행에도 나뉘었을 때만** true. 같은 날 사고 판 단일 페어(정산 1행을 자기 매수·매도 행만 나눠 받음)는 false. 추정 행·open 페어는 기존대로 false. 체결 행 단위 `trade_costs(...)[id]["allocated"]` 의미는 그대로(정산 1행을 2개 이상 체결 행이 나눔). → 위 「메인 세션 결정」 6 을 이 문장이 대체한다.
+- **F12 타입.** `frontend/src/types/trading.ts` — `PerformanceSummary.net_total_profit_rate`·`net_avg_daily_profit_rate` · `DailyPerformance` 비용·세후 6칸(`cost_status` 포함) · `TradeRecord.fee`·`tax`·`net_profit_loss`·`cost_status` · `TradePair.cost_status` · `TradePnLSummary.slippage_n` 에 `| null`. `TradePair` 에 `partial_fee?: number | null`·`partial_tax?: number | null`·`partial_sell_trade_ids?: number[]`(화면 미사용, 타입만). `frontend/src/types/strategy.ts` `TeRrMetrics.realized_net_sum_krw`·`fee_sum`·`tax_sum` 에 `| null`.
+- **F13 MSW 기본 목 산수.** `/api/history/pnl`: 페어 `net_profit_loss = profit_loss − fee − tax`, `cost_bp` 정의식 ±0.05, summary 합계 = closed 페어 합(`realized_total_krw`·`realized_net_total_krw`·`fee_sum`·`tax_sum`·`closed_count`), 그 핸들러에 `as never` 없음. `/api/performance/daily`: `daily_net_pnl = daily_realized_pnl − daily_fee − daily_tax`, 세후 ≤ 세전, 첫 행 「창 이전 누적」 `(1+누적)/(1+당일)` 이 세전·세후 같음(1e-7). `/api/balance`: `{holdings: [...], summary: {AccountSummary 7키}}`(보유가 있으면 실비용 4칸 포함). `/api/history`: 행에 `fee`·`cost_status`·`order_price`(SELL 이면 `tax`·`net_profit_loss`).
+- **F14 정본 현재형.** `README.md`·`src/routes/CLAUDE.md` — 굵은 꼬리표 `**cycle411…**`·`cycle411 보완` 금지, 실비용 표 행에 「보완」·문장 끝 「추가」(`… 추가.`·`… 추가 —`) 금지. 값의 출처 괄호 `(cycle411, 사용자 결정 10-08 …)` 는 허용. 걷어낸 경위는 `docs/history/README.history.md`(새 파일)·`docs/history/src-routes-CLAUDE.history.md` 에 append(둘 다 `cycle411` 언급).
+
+### 실행 결과 (2차 보완 Red, 2026-10-08)
+- 백엔드 새 3파일: **36 실패 / 5 통과** — 라우트 16 실패 / 1 통과(F11b 가드) · 엔진 10 실패 / 4 통과(B4b·F5c·F6b·F8b 가드 — 기본값 폴백 보존·정상 행 무경고·하루 넘으면 다시 경고·실패 미캐시) · 문서 10 실패. 실패 사유 = `56.0 is None`(B1) · `0.33 is None`·500(B2) · `14000.0 is None`·캐시된 세전·`n 0 == 20`(B4) · `stock_master.get` 직렬 호출·`AttributeError: get_etf_group_codes`(F1) · `50.0 == 55`(F2) · `0.0 is None`(F3) · `0 is None`(F4) · 매수 행 세금 634.375·경고 0건(F5) · 경고 2건(F6) · 창 조회 2회·같은 범위 4회(F8) · `TypeError: costs_available`(B4) · `True is False`(F11) · `_reset_cache_for_tests` 없음 · 정본 꼬리표·history 부재(F14)
+- 전체 백엔드: 42 실패 / 15,764 통과 — 새 36 + 인덱스 신선도 1(재생성 후 통과) + 알려진 환경 5(프론트 인덱스 3 — 루트 `node_modules` 없음 · parquet 2). 기존 테스트 무손상
+- 프론트 새 6파일: **21 실패 / 2 통과**(PC3·MH9 가드). 전체 1,131 중 21 실패 · 1,110 통과(기존 1,108 무손상). `tsc -b`·eslint 깨끗
+- 영향 인덱스 재생성: 백엔드 1,289 테스트 · 프론트 133(루트 `node_modules` 임시 링크 → 삭제)

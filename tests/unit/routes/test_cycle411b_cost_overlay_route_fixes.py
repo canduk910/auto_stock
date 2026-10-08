@@ -155,6 +155,12 @@ def db(monkeypatch):
     monkeypatch.setattr(sm, "get_master_raw", AsyncMock(return_value=None))
     monkeypatch.setattr(sm, "get", sm_get)
 
+    # cycle411 2차 보완 F1 — ETF 판정 일괄 조회(`get_etf_group_codes`)도 같은 원천을 본다.
+    async def sm_codes(tickers):
+        return {t: (st.stock_raw.get(t) or {}).get("scty_grp_id_cd") for t in tickers}
+
+    monkeypatch.setattr(sm, "get_etf_group_codes", sm_codes, raising=False)
+
     with freeze_time(FROZEN):
         yield st
 
