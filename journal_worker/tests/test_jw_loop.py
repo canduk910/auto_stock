@@ -12,18 +12,29 @@ uvicorn 단일 워커의 루프를 점유해 틱·체결통보 처리가 밀린�
 | L5 | idle(엔진 정지·`phase=idle`) → G1·로그·DB 0 |
 | L6 | G0/G1 실패 → 스냅샷 없이 로그 수확은 계속(`degraded`) |
 | L7 | 커서는 행이 DB 에 다 쓰인 청크 끝까지만 전진한다(한 회전 보류 중인 청크는 다시 읽게 남긴다) |
+
+보완2(직전 판정 N9, 계약 7절 뒤 추가) — 커서 저장이 거듭 실패하면 같은 덩어리를 다시 읽어, 같은 매도
+주문의 exit 사건(`trade_journal_stops`)이 중복 기록된다. 그 회전에 매도 주문 행을 **새로** 쓰지(승격
+포함) 않았으면 exit 도 쓰지 않는다.
+
+| # | 계약 |
+|---|---|
+| N9 | 커서 저장 실패 3회(같은 덩어리 재읽기) — 매도 1건 → exit 사건 1행(중복 0) |
 """
 from __future__ import annotations
 
 import ast
 import asyncio
+from datetime import datetime, timedelta, timezone
 
 import httpx
 import pytest
 
-from jw_testkit import jw, jw_sources, log_line
+from jw_testkit import FakeJournalDB, jw, jw_sources, log_line
 
 pytestmark = pytest.mark.unit
+
+KST = timezone(timedelta(hours=9))
 
 G0 = "/api/trading/status?include=system,holdings,strategies"
 G1 = "/api/balance/exit-lines"
@@ -218,3 +229,56 @@ def test_l6_snapshot_failure_keeps_harvesting(tmp_path):
 
     assert asyncio.run(go()) == ["degraded", "degraded"]
     assert ("insert_order", "0000300100") in db.writes()
+
+
+# ── 보완2 N9 — 커서 저장 실패 → 같은 덩어리 재읽기가 exit 사건을 중복 기록 ──────────────
+
+FIXED_NOW = datetime(2026, 10, 13, 9, 55, 0, tzinfo=KST)  # 매도 접수(10:00:08) 이전 — G1 스냅샷이 "그 전" 값이어야 한다
+G1_ITEM = {"strategy_id": "kojiro", "ticker": "005930", "stop_price": 68000, "stop_source": "atr",
+           "buy_price": 70000, "buy_date": "2026-10-10", "order_no": "POS0001",
+           "target_price": None, "target_source": None, "kk_arm_price": None}
+
+
+def _n9_lines():
+    return [log_line("2026-10-13 10:00:08", "INFO", "src.api.order",
+                     "SELL 주문 완료: 005930 3주 @ 68000 (주문번호: 0000300100)"),
+            log_line("2026-10-13 10:00:08", "INFO", "src.engine.order_engine",
+                     "STOP_LOSS 매도 주문 접수: 삼성전자(005930) 3주 (주문번호: 0000300100, 전략: kojiro)")]
+
+
+def _n9_handler(http_log):
+    def handler(req):
+        path = req.url.raw_path.decode()
+        http_log.append(path)
+        if path.startswith("/api/trading/status"):
+            return httpx.Response(200, json=_status())
+        return httpx.Response(200, json={"success": True, "message": "", "data": {
+            "running": True, "as_of": "2026-10-13T10:05:00+09:00", "items": [G1_ITEM]}})
+    return handler
+
+
+def test_n9_cursor_save_failures_do_not_duplicate_exit_stops(tmp_path):
+    (tmp_path / "auto_stock.log").write_text("\n".join(_n9_lines()) + "\n", encoding="utf-8")
+    http_log: list[str] = []
+    db = FakeJournalDB(fail_saves=3)
+    client = jw("http").build_client(base_url="http://backend:8000", reporter_key="rk",
+                                     transport=httpx.MockTransport(_n9_handler(http_log)))
+    w = jw("main").Worker(client=client, db=db, log_dir=tmp_path, now=lambda: FIXED_NOW)
+
+    async def go():
+        async with client:
+            n = {"sleeps": 0}
+
+            async def sleep(_d):
+                n["sleeps"] += 1
+
+            await jw("main").run_forever(w.rotate, sleep=sleep, stop=lambda: n["sleeps"] >= 10)
+
+    asyncio.run(go())
+
+    exit_stops = [s for s in db.stops if s["event"] == "exit"]
+    assert len(exit_stops) == 1, (
+        f"커서 저장 실패 3회가 같은 덩어리를 재읽어 exit 사건을 중복 기록했다: {len(exit_stops)}행 — {exit_stops}")
+    assert exit_stops[0]["inputs"]["sell_order_no"] == "0000300100"
+    # 매도 주문 행 자체도 정확히 한 번만 실측으로 들어간다(중복 재읽기가 그 자체로 새 쓰기가 아니다).
+    assert [r["source"] for r in db.rows(order_no="0000300100")] == ["log_harvest"]

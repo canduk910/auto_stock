@@ -36,6 +36,33 @@ def _last_line_ts(lines):
     return None
 
 
+def _cutoff_split(done_events, day_rows, cutoff):
+    """완료 줄·행을 (주문번호, side) 로 짝지어 "두 시각 중 늦은 쪽" 을 함께 기준으로 자른다(보완2 N10).
+
+    짝의 완료 시각과 행의 시각(접수 등)이 1초 벌어져 대사 경계가 그 사이에 걸리면, 독립적으로 자를 때
+    한쪽만 포함돼 항등식이 거짓으로 어긋난다 — 짝이 있으면 둘 다 같은(늦은) 기준으로 포함되거나 빠진다.
+    짝이 없는 경우(접수 줄 없는 완료·행으로 안 남은 완료 등)는 자기 시각 그대로(기존 동작 그대로).
+    """
+    done_ts = {(e["order_no"], e["side"]): e["ts"] for e in done_events}
+    row_ts = {(r["order_no"], r["side"]): r["noted_at"] for r in day_rows if r.get("order_no") is not None}
+
+    kept_done = []
+    for e in done_events:
+        paired = row_ts.get((e["order_no"], e["side"]))
+        eff = max(e["ts"], paired) if paired is not None else e["ts"]
+        if eff <= cutoff:
+            kept_done.append(e)
+
+    kept_rows = []
+    for r in day_rows:
+        paired = done_ts.get((r.get("order_no"), r.get("side")))
+        eff = max(r["noted_at"], paired) if paired is not None else r["noted_at"]
+        if eff <= cutoff:
+            kept_rows.append(r)
+
+    return kept_done, kept_rows
+
+
 def backoff_delay(failures: int) -> float:
     return min(CYCLE_SECONDS * (2 ** failures), BACKOFF_MAX_SECONDS)
 
@@ -106,28 +133,33 @@ class Worker:
             self._done_order_sides, self._counted_pairs = set(), set()
 
     async def _write_row(self, row):
+        """반환 = 이 회전에 실측 행을 **새로** 넣었거나 승격했는가(보완2 N9 — exit 중복 차단에 쓴다).
+
+        `journal_keys`/`day_rows` 집계(보완2 N1)는 그대로다 — insert 가 False 이고 promote 도 False 면
+        (충돌 상대가 이미 실측 행) 그 키는 집계에 센다. 다만 그 경우는 "새로" 쓴 것이 아니므로 fresh=False.
+        """
         is_empty = row["source"] in _EMPTY_SOURCES
         try:
-            counted = await self.db.insert_order(row)
-            if not counted and not is_empty:
+            inserted = await self.db.insert_order(row)
+            promoted = False
+            if not inserted and not is_empty:
                 # insert 가 False 라는 것은 그 키의 행이 이미 있다는 뜻 — promote 가 예외 없이 끝나면
                 # (True 든 False 든) 그 키에 측정 가능한 행이 있다는 것이 확인된다(보완2 N1).
-                await self.db.promote_order(row)
-                counted = True
+                promoted = await self.db.promote_order(row)
         except Exception as exc:
             log.warning("[journal_write_error] order_no=%s side=%s %s: %s", row.get("order_no"),
                         row.get("side"), type(exc).__name__, exc)
-            return
+            return False
         key = (row["order_date"], row["order_no"], row["side"])
         self._journal_keys.add(key)
         if is_empty:
-            return
+            return False
         pair = (row["order_no"], row["side"])
-        if pair in self._counted_pairs:
-            return
-        self._counted_pairs.add(pair)
-        self._day_rows.append({"side": row["side"], "source": row["source"], "reason_code": row["reason_code"],
-                               "noted_at": row["noted_at"]})
+        if pair not in self._counted_pairs:
+            self._counted_pairs.add(pair)
+            self._day_rows.append({"side": row["side"], "order_no": row["order_no"], "source": row["source"],
+                                   "reason_code": row["reason_code"], "noted_at": row["noted_at"]})
+        return inserted or promoted
 
     async def _trade_strategies(self, now):
         start = datetime.combine(now.astimezone(KST).date(), datetime.min.time(), tzinfo=KST)
@@ -154,10 +186,16 @@ class Worker:
                                            now=w):
             await self._write_row(row)
         cutoff = w - timedelta(seconds=RECONCILE_MIN_AGE_SECONDS)
-        res = check_identities([e for e in self._done_events if e["ts"] <= cutoff],
-                               [r for r in self._day_rows if r["noted_at"] <= cutoff])
+        kept_done, kept_rows = _cutoff_split(self._done_events, self._day_rows, cutoff)
+        res = check_identities(kept_done, kept_rows)
         if res != self._last_reconcile_result:
-            emit_gap(res, log)
+            if not res["ok"]:
+                emit_gap(res, log)
+            elif self._last_reconcile_result is not None and not self._last_reconcile_result.get("ok"):
+                # 어긋났던 항등식이 풀렸다 — 운영자가 해소를 알 수 있게 1줄(보완2 N10).
+                log.info("[journal_gap_resolved] sell_done=%s sell_rows=%s buy_done=%s buy_rows=%s "
+                         "unknown_reason_sells=%s", res["sell_done"], res["sell_rows"], res["buy_done"],
+                         res["buy_rows"], res["unknown_reason_sells"])
             self._last_reconcile_result = res
 
     async def rotate(self) -> str:
@@ -208,9 +246,17 @@ class Worker:
         self._pairer.feed_events(events)
 
         result = self._pairer.drain(trade_strategies=await self._trade_strategies(now))
+        fresh_sell_orders: set = set()
         for row in result["orders"]:
-            await self._write_row(row)
+            fresh = await self._write_row(row)
+            if fresh and row["side"] == "SELL":
+                fresh_sell_orders.add(row["order_no"])
         for ev in result["stops"]:
+            # 커서 저장 실패로 같은 덩어리를 다시 읽으면 같은 매도 주문이 또 한 회전 보류를 거쳐
+            # 다시 drain 된다 — 그 매도 행이 이번 회전에 "새로" 쓰이지 않았으면(이미 실측 행이 있음)
+            # exit 사건도 다시 넣지 않는다(보완2 N9).
+            if ev.get("inputs", {}).get("sell_order_no") not in fresh_sell_orders:
+                continue
             try:
                 await self.db.insert_stop(ev)
             except Exception as exc:

@@ -25,6 +25,16 @@
 | N1h | 커서 저장 실패 3회 + 정상 주문 — `[journal_gap]` 0 (재읽기의 `INSERT 0 0` 이 이미 센 키를 지우지 않는다) |
 | N1i | 커서가 뒤로 간 채 재시작(이미 쓴 로그를 다시 읽음) — 이미 실측 행이 있는 키는 행으로 센다 · `[journal_gap]` 0 · 빈 행 시도 0 |
 | N2 | 같은 값으로 어긋난 항등식은 경고 1줄 — 값이 바뀌면 그때 1줄 더(15분 동안 정확히 2줄) |
+
+보완2(직전 판정 N10, 계약 7절 뒤 추가) — 완료 줄과 행(접수 등)이 1초 벌어진 주문에서, 대사 기준선
+(`W − 120초`)이 그 사이에 걸리면 한쪽만 포함돼 거짓 `[journal_gap]` 이 난다. 짝(주문번호, side)의
+두 시각 중 늦은 쪽을 기준으로 함께 자른다. gap 이 풀리면 `[journal_gap_resolved]` INFO 1줄.
+
+| # | 계약 |
+|---|---|
+| N10a | `_cutoff_split` — 완료·행이 1초 벌어진 짝을 경계 전후 여러 위상(phase)에서 전수 — 항상 둘 다 포함되거나 둘 다 빠진다(거짓 gap 0) |
+| N10b | `_reconcile` 와이어링 — 경계가 정확히 그 사이에 걸리는 실제 호출에서도 `[journal_gap]` 0 |
+| N10c | 어긋난 항등식이 풀리면 `[journal_gap_resolved]` INFO 1줄(그 전엔 없음, 반복 없음) |
 """
 from __future__ import annotations
 
@@ -356,3 +366,102 @@ def test_n2_gap_is_logged_once_per_distinct_result(tmp_path, caplog):
     assert len(gaps) == 2, f"값이 바뀔 때만 경고한다 — 15분 동안 {len(gaps)}줄: {gaps}"
     assert "sell_done=1 sell_rows=1 buy_done=1 buy_rows=0" in gaps[0], gaps
     assert "sell_done=2 sell_rows=1 buy_done=1 buy_rows=0" in gaps[1], gaps
+
+
+# ── N10 완료 줄·행이 1초 벌어진 주문 — 대사 경계가 그 사이에 걸리면 거짓 gap ──────────────
+
+def _infos(caplog, prefix):
+    return [r.getMessage() for r in caplog.records
+            if r.levelno == logging.INFO and (r.name == "jw" or r.name.startswith("jw."))
+            and r.getMessage().startswith(prefix)]
+
+
+def test_n10a_cutoff_split_never_splits_a_paired_order_across_phases():
+    """매도 1건의 완료(T+1)·행(T) 이 1초 벌어진다 — 경계를 전후로 쓸며도 둘은 항상 함께 포함되거나 빠진다."""
+    m = jw("main")
+    T = kst(*DAY, 10, 0, 8)
+    done_evt = {"kind": "order_done", "side": "SELL", "order_no": "0000300100", "ts": T + timedelta(seconds=1)}
+    row = {"side": "SELL", "order_no": "0000300100", "source": "log_harvest", "reason_code": "STOP_LOSS",
+           "noted_at": T}
+    for offset in range(-3, 4):
+        cutoff = T + timedelta(seconds=offset)
+        kept_done, kept_rows = m._cutoff_split([done_evt], [row], cutoff)
+        assert (len(kept_done) == 1) == (len(kept_rows) == 1), (
+            f"offset={offset}s(cutoff={cutoff}): done={len(kept_done)} rows={len(kept_rows)} — "
+            "짝이 경계에서 쪼개져 거짓 [journal_gap] 이 난다")
+
+
+def test_n10a_cutoff_split_keeps_unpaired_events_on_their_own_timestamp():
+    """짝이 없는 완료 줄(접수 줄 없음)·행은 그대로 자기 시각 기준 — 기존 동작을 바꾸지 않는다."""
+    m = jw("main")
+    T = kst(*DAY, 10, 0, 8)
+    orphan_done = {"kind": "order_done", "side": "BUY", "order_no": "0000200100", "ts": T}
+    cutoff = T  # ts <= cutoff
+    kept_done, kept_rows = m._cutoff_split([orphan_done], [], cutoff)
+    assert len(kept_done) == 1 and kept_rows == []
+    cutoff_before = T - timedelta(seconds=1)  # ts > cutoff
+    kept_done2, _ = m._cutoff_split([orphan_done], [], cutoff_before)
+    assert kept_done2 == []
+
+
+def test_n10b_reconcile_wiring_gives_no_false_gap_when_boundary_falls_between_done_and_row(tmp_path, caplog):
+    """`_reconcile` 실제 경로 — 완료(10:00:09)·행(10:00:08) 1초 차, W 를 그 사이로 맞춰도 [journal_gap] 0."""
+    caplog.set_level(logging.INFO)
+    db = FakeJournalDB()
+    client = jw("http").build_client(base_url="http://backend:8000", reporter_key="rk",
+                                     transport=httpx.MockTransport(_ok))
+    w = jw("main").Worker(client=client, db=db, log_dir=tmp_path)
+    w._pairer = jw("pairing").Pairer()
+    w._booted = True
+    w._day = kst(*DAY, 0, 0).date()
+
+    accept_ts = kst(*DAY, 10, 0, 8)
+    done_ts = accept_ts + timedelta(seconds=1)
+    w._done_events = [{"kind": "order_done", "side": "SELL", "order_no": "0000300100", "ts": done_ts}]
+    w._day_rows = [{"side": "SELL", "order_no": "0000300100", "source": "log_harvest",
+                    "reason_code": "STOP_LOSS", "noted_at": accept_ts}]
+    # W − RECONCILE_MIN_AGE_SECONDS == accept_ts(행의 시각) — done_ts 는 그 1초 뒤라 경계 바로 밖.
+    # 짝짓기 없이 독립적으로 자르면 행은 포함되고 완료는 빠져 거짓 gap 이 난다.
+    reconcile_cfg = jw("config")
+    W = accept_ts + timedelta(seconds=reconcile_cfg.RECONCILE_MIN_AGE_SECONDS)
+
+    async def go():
+        async with client:
+            await w._reconcile(W, W, catching_up=False)
+
+    asyncio.run(go())
+    assert _gaps(caplog) == [], "완료 줄·행이 1초 벌어진 주문이 대사 경계에서 쪼개져 거짓 [journal_gap]"
+
+
+def test_n10c_gap_resolution_logs_info_once(tmp_path, caplog):
+    """어긋난 항등식이 다음 회차에 풀리면 WARNING 1줄 뒤 INFO [journal_gap_resolved] 1줄."""
+    caplog.set_level(logging.INFO)
+    db = FakeJournalDB()
+    client = jw("http").build_client(base_url="http://backend:8000", reporter_key="rk",
+                                     transport=httpx.MockTransport(_ok))
+    w = jw("main").Worker(client=client, db=db, log_dir=tmp_path)
+    w._pairer = jw("pairing").Pairer()
+    w._booted = True
+    w._day = kst(*DAY, 0, 0).date()
+    age = jw("config").RECONCILE_MIN_AGE_SECONDS
+
+    async def go():
+        async with client:
+            # 1회차 — 완료 줄만 있고 행이 없다(접수 줄 없는 매도) → 항등식이 깨진다.
+            T1 = kst(*DAY, 10, 0, 8)
+            w._done_events = [{"kind": "order_done", "side": "SELL", "order_no": "0000300100", "ts": T1}]
+            w._day_rows = []
+            W1 = T1 + timedelta(seconds=age)
+            await w._reconcile(W1, W1, catching_up=False)
+            # 2회차(60초 뒤) — 행이 들어와 항등식이 풀린다.
+            w._day_rows = [{"side": "SELL", "order_no": "0000300100", "source": "log_harvest",
+                            "reason_code": "FORCE_CLEAR", "noted_at": T1}]
+            W2 = W1 + timedelta(seconds=65)
+            await w._reconcile(W2, W2, catching_up=False)
+
+    asyncio.run(go())
+    warn = _gaps(caplog)
+    resolved = _infos(caplog, "[journal_gap_resolved]")
+    assert len(warn) == 1, warn
+    assert len(resolved) == 1, resolved
+    assert "sell_done=1 sell_rows=1" in resolved[0], resolved
