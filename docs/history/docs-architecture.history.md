@@ -886,3 +886,34 @@ flowchart TB
 새로 적었다. 9.1 확장 테이블에 047 행을 덧붙였다(걷어낸 원문 없음).
 
 → CHANGELOG: cycle412 행
+
+---
+
+## 15.8 첫 워커 선례 — `journal_worker` (거래일지 관찰자, cycle412)
+
+### 2026-10-09 cycle412 마무리 문서 동기화 — 대사 연결 · 과거분 적재 · `exit` 사건
+
+정본 원문(바뀐 줄):
+
+```
+        R["한 회전 (15초)<br/>G0 → G1 → 로그 꼬리 읽기<br/>→ 짝짓기 → 쓰기 → 커서 저장"]
+```
+
+```
+    R -->|"전용 역할 journal_worker<br/>자동커밋 단문"| DB
+```
+
+```
+| 손절선 사건 | G1 값을 직전 기록과 비교해 `first`·`change`·`boot`·`eod`·`paused`·`exit` 를 쓴다 | `jw/stops.py` |
+| 대사 | 로그 체결 수와 일지 행 수의 항등식 점검 · `trade_history` 로 빠진 행 보강 | `jw/reconcile.py` — ⚠️ 루프(`jw/main.py`)가 부르지 않는다 |
+| 과거분 | 로컬 로그 사본을 한 번 적재한다(D3) | `jw/backfill.py` — ⚠️ `python -m jw backfill` 은 안내 문구만 찍고 종료 코드 1 로 끝난다(DB 적재 경로 없음) |
+```
+
+경위: 원문의 두 ⚠️ 는 첫 Green(`c0f5b289`) 시점 사실이다. 보완(`17dbd16c`)이 대사를 `rotate()` 에
+60초 간격으로 연결하고 `run_backfill` 을 실제 적재로 만들었다. 보완2(`2b626e6c`)가 대사 기준을 벽시계에서
+「행까지 쓴 로그 줄의 시각」 으로 바꾸고 빈 행 승격을 더했다. 마무리(`a7db32a1`)가 완료 줄·행을 짝지어
+두 시각 중 늦은 쪽으로 자르고(N10) `[journal_gap_resolved]` INFO 를 더했으며, `exit` 사건을 그 회전에
+매도 행을 새로 쓴 경우로 한정했다(N9). `exit` 는 `jw/stops.py` 가 아니라 `jw/pairing.py`
+(`_snapshot_exit`)가 만든다. 대사가 `trade_history` 를 SELECT 하므로 DB 화살표 이름에 그것을 더했다.
+
+→ CHANGELOG: cycle412 마무리 행

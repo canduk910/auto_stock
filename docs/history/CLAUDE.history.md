@@ -1525,3 +1525,18 @@ EC2 사전 생성 규약의 `secrets/journal_worker.env` 문장(`env_file` 결�
 문장 · 테스트 실행 주석 둘(워커 테스트 포함 · 영향 인덱스 범위).
 
 → CHANGELOG: cycle412 행
+
+### 2026-10-09 cycle412 마무리 문서 동기화 — `journal_worker` 한 회전에 대사 · 과거분 적재 · `TZ`
+
+정본 원문(「Docker / 배포」 `journal_worker` 항목의 바뀐 부분):
+
+```
+15초 한 회전 = G0 `GET /api/trading/status?include=system,holdings,strategies` → G1 `GET /api/balance/exit-lines` → `./logs:/app/logs:ro` 꼬리 읽기 → 주문 행·손절선 사건 쓰기 → 커서 저장(엔진 정지·`phase=="idle"` 이면 300초 주기에 쓰기 0). 환경변수는 `JOURNAL_DATABASE_URL`(`env_file: ./secrets/journal_worker.env`)·`API_REPORTER_KEY` 둘뿐이고 자원 상한은 `mem_limit: 160m`·`cpus: 0.25` 다.
+```
+
+경위: cycle412 보완(`17dbd16c`)이 대사(`jw/reconcile.py`)를 한 회전 끝에 60초 간격으로 연결하고
+`python -m jw backfill <경로…>` 를 실제 적재로 만들었다. 원문은 그 전 코드라 대사 단계가 없었다.
+`docker-compose.prod.yml` 의 `journal_worker` `environment` 에는 `TZ=Asia/Seoul` 도 있어 「둘뿐」 을
+「`TZ` 말고는 둘뿐」 으로 고쳤다(워커 코드가 `os.environ` 에서 읽는 것은 여전히 둘이다).
+
+→ CHANGELOG: cycle412 마무리 행

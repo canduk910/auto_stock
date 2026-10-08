@@ -702,7 +702,7 @@ auto_stock/
 
 `docker-compose.prod.yml` 의 컨테이너는 4개다 — `backend` · `frontend` · `macro` · `journal_worker`.
 `macro` 는 매크로 화면 API 이고 매매 판단을 하지 않는다. `journal_worker` 는 거래일지를 쓰는 관찰자다.
-backend 가 남긴 로그와 조회 API 응답을 읽기만 하고, KIS 에는 접속하지 않는다. 매매에 관한 일은 전부
+backend 가 남긴 로그·조회 API 응답·`trade_history` 를 읽기만 하고, KIS 에는 접속하지 않는다. 매매에 관한 일은 전부
 `backend` 한 프로세스에 있다.
 
 ```mermaid
@@ -720,7 +720,7 @@ flowchart LR
     BE -->|"asyncpg"| RDS
     JW -->|"조회 GET 2개 (15초)"| BE
     BE -.->|"파일 로그 (읽기 전용)"| JW
-    JW -->|"trade_journal_* (전용 DB 역할)"| RDS
+    JW -->|"trade_journal_* 쓰기 · trade_history 읽기<br/>(전용 DB 역할)"| RDS
 ```
 
 매매에 필요한 모든 일이 한 프로세스 안에 있어서, 프롬프트 한 줄만 고쳐도 backend 전체를
@@ -781,6 +781,7 @@ chmod 600 secrets/journal_worker.env
 - `certbot-www` 를 미리 만들지 않으면 Docker 가 bind mount 소스를 `root:root` 로 만들어 `ubuntu` 가 쓰지 못한다.
 - `secrets/journal_worker.env` 가 없으면 `journal_worker` 하나만 못 뜨는 것이 아니다. `env_file` 결손은 compose 명령 전체의 오류라서, 서비스를 지정하지 않는 `full`·`none` 배포의 `docker compose up` 이 아무것도 만들지 않고 실패한다(로컬 compose v5.1.1 실측). 그래서 이 파일은 거래일지 워커가 들어가는 첫 배포보다 먼저 있어야 한다.
 - 이 파일에 메인 앱 `.env` 를 대신 쓰지 않는다 — KIS 앱키·HTS ID·운영 DSN 33개가 그 컨테이너에도 들어간다.
+- `journal_worker` 는 컨테이너 안 uid 1000(`journal`)으로 돌며 `./logs` 를 읽기 전용으로 마운트한다. 호스트 `logs/auto_stock.log*` 를 uid 1000 이 읽을 수 있어야 한다 — 소유자가 uid 1000 이 아니면 다른 사용자 읽기 권한(예: `644`)이 필요하다.
 - 이 파일은 `600` 으로 둔다. frontend(nginx)가 `./secrets` 디렉터리를 통째로 마운트해서 nginx 컨테이너 안에서도 이 파일이 보인다. `600` 이면 nginx worker(uid 101)는 읽지 못하고, `env_file` 은 호스트에서 compose 를 돌리는 `ubuntu` 가 읽으므로 배포에는 지장이 없다.
 - `secrets/` 는 **git 커밋 금지** (`.gitignore` 등재).
 

@@ -414,3 +414,21 @@ async def run_backfill(paths, db, *, max_bytes_per_sec: int = BACKFILL_MAX_BYTES
 - Red 가 scratchpad 시제품(리포 밖, `jw/{main,db,config,pairing,__main__}.py`·`Dockerfile` 만 고친 사본)으로 워커 280 전부 통과(`--log-level=DEBUG` 포함) · pg K10·K11 통과(실 Postgres, 워커 역할)를 확인했다.
 - 시제품 돌연변이 10종 — 벽시계 기준 → N1d · W 없을 때도 대사 → N1a·N1b·N1c·N1d·N1i · 승격 없음 → N1e·N1f · 승격 실패도 셈 → N1f · 완료 줄/행 중복 집계 → N1g·N1h · 경고 매번 → N2 · 엄격 집계(이미 실측=안 셈) → N1i · 날짜 경계 정리 없음 → M5 가 잡는다. 창 꽉 참 건너뜀 제거만 0건(위 N1 둘째 줄).
 - 문서: `journal_worker/README.md` 의 「1회 상한 20MB」 는 Green/동기화 때 4MiB 로 고친다.
+
+---
+
+## 8. 마무리 (10-09 — 최종 판정 「배포 가능」 뒤 남은 낮음 N9·N10, 메인 세션 결정: 고친다)
+
+번호는 판정 원문 그대로다. 6·7절의 금기가 그대로 선다. 047 스키마는 바꾸지 않는다(코드만으로 막는다). 이 절은 `/sync-docs` 가 시정 커밋 `a7db32a1` 의 코드·테스트를 옮겨 적은 것이다 — 테스트가 정본이다.
+
+### N9 (낮음) 커서 저장 실패 뒤 재읽기로 `exit` 사건이 겹친다
+
+- 원인 — `trade_journal_stops` 에는 UNIQUE 가 없다. 같은 덩어리를 다시 읽으면 같은 매도가 다시 drain 되고, `result["stops"]` 의 `exit` 가 검사 없이 또 들어갔다(저장 실패 3회 → `exit` 3행).
+- 규칙 — `Worker._write_row(row) -> bool` 이 「이 회전에 실측 행을 **새로** 넣었거나 승격했는가」(`inserted or promoted`)를 돌려준다. 빈 행(`unmatched`·`external`)·예외·`INSERT 0 0` + 승격 False 는 False. `exit` 사건은 `inputs.sell_order_no` 가 그 회전에 True 를 받은 SELL 행의 주문번호일 때만 쓴다. 항등식 집계(7절 N1 「둘 다 False 도 센다」)는 그대로다.
+- 테스트 = `test_jw_loop.py::test_n9_cursor_save_failures_do_not_duplicate_exit_stops`(저장 실패 3회 + 매도 1건 → `exit` 1행 · 매도 행 `log_harvest` 1개).
+
+### N10 (낮음) 완료 줄과 행이 1초 벌어지면 기준선이 그 사이에 걸려 거짓 `[journal_gap]` 1줄
+
+- 규칙 — `_cutoff_split(done_events, day_rows, cutoff) -> (kept_done, kept_rows)`(`jw/main.py`). 완료 줄과 행을 (주문번호, side) 로 짝지어 **두 시각 중 늦은 쪽**이 `cutoff`(= W − `RECONCILE_MIN_AGE_SECONDS`) 이하일 때 둘 다 남긴다. 짝이 없으면 자기 시각 그대로. `_reconcile` 이 `check_identities` 앞에서 이것을 쓴다. `rows_from_trade_history` 의 기준(`trade_history.timestamp ≤ W − 120초`)은 그대로다.
+- 해소 로그 — 직전 결과가 어긋남이고 이번이 ok 면 INFO `[journal_gap_resolved] sell_done=… sell_rows=… buy_done=… buy_rows=… unknown_reason_sells=…` 1줄. 경고 규칙(7절 N2 — 값이 바뀔 때만 1줄)은 그대로다.
+- 테스트 = `test_jw_reconcile_timing.py` `test_n10a_*`(짝 있는 주문은 경계 −3~+3초 전 위상에서 함께 남거나 함께 빠짐 · 짝 없는 줄은 자기 시각) · `test_n10b_*`(`_reconcile` 실제 경로, 경계가 두 시각 사이 → `[journal_gap]` 0) · `test_n10c_*`(WARNING 1줄 뒤 해소 INFO 1줄).

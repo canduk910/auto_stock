@@ -2044,13 +2044,13 @@ flowchart LR
         LOG["파일 로그<br/>logs/auto_stock.log"]
     end
     subgraph JW["journal_worker (src 밖 · KIS 0)"]
-        R["한 회전 (15초)<br/>G0 → G1 → 로그 꼬리 읽기<br/>→ 짝짓기 → 쓰기 → 커서 저장"]
+        R["한 회전 (15초)<br/>G0 → G1 → 로그 꼬리 읽기<br/>→ 짝짓기 → 쓰기 → 커서 저장<br/>→ 대사 (60초 간격)"]
     end
     DB[("RDS<br/>trade_journal_orders · _stops<br/>_notes · _cursor (047)")]
     R -->|"X-API-Key = API_REPORTER_KEY<br/>http://backend:8000 직결"| G0
     R --> G1
     LOG -.->|"./logs:/app/logs:ro"| R
-    R -->|"전용 역할 journal_worker<br/>자동커밋 단문"| DB
+    R -->|"전용 역할 journal_worker<br/>자동커밋 단문 · trade_history 는 읽기만"| DB
 ```
 
 | 구성 | 하는 일 | 코드 |
@@ -2058,9 +2058,9 @@ flowchart LR
 | G0 | 엔진 상태(`running`·`phase`)와 전략별 `enabled`·`params`·`buy_signals` 를 준다. 매수 행의 신호·파라미터 출처다 | 기존 `routes/trading.py` — src 0줄 |
 | G1 | 보유마다 손절선·목표가·진입 ATR·donchian 무장가를 준다. 엔진 메모리에만 있는 값이라 이 GET 이 유일한 창이다 | `src/routes/balance.py::exit_lines` — read-only(AST 가드 `test_cycle412_g1_purity.py`) |
 | 로그 수확 | 접수·완료·폴백·재주문·수동 매도 줄과 청산 사유 줄을 짝지어 주문 1건 1행을 만든다 | `jw/tailer.py` · `jw/grammar.py` · `jw/pairing.py` |
-| 손절선 사건 | G1 값을 직전 기록과 비교해 `first`·`change`·`boot`·`eod`·`paused`·`exit` 를 쓴다 | `jw/stops.py` |
-| 대사 | 로그 체결 수와 일지 행 수의 항등식 점검 · `trade_history` 로 빠진 행 보강 | `jw/reconcile.py` — ⚠️ 루프(`jw/main.py`)가 부르지 않는다 |
-| 과거분 | 로컬 로그 사본을 한 번 적재한다(D3) | `jw/backfill.py` — ⚠️ `python -m jw backfill` 은 안내 문구만 찍고 종료 코드 1 로 끝난다(DB 적재 경로 없음) |
+| 손절선 사건 | G1 값을 직전 기록과 비교해 `first`·`change`·`boot`·`eod`·`paused` 를 쓴다. `exit` 는 매도 행을 짝지을 때 직전 G1 스냅샷으로 만들고, 그 회전에 매도 행을 새로 넣었거나 승격했을 때만 쓴다 | `jw/stops.py` · `exit` = `jw/pairing.py` |
+| 대사 | 60초 간격으로 `trade_history` 를 읽어 로그가 못 잡은 체결을 빈 행(`unmatched`·`external`)으로 채운다. 같은 주문의 로그 행이 뒤에 오면 그 빈 행을 실측으로 승격한다. 로그 완료 줄 수와 실측 행 수의 항등식도 본다. 기준 시각은 벽시계가 아니라 행까지 쓴 로그 줄의 시각이고, 그보다 120초 넘게 지난 것만 센다. 어긋나면 `[journal_gap]` WARNING, 풀리면 `[journal_gap_resolved]` INFO — 결과가 바뀔 때만 1줄 | `jw/reconcile.py` · 호출 = `jw/main.py` |
+| 과거분 | 로그 사본(평문·`.gz`)을 사람이 장외에 한 번 적재한다(D3). 행은 `source='log_restore'` 이고 `ON CONFLICT DO NOTHING` 이라 다시 돌려도 늘지 않는다. 손절선 사건·커서는 건드리지 않는다. 기동 경로 밖이다 | `jw/backfill.py` · `python -m jw backfill <경로…>` |
 
 이 워커가 1단계(15.2)에 남기는 선례는 넷이다.
 

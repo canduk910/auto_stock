@@ -87,3 +87,27 @@
 `journal_worker/` 줄 · 선택적 배포 절의 `journal` 축 설명 줄.
 
 → CHANGELOG: cycle412 행
+
+---
+
+## 프로세스 구성과 분리 로드맵
+
+### 2026-10-09 cycle412 마무리 문서 동기화 — `journal_worker` 가 `trade_history` 를 읽는다
+
+정본 원문(바뀐 줄):
+
+```
+backend 가 남긴 로그와 조회 API 응답을 읽기만 하고, KIS 에는 접속하지 않는다. 매매에 관한 일은 전부
+```
+
+```
+    JW -->|"trade_journal_* (전용 DB 역할)"| RDS
+```
+
+경위: cycle412 보완(`17dbd16c`)이 대사를 루프에 연결해 워커가 60초 간격으로 `trade_history` 를
+SELECT 한다(전용 역할에 SELECT 만 있다). 원문은 그 읽기를 빠뜨렸다. 같은 동기화에서 「배포 전 호스트
+준비」 에 `journal_worker` 실행 사용자 uid 1000 과 호스트 로그 읽기 권한 문장을 덧붙였다(걷어낸 원문
+없음 — 근거 = `journal_worker/Dockerfile` `useradd --uid 1000 … journal` · `USER journal` · compose
+`./logs:/app/logs:ro`).
+
+→ CHANGELOG: cycle412 마무리 행

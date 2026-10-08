@@ -24,9 +24,10 @@ jw/reconcile.py   대사 — 항등식 점검 + trade_history 외부/미매칭 �
 jw/tailer.py      로그 꼬리 읽기(커서·회전·1회 상한)
 jw/http.py        G0/G1 호출(허용 경로 화이트리스트)
 jw/db.py          자동커밋 단문 DB 접근(트랜잭션 금지)
-jw/main.py        한 회전 루프(Worker.rotate · run_forever) — 대사 연결 + 표준출력 로깅 + 행 단위
-                  예외 격리(한 행 실패가 같은 회전의 다른 행을 지우지 않는다)
+jw/main.py        한 회전 루프(Worker.rotate · run_forever) — 대사 연결 + 행 단위 예외 격리(한 행
+                  실패가 같은 회전의 다른 행을 지우지 않는다) + `exit` 사건 중복 차단
 jw/backfill.py    과거분 파싱 + DB 적재(`run_backfill`) — 기동 경로 밖, `source='log_restore'`
+jw/__main__.py    진입점 `python -m jw run`(기본) | `python -m jw backfill <경로…>` + 로깅 설정
 ops/role.sql      워커 전용 DB 역할 — 마이그레이션이 아니다. 047 뒤 사람이 psql 로 1회 실행
 ```
 
@@ -38,13 +39,21 @@ ops/role.sql      워커 전용 DB 역할 — 마이그레이션이 아니다. 0
 4. 짝짓기 — 앵커 줄(접수·완료·폴백·재주문·수동)은 **다음** 회전에 내보낸다
 5. 주문 행·손절선 사건 쓰기(행 단위 예외 격리 — 한 건이 실패해도 WARNING 뒤 다음 행으로 넘어간다).
    로그 행(`unmatched`·`external` 아닌 source)은 `insert_order` 가 실패(이미 있음)하면
-   `promote_order` 로 그 빈 행(`unmatched`·`external`)을 실측으로 승격한다
+   `promote_order` 로 그 빈 행(`unmatched`·`external`)을 실측으로 승격한다.
+   청산 사건(`exit`)은 그 회전에 매도 행을 **새로 넣었거나 승격했을 때만** 쓴다 —
+   `trade_journal_stops` 에는 UNIQUE 가 없어서, 커서 저장 실패로 같은 덩어리를 다시 읽으면
+   같은 매도의 `exit` 가 겹칠 수 있기 때문이다
 6. 커서 저장 — 행이 다 쓰인 청크 끝까지만 전진한다
 7. 대사 — **대사 기준 시각 W**(행까지 쓴 로그 줄의 시각, 벽시계가 아니다)가 생긴 뒤부터 60초마다
    `trade_history` 를 읽어 누락 행(`unmatched`/`external`)을 보강하고 항등식을 확인한다. 읽기 창이
    꽉 찬 회전(따라잡는 중)은 건너뛴다. 완료 줄·행은 (주문번호, side) 고유값으로 센다(커서 저장 실패로
-   같은 덩어리를 다시 읽어도 거듭 세지 않는다). 어긋나면 `[journal_gap]` WARNING — 직전 결과와 값이
-   다를 때만 1줄(어긋남이 계속되면 매번 다시 남기지 않는다)
+   같은 덩어리를 다시 읽어도 거듭 세지 않는다).
+   - 대사 기준선 = W − `RECONCILE_MIN_AGE_SECONDS`(120초). 이보다 늦은 완료 줄·행은 아직 세지 않는다.
+   - 완료 줄과 그 주문의 행은 (주문번호, side) 로 짝지어 **두 시각 중 늦은 쪽**으로 함께 자른다
+     (`_cutoff_split`). 기준선이 두 시각 사이(예: 1초 차이)에 걸려도 한쪽만 세는 일이 없다. 짝이
+     없으면 자기 시각 그대로다.
+   - 어긋나면 `[journal_gap]` WARNING — 직전 결과와 값이 다를 때만 1줄(어긋남이 계속되면 매번 다시
+     남기지 않는다). 어긋났던 항등식이 맞으면 `[journal_gap_resolved]` INFO 1줄
 
 평소 주기는 15초다. G0·G1 이 실패하면 스냅샷 없이 로그만 수확하고(`degraded`), 연속 실패는
 30·60·120·240·300초로 물러난다. 예외가 올라오면(`run_forever`) WARNING 으로 남기고 같은 백오프를 탄다.
@@ -90,7 +99,7 @@ docker compose -f docker-compose.prod.yml up -d journal_worker   # 상시 루프
 - `journal_worker` 서비스는 `docker-compose.prod.yml` 에만 있다 — `-f` 를 빼면 개발용 compose 를 읽어
   서비스를 찾지 못한다.
 - ⚠️ 배포 전 확인 — 호스트 `~/auto_stock/logs/auto_stock.log*` 를 컨테이너 uid(1000)가 읽을 수
-  있어야 한다(권한이 640 등으로 더 좁으면 워커가 로그를 못 읽는다. 644 면 충분하다).
+  있어야 한다. 소유자가 uid 1000 이 아니면 다른 사용자 읽기 권한이 필요하다(`644` 면 충분하다).
 
 ### 사전 준비 (E1c — 운영 DB 역할, 1회성)
 
