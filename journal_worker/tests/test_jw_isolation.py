@@ -220,3 +220,71 @@ def test_i8_golden_fixture_has_no_sensitive_values():
         m = _LINE.match(ln)
         assert m, f"{i}행 형식이 운영 로그 꼴이 아니다: {ln[:80]}"
         assert _ALLOWED_LOGGERS.match(m.group(1)), f"{i}행 로거 {m.group(1)} — 필요한 로거 줄만 둔다"
+
+
+# ── cycle412 보완 Red — 결함 10·11(낮음) ──────────────────────────────────────────
+#
+# | # | 계약 |
+# |---|---|
+# | I9 | Dockerfile 이 root 가 아닌 사용자로 실행한다 — 마지막 `USER` 가 root·0 이 아니고 ENTRYPOINT 앞 |
+# | I10 | 빌드 문맥 `journal_worker/` 에 `.dockerignore` — 테스트(실측 로그 픽스처 포함)·`ops/`·`__pycache__`·`*.pyc`·`.env*` 를 빼고 `jw/`·`requirements.txt` 는 남긴다 |
+# | I11 | `ops/role.sql` 실행 예시의 비밀번호 생성은 `openssl rand -hex` — base64 는 `/`·`+`·`=` 가 DSN 을 깨고, 즉석 생성은 값을 확인할 길이 없다 |
+
+import fnmatch  # noqa: E402
+
+_DOCKERIGNORE = WORKER_ROOT / ".dockerignore"
+_ROLE_SQL = WORKER_ROOT / "ops" / "role.sql"
+
+
+def test_i9_dockerfile_runs_as_non_root():
+    code = _docker_code_lines()
+    users = [i for i, ln in enumerate(code) if re.match(r"^USER\s+", ln, re.I)]
+    assert users, "Dockerfile 에 USER 가 없다 — 워커가 root 로 돈다"
+    last = users[-1]
+    who = code[last].split(None, 1)[1].strip().split(":")[0]
+    assert who not in {"root", "0"}, f"USER {who} — root 가 아니어야 한다"
+    ep = next(i for i, ln in enumerate(code) if ln.upper().startswith("ENTRYPOINT"))
+    assert last < ep, "USER 는 ENTRYPOINT 앞"
+    assert all(not re.match(r"^(RUN|COPY|ADD)\b", ln, re.I) for ln in code[last + 1:]), (
+        "USER 뒤에 RUN/COPY 가 있으면 그 단계가 다시 root 를 요구하는지 확인할 수 없다 — USER 는 빌드 단계 뒤")
+
+
+def _ignored(path: str, patterns: list[str]) -> bool:
+    """docker 빌드 문맥 규칙을 줄인 판정 — 마지막에 맞은 패턴이 이긴다(`!` = 다시 넣기), 디렉터리 패턴은 하위 전부."""
+    verdict = False
+    for raw in patterns:
+        neg = raw.startswith("!")
+        pat = raw[1:] if neg else raw
+        pat = pat.strip().lstrip("/").rstrip("/")
+        if not pat:
+            continue
+        parts = path.split("/")
+        prefixes = ["/".join(parts[:k]) for k in range(1, len(parts) + 1)]
+        hit = any(fnmatch.fnmatch(pre, pat) for pre in prefixes)
+        if pat.startswith("**/"):
+            sub = pat[3:]
+            hit = hit or any(fnmatch.fnmatch(seg, sub) for seg in parts) or any(
+                fnmatch.fnmatch("/".join(parts[k:]), sub) for k in range(len(parts)))
+        if hit:
+            verdict = not neg
+    return verdict
+
+
+def test_i10_dockerignore_keeps_context_to_the_image_inputs():
+    assert _DOCKERIGNORE.is_file(), "journal_worker/.dockerignore 가 없다 — 테스트·실측 로그 픽스처까지 빌드 문맥으로 간다"
+    pats = [ln.strip() for ln in _DOCKERIGNORE.read_text(encoding="utf-8").splitlines()
+            if ln.strip() and not ln.strip().startswith("#")]
+    must_out = ["tests/test_jw_isolation.py", "tests/fixtures/golden_2026-09-17_10-07.log", "ops/role.sql",
+                "jw/__pycache__/main.cpython-312.pyc", "tests/__pycache__/conftest.cpython-312.pyc", ".env",
+                ".env.local"]
+    must_in = ["jw/main.py", "jw/__init__.py", "requirements.txt", "Dockerfile"]
+    assert [p for p in must_out if not _ignored(p, pats)] == [], pats
+    assert [p for p in must_in if _ignored(p, pats)] == [], pats
+
+
+def test_i11_role_sql_example_uses_hex_password():
+    text = _ROLE_SQL.read_text(encoding="utf-8")
+    assert "openssl rand -base64" not in text, "base64 비밀번호는 DSN 특수문자(/ + =)로 깨진다"
+    assert re.search(r"openssl rand -hex \d+", text), "예시는 openssl rand -hex 로 만든 값을 쓴다"
+    assert not re.search(r"journal_pw=\"?\$\(openssl", text), (
+        "psql 인자 안에서 즉석 생성하면 그 값을 secrets/journal_worker.env 에 옮길 길이 없다 — 변수에 먼저 담는다")

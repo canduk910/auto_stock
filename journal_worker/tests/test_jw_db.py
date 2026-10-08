@@ -155,3 +155,16 @@ def test_b4b_db_module_knows_no_http_or_sleep():
         if isinstance(node, (ast.Name, ast.Attribute)):
             name = node.id if isinstance(node, ast.Name) else node.attr
             assert name != "sleep", f"jw/db.py:{node.lineno} sleep"
+
+
+# ── cycle412 보완 Red — 결함 6: 이어 붙이기에 보유 주문번호가 필요하다 ─────────────
+
+def test_b6_last_stop_rows_carries_pos_order_no():
+    row = {"strategy": "kojiro", "ticker": "005930", "pos_order_no": "0000100000", "stop_price": 9500,
+           "stop_kind": "effective", "target_price": None, "target_hit": None, "arm_price": None,
+           "event": "eod", "observed_at": kst(2026, 10, 10, 15, 31)}
+    conn = FakeConn(fetch_result=[row])
+    got = _run(jw("db").JournalDB(conn).last_stop_rows())
+    sql = " ".join(conn.calls[0][1].split())
+    assert re.search(r"\bpos_order_no\b", sql.split("FROM")[0]), f"SELECT 칸에 pos_order_no 가 없다: {sql}"
+    assert got[("kojiro", "005930")]["pos_order_no"] == "0000100000"

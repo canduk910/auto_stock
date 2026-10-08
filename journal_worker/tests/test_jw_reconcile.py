@@ -114,3 +114,41 @@ def test_c7_golden_external_notices_without_trade_rows_make_nothing():
     rows = jw("reconcile").rows_from_trade_history([], set(), p.external_notice_orders(),
                                                    now=kst(2026, 9, 28, 23, 0))
     assert rows == []
+
+
+# ── cycle412 보완 Red — 결함 7(낮음): UTC 시각에서 날짜를 뽑음 · 대사 행 모양 ─────────
+#
+# asyncpg 는 TIMESTAMPTZ 를 UTC aware 로 돌려준다. KST 00:00~09:00 체결(08:00 NXT 프리장 포함)은 UTC 로
+# 전날이라 `ts.date()` 가 하루 앞선 날짜를 만든다 → 일지 키와 안 맞아 같은 주문이 unmatched 로 한 번 더.
+#
+# | # | 계약 |
+# |---|---|
+# | C8 | 날짜 키·`order_date` 는 KST 날짜 · `noted_at` 은 KST aware |
+# | C9 | 대사 행은 `insert_order` 가 쓰는 칸을 전부 갖는다(없는 값은 None) — 그대로 저장할 수 있다 |
+
+from datetime import date, datetime, timezone  # noqa: E402
+
+from jw_testkit import ORDER_KEYS  # noqa: E402
+
+_UTC = timezone.utc
+_PRE = datetime(2026, 10, 12, 23, 30, tzinfo=_UTC)   # = 2026-10-13 08:30 KST (NXT 프리장)
+
+
+def test_c8_kst_date_for_utc_timestamp_already_in_journal():
+    trades = [_th("0000100200", "SELL", "COMPLETED", _PRE)]
+    journal = {(date(2026, 10, 13), "0000100200", "SELL")}
+    assert jw("reconcile").rows_from_trade_history(trades, journal, set(), now=NOW) == []
+
+
+def test_c8b_kst_date_and_kst_noted_at_for_new_row():
+    (r,) = jw("reconcile").rows_from_trade_history([_th("0000100200", "SELL", "COMPLETED", _PRE)], set(), set(),
+                                                   now=NOW)
+    assert r["order_date"] == date(2026, 10, 13)
+    assert r["noted_at"] == _PRE and r["noted_at"].utcoffset() == timedelta(hours=9)
+
+
+def test_c9_reconcile_rows_have_every_insert_column():
+    (r,) = jw("reconcile").rows_from_trade_history(
+        [_th("0000100300", "BUY", "PARTIAL", NOW - timedelta(minutes=5))], set(), set(), now=NOW)
+    missing = [k for k in ORDER_KEYS if k not in r]
+    assert missing == [], f"대사 행에 insert_order 칸이 없다(KeyError 로 저장 실패): {missing}"

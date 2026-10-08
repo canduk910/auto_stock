@@ -94,3 +94,72 @@ def test_k5b_iter_log_lines_throttles(tmp_path):
     list(jw("backfill").iter_log_lines([p], max_bytes_per_sec=100, sleep=slept.append))
     assert slept and all(s > 0 for s in slept)
     assert jw("config").BACKFILL_MAX_BYTES_PER_SEC == 5 * 1024 * 1024
+
+
+# ── cycle412 보완 Red — 결함 8(낮음): backfill 이 안내 문구만 찍고 exit 1 ────────────
+#
+# D3(과거 로그 1회 적재)는 승인 사항이라 실제로 동작하게 한다. 운영 적재는 10-13 배포와 분리한다.
+#
+# | # | 계약 |
+# |---|---|
+# | K6 | `async run_backfill(paths, db, *, max_bytes_per_sec=BACKFILL_MAX_BYTES_PER_SEC, sleep=time.sleep) -> dict` — 읽은 줄 수 `lines`·만든 행 수 `rows` · 행은 `db.insert_order` 로(=ON CONFLICT DO NOTHING) · 전부 `source="log_restore"` · 손절선 사건은 쓰지 않는다(스냅샷이 없다) |
+# | K7 | 멱등 — 같은 파일을 두 번 적재해도 행이 늘지 않는다 |
+# | K8 | 읽기 속도 상한 — 상한을 넘는 만큼 sleep(1초 단위) 한다 |
+# | K9 | `.gz` 사본도 같은 행 |
+# (CLI `python -m jw backfill <경로…>` 의 종료 코드·풀 크기 = test_jw_worker_ops W9b·W9c)
+
+import asyncio  # noqa: E402
+
+from jw_testkit import FakeJournalDB  # noqa: E402
+
+
+def _golden_file(tmp_path, *, gz=False):
+    if gz:
+        p = tmp_path / "auto_stock.log.2026-10-07.gz"
+        with gzip.open(p, "wt", encoding="utf-8") as f:
+            f.write(GOLDEN_LOG.read_text(encoding="utf-8"))
+        return p
+    p = tmp_path / "auto_stock.log.2026-10-07"
+    p.write_text(GOLDEN_LOG.read_text(encoding="utf-8"), encoding="utf-8")
+    return p
+
+
+def _backfill(paths, db, **kw):
+    kw.setdefault("max_bytes_per_sec", 10**12)
+    kw.setdefault("sleep", lambda s: None)
+    return asyncio.run(jw("backfill").run_backfill(paths, db, **kw))
+
+
+def test_k6_run_backfill_writes_restore_rows(tmp_path):
+    db = FakeJournalDB()
+    res = _backfill([_golden_file(tmp_path)], db)
+    assert res["rows"] == 145 and res["lines"] == len(golden_lines())
+    assert len(db.orders) == 145
+    assert {r["source"] for r in db.orders.values()} == {"log_restore"}
+    assert db.stops == []
+    assert not [c for c in db.calls if c[0] in ("save_cursor", "load_cursor")], "backfill 은 실시간 커서를 건드리지 않는다"
+
+
+def test_k7_backfill_twice_does_not_add_rows(tmp_path):
+    db = FakeJournalDB()
+    f = _golden_file(tmp_path)
+    _backfill([f], db)
+    before = {k: dict(v) for k, v in db.orders.items()}
+    res = _backfill([f], db)
+    assert res["rows"] == 145
+    assert db.orders == before
+
+
+def test_k8_backfill_respects_read_rate_cap(tmp_path):
+    f = _golden_file(tmp_path)
+    cap = 16 * 1024
+    slept: list[float] = []
+    _backfill([f], FakeJournalDB(), max_bytes_per_sec=cap, sleep=slept.append)
+    assert sum(slept) >= f.stat().st_size // cap - 1, (sum(slept), f.stat().st_size // cap)
+
+
+def test_k9_gz_copy_restores_same_rows(tmp_path):
+    a, b = FakeJournalDB(), FakeJournalDB()
+    _backfill([_golden_file(tmp_path)], a)
+    _backfill([_golden_file(tmp_path, gz=True)], b)
+    assert set(a.orders) == set(b.orders) and len(b.orders) == 145

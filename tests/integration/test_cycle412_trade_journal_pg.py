@@ -268,3 +268,35 @@ async def test_r6_everything_else_is_denied(role_conn, sql):
 
     with pytest.raises(asyncpg.InsufficientPrivilegeError):
         await role_conn.execute(sql)
+
+
+# ── cycle412 보완 Red — 결함 8: 과거분 적재는 멱등(실 Postgres · 워커 전용 역할로 쓴다) ──────
+#
+# | # | 계약 |
+# |---|---|
+# | K10 | `jw.backfill.run_backfill` 을 같은 골든 파일로 두 번 — 행 수 145 그대로 · 전부 `log_restore` · 손절선 사건 0 · 워커 역할 권한(SELECT·INSERT)만으로 된다 |
+
+_GOLDEN = _ROOT / "journal_worker" / "tests" / "fixtures" / "golden_2026-09-17_10-07.log"
+
+
+def _jw(module: str):
+    import importlib
+    import sys
+
+    root = str(_ROOT / "journal_worker")
+    if root not in sys.path:
+        sys.path.insert(0, root)
+    return importlib.import_module(f"jw.{module}")
+
+
+async def test_k10_backfill_twice_keeps_rows_as_worker_role(admin, role_conn):
+    db = _jw("db").JournalDB(role_conn)
+    run = _jw("backfill").run_backfill
+    first = await run([_GOLDEN], db, max_bytes_per_sec=10**12, sleep=lambda s: None)
+    n1 = await admin.fetchval("SELECT count(*) FROM trade_journal_orders")
+    second = await run([_GOLDEN], db, max_bytes_per_sec=10**12, sleep=lambda s: None)
+    n2 = await admin.fetchval("SELECT count(*) FROM trade_journal_orders")
+    assert (first["rows"], second["rows"], n1, n2) == (145, 145, 145, 145)
+    sources = [r["source"] for r in await admin.fetch("SELECT DISTINCT source FROM trade_journal_orders")]
+    assert sources == ["log_restore"]
+    assert await admin.fetchval("SELECT count(*) FROM trade_journal_stops") == 0

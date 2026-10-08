@@ -213,3 +213,58 @@ def test_s12_two_strategies_same_ticker_are_separate_keys():
     tr = T()
     evs = obs(tr, at(10, 0), it("kojiro", stop=9500), it("donchian_swing", stop=9200))
     assert sorted((e["strategy"], e["event"]) for e in evs) == [("donchian_swing", "first"), ("kojiro", "first")]
+
+
+# ── cycle412 보완 Red — 결함 6(중간): 보유를 (전략,종목) 으로만 가른다 ──────────────
+#
+# | # | 계약 |
+# |---|---|
+# | S13 | 같은 (전략,종목) 이라도 보유 주문번호(G1 `order_no`)가 바뀌면 새 보유 = `first` (사라졌다 다시 산 경우·회전 사이에 팔고 다시 산 경우 모두) |
+# | S13c | 같은 주문번호가 한 회전 빠졌다 돌아오면 새 보유가 아니다(G1 일시 누락) |
+# | S14 | DB 마지막 행의 `pos_order_no` 와 지금 보유 주문번호가 다르면 `first` · 같으면 이어 붙인다 · 마지막 행에 주문번호가 없으면(옛 행) 이어 붙인다 |
+
+
+def _it_no(order_no, **kw):
+    d = it(**kw)
+    d["order_no"] = order_no
+    return d
+
+
+def test_s13_reentry_same_ticker_after_exit_is_first():
+    tr = T()
+    assert [e["event"] for e in obs(tr, at(10, 0), _it_no("0000100000", stop=9500))] == ["first"]
+    assert obs(tr, at(10, 0, 15)) == []                                   # 팔림 — 보유 목록에서 빠졌다
+    evs = obs(tr, at(10, 30), _it_no("0000200700", stop=9500))           # 같은 종목 다시 매수
+    assert [(e["event"], e["pos_order_no"]) for e in evs] == [("first", "0000200700")]
+
+
+def test_s13b_reentry_between_two_rotations_is_first():
+    tr = T()
+    obs(tr, at(10, 0), _it_no("0000100000", stop=9500))
+    evs = obs(tr, at(10, 0, 15), _it_no("0000200700", stop=9500))         # 15초 사이 팔고 다시 샀다
+    assert [(e["event"], e["pos_order_no"]) for e in evs] == [("first", "0000200700")]
+
+
+def test_s13c_same_holding_missing_one_rotation_is_not_new():
+    tr = T()
+    obs(tr, at(10, 0), _it_no("0000100000", stop=9500))
+    assert obs(tr, at(10, 0, 15)) == []
+    assert obs(tr, at(10, 0, 30), _it_no("0000100000", stop=9500)) == []
+
+
+def _last(pos_order_no):
+    row = {"stop_price": 9500, "stop_kind": "effective", "target_price": None, "target_hit": None,
+           "arm_price": None, "event": "eod", "observed_at": at(15, 31, day=10)}
+    if pos_order_no is not None:
+        row["pos_order_no"] = pos_order_no
+    return {("kojiro", "005930"): row}
+
+
+@pytest.mark.parametrize("last_no,now_no,expected", [
+    ("0000100000", "0000200700", ["first"]),    # 재시작 사이에 팔고 다시 샀다
+    ("0000100000", "0000100000", []),           # 같은 보유 — 값이 같으면 0
+    (None, "0000200700", []),                   # 옛 행(주문번호 없음) — 이어 붙인다
+])
+def test_s14_continuation_from_db_uses_pos_order_no(last_no, now_no, expected):
+    tr = T(last_rows=_last(last_no))
+    assert [e["event"] for e in obs(tr, at(10, 0), _it_no(now_no, stop=9500))] == expected

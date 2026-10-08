@@ -201,8 +201,8 @@ class Pairer:
   - `fired_line`(발동선): 줄에 선 가격(`line`) → 그 값 · 줄에 임계(`threshold`)+매수가 → `round(buy × (1 + threshold / 100))` · LTV 두 문구 → 스냅샷 `params` 의 `intraday_stop_loss`/`overnight_stop_loss` 로 같은 식 · 그 밖의 가격 청산(BFB 눌림목·VB 등) → 직전 스냅샷 `stop_price` · 가격 무관 청산·스냅샷 없음 → None.
   - `judge_price`: 줄의 `current_price` → `judge_src="log_price"` · 없으면 줄의 `pct` 로 `round(buy × (1 + pct / 100))` → `"log_pct"` · 없으면 None(1b 가 `trade_history.order_price` 로 채운다). kojiro ATR 손절은 `signal.judge_upper = line`.
   - 매수가(`buy`) 출처: 줄의 `buy_price` → 직전 G1 스냅샷 item `buy_price` → 같은 (전략, 종목) 의 마지막 `buy_accept` 가격(LTV 과거분은 이것뿐).
-  - `effective_line`: 접수 시각 **이전**(≤) 의 가장 최근 G1 스냅샷 item `stop_price` + `signal.snapshot_age_s = 접수시각 − 스냅샷시각`(초, int). 스냅샷 기록은 최근 8개 이상 보관. 없으면 None(관측 전 청산). 이때 `stops` 에 `event="exit"` 사건 1개(inputs 에 `snapshot_age_s`·`sell_order_no`).
-- **경로별 source**(실시간; 과거분은 전부 `log_restore`, 경로는 `signal.path`): 접수 = `log_harvest`(path `accept`) · 매도 폴백 = `fallback_inferred`(`sell_fallback` 줄, 사유는 10초 안 사유 줄) · 매수 폴백 = `fallback_inferred`(`BUY 주문 완료` + 같은 종목 `buy_fallback`, 접수 줄 없음, 전략은 `trade_strategies[order_no]`) · 재주문 = `reorder_inferred`(`SELL 주문 완료` 뒤 같은 종목·같은 수량 `reorder`, 접수 줄 없음, `parent_order_no` = 같은 종목 직전 매도 접수 주문번호, 전략·사유는 부모 것) · 수동 = `manual_api`(`src.routes.trading` 로거, `reason_code="MANUAL"`).
+  - `effective_line`: 접수 시각 **이전**(≤) 의 가장 최근 G1 스냅샷 item `stop_price` + `signal.snapshot_age_s = 접수시각 − 스냅샷시각`(초, int). 스냅샷은 원본을 보관하지 않고 손절 관련 칸만 담은 압축 기록 2~8개(6절 결함 1). 없으면 None(관측 전 청산). 이때 `stops` 에 `event="exit"` 사건 1개(inputs 에 `snapshot_age_s`·`sell_order_no`).
+- **경로별 source**(실시간; 과거분은 전부 `log_restore`, 경로는 `signal.path`): 접수 = `log_harvest`(path `accept`) · 매도 폴백 = `fallback_inferred`(`sell_fallback` 줄, 사유는 10초 안 사유 줄) · 매수 폴백 = `fallback_inferred`(`BUY 주문 완료` + 같은 종목 `buy_fallback`, 접수 줄 없음, 전략은 `trade_strategies[order_no]`, 없으면 `"unknown"` — 6절 결함 2) · 재주문 = `reorder_inferred`(`SELL 주문 완료` 뒤 같은 종목·같은 수량 `reorder`, 접수 줄 없음, `parent_order_no` = 같은 종목 직전 매도 접수 주문번호, 전략·사유는 부모 것) · 수동 = `manual_api`(`src.routes.trading` 로거, `reason_code="MANUAL"`).
 - `order_date` = 앵커 줄 KST 날짜 · `noted_at` = 앵커 줄 시각(aware KST) · `order_division` = 그 주문번호 첫 `[order_notice]`(`rctf=="0"`) 의 `division`.
 
 ### 3.4 손절선 사건 — `jw/stops.py`
@@ -249,7 +249,7 @@ class JournalDB:
     async def insert_stop(self, event: dict) -> None
     async def load_cursor(self, name: str = "main") -> dict | None    # {"file_name","inode","byte_offset"}
     async def save_cursor(self, cursor: dict, name: str = "main") -> None   # INSERT … ON CONFLICT (name) DO UPDATE
-    async def last_stop_rows(self) -> dict
+    async def last_stop_rows(self) -> dict                            # (전략,종목) → 마지막 행(pos_order_no 포함 — 6절 결함 6)
     async def trades_since(self, since: datetime) -> list[dict]       # trade_history SELECT
 ```
 - 메서드마다 `execute/fetch/fetchrow/fetchval` 정확히 1번 · SQL 은 문장 1개 · `transaction()` 0 · `BEGIN/COMMIT` 0. jw/ 어디에도 `.transaction(` 없음. `jw/db.py` 는 httpx·sleep 을 모른다.
@@ -273,12 +273,14 @@ class Worker:
 - `run_forever`: `while not stop()` 마다 `try: status = await rotate() … except Exception … finally: await sleep(delay)`. active → 15 · idle → 300 · degraded·예외 → 연속 실패 수로 `backoff_delay`(30, 60, 120, 240, 300, 300…), 성공하면 0 으로.
 - `rotate` 순서: (첫 회전만 `load_cursor`·`last_stop_rows`) → G0 → (idle 아니면) G1 → `feed_snapshot` → 로그 이어 읽기(`read_chunk`) → `feed_events` → `drain` → 행·사건 쓰기 → `StopTracker.observe` 사건 쓰기 → **커서 저장**. idle(G0 `running` 거짓 또는 `phase=="idle"`) → G1·로그·DB 쓰기 0. G0/G1 실패(`JournalFetchError`) → 스냅샷 없이 로그 수확은 계속하고 `"degraded"`. 동시 요청 0(`gather`/`create_task`/`TaskGroup` 금지).
 - **커서는 행이 DB 에 다 쓰인 청크 끝까지만 전진한다** — 한 회전 보류 때문에 회전 k 에 읽은 청크의 행은 회전 k+1 에 쓰인다. 그래서 회전 k 의 쓰기 뒤에는 **회전 k−1 청크 끝** 커서를 저장한다(첫 회전은 저장하지 않거나 offset 0). 재시작하면 보류 중이던 청크를 다시 읽고, 이미 쓴 행은 `ON CONFLICT DO NOTHING` 이 걸러 준다.
-- 대사(3.5)는 60초마다 + 매일 20:10 1회(설계 W3) — 이 Red 는 주기를 테스트하지 않는다(순수 함수만).
+- 대사(3.5)는 `rotate` 안에서 60초마다(첫 회전 포함) + 매일 20:10 1회(설계 W3) — 연결·로그·거짓 경보 금지는 6절 결함 3.
 
 ### 3.10 과거분 — `jw/backfill.py`
 ```python
 def iter_log_lines(paths, *, max_bytes_per_sec: int = BACKFILL_MAX_BYTES_PER_SEC, sleep=time.sleep) -> Iterator[str]   # .gz·평문
 def restore_rows(lines) -> list[dict]          # Pairer(source="log_restore") + drain(final=True) 의 orders
+async def run_backfill(paths, db, *, max_bytes_per_sec: int = BACKFILL_MAX_BYTES_PER_SEC, sleep=time.sleep) -> dict
+    # -> {"lines": 읽은 줄 수, "rows": 만든 행 수} · db.insert_order 로만 쓴다(6절 결함 8)
 ```
 - 기동 경로(`jw.main`·Dockerfile CMD·compose `command`)는 backfill 을 부르지 않는다. 문자열 `'log_restore'` 는 jw/ 에서 `backfill.py` 에만.
 
@@ -328,3 +330,28 @@ def restore_rows(lines) -> list[dict]          # Pairer(source="log_restore") + 
 | 백엔드/배포(핀) | `tests/unit/ast/test_cycle287_ast_scope.py`·`test_cycle291_ast_scope.py` 등의 `_SRC_TREE_DIGEST` | `balance.py` 가 바뀌므로 digest 만 다시 계산(파일 수 핀 182·96·85 등은 그대로 — src 새 파일 0) |
 | 워커 | `journal_worker/tests/test_jw_*.py` 11개 | `journal_worker/Dockerfile` · `requirements.txt` · `jw/{__init__,__main__,config,grammar,pairing,stops,reconcile,tailer,http,db,main,backfill}.py` |
 | 가드(지금 초록) | `tests/unit/ast/test_cycle412_scope_guard.py`(사이클 한정, 병합 후 삭제) · `tests/unit/ast/test_cycle412_log_phrase_pins.py` | 없음 — 붉어지면 범위 위반 |
+| 워커(보완) | `journal_worker/tests/test_jw_memory.py` · `test_jw_pairing_fixes.py` · `test_jw_worker_ops.py` + 기존 `test_jw_{stops,db,reconcile,backfill,isolation}.py` 끝의 「보완 Red」 블록 | 6절 |
+| 백엔드/배포(보완) | `tests/integration/test_cycle412_trade_journal_pg.py::test_k10_*` | `jw/backfill.py`(`run_backfill`) |
+
+---
+
+## 6. 보완 결정 (10-09 — 직전 판정 「보완 필요」 11건, 메인 세션 결정)
+
+결함 번호는 판정 원문 그대로다. 8영역·`scheduler.py`·기존 마이그레이션은 여전히 0줄이고 047 의 NOT NULL 도 바꾸지 않는다. 테스트가 정본이다(이 절과 갈리면 테스트).
+
+| # | 결정 | 테스트 |
+|---|---|---|
+| 1 (높음) | **보관 정책을 바꾼다**(개수 상한 뒤 줄이기 금지). G0·G1 원본 dict 는 들고 있지 않는다. 남기는 것 = ① 링: (전략,종목)별, 신호 시각 기준 600초 — 만료 키 집합을 따로 두지 않고 TTL 밖 신호는 처음부터 넣지 않는다 ② 전략별 `params` 사본(LTV 발동선용)과 G1 압축 기록(`stop_price stop_source buy_price buy_date order_no target_price target_source kk_arm_price`) 최근 2~8개 ③ 짝짓기 대기 항목(완료 줄·접수 전문·사유 줄·신호 줄·종목상태 줄) = 이벤트 시각 기준 TTL(창보다 넉넉히, 한 회전 보류를 덮게) ④ 날 단위 상태(익일청산 보류 줄·그날 신규 접수 전문 번호·앵커 번호)는 날이 바뀌면 비운다 ⑤ (전략,종목)별 마지막 매수 접수가는 키당 1개. 과거분 모드(`source != "log_harvest"`)는 입력 전체를 한 번에 넣으므로 이 정책 밖이다(골든 P8) | `test_jw_memory.py` M1(500·2000·5000 회전, 같은 시각에 재서 첫날→둘째 날 +25%·둘째 날→넷째 날 +2%·절대 2MB 미만) · M2(원본 dict·안 쓰는 칸 값이 닿지 않음) · M3(Worker 전체) · M4 |
+| 2 (중간) | 전략 = 줄 → (재주문) 부모 → `trade_strategies[주문번호]` → `"unknown"`. 채운 출처는 `signal["strategy_src"]`(`"trade_history"`·`"unknown"`). 워커는 `JournalDB.trades_since(KST 오늘 00:00)` 로 `{주문번호: 전략}` 을 만들어 `drain` 에 넘긴다(새 DB 메서드 없음 · 조회 실패 = WARNING 후 빈 dict). **행 단위 예외 격리** — `insert_order`·`insert_stop` 한 건 실패는 WARNING(주문번호) 뒤 다음 행으로, 커서 저장은 계속, `rotate()` 는 예외를 올리지 않는다 | F2a~F2f · W2 · W2b · W2c |
+| 3 (중간) | 대사를 `rotate` 에 연결한다 — 60초마다(첫 회전 포함): `trades_since(KST 오늘)` → `rows_from_trade_history(…, 오늘 일지 키, external_notice_orders(), now)` → 격리된 `insert_order` → `check_identities(120초 지난 완료 줄, 120초 지난 행)` → `emit_gap`. 대사 실패 = WARNING, 그 회전의 수확·커서는 계속. 정상 흐름(한 회전 보류 포함)에서 `[journal_gap]` 0줄 · 일지에 있는 주문으로 대사 행을 다시 쓰지 않는다. 날 단위 누적(그날 완료 줄·행·키)은 날이 바뀌면 비운다(M3). **로깅** = 모듈마다 `logging.getLogger(__name__)`(`jw.*`) · `python -m jw` 가 `main()` 안에서 표준 출력·평문·INFO 로 설정(가져오기만으로는 설정하지 않는다) · `run_forever` 예외 = WARNING(예외 문구 포함) + 백오프 · G0/G1 실패 = WARNING · 쓰기 실패 = WARNING | W3 · W3b · W3c · W3d · W3e · W3f · W3g · C9 |
+| 4 (중간) | 사유 줄의 `reason_code` 가 `TIME_EXIT`·`TAKE_PROFIT`·`TREND_EXIT` 면 `fired_line=None`(설계 「시각·시간·추세 청산 = 미발동, 참고값」). `effective_line` 은 그대로 스냅샷 값. 선·임계가 없는 가격 손절(BFB 눌림목·VB)은 여전히 스냅샷 손절선 | F4 · F4b |
+| 5 (중간) | 접수·수동·매도 폴백 줄은 같은 주문번호 완료 줄에 「사용」 표시. 폴백 매수·재주문은 같은 종목(재주문은 같은 수량) 미사용 완료 줄 중 **시각이 가장 가까운** 것 | F5a~F5d |
+| 6 (중간) | 보유 식별 = (전략, 종목) + 보유 주문번호(G1 `order_no`). 주문번호가 바뀌면(사라졌다 다시 산 경우·회전 사이에 바뀐 경우) `first`. 같은 주문번호가 한 회전 빠졌다 돌아오면 새 보유가 아니다. DB 마지막 행의 `pos_order_no` 와 다르면 `first`, 마지막 행에 주문번호가 없으면(옛 행) 이어 붙인다. `last_stop_rows` 가 `pos_order_no` 를 읽는다 | S13 · S13b · S13c · S14 · B6 |
+| 7 (낮음) | 대사의 날짜 키·`order_date` 는 KST 날짜, `noted_at` 은 KST aware(asyncpg 는 UTC aware 로 준다) | C8 · C8b |
+| 8 (낮음) | D3 을 실제로 동작하게 한다 — `async run_backfill(paths, db, *, max_bytes_per_sec, sleep) -> {"lines","rows"}`(3.10절) · CLI `python -m jw backfill <경로…>`(종료 코드 0, 경로가 없으면 사용법 오류이고 DB 에 붙지 않는다) · `insert_order`(ON CONFLICT DO NOTHING)로 멱등 · 손절선 사건·커서는 건드리지 않는다 · 읽기 속도 상한(1초 단위 sleep) · `.gz` 같은 결과. 기동 경로 밖(K1·K2 그대로). **운영 적재는 10-13 배포와 분리**(사람이 장외 창에 1회) | K6~K9 · W9c · W9d · pg K10(워커 역할로 두 번 → 145행 그대로) |
+| 9 (낮음) | `create_pool(dsn, min_size=…, max_size=…)` 명시, 1 ≤ min ≤ max ≤ 2(run·backfill 둘 다) | W9 · W9b |
+| 10 (낮음) | Dockerfile 마지막 `USER` = root·0 이 아닌 사용자, 빌드 단계(RUN·COPY) 뒤·ENTRYPOINT 앞. 빌드 문맥 `journal_worker/.dockerignore` = `tests`·`ops`·`__pycache__`·`*.pyc`·`.env*` 를 빼고 `jw/`·`requirements.txt`·`Dockerfile` 은 남긴다. ⚠️ 배포 전 확인: 호스트 `~/auto_stock/logs` 파일을 그 uid 가 읽을 수 있어야 한다(로그 파일 권한이 644 가 아니면 워커가 로그를 못 읽는다) | I9 · I10 |
+| 11 (낮음) | `ops/role.sql` 예시 = `PW=$(openssl rand -hex 24)` 로 변수에 먼저 담고 `-v journal_pw="$PW"` — 같은 값을 `secrets/journal_worker.env` 의 `JOURNAL_DATABASE_URL` 에 넣는다(base64 의 `/`·`+`·`=` 는 DSN 을 깬다) | I11 |
+
+- 테스트 도우미(`jw_testkit.py`) — `FakeJournalDB`(047 의 UNIQUE·NOT NULL 을 흉내 내는 가짜 DB, `trades_since` 는 `timestamp >= since` 만) · `retained_bytes`/`reachable_ids`(객체 그래프 크기·도달 집합, 클래스·모듈·함수·로거 제외) · `ORDER_KEYS`·`ORDER_NOT_NULL`·`STOP_KEYS`.
+- 충족 가능성 — Red 가 scratchpad 시제품(리포 밖)으로 워커 테스트 전부와 pg K10 통과를 확인했다(M1 보관 크기 500·2000·5000 회전 모두 같은 값).
