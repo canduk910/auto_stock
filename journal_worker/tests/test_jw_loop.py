@@ -20,6 +20,13 @@ uvicorn 단일 워커의 루프를 점유해 틱·체결통보 처리가 밀린�
 | # | 계약 |
 |---|---|
 | N9 | 커서 저장 실패 3회(같은 덩어리 재읽기) — 매도 1건 → exit 사건 1행(중복 0) |
+
+보완3(직전 판정 N11, 머지·배포 가능 뒤 마지막 손질) — `JournalDB.fill_order_division` 을 부르는 곳이 jw/ 안에
+0곳이라, 행을 쓴 뒤에 온 접수 통보(`[order_notice]`)의 주문구분이 NULL 로 남는다.
+
+| # | 계약 |
+|---|---|
+| N11 | 회전마다 읽은 줄 중 `rctf=="0"` 인 `[order_notice]` 는 — 보류 중인 행이든 이미 쓰인 행이든 — `fill_order_division(order_date, order_no, side, division)` 으로 연결한다(빈 칸만 채우는 UPDATE, 덮어쓰기 금지는 DB 쪽 WHERE 가 지킨다) |
 """
 from __future__ import annotations
 
@@ -280,5 +287,37 @@ def test_n9_cursor_save_failures_do_not_duplicate_exit_stops(tmp_path):
     assert len(exit_stops) == 1, (
         f"커서 저장 실패 3회가 같은 덩어리를 재읽어 exit 사건을 중복 기록했다: {len(exit_stops)}행 — {exit_stops}")
     assert exit_stops[0]["inputs"]["sell_order_no"] == "0000300100"
+
+
+# ── 보완3 N11 — 행을 쓴 뒤에 온 접수 통보가 주문구분을 못 채운다 ───────────────────────
+
+def test_n11_late_order_notice_fills_division_after_row_already_written(tmp_path):
+    """매도 행이 이미 `log_harvest` 로 쓰인 뒤(한 회전 보류가 끝난 뒤) 도착한 `[order_notice]` 도
+    `fill_order_division` 로 그 행의 빈 주문구분 칸을 채워야 한다."""
+    log_path = tmp_path / "auto_stock.log"
+    log_path.write_text("\n".join(_lines()) + "\n", encoding="utf-8")
+    http_log: list[str] = []
+    db = FakeJournalDB()
+    client, w = _worker(tmp_path, _ok_handler(http_log), db)
+
+    async def go():
+        async with client:
+            await w.rotate()   # 1회차 — 앵커 보류
+            await w.rotate()   # 2회차 — 드레인되어 행이 쓰인다(이 시점엔 통보가 없어 order_division=None)
+            (row,) = db.rows(order_no="0000300100")
+            assert row["order_division"] is None, "사전조건: 아직 주문구분을 모른다"
+
+            notice = log_line("2026-10-13 10:00:40", "INFO", "src.realtime.handler",
+                              "[order_notice] order_no=0000300100 orig_order_no= side=SELL rctf=0 kind=01 "
+                              "cond=0 ticker=005930 qty=0000000003 price=000000000 hour=100040 rfus=0 "
+                              "acpt=1 ord_qty=000000003")
+            with open(log_path, "a", encoding="utf-8") as f:
+                f.write(notice + "\n")
+            await w.rotate()   # 3회차 — 늦게 온 통보를 읽는다. 행은 이미 DB 에 있다.
+
+    asyncio.run(go())
+    (row,) = db.rows(order_no="0000300100")
+    assert row["order_division"] == "01", "이미 쓰인 행의 주문구분이 늦게 온 접수 통보로 채워지지 않았다"
+    assert ("fill_order_division", "0000300100") in db.calls
     # 매도 주문 행 자체도 정확히 한 번만 실측으로 들어간다(중복 재읽기가 그 자체로 새 쓰기가 아니다).
     assert [r["source"] for r in db.rows(order_no="0000300100")] == ["log_harvest"]

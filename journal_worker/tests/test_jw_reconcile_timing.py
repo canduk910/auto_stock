@@ -35,6 +35,15 @@
 | N10a | `_cutoff_split` — 완료·행이 1초 벌어진 짝을 경계 전후 여러 위상(phase)에서 전수 — 항상 둘 다 포함되거나 둘 다 빠진다(거짓 gap 0) |
 | N10b | `_reconcile` 와이어링 — 경계가 정확히 그 사이에 걸리는 실제 호출에서도 `[journal_gap]` 0 |
 | N10c | 어긋난 항등식이 풀리면 `[journal_gap_resolved]` INFO 1줄(그 전엔 없음, 반복 없음) |
+
+보완3(직전 판정 N11, 머지·배포 가능 뒤 마지막 손질) — `_roll_day` 가 `_last_reconcile_result` 를 날짜 경계에서
+비우지 않아, 미해소 gap 을 안고 날이 바뀌면 다음 날 첫 대사(값은 trivially ok)가 전날의 어긋난 결과와 달라
+"해소"로 오판해 거짓 `[journal_gap_resolved]` INFO 를 남긴다.
+
+| # | 계약 |
+|---|---|
+| N11a | `_roll_day` — 날짜가 바뀌는 순간 직전 `_last_reconcile_result` 가 어긋난 채였으면 `[journal_gap_unresolved_at_rollover]` WARNING 1줄(그 날의 마지막 값) 뒤 `_last_reconcile_result` 를 None 으로 비운다. 전날이 ok 였으면 WARNING 없이 비우기만 |
+| N11b | `_reconcile` 와이어링 — 미해소 gap 을 안고 날이 바뀌면, 다음 날 첫 대사가 trivially ok 여도 `[journal_gap_resolved]` 가 나지 않는다(전날 값과 비교하지 않는다) |
 """
 from __future__ import annotations
 
@@ -142,6 +151,12 @@ def _gaps(caplog):
     return [r.getMessage() for r in caplog.records
             if r.levelno >= logging.WARNING and (r.name == "jw" or r.name.startswith("jw."))
             and r.getMessage().startswith("[journal_gap] ")]
+
+
+def _warnings(caplog, prefix):
+    return [r.getMessage() for r in caplog.records
+            if r.levelno == logging.WARNING and (r.name == "jw" or r.name.startswith("jw."))
+            and r.getMessage().startswith(prefix)]
 
 
 def _empty_attempts(db, order_nos):
@@ -465,3 +480,67 @@ def test_n10c_gap_resolution_logs_info_once(tmp_path, caplog):
     assert len(warn) == 1, warn
     assert len(resolved) == 1, resolved
     assert "sell_done=1 sell_rows=1" in resolved[0], resolved
+
+
+# ── N11 날짜 경계 — 미해소 gap 을 안고 날이 바뀌면 거짓 [journal_gap_resolved] ────────────
+
+def test_n11a_roll_day_warns_and_clears_unresolved_result(tmp_path, caplog):
+    """`_roll_day` 가 전날 미해소 결과로 경고 1줄을 남긴 뒤 비운다 — 다음 날이 그 값과 비교되지 않는다."""
+    caplog.set_level(logging.WARNING)
+    w = jw("main").Worker(client=None, db=None, log_dir=tmp_path)
+    w._day = kst(*DAY, 0, 0).date()
+    w._last_reconcile_result = {"sell_done": 2, "sell_rows": 1, "buy_done": 1, "buy_rows": 1,
+                                "unknown_reason_sells": 0, "ok": False}
+    w._roll_day(kst(2026, 10, 14, 7, 45, 0))
+
+    assert w._last_reconcile_result is None, "날이 바뀐 뒤에도 전날 결과가 남아 있다"
+    warn = _warnings(caplog, "[journal_gap_unresolved_at_rollover]")
+    assert len(warn) == 1, warn
+    assert "sell_done=2 sell_rows=1 buy_done=1 buy_rows=1 unknown_reason_sells=0" in warn[0], warn[0]
+
+
+def test_n11a_roll_day_is_quiet_when_prior_day_was_ok(tmp_path, caplog):
+    """전날 항등식이 이미 ok 였으면 비우기만 하고 경고는 없다."""
+    caplog.set_level(logging.WARNING)
+    w = jw("main").Worker(client=None, db=None, log_dir=tmp_path)
+    w._day = kst(*DAY, 0, 0).date()
+    w._last_reconcile_result = {"sell_done": 1, "sell_rows": 1, "buy_done": 0, "buy_rows": 0,
+                                "unknown_reason_sells": 0, "ok": True}
+    w._roll_day(kst(2026, 10, 14, 7, 45, 0))
+
+    assert w._last_reconcile_result is None
+    assert [r for r in caplog.records if r.levelno >= logging.WARNING] == []
+
+
+def test_n11b_reconcile_does_not_falsely_resolve_across_day_rollover(tmp_path, caplog):
+    """미해소 gap 을 안고 날이 바뀌면, 다음 날 첫(trivially ok) 대사에서 [journal_gap_resolved] 가 나면 안 된다."""
+    caplog.set_level(logging.INFO)
+    db = FakeJournalDB()
+    client = jw("http").build_client(base_url="http://backend:8000", reporter_key="rk",
+                                     transport=httpx.MockTransport(_ok))
+    w = jw("main").Worker(client=client, db=db, log_dir=tmp_path)
+    w._pairer = jw("pairing").Pairer()
+    w._booted = True
+    age = jw("config").RECONCILE_MIN_AGE_SECONDS
+
+    async def go():
+        async with client:
+            # 1일차 — 접수 줄 없는 매도 완료만 있어 항등식이 깨진 채 하루가 끝난다(해소 안 됨).
+            w._day = kst(*DAY, 0, 0).date()
+            T1 = kst(*DAY, 10, 0, 8)
+            w._done_events = [{"kind": "order_done", "side": "SELL", "order_no": "0000300100", "ts": T1}]
+            w._day_rows = []
+            W1 = T1 + timedelta(seconds=age)
+            await w._reconcile(W1, W1, catching_up=False)
+            # 날이 바뀐다 — rotate() 맨 앞의 _roll_day 를 그대로 흉내낸다.
+            next_day = T1 + timedelta(days=1, hours=14)
+            w._roll_day(next_day)
+            # 2일차 첫 대사 — 오늘 안에는 아무 사건도 없다(trivially ok). 전날 값과 비교되면 "해소"로 오판한다.
+            W2 = next_day + timedelta(seconds=age + 60)
+            await w._reconcile(W2, W2, catching_up=False)
+
+    asyncio.run(go())
+    warn = _gaps(caplog)
+    resolved = _infos(caplog, "[journal_gap_resolved]")
+    assert len(warn) == 1, warn
+    assert resolved == [], f"날이 바뀐 뒤 거짓 [journal_gap_resolved] — 전날 미해소 gap 과 비교해 해소로 오판했다: {resolved}"

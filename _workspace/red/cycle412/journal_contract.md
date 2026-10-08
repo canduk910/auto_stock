@@ -432,3 +432,21 @@ async def run_backfill(paths, db, *, max_bytes_per_sec: int = BACKFILL_MAX_BYTES
 - 규칙 — `_cutoff_split(done_events, day_rows, cutoff) -> (kept_done, kept_rows)`(`jw/main.py`). 완료 줄과 행을 (주문번호, side) 로 짝지어 **두 시각 중 늦은 쪽**이 `cutoff`(= W − `RECONCILE_MIN_AGE_SECONDS`) 이하일 때 둘 다 남긴다. 짝이 없으면 자기 시각 그대로. `_reconcile` 이 `check_identities` 앞에서 이것을 쓴다. `rows_from_trade_history` 의 기준(`trade_history.timestamp ≤ W − 120초`)은 그대로다.
 - 해소 로그 — 직전 결과가 어긋남이고 이번이 ok 면 INFO `[journal_gap_resolved] sell_done=… sell_rows=… buy_done=… buy_rows=… unknown_reason_sells=…` 1줄. 경고 규칙(7절 N2 — 값이 바뀔 때만 1줄)은 그대로다.
 - 테스트 = `test_jw_reconcile_timing.py` `test_n10a_*`(짝 있는 주문은 경계 −3~+3초 전 위상에서 함께 남거나 함께 빠짐 · 짝 없는 줄은 자기 시각) · `test_n10b_*`(`_reconcile` 실제 경로, 경계가 두 시각 사이 → `[journal_gap]` 0) · `test_n10c_*`(WARNING 1줄 뒤 해소 INFO 1줄).
+
+---
+
+## 9. 마무리 2 (10-09 — 「머지·배포 가능」 판정 뒤 마지막 손질 N11, backend-dev 결정: 고친다)
+
+번호는 판정 원문 그대로다. 6·7·8절의 금기가 그대로 선다 — 8영역·`scheduler.py`·마이그레이션 0줄, 워커 `src` import 0. 테스트가 정본이다.
+
+### N11-a (낮음) 날짜 경계에서 `_last_reconcile_result` 를 비우지 않아 거짓 `[journal_gap_resolved]`
+
+- 원인 — `_roll_day` 가 날짜별 집계(`_done_events`·`_day_rows`·`_journal_keys` 등)는 비우면서 `_last_reconcile_result` 는 그대로 둔다. 미해소 gap(`ok=False`)을 안고 날이 바뀌면, 다음 날 첫 대사는 그날 사건이 없어 trivially `ok=True` 인데, `_reconcile` 의 비교 대상이 여전히 전날의 `ok=False` 라 "어긋남이 풀렸다"로 오판해 거짓 `[journal_gap_resolved]` INFO 1줄을 남긴다.
+- 규칙 — `_roll_day(now)`: 날짜가 바뀌는 순간, 비우기 **전에** `self._last_reconcile_result` 가 있고 그 값이 `ok=False` 였으면 `[journal_gap_unresolved_at_rollover] day=… sell_done=… sell_rows=… buy_done=… buy_rows=… unknown_reason_sells=…` WARNING 1줄(그 날의 마지막 값 — 운영자가 "하루가 미해소로 끝났다"를 알 수 있게). 그 뒤 `self._last_reconcile_result = None`. 전날이 이미 `ok=True` 였으면 경고 없이 비우기만 한다. 첫 기동(`self._day is None`)은 이 경고 대상이 아니다.
+- 테스트 = `test_jw_reconcile_timing.py::test_n11a_roll_day_warns_and_clears_unresolved_result`(미해소 상태 → 경고 1줄 + None) · `test_n11a_roll_day_is_quiet_when_prior_day_was_ok`(ok 상태 → 경고 0 + None) · `test_n11b_reconcile_does_not_falsely_resolve_across_day_rollover`(`_reconcile` 실제 경로 — 1일차 미해소 → `_roll_day` → 2일차 trivially ok 대사에서 `[journal_gap_resolved]` 0).
+
+### N11-b (낮음) `JournalDB.fill_order_division` 호출 0곳 — 행을 쓴 뒤 온 접수 통보의 주문구분이 NULL 로 남는다
+
+- 원인 — 보류 중(같은 회전 안)에 도착한 `[order_notice]` 는 `Pairer._finalize` 가 `self._order_notices` 에서 읽어 `order_division` 을 채우지만(3.3절, Q7), 한 회전 보류가 끝나 행이 이미 DB 에 쓰인 **뒤**에 도착한 통보는 어디서도 다시 그 행을 보지 않는다. `jw/db.py::fill_order_division` 은 1절의 예외(`UPDATE … WHERE order_division IS NULL`)를 구현해 두고도 jw/ 안에서 부르는 곳이 없었다.
+- 규칙 — `Worker.rotate()` 가 그 회전에 읽은 `events` 를 훑을 때, `kind=="order_notice"` 이고 `rctf=="0"`(최초 확정)이고 `division` 이 있으면 `_fill_division(e)` → `self.db.fill_order_division(e["ts"] 의 KST 날짜, e["order_no"], e["side"], e["division"])`. **보류 중인 행이든 이미 쓰인 행이든 똑같이 부른다** — 빈 칸만 채우는 쪽은 DB 쪽 `WHERE order_division IS NULL` 이 지키므로(M4, pg 통합 테스트), 보류 중 경로(Pairer)와 겹쳐 불러도 덮어쓰지 않는다. 행 단위 예외 격리(`_fill_division`)는 `_write_row` 와 같은 규약 — 통보 1건 실패가 그 회전의 다른 처리를 막지 않는다(WARNING `[journal_write_error] division order_no=… side=… …`).
+- 테스트 = `test_jw_loop.py::test_n11_late_order_notice_fills_division_after_row_already_written`(SELL 행이 2회전째 `log_harvest` 로 쓰인 뒤, 3회전째 읽은 늦은 `[order_notice]` 가 그 행의 `order_division` 을 NULL → `"01"` 로 채운다).

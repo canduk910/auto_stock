@@ -128,9 +128,27 @@ class Worker:
     def _roll_day(self, now):
         d = now.astimezone(KST).date()
         if d != self._day:
+            if self._day is not None and self._last_reconcile_result is not None and \
+                    not self._last_reconcile_result.get("ok"):
+                # 전날이 미해소 상태로 끝났다 — 운영자가 그 사실을 알 수 있게 1줄(보완3 N11). 비우지 않으면
+                # 다음 날 첫(trivially ok) 대사가 이 값과 달라 "해소"로 오판해 거짓 [journal_gap_resolved] 를 낸다.
+                res = self._last_reconcile_result
+                log.warning("[journal_gap_unresolved_at_rollover] day=%s sell_done=%s sell_rows=%s "
+                            "buy_done=%s buy_rows=%s unknown_reason_sells=%s", self._day, res["sell_done"],
+                            res["sell_rows"], res["buy_done"], res["buy_rows"], res["unknown_reason_sells"])
             self._day = d
             self._done_events, self._day_rows, self._journal_keys = [], [], set()
             self._done_order_sides, self._counted_pairs = set(), set()
+            self._last_reconcile_result = None
+
+    async def _fill_division(self, notice):
+        """행 단위 예외 격리(`_write_row` 와 같은 규약) — 통보 1건 실패가 같은 회전의 다른 처리를 막지 않는다."""
+        try:
+            await self.db.fill_order_division(notice["ts"].astimezone(KST).date(), notice["order_no"],
+                                               notice["side"], notice["division"])
+        except Exception as exc:
+            log.warning("[journal_write_error] division order_no=%s side=%s %s: %s", notice.get("order_no"),
+                        notice.get("side"), type(exc).__name__, exc)
 
     async def _write_row(self, row):
         """반환 = 이 회전에 실측 행을 **새로** 넣었거나 승격했는가(보완2 N9 — exit 중복 차단에 쓴다).
@@ -235,14 +253,18 @@ class Worker:
 
         events = [e for e in (parse_line(ln) for ln in lines) if e is not None]
         for e in events:
-            if e["kind"] != "order_done":
-                continue
-            pair = (e["order_no"], e["side"])
-            if pair in self._done_order_sides:
-                continue
-            self._done_order_sides.add(pair)
-            self._done_events.append({"kind": "order_done", "side": e["side"], "order_no": e["order_no"],
-                                       "ts": e["ts"]})
+            if e["kind"] == "order_done":
+                pair = (e["order_no"], e["side"])
+                if pair in self._done_order_sides:
+                    continue
+                self._done_order_sides.add(pair)
+                self._done_events.append({"kind": "order_done", "side": e["side"], "order_no": e["order_no"],
+                                           "ts": e["ts"]})
+            elif e["kind"] == "order_notice" and e.get("rctf") == "0" and e.get("division") is not None:
+                # 보류 중인 행은 Pairer._finalize 가 채운다 — 이 호출은 그 보류가 끝나 행이 이미 쓰인
+                # 뒤에 도착한 통보를 위한 것이다(보완3 N11). DB 쪽 WHERE order_division IS NULL 이
+                # 덮어쓰기를 막아 두 경로가 겹쳐도 안전하다.
+                await self._fill_division(e)
         self._pairer.feed_events(events)
 
         result = self._pairer.drain(trade_strategies=await self._trade_strategies(now))

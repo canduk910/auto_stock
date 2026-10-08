@@ -36,7 +36,10 @@ ops/role.sql      워커 전용 DB 역할 — 마이그레이션이 아니다. 0
 1. G0 호출 — 엔진이 멈췄거나 `phase=="idle"` 이면 여기서 끝(쓰기 0, 다음 회전 300초 뒤)
 2. G1 호출
 3. 로그 이어 읽기(1회 상한 4MiB)
-4. 짝짓기 — 앵커 줄(접수·완료·폴백·재주문·수동)은 **다음** 회전에 내보낸다
+4. 짝짓기 — 앵커 줄(접수·완료·폴백·재주문·수동)은 **다음** 회전에 내보낸다. 그 회전에 읽은
+   `[order_notice]`(`rctf=="0"`, 최초 확정) 는 짝짓기와 별도로 `fill_order_division` 에 바로 연결한다 —
+   보류 중인 행이든 이미 DB 에 쓰인 행이든 똑같이 부르고, 빈 칸만 채우는 것은 DB 쪽
+   `WHERE order_division IS NULL` 이 지켜 두 경로가 겹쳐도 덮어쓰지 않는다
 5. 주문 행·손절선 사건 쓰기(행 단위 예외 격리 — 한 건이 실패해도 WARNING 뒤 다음 행으로 넘어간다).
    로그 행(`unmatched`·`external` 아닌 source)은 `insert_order` 가 실패(이미 있음)하면
    `promote_order` 로 그 빈 행(`unmatched`·`external`)을 실측으로 승격한다.
@@ -54,6 +57,10 @@ ops/role.sql      워커 전용 DB 역할 — 마이그레이션이 아니다. 0
      없으면 자기 시각 그대로다.
    - 어긋나면 `[journal_gap]` WARNING — 직전 결과와 값이 다를 때만 1줄(어긋남이 계속되면 매번 다시
      남기지 않는다). 어긋났던 항등식이 맞으면 `[journal_gap_resolved]` INFO 1줄
+   - 날짜가 바뀌면(`_roll_day`) 그 비교 대상(`_last_reconcile_result`)도 함께 비운다 — 미해소 상태로
+     하루가 끝났으면 비우기 전에 `[journal_gap_unresolved_at_rollover]` WARNING 1줄(그 날의 마지막
+     값)을 남긴다. 비우지 않으면 다음 날 첫(사건 0건이라 trivially ok인) 대사가 전날의 어긋난 값과
+     비교돼 "해소"로 오판하고 거짓 `[journal_gap_resolved]` 를 낸다
 
 평소 주기는 15초다. G0·G1 이 실패하면 스냅샷 없이 로그만 수확하고(`degraded`), 연속 실패는
 30·60·120·240·300초로 물러난다. 예외가 올라오면(`run_forever`) WARNING 으로 남기고 같은 백오프를 탄다.
