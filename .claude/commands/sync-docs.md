@@ -89,6 +89,7 @@ git diff 를 보지 말고 **지정 영역의 코드를 직접 읽는다**.
 | `src/routes/*` | `src/routes/CLAUDE.md`, `README.md`(API 엔드포인트 표) |
 | `src/middleware/*` | `src/CLAUDE.md`(의존 관계·진입점 표), `CLAUDE.md`(API 인증 규칙·환경 변수) — **전용 CLAUDE.md 없음, 누락 주의**(cycle243 API 인증이 여기 산다) |
 | `tools/deploy/*`, `.github/workflows/deploy.yml` | `CLAUDE.md`(Docker/배포 — 선택적 배포 3모드), `README.md`(배포) |
+| `journal_worker/*` (거래일지 워커 — `src` 밖 별도 컨테이너) | `journal_worker/README.md`(모듈 구조·한 회전), `CLAUDE.md`(Docker/배포 `journal_worker` 항목 — 금기·DB 역할), `docs/architecture.md`(15.8), `src/db/CLAUDE.md`(047 표 — 워커가 쓰는 칸·규약). ⚠️ `journal_worker/README.md` 에는 KIS 자격 변수 접두사·체결통보 TR 이름을 쓰지 않는다(격리 가드 I2 가 문서까지 훑는다) |
 | `tools/ops/*` | `CLAUDE.md`(운영 가이드 — TLS 단계·자격 회전 등 운영자 실행 절차) |
 | `tools/analysis/*`, `tools/test_impact/*` | `CLAUDE.md`(테스트 실행 / 관측 도구), 해당 산출물 디렉터리의 README 성격 문서 |
 | `e2e/*` | `frontend/CLAUDE.md`(E2E 규약), `README.md`(테스트 실행) |
@@ -115,6 +116,7 @@ git diff 를 보지 말고 **지정 영역의 코드를 직접 읽는다**.
 | `docs/HARNESS_CHANGELOG.md` | verbatim 누적 (행 추가만) |
 | `docs/backtest-monitoring.md` | 외부 통합(백테스트 MCP·매크로 레짐) 운영 가이드 |
 | `docs/macro-lite.md` | 매크로 컨테이너 운영 가이드 (설치·seed·캐시 영속·첫 호출 예산·장애 복구) |
+| `journal_worker/README.md` | 거래일지 워커 디렉터리 문서 (전용 `CLAUDE.md` 없음 — 금기의 정본은 루트 `CLAUDE.md`) |
 | `_workspace/00_URGENT_WORKLIST.md` | 열린 과제 정본 |
 | `_workspace/00_leader_trading_rules.md` | 매매 규칙 정본 (`DEFAULT_PARAMS` 변경 시 동기화 의무) |
 | `.claude/agents/*.md` · `.claude/skills/**/SKILL.md` · `.claude/commands/*.md` | 하네스 구성 |

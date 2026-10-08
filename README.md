@@ -115,7 +115,7 @@ for f in supabase/migrations/*.sql; do
 done
 ```
 
-파일 목록 (현재 `001`~`043`, 실제 집합은 디렉터리가 정본):
+파일 목록 (현재 `001`~`047`, 실제 집합은 디렉터리가 정본):
 
 ```
 001_init.sql                          # 기본 테이블
@@ -161,7 +161,23 @@ done
 041_stock_master_financial.sql        # KIS 재무 5 TR 정규화 PK(ticker, stac_yymm, div_cls) + 18 NUMERIC + raw JSONB (cycleC1, 마법공식·F-Score-7 원천)
 042_daily_log_reports_external.sql    # daily_log_reports ext_* 6컬럼 (cycle249 외부 리포터 루틴 쓰기 대상)
 043_llm_buy_evaluations.sql           # AI 매수평가(LLM) — 주문이 나갈 때 남기는 기록 PK(trade_date, account_no, ticker, order_no) (cycle276, 관측 전용 — 매매 hot path 무관)
+044_etf_trend_seed.sql                # 신규 전략 etf_trend strategy_config 초기 행 (cycle403, 기본 비활성)
+045_trade_cost_daily.sql              # KIS TTTC8715R 정산 수수료·제세금 저장 PK(trad_dt, pdno) + 기간 합계 표 (트랙 C)
+046_trade_history_order_price.sql     # trade_history.order_price — PENDING 때 주문가 (cycle409, 슬리피지 원천)
+047_trade_journal.sql                 # 거래일지 4표 trade_journal_orders/_stops/_notes/_cursor (cycle412, 쓰는 쪽 = journal_worker 전용 역할)
 ```
+
+`journal_worker/ops/role.sql`(거래일지 워커 전용 DB 역할)은 이 목록에 없다. 마이그레이션이
+아니라서 자동 배포가 돌리지 않는다. 047 을 적용한 뒤 사람이 한 번 실행한다. 두 번 실행해도 오류가
+나지 않는다. 비밀번호는 psql 변수 `journal_pw` 로만 받는다.
+
+```bash
+JPW="$(openssl rand -hex 24)"     # hex = DSN 에 넣을 때 URL 인코딩이 필요 없다
+psql -v ON_ERROR_STOP=1 "$DATABASE_URL" -v journal_pw="$JPW" -f journal_worker/ops/role.sql
+```
+
+그다음 `DATABASE_URL` 과 같은 호스트·DB 에 사용자만 `journal_worker`, 비밀번호만 `$JPW` 로 바꾼
+DSN 을 `secrets/journal_worker.env` 에 넣는다(아래 「배포 전 호스트 준비」 3번).
 
 ### 3. Docker Compose로 실행 (권장)
 
@@ -252,9 +268,9 @@ cd .. && npx playwright install && npx playwright test --config=e2e/playwright.c
 
 | 화면 | 기능 |
 |------|------|
-| 대시보드 (`/`) | 계좌 요약, 보유 종목(섹터·거래시장 + **종목별 손절가·목표가** — 값이 불확실하면 `—` 이고 고정%손절 근사는 「근사」 꼬리표가 붙는다. 행을 더블클릭하면 **종목 차트**가 뜬다 — 아래 거래 내역 행 참조), 매매 실적 차트, 상태 인디케이터, 조건검색 현황(전략별 스캔/타겟/스윙 깔때기), **`KisAccountPoolCard` 세션별 expand** (cycle35/37 — main/quote-N 종목 테이블 + WS tick / KIS 체결시각 / WS 의심 amber 배지) |
+| 대시보드 (`/`) | 계좌 요약, 보유 종목(섹터·거래시장 + **종목별 손절가·목표가** — 값이 불확실하면 `—` 이고 고정%손절 근사는 「근사」 꼬리표가 붙는다. 행을 더블클릭하면 **종목 차트**가 뜬다 — 아래 거래 내역 행 참조), 매매 실적 차트(실적 금액·수익률은 **세후**(수수료·세금 차감)가 기본이고 「세전」 토글로 바꿔 본다. 아직 정산되지 않은 비용은 실측 요율로 추정해 「추정」 배지를 단다), 보유 종목의 「예상 매도비용」·「순 평가손익」 칸, 주문처리 현황의 오늘 실현 순손익(추정), 상태 인디케이터, 조건검색 현황(전략별 스캔/타겟/스윙 깔때기), **`KisAccountPoolCard` 세션별 expand** (cycle35/37 — main/quote-N 종목 테이블 + WS tick / KIS 체결시각 / WS 의심 amber 배지) |
 | 조건검색 추적 (`/strategy-funnel`) | 전략 dropdown + 날짜 picker + 단계별로 펼칠 수 있는 테이블(통과·탈락 종목 + 탈락 사유 표본) + 수동 실행 버튼 (cycle34) |
-| 거래 내역 (`/history`) | **두 탭** — 주문체결내역(매수/매도 raw 행, 필터·페이징) / 매매손익(매수·매도 페어 1행, 가중평균. 보유 중은 open 페어로 미실현 손익 표시). 두 그리드 각 행 맨 끝에 **AI 매수평가 점수 배지 + 버튼 + 팝업**(`LlmScoreBadge` · `LlmEvaluationModal`) — 점수는 배지로 목록에서 바로 읽고(기록 없음 `·` / 평가 실패 `–` / 통과·차단은 색으로 구분), 버튼을 누르면 그 주문이 나갈 때 기록된 매수평가(사유·핵심 위험·무효화 조건·주문 스냅샷)를 주문번호로 조회한다. 메뉴의 「전략수정 AI자문」(20:00 파라미터 추천)과는 **다른 기능**이다. 기록이 없는 행의 버튼은 비활성이다(cycle276). ⚠️ 화면의 열 이름·버튼 라벨은 아직 「AI 자문」 이고 팝업 제목만 「AI 매수평가」 다. 두 그리드와 대시보드 보유 종목 표의 **행을 더블클릭하면 종목 차트 모달**이 뜬다 — 최근 5년 캔들을 일봉/주봉/월봉으로 본다(KLineChart, 수정주가, KRX 기준). 캔들 위에는 EMA 5·20·60·120 이 겹치고, 아래에는 거래량 막대 · RSI(14) · MACD(12·26·9) 가 차례로 놓인다. 오늘 봉처럼 아직 확정되지 않은 마지막 봉은 「잠정」 안내가 붙는다(cycle387) |
+| 거래 내역 (`/history`) | **두 탭** — 주문체결내역(매수/매도 raw 행, 필터·페이징) / 매매손익(매수·매도 페어 1행, 가중평균. 보유 중은 open 페어로 미실현 손익 표시). 매매손익 탭은 수수료·세금·순손익·순손익율·비용률·슬리피지 칸과 「추정」·「배분」 배지를, 주문체결내역 탭은 매도 행의 순손익 칸을 함께 보인다. 두 그리드 각 행 맨 끝에 **AI 매수평가 점수 배지 + 버튼 + 팝업**(`LlmScoreBadge` · `LlmEvaluationModal`) — 점수는 배지로 목록에서 바로 읽고(기록 없음 `·` / 평가 실패 `–` / 통과·차단은 색으로 구분), 버튼을 누르면 그 주문이 나갈 때 기록된 매수평가(사유·핵심 위험·무효화 조건·주문 스냅샷)를 주문번호로 조회한다. 메뉴의 「전략수정 AI자문」(20:00 파라미터 추천)과는 **다른 기능**이다. 기록이 없는 행의 버튼은 비활성이다(cycle276). ⚠️ 화면의 열 이름·버튼 라벨은 아직 「AI 자문」 이고 팝업 제목만 「AI 매수평가」 다. 두 그리드와 대시보드 보유 종목 표의 **행을 더블클릭하면 종목 차트 모달**이 뜬다 — 최근 5년 캔들을 일봉/주봉/월봉으로 본다(KLineChart, 수정주가, KRX 기준). 캔들 위에는 EMA 5·20·60·120 이 겹치고, 아래에는 거래량 막대 · RSI(14) · MACD(12·26·9) 가 차례로 놓인다. 오늘 봉처럼 아직 확정되지 않은 마지막 봉은 「잠정」 안내가 붙는다(cycle387) |
 | 전략 현황 (`/strategies`) | 전략별 손절 임계 가시화 (`stop_loss_rate` 손절 임계 · `daily_loss_limit` 일일 손실 한도 · `trailing_stop_rate` 트레일링 임계 · `position_ratio` 종목당 포지션 비율) (cycle103) |
 | 전략수정 AI자문 (`/recommendations`) | 20:00 OpenAI 자동 생성 자문 — 신규 자문 탭(승인/거절) + 이력 탭(상태/전략 필터). 자산 배정/로직 자문/비중 변경 사유(`weight_reasoning`) 별도 카드 + 백테스트 비교 카드(`BacktestComparisonCard`) |
 | 로그 (`/logs`) | **두 탭** — 시스템 로그(기간·레벨·페이징) / 일일 로그 분석. 일일 로그 분석 = **21:30** 정산 직후 OpenAI 가 system_logs+trade_history 를 분석한 운영 개선 리포트(영업일 리스트 + findings + 메트릭). 20:05 metrics 1차 스냅샷이 같은 행을 먼저 채우고 21:30 완전판이 upsert 로 덮어쓴다. 구 `/log-reports` 북마크는 `/logs?tab=daily-report` 로 리다이렉트된다 |
@@ -509,18 +525,21 @@ KIS OpenAPI 가 NXT(넥스트레이드 ATS) 주문·시세를 정식 지원하�
 | GET | `/api/trading/status` | 현재 상태 조회 |
 | GET | `/api/trading/positions` | 보유 포지션 상세만 (BalanceTable 전용 분리) |
 | GET | `/api/trading/orders` | 주문 추적 상태만 (OrderMonitor 전용 분리) |
-| GET | `/api/balance` | 잔고 조회 (예수금 + 보유종목, 종목별 NXT/KRX 거래시장 정보 join) |
+| GET | `/api/balance` | 잔고 조회 (예수금 + 보유종목, 종목별 NXT/KRX 거래시장 정보 join). 보유마다 예상 매도비용 요율 `sell_cost_rate`(ETF 는 수수료율만)와 이미 낸 매수 수수료 `buy_fee_paid`·`buy_fee_status` 를 함께 낸다(비용 조회 실패는 `buy_fee_paid`·`buy_fee_status` 둘 다 `None`) |
 | GET | `/api/balance/buyable` | 매수 가능 금액 조회 |
-| GET | `/api/history?page=&size=` | 거래 내역 (페이징) |
-| GET | `/api/history/pnl?page=&size=&strategy=&ticker=` | 매매손익 — 매수/매도 페어 1행 (포지션 0 사이클 단위 가중평균). 보유 중은 open 페어 (미실현 손익은 `ticker_prices` 현재가) |
+| GET | `/api/balance/exit-lines` | 보유마다 손절선·목표가·진입 ATR·무장가(거래일지 워커 전용, 읽기만 · 5초 캐시) |
+| GET | `/api/history?page=&size=` | 거래 내역 (페이징). 체결 행마다 `fee`·`cost_status` + SELL 행 `tax`·`net_profit_loss` 를 낸다. 배분은 페이지가 아니라 그 날짜 전체 체결로 한다 |
+| GET | `/api/history/pnl?page=&size=&strategy=&ticker=` | 매매손익 — 매수/매도 페어 1행 (포지션 0 사이클 단위 가중평균). 보유 중은 open 페어 (미실현 손익은 `ticker_prices` 현재가). 페어마다 `fee`·`tax`·`net_profit_loss`·`net_profit_rate`·`cost_bp`·`slippage_won`·`cost_status`·`allocated` + summary 순손익 합계를 낸다(현재가를 모르면 `fee`~`cost_bp` 는 `None`). 분할 매도 뒤 보유 페어에 `partial_fee`·`partial_tax`, 비용 모름은 summary 5칸(`fee_sum`·`tax_sum`·`realized_net_total_krw`·`realized_net_rate_pct`·`slippage_n`) `None`(0 아님) |
 | GET | `/api/llm-evaluations?order_nos=<CSV>&trade_date=` | **cycle276** AI 매수평가 배치 요약 — 키는 `"<trade_date>\|<order_no>"` 복합 키다(같은 주문번호가 여러 날짜에 있으면 날짜마다 한 키). 거래 내역 두 그리드의 AI 매수평가 버튼 활성 판정용. CSV 는 공백·중복 제거 후 1~200개(0개·초과 422), `trade_date` 형식 위반 422 |
 | GET | `/api/llm-evaluations/{order_no}?trade_date=` | **cycle276** 단건 상세 (모달 본문) — 화이트리스트 53키 사영, 계좌번호는 `account_no_masked` 로만 나간다. 기록 없음 404 / DB 예외 500 (두 경우를 섞지 않는다) |
-| GET | `/api/performance/summary` | 실적 요약 (TWR 누적 + 일평균 실현 수익률) |
-| GET | `/api/performance/daily` | 일별 실적 (실현손익 기반 + TWR 누적 + 외부 입출금) |
+| GET | `/api/performance/summary` | 실적 요약 (TWR 누적 + 일평균 실현 수익률). `net_total_profit_rate`·`net_avg_daily_profit_rate`(순손익 기준)를 함께 낸다 — 조회 창이 아니라 개시 이래 전체로 재누적하고, 비용 조회 실패는 두 칸 모두 `None`(세전 값을 세후 칸에 담지 않는다) |
+| GET | `/api/performance/daily` | 일별 실적 (실현손익 기반 + TWR 누적 + 외부 입출금). 행마다 `daily_fee`·`daily_tax`·`daily_net_pnl`·`net_daily_profit_rate`·`net_cumulative_return_rate`·`cost_status` 를 함께 낸다 — `net_cumulative_return_rate` 는 이 창이 아니라 개시 이래 전체 재누적, 전략 필터는 배분 뒤에 건다 |
+| GET | `/api/costs/today?strategy=` | 오늘 체결 × (정산 or 추정 요율), 전략별 + total — OrderMonitor 용. 전략 필터는 배분 뒤에 걸고 요율은 서버 오늘 기준 30일 창이다(KST 하루 단위 캐시) |
+| GET | `/api/costs/daily?from=&to=` | 날짜별 비용·슬리피지·`cost_status` 추이. 요율은 화면 범위가 아니라 서버 오늘 기준 30일 창이다 |
 | POST | `/api/performance/recompute` | trade_history 기반 daily_performance 전체 소급 재계산 (멱등) |
 | GET | `/api/strategies` | 전략 목록 + 비중 + 상태 + 타겟가 + 스윙 `scan_stats` 깔때기 |
 | GET | `/api/strategies/params-schema` | cycle278 파라미터 카탈로그 전체 + 전략별 적용 키·현재값·기본값. 편집 폼은 **이 한 응답**으로 렌더한다 (키·범위·선택지 프론트 하드코딩 금지) |
-| GET | `/api/strategies/te?months=3` | cycleF 전략별 TE(트레이딩 예지치)/RR(손익비) 최근 N개월(`months`×30일) 지표 — 관찰 전용, 5분 프로세스 캐시. 전략별 계산 실패는 그 전략만 빈 값으로 격리 |
+| GET | `/api/strategies/te?months=3` | cycleF 전략별 TE(트레이딩 예지치)/RR(손익비) 최근 N개월(`months`×30일) 지표 — 관찰 전용, 5분 프로세스 캐시. 전략별 계산 실패는 그 전략만 빈 값으로 격리한다. 판정은 순손익 기준, 세전은 `*_gross` 칸으로 병기하고 세전 승/패 수 `win_gross`·`loss_gross` 도 함께 낸다 |
 | PUT | `/api/strategies/weights` | 전략별 비중 수정 (매수금액 하한선 검증). body `{weights: {strategy_id: ratio}}` — **단위는 비율 `0.0~1.0`, 퍼센트(0~100) 금지**(2026-08-18 확정). 범위 위반 422, Σ>1.0 은 `success=false`(저장 미수행), 부분 payload(Σ<1) 허용. `GET /api/strategies` 의 `weight` 와 단위가 같아 왕복 항등 |
 | PUT | `/api/strategies/{id}/params` | 전략 파라미터 수정 (부분 dict **병합** — 요청에 없는 키는 보존). **미지 키·읽기 전용 키·자료형·선택지·범위·예산 불변식 위반은 422 다**(cycle278). 오류가 하나라도 있으면 아무것도 저장하지 않는다. 알 수 없는 전략 id 는 200 + `success=false` |
 | GET | `/api/strategies/system/auto-start` | 자동 매매 설정 조회 |
@@ -611,6 +630,7 @@ auto_stock/
 ├── tests/                     # 백엔드 테스트 (pytest)
 ├── e2e/                       # Playwright E2E
 ├── tools/                     # 배포 판정(deploy) · TLS 운영(ops) · 영향 인덱스(test_impact)
+├── journal_worker/            # 거래일지 관찰자 워커 컨테이너 (src 밖 · 로그와 조회 API 를 읽기만 한다)
 ├── supabase/migrations/       # DB 마이그레이션
 ├── docs/
 │   ├── kis/                   # KIS API 스펙 문서
@@ -680,14 +700,17 @@ auto_stock/
 
 ## 프로세스 구성과 분리 로드맵
 
-현재 운영 컨테이너는 3개다 (`docker-compose.prod.yml`) — `backend` · `frontend` · `macro`.
-`macro` 는 매크로 화면 API 이고 매매 판단을 하지 않는다. 매매에 관한 일은 전부 `backend` 한 프로세스에 있다.
+`docker-compose.prod.yml` 의 컨테이너는 4개다 — `backend` · `frontend` · `macro` · `journal_worker`.
+`macro` 는 매크로 화면 API 이고 매매 판단을 하지 않는다. `journal_worker` 는 거래일지를 쓰는 관찰자다.
+backend 가 남긴 로그·조회 API 응답·`trade_history` 를 읽기만 하고, KIS 에는 접속하지 않는다. 매매에 관한 일은 전부
+`backend` 한 프로세스에 있다.
 
 ```mermaid
 flowchart LR
     FE["frontend<br/>nginx + SPA<br/>Basic Auth"]
     BE["backend (uvicorn 단일 워커)<br/>시세 감시 · 전략 판정 ·<br/>주문 · 정산 · 관측이 한 곳"]
     MAC["macro<br/>매크로 API"]
+    JW["journal_worker<br/>거래일지 관찰자"]
     KIS["KIS OpenAPI<br/>REST · WebSocket"]
     RDS[("AWS RDS PostgreSQL")]
     FE -->|"/api"| BE
@@ -695,6 +718,9 @@ flowchart LR
     BE -->|"레짐 조회 (관찰)"| MAC
     BE <--> KIS
     BE -->|"asyncpg"| RDS
+    JW -->|"조회 GET 2개 (15초)"| BE
+    BE -.->|"파일 로그 (읽기 전용)"| JW
+    JW -->|"trade_journal_* 쓰기 · trade_history 읽기<br/>(전용 DB 역할)"| RDS
 ```
 
 매매에 필요한 모든 일이 한 프로세스 안에 있어서, 프롬프트 한 줄만 고쳐도 backend 전체를
@@ -743,11 +769,20 @@ chmod 644 secrets/.htpasswd; unset AUTH_PASS
 
 # 2) ACME(HTTP-01) 챌린지 webroot — TLS 첫 발급의 전제
 mkdir -p certbot-www
+
+# 3) 거래일지 워커(cycle412) DSN — journal_worker 전용 역할의 DSN 하나만 담는다
+#    (메인 .env 와 분리 — journal_worker/ops/role.sql 로 역할을 먼저 만든다)
+printf 'JOURNAL_DATABASE_URL=%s\n' "<journal_worker 역할 DSN>" > secrets/journal_worker.env
+chmod 600 secrets/journal_worker.env
 ```
 
 - 권한 `755 secrets` + `644 secrets/.htpasswd` 는 **필수**다. nginx worker 는 컨테이너 안 **uid 101**, 호스트 파일은 `ubuntu`(uid 1000) 소유라 `700`/`600` 이면 자격 요청이 전부 **500** 이 된다.
 - 자격 파일이 아예 없으면 자격을 보낸 요청이 **403** 이다. 무자격 요청은 어느 상태에서도 401 이라 그것만으로는 결손을 판별할 수 없다.
 - `certbot-www` 를 미리 만들지 않으면 Docker 가 bind mount 소스를 `root:root` 로 만들어 `ubuntu` 가 쓰지 못한다.
+- `secrets/journal_worker.env` 가 없으면 `journal_worker` 하나만 못 뜨는 것이 아니다. `env_file` 결손은 compose 명령 전체의 오류라서, 서비스를 지정하지 않는 `full`·`none` 배포의 `docker compose up` 이 아무것도 만들지 않고 실패한다(로컬 compose v5.1.1 실측). 그래서 이 파일은 거래일지 워커가 들어가는 첫 배포보다 먼저 있어야 한다.
+- 이 파일에 메인 앱 `.env` 를 대신 쓰지 않는다 — KIS 앱키·HTS ID·운영 DSN 33개가 그 컨테이너에도 들어간다.
+- `journal_worker` 는 컨테이너 안 uid 1000(`journal`)으로 돌며 `./logs` 를 읽기 전용으로 마운트한다. 호스트 `logs/auto_stock.log*` 를 uid 1000 이 읽을 수 있어야 한다 — 소유자가 uid 1000 이 아니면 다른 사용자 읽기 권한(예: `644`)이 필요하다.
+- 이 파일은 `600` 으로 둔다. frontend(nginx)가 `./secrets` 디렉터리를 통째로 마운트해서 nginx 컨테이너 안에서도 이 파일이 보인다. `600` 이면 nginx worker(uid 101)는 읽지 못하고, `env_file` 은 호스트에서 compose 를 돌리는 `ubuntu` 가 읽으므로 배포에는 지장이 없다.
 - `secrets/` 는 **git 커밋 금지** (`.gitignore` 등재).
 
 ### 자동 배포 (CI/CD)
@@ -777,12 +812,13 @@ EC2 는 모든 push 에 `up --build` 를 돌지 않는다. `compose_up_changed.s
 | 모드 | 조건 (변경 경로) | 실행 | backend |
 |------|------------------|------|---------|
 | `full` | `src/` · `requirements.txt` · `Dockerfile` · `.dockerignore` · `docker-compose.prod.yml`/`.tls.yml`/`.tls2.yml` · `.github/workflows/deploy.yml` · `tools/deploy/` 중 하나라도. 단 `src/` 안 `.md` 는 뺀다 | `up --build -d --remove-orphans` | 재생성 |
-| 선택 배포 — `frontend` · `macro` · `frontend+macro` | backend 축이 그대로이고 `frontend/`·`tools/ops/tls_stage2/`(frontend 축) · `macro/`(macro 축) 중 바뀐 축만. 모드 이름이 곧 서비스 목록이다 | `up --build -d --remove-orphans --no-deps <서비스…>` | 무접촉 |
+| 선택 배포 — `frontend`·`macro`·`journal` 중 걸린 축을 그 순서로 `+` 로 이은 조합(cycle412 — `journal_worker/`) | backend 축이 그대로이고 `frontend/`·`tools/ops/tls_stage2/`(frontend 축) · `macro/`(macro 축) · `journal_worker/`(journal 축, 서비스 `journal_worker`) 중 바뀐 축만 | `up --build -d --remove-orphans --no-deps <서비스…>` | 무접촉 |
 | `none` | 위 축 어느 것도 아님(docs·tests 등) 또는 마커 == HEAD | `up -d --remove-orphans` (빌드 없음) | 재생성 0 |
 
 - **판정 불가는 전부 `full`** 이다(fail-safe) — 마커 없음 · 마커 SHA 미지 · 직전 시도 마커(`.deployed_sha.attempt`) 잔존 · diff 실패.
 - `.tls_enabled` 가 있으면 모든 compose 호출에 `-f docker-compose.tls.yml` 이, `.tls_stage2` 도 함께 있으면 `-f docker-compose.tls2.yml` 까지 base 뒤에 붙는다. 두 마커는 **모드 판정에는 개입하지 않는다**.
 - `.env` 는 git 밖이라 스크립트가 못 본다 — `.env` 를 손댄 뒤에는 운영자가 직접 재생성한다.
+- `journal_worker/` 만 바꾸면 워커만 다시 만든다(`journal_worker/tests/`·`ops/role.sql` 만 바꿔도 `journal`). 하지만 compose 의 `journal_worker` 블록(자원 상한 등)을 고치면 `docker-compose.prod.yml` 이 backend 축이라 `full` 이다. migration 만 바꾸면 `none` 이다(migration 은 compose 전에 `deploy.yml` 이 적용한다).
 - 모드를 미리 확인: 로컬에서 `git diff --name-only <EC2 의 .deployed_sha 값> HEAD` 를 위 표에 대보거나, EC2 에서 `DEPLOY_DRY_RUN=1 bash tools/deploy/compose_up_changed.sh` (docker 미호출 · 마커 미기록).
 
 ### TLS (HTTPS)

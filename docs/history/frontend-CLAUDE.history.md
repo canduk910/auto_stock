@@ -1597,3 +1597,77 @@ nginx 계약(`auth_basic off;` 금지 · 옛 `nginx.conf` 부활 금지)은 루�
 - 금기 이유 한 문장 4건 — `StrategyParamsEditor` 키 비보유 · `ScrollPane` 상한 · Macro 국면 화살표 · `ExchangeBoardRow` `SOR` 회색 안내.
 - AI 매수평가 — 가드가 잠그는 「두 그리드의 요약 맵 직접 인덱싱 0건」 · 숫자·시각의 전칭 「전부」 복원.
 - 서체 캐시 — 원인 조건 「정적자산 정규식에 `ttf` 가 없어」 복원. kojiro 탭 — 백엔드 추가 한정 「`atr_ratio` 1키만」 복원.
+
+---
+
+## 테스트 규약 (공통)
+
+### 2026-10-08 cycle411 문서 동기화 — 규약 1 에 5초 폴링 예외를 적음
+
+정본 원문:
+
+```
+1. **모든 `useQuery` 에 `retry: 1` 을 명시한다**(전역 기본값이 있어도) — 백엔드 없는 e2e 에서 ECONNREFUSED 재시도가 spec timeout 을 낸다. AST 가드 `frontend/src/components/__tests__/_ast_useQuery_retry_required.test.ts`(카드 + `TARGET_PAGES` 전수).
+```
+
+경위: 코드에 `retry: 1` 이 아닌 쿼리가 둘 있었다 — `OrderMonitor` 의 `/api/costs/today`(`retry: 0`, cycle411 2차 통합 검증 F7: `retry: 1` × 5초 폴링이면 실패가 분당 24건 WARNING 으로 쌓였다)와 `TradingStatusContext` 의 `/api/trading/status`(`retry: false`). AST 가드는 처음부터 `retry:` 키 존재(값 `false`/`0`~`3`)만 보았다. 코드를 정본으로 보고 규약을 「명시 의무 + 기본 1 + 5초 폴링 예외 0」 으로 고쳤다.
+
+→ CHANGELOG: cycle411 행
+
+## OrderMonitor
+
+### 2026-10-08 cycle411 문서 동기화 — 조회 실패 표시·쿼리 옵션·머리줄 규칙
+
+정본 원문:
+
+```
+- 오늘 실현 순손익(추정, testid `order-monitor-net-pnl`) — `GET /api/costs/today?strategy=`(scheduler 무접촉). 전체 탭은 strategy 없이 조회해 `total.net_pnl`, 전략 탭은 `strategy=<id>` 조회 결과를 보인다. `cost_status` 가 `estimated`/`mixed` 면 「추정」 배지. 조회 실패여도 기존 「실현 손익」(세전, 전략별 `daily_realized_pnl` 합산)은 그대로 보인다.
+```
+
+경위: 3차 통합 검증 지적. 조회 실패 시 「—」 + `order-monitor-net-pnl-error` 「조회 실패」(마지막 성공값을 남기지 않음), `retry: 0`·`refetchInterval: 5000`, 머리줄 `flex-wrap gap-2`·`whitespace-nowrap`, 「추정」 한 번 규칙이 없었다. 위 문장은 세 줄로 나눠 덮어썼다.
+
+→ CHANGELOG: cycle411 행
+
+## History (`/history`)
+
+### 2026-10-08 cycle411 문서 동기화 — 배지 조건·summary 「모름」 표시
+
+정본 원문(바뀐 부분):
+
+```
+- 주문체결내역: `TradeHistoryGrid`(raw 행). SELL 행만 `순손익`(`net_profit_loss`, `cost_status` 가 추정/배분이면 「추정」 배지) 칸을 보이고 BUY 행은 `-`. 기존 `매매손익`(세전) 칸은 그대로.
+- 매매손익: … summary 부재 시 0. 행 단위 `cost_status="estimated"/"mixed"` 는 「추정」, `allocated=true` 는 「배분」 배지(`cost-badge-<rowIndex>`) — 정산·단독 행은 둘 다 없다. 새 칸이 없는(구 서버) 페어는 `—`(NaN·undefined 금지).
+```
+
+경위: `TradeHistoryGrid` 배지 조건은 「추정/배분」 이 아니라 `cost_status` 가 `estimated`/`mixed` 일 때다(`배분` 은 `cost_status` 값이 아니다). `TradePnLGrid` 는 summary 비용 칸 `null` → `—`, 정수 원·`NN.Nbp` 표기, `allocated` 의 「페어 밖 배분」 규칙이 빠져 있었다(3차 통합 검증 지적).
+
+→ CHANGELOG: cycle411 행
+
+## BalanceTable
+
+### 2026-10-08 cycle411 문서 동기화 — 순 평가손익 식에 매수 수수료
+
+정본 원문:
+
+```
+**예상 매도비용 · 순 평가손익 (cycle411)**: "수익률" 다음. 백엔드가 보유 종목마다 `sell_cost_rate`(수수료율+세율, ETF 는 수수료율만)·`cost_status="estimated"` 를 싣고, 화면이 (WS 실시간 시세로 덮인) 평가금액에 곱한다 — `round(평가금액 × sell_cost_rate)`, 순 평가손익 = 평가손익 − 예상 매도비용. testid `sell-cost-{ticker}`(「추정」 꼬리표 포함) · `net-pl-{ticker}`. `sell_cost_rate` 가 없으면(구 서버) 둘 다 `—`(숫자를 지어내지 않는다). 기존 "평가손익"(세전) 칸은 그대로.
+```
+
+경위: 화면은 `buy_fee_paid`(이미 낸 매수 수수료)까지 빼고, `buy_fee_paid` 가 `null` 이면 `—` 를 그린다. 표 루트 `<table>` 의 `whitespace-nowrap` 도 없었다(3차 통합 검증 지적).
+
+→ CHANGELOG: cycle411 행
+
+## Strategies (`/strategies`) — ### TE/RR 성과 섹션
+
+### 2026-10-08 cycle411 문서 동기화 — 필드 수·세후/세전 라벨
+
+정본 원문(바뀐 부분):
+
+```
+… 타입 `TeRrMetrics`(`strategy.ts`, 백엔드 1:1 19필드).
+- A: … + 3개월 실현 ₩(`te-realized-{key}`, cycle411 — `realized_net_sum_krw`(세후) 기본, 없으면(구 서버) `realized_sum_krw`(세전)로 폴백). 판정 지표(TE%·RR·승률)는 **net(세후) 기준**이고, 세전 값은 비교용 `*_gross`(`te_pct_gross`/`te_krw_avg_gross`/`win_rate_gross`/`rr_gross`/`verdict_gross`) 로 따로 실린다 — 화면은 아직 쓰지 않는다.
+```
+
+경위: `TeRrMetrics` 는 19필드가 아니라 29필드(기본 19 + 실비용 선택 칸 10)다. 「3개월 실현」 옆 「세후」/「세전」 라벨과, 비용을 못 얹었을 때 배지 옆 `te-pretax-{key}` 「세전」 이 빠져 있었다. 「화면은 아직 쓰지 않는다」 는 「이 섹션은 그리지 않는다」 로 바꿨다(`PerformanceCard` 세전 모드는 `win_rate_gross` 를 쓴다).
+
+→ CHANGELOG: cycle411 행

@@ -44,8 +44,10 @@ AWS RDS PostgreSQL CRUD 모듈. DB 클라이언트 정본 = **`pg.py` (asyncpg �
 - `_update_trade_status_by_order_no(order_no, trade_type, status, price=None, profit_loss=None) -> int`: `order_no` 단일 키 UPDATE(전략 필터 없음). 보정 INSERT 가 UNIQUE 위반일 때의 폴백.
 - **`get_trades_in_range(start_date, end_date, strategy=None)`**: KST inclusive. 경계 `f"{date}T00:00:00+09:00"` / `f"{date}T23:59:59.999999+09:00"` — **`+09:00` 필수**. `recommendation_engine`·`log_analysis_engine` 공유.
 - `get_trades(limit=50, offset=0, ticker=None, strategy=None) -> (list[dict], int)`: 페이징 + 전체 건수
-- `get_trade_pairs(strategy=None, ticker=None)`: `(ticker, strategy)` 를 timestamp ASC 로 훑어 누적 수량이 0 이 될 때마다 closed 페어, 잔여는 open 페어(미실현 손익 = `scanner.ticker_prices` 기준 원 단위 0 쪽 절사 `int`, 미수신이면 None). 계산은 Decimal 로 하고 내보낼 때 **`buy_price`·`sell_price` = 가중평균 원 단위 내림 `int`**(closed·open 공통, `_won_floor`). closed `profit_loss` = 그 페어 SELL 행 `profit_loss` 합(엔진 실현손익 — `daily_performance` 와 같은 출처, `int`) — SELL 행 하나라도 NULL 이면 가중평균 재계산값을 0 쪽으로 절사한 `int`. `profit_rate` = profit_loss ÷ (매수 가중평균 × 매도 수량) × 100, 소수 넷째 자리(cycle396 — 매매손익 그리드에 소수를 남기지 않는다). 응답 키 = buy_date / buy_time / sell_date / sell_time / ticker / ticker_name / buy_price / buy_qty / sell_price / sell_qty / profit_loss / profit_rate / status('closed'|'open') / strategy **+ `buy_order_nos: list[str]` / `sell_order_nos: list[str]` / `pair_key: str|None`**.
+- `get_trade_pairs(strategy=None, ticker=None)`: `(ticker, strategy)` 를 timestamp ASC 로 훑어 누적 수량이 0 이 될 때마다 closed 페어, 잔여는 open 페어(미실현 손익 = `scanner.ticker_prices` 기준 원 단위 0 쪽 절사 `int`, 미수신이면 None). 계산은 Decimal 로 하고 내보낼 때 **`buy_price`·`sell_price` = 가중평균 원 단위 내림 `int`**(closed·open 공통, `_won_floor`). closed `profit_loss` = 그 페어 SELL 행 `profit_loss` 합(엔진 실현손익 — `daily_performance` 와 같은 출처, `int`) — SELL 행 하나라도 NULL 이면 가중평균 재계산값을 0 쪽으로 절사한 `int`. `profit_rate` = profit_loss ÷ (매수 가중평균 × 매도 수량) × 100, 소수 넷째 자리(cycle396 — 매매손익 그리드에 소수를 남기지 않는다). 응답 키 = buy_date / buy_time / sell_date / sell_time / ticker / ticker_name / buy_price / buy_qty / sell_price / sell_qty / profit_loss / profit_rate / status('closed'|'open') / strategy **+ `buy_order_nos: list[str]` / `sell_order_nos: list[str]` / `pair_key: str|None`** **+ `buy_trade_ids` / `sell_trade_ids` / `partial_sell_trade_ids`**(체결 행 `id` 목록 — `trade_history.id` 가 `UUID`(migration 001)라 원소는 UUID, JSON 응답에서는 UUID 문자열. 정수가 아니다).
   - `pair_key` = `strategy:ticker:첫 매수 order_no`(페어의 유일한 안정 식별자). 빈 `order_no` 체결은 주문번호 목록에서만 빠진다. 시각은 `_to_kst()` 가 ISO(UTC/KST/tz-naive)를 `astimezone(KST).strftime()` 으로 변환.
+  - **`buy_trade_ids`/`sell_trade_ids`(cycle411, 실비용 귀속용 사영만 — 페어링 알고리즘 무변경)** = `buy_order_nos`/`sell_order_nos` 와 같은 관례의 체결 행 `id`(UUID) 병행 리스트(시간순, dedupe 없음 — id 는 행마다 고유). `id` 없는 행은 목록에서만 빠진다. open 페어는 `sell_trade_ids=[]`(`sell_order_nos` 와 같은 이유로 `None` 아님). 버퍼 튜플 arity 3 유지(cycle276 관례 그대로 — 새 병행 리스트 2개를 **더한** 것이지 arity 를 바꾼 게 아니다). 소비 = `src/engine/cost_overlay.py::overlay_pairs`(`/api/history/pnl`·`/api/strategies/te`).
+  - **`partial_sell_trade_ids`(cycle411, 사영만)** — open 페어 = 같은 포지션 사이클 안에서 **이미 판** SELL 행 id(시간순, `sell_trade_ids` 와 분리 — open 은 `sell_trade_ids` 그대로 `[]`). closed 페어는 항상 `[]`(판 행은 이미 `sell_trade_ids` 에 있다). 분할 매도 뒤 보유분의 매수 수수료 귀속(남은 수량 비율) 과 판 몫(`partial_fee`/`partial_tax`)을 나누는 입력 — 소비 = `cost_overlay.overlay_pairs`.
 - `get_today_buy_trades / get_today_sell_trades`: 당일(`f"{today}T00:00:00+09:00"`), **ticker 별 dedupe(최신 1건) — 포지션 복구·손익 매핑용.**
 - `get_today_trades_for_settlement(strategy=None)`: 정산용, 당일 COMPLETED·PARTIAL 전부 · `get_today_buy_trades_for_funnel()`: funnel 대조용, 당일 BUY 전 상태. 둘 다 dedupe 없음.
 - **`get_today_buy_trades_for_sync(ticker=None) / get_today_sell_trades_for_sync(ticker=None)`**: **dedupe 없음** + CANCELLED 제외 + optional ticker — `_sync_orders_to_db` 중복 판정 전용. 🔴 **포지션 복구용 dedupe 함수를 sync 중복 판정에 쓰지 않는다** — 다른 `order_no` 가 가려져 재기동마다 신규로 판정된다(5/20 042700 핑퐁 INSERT 사고).
@@ -69,7 +71,8 @@ AWS RDS PostgreSQL CRUD 모듈. DB 클라이언트 정본 = **`pg.py` (asyncpg �
 - 테이블 `trade_cost_daily`(migration 045, PK `(trad_dt, pdno)`) = KIS `TTTC8715R` 행을 `(매매일, 종목 뒤 6자리)` 로 접은 정산값 — `buy_qty`·`buy_amt`·`sll_qty`·`sll_amt`·`rlzt_pfls`·`fee`·`tl_tax`(NUMERIC) · `row_count` · `raw`(JSONB 원문 목록) · `fetched_at`. `trade_cost_period_totals`(PK `(from_dt, to_dt)`) = 대사 기간의 KIS output2 합계(`tot_fee`·`tot_tltx` 등 + `raw`) — 행 합계와 1원 대조용
 - 쓰기 = `upsert_daily(rows) -> int` · `upsert_period_total(from_dt, to_dt, summary)` — 같은 키 재대사는 덮어쓴다. 범위 안에서 KIS 가 더는 주지 않는 행을 지우지 않는다
 - 읽기 = `get_daily_range(start, end)` · `get_completed_trades(start, end)`(`trade_history` COMPLETED + 주문가 `order_price`, `trade_date` = `(timestamp AT TIME ZONE 'Asia/Seoul')::date`). `trade_history` 는 읽기만 한다
-- `trade_history.profit_loss` 의 의미(세전·비용 전 gross)는 바꾸지 않는다 — net 은 `engine/trade_cost.py` 가 계산만 한다. 예외는 전파한다
+- **`get_trades_by_status(start, end, statuses=("COMPLETED","PARTIAL"))`**(cycle411, 가산형) — `status` 를 `ANY($n::text[])` 로 받는 일반화 읽기. `get_completed_trades` 와 달리 `id`·`ticker_name`·`status` 도 함께 읽는다(실비용 체결 행 단위 귀속 `engine/cost_overlay.py::trade_costs` 의 입력). `get_completed_trades` 는 그대로 COMPLETED 전용(행위 보존)
+- `trade_history.profit_loss` 의 의미(세전·비용 전 gross)는 바꾸지 않는다 — net 은 `engine/trade_cost.py`·`engine/cost_overlay.py` 가 계산만 한다. 예외는 전파한다
 
 ## positions.py — 보유 포지션 영속화
 
@@ -209,6 +212,7 @@ AWS RDS PostgreSQL CRUD 모듈. DB 클라이언트 정본 = **`pg.py` (asyncpg �
 - 호출 = 매수/매도 진입 직전 lazy(miss/stale → `inquire_stock_basics` 후 upsert) + 부팅 eager `scheduler._eager_refresh_stock_master_for_held_positions()`(보유 + `_pending_next_day_clear`, 24h fresh 는 skip) — lazy 만이면 첫 사이클 캐시 miss → SOR/NXT 발사 → KIS 거부다
 - **ticker 정규화**: `inquire_stock_basics` 가 `_normalize_ticker()` 로 KIS `pdno` 12자리의 마지막 6자리를 뽑고, `upsert_one` 이 6자리 미준수 입력도 정규화한다(이중 안전망, WARNING)
 - 조회·진단 보조: `count_active()` / `list_all(limit=100, offset=0)` / `list_history(ticker, limit=100)`(「DB 스키마」 절 `stock_master_history`) / `count_eager_refresh_today()`
+- **`get_etf_group_codes(tickers: list[str]) -> dict[str, str | None]`**(cycle411) — ETF/ETN 구분 코드 `raw->>'scty_grp_id_cd'` 일괄 조회. `pg.fetch` **1회**(`WHERE ticker = ANY($1::text[])`, `SELECT *` 아님). 요청 종목 **전부**를 키로 돌려준다(DB 에 없거나 코드가 없으면 `None`). 빈 입력은 쿼리를 생략하고 `{}`. 소비 = `engine/cost_overlay.stock_master_etf_flags`(실비용 매도세 판정)
 
 ### `master_raw` 컬럼 (migration 034)
 
@@ -367,6 +371,17 @@ list_paged_by_filter(*, market=None, min_market_cap=0, min_trade_amount=0,
 - 마이그레이션 = `supabase/migrations/NNN_*.sql`(디렉터리명은 `supabase/` 유지 — 스키마 SQL 정본, RDS 에 순차 적용). 테이블별 계약은 위 모듈 절이 정본이다.
 - `trade_history.status` CHECK = `PENDING`/`COMPLETED`/`PARTIAL`/`CANCELLED`(PENDING → COMPLETED / PARTIAL → CANCELLED) · `trade_type` CHECK = `BUY`/`SELL`(migration 001). status 값을 바꾸면 CHECK 제약도 새 migration 으로 함께 고친다.
 - `stock_master_history`(migration 032·036, 전용 모듈 없음 — `stock_master.list_history` 가 읽는다): `stock_master` 의 INSERT/UPDATE/DELETE 트리거가 쓰는 직전본 표. PK `(ticker, seq)` — `seq` 0=최신본·1=직전본. UPDATE 는 `raw` 가 바뀔 때만 기록하고, DELETE 는 그 종목 행을 지운다.
+- **거래일지 4표 `trade_journal_*`**(migration 047, 가산형 `CREATE … IF NOT EXISTS` 만 · cycle412). **이 디렉터리에 모듈이 없다** — 쓰는 쪽은 `journal_worker` 컨테이너의 `journal_worker/jw/db.py` 하나이고 전용 DB 역할 `journal_worker`(`journal_worker/ops/role.sql`)로 붙는다. backend 는 지금 읽지도 쓰지도 않는다.
+  - `trade_journal_orders` — 주문 1건 1행. `UNIQUE (order_date, order_no, side)` · `side` = `BUY`/`SELL` · NOT NULL = `order_date`·`order_no`·`side`·`strategy`·`ticker`·`source`·`noted_at`. 나머지(`reason_code`·`reason_sub`·`judge_price`·`order_price`·`order_division`·`exchange`·`parent_order_no`·`fired_line`·`effective_line`·`signal` JSONB·`params` JSONB)는 NULL 허용.
+    - `source` 는 두 갈래다. **로그 행**(로그 줄을 짝지은 실측) = 상시 루프의 `log_harvest`·`fallback_inferred`·`reorder_inferred`·`manual_api` + 과거분 적재(`python -m jw backfill <경로…>`, `jw/backfill.py`)의 `log_restore`. **빈 행**(대사 `jw/reconcile.py` 가 `trade_history` 의 `COMPLETED`·`PARTIAL` 로 채운 보강 — 사유·판단가 등은 NULL, 전략이 없으면 `'unknown'`) = `external`(접수 통보 `[order_notice]` 만 있고 로그 앵커 줄이 없는 주문)·`unmatched`(그 밖). 대사는 루프(`jw/main.py`)가 60초 간격으로 부른다.
+    - 쓰기 기본 = `insert_order` 의 `ON CONFLICT (order_date, order_no, side) DO NOTHING`(처음 값을 지킨다). 과거분 적재는 이것만 쓴다 — 같은 파일을 두 번 적재해도 행이 늘지 않는다.
+    - 예외 하나 = **승격** `promote_order`. 상시 루프의 로그 행이 `insert_order` 에서 충돌하면 부른다. 상대가 빈 행(`source IN ('unmatched', 'external')`)일 때만 UPDATE 한다 — NULL 칸은 `COALESCE(기존, 새 값)`, 전략 `'unknown'` 은 새 값, `source` 는 로그 행 것. `ticker`·`noted_at`·키는 그대로다. 이미 실측인 행은 바꾸지 않는다.
+    - ⚠️ `JournalDB.fill_order_division`(`… AND order_division IS NULL` UPDATE)은 정의만 있고 `jw/` 안에 부르는 곳이 없다. `order_division` 은 행을 처음 쓸 때 정해진 값 그대로다.
+  - `trade_journal_stops` — 손절선 사건. `event` = `first`·`change`·`boot`·`eod`·`paused`·`exit` · `stop_kind` = G1 `stop_source` · `inputs` JSONB · 인덱스 `(strategy, ticker, observed_at)`. 워커 재시작은 `(strategy, ticker)` 별 마지막 행(`DISTINCT ON`)에서 이어 간다. 이 표에는 UNIQUE 가 없어 DB 가 중복을 막지 않는다. 그래서 `exit` 사건은 그 회전에 매도 행을 **새로 넣었거나 승격했을 때만** 쓴다(`jw/main.py` — 커서 저장 실패로 같은 로그 덩어리를 다시 읽어도 겹치지 않는다).
+  - `trade_journal_notes` — 메모. `anchor_trade_id` UUID NOT NULL UNIQUE · `body` NOT NULL. 표만 있고 읽고 쓰는 코드는 없다.
+  - `trade_journal_cursor` — 로그 꼬리 읽기 커서(`name` PK, 기본 행 `'main'` · `file_name`·`inode`·`byte_offset`). 칸 이름이 `offset` 이 아닌 것은 SQL 예약어라서다.
+  - 🔴 **이 표들은 지우지 않는다** — 워커 역할에 DELETE·TRUNCATE 권한이 없다.
+  - ⚠️ 워커 풀에는 backend 의 JSONB codec(「pg.py」 절 `_init_conn`)이 없다. 그래서 워커는 `json.dumps` 문자열을 바인딩한다 — 「asyncpg 계약 패턴」 의 「raw dict 바인딩」 은 backend 풀 규약이다. 워커 코드를 그 규약대로 고치면 INSERT 가 실패한다.
 
 ## TIMESTAMPTZ 계약
 

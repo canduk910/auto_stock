@@ -92,4 +92,17 @@ export interface TeRrMetrics {
   verdict: 'undecided' | 'superior' | 'inferior' | 'flat'
   structure_tag: 'robust' | 'fragile' | 'balanced' | null
   single_trade_dominant: boolean
+  // cycle411 — 판정 지표는 net(세후) 기준으로 바뀌었다. 세전 값은 비교용 `*_gross` 로
+  // 별도 보존(사용자 결정 10-08 Q2). 구 서버(이 칸 없음)는 전부 undefined.
+  te_pct_gross?: number
+  te_krw_avg_gross?: number
+  win_rate_gross?: number
+  win_gross?: number
+  loss_gross?: number
+  rr_gross?: number | null
+  verdict_gross?: 'undecided' | 'superior' | 'inferior' | 'flat'
+  // cycle411c B4 — 비용 조회 실패(costs_available=false)는 null(「모름」, 세전 값을 담지 않는다).
+  realized_net_sum_krw?: number | null
+  fee_sum?: number | null
+  tax_sum?: number | null
 }

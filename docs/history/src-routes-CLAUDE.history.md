@@ -711,3 +711,54 @@ KOSPI 70 컬럼 + KOSDAQ 64 컬럼(KOSDAQ 전용 `invt_alrm_yn` 투자주의환�
 - **인증 절 보완 수단** — 위 절 사유 「2단계 확인은 화면 절차이고 정본은 frontend 문서다」 는 틀렸다. `frontend/CLAUDE.md` 에는 identity 배지 한 줄뿐이고 「2단계 확인」 서술이 없다. 남은 곳은 이 정본 「전략 설정 쓰기 경로」 의 identity 항목 하나다(앞으로의 압축에서 지우지 않는다). 인증 절에 「보완 = 화면의 2단계 확인(identity 18키) · 운영 기록」 한 구절과 그 항목 링크를 되살렸다.
 - **응답 모양의 정본 방향** — `src/models/CLAUDE.md` 머리는 「응답 칸의 뜻은 routes 가 정본」 이라 하는데, 2차 압축은 응답 모양을 프론트 TS 사본에 맡겼다. TS 는 소비자 사본이라 어긋날 수 있다 — 실례로 `BuyBlockState` 에는 ETF 키가 없다. 정본 표 머리에 「응답 모양의 정본 = 백엔드 모델·생산 함수, TS 는 사본」 을 적고, TS 링크 옆에 백엔드 이름을 붙였다(`BuyBlockStatusResponse` · `KisQuoteAccount` · `_build_pnl_summary` · `_build_params_schema` · `get_market_op_state_summary()` · `refresh_progress.get_all_progress()` · `stock_master.get_stats()`). 같은 행의 「ETF 관찰 3키」 는 이름을 넷 나열하고 있었고 모델 docstring 도 「관찰 필드 4종」 이라 「4키」 로 고쳤다. `src/models/CLAUDE.md` 의 문장은 이 담당 범위 밖이라 손대지 않았다.
 - **되살리지 않은 것** — funnel snapshot · stock-chart 의 `message` 원문. 응답 키는 불변이고 문구는 계약이 아니다. 원문은 소스(`src/routes/strategy_funnel.py` · `src/routes/stock_chart.py`)와 위 이관 절에 남아 있다.
+
+---
+
+## 엔드포인트 목록
+
+### 2026-10-08 cycle411 2차 보완 F14 — 실비용 엔드포인트 행의 사이클 꼬리표·「보완」 표기 제거, B2·B4 문구 정정
+
+정본 원문(실비용 관련 행, 걷어내기 전):
+
+```
+| GET | `/api/balance` | balance.py | 잔고(예수금 + 보유종목, 0수량 제외). … `sell_cost_rate`(수수료율+세율, ETF/ETN 은 수수료율만)·`cost_status="estimated"`(cycle411, 사용자 결정 10-08 §3 — `engine/cost_overlay.today_window_rates`, 서버 오늘 기준 30일 창, 표본 없으면 기본값. 화면이 평가금액에 곱한다) + `buy_fee_paid`/`buy_fee_status`(cycle411 보완 M1 — 엔진 open 페어(`db/trade_history.get_trade_pairs` 모듈 속성 경유)의 `buy_trade_ids` 체결 비용(정산→추정, 남은 수량 비율)을 더하고, 페어 없는 보유(수동 매수 등)는 매입금액 × 추정 수수료율·`estimated`) 상세 = … |
+| GET | `/api/history?page=&size=&ticker=&strategy=` | history.py | … 체결 행마다 `fee`·`cost_status`(BUY·SELL 공통) + SELL 행 `tax`·`net_profit_loss`(= 그 행 `profit_loss − fee − tax`, cycle411 — 비용 조회 실패는 새 칸만 비우고 기존 응답 유지, `[cost_overlay_unavailable]`). **cycle411 보완 H2** — 배분(`cost_overlay.trade_costs`)은 이 페이지 트래이드가 아니라 그 날짜 범위의 **전체** COMPLETED+PARTIAL 체결(`trade_cost_db.get_trades_by_status`)로 하고, 페이지·전략 필터(`?strategy=`)는 배분 **뒤**에 거른다(한 페이지만 보면 그 날 정산 1행 전부를 떠안는 결함을 막는다). CANCELLED·PENDING 행은 배분 대상이 아니라 `fee`/`cost_status` 가 없다(None) |
+| GET | `/api/history/pnl?page=&size=&strategy=&ticker=` | history.py | … + `buy_trade_ids`/`sell_trade_ids`(cycle411) + `partial_sell_trade_ids`(cycle411 보완 L2). … **cycle411(사용자 결정 10-08)** — 페어마다 `fee`·`tax`·`net_profit_loss`·`net_profit_rate`·`cost_bp`·`slippage_won`·`cost_status`(settled/estimated/mixed)·`allocated`(같은 날·종목 체결 2건 이상이 정산 1행을 나눠 받았을 때만 true) 를 `engine/cost_overlay.overlay_pairs` 로 덧붙인다. … **분할 매도 뒤(보완 L2)** 판 몫은 `partial_fee`·`partial_tax` 로 따로(총합 보존). `slippage_won`(보완 M4) = 그 페어 체결 행 중 `order_price` 가 하나도 없으면 `None`(있으면 덮인 행만 합산). summary 에 `fee_sum`·`tax_sum`·`realized_net_total_krw`·`realized_net_rate_pct`·`slippage_n`(closed 페어가 가리키는 체결 행 중 `order_price` 덮인 수) 추가 — **보완 M4** 비용 조회 실패 시 저 네 합계는 `0` 이 아니라 `None`(기존 칸은 그대로) |
+| GET | `/api/performance/summary?strategy=total` | performance.py | … **cycle411** — `net_total_profit_rate`·`net_avg_daily_profit_rate`(순손익 기준, round 4 — gross 는 round 2 라 수수료·세금처럼 작은 차이가 같은 자리로 뭉개지는 것을 피한다). 🔴 **보완 H1** — `net_total_profit_rate` 는 30일 창이 아니라 **개시 이래** 전체(`_since_inception_net_rows`, `get_performance(days=36_500, …)` 로 전 기간을 읽어 재누적) 축이다 — 비용이 없으면 gross `cumulative_return_rate` 와 같다. 비용 조회 실패 = gross 값으로 폴백 |
+| GET | `/api/performance/daily?days=30&strategy=total` | performance.py | … **cycle411** — 행마다 `daily_fee`·`daily_tax`·`daily_net_pnl`·`net_daily_profit_rate`·`net_cumulative_return_rate`·`cost_status`(settled/estimated/mixed). `strategy=` 를 주면 그 전략 체결의 비용만 합친다(**보완 H2** — 배분은 그 날짜 범위 전체 체결로 하고 전략 필터는 배분 뒤에 건다). 🔴 **보완 H1** — `net_cumulative_return_rate` 는 이 창이 아니라 개시 이래 전체로 재누적한 값에서 이 창의 날짜만 집는다(창 첫 행부터 다시 쌓지 않는다). 요율은 화면 범위가 아니라 서버 오늘 기준 30일 창(**보완 M2**, `cost_overlay.today_window_rates`). 비용 조회 실패 = `[cost_overlay_unavailable]` WARNING + 새 칸 전부 `None`(기존 칸 그대로) |
+| GET | `/api/strategies/te?months=3` | strategies.py | … `data: TeRrMetrics[]`(7전략 · 19필드 + cycle411 net 8필드 + 보완 M5 `win_gross`/`loss_gross` 2필드, …). … 전략별 예외 격리. **cycle411(사용자 결정 10-08 Q2)** — `compute_te_rr` 호출 **전** `engine/cost_overlay.overlay_pairs(pairs)` 로 페어에 net 칸을 얹어 판정을 순손익 기준으로 만든다(실패해도 pairs 는 gross 그대로 — compute_te_rr 의 net→gross 폴백이 받는다) |
+| GET | `/api/costs/today?strategy=` | costs.py | 오늘 체결 × (정산 or 추정 요율), 전략별 + total(cycle411 — OrderMonitor 용, `scheduler.py` 무접촉 경로). … `strategy=` 는 **배분 뒤에** 그 전략만 거른다(cycle411 보완 H2 — 배분 자체는 오늘 전체 COMPLETED+PARTIAL 로 한다). `fee_rate`/`tax_rate`/`rate_source` 는 오늘 하루가 아니라 서버 오늘 기준 30일 창(보완 M2). DB 예외 500 |
+| GET | `/api/costs/daily?from=&to=` | costs.py | 날짜별 비용·슬리피지·`cost_status` 추이(cycle411) → … 요율은 `from`~`to` 화면 범위가 아니라 서버 오늘 기준 30일 창(보완 M2, `cost_overlay.today_window_rates`) · ETF 판정은 stock_master 구분 코드 우선(보완 M3, `cost_overlay.stock_master_etf_flags`). 날짜 형식·순서·366일 초과 = 422(`_parse_range` 재사용) · DB 예외 500 |
+```
+
+경위: 루트 `CLAUDE.md` 「문서 규약」을 cycle411 1차·2차 보완이 쌓은 `**cycle411**`·`**보완
+Hx/Mx**` 태그가 어겼다(2차 통합 검증 F14). 더불어 `/api/performance/summary` 행의 「비용
+조회 실패 = gross 값으로 폴백」과 `/api/strategies/te` 행의 「실패해도 pairs 는 gross
+그대로」는 2차 보완 B2·B4 가 바꾼 실제 동작(둘 다 **실패 = net 전용 칸 `None`**, 세전 값을
+세후 칸에 담지 않는다)과 더 이상 맞지 않아 같이 고쳤다. 각 행을 현재형으로 다시 쓰며
+걷어냈다. 값의 출처 괄호(`cycle411, 사용자 결정 10-08 §3 …`)는 규약이 허용해 남긴 곳도
+있다.
+
+→ CHANGELOG: cycle411
+
+---
+
+## 엔드포인트 목록
+
+### 2026-10-08 cycle411 문서 동기화 — 실비용 행을 3차 LOW 정리 뒤 코드에 맞춤
+
+정본 원문(바뀐 부분, `…` 은 그대로 남은 앞뒤):
+
+```
+| GET | `/api/history?page=&size=&ticker=&strategy=` | history.py | … 체결 행마다 `fee`·`cost_status`(BUY·SELL 공통) + SELL 행 `tax`·`net_profit_loss`(= 그 행 `profit_loss − fee − tax`, cycle411 — 비용 조회 실패는 새 칸만 비우고 기존 응답 유지, `[cost_overlay_unavailable]`). 배분(`cost_overlay.trade_costs`)은 이 페이지 트래이드가 아니라 그 날짜 범위의 **전체** COMPLETED+PARTIAL … |
+| GET | `/api/history/pnl?page=&size=&strategy=&ticker=` | history.py | … + `buy_trade_ids`/`sell_trade_ids`·`partial_sell_trade_ids`(cycle411, 분할 매도 뒤 판 몫 추적용 체결 id 목록). `data.summary` = 슬라이스 전 closed 페어 집계(생산 `_build_pnl_summary` · TS 사본 `frontend/src/types/trading.ts` `TradePnLSummary` 7필드 — `realized_rate_pct` 가중 round2 · `win_rate_pct` round1, 분모 0 이면 비율 0.0) … summary 에 `fee_sum`·`tax_sum`·`realized_net_total_krw`·`realized_net_rate_pct`·`slippage_n`(closed 페어가 가리키는 체결 행 중 `order_price` 덮인 수) 를 함께 낸다 — 비용 조회 실패 시 저 네 합계는 `0` 이 아니라 `None`(기존 칸은 그대로) |
+| GET | `/api/strategies/te?months=3` | strategies.py | … **5분 monotonic 캐시**(months 키, `invalidate_te_cache()` — 비용 조회가 하나라도 실패한 계산은 60초 이하로만 캐시한다). 전략별 예외 격리. … 실패(None 반환·예외)하면 `costs_available=False` 로 넘겨 그 전략은 `realized_net_sum_krw`·`fee_sum`·`tax_sum` 만 `None` 이고 나머지 지표(n·세전 합 등)는 세전 값으로 그대로 계산한다 |
+```
+
+경위: 3차 통합 검증이 이 행들과 코드의 어긋남을 지적했다.
+- `/api/history/pnl` — summary 비용 칸은 넷이 아니라 다섯(`slippage_n` 포함)이 「모름」 이면 `None` 이다. `TradePnLSummary` 는 7필드가 아니라 12필드다. 체결 id 목록이 UUID 문자열이라는 점이 없었다. 라우트가 `overlay_pairs` 호출 자체를 감싸 계산 예외도 200 을 유지한다는 점이 없었다.
+- `/api/history` — 「새 칸만 비우고」 는 실제 동작(실패하면 새 칸을 싣지 않음)과 달랐다. 「트래이드」 오타.
+- `/api/strategies/te` — 짧은 캐시는 「60초 이하」 가 아니라 `_TE_CACHE_FAILURE_TTL` 60초이고, 비용 조회뿐 아니라 페어 조회 실패에도 걸린다. 모집단 net 칸 혼재 시 세 칸 `None` 이 없었다.
+- `/api/balance`·`/api/performance/*` 는 덧붙임만 했다(요율 조회 실패 = 기본 요율, 매수 수수료 「모름」 의 네 경우, 기록 없음 = 0, 조회·계산 실패).
+
+→ CHANGELOG: cycle411 행

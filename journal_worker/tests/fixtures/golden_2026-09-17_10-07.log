@@ -1,0 +1,1008 @@
+2026-09-17 09:30:45 [INFO    ] src.engine.strategies.long_tail_volatility — 롱테일 변동성 돌파 매수 신호 [main]: 포스코인터내셔널(047050) 현재가(58800) >= 목표가(58790), K=0.5402
+2026-09-17 09:30:45 [INFO    ] src.api.order — BUY 주문 완료: 047050 1주 @ 0 (주문번호: 0000451100)
+2026-09-17 09:30:45 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000451100, ticker=047050
+2026-09-17 09:30:45 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 포스코인터내셔널(047050) 1주 @ 58900 (전략: long_tail_volatility)
+2026-09-17 09:30:45 [INFO    ] src.engine.order_engine — 매수 주문 접수: 포스코인터내셔널(047050) 1주 @ 58800 (주문번호: 0000451100, 전략: long_tail_volatility)
+2026-09-17 14:13:39 [INFO    ] src.engine.strategies.bull_flag_breakout — [bfb_vol_gate_pass] ticker=003160 observed=323837 threshold=322528 latch_age_sec=18519
+2026-09-17 14:13:40 [INFO    ] src.api.order — BUY 주문 완료: 003160 2주 @ 0 (주문번호: 0001066400)
+2026-09-17 14:13:40 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001066400, ticker=003160
+2026-09-17 14:13:40 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 디아이(003160) 2주 @ 31700 (전략: bull_flag_breakout)
+2026-09-17 14:13:40 [INFO    ] src.engine.order_engine — 매수 주문 접수: 디아이(003160) 2주 @ 31600 (주문번호: 0001066400, 전략: bull_flag_breakout)
+2026-09-17 14:13:40 [INFO    ] src.engine.order_engine — 매수 전량 체결: 디아이(003160) 2주 @ 31700 (전략: bull_flag_breakout)
+2026-09-17 15:20:00 [INFO    ] src.api.order — SELL 주문 완료: 047050 1주 @ 0 (주문번호: 0001184400)
+2026-09-17 15:20:00 [INFO    ] src.engine.order_engine — FORCE_CLEAR 매도 주문 접수: 포스코인터내셔널(047050) 1주 (주문번호: 0001184400, 전략: long_tail_volatility)
+2026-09-17 15:20:01 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001184400, ticker=047050
+2026-09-18 10:21:34 [INFO    ] src.engine.strategies.volatility_breakout — 변동성돌파 매수 신호 [main]: 지엔씨에너지(119850) 현재가(55400) >= 목표가(55395), 이전가(55300), K=0.5698
+2026-09-18 10:21:34 [INFO    ] src.api.order — BUY 주문 완료: 119850 1주 @ 0 (주문번호: 0000686100)
+2026-09-18 10:21:34 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000686100, ticker=119850
+2026-09-18 10:21:34 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 지엔씨에너지(119850) 1주 @ 55400 (전략: volatility_breakout)
+2026-09-18 10:21:34 [INFO    ] src.engine.order_engine — 매수 주문 접수: 지엔씨에너지(119850) 1주 @ 55400 (주문번호: 0000686100, 전략: volatility_breakout)
+2026-09-18 15:20:00 [INFO    ] src.api.order — SELL 주문 완료: 119850 1주 @ 0 (주문번호: 0001291400)
+2026-09-18 15:20:00 [INFO    ] src.engine.order_engine — FORCE_CLEAR 매도 주문 접수: 지엔씨에너지(119850) 1주 (주문번호: 0001291400, 전략: volatility_breakout)
+2026-09-18 15:20:01 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001291400, ticker=119850
+2026-09-21 09:00:20 [INFO    ] src.realtime.handler — [open_scope_observe] ticker=003470 oprc_hour=090020 tick_open=4485 cntg_hour=090020 hgpr_hour=090020 mkop=20 hour_cls=0 in_main_window=true
+2026-09-21 09:00:20 [INFO    ] src.engine.strategies.kojiro — [kojiro_stage3_exit] 003470 스테이지3 진입 (추세 종료) judged_on=2026-09-21
+2026-09-21 09:00:20 [INFO    ] src.api.order — SELL 주문 완료: 003470 2주 @ 0 (주문번호: 0000237500)
+2026-09-21 09:00:21 [INFO    ] src.engine.order_engine — TRAILING_STOP 매도 주문 접수: 유안타증권(003470) 2주 (주문번호: 0000237500, 전략: kojiro)
+2026-09-21 09:00:21 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000237500, ticker=003470
+2026-09-21 09:00:21 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000237500 ticker=유안타증권(003470) side=SELL src=map ordered=2 filled_total=2 incr=2
+2026-09-21 09:00:21 [INFO    ] src.engine.order_engine — 매도 전량 체결: 유안타증권(003470) 2주 @ 4460 (손익: -540, 전략: kojiro)
+2026-09-21 09:00:21 [INFO    ] src.engine.order_engine — [sell_unsubscribe] 유안타증권(003470) WS 구독 정리
+2026-09-21 09:02:28 [INFO    ] src.engine.strategies.kojiro — [kojiro_trailing] 285130 고점(57000) - 2.5×ATR(2464.3) = 50839 / 현재가 50700
+2026-09-21 09:02:28 [INFO    ] src.api.order — SELL 주문 완료: 285130 1주 @ 0 (주문번호: 0000257800)
+2026-09-21 09:02:28 [INFO    ] src.engine.order_engine — TRAILING_STOP 매도 주문 접수: SK케미칼(285130) 1주 (주문번호: 0000257800, 전략: kojiro)
+2026-09-21 09:02:28 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000257800, ticker=285130
+2026-09-21 09:02:28 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000257800 ticker=SK케미칼(285130) side=SELL src=map ordered=1 filled_total=1 incr=1
+2026-09-21 09:02:28 [INFO    ] src.engine.order_engine — 매도 전량 체결: SK케미칼(285130) 1주 @ 50700 (손익: 3350, 전략: kojiro)
+2026-09-21 09:02:28 [INFO    ] src.engine.order_engine — [sell_unsubscribe] SK케미칼(285130) WS 구독 정리
+2026-09-21 09:18:12 [INFO    ] src.engine.strategies.long_tail_volatility — 롱테일 변동성 돌파 매수 신호 [main]: 이수페타시스(007660) 현재가(110700) >= 목표가(110657), K=0.5440
+2026-09-21 09:18:12 [INFO    ] src.api.order — BUY 주문 완료: 007660 1주 @ 0 (주문번호: 0000391200)
+2026-09-21 09:18:12 [INFO    ] src.engine.order_engine — 매수 주문 접수: 이수페타시스(007660) 1주 @ 110700 (주문번호: 0000391200, 전략: long_tail_volatility)
+2026-09-21 09:18:12 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000391200, ticker=007660
+2026-09-21 09:18:12 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000391200 ticker=이수페타시스(007660) side=BUY src=map ordered=1 filled_total=1 incr=1
+2026-09-21 09:18:12 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 이수페타시스(007660) 1주 @ 110800 (전략: long_tail_volatility)
+2026-09-21 09:18:12 [INFO    ] src.engine.order_engine — 매수 전량 체결: 이수페타시스(007660) 1주 @ 110800 (전략: long_tail_volatility)
+2026-09-21 09:20:00 [INFO    ] src.engine.strategies.kojiro — 고지로 매수 신호: 000520 현재가(7740) — 스테이지1(6→1) + EMA정배열 + ATR(392.9)
+2026-09-21 09:20:01 [INFO    ] src.api.order — BUY 주문 완료: 000520 25주 @ 0 (주문번호: 0000404800)
+2026-09-21 09:20:01 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000404800, ticker=000520
+2026-09-21 09:20:01 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000404800 ticker=삼일제약(000520) side=BUY src=map ordered=25 filled_total=25 incr=25
+2026-09-21 09:20:01 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 삼일제약(000520) 25주 @ 7740 (전략: kojiro)
+2026-09-21 09:20:01 [INFO    ] src.engine.order_engine — 매수 주문 접수: 삼일제약(000520) 25주 @ 7740 (주문번호: 0000404800, 전략: kojiro)
+2026-09-21 09:20:01 [INFO    ] src.engine.order_engine — 매수 전량 체결: 삼일제약(000520) 25주 @ 7740 (전략: kojiro)
+2026-09-21 09:20:01 [INFO    ] src.realtime.handler — [open_scope_observe] ticker=000520 oprc_hour=090010 tick_open=7740 cntg_hour=092001 hgpr_hour=090010 mkop=20 hour_cls=0 in_main_window=true
+2026-09-21 09:37:22 [INFO    ] src.engine.strategies.long_tail_volatility — 롱테일 변동성 돌파 매수 신호 [main]: 한양디지텍(078350) 현재가(27850) >= 목표가(27804), K=0.6012
+2026-09-21 09:37:23 [INFO    ] src.api.order — BUY 주문 완료: 078350 1주 @ 0 (주문번호: 0000503000)
+2026-09-21 09:37:23 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000503000, ticker=078350
+2026-09-21 09:37:23 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000503000 ticker=한양디지텍(078350) side=BUY src=map ordered=1 filled_total=1 incr=1
+2026-09-21 09:37:23 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 한양디지텍(078350) 1주 @ 27850 (전략: long_tail_volatility)
+2026-09-21 09:37:23 [INFO    ] src.engine.order_engine — 매수 주문 접수: 한양디지텍(078350) 1주 @ 27850 (주문번호: 0000503000, 전략: long_tail_volatility)
+2026-09-21 09:37:23 [INFO    ] src.engine.order_engine — 매수 전량 체결: 한양디지텍(078350) 1주 @ 27850 (전략: long_tail_volatility)
+2026-09-21 10:49:04 [INFO    ] src.engine.strategies.kojiro — [kojiro_atr_stop] 004690 손절선(130000) = 매수가(130000) - 2.0×ATR(3628.5)
+2026-09-21 10:49:04 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000788000, ticker=004690
+2026-09-21 10:49:04 [INFO    ] src.api.order — SELL 주문 완료: 004690 1주 @ 0 (주문번호: 0000788000)
+2026-09-21 10:49:04 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000788000 ticker=삼천리(004690) side=SELL src=map ordered=1 filled_total=1 incr=1
+2026-09-21 10:49:04 [INFO    ] src.engine.order_engine — STOP_LOSS 매도 주문 접수: 삼천리(004690) 1주 (주문번호: 0000788000, 전략: kojiro)
+2026-09-21 10:49:04 [INFO    ] src.engine.order_engine — 매도 전량 체결: 삼천리(004690) 1주 @ 130000 (손익: 0, 전략: kojiro)
+2026-09-21 10:49:04 [INFO    ] src.engine.order_engine — [sell_unsubscribe] 삼천리(004690) WS 구독 정리
+2026-09-21 12:19:31 [INFO    ] src.engine.strategies.volatility_breakout — 변동성돌파 매수 신호 [main]: KB금융(105560) 현재가(178900) >= 목표가(178893), 이전가(178800), K=0.4471
+2026-09-21 12:19:31 [INFO    ] src.api.order — BUY 주문 완료: 105560 1주 @ 0 (주문번호: 0000989800)
+2026-09-21 12:19:31 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000989800, ticker=105560
+2026-09-21 12:19:31 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000989800 ticker=KB금융(105560) side=BUY src=map ordered=1 filled_total=1 incr=1
+2026-09-21 12:19:31 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: KB금융(105560) 1주 @ 178900 (전략: volatility_breakout)
+2026-09-21 12:19:31 [INFO    ] src.engine.order_engine — 매수 주문 접수: KB금융(105560) 1주 @ 178900 (주문번호: 0000989800, 전략: volatility_breakout)
+2026-09-21 12:19:31 [INFO    ] src.engine.order_engine — 매수 전량 체결: KB금융(105560) 1주 @ 178900 (전략: volatility_breakout)
+2026-09-21 13:14:56 [INFO    ] src.engine.strategies.long_tail_volatility — 롱테일 변동성 돌파 매수 신호 [main]: 비나텍(126340) 현재가(85300) >= 목표가(85221), K=0.5460
+2026-09-21 13:14:56 [INFO    ] src.api.order — BUY 주문 완료: 126340 1주 @ 0 (주문번호: 0001086500)
+2026-09-21 13:14:56 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001086500, ticker=126340
+2026-09-21 13:14:56 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0001086500 ticker=비나텍(126340) side=BUY src=map ordered=1 filled_total=1 incr=1
+2026-09-21 13:14:56 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 비나텍(126340) 1주 @ 85300 (전략: long_tail_volatility)
+2026-09-21 13:14:56 [INFO    ] src.engine.order_engine — 매수 주문 접수: 비나텍(126340) 1주 @ 85300 (주문번호: 0001086500, 전략: long_tail_volatility)
+2026-09-21 13:14:56 [INFO    ] src.engine.order_engine — 매수 전량 체결: 비나텍(126340) 1주 @ 85300 (전략: long_tail_volatility)
+2026-09-21 15:20:00 [INFO    ] src.api.order — SELL 주문 완료: 105560 1주 @ 0 (주문번호: 0001411900)
+2026-09-21 15:20:00 [INFO    ] src.engine.order_engine — FORCE_CLEAR 매도 주문 접수: KB금융(105560) 1주 (주문번호: 0001411900, 전략: volatility_breakout)
+2026-09-21 15:20:00 [INFO    ] src.api.order — SELL 주문 완료: 007660 1주 @ 0 (주문번호: 0001412100)
+2026-09-21 15:20:00 [INFO    ] src.engine.order_engine — FORCE_CLEAR 매도 주문 접수: 이수페타시스(007660) 1주 (주문번호: 0001412100, 전략: long_tail_volatility)
+2026-09-21 15:20:00 [INFO    ] src.api.order — SELL 주문 완료: 078350 1주 @ 0 (주문번호: 0001412200)
+2026-09-21 15:20:00 [INFO    ] src.engine.order_engine — FORCE_CLEAR 매도 주문 접수: 한양디지텍(078350) 1주 (주문번호: 0001412200, 전략: long_tail_volatility)
+2026-09-21 15:20:00 [INFO    ] src.api.order — SELL 주문 완료: 126340 1주 @ 0 (주문번호: 0001412300)
+2026-09-21 15:20:00 [INFO    ] src.engine.order_engine — FORCE_CLEAR 매도 주문 접수: 비나텍(126340) 1주 (주문번호: 0001412300, 전략: long_tail_volatility)
+2026-09-21 15:20:01 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001412200, ticker=078350
+2026-09-21 15:20:01 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001412300, ticker=126340
+2026-09-21 15:20:01 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001411900, ticker=105560
+2026-09-21 15:20:01 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001412100, ticker=007660
+2026-09-22 09:00:30 [INFO    ] src.realtime.handler — [open_scope_observe] ticker=036800 oprc_hour=090030 tick_open=7690 cntg_hour=090030 hgpr_hour=090030 mkop=20 hour_cls=0 in_main_window=true
+2026-09-22 09:00:30 [INFO    ] src.engine.strategies.bull_flag_breakout — 눌림목 시간 청산: 036800 buy_date=2026-09-14 today=2026-09-22 보유일수 초과
+2026-09-22 09:00:30 [INFO    ] src.api.order — SELL 주문 완료: 036800 10주 @ 0 (주문번호: 0000350600)
+2026-09-22 09:00:30 [INFO    ] src.engine.order_engine — TRAILING_STOP 매도 주문 접수: 나이스정보통신(036800) 10주 (주문번호: 0000350600, 전략: bull_flag_breakout)
+2026-09-22 09:00:30 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000350600, ticker=036800
+2026-09-22 09:00:30 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000350600 ticker=나이스정보통신(036800) side=SELL src=map ordered=10 filled_total=10 incr=10
+2026-09-22 09:00:30 [INFO    ] src.engine.order_engine — 매도 전량 체결: 나이스정보통신(036800) 10주 @ 7650 (손익: -4900, 전략: bull_flag_breakout)
+2026-09-22 09:00:30 [INFO    ] src.engine.order_engine — [sell_unsubscribe] 나이스정보통신(036800) WS 구독 정리
+2026-09-22 09:01:32 [INFO    ] src.engine.strategies.volatility_breakout — 변동성돌파 매수 신호 [main]: S-Oil(010950) 현재가(152600) >= 목표가(152570), 이전가(152100), K=0.6119
+2026-09-22 09:01:33 [INFO    ] src.api.order — BUY 주문 완료: 010950 1주 @ 0 (주문번호: 0000381400)
+2026-09-22 09:01:33 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000381400, ticker=010950
+2026-09-22 09:01:33 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000381400 ticker=S-Oil(010950) side=BUY src=map ordered=1 filled_total=1 incr=1
+2026-09-22 09:01:33 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: S-Oil(010950) 1주 @ 152500 (전략: volatility_breakout)
+2026-09-22 09:01:33 [INFO    ] src.engine.order_engine — 매수 주문 접수: S-Oil(010950) 1주 @ 152600 (주문번호: 0000381400, 전략: volatility_breakout)
+2026-09-22 09:01:34 [INFO    ] src.engine.order_engine — 매수 전량 체결: S-Oil(010950) 1주 @ 152500 (전략: volatility_breakout)
+2026-09-22 09:02:39 [INFO    ] src.engine.strategies.volatility_breakout — 변동성돌파 매수 신호 [main]: SK텔레콤(017670) 현재가(89100) >= 목표가(89053), 이전가(89000), K=0.6577
+2026-09-22 09:02:40 [INFO    ] src.api.order — BUY 주문 완료: 017670 1주 @ 0 (주문번호: 0000405800)
+2026-09-22 09:02:40 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000405800, ticker=017670
+2026-09-22 09:02:40 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000405800 ticker=SK텔레콤(017670) side=BUY src=map ordered=1 filled_total=1 incr=1
+2026-09-22 09:02:40 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: SK텔레콤(017670) 1주 @ 89200 (전략: volatility_breakout)
+2026-09-22 09:02:40 [INFO    ] src.engine.order_engine — 매수 주문 접수: SK텔레콤(017670) 1주 @ 89100 (주문번호: 0000405800, 전략: volatility_breakout)
+2026-09-22 09:02:40 [INFO    ] src.engine.order_engine — 매수 전량 체결: SK텔레콤(017670) 1주 @ 89200 (전략: volatility_breakout)
+2026-09-22 09:05:02 [INFO    ] src.engine.strategies.kojiro — 고지로 매수 신호: 011170 현재가(64400) — 스테이지1(6→1) + EMA정배열 + ATR(3455.3)
+2026-09-22 09:05:02 [INFO    ] src.api.order — BUY 주문 완료: 011170 2주 @ 0 (주문번호: 0000442400)
+2026-09-22 09:05:02 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000442400, ticker=011170
+2026-09-22 09:05:02 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000442400 ticker=롯데케미칼(011170) side=BUY src=map ordered=2 filled_total=2 incr=2
+2026-09-22 09:05:02 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 롯데케미칼(011170) 2주 @ 64400 (전략: kojiro)
+2026-09-22 09:05:02 [INFO    ] src.engine.order_engine — 매수 주문 접수: 롯데케미칼(011170) 2주 @ 64400 (주문번호: 0000442400, 전략: kojiro)
+2026-09-22 09:05:02 [WARNING ] src.engine.order_engine — [buy_fill_correction_unique_violation] ticker=011170 order_no=0000442400 strategy_attempted=kojiro err=UniqueViolationError('duplicate key value violates unique constraint "uq_trade_history_ticker_order_no_type"') → strategy 무관 강제 COMPLETED UPDATE
+2026-09-22 09:05:02 [INFO    ] src.engine.order_engine — 매수 전량 체결: 롯데케미칼(011170) 2주 @ 64400 (전략: kojiro)
+2026-09-22 09:05:02 [INFO    ] src.realtime.handler — [open_scope_observe] ticker=011170 oprc_hour=090019 tick_open=64100 cntg_hour=090502 hgpr_hour=090414 mkop=20 hour_cls=0 in_main_window=true
+2026-09-22 09:05:02 [INFO    ] src.engine.strategies.kojiro — 고지로 매수 신호: 035760 현재가(39400) — 스테이지1(6→1) + EMA정배열 + ATR(1805.5)
+2026-09-22 09:05:03 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000442700, ticker=035760
+2026-09-22 09:05:03 [INFO    ] src.api.order — BUY 주문 완료: 035760 5주 @ 0 (주문번호: 0000442700)
+2026-09-22 09:05:03 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000442700 ticker=CJ ENM(035760) side=BUY src=map ordered=5 filled_total=5 incr=5
+2026-09-22 09:05:03 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: CJ ENM(035760) 5주 @ 39400 (전략: kojiro)
+2026-09-22 09:05:03 [WARNING ] src.engine.order_engine — 체결통보 선행 race — COMPLETED 직접 INSERT: 매수 CJ ENM(035760) (주문번호: 0000442700)
+2026-09-22 09:05:03 [INFO    ] src.engine.order_engine — 매수 전량 체결: CJ ENM(035760) 5주 @ 39400 (전략: kojiro)
+2026-09-22 09:05:03 [INFO    ] src.engine.order_engine — [buy_fill_during_insert] ticker=035760 order_no=0000442700 strategy=kojiro path=market
+2026-09-22 09:05:03 [INFO    ] src.engine.order_engine — 매수 주문 접수: CJ ENM(035760) 5주 @ 39400 (주문번호: 0000442700, 전략: kojiro)
+2026-09-22 09:05:03 [INFO    ] src.realtime.handler — [open_scope_observe] ticker=035760 oprc_hour=090014 tick_open=38850 cntg_hour=090503 hgpr_hour=090459 mkop=20 hour_cls=0 in_main_window=true
+2026-09-22 09:06:08 [INFO    ] src.engine.strategies.long_tail_volatility — 롱테일 변동성 돌파 매수 신호 [main]: KBI메탈(024840) 현재가(6830) >= 목표가(6827), K=0.5564
+2026-09-22 09:06:08 [INFO    ] src.api.order — BUY 주문 완료: 024840 7주 @ 0 (주문번호: 0000458100)
+2026-09-22 09:06:08 [INFO    ] src.engine.order_engine — 매수 주문 접수: KBI메탈(024840) 7주 @ 6830 (주문번호: 0000458100, 전략: long_tail_volatility)
+2026-09-22 09:06:08 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000458100, ticker=024840
+2026-09-22 09:06:08 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000458100 ticker=KBI메탈(024840) side=BUY src=map ordered=7 filled_total=7 incr=7
+2026-09-22 09:06:08 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: KBI메탈(024840) 7주 @ 6840 (전략: long_tail_volatility)
+2026-09-22 09:06:08 [INFO    ] src.engine.order_engine — 매수 전량 체결: KBI메탈(024840) 7주 @ 6840 (전략: long_tail_volatility)
+2026-09-22 09:06:26 [INFO    ] src.engine.strategies.long_tail_volatility — 롱테일 변동성 돌파 매수 신호 [main]: 이수페타시스(007660) 현재가(118300) >= 목표가(118278), K=0.5271
+2026-09-22 09:06:26 [INFO    ] src.api.order — BUY 주문 완료: 007660 1주 @ 0 (주문번호: 0000461900)
+2026-09-22 09:06:26 [INFO    ] src.engine.order_engine — 매수 주문 접수: 이수페타시스(007660) 1주 @ 118300 (주문번호: 0000461900, 전략: long_tail_volatility)
+2026-09-22 09:06:26 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000461900, ticker=007660
+2026-09-22 09:06:26 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000461900 ticker=이수페타시스(007660) side=BUY src=map ordered=1 filled_total=1 incr=1
+2026-09-22 09:06:26 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 이수페타시스(007660) 1주 @ 118400 (전략: long_tail_volatility)
+2026-09-22 09:06:26 [INFO    ] src.engine.order_engine — 매수 전량 체결: 이수페타시스(007660) 1주 @ 118400 (전략: long_tail_volatility)
+2026-09-22 09:14:27 [INFO    ] src.engine.strategies.long_tail_volatility — 롱테일 변동성 돌파 매수 신호 [main]: 한켐(457370) 현재가(12110) >= 목표가(12105), K=0.5725
+2026-09-22 09:14:27 [INFO    ] src.api.order — BUY 주문 완료: 457370 4주 @ 0 (주문번호: 0000553500)
+2026-09-22 09:14:27 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000553500, ticker=457370
+2026-09-22 09:14:27 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000553500 ticker=한켐(457370) side=BUY src=map ordered=4 filled_total=4 incr=4
+2026-09-22 09:14:27 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 한켐(457370) 4주 @ 12110 (전략: long_tail_volatility)
+2026-09-22 09:14:27 [INFO    ] src.engine.order_engine — 매수 주문 접수: 한켐(457370) 4주 @ 12110 (주문번호: 0000553500, 전략: long_tail_volatility)
+2026-09-22 09:14:27 [INFO    ] src.engine.order_engine — 매수 전량 체결: 한켐(457370) 4주 @ 12110 (전략: long_tail_volatility)
+2026-09-22 09:35:33 [INFO    ] src.engine.strategies.bull_flag_breakout — [bfb_vol_gate_pass] ticker=052710 observed=1207033 threshold=1207024 latch_age_sec=1644
+2026-09-22 09:35:33 [INFO    ] src.api.order — BUY 주문 완료: 052710 9주 @ 0 (주문번호: 0000720200)
+2026-09-22 09:35:33 [INFO    ] src.engine.order_engine — 매수 주문 접수: 아모텍(052710) 9주 @ 19230 (주문번호: 0000720200, 전략: bull_flag_breakout)
+2026-09-22 09:35:33 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000720200, ticker=052710
+2026-09-22 09:35:33 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000720200 ticker=아모텍(052710) side=BUY src=map ordered=9 filled_total=9 incr=9
+2026-09-22 09:35:33 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 아모텍(052710) 9주 @ 19270 (전략: bull_flag_breakout)
+2026-09-22 09:35:33 [INFO    ] src.engine.order_engine — 매수 전량 체결: 아모텍(052710) 9주 @ 19270 (전략: bull_flag_breakout)
+2026-09-22 09:39:12 [INFO    ] src.engine.strategies.momentum — 매수 신호: 코리아써키트(007810) 전일종가(52300) 대비 29.1% (현재가: 67500, 직전: 28.9%)
+2026-09-22 09:39:12 [INFO    ] src.api.order — BUY 주문 완료: 007810 1주 @ 0 (주문번호: 0000740000)
+2026-09-22 09:39:12 [INFO    ] src.engine.order_engine — 매수 주문 접수: 코리아써키트(007810) 1주 @ 67500 (주문번호: 0000740000, 전략: momentum)
+2026-09-22 09:39:12 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000740000, ticker=007810
+2026-09-22 09:39:12 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000740000 ticker=코리아써키트(007810) side=BUY src=map ordered=1 filled_total=1 incr=1
+2026-09-22 09:39:12 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 코리아써키트(007810) 1주 @ 67600 (전략: momentum)
+2026-09-22 09:39:12 [INFO    ] src.engine.order_engine — 매수 전량 체결: 코리아써키트(007810) 1주 @ 67600 (전략: momentum)
+2026-09-22 10:12:06 [INFO    ] src.engine.strategies.bull_flag_breakout — [bfb_vol_gate_pass] ticker=149950 observed=188690 threshold=188644 latch_age_sec=4026
+2026-09-22 10:12:06 [INFO    ] src.api.order — BUY 주문 완료: 149950 14주 @ 0 (주문번호: 0000881100)
+2026-09-22 10:12:06 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000881100, ticker=149950
+2026-09-22 10:12:06 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000881100 ticker=아바텍(149950) side=BUY src=map ordered=14 filled_total=14 incr=14
+2026-09-22 10:12:06 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 아바텍(149950) 14주 @ 13040 (전략: bull_flag_breakout)
+2026-09-22 10:12:06 [INFO    ] src.engine.order_engine — 매수 주문 접수: 아바텍(149950) 14주 @ 13040 (주문번호: 0000881100, 전략: bull_flag_breakout)
+2026-09-22 10:12:06 [WARNING ] src.engine.order_engine — [buy_fill_correction_unique_violation] ticker=149950 order_no=0000881100 strategy_attempted=bull_flag_breakout err=UniqueViolationError('duplicate key value violates unique constraint "uq_trade_history_ticker_order_no_type"') → strategy 무관 강제 COMPLETED UPDATE
+2026-09-22 10:12:06 [INFO    ] src.engine.order_engine — 매수 전량 체결: 아바텍(149950) 14주 @ 13040 (전략: bull_flag_breakout)
+2026-09-22 11:09:18 [INFO    ] src.engine.strategies.bull_flag_breakout — [bfb_vol_gate_pass] ticker=100840 observed=160369 threshold=160078 latch_age_sec=836
+2026-09-22 11:09:18 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001079700, ticker=100840
+2026-09-22 11:09:18 [INFO    ] src.api.order — BUY 주문 완료: 100840 4주 @ 0 (주문번호: 0001079700)
+2026-09-22 11:09:18 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0001079700 ticker=SNT에너지(100840) side=BUY src=map ordered=4 filled_total=4 incr=4
+2026-09-22 11:09:18 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: SNT에너지(100840) 4주 @ 39450 (전략: bull_flag_breakout)
+2026-09-22 11:09:18 [INFO    ] src.engine.order_engine — 매수 주문 접수: SNT에너지(100840) 4주 @ 39400 (주문번호: 0001079700, 전략: bull_flag_breakout)
+2026-09-22 11:09:18 [INFO    ] src.engine.order_engine — 매수 전량 체결: SNT에너지(100840) 4주 @ 39450 (전략: bull_flag_breakout)
+2026-09-22 11:36:23 [INFO    ] src.engine.strategies.long_tail_volatility — 롱테일VB 당일 손절: 한켐(457370) -5.0%
+2026-09-22 11:36:23 [INFO    ] src.api.order — SELL 주문 완료: 457370 4주 @ 0 (주문번호: 0001154900)
+2026-09-22 11:36:23 [INFO    ] src.engine.order_engine — STOP_LOSS 매도 주문 접수: 한켐(457370) 4주 (주문번호: 0001154900, 전략: long_tail_volatility)
+2026-09-22 11:36:23 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001154900, ticker=457370
+2026-09-22 11:36:23 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0001154900 ticker=한켐(457370) side=SELL src=map ordered=4 filled_total=4 incr=4
+2026-09-22 11:36:23 [INFO    ] src.engine.order_engine — 매도 전량 체결: 한켐(457370) 4주 @ 11500 (손익: -2440, 전략: long_tail_volatility)
+2026-09-22 11:36:23 [DEBUG   ] src.engine.order_engine — [unsubscribe_skip] 457370 — strategy=long_tail_volatility 스캔 후보
+2026-09-22 11:43:02 [INFO    ] src.engine.strategies.momentum — 매수 신호: 노타(486990) 전일종가(17350) 대비 29.1% (현재가: 22400, 직전: 28.5%)
+2026-09-22 11:43:03 [INFO    ] src.api.order — BUY 주문 완료: 486990 2주 @ 0 (주문번호: 0001167800)
+2026-09-22 11:43:03 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001167800, ticker=486990
+2026-09-22 11:43:03 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0001167800 ticker=노타(486990) side=BUY src=map ordered=2 filled_total=2 incr=2
+2026-09-22 11:43:03 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 노타(486990) 2주 @ 22300 (전략: momentum)
+2026-09-22 11:43:03 [INFO    ] src.engine.order_engine — 매수 주문 접수: 노타(486990) 2주 @ 22400 (주문번호: 0001167800, 전략: momentum)
+2026-09-22 11:43:03 [INFO    ] src.engine.order_engine — 매수 전량 체결: 노타(486990) 2주 @ 22300 (전략: momentum)
+2026-09-22 11:52:10 [INFO    ] src.engine.strategies.long_tail_volatility — 롱테일 변동성 돌파 매수 신호 [main]: 일진전기(103590) 현재가(77700) >= 목표가(77676), K=0.6040
+2026-09-22 11:52:10 [INFO    ] src.api.order — BUY 주문 완료: 103590 1주 @ 0 (주문번호: 0001191300)
+2026-09-22 11:52:10 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001191300, ticker=103590
+2026-09-22 11:52:10 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0001191300 ticker=일진전기(103590) side=BUY src=map ordered=1 filled_total=1 incr=1
+2026-09-22 11:52:10 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 일진전기(103590) 1주 @ 77700 (전략: long_tail_volatility)
+2026-09-22 11:52:10 [INFO    ] src.engine.order_engine — 매수 주문 접수: 일진전기(103590) 1주 @ 77700 (주문번호: 0001191300, 전략: long_tail_volatility)
+2026-09-22 11:52:10 [INFO    ] src.engine.order_engine — 매수 전량 체결: 일진전기(103590) 1주 @ 77700 (전략: long_tail_volatility)
+2026-09-22 13:19:53 [INFO    ] src.engine.strategies.long_tail_volatility — 롱테일VB 당일 손절: KBI메탈(024840) -5.1%
+2026-09-22 13:19:53 [INFO    ] src.api.order — SELL 주문 완료: 024840 7주 @ 0 (주문번호: 0001422800)
+2026-09-22 13:19:53 [INFO    ] src.engine.order_engine — STOP_LOSS 매도 주문 접수: KBI메탈(024840) 7주 (주문번호: 0001422800, 전략: long_tail_volatility)
+2026-09-22 13:19:53 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001422800, ticker=024840
+2026-09-22 13:19:53 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0001422800 ticker=KBI메탈(024840) side=SELL src=map ordered=7 filled_total=7 incr=7
+2026-09-22 13:19:53 [INFO    ] src.engine.order_engine — 매도 전량 체결: KBI메탈(024840) 7주 @ 6470 (손익: -2590, 전략: long_tail_volatility)
+2026-09-22 13:19:53 [DEBUG   ] src.engine.order_engine — [unsubscribe_skip] 024840 — strategy=long_tail_volatility 스캔 후보
+2026-09-22 13:32:53 [INFO    ] src.engine.strategies.long_tail_volatility — 롱테일VB 당일 손절: 이수페타시스(007660) -5.1%
+2026-09-22 13:32:53 [INFO    ] src.api.order — SELL 주문 완료: 007660 1주 @ 0 (주문번호: 0001463400)
+2026-09-22 13:32:53 [INFO    ] src.engine.order_engine — STOP_LOSS 매도 주문 접수: 이수페타시스(007660) 1주 (주문번호: 0001463400, 전략: long_tail_volatility)
+2026-09-22 13:32:53 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001463400, ticker=007660
+2026-09-22 13:32:53 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0001463400 ticker=이수페타시스(007660) side=SELL src=map ordered=1 filled_total=1 incr=1
+2026-09-22 13:32:53 [INFO    ] src.engine.order_engine — 매도 전량 체결: 이수페타시스(007660) 1주 @ 112400 (손익: -6000, 전략: long_tail_volatility)
+2026-09-22 13:32:53 [DEBUG   ] src.engine.order_engine — [unsubscribe_skip] 007660 — strategy=volatility_breakout 스캔 후보
+2026-09-22 13:54:44 [INFO    ] src.engine.strategies.donchian_swing — 도치안 시간 기반 청산: 316140 보유 5영업일 ≥ 2, 현재가(35550) < 돌파선(35600)
+2026-09-22 13:54:45 [INFO    ] src.api.order — SELL 주문 완료: 316140 1주 @ 0 (주문번호: 0001519800)
+2026-09-22 13:54:45 [INFO    ] src.engine.order_engine — STOP_LOSS 매도 주문 접수: 우리금융지주(316140) 1주 (주문번호: 0001519800, 전략: donchian_swing)
+2026-09-22 13:54:45 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001519800, ticker=316140
+2026-09-22 13:54:45 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0001519800 ticker=우리금융지주(316140) side=SELL src=map ordered=1 filled_total=1 incr=1
+2026-09-22 13:54:45 [INFO    ] src.engine.order_engine — 매도 전량 체결: 우리금융지주(316140) 1주 @ 35550 (손익: -450, 전략: donchian_swing)
+2026-09-22 13:54:45 [INFO    ] src.engine.order_engine — [sell_unsubscribe] 우리금융지주(316140) WS 구독 정리
+2026-09-22 14:29:16 [INFO    ] src.engine.strategies.long_tail_volatility — 롱테일 변동성 돌파 매수 신호 [main]: 인제니아테라퓨틱스(Reg.S)(950260) 현재가(23350) >= 목표가(23324), K=0.5804
+2026-09-22 14:29:17 [INFO    ] src.api.order — BUY 주문 완료: 950260 2주 @ 0 (주문번호: 0001614400)
+2026-09-22 14:29:17 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001614400, ticker=950260
+2026-09-22 14:29:17 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0001614400 ticker=인제니아테라퓨틱스(Reg.S)(950260) side=BUY src=map ordered=2 filled_total=2 incr=2
+2026-09-22 14:29:17 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 인제니아테라퓨틱스(Reg.S)(950260) 2주 @ 23400 (전략: long_tail_volatility)
+2026-09-22 14:29:17 [INFO    ] src.engine.order_engine — 매수 주문 접수: 인제니아테라퓨틱스(Reg.S)(950260) 2주 @ 23350 (주문번호: 0001614400, 전략: long_tail_volatility)
+2026-09-22 14:29:17 [INFO    ] src.engine.order_engine — 매수 전량 체결: 인제니아테라퓨틱스(Reg.S)(950260) 2주 @ 23400 (전략: long_tail_volatility)
+2026-09-22 14:36:50 [INFO    ] src.engine.strategies.bull_flag_breakout — 눌림목 손절: 149950 매수가(13040) 대비 -5.1%
+2026-09-22 14:36:50 [INFO    ] src.api.order — SELL 주문 완료: 149950 14주 @ 0 (주문번호: 0001637700)
+2026-09-22 14:36:50 [INFO    ] src.engine.order_engine — STOP_LOSS 매도 주문 접수: 아바텍(149950) 14주 (주문번호: 0001637700, 전략: bull_flag_breakout)
+2026-09-22 14:36:50 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001637700, ticker=149950
+2026-09-22 14:36:50 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0001637700 ticker=아바텍(149950) side=SELL src=map ordered=14 filled_total=3 incr=3
+2026-09-22 14:36:51 [INFO    ] src.engine.order_engine — 매도 부분 체결: 아바텍(149950) 3/14주 @ 12380 (전략: bull_flag_breakout)
+2026-09-22 14:36:51 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0001637700 ticker=아바텍(149950) side=SELL src=map ordered=14 filled_total=14 incr=11
+2026-09-22 14:36:51 [INFO    ] src.engine.order_engine — 매도 전량 체결: 아바텍(149950) 14주 @ 12350 (손익: -7590, 전략: bull_flag_breakout)
+2026-09-22 14:36:51 [INFO    ] src.engine.order_engine — [partial_cancel_timer_cleared] ticker=아바텍(149950) order_no=0001637700
+2026-09-22 14:36:51 [DEBUG   ] src.engine.order_engine — [unsubscribe_skip] 149950 — strategy=bull_flag_breakout 스캔 후보
+2026-09-22 15:20:00 [INFO    ] src.api.order — SELL 주문 완료: 010950 1주 @ 0 (주문번호: 0001754100)
+2026-09-22 15:20:00 [INFO    ] src.engine.order_engine — FORCE_CLEAR 매도 주문 접수: S-Oil(010950) 1주 (주문번호: 0001754100, 전략: volatility_breakout)
+2026-09-22 15:20:00 [INFO    ] src.api.order — SELL 주문 완료: 017670 1주 @ 0 (주문번호: 0001754200)
+2026-09-22 15:20:00 [INFO    ] src.engine.order_engine — FORCE_CLEAR 매도 주문 접수: SK텔레콤(017670) 1주 (주문번호: 0001754200, 전략: volatility_breakout)
+2026-09-22 15:20:00 [INFO    ] src.api.order — SELL 주문 완료: 103590 1주 @ 0 (주문번호: 0001754300)
+2026-09-22 15:20:00 [INFO    ] src.engine.order_engine — FORCE_CLEAR 매도 주문 접수: 일진전기(103590) 1주 (주문번호: 0001754300, 전략: long_tail_volatility)
+2026-09-22 15:20:00 [INFO    ] src.api.order — SELL 주문 완료: 950260 2주 @ 0 (주문번호: 0001754400)
+2026-09-22 15:20:00 [INFO    ] src.engine.order_engine — FORCE_CLEAR 매도 주문 접수: 인제니아테라퓨틱스(Reg.S)(950260) 2주 (주문번호: 0001754400, 전략: long_tail_volatility)
+2026-09-22 15:20:01 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001754400, ticker=950260
+2026-09-22 15:20:01 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001754100, ticker=010950
+2026-09-22 15:20:01 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001754200, ticker=017670
+2026-09-22 15:20:01 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001754300, ticker=103590
+2026-09-23 08:00:30 [INFO    ] src.engine.scheduler — 익일 청산 보류 (갭 -2.8% < 임계 10.0%, 09:00 KRX 시장가 청산 예약): 코리아써키트(007810) (전략: momentum)
+2026-09-23 08:00:30 [INFO    ] src.engine.scheduler — 익일 청산 보류 (갭 8.1% < 임계 10.0%, 09:00 KRX 시장가 청산 예약): 노타(486990) (전략: momentum)
+2026-09-23 09:00:04 [INFO    ] src.realtime.handler — [open_scope_observe] ticker=486990 oprc_hour=090004 tick_open=24400 cntg_hour=090004 hgpr_hour=090004 mkop=20 hour_cls=0 in_main_window=true
+2026-09-23 09:00:05 [INFO    ] src.api.order — SELL 주문 완료: 486990 2주 @ 0 (주문번호: 0000277800)
+2026-09-23 09:00:05 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000277800, ticker=486990
+2026-09-23 09:00:05 [INFO    ] src.engine.order_engine — NEXT_DAY_CLEAR 매도 주문 접수: 노타(486990) 2주 (주문번호: 0000277800, 전략: momentum)
+2026-09-23 09:00:05 [INFO    ] src.api.order — SELL 주문 완료: 007810 1주 @ 0 (주문번호: 0000277900)
+2026-09-23 09:00:05 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000277900, ticker=007810
+2026-09-23 09:00:05 [INFO    ] src.engine.order_engine — NEXT_DAY_CLEAR 매도 주문 접수: 코리아써키트(007810) 1주 (주문번호: 0000277900, 전략: momentum)
+2026-09-23 09:05:00 [INFO    ] src.engine.strategies.donchian_swing — 도치안 스윙 매수 신호: 095340 현재가(210000) — 신고가(203500) 돌파 + EMA60(170499) 위 + ATR(12700)
+2026-09-23 09:05:00 [INFO    ] src.api.order — BUY 주문 완료: 095340 1주 @ 0 (주문번호: 0000324700)
+2026-09-23 09:05:00 [INFO    ] src.engine.order_engine — 매수 주문 접수: ISC(095340) 1주 @ 210000 (주문번호: 0000324700, 전략: donchian_swing)
+2026-09-23 09:05:00 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000324700, ticker=095340
+2026-09-23 09:05:00 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000324700 ticker=ISC(095340) side=BUY src=map ordered=1 filled_total=1 incr=1
+2026-09-23 09:05:00 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: ISC(095340) 1주 @ 210000 (전략: donchian_swing)
+2026-09-23 09:05:00 [INFO    ] src.engine.order_engine — 매수 전량 체결: ISC(095340) 1주 @ 210000 (전략: donchian_swing)
+2026-09-23 09:05:00 [INFO    ] src.realtime.handler — [open_scope_observe] ticker=095340 oprc_hour=090027 tick_open=210000 cntg_hour=090500 hgpr_hour=090050 mkop=20 hour_cls=0 in_main_window=true
+2026-09-23 09:05:00 [INFO    ] src.engine.strategies.donchian_swing — [days_held_observe] ticker=095340 strategy=donchian_swing buy_date=2026-09-23 days_held=0 calendar_days=0 n_days=2 breakout_high=203500 current_price=210000 days_ok=False price_ok=False
+2026-09-23 09:05:00 [INFO    ] src.engine.strategies.donchian_swing — 도치안 스윙 매수 신호: 067310 현재가(45450) — 신고가(45400) 돌파 + EMA60(38035) 위 + ATR(2528)
+2026-09-23 09:05:01 [INFO    ] src.api.order — BUY 주문 완료: 067310 2주 @ 0 (주문번호: 0000325000)
+2026-09-23 09:05:01 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000325000, ticker=067310
+2026-09-23 09:05:01 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000325000 ticker=하나마이크론(067310) side=BUY src=map ordered=2 filled_total=2 incr=2
+2026-09-23 09:05:01 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 하나마이크론(067310) 2주 @ 45500 (전략: donchian_swing)
+2026-09-23 09:05:01 [INFO    ] src.engine.order_engine — 매수 주문 접수: 하나마이크론(067310) 2주 @ 45450 (주문번호: 0000325000, 전략: donchian_swing)
+2026-09-23 09:05:01 [WARNING ] src.engine.order_engine — [buy_fill_correction_unique_violation] ticker=067310 order_no=0000325000 strategy_attempted=donchian_swing err=UniqueViolationError('duplicate key value violates unique constraint "uq_trade_history_ticker_order_no_type"') → strategy 무관 강제 COMPLETED UPDATE
+2026-09-23 09:05:01 [INFO    ] src.engine.order_engine — 매수 전량 체결: 하나마이크론(067310) 2주 @ 45500 (전략: donchian_swing)
+2026-09-23 09:05:01 [INFO    ] src.realtime.handler — [open_scope_observe] ticker=067310 oprc_hour=090013 tick_open=46100 cntg_hour=090501 hgpr_hour=090134 mkop=20 hour_cls=0 in_main_window=true
+2026-09-23 09:05:01 [INFO    ] src.engine.strategies.donchian_swing — [days_held_observe] ticker=067310 strategy=donchian_swing buy_date=2026-09-23 days_held=0 calendar_days=0 n_days=2 breakout_high=45400 current_price=45500 days_ok=False price_ok=False
+2026-09-23 09:05:55 [INFO    ] src.engine.strategies.donchian_swing — 도치안 스윙 트레일링: 036540 고점(11160) - ATR×1.8 = 10387 / 현재가 10380
+2026-09-23 09:05:55 [INFO    ] src.api.order — SELL 주문 완료: 036540 4주 @ 0 (주문번호: 0000337700)
+2026-09-23 09:05:55 [INFO    ] src.engine.order_engine — TRAILING_STOP 매도 주문 접수: SFA반도체(036540) 4주 (주문번호: 0000337700, 전략: donchian_swing)
+2026-09-23 09:05:55 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000337700, ticker=036540
+2026-09-23 09:05:55 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000337700 ticker=SFA반도체(036540) side=SELL src=map ordered=4 filled_total=4 incr=4
+2026-09-23 09:05:55 [INFO    ] src.engine.order_engine — 매도 전량 체결: SFA반도체(036540) 4주 @ 10380 (손익: 13680, 전략: donchian_swing)
+2026-09-23 09:05:55 [DEBUG   ] src.engine.order_engine — [unsubscribe_skip] 036540 — strategy=volatility_breakout 스캔 후보
+2026-09-23 09:05:59 [INFO    ] src.engine.strategies.volatility_breakout — 변동성돌파 매수 신호 [main]: SK이노베이션(096770) 현재가(147500) >= 목표가(147475), 이전가(147100), K=0.5466
+2026-09-23 09:05:59 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000338400, ticker=096770
+2026-09-23 09:05:59 [WARNING ] src.engine.order_engine — 체결통보: 주문번호 0000338400에 대한 종목 매핑 없음, payload ticker 사용: 096770
+2026-09-23 09:05:59 [WARNING ] src.engine.order_engine — [fill_qty_src] order_no=0000338400 ticker=SK이노베이션(096770) side=BUY src=payload ordered=1 filled_total=1 incr=1
+2026-09-23 09:05:59 [INFO    ] src.api.order — BUY 주문 완료: 096770 1주 @ 0 (주문번호: 0000338400)
+2026-09-23 09:05:59 [WARNING ] src.engine.order_engine — [buy_fill_strategy_from_pending] order_no=0000338400 ticker=SK이노베이션(096770) strategy=volatility_breakout qty_src=payload incr=1 filled_total=1 ordered=1 — 발사 창 귀속
+2026-09-23 09:05:59 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: SK이노베이션(096770) 1주 @ 147500 (전략: volatility_breakout)
+2026-09-23 09:05:59 [INFO    ] src.engine.order_engine — 매수 주문 접수: SK이노베이션(096770) 1주 @ 147500 (주문번호: 0000338400, 전략: volatility_breakout)
+2026-09-23 09:05:59 [WARNING ] src.engine.order_engine — [buy_fill_correction_unique_violation] ticker=096770 order_no=0000338400 strategy_attempted=volatility_breakout err=UniqueViolationError('duplicate key value violates unique constraint "uq_trade_history_ticker_order_no_type"') → strategy 무관 강제 COMPLETED UPDATE
+2026-09-23 09:05:59 [INFO    ] src.engine.order_engine — 매수 전량 체결: SK이노베이션(096770) 1주 @ 147500 (전략: volatility_breakout)
+2026-09-23 09:12:08 [INFO    ] src.engine.strategies.bull_flag_breakout — [bfb_vol_gate_pass] ticker=356680 observed=4839986 threshold=4137332 latch_age_sec=428
+2026-09-23 09:12:08 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000385600, ticker=356680
+2026-09-23 09:12:08 [WARNING ] src.engine.order_engine — 체결통보: 주문번호 0000385600에 대한 종목 매핑 없음, payload ticker 사용: 356680
+2026-09-23 09:12:08 [WARNING ] src.engine.order_engine — [fill_qty_src] order_no=0000385600 ticker=엑스게이트(356680) side=BUY src=payload ordered=9 filled_total=9 incr=9
+2026-09-23 09:12:08 [INFO    ] src.api.order — BUY 주문 완료: 356680 9주 @ 0 (주문번호: 0000385600)
+2026-09-23 09:12:08 [WARNING ] src.engine.order_engine — [buy_fill_strategy_from_pending] order_no=0000385600 ticker=엑스게이트(356680) strategy=bull_flag_breakout qty_src=payload incr=9 filled_total=9 ordered=9 — 발사 창 귀속
+2026-09-23 09:12:08 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 엑스게이트(356680) 9주 @ 19370 (전략: bull_flag_breakout)
+2026-09-23 09:12:08 [WARNING ] src.engine.order_engine — 체결통보 선행 race — COMPLETED 직접 INSERT: 매수 엑스게이트(356680) (주문번호: 0000385600)
+2026-09-23 09:12:08 [INFO    ] src.engine.order_engine — 매수 전량 체결: 엑스게이트(356680) 9주 @ 19370 (전략: bull_flag_breakout)
+2026-09-23 09:12:08 [INFO    ] src.engine.order_engine — [buy_fill_during_insert] ticker=356680 order_no=0000385600 strategy=bull_flag_breakout path=market
+2026-09-23 09:12:08 [INFO    ] src.engine.order_engine — 매수 주문 접수: 엑스게이트(356680) 9주 @ 19370 (주문번호: 0000385600, 전략: bull_flag_breakout)
+2026-09-23 10:13:34 [INFO    ] src.engine.strategies.volatility_breakout — 변동성돌파 매수 신호 [main]: 일진전기(103590) 현재가(81900) >= 목표가(81866), 이전가(81800), K=0.5548
+2026-09-23 10:13:34 [INFO    ] src.api.order — BUY 주문 완료: 103590 1주 @ 0 (주문번호: 0000692000)
+2026-09-23 10:13:34 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000692000, ticker=103590
+2026-09-23 10:13:34 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000692000 ticker=일진전기(103590) side=BUY src=map ordered=1 filled_total=1 incr=1
+2026-09-23 10:13:34 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 일진전기(103590) 1주 @ 81900 (전략: volatility_breakout)
+2026-09-23 10:13:34 [INFO    ] src.engine.order_engine — 매수 주문 접수: 일진전기(103590) 1주 @ 81900 (주문번호: 0000692000, 전략: volatility_breakout)
+2026-09-23 10:13:34 [INFO    ] src.engine.order_engine — 매수 전량 체결: 일진전기(103590) 1주 @ 81900 (전략: volatility_breakout)
+2026-09-23 10:50:45 [INFO    ] src.engine.strategies.bull_flag_breakout — [bfb_turtle_backstop] 100840 매수가(39450) 대비 -7.1% ≤ -7.0%
+2026-09-23 10:50:45 [INFO    ] src.api.order — SELL 주문 완료: 100840 4주 @ 0 (주문번호: 0000849100)
+2026-09-23 10:50:45 [INFO    ] src.engine.order_engine — STOP_LOSS 매도 주문 접수: SNT에너지(100840) 4주 (주문번호: 0000849100, 전략: bull_flag_breakout)
+2026-09-23 10:50:45 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000849100, ticker=100840
+2026-09-23 10:50:45 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000849100 ticker=SNT에너지(100840) side=SELL src=map ordered=4 filled_total=4 incr=4
+2026-09-23 10:50:45 [INFO    ] src.engine.order_engine — 매도 전량 체결: SNT에너지(100840) 4주 @ 36650 (손익: -11200, 전략: bull_flag_breakout)
+2026-09-23 10:50:45 [DEBUG   ] src.engine.order_engine — [unsubscribe_skip] 100840 — strategy=long_tail_volatility 스캔 후보
+2026-09-23 10:51:54 [INFO    ] src.engine.strategies.kojiro — [kojiro_atr_stop] 004020 손절선(33050) = 매수가(33050) - 2.0×ATR(1700.5)
+2026-09-23 10:51:54 [INFO    ] src.api.order — SELL 주문 완료: 004020 2주 @ 0 (주문번호: 0000851600)
+2026-09-23 10:51:54 [INFO    ] src.engine.order_engine — STOP_LOSS 매도 주문 접수: 현대제철(004020) 2주 (주문번호: 0000851600, 전략: kojiro)
+2026-09-23 10:51:54 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000851600, ticker=004020
+2026-09-23 10:51:54 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000851600 ticker=현대제철(004020) side=SELL src=map ordered=2 filled_total=2 incr=2
+2026-09-23 10:51:54 [INFO    ] src.engine.order_engine — 매도 전량 체결: 현대제철(004020) 2주 @ 33050 (손익: 0, 전략: kojiro)
+2026-09-23 10:51:54 [DEBUG   ] src.engine.order_engine — [unsubscribe_skip] 004020 — strategy=long_tail_volatility 스캔 후보
+2026-09-23 11:02:33 [INFO    ] src.engine.strategies.momentum — 매수 신호: 우리넷(115440) 전일종가(9330) 대비 29.4% (현재가: 12070, 직전: 28.9%)
+2026-09-23 11:02:34 [INFO    ] src.api.order — BUY 주문 완료: 115440 5주 @ 0 (주문번호: 0000891700)
+2026-09-23 11:02:34 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000891700, ticker=115440
+2026-09-23 11:02:34 [INFO    ] src.engine.order_engine — 매수 주문 접수: 우리넷(115440) 5주 @ 12070 (주문번호: 0000891700, 전략: momentum)
+2026-09-23 12:11:43 [INFO    ] src.engine.strategies.bull_flag_breakout — 눌림목 손절: 356680 매수가(19370) 대비 -5.0%
+2026-09-23 12:11:44 [INFO    ] src.api.order — SELL 주문 완료: 356680 9주 @ 0 (주문번호: 0001036400)
+2026-09-23 12:11:44 [INFO    ] src.engine.order_engine — STOP_LOSS 매도 주문 접수: 엑스게이트(356680) 9주 (주문번호: 0001036400, 전략: bull_flag_breakout)
+2026-09-23 12:11:44 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001036400, ticker=356680
+2026-09-23 12:11:44 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0001036400 ticker=엑스게이트(356680) side=SELL src=map ordered=9 filled_total=9 incr=9
+2026-09-23 12:11:44 [INFO    ] src.engine.order_engine — 매도 전량 체결: 엑스게이트(356680) 9주 @ 18400 (손익: -8730, 전략: bull_flag_breakout)
+2026-09-23 12:11:44 [DEBUG   ] src.engine.order_engine — [unsubscribe_skip] 356680 — strategy=bull_flag_breakout 스캔 후보
+2026-09-23 12:22:43 [INFO    ] src.engine.strategies.bull_flag_breakout — [bfb_vol_gate_pass] ticker=295310 observed=165360 threshold=164920 latch_age_sec=5503
+2026-09-23 12:22:43 [INFO    ] src.api.order — BUY 주문 완료: 295310 2주 @ 0 (주문번호: 0001056800)
+2026-09-23 12:22:43 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001056800, ticker=295310
+2026-09-23 12:22:43 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0001056800 ticker=에이치브이엠(295310) side=BUY src=map ordered=2 filled_total=2 incr=2
+2026-09-23 12:22:43 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 에이치브이엠(295310) 2주 @ 63400 (전략: bull_flag_breakout)
+2026-09-23 12:22:43 [INFO    ] src.engine.order_engine — 매수 주문 접수: 에이치브이엠(295310) 2주 @ 63300 (주문번호: 0001056800, 전략: bull_flag_breakout)
+2026-09-23 12:22:43 [INFO    ] src.engine.order_engine — 매수 전량 체결: 에이치브이엠(295310) 2주 @ 63400 (전략: bull_flag_breakout)
+2026-09-23 12:51:44 [INFO    ] src.engine.strategies.kojiro — [kojiro_atr_stop] 000520 손절선(7740) = 매수가(7740) - 2.0×ATR(417.5)
+2026-09-23 12:51:45 [INFO    ] src.api.order — SELL 주문 완료: 000520 25주 @ 0 (주문번호: 0001116100)
+2026-09-23 12:51:45 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001116100, ticker=000520
+2026-09-23 12:51:45 [INFO    ] src.engine.order_engine — STOP_LOSS 매도 주문 접수: 삼일제약(000520) 25주 (주문번호: 0001116100, 전략: kojiro)
+2026-09-23 14:18:35 [INFO    ] src.engine.strategies.momentum — 매수 신호: HT로보틱스(396300) 전일종가(4625) 대비 29.1% (현재가: 5970, 직전: 28.9%)
+2026-09-23 14:18:35 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001331100, ticker=396300
+2026-09-23 14:18:35 [INFO    ] src.api.order — BUY 주문 완료: 396300 10주 @ 0 (주문번호: 0001331100)
+2026-09-23 14:18:35 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0001331100 ticker=HT로보틱스(396300) side=BUY src=map ordered=10 filled_total=10 incr=10
+2026-09-23 14:18:35 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: HT로보틱스(396300) 10주 @ 5990 (전략: momentum)
+2026-09-23 14:18:35 [INFO    ] src.engine.order_engine — 매수 주문 접수: HT로보틱스(396300) 10주 @ 5970 (주문번호: 0001331100, 전략: momentum)
+2026-09-23 14:18:35 [INFO    ] src.engine.order_engine — 매수 전량 체결: HT로보틱스(396300) 10주 @ 5990 (전략: momentum)
+2026-09-23 15:20:00 [INFO    ] src.api.order — SELL 주문 완료: 096770 1주 @ 0 (주문번호: 0001480500)
+2026-09-23 15:20:00 [INFO    ] src.engine.order_engine — FORCE_CLEAR 매도 주문 접수: SK이노베이션(096770) 1주 (주문번호: 0001480500, 전략: volatility_breakout)
+2026-09-23 15:20:00 [INFO    ] src.api.order — SELL 주문 완료: 103590 1주 @ 0 (주문번호: 0001480600)
+2026-09-23 15:20:00 [INFO    ] src.engine.order_engine — FORCE_CLEAR 매도 주문 접수: 일진전기(103590) 1주 (주문번호: 0001480600, 전략: volatility_breakout)
+2026-09-23 15:20:01 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001480500, ticker=096770
+2026-09-23 15:20:01 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001480600, ticker=103590
+2026-09-28 08:00:30 [INFO    ] src.engine.scheduler — stock_master nxt_tradable=False — 익일 청산 보류 (09:00 KRX 시장가 청산 예약): 우리넷(115440) (전략: momentum)
+2026-09-28 08:00:30 [INFO    ] src.engine.scheduler — stock_master nxt_tradable=False — 익일 청산 보류 (09:00 KRX 시장가 청산 예약): HT로보틱스(396300) (전략: momentum)
+2026-09-28 08:08:33 [INFO    ] src.realtime.handler — [order_notice] order_no=0000042300 orig_order_no= side=BUY rctf=0 kind=00 cond=3 ticker=199800 qty=0000000001 price=000023650 hour=080833 rfus=0 acpt=1 ord_qty=000000001
+2026-09-28 08:50:00 [INFO    ] src.realtime.handler — [order_notice] order_no=0000042300 orig_order_no= side=BUY rctf=2 kind=00 cond=3 ticker=199800 qty=0000000001 price=000023650 hour=085000 rfus=0 acpt=3 ord_qty=000000001
+2026-09-28 09:00:05 [INFO    ] src.api.order — SELL 주문 완료: 396300 10주 @ 0 (주문번호: 0000246100)
+2026-09-28 09:00:05 [INFO    ] src.realtime.handler — [order_notice] order_no=0000246100 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=396300 qty=0000000010 price=000000000 hour=090005 rfus=0 acpt=1 ord_qty=000000010
+2026-09-28 09:00:05 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000246100, ticker=396300
+2026-09-28 09:00:05 [INFO    ] src.engine.order_engine — NEXT_DAY_CLEAR 매도 주문 접수: HT로보틱스(396300) 10주 (주문번호: 0000246100, 전략: momentum)
+2026-09-28 09:00:05 [INFO    ] src.api.order — SELL 주문 완료: 115440 5주 @ 0 (주문번호: 0000246200)
+2026-09-28 09:00:05 [INFO    ] src.realtime.handler — [order_notice] order_no=0000246200 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=115440 qty=0000000005 price=000000000 hour=090005 rfus=0 acpt=1 ord_qty=000000005
+2026-09-28 09:00:05 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000246200, ticker=115440
+2026-09-28 09:00:05 [INFO    ] src.engine.order_engine — NEXT_DAY_CLEAR 매도 주문 접수: 우리넷(115440) 5주 (주문번호: 0000246200, 전략: momentum)
+2026-09-28 09:00:30 [INFO    ] src.realtime.handler — [open_scope_observe] ticker=003160 oprc_hour=090029 tick_open=36550 cntg_hour=090029 hgpr_hour=090029 mkop=20 hour_cls=0 in_main_window=true
+2026-09-28 09:00:30 [INFO    ] src.engine.strategies.bull_flag_breakout — [bfb_breakeven_promote] 003160 고점(36850) ≥ 매수가(31700)+1.5×ATR(1767) → 래치
+2026-09-28 09:00:30 [INFO    ] src.engine.strategies.bull_flag_breakout — 눌림목 시간 청산: 003160 buy_date=2026-09-17 today=2026-09-28 보유일수 초과
+2026-09-28 09:00:30 [INFO    ] src.api.order — SELL 주문 완료: 003160 2주 @ 0 (주문번호: 0000247200)
+2026-09-28 09:00:30 [INFO    ] src.engine.order_engine — TRAILING_STOP 매도 주문 접수: 디아이(003160) 2주 (주문번호: 0000247200, 전략: bull_flag_breakout)
+2026-09-28 09:00:30 [INFO    ] src.realtime.handler — [order_notice] order_no=0000247200 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=003160 qty=0000000002 price=000000000 hour=090030 rfus=0 acpt=1 ord_qty=000000002
+2026-09-28 09:00:30 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000247200, ticker=003160
+2026-09-28 09:00:30 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000247200 ticker=디아이(003160) side=SELL src=map ordered=2 filled_total=2 incr=2
+2026-09-28 09:00:30 [INFO    ] src.engine.order_engine — 매도 전량 체결: 디아이(003160) 2주 @ 36450 (손익: 9500, 전략: bull_flag_breakout)
+2026-09-28 09:00:30 [INFO    ] src.engine.order_engine — [sell_unsubscribe] 디아이(003160) WS 구독 정리
+2026-09-28 09:03:10 [INFO    ] src.engine.strategies.kojiro — [kojiro_hard_stop] 011170 매수가(64400) 대비 -8.1% ≤ -8.0%
+2026-09-28 09:03:10 [INFO    ] src.api.order — SELL 주문 완료: 011170 2주 @ 0 (주문번호: 0000269700)
+2026-09-28 09:03:10 [INFO    ] src.engine.order_engine — STOP_LOSS 매도 주문 접수: 롯데케미칼(011170) 2주 (주문번호: 0000269700, 전략: kojiro)
+2026-09-28 09:03:10 [INFO    ] src.realtime.handler — [order_notice] order_no=0000269700 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=011170 qty=0000000002 price=000000000 hour=090310 rfus=0 acpt=1 ord_qty=000000002
+2026-09-28 09:03:10 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000269700, ticker=011170
+2026-09-28 09:03:10 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000269700 ticker=롯데케미칼(011170) side=SELL src=map ordered=2 filled_total=2 incr=2
+2026-09-28 09:03:10 [INFO    ] src.engine.order_engine — 매도 전량 체결: 롯데케미칼(011170) 2주 @ 59100 (손익: -10600, 전략: kojiro)
+2026-09-28 09:03:10 [INFO    ] src.engine.order_engine — [sell_unsubscribe] 롯데케미칼(011170) WS 구독 정리
+2026-09-28 09:03:52 [INFO    ] src.engine.strategies.momentum — 매수 신호: 쓰리빌리언(394800) 전일종가(5520) 대비 29.2% (현재가: 7130, 직전: 29.0%)
+2026-09-28 09:03:52 [INFO    ] src.api.order — BUY 주문 완료: 394800 8주 @ 0 (주문번호: 0000276000)
+2026-09-28 09:03:52 [INFO    ] src.engine.order_engine — 매수 주문 접수: 쓰리빌리언(394800) 8주 @ 7130 (주문번호: 0000276000, 전략: momentum)
+2026-09-28 09:03:52 [INFO    ] src.realtime.handler — [order_notice] order_no=0000276000 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=394800 qty=0000000008 price=000000000 hour=090352 rfus=0 acpt=1 ord_qty=000000008
+2026-09-28 09:03:52 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000276000, ticker=394800
+2026-09-28 09:03:52 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000276000 ticker=쓰리빌리언(394800) side=BUY src=map ordered=8 filled_total=8 incr=8
+2026-09-28 09:03:52 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 쓰리빌리언(394800) 8주 @ 7130 (전략: momentum)
+2026-09-28 09:03:52 [INFO    ] src.engine.order_engine — 매수 전량 체결: 쓰리빌리언(394800) 8주 @ 7130 (전략: momentum)
+2026-09-28 09:04:56 [INFO    ] src.engine.strategies.long_tail_volatility — 롱테일 변동성 돌파 매수 신호 [main]: 엑스게이트(356680) 현재가(19680) >= 목표가(19680), K=0.5960
+2026-09-28 09:04:57 [INFO    ] src.realtime.handler — [order_notice] order_no=0000284500 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=356680 qty=0000000002 price=000000000 hour=090457 rfus=0 acpt=1 ord_qty=000000002
+2026-09-28 09:04:57 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000284500, ticker=356680
+2026-09-28 09:04:57 [INFO    ] src.api.order — BUY 주문 완료: 356680 2주 @ 0 (주문번호: 0000284500)
+2026-09-28 09:04:57 [INFO    ] src.engine.order_engine — 매수 주문 접수: 엑스게이트(356680) 2주 @ 19680 (주문번호: 0000284500, 전략: long_tail_volatility)
+2026-09-28 09:04:57 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000284500 ticker=엑스게이트(356680) side=BUY src=map ordered=2 filled_total=2 incr=2
+2026-09-28 09:04:57 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 엑스게이트(356680) 2주 @ 19650 (전략: long_tail_volatility)
+2026-09-28 09:04:57 [INFO    ] src.engine.order_engine — 매수 전량 체결: 엑스게이트(356680) 2주 @ 19650 (전략: long_tail_volatility)
+2026-09-28 09:05:01 [INFO    ] src.engine.strategies.kojiro — 고지로 매수 신호: 083450 현재가(50100) — 스테이지1(6→1) + EMA정배열 + ATR(2817.9)
+2026-09-28 09:05:02 [INFO    ] src.api.order — BUY 주문 완료: 083450 3주 @ 0 (주문번호: 0000285500)
+2026-09-28 09:05:02 [INFO    ] src.realtime.handler — [order_notice] order_no=0000285500 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=083450 qty=0000000003 price=000000000 hour=090502 rfus=0 acpt=1 ord_qty=000000003
+2026-09-28 09:05:02 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000285500, ticker=083450
+2026-09-28 09:05:02 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000285500 ticker=GST(083450) side=BUY src=map ordered=3 filled_total=3 incr=3
+2026-09-28 09:05:02 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: GST(083450) 3주 @ 50200 (전략: kojiro)
+2026-09-28 09:05:02 [INFO    ] src.engine.order_engine — 매수 주문 접수: GST(083450) 3주 @ 50100 (주문번호: 0000285500, 전략: kojiro)
+2026-09-28 09:05:02 [INFO    ] src.engine.strategies.kojiro — 고지로 매수 신호: 005930 현재가(284500) — 스테이지1(6→1) + EMA정배열 + ATR(13907.6)
+2026-09-28 09:05:02 [INFO    ] src.engine.order_engine — 매수 전량 체결: GST(083450) 3주 @ 50200 (전략: kojiro)
+2026-09-28 09:05:02 [INFO    ] src.realtime.handler — [open_scope_observe] ticker=083450 oprc_hour=090029 tick_open=49900 cntg_hour=090502 hgpr_hour=090347 mkop=20 hour_cls=0 in_main_window=true
+2026-09-28 09:05:02 [INFO    ] src.api.order — BUY 주문 완료: 005930 1주 @ 0 (주문번호: 0000285600)
+2026-09-28 09:05:02 [INFO    ] src.realtime.handler — [order_notice] order_no=0000285600 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=005930 qty=0000000001 price=000000000 hour=090502 rfus=0 acpt=1 ord_qty=000000001
+2026-09-28 09:05:02 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000285600, ticker=005930
+2026-09-28 09:05:02 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000285600 ticker=삼성전자(005930) side=BUY src=map ordered=1 filled_total=1 incr=1
+2026-09-28 09:05:02 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 삼성전자(005930) 1주 @ 284500 (전략: kojiro)
+2026-09-28 09:05:02 [INFO    ] src.engine.order_engine — 매수 주문 접수: 삼성전자(005930) 1주 @ 284500 (주문번호: 0000285600, 전략: kojiro)
+2026-09-28 09:05:02 [WARNING ] src.engine.order_engine — [buy_fill_correction_unique_violation] ticker=005930 order_no=0000285600 strategy_attempted=kojiro err=UniqueViolationError('duplicate key value violates unique constraint "uq_trade_history_ticker_order_no_type"') → strategy 무관 강제 COMPLETED UPDATE
+2026-09-28 09:05:02 [INFO    ] src.engine.order_engine — 매수 전량 체결: 삼성전자(005930) 1주 @ 284500 (전략: kojiro)
+2026-09-28 09:05:03 [INFO    ] src.engine.strategies.kojiro — 고지로 매수 신호: 121600 현재가(52100) — 스테이지1(6→1) + EMA정배열 + ATR(2696.1)
+2026-09-28 09:05:03 [INFO    ] src.api.order — BUY 주문 완료: 121600 3주 @ 0 (주문번호: 0000285700)
+2026-09-28 09:05:03 [INFO    ] src.engine.order_engine — 매수 주문 접수: 나노신소재(121600) 3주 @ 52100 (주문번호: 0000285700, 전략: kojiro)
+2026-09-28 09:05:03 [INFO    ] src.realtime.handler — [order_notice] order_no=0000285700 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=121600 qty=0000000003 price=000000000 hour=090503 rfus=0 acpt=1 ord_qty=000000003
+2026-09-28 09:05:03 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000285700, ticker=121600
+2026-09-28 09:05:03 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000285700 ticker=나노신소재(121600) side=BUY src=map ordered=3 filled_total=3 incr=3
+2026-09-28 09:05:03 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 나노신소재(121600) 3주 @ 52100 (전략: kojiro)
+2026-09-28 09:05:03 [INFO    ] src.engine.order_engine — 매수 전량 체결: 나노신소재(121600) 3주 @ 52100 (전략: kojiro)
+2026-09-28 09:05:04 [INFO    ] src.realtime.handler — [open_scope_observe] ticker=121600 oprc_hour=090027 tick_open=51700 cntg_hour=090503 hgpr_hour=090330 mkop=20 hour_cls=0 in_main_window=true
+2026-09-28 09:05:38 [INFO    ] src.engine.strategies.long_tail_volatility — 롱테일 변동성 돌파 매수 신호 [main]: 엑시콘(092870) 현재가(46600) >= 목표가(46576), K=0.4208
+2026-09-28 09:05:38 [INFO    ] src.realtime.handler — [order_notice] order_no=0000290700 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=092870 qty=0000000001 price=000000000 hour=090538 rfus=0 acpt=1 ord_qty=000000001
+2026-09-28 09:05:38 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000290700, ticker=092870
+2026-09-28 09:05:38 [WARNING ] src.engine.order_engine — 체결통보: 주문번호 0000290700에 대한 종목 매핑 없음, payload ticker 사용: 092870
+2026-09-28 09:05:38 [WARNING ] src.engine.order_engine — [fill_qty_src] order_no=0000290700 ticker=엑시콘(092870) side=BUY src=payload ordered=1 filled_total=1 incr=1
+2026-09-28 09:05:38 [INFO    ] src.api.order — BUY 주문 완료: 092870 1주 @ 0 (주문번호: 0000290700)
+2026-09-28 09:05:38 [INFO    ] src.engine.order_engine — 매수 주문 접수: 엑시콘(092870) 1주 @ 46600 (주문번호: 0000290700, 전략: long_tail_volatility)
+2026-09-28 09:05:38 [INFO    ] src.engine.order_engine — [buy_fill_strategy_lookup_recovered] order_no=0000290700 ticker=092870 strategy=long_tail_volatility — 매핑 dict miss + trade_history 복구
+2026-09-28 09:05:38 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 엑시콘(092870) 1주 @ 46650 (전략: long_tail_volatility)
+2026-09-28 09:05:38 [INFO    ] src.engine.order_engine — 매수 전량 체결: 엑시콘(092870) 1주 @ 46650 (전략: long_tail_volatility)
+2026-09-28 09:06:12 [INFO    ] src.engine.strategies.volatility_breakout — 변동성돌파 매수 신호 [main]: 대한광통신(010170) 현재가(18380) >= 목표가(18361), 이전가(18350), K=0.5922
+2026-09-28 09:06:12 [INFO    ] src.api.order — BUY 주문 완료: 010170 4주 @ 0 (주문번호: 0000295600)
+2026-09-28 09:06:12 [INFO    ] src.realtime.handler — [order_notice] order_no=0000295600 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=010170 qty=0000000004 price=000000000 hour=090612 rfus=0 acpt=1 ord_qty=000000004
+2026-09-28 09:06:12 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000295600, ticker=010170
+2026-09-28 09:06:12 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000295600 ticker=대한광통신(010170) side=BUY src=map ordered=4 filled_total=4 incr=4
+2026-09-28 09:06:12 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 대한광통신(010170) 4주 @ 18400 (전략: volatility_breakout)
+2026-09-28 09:06:12 [INFO    ] src.engine.order_engine — 매수 주문 접수: 대한광통신(010170) 4주 @ 18380 (주문번호: 0000295600, 전략: volatility_breakout)
+2026-09-28 09:06:12 [INFO    ] src.engine.order_engine — 매수 전량 체결: 대한광통신(010170) 4주 @ 18400 (전략: volatility_breakout)
+2026-09-28 09:06:45 [INFO    ] src.engine.strategies.long_tail_volatility — 롱테일 변동성 돌파 매수 신호 [main]: 한화솔루션(009830) 현재가(31700) >= 목표가(31694), K=0.6166
+2026-09-28 09:06:45 [INFO    ] src.api.order — BUY 주문 완료: 009830 1주 @ 0 (주문번호: 0000300300)
+2026-09-28 09:06:45 [INFO    ] src.realtime.handler — [order_notice] order_no=0000300300 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=009830 qty=0000000001 price=000000000 hour=090645 rfus=0 acpt=1 ord_qty=000000001
+2026-09-28 09:06:45 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000300300, ticker=009830
+2026-09-28 09:06:45 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000300300 ticker=한화솔루션(009830) side=BUY src=map ordered=1 filled_total=1 incr=1
+2026-09-28 09:06:45 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 한화솔루션(009830) 1주 @ 31750 (전략: long_tail_volatility)
+2026-09-28 09:06:45 [INFO    ] src.engine.order_engine — 매수 주문 접수: 한화솔루션(009830) 1주 @ 31700 (주문번호: 0000300300, 전략: long_tail_volatility)
+2026-09-28 09:06:45 [WARNING ] src.engine.order_engine — [buy_fill_correction_unique_violation] ticker=009830 order_no=0000300300 strategy_attempted=long_tail_volatility err=UniqueViolationError('duplicate key value violates unique constraint "uq_trade_history_ticker_order_no_type"') → strategy 무관 강제 COMPLETED UPDATE
+2026-09-28 09:06:45 [INFO    ] src.engine.order_engine — 매수 전량 체결: 한화솔루션(009830) 1주 @ 31750 (전략: long_tail_volatility)
+2026-09-28 09:08:00 [INFO    ] src.engine.strategies.long_tail_volatility — 롱테일 변동성 돌파 매수 신호 [main]: 한컴위드(054920) 현재가(5080) >= 목표가(5063), K=0.5425
+2026-09-28 09:08:00 [INFO    ] src.api.order — BUY 주문 완료: 054920 9주 @ 0 (주문번호: 0000312500)
+2026-09-28 09:08:00 [INFO    ] src.engine.order_engine — 매수 주문 접수: 한컴위드(054920) 9주 @ 5080 (주문번호: 0000312500, 전략: long_tail_volatility)
+2026-09-28 09:08:00 [INFO    ] src.realtime.handler — [order_notice] order_no=0000312500 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=054920 qty=0000000009 price=000000000 hour=090800 rfus=0 acpt=1 ord_qty=000000009
+2026-09-28 09:08:00 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000312500, ticker=054920
+2026-09-28 09:08:00 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000312500 ticker=한컴위드(054920) side=BUY src=map ordered=9 filled_total=9 incr=9
+2026-09-28 09:08:00 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 한컴위드(054920) 9주 @ 5090 (전략: long_tail_volatility)
+2026-09-28 09:08:00 [INFO    ] src.engine.order_engine — 매수 전량 체결: 한컴위드(054920) 9주 @ 5090 (전략: long_tail_volatility)
+2026-09-28 09:11:22 [INFO    ] src.realtime.handler — [order_notice] order_no=0000340300 orig_order_no= side=BUY rctf=0 kind=00 cond=0 ticker=199800 qty=0000000001 price=000023650 hour=091122 rfus=0 acpt=1 ord_qty=000000001
+2026-09-28 09:12:16 [INFO    ] src.realtime.handler — [order_notice] order_no=0000345900 orig_order_no=0000340300 side=BUY rctf=2 kind=00 cond=0 ticker=199800 qty=0000000001 price=000000000 hour=091216 rfus=0 acpt=2 ord_qty=000000001
+2026-09-28 09:21:28 [INFO    ] src.engine.strategies.volatility_breakout — 변동성돌파 매수 신호 [main]: 대우건설(047040) 현재가(18760) >= 목표가(18752), 이전가(18750), K=0.5709
+2026-09-28 09:21:28 [INFO    ] src.api.order — BUY 주문 완료: 047040 4주 @ 0 (주문번호: 0000423000)
+2026-09-28 09:21:28 [INFO    ] src.realtime.handler — [order_notice] order_no=0000423000 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=047040 qty=0000000004 price=000000000 hour=092128 rfus=0 acpt=1 ord_qty=000000004
+2026-09-28 09:21:28 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000423000, ticker=047040
+2026-09-28 09:21:28 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000423000 ticker=대우건설(047040) side=BUY src=map ordered=4 filled_total=4 incr=4
+2026-09-28 09:21:28 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 대우건설(047040) 4주 @ 18780 (전략: volatility_breakout)
+2026-09-28 09:21:28 [INFO    ] src.engine.order_engine — 매수 주문 접수: 대우건설(047040) 4주 @ 18760 (주문번호: 0000423000, 전략: volatility_breakout)
+2026-09-28 09:21:28 [INFO    ] src.engine.order_engine — 매수 전량 체결: 대우건설(047040) 4주 @ 18780 (전략: volatility_breakout)
+2026-09-28 09:29:54 [INFO    ] src.engine.strategies.momentum — 매수 신호: 토마토시스템(393210) 전일종가(3715) 대비 29.9% (현재가: 4825, 직전: 27.9%)
+2026-09-28 09:29:54 [INFO    ] src.realtime.handler — [order_notice] order_no=0000473100 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=393210 qty=0000000012 price=000000000 hour=092954 rfus=0 acpt=1 ord_qty=000000012
+2026-09-28 09:29:54 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000473100, ticker=393210
+2026-09-28 09:29:54 [WARNING ] src.engine.order_engine — 체결통보: 주문번호 0000473100에 대한 종목 매핑 없음, payload ticker 사용: 393210
+2026-09-28 09:29:54 [WARNING ] src.engine.order_engine — [fill_qty_src] order_no=0000473100 ticker=토마토시스템(393210) side=BUY src=payload ordered=12 filled_total=12 incr=12
+2026-09-28 09:29:54 [INFO    ] src.api.order — BUY 주문 완료: 393210 12주 @ 0 (주문번호: 0000473100)
+2026-09-28 09:29:54 [WARNING ] src.engine.order_engine — [buy_fill_strategy_from_pending] order_no=0000473100 ticker=토마토시스템(393210) strategy=momentum qty_src=payload incr=12 filled_total=12 ordered=12 — 발사 창 귀속
+2026-09-28 09:29:54 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 토마토시스템(393210) 12주 @ 4825 (전략: momentum)
+2026-09-28 09:29:54 [WARNING ] src.engine.order_engine — 체결통보 선행 race — COMPLETED 직접 INSERT: 매수 토마토시스템(393210) (주문번호: 0000473100)
+2026-09-28 09:29:54 [INFO    ] src.engine.order_engine — 매수 전량 체결: 토마토시스템(393210) 12주 @ 4825 (전략: momentum)
+2026-09-28 09:29:54 [INFO    ] src.engine.order_engine — [buy_fill_during_insert] ticker=393210 order_no=0000473100 strategy=momentum path=market
+2026-09-28 09:29:54 [INFO    ] src.engine.order_engine — 매수 주문 접수: 토마토시스템(393210) 12주 @ 4825 (주문번호: 0000473100, 전략: momentum)
+2026-09-28 09:43:53 [INFO    ] src.realtime.handler — [order_notice] order_no=0000549100 orig_order_no= side=BUY rctf=0 kind=00 cond=0 ticker=199800 qty=0000000001 price=000023650 hour=094353 rfus=0 acpt=1 ord_qty=000000001
+2026-09-28 09:51:11 [INFO    ] src.engine.strategies.momentum — 손절 신호: 토마토시스템(393210) 매수가(4825) 대비 -5.1% (임계: -5.0%, 현재가: 4580)
+2026-09-28 09:51:11 [INFO    ] src.api.order — SELL 주문 완료: 393210 12주 @ 0 (주문번호: 0000578700)
+2026-09-28 09:51:11 [INFO    ] src.engine.order_engine — STOP_LOSS 매도 주문 접수: 토마토시스템(393210) 12주 (주문번호: 0000578700, 전략: momentum)
+2026-09-28 09:51:11 [INFO    ] src.realtime.handler — [order_notice] order_no=0000578700 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=393210 qty=0000000012 price=000000000 hour=095111 rfus=0 acpt=1 ord_qty=000000012
+2026-09-28 09:51:11 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000578700, ticker=393210
+2026-09-28 09:51:11 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000578700 ticker=토마토시스템(393210) side=SELL src=map ordered=12 filled_total=12 incr=12
+2026-09-28 09:51:11 [INFO    ] src.engine.order_engine — 매도 전량 체결: 토마토시스템(393210) 12주 @ 4580 (손익: -2940, 전략: momentum)
+2026-09-28 09:51:11 [DEBUG   ] src.engine.order_engine — [unsubscribe_skip] 393210 — strategy=volatility_breakout 스캔 후보
+2026-09-28 10:25:29 [INFO    ] src.engine.strategies.bull_flag_breakout — 눌림목 손절: 295310 매수가(63400) 대비 -5.0%
+2026-09-28 10:25:29 [INFO    ] src.api.order — SELL 주문 완료: 295310 2주 @ 0 (주문번호: 0000716700)
+2026-09-28 10:25:29 [INFO    ] src.engine.order_engine — STOP_LOSS 매도 주문 접수: 에이치브이엠(295310) 2주 (주문번호: 0000716700, 전략: bull_flag_breakout)
+2026-09-28 10:25:29 [INFO    ] src.realtime.handler — [order_notice] order_no=0000716700 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=295310 qty=0000000002 price=000000000 hour=102529 rfus=0 acpt=1 ord_qty=000000002
+2026-09-28 10:25:29 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000716700, ticker=295310
+2026-09-28 10:25:29 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000716700 ticker=에이치브이엠(295310) side=SELL src=map ordered=2 filled_total=2 incr=2
+2026-09-28 10:25:29 [INFO    ] src.engine.order_engine — 매도 전량 체결: 에이치브이엠(295310) 2주 @ 60100 (손익: -6600, 전략: bull_flag_breakout)
+2026-09-28 10:25:29 [INFO    ] src.engine.order_engine — [sell_unsubscribe] 에이치브이엠(295310) WS 구독 정리
+2026-09-28 10:39:02 [INFO    ] src.engine.strategies.long_tail_volatility — 롱테일VB 당일 손절: 엑스게이트(356680) -5.0%
+2026-09-28 10:39:03 [INFO    ] src.api.order — SELL 주문 완료: 356680 2주 @ 0 (주문번호: 0000761000)
+2026-09-28 10:39:03 [INFO    ] src.engine.order_engine — STOP_LOSS 매도 주문 접수: 엑스게이트(356680) 2주 (주문번호: 0000761000, 전략: long_tail_volatility)
+2026-09-28 10:39:03 [INFO    ] src.realtime.handler — [order_notice] order_no=0000761000 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=356680 qty=0000000002 price=000000000 hour=103903 rfus=0 acpt=1 ord_qty=000000002
+2026-09-28 10:39:03 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000761000, ticker=356680
+2026-09-28 10:39:03 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000761000 ticker=엑스게이트(356680) side=SELL src=map ordered=2 filled_total=2 incr=2
+2026-09-28 10:39:03 [INFO    ] src.engine.order_engine — 매도 전량 체결: 엑스게이트(356680) 2주 @ 18660 (손익: -1980, 전략: long_tail_volatility)
+2026-09-28 10:39:03 [DEBUG   ] src.engine.order_engine — [unsubscribe_skip] 356680 — strategy=volatility_breakout 스캔 후보
+2026-09-28 10:52:33 [INFO    ] src.engine.strategies.long_tail_volatility — 롱테일VB 당일 손절: 한컴위드(054920) -5.0%
+2026-09-28 10:52:33 [INFO    ] src.api.order — SELL 주문 완료: 054920 9주 @ 0 (주문번호: 0000806100)
+2026-09-28 10:52:33 [INFO    ] src.engine.order_engine — STOP_LOSS 매도 주문 접수: 한컴위드(054920) 9주 (주문번호: 0000806100, 전략: long_tail_volatility)
+2026-09-28 10:52:33 [INFO    ] src.realtime.handler — [order_notice] order_no=0000806100 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=054920 qty=0000000009 price=000000000 hour=105233 rfus=0 acpt=1 ord_qty=000000009
+2026-09-28 10:52:33 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000806100, ticker=054920
+2026-09-28 10:52:33 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000806100 ticker=한컴위드(054920) side=SELL src=map ordered=9 filled_total=2 incr=2
+2026-09-28 10:52:33 [INFO    ] src.engine.order_engine — 매도 부분 체결: 한컴위드(054920) 2/9주 @ 4830 (전략: long_tail_volatility)
+2026-09-28 10:52:33 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000806100 ticker=한컴위드(054920) side=SELL src=map ordered=9 filled_total=9 incr=7
+2026-09-28 10:52:33 [INFO    ] src.engine.order_engine — 매도 전량 체결: 한컴위드(054920) 9주 @ 4825 (손익: -1855, 전략: long_tail_volatility)
+2026-09-28 10:52:33 [INFO    ] src.engine.order_engine — [partial_cancel_timer_cleared] ticker=한컴위드(054920) order_no=0000806100
+2026-09-28 10:52:33 [DEBUG   ] src.engine.order_engine — [unsubscribe_skip] 054920 — strategy=long_tail_volatility 스캔 후보
+2026-09-28 10:56:31 [INFO    ] src.engine.strategies.long_tail_volatility — 롱테일 변동성 돌파 매수 신호 [main]: 동국생명과학(303810) 현재가(3205) >= 목표가(3204), K=0.6931
+2026-09-28 10:56:31 [INFO    ] src.realtime.handler — [order_notice] order_no=0000823600 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=303810 qty=0000000015 price=000000000 hour=105631 rfus=0 acpt=1 ord_qty=000000015
+2026-09-28 10:56:31 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000823600, ticker=303810
+2026-09-28 10:56:31 [INFO    ] src.api.order — BUY 주문 완료: 303810 15주 @ 0 (주문번호: 0000823600)
+2026-09-28 10:56:31 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000823600 ticker=동국생명과학(303810) side=BUY src=map ordered=15 filled_total=15 incr=15
+2026-09-28 10:56:31 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 동국생명과학(303810) 15주 @ 3220 (전략: long_tail_volatility)
+2026-09-28 10:56:31 [INFO    ] src.engine.order_engine — 매수 주문 접수: 동국생명과학(303810) 15주 @ 3205 (주문번호: 0000823600, 전략: long_tail_volatility)
+2026-09-28 10:56:31 [INFO    ] src.engine.order_engine — 매수 전량 체결: 동국생명과학(303810) 15주 @ 3220 (전략: long_tail_volatility)
+2026-09-28 11:20:18 [INFO    ] src.engine.strategies.vcp_breakout — [vcp_vol_gate_pass] ticker=006120 observed=33246 threshold=30296 latch_age_sec=8109
+2026-09-28 11:20:18 [INFO    ] src.api.order — BUY 주문 완료: 006120 2주 @ 0 (주문번호: 0000889400)
+2026-09-28 11:20:18 [INFO    ] src.realtime.handler — [order_notice] order_no=0000889400 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=006120 qty=0000000002 price=000000000 hour=112018 rfus=0 acpt=1 ord_qty=000000002
+2026-09-28 11:20:18 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000889400, ticker=006120
+2026-09-28 11:20:18 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000889400 ticker=SK디스커버리(006120) side=BUY src=map ordered=2 filled_total=2 incr=2
+2026-09-28 11:20:18 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: SK디스커버리(006120) 2주 @ 63100 (전략: vcp_breakout)
+2026-09-28 11:20:18 [INFO    ] src.engine.order_engine — 매수 주문 접수: SK디스커버리(006120) 2주 @ 63000 (주문번호: 0000889400, 전략: vcp_breakout)
+2026-09-28 11:20:19 [INFO    ] src.engine.order_engine — 매수 전량 체결: SK디스커버리(006120) 2주 @ 63100 (전략: vcp_breakout)
+2026-09-28 11:23:18 [INFO    ] src.engine.strategies.bull_flag_breakout — 눌림목 손절: 052710 매수가(19270) 대비 -6.0%
+2026-09-28 11:23:18 [INFO    ] src.api.order — SELL 주문 완료: 052710 9주 @ 0 (주문번호: 0000898800)
+2026-09-28 11:23:18 [INFO    ] src.engine.order_engine — STOP_LOSS 매도 주문 접수: 아모텍(052710) 9주 (주문번호: 0000898800, 전략: bull_flag_breakout)
+2026-09-28 11:23:18 [INFO    ] src.realtime.handler — [order_notice] order_no=0000898800 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=052710 qty=0000000009 price=000000000 hour=112318 rfus=0 acpt=1 ord_qty=000000009
+2026-09-28 11:23:18 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000898800, ticker=052710
+2026-09-28 11:23:18 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000898800 ticker=아모텍(052710) side=SELL src=map ordered=9 filled_total=9 incr=9
+2026-09-28 11:23:18 [INFO    ] src.engine.order_engine — 매도 전량 체결: 아모텍(052710) 9주 @ 18120 (손익: -10350, 전략: bull_flag_breakout)
+2026-09-28 11:23:18 [INFO    ] src.engine.order_engine — [sell_unsubscribe] 아모텍(052710) WS 구독 정리
+2026-09-28 11:49:15 [INFO    ] src.engine.strategies.momentum — 매수 신호: 레메디(387690) 전일종가(18850) 대비 29.2% (현재가: 24350, 직전: 28.9%)
+2026-09-28 11:49:15 [INFO    ] src.api.order — BUY 주문 완료: 387690 2주 @ 0 (주문번호: 0000955800)
+2026-09-28 11:49:15 [INFO    ] src.realtime.handler — [order_notice] order_no=0000955800 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=387690 qty=0000000002 price=000000000 hour=114915 rfus=0 acpt=1 ord_qty=000000002
+2026-09-28 11:49:15 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000955800, ticker=387690
+2026-09-28 11:49:15 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000955800 ticker=레메디(387690) side=BUY src=map ordered=2 filled_total=2 incr=2
+2026-09-28 11:49:15 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 레메디(387690) 2주 @ 24400 (전략: momentum)
+2026-09-28 11:49:15 [INFO    ] src.engine.order_engine — 매수 주문 접수: 레메디(387690) 2주 @ 24350 (주문번호: 0000955800, 전략: momentum)
+2026-09-28 11:49:15 [INFO    ] src.engine.order_engine — 매수 전량 체결: 레메디(387690) 2주 @ 24400 (전략: momentum)
+2026-09-28 12:54:16 [INFO    ] src.engine.strategies.momentum — 손절 신호: 레메디(387690) 매수가(24400) 대비 -5.1% (임계: -5.0%, 현재가: 23150)
+2026-09-28 12:54:16 [INFO    ] src.api.order — SELL 주문 완료: 387690 2주 @ 0 (주문번호: 0001088300)
+2026-09-28 12:54:16 [INFO    ] src.engine.order_engine — STOP_LOSS 매도 주문 접수: 레메디(387690) 2주 (주문번호: 0001088300, 전략: momentum)
+2026-09-28 12:54:16 [INFO    ] src.realtime.handler — [order_notice] order_no=0001088300 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=387690 qty=0000000002 price=000000000 hour=125416 rfus=0 acpt=1 ord_qty=000000002
+2026-09-28 12:54:16 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001088300, ticker=387690
+2026-09-28 12:54:16 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0001088300 ticker=레메디(387690) side=SELL src=map ordered=2 filled_total=2 incr=2
+2026-09-28 12:54:16 [INFO    ] src.engine.order_engine — 매도 전량 체결: 레메디(387690) 2주 @ 23150 (손익: -2500, 전략: momentum)
+2026-09-28 12:54:16 [DEBUG   ] src.engine.order_engine — [unsubscribe_skip] 387690 — strategy=volatility_breakout 스캔 후보
+2026-09-28 14:46:39 [INFO    ] src.engine.strategies.volatility_breakout — 변동성돌파 손절: 대한광통신(010170) 매수가(18400) 대비 -5.0% (현재가: 17480)
+2026-09-28 14:46:39 [INFO    ] src.api.order — SELL 주문 완료: 010170 4주 @ 0 (주문번호: 0001299200)
+2026-09-28 14:46:39 [INFO    ] src.engine.order_engine — STOP_LOSS 매도 주문 접수: 대한광통신(010170) 4주 (주문번호: 0001299200, 전략: volatility_breakout)
+2026-09-28 14:46:39 [INFO    ] src.realtime.handler — [order_notice] order_no=0001299200 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=010170 qty=0000000004 price=000000000 hour=144639 rfus=0 acpt=1 ord_qty=000000004
+2026-09-28 14:46:39 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001299200, ticker=010170
+2026-09-28 14:46:39 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0001299200 ticker=대한광통신(010170) side=SELL src=map ordered=4 filled_total=4 incr=4
+2026-09-28 14:46:39 [INFO    ] src.engine.order_engine — 매도 전량 체결: 대한광통신(010170) 4주 @ 17480 (손익: -3680, 전략: volatility_breakout)
+2026-09-28 14:46:39 [DEBUG   ] src.engine.order_engine — [unsubscribe_skip] 010170 — strategy=volatility_breakout 스캔 후보
+2026-09-28 15:20:00 [INFO    ] src.api.order — SELL 주문 완료: 047040 4주 @ 0 (주문번호: 0001358700)
+2026-09-28 15:20:00 [INFO    ] src.engine.order_engine — FORCE_CLEAR 매도 주문 접수: 대우건설(047040) 4주 (주문번호: 0001358700, 전략: volatility_breakout)
+2026-09-28 15:20:00 [INFO    ] src.api.order — SELL 주문 완료: 092870 1주 @ 0 (주문번호: 0001358800)
+2026-09-28 15:20:00 [INFO    ] src.engine.order_engine — FORCE_CLEAR 매도 주문 접수: 엑시콘(092870) 1주 (주문번호: 0001358800, 전략: long_tail_volatility)
+2026-09-28 15:20:00 [INFO    ] src.api.order — SELL 주문 완료: 009830 1주 @ 0 (주문번호: 0001358900)
+2026-09-28 15:20:00 [INFO    ] src.engine.order_engine — FORCE_CLEAR 매도 주문 접수: 한화솔루션(009830) 1주 (주문번호: 0001358900, 전략: long_tail_volatility)
+2026-09-28 15:20:00 [INFO    ] src.api.order — SELL 주문 완료: 303810 15주 @ 0 (주문번호: 0001359000)
+2026-09-28 15:20:00 [INFO    ] src.engine.order_engine — FORCE_CLEAR 매도 주문 접수: 동국생명과학(303810) 15주 (주문번호: 0001359000, 전략: long_tail_volatility)
+2026-09-28 15:20:01 [INFO    ] src.realtime.handler — [order_notice] order_no=0001358700 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=047040 qty=0000000004 price=000000000 hour=152000 rfus=0 acpt=1 ord_qty=000000004
+2026-09-28 15:20:01 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001358700, ticker=047040
+2026-09-28 15:20:01 [INFO    ] src.realtime.handler — [order_notice] order_no=0001358800 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=092870 qty=0000000001 price=000000000 hour=152000 rfus=0 acpt=1 ord_qty=000000001
+2026-09-28 15:20:01 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001358800, ticker=092870
+2026-09-28 15:20:01 [INFO    ] src.realtime.handler — [order_notice] order_no=0001359000 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=303810 qty=0000000015 price=000000000 hour=152000 rfus=0 acpt=1 ord_qty=000000015
+2026-09-28 15:20:01 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001359000, ticker=303810
+2026-09-28 15:20:01 [INFO    ] src.realtime.handler — [order_notice] order_no=0001358900 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=009830 qty=0000000001 price=000000000 hour=152000 rfus=0 acpt=1 ord_qty=000000001
+2026-09-28 15:20:01 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001358900, ticker=009830
+2026-09-28 16:12:23 [INFO    ] src.realtime.handler — [order_notice] order_no=0001402000 orig_order_no= side=BUY rctf=0 kind=41 cond=0 ticker=199800 qty=0000000001 price=000023650 hour=161223 rfus=0 acpt=1 ord_qty=000000001
+2026-09-29 08:00:31 [INFO    ] src.engine.scheduler — 익일 청산 보류 (갭 2.7% < 임계 10.0%, 09:00 KRX 시장가 청산 예약): 쓰리빌리언(394800) (전략: momentum)
+2026-09-29 09:00:05 [INFO    ] src.api.order — SELL 주문 완료: 394800 8주 @ 0 (주문번호: 0000274400)
+2026-09-29 09:00:05 [INFO    ] src.realtime.handler — [order_notice] order_no=0000274400 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=394800 qty=0000000008 price=000000000 hour=090005 rfus=0 acpt=1 ord_qty=000000008
+2026-09-29 09:00:05 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000274400, ticker=394800
+2026-09-29 09:00:05 [INFO    ] src.engine.order_engine — NEXT_DAY_CLEAR 매도 주문 접수: 쓰리빌리언(394800) 8주 (주문번호: 0000274400, 전략: momentum)
+2026-09-29 09:04:31 [INFO    ] src.engine.strategies.volatility_breakout — 변동성돌파 매수 신호 [main]: HPSP(403870) 현재가(58000) >= 목표가(57969), 이전가(57900), K=0.6956
+2026-09-29 09:04:31 [INFO    ] src.api.order — BUY 주문 완료: 403870 1주 @ 0 (주문번호: 0000332100)
+2026-09-29 09:04:31 [INFO    ] src.engine.order_engine — 매수 주문 접수: HPSP(403870) 1주 @ 58000 (주문번호: 0000332100, 전략: volatility_breakout)
+2026-09-29 09:04:32 [INFO    ] src.realtime.handler — [order_notice] order_no=0000332100 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=403870 qty=0000000001 price=000000000 hour=090431 rfus=0 acpt=1 ord_qty=000000001
+2026-09-29 09:04:32 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000332100, ticker=403870
+2026-09-29 09:04:32 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000332100 ticker=HPSP(403870) side=BUY src=map ordered=1 filled_total=1 incr=1
+2026-09-29 09:04:32 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: HPSP(403870) 1주 @ 58000 (전략: volatility_breakout)
+2026-09-29 09:04:33 [INFO    ] src.engine.order_engine — 매수 전량 체결: HPSP(403870) 1주 @ 58000 (전략: volatility_breakout)
+2026-09-29 09:09:11 [INFO    ] src.engine.strategies.donchian_swing — 도치안 시간 기반 청산: 095340 보유 2영업일 ≥ 2, 현재가(203000) < 돌파선(203500)
+2026-09-29 09:09:11 [INFO    ] src.api.order — SELL 주문 완료: 095340 1주 @ 0 (주문번호: 0000378200)
+2026-09-29 09:09:11 [INFO    ] src.engine.order_engine — STOP_LOSS 매도 주문 접수: ISC(095340) 1주 (주문번호: 0000378200, 전략: donchian_swing)
+2026-09-29 09:09:11 [INFO    ] src.realtime.handler — [order_notice] order_no=0000378200 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=095340 qty=0000000001 price=000000000 hour=090911 rfus=0 acpt=1 ord_qty=000000001
+2026-09-29 09:09:11 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000378200, ticker=095340
+2026-09-29 09:09:11 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000378200 ticker=ISC(095340) side=SELL src=map ordered=1 filled_total=1 incr=1
+2026-09-29 09:09:11 [INFO    ] src.engine.order_engine — 매도 전량 체결: ISC(095340) 1주 @ 203000 (손익: -7000, 전략: donchian_swing)
+2026-09-29 09:09:11 [DEBUG   ] src.engine.order_engine — [unsubscribe_skip] 095340 — strategy=long_tail_volatility 스캔 후보
+2026-09-29 09:12:32 [INFO    ] src.engine.strategies.donchian_swing — 도치안 시간 기반 청산: 067310 보유 2영업일 ≥ 2, 현재가(45350) < 돌파선(45400)
+2026-09-29 09:12:32 [INFO    ] src.api.order — SELL 주문 완료: 067310 2주 @ 0 (주문번호: 0000409700)
+2026-09-29 09:12:32 [INFO    ] src.engine.order_engine — STOP_LOSS 매도 주문 접수: 하나마이크론(067310) 2주 (주문번호: 0000409700, 전략: donchian_swing)
+2026-09-29 09:12:32 [INFO    ] src.realtime.handler — [order_notice] order_no=0000409700 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=067310 qty=0000000002 price=000000000 hour=091232 rfus=0 acpt=1 ord_qty=000000002
+2026-09-29 09:12:32 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000409700, ticker=067310
+2026-09-29 09:12:32 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000409700 ticker=하나마이크론(067310) side=SELL src=map ordered=2 filled_total=2 incr=2
+2026-09-29 09:12:32 [INFO    ] src.engine.order_engine — 매도 전량 체결: 하나마이크론(067310) 2주 @ 45350 (손익: -300, 전략: donchian_swing)
+2026-09-29 09:12:32 [DEBUG   ] src.engine.order_engine — [unsubscribe_skip] 067310 — strategy=volatility_breakout 스캔 후보
+2026-09-29 09:30:17 [INFO    ] src.engine.strategies.volatility_breakout — 변동성돌파 매수 신호 [main]: 파두(440110) 현재가(83600) >= 목표가(83562), 이전가(83500), K=0.4024
+2026-09-29 09:30:17 [INFO    ] src.api.order — BUY 주문 완료: 440110 1주 @ 0 (주문번호: 0000534900)
+2026-09-29 09:30:17 [INFO    ] src.engine.order_engine — 매수 주문 접수: 파두(440110) 1주 @ 83600 (주문번호: 0000534900, 전략: volatility_breakout)
+2026-09-29 09:30:17 [INFO    ] src.realtime.handler — [order_notice] order_no=0000534900 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=440110 qty=0000000001 price=000000000 hour=093017 rfus=0 acpt=1 ord_qty=000000001
+2026-09-29 09:30:17 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000534900, ticker=440110
+2026-09-29 09:30:17 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000534900 ticker=파두(440110) side=BUY src=map ordered=1 filled_total=1 incr=1
+2026-09-29 09:30:17 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 파두(440110) 1주 @ 83600 (전략: volatility_breakout)
+2026-09-29 09:30:18 [INFO    ] src.engine.order_engine — 매수 전량 체결: 파두(440110) 1주 @ 83600 (전략: volatility_breakout)
+2026-09-29 09:59:28 [INFO    ] src.engine.strategies.momentum — 매수 신호: HLB제약(047920) 전일종가(9620) 대비 29.0% (현재가: 12410, 직전: 28.8%)
+2026-09-29 09:59:28 [INFO    ] src.api.order — BUY 주문 완료: 047920 4주 @ 0 (주문번호: 0000723500)
+2026-09-29 09:59:28 [INFO    ] src.realtime.handler — [order_notice] order_no=0000723500 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=047920 qty=0000000004 price=000000000 hour=095928 rfus=0 acpt=1 ord_qty=000000004
+2026-09-29 09:59:28 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000723500, ticker=047920
+2026-09-29 09:59:28 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000723500 ticker=HLB제약(047920) side=BUY src=map ordered=4 filled_total=4 incr=4
+2026-09-29 09:59:28 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: HLB제약(047920) 4주 @ 12420 (전략: momentum)
+2026-09-29 09:59:28 [INFO    ] src.engine.order_engine — 매수 주문 접수: HLB제약(047920) 4주 @ 12410 (주문번호: 0000723500, 전략: momentum)
+2026-09-29 09:59:28 [INFO    ] src.engine.order_engine — 매수 전량 체결: HLB제약(047920) 4주 @ 12420 (전략: momentum)
+2026-09-29 10:59:07 [INFO    ] src.engine.strategies.momentum — 매수 신호: 테라뷰(950250) 전일종가(3350) 대비 29.1% (현재가: 4325, 직전: 28.7%)
+2026-09-29 10:59:07 [INFO    ] src.api.order — BUY 주문 완료: 950250 14주 @ 0 (주문번호: 0000937100)
+2026-09-29 10:59:07 [INFO    ] src.realtime.handler — [order_notice] order_no=0000937100 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=950250 qty=0000000014 price=000000000 hour=105907 rfus=0 acpt=1 ord_qty=000000014
+2026-09-29 10:59:07 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000937100, ticker=950250
+2026-09-29 10:59:07 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000937100 ticker=테라뷰(950250) side=BUY src=map ordered=14 filled_total=14 incr=14
+2026-09-29 10:59:07 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 테라뷰(950250) 14주 @ 4330 (전략: momentum)
+2026-09-29 10:59:07 [INFO    ] src.engine.order_engine — 매수 주문 접수: 테라뷰(950250) 14주 @ 4325 (주문번호: 0000937100, 전략: momentum)
+2026-09-29 10:59:07 [INFO    ] src.engine.order_engine — 매수 전량 체결: 테라뷰(950250) 14주 @ 4330 (전략: momentum)
+2026-09-29 12:02:42 [INFO    ] src.engine.strategies.momentum — 손절 신호: HLB제약(047920) 매수가(12420) 대비 -5.2% (임계: -5.0%, 현재가: 11770)
+2026-09-29 12:02:43 [INFO    ] src.api.order — SELL 주문 완료: 047920 4주 @ 0 (주문번호: 0001113700)
+2026-09-29 12:02:43 [INFO    ] src.engine.order_engine — STOP_LOSS 매도 주문 접수: HLB제약(047920) 4주 (주문번호: 0001113700, 전략: momentum)
+2026-09-29 12:02:43 [INFO    ] src.realtime.handler — [order_notice] order_no=0001113700 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=047920 qty=0000000004 price=000000000 hour=120243 rfus=0 acpt=1 ord_qty=000000004
+2026-09-29 12:02:43 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001113700, ticker=047920
+2026-09-29 12:02:43 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0001113700 ticker=HLB제약(047920) side=SELL src=map ordered=4 filled_total=4 incr=4
+2026-09-29 12:02:43 [INFO    ] src.engine.order_engine — 매도 전량 체결: HLB제약(047920) 4주 @ 11770 (손익: -2600, 전략: momentum)
+2026-09-29 12:02:43 [INFO    ] src.engine.order_engine — [sell_unsubscribe] HLB제약(047920) WS 구독 정리
+2026-09-29 13:29:59 [INFO    ] src.engine.strategies.momentum — 매수 신호: 현대바이오랜드(052260) 전일종가(4365) 대비 29.4% (현재가: 5650, 직전: 28.8%)
+2026-09-29 13:30:00 [INFO    ] src.api.order — BUY 주문 완료: 052260 10주 @ 0 (주문번호: 0001313800)
+2026-09-29 13:30:00 [INFO    ] src.realtime.handler — [order_notice] order_no=0001313800 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=052260 qty=0000000010 price=000000000 hour=133000 rfus=0 acpt=1 ord_qty=000000010
+2026-09-29 13:30:00 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001313800, ticker=052260
+2026-09-29 13:30:00 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0001313800 ticker=현대바이오랜드(052260) side=BUY src=map ordered=10 filled_total=10 incr=10
+2026-09-29 13:30:00 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 현대바이오랜드(052260) 10주 @ 5630 (전략: momentum)
+2026-09-29 13:30:00 [INFO    ] src.engine.order_engine — 매수 주문 접수: 현대바이오랜드(052260) 10주 @ 5650 (주문번호: 0001313800, 전략: momentum)
+2026-09-29 13:30:00 [INFO    ] src.engine.order_engine — 매수 전량 체결: 현대바이오랜드(052260) 10주 @ 5630 (전략: momentum)
+2026-09-29 14:33:34 [INFO    ] src.engine.strategies.kojiro — [kojiro_trailing] 004990 고점(25600) - 2.5×ATR(730.8) = 23773 / 현재가 23750
+2026-09-29 14:33:34 [INFO    ] src.api.order — SELL 주문 완료: 004990 5주 @ 0 (주문번호: 0001466800)
+2026-09-29 14:33:34 [INFO    ] src.engine.order_engine — TRAILING_STOP 매도 주문 접수: 롯데지주(004990) 5주 (주문번호: 0001466800, 전략: kojiro)
+2026-09-29 14:33:34 [INFO    ] src.realtime.handler — [order_notice] order_no=0001466800 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=004990 qty=0000000005 price=000000000 hour=143334 rfus=0 acpt=1 ord_qty=000000005
+2026-09-29 14:33:34 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001466800, ticker=004990
+2026-09-29 14:33:34 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0001466800 ticker=롯데지주(004990) side=SELL src=map ordered=5 filled_total=5 incr=5
+2026-09-29 14:33:34 [INFO    ] src.engine.order_engine — 매도 전량 체결: 롯데지주(004990) 5주 @ 23750 (손익: -5250, 전략: kojiro)
+2026-09-29 14:33:34 [DEBUG   ] src.engine.order_engine — [unsubscribe_skip] 004990 — strategy=kojiro 스캔 후보
+2026-09-29 15:20:00 [INFO    ] src.api.order — SELL 주문 완료: 403870 1주 @ 0 (주문번호: 0001595300)
+2026-09-29 15:20:00 [INFO    ] src.engine.order_engine — FORCE_CLEAR 매도 주문 접수: HPSP(403870) 1주 (주문번호: 0001595300, 전략: volatility_breakout)
+2026-09-29 15:20:00 [INFO    ] src.api.order — SELL 주문 완료: 440110 1주 @ 0 (주문번호: 0001595400)
+2026-09-29 15:20:00 [INFO    ] src.engine.order_engine — FORCE_CLEAR 매도 주문 접수: 파두(440110) 1주 (주문번호: 0001595400, 전략: volatility_breakout)
+2026-09-29 15:20:01 [INFO    ] src.realtime.handler — [order_notice] order_no=0001595300 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=403870 qty=0000000001 price=000000000 hour=152000 rfus=0 acpt=1 ord_qty=000000001
+2026-09-29 15:20:01 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001595300, ticker=403870
+2026-09-29 15:20:01 [INFO    ] src.realtime.handler — [order_notice] order_no=0001595400 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=440110 qty=0000000001 price=000000000 hour=152000 rfus=0 acpt=1 ord_qty=000000001
+2026-09-29 15:20:01 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001595400, ticker=440110
+2026-09-29 16:02:21 [INFO    ] src.engine.strategies.donchian_swing — 도치안 스윙 트레일링: 030530 고점(30400) - ATR×1.8 = 26659 / 현재가 26650
+2026-09-29 16:02:21 [INFO    ] src.engine.order_engine — [after_exit_division] ticker=030530 div=44 unpr=0 cur=26650 exchange=KRX dial=44
+2026-09-29 16:02:21 [INFO    ] src.api.order — SELL 주문 완료: 030530 1주 @ 0 (주문번호: 0001638800)
+2026-09-29 16:02:21 [INFO    ] src.engine.order_engine — TRAILING_STOP 매도 주문 접수: 원익홀딩스(030530) 1주 (주문번호: 0001638800, 전략: donchian_swing)
+2026-09-29 16:02:21 [INFO    ] src.realtime.handler — [order_notice] order_no=0001638800 orig_order_no= side=SELL rctf=0 kind=44 cond=0 ticker=030530 qty=0000000001 price=000000000 hour=160221 rfus=0 acpt=1 ord_qty=000000001
+2026-09-29 16:02:21 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001638800, ticker=030530
+2026-09-29 16:02:21 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0001638800 ticker=원익홀딩스(030530) side=SELL src=map ordered=1 filled_total=1 incr=1
+2026-09-29 16:02:21 [INFO    ] src.engine.order_engine — 매도 전량 체결: 원익홀딩스(030530) 1주 @ 26600 (손익: 1500, 전략: donchian_swing)
+2026-09-29 16:02:21 [DEBUG   ] src.engine.order_engine — [unsubscribe_skip] 030530 — strategy=bull_flag_breakout 스캔 후보
+2026-09-30 08:00:30 [INFO    ] src.engine.scheduler — stock_master nxt_tradable=False — 익일 청산 보류 (09:00 KRX 시장가 청산 예약): 테라뷰(950250) (전략: momentum)
+2026-09-30 08:00:30 [INFO    ] src.engine.scheduler — stock_master nxt_tradable=False — 익일 청산 보류 (09:00 KRX 시장가 청산 예약): 현대바이오랜드(052260) (전략: momentum)
+2026-09-30 09:00:05 [INFO    ] src.api.order — SELL 주문 완료: 950250 14주 @ 0 (주문번호: 0000304900)
+2026-09-30 09:00:05 [INFO    ] src.realtime.handler — [order_notice] order_no=0000304900 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=950250 qty=0000000014 price=000000000 hour=090005 rfus=0 acpt=1 ord_qty=000000014
+2026-09-30 09:00:05 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000304900, ticker=950250
+2026-09-30 09:00:05 [INFO    ] src.engine.order_engine — NEXT_DAY_CLEAR 매도 주문 접수: 테라뷰(950250) 14주 (주문번호: 0000304900, 전략: momentum)
+2026-09-30 09:00:05 [INFO    ] src.api.order — SELL 주문 완료: 052260 10주 @ 0 (주문번호: 0000305000)
+2026-09-30 09:00:05 [INFO    ] src.realtime.handler — [order_notice] order_no=0000305000 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=052260 qty=0000000010 price=000000000 hour=090005 rfus=0 acpt=1 ord_qty=000000010
+2026-09-30 09:00:05 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000305000, ticker=052260
+2026-09-30 09:00:05 [INFO    ] src.engine.order_engine — NEXT_DAY_CLEAR 매도 주문 접수: 현대바이오랜드(052260) 10주 (주문번호: 0000305000, 전략: momentum)
+2026-09-30 09:03:52 [INFO    ] src.engine.strategies.volatility_breakout — 변동성돌파 매수 신호 [main]: 서진시스템(178320) 현재가(38850) >= 목표가(38807), 이전가(38750), K=0.4644
+2026-09-30 09:03:52 [INFO    ] src.api.order — BUY 주문 완료: 178320 1주 @ 0 (주문번호: 0000335800)
+2026-09-30 09:03:52 [INFO    ] src.realtime.handler — [order_notice] order_no=0000335800 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=178320 qty=0000000001 price=000000000 hour=090352 rfus=0 acpt=1 ord_qty=000000001
+2026-09-30 09:03:52 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000335800, ticker=178320
+2026-09-30 09:03:52 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000335800 ticker=서진시스템(178320) side=BUY src=map ordered=1 filled_total=1 incr=1
+2026-09-30 09:03:52 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 서진시스템(178320) 1주 @ 38800 (전략: volatility_breakout)
+2026-09-30 09:03:52 [INFO    ] src.engine.order_engine — 매수 주문 접수: 서진시스템(178320) 1주 @ 38850 (주문번호: 0000335800, 전략: volatility_breakout)
+2026-09-30 09:03:52 [INFO    ] src.engine.order_engine — 매수 전량 체결: 서진시스템(178320) 1주 @ 38800 (전략: volatility_breakout)
+2026-09-30 09:05:02 [INFO    ] src.engine.strategies.kojiro — 고지로 매수 신호: 046890 현재가(10580) — 스테이지1(6→1) + EMA정배열 + ATR(515.1)
+2026-09-30 09:05:03 [INFO    ] src.api.order — BUY 주문 완료: 046890 19주 @ 0 (주문번호: 0000348300)
+2026-09-30 09:05:03 [INFO    ] src.realtime.handler — [order_notice] order_no=0000348300 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=046890 qty=0000000019 price=000000000 hour=090503 rfus=0 acpt=1 ord_qty=000000019
+2026-09-30 09:05:03 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000348300, ticker=046890
+2026-09-30 09:05:03 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000348300 ticker=서울반도체(046890) side=BUY src=map ordered=19 filled_total=19 incr=19
+2026-09-30 09:05:03 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 서울반도체(046890) 19주 @ 10580 (전략: kojiro)
+2026-09-30 09:05:03 [INFO    ] src.engine.order_engine — 매수 주문 접수: 서울반도체(046890) 19주 @ 10580 (주문번호: 0000348300, 전략: kojiro)
+2026-09-30 09:05:03 [INFO    ] src.engine.order_engine — 매수 전량 체결: 서울반도체(046890) 19주 @ 10580 (전략: kojiro)
+2026-09-30 09:05:03 [INFO    ] src.realtime.handler — [open_scope_observe] ticker=046890 oprc_hour=090023 tick_open=10480 cntg_hour=090503 hgpr_hour=090359 mkop=20 hour_cls=0 in_main_window=true
+2026-09-30 09:19:59 [INFO    ] src.engine.strategies.volatility_breakout — 변동성돌파 매수 신호 [main]: 성호전자(043260) 현재가(26450) >= 목표가(26428), 이전가(26350), K=0.6319
+2026-09-30 09:19:59 [INFO    ] src.realtime.handler — [order_notice] order_no=0000454800 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=043260 qty=0000000001 price=000000000 hour=091959 rfus=0 acpt=1 ord_qty=000000001
+2026-09-30 09:19:59 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000454800, ticker=043260
+2026-09-30 09:19:59 [INFO    ] src.api.order — BUY 주문 완료: 043260 1주 @ 0 (주문번호: 0000454800)
+2026-09-30 09:19:59 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000454800 ticker=성호전자(043260) side=BUY src=map ordered=1 filled_total=1 incr=1
+2026-09-30 09:19:59 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 성호전자(043260) 1주 @ 26450 (전략: volatility_breakout)
+2026-09-30 09:19:59 [INFO    ] src.engine.order_engine — 매수 주문 접수: 성호전자(043260) 1주 @ 26450 (주문번호: 0000454800, 전략: volatility_breakout)
+2026-09-30 09:19:59 [INFO    ] src.engine.order_engine — 매수 전량 체결: 성호전자(043260) 1주 @ 26450 (전략: volatility_breakout)
+2026-09-30 09:22:41 [INFO    ] src.engine.strategies.bull_flag_breakout — [bfb_vol_gate_pass] ticker=417200 observed=1252426 threshold=1225559 latch_age_sec=1050
+2026-09-30 09:22:42 [INFO    ] src.api.order — BUY 주문 완료: 417200 8주 @ 0 (주문번호: 0000468000)
+2026-09-30 09:22:42 [INFO    ] src.realtime.handler — [order_notice] order_no=0000468000 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=417200 qty=0000000008 price=000000000 hour=092242 rfus=0 acpt=1 ord_qty=000000008
+2026-09-30 09:22:42 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000468000, ticker=417200
+2026-09-30 09:22:42 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000468000 ticker=LS머트리얼즈(417200) side=BUY src=map ordered=8 filled_total=8 incr=8
+2026-09-30 09:22:42 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: LS머트리얼즈(417200) 8주 @ 14280 (전략: bull_flag_breakout)
+2026-09-30 09:22:42 [INFO    ] src.engine.order_engine — 매수 주문 접수: LS머트리얼즈(417200) 8주 @ 14280 (주문번호: 0000468000, 전략: bull_flag_breakout)
+2026-09-30 09:22:42 [INFO    ] src.engine.order_engine — 매수 전량 체결: LS머트리얼즈(417200) 8주 @ 14280 (전략: bull_flag_breakout)
+2026-09-30 09:25:34 [INFO    ] src.engine.strategies.bull_flag_breakout — [bfb_vol_gate_pass] ticker=126340 observed=130908 threshold=116333 latch_age_sec=1234
+2026-09-30 09:25:35 [INFO    ] src.api.order — BUY 주문 완료: 126340 1주 @ 0 (주문번호: 0000484200)
+2026-09-30 09:25:35 [INFO    ] src.realtime.handler — [order_notice] order_no=0000484200 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=126340 qty=0000000001 price=000000000 hour=092535 rfus=0 acpt=1 ord_qty=000000001
+2026-09-30 09:25:35 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000484200, ticker=126340
+2026-09-30 09:25:35 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000484200 ticker=비나텍(126340) side=BUY src=map ordered=1 filled_total=1 incr=1
+2026-09-30 09:25:35 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 비나텍(126340) 1주 @ 92900 (전략: bull_flag_breakout)
+2026-09-30 09:25:35 [INFO    ] src.engine.order_engine — 매수 주문 접수: 비나텍(126340) 1주 @ 92800 (주문번호: 0000484200, 전략: bull_flag_breakout)
+2026-09-30 09:25:35 [INFO    ] src.engine.order_engine — 매수 전량 체결: 비나텍(126340) 1주 @ 92900 (전략: bull_flag_breakout)
+2026-09-30 09:42:10 [INFO    ] src.engine.strategies.bull_flag_breakout — [bfb_vol_gate_pass] ticker=425040 observed=1542680 threshold=1028466 latch_age_sec=2230
+2026-09-30 09:42:11 [INFO    ] src.realtime.handler — [order_notice] order_no=0000576800 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=425040 qty=0000000009 price=000000000 hour=094211 rfus=0 acpt=1 ord_qty=000000009
+2026-09-30 09:42:11 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000576800, ticker=425040
+2026-09-30 09:42:11 [WARNING ] src.engine.order_engine — 체결통보: 주문번호 0000576800에 대한 종목 매핑 없음, payload ticker 사용: 425040
+2026-09-30 09:42:11 [WARNING ] src.engine.order_engine — [fill_qty_src] order_no=0000576800 ticker=티이엠씨(425040) side=BUY src=payload ordered=9 filled_total=9 incr=9
+2026-09-30 09:42:11 [INFO    ] src.api.order — BUY 주문 완료: 425040 9주 @ 0 (주문번호: 0000576800)
+2026-09-30 09:42:11 [WARNING ] src.engine.order_engine — [buy_fill_strategy_from_pending] order_no=0000576800 ticker=티이엠씨(425040) strategy=bull_flag_breakout qty_src=payload incr=9 filled_total=9 ordered=9 — 발사 창 귀속
+2026-09-30 09:42:11 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 티이엠씨(425040) 9주 @ 14150 (전략: bull_flag_breakout)
+2026-09-30 09:42:11 [INFO    ] src.engine.order_engine — 매수 주문 접수: 티이엠씨(425040) 9주 @ 14090 (주문번호: 0000576800, 전략: bull_flag_breakout)
+2026-09-30 09:42:11 [WARNING ] src.engine.order_engine — [buy_fill_correction_unique_violation] ticker=425040 order_no=0000576800 strategy_attempted=bull_flag_breakout err=UniqueViolationError('duplicate key value violates unique constraint "uq_trade_history_ticker_order_no_type"') → strategy 무관 강제 COMPLETED UPDATE
+2026-09-30 09:42:11 [INFO    ] src.engine.order_engine — 매수 전량 체결: 티이엠씨(425040) 9주 @ 14150 (전략: bull_flag_breakout)
+2026-09-30 09:47:58 [INFO    ] src.engine.strategies.bull_flag_breakout — [bfb_vol_gate_pass] ticker=232140 observed=1668920 threshold=1666802 latch_age_sec=2578
+2026-09-30 09:47:58 [INFO    ] src.api.order — BUY 주문 완료: 232140 8주 @ 0 (주문번호: 0000618500)
+2026-09-30 09:47:58 [INFO    ] src.realtime.handler — [order_notice] order_no=0000618500 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=232140 qty=0000000008 price=000000000 hour=094758 rfus=0 acpt=1 ord_qty=000000008
+2026-09-30 09:47:58 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000618500, ticker=232140
+2026-09-30 09:47:58 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000618500 ticker=와이씨(232140) side=BUY src=map ordered=8 filled_total=8 incr=8
+2026-09-30 09:47:58 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 와이씨(232140) 8주 @ 14900 (전략: bull_flag_breakout)
+2026-09-30 09:47:58 [INFO    ] src.engine.order_engine — 매수 주문 접수: 와이씨(232140) 8주 @ 14890 (주문번호: 0000618500, 전략: bull_flag_breakout)
+2026-09-30 09:47:58 [INFO    ] src.engine.order_engine — 매수 전량 체결: 와이씨(232140) 8주 @ 14900 (전략: bull_flag_breakout)
+2026-09-30 15:20:00 [INFO    ] src.api.order — SELL 주문 완료: 178320 1주 @ 0 (주문번호: 0001322500)
+2026-09-30 15:20:00 [INFO    ] src.engine.order_engine — FORCE_CLEAR 매도 주문 접수: 서진시스템(178320) 1주 (주문번호: 0001322500, 전략: volatility_breakout)
+2026-09-30 15:20:00 [INFO    ] src.api.order — SELL 주문 완료: 043260 1주 @ 0 (주문번호: 0001322600)
+2026-09-30 15:20:00 [INFO    ] src.engine.order_engine — FORCE_CLEAR 매도 주문 접수: 성호전자(043260) 1주 (주문번호: 0001322600, 전략: volatility_breakout)
+2026-09-30 15:20:01 [INFO    ] src.realtime.handler — [order_notice] order_no=0001322500 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=178320 qty=0000000001 price=000000000 hour=152000 rfus=0 acpt=1 ord_qty=000000001
+2026-09-30 15:20:01 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001322500, ticker=178320
+2026-09-30 15:20:01 [INFO    ] src.realtime.handler — [order_notice] order_no=0001322600 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=043260 qty=0000000001 price=000000000 hour=152000 rfus=0 acpt=1 ord_qty=000000001
+2026-09-30 15:20:01 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001322600, ticker=043260
+2026-10-01 09:02:24 [INFO    ] src.engine.strategies.volatility_breakout — 변동성돌파 매수 신호 [main]: 한온시스템(018880) 현재가(3695) >= 목표가(3693), 이전가(3690), K=0.3782
+2026-10-01 09:02:25 [INFO    ] src.realtime.handler — [order_notice] order_no=0000262700 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=018880 qty=0000000013 price=000000000 hour=090225 rfus=0 acpt=1 ord_qty=000000013
+2026-10-01 09:02:25 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000262700, ticker=018880
+2026-10-01 09:02:25 [INFO    ] src.api.order — BUY 주문 완료: 018880 13주 @ 0 (주문번호: 0000262700)
+2026-10-01 09:02:25 [INFO    ] src.engine.order_engine — 매수 주문 접수: 한온시스템(018880) 13주 @ 3695 (주문번호: 0000262700, 전략: volatility_breakout)
+2026-10-01 09:02:25 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000262700 ticker=한온시스템(018880) side=BUY src=map ordered=13 filled_total=13 incr=13
+2026-10-01 09:02:25 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 한온시스템(018880) 13주 @ 3695 (전략: volatility_breakout)
+2026-10-01 09:02:25 [INFO    ] src.engine.order_engine — 매수 전량 체결: 한온시스템(018880) 13주 @ 3695 (전략: volatility_breakout)
+2026-10-01 09:03:40 [INFO    ] src.engine.strategies.volatility_breakout — 변동성돌파 매수 신호 [main]: SFA반도체(036540) 현재가(11110) >= 목표가(11105), 이전가(11100), K=0.5010
+2026-10-01 09:03:40 [INFO    ] src.realtime.handler — [order_notice] order_no=0000273300 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=036540 qty=0000000004 price=000000000 hour=090340 rfus=0 acpt=1 ord_qty=000000004
+2026-10-01 09:03:40 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000273300, ticker=036540
+2026-10-01 09:03:40 [INFO    ] src.api.order — BUY 주문 완료: 036540 4주 @ 0 (주문번호: 0000273300)
+2026-10-01 09:03:40 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000273300 ticker=SFA반도체(036540) side=BUY src=map ordered=4 filled_total=4 incr=4
+2026-10-01 09:03:40 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: SFA반도체(036540) 4주 @ 11120 (전략: volatility_breakout)
+2026-10-01 09:03:40 [INFO    ] src.engine.order_engine — 매수 주문 접수: SFA반도체(036540) 4주 @ 11110 (주문번호: 0000273300, 전략: volatility_breakout)
+2026-10-01 09:03:41 [INFO    ] src.engine.order_engine — 매수 전량 체결: SFA반도체(036540) 4주 @ 11120 (전략: volatility_breakout)
+2026-10-01 09:44:18 [INFO    ] src.engine.strategies.kojiro — [kojiro_hard_stop] 035760 매수가(39400) 대비 -8.1% ≤ -8.0%
+2026-10-01 09:44:19 [INFO    ] src.api.order — SELL 주문 완료: 035760 5주 @ 0 (주문번호: 0000501000)
+2026-10-01 09:44:19 [INFO    ] src.engine.order_engine — STOP_LOSS 매도 주문 접수: CJ ENM(035760) 5주 (주문번호: 0000501000, 전략: kojiro)
+2026-10-01 09:44:19 [INFO    ] src.realtime.handler — [order_notice] order_no=0000501000 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=035760 qty=0000000005 price=000000000 hour=094419 rfus=0 acpt=1 ord_qty=000000005
+2026-10-01 09:44:19 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000501000, ticker=035760
+2026-10-01 09:44:19 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000501000 ticker=CJ ENM(035760) side=SELL src=map ordered=5 filled_total=1 incr=1
+2026-10-01 09:44:19 [INFO    ] src.engine.order_engine — 매도 부분 체결: CJ ENM(035760) 1/5주 @ 36150 (전략: kojiro) held_after=4
+2026-10-01 09:44:19 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000501000 ticker=CJ ENM(035760) side=SELL src=map ordered=5 filled_total=5 incr=4
+2026-10-01 09:44:19 [INFO    ] src.engine.order_engine — 매도 전량 체결: CJ ENM(035760) 5주 @ 36100 (손익: -13200, 전략: kojiro)
+2026-10-01 09:44:19 [INFO    ] src.engine.order_engine — [partial_cancel_timer_cleared] ticker=CJ ENM(035760) order_no=0000501000
+2026-10-01 09:44:19 [DEBUG   ] src.engine.order_engine — [unsubscribe_skip] 035760 — strategy=kojiro 스캔 후보
+2026-10-01 13:39:08 [INFO    ] src.engine.strategies.vcp_breakout — [vcp_vol_gate_pass] ticker=101160 observed=52598 threshold=52494 latch_age_sec=14324
+2026-10-01 13:39:08 [INFO    ] src.api.order — BUY 주문 완료: 101160 5주 @ 0 (주문번호: 0001127900)
+2026-10-01 13:39:08 [INFO    ] src.realtime.handler — [order_notice] order_no=0001127900 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=101160 qty=0000000005 price=000000000 hour=133908 rfus=0 acpt=1 ord_qty=000000005
+2026-10-01 13:39:08 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001127900, ticker=101160
+2026-10-01 13:39:08 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0001127900 ticker=월덱스(101160) side=BUY src=map ordered=5 filled_total=5 incr=5
+2026-10-01 13:39:08 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 월덱스(101160) 5주 @ 33050 (전략: vcp_breakout)
+2026-10-01 13:39:08 [INFO    ] src.engine.order_engine — 매수 주문 접수: 월덱스(101160) 5주 @ 33050 (주문번호: 0001127900, 전략: vcp_breakout)
+2026-10-01 13:39:08 [INFO    ] src.engine.order_engine — 매수 전량 체결: 월덱스(101160) 5주 @ 33050 (전략: vcp_breakout)
+2026-10-01 15:20:00 [INFO    ] src.api.order — SELL 주문 완료: 018880 13주 @ 0 (주문번호: 0001461300)
+2026-10-01 15:20:00 [INFO    ] src.engine.order_engine — FORCE_CLEAR 매도 주문 접수: 한온시스템(018880) 13주 (주문번호: 0001461300, 전략: volatility_breakout)
+2026-10-01 15:20:00 [INFO    ] src.api.order — SELL 주문 완료: 036540 4주 @ 0 (주문번호: 0001461400)
+2026-10-01 15:20:00 [INFO    ] src.engine.order_engine — FORCE_CLEAR 매도 주문 접수: SFA반도체(036540) 4주 (주문번호: 0001461400, 전략: volatility_breakout)
+2026-10-01 15:20:01 [INFO    ] src.realtime.handler — [order_notice] order_no=0001461300 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=018880 qty=0000000013 price=000000000 hour=152000 rfus=0 acpt=1 ord_qty=000000013
+2026-10-01 15:20:01 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001461300, ticker=018880
+2026-10-01 15:20:01 [INFO    ] src.realtime.handler — [order_notice] order_no=0001461400 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=036540 qty=0000000004 price=000000000 hour=152000 rfus=0 acpt=1 ord_qty=000000004
+2026-10-01 15:20:01 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001461400, ticker=036540
+2026-10-02 09:05:11 [INFO    ] src.engine.strategies.kojiro — 고지로 매수 신호: 011790 현재가(107900) — 스테이지1(6→1) + EMA정배열 + ATR(5035.8)
+2026-10-02 09:05:11 [INFO    ] src.api.order — BUY 주문 완료: 011790 1주 @ 0 (주문번호: 0000311000)
+2026-10-02 09:05:11 [INFO    ] src.realtime.handler — [order_notice] order_no=0000311000 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=011790 qty=0000000001 price=000000000 hour=090511 rfus=0 acpt=1 ord_qty=000000001
+2026-10-02 09:05:11 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000311000, ticker=011790
+2026-10-02 09:05:11 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000311000 ticker=SKC(011790) side=BUY src=map ordered=1 filled_total=1 incr=1
+2026-10-02 09:05:11 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: SKC(011790) 1주 @ 108000 (전략: kojiro)
+2026-10-02 09:05:12 [INFO    ] src.engine.order_engine — 매수 주문 접수: SKC(011790) 1주 @ 107900 (주문번호: 0000311000, 전략: kojiro)
+2026-10-02 09:05:12 [INFO    ] src.engine.order_engine — 매수 전량 체결: SKC(011790) 1주 @ 108000 (전략: kojiro)
+2026-10-02 09:05:12 [INFO    ] src.realtime.handler — [open_scope_observe] ticker=011790 oprc_hour=090028 tick_open=104100 cntg_hour=090511 hgpr_hour=090342 mkop=20 hour_cls=0 in_main_window=true
+2026-10-02 09:08:37 [INFO    ] src.engine.strategies.volatility_breakout — 변동성돌파 매수 신호 [main]: 빛샘전자(072950) 현재가(18170) >= 목표가(18163), 이전가(18150), K=0.6112
+2026-10-02 09:08:37 [INFO    ] src.api.order — BUY 주문 완료: 072950 2주 @ 0 (주문번호: 0000341800)
+2026-10-02 09:08:37 [INFO    ] src.engine.order_engine — 매수 주문 접수: 빛샘전자(072950) 2주 @ 18170 (주문번호: 0000341800, 전략: volatility_breakout)
+2026-10-02 09:08:37 [INFO    ] src.realtime.handler — [order_notice] order_no=0000341800 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=072950 qty=0000000002 price=000000000 hour=090837 rfus=0 acpt=1 ord_qty=000000002
+2026-10-02 09:08:37 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000341800, ticker=072950
+2026-10-02 09:08:37 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000341800 ticker=빛샘전자(072950) side=BUY src=map ordered=2 filled_total=2 incr=2
+2026-10-02 09:08:37 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 빛샘전자(072950) 2주 @ 18200 (전략: volatility_breakout)
+2026-10-02 09:08:37 [INFO    ] src.engine.order_engine — 매수 전량 체결: 빛샘전자(072950) 2주 @ 18200 (전략: volatility_breakout)
+2026-10-02 09:09:18 [INFO    ] src.engine.strategies.volatility_breakout — 변동성돌파 매수 신호 [main]: 대한광통신(010170) 현재가(18170) >= 목표가(18162), 이전가(18150), K=0.5601
+2026-10-02 09:09:18 [INFO    ] src.api.order — BUY 주문 완료: 010170 2주 @ 0 (주문번호: 0000346300)
+2026-10-02 09:09:18 [INFO    ] src.realtime.handler — [order_notice] order_no=0000346300 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=010170 qty=0000000002 price=000000000 hour=090918 rfus=0 acpt=1 ord_qty=000000002
+2026-10-02 09:09:18 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000346300, ticker=010170
+2026-10-02 09:09:18 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000346300 ticker=대한광통신(010170) side=BUY src=map ordered=2 filled_total=2 incr=2
+2026-10-02 09:09:18 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 대한광통신(010170) 2주 @ 18170 (전략: volatility_breakout)
+2026-10-02 09:09:18 [INFO    ] src.engine.order_engine — 매수 주문 접수: 대한광통신(010170) 2주 @ 18170 (주문번호: 0000346300, 전략: volatility_breakout)
+2026-10-02 09:09:18 [INFO    ] src.engine.order_engine — 매수 전량 체결: 대한광통신(010170) 2주 @ 18170 (전략: volatility_breakout)
+2026-10-02 09:33:16 [INFO    ] src.engine.strategies.volatility_breakout — 변동성돌파 손절: 빛샘전자(072950) 매수가(18200) 대비 -5.0% (현재가: 17290)
+2026-10-02 09:33:16 [INFO    ] src.api.order — SELL 주문 완료: 072950 2주 @ 0 (주문번호: 0000495600)
+2026-10-02 09:33:16 [INFO    ] src.engine.order_engine — STOP_LOSS 매도 주문 접수: 빛샘전자(072950) 2주 (주문번호: 0000495600, 전략: volatility_breakout)
+2026-10-02 09:33:16 [INFO    ] src.realtime.handler — [order_notice] order_no=0000495600 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=072950 qty=0000000002 price=000000000 hour=093316 rfus=0 acpt=1 ord_qty=000000002
+2026-10-02 09:33:16 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000495600, ticker=072950
+2026-10-02 09:33:16 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000495600 ticker=빛샘전자(072950) side=SELL src=map ordered=2 filled_total=2 incr=2
+2026-10-02 09:33:16 [INFO    ] src.engine.order_engine — 매도 전량 체결: 빛샘전자(072950) 2주 @ 17280 (손익: -1840, 전략: volatility_breakout)
+2026-10-02 09:33:16 [DEBUG   ] src.engine.order_engine — [unsubscribe_skip] 072950 — strategy=volatility_breakout 스캔 후보
+2026-10-02 09:33:23 [INFO    ] src.engine.strategies.volatility_breakout — 변동성돌파 매수 신호 [main]: 한화솔루션(009830) 현재가(35900) >= 목표가(35898), 이전가(35850), K=0.5766
+2026-10-02 09:33:23 [INFO    ] src.api.order — BUY 주문 완료: 009830 1주 @ 0 (주문번호: 0000496100)
+2026-10-02 09:33:23 [INFO    ] src.realtime.handler — [order_notice] order_no=0000496100 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=009830 qty=0000000001 price=000000000 hour=093323 rfus=0 acpt=1 ord_qty=000000001
+2026-10-02 09:33:23 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000496100, ticker=009830
+2026-10-02 09:33:23 [INFO    ] src.engine.order_engine — 매수 주문 접수: 한화솔루션(009830) 1주 @ 35900 (주문번호: 0000496100, 전략: volatility_breakout)
+2026-10-02 09:33:23 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000496100 ticker=한화솔루션(009830) side=BUY src=map ordered=1 filled_total=1 incr=1
+2026-10-02 09:33:23 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 한화솔루션(009830) 1주 @ 35950 (전략: volatility_breakout)
+2026-10-02 09:33:23 [INFO    ] src.engine.order_engine — 매수 전량 체결: 한화솔루션(009830) 1주 @ 35950 (전략: volatility_breakout)
+2026-10-02 10:05:06 [INFO    ] src.engine.strategies.momentum — 매수 신호: 티엠씨(217590) 전일종가(14190) 대비 29.5% (현재가: 18370, 직전: 28.7%)
+2026-10-02 10:05:06 [INFO    ] src.realtime.handler — [order_notice] order_no=0000629300 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=217590 qty=0000000002 price=000000000 hour=100506 rfus=0 acpt=1 ord_qty=000000002
+2026-10-02 10:05:06 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000629300, ticker=217590
+2026-10-02 10:05:06 [INFO    ] src.api.order — BUY 주문 완료: 217590 2주 @ 0 (주문번호: 0000629300)
+2026-10-02 10:05:06 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000629300 ticker=티엠씨(217590) side=BUY src=map ordered=2 filled_total=2 incr=2
+2026-10-02 10:05:06 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 티엠씨(217590) 2주 @ 18340 (전략: momentum)
+2026-10-02 10:05:06 [INFO    ] src.engine.order_engine — 매수 주문 접수: 티엠씨(217590) 2주 @ 18370 (주문번호: 0000629300, 전략: momentum)
+2026-10-02 10:05:06 [INFO    ] src.engine.order_engine — 매수 전량 체결: 티엠씨(217590) 2주 @ 18340 (전략: momentum)
+2026-10-02 15:20:00 [INFO    ] src.api.order — SELL 주문 완료: 010170 2주 @ 0 (주문번호: 0001393200)
+2026-10-02 15:20:00 [INFO    ] src.engine.order_engine — FORCE_CLEAR 매도 주문 접수: 대한광통신(010170) 2주 (주문번호: 0001393200, 전략: volatility_breakout)
+2026-10-02 15:20:00 [INFO    ] src.api.order — SELL 주문 완료: 009830 1주 @ 0 (주문번호: 0001393300)
+2026-10-02 15:20:00 [INFO    ] src.engine.order_engine — FORCE_CLEAR 매도 주문 접수: 한화솔루션(009830) 1주 (주문번호: 0001393300, 전략: volatility_breakout)
+2026-10-02 15:20:01 [INFO    ] src.realtime.handler — [order_notice] order_no=0001393300 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=009830 qty=0000000001 price=000000000 hour=152000 rfus=0 acpt=1 ord_qty=000000001
+2026-10-02 15:20:01 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001393300, ticker=009830
+2026-10-02 15:20:01 [INFO    ] src.realtime.handler — [order_notice] order_no=0001393200 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=010170 qty=0000000002 price=000000000 hour=152000 rfus=0 acpt=1 ord_qty=000000002
+2026-10-02 15:20:01 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001393200, ticker=010170
+2026-10-06 08:00:30 [INFO    ] src.engine.scheduler — stock_master nxt_tradable=False — 익일 청산 보류 (09:00 KRX 시장가 청산 예약): 티엠씨(217590) (전략: momentum)
+2026-10-06 09:00:05 [INFO    ] src.api.order — SELL 주문 완료: 217590 2주 @ 0 (주문번호: 0000277500)
+2026-10-06 09:00:05 [INFO    ] src.realtime.handler — [order_notice] order_no=0000277500 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=217590 qty=0000000002 price=000000000 hour=090005 rfus=0 acpt=1 ord_qty=000000002
+2026-10-06 09:00:05 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000277500, ticker=217590
+2026-10-06 09:00:05 [INFO    ] src.engine.order_engine — NEXT_DAY_CLEAR 매도 주문 접수: 티엠씨(217590) 2주 (주문번호: 0000277500, 전략: momentum)
+2026-10-06 09:01:35 [INFO    ] src.engine.strategies.volatility_breakout — 변동성돌파 매수 신호 [main]: 대우건설(047040) 현재가(17900) >= 목표가(17900), 이전가(17890), K=0.4993
+2026-10-06 09:01:36 [INFO    ] src.api.order — BUY 주문 완료: 047040 2주 @ 0 (주문번호: 0000289200)
+2026-10-06 09:01:36 [INFO    ] src.realtime.handler — [order_notice] order_no=0000289200 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=047040 qty=0000000002 price=000000000 hour=090136 rfus=0 acpt=1 ord_qty=000000002
+2026-10-06 09:01:36 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000289200, ticker=047040
+2026-10-06 09:01:36 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000289200 ticker=대우건설(047040) side=BUY src=map ordered=2 filled_total=2 incr=2
+2026-10-06 09:01:36 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 대우건설(047040) 2주 @ 17910 (전략: volatility_breakout)
+2026-10-06 09:01:36 [INFO    ] src.engine.order_engine — 매수 주문 접수: 대우건설(047040) 2주 @ 17900 (주문번호: 0000289200, 전략: volatility_breakout)
+2026-10-06 09:01:37 [INFO    ] src.engine.order_engine — 매수 전량 체결: 대우건설(047040) 2주 @ 17910 (전략: volatility_breakout)
+2026-10-06 09:02:05 [INFO    ] src.engine.strategies.volatility_breakout — 변동성돌파 매수 신호 [main]: 대한광통신(010170) 현재가(18720) >= 목표가(18717), 이전가(18700), K=0.5429
+2026-10-06 09:02:06 [INFO    ] src.api.order — BUY 주문 완료: 010170 2주 @ 0 (주문번호: 0000294400)
+2026-10-06 09:02:06 [INFO    ] src.realtime.handler — [order_notice] order_no=0000294400 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=010170 qty=0000000002 price=000000000 hour=090206 rfus=0 acpt=1 ord_qty=000000002
+2026-10-06 09:02:06 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000294400, ticker=010170
+2026-10-06 09:02:06 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000294400 ticker=대한광통신(010170) side=BUY src=map ordered=2 filled_total=2 incr=2
+2026-10-06 09:02:06 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 대한광통신(010170) 2주 @ 18720 (전략: volatility_breakout)
+2026-10-06 09:02:06 [INFO    ] src.engine.order_engine — 매수 주문 접수: 대한광통신(010170) 2주 @ 18720 (주문번호: 0000294400, 전략: volatility_breakout)
+2026-10-06 09:02:06 [INFO    ] src.engine.order_engine — 매수 전량 체결: 대한광통신(010170) 2주 @ 18720 (전략: volatility_breakout)
+2026-10-06 09:02:29 [INFO    ] src.realtime.handler — [open_scope_observe] ticker=263860 oprc_hour=090229 tick_open=25650 cntg_hour=090229 hgpr_hour=090229 mkop=20 hour_cls=0 in_main_window=true
+2026-10-06 09:02:29 [INFO    ] src.engine.strategies.momentum — 매수 신호: 지니언스(263860) 전일종가(20400) 대비 29.9% (현재가: 26500, 직전: 27.2%)
+2026-10-06 09:02:30 [INFO    ] src.api.order — BUY 주문 완료: 263860 1주 @ 0 (주문번호: 0000298700)
+2026-10-06 09:02:30 [INFO    ] src.realtime.handler — [order_notice] order_no=0000298700 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=263860 qty=0000000001 price=000000000 hour=090230 rfus=0 acpt=1 ord_qty=000000001
+2026-10-06 09:02:30 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000298700, ticker=263860
+2026-10-06 09:02:30 [INFO    ] src.engine.order_engine — 매수 주문 접수: 지니언스(263860) 1주 @ 26500 (주문번호: 0000298700, 전략: momentum)
+2026-10-06 09:11:00 [INFO    ] src.engine.strategies.momentum — 손절 신호: 지니언스(263860) 매수가(26500) 대비 -5.1% (임계: -5.0%, 현재가: 25150)
+2026-10-06 09:11:01 [INFO    ] src.api.order — SELL 주문 완료: 263860 1주 @ 0 (주문번호: 0000373700)
+2026-10-06 09:11:01 [INFO    ] src.realtime.handler — [order_notice] order_no=0000373700 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=263860 qty=0000000001 price=000000000 hour=091101 rfus=0 acpt=1 ord_qty=000000001
+2026-10-06 09:11:01 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000373700, ticker=263860
+2026-10-06 09:11:01 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000373700 ticker=지니언스(263860) side=SELL src=map ordered=1 filled_total=1 incr=1
+2026-10-06 09:11:01 [INFO    ] src.engine.order_engine — STOP_LOSS 매도 주문 접수: 지니언스(263860) 1주 (주문번호: 0000373700, 전략: momentum)
+2026-10-06 09:11:01 [INFO    ] src.engine.order_engine — 매도 전량 체결: 지니언스(263860) 1주 @ 25150 (손익: -1350, 전략: momentum) avg=25150
+2026-10-06 09:11:01 [DEBUG   ] src.engine.order_engine — [unsubscribe_skip] 263860 — strategy=bull_flag_breakout 스캔 후보
+2026-10-06 09:42:58 [INFO    ] src.engine.strategies.momentum — 매수 신호: HLB제약(047920) 전일종가(10010) 대비 29.1% (현재가: 12920, 직전: 28.9%)
+2026-10-06 09:42:58 [INFO    ] src.api.order — BUY 주문 완료: 047920 2주 @ 0 (주문번호: 0000623200)
+2026-10-06 09:42:58 [INFO    ] src.engine.order_engine — 매수 주문 접수: HLB제약(047920) 2주 @ 12920 (주문번호: 0000623200, 전략: momentum)
+2026-10-06 09:42:58 [INFO    ] src.realtime.handler — [order_notice] order_no=0000623200 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=047920 qty=0000000002 price=000000000 hour=094258 rfus=0 acpt=1 ord_qty=000000002
+2026-10-06 09:42:58 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000623200, ticker=047920
+2026-10-06 10:23:30 [INFO    ] src.engine.strategies.momentum — 매수 신호: 라온시큐어(042510) 전일종가(11440) 대비 29.2% (현재가: 14780, 직전: 28.6%)
+2026-10-06 10:23:30 [INFO    ] src.api.order — BUY 주문 완료: 042510 2주 @ 0 (주문번호: 0000796800)
+2026-10-06 10:23:30 [INFO    ] src.realtime.handler — [order_notice] order_no=0000796800 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=042510 qty=0000000002 price=000000000 hour=102330 rfus=0 acpt=1 ord_qty=000000002
+2026-10-06 10:23:30 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000796800, ticker=042510
+2026-10-06 10:23:30 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000796800 ticker=라온시큐어(042510) side=BUY src=map ordered=2 filled_total=2 incr=2
+2026-10-06 10:23:30 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 라온시큐어(042510) 2주 @ 14740 (전략: momentum)
+2026-10-06 10:23:30 [INFO    ] src.engine.order_engine — 매수 주문 접수: 라온시큐어(042510) 2주 @ 14780 (주문번호: 0000796800, 전략: momentum)
+2026-10-06 10:23:30 [INFO    ] src.engine.order_engine — 매수 전량 체결: 라온시큐어(042510) 2주 @ 14740 (전략: momentum)
+2026-10-06 13:47:22 [INFO    ] src.engine.strategies.momentum — 매수 신호: 아톤(158430) 전일종가(5500) 대비 29.1% (현재가: 7100, 직전: 28.9%)
+2026-10-06 13:47:23 [INFO    ] src.api.order — BUY 주문 완료: 158430 5주 @ 0 (주문번호: 0001301000)
+2026-10-06 13:47:23 [INFO    ] src.realtime.handler — [order_notice] order_no=0001301000 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=158430 qty=0000000005 price=000000000 hour=134723 rfus=0 acpt=1 ord_qty=000000005
+2026-10-06 13:47:23 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001301000, ticker=158430
+2026-10-06 13:47:23 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0001301000 ticker=아톤(158430) side=BUY src=map ordered=5 filled_total=5 incr=5
+2026-10-06 13:47:23 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 아톤(158430) 5주 @ 7100 (전략: momentum)
+2026-10-06 13:47:23 [INFO    ] src.engine.order_engine — 매수 주문 접수: 아톤(158430) 5주 @ 7100 (주문번호: 0001301000, 전략: momentum)
+2026-10-06 13:47:23 [INFO    ] src.engine.order_engine — 매수 전량 체결: 아톤(158430) 5주 @ 7100 (전략: momentum)
+2026-10-06 14:06:51 [INFO    ] src.engine.strategies.bull_flag_breakout — 눌림목 측정된 이동 도달: 232140 현재가(18640) ≥ 타겟(18640) — 익절 신호
+2026-10-06 14:06:51 [INFO    ] src.api.order — SELL 주문 완료: 232140 8주 @ 0 (주문번호: 0001347100)
+2026-10-06 14:06:51 [INFO    ] src.engine.order_engine — TRAILING_STOP 매도 주문 접수: 와이씨(232140) 8주 (주문번호: 0001347100, 전략: bull_flag_breakout)
+2026-10-06 14:06:51 [INFO    ] src.realtime.handler — [order_notice] order_no=0001347100 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=232140 qty=0000000008 price=000000000 hour=140651 rfus=0 acpt=1 ord_qty=000000008
+2026-10-06 14:06:51 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001347100, ticker=232140
+2026-10-06 14:06:51 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0001347100 ticker=와이씨(232140) side=SELL src=map ordered=8 filled_total=8 incr=8
+2026-10-06 14:06:51 [INFO    ] src.engine.order_engine — 매도 전량 체결: 와이씨(232140) 8주 @ 18620 (손익: 29760, 전략: bull_flag_breakout) avg=18620
+2026-10-06 14:06:51 [INFO    ] src.engine.order_engine — [sell_unsubscribe] 와이씨(232140) WS 구독 정리
+2026-10-06 14:06:51 [INFO    ] src.engine.strategies.bull_flag_breakout — [bfb_vol_gate_pass] ticker=356680 observed=6713058 threshold=3215797 latch_age_sec=0
+2026-10-06 14:06:52 [INFO    ] src.realtime.handler — [order_notice] order_no=0001347200 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=356680 qty=0000000003 price=000000000 hour=140652 rfus=0 acpt=1 ord_qty=000000003
+2026-10-06 14:06:52 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001347200, ticker=356680
+2026-10-06 14:06:52 [INFO    ] src.api.order — BUY 주문 완료: 356680 3주 @ 0 (주문번호: 0001347200)
+2026-10-06 14:06:52 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0001347200 ticker=엑스게이트(356680) side=BUY src=map ordered=3 filled_total=3 incr=3
+2026-10-06 14:06:52 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 엑스게이트(356680) 3주 @ 20650 (전략: bull_flag_breakout)
+2026-10-06 14:06:52 [INFO    ] src.engine.order_engine — 매수 주문 접수: 엑스게이트(356680) 3주 @ 20650 (주문번호: 0001347200, 전략: bull_flag_breakout)
+2026-10-06 14:06:52 [INFO    ] src.engine.order_engine — 매수 전량 체결: 엑스게이트(356680) 3주 @ 20650 (전략: bull_flag_breakout)
+2026-10-06 15:20:00 [INFO    ] src.api.order — SELL 주문 완료: 047040 2주 @ 0 (주문번호: 0001531100)
+2026-10-06 15:20:00 [INFO    ] src.engine.order_engine — FORCE_CLEAR 매도 주문 접수: 대우건설(047040) 2주 (주문번호: 0001531100, 전략: volatility_breakout)
+2026-10-06 15:20:00 [INFO    ] src.api.order — SELL 주문 완료: 010170 2주 @ 0 (주문번호: 0001531200)
+2026-10-06 15:20:00 [INFO    ] src.engine.order_engine — FORCE_CLEAR 매도 주문 접수: 대한광통신(010170) 2주 (주문번호: 0001531200, 전략: volatility_breakout)
+2026-10-06 15:20:01 [INFO    ] src.realtime.handler — [order_notice] order_no=0001531100 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=047040 qty=0000000002 price=000000000 hour=152000 rfus=0 acpt=1 ord_qty=000000002
+2026-10-06 15:20:01 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001531100, ticker=047040
+2026-10-06 15:20:01 [INFO    ] src.realtime.handler — [order_notice] order_no=0001531200 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=010170 qty=0000000002 price=000000000 hour=152000 rfus=0 acpt=1 ord_qty=000000002
+2026-10-06 15:20:01 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001531200, ticker=010170
+2026-10-07 08:00:30 [INFO    ] src.engine.scheduler — 익일 청산 보류 (갭 3.9% < 임계 10.0%, 09:00 KRX 시장가 청산 예약): HLB제약(047920) (전략: momentum)
+2026-10-07 08:00:30 [INFO    ] src.engine.scheduler — stock_master nxt_tradable=False — 익일 청산 보류 (09:00 KRX 시장가 청산 예약): 라온시큐어(042510) (전략: momentum)
+2026-10-07 08:00:30 [INFO    ] src.engine.scheduler — stock_master nxt_tradable=False — 익일 청산 보류 (09:00 KRX 시장가 청산 예약): 아톤(158430) (전략: momentum)
+2026-10-07 09:00:05 [INFO    ] src.api.order — SELL 주문 완료: 158430 5주 @ 0 (주문번호: 0000280100)
+2026-10-07 09:00:05 [INFO    ] src.realtime.handler — [order_notice] order_no=0000280100 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=158430 qty=0000000005 price=000000000 hour=090005 rfus=0 acpt=1 ord_qty=000000005
+2026-10-07 09:00:05 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000280100, ticker=158430
+2026-10-07 09:00:05 [INFO    ] src.engine.order_engine — NEXT_DAY_CLEAR 매도 주문 접수: 아톤(158430) 5주 (주문번호: 0000280100, 전략: momentum)
+2026-10-07 09:00:05 [INFO    ] src.api.order — SELL 주문 완료: 047920 2주 @ 0 (주문번호: 0000280200)
+2026-10-07 09:00:05 [INFO    ] src.realtime.handler — [order_notice] order_no=0000280200 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=047920 qty=0000000002 price=000000000 hour=090005 rfus=0 acpt=1 ord_qty=000000002
+2026-10-07 09:00:05 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000280200, ticker=047920
+2026-10-07 09:00:05 [INFO    ] src.engine.order_engine — NEXT_DAY_CLEAR 매도 주문 접수: HLB제약(047920) 2주 (주문번호: 0000280200, 전략: momentum)
+2026-10-07 09:00:05 [INFO    ] src.api.order — SELL 주문 완료: 042510 2주 @ 0 (주문번호: 0000280300)
+2026-10-07 09:00:05 [INFO    ] src.engine.order_engine — NEXT_DAY_CLEAR 매도 주문 접수: 라온시큐어(042510) 2주 (주문번호: 0000280300, 전략: momentum)
+2026-10-07 09:00:05 [INFO    ] src.realtime.handler — [order_notice] order_no=0000280300 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=042510 qty=0000000002 price=000000000 hour=090005 rfus=0 acpt=1 ord_qty=000000002
+2026-10-07 09:00:05 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000280300, ticker=042510
+2026-10-07 09:05:00 [INFO    ] src.engine.strategies.donchian_swing — 도치안 스윙 매수 신호: 112610 현재가(57200) — 신고가(56800) 돌파 + EMA60(47309) 위 + ATR(2867)
+2026-10-07 09:05:00 [INFO    ] src.api.order — BUY 주문 완료: 112610 2주 @ 0 (주문번호: 0000320700)
+2026-10-07 09:05:00 [INFO    ] src.realtime.handler — [order_notice] order_no=0000320700 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=112610 qty=0000000002 price=000000000 hour=090500 rfus=0 acpt=1 ord_qty=000000002
+2026-10-07 09:05:00 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000320700, ticker=112610
+2026-10-07 09:05:00 [INFO    ] src.engine.order_engine — 매수 주문 접수: 씨에스윈드(112610) 2주 @ 57200 (주문번호: 0000320700, 전략: donchian_swing)
+2026-10-07 09:05:00 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000320700 ticker=씨에스윈드(112610) side=BUY src=map ordered=2 filled_total=2 incr=2
+2026-10-07 09:05:00 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 씨에스윈드(112610) 2주 @ 57200 (전략: donchian_swing)
+2026-10-07 09:05:02 [INFO    ] src.engine.order_engine — 매수 전량 체결: 씨에스윈드(112610) 2주 @ 57200 (전략: donchian_swing)
+2026-10-07 09:05:04 [INFO    ] src.engine.strategies.donchian_swing — 도치안 스윙 매수 신호: 253590 현재가(16250) — 신고가(16030) 돌파 + EMA60(11439) 위 + ATR(847)
+2026-10-07 09:05:05 [INFO    ] src.api.order — BUY 주문 완료: 253590 8주 @ 0 (주문번호: 0000321000)
+2026-10-07 09:05:05 [INFO    ] src.realtime.handler — [order_notice] order_no=0000321000 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=253590 qty=0000000008 price=000000000 hour=090505 rfus=0 acpt=1 ord_qty=000000008
+2026-10-07 09:05:05 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0000321000, ticker=253590
+2026-10-07 09:05:05 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0000321000 ticker=네오셈(253590) side=BUY src=map ordered=8 filled_total=8 incr=8
+2026-10-07 09:05:05 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 네오셈(253590) 8주 @ 16310 (전략: donchian_swing)
+2026-10-07 09:05:05 [INFO    ] src.engine.order_engine — 매수 주문 접수: 네오셈(253590) 8주 @ 16250 (주문번호: 0000321000, 전략: donchian_swing)
+2026-10-07 09:05:05 [WARNING ] src.engine.order_engine — [buy_fill_correction_unique_violation] ticker=253590 order_no=0000321000 strategy_attempted=donchian_swing err=UniqueViolationError('duplicate key value violates unique constraint "uq_trade_history_ticker_order_no_type"') → strategy 무관 강제 COMPLETED UPDATE
+2026-10-07 09:05:05 [INFO    ] src.engine.order_engine — 매수 전량 체결: 네오셈(253590) 8주 @ 16310 (전략: donchian_swing)
+2026-10-07 09:05:05 [INFO    ] src.realtime.handler — [open_scope_observe] ticker=253590 oprc_hour=090022 tick_open=16130 cntg_hour=090505 hgpr_hour=090303 mkop=20 hour_cls=0 in_main_window=true
+2026-10-07 09:05:05 [INFO    ] src.engine.strategies.donchian_swing — [days_held_observe] ticker=253590 strategy=donchian_swing buy_date=2026-10-07 days_held=0 calendar_days=0 n_days=19 breakout_high=16030 current_price=16310 days_ok=False reached_1r=False armed_3r=False
+2026-10-07 12:07:52 [INFO    ] src.engine.strategies.vcp_breakout — [vcp_vol_gate_pass] ticker=003350 observed=4131598 threshold=2164350 latch_age_sec=0
+2026-10-07 12:07:52 [INFO    ] src.realtime.handler — [order_notice] order_no=0001028600 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=003350 qty=0000000005 price=000000000 hour=120752 rfus=0 acpt=1 ord_qty=000000005
+2026-10-07 12:07:52 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001028600, ticker=003350
+2026-10-07 12:07:52 [INFO    ] src.api.order — BUY 주문 완료: 003350 5주 @ 0 (주문번호: 0001028600)
+2026-10-07 12:07:53 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0001028600 ticker=한국화장품제조(003350) side=BUY src=map ordered=5 filled_total=5 incr=5
+2026-10-07 12:07:53 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 한국화장품제조(003350) 5주 @ 17910 (전략: vcp_breakout)
+2026-10-07 12:07:53 [INFO    ] src.engine.order_engine — 매수 주문 접수: 한국화장품제조(003350) 5주 @ 17910 (주문번호: 0001028600, 전략: vcp_breakout)
+2026-10-07 12:07:53 [WARNING ] src.engine.order_engine — [buy_fill_correction_unique_violation] ticker=003350 order_no=0001028600 strategy_attempted=vcp_breakout err=UniqueViolationError('duplicate key value violates unique constraint "uq_trade_history_ticker_order_no_type"') → strategy 무관 강제 COMPLETED UPDATE
+2026-10-07 12:07:53 [INFO    ] src.engine.order_engine — 매수 전량 체결: 한국화장품제조(003350) 5주 @ 17910 (전략: vcp_breakout)
+2026-10-07 13:39:04 [INFO    ] src.engine.strategies.bull_flag_breakout — [bfb_turtle_backstop] 356680 매수가(20650) 대비 -7.0% ≤ -7.0%
+2026-10-07 13:39:04 [INFO    ] src.api.order — SELL 주문 완료: 356680 3주 @ 0 (주문번호: 0001204700)
+2026-10-07 13:39:04 [INFO    ] src.engine.order_engine — STOP_LOSS 매도 주문 접수: 엑스게이트(356680) 3주 (주문번호: 0001204700, 전략: bull_flag_breakout)
+2026-10-07 13:39:04 [INFO    ] src.realtime.handler — [order_notice] order_no=0001204700 orig_order_no= side=SELL rctf=0 kind=01 cond=0 ticker=356680 qty=0000000003 price=000000000 hour=133904 rfus=0 acpt=1 ord_qty=000000003
+2026-10-07 13:39:04 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001204700, ticker=356680
+2026-10-07 13:39:04 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0001204700 ticker=엑스게이트(356680) side=SELL src=map ordered=3 filled_total=3 incr=3
+2026-10-07 13:39:04 [INFO    ] src.engine.order_engine — 매도 전량 체결: 엑스게이트(356680) 3주 @ 19190 (손익: -4380, 전략: bull_flag_breakout) avg=19190
+2026-10-07 13:39:04 [DEBUG   ] src.engine.order_engine — [unsubscribe_skip] 356680 — strategy=volatility_breakout 스캔 후보
+2026-10-07 13:39:06 [INFO    ] src.engine.strategies.bull_flag_breakout — [bfb_vol_gate_pass] ticker=069540 observed=41620929 threshold=8856835 latch_age_sec=0
+2026-10-07 13:39:06 [INFO    ] src.api.order — BUY 주문 완료: 069540 18주 @ 0 (주문번호: 0001204800)
+2026-10-07 13:39:06 [INFO    ] src.realtime.handler — [order_notice] order_no=0001204800 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=069540 qty=0000000018 price=000000000 hour=133906 rfus=0 acpt=1 ord_qty=000000018
+2026-10-07 13:39:06 [DEBUG   ] src.realtime.handler — 체결통보 접수(미체결): order_no=0001204800, ticker=069540
+2026-10-07 13:39:06 [DEBUG   ] src.engine.order_engine — [fill_qty_src] order_no=0001204800 ticker=빛과전자(069540) side=BUY src=map ordered=18 filled_total=18 incr=18
+2026-10-07 13:39:06 [INFO    ] src.engine.order_engine — 매수 체결 → 포지션 등록: 빛과전자(069540) 18주 @ 5190 (전략: bull_flag_breakout)
+2026-10-07 13:39:06 [INFO    ] src.engine.order_engine — 매수 주문 접수: 빛과전자(069540) 18주 @ 5180 (주문번호: 0001204800, 전략: bull_flag_breakout)
+2026-10-07 13:39:06 [INFO    ] src.engine.order_engine — 매수 전량 체결: 빛과전자(069540) 18주 @ 5190 (전략: bull_flag_breakout)

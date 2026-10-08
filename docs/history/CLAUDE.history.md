@@ -1495,3 +1495,48 @@ VCP universe(KOSPI200∪KOSDAQ150) backfill target **120일** · retention `DAIL
 `tick_volume.get_observed_acml_vol`) + R(구독 중 KRX 누적거래량 증가, `inquire_acml_vol`
 을 600초 간격 두 번 읽어 확인 + 60초 더 대기) 두 증거 다리가 모두 서야 확정한다.
 상세 규약 = `src/engine/CLAUDE.md` `stale_watcher_core.py` 절(현재형).
+
+---
+
+## Docker / 배포
+
+### 2026-10-08 cycle412 문서 동기화 — 선택 배포 모드 일반화 · CI migration 범위
+
+정본 원문(바뀐 부분):
+
+```
+/ **선택 배포**(`frontend` · `macro` · `frontend+macro` — `--no-deps`, backend 무접촉) / **none**
+```
+
+```
+(`tests/integration/pg_harness.py` 가 migration 001~045 적용)
+```
+
+경위: cycle412(거래일지 1a)가 `journal` 축(`JOURNAL_RE='^journal_worker/'` → 서비스
+`journal_worker`)을 더하면서 `tools/deploy/compose_up_changed.sh` 가 걸린 축을 `frontend`·
+`macro`·`journal` 순서로 `+` 로 잇는 일반 조합으로 바뀌었다. 고정 3모드 나열은 그것을 담지
+못한다. CI 의 migration 범위는 047(거래일지 4표)까지다 — 046(cycle409)이 들어올 때 이 줄이
+고쳐지지 않아 두 번호가 함께 밀려 있었다.
+
+같은 동기화에서 덧붙인 것(걷어낸 원문 없음) = 「Docker / 배포」 의 `journal_worker` 항목 ·
+EC2 사전 생성 규약의 `secrets/journal_worker.env` 문장(`env_file` 결손이 compose 명령 전체를
+실패시킨다 — 로컬 compose v5.1.1 실측) · `llm_worker` 항목의 선례 문장 · DB 스키마 표
+`trade_journal_*` 행 · 디렉토리 역할 `journal_worker/` 행 · `API_REPORTER_KEY` 의 워커 직결
+문장 · 테스트 실행 주석 둘(워커 테스트 포함 · 영향 인덱스 범위).
+
+→ CHANGELOG: cycle412 행
+
+### 2026-10-09 cycle412 마무리 문서 동기화 — `journal_worker` 한 회전에 대사 · 과거분 적재 · `TZ`
+
+정본 원문(「Docker / 배포」 `journal_worker` 항목의 바뀐 부분):
+
+```
+15초 한 회전 = G0 `GET /api/trading/status?include=system,holdings,strategies` → G1 `GET /api/balance/exit-lines` → `./logs:/app/logs:ro` 꼬리 읽기 → 주문 행·손절선 사건 쓰기 → 커서 저장(엔진 정지·`phase=="idle"` 이면 300초 주기에 쓰기 0). 환경변수는 `JOURNAL_DATABASE_URL`(`env_file: ./secrets/journal_worker.env`)·`API_REPORTER_KEY` 둘뿐이고 자원 상한은 `mem_limit: 160m`·`cpus: 0.25` 다.
+```
+
+경위: cycle412 보완(`17dbd16c`)이 대사(`jw/reconcile.py`)를 한 회전 끝에 60초 간격으로 연결하고
+`python -m jw backfill <경로…>` 를 실제 적재로 만들었다. 원문은 그 전 코드라 대사 단계가 없었다.
+`docker-compose.prod.yml` 의 `journal_worker` `environment` 에는 `TZ=Asia/Seoul` 도 있어 「둘뿐」 을
+「`TZ` 말고는 둘뿐」 으로 고쳤다(워커 코드가 `os.environ` 에서 읽는 것은 여전히 둘이다).
+
+→ CHANGELOG: cycle412 마무리 행

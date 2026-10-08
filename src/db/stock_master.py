@@ -785,6 +785,28 @@ async def count_missing_kis_provenance_key() -> int:
     return int(count or 0)
 
 
+async def get_etf_group_codes(tickers: list[str]) -> dict[str, str | None]:
+    """ETF/ETN 구분 코드(`raw.scty_grp_id_cd`) 일괄 조회 (cycle411 2차 보완 F1).
+
+    `cost_overlay.stock_master_etf_flags` 가 종목마다 `get()`(`SELECT *`)을 직렬로 부르던
+    것을 `pg.fetch` **1회**로 바꾼다. 요청 ticker 전부를 키로 반환한다(DB 미존재·코드
+    없음 = `None` — 이름 폴백이 받는다). 빈 입력은 쿼리 자체를 생략한다(규약 답습).
+    """
+    if not tickers:
+        return {}
+    rows = await pg.fetch(
+        "SELECT ticker, raw->>'scty_grp_id_cd' AS scty_grp_id_cd "
+        "FROM stock_master WHERE ticker = ANY($1::text[])",
+        list(tickers),
+    )
+    result: dict[str, str | None] = {t: None for t in tickers}
+    for row in rows:
+        ticker = row.get("ticker")
+        if ticker in result:
+            result[ticker] = row.get("scty_grp_id_cd")
+    return result
+
+
 async def get_nxt_tradable_map(tickers: list[str]) -> dict[str, bool | None]:
     """cycle252 — `no_feed_registry.ensure_fresh` 전용 벌크 조회.
 

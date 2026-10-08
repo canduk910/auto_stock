@@ -1,0 +1,45 @@
+cycle411 2차 보완 Green (프론트) — progress_fe4.log
+
+역할: c411-fe (frontend-dev). 대상: B3 · F3 · F7 · F9 · F10 · F12 · F13 (프론트 범위).
+Red 기준 커밋: 5f38cd4c. 작업 디렉터리: /Users/koscom/Projects/auto_stock_c411 (브랜치 feat/cost-overlay).
+
+변경 파일 (frontend/ 만):
+- src/components/PerformanceCard.tsx — B3: summary net 두 칸 · TE realized_net_sum_krw
+  를 `!= null` 로 거름. null(모름)이면 세전 값 + 그 카드/행에 「세전」. 세후 값이 있으면
+  라벨 없음(PC3 가드).
+- src/components/BalanceTable.tsx — F3: buy_fee_paid === null(명시적 모름) 이면
+  net-pl-<ticker> 「—」(0 으로 치지 않음). 칸 자체가 없는 구 응답은 기존 식 유지(BB2).
+  F10: 예상 매도비용·순 평가손익 헤더 2개 + 값 칸 2개에 whitespace-nowrap.
+- src/components/OrderMonitor.tsx — F7: /api/costs/today retry 0, isError 우선 — 실패 시
+  마지막 성공값 대신 「—」 + order-monitor-net-pnl-error(「조회 실패」, 「실현 손익」 미포함).
+  F10: 라벨의 「(추정)」 중복 제거(배지만 남김), 제목에 whitespace-nowrap.
+- src/pages/Strategies.tsx — F9/B4: te-realized-<id> — realized_net_sum_krw != null 이면
+  그 값 + 「세후」, null 이면 realized_sum_krw + 「세전」.
+- src/types/trading.ts, src/types/strategy.ts — F12: PerformanceSummary·DailyPerformance·
+  TradeRecord·TradePair·TradePnLSummary·TeRrMetrics 의 null 가능 칸에 `| null` 추가.
+  TradePair 에 partial_fee/partial_tax/partial_sell_trade_ids(타입만) 추가.
+- src/test/handlers.ts, src/test/factories.ts — F13: /api/balance 기본 목을
+  {holdings, summary} 실제 모양으로(makeHolding 신설) · /api/history/pnl 의 `as never`
+  제거 + summary 산수를 실제 페어와 일치 · /api/performance/daily 의 net_cumulative_return_rate
+  를 net_daily_profit_rate 와 일치(첫 행 누적=당일) · /api/history 기본 행에 fee/cost_status/
+  order_price 추가.
+- src/components/TradePnLGrid.tsx — 부수 정리(F12 타입 확장에 따른 정직화): summary.slippage_n
+  이 null(F4, 비용 조회 실패)이면 pnl-summary-slippage 를 「—」로(기존 Red 범위 밖, 타입 일치
+  방어적 수정, 신규 테스트 없음).
+
+검증:
+- npx vitest run (frontend 전체): 133 files / 1131 tests 전부 통과(cycle411c 대상 7파일 포함,
+  기존 테스트 무손상).
+- npx tsc -b: 깨끗.
+- npm run build: 성공.
+- npm run lint(전체): 기존에도 38 errors/10 warnings(Strategies.tsx Math.random, BalanceTable
+  useMemo 등 내가 건드리지 않은 다른 줄) — git show HEAD 로 대조해 내 변경 전부터 있던 문제임을
+  확인, 내 diff 라인에는 새 lint 오류 없음.
+
+범위 밖(백엔드 담당, 손대지 않음): B1·B2·B4(백엔드 로직)·F1·F2·F4(라우트)·F5·F6·F8·F11(백엔드
++ 계약 문서)·F14(README·src/routes/CLAUDE.md). src/·tests/·README.md·_workspace/red/cycle411/
+cost_overlay.md 무접촉. 8영역·scheduler.py·migrations 무접촉. e2e/ 는 이미 cycle411 1차에서
+/api/costs/today·daily 등록 완료 확인(수정 불필요).
+
+커밋 범위: `git commit frontend e2e`(-A 금지) — src/engine/cost_overlay.py(backend 동시 작업중)
+는 제외.

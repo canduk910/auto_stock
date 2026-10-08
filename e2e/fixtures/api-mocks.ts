@@ -177,6 +177,25 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
     route.fulfill({ json: envelope([]) }),
   );
 
+  // cycle411 — 실비용 추정(scheduler 무접촉 경로). 백엔드 없는 E2E 의 ECONNREFUSED 방지
+  // (사이클 75 카드 #19' 와 같은 계열) — OrderMonitor 가 이 엔드포인트를 그린다.
+  await page.route("**/api/costs/today*", (route) =>
+    route.fulfill({
+      json: envelope({
+        date: "2026-10-08",
+        fee_rate: 0.00142,
+        tax_rate: 0.00199,
+        rate_source: "default",
+        cost_status: "estimated",
+        strategies: [],
+        total: { gross_pnl: 0, fee: 0, tax: 0, net_pnl: 0 },
+      }),
+    }),
+  );
+  await page.route("**/api/costs/daily*", (route) =>
+    route.fulfill({ json: envelope({ from: "", to: "", days: [] }) }),
+  );
+
   // ⚠️ cycle276 Green 실측 — `**/api/history*` 글롭은 vite 모듈 요청
   //    `http://localhost:3000/src/api/history.ts` 까지 잡는다. JSON 을 돌려주면 MIME
   //    불일치로 `History.tsx` 동적 import 가 통째로 죽어 **빈 화면**이 된다(사이클 104 가

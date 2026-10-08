@@ -235,7 +235,12 @@ export default function BalanceTable({ selectedStrategy }: Props) {
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <ScrollPane>
-        <table className="w-full text-sm">
+        {/* cycle411d — 표 전체 줄바꿈 금지(F10 재확인). `white-space` 는 상속되는
+            속성이라 루트에 한 번 달면 거래시장·매입일·손절가·목표가 등 기존 칸도
+            전부 물려받는다 — 1280px 에서 한 자씩 꺾여 행 높이가 51→85px 로 늘던
+            결함의 뿌리가 "새 칸 2개만" 이 아니라 표 전체였다. ScrollPane 이 이미
+            overflow-auto 라 넘치는 폭은 가로 스크롤로 받는다. */}
+        <table className="w-full text-sm whitespace-nowrap">
           <thead className="bg-gray-50 border-b">
             <tr>
               <th className="px-4 py-3 text-left font-medium text-gray-600">종목명</th>
@@ -253,13 +258,17 @@ export default function BalanceTable({ selectedStrategy }: Props) {
               <th className="px-4 py-3 text-right font-medium text-gray-600">평가금액</th>
               <th className="px-4 py-3 text-right font-medium text-gray-600">평가손익</th>
               <th className="px-4 py-3 text-right font-medium text-gray-600">수익률</th>
+              {/* cycle411 — 예상 매도비용(추정) × 평가금액, 순 평가손익 = 평가손익 − 예상 매도비용 */}
+              {/* cycle411c F10 — 1280px 에서 한 자씩 줄바꿈되어 행 높이가 51→85px 로 늘던 결함 */}
+              <th className="px-4 py-3 text-right font-medium text-gray-600 whitespace-nowrap">예상 매도비용</th>
+              <th className="px-4 py-3 text-right font-medium text-gray-600 whitespace-nowrap">순 평가손익</th>
               <th className="px-4 py-3 text-center font-medium text-gray-600"></th>
             </tr>
           </thead>
           <tbody>
             {filteredHoldings.length === 0 ? (
               <tr>
-                <td colSpan={isAll ? 14 : 13} className="px-4 py-8 text-center text-gray-400">
+                <td colSpan={isAll ? 16 : 15} className="px-4 py-8 text-center text-gray-400">
                   보유 종목이 없습니다.
                 </td>
               </tr>
@@ -345,6 +354,48 @@ export default function BalanceTable({ selectedStrategy }: Props) {
                     <td className={`px-4 py-3 text-right font-medium ${profitColor(h.eval_profit_rate)}`}>
                       {h.eval_profit_rate.toFixed(2)}%
                     </td>
+                    {/* cycle411 — sell_cost_rate 가 없는(구 서버) 응답은 숫자를 지어내지 않고 — 로 그린다 */}
+                    <td data-testid={`sell-cost-${h.ticker}`} className="px-4 py-3 text-right text-gray-500 whitespace-nowrap">
+                      {h.sell_cost_rate != null ? (
+                        <>
+                          {formatKRW(Math.round(h.eval_amount * h.sell_cost_rate))}원
+                          <span className="ml-1 text-[10px] text-amber-600">추정</span>
+                        </>
+                      ) : (
+                        '—'
+                      )}
+                    </td>
+                    {(() => {
+                      // cycle411b M1 — 순 평가손익 = 평가손익 − 예상 매도비용 − 이미 낸 매수 수수료.
+                      // buy_fee_paid 가 없는(구 서버) 응답은 기존 식 그대로(BB2).
+                      if (h.sell_cost_rate == null) {
+                        return (
+                          <td data-testid={`net-pl-${h.ticker}`} className="px-4 py-3 text-right font-medium text-gray-500 whitespace-nowrap">
+                            —
+                          </td>
+                        )
+                      }
+                      // cycle411c F3 — buy_fee_paid 가 명시적으로 null(비용 조회 실패, 「모름」)이면
+                      // 0 으로 치지 않는다 — 순 평가손익도 「모름」이라 — 로 그린다.
+                      if (h.buy_fee_paid === null) {
+                        return (
+                          <td data-testid={`net-pl-${h.ticker}`} className="px-4 py-3 text-right font-medium text-gray-500 whitespace-nowrap">
+                            —
+                          </td>
+                        )
+                      }
+                      const sellCost = Math.round(h.eval_amount * h.sell_cost_rate)
+                      const buyFee = h.buy_fee_paid ?? 0
+                      const netPl = Math.round(h.eval_profit_loss - sellCost - buyFee)
+                      return (
+                        <td
+                          data-testid={`net-pl-${h.ticker}`}
+                          className={`px-4 py-3 text-right font-medium whitespace-nowrap ${profitColor(netPl)}`}
+                        >
+                          {formatKRW(netPl)}원
+                        </td>
+                      )
+                    })()}
                     <td className="px-4 py-3 text-center">
                       <button
                         onClick={() => setSellTarget({

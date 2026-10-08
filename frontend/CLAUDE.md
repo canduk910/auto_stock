@@ -117,7 +117,7 @@ leaf 12개를 **상위 9개**로 묶는다(사용자 지정 묶음·순서 — �
 
 여기 한 번만 적는다. 신규 카드·페이지·목 전부 해당한다.
 
-1. **모든 `useQuery` 에 `retry: 1` 을 명시한다**(전역 기본값이 있어도) — 백엔드 없는 e2e 에서 ECONNREFUSED 재시도가 spec timeout 을 낸다. AST 가드 `frontend/src/components/__tests__/_ast_useQuery_retry_required.test.ts`(카드 + `TARGET_PAGES` 전수).
+1. **모든 `useQuery` 에 `retry:` 를 명시한다**(전역 기본값이 있어도) — 백엔드 없는 e2e 에서 ECONNREFUSED 재시도가 spec timeout 을 낸다. 기본값은 `retry: 1` 이다. **예외 = 5초 폴링(`refetchInterval: 5000`) 쿼리는 `retry: 0`(또는 `false`)** — 다음 폴링이 재시도를 맡고, `retry: 1` 이면 실패마다 요청이 두 배가 된다(현재 `OrderMonitor` 의 `/api/costs/today` · `TradingStatusContext` 의 `/api/trading/status`). AST 가드 `frontend/src/components/__tests__/_ast_useQuery_retry_required.test.ts`(카드 + `TARGET_PAGES` 전수)는 `retry:` 키가 있는지(값 `false`/`0`~`3`)만 본다.
 2. **Playwright route 매칭은 LIFO**("latest registered route wins") — 구체 라우트는 wildcard **뒤**에 등록한다. 가드 `tests/unit/e2e_mocks/test_api_mocks_routes_registered.py`(`..._specific_routes_registered_after_wildcard`).
 3. **`frontend/src/api/*.ts` 엔드포인트 ↔ `e2e/fixtures/api-mocks.ts` route glob 정합.** 가드 `_ast_api_mocks_coverage.test.ts`.
 4. **glob 이 Vite 모듈 경로(`/src/api/*.ts`)와 겹치면 resourceType 가드 의무** — `**/api/logs*` 같은 glob 이 스크립트 요청까지 잡아 모듈 로딩을 깬다. 핸들러 첫 줄 `if (route.request().resourceType() === "script") return route.continue();`. `/api/strategies` e2e mock 은 **플랫 형식 하나만** 등록한다(내포 형식이 LIFO 로 이기면 `name = undefined`).
@@ -132,6 +132,15 @@ leaf 12개를 **상위 9개**로 묶는다(사용자 지정 묶음·순서 — �
 ## OrderMonitor
 
 - `pos.is_next_day=true` 일 때만 "청산" 배지. 백엔드 `Position.is_next_day`(`strategy_base.py`)는 `_MULTIDAY_STRATEGIES`(**코드 정본 = `{donchian_swing, vcp_breakout, kojiro}`**)면 항상 False, 나머지는 `buy_date < 오늘(KST)`
+- 오늘 실현 순손익(추정, testid `order-monitor-net-pnl`) — `GET /api/costs/today?strategy=`(scheduler 무접촉). 전체 탭은 strategy 없이, 전략 탭은 `strategy=<id>` 로 조회해 `total.net_pnl` 을 정수 원으로 보인다. `cost_status` 가 `estimated`/`mixed` 면 「추정」 배지(머리줄 전체에서 「추정」 은 이 배지 한 번뿐이다). 쿼리 = `retry: 0` + `refetchInterval: 5000`(세전 실현 손익과 같은 주기, 위 「테스트 규약」 1 예외).
+- 조회가 실패하면(`isError`) 마지막 성공값을 남기지 않는다 — `order-monitor-net-pnl` 에 「—」, 옆 `order-monitor-net-pnl-error` 에 「조회 실패」(「실현 손익」 이라는 말을 담지 않는다). 첫 조회부터 실패해도 같은 자리에 그린다. 기존 「실현 손익」(세전, 전략별 `daily_realized_pnl` 합산)은 그대로 보인다.
+- 머리줄은 `flex-wrap gap-2` 이고 제목 「주문처리 현황」·「조회 실패」 는 `whitespace-nowrap` 이다 — 좁은 폭(400px)에서 배지 묶음이 다음 줄로 내려가고, 글자 단위로 꺾이지 않는다.
+
+## 세후(net)/세전(gross) 토글 — 실적 화면 공통 (cycle411)
+
+- 모든 실적 화면의 기본 표시는 **세후**(net, 실비용 = 수수료+세금 차감)다. 공유 훅 `utils/costBasis.ts::useCostBasis()` 가 localStorage 키 `autostock.costBasis`(`net`|`gross`)에 선택을 기억하고(read/write 모두 try/catch — 사생활 모드 등 예외에서도 화면은 그려진다), `window` 커스텀 이벤트로 같은 창에 동시에 떠 있는 다른 컴포넌트의 토글도 함께 바꾼다(Context Provider 불필요). 공유 버튼은 `components/CostBasisToggle.tsx`(testid `cost-basis-toggle`, 안의 `세후`/`세전` 버튼 `aria-pressed`). `PerformanceCard`·`ProfitChart` 가 이 토글을 쓴다. net 칸이 없거나(구 서버) `null` 이면(비용 조회 실패 = 「모름」) 세전 값으로 폴백하고, 폴백한 자리에 「세전」 을 밝힌다 — 빈 칸·NaN·「0원」 을 만들지 않는다. 세후 값이 있으면 「세전」 을 달지 않는다.
+- `PerformanceCard` — 누적/일평균 수익률 카드는 `net_total_profit_rate`/`net_avg_daily_profit_rate`(세후, `/api/performance/summary`) 기본, 토글로 `total_profit_rate`/`avg_daily_profit_rate`(세전). 세후 모드인데 그 칸이 `null` 이면(`!= null` 로 거른다) 세전 값을 보이고 **그 카드**에만 「세전」 을 단다. 실현 성과 행(`realized-pnl-*`)도 `realized_net_sum_krw`(세후) 기본 / `realized_sum_krw`(세전) — 세후 칸이 `null` 이면 세전 합 + 「세전」. 승률 줄(`realized-winrate-*`)은 세전 모드에서 `win_rate_gross`·`win_gross`·`loss_gross` 를 쓰고(없으면 세후 값), 세후 모드에서 `win_rate`·`win`·`loss` 를 쓴다.
+- `ProfitChart` — 차트 컨테이너 testid `profit-chart-daily`/`profit-chart-cumulative`(각 `data-series` 속성 = 그리는 dataKey, jsdom 에 SVG 가 안 그려져 테스트가 이 속성으로 확인한다). 세후는 `net_daily_profit_rate`/`net_cumulative_return_rate`, 세전은 `daily_profit_rate`/`cumulative_return_rate`. 세후 모드여도 한 행이라도 net 칸이 없거나 `null` 이면 그 차트 전체를 세전 시리즈로 그린다. 제목과 범례에 실제로 그린 기준(세후/세전)을 적는다 — net 이 빠져 세전으로 그렸으면 「세전」.
 
 ## ScanMonitor
 
@@ -335,8 +344,8 @@ leaf 12개를 **상위 9개**로 묶는다(사용자 지정 묶음·순서 — �
 ## History (`/history`)
 
 두 탭(행 더블클릭 → 종목 차트, 「종목 차트 모달」 절):
-- 주문체결내역: `TradeHistoryGrid`(raw 행)
-- 매매손익: `TradePnLGrid`(`/api/history/pnl` — 매수·매도 페어, closed/open 사이클). 12 컬럼 + 전략 뱃지. open 행은 매도 컬럼 "—" + "(미실현)", emerald-50 배경, 시세 미수신 "(미실현 시세 대기)". 전략 select 7종(kojiro `고지로 대순환` 포함). 상단 실현손익 요약 바 `pnl-summary` — `data.summary`(슬라이스 전 전체 closed 페어 집계)의 실현 합계(`pnl-summary-realized`, 이익 red/손실 blue)·손익율·승/패/보합·승률·전략 필터 라벨. summary 부재 시 0
+- 주문체결내역: `TradeHistoryGrid`(raw 행). SELL 행만 `순손익`(`net_profit_loss`, 정수 원. `cost_status` 가 `estimated`/`mixed` 면 「추정」 배지) 칸을 보이고 BUY 행과 값이 없는 행은 `-`. 기존 `매매손익`(세전) 칸은 그대로.
+- 매매손익: `TradePnLGrid`(`/api/history/pnl` — 매수·매도 페어, closed/open 사이클). 12 컬럼 + 전략 뱃지, 그 뒤로 실비용 6컬럼(수수료·세금·순손익·순손익율·비용률·슬리피지, cycle411) + 전략·AI 자문. open 행은 매도 컬럼 "—" + "(미실현)", emerald-50 배경, 시세 미수신 "(미실현 시세 대기)". 전략 select 7종(kojiro `고지로 대순환` 포함). 상단 실현손익 요약 바 `pnl-summary` — `data.summary`(슬라이스 전 전체 closed 페어 집계)의 실현 합계(`pnl-summary-realized`, 이익 red/손실 blue)·손익율·승/패/보합·승률·전략 필터 라벨 + (summary 에 net 칸이 있으면) 순손익 합(`pnl-summary-net`)·비용 합(`pnl-summary-cost`)·슬리피지 덮인 건수(`pnl-summary-slippage`, `N건`). summary 부재 시 0. summary 의 비용 칸이 `null`(비용 조회 실패 = 「모름」)이면 `pnl-summary-net`·`pnl-summary-cost`·`pnl-summary-slippage` 는 `—` 다(「0원」·「0건」 금지). 원 단위 칸(수수료·세금·순손익·슬리피지·`pnl-summary-cost`)은 정수 원(반올림), 비용률은 소수 1자리 `NN.Nbp`. 행 단위 `cost_status="estimated"/"mixed"` 는 「추정」, `allocated=true` 는 「배분」 배지(`cost-badge-<rowIndex>`) — 정산을 그 페어 혼자 받은 행은 둘 다 없다. `allocated` 는 그 페어 체결이 받은 정산 행이 **페어 밖** 체결에도 나뉘었을 때만 true 다(같은 날 사고 판 단일 페어는 false — 판정 = `src/engine/CLAUDE.md` 의 `cost_overlay.py` 항목). 새 칸이 없는(구 서버) 페어나 `null` 칸은 `—`(NaN·undefined 금지).
 
 ### AI 매수평가 점수 배지 + 상세 팝업
 
@@ -399,6 +408,7 @@ leaf 12개를 **상위 9개**로 묶는다(사용자 지정 묶음·순서 — �
 - **레거시 `findings` 는 정규화하지 않는다**(`log_analysis_engine._validate_report` 가 검증). 대신 `ReportCard` 를 `ReportCardBoundary`(같은 파일, class error boundary, `key={report.id}` 로 전환 시 리셋)로 감싸 예외가 나도 `data-testid="report-card-error"` 카드 하나만 대체된다.
 - **휴장일 배지 (cycle366)**: `report.metrics?.report_accuracy?.market_closed === true` 일 때만 총평 헤더에 회색 배지(`data-testid="report-holiday-badge"`, "휴장일" + 툴팁 "거래·로그 0건은 결함이 아니라 정상"). `report_accuracy` 없는 옛 행·`trading_day: null`("모름")·`market_closed: false` 는 안 그린다. `LogReportMetrics.report_accuracy`(`types/log_reports.ts::LogReportAccuracy`)는 옵셔널.
 - 회귀 = `components/__tests__/DailyReportTab.ext.test.tsx`(파리티·정규화·error boundary 포함) + `DailyReportTab.holiday.test.tsx`
+- **「원본 메트릭 → 거래 통계」 실현손익 라벨 = 「실현손익(세전)」 (cycle411)** — 이 숫자는 그날 저장된 스냅샷(`metrics.trades.realized_pnl`)이라 비용을 빼지 않고 그대로 보이고, 라벨만 세전임을 밝힌다(다른 실적 화면의 net 기본과 다르다).
 
 ## Recommendations (`/recommendations`)
 
@@ -415,7 +425,9 @@ leaf 12개를 **상위 9개**로 묶는다(사용자 지정 묶음·순서 — �
 
 **섹터 컬럼**: 헤더 순서 `종목명 → 섹터 → 거래시장 → (전략) → …`. `Holding.sector`, 없으면 `-`. `data-testid="sector-{ticker}"`. `/api/balance` 가 **이미 조회한 stock_master basics 를 재사용**한다(추가 DB 호출 0) — `sector_naming` 단일 진실원(`bstp_kor_isnm` → `_kojiro_sector_key(master_raw)` → `미분류-{ticker}`).
 
-⚠️ **컬럼을 늘리면 빈 상태 행 `colSpan` 도 고친다** — 지금 `isAll ? 13 : 12`, 회귀가 헤더 수와 대조한다.
+⚠️ **컬럼을 늘리면 빈 상태 행 `colSpan` 도 고친다** — 지금 `isAll ? 16 : 15`, 회귀가 헤더 수와 대조한다.
+
+**예상 매도비용 · 순 평가손익 (cycle411)**: "수익률" 다음. 백엔드가 보유 종목마다 `sell_cost_rate`(수수료율+세율, ETF 는 수수료율만)·`cost_status="estimated"` 를 싣고, 화면이 (WS 실시간 시세로 덮인) 평가금액에 곱한다 — 예상 매도비용 = `round(평가금액 × sell_cost_rate)`, 순 평가손익 = `round(평가손익 − 예상 매도비용 − buy_fee_paid)`(이미 낸 매수 수수료 — 매매손익 표의 페어 net 과 같은 정의). testid `sell-cost-{ticker}`(「추정」 꼬리표 포함) · `net-pl-{ticker}`. `sell_cost_rate` 가 없으면(구 서버) 둘 다 `—`(숫자를 지어내지 않는다). `buy_fee_paid` 가 `null` 이면(비용 조회 실패 = 「모름」) `net-pl-{ticker}` 는 `—` 다(`?? 0` 금지). `buy_fee_paid` 칸 자체가 없는 응답(구 서버)은 매수 수수료를 빼지 않는다. 기존 "평가손익"(세전) 칸은 그대로. 표 루트 `<table>` 에 `whitespace-nowrap` 을 둔다 — `white-space` 는 상속되므로 모든 칸이 줄바꿈하지 않고, 넘치는 폭은 `ScrollPane` 가로 스크롤이 받는다(1280px 에서 한 자씩 꺾여 행이 높아지던 결함 방지).
 
 **손절가 · 목표가 컬럼 (cycle339)**: "현재가" 다음, "평가금액" 앞. 데이터 = Holding 의 `stop_price`/`stop_source`/`target_price`/`target_source`(백엔드 `position_exit_lines` 단일 진실원, 추가 DB 호출 0). testid `stop-price-{ticker}` · `target-price-{ticker}`.
 
@@ -480,9 +492,9 @@ Dashboard `MarketRegimeCard` 바로 아래. 장세와 시장 유닛을 한 카�
 
 ### TE/RR 성과 섹션
 
-4임계 *아래* "성과 (최근 3개월)"(`te-section-{key}`) 5행 — 서적 TE(예지치)/RR비율. 데이터 `GET /api/strategies/te?months=3`(`getStrategyTeRr`, `frontend/src/api/strategies.ts`, `useQuery(['strategy-te',3], retry:1, staleTime:5분)`, `/api/strategies` 폴링과 독립). 타입 `TeRrMetrics`(`strategy.ts`, 백엔드 1:1 19필드).
+4임계 *아래* "성과 (최근 3개월)"(`te-section-{key}`) 5행 — 서적 TE(예지치)/RR비율. 데이터 `GET /api/strategies/te?months=3`(`getStrategyTeRr`, `frontend/src/api/strategies.ts`, `useQuery(['strategy-te',3], retry:1, staleTime:5분)`, `/api/strategies` 폴링과 독립). 타입 `TeRrMetrics`(`strategy.ts`, 백엔드 1:1 29필드 = 기본 19 + 실비용 선택 칸 10).
 
-- A: 배지(`te-verdict-{key}` 우위/열위/판정유보) + TE%(`te-value-{key}`) + 3개월 실현 ₩(`te-realized-{key}`)
+- A: 배지(`te-verdict-{key}` 우위/열위/판정유보) + TE%(`te-value-{key}`) + 3개월 실현 ₩(`te-realized-{key}`, cycle411 — `realized_net_sum_krw`(세후) 기본 + 「세후」 라벨. 그 칸이 없거나 `null` 이면(구 서버·비용 조회 실패) `realized_sum_krw`(세전) + 「세전」 라벨). 판정 지표(TE%·RR·승률·배지)는 **net(세후) 기준**이지만 비용을 못 얹으면 백엔드가 세전으로 계산한다 — 그래서 `realized_net_sum_krw` 가 `null`/없음이면 배지 옆에 `te-pretax-{key}` 「세전」 을 단다(세후 값이 있으면 달지 않는다). 세전 값은 비교용 `*_gross`(`te_pct_gross`/`te_krw_avg_gross`/`win_rate_gross`/`rr_gross`/`verdict_gross`) 로 따로 실리고, 이 섹션은 그것을 그리지 않는다.
 - B: RR 게이지(`rr-gauge-{key}`/`rr-gauge-fill-{key}`/`rr-gauge-marker-{key}`) — 실제RR 채움 + 필요RR 세로 마커. 채움 ≥ 마커 = 우위(이익색) / 미만 = 열위(손실색). 색은 시맨틱 클래스 `bg-pnl-profit`/`bg-pnl-loss`(+ `pnlColorClass`)
 - C: 분해(`te-decomposition-{key}` 승률 W/L·평균수익·평균손실·N) / D: 구조태그(`te-structure-{key}`) / E: 표본캡션(`te-sample-caption-{key}`)
 - **표본 게이트 3분기**: `sample_tier='insufficient'`(N<20) → TE·배지 회색 + "판정 유보" + 게이지·구조 숨김 / `'low'`(20-49)+rr_available → amber "표본 적음" / `'low'`+!rr_available → 게이지 "RR 참고 불가" / `'normal'`(50+) → 정상(single_trade_dominant 시 "RR 과대 가능")

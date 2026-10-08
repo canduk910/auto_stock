@@ -857,3 +857,33 @@ def _reset_price_filter_memory_override():
     _clear_price_filter_memory_override()
     yield
     _clear_price_filter_memory_override()
+
+
+# ---------------------------------------------------------------------------
+# cycle411 2차 보완(F6·F8) — 실비용 leaf 의 프로세스 메모 초기화
+#
+# `src/engine/cost_overlay.py` 는 (1) 서버 오늘(KST) 기준 30일 추정 요율을 **하루 단위 메모리
+# 캐시**에 담고(F8) (2) `[cost_overlay_tax_unallocated]`·`[cost_overlay_unmatched_cost]` 경고를
+# (KST 오늘, trad_dt, pdno) 당 하루 1회로 줄이는 **dedupe 집합**을 둔다(F6). 둘 다 모듈 전역이라
+# 그대로 두면 한 테스트가 채운 요율·경고 이력이 다음 테스트의 기대값을 바꾼다(같은 날짜로 도는
+# 테스트끼리 섞인다). 매 테스트 전·후로 `cost_overlay._reset_cache_for_tests()` 를 부른다.
+# 이미 import 된 경우에만 부른다 — 이 픽스처가 모든 테스트에 leaf import 를 끌고 오지 않게 한다.
+# Red 단계(함수 미존재)에서는 아무것도 하지 않는다(`getattr` 폴백).
+# ---------------------------------------------------------------------------
+def _reset_cost_overlay_memo_now() -> None:
+    mod = sys.modules.get("src.engine.cost_overlay")
+    if mod is None:
+        return
+    reset = getattr(mod, "_reset_cache_for_tests", None)
+    if callable(reset):
+        try:
+            reset()
+        except Exception:
+            pass
+
+
+@pytest.fixture(autouse=True)
+def _reset_cost_overlay_memo():
+    _reset_cost_overlay_memo_now()
+    yield
+    _reset_cost_overlay_memo_now()

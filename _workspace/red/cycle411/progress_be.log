@@ -1,0 +1,3 @@
+08:37 backend-dev 시작 — 명세/계약 읽음
+08:45 순수함수(cost_overlay.py)·allocate_rows·te_metrics·DB 2건 — 전부 Green. 라우트 착수
+09:02 라우트 7곳(daily/summary/history/pnl/te/costs today·daily/balance) 전부 Green — Red 57/57 통과. 전체 스위트 돌입

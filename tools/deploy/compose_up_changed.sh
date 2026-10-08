@@ -126,6 +126,11 @@ FRONTEND_RE='^(frontend/|tools/ops/tls_stage2/)'
 # 구분해 `--no-deps` 대상 서비스 목록을 정확히 고르기 위해서다(아래 서비스 목록
 # 일반화 참조).
 MACRO_RE='^macro/'
+# cycle412 — 거래일지 워커(사용자 결정 E1a). `journal_worker/` 는 독립 이미지(빌드 컨텍스트
+# `./journal_worker`, `src` import 0)라 backend 이미지 입력이 아니다(BACKEND_RE 에 넣지
+# 않는다 — 넣으면 워커만 고칠 때마다 매매 backend 가 재시작된다). frontend·macro 와 같은
+# 방식으로 별도 축으로 둔다.
+JOURNAL_RE='^journal_worker/'
 
 # cycle322 (사용자 결정 D2) — backend 축에 걸리지만 **이미지에는 안 들어가는** 경로.
 # `src/**` 는 확장자 무관 이미지 입력이라 `src/db/CLAUDE.md` 한 줄이 full 을 불러 매매
@@ -204,37 +209,51 @@ else
     fi
 fi
 
-# cycle303 — 서비스 목록 일반화. backend 축(BACKEND_RE)은 cycle248 과 완전히 동일하게
-# "하나라도 있으면 full" 이다. backend 가 아닌 나머지는 SERVICES 배열로 모아 하나의
-# `--no-deps` 라인을 공유한다(frontend/macro/frontend+macro 3가지 조합).
+# cycle303 — 서비스 목록 일반화, cycle412 — journal 축 추가로 조합을 더 일반화. backend
+# 축(BACKEND_RE)은 cycle248 과 완전히 동일하게 "하나라도 있으면 full" 이다. backend 가
+# 아닌 나머지는 SERVICES 배열(docker compose 서비스 이름)로 모아 하나의 `--no-deps`
+# 라인을 공유한다. AXES 배열은 같은 순서로 **축 이름**(mode/reason 문구용 — journal 축의
+# 서비스 이름은 `journal_worker` 지만 축 이름은 `journal`)을 모은다.
 # ⚠️ `set -e` 아래서 `[ -n "$X" ] && ARR+=(x)` 는 조건이 거짓일 때(= 히트 없음) 그 라인의
 # 종료코드가 1 이 되어 스크립트 전체가 죽는다(`&&` 단축평가 실패가 `set -e` 트리거) —
 # 그래서 반드시 `if … then … fi` 로 쓴다.
 SERVICES=()
+AXES=()
 if [ -z "$MODE" ]; then
     # cycle322 — backend 축에 걸린 뒤 **이미지에 안 들어가는 경로만** 덜어낸다(`grep -vE`).
     # ERE 에는 부정 전방탐색이 없어 BACKEND_RE 안에 negation 을 넣을 수 없다 — 그래서 2단이다.
     BACKEND_HITS="$(printf '%s\n' "$CHANGED" | grep -E "$BACKEND_RE" | grep -vE "$IMAGE_EXCLUDED_RE" || true)"
     FRONTEND_HITS="$(printf '%s\n' "$CHANGED" | grep -E "$FRONTEND_RE" || true)"
     MACRO_HITS="$(printf '%s\n' "$CHANGED" | grep -E "$MACRO_RE" || true)"
+    JOURNAL_HITS="$(printf '%s\n' "$CHANGED" | grep -E "$JOURNAL_RE" || true)"
     if [ -n "$BACKEND_HITS" ]; then
         MODE="full"; REASON="backend_inputs_changed"
     else
         if [ -n "$FRONTEND_HITS" ]; then
-            SERVICES+=(frontend)
+            SERVICES+=(frontend); AXES+=(frontend)
         fi
         if [ -n "$MACRO_HITS" ]; then
-            SERVICES+=(macro)
+            SERVICES+=(macro); AXES+=(macro)
         fi
-        case "${#SERVICES[@]}" in
+        if [ -n "$JOURNAL_HITS" ]; then
+            SERVICES+=(journal_worker); AXES+=(journal)
+        fi
+        case "${#AXES[@]}" in
             0)
                 MODE="none"; REASON="no_image_inputs_changed"
                 ;;
             1)
-                MODE="${SERVICES[0]}"; REASON="${SERVICES[0]}_only"
+                MODE="${AXES[0]}"; REASON="${AXES[0]}_only"
                 ;;
             *)
-                MODE="frontend+macro"; REASON="frontend_and_macro_only"
+                # 조합(2개 이상) — MODE 는 `+` 로, REASON 은 `_and_` 로 이어 `_only` 를 붙인다.
+                # IFS 트릭은 한 글자 구분자만 되므로 MODE 는 그걸로 충분하고, REASON 은 루프.
+                MODE="$(IFS=+; echo "${AXES[*]}")"
+                REASON="${AXES[0]}"
+                for ax in "${AXES[@]:1}"; do
+                    REASON="${REASON}_and_${ax}"
+                done
+                REASON="${REASON}_only"
                 ;;
         esac
     fi
@@ -268,16 +287,18 @@ case "$MODE" in
         # 빌드 없는 up = 구성 일치 시 Running(재생성 0), 죽어 있던 컨테이너만 기동.
         run docker compose "${COMPOSE_FILE_ARGS[@]}" up -d --remove-orphans
         ;;
-    frontend|macro|"frontend+macro")
-        # --no-deps 가 계약이다: 빼면 depends_on(backend/macro) 까지 --build 대상이 돼
-        # backend 가 재생성된다(실측, cycle248). SERVICES 는 FRONTEND_HITS/MACRO_HITS
-        # 로만 채워진다(위 분류 블록) — backend 가 이 목록에 들어갈 길이 **구조적으로
-        # 없다**: backend 히트가 하나라도 있으면 그 즉시 MODE=full 로 확정되어 이
-        # 분기 자체에 도달하지 않는다.
-        run docker compose "${COMPOSE_FILE_ARGS[@]}" up --build -d --remove-orphans --no-deps "${SERVICES[@]}"
-        ;;
     *)
-        log "internal error: unknown mode '$MODE'"; exit 2
+        # --no-deps 가 계약이다: 빼면 depends_on(backend/macro) 까지 --build 대상이 돼
+        # backend 가 재생성된다(실측, cycle248). SERVICES 는 FRONTEND_HITS/MACRO_HITS/
+        # JOURNAL_HITS 로만 채워진다(위 분류 블록) — backend 가 이 목록에 들어갈 길이
+        # **구조적으로 없다**: backend 히트가 하나라도 있으면 그 즉시 MODE=full 로
+        # 확정되어 이 분기 자체에 도달하지 않는다. MODE 가 full/none 이 아니면(위에서
+        # 이미 걸러짐) 여기 오고, 그때 SERVICES 는 항상 1개 이상이다(AXES 가 비어 있으면
+        # MODE=none 으로 확정되므로 이 분기에 올 때 SERVICES 가 빈 경우는 구조적으로 없다).
+        if [ "${#SERVICES[@]}" -eq 0 ]; then
+            log "internal error: unknown mode '$MODE'"; exit 2
+        fi
+        run docker compose "${COMPOSE_FILE_ARGS[@]}" up --build -d --remove-orphans --no-deps "${SERVICES[@]}"
         ;;
 esac
 
