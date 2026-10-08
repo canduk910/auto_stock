@@ -36,10 +36,12 @@ export default function OrderMonitor({ selectedStrategy }: Props) {
 
   // cycle411 — 오늘 실현 순손익(추정). scheduler 무접촉 경로(`GET /api/costs/today`).
   // 조회 실패여도 기존 「실현 손익」(세전)은 그대로 보인다(OM4) — 이 쿼리는 그 옆에 덧붙일 뿐.
+  // cycle411b M6 — 세전 실현손익(`/api/trading/status`)과 같은 주기(5초)로 다시 읽는다.
   const { data: costsToday } = useQuery({
     queryKey: ['costsToday', isAll ? undefined : selectedStrategy],
     queryFn: () => getCostsToday(isAll ? undefined : selectedStrategy),
     retry: 1,
+    refetchInterval: 5000,
   })
   const costsEstimated = costsToday?.cost_status === 'estimated' || costsToday?.cost_status === 'mixed'
 
@@ -66,7 +68,7 @@ export default function OrderMonitor({ selectedStrategy }: Props) {
                 data-testid="order-monitor-net-pnl"
                 className={costsToday.total.net_pnl >= 0 ? 'text-red-500' : 'text-blue-500'}
               >
-                {formatPrice(costsToday.total.net_pnl)}원
+                {formatPrice(Math.round(costsToday.total.net_pnl))}원
                 {costsEstimated && (
                   <span className="ml-1 px-1 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-700">
                     추정

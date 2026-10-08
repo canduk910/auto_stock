@@ -359,18 +359,28 @@ export default function BalanceTable({ selectedStrategy }: Props) {
                         '—'
                       )}
                     </td>
-                    <td
-                      data-testid={`net-pl-${h.ticker}`}
-                      className={`px-4 py-3 text-right font-medium ${
-                        h.sell_cost_rate != null
-                          ? profitColor(h.eval_profit_loss - Math.round(h.eval_amount * h.sell_cost_rate))
-                          : 'text-gray-500'
-                      }`}
-                    >
-                      {h.sell_cost_rate != null
-                        ? formatKRW(h.eval_profit_loss - Math.round(h.eval_amount * h.sell_cost_rate)) + '원'
-                        : '—'}
-                    </td>
+                    {(() => {
+                      // cycle411b M1 — 순 평가손익 = 평가손익 − 예상 매도비용 − 이미 낸 매수 수수료.
+                      // buy_fee_paid 가 없는(구 서버) 응답은 기존 식 그대로(BB2).
+                      if (h.sell_cost_rate == null) {
+                        return (
+                          <td data-testid={`net-pl-${h.ticker}`} className="px-4 py-3 text-right font-medium text-gray-500">
+                            —
+                          </td>
+                        )
+                      }
+                      const sellCost = Math.round(h.eval_amount * h.sell_cost_rate)
+                      const buyFee = h.buy_fee_paid ?? 0
+                      const netPl = Math.round(h.eval_profit_loss - sellCost - buyFee)
+                      return (
+                        <td
+                          data-testid={`net-pl-${h.ticker}`}
+                          className={`px-4 py-3 text-right font-medium ${profitColor(netPl)}`}
+                        >
+                          {formatKRW(netPl)}원
+                        </td>
+                      )
+                    })()}
                     <td className="px-4 py-3 text-center">
                       <button
                         onClick={() => setSellTarget({

@@ -29,7 +29,6 @@ export default function ProfitChart({ selectedStrategy }: Props) {
   // cycle411 — 세후 기본 + 세전 토글. 화면 공통(PerformanceCard 와 상태 공유).
   const [costBasis, setCostBasis] = useCostBasis()
   const isNet = costBasis === 'net'
-  const basisLabel = isNet ? '세후' : '세전'
 
   // 당일 수익률 — 최근 40일
   const { data: daily, isLoading: dailyLoading } = useQuery({
@@ -46,12 +45,20 @@ export default function ProfitChart({ selectedStrategy }: Props) {
   const hasDaily = !!daily && daily.length > 0
   const hasCumulative = !!cumulative && cumulative.length > 0
 
-  // net 칸이 없는(구 서버) 응답은 세전 칸으로 폴백한다.
-  const hasNetDaily = hasDaily && daily!.every((d) => d.net_daily_profit_rate !== undefined)
+  // net 칸이 없거나(구 서버) null(비용 조회 실패, cycle411b M4)이면 세전 칸으로 폴백한다.
+  const hasNetDaily =
+    hasDaily && daily!.every((d) => d.net_daily_profit_rate !== undefined && d.net_daily_profit_rate !== null)
   const hasNetCumulative =
-    hasCumulative && cumulative!.every((d) => d.net_cumulative_return_rate !== undefined)
-  const dailyKey = isNet && hasNetDaily ? 'net_daily_profit_rate' : 'daily_profit_rate'
-  const cumulativeKey = isNet && hasNetCumulative ? 'net_cumulative_return_rate' : 'cumulative_return_rate'
+    hasCumulative &&
+    cumulative!.every(
+      (d) => d.net_cumulative_return_rate !== undefined && d.net_cumulative_return_rate !== null,
+    )
+  const useNetDaily = isNet && hasNetDaily
+  const useNetCumulative = isNet && hasNetCumulative
+  const dailyKey = useNetDaily ? 'net_daily_profit_rate' : 'daily_profit_rate'
+  const cumulativeKey = useNetCumulative ? 'net_cumulative_return_rate' : 'cumulative_return_rate'
+  const dailyBasisLabel = useNetDaily ? '세후' : '세전'
+  const cumulativeBasisLabel = useNetCumulative ? '세후' : '세전'
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -60,7 +67,7 @@ export default function ProfitChart({ selectedStrategy }: Props) {
       </div>
       <div className="bg-white rounded-lg shadow p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          당일 수익률 (실현손익 기준, 최근 {DAILY_DAYS}일 · {basisLabel})
+          당일 수익률 (실현손익 기준, 최근 {DAILY_DAYS}일 · {dailyBasisLabel})
         </h3>
         {dailyLoading ? (
           <p className="text-gray-500">로딩 중...</p>
@@ -74,7 +81,7 @@ export default function ProfitChart({ selectedStrategy }: Props) {
                 <XAxis dataKey="date" fontSize={12} />
                 <YAxis fontSize={12} unit="%" />
                 <Tooltip formatter={(v) => Number(v).toFixed(2) + '%'} />
-                <Bar dataKey={dailyKey} name={`당일 수익률(${basisLabel})`}>
+                <Bar dataKey={dailyKey} name={`당일 수익률(${dailyBasisLabel})`}>
                   {daily!.map((d, i) => (
                     <Cell
                       key={i}
@@ -90,7 +97,7 @@ export default function ProfitChart({ selectedStrategy }: Props) {
 
       <div className="bg-white rounded-lg shadow p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          누적 수익률 (TWR 복리, 최근 6개월 · {basisLabel})
+          누적 수익률 (TWR 복리, 최근 6개월 · {cumulativeBasisLabel})
         </h3>
         {cumLoading ? (
           <p className="text-gray-500">로딩 중...</p>
@@ -110,7 +117,7 @@ export default function ProfitChart({ selectedStrategy }: Props) {
                   stroke={PROFIT_COLOR}
                   strokeWidth={2}
                   dot={false}
-                  name={`누적 수익률(${basisLabel})`}
+                  name={`누적 수익률(${cumulativeBasisLabel})`}
                 />
               </LineChart>
             </ResponsiveContainer>

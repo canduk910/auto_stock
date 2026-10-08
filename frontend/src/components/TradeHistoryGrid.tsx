@@ -186,8 +186,9 @@ function makeColumns(
       cell: (info) => {
         const row = info.row.original
         if (String(row.trade_type ?? '') !== 'SELL') return '-'
-        const n = toNum(row.net_profit_loss)
-        if (n === null) return '-'
+        const raw = toNum(row.net_profit_loss)
+        if (raw === null) return '-'
+        const n = Math.round(raw)
         const cls = n > 0 ? 'text-red-600' : n < 0 ? 'text-blue-600' : 'text-gray-700'
         const sign = n > 0 ? '+' : ''
         const estimated = row.cost_status === 'estimated' || row.cost_status === 'mixed'

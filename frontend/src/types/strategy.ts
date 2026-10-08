@@ -97,6 +97,8 @@ export interface TeRrMetrics {
   te_pct_gross?: number
   te_krw_avg_gross?: number
   win_rate_gross?: number
+  win_gross?: number
+  loss_gross?: number
   rr_gross?: number | null
   verdict_gross?: 'undecided' | 'superior' | 'inferior' | 'flat'
   realized_net_sum_krw?: number

@@ -30,9 +30,10 @@ function fmtDate(d: string | null): string {
   return y && m && dd ? `${y.slice(2)}-${m}-${dd}` : d
 }
 
+// cycle411b L1 — 원 단위는 정수(반올림) + 접미사. 원래 수량/가격도 정수라 영향 없다.
 function fmtNum(n: number | null | undefined, suffix = ''): string {
   if (n === null || n === undefined || !Number.isFinite(n)) return '—'
-  return n.toLocaleString() + suffix
+  return Math.round(n).toLocaleString() + suffix
 }
 
 function pnlClass(v: number | null | undefined): string {
@@ -54,10 +55,10 @@ function fmtSignedPct(v: number | null | undefined): string {
   return sign + v.toFixed(2) + '%'
 }
 
-// 비용률 "23.01bp" 형식.
+// 비용률 "23.0bp" 형식(cycle411b L1 — 소수 1자리).
 function fmtBp(v: number | null | undefined): string {
   if (v === null || v === undefined || !Number.isFinite(v)) return '—'
-  return v.toFixed(2) + 'bp'
+  return v.toFixed(1) + 'bp'
 }
 
 /** `cost_status`/`allocated` 배지 — 「추정」/「배분」, 정산·단독 행은 둘 다 없다(G3). */
@@ -160,11 +161,11 @@ function makeColumns(
   // cycle411 — 실비용(수수료·세금) 합친 칸 6개. 기존 매매손익·손익율(세전)은 위에서 유지.
   columnHelper.accessor('fee', {
     header: '수수료',
-    cell: (info) => fmtNum(info.getValue()),
+    cell: (info) => fmtNum(info.getValue(), '원'),
   }),
   columnHelper.accessor('tax', {
     header: '세금',
-    cell: (info) => fmtNum(info.getValue()),
+    cell: (info) => fmtNum(info.getValue(), '원'),
   }),
   columnHelper.display({
     id: 'net_profit_loss',
@@ -413,7 +414,10 @@ export default function TradePnLGrid() {
           <span>
             비용(수수료+세금){' '}
             <span data-testid="pnl-summary-cost">
-              {fmtNum((summary.fee_sum ?? 0) + (summary.tax_sum ?? 0), '원')}
+              {/* cycle411b M4 — 비용 조회 실패(null)는 모름 — 0원 금지 */}
+              {summary.fee_sum === null || summary.tax_sum === null
+                ? '—'
+                : fmtNum((summary.fee_sum ?? 0) + (summary.tax_sum ?? 0), '원')}
             </span>
           </span>
         )}

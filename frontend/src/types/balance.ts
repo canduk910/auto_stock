@@ -35,6 +35,10 @@ export interface Holding {
   // (실시간 현재가로 덮인) 평가금액에 곱한다. 없으면(구 서버) 화면은 `—` 를 그린다.
   sell_cost_rate?: number | null
   cost_status?: 'settled' | 'estimated' | 'mixed' | null
+  // cycle411b M1 — 이미 낸 매수 수수료(정산 실측 있으면 실측, 없으면 추정). 없으면(구 서버)
+  // 화면은 기존 식(평가손익 − 예상 매도비용)을 그대로 쓴다.
+  buy_fee_paid?: number | null
+  buy_fee_status?: 'settled' | 'estimated' | 'mixed' | null
 }
 
 export interface BalanceSummary {

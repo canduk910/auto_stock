@@ -32,7 +32,7 @@ export interface CostDailyDay {
   tax: number
   slippage_won: number | null
   slippage_n: number
-  cost_status: CostStatus
+  cost_status: CostStatus | null
 }
 
 export interface CostDailyData {

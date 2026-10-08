@@ -272,11 +272,12 @@ export interface TradePair {
   sell_order_nos: string[]
   pair_key: string | null
   // cycle411 — 실비용 합친 칸(배분·추정 포함). 구 서버는 전부 undefined.
-  fee?: number
-  tax?: number
-  net_profit_loss?: number
-  net_profit_rate?: number
-  cost_bp?: number
+  // cycle411b M4 — 비용 조회 실패는 null(「모름」, 0 과 다르다).
+  fee?: number | null
+  tax?: number | null
+  net_profit_loss?: number | null
+  net_profit_rate?: number | null
+  cost_bp?: number | null
   slippage_won?: number | null
   cost_status?: 'settled' | 'estimated' | 'mixed'
   allocated?: boolean
@@ -293,10 +294,11 @@ export interface TradePnLSummary {
   win_rate_pct: number
   closed_count: number
   // cycle411
-  fee_sum?: number
-  tax_sum?: number
-  realized_net_total_krw?: number
-  realized_net_rate_pct?: number
+  // cycle411b M4 — 비용 조회 실패는 null(「모름」, 0 과 다르다).
+  fee_sum?: number | null
+  tax_sum?: number | null
+  realized_net_total_krw?: number | null
+  realized_net_rate_pct?: number | null
   slippage_n?: number
 }
 

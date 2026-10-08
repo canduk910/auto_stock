@@ -205,9 +205,21 @@ export default function PerformanceCard({ selectedStrategy }: Props) {
                           </span>
                         )
                       })()}
-                      <span data-testid={`realized-winrate-${m.strategy_id}`} className="text-xs text-gray-500">
-                        승률 {(m.win_rate * 100).toFixed(0)}% (승{m.win}/패{m.loss})
-                      </span>
+                      {(() => {
+                        // cycle411b M5 — 세전 모드는 win_rate_gross·win_gross·loss_gross (없으면 세후 값 폴백).
+                        const winRate =
+                          !isNet && m.win_rate_gross !== undefined ? m.win_rate_gross : m.win_rate
+                        const win = !isNet && m.win_gross !== undefined ? m.win_gross : m.win
+                        const loss = !isNet && m.loss_gross !== undefined ? m.loss_gross : m.loss
+                        return (
+                          <span
+                            data-testid={`realized-winrate-${m.strategy_id}`}
+                            className="text-xs text-gray-500"
+                          >
+                            승률 {(winRate * 100).toFixed(0)}% (승{win}/패{loss})
+                          </span>
+                        )
+                      })()}
                     </div>
                   )}
                 </div>
