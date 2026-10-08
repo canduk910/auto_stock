@@ -2,14 +2,61 @@
 
 from __future__ import annotations
 
+import logging
+from datetime import date, datetime
 from decimal import Decimal
 
 from fastapi import APIRouter, Query
 
+from src.db import trade_cost as trade_cost_db
 from src.db.trade_history import get_trade_pairs, get_trades
+from src.engine import cost_overlay
 from src.models.response import ApiResponse
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter(prefix="/api/history", tags=["history"])
+
+
+def _trade_date(ts) -> date | None:
+    """`timestamp`(KST ISO 문자열, `_TS_SELECT`)에서 KST 날짜만 뽑는다."""
+    if not ts:
+        return None
+    try:
+        s = str(ts).replace("Z", "+00:00")
+        return datetime.fromisoformat(s).date()
+    except (TypeError, ValueError):
+        return None
+
+
+async def _overlay_trade_costs(trades: list[dict]) -> None:
+    """체결 행마다 `fee`·`tax`·`net_profit_loss`·`cost_status` 를 얹는다(cycle411).
+
+    비용 조회가 실패하면 기존 칸만 남기고 새 칸은 건너뛴다(사용자 결정 10-08 §2 —
+    `[cost_overlay_unavailable]`, 기존 응답 200 유지).
+    """
+    dated = [(_trade_date(t.get("timestamp")), t) for t in trades]
+    dates = [d for d, _ in dated if d]
+    if not dates:
+        return
+    try:
+        cost_rows = await trade_cost_db.get_daily_range(min(dates), max(dates))
+    except Exception:
+        logger.warning("[cost_overlay_unavailable] /api/history 실비용 조회 실패", exc_info=True)
+        return
+
+    rates = cost_overlay.estimate_rates(cost_rows)
+    tagged = [{**t, "trade_date": d} for d, t in dated if d]
+    costs = cost_overlay.trade_costs(cost_rows, tagged, rates)
+    for t in trades:
+        c = costs.get(t.get("id"))
+        if c is None:
+            continue
+        t["fee"] = c["fee"]
+        t["cost_status"] = c["cost_status"]
+        if str(t.get("trade_type") or "").upper() == "SELL":
+            t["tax"] = c["tax"]
+            t["net_profit_loss"] = float(t.get("profit_loss") or 0.0) - c["fee"] - c["tax"]
 
 
 @router.get("", response_model=ApiResponse)
@@ -36,6 +83,8 @@ async def trade_history(
         # 형제 경로 `/api/history/pnl` 은 `get_trade_pairs` 가 `float()` 로 캐스트해 이미 숫자다.
         for key in [k for k, v in trade.items() if isinstance(v, Decimal)]:
             trade[key] = float(trade[key])
+
+    await _overlay_trade_costs(trades)
 
     return ApiResponse(
         success=True,
@@ -69,8 +118,10 @@ async def trade_pnl(
         if not p.get("ticker_name"):
             p["ticker_name"] = ticker_names.get(p.get("ticker", ""), "")
 
+    trades_by_id = await cost_overlay.overlay_pairs(pairs)
+
     total = len(pairs)
-    summary = _build_pnl_summary(pairs)
+    summary = _build_pnl_summary(pairs, trades_by_id)
     offset = (page - 1) * size
     sliced = pairs[offset:offset + size]
 
@@ -87,11 +138,16 @@ async def trade_pnl(
     )
 
 
-def _build_pnl_summary(pairs: list[dict]) -> dict:
+def _build_pnl_summary(pairs: list[dict], trades_by_id: dict[int, dict] | None = None) -> dict:
     """전체 pairs(슬라이스 전) 중 closed 만 집계한 실현손익 요약.
 
     open 페어는 미실현(profit_loss None 가능) 이므로 제외한다.
     Decimal/float 혼용 대비 최종 값은 float 로 정규화한다.
+
+    cycle411 — `fee_sum`·`tax_sum`·`realized_net_total_krw`·`realized_net_rate_pct`(closed
+    페어 기준) · `slippage_n`(closed 페어가 가리키는 체결 행 중 `order_price` 덮인 수).
+    비용 조회가 실패했으면(`trades_by_id is None`) 페어에 `fee` 칸이 없어 둘 다 0 으로 뜬다
+    (F1 — 기존 칸만 유지, 새 칸은 비거나 0).
     """
     closed = [p for p in pairs if p.get("status") == "closed"]
 
@@ -100,6 +156,9 @@ def _build_pnl_summary(pairs: list[dict]) -> dict:
     win_count = 0
     loss_count = 0
     even_count = 0
+    fee_sum = 0.0
+    tax_sum = 0.0
+    realized_net_total = 0.0
 
     for p in closed:
         profit_loss = float(p.get("profit_loss") or 0)
@@ -111,10 +170,31 @@ def _build_pnl_summary(pairs: list[dict]) -> dict:
             loss_count += 1
         else:
             even_count += 1
+        if "fee" in p:
+            fee_sum += float(p.get("fee") or 0.0)
+        if "tax" in p:
+            tax_sum += float(p.get("tax") or 0.0)
+        if "net_profit_loss" in p:
+            realized_net_total += float(p.get("net_profit_loss") or 0.0)
 
     realized_rate_pct = round(realized_total / buy_amount_total * 100, 2) if buy_amount_total else 0.0
+    realized_net_rate_pct = (
+        round(realized_net_total / buy_amount_total * 100, 2) if buy_amount_total else 0.0
+    )
     win_loss_total = win_count + loss_count
     win_rate_pct = round(win_count / win_loss_total * 100, 1) if win_loss_total else 0.0
+
+    slippage_n = 0
+    if trades_by_id:
+        seen: set[int] = set()
+        for p in closed:
+            for i in list(p.get("buy_trade_ids") or []) + list(p.get("sell_trade_ids") or []):
+                if i in seen:
+                    continue
+                seen.add(i)
+                t = trades_by_id.get(i)
+                if t and t.get("order_price") is not None:
+                    slippage_n += 1
 
     return {
         "realized_total_krw": realized_total,
@@ -124,4 +204,9 @@ def _build_pnl_summary(pairs: list[dict]) -> dict:
         "even_count": even_count,
         "win_rate_pct": win_rate_pct,
         "closed_count": len(closed),
+        "fee_sum": fee_sum,
+        "tax_sum": tax_sum,
+        "realized_net_total_krw": realized_net_total,
+        "realized_net_rate_pct": realized_net_rate_pct,
+        "slippage_n": slippage_n,
     }

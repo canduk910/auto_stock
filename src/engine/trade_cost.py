@@ -91,9 +91,20 @@ def _share(part: Decimal, whole: Decimal) -> Decimal:
     return part / whole if whole else Decimal(0)
 
 
-def attribute(cost_rows: list[dict], trades: list[dict]) -> list[dict]:
-    """정산 행을 전략으로 나눈다 — 행마다 (날짜, 종목, 전략) 1행씩."""
-    sides: dict[tuple[date, str], dict[str, dict[str, Decimal]]] = defaultdict(
+def allocate_rows(cost_rows: list[dict], trades: list[dict], key: str = "strategy") -> list[dict]:
+    """정산 행을 `key` 단위로 나눈다 — 행마다 (날짜, 종목, `key` 값) 1행씩 (cycle411 일반화).
+
+    `key="strategy"` 는 기존 `attribute()` 와 **결과가 같다**(행위 보존 — `test_a1`). `key="id"`
+    는 체결 행 단위로 나눠 수수료는 체결금액 비율, 세금·실현손익은 매도 체결금액 비율로 쪼갠다
+    (`src/engine/cost_overlay.py::trade_costs` 의 입력). `key` 는 trades 행의 키 이름이고,
+    `"strategy"` 만 `UNATTRIBUTED` 폴백이 있다(다른 키는 값이 그대로 들어간다).
+    """
+    def group_val(t: dict):
+        if key == "strategy":
+            return t.get("strategy") or UNATTRIBUTED
+        return t.get(key)
+
+    sides: dict[tuple[date, str], dict] = defaultdict(
         lambda: defaultdict(lambda: {"BUY": Decimal(0), "SELL": Decimal(0)})
     )
     for t in trades:
@@ -101,27 +112,28 @@ def attribute(cost_rows: list[dict], trades: list[dict]) -> list[dict]:
         if side not in ("BUY", "SELL"):
             continue
         amt = _dec(t.get("price")) * _dec(t.get("quantity"))
-        sides[(t["trade_date"], str(t.get("ticker") or ""))][t.get("strategy") or UNATTRIBUTED][side] += amt
+        sides[(t["trade_date"], str(t.get("ticker") or ""))][group_val(t)][side] += amt
 
     out: list[dict] = []
     for c in cost_rows:
-        by_strategy = {s: v for s, v in sides.get((c["trad_dt"], c["pdno"]), {}).items()
-                       if v["BUY"] + v["SELL"] > 0}
+        by_group = {g: v for g, v in sides.get((c["trad_dt"], c["pdno"]), {}).items()
+                    if v["BUY"] + v["SELL"] > 0}
         vals = {k: _dec(c.get(k)) for k in ("buy_amt", "sll_amt", "fee", "tl_tax", "rlzt_pfls")}
-        if not by_strategy:
-            out.append({"trad_dt": c["trad_dt"], "pdno": c["pdno"], "strategy": UNATTRIBUTED,
+        if not by_group:
+            out.append({"trad_dt": c["trad_dt"], "pdno": c["pdno"],
+                        key: UNATTRIBUTED if key == "strategy" else None,
                         **{k: float(v) for k, v in vals.items()}, "estimated": False})
             continue
-        buy_tot = sum((v["BUY"] for v in by_strategy.values()), Decimal(0))
-        sell_tot = sum((v["SELL"] for v in by_strategy.values()), Decimal(0))
+        buy_tot = sum((v["BUY"] for v in by_group.values()), Decimal(0))
+        sell_tot = sum((v["SELL"] for v in by_group.values()), Decimal(0))
         all_tot = buy_tot + sell_tot
-        estimated = len(by_strategy) > 1
-        for s, v in sorted(by_strategy.items()):
+        estimated = len(by_group) > 1
+        for g, v in sorted(by_group.items()):
             total_share = _share(v["BUY"] + v["SELL"], all_tot)
             sell_share = _share(v["SELL"], sell_tot) if sell_tot else total_share
             buy_share = _share(v["BUY"], buy_tot) if buy_tot else total_share
             out.append({
-                "trad_dt": c["trad_dt"], "pdno": c["pdno"], "strategy": s,
+                "trad_dt": c["trad_dt"], "pdno": c["pdno"], key: g,
                 "buy_amt": float(vals["buy_amt"] * buy_share),
                 "sll_amt": float(vals["sll_amt"] * sell_share),
                 "fee": float(vals["fee"] * total_share),
@@ -130,6 +142,15 @@ def attribute(cost_rows: list[dict], trades: list[dict]) -> list[dict]:
                 "estimated": estimated,
             })
     return out
+
+
+def attribute(cost_rows: list[dict], trades: list[dict]) -> list[dict]:
+    """정산 행을 전략으로 나눈다 — 행마다 (날짜, 종목, 전략) 1행씩.
+
+    `allocate_rows(cost_rows, trades, key="strategy")` 와 동일(행위 보존, cycle411 — 일반화는
+    `allocate_rows` 가 하고 이 함수는 기존 호출부를 위해 남긴다).
+    """
+    return allocate_rows(cost_rows, trades, key="strategy")
 
 
 def _bp(num: float, den: float) -> float | None:

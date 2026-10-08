@@ -414,6 +414,10 @@ _ENGINE_PY_FILES: dict[str, tuple[str, ...]] = {
         # 대칭, 8영역 import 0). 등재해도 "다음 신규 파일" 은 여전히 붉어진다(이름 축 가드는
         # 변경 없음).
         "buying_reconcile.py",
+        # cycle411(실비용 합치기, 사용자 결정 10-08) — 실적 화면 수수료·세금 overlay
+        # 순수 함수 + async 어댑터 leaf. 8영역·scheduler import 0(`test_cycle411_ast_scope.py`).
+        # 등재해도 "다음 신규 파일" 은 여전히 붉어진다(이름 축 가드는 변경 없음).
+        "cost_overlay.py",
         # cycle386 — 부팅 prepare 직전 전일 「잠정 봉」(20:30 적재의 애프터마켓 종가·고저)을
         # KIS 확정값으로 덮는 leaf. 8영역·scheduler·scanner·boot_manager·strategies import 0.
         # 등재해도 "다음 신규 파일" 은 여전히 붉어진다(이름 축 가드는 변경 없음).

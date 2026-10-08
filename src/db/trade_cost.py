@@ -132,3 +132,27 @@ async def get_completed_trades(start: date, end: date) -> list[dict]:
         lo, hi,
     )
 
+
+async def get_trades_by_status(
+    start: date, end: date, statuses: list[str] | tuple[str, ...] = ("COMPLETED", "PARTIAL"),
+) -> list[dict]:
+    """`trade_history` 행 — `status` 를 `ANY($n::text[])` 로 받는다(가산형, cycle411).
+
+    `get_completed_trades` 와 달리 `id`·`ticker_name`·`order_price`·`status` 를 함께 읽는다 —
+    실비용 체결 행 단위 귀속(`src/engine/cost_overlay.py::trade_costs`)의 입력. 체결일은 여기도
+    **KST** 날짜(`trade_date`).
+    """
+    lo, hi = _kst_bounds(to_date(start), to_date(end))
+    return await pg.fetch(
+        """
+        SELECT id, (timestamp AT TIME ZONE 'Asia/Seoul')::date AS trade_date,
+               ticker, ticker_name, trade_type, strategy, price, quantity,
+               COALESCE(profit_loss, 0) AS profit_loss, COALESCE(order_no, '') AS order_no,
+               order_price, status
+        FROM trade_history
+        WHERE status = ANY($1::text[]) AND timestamp >= $2 AND timestamp < $3
+        ORDER BY timestamp
+        """,
+        list(statuses), lo, hi,
+    )
+

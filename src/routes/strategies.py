@@ -16,6 +16,7 @@ from src.db import system_config as _system_config
 from src.db._kst import KST
 from src.db.system_config import get_cash_usage_ratio, set_cash_usage_ratio
 from src.db.trade_history import get_trade_pairs
+from src.engine import cost_overlay
 from src.engine import param_catalog as pc
 from src.engine.param_validation import BUDGET_KEYS, MAX_BUDGET_PRODUCT, validate_params
 from src.engine.scheduler import trading_scheduler
@@ -212,6 +213,10 @@ async def get_strategies_te(months: int = 3):
         sid = strategy.strategy_id
         try:
             pairs = await get_trade_pairs(strategy=sid)
+            # cycle411 — 사용자 결정 10-08 Q2: 판정을 net 기준으로 내리려면 compute_te_rr
+            # 가 보기 전에 페어에 net_profit_loss/net_profit_rate 를 얹어야 한다. 실패해도
+            # pairs 는 gross 그대로 쓴다(compute_te_rr 의 net→gross 폴백, test_q4).
+            await cost_overlay.overlay_pairs(pairs)
             metrics = compute_te_rr(pairs, now=now, window_days=window_days, strategy_id=sid)
         except Exception:
             metrics = compute_te_rr([], now=now, window_days=window_days, strategy_id=sid)

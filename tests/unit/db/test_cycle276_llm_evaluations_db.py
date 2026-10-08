@@ -527,7 +527,11 @@ _BASE_KEYS = {
 
 
 async def test_p1_existing_keys_and_values_unchanged() -> None:
-    """C41 (회귀) — 기존 키의 이름·타입·값이 그대로다. 추가는 3키뿐."""
+    """C41 (회귀) — 기존 키의 이름·타입·값이 그대로다.
+
+    cycle411(실비용 합치기)이 `buy_trade_ids`·`sell_trade_ids`(체결 행 id 병행 리스트,
+    order_nos 와 같은 관례)를 더해 추가 키가 3 → 5 가 됐다.
+    """
     rows = [
         _trade("BUY", 10_000, 2, "2026-09-11T09:01:31.000000+09:00", order_no="B1"),
         _trade("SELL", 11_000, 2, "2026-09-11T15:20:02.000000+09:00", order_no="S1"),
@@ -539,7 +543,8 @@ async def test_p1_existing_keys_and_values_unchanged() -> None:
     assert len(_BASE_KEYS) == 14, "기존 키 정본이 14개라는 전제가 깨졌다"
     assert _BASE_KEYS <= set(p), f"기존 키가 사라졌다: {sorted(_BASE_KEYS - set(p))}"
     added = set(p) - _BASE_KEYS
-    assert added == {"buy_order_nos", "sell_order_nos", "pair_key"}, (
+    assert added == {"buy_order_nos", "sell_order_nos", "pair_key",
+                      "buy_trade_ids", "sell_trade_ids"}, (
         f"추가 키가 계약과 다르다 — 실제 {sorted(added)}"
     )
     assert p["buy_price"] == 10_000.0 and p["sell_price"] == 11_000.0

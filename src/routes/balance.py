@@ -3,11 +3,16 @@
 from __future__ import annotations
 
 import logging
+from datetime import timedelta
 
 from fastapi import APIRouter
 
 from src.api.balance import get_balance, get_buyable
+from src.db import trade_cost as trade_cost_db
+from src.db._kst import today_kst
 from src.db.stock_master import get as stock_master_get
+from src.engine import cost_overlay
+from src.engine.etf_like import is_etf_like
 from src.engine.position_buy_date import merge_buy_date, resolve_engine_buy_dates
 from src.engine.position_exit_lines import build_exit_line_map
 from src.engine.sector_naming import resolve_sector_name
@@ -36,6 +41,17 @@ async def balance():
     except Exception as exc:  # noqa: BLE001 — 원인 불문 흡수, 메시지에 남긴다
         logger.warning("[balance] get_balance 실패 — success=False 로 흡수: %s", exc, exc_info=True)
         return ApiResponse(success=False, data=None, message=f"잔고 조회 실패: {exc}")
+
+    # cycle411 — 예상 매도비용 요율(수수료율+세율, ETF 는 수수료율만). 최근 30달력일
+    # 정산 표본이 없으면 기본값으로 떨어진다(`estimate_rates`) — DB 조회 실패도 같은
+    # fail-open(「살까 말까」 가 아니라 화면 참고용 추정이라 전체 잔고를 막지 않는다).
+    try:
+        today = today_kst()
+        cost_rows = await trade_cost_db.get_daily_range(today - timedelta(days=30), today)
+    except Exception:
+        logger.debug("[cost_overlay] 잔고 요율 조회 실패 graceful — 기본값", exc_info=True)
+        cost_rows = []
+    sell_rates = cost_overlay.estimate_rates(cost_rows)
 
     # cycle339 — 종목별 청산선(손절가·목표가). in-memory registry 조회뿐이라
     # DB·KIS 왕복이 0 이다. 🔴 registry 를 못 읽어도 잔고는 그대로 나가야 하므로
@@ -87,6 +103,12 @@ async def balance():
             payload["krx_halted"] = bool(basics.krx_halted)
             payload["excg_dvsn_cd"] = basics.excg_dvsn_cd or None
         # basics is None: payload 의 nxt_tradable/krx_halted/excg_dvsn_cd 기본 None 유지
+        # cycle411 — 예상 매도비용 요율(ETF 는 수수료율만). 화면이 평가금액에 곱한다.
+        is_etf = is_etf_like(getattr(basics, "raw", None) if basics is not None else None, h.name)
+        payload["sell_cost_rate"] = (
+            sell_rates["fee_rate"] if is_etf else sell_rates["fee_rate"] + sell_rates["tax_rate"]
+        )
+        payload["cost_status"] = "estimated"
         # 섹터명 — 위에서 이미 조회한 basics.raw 를 주입해 재조회를 막는다
         # (`sector_naming` 단일 진실원: bstp_kor_isnm → master_raw → 미분류).
         payload["sector"] = await resolve_sector_name(
