@@ -2,26 +2,37 @@
 
 from __future__ import annotations
 
+import json
 import logging
+import time
 from datetime import date
+from math import ceil, isfinite
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Response
 
 from src.api.balance import get_balance, get_buyable
 from src.db import trade_cost as trade_cost_db
 from src.db import trade_history as trade_history_db
-from src.db._kst import today_kst
+from src.db._kst import now_kst_iso, today_kst
 from src.db.stock_master import get as stock_master_get
 from src.engine import cost_overlay
 from src.engine.etf_like import is_etf_like
 from src.engine.position_buy_date import merge_buy_date, resolve_engine_buy_dates
-from src.engine.position_exit_lines import build_exit_line_map
+from src.engine.position_exit_lines import build_exit_line_map, resolve_exit_lines
 from src.engine.sector_naming import resolve_sector_name
 from src.models.response import ApiResponse
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/balance", tags=["balance"])
+
+#: cycle412 G1 — `GET /exit-lines` 5초 캐시. 직전 **성공** 응답 뒤 5초 안 재호출은
+#: 같은 바이트를 그대로 준다(워커가 15초 주기로 이 엔드포인트를 때릴 때 매 회전
+#: 전략 registry 를 다시 훑지 않는다). 시계는 `_exit_lines_clock` seam 으로 테스트가
+#: 갈아 끼운다. `global` 재바인딩으로만 바꾼다(AST G1 가드 A5).
+_EXIT_LINES_CACHE_TTL_S = 5.0
+_exit_lines_cache: tuple[float, str] | None = None
+_exit_lines_clock = time.monotonic
 
 #: `_get_cost_range` 가 (start, end) 범위를 못 읽었을 때 캐시에 두는 표식(조회 재시도를
 #: 요청 안에서 또 하지 않는다 — None 은 "아직 안 찾아봄" 과 겹쳐 쓸 수 없다, 2차 보완 F3·F8b).
@@ -287,3 +298,119 @@ async def buyable(ticker: str = "", price: int = 0):
     """매수 가능 금액/수량을 반환한다."""
     info = await get_buyable(ticker, price)
     return ApiResponse(success=True, data=info.model_dump())
+
+
+# ── cycle412 G1 — 거래일지 워커 전용 청산선 스냅샷 ───────────────────────────────
+#
+# 사용자 결정 E1b — 워커 컨테이너(`journal_worker/`)가 15초 주기로 이 엔드포인트를
+# 읽어 손절선 사건(R8)을 기록한다. 손절선 계산 입력(`_entry_atr`·래치·무장 여부)은
+# 엔진 메모리에만 있어 이 GET 이 유일한 창이다.
+#
+# 🔴 **read-only** — 7전략 registry 를 절대 바꾸지 않는다(변이 메서드·`setattr`·
+# `_apply_budget_limit`·`check_*`·`on_*` 호출 전부 AST 가드 `test_cycle412_g1_purity.py`
+# 가 막는다). 운영 Position·params 를 바꾸면 손절이 깨진다.
+
+
+def _exit_lines_positions(strategy) -> dict:
+    """`strategy.state.positions` — dict 가 아니면 빈 dict(read-only, 원본 참조 반환)."""
+    state = getattr(strategy, "state", None)
+    positions = getattr(state, "positions", None)
+    return positions if isinstance(positions, dict) else {}
+
+
+def _exit_lines_atr(strategy, ticker: str):
+    """진입 ATR — `_entry_atr.get(t)` 우선, 없으면 kojiro `_position_atr.get(t)`."""
+    primary = getattr(strategy, "_entry_atr", None)
+    value = primary.get(ticker) if isinstance(primary, dict) else None
+    if value is not None:
+        return value
+    fallback = getattr(strategy, "_position_atr", None)
+    return fallback.get(ticker) if isinstance(fallback, dict) else None
+
+
+def _exit_lines_kk(strategy, sid: str, ticker: str, pos) -> tuple:
+    """donchian 무장 여부·무장가 — 그 밖 전략은 `(None, None)`.
+
+    무장가(미무장일 때만) = `ceil(E + kk_breakeven_r × (E − 손절선))`. 무장되면
+    손절선이 이미 본전으로 승격돼 "앞으로 얼마 더 오르면 무장" 이라는 숫자가
+    더 이상 없다 — `None`.
+    """
+    if sid != "donchian_swing":
+        return None, None
+    stop, armed, _channel = strategy._kk_exit_lines(ticker, pos)
+    if armed:
+        return True, None
+    breakeven_r = strategy._kk("kk_breakeven_r")
+    buy_price = pos.buy_price
+    ready = isfinite(stop) and isfinite(breakeven_r) and isfinite(buy_price)
+    arm_price = ceil(buy_price + breakeven_r * (buy_price - stop)) if ready else None
+    return False, arm_price
+
+
+def _exit_lines_item(strategy, ticker: str, pos) -> dict:
+    """보유 종목 1건의 응답 item — `resolve_exit_lines` 값 + 같은 순간 Position 값."""
+    leaf = resolve_exit_lines([strategy], ticker)
+    sid = strategy.strategy_id
+    kk_armed, kk_arm_price = _exit_lines_kk(strategy, sid, ticker, pos)
+    return {
+        "strategy_id": sid,
+        "ticker": ticker,
+        "stop_price": leaf.get("stop_price"),
+        "stop_source": leaf.get("stop_source"),
+        "target_price": leaf.get("target_price"),
+        "target_source": leaf.get("target_source"),
+        "buy_price": pos.buy_price,
+        "quantity": pos.quantity,
+        "high_since_buy": pos.high_since_buy,
+        "buy_date": pos.buy_date.isoformat(),
+        "order_no": pos.order_no,
+        "entry_atr": _exit_lines_atr(strategy, ticker),
+        "kk_armed": kk_armed,
+        "kk_arm_price": kk_arm_price,
+    }
+
+
+def _exit_lines_items(strategies) -> list:
+    """전략마다 보유마다 1 item(같은 종목을 두 전략이 들고 있으면 2 item)."""
+    return [
+        _exit_lines_item(s, ticker, pos)
+        for s in strategies
+        for ticker, pos in _exit_lines_positions(s).items()
+    ]
+
+
+def _exit_lines_snapshot(strategies, *, running: bool) -> dict:
+    """`{running, as_of(KST), items}` — await 0, 순수 조립."""
+    return {
+        "running": running,
+        "as_of": now_kst_iso(),
+        "items": _exit_lines_items(strategies),
+    }
+
+
+@router.get("/exit-lines")
+async def exit_lines():
+    """`GET /api/balance/exit-lines` — 워커 전용 청산선 스냅샷(cycle412 G1).
+
+    실패는 전부 `success=false` + HTTP 200 으로 흡수한다(워커가 매 회전 때리는
+    엔드포인트라 500 스택트레이스를 로그에 쌓지 않는다 — INFO 이상 로그 0줄,
+    `logger.debug` 만).
+    """
+    global _exit_lines_cache
+    try:
+        now = _exit_lines_clock()
+        cached = _exit_lines_cache
+        if cached is not None and (now - cached[0]) < _EXIT_LINES_CACHE_TTL_S:
+            body = cached[1]
+        else:
+            from src.engine.scheduler import trading_scheduler
+
+            snapshot = _exit_lines_snapshot(
+                trading_scheduler.registry.all(), running=bool(trading_scheduler.is_running)
+            )
+            body = json.dumps({"success": True, "data": snapshot, "message": ""}, default=str)
+            _exit_lines_cache = (now, body)
+        return Response(content=body, media_type="application/json")
+    except Exception:
+        logger.debug("[exit_lines] G1 조회 실패 graceful", exc_info=True)
+        return ApiResponse(success=False, data=None, message="청산선 조회 실패")

@@ -745,11 +745,16 @@ chmod 644 secrets/.htpasswd; unset AUTH_PASS
 
 # 2) ACME(HTTP-01) 챌린지 webroot — TLS 첫 발급의 전제
 mkdir -p certbot-www
+
+# 3) 거래일지 워커(cycle412) DSN — journal_worker 전용 역할의 DSN 하나만 담는다
+#    (메인 .env 와 분리 — journal_worker/ops/role.sql 로 역할을 먼저 만든다)
+printf 'JOURNAL_DATABASE_URL=%s\n' "<journal_worker 역할 DSN>" > secrets/journal_worker.env
 ```
 
 - 권한 `755 secrets` + `644 secrets/.htpasswd` 는 **필수**다. nginx worker 는 컨테이너 안 **uid 101**, 호스트 파일은 `ubuntu`(uid 1000) 소유라 `700`/`600` 이면 자격 요청이 전부 **500** 이 된다.
 - 자격 파일이 아예 없으면 자격을 보낸 요청이 **403** 이다. 무자격 요청은 어느 상태에서도 401 이라 그것만으로는 결손을 판별할 수 없다.
 - `certbot-www` 를 미리 만들지 않으면 Docker 가 bind mount 소스를 `root:root` 로 만들어 `ubuntu` 가 쓰지 못한다.
+- `secrets/journal_worker.env` 가 없으면 `journal_worker` 컨테이너가 기동 실패한다(`env_file` 필수 참조) — 메인 앱 `.env` 를 대신 쓰지 않는다(KIS 앱키·HTS ID·운영 DSN 33개가 그 컨테이너에도 들어간다).
 - `secrets/` 는 **git 커밋 금지** (`.gitignore` 등재).
 
 ### 자동 배포 (CI/CD)
@@ -779,7 +784,7 @@ EC2 는 모든 push 에 `up --build` 를 돌지 않는다. `compose_up_changed.s
 | 모드 | 조건 (변경 경로) | 실행 | backend |
 |------|------------------|------|---------|
 | `full` | `src/` · `requirements.txt` · `Dockerfile` · `.dockerignore` · `docker-compose.prod.yml`/`.tls.yml`/`.tls2.yml` · `.github/workflows/deploy.yml` · `tools/deploy/` 중 하나라도. 단 `src/` 안 `.md` 는 뺀다 | `up --build -d --remove-orphans` | 재생성 |
-| 선택 배포 — `frontend` · `macro` · `frontend+macro` | backend 축이 그대로이고 `frontend/`·`tools/ops/tls_stage2/`(frontend 축) · `macro/`(macro 축) 중 바뀐 축만. 모드 이름이 곧 서비스 목록이다 | `up --build -d --remove-orphans --no-deps <서비스…>` | 무접촉 |
+| 선택 배포 — `frontend`·`macro`·`journal` 중 걸린 축을 그 순서로 `+` 로 이은 조합(cycle412 — `journal_worker/`) | backend 축이 그대로이고 `frontend/`·`tools/ops/tls_stage2/`(frontend 축) · `macro/`(macro 축) · `journal_worker/`(journal 축, 서비스 `journal_worker`) 중 바뀐 축만 | `up --build -d --remove-orphans --no-deps <서비스…>` | 무접촉 |
 | `none` | 위 축 어느 것도 아님(docs·tests 등) 또는 마커 == HEAD | `up -d --remove-orphans` (빌드 없음) | 재생성 0 |
 
 - **판정 불가는 전부 `full`** 이다(fail-safe) — 마커 없음 · 마커 SHA 미지 · 직전 시도 마커(`.deployed_sha.attempt`) 잔존 · diff 실패.
