@@ -4,3 +4,4 @@
 2026-10-08T10:35:00Z [be4] 핀 재계산 — _SRC_TREE_DIGEST 재해시(파일수 179 불변, 새 값 cff7781f58a9a2237aa7312505b8a3e147efa5648c21d87766ad8c8e07dd112c) + 가짜 compute_te_rr 시그니처에 costs_available=True 기본값 추가(기존 단언 영향 0). 영향 테스트 3파일 재실행 통과.
 2026-10-08T10:35:30Z [be4] 2차 전체 스위트(백그라운드) 재실행 — 5 failed/15801 passed/20 skipped/337 xfailed/12 xpassed, 324.32s. 실패 5건 전부 알려진 환경(node_modules 3·parquet 2) — 이번 변경 직격 실패 0. --log-level=DEBUG 전제로 실행.
 2026-10-08T10:36:10Z [be4] python tools/test_impact/build_index.py 재생성 — backend modules 182 · backend tests 1289 · unmapped 10, frontend 섹션 보존 확인.
+2026-10-08T10:40:00Z [be4] 커밋 eaca5b3c — 내 경로만(-A 금지) 선택 add. 보고 발송
