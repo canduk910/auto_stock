@@ -104,13 +104,15 @@ class Pairer:
             return
         if self._watermark is None or ts > self._watermark:
             self._watermark = ts
-        if self._day != ts.date():
+        day_changed = self._day != ts.date()
+        if day_changed:
             self._day = ts.date()
             self._ndc_defer_events = [e for e in self._ndc_defer_events if e["ts"].date() == ts.date()]
             self._anchor_order_nos = set()
             self._notice_new_order_nos = set()
         cutoff = self._watermark - _KEEP
-        if len(self._exit_reason_events) > 64 or len(self._buy_signal_events) > 64 or \
+        # 날이 바뀌면 개수와 무관하게 정리한다(보완2 N6) — 64개 미만이어도 전날 대기 항목이 남지 않게.
+        if day_changed or len(self._exit_reason_events) > 64 or len(self._buy_signal_events) > 64 or \
                 len(self._status_exit_events) > 64 or len(self._recent_done) > 64 or len(self._order_notices) > 64:
             self._exit_reason_events = [e for e in self._exit_reason_events if e["ts"] >= cutoff]
             self._buy_signal_events = [e for e in self._buy_signal_events if e["ts"] >= cutoff]

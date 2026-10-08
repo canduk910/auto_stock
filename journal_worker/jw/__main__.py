@@ -7,9 +7,14 @@ import os
 import sys
 
 
+_USAGE = "usage: python -m jw backfill <log-path> [<log-path> ...]"
+
+
 def _setup_logging():
     logging.basicConfig(stream=sys.stdout, level=logging.INFO,
                         format="%(asctime)s [%(levelname)-8s] %(name)s — %(message)s")
+    # httpx 는 요청마다 INFO 1줄을 남긴다(하루 약 6,600줄) — jw.* 의 INFO 는 그대로 두고 httpx 만 낮춘다.
+    logging.getLogger("httpx").setLevel(logging.WARNING)
 
 
 async def _pool():
@@ -51,6 +56,7 @@ def main(argv=None) -> None:
     _setup_logging()
     if cmd == "backfill":
         if len(argv) < 2:
+            print(_USAGE, file=sys.stderr)
             raise SystemExit(2)
         asyncio.run(_backfill(argv[1:]))
     else:

@@ -13,11 +13,22 @@ def _jsonb(value):
     return json.dumps(value, default=str, ensure_ascii=False)
 
 
+def _rows_affected(status) -> int:
+    """asyncpg ``Connection.execute`` 커맨드 상태 문자열(``"INSERT 0 1"``·``"UPDATE 1"``) 끝의 수."""
+    if not status:
+        return 0
+    try:
+        return int(status.split()[-1])
+    except (ValueError, IndexError):
+        return 0
+
+
 class JournalDB:
     def __init__(self, conn):
         self._conn = conn
 
-    async def insert_order(self, row: dict) -> None:
+    async def insert_order(self, row: dict) -> bool:
+        """``INSERT 0 1``(새로 넣음) → True · ``INSERT 0 0``(이미 있음, ON CONFLICT DO NOTHING) → False."""
         sql = (
             "INSERT INTO trade_journal_orders "
             "(order_date, order_no, side, strategy, ticker, source, reason_code, reason_sub, "
@@ -26,12 +37,42 @@ class JournalDB:
             "VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) "
             "ON CONFLICT (order_date, order_no, side) DO NOTHING"
         )
-        await self._conn.execute(
+        status = await self._conn.execute(
             sql, row["order_date"], row["order_no"], row["side"], row["strategy"], row["ticker"],
             row["source"], row["reason_code"], row["reason_sub"], row["judge_price"], row["order_price"],
             row["order_division"], row["exchange"], row["parent_order_no"], row["fired_line"],
             row["effective_line"], _jsonb(row["signal"]), _jsonb(row["params"]), row["noted_at"],
         )
+        return _rows_affected(status) > 0
+
+    async def promote_order(self, row: dict) -> bool:
+        """같은 키의 행이 ``unmatched``·``external`` 일 때만 빈 칸(NULL·전략 ``'unknown'``)을 채우고
+        source 를 로그 행 것으로 바꾼다. ``UPDATE 1`` → True · ``UPDATE 0``(이미 실측·없는 키) → False."""
+        sql = (
+            "UPDATE trade_journal_orders SET "
+            "strategy = CASE WHEN strategy = 'unknown' THEN $4 ELSE strategy END, "
+            "source = $5, "
+            "reason_code = COALESCE(reason_code, $6), "
+            "reason_sub = COALESCE(reason_sub, $7), "
+            "judge_price = COALESCE(judge_price, $8), "
+            "order_price = COALESCE(order_price, $9), "
+            "order_division = COALESCE(order_division, $10), "
+            "exchange = COALESCE(exchange, $11), "
+            "parent_order_no = COALESCE(parent_order_no, $12), "
+            "fired_line = COALESCE(fired_line, $13), "
+            "effective_line = COALESCE(effective_line, $14), "
+            "signal = COALESCE(signal, $15), "
+            "params = COALESCE(params, $16) "
+            "WHERE order_date = $1 AND order_no = $2 AND side = $3 "
+            "AND source IN ('unmatched', 'external')"
+        )
+        status = await self._conn.execute(
+            sql, row["order_date"], row["order_no"], row["side"], row["strategy"], row["source"],
+            row["reason_code"], row["reason_sub"], row["judge_price"], row["order_price"],
+            row["order_division"], row["exchange"], row["parent_order_no"], row["fired_line"],
+            row["effective_line"], _jsonb(row["signal"]), _jsonb(row["params"]),
+        )
+        return _rows_affected(status) > 0
 
     async def fill_order_division(self, order_date, order_no, side, division) -> None:
         sql = (

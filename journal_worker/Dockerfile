@@ -7,7 +7,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY jw/ ./jw/
 
-RUN useradd --create-home --uid 1000 --user-group journal && chown -R journal:journal /app
+RUN useradd --create-home --uid 1000 --user-group journal
 USER journal
 
 ENTRYPOINT ["python", "-m", "jw"]
