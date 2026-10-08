@@ -300,3 +300,70 @@ async def test_k10_backfill_twice_keeps_rows_as_worker_role(admin, role_conn):
     sources = [r["source"] for r in await admin.fetch("SELECT DISTINCT source FROM trade_journal_orders")]
     assert sources == ["log_restore"]
     assert await admin.fetchval("SELECT count(*) FROM trade_journal_stops") == 0
+
+
+
+# ── cycle412 보완2 Red — N1: 쓴 행만 센다 · 빈 행을 실측으로 승격한다 ─────────────────────
+#
+# | # | 계약 |
+# |---|---|
+# | K11 | 워커 역할로 — `insert_order` 는 새로 넣었는지 돌려준다(True → 같은 키 False) · `promote_order` 는 같은 키의 `unmatched`·`external` 행만, 빈 칸(NULL · 전략 `'unknown'`)만 채우고 source 를 로그 행 것으로 바꾼다(이미 있는 값·`noted_at` 은 그대로) → True · 이미 실측인 행·없는 키 → False, 행 그대로 |
+
+_ORDER_COLS = ("order_date", "order_no", "side", "strategy", "ticker", "source", "reason_code", "reason_sub",
+               "judge_price", "order_price", "order_division", "exchange", "parent_order_no", "fired_line",
+               "effective_line", "signal", "params", "noted_at")
+
+
+def _order(**kw):
+    row = {k: None for k in _ORDER_COLS}
+    row.update(order_date=date(2026, 10, 13), ticker="005930", noted_at=_NOW)
+    row.update(kw)
+    return row
+
+
+async def _get(admin, no, side):
+    import json
+
+    r = await admin.fetchrow("SELECT * FROM trade_journal_orders WHERE order_date=$1 AND order_no=$2 AND side=$3",
+                             date(2026, 10, 13), no, side)
+    out = dict(r)
+    for k in ("signal", "params"):
+        if isinstance(out[k], str):
+            out[k] = json.loads(out[k])
+    return out
+
+
+async def test_k11_insert_reports_and_promote_fills_only_empty_rows(admin, role_conn):
+    db = _jw("db").JournalDB(role_conn)
+    sell_empty = _order(order_no="0000300100", side="SELL", strategy="unknown", source="unmatched",
+                        order_price=70100)
+    assert await db.insert_order(sell_empty) is True
+    assert await db.insert_order(sell_empty) is False
+
+    measured = _order(order_no="0000300100", side="SELL", strategy="kojiro", source="log_harvest",
+                      reason_code="STOP_LOSS", judge_price=9180, order_price=70000, fired_line=9200,
+                      effective_line=9500, signal={"signal_name": "STOP_LOSS", "path": "accept"},
+                      noted_at=_NOW + timedelta(seconds=1))
+    assert await db.insert_order(measured) is False, "빈 행이 이미 있다 — INSERT 0 0"
+    assert await db.promote_order(measured) is True
+    r = await _get(admin, "0000300100", "SELL")
+    assert (r["source"], r["strategy"], r["reason_code"], r["judge_price"], r["fired_line"], r["effective_line"]) == (
+        "log_harvest", "kojiro", "STOP_LOSS", 9180, 9200, 9500), r
+    assert r["signal"] == {"signal_name": "STOP_LOSS", "path": "accept"}
+    assert r["order_price"] == 70100 and r["noted_at"] == _NOW, "이미 있는 값은 그대로 — 빈 칸만 채운다"
+
+    again = dict(measured, source="fallback_inferred", reason_code="TRAILING_STOP", order_division="01")
+    assert await db.promote_order(again) is False, "이미 실측인 행은 승격 대상이 아니다"
+    r2 = await _get(admin, "0000300100", "SELL")
+    assert (r2["source"], r2["reason_code"], r2["order_division"]) == ("log_harvest", "STOP_LOSS", None)
+
+    assert await db.promote_order(dict(measured, order_no="0000999999")) is False, "없는 키"
+
+    ext = _order(order_no="0000200100", side="BUY", strategy="kojiro", source="external")
+    assert await db.insert_order(ext) is True
+    assert await db.promote_order(_order(order_no="0000200100", side="BUY", strategy="kojiro",
+                                         source="fallback_inferred", reason_code="ENTRY",
+                                         signal={"path": "fallback", "strategy_src": "trade_history"})) is True
+    r3 = await _get(admin, "0000200100", "BUY")
+    assert (r3["source"], r3["reason_code"]) == ("fallback_inferred", "ENTRY")
+    assert await admin.fetchval("SELECT count(*) FROM trade_journal_orders") == 2

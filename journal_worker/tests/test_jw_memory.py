@@ -17,6 +17,7 @@
 | M2 | 스냅샷 원본을 들고 있지 않다 — G0/G1 dict·목록과 짝짓기에 안 쓰는 칸의 값이 `Pairer` 에서 닿지 않는다 |
 | M3 | `Worker` 전체(짝짓기 + 손절선 + 대사 누적 + 커서) 도 같은 조건에서 크기가 같다 |
 | M4 | 과거분 모드(`source="log_restore"`)는 이 정책 밖이다 — 골든 3주를 한 번에 넣어도 외부 접수 전문 후보가 남는다(골든 P8 과 같은 사실) |
+| M5 | (보완2 N6) 날이 바뀌면 짝짓기 대기 항목(사유 줄·신호 줄·종목상태 줄·접수 전문·짝 없는 완료 줄)을 개수와 무관하게 비운다 — 64개 미만이어도 전날 시각이 `Pairer` 에 남지 않는다 |
 """
 from __future__ import annotations
 
@@ -28,7 +29,7 @@ import httpx
 import pytest
 
 from jw_testkit import (FakeJournalDB, golden_lines, jw, kst, log_line, parse_all, reachable_ids,
-                        retained_bytes)
+                        reachable_objects, retained_bytes)
 
 pytestmark = pytest.mark.unit
 
@@ -283,3 +284,51 @@ def test_m4_restore_mode_keeps_whole_input_external_candidates():
     pr.feed_events(parse_all(golden_lines()))
     pr.drain(final=True)
     assert {"0000042300", "0000340300", "0000549100", "0001402000"} <= pr.external_notice_orders()
+
+
+# ── M5 (보완2 N6) — 날짜 경계 정리 ───────────────────────────────────────────────
+
+def _day1_lines(n=10):
+    out = []
+    for k in range(n):
+        ts = f"2026-10-13 14:{k:02d}:00"
+        out += [
+            log_line(ts, "INFO", "src.engine.strategies.kojiro",
+                     f"고지로 매수 신호: {200000 + k:06d} 현재가(70000) — 스테이지1(6→1) + EMA정배열 + ATR(1200.0)"),
+            log_line(ts, "INFO", "src.engine.strategies.kojiro",
+                     f"[kojiro_hard_stop] {100000 + k:06d} 매수가(10000) 대비 -8.1% ≤ -8.0%"),
+            log_line(ts, "WARNING", "src.engine.status_exit_watch",
+                     f"[status_exit_fire] ticker={100000 + k:06d} strategy=kojiro reason=short_over iscd=59 mang=N "
+                     f"short_over=Y qty=3 mode=enforce attempt=1 bought_today=0"),
+            log_line(ts, "INFO", "src.realtime.handler",
+                     f"[order_notice] order_no={9990000 + k:010d} orig_order_no= side=BUY rctf=0 kind=01 cond=0 "
+                     f"ticker=199800 qty=0000000003 price=000000000 hour=140000 rfus=0 acpt=1 ord_qty=000000003"),
+            log_line(ts, "INFO", "src.api.order", f"BUY 주문 완료: {300000 + k:06d} 1주 @ 0 (주문번호: {9980000 + k:010d})"),
+        ]
+    return out
+
+
+def test_m5_day_boundary_drops_previous_day_pending_items():
+    import datetime as _dt
+
+    day1 = kst(2026, 10, 13).date()
+    evs = parse_all(_day1_lines())
+    kinds = sorted({e["kind"] for e in evs})
+    assert kinds == ["buy_signal", "exit_reason", "order_done", "order_notice", "status_exit_fire"], kinds
+    assert all(sum(1 for e in evs if e["kind"] == k) < 64 for k in kinds), "64개 미만이어야 이 시험이 뜻이 있다"
+
+    p = jw("pairing").Pairer()
+    p.feed_events(evs)
+    p.drain(trade_strategies={})
+    p.drain(trade_strategies={})
+    p.feed_events(parse_all([log_line("2026-10-14 08:00:05", "INFO", "src.engine.strategies.kojiro",
+                                      "고지로 매수 신호: 200999 현재가(70000) — 스테이지1(6→1) + EMA정배열 + ATR(1200.0)")]))
+    p.drain(trade_strategies={})
+
+    left = []
+    for o in reachable_objects(p):
+        if isinstance(o, _dt.datetime) and o.date() == day1:
+            left.append(o)
+        elif type(o) is _dt.date and o == day1:
+            left.append(o)
+    assert left == [], f"날이 바뀌었는데 전날 대기 항목이 남았다(개수 상한 64 아래라 정리가 안 돌았다): {len(left)}개"

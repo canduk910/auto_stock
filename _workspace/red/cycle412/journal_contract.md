@@ -126,7 +126,7 @@ journal_worker/
 - 환경변수는 `JOURNAL_DATABASE_URL`·`API_REPORTER_KEY` 둘만 읽는다(`TZ` 는 컨테이너가 쓴다).
 
 ### 3.1 `jw/config.py` 상수
-`BASE_URL = "http://backend:8000"` · `G0_PATH = "/api/trading/status?include=system,holdings,strategies"` · `G1_PATH = "/api/balance/exit-lines"` · `ALLOWED_PATHS = frozenset({G0_PATH, G1_PATH})` · `CYCLE_SECONDS = 15` · `IDLE_CYCLE_SECONDS = 300` · `BACKOFF_MAX_SECONDS = 300` · `MAX_READ_BYTES = 20 * 1024 * 1024` · `SIGNAL_RING_TTL_SECONDS = 600` · `REASON_WINDOW_SECONDS = 10` · `BUY_SIGNAL_LOG_WINDOW_SECONDS = 5` · `LOG_DIR = "/app/logs"` · `LOG_FILE = "auto_stock.log"` · `RECONCILE_MIN_AGE_SECONDS = 120` · `BACKFILL_MAX_BYTES_PER_SEC = 5 * 1024 * 1024`.
+`BASE_URL = "http://backend:8000"` · `G0_PATH = "/api/trading/status?include=system,holdings,strategies"` · `G1_PATH = "/api/balance/exit-lines"` · `ALLOWED_PATHS = frozenset({G0_PATH, G1_PATH})` · `CYCLE_SECONDS = 15` · `IDLE_CYCLE_SECONDS = 300` · `BACKOFF_MAX_SECONDS = 300` · `MAX_READ_BYTES = 4 * 1024 * 1024`(7절 N5) · `SIGNAL_RING_TTL_SECONDS = 600` · `REASON_WINDOW_SECONDS = 10` · `BUY_SIGNAL_LOG_WINDOW_SECONDS = 5` · `LOG_DIR = "/app/logs"` · `LOG_FILE = "auto_stock.log"` · `RECONCILE_MIN_AGE_SECONDS = 120` · `BACKFILL_MAX_BYTES_PER_SEC = 5 * 1024 * 1024`.
 - 코드 안 `"/api/…"` 문자열은 위 두 경로뿐(테스트가 jw/ 전체를 훑는다).
 
 ### 3.2 로그 문법 — `jw/grammar.py`
@@ -231,7 +231,7 @@ def emit_gap(result: dict, logger: logging.Logger) -> bool      # ok 가 아니�
 def rows_from_trade_history(trade_rows: list[dict], journal_keys: set, notice_orders: set[str], *, now: datetime) -> list[dict]
 ```
 - `sell_done`/`buy_done` = `order_done` 줄 수(SELL/BUY) · `*_rows` = 그 side 행 중 source 가 `external`·`unmatched` 가 아닌 것 · `unknown_reason_sells` = 그 매도 행 중 `reason_code` 가 None.
-- `rows_from_trade_history`: `trade_rows`(키 `order_no trade_type strategy ticker timestamp status price order_price`) 중 status `COMPLETED`/`PARTIAL`, `timestamp ≤ now − RECONCILE_MIN_AGE_SECONDS`, `(KST 날짜, order_no, trade_type)` 가 `journal_keys` 에 없는 것 → `notice_orders` 에 있으면 `source="external"`, 없으면 `"unmatched"`. `reason_code=None`. PENDING·CANCELLED·[order_notice] 만 있는 주문(미체결 외부) = 행 0.
+- `rows_from_trade_history`: `trade_rows`(키 `order_no trade_type strategy ticker timestamp status price order_price`) 중 status `COMPLETED`/`PARTIAL`, `timestamp ≤ now − RECONCILE_MIN_AGE_SECONDS`(워커는 `now` 에 벽시계가 아니라 대사 기준 시각 W 를 넘긴다 — 7절 N1), `(KST 날짜, order_no, trade_type)` 가 `journal_keys` 에 없는 것 → `notice_orders` 에 있으면 `source="external"`, 없으면 `"unmatched"`. `reason_code=None`. PENDING·CANCELLED·[order_notice] 만 있는 주문(미체결 외부) = 행 0.
 
 ### 3.6 HTTP — `jw/http.py`
 ```python
@@ -244,7 +244,8 @@ class JournalFetchError(Exception)
 ```python
 class JournalDB:
     def __init__(self, conn): ...   # asyncpg Connection 또는 Pool (execute/fetch/fetchrow/fetchval)
-    async def insert_order(self, row: dict) -> None                   # INSERT … ON CONFLICT (order_date, order_no, side) DO NOTHING
+    async def insert_order(self, row: dict) -> bool                   # INSERT … ON CONFLICT (order_date, order_no, side) DO NOTHING · 새로 넣었으면 True(7절 N1)
+    async def promote_order(self, row: dict) -> bool                  # UPDATE … 빈 행(unmatched·external)의 빈 칸만 채우고 source 를 로그 행 것으로 · 바꿨으면 True(7절 N1)
     async def fill_order_division(self, order_date, order_no, side, division) -> None   # UPDATE … WHERE … AND order_division IS NULL
     async def insert_stop(self, event: dict) -> None
     async def load_cursor(self, name: str = "main") -> dict | None    # {"file_name","inode","byte_offset"}
@@ -273,7 +274,7 @@ class Worker:
 - `run_forever`: `while not stop()` 마다 `try: status = await rotate() … except Exception … finally: await sleep(delay)`. active → 15 · idle → 300 · degraded·예외 → 연속 실패 수로 `backoff_delay`(30, 60, 120, 240, 300, 300…), 성공하면 0 으로.
 - `rotate` 순서: (첫 회전만 `load_cursor`·`last_stop_rows`) → G0 → (idle 아니면) G1 → `feed_snapshot` → 로그 이어 읽기(`read_chunk`) → `feed_events` → `drain` → 행·사건 쓰기 → `StopTracker.observe` 사건 쓰기 → **커서 저장**. idle(G0 `running` 거짓 또는 `phase=="idle"`) → G1·로그·DB 쓰기 0. G0/G1 실패(`JournalFetchError`) → 스냅샷 없이 로그 수확은 계속하고 `"degraded"`. 동시 요청 0(`gather`/`create_task`/`TaskGroup` 금지).
 - **커서는 행이 DB 에 다 쓰인 청크 끝까지만 전진한다** — 한 회전 보류 때문에 회전 k 에 읽은 청크의 행은 회전 k+1 에 쓰인다. 그래서 회전 k 의 쓰기 뒤에는 **회전 k−1 청크 끝** 커서를 저장한다(첫 회전은 저장하지 않거나 offset 0). 재시작하면 보류 중이던 청크를 다시 읽고, 이미 쓴 행은 `ON CONFLICT DO NOTHING` 이 걸러 준다.
-- 대사(3.5)는 `rotate` 안에서 60초마다(첫 회전 포함) + 매일 20:10 1회(설계 W3) — 연결·로그·거짓 경보 금지는 6절 결함 3.
+- 대사(3.5)는 `rotate` 안에서 60초마다 — 단 기준 시각 W(행까지 쓴 로그 줄의 시각)가 생긴 뒤부터, 읽기 창이 꽉 찬 회전은 건너뛴다(7절 N1). 연결·로그·거짓 경보 금지는 6절 결함 3 · 경고 빈도는 7절 N2.
 
 ### 3.10 과거분 — `jw/backfill.py`
 ```python
@@ -332,6 +333,8 @@ async def run_backfill(paths, db, *, max_bytes_per_sec: int = BACKFILL_MAX_BYTES
 | 가드(지금 초록) | `tests/unit/ast/test_cycle412_scope_guard.py`(사이클 한정, 병합 후 삭제) · `tests/unit/ast/test_cycle412_log_phrase_pins.py` | 없음 — 붉어지면 범위 위반 |
 | 워커(보완) | `journal_worker/tests/test_jw_memory.py` · `test_jw_pairing_fixes.py` · `test_jw_worker_ops.py` + 기존 `test_jw_{stops,db,reconcile,backfill,isolation}.py` 끝의 「보완 Red」 블록 | 6절 |
 | 백엔드/배포(보완) | `tests/integration/test_cycle412_trade_journal_pg.py::test_k10_*` | `jw/backfill.py`(`run_backfill`) |
+| 워커(보완2) | `journal_worker/tests/test_jw_reconcile_timing.py`(신규) · `test_jw_worker_ops.py`(W3·W3b·W3c 다시 씀 + W10·W11) · `test_jw_db.py` B1(promote_order)·B7·B8 · `test_jw_memory.py` M5 · `test_jw_isolation.py` I12 · `test_jw_tailer.py` T3b(4MiB) · `test_jw_loop.py` FakeDB(반환값) · `jw_testkit.py`(FakeJournalDB·LiveLog) | 7절 — `jw/{main,db,config,pairing,__main__}.py` · `Dockerfile` |
+| 백엔드/배포(보완2) | `tests/integration/test_cycle412_trade_journal_pg.py::test_k11_*` | `jw/db.py`(`insert_order` 반환 · `promote_order`) |
 
 ---
 
@@ -355,3 +358,59 @@ async def run_backfill(paths, db, *, max_bytes_per_sec: int = BACKFILL_MAX_BYTES
 
 - 테스트 도우미(`jw_testkit.py`) — `FakeJournalDB`(047 의 UNIQUE·NOT NULL 을 흉내 내는 가짜 DB, `trades_since` 는 `timestamp >= since` 만) · `retained_bytes`/`reachable_ids`(객체 그래프 크기·도달 집합, 클래스·모듈·함수·로거 제외) · `ORDER_KEYS`·`ORDER_NOT_NULL`·`STOP_KEYS`.
 - 충족 가능성 — Red 가 scratchpad 시제품(리포 밖)으로 워커 테스트 전부와 pg K10 통과를 확인했다(M1 보관 크기 500·2000·5000 회전 모두 같은 값).
+
+---
+
+## 7. 보완 결정 2 (10-09 — 직전 판정 「보완 필요」 N1·N1-b·N2~N8, 메인 세션 결정: 전부 고친다)
+
+번호는 판정 원문 그대로다. 6절과 같은 금기(8영역·`scheduler.py`·기존 마이그레이션 0줄 · 047 NOT NULL 그대로 · 워커 `src` import 0·KIS 0·`.env` 0)가 그대로 선다. backfill 운영 적재는 여전히 10-13 배포와 분리. 테스트가 정본이다.
+
+### N1 (중간) 대사가 로그를 앞질러 실측 행을 빈 행으로 선점한다
+
+- **대사 기준 시각 W** = 「행까지 쓴 로그 줄의 시각」 — 이번 회전 `drain` 이 내보낸(= 직전 회전에 읽은) 청크의 **마지막 줄 시각**. 줄 앞머리 `YYYY-MM-DD HH:MM:SS`(KST)를 읽는다 — **문법이 모르는 줄도 센다**(운영 로그는 스캔 루프 같은 줄이 끊임없이 찍힌다. 문법 줄만 보면 조용한 시간대에 W 가 멈춰 그날 마지막 주문들이 대사·항등식 밖에 남는다). 청크에 행이 0개여도 그 청크의 마지막 줄이 W 다.
+- W 가 없으면(첫 기동·재시작 직후, 아직 행까지 쓴 청크가 없음) 대사를 건너뛴다. **읽기 창이 꽉 찬 회전(따라잡는 중)도 건너뛴다**(판정 지시 — 단 W 기준만으로 같은 효과가 나서 테스트로는 구별되지 않는다: 돌연변이 0건. 리뷰 항목).
+- `rows_from_trade_history(…, now=W)` · `check_identities` 는 `ts ≤ W − RECONCILE_MIN_AGE_SECONDS(120)` 인 완료 줄·행만. 60초 간격은 그대로(벽시계).
+- **승격** — `JournalDB.promote_order(row) -> bool`(단문 UPDATE 1개): 같은 키(`order_date, order_no, side`)의 행이 `source IN ('unmatched','external')` 일 때만, NULL 칸은 `COALESCE(기존, 새 값)` · 전략 `'unknown'` 은 빈 칸으로 보고 새 값 · `source` = 로그 행 것 · `ticker`·`noted_at`·키는 그대로 → `UPDATE 1` 이면 True. 이미 실측인 행·없는 키 → False(행 그대로). `insert_order` 는 `INSERT 0 1` 이면 True, `INSERT 0 0` 이면 False 를 돌려준다(SQL 은 그대로 DO NOTHING).
+- 워커 쓰기 — 로그 행(`source` 가 `unmatched`·`external` 아님): `insert_order` False 면 `promote_order`. **항등식에 세는 것 = DB 에 실측 행이 있음이 확인된 키**: insert True · promote True · 둘 다 False(충돌 상대가 이미 실측 행 — promote 는 빈 행만 바꾸므로). 예외(어느 쪽이든)면 WARNING 후 세지 않는다. 즉 `INSERT 0 0` 은 그 자체로 쓴 행이 아니다 — 충돌 상대가 빈 행이면 승격이 성공해야만 센다. 대사 행(`unmatched`·`external`)은 예외만 아니면 일지 키에 넣는다(재시도 방지), 항등식에는 세지 않는다(C4 그대로).
+- 테스트: `test_jw_reconcile_timing.py` N1a(주문 5분 뒤 첫 기동) · N1b(첫 기동 15:45 재생 8건) · N1c(6분 정지 뒤 재시작) · N1d(≈10MB 따라잡기 — 읽기 창 여럿) · N1e(승격) · N1f(승격 실패 = 세지 않음) · N1i(커서가 뒤로 간 채 재시작 — 이미 실측인 키는 센다) · `test_jw_db.py` B1·B7·B8·B8b · pg K11. 공통 단언 = 최종 행 `log_harvest` · 그 주문으로 빈 행 쓰기 시도 0 · `[journal_gap]` 0.
+- 시험 장치: 대사가 도는 시험은 로그가 가짜 시계를 따라 자란다(`jw_testkit.LiveLog` + `heartbeats()` — 문법이 모르는 `src.engine.scanner` 줄 15초 간격). 그래서 정적 로그를 쓰던 W3·W3b·W3c 는 살아 있는 로그로 다시 썼다(W3 은 「첫 회전」 → 「행까지 쓴 첫 회전(둘째)」, W3c 는 외부 체결 1건이 `external` 행이 되는 것으로 대사가 실제로 돌았음을 확인).
+
+### N1-b (N1 과 함께) 커서 저장 실패 → 같은 덩어리 재읽기로 거듭 집계
+
+- 완료 줄과 행 모두 **(주문번호, side) 고유값**으로 센다(날이 바뀌면 비운다).
+- 테스트: N1g(저장 실패 3회 + 접수 줄 없는 매수 1건 — 경고 값 `sell_done=1 sell_rows=1 buy_done=1 buy_rows=0 unknown_reason_sells=0`) · N1h(저장 실패 3회 + 정상 주문 — `[journal_gap]` 0).
+
+### N2 (낮음) 어긋난 항등식이 60초마다 경고(하루 598줄)
+
+- `[journal_gap]` 은 **직전 대사 결과와 값이 다를 때만** 1줄(ok → 어긋남으로 돌아온 경우 포함). 접두·형식은 3.5절 그대로.
+- 테스트: N2(15분 동안 값 두 가지 → 정확히 2줄, 값 순서대로).
+
+### N3 (낮음) 재시작·첫 기동 직후 거짓 경고 1회
+
+- N1 의 W 규칙으로 없어진다. 테스트 = N1a·N1b·N1c·N1i 의 `[journal_gap]` 0.
+
+### N4 (낮음) httpx 요청 줄 하루 약 6,600줄
+
+- `python -m jw` 의 로깅 설정(`main()` 안)에서 `logging.getLogger("httpx")` 를 WARNING 으로. `jw.*` INFO 는 그대로. 테스트 = W10.
+
+### N5 (낮음) 따라잡기 순간 메모리 ≈100MB(상한 160m 의 80%)
+
+- `MAX_READ_BYTES = 4 * 1024 * 1024`(`read_chunk` 기본값도 같은 상수). 테스트 = T3b · N1d(한 회전 커서 전진 ≤ 4MiB).
+
+### N6 (참고) 정리가 64개 넘을 때만 돌아 날을 넘겨 남음
+
+- `Pairer` 는 날이 바뀌는 첫 이벤트에서 개수와 무관하게 대기 항목(사유 줄·신호 줄·종목상태 줄·접수 전문·짝 없는 완료 줄)을 TTL 로 정리한다. 테스트 = M5(종류마다 10개 — 다음 날 첫 이벤트 뒤 전날 시각 0개).
+
+### N7 (참고) backfill 을 인자 없이 부르면 안내 없이 exit 2
+
+- 종료 코드 2 + 표준 오류에 사용법(`backfill` 과 `usage`/`사용법`). DB 에 붙지 않는다(W9d 그대로). 테스트 = W11.
+
+### N8 (참고) 실행 사용자가 자기 코드를 쓸 수 있다
+
+- Dockerfile 에서 `chown` 을 없앤다 — COPY 한 코드는 root 소유 그대로, 실행 사용자(`journal`)는 읽기만. COPY `--chown`/`--chmod` 0 · `chmod` 는 쓰기를 빼는 것만 · 실행 사용자 홈이 `/app` 아님. 테스트 = I12(이어 쓴 줄 `\` 도 합쳐 본다). ⚠️ 배포 전 확인(6절 10 과 같음): 호스트 로그 파일을 uid 1000 이 읽을 수 있어야 한다.
+
+### 충족 가능성
+
+- Red 가 scratchpad 시제품(리포 밖, `jw/{main,db,config,pairing,__main__}.py`·`Dockerfile` 만 고친 사본)으로 워커 280 전부 통과(`--log-level=DEBUG` 포함) · pg K10·K11 통과(실 Postgres, 워커 역할)를 확인했다.
+- 시제품 돌연변이 10종 — 벽시계 기준 → N1d · W 없을 때도 대사 → N1a·N1b·N1c·N1d·N1i · 승격 없음 → N1e·N1f · 승격 실패도 셈 → N1f · 완료 줄/행 중복 집계 → N1g·N1h · 경고 매번 → N2 · 엄격 집계(이미 실측=안 셈) → N1i · 날짜 경계 정리 없음 → M5 가 잡는다. 창 꽉 참 건너뜀 제거만 0건(위 N1 둘째 줄).
+- 문서: `journal_worker/README.md` 의 「1회 상한 20MB」 는 Green/동기화 때 4MiB 로 고친다.

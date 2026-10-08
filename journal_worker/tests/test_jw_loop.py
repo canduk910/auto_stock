@@ -101,6 +101,11 @@ class FakeDB:
 
     async def insert_order(self, row):
         self.calls.append(("insert_order", row["order_no"]))
+        return True                        # 보완2 N1 — 새로 넣었으면 True
+
+    async def promote_order(self, row):    # 보완2 N1 — 빈 행 승격(이 가짜 DB 에는 빈 행이 없다)
+        self.calls.append(("promote_order", row["order_no"]))
+        return False
 
     async def fill_order_division(self, *a):
         self.calls.append(("fill_order_division",) + tuple(a))

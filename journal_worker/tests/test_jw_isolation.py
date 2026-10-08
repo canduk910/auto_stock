@@ -288,3 +288,45 @@ def test_i11_role_sql_example_uses_hex_password():
     assert re.search(r"openssl rand -hex \d+", text), "예시는 openssl rand -hex 로 만든 값을 쓴다"
     assert not re.search(r"journal_pw=\"?\$\(openssl", text), (
         "psql 인자 안에서 즉석 생성하면 그 값을 secrets/journal_worker.env 에 옮길 길이 없다 — 변수에 먼저 담는다")
+
+
+# ── cycle412 보완2 Red — N8(참고): 실행 사용자가 자기 코드를 고칠 수 있다 ────────────────
+#
+# 직전 판정: Dockerfile 이 `chown -R journal:journal /app` 으로 코드(`/app/jw`)까지 실행 사용자 소유로 넘겼다.
+# 워커가 뚫리면 다음 재시작부터 돌 코드를 스스로 바꿀 수 있다. 코드는 root 소유 그대로(COPY 기본) 두고
+# 실행 사용자는 읽기만 한다.
+#
+# | # | 계약 |
+# |---|---|
+# | I12 | RUN 에 `chown` 0 · COPY/ADD 에 `--chown`/`--chmod` 0 · `chmod` 는 쓰기를 빼는 것(`a-w` 꼴)만 · `useradd` 의 홈이 `/app` 아니다 |
+
+
+def _docker_instructions() -> list[str]:
+    """줄 끝 `\\` 이어 쓰기를 한 지시문으로 합친다(`RUN a && \\ chown …` 도 RUN 으로 본다)."""
+    out, cur = [], ""
+    for ln in _docker_code_lines():
+        if ln.endswith("\\"):
+            cur += ln[:-1] + " "
+            continue
+        out.append(cur + ln)
+        cur = ""
+    if cur:
+        out.append(cur)
+    return out
+
+
+def test_i12_code_stays_root_owned_and_read_only_for_runtime_user():
+    code = _docker_instructions()
+    bad = []
+    for ln in code:
+        if re.match(r"^(COPY|ADD)\b", ln, re.I) and re.search(r"--ch(own|mod)\b", ln):
+            bad.append(f"COPY 소유권/권한 지정: {ln}")
+        if re.match(r"^RUN\b", ln, re.I):
+            if re.search(r"\bchown\b", ln):
+                bad.append(f"chown: {ln}")
+            for m in re.finditer(r"\bchmod\s+((?:-\w+\s+)*)(\S+)", ln):
+                if not re.fullmatch(r"[ugoa]*-[rwxX]+", m.group(2)):
+                    bad.append(f"chmod 는 쓰기를 빼는 것만: {ln}")
+            if re.search(r"\buseradd\b", ln) and re.search(r"(-d|--home(-dir)?)[\s=]+/app\b", ln):
+                bad.append(f"실행 사용자 홈이 코드 디렉터리: {ln}")
+    assert bad == [], "실행 사용자가 자기 코드를 쓸 수 있다 — " + " | ".join(bad)

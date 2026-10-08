@@ -10,6 +10,8 @@ ALTER 가 그 뒤에서 기다리고, 그 뒤로 backend 의 `trade_history` 쓰
 | B3 | 주문 행 = `ON CONFLICT (order_date, order_no, side) DO NOTHING` · 주문구분 채우기 = `order_division IS NULL` 일 때만 |
 | B4 | jw/ 어디에도 `.transaction(` · `BEGIN` 없음 · `jw/db.py` 는 httpx·sleep 을 모른다(트랜잭션 안 HTTP·sleep 원천 차단) |
 | B5 | JSONB 칸(signal·params·inputs)은 dict 그대로 넘기거나 json 문자열 — 어느 쪽이든 인자 수가 SQL 자리표시자 수와 같다 |
+| B7 | (보완2 N1) `insert_order` 는 새로 넣었는지를 돌려준다 — `INSERT 0 1` → True · `INSERT 0 0`(이미 있음) → False |
+| B8 | (보완2 N1) `promote_order(row)` = 단문 `UPDATE trade_journal_orders` 1개 — 같은 키의 행이 `unmatched`·`external` 일 때만(WHERE), 빈 칸만 채운다(COALESCE · 전략 `'unknown'` 은 빈 칸) · source 는 로그 행 것 · `UPDATE 1` → True · `UPDATE 0` → False |
 """
 from __future__ import annotations
 
@@ -26,14 +28,17 @@ pytestmark = pytest.mark.unit
 
 
 class FakeConn:
-    def __init__(self, fetchrow_result=None, fetch_result=None):
+    def __init__(self, fetchrow_result=None, fetch_result=None, status=None):
         self.calls: list[tuple[str, str, tuple]] = []
         self._row = fetchrow_result
         self._rows = fetch_result or []
+        self._status = status
 
     async def execute(self, sql, *args):
         self.calls.append(("execute", sql, args))
-        return "INSERT 0 1"
+        if self._status is not None:
+            return self._status
+        return "UPDATE 1" if sql.lstrip().upper().startswith("UPDATE") else "INSERT 0 1"
 
     async def fetch(self, sql, *args):
         self.calls.append(("fetch", sql, args))
@@ -80,6 +85,7 @@ def _run(coro):
 
 @pytest.mark.parametrize("method,args", [
     ("insert_order", (ROW,)),
+    ("promote_order", (ROW,)),
     ("fill_order_division", (date(2026, 10, 13), "0000300100", "SELL", "01")),
     ("insert_stop", (EVENT,)),
     ("load_cursor", ()),
@@ -168,3 +174,44 @@ def test_b6_last_stop_rows_carries_pos_order_no():
     sql = " ".join(conn.calls[0][1].split())
     assert re.search(r"\bpos_order_no\b", sql.split("FROM")[0]), f"SELECT 칸에 pos_order_no 가 없다: {sql}"
     assert got[("kojiro", "005930")]["pos_order_no"] == "0000100000"
+
+
+# ── cycle412 보완2 Red — N1: 쓴 행만 센다 · 빈 행을 실측으로 승격한다 ──────────────────
+
+@pytest.mark.parametrize("status,expected", [("INSERT 0 1", True), ("INSERT 0 0", False)])
+def test_b7_insert_order_reports_whether_a_row_was_added(status, expected):
+    got = _run(jw("db").JournalDB(FakeConn(status=status)).insert_order(ROW))
+    assert got is expected, f"{status} → {got!r} (기대 {expected!r}) — INSERT 0 0 을 쓴 행으로 세면 실측 행이 버려진 것을 못 본다"
+
+
+def _norm(sql: str) -> str:
+    return " ".join(sql.split())
+
+
+def test_b8_promote_order_fills_only_empty_cells_of_empty_rows():
+    conn = FakeConn()
+    got = _run(jw("db").JournalDB(conn).promote_order(ROW))
+    assert got is True
+    (kind, sql, args) = conn.calls[0]
+    n = _norm(sql)
+    assert kind == "execute" and n.upper().startswith("UPDATE TRADE_JOURNAL_ORDERS SET"), n
+    where = re.split(r"\bWHERE\b", n, flags=re.I)
+    assert len(where) == 2, n
+    assert re.search(r"\border_date\s*=\s*\$\d+", where[1]) and re.search(r"\border_no\s*=\s*\$\d+", where[1]) \
+        and re.search(r"\bside\s*=\s*\$\d+", where[1]), f"키 셋으로 한 행만: {n}"
+    assert re.search(r"\bsource\s+IN\s*\(\s*'(unmatched|external)'\s*,\s*'(unmatched|external)'\s*\)", where[1], re.I), (
+        f"빈 행(unmatched·external)만 바꾼다 — 이미 실측인 행은 건드리지 않는다: {n}")
+    sets = where[0]
+    for col in ("reason_code", "reason_sub", "judge_price", "order_price", "order_division", "exchange",
+                "parent_order_no", "fired_line", "effective_line", "signal", "params"):
+        assert re.search(rf"\b{col}\s*=\s*COALESCE\(\s*(trade_journal_orders\.)?{col}\s*,", sets, re.I), (
+            f"{col} 은 빈 칸일 때만 채운다: {n}")
+    assert re.search(r"\bsource\s*=\s*\$\d+", sets), f"source 는 로그 행 것으로: {n}"
+    assert re.search(r"\bstrategy\s*=", sets) and "'unknown'" in sets, f"전략 'unknown' 은 빈 칸으로 본다: {n}"
+    assert not re.search(r"\b(ticker|noted_at|order_date|order_no|side)\s*=", sets), f"키·종목·기록 시각은 바꾸지 않는다: {n}"
+    pos = {int(x) for x in re.findall(r"\$(\d+)", n)}
+    assert pos == set(range(1, len(args) + 1)), f"자리표시자 {sorted(pos)} ↔ 인자 {len(args)}개"
+
+
+def test_b8b_promote_order_reports_no_change():
+    assert _run(jw("db").JournalDB(FakeConn(status="UPDATE 0")).promote_order(ROW)) is False

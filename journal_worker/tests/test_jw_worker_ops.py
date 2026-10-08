@@ -4,15 +4,23 @@
 |---|---|---|
 | W2·W2b | 2 `main.py:100` `trade_strategies={}` | 워커가 `trade_history` 를 주문번호로 조회해 짝짓기에 넘긴다(새 DB 메서드 없이 `JournalDB.trades_since`) — 폴백 매수·부모 없는 재주문 행이 전략을 갖고 저장된다 |
 | W2c | 2 저장 실패가 같은 회차 다른 행을 지움 | 행 단위 예외 격리 — 한 행의 쓰기 실패는 그 행만 잃고 WARNING(주문번호 포함), 같은 회차 다른 행·커서 저장은 계속된다. `rotate()` 는 예외를 올리지 않는다 |
-| W3 | 3 대사(W3) 실행 루프 미연결 | `run_forever` 첫 회전 안에서 대사가 돈다 — 일지에 없는 체결 `trade_history` 행이 `unmatched`/`external` 행(047 칸 전부)으로 저장된다 |
+| W3 | 3 대사(W3) 실행 루프 미연결 | `run_forever` 회전 안에서 대사가 돈다 — 행까지 쓴 첫 회전(둘째 회전)에 일지에 없는 체결 `trade_history` 행이 `unmatched`/`external` 행(047 칸 전부)으로 저장된다(보완2 N1: 행을 쓰기 전에는 대사하지 않는다) |
 | W3b | 3 | 항등식이 깨지면 `[journal_gap]` WARNING(접두 고정, `jw` 로거) |
-| W3c | 3 | 정상 흐름(한 회전 보류 포함)에서는 `[journal_gap]` 0줄 · 일지에 있는 주문으로 대사 행을 다시 쓰지 않는다 |
+| W3c | 3 | 정상 흐름(한 회전 보류 포함)에서는 `[journal_gap]` 0줄 · 일지에 있는 주문으로 대사 행을 다시 쓰지 않는다(대사가 실제로 돌았음 = 외부 체결 1건이 `external` 행이 된다) |
 | W3d | 3 대사 실패 | 대사(trade_history 조회) 예외는 WARNING 으로 남기고 그 회전의 수확(행 쓰기·커서)은 계속된다 |
 | W3e | 3 `run_forever` 가 예외를 소리 없이 삼킴 | 회전 예외 = `jw` 로거 WARNING(예외 문구 포함) + 백오프 |
 | W3f | 3 | G0/G1 조회 실패(`degraded` — 리포터 키 오설정 등)도 WARNING |
 | W3g | 3 워커 패키지에 로그 0줄 | `python -m jw run` 이 `main()` 안에서 표준 출력·평문(JSON 아님)·INFO 로 로깅을 설정한다 |
 | W9·W9b | 9 `create_pool` 기본값(연결 10개) | run·backfill 모두 `min_size`·`max_size` 를 명시 — 1 ≤ min ≤ max ≤ 2 |
 | W9c·W9d | 8 backfill CLI | `python -m jw backfill <경로…>` = 종료 코드 0 · `log_restore` 행 · 경로가 없으면 사용법 오류이고 DB 에 붙지 않는다 |
+
+보완2(직전 판정 N1·N4·N7, 계약 7절) — 대사 기준이 「행까지 쓴 로그 줄의 시각」 이 되어 W3·W3b·W3c 는 시계를 따라
+자라는 로그(`jw_testkit.LiveLog` + 심장 박동 줄)로 다시 쓴다. 정적 로그면 기준 시각이 멈춰 대사가 돌지 않는다.
+
+| # | 결함 | 계약 |
+|---|---|---|
+| W10 | N4 httpx 요청 줄(하루 약 6,600줄) | `python -m jw run` 이 `httpx` 로거를 WARNING 이상으로 둔다 — `jw.*` INFO 는 그대로 |
+| W11 | N7 backfill 을 인자 없이 부르면 안내 없이 exit 2 | 종료 코드 2 + 표준 오류(또는 출력)에 사용법 문구(`backfill` 과 `usage`/`사용법`) |
 """
 from __future__ import annotations
 
@@ -25,7 +33,7 @@ from datetime import timedelta, timezone
 import httpx
 import pytest
 
-from jw_testkit import GOLDEN_LOG, ORDER_KEYS, FakeJournalDB, jw, kst, log_line
+from jw_testkit import GOLDEN_LOG, ORDER_KEYS, FakeJournalDB, LiveLog, heartbeats, jw, kst, log_line
 
 pytestmark = pytest.mark.unit
 
@@ -107,6 +115,29 @@ def _spin(tmp_path, lines, db, *, rotations, handler=_ok):
     return w
 
 
+def _spin_live(tmp_path, lines, db, *, rotations, handler=_ok, boot_at=START):
+    """`_spin` 과 같되 로그가 시계를 따라 자란다(보완2 N1 — 대사 기준 = 행까지 쓴 로그 줄의 시각)."""
+    log = LiveLog(tmp_path, lines)
+    clock = Clock(boot_at)
+    log.advance(clock.t)
+    client = jw("http").build_client(base_url="http://backend:8000", reporter_key="rk",
+                                     transport=httpx.MockTransport(handler))
+    w = jw("main").Worker(client=client, db=db, log_dir=tmp_path, now=clock)
+    n = {"sleeps": 0}
+
+    async def sleep(d):
+        n["sleeps"] += 1
+        clock.t = clock.t + timedelta(seconds=d)
+        log.advance(clock.t)
+
+    async def go():
+        async with client:
+            await jw("main").run_forever(w.rotate, sleep=sleep, stop=lambda: n["sleeps"] >= rotations)
+
+    asyncio.run(go())
+    return w
+
+
 def _jw_warnings(caplog, prefix=""):
     return [r for r in caplog.records if r.levelno >= logging.WARNING
             and (r.name == "jw" or r.name.startswith("jw."))
@@ -167,13 +198,13 @@ def test_w2c_one_failing_row_does_not_take_the_others_down(tmp_path, caplog):
 
 # ── W3 대사 연결 ──────────────────────────────────────────────────────────────
 
-def test_w3_reconcile_runs_within_first_run_forever_rotation(tmp_path):
+def test_w3_reconcile_runs_within_run_forever_rotations(tmp_path):
     db = FakeJournalDB(trade_rows=[
         th("0000100200", "BUY", kst(2026, 10, 13, 9, 50, 0), ticker="000660"),   # 10분 전 체결 · 일지 없음
     ])
-    _spin(tmp_path, [], db, rotations=1)
+    _spin_live(tmp_path, heartbeats(kst(2026, 10, 13, 9, 45), kst(2026, 10, 13, 10, 30)), db, rotations=2)
     rows = db.rows(order_no="0000100200")
-    assert len(rows) == 1, "run_forever 첫 회전 안에서 대사가 돌지 않았다(일지 밖 체결이 행이 안 됐다)"
+    assert len(rows) == 1, "run_forever 회전 안에서 대사가 돌지 않았다(행까지 쓴 첫 회전에 일지 밖 체결이 행이 안 됐다)"
     r = rows[0]
     assert set(ORDER_KEYS) <= set(r)
     assert (r["side"], r["source"], r["strategy"], r["ticker"], r["reason_code"]) == (
@@ -184,8 +215,9 @@ def test_w3_reconcile_runs_within_first_run_forever_rotation(tmp_path):
 def test_w3b_gap_is_reported_once_rows_are_settled(tmp_path, caplog):
     caplog.set_level(logging.INFO)
     lines = [done("10:00:08", "SELL", "005930", 3, 0, "0000300100")]   # 완료 줄만 — 접수 줄 없음
+    lines += heartbeats(kst(2026, 10, 13, 9, 55), kst(2026, 10, 13, 10, 30))
     db = FakeJournalDB(trade_rows=[th("0000300100", "SELL", kst(2026, 10, 13, 10, 0, 8))])
-    _spin(tmp_path, lines, db, rotations=16)   # 10:00:10 → 10:03:55 (보류·120초 문턱을 넘긴다)
+    _spin_live(tmp_path, lines, db, rotations=16)   # 10:00:10 → 10:03:55 (보류·120초 문턱을 넘긴다)
     gaps = _jw_warnings(caplog, "[journal_gap] ")
     assert gaps, "항등식이 깨졌는데 [journal_gap] 이 없다"
     assert "sell_done=1" in gaps[-1].getMessage() and "sell_rows=0" in gaps[-1].getMessage()
@@ -197,14 +229,23 @@ def test_w3c_normal_flow_reports_no_gap_and_no_reconcile_rows(tmp_path, caplog):
     lines = [done("10:00:08", "SELL", "005930", 3, 0, "0000300100"),
              sell_accept("10:00:08", "FORCE_CLEAR", "0000300100"),
              done("10:00:09", "BUY", "000660", 3, 0, "0000200100"),
-             buy_accept("10:00:09", "0000200100")]
+             buy_accept("10:00:09", "0000200100"),
+             # 외부(HTS) 체결 1건 — 접수 전문만 있고 우리 접수·완료 줄은 없다. external 행이 생기면 대사가 이 시각을
+             # 넘어 실제로 돈 것이다(정상 두 주문의 무경보가 공허하지 않다).
+             L("10:00:30", "src.realtime.handler",
+               "[order_notice] order_no=0000042300 orig_order_no= side=BUY rctf=0 kind=01 cond=0 ticker=199800 "
+               "qty=0000000003 price=000000000 hour=100030 rfus=0 acpt=1 ord_qty=000000003")]
+    lines += heartbeats(kst(2026, 10, 13, 9, 55), kst(2026, 10, 13, 10, 30))
     db = FakeJournalDB(trade_rows=[th("0000300100", "SELL", kst(2026, 10, 13, 10, 0, 8)),
-                                   th("0000200100", "BUY", kst(2026, 10, 13, 10, 0, 9), ticker="000660")])
-    _spin(tmp_path, lines, db, rotations=16)
+                                   th("0000200100", "BUY", kst(2026, 10, 13, 10, 0, 9), ticker="000660"),
+                                   th("0000042300", "BUY", kst(2026, 10, 13, 10, 0, 30), ticker="199800")])
+    _spin_live(tmp_path, lines, db, rotations=16)
     assert _jw_warnings(caplog, "[journal_gap] ") == [], "정상 흐름(한 회전 보류 포함)에서 거짓 [journal_gap]"
-    assert sorted(r["source"] for r in db.orders.values()) == ["log_harvest", "log_harvest"]
-    assert sorted(db.order_attempts) == ["0000200100", "0000300100"], (
-        f"일지에 있는 주문으로 대사 행을 다시 쓰려 했다: {db.order_attempts}")
+    assert sorted((r["order_no"], r["source"]) for r in db.orders.values()) == [
+        ("0000042300", "external"), ("0000200100", "log_harvest"), ("0000300100", "log_harvest")]
+    empty = [a for a in db.attempts if a[0] == "insert_order" and a[1] in ("0000200100", "0000300100")
+             and a[3] in ("unmatched", "external")]
+    assert empty == [], f"일지에 있는 주문으로 대사 행을 다시 쓰려 했다: {empty}"
 
 
 def test_w3d_reconcile_failure_is_logged_and_harvest_continues(tmp_path, caplog):
@@ -389,3 +430,32 @@ def test_w9d_backfill_cli_without_paths_is_a_usage_error(boot):
     code = _main(["backfill"])
     assert code not in (0, None), "경로 없이 backfill 을 부르면 사용법 오류여야 한다"
     assert boot["pool_kwargs"] == [], "경로가 없으면 DB 에 붙지도 않는다"
+
+
+# ── 보완2 W10 (N4) — httpx 요청 줄 ──────────────────────────────────────────────
+
+def test_w10_run_silences_httpx_request_lines(boot):
+    hx = logging.getLogger("httpx")
+    saved = hx.level
+    try:
+        with bare_root_logger():
+            jw("__main__").main(["run"])
+            hx_eff = hx.getEffectiveLevel()
+            jw_eff = logging.getLogger("jw.main").getEffectiveLevel()
+    finally:
+        hx.setLevel(saved)
+    assert hx_eff >= logging.WARNING, (
+        f"httpx 가 요청마다 INFO 1줄(하루 약 6,600줄) — httpx 로거를 WARNING 으로 둔다(지금 {logging.getLevelName(hx_eff)})")
+    assert jw_eff <= logging.INFO, "jw.* INFO 는 그대로 나와야 한다"
+
+
+# ── 보완2 W11 (N7) — backfill 사용법 ───────────────────────────────────────────
+
+def test_w11_backfill_without_paths_prints_usage(boot, capsys):
+    code = _main(["backfill"])
+    out = capsys.readouterr()
+    text = out.err + out.out
+    assert code == 2, f"사용법 오류의 종료 코드는 2 — 지금 {code!r}"
+    assert "backfill" in text and ("usage" in text.lower() or "사용법" in text), (
+        f"인자 없이 부르면 사용법을 알려 준다 — 출력: {text!r}")
+    assert boot["pool_kwargs"] == []

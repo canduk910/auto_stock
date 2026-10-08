@@ -1,13 +1,13 @@
 """cycle412 Red — 로그 꼬리 읽기(설계 관찰자안 3절 W1 · 8절 한계 9).
 
 운영 로그는 `TimedRotatingFileHandler` 가 자정에 **이름을 바꿔** 회전한다(압축 없음, `src/main.py`).
-하루 235~376MB 라 한 번에 다 읽지 않는다(1회 상한 20MB). 커서(파일·inode·offset)는 DB 에 둔다.
+하루 235~376MB 라 한 번에 다 읽지 않는다(1회 상한 4MiB — 보완2 N5). 커서(파일·inode·offset)는 DB 에 둔다.
 
 | # | 계약 |
 |---|---|
 | T1 | 커서 없음 → 현재 파일 0 부터 · 반환 줄은 개행 없이 · 새 커서 = (파일명, inode, 읽은 끝) |
 | T2 | 끝의 미완성 줄은 소비하지 않는다(다음 호출에서 완결되면 읽는다) |
-| T3 | 한 번에 `max_bytes` 이하 · 기본값 = `MAX_READ_BYTES`(20MiB) |
+| T3 | 한 번에 `max_bytes` 이하 · 기본값 = `MAX_READ_BYTES`(4MiB — 보완2 N5) |
 | T4 | 회전: 커서 inode 가 바뀐 파일(`auto_stock.log.YYYY-MM-DD`)에 남은 꼬리를 먼저 끝까지 읽고 새 파일 0 으로 |
 | T5 | 옛 파일이 없어졌으면 새 파일 0 부터 · 같은 inode 인데 잘렸으면 0 부터 |
 | T6 | 깨진 바이트는 대체 문자로(예외 없음) |
@@ -65,10 +65,11 @@ def test_t3_read_cap(tmp_path):
     assert total == [f"line{i:03d}" for i in range(100)]
 
 
-def test_t3b_default_cap_is_20_mib():
-    assert jw("config").MAX_READ_BYTES == 20 * 1024 * 1024
+def test_t3b_default_cap_is_4_mib():
+    """보완2 N5 — 20MiB 창이면 따라잡을 때 순간 메모리 ≈100MB(상한 160m 의 80%). 4MiB 로 줄인다."""
+    assert jw("config").MAX_READ_BYTES == 4 * 1024 * 1024
     sig = inspect.signature(jw("tailer").read_chunk)
-    assert sig.parameters["max_bytes"].default == 20 * 1024 * 1024
+    assert sig.parameters["max_bytes"].default == 4 * 1024 * 1024
 
 
 def test_t4_rotation_reads_old_tail_then_new_file(tmp_path):
