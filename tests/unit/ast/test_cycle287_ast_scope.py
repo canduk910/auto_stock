@@ -789,8 +789,13 @@ _SRC_TREE_FILES = 179  # 직전 = 트랙 C — 실비용 사후 대사: 신규 4
 # (cycle405 L5) = `0e4226c91676b44f006f7135e7bff92c628c3daa6851796e3cd459b859f08f8d`.
 # cycle411(실비용 합치기) — 신규 leaf 1개 + 기존 파일 9개 변경. 직전 값(cycle410) =
 # `d09ab4f9d221f5efbcc9a047baeced64d1a434af4c3143a7d7afe2c5a8ab32ce`.
+# cycle411 보완(통합 검증 결함 고정, 2026-10-08) — `engine/cost_overlay.py`(`today_window_rates`·
+# `stock_master_etf_flags`·`overlay_pairs` L2/M2/M3/M4)·`engine/te_metrics.py`(`win_gross`/
+# `loss_gross`)·`routes/{history,performance,costs,balance}.py`(H1·H2 전체population·M1·M2·
+# M3·M4) 가 바뀌었다. 신규/삭제 파일 0 — 파일 수 179 그대로. 직전 값(cycle411 1차 Green) =
+# `d467c75edd15dc1fe0db4a13bfaec835ac17b60661d32a8d7db748faccf1ee98`.
 _SRC_TREE_DIGEST = (
-    "d467c75edd15dc1fe0db4a13bfaec835ac17b60661d32a8d7db748faccf1ee98"
+    "0343b79a6a35618e93df5ceac04a78acfbb146ad1449d7e7f4bac30fd8c46327"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

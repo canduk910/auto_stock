@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 import logging
-from datetime import timedelta
+from datetime import date
 
 from fastapi import APIRouter
 
 from src.api.balance import get_balance, get_buyable
 from src.db import trade_cost as trade_cost_db
-from src.db._kst import today_kst
+from src.db import trade_history as trade_history_db
 from src.db.stock_master import get as stock_master_get
 from src.engine import cost_overlay
 from src.engine.etf_like import is_etf_like
@@ -21,6 +21,68 @@ from src.models.response import ApiResponse
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/balance", tags=["balance"])
+
+
+async def _open_pair_buy_fee(pair: dict, rates: dict) -> tuple[float, str]:
+    """`open` 페어의 매수 수수료 — 정산 있으면 대사값, 없으면 추정 요율(cycle411 보완 M1).
+
+    분할 매도 뒤(남은 수량 < 원 매수 수량)면 남은 수량 비율만 센다(L2 와 같은 식).
+    페어·매수일·조회가 모두 온전해야 계산하고, 그 밖은 0.0·"estimated" 로 graceful.
+    """
+    ids = pair.get("buy_trade_ids") or []
+    buy_date_raw = pair.get("buy_date")
+    if not ids or not buy_date_raw:
+        return 0.0, "estimated"
+    try:
+        d = date.fromisoformat(str(buy_date_raw))
+    except ValueError:
+        return 0.0, "estimated"
+    try:
+        cost_rows = await trade_cost_db.get_daily_range(d, d)
+        full_trades = await trade_cost_db.get_trades_by_status(d, d)
+    except Exception:
+        logger.debug("[cost_overlay] 잔고 페어 비용 조회 실패 graceful", exc_info=True)
+        return 0.0, "estimated"
+
+    costs = cost_overlay.trade_costs(cost_rows, full_trades, rates)
+    entries = [costs[i] for i in ids if i in costs]
+    if not entries:
+        return 0.0, "estimated"
+
+    fee_total = sum(c["fee"] for c in entries)
+    total_buy_qty = sum(float(t["quantity"]) for t in full_trades if t.get("id") in ids)
+    remaining_qty = float(pair.get("buy_qty") or 0)
+    ratio = (remaining_qty / total_buy_qty) if total_buy_qty else 1.0
+    status = cost_overlay.day_cost_status([c["cost_status"] for c in entries])
+    return fee_total * ratio, status
+
+
+async def _buy_fee_paid_by_ticker(holdings: list, rates: dict) -> dict[str, tuple[float, str]]:
+    """보유 종목마다 `(buy_fee_paid, buy_fee_status)` (cycle411 보완 M1).
+
+    엔진 페어(`trade_history.get_trade_pairs` 모듈 속성 경유)의 open 페어가 있으면 그
+    매수 수수료, 없으면(수동 매수 등) 매입금액 × 추정 수수료율 · "estimated".
+    """
+    out: dict[str, tuple[float, str]] = {}
+    for h in holdings:
+        try:
+            pairs = await trade_history_db.get_trade_pairs(ticker=h.ticker)
+        except Exception:
+            logger.debug("[cost_overlay] 잔고 페어 조회 실패(ticker=%s) graceful", h.ticker,
+                        exc_info=True)
+            pairs = []
+        open_pairs = [p for p in pairs if p.get("status") == "open"]
+        if not open_pairs:
+            out[h.ticker] = (float(h.purchase_amount or 0) * rates["fee_rate"], "estimated")
+            continue
+        fee_total = 0.0
+        statuses: list[str] = []
+        for p in open_pairs:
+            fee, status = await _open_pair_buy_fee(p, rates)
+            fee_total += fee
+            statuses.append(status)
+        out[h.ticker] = (fee_total, cost_overlay.day_cost_status(statuses))
+    return out
 
 
 @router.get("", response_model=ApiResponse)
@@ -42,16 +104,23 @@ async def balance():
         logger.warning("[balance] get_balance 실패 — success=False 로 흡수: %s", exc, exc_info=True)
         return ApiResponse(success=False, data=None, message=f"잔고 조회 실패: {exc}")
 
-    # cycle411 — 예상 매도비용 요율(수수료율+세율, ETF 는 수수료율만). 최근 30달력일
-    # 정산 표본이 없으면 기본값으로 떨어진다(`estimate_rates`) — DB 조회 실패도 같은
-    # fail-open(「살까 말까」 가 아니라 화면 참고용 추정이라 전체 잔고를 막지 않는다).
+    # cycle411 — 예상 매도비용 요율(수수료율+세율, ETF 는 수수료율만). 서버 오늘 기준
+    # 30일 창(M2, `today_window_rates`)에 정산 표본이 없으면 기본값으로 떨어진다 — DB
+    # 조회 실패도 같은 fail-open(「살까 말까」 가 아니라 화면 참고용 추정이라 전체
+    # 잔고를 막지 않는다).
     try:
-        today = today_kst()
-        cost_rows = await trade_cost_db.get_daily_range(today - timedelta(days=30), today)
+        sell_rates = await cost_overlay.today_window_rates()
     except Exception:
         logger.debug("[cost_overlay] 잔고 요율 조회 실패 graceful — 기본값", exc_info=True)
-        cost_rows = []
-    sell_rates = cost_overlay.estimate_rates(cost_rows)
+        sell_rates = {"fee_rate": cost_overlay.DEFAULT_FEE_RATE,
+                     "tax_rate": cost_overlay.DEFAULT_TAX_RATE, "source": "default"}
+
+    # cycle411 보완 M1 — 보유마다 매수 수수료(buy_fee_paid)·상태(buy_fee_status).
+    try:
+        buy_fee_by_ticker = await _buy_fee_paid_by_ticker(holdings, sell_rates)
+    except Exception:
+        logger.debug("[cost_overlay] 잔고 매수수수료 조회 실패 graceful", exc_info=True)
+        buy_fee_by_ticker = {}
 
     # cycle339 — 종목별 청산선(손절가·목표가). in-memory registry 조회뿐이라
     # DB·KIS 왕복이 0 이다. 🔴 registry 를 못 읽어도 잔고는 그대로 나가야 하므로
@@ -109,6 +178,10 @@ async def balance():
             sell_rates["fee_rate"] if is_etf else sell_rates["fee_rate"] + sell_rates["tax_rate"]
         )
         payload["cost_status"] = "estimated"
+        # cycle411 보완 M1 — 이 종목이 낸(또는 추정한) 매수 수수료.
+        fee_paid, fee_status = buy_fee_by_ticker.get(h.ticker, (0.0, "estimated"))
+        payload["buy_fee_paid"] = fee_paid
+        payload["buy_fee_status"] = fee_status
         # 섹터명 — 위에서 이미 조회한 basics.raw 를 주입해 재조회를 막는다
         # (`sector_naming` 단일 진실원: bstp_kor_isnm → master_raw → 미분류).
         payload["sector"] = await resolve_sector_name(

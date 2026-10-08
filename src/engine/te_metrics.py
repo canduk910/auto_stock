@@ -47,6 +47,9 @@ class TeRrMetrics:
     realized_net_sum_krw: float = 0.0
     fee_sum: float = 0.0
     tax_sum: float = 0.0
+    # cycle411 보완 M5 — 세전 승/패 수(세전 화면의 승률·승/패 표시용). 빈 모집단 = 0.
+    win_gross: int = 0
+    loss_gross: int = 0
 
 
 def _empty_metrics(strategy_id: str) -> TeRrMetrics:
@@ -244,4 +247,6 @@ def compute_te_rr(
         realized_net_sum_krw=realized_net_sum_krw,
         fee_sum=fee_sum,
         tax_sum=tax_sum,
+        win_gross=gross_core["win"],
+        loss_gross=gross_core["loss"],
     )

@@ -106,23 +106,27 @@ async def costs_today(strategy: str | None = Query(None)) -> ApiResponse:
     """오늘 체결 × (정산 or 추정 요율) — 전략별 + total (OrderMonitor 용, cycle411).
 
     `scheduler.py` 무접촉 경로 — `trade_cost_db`·`cost_overlay` 만 읽는다.
+
+    cycle411 보완 H2 — 배분은 오늘 **전체** COMPLETED+PARTIAL 체결로 하고 `strategy` 는
+    배분 뒤에 거른다. 요율은 오늘 하루가 아니라 서버 오늘 기준 30일 창(M2) · ETF 판정은
+    stock_master 구분 코드 우선(M3).
     """
     today = today_kst()
     try:
         cost_rows = await trade_cost_db.get_daily_range(today, today)
         trades = await trade_cost_db.get_trades_by_status(today, today, ["COMPLETED", "PARTIAL"])
+        rates = await cost_overlay.today_window_rates()
+        etf_flags = await cost_overlay.stock_master_etf_flags(trades)
     except Exception as exc:
         logger.warning("%s today 조회 실패: %r", _MARKER_ERROR, exc, exc_info=True)
         raise HTTPException(status_code=500, detail="오늘 실비용 조회 실패")
 
-    if strategy:
-        trades = [t for t in trades if t.get("strategy") == strategy]
+    costs = cost_overlay.trade_costs(cost_rows, trades, rates, etf_flags=etf_flags)
 
-    rates = cost_overlay.estimate_rates(cost_rows)
-    costs = cost_overlay.trade_costs(cost_rows, trades, rates)
+    target_trades = trades if not strategy else [t for t in trades if t.get("strategy") == strategy]
 
     by_strategy: dict[str, dict] = {}
-    for t in trades:
+    for t in target_trades:
         sid = t.get("strategy") or trade_cost.UNATTRIBUTED
         c = costs.get(t.get("id"), {"fee": 0.0, "tax": 0.0, "cost_status": "estimated"})
         acc = by_strategy.setdefault(sid, {"gross_pnl": 0.0, "fee": 0.0, "tax": 0.0})
@@ -144,7 +148,8 @@ async def costs_today(strategy: str | None = Query(None)) -> ApiResponse:
         "tax": sum(s["tax"] for s in strategies),
         "net_pnl": sum(s["net_pnl"] for s in strategies),
     }
-    statuses = [c["cost_status"] for c in costs.values()] or ["estimated"]
+    statuses = ([costs[t.get("id")]["cost_status"] for t in target_trades if t.get("id") in costs]
+                or ["estimated"])
 
     return ApiResponse(success=True, data={
         "date": today.isoformat(),
@@ -162,17 +167,22 @@ async def costs_daily(
     from_: str = Query(..., alias="from"),
     to: str = Query(...),
 ) -> ApiResponse:
-    """날짜별 비용·슬리피지·`cost_status` 추이(cycle411)."""
+    """날짜별 비용·슬리피지·`cost_status` 추이(cycle411).
+
+    cycle411 보완 M2 — 요율은 화면 범위(`from`~`to`)가 아니라 서버 오늘 기준 30일
+    창(`today_window_rates`) · M3 — ETF 판정은 stock_master 구분 코드 우선.
+    """
     start, end = _parse_range(from_, to)
     try:
         cost_rows = await trade_cost_db.get_daily_range(start, end)
         trades = await trade_cost_db.get_trades_by_status(start, end, ["COMPLETED", "PARTIAL"])
+        rates = await cost_overlay.today_window_rates()
+        etf_flags = await cost_overlay.stock_master_etf_flags(trades)
     except Exception as exc:
         logger.warning("%s daily 조회 실패: %r", _MARKER_ERROR, exc, exc_info=True)
         raise HTTPException(status_code=500, detail="실비용 일별 조회 실패")
 
-    rates = cost_overlay.estimate_rates(cost_rows)
-    costs = cost_overlay.trade_costs(cost_rows, trades, rates)
+    costs = cost_overlay.trade_costs(cost_rows, trades, rates, etf_flags=etf_flags)
 
     by_date: dict[date, dict] = {}
     for t in trades:

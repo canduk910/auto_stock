@@ -21,6 +21,11 @@ async def _net_overlay_rows(records: list[dict], strategy: str) -> list[dict] | 
 
     조회 실패(DB 오류 등) = None — 호출부가 기존 gross 응답을 그대로 유지한다
     (사용자 결정 10-08 §2 `[cost_overlay_unavailable]`).
+
+    cycle411 보완 H2 — 배분(`cost_overlay.trade_costs`)은 항상 그 날짜 범위의 **전체**
+    COMPLETED+PARTIAL 체결로 하고, `strategy` 필터는 배분 **뒤에** 그 전략 체결만 걸러
+    `by_date` 로 더한다(배분 전에 거르면 그 전략 혼자 그 날 정산 전체를 떠안는다). 요율은
+    화면 날짜 범위가 아니라 서버 오늘 기준 30일 창(M2).
     """
     if not records:
         return []
@@ -29,18 +34,21 @@ async def _net_overlay_rows(records: list[dict], strategy: str) -> list[dict] | 
     try:
         cost_rows = await trade_cost_db.get_daily_range(start, end)
         trades = await trade_cost_db.get_trades_by_status(start, end, ["COMPLETED", "PARTIAL"])
+        rates = await cost_overlay.today_window_rates()
+        etf_flags = await cost_overlay.stock_master_etf_flags(trades)
     except Exception:
         logger.warning("[cost_overlay_unavailable] /api/performance 실비용 조회 실패", exc_info=True)
         return None
 
-    if strategy and strategy != "total":
-        trades = [t for t in trades if t.get("strategy") == strategy]
+    tc_by_id = cost_overlay.trade_costs(cost_rows, trades, rates, etf_flags=etf_flags)
 
-    rates = cost_overlay.estimate_rates(cost_rows)
-    tc_by_id = cost_overlay.trade_costs(cost_rows, trades, rates)
+    target_trades = (
+        trades if not strategy or strategy == "total"
+        else [t for t in trades if t.get("strategy") == strategy]
+    )
 
     by_date: dict = {}
-    for t in trades:
+    for t in target_trades:
         c = tc_by_id.get(t.get("id"))
         if c is None:
             continue
@@ -54,6 +62,20 @@ async def _net_overlay_rows(records: list[dict], strategy: str) -> list[dict] | 
         for d, v in by_date.items()
     }
     return cost_overlay.net_twr(records, costs_by_date)
+
+
+#: cycle411 보완 H1 — "개시 이래" 전체 조회용(100년, 실질 전체 — `get_performance` 의
+#: `LIMIT $2` 가 실제 행 수보다 크면 전체를 돌려준다).
+_SINCE_INCEPTION_DAYS = 36_500
+
+
+async def _since_inception_net_rows(strategy: str) -> list[dict] | None:
+    """`net_cumulative_return_rate` 가 창이 아니라 **개시 이래**로 쌓이도록 전체 기간을
+    읽어 재누적한다(H1 — 창 첫 행부터 다시 쌓지 않는다). 조회 실패 = None(호출부가 gross
+    로 폴백).
+    """
+    full_records = await get_performance(days=_SINCE_INCEPTION_DAYS, strategy=strategy)
+    return await _net_overlay_rows(full_records, strategy)
 
 
 @router.get("/summary", response_model=ApiResponse)
@@ -82,10 +104,16 @@ async def summary(strategy: str = "total"):
     # 자리로 뭉개진다 — net 은 4자리로 둔다(비교 단언은 라운딩 전 크기 차이를 본다).
     net_total_profit_rate = round(cum_rate, 4)
     net_avg_daily_profit_rate = round(avg_rate, 4)
-    net_rows = await _net_overlay_rows(records, strategy)
-    if net_rows:
-        net_total_profit_rate = round(net_rows[-1]["net_cumulative_return_rate"], 4)
-        net_daily_rates = [r["net_daily_profit_rate"] for r in net_rows]
+    # cycle411 보완 H1 — 누적은 창(30일)이 아니라 개시 이래 전체로 재누적한다(창 첫 행부터
+    # 다시 쌓지 않는다). 평균은 그대로 창(`records`) 범위만 본다.
+    net_rows_full = await _since_inception_net_rows(strategy)
+    if net_rows_full:
+        net_total_profit_rate = round(net_rows_full[-1]["net_cumulative_return_rate"], 4)
+        net_by_date = {r["date"]: r for r in net_rows_full}
+        net_daily_rates = [
+            net_by_date[r["date"]]["net_daily_profit_rate"]
+            for r in records if r["date"] in net_by_date
+        ]
         if net_daily_rates:
             net_avg_daily_profit_rate = round(sum(net_daily_rates) / len(net_daily_rates), 4)
 
@@ -138,7 +166,9 @@ async def daily(days: int = 30, strategy: str = "total"):
     """
     records = await get_performance(days=days, strategy=strategy)
     rows = [dict(r) for r in records]
-    net_rows = await _net_overlay_rows(records, strategy)
+    # cycle411 보완 H1 — net 누적은 이 창이 아니라 개시 이래 전체로 재누적한 값에서
+    # 이 창의 날짜만 집어 쓴다(창 첫 행부터 다시 쌓지 않는다).
+    net_rows = await _since_inception_net_rows(strategy)
     if net_rows is None:
         for r in rows:
             r["daily_fee"] = None

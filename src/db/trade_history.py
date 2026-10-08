@@ -664,7 +664,9 @@ async def get_trade_pairs(
         profit_loss, profit_rate, status('closed'|'open'), strategy,
         buy_order_nos, sell_order_nos, pair_key,
         buy_trade_ids, sell_trade_ids(cycle411 — 실비용 귀속용 체결 행 id 병행 리스트,
-        order_nos 와 같은 관례. id 없는 행은 목록에서만 빠진다)
+        order_nos 와 같은 관례. id 없는 행은 목록에서만 빠진다),
+        partial_sell_trade_ids(cycle411 보완 L2 — open 페어의 분할 매도 SELL 행 id
+        시간순, closed 는 항상 `[]`)
 
     cycle276 (2026-09-11) — 주문번호 3키 **추가**(사영만, 페어링 알고리즘 무변경).
     손익 화면은 테이블이 아니라 매번 계산되는 뷰라 행을 가리키는 안정적 키가 없었다.
@@ -785,6 +787,8 @@ async def get_trade_pairs(
                 "pair_key": f"{strat}:{tkr}:{buy_onos[0]}" if buy_onos else None,
                 "buy_trade_ids": list(buy_id_buf),
                 "sell_trade_ids": list(sell_id_buf),
+                # cycle411 보완 L2b — closed 페어는 판 행이 이미 sell_trade_ids 에 있다.
+                "partial_sell_trade_ids": [],
             })
 
         for t in trades:
@@ -868,6 +872,8 @@ async def get_trade_pairs(
                 "buy_trade_ids": list(buy_id_buf),
                 # open 페어는 아직 매도가 없다 — `None` 이 아니라 `[]`(위 sell_order_nos 와 같은 이유).
                 "sell_trade_ids": [],
+                # cycle411 보완 L2a — 이 사이클 안에서 이미 판 SELL 행 id(시간순, 분할매도 귀속용).
+                "partial_sell_trade_ids": list(sell_id_buf),
             })
 
     # 4) 신규 매수가 위로 오도록 buy_date+buy_time DESC. open이 closed보다 우선

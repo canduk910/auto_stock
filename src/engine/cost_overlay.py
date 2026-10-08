@@ -26,11 +26,12 @@ Red 메모 = `_workspace/red/cycle411/cost_overlay.md`.
 from __future__ import annotations
 
 import logging
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal, InvalidOperation
 from typing import Iterable
 
 from src.db import trade_cost as trade_cost_db
+from src.db._kst import today_kst
 from src.engine import trade_cost
 from src.engine.etf_like import is_etf_like
 
@@ -39,6 +40,9 @@ logger = logging.getLogger(__name__)
 #: 사용자 결정 10-08 Q1 — 최근 30달력일 `trade_cost_daily` 표본이 없을 때의 기본값.
 DEFAULT_FEE_RATE = 0.00142
 DEFAULT_TAX_RATE = 0.00199
+
+#: cycle411 보완 M2 — 추정 요율 창 길이(달력일). 화면 날짜 범위가 아니라 항상 이 길이다.
+RATE_WINDOW_DAYS = 30
 
 
 def _num(v) -> Decimal:
@@ -67,7 +71,54 @@ def estimate_rates(cost_rows: list[dict]) -> dict:
     return {"fee_rate": fee_rate, "tax_rate": tax_rate, "source": "measured"}
 
 
-def _is_etf(ticker: str, ticker_name: str | None, etf_tickers: frozenset[str]) -> bool:
+async def today_window_rates(window_days: int = RATE_WINDOW_DAYS) -> dict:
+    """서버 오늘(KST) 기준 최근 `window_days`일 정산 행으로 요율을 추정한다(cycle411 보완 M2).
+
+    화면/계산 범위의 날짜(screen range)가 아니라 **항상 이 창**이다 — 모든 라우트
+    (`/api/costs/{today,daily}` · `/api/history` · `/api/history/pnl` ·
+    `/api/performance/daily`·`summary` · `/api/strategies/te` · `/api/balance`) 공통.
+    """
+    today = today_kst()
+    rows = await trade_cost_db.get_daily_range(today - timedelta(days=window_days), today)
+    return estimate_rates(rows)
+
+
+async def stock_master_etf_flags(trades: list[dict]) -> dict[str, bool]:
+    """체결 행들의 종목코드마다 `stock_master.get()` 구분 코드로 ETF 판정한다(cycle411 보완 M3).
+
+    `src.db.stock_master` **모듈 속성 경유**(테스트가 그 모듈의 `get` 을 간다). 조회 실패·
+    None(캐시 미스)인 종목은 결과에서 제외한다 — `trade_costs(..., etf_flags=...)` 의
+    `etf_tickers`→이름 폴백이 대신한다.
+    """
+    from src.db import stock_master
+
+    names: dict[str, str | None] = {}
+    for t in trades:
+        tk = t.get("ticker")
+        if tk and tk not in names:
+            names[tk] = t.get("ticker_name")
+
+    out: dict[str, bool] = {}
+    for tk, name in names.items():
+        try:
+            basics = await stock_master.get(tk)
+        except Exception:
+            logger.debug("[cost_overlay] stock_master 조회 실패(ticker=%s) — 이름 폴백", tk, exc_info=True)
+            continue
+        if basics is None:
+            continue
+        out[tk] = is_etf_like(basics.raw, name)
+    return out
+
+
+def _is_etf(
+    ticker: str,
+    ticker_name: str | None,
+    etf_tickers: frozenset[str],
+    etf_flags: dict[str, bool] | None = None,
+) -> bool:
+    if etf_flags is not None and ticker in etf_flags:
+        return etf_flags[ticker]
     if ticker in etf_tickers:
         return True
     return is_etf_like(None, ticker_name)
@@ -78,15 +129,38 @@ def trade_costs(
     trades: list[dict],
     rates: dict,
     etf_tickers: frozenset[str] = frozenset(),
+    etf_flags: dict[str, bool] | None = None,
 ) -> dict:
     """체결 행(`id`) 단위 비용 — 정산 행이 있으면 대사값, 없으면 추정 요율.
 
     반환 = `{id: {"fee": float, "tax": float, "cost_status": "settled"|"estimated",
     "allocated": bool}}`. `allocated` = 같은 날·종목 정산 1행을 2개 이상 체결 행이 나눠
     받았을 때만 True(추정 행은 항상 False — 사용자 결정 10-08 §6).
+
+    `etf_flags`(cycle411 보완 M3) — `{ticker: bool}`. 판정이 있는 종목은 그 값만 보고
+    (이름 키워드 폴백보다 우선), 없는 종목은 `etf_tickers` → 이름 폴백(기존대로).
     """
     settled_rows = trade_cost.allocate_rows(cost_rows, trades, key="id")
     settled_by_id = {r["id"]: r for r in settled_rows if r["id"] is not None}
+
+    # cycle411 보완 H2b — 정산 행에 매도 체결금액이 없는데(sll_amt==0) 세금이 있으면
+    # (예: 당일 KIS 정산 지연·수기 조정) allocate_rows 의 sell_share→total_share 폴백이
+    # 그 세금을 매수 행에 몰아준다. 몰지 않고 미배분으로 둔다(id 단위에서만 — 전략 귀속
+    # `attribute`/`allocate_rows(key="strategy")` 는 트랙 C 요약 행위 보존, H2c).
+    zero_tax_keys = {
+        (c.get("trad_dt"), str(c.get("pdno") or ""))
+        for c in cost_rows
+        if _num(c.get("sll_amt")) == 0 and _num(c.get("tl_tax")) > 0
+    }
+    for key in zero_tax_keys:
+        logger.warning(
+            "[cost_overlay_tax_unallocated] trad_dt=%s pdno=%s — 매도 없이 잡힌 세금, 미배분",
+            key[0], key[1],
+        )
+    if zero_tax_keys:
+        for r in settled_by_id.values():
+            if (r.get("trad_dt"), str(r.get("pdno") or "")) in zero_tax_keys:
+                r["tl_tax"] = 0.0
 
     out: dict = {}
     for t in trades:
@@ -107,7 +181,9 @@ def trade_costs(
         side = str(t.get("trade_type") or "").upper()
         fee = amt * rates["fee_rate"]
         tax = 0.0
-        if side == "SELL" and not _is_etf(str(t.get("ticker") or ""), t.get("ticker_name"), etf_tickers):
+        if side == "SELL" and not _is_etf(
+            str(t.get("ticker") or ""), t.get("ticker_name"), etf_tickers, etf_flags
+        ):
             tax = amt * rates["tax_rate"]
         out[tid] = {"fee": fee, "tax": tax, "cost_status": "estimated", "allocated": False}
     return out
@@ -174,9 +250,16 @@ async def overlay_pairs(pairs: list[dict]) -> dict[int, dict] | None:
 
     거래 단위 귀속 — `buy_trade_ids`·`sell_trade_ids`(cycle411 DB 추가)로 체결 행 비용을
     모아 더한다(수수료 = 매수+매도 전부, 세금 = 매도 행만 — 매수 행의 세금은 이미 0).
-    보유 중(open) 페어 = 낸 매수 수수료(정산/추정) + 예상 매도비용(현재가 추정, 사용자 결정
-    10-08 §3·§5 — 현재가는 `buy_price + profit_loss/buy_qty` 로 페어 안에서만 역산한다,
-    scanner 시세 캐시에 의존하지 않는다). 추정 행의 `allocated` 는 항상 False(§6).
+    보유 중(open) 페어 = 낸 매수 수수료(정산/추정) × 남은 수량 비율 + 예상 매도비용(현재가
+    추정, 사용자 결정 10-08 §3·§5 — 현재가는 `buy_price + profit_loss/buy_qty` 로 페어
+    안에서만 역산한다, scanner 시세 캐시에 의존하지 않는다). 분할 매도 뒤(`partial_sell_trade_ids`,
+    cycle411 보완 L2) 판 몫은 `partial_fee`(매수 수수료 × 판 비율 + 매도 수수료)·`partial_tax`
+    (매도세)로 따로 낸다 — 총합 보존(보유 몫 낸 수수료 + 판 몫 = 정산 합). 추정 행의 `allocated`
+    는 항상 False(§6).
+
+    요율은 화면 날짜 범위가 아니라 **서버 오늘 기준 30일 창**(M2, `today_window_rates`)이고,
+    ETF 판정은 `stock_master` 구분 코드 우선(M3, `stock_master_etf_flags`)이다. `slippage_won`
+    은 그 페어 체결 행 중 `order_price` 가 하나도 없으면 `None`(M4, 있으면 덮인 행만 합산).
 
     비용 조회가 실패하면 `[cost_overlay_unavailable]` WARNING 을 남기고 None 을 돌려준다
     (호출부가 기존 응답을 그대로 둔다 — 사용자 결정 10-08 §2).
@@ -195,34 +278,61 @@ async def overlay_pairs(pairs: list[dict]) -> dict[int, dict] | None:
                 pass
     if not dates:
         return {}
+    # cycle411 보완 L2 — open 페어의 분할 매도(`partial_sell_trade_ids`)는 날짜를 모른다
+    # (매수일 이후 ~ 지금 사이). 상한을 "오늘"까지 넓혀 그 체결·정산 행을 범위 안에 둔다.
+    dates.append(today_kst())
 
     try:
         cost_rows = await trade_cost_db.get_daily_range(min(dates), max(dates))
         trades = await trade_cost_db.get_trades_by_status(
             min(dates), max(dates), ["COMPLETED", "PARTIAL"])
+        rates = await today_window_rates()
+        etf_flags = await stock_master_etf_flags(trades)
     except Exception:
         logger.warning("[cost_overlay_unavailable] 실비용 조회 실패", exc_info=True)
         return None
 
-    rates = estimate_rates(cost_rows)
-    costs = trade_costs(cost_rows, trades, rates)
+    costs = trade_costs(cost_rows, trades, rates, etf_flags=etf_flags)
     trades_by_id = {t["id"]: t for t in trades if t.get("id") is not None}
 
     for p in pairs:
-        ids = list(p.get("buy_trade_ids") or []) + list(p.get("sell_trade_ids") or [])
+        buy_ids = list(p.get("buy_trade_ids") or [])
+        sell_ids = list(p.get("sell_trade_ids") or [])
+        partial_ids = list(p.get("partial_sell_trade_ids") or [])
+        ids = buy_ids + sell_ids
         entries = [costs[i] for i in ids if i in costs]
 
+        ticker = p.get("ticker") or ""
+        etf_flag = etf_flags.get(ticker)
+        is_etf = etf_flag if etf_flag is not None else is_etf_like(None, p.get("ticker_name"))
+
         if p.get("status") == "open":
-            buy_fee = sum(c["fee"] for c in entries)
-            qty = float(p.get("buy_qty") or 0)
+            buy_entries = [costs[i] for i in buy_ids if i in costs]
+            buy_fee_total = sum(c["fee"] for c in buy_entries)
+
+            total_buy_qty = sum(
+                float(trades_by_id[i]["quantity"]) for i in buy_ids if i in trades_by_id
+            )
+            remaining_qty = float(p.get("buy_qty") or 0)
+            ratio_remaining = (remaining_qty / total_buy_qty) if total_buy_qty else 1.0
+            ratio_sold = 1.0 - ratio_remaining
+
             buy_price = float(p.get("buy_price") or 0)
             pl = p.get("profit_loss")
-            cur_price = (buy_price * qty + float(pl)) / qty if (pl is not None and qty) else 0.0
-            sell_amt = cur_price * qty
+            cur_price = (
+                (buy_price * remaining_qty + float(pl)) / remaining_qty
+                if (pl is not None and remaining_qty) else 0.0
+            )
+            sell_amt = cur_price * remaining_qty
             fee_est = sell_amt * rates["fee_rate"]
-            tax_est = 0.0 if is_etf_like(None, p.get("ticker_name")) else sell_amt * rates["tax_rate"]
-            fee, tax = buy_fee + fee_est, tax_est
+            tax_est = 0.0 if is_etf else sell_amt * rates["tax_rate"]
+            fee = buy_fee_total * ratio_remaining + fee_est
+            tax = tax_est
             cost_status, allocated = "estimated", False
+
+            partial_entries = [costs[i] for i in partial_ids if i in costs]
+            p["partial_fee"] = buy_fee_total * ratio_sold + sum(c["fee"] for c in partial_entries)
+            p["partial_tax"] = sum(c["tax"] for c in partial_entries)
         else:
             fee = sum(c["fee"] for c in entries)
             tax = sum(c["tax"] for c in entries)
@@ -245,14 +355,17 @@ async def overlay_pairs(pairs: list[dict]) -> dict[int, dict] | None:
         p["cost_bp"] = round((fee + tax) / denom * 1e4, 4) if denom else None
 
         slip = 0.0
+        covered = False
         for i in (p.get("buy_trade_ids") or []):
             t = trades_by_id.get(i)
             if t and t.get("order_price") is not None:
+                covered = True
                 slip += (float(t["price"]) - float(t["order_price"])) * float(t["quantity"])
         for i in (p.get("sell_trade_ids") or []):
             t = trades_by_id.get(i)
             if t and t.get("order_price") is not None:
+                covered = True
                 slip += (float(t["order_price"]) - float(t["price"])) * float(t["quantity"])
-        p["slippage_won"] = slip
+        p["slippage_won"] = slip if covered else None
 
     return trades_by_id

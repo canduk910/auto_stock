@@ -197,8 +197,10 @@ def test_performance_daily_returns_records_array(contract_env):
     body = r.json()
     assert isinstance(body["data"], list)
     assert len(body["data"]) == 1
-    # query param 전달 확인
-    assert contract_env.calls.get_performance[-1]["days"] == 7
+    # query param 전달 확인 — cycle411 보완 H1 이후 `daily()` 는 `get_performance` 를 두 번
+    # 부른다(이 창 `days=7` 1회 + `net_cumulative_return_rate` 개시 이래 재누적용 전체 조회
+    # 1회, `_since_inception_net_rows`). 창 자체를 확인하는 단언이라 **첫** 호출을 본다.
+    assert contract_env.calls.get_performance[0]["days"] == 7
 
 
 def test_performance_recompute_returns_success(contract_env):

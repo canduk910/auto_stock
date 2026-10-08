@@ -509,20 +509,20 @@ KIS OpenAPI 가 NXT(넥스트레이드 ATS) 주문·시세를 정식 지원하�
 | GET | `/api/trading/status` | 현재 상태 조회 |
 | GET | `/api/trading/positions` | 보유 포지션 상세만 (BalanceTable 전용 분리) |
 | GET | `/api/trading/orders` | 주문 추적 상태만 (OrderMonitor 전용 분리) |
-| GET | `/api/balance` | 잔고 조회 (예수금 + 보유종목, 종목별 NXT/KRX 거래시장 정보 join) |
+| GET | `/api/balance` | 잔고 조회 (예수금 + 보유종목, 종목별 NXT/KRX 거래시장 정보 join). **cycle411 보완** 보유마다 `buy_fee_paid`·`buy_fee_status` |
 | GET | `/api/balance/buyable` | 매수 가능 금액 조회 |
-| GET | `/api/history?page=&size=` | 거래 내역 (페이징). **cycle411** 체결 행마다 `fee`·`cost_status` + SELL 행 `tax`·`net_profit_loss` |
-| GET | `/api/history/pnl?page=&size=&strategy=&ticker=` | 매매손익 — 매수/매도 페어 1행 (포지션 0 사이클 단위 가중평균). 보유 중은 open 페어 (미실현 손익은 `ticker_prices` 현재가). **cycle411** 페어마다 `fee`·`tax`·`net_profit_loss`·`net_profit_rate`·`cost_bp`·`slippage_won`·`cost_status`·`allocated` + summary 순손익 합계 |
+| GET | `/api/history?page=&size=` | 거래 내역 (페이징). **cycle411** 체결 행마다 `fee`·`cost_status` + SELL 행 `tax`·`net_profit_loss`. **보완** 배분은 페이지가 아니라 그 날짜 전체 체결로 한다 |
+| GET | `/api/history/pnl?page=&size=&strategy=&ticker=` | 매매손익 — 매수/매도 페어 1행 (포지션 0 사이클 단위 가중평균). 보유 중은 open 페어 (미실현 손익은 `ticker_prices` 현재가). **cycle411** 페어마다 `fee`·`tax`·`net_profit_loss`·`net_profit_rate`·`cost_bp`·`slippage_won`·`cost_status`·`allocated` + summary 순손익 합계. **보완** 분할 매도 뒤 보유 페어에 `partial_fee`·`partial_tax`, 비용 모름은 summary 4칸 `None`(0 아님) |
 | GET | `/api/llm-evaluations?order_nos=<CSV>&trade_date=` | **cycle276** AI 매수평가 배치 요약 — 키는 `"<trade_date>\|<order_no>"` 복합 키다(같은 주문번호가 여러 날짜에 있으면 날짜마다 한 키). 거래 내역 두 그리드의 AI 매수평가 버튼 활성 판정용. CSV 는 공백·중복 제거 후 1~200개(0개·초과 422), `trade_date` 형식 위반 422 |
 | GET | `/api/llm-evaluations/{order_no}?trade_date=` | **cycle276** 단건 상세 (모달 본문) — 화이트리스트 53키 사영, 계좌번호는 `account_no_masked` 로만 나간다. 기록 없음 404 / DB 예외 500 (두 경우를 섞지 않는다) |
-| GET | `/api/performance/summary` | 실적 요약 (TWR 누적 + 일평균 실현 수익률). **cycle411** `net_total_profit_rate`·`net_avg_daily_profit_rate`(순손익 기준) 추가 |
-| GET | `/api/performance/daily` | 일별 실적 (실현손익 기반 + TWR 누적 + 외부 입출금). **cycle411** `daily_fee`·`daily_tax`·`daily_net_pnl`·`net_daily_profit_rate`·`net_cumulative_return_rate`·`cost_status` 추가 |
-| GET | `/api/costs/today?strategy=` | **cycle411** 오늘 체결 × (정산 or 추정 요율), 전략별 + total — OrderMonitor 용 |
-| GET | `/api/costs/daily?from=&to=` | **cycle411** 날짜별 비용·슬리피지·`cost_status` 추이 |
+| GET | `/api/performance/summary` | 실적 요약 (TWR 누적 + 일평균 실현 수익률). **cycle411** `net_total_profit_rate`·`net_avg_daily_profit_rate`(순손익 기준) 추가. **보완** `net_total_profit_rate` 는 조회 창이 아니라 개시 이래 전체로 재누적한다 |
+| GET | `/api/performance/daily` | 일별 실적 (실현손익 기반 + TWR 누적 + 외부 입출금). **cycle411** `daily_fee`·`daily_tax`·`daily_net_pnl`·`net_daily_profit_rate`·`net_cumulative_return_rate`·`cost_status` 추가. **보완** `net_cumulative_return_rate` 는 이 창이 아니라 개시 이래 전체 재누적, 전략 필터는 배분 뒤에 건다 |
+| GET | `/api/costs/today?strategy=` | **cycle411** 오늘 체결 × (정산 or 추정 요율), 전략별 + total — OrderMonitor 용. **보완** 전략 필터는 배분 뒤에 걸고 요율은 서버 오늘 기준 30일 창 |
+| GET | `/api/costs/daily?from=&to=` | **cycle411** 날짜별 비용·슬리피지·`cost_status` 추이. **보완** 요율은 화면 범위가 아니라 서버 오늘 기준 30일 창 |
 | POST | `/api/performance/recompute` | trade_history 기반 daily_performance 전체 소급 재계산 (멱등) |
 | GET | `/api/strategies` | 전략 목록 + 비중 + 상태 + 타겟가 + 스윙 `scan_stats` 깔때기 |
 | GET | `/api/strategies/params-schema` | cycle278 파라미터 카탈로그 전체 + 전략별 적용 키·현재값·기본값. 편집 폼은 **이 한 응답**으로 렌더한다 (키·범위·선택지 프론트 하드코딩 금지) |
-| GET | `/api/strategies/te?months=3` | cycleF 전략별 TE(트레이딩 예지치)/RR(손익비) 최근 N개월(`months`×30일) 지표 — 관찰 전용, 5분 프로세스 캐시. 전략별 계산 실패는 그 전략만 빈 값으로 격리. **cycle411** 판정은 순손익 기준, 세전은 `*_gross` 칸으로 병기 |
+| GET | `/api/strategies/te?months=3` | cycleF 전략별 TE(트레이딩 예지치)/RR(손익비) 최근 N개월(`months`×30일) 지표 — 관찰 전용, 5분 프로세스 캐시. 전략별 계산 실패는 그 전략만 빈 값으로 격리. **cycle411** 판정은 순손익 기준, 세전은 `*_gross` 칸으로 병기(**보완** 세전 승/패 수 `win_gross`·`loss_gross` 추가) |
 | PUT | `/api/strategies/weights` | 전략별 비중 수정 (매수금액 하한선 검증). body `{weights: {strategy_id: ratio}}` — **단위는 비율 `0.0~1.0`, 퍼센트(0~100) 금지**(2026-08-18 확정). 범위 위반 422, Σ>1.0 은 `success=false`(저장 미수행), 부분 payload(Σ<1) 허용. `GET /api/strategies` 의 `weight` 와 단위가 같아 왕복 항등 |
 | PUT | `/api/strategies/{id}/params` | 전략 파라미터 수정 (부분 dict **병합** — 요청에 없는 키는 보존). **미지 키·읽기 전용 키·자료형·선택지·범위·예산 불변식 위반은 422 다**(cycle278). 오류가 하나라도 있으면 아무것도 저장하지 않는다. 알 수 없는 전략 id 는 200 + `success=false` |
 | GET | `/api/strategies/system/auto-start` | 자동 매매 설정 조회 |
