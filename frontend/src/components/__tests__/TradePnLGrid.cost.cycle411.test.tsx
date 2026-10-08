@@ -5,7 +5,7 @@
  *
  * 계약
  *  - G1: 머리 칸 `수수료`·`세금`·`순손익`·`순손익율`·`비용률`·`슬리피지` 가 있다. 기존 `매매손익`·`손익율` 칸은 그대로(세전).
- *  - G2: 행 값 — 순손익 `+18,366원`, 순손익율 `+2.62%`, 비용률 `23.01bp`, 슬리피지 `2,000원`.
+ *  - G2: 행 값 — 순손익 `+18,366원`, 순손익율 `+2.62%`, 비용률 `23.0bp`(cycle411b L1 — 소수 1자리), 슬리피지 `2,000원`.
  *  - G3: `cost_status="estimated"` 행은 `추정` 배지, `allocated=true` 행은 `배분` 배지(행 testid `cost-badge-*`).
  *        정산·단독 행에는 둘 다 없다.
  *  - G4: 요약 바 — `pnl-summary-net`(순손익 합 `realized_net_total_krw`) · `pnl-summary-cost`(수수료+세금)
@@ -137,7 +137,7 @@ describe('cycle411 — TradePnLGrid 실비용 칸', () => {
     expect(text).toContain('+20,000원') // 기존 매매손익(세전)
     expect(text).toContain('+18,366원')
     expect(text).toContain('+2.62%')
-    expect(text).toContain('23.01bp')
+    expect(text).toContain('23.0bp') // cycle411b L1 — bp 소수 1자리
     expect(text).toContain('2,000원')
     expect(text).toContain('1,433')
   })

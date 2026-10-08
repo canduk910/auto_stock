@@ -76,3 +76,39 @@
 7. TE: `realized_sum_krw` 세전 유지 + `realized_net_sum_krw` 별도 · `*_gross` 는 te_pct·te_krw_avg·win_rate 3개 + `rr_gross`·`verdict_gross` 도 둔다(판정이 바뀐 이유를 화면에서 비교할 수 있게).
 8. `/api/performance/daily` MSW 목 배열 정직화 — 채택.
 9. localStorage 키 `autostock.costBasis` — 채택.
+
+## 보완 결정 (통합 검증 결함 고정, 메인 세션 결정 10-08)
+
+tester 합성 시나리오 x1~x10 이 찾은 결함을 회귀 테스트로 고정한다. 작성 = tdd-engineer, 2026-10-08.
+
+### 테스트 파일
+
+| 파일 | 덮는 것 |
+|---|---|
+| `tests/unit/routes/test_cycle411b_cost_overlay_route_fixes.py` | H1 · H2 · M1 · M2 · M3 · M4 · L2 (라우트) — 시계 freezegun **2026-10-07 12:00 KST** 고정 |
+| `tests/unit/engine/test_cycle411b_cost_overlay_engine_fixes.py` | H2(세금 미배분) · M3(`etf_flags`) · M5(`win_gross`·`loss_gross`) |
+| `tests/unit/db/test_cycle411b_partial_sell_ids.py` | L2 `partial_sell_trade_ids` |
+| `frontend/src/components/__tests__/{PerformanceCard,ProfitChart,OrderMonitor,BalanceTable,TradePnLGrid,TradeHistoryGrid}.cycle411b.test.tsx` · `costsTypes.cycle411b.test.ts` | M1 · M4 · M5 · M6 · L1 · L3 (화면) |
+| `frontend/src/components/__tests__/TradePnLGrid.cost.cycle411.test.tsx` G2 | **기대값 1줄 갱신** `23.01bp` → `23.0bp` (L1 — 위 계약 「비용률 `NN.NNbp`」 를 대체) |
+
+### 기대값
+
+- **H1 세후 누적 = 개시 이래.** `/api/performance/daily` 행의 `net_cumulative_return_rate` 와 `/api/performance/summary` 의 `net_total_profit_rate` 는 창 첫 행부터 다시 쌓지 않는다 — 개시 이래 전 기간 `daily_performance` 로 net TWR 을 계산하거나, 창 직전까지의 누적을 이어 붙인다(둘 다 허용 — 테스트는 창 밖 비용이 없는 경우만 본다). 비용 0 이면 net 누적 = `cumulative_return_rate`(daily 1e-9 · summary 는 기존 4자리 반올림이라 1e-4). 창 밖 행은 라우트 모듈 속성 `src.routes.performance.get_performance(days=…)` 로 더 길게 읽는다(테스트 가짜는 `days` 를 존중한다).
+- **H2 배분 모집단.** 배분은 항상 **그 날짜 범위 전체 COMPLETED+PARTIAL 체결**(`trade_cost_db.get_trades_by_status`)로 한 뒤 id·전략·페이지로 거른다 — `/api/history`(페이지·`strategy=`) · `/api/performance/daily?strategy=` · `/api/costs/today?strategy=`. `/api/history` 의 CANCELLED·PENDING 행은 `fee`·`tax`·`net_profit_loss`·`cost_status` 를 싣지 않거나 None, 다른 행 몫도 그대로.
+  - 정산 행 매도 체결금액 합이 0 인데 `tl_tax > 0` 이면 세금을 매수 행에 몰지 않는다 — 그 세금은 미배분(체결 행 `tax` = 0), WARNING 1줄 `[cost_overlay_tax_unallocated] …`(공백 포함 prefix). 처리 위치 = `cost_overlay.trade_costs` — `trade_cost.attribute`/`allocate_rows(key="strategy")` 결과는 그대로(트랙 C 요약 행위 보존, H2c).
+- **M1 잔고.** `/api/balance` 보유 종목마다 `buy_fee_paid`(float) + `buy_fee_status`(`settled`|`estimated`|`mixed`). 엔진 페어(`src.db.trade_history.get_trade_pairs` **모듈 속성 경유**)의 open 페어 `buy_trade_ids` 체결 행 비용(정산 → 없으면 추정)을 더하고, 페어가 없는 보유(수동 매수)는 `purchase_amount × 추정 수수료율`, `estimated`. 분할 매도 뒤면 남은 수량 비율(L2 와 같은 식). 화면 순 평가손익 = round(평가손익 − round(평가금액 × `sell_cost_rate`) − `buy_fee_paid`) — `buy_fee_paid` 없으면 기존 식.
+- **M2 추정 요율 창.** `estimate_rates` 입력 = **서버 오늘(KST, `today_kst()`) 기준 `[today − 30일, today]`** 정산 행 — 모든 라우트 공통(`/api/costs/{today,daily}` · `/api/history` · `/api/history/pnl` · `/api/performance/daily`·`summary` · `/api/strategies/te` · `/api/balance`). 화면 날짜 범위 행은 정산 대사(배분)에만 쓴다. 표본 없으면 기본값.
+- **M3 ETF 판정.** `trade_costs(..., etf_flags: Mapping[str, bool] | None = None)` 신설 — 판정이 있는 종목은 그 값만 본다(이름 키워드보다 우선), 없으면 기존(`etf_tickers` → 이름 폴백). 라우트는 `src.db.stock_master.get(ticker)` **모듈 속성 경유**로 `is_etf_like(basics.raw, name)` 를 계산해 넘긴다(open 페어 예상 매도세도 같은 판정). `BNK금융지주`(`scty_grp_id_cd=ST`) 매도세 > 0 · `KIWOOM 200`(`EF`) 0.
+- **M4 「모름」 ≠ 0.** 비용 조회 실패 시 `/api/history/pnl` summary 의 `realized_net_total_krw`·`realized_net_rate_pct`·`fee_sum`·`tax_sum` = None. 페어 `slippage_won` = 그 페어 체결 행 중 `order_price` 가 하나도 없으면 None(있으면 덮인 행만 합산). 화면: `pnl-summary-cost`·`pnl-summary-net` 은 null 이면 `—`(`0원` 금지) · ProfitChart 는 net 칸이 null 이어도 세전 시리즈로 폴백하고 제목에 `세후` 를 달지 않는다(`세전`).
+- **M5 세전 승률.** `compute_te_rr` → `win_gross`·`loss_gross`(int, 빈 지표 0). PerformanceCard 세전 모드 = `승률 {win_rate_gross}% (승{win_gross}/패{loss_gross})`, 없으면 기존 값.
+- **M6 OrderMonitor.** `/api/costs/today` 는 세전 실현손익(`/api/trading/status`, 5초)과 같은 주기로 다시 읽는다(`refetchInterval` 등).
+- **L1 표기.** 원 단위 = 정수 원(반올림) + `원` — TradePnLGrid 수수료·세금·슬리피지·`pnl-summary-cost` · TradeHistoryGrid 순손익 · OrderMonitor 순손익 · BalanceTable 순 평가손익. 비용률 = 소수 1자리 `22.8bp`.
+- **L2 분할 매도.** DB `get_trade_pairs` 의 모든 페어에 `partial_sell_trade_ids`(open = 그 사이클 안에서 이미 판 SELL 행 id 시간순, closed = `[]`). open 페어 `fee` = 매수 수수료 × (남은 수량 ÷ `buy_trade_ids` 매수 수량 합) + 남은 수량 예상 매도수수료, `tax` = 남은 수량 예상 매도세. 판 몫은 새 칸 `partial_fee`(매수 수수료 × 판 비율 + 부분 매도 수수료) · `partial_tax`(부분 매도세). 총합 보존 = 낸 비용 합 = 정산 행 합.
+- **L3.** `frontend/src/types/costs.ts::CostDailyDay.cost_status: CostStatus | null`.
+
+### 보고만 (테스트 아님)
+- `frontend/package-lock.json` 의 이번 사이클 무관 변동(cd201f52 +23줄)은 main 버전으로 되돌릴 대상.
+
+### 실행 결과 (보완 Red, 2026-10-08)
+- 백엔드 새 3파일: 27 실패 / 2 통과 — 통과 2 = H2b2(매도 있는 날 세금은 매도 행)·H2c(`attribute` 행위 보존) 가드 성격. 실패 사유는 각 테스트가 겨냥한 결함(창 재누적 · 페이지/필터/취소 행 배분 · 화면 범위 요율 · 이름 폴백 ETF · `0.0 is None` · `KeyError: buy_fee_paid`/`win_gross`/`partial_sell_trade_ids` · `TypeError: etf_flags` · 경고 0건)
+- 프론트 새 7파일: 9 실패 / 3 통과(PB1·PB3·BB2 — 기존 행위 가드) + 갱신한 G2 1 실패. 전체 1108 중 10 실패 · 1098 통과(기존 테스트 무손상)
