@@ -67,7 +67,9 @@ async def _open_pair_buy_fee(
     2차 보완 F2 — 조회 범위는 매수일 **하루** 가 아니라 **매수일 ~ 오늘**(여러 날 매수가
     `buy_trade_ids` 에 섞여 있으면 하루만 보면 다른 날 매수분의 수수료를 놓친다). 2차
     보완 F3 — 비용 조회 자체가 실패하면 `(None, None)`(「모름」 ≠ 0). 페어·매수일이 없는
-    경우만 `(0.0, "estimated")` graceful(계산할 근거가 원래 없다).
+    경우만 `(0.0, "estimated")` graceful(계산할 근거가 원래 없다) — 3차 LOW 보완: 범위
+    조회는 성공했는데 그 체결 id 를 결과에서 못 찾은 경우(데이터 불일치)도 `(None, None)`
+    이다(근거가 있는데 못 찾은 것은 "없다" 가 아니라 "모른다").
     """
     ids = pair.get("buy_trade_ids") or []
     buy_date_raw = pair.get("buy_date")
@@ -87,7 +89,11 @@ async def _open_pair_buy_fee(
     costs = cost_overlay.trade_costs(cost_rows, full_trades, rates)
     entries = [costs[i] for i in ids if i in costs]
     if not entries:
-        return 0.0, "estimated"
+        # 3차 LOW 보완 — 범위 조회 자체는 성공했는데 이 페어의 체결 id 가 그 결과에
+        # 하나도 없다(데이터 불일치 — 날짜 범위 추론이 어긋났거나 상태 필터에 걸림).
+        # 계산할 근거가 **있는데 못 찾은** 상태라 0 으로 지어내지 않는다 — 모른다(None).
+        # (위 74·78행의 "근거가 원래 없다" 분기와는 다르다 — 거기는 기존대로 둔다.)
+        return None, None
 
     fee_total = sum(c["fee"] for c in entries)
     total_buy_qty = sum(float(t["quantity"]) for t in full_trades if t.get("id") in ids)
@@ -235,8 +241,12 @@ async def balance():
             sell_rates["fee_rate"] if is_etf else sell_rates["fee_rate"] + sell_rates["tax_rate"]
         )
         payload["cost_status"] = "estimated"
-        # cycle411 보완 M1 — 이 종목이 낸(또는 추정한) 매수 수수료.
-        fee_paid, fee_status = buy_fee_by_ticker.get(h.ticker, (0.0, "estimated"))
+        # cycle411 보완 M1 — 이 종목이 낸(또는 추정한) 매수 수수료. 3차 LOW 보완 —
+        # 기본값은 `(None, None)`이다. `h.ticker` 가 이 dict 에 없다는 것은
+        # `_buy_fee_paid_by_ticker` 가 (그 종목이 아니라) **통째로** 예외를 내 위에서
+        # `buy_fee_by_ticker = {}` 로 흡수됐다는 뜻이라 — 모든 보유종목이 "모른다" 다.
+        # `(0.0, "estimated")` 로 지어내면 실패를 "수수료 0원짜리 추정" 으로 보여준다.
+        fee_paid, fee_status = buy_fee_by_ticker.get(h.ticker, (None, None))
         payload["buy_fee_paid"] = fee_paid
         payload["buy_fee_status"] = fee_status
         # 섹터명 — 위에서 이미 조회한 basics.raw 를 주입해 재조회를 막는다

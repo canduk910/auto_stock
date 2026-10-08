@@ -47,8 +47,11 @@ RATE_WINDOW_DAYS = 30
 # ── 2차 보완 F8 — `today_window_rates()` KST 하루 단위 메모리 캐시 ──────────────
 _window_rate_cache: dict[tuple[date, int], dict] = {}
 
-# ── 2차 보완 F6 — 경고 dedupe. 키 = (kind, KST 오늘, trad_dt, pdno). ──────────
-_warned_keys: set[tuple[str, date, object, str]] = set()
+# ── 2차 보완 F6 · 3차 LOW 보완 — 경고 dedupe. 키 = (kind, trad_dt, pdno), **날짜
+# 없이** 프로세스 수명 동안 1회(날짜가 바뀌어도 다시 경고하지 않는다 — 3차 검증에서
+# "KST 오늘" 을 키에 넣어 매일 재경고하던 것을 LOW 결함으로 지목·시정). 다시 보고
+# 싶으면 `_reset_cache_for_tests()`.
+_warned_keys: set[tuple[str, object, str]] = set()
 
 
 def _reset_cache_for_tests() -> None:
@@ -60,9 +63,13 @@ def _reset_cache_for_tests() -> None:
     _warned_keys.clear()
 
 
-def _warn_once_per_day(kind: str, trad_dt, pdno: str) -> bool:
-    """`(kind, KST 오늘, trad_dt, pdno)` 당 한 번만 True — 그 뒤는 조용하다(F6)."""
-    key = (kind, today_kst(), trad_dt, pdno)
+def _warn_once(kind: str, trad_dt, pdno: str) -> bool:
+    """`(kind, trad_dt, pdno)` 당 프로세스 수명 동안 한 번만 True — 그 뒤는 조용하다.
+
+    3차 LOW 보완 — 키에 날짜를 넣지 않는다. 같은 (trad_dt, pdno) 는 다음 KST 날짜에도
+    다시 경고하지 않는다(매일 쌓이는 과거 정산 행에 대한 재경고는 신호가 아니라 잡음).
+    """
+    key = (kind, trad_dt, pdno)
     if key in _warned_keys:
         return False
     _warned_keys.add(key)
@@ -193,14 +200,35 @@ def trade_costs(
         if str(t.get("trade_type") or "").upper() == "SELL"
         and _num(t.get("price")) * _num(t.get("quantity")) > 0
     }
+
+    # 2차 보완 F5(b) — 짝이 되는 체결이 **하나도 없는** 정산 행은 비용이 조용히 사라지지
+    # 않게 경고한다(반환 dict 에는 아무것도 더하지 않는다 — 귀속할 체결 id 가 없다).
+    # `no_sell_tax_keys` 보다 **먼저** 계산한다 — 체결이 전혀 없는 키는 "매도 없이 잡힌
+    # 세금"(아래)도 동시에 참이라, 먼저 걷어내지 않으면 같은 정산 행에 경고가 두 줄
+    # 남는다(3차 LOW 보완 — 「짝 자체가 없음」 과 「짝은 있는데 매도가 아님」 은 서로 다른
+    # 사실이라 하나만 보인다 — 더 근본적인 unmatched_cost 가 이긴다).
+    trade_keys = {(t.get("trade_date"), str(t.get("ticker") or "")) for t in trades}
+    unmatched_cost_keys = {
+        (c.get("trad_dt"), str(c.get("pdno") or ""))
+        for c in cost_rows
+        if (c.get("trad_dt"), str(c.get("pdno") or "")) not in trade_keys
+    }
+    for key in unmatched_cost_keys:
+        if _warn_once("unmatched_cost", key[0], key[1]):
+            logger.warning(
+                "[cost_overlay_unmatched_cost] trad_dt=%s pdno=%s — 짝 체결 없음, 비용 미배정",
+                key[0], key[1],
+            )
+
     no_sell_tax_keys = {
         (c.get("trad_dt"), str(c.get("pdno") or ""))
         for c in cost_rows
         if _num(c.get("tl_tax")) > 0
         and (c.get("trad_dt"), str(c.get("pdno") or "")) not in sell_fill_keys
+        and (c.get("trad_dt"), str(c.get("pdno") or "")) not in unmatched_cost_keys
     }
     for key in no_sell_tax_keys:
-        if _warn_once_per_day("tax_unallocated", key[0], key[1]):
+        if _warn_once("tax_unallocated", key[0], key[1]):
             logger.warning(
                 "[cost_overlay_tax_unallocated] trad_dt=%s pdno=%s — 매도 체결 없이 잡힌 세금, 미배분",
                 key[0], key[1],
@@ -209,21 +237,6 @@ def trade_costs(
         for r in settled_by_id.values():
             if (r.get("trad_dt"), str(r.get("pdno") or "")) in no_sell_tax_keys:
                 r["tl_tax"] = 0.0
-
-    # 2차 보완 F5(b) — 짝이 되는 체결이 **하나도 없는** 정산 행은 비용이 조용히 사라지지
-    # 않게 경고한다(반환 dict 에는 아무것도 더하지 않는다 — 귀속할 체결 id 가 없다).
-    trade_keys = {(t.get("trade_date"), str(t.get("ticker") or "")) for t in trades}
-    unmatched_cost_keys = {
-        (c.get("trad_dt"), str(c.get("pdno") or ""))
-        for c in cost_rows
-        if (c.get("trad_dt"), str(c.get("pdno") or "")) not in trade_keys
-    }
-    for key in unmatched_cost_keys:
-        if _warn_once_per_day("unmatched_cost", key[0], key[1]):
-            logger.warning(
-                "[cost_overlay_unmatched_cost] trad_dt=%s pdno=%s — 짝 체결 없음, 비용 미배정",
-                key[0], key[1],
-            )
 
     out: dict = {}
     for t in trades:

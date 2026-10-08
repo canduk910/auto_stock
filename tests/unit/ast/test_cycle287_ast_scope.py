@@ -800,8 +800,14 @@ _SRC_TREE_FILES = 179  # 직전 = 트랙 C — 실비용 사후 대사: 신규 4
 # balance}.py`(B2·B4 라우트·F2/F3/F4/F8b)·`db/stock_master.py`(F1 `get_etf_group_codes`
 # 신규)가 바뀌었다. 신규/삭제 파일 0 — 파일 수 179 그대로. 직전 값(cycle411 보완) =
 # `0343b79a6a35618e93df5ceac04a78acfbb146ad1449d7e7f4bac30fd8c46327`.
+# cycle411 3차 LOW 보완(배포 가능 판정 후 남은 LOW 결함 정리, 2026-10-08) —
+# `engine/cost_overlay.py`(경고 중복 제거 + dedupe 키에서 날짜 제거)·`engine/te_metrics.py`
+# (혼재 net 상태 guard)·`routes/history.py`(trade_costs·overlay_pairs try 확장)·
+# `routes/performance.py`(trade_costs·net_twr try 확장)·`routes/balance.py`(모르는
+# 매수수수료 기본값 None)가 바뀌었다. 신규/삭제 파일 0 — 파일 수 179 그대로. 직전 값
+# (cycle411 2차 보완) = `cff7781f58a9a2237aa7312505b8a3e147efa5648c21d87766ad8c8e07dd112c`.
 _SRC_TREE_DIGEST = (
-    "cff7781f58a9a2237aa7312505b8a3e147efa5648c21d87766ad8c8e07dd112c"
+    "3c2a9773bc7aedf0ad83acf234923e5ba90ac224508ddfcc2ba61b3a055aed5b"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

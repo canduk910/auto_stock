@@ -7,7 +7,7 @@
 | B4 | `compute_te_rr(..., costs_available=False)` → `realized_net_sum_krw`·`fee_sum`·`tax_sum` = None(세전 합을 세후 칸에 담지 않는다). 판정은 페어 값 그대로(net 이 없으니 세전) |
 | F1 | `cost_overlay.stock_master_etf_flags(trades)` = `stock_master.get_etf_group_codes(고유 종목)` **1회**. `stock_master.get` 직렬 호출 0. 코드 없음·None 종목은 결과에서 빠진다(이름 폴백) · DB 함수는 `ticker = ANY($1::text[])` 1회 + 필요한 칸만(`SELECT *` 금지) |
 | F5 | (a) 「매도 없음」 은 **체결 집합**으로 판정 — 정산 행에 매도금액이 있어도 그 (날짜, 종목) 체결에 SELL 이 없으면 세금은 미배분 + `[cost_overlay_tax_unallocated] ` (b) 짝 체결이 하나도 없는 정산 행 = `[cost_overlay_unmatched_cost] ` WARNING |
-| F6 | 두 경고는 (KST 오늘, trad_dt, pdno) 당 하루 1회 — 같은 날 같은 키 두 번째 호출은 조용하다, 다음 날은 다시 1회 |
+| F6 | 두 경고는 (trad_dt, pdno) 당 **프로세스 수명** 1회 — 같은 키는 날짜가 바뀌어도 다시 경고하지 않는다(3차 LOW 보완 — 「KST 오늘」 을 키에서 뺐다. 이전엔 하루 1회였다, `test_cycle411d_cost_overlay_warn_fixes.py`) |
 | F8 | `today_window_rates()` = KST 하루 단위 메모리 캐시(같은 날 두 번째 호출은 DB 를 읽지 않는다, 다음 날 다시 읽는다). 실패는 캐시하지 않는다 |
 | 위생 | `cost_overlay._reset_cache_for_tests()` 가 요율 캐시·경고 dedupe 를 비우고, `tests/conftest.py::_reset_cost_overlay_memo`(autouse)가 매 테스트 전·후에 부른다 |
 
@@ -197,7 +197,7 @@ def test_f5c_matched_settlement_rows_do_not_warn(caplog):
     assert not _warns(caplog, "[cost_overlay_unmatched_cost] ")
 
 
-# ── F6: 경고 (KST 오늘, trad_dt, pdno) 당 하루 1회 ──────────────────────────────
+# ── F6: 경고 (trad_dt, pdno) 당 프로세스 수명 1회 (3차 LOW 보완) ───────────────
 
 def _tax_no_sell(pdno):
     return ([_t(1, "kojiro", "BUY", 100_000, 3, ticker=pdno)],
@@ -212,14 +212,16 @@ def test_f6a_tax_unallocated_same_key_same_day_warns_once(caplog):
     assert len(_warns(caplog, "[cost_overlay_tax_unallocated] ")) == 1
 
 
-def test_f6b_tax_unallocated_warns_again_on_next_kst_day(caplog):
-    """가드 — dedupe 는 하루 단위다(영구 침묵 금지)."""
+def test_f6b_tax_unallocated_stays_silent_on_next_kst_day(caplog):
+    """3차 LOW 보완 — dedupe 는 프로세스 수명 동안이다(날짜가 바뀌어도 다시 경고하지
+    않는다). 날짜 포함 재경고가 필요하면 `_reset_cache_for_tests()` 로 직접 비운다
+    (`test_cycle411d_cost_overlay_warn_fixes.py::test_l8b/l8c` 가 그 둘을 각각 지킨다)."""
     trades, rows = _tax_no_sell("200060")
     with freeze_time(DAY1) as fr, caplog.at_level(logging.DEBUG):
         cost_overlay.trade_costs(rows, trades, RATES)
         fr.move_to(DAY2)
         cost_overlay.trade_costs(rows, trades, RATES)
-    assert len(_warns(caplog, "[cost_overlay_tax_unallocated] ")) == 2
+    assert len(_warns(caplog, "[cost_overlay_tax_unallocated] ")) == 1
 
 
 def test_f6c_unmatched_cost_same_key_same_day_warns_once(caplog):

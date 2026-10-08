@@ -52,11 +52,15 @@ async def _overlay_trade_costs(trades: list[dict]) -> None:
         full_trades = await trade_cost_db.get_trades_by_status(start, end)
         rates = await cost_overlay.today_window_rates()
         etf_flags = await cost_overlay.stock_master_etf_flags(full_trades)
+        # 3차 LOW 보완 — DB 조회뿐 아니라 순수 계산(`trade_costs`)의 코드 결함도 같은
+        # try 안에서 삼킨다. 계산이 예외를 내도 기존 세전 응답은 그대로 두고 새 칸만
+        # 건너뛴다(계약 결정 2) — 이 호출을 try 밖에 두면 그 예외가 라우트까지 전파돼
+        # 200 이어야 할 응답이 500 이 된다.
+        costs = cost_overlay.trade_costs(cost_rows, full_trades, rates, etf_flags=etf_flags)
     except Exception:
         logger.warning("[cost_overlay_unavailable] /api/history 실비용 조회 실패", exc_info=True)
         return
 
-    costs = cost_overlay.trade_costs(cost_rows, full_trades, rates, etf_flags=etf_flags)
     for t in trades:
         c = costs.get(t.get("id"))
         if c is None:
@@ -127,7 +131,14 @@ async def trade_pnl(
         if not p.get("ticker_name"):
             p["ticker_name"] = ticker_names.get(p.get("ticker", ""), "")
 
-    trades_by_id = await cost_overlay.overlay_pairs(pairs)
+    # 3차 LOW 보완 — `overlay_pairs` 는 DB 조회 실패는 내부에서 이미 None 으로 삼키지만,
+    # 그 뒤 순수 계산(페어별 귀속 루프)의 코드 결함까지는 못 삼킨다. 라우트 경계에서
+    # 한 번 더 감싸, 계산 버그가 이 응답 전체를 500 으로 만들지 않게 한다(계약 결정 2).
+    try:
+        trades_by_id = await cost_overlay.overlay_pairs(pairs)
+    except Exception:
+        logger.warning("[cost_overlay_unavailable] /api/history/pnl 실비용 조회 실패", exc_info=True)
+        trades_by_id = None
 
     total = len(pairs)
     summary = _build_pnl_summary(pairs, trades_by_id)

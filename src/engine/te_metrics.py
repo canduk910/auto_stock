@@ -221,7 +221,15 @@ def compute_te_rr(
     gross_core = _core(population, _gross_rate, _gross_pl)
 
     realized_sum_krw = sum(_gross_pl(p) for p in population)
-    if costs_available:
+    # 3차 LOW 보완 — `_net_rate`/`_net_pl` 의 페어별 세전 폴백(없는 페어만 그 페어 혼자
+    # 세전으로 떨어지는 설계, Q4)은 population 전체가 **균일하게** net 필드를 가졌거나
+    # **균일하게** 없을 때만 안전하다. `overlay_pairs` 가 루프 중간에 예외로 끝나면(코드
+    # 결함) 일부 페어만 net 필드를 갖는 **혼재** 상태가 될 수 있다 — 그대로 합치면 한
+    # 합계 안에서 세전·세후 값이 섞인다. 혼재를 감지하면 costs_available 과 무관하게
+    # 세후 칸 전체를 None 으로 둔다(「한 페어라도 비용 계산 실패면 전략 전체가 모른다」).
+    has_net_flags = [p.get("net_profit_loss") is not None for p in population]
+    mixed_net_state = any(has_net_flags) and not all(has_net_flags)
+    if costs_available and not mixed_net_state:
         realized_net_sum_krw: float | None = sum(_net_pl(p) for p in population)
         fee_sum: float | None = sum(float(p.get("fee") or 0.0) for p in population)
         tax_sum: float | None = sum(float(p.get("tax") or 0.0) for p in population)

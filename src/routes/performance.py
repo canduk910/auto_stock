@@ -31,37 +31,42 @@ async def _net_overlay_rows(records: list[dict], strategy: str) -> list[dict] | 
         return []
     dates = [r["date"] for r in records]
     start, end = min(dates), max(dates)
+    # 3차 LOW 보완 — DB 조회뿐 아니라 그 뒤 순수 계산(`trade_costs`·`net_twr`)의 코드
+    # 결함도 같은 try 안에서 삼킨다. 둘 다 이 함수 하나의 반환값(list | None)을 만드는
+    # 데만 쓰여 중간에 멈춰도 부분 상태가 새지 않는다 — 계산이 실패하면 호출부가 기존
+    # gross 응답을 그대로 유지한다(계약 결정 2).
     try:
         cost_rows = await trade_cost_db.get_daily_range(start, end)
         trades = await trade_cost_db.get_trades_by_status(start, end, ["COMPLETED", "PARTIAL"])
         rates = await cost_overlay.today_window_rates()
         etf_flags = await cost_overlay.stock_master_etf_flags(trades)
+
+        tc_by_id = cost_overlay.trade_costs(cost_rows, trades, rates, etf_flags=etf_flags)
+
+        target_trades = (
+            trades if not strategy or strategy == "total"
+            else [t for t in trades if t.get("strategy") == strategy]
+        )
+
+        by_date: dict = {}
+        for t in target_trades:
+            c = tc_by_id.get(t.get("id"))
+            if c is None:
+                continue
+            acc = by_date.setdefault(t["trade_date"], {"fee": 0.0, "tax": 0.0, "statuses": []})
+            acc["fee"] += c["fee"]
+            acc["tax"] += c["tax"]
+            acc["statuses"].append(c["cost_status"])
+
+        costs_by_date = {
+            d: {"fee": v["fee"], "tax": v["tax"],
+                "cost_status": cost_overlay.day_cost_status(v["statuses"])}
+            for d, v in by_date.items()
+        }
+        return cost_overlay.net_twr(records, costs_by_date)
     except Exception:
         logger.warning("[cost_overlay_unavailable] /api/performance 실비용 조회 실패", exc_info=True)
         return None
-
-    tc_by_id = cost_overlay.trade_costs(cost_rows, trades, rates, etf_flags=etf_flags)
-
-    target_trades = (
-        trades if not strategy or strategy == "total"
-        else [t for t in trades if t.get("strategy") == strategy]
-    )
-
-    by_date: dict = {}
-    for t in target_trades:
-        c = tc_by_id.get(t.get("id"))
-        if c is None:
-            continue
-        acc = by_date.setdefault(t["trade_date"], {"fee": 0.0, "tax": 0.0, "statuses": []})
-        acc["fee"] += c["fee"]
-        acc["tax"] += c["tax"]
-        acc["statuses"].append(c["cost_status"])
-
-    costs_by_date = {
-        d: {"fee": v["fee"], "tax": v["tax"], "cost_status": cost_overlay.day_cost_status(v["statuses"])}
-        for d, v in by_date.items()
-    }
-    return cost_overlay.net_twr(records, costs_by_date)
 
 
 #: cycle411 보완 H1 — "개시 이래" 전체 조회용(100년, 실질 전체 — `get_performance` 의
