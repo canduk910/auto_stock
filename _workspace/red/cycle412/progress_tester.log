@@ -24,3 +24,11 @@
 2026-10-09 04:25:00 tester(fin) (3) pg 5영업일 재생(09-28~10-02)+합성·고장 2회 — 행 손실 0(trade_history 88/88)·중복 0·골든 67/67·exit 33 중복 0·합성/고장 16/16 ok · [journal_gap] 11→10(10:56 거짓 경고 사라짐, 남은 10 = 09-29 주입 결함 F-a·합성 사유불명 1) · 🟡 09-29 미해소 gap 을 안고 날이 바뀌자 09-30 07:46 [journal_gap_resolved] sell_done=0 … 0 거짓 해소 1줄(_roll_day 가 _last_reconcile_result 를 안 비움)
 2026-10-09 04:25:00 tester(fin) (4) 이미지 빌드 성공 · USER journal(uid1000) · /app 에 tests 없음·KIS_ 0 · _cutoff_split·journal_gap_resolved 포함 · backfill 인자 없음 exit 2 (5) 범위 — 8영역·scheduler 0 · src 비문서 = src/routes/balance.py 만 · 마이그레이션 = 047 추가만(048 없음, 마감 2커밋 supabase 0) · 워커 src import 0 · 추가 줄 민감값 0 (6) merge-tree — feat/cost-overlay(FF)·main·origin/main 모두 충돌 0 · 마이그레이션 번호 충돌 0 (7) 영향 인덱스 재생성 — 내용 무변화(182/1300·139/137, generated_at 만)
 2026-10-09 04:25:00 tester(fin) 완료 — 판정 머지·배포 가능 · 남은 낮음 1(N11 날짜 넘김 거짓 gap_resolved — _roll_day 한 줄) · 관찰 2(매도 행 쓰기 실패 시 exit 도 함께 빠짐 · fill_order_division 호출처 0)
+
+---- 마무리 2(N11) 검증 ----
+2026-10-09 05:03:22 tester(n11) 시작 — f9f9bb46 대상(N11-a 날짜 넘김 거짓 해소 · N11-b 늦은 접수 통보 주문구분)
+2026-10-09 05:03:22 tester(n11) (1) 워커 289(DEBUG 동일, 이전 285 +4) · pg 26 · 잔여 시험 컨테이너 0 · 백엔드 전체 16240 통과·2 실패(replay parquet 기존)·23 skip·336 xfail·13 xpass
+2026-10-09 05:03:22 tester(n11) (2) pg 5영업일 재생(09-28~10-02)+합성·고장, 고치기 전(15a7ead0)/후 × 실로그/늦은 통보 4줄 주입 = 4회 — 행 손실 0(trade_history 88/88)·중복 0·골든 67/67·합성/고장 16/16·exit 33 중복 0 · 거짓 [journal_gap_resolved] 전 1(09-30 07:46)→후 0 · [journal_gap_unresolved_at_rollover] 1(09-30 00:01 day=2026-09-29 sell 13/13 buy 18/17 사유불명 1) · order_division NULL 실로그 19→19(통보 77건 전부 행보다 먼저 와 짝짓기가 채움 — 늦은 통보 0건) · 늦은 통보 주입 19→16(3건 채움·이미 값 있는 행 덮어쓰기 0·첫 통보 값과 불일치 0) · 남은 「통보 있는데 NULL」 = external 4(계약 3.5절: 대사 행은 주문구분 None, 통보가 행보다 먼저라 갱신 대상 없음)
+2026-10-09 05:03:22 tester(n11) (3) 탐침 — fill 예외 주입: 회전 active 유지·행·커서 저장·[journal_write_error] division 1줄 · 같은 덩어리 통보: 짝짓기가 채움 · 날짜 넘김 순서(미해소→경고 1·같은 날 재호출 0·다음 날 실제 gap→해소 INFO 1·ok 로 끝난 날 0)
+2026-10-09 05:03:22 tester(n11) (4) 이미지 빌드 성공 · USER journal(uid1000) · /app = jw·requirements.txt · KIS_ 0 · backfill 인자 없음 exit 2 (5) 범위 — 8영역·scheduler 0 · f9f9bb46 의 src·supabase 0 · 마이그레이션 = 047 추가만 · 워커 src import 0 · 추가 줄 민감값 0 · merge-tree(feat/cost-overlay·main·origin/main) 충돌 0 (6) 영향 인덱스 재생성 — 내용 무변화(182/1300·139/137, generated_at 만)
+2026-10-09 05:03:22 tester(n11) 완료 — 판정 머지·배포 가능(N11-a·N11-b 시정 확인)
