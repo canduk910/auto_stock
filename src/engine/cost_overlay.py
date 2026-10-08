@@ -44,6 +44,30 @@ DEFAULT_TAX_RATE = 0.00199
 #: cycle411 보완 M2 — 추정 요율 창 길이(달력일). 화면 날짜 범위가 아니라 항상 이 길이다.
 RATE_WINDOW_DAYS = 30
 
+# ── 2차 보완 F8 — `today_window_rates()` KST 하루 단위 메모리 캐시 ──────────────
+_window_rate_cache: dict[tuple[date, int], dict] = {}
+
+# ── 2차 보완 F6 — 경고 dedupe. 키 = (kind, KST 오늘, trad_dt, pdno). ──────────
+_warned_keys: set[tuple[str, date, object, str]] = set()
+
+
+def _reset_cache_for_tests() -> None:
+    """요율 캐시·경고 dedupe 를 비운다 — 테스트 간 메모리 오염을 막는다(2차 보완 위생).
+
+    `tests/conftest.py::_reset_cost_overlay_memo`(autouse) 가 매 테스트 전·후에 부른다.
+    """
+    _window_rate_cache.clear()
+    _warned_keys.clear()
+
+
+def _warn_once_per_day(kind: str, trad_dt, pdno: str) -> bool:
+    """`(kind, KST 오늘, trad_dt, pdno)` 당 한 번만 True — 그 뒤는 조용하다(F6)."""
+    key = (kind, today_kst(), trad_dt, pdno)
+    if key in _warned_keys:
+        return False
+    _warned_keys.add(key)
+    return True
+
 
 def _num(v) -> Decimal:
     if isinstance(v, Decimal):
@@ -77,18 +101,29 @@ async def today_window_rates(window_days: int = RATE_WINDOW_DAYS) -> dict:
     화면/계산 범위의 날짜(screen range)가 아니라 **항상 이 창**이다 — 모든 라우트
     (`/api/costs/{today,daily}` · `/api/history` · `/api/history/pnl` ·
     `/api/performance/daily`·`summary` · `/api/strategies/te` · `/api/balance`) 공통.
+
+    2차 보완 F8 — 결과를 **KST 날짜 단위로 메모리 캐시**한다(같은 날 두 번째 호출부터는
+    DB 를 읽지 않는다, 다음 날은 다시 읽는다). 조회 실패(예외)는 캐시하지 않는다 —
+    다음 호출이 다시 시도한다(`_window_rate_cache` 에 쓰기 전에 예외가 전파된다).
     """
     today = today_kst()
+    cache_key = (today, window_days)
+    cached = _window_rate_cache.get(cache_key)
+    if cached is not None:
+        return cached
     rows = await trade_cost_db.get_daily_range(today - timedelta(days=window_days), today)
-    return estimate_rates(rows)
+    rates = estimate_rates(rows)
+    _window_rate_cache[cache_key] = rates
+    return rates
 
 
 async def stock_master_etf_flags(trades: list[dict]) -> dict[str, bool]:
-    """체결 행들의 종목코드마다 `stock_master.get()` 구분 코드로 ETF 판정한다(cycle411 보완 M3).
+    """체결 행들의 종목코드마다 구분 코드로 ETF 를 판정한다(M3, 2차 보완 F1 — 일괄 조회).
 
-    `src.db.stock_master` **모듈 속성 경유**(테스트가 그 모듈의 `get` 을 간다). 조회 실패·
-    None(캐시 미스)인 종목은 결과에서 제외한다 — `trade_costs(..., etf_flags=...)` 의
-    `etf_tickers`→이름 폴백이 대신한다.
+    `src.db.stock_master` **모듈 속성 경유**(테스트가 그 모듈의 `get_etf_group_codes` 를
+    간다) — 종목마다 `stock_master.get()` 을 직렬로 부르던 것을 **`pg.fetch` 1회**(고유
+    종목 전부)로 바꾼다(`stock_master.get` 호출 0). 코드가 없는·조회 실패 종목은 결과에서
+    제외한다 — `trade_costs(..., etf_flags=...)` 의 `etf_tickers`→이름 폴백이 대신한다.
     """
     from src.db import stock_master
 
@@ -97,17 +132,20 @@ async def stock_master_etf_flags(trades: list[dict]) -> dict[str, bool]:
         tk = t.get("ticker")
         if tk and tk not in names:
             names[tk] = t.get("ticker_name")
+    if not names:
+        return {}
+
+    try:
+        codes = await stock_master.get_etf_group_codes(list(names.keys()))
+    except Exception:
+        logger.debug("[cost_overlay] stock_master 일괄 조회 실패 — 이름 폴백", exc_info=True)
+        return {}
 
     out: dict[str, bool] = {}
-    for tk, name in names.items():
-        try:
-            basics = await stock_master.get(tk)
-        except Exception:
-            logger.debug("[cost_overlay] stock_master 조회 실패(ticker=%s) — 이름 폴백", tk, exc_info=True)
+    for tk, code in codes.items():
+        if not code:
             continue
-        if basics is None:
-            continue
-        out[tk] = is_etf_like(basics.raw, name)
+        out[tk] = is_etf_like({"scty_grp_id_cd": code}, names.get(tk))
     return out
 
 
@@ -143,24 +181,49 @@ def trade_costs(
     settled_rows = trade_cost.allocate_rows(cost_rows, trades, key="id")
     settled_by_id = {r["id"]: r for r in settled_rows if r["id"] is not None}
 
-    # cycle411 보완 H2b — 정산 행에 매도 체결금액이 없는데(sll_amt==0) 세금이 있으면
-    # (예: 당일 KIS 정산 지연·수기 조정) allocate_rows 의 sell_share→total_share 폴백이
-    # 그 세금을 매수 행에 몰아준다. 몰지 않고 미배분으로 둔다(id 단위에서만 — 전략 귀속
-    # `attribute`/`allocate_rows(key="strategy")` 는 트랙 C 요약 행위 보존, H2c).
-    zero_tax_keys = {
+    # 2차 보완 F5(a) — 「매도 없음」은 정산 행의 `sll_amt` 가 아니라 **그 (날짜, 종목)의
+    # 체결 집합**으로 판정한다. 정산 행에 매도금액·세금이 있어도 실제 체결(trade_history)
+    # 에 SELL 이 없으면(예: 당일 KIS 정산 지연·수기 조정·배분 오류) allocate_rows 의
+    # sell_share→total_share 폴백이 그 세금을 매수 행에 몰아준다 — 몰지 않고 미배분으로
+    # 둔다(id 단위에서만 — 전략 귀속 `attribute`/`allocate_rows(key="strategy")` 는 트랙 C
+    # 요약 행위 보존, H2c).
+    sell_fill_keys = {
+        (t.get("trade_date"), str(t.get("ticker") or ""))
+        for t in trades
+        if str(t.get("trade_type") or "").upper() == "SELL"
+        and _num(t.get("price")) * _num(t.get("quantity")) > 0
+    }
+    no_sell_tax_keys = {
         (c.get("trad_dt"), str(c.get("pdno") or ""))
         for c in cost_rows
-        if _num(c.get("sll_amt")) == 0 and _num(c.get("tl_tax")) > 0
+        if _num(c.get("tl_tax")) > 0
+        and (c.get("trad_dt"), str(c.get("pdno") or "")) not in sell_fill_keys
     }
-    for key in zero_tax_keys:
-        logger.warning(
-            "[cost_overlay_tax_unallocated] trad_dt=%s pdno=%s — 매도 없이 잡힌 세금, 미배분",
-            key[0], key[1],
-        )
-    if zero_tax_keys:
+    for key in no_sell_tax_keys:
+        if _warn_once_per_day("tax_unallocated", key[0], key[1]):
+            logger.warning(
+                "[cost_overlay_tax_unallocated] trad_dt=%s pdno=%s — 매도 체결 없이 잡힌 세금, 미배분",
+                key[0], key[1],
+            )
+    if no_sell_tax_keys:
         for r in settled_by_id.values():
-            if (r.get("trad_dt"), str(r.get("pdno") or "")) in zero_tax_keys:
+            if (r.get("trad_dt"), str(r.get("pdno") or "")) in no_sell_tax_keys:
                 r["tl_tax"] = 0.0
+
+    # 2차 보완 F5(b) — 짝이 되는 체결이 **하나도 없는** 정산 행은 비용이 조용히 사라지지
+    # 않게 경고한다(반환 dict 에는 아무것도 더하지 않는다 — 귀속할 체결 id 가 없다).
+    trade_keys = {(t.get("trade_date"), str(t.get("ticker") or "")) for t in trades}
+    unmatched_cost_keys = {
+        (c.get("trad_dt"), str(c.get("pdno") or ""))
+        for c in cost_rows
+        if (c.get("trad_dt"), str(c.get("pdno") or "")) not in trade_keys
+    }
+    for key in unmatched_cost_keys:
+        if _warn_once_per_day("unmatched_cost", key[0], key[1]):
+            logger.warning(
+                "[cost_overlay_unmatched_cost] trad_dt=%s pdno=%s — 짝 체결 없음, 비용 미배정",
+                key[0], key[1],
+            )
 
     out: dict = {}
     for t in trades:
@@ -187,6 +250,46 @@ def trade_costs(
             tax = amt * rates["tax_rate"]
         out[tid] = {"fee": fee, "tax": tax, "cost_status": "estimated", "allocated": False}
     return out
+
+
+def _settlement_id_groups(cost_rows: list[dict], trades: list[dict]) -> dict[int, frozenset[int]]:
+    """정산 행이 있는 (날짜, 종목) 마다 그 체결 id 집합 — 페어 밖 배분 판정용(F11).
+
+    `trade_costs(...)[id]["allocated"]`(= `allocate_rows(key="id")` 의 `estimated`)는 "이
+    id 가 정산 1행을 다른 id 와 나눠 받았나" 만 말해 **같은 페어 안의 매수·매도** 도
+    True 로 잡는다(당일 매수→당일 매도 단일 페어가 늘 "배분"으로 보이던 결함). 이
+    함수는 (날짜,종목)별 **실제 id 집합**을 돌려줘, 그 집합이 한 페어의 id 전부를
+    넘어서는지(=페어 밖 체결과 나눴는지)를 호출부가 직접 비교하게 한다.
+    """
+    cost_keys = {(c.get("trad_dt"), str(c.get("pdno") or "")) for c in cost_rows}
+    groups: dict[tuple, set[int]] = {}
+    for t in trades:
+        tid = t.get("id")
+        if tid is None:
+            continue
+        key = (t.get("trade_date"), str(t.get("ticker") or ""))
+        if key not in cost_keys:
+            continue
+        groups.setdefault(key, set()).add(tid)
+    out: dict[int, frozenset[int]] = {}
+    for ids in groups.values():
+        frozen = frozenset(ids)
+        for tid in ids:
+            out[tid] = frozen
+    return out
+
+
+def _pair_allocated_outside(own_ids: set[int], id_groups: dict[int, frozenset[int]]) -> bool:
+    """`own_ids`(한 페어의 체결 id 전부) 중 하나라도 정산 그룹이 페어 밖으로 넘치면 True.
+
+    (F11, 결정 6 갱신) — 같은 날 사고 판 단일 페어(정산 1행을 자기 매수·매도 행만 나눠
+    받음)는 False. 다른 전략·다른 페어의 체결과 나눠 받았을 때만 True.
+    """
+    for tid in own_ids:
+        group = id_groups.get(tid)
+        if group and not group.issubset(own_ids):
+            return True
+    return False
 
 
 def day_cost_status(statuses: Iterable[str]) -> str:
@@ -294,6 +397,7 @@ async def overlay_pairs(pairs: list[dict]) -> dict[int, dict] | None:
 
     costs = trade_costs(cost_rows, trades, rates, etf_flags=etf_flags)
     trades_by_id = {t["id"]: t for t in trades if t.get("id") is not None}
+    id_groups = _settlement_id_groups(cost_rows, trades)
 
     for p in pairs:
         buy_ids = list(p.get("buy_trade_ids") or [])
@@ -317,42 +421,61 @@ async def overlay_pairs(pairs: list[dict]) -> dict[int, dict] | None:
             ratio_remaining = (remaining_qty / total_buy_qty) if total_buy_qty else 1.0
             ratio_sold = 1.0 - ratio_remaining
 
-            buy_price = float(p.get("buy_price") or 0)
-            pl = p.get("profit_loss")
-            cur_price = (
-                (buy_price * remaining_qty + float(pl)) / remaining_qty
-                if (pl is not None and remaining_qty) else 0.0
-            )
-            sell_amt = cur_price * remaining_qty
-            fee_est = sell_amt * rates["fee_rate"]
-            tax_est = 0.0 if is_etf else sell_amt * rates["tax_rate"]
-            fee = buy_fee_total * ratio_remaining + fee_est
-            tax = tax_est
-            cost_status, allocated = "estimated", False
-
+            # 분할 매도 뒤(`partial_sell_trade_ids`) 판 몫 — 현재가(2차 보완 B1) 와
+            # 무관하게 **이미 낸** 비용이라 그대로 집계한다.
             partial_entries = [costs[i] for i in partial_ids if i in costs]
             p["partial_fee"] = buy_fee_total * ratio_sold + sum(c["fee"] for c in partial_entries)
             p["partial_tax"] = sum(c["tax"] for c in partial_entries)
+
+            pl = p.get("profit_loss")
+            if pl is None:
+                # 2차 보완 B1 — 현재가를 모르면(21:30 이후·재기동 직후·휴장일) 예상
+                # 매도비용·순손익을 0 으로 치지 않는다. fee·tax 자체를 모른다로 둔다.
+                fee = None
+                tax = None
+            else:
+                buy_price = float(p.get("buy_price") or 0)
+                cur_price = (
+                    (buy_price * remaining_qty + float(pl)) / remaining_qty
+                    if remaining_qty else 0.0
+                )
+                est_sell_amt = cur_price * remaining_qty
+                fee_est = est_sell_amt * rates["fee_rate"]
+                tax_est = 0.0 if is_etf else est_sell_amt * rates["tax_rate"]
+                fee = buy_fee_total * ratio_remaining + fee_est
+                tax = tax_est
+            cost_status, allocated = "estimated", False
         else:
             fee = sum(c["fee"] for c in entries)
             tax = sum(c["tax"] for c in entries)
             statuses = [c["cost_status"] for c in entries] or ["estimated"]
             cost_status = day_cost_status(statuses)
-            allocated = any(c["allocated"] for c in entries)
+            # 2차 보완 F11(결정 6 갱신) — 페어 밖 체결과 나눴을 때만 True.
+            own_ids = set(buy_ids) | set(sell_ids) | set(partial_ids)
+            allocated = _pair_allocated_outside(own_ids, id_groups)
 
         p["fee"] = fee
         p["tax"] = tax
         p["cost_status"] = cost_status
         p["allocated"] = allocated
-        p["net_profit_loss"] = float(p.get("profit_loss") or 0.0) - fee - tax
 
-        buy_amt = float(p.get("buy_price") or 0) * float(p.get("buy_qty") or 0)
-        p["net_profit_rate"] = round(p["net_profit_loss"] / buy_amt * 100, 4) if buy_amt else None
+        if fee is None or tax is None:
+            # B1 — fee·tax 를 모르면 그에 의존하는 칸도 전부 모른다(0 으로 치지 않는다).
+            p["net_profit_loss"] = None
+            p["net_profit_rate"] = None
+            p["cost_bp"] = None
+        else:
+            p["net_profit_loss"] = float(p.get("profit_loss") or 0.0) - fee - tax
 
-        sell_amt = (float(p.get("sell_price") or 0) * float(p.get("sell_qty") or 0)
-                    if p.get("sell_qty") else 0.0)
-        denom = (buy_amt + sell_amt) / 2 if sell_amt else buy_amt
-        p["cost_bp"] = round((fee + tax) / denom * 1e4, 4) if denom else None
+            buy_amt = float(p.get("buy_price") or 0) * float(p.get("buy_qty") or 0)
+            p["net_profit_rate"] = (
+                round(p["net_profit_loss"] / buy_amt * 100, 4) if buy_amt else None
+            )
+
+            proceeds = (float(p.get("sell_price") or 0) * float(p.get("sell_qty") or 0)
+                        if p.get("sell_qty") else 0.0)
+            denom = (buy_amt + proceeds) / 2 if proceeds else buy_amt
+            p["cost_bp"] = round((fee + tax) / denom * 1e4, 4) if denom else None
 
         slip = 0.0
         covered = False

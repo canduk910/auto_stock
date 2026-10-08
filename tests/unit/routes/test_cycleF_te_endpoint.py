@@ -146,7 +146,7 @@ async def test_te_endpoint_months_maps_window_and_separates_cache_key(monkeypatc
 
     captured_windows: list[int] = []
 
-    def _fake_compute(pairs, *, now, window_days=90, strategy_id=""):
+    def _fake_compute(pairs, *, now, window_days=90, strategy_id="", costs_available=True):
         captured_windows.append(window_days)
         return TeRrMetrics(
             strategy_id=strategy_id,

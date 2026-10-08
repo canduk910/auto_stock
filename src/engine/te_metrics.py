@@ -44,9 +44,11 @@ class TeRrMetrics:
     rr_gross: float | None = None
     verdict_gross: str = "undecided"
     # realized_sum_krw(위)는 기존 의미(세전) 그대로 — net 합·수수료·세금 합은 별도 칸.
-    realized_net_sum_krw: float = 0.0
-    fee_sum: float = 0.0
-    tax_sum: float = 0.0
+    # 2차 보완 B4 — 비용 조회가 실패하면(`costs_available=False`) 이 세 칸은 `None`
+    # (세전 합을 세후 칸에 담지 않는다).
+    realized_net_sum_krw: float | None = 0.0
+    fee_sum: float | None = 0.0
+    tax_sum: float | None = 0.0
     # cycle411 보완 M5 — 세전 승/패 수(세전 화면의 승률·승/패 표시용). 빈 모집단 = 0.
     win_gross: int = 0
     loss_gross: int = 0
@@ -178,6 +180,7 @@ def compute_te_rr(
     now: datetime,
     window_days: int = 90,
     strategy_id: str = "",
+    costs_available: bool = True,
 ) -> TeRrMetrics:
     """전략별 TE(예지치)/RR(손익비) 지표를 계산한다 (F-B1~F-B9, cycle411 — net 판정 + gross 병기).
 
@@ -188,6 +191,11 @@ def compute_te_rr(
     `net_profit_rate`/`net_profit_loss`(순손익, 비용 차감)가 있으면 그 값 기준이고, 없는
     페어(구 입력)는 세전 값으로 폴백한다(`test_cycleF_te_rr_metrics.py` 무수정 통과). 세전
     값은 항상 `*_gross` 로 별도 남는다.
+
+    2차 보완 B4 — `costs_available=False`(호출부의 비용 조회가 실패·예외였을 때)면
+    `realized_net_sum_krw`·`fee_sum`·`tax_sum` 은 `None`(세전 합을 세후 칸에 담지 않는다).
+    판정 자체는 페어가 들고 온 값 그대로 계산한다(비용을 못 얹은 페어는 net 필드가 없어
+    위 폴백으로 세전이 된다).
     """
     cutoff = (now - timedelta(days=window_days)).date()
 
@@ -213,9 +221,14 @@ def compute_te_rr(
     gross_core = _core(population, _gross_rate, _gross_pl)
 
     realized_sum_krw = sum(_gross_pl(p) for p in population)
-    realized_net_sum_krw = sum(_net_pl(p) for p in population)
-    fee_sum = sum(float(p.get("fee") or 0.0) for p in population)
-    tax_sum = sum(float(p.get("tax") or 0.0) for p in population)
+    if costs_available:
+        realized_net_sum_krw: float | None = sum(_net_pl(p) for p in population)
+        fee_sum: float | None = sum(float(p.get("fee") or 0.0) for p in population)
+        tax_sum: float | None = sum(float(p.get("tax") or 0.0) for p in population)
+    else:
+        realized_net_sum_krw = None
+        fee_sum = None
+        tax_sum = None
 
     sample_tier = _sample_tier(net_core["n"])
 

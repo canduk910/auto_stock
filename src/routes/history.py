@@ -157,7 +157,9 @@ def _build_pnl_summary(pairs: list[dict], trades_by_id: dict[int, dict] | None =
     페어 기준) · `slippage_n`(closed 페어가 가리키는 체결 행 중 `order_price` 덮인 수).
 
     cycle411 보완 M4 — 비용 조회가 실패했으면(`trades_by_id is None`) 위 네 칸은 **0 이
-    아니라 `None`**(「모름」 ≠ 0, 기존 칸은 그대로 유지).
+    아니라 `None`**(「모름」 ≠ 0, 기존 칸은 그대로 유지). 2차 보완 F4 — `slippage_n` 도
+    같은 규약(종전엔 `if trades_by_id:` 가 실패(`None`)와 성공-빈 결과(`{}`)를 모두
+    0 으로 뭉갰다 — `is None` 으로만 실패를 가른다).
     """
     closed = [p for p in pairs if p.get("status") == "closed"]
     cost_available = trades_by_id is not None
@@ -196,8 +198,11 @@ def _build_pnl_summary(pairs: list[dict], trades_by_id: dict[int, dict] | None =
     win_loss_total = win_count + loss_count
     win_rate_pct = round(win_count / win_loss_total * 100, 1) if win_loss_total else 0.0
 
-    slippage_n = 0
-    if trades_by_id:
+    slippage_n: int | None
+    if trades_by_id is None:
+        slippage_n = None
+    else:
+        slippage_n = 0
         seen: set[int] = set()
         for p in closed:
             for i in list(p.get("buy_trade_ids") or []) + list(p.get("sell_trade_ids") or []):

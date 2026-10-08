@@ -71,10 +71,21 @@ _SINCE_INCEPTION_DAYS = 36_500
 
 async def _since_inception_net_rows(strategy: str) -> list[dict] | None:
     """`net_cumulative_return_rate` 가 창이 아니라 **개시 이래**로 쌓이도록 전체 기간을
-    읽어 재누적한다(H1 — 창 첫 행부터 다시 쌓지 않는다). 조회 실패 = None(호출부가 gross
-    로 폴백).
+    읽어 재누적한다(H1 — 창 첫 행부터 다시 쌓지 않는다). 조회 실패 = None(호출부가 net
+    칸을 `None` 으로 둔다 — 세전 값을 세후 칸에 담지 않는다, 2차 보완 B2).
+
+    🔴 개시 이래 재조회(`get_performance(days=_SINCE_INCEPTION_DAYS, …)`) 자체의 실패도
+    `_net_overlay_rows` 와 같은 무게로 잡는다 — 이 호출을 try 밖에 두면 그 예외가
+    `summary`/`daily` 라우트까지 그대로 전파돼 500 이 된다(비용 조회 실패는 200 을 유지하는
+    계약, B2).
     """
-    full_records = await get_performance(days=_SINCE_INCEPTION_DAYS, strategy=strategy)
+    try:
+        full_records = await get_performance(days=_SINCE_INCEPTION_DAYS, strategy=strategy)
+    except Exception:
+        logger.warning(
+            "[cost_overlay_unavailable] /api/performance 개시 이래 조회 실패", exc_info=True,
+        )
+        return None
     return await _net_overlay_rows(full_records, strategy)
 
 
@@ -99,11 +110,13 @@ async def summary(strategy: str = "total"):
     daily_rates = [float(r.get("daily_profit_rate", 0) or 0) for r in records]
     avg_rate = sum(daily_rates) / len(daily_rates) if daily_rates else 0.0
 
-    # cycle411 — net(세후) 누적·평균. 비용 조회가 실패하면 gross 값으로 폴백한다.
+    # cycle411 — net(세후) 누적·평균. 🔴 2차 보완 B2 — 비용 조회가 실패하면 세전 값을
+    # 세후 칸에 담지 않는다(「모름」 ≠ gross 값) — 초기값은 `None`이고, 아래 개시 이래
+    # 재조회(`net_rows_full`)가 성공했을 때만 채운다.
     # 🔴 수수료·세금은 % 로는 작아 round(…, 2) 로 gross 와 자릿수를 맞추면 두 값이 같은
     # 자리로 뭉개진다 — net 은 4자리로 둔다(비교 단언은 라운딩 전 크기 차이를 본다).
-    net_total_profit_rate = round(cum_rate, 4)
-    net_avg_daily_profit_rate = round(avg_rate, 4)
+    net_total_profit_rate: float | None = None
+    net_avg_daily_profit_rate: float | None = None
     # cycle411 보완 H1 — 누적은 창(30일)이 아니라 개시 이래 전체로 재누적한다(창 첫 행부터
     # 다시 쌓지 않는다). 평균은 그대로 창(`records`) 범위만 본다.
     net_rows_full = await _since_inception_net_rows(strategy)

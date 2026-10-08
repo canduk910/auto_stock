@@ -10,6 +10,7 @@ from fastapi import APIRouter
 from src.api.balance import get_balance, get_buyable
 from src.db import trade_cost as trade_cost_db
 from src.db import trade_history as trade_history_db
+from src.db._kst import today_kst
 from src.db.stock_master import get as stock_master_get
 from src.engine import cost_overlay
 from src.engine.etf_like import is_etf_like
@@ -22,12 +23,51 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/balance", tags=["balance"])
 
+#: `_get_cost_range` 가 (start, end) 범위를 못 읽었을 때 캐시에 두는 표식(조회 재시도를
+#: 요청 안에서 또 하지 않는다 — None 은 "아직 안 찾아봄" 과 겹쳐 쓸 수 없다, 2차 보완 F3·F8b).
+_RANGE_FAILED = object()
 
-async def _open_pair_buy_fee(pair: dict, rates: dict) -> tuple[float, str]:
+
+async def _get_cost_range(
+    start: date, end: date, range_cache: dict,
+) -> tuple[list[dict], list[dict]] | None:
+    """`(start, end)` 정산 행·체결 행을 **요청 안에서 한 번만** 읽는다(2차 보완 F8b).
+
+    보유 종목이 여럿이고 같은 날 샀으면 `_open_pair_buy_fee` 가 같은 범위를 여러 번
+    부른다 — `range_cache` 를 호출부(`balance()`)가 한 번 만들어 공유한다. 조회 실패는
+    `None`(그 범위는 이 요청 안에서 다시 시도하지 않는다 — 실패를 캐시하는 것은 이
+    요청-로컬 캐시에서만 안전하다, 영속 캐시(`today_window_rates`)는 F8 규약이 달라
+    실패를 캐시하지 않는다).
+    """
+    key = (start, end)
+    cached = range_cache.get(key, None)
+    if cached is _RANGE_FAILED:
+        return None
+    if cached is not None:
+        return cached
+    try:
+        cost_rows = await trade_cost_db.get_daily_range(start, end)
+        full_trades = await trade_cost_db.get_trades_by_status(start, end)
+    except Exception:
+        logger.debug("[cost_overlay] 잔고 비용 범위 조회 실패(%s~%s) graceful", start, end,
+                    exc_info=True)
+        range_cache[key] = _RANGE_FAILED
+        return None
+    result = (cost_rows, full_trades)
+    range_cache[key] = result
+    return result
+
+
+async def _open_pair_buy_fee(
+    pair: dict, rates: dict, range_cache: dict,
+) -> tuple[float | None, str | None]:
     """`open` 페어의 매수 수수료 — 정산 있으면 대사값, 없으면 추정 요율(cycle411 보완 M1).
 
     분할 매도 뒤(남은 수량 < 원 매수 수량)면 남은 수량 비율만 센다(L2 와 같은 식).
-    페어·매수일·조회가 모두 온전해야 계산하고, 그 밖은 0.0·"estimated" 로 graceful.
+    2차 보완 F2 — 조회 범위는 매수일 **하루** 가 아니라 **매수일 ~ 오늘**(여러 날 매수가
+    `buy_trade_ids` 에 섞여 있으면 하루만 보면 다른 날 매수분의 수수료를 놓친다). 2차
+    보완 F3 — 비용 조회 자체가 실패하면 `(None, None)`(「모름」 ≠ 0). 페어·매수일이 없는
+    경우만 `(0.0, "estimated")` graceful(계산할 근거가 원래 없다).
     """
     ids = pair.get("buy_trade_ids") or []
     buy_date_raw = pair.get("buy_date")
@@ -37,12 +77,12 @@ async def _open_pair_buy_fee(pair: dict, rates: dict) -> tuple[float, str]:
         d = date.fromisoformat(str(buy_date_raw))
     except ValueError:
         return 0.0, "estimated"
-    try:
-        cost_rows = await trade_cost_db.get_daily_range(d, d)
-        full_trades = await trade_cost_db.get_trades_by_status(d, d)
-    except Exception:
-        logger.debug("[cost_overlay] 잔고 페어 비용 조회 실패 graceful", exc_info=True)
-        return 0.0, "estimated"
+    end = max(d, today_kst())
+
+    result = await _get_cost_range(d, end, range_cache)
+    if result is None:
+        return None, None
+    cost_rows, full_trades = result
 
     costs = cost_overlay.trade_costs(cost_rows, full_trades, rates)
     entries = [costs[i] for i in ids if i in costs]
@@ -57,13 +97,17 @@ async def _open_pair_buy_fee(pair: dict, rates: dict) -> tuple[float, str]:
     return fee_total * ratio, status
 
 
-async def _buy_fee_paid_by_ticker(holdings: list, rates: dict) -> dict[str, tuple[float, str]]:
+async def _buy_fee_paid_by_ticker(
+    holdings: list, rates: dict, range_cache: dict,
+) -> dict[str, tuple[float | None, str | None]]:
     """보유 종목마다 `(buy_fee_paid, buy_fee_status)` (cycle411 보완 M1).
 
     엔진 페어(`trade_history.get_trade_pairs` 모듈 속성 경유)의 open 페어가 있으면 그
-    매수 수수료, 없으면(수동 매수 등) 매입금액 × 추정 수수료율 · "estimated".
+    매수 수수료, 없으면(수동 매수 등) 매입금액 × 추정 수수료율 · "estimated". 2차 보완
+    F3 — open 페어 중 하나라도 비용 조회가 실패하면(「모름」) 그 종목 전체를 `(None,
+    None)` 으로 둔다(알고 있는 몫과 모르는 몫을 더해 그럴듯한 숫자를 만들지 않는다).
     """
-    out: dict[str, tuple[float, str]] = {}
+    out: dict[str, tuple[float | None, str | None]] = {}
     for h in holdings:
         try:
             pairs = await trade_history_db.get_trade_pairs(ticker=h.ticker)
@@ -77,11 +121,21 @@ async def _buy_fee_paid_by_ticker(holdings: list, rates: dict) -> dict[str, tupl
             continue
         fee_total = 0.0
         statuses: list[str] = []
+        unknown = False
         for p in open_pairs:
-            fee, status = await _open_pair_buy_fee(p, rates)
+            fee, status = await _open_pair_buy_fee(p, rates, range_cache)
+            if fee is None:
+                unknown = True
+                continue
             fee_total += fee
             statuses.append(status)
-        out[h.ticker] = (fee_total, cost_overlay.day_cost_status(statuses))
+        if unknown:
+            out[h.ticker] = (None, None)
+        else:
+            out[h.ticker] = (
+                fee_total,
+                cost_overlay.day_cost_status(statuses) if statuses else "estimated",
+            )
     return out
 
 
@@ -116,8 +170,11 @@ async def balance():
                      "tax_rate": cost_overlay.DEFAULT_TAX_RATE, "source": "default"}
 
     # cycle411 보완 M1 — 보유마다 매수 수수료(buy_fee_paid)·상태(buy_fee_status).
+    # 2차 보완 F8b — `range_cache` 를 이 요청 안에서 공유해 같은 (start, end) 범위를
+    # 보유 종목 수만큼 중복 조회하지 않는다(같은 날 산 종목이 여럿인 경우).
+    range_cache: dict = {}
     try:
-        buy_fee_by_ticker = await _buy_fee_paid_by_ticker(holdings, sell_rates)
+        buy_fee_by_ticker = await _buy_fee_paid_by_ticker(holdings, sell_rates, range_cache)
     except Exception:
         logger.debug("[cost_overlay] 잔고 매수수수료 조회 실패 graceful", exc_info=True)
         buy_fee_by_ticker = {}

@@ -186,6 +186,9 @@ async def get_params_schema():
 
 
 _TE_CACHE_TTL = 300.0
+#: 2차 보완 B4 — 비용 조회가 하나라도 실패한 계산은 짧게만 캐시한다(그 계산이 비용 없이
+#: 세전으로 내려간 결과이기 때문 — 비용 DB 가 살아나면 빨리 세후 값으로 돌아와야 한다).
+_TE_CACHE_FAILURE_TTL = 60.0
 _te_cache: dict[int, tuple[float, list[dict]]] = {}
 
 
@@ -209,20 +212,48 @@ async def get_strategies_te(months: int = 3):
     now = datetime.now(KST)
 
     data: list[dict] = []
+    any_costs_unavailable = False
     for strategy in trading_scheduler.registry.all():
         sid = strategy.strategy_id
         try:
             pairs = await get_trade_pairs(strategy=sid)
-            # cycle411 — 사용자 결정 10-08 Q2: 판정을 net 기준으로 내리려면 compute_te_rr
-            # 가 보기 전에 페어에 net_profit_loss/net_profit_rate 를 얹어야 한다. 실패해도
-            # pairs 는 gross 그대로 쓴다(compute_te_rr 의 net→gross 폴백, test_q4).
-            await cost_overlay.overlay_pairs(pairs)
-            metrics = compute_te_rr(pairs, now=now, window_days=window_days, strategy_id=sid)
         except Exception:
             metrics = compute_te_rr([], now=now, window_days=window_days, strategy_id=sid)
+            data.append(asdict(metrics))
+            any_costs_unavailable = True
+            continue
+
+        # 2차 보완 B4 — 사용자 결정 10-08 Q2: 판정을 net 기준으로 내리려면 compute_te_rr
+        # 가 보기 전에 페어에 net_profit_loss/net_profit_rate 를 얹어야 한다. `overlay_pairs`
+        # 는 **별도 try** 로 불러 그 실패(None 반환·예외)가 이 전략의 나머지 지표(n·세전
+        # 합 등)까지 비우지 않게 한다 — 실패하면 `costs_available=False` 로 compute_te_rr
+        # 에 넘겨 net 전용 칸(`realized_net_sum_krw`·`fee_sum`·`tax_sum`)만 None 이 되고
+        # 판정은 페어가 들고 온 값(세전 폴백) 그대로 진행한다.
+        costs_available = True
+        try:
+            overlaid = await cost_overlay.overlay_pairs(pairs)
+            if overlaid is None:
+                costs_available = False
+        except Exception:
+            logger.warning(
+                "[cost_overlay_unavailable] /api/strategies/te 실비용 조회 실패 sid=%s", sid,
+                exc_info=True,
+            )
+            costs_available = False
+
+        if not costs_available:
+            any_costs_unavailable = True
+
+        metrics = compute_te_rr(
+            pairs, now=now, window_days=window_days, strategy_id=sid,
+            costs_available=costs_available,
+        )
         data.append(asdict(metrics))
 
-    _te_cache[months] = (time.monotonic() + _TE_CACHE_TTL, data)
+    # 2차 보완 B4 — 비용 조회가 하나라도 실패했으면 짧게만 캐시한다(세전 폴백 결과를
+    # 오래 남기지 않는다). `invalidate_te_cache()` 는 테스트/토글용으로 그대로 둔다.
+    ttl = _TE_CACHE_FAILURE_TTL if any_costs_unavailable else _TE_CACHE_TTL
+    _te_cache[months] = (time.monotonic() + ttl, data)
     return ApiResponse(success=True, data=data)
 
 
