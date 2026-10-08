@@ -176687,6 +176687,13 @@ frontend:
     - frontend/src/pages/__tests__/StrategiesTeRr.cost.cycle411.test.tsx
     - frontend/src/pages/__tests__/StrategiesTeRr.test.tsx
     - frontend/src/pages/__tests__/StrategyFunnel.bottleneckTrend.test.tsx
+  frontend/src/api/costs.ts:
+    direct_tests: []
+    transitive_tests:
+    - frontend/src/__tests__/AppShell.test.tsx
+    - frontend/src/__tests__/ContentWidthSlider.test.tsx
+    - frontend/src/components/__tests__/OrderMonitor.cost.cycle411.test.tsx
+    - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/api/history.ts:
     direct_tests:
     - frontend/src/api/__tests__/history.test.ts
@@ -176965,6 +176972,15 @@ frontend:
     transitive_tests:
     - frontend/src/__tests__/AppShell.test.tsx
     - frontend/src/__tests__/ContentWidthSlider.test.tsx
+    - frontend/src/pages/__tests__/MarketState.test.tsx
+  frontend/src/components/CostBasisToggle.tsx:
+    direct_tests: []
+    transitive_tests:
+    - frontend/src/__tests__/AppShell.test.tsx
+    - frontend/src/__tests__/ContentWidthSlider.test.tsx
+    - frontend/src/components/__tests__/PerformanceCard.cost.cycle411.test.tsx
+    - frontend/src/components/__tests__/PerformanceCard.test.tsx
+    - frontend/src/components/__tests__/ProfitChart.cost.cycle411.test.tsx
     - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/components/DailyReportTab.tsx:
     direct_tests:
@@ -178156,6 +178172,13 @@ frontend:
     - frontend/src/pages/__tests__/StrategiesTeRr.cost.cycle411.test.tsx
     - frontend/src/pages/__tests__/StrategiesTeRr.test.tsx
     - frontend/src/pages/__tests__/StrategyFunnel.bottleneckTrend.test.tsx
+  frontend/src/types/costs.ts:
+    direct_tests: []
+    transitive_tests:
+    - frontend/src/__tests__/AppShell.test.tsx
+    - frontend/src/__tests__/ContentWidthSlider.test.tsx
+    - frontend/src/components/__tests__/OrderMonitor.cost.cycle411.test.tsx
+    - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/types/integrations.ts:
     direct_tests: []
     transitive_tests:
@@ -178597,6 +178620,15 @@ frontend:
     - frontend/src/__tests__/AppShell.test.tsx
     - frontend/src/__tests__/ContentWidthSlider.test.tsx
     - frontend/src/pages/__tests__/MarketState.test.tsx
+  frontend/src/utils/costBasis.ts:
+    direct_tests: []
+    transitive_tests:
+    - frontend/src/__tests__/AppShell.test.tsx
+    - frontend/src/__tests__/ContentWidthSlider.test.tsx
+    - frontend/src/components/__tests__/PerformanceCard.cost.cycle411.test.tsx
+    - frontend/src/components/__tests__/PerformanceCard.test.tsx
+    - frontend/src/components/__tests__/ProfitChart.cost.cycle411.test.tsx
+    - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/utils/kst.ts:
     direct_tests: []
     transitive_tests:
@@ -178779,11 +178811,11 @@ frontend:
     - frontend/src/pages/__tests__/StrategiesTeRr.cost.cycle411.test.tsx
     - frontend/src/pages/__tests__/StrategiesTeRr.test.tsx
     - frontend/src/pages/__tests__/StrategyFunnel.bottleneckTrend.test.tsx
-generated_at: '2026-10-08T09:10:24.719946+09:00'
+generated_at: '2026-10-08T09:26:59.971028+09:00'
 stats:
   backend_modules: 182
   backend_tests: 1283
-  frontend_modules: 135
+  frontend_modules: 139
   frontend_tests: 120
   unmapped_modules:
   - frontend/src/api/backtest.ts
