@@ -37,3 +37,17 @@ def restore_rows(lines) -> list:
     events = [e for e in (parse_line(ln) for ln in lines) if e is not None]
     pairer.feed_events(events)
     return pairer.drain(final=True)["orders"]
+
+
+async def run_backfill(paths, db, *, max_bytes_per_sec: int = BACKFILL_MAX_BYTES_PER_SEC, sleep=time.sleep) -> dict:
+    n = {"lines": 0}
+
+    def counted():
+        for ln in iter_log_lines(paths, max_bytes_per_sec=max_bytes_per_sec, sleep=sleep):
+            n["lines"] += 1
+            yield ln
+
+    rows = restore_rows(counted())
+    for row in rows:
+        await db.insert_order(row)
+    return {"lines": n["lines"], "rows": len(rows)}

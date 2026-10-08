@@ -5,7 +5,10 @@
 -- 이 사이클(cycle412)에서는 이 스크립트를 만들기만 하고 운영 DB 에는 실행하지 않는다.
 --
 -- 비밀번호는 psql 변수 journal_pw 하나로만 받는다(리터럴 비밀번호 0). 실행 예:
---   psql "$DATABASE_URL" -v journal_pw="$(openssl rand -base64 24)" -f journal_worker/ops/role.sql
+--   PW=$(openssl rand -hex 24)
+--   psql "$DATABASE_URL" -v journal_pw="$PW" -f journal_worker/ops/role.sql
+-- 변수에 먼저 담는 이유 둘 — ① 같은 값을 secrets/journal_worker.env 의 JOURNAL_DATABASE_URL 에도
+-- 옮겨야 한다 ② hex 는 DSN 을 깨는 `/`·`+`·`=`(base64 가 쓴다) 가 없다.
 --
 -- 두 번 실행해도 오류가 나지 않는다 — CREATE ROLE 은 존재 확인 뒤에만, GRANT·ALTER ROLE SET
 -- 은 원래 멱등이다.

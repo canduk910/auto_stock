@@ -1,7 +1,9 @@
 """대사 — 항등식 점검(cycle412 계약 3.5절)."""
 from __future__ import annotations
 
-from datetime import timedelta
+from datetime import timedelta, timezone
+
+_KST = timezone(timedelta(hours=9))
 
 from jw.config import RECONCILE_MIN_AGE_SECONDS
 
@@ -38,7 +40,7 @@ def rows_from_trade_history(trade_rows: list, journal_keys: set, notice_orders: 
     for t in trade_rows:
         if t.get("status") not in ("COMPLETED", "PARTIAL"):
             continue
-        ts = t["timestamp"]
+        ts = t["timestamp"].astimezone(_KST)
         if ts > cutoff:
             continue
         key = (ts.date(), t["order_no"], t["trade_type"])
@@ -46,8 +48,10 @@ def rows_from_trade_history(trade_rows: list, journal_keys: set, notice_orders: 
             continue
         source = "external" if t["order_no"] in notice_orders else "unmatched"
         out.append({
-            "order_no": t["order_no"], "side": t["trade_type"], "strategy": t.get("strategy"),
-            "ticker": t.get("ticker"), "source": source, "reason_code": None,
+            "order_no": t["order_no"], "side": t["trade_type"], "strategy": t.get("strategy") or "unknown",
+            "ticker": t.get("ticker"), "source": source, "reason_code": None, "reason_sub": None,
+            "judge_price": None, "order_price": t.get("order_price"), "order_division": None, "exchange": None,
+            "parent_order_no": None, "fired_line": None, "effective_line": None, "signal": None, "params": None,
             "order_date": ts.date(), "noted_at": ts,
         })
     return out

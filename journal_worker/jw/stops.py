@@ -48,7 +48,10 @@ class StopTracker:
         self._last: dict = {}
         self._known_keys: set = set()
         self._last_arm_price: dict = {}
+        self._pos_no: dict = {}
         for key, row in (last_rows or {}).items():
+            if row.get("pos_order_no"):
+                self._pos_no[key] = row["pos_order_no"]
             self._last[key] = {
                 "stop_price": row.get("stop_price"), "stop_kind": row.get("stop_kind"),
                 "target_price": row.get("target_price"), "target_hit": bool(row.get("target_hit")),
@@ -94,7 +97,12 @@ class StopTracker:
                 "target_hit": item.get("target_source") == "measured_move_hit",
                 "arm_price": effective_arm,
             }
-            is_new = key not in self._known_keys or key in new_holding_keys
+            pos_no = item.get("order_no")
+            prev_no = self._pos_no.get(key)
+            reentry = bool(pos_no and prev_no and pos_no != prev_no)
+            if pos_no:
+                self._pos_no[key] = pos_no
+            is_new = key not in self._known_keys or key in new_holding_keys or reentry
             was_enabled = self._enabled_state.get(key, True)
             last = self._last.get(key)
 

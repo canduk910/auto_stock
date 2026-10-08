@@ -71,7 +71,7 @@ class JournalDB:
 
     async def last_stop_rows(self) -> dict:
         sql = (
-            "SELECT DISTINCT ON (strategy, ticker) strategy, ticker, stop_price, stop_kind, "
+            "SELECT DISTINCT ON (strategy, ticker) strategy, ticker, pos_order_no, stop_price, stop_kind, "
             "target_price, target_hit, arm_price, event, observed_at "
             "FROM trade_journal_stops ORDER BY strategy, ticker, observed_at DESC"
         )

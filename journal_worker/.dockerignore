@@ -1,0 +1,5 @@
+tests
+ops
+**/__pycache__
+**/*.pyc
+.env*

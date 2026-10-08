@@ -9,6 +9,7 @@
 """
 from __future__ import annotations
 
+from collections import deque
 from datetime import date, timedelta
 
 from jw.config import BUY_SIGNAL_LOG_WINDOW_SECONDS, REASON_WINDOW_SECONDS, SIGNAL_RING_TTL_SECONDS
@@ -17,6 +18,11 @@ _CORRECTABLE = {"STOP_LOSS", "TRAILING_STOP", "TIME_EXIT", "TAKE_PROFIT", "TREND
 _PATH_SOURCE = {"accept": "log_harvest", "manual": "manual_api", "fallback": "fallback_inferred",
                 "reorder": "reorder_inferred"}
 _SNAP_FIELDS = ("stop_price", "stop_kind", "target_price", "target_hit", "arm_price")
+_G1_KEEP = ("stop_price", "stop_source", "buy_price", "buy_date", "order_no", "target_price", "target_source",
+            "kk_arm_price")
+_NON_PRICE_CODES = {"TIME_EXIT", "TAKE_PROFIT", "TREND_EXIT"}
+_HIST = 8
+_KEEP = timedelta(seconds=SIGNAL_RING_TTL_SECONDS)
 
 
 def _parse_date(s):
@@ -39,12 +45,10 @@ class Pairer:
         self._ready: list[dict] = []
         self._last_trade_strategies: dict[str, str] = {}
 
+        self._live = source == "log_harvest"
         self._ring: dict[tuple, list[dict]] = {}
-        self._ring_seen: set = set()
-        self._ring_expired: set = set()
-
-        self._g0_history: list[tuple] = []
-        self._g1_history: list[tuple] = []
+        self._params_history: deque = deque(maxlen=_HIST)
+        self._g1_history: deque = deque(maxlen=_HIST)
 
         self._buy_signal_events: list[dict] = []
         self._exit_reason_events: list[dict] = []
@@ -53,52 +57,71 @@ class Pairer:
 
         self._order_notices: dict[str, list[dict]] = {}
         self._recent_done: list[dict] = []
-        self._buy_accept_events: list[dict] = []
+        self._last_buy_accept: dict = {}
         self._anchor_order_nos: set = set()
+        self._notice_new_order_nos: set = set()
         self._last_sell_resolved: dict[str, dict] = {}
+        self._watermark = None
+        self._day = None
 
     # ── 입력 ──────────────────────────────────────────────────────────────
 
     def feed_snapshot(self, g0, g1, observed_at) -> None:
         if g0 is not None:
-            self._update_ring(g0, observed_at)
-            self._g0_history.append((observed_at, g0))
-            if len(self._g0_history) > 2000:
-                self._g0_history = self._g0_history[-1000:]
+            params = self._update_ring(g0, observed_at)
+            self._params_history.append((observed_at, params))
         if g1 is not None:
-            items = {(it["strategy_id"], it["ticker"]): it for it in (g1.get("items") or [])}
+            items = {(it["strategy_id"], it["ticker"]): {k: it.get(k) for k in _G1_KEEP}
+                     for it in (g1.get("items") or [])}
             self._g1_history.append((observed_at, items))
-            if len(self._g1_history) > 2000:
-                self._g1_history = self._g1_history[-1000:]
 
     def _update_ring(self, g0, observed_at):
+        cutoff = observed_at - timedelta(seconds=SIGNAL_RING_TTL_SECONDS)
+        params_by_sid = {}
         for sid, strat in (g0.get("strategies") or {}).items():
             params_copy = dict(strat.get("params") or {})
+            params_by_sid[sid] = params_copy
             for sig in strat.get("buy_signals") or []:
                 ticker = sig.get("ticker")
                 time_str = sig.get("time")
-                key = (sid, ticker, time_str)
-                if key in self._ring_seen or key in self._ring_expired:
-                    continue
                 signal_dt = _combine_time(observed_at, time_str)
-                self._ring_seen.add(key)
-                self._ring.setdefault((sid, ticker), []).append(
-                    {"signal_dt": signal_dt, "signal": dict(sig), "params": params_copy})
-        cutoff = observed_at - timedelta(seconds=SIGNAL_RING_TTL_SECONDS)
+                if signal_dt < cutoff:
+                    continue
+                lst = self._ring.setdefault((sid, ticker), [])
+                if any(e["signal"].get("time") == time_str for e in lst):
+                    continue
+                lst.append({"signal_dt": signal_dt, "signal": dict(sig), "params": params_copy})
         for k in list(self._ring.keys()):
-            kept = []
-            for e in self._ring[k]:
-                if e["signal_dt"] < cutoff:
-                    self._ring_expired.add((k[0], k[1], e["signal"].get("time")))
-                else:
-                    kept.append(e)
+            kept = [e for e in self._ring[k] if e["signal_dt"] >= cutoff]
             if kept:
                 self._ring[k] = kept
             else:
                 del self._ring[k]
+        return params_by_sid
+
+    def _purge(self, ts):
+        if not self._live:
+            return
+        if self._watermark is None or ts > self._watermark:
+            self._watermark = ts
+        if self._day != ts.date():
+            self._day = ts.date()
+            self._ndc_defer_events = [e for e in self._ndc_defer_events if e["ts"].date() == ts.date()]
+            self._anchor_order_nos = set()
+            self._notice_new_order_nos = set()
+        cutoff = self._watermark - _KEEP
+        if len(self._exit_reason_events) > 64 or len(self._buy_signal_events) > 64 or \
+                len(self._status_exit_events) > 64 or len(self._recent_done) > 64 or len(self._order_notices) > 64:
+            self._exit_reason_events = [e for e in self._exit_reason_events if e["ts"] >= cutoff]
+            self._buy_signal_events = [e for e in self._buy_signal_events if e["ts"] >= cutoff]
+            self._status_exit_events = [e for e in self._status_exit_events if e["ts"] >= cutoff]
+            self._recent_done = [d for d in self._recent_done if not d["used"] and d["ts"] >= cutoff]
+            self._order_notices = {k: v for k, v in self._order_notices.items() if v[-1]["ts"] >= cutoff}
 
     def feed_events(self, events) -> None:
         for ev in events:
+            if ev.get("ts") is not None:
+                self._purge(ev["ts"])
             kind = ev.get("kind")
             if kind == "buy_signal":
                 self._buy_signal_events.append({"strategy": ev["strategy"], "ticker": ev["ticker"],
@@ -111,10 +134,10 @@ class Pairer:
                 self._status_exit_events.append(ev)
             elif kind == "order_notice":
                 self._order_notices.setdefault(ev["order_no"], []).append(ev)
+                if ev.get("rctf") == "0":
+                    self._notice_new_order_nos.add(ev["order_no"])
             elif kind == "order_done":
                 self._recent_done.append(dict(ev, used=False))
-                if len(self._recent_done) > 2000:
-                    self._recent_done = [d for d in self._recent_done if not d["used"]][-500:]
             elif kind == "buy_accept":
                 self._handle_buy_accept(ev)
             elif kind == "sell_accept":
@@ -130,21 +153,29 @@ class Pairer:
 
     # ── 앵커 처리 ─────────────────────────────────────────────────────────
 
-    def _pop_matching_done(self, *, side, ticker, qty=None):
+    def _pop_matching_done(self, *, side, ticker, ts, qty=None):
+        best = None
         for d in self._recent_done:
             if d["used"] or d["side"] != side or d["ticker"] != ticker:
                 continue
             if qty is not None and d["qty"] != qty:
                 continue
-            d["used"] = True
-            return d
-        return None
+            if best is None or abs((d["ts"] - ts).total_seconds()) <= abs((best["ts"] - ts).total_seconds()):
+                best = d
+        if best is not None:
+            best["used"] = True
+        return best
+
+    def _mark_done(self, order_no):
+        for d in self._recent_done:
+            if d["order_no"] == order_no:
+                d["used"] = True
 
     def _handle_buy_accept(self, ev):
         order_no = ev["order_no"]
         self._anchor_order_nos.add(order_no)
-        self._buy_accept_events.append({"strategy": ev["strategy"], "ticker": ev["ticker"],
-                                         "price": ev["price"], "ts": ev["ts"]})
+        self._mark_done(order_no)
+        self._last_buy_accept[(ev["strategy"], ev["ticker"])] = {"price": ev["price"], "ts": ev["ts"]}
         self._incoming.append({
             "side": "BUY", "order_no": order_no, "ticker": ev["ticker"], "strategy": ev["strategy"],
             "order_price": ev["price"], "path": "accept", "ts": ev["ts"], "parent_order_no": None,
@@ -152,7 +183,7 @@ class Pairer:
         })
 
     def _handle_buy_fallback(self, ev):
-        match = self._pop_matching_done(side="BUY", ticker=ev["ticker"])
+        match = self._pop_matching_done(side="BUY", ticker=ev["ticker"], ts=ev["ts"])
         if match is None:
             return
         order_no = match["order_no"]
@@ -166,6 +197,7 @@ class Pairer:
     def _handle_sell_accept(self, ev):
         order_no = ev["order_no"]
         self._anchor_order_nos.add(order_no)
+        self._mark_done(order_no)
         anchor = self._build_sell_anchor(order_no=order_no, ticker=ev["ticker"], strategy=ev["strategy"],
                                           raw_name=ev["signal"], ts=ev["ts"], path="accept",
                                           order_price=None, parent_order_no=None)
@@ -175,6 +207,7 @@ class Pairer:
     def _handle_manual_sell_accept(self, ev):
         order_no = ev["order_no"]
         self._anchor_order_nos.add(order_no)
+        self._mark_done(order_no)
         anchor = self._build_sell_anchor(order_no=order_no, ticker=ev["ticker"], strategy=ev["strategy"],
                                           raw_name="MANUAL", ts=ev["ts"], path="manual",
                                           order_price=None, parent_order_no=None)
@@ -183,6 +216,7 @@ class Pairer:
     def _handle_sell_fallback(self, ev):
         order_no = ev["order_no"]
         self._anchor_order_nos.add(order_no)
+        self._mark_done(order_no)
         anchor = self._build_sell_anchor(order_no=order_no, ticker=ev["ticker"], strategy=ev["strategy"],
                                           raw_name=None, ts=ev["ts"], path="fallback",
                                           order_price=ev["price"], parent_order_no=None)
@@ -191,7 +225,7 @@ class Pairer:
 
     def _handle_reorder(self, ev):
         ticker = ev["ticker"]
-        match = self._pop_matching_done(side="SELL", ticker=ticker, qty=ev["qty"])
+        match = self._pop_matching_done(side="SELL", ticker=ticker, ts=ev["ts"], qty=ev["qty"])
         if match is None:
             return
         order_no = match["order_no"]
@@ -245,10 +279,10 @@ class Pairer:
                 return snap_ts, items[(strategy, ticker)]
         return None
 
-    def _last_g0_before(self, ts):
-        for snap_ts, g0 in reversed(self._g0_history):
+    def _last_params_before(self, ts, strategy):
+        for snap_ts, params in reversed(self._params_history):
             if snap_ts <= ts:
-                return g0
+                return params.get(strategy)
         return None
 
     def _resolve_buy_price(self, strategy, ticker, ts, exit_ev):
@@ -257,10 +291,9 @@ class Pairer:
         snap = self._last_g1_item_before(strategy, ticker, ts)
         if snap and snap[1].get("buy_price") is not None:
             return snap[1]["buy_price"]
-        cands = [e for e in self._buy_accept_events if e["strategy"] == strategy and e["ticker"] == ticker
-                 and e["ts"] <= ts]
-        if cands:
-            return max(cands, key=lambda e: e["ts"])["price"]
+        last = self._last_buy_accept.get((strategy, ticker))
+        if last is not None and last["ts"] <= ts:
+            return last["price"]
         return None
 
     def _compute_fired_line(self, strategy, ticker, ts, exit_ev, buy_price):
@@ -270,11 +303,12 @@ class Pairer:
             return exit_ev["line"]
         if exit_ev.get("threshold") is not None and exit_ev.get("buy_price") is not None:
             return round(exit_ev["buy_price"] * (1 + exit_ev["threshold"] / 100))
+        if exit_ev.get("reason_code") in _NON_PRICE_CODES:
+            return None
         if exit_ev.get("phrase") in ("ltv_intraday_stop", "ltv_limit_up_stop"):
-            g0 = self._last_g0_before(ts)
-            if g0 is None or buy_price is None:
+            params = self._last_params_before(ts, strategy)
+            if params is None or buy_price is None:
                 return None
-            params = ((g0.get("strategies") or {}).get(strategy) or {}).get("params") or {}
             key = "intraday_stop_loss" if exit_ev.get("mode") == "intraday" else "overnight_stop_loss"
             pct = params.get(key)
             if pct is None:
@@ -409,13 +443,17 @@ class Pairer:
     def _finalize(self, anchor):
         order_division = self._resolve_division(anchor["order_no"])
         source = self._resolve_source(anchor["path"])
+        strategy, strategy_src = anchor["strategy"], None
+        if strategy is None:
+            strategy = self._last_trade_strategies.get(anchor["order_no"])
+            strategy_src = "trade_history" if strategy else "unknown"
+            strategy = strategy or "unknown"
         if anchor["side"] == "BUY":
-            strategy = anchor["strategy"]
-            if strategy is None:
-                strategy = self._last_trade_strategies.get(anchor["order_no"])
             signal, params, judge_price = self._resolve_buy_signal(strategy, anchor["ticker"],
                                                                      anchor["ts"])
             signal["path"] = anchor["path"]
+            if strategy_src:
+                signal["strategy_src"] = strategy_src
             return {
                 "order_date": anchor["ts"].date(), "order_no": anchor["order_no"], "side": "BUY",
                 "strategy": strategy, "ticker": anchor["ticker"], "source": source,
@@ -426,9 +464,11 @@ class Pairer:
             }
         signal = dict(anchor["signal"])
         signal["path"] = anchor["path"]
+        if strategy_src:
+            signal["strategy_src"] = strategy_src
         return {
             "order_date": anchor["ts"].date(), "order_no": anchor["order_no"], "side": "SELL",
-            "strategy": anchor["strategy"], "ticker": anchor["ticker"], "source": source,
+            "strategy": strategy, "ticker": anchor["ticker"], "source": source,
             "reason_code": anchor["reason_code"], "reason_sub": anchor["reason_sub"],
             "judge_price": anchor["judge_price"], "order_price": anchor.get("order_price"),
             "order_division": order_division, "exchange": None,
@@ -456,10 +496,4 @@ class Pairer:
         return {"orders": orders, "stops": stops}
 
     def external_notice_orders(self) -> set:
-        out = set()
-        for order_no, notices in self._order_notices.items():
-            if order_no in self._anchor_order_nos:
-                continue
-            if any(n.get("rctf") == "0" for n in notices):
-                out.add(order_no)
-        return out
+        return {o for o in self._notice_new_order_nos if o not in self._anchor_order_nos}
