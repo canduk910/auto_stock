@@ -1,0 +1,5 @@
+2026-10-08 (fe3) 착수 — cycle411b 프론트 7실패 인계받음 (BalanceTable·OrderMonitor·TradeHistoryGrid·TradePnLGrid×3)
+2026-10-08 (fe3) BalanceTable M1(buy_fee_paid 반영)·OrderMonitor M6(5초 재조회)+L1(반올림)·TradeHistoryGrid L1(반올림)·TradePnLGrid L1(fee/tax 원·bp 1자리)+M4(pnl-summary-cost null→—) 수정
+2026-10-08 (fe3) npm test -- --run 1108/1108 통과 · npm run build 성공
+2026-10-08 (fe3) package-lock.json 무관 변동(@emnapi/core, cd201f52 +23줄) main 버전으로 되돌림 — npm ci 는 main 에서도 동일하게 실패(로컬 npm/플랫폼 드리프트, cycle411 무관 — npm install 로 설치 확인)
+2026-10-08 (fe3) 커밋 687afeb6 (frontend 11파일만, git commit frontend e2e) — 완료
