@@ -175,16 +175,19 @@ def test_macro_lite_when_scanned_then_zero_original_project_imports():
     assert hits == [], f"macro/macro_lite/ 가 원 프로젝트 모듈을 import 한다: {hits}"
 
 
-# ── 7. pyproject.toml testpaths == ["tests"] (macro/tests/ 가 우리 스위트에 안 섞인다) ──
+# ── 7. pyproject.toml testpaths ⊆ {tests, journal_worker/tests} (macro/tests/ 가 우리 스위트에 안 섞인다) ──
+# cycle412 갱신 — 거래일지 워커(`journal_worker/`, 우리 코드)의 테스트는 루트 스위트에 넣는다(CI 가 돌게).
+# 이 가드의 이빨(vendor `macro/tests/` 배제)은 그대로다.
 
 def test_pyproject_when_read_then_testpaths_is_tests_only():
     import tomllib
 
     d = tomllib.loads(_read(_PYPROJECT))
     testpaths = d["tool"]["pytest"]["ini_options"]["testpaths"]
-    assert testpaths == ["tests"], (
+    assert "tests" in testpaths and set(testpaths) <= {"tests", "journal_worker/tests"}, (
         f"pyproject.toml testpaths={testpaths!r} — macro/tests/ 가 섞일 수 있다"
     )
+    assert not any(str(t).startswith("macro") for t in testpaths), testpaths
 
 
 def test_macro_dir_when_present_then_has_own_pytest_ini_not_relying_on_root():

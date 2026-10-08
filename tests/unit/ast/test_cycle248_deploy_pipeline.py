@@ -76,6 +76,12 @@ def _frontend_re() -> str:
     return m.group(1)
 
 
+def _journal_re() -> str:
+    m = re.search(r"^JOURNAL_RE='([^']+)'\s*$", _read(_SCRIPT), re.M)
+    assert m, "스크립트에 JOURNAL_RE='…' 한 줄 정의가 없다(cycle412)"
+    return m.group(1)
+
+
 def test_deploy_yml_when_deploying_then_calls_selector_and_has_no_bare_compose_up():
     """G-248-1 — deploy.yml 은 `git pull` 뒤 선택 스크립트를 호출하고, 무조건 `up --build` 를
     직접 쓰지 않는다(그 한 줄이 돌아오면 cycle248 전체가 무효)."""
@@ -130,7 +136,9 @@ def test_backend_regex_when_probed_then_exact_positive_and_negative_set():
         assert pat.search(p), f"양성이어야 한다: {p}"
     for p in ["srcs/a.py", "requirements-dev.txt", "frontend/Dockerfile", "docker-compose.yml",
               ".github/workflows/ci.yml", "tools/test_impact/a.py", "tests/unit/x.py",
-              "docs/a.md", "CLAUDE.md", "pyproject.toml", "supabase/migrations/1.sql"]:
+              "docs/a.md", "CLAUDE.md", "pyproject.toml", "supabase/migrations/1.sql",
+              # cycle412 — 워커는 독립 이미지라 backend 입력이 아니다(넣으면 워커만 고쳐도 backend 재시작)
+              "journal_worker/jw/main.py", "journal_worker/Dockerfile", "journal_worker/requirements.txt"]:
         assert not pat.search(p), f"음성이어야 한다: {p}"
 
 
@@ -141,8 +149,28 @@ def test_frontend_regex_when_probed_then_anchored_to_frontend_dir():
     assert not pat.search("frontendx/a.js") and not pat.search("src/frontend/a.py")
 
 
+def test_journal_regex_when_worker_dockerfile_copy_sources_then_all_matched():
+    """G-248-2j (cycle412) — `journal_worker/Dockerfile` 의 **모든** COPY 소스(빌드 컨텍스트 `./journal_worker`
+    기준)가 journal 축에 걸리고 backend 축에는 걸리지 않는다. 워커 이미지 입력을 놓치면 stale 워커가 돈다."""
+    jpat, bpat = re.compile(_journal_re()), re.compile(_backend_re())
+    sources = _dockerfile_copy_sources(_read(_ROOT / "journal_worker" / "Dockerfile"))
+    assert sources, "journal_worker/Dockerfile 에 COPY 가 없다?"
+    for src in sources:
+        probe = "journal_worker/" + (src if not src.endswith("/") else src + "anything.py")
+        assert jpat.search(probe), f"워커 COPY 소스 {src!r} 가 journal 축 밖이다"
+        assert not bpat.search(probe), f"워커 COPY 소스 {src!r} 가 backend 축에 걸린다"
+
+
+def test_journal_regex_when_probed_then_anchored_to_worker_dir():
+    """G-248-4j (cycle412) — `JOURNAL_RE` 는 `journal_worker/` 접두에 앵커된다."""
+    pat = re.compile(_journal_re())
+    assert pat.search("journal_worker/jw/main.py") and pat.search("journal_worker/Dockerfile")
+    assert not pat.search("journal_workerx/a.py") and not pat.search("src/journal_worker/a.py")
+    assert not pat.search("frontend/a.ts") and not pat.search("macro/a.py")
+
+
 def test_script_when_modes_then_flags_match_contract():
-    """G-248-5 (cycle303 갱신) — 모드별 compose 플래그 계약.
+    """G-248-5 (cycle303 갱신 · cycle412 journal 축 추가) — 모드별 compose 플래그 계약.
 
     cycle248 당시엔 frontend 전용 모드가 리터럴 `--no-deps … frontend` 로 끝나는 한 줄이었다.
     cycle303 이 macro 서비스를 추가하며 frontend/macro/frontend+macro 세 모드가 **같은 코드
@@ -179,6 +207,9 @@ def test_script_when_modes_then_flags_match_contract():
     assert not re.search(r"SERVICES\+=\(\s*backend\s*\)", text), "backend 가 SERVICES 에 append 되는 경로가 생겼다"
     assert re.search(r"SERVICES\+=\(\s*frontend\s*\)", text), "FRONTEND_HITS → SERVICES append 가 없다"
     assert re.search(r"SERVICES\+=\(\s*macro\s*\)", text), "MACRO_HITS → SERVICES append 가 없다"
+    # cycle412 — journal 축(서비스 `journal_worker`)도 같은 한 줄을 공유한다. full 줄은 여전히 서비스 0.
+    assert re.search(r"SERVICES\+=\(\s*journal_worker\s*\)", text), "JOURNAL_HITS → SERVICES append 가 없다"
+    assert "journal_worker" not in full[0].split(), full
 
 
 def test_script_when_written_then_strict_mode_and_marker_after_compose():
