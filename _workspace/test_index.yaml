@@ -183809,7 +183809,7 @@ frontend:
       - frontend/src/pages/__tests__/StrategiesTeRr.cycle411d.test.tsx
       - frontend/src/pages/__tests__/StrategiesTeRr.test.tsx
       - frontend/src/pages/__tests__/StrategyFunnel.bottleneckTrend.test.tsx
-generated_at: '2026-10-08T18:09:24.462Z'
+generated_at: '2026-10-08T19:24:35.198Z'
 stats:
   backend_modules: 182
   backend_tests: 1300
