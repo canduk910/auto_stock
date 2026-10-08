@@ -285,12 +285,14 @@ export interface TradePair {
   slippage_won?: number | null
   cost_status?: 'settled' | 'estimated' | 'mixed' | null
   allocated?: boolean
-  buy_trade_ids?: number[]
-  sell_trade_ids?: number[]
+  // cycle411d — trade_history.id = UUID(`supabase/migrations/001_init.sql`), 정수가
+  // 아니다. 화면은 이 배열을 렌더하지 않아(타입만) 3차 검증 전까지 무증상이었다.
+  buy_trade_ids?: string[]
+  sell_trade_ids?: string[]
   // cycle411c L2/F12 — 분할 매도 뒤 남은 수량 몫(open 페어). 화면 미사용, 타입만.
   partial_fee?: number | null
   partial_tax?: number | null
-  partial_sell_trade_ids?: number[]
+  partial_sell_trade_ids?: string[]
 }
 
 export interface TradePnLSummary {

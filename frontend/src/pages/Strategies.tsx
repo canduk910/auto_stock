@@ -222,6 +222,12 @@ function TeRrBody({ strategyKey, metrics: m }: { strategyKey: string; metrics: T
   const showGauge = !isInsufficient && m.rr_available && m.rr !== null && m.required_rr !== null
   const showStructure = !isInsufficient && m.structure_tag !== null
   const caption = sampleCaption(m)
+  // cycle411d — 「3개월 실현」 뿐 아니라 판정(verdict)·TE·승률 자체도 비용 조회 실패
+  // (`realized_net_sum_krw: null`)면 세전으로 자동 폴백된다(`compute_te_rr` — net 칸이
+  // 없는 페어는 세전 값으로 떨어진다, 계약 B4). 같은 조건(hasNet)을 배지 옆에도 걸어
+  // 「우위/열위」 가 세후 기준이라고 오인하지 않게 한다. 세후 값이 있으면(PC3 와 같은
+  // 규약) 라벨을 달지 않는다.
+  const hasNet = m.realized_net_sum_krw != null
 
   return (
     <div className="space-y-1.5">
@@ -235,6 +241,11 @@ function TeRrBody({ strategyKey, metrics: m }: { strategyKey: string; metrics: T
           >
             {VERDICT_LABELS[m.verdict]}
           </span>
+          {!hasNet && (
+            <span data-testid={`te-pretax-${strategyKey}`} className="text-[10px] text-gray-400">
+              세전
+            </span>
+          )}
           <span
             data-testid={`te-value-${strategyKey}`}
             className={`text-sm font-semibold ${isInsufficient ? 'text-gray-400' : profitColorClass(m.te_pct)}`}
@@ -244,9 +255,9 @@ function TeRrBody({ strategyKey, metrics: m }: { strategyKey: string; metrics: T
         </div>
         <span data-testid={`te-realized-${strategyKey}`} className="text-xs text-gray-500">
           {/* cycle411 — 세후(net) 기본. 구 서버·비용 조회 실패(null, 「모름」)는 세전으로
-              폴백한다(ST2 · cycle411c F9·B4) — 어느 쪽인지 라벨로 밝힌다. */}
+              폴백한다(ST2 · cycle411c F9·B4) — 어느 쪽인지 라벨로 밝힌다.
+              cycle411d — hasNet 은 위로 끌어올려 배지 옆 「세전」 표시와 공유한다. */}
           {(() => {
-            const hasNet = m.realized_net_sum_krw != null
             const realized = hasNet ? m.realized_net_sum_krw! : m.realized_sum_krw
             return (
               <>

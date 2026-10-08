@@ -52,7 +52,9 @@ describe('cycle411c — 실비용 칸 타입 정직화 (F12)', () => {
     expectNullable('trading.ts', 'TradePair', ['cost_status', 'partial_fee', 'partial_tax'])
     const line = fieldLine(block('trading.ts', 'TradePair'), 'partial_sell_trade_ids')
     expect(line, 'TradePair.partial_sell_trade_ids 선언 없음').toBeDefined()
-    expect(line!).toMatch(/number\[\]/)
+    // cycle411d — trade_history.id = UUID 문자열. costTypes.cycle411d 가 세 체결 id 칸
+    // 전부(buy_trade_ids·sell_trade_ids·partial_sell_trade_ids)를 string[] 로 고정한다.
+    expect(line!).toMatch(/string\[\]/)
   })
 
   it('TradePnLSummary.slippage_n = number | null (F4)', () => {

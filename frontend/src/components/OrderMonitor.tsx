@@ -50,7 +50,10 @@ export default function OrderMonitor({ selectedStrategy }: Props) {
 
   return (
     <div className="bg-white rounded-lg shadow p-5">
-      <div className="flex items-center justify-between mb-4">
+      {/* cycle411d — 머리줄 gap. 공간이 부족하면(400px) flex-wrap 으로 배지 그룹이
+          다음 줄로 내려가고 gap-2 가 그 사이 여백을 준다 — 줄바꿈 없이 압착돼
+          안의 문구까지 글자 단위로 꺾이던 결함(F10 재확인). */}
+      <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
         <h3 className="text-lg font-semibold text-gray-900 whitespace-nowrap">주문처리 현황</h3>
         <div className="flex items-center gap-2">
           {aggregated.buyDisabled && (
@@ -72,9 +75,11 @@ export default function OrderMonitor({ selectedStrategy }: Props) {
               {costsError ? (
                 <>
                   <span data-testid="order-monitor-net-pnl" className="text-gray-400">—</span>
+                  {/* cycle411d — 가장 좁은 폭에서도 「조회 실패」 가 글자 단위로 꺾이지
+                      않는다(F10 재확인). */}
                   <span
                     data-testid="order-monitor-net-pnl-error"
-                    className="ml-1 text-[10px] font-medium text-red-500"
+                    className="ml-1 text-[10px] font-medium text-red-500 whitespace-nowrap"
                   >
                     조회 실패
                   </span>

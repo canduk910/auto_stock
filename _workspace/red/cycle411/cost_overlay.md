@@ -33,7 +33,7 @@
 
 ### DB (가산형)
 - `src/db/trade_cost.py::get_trades_by_status(start, end, statuses)` — `status = ANY($n::text[])`, KST `trade_date`, `id`·`ticker_name`·`order_price`·`status` 포함
-- `get_trade_pairs` 페어에 `buy_trade_ids`·`sell_trade_ids`(int, 시간순, id 없는 행은 목록에서만 빠짐, open 은 `sell_trade_ids=[]`)
+- `get_trade_pairs` 페어에 `buy_trade_ids`·`sell_trade_ids`(string/UUID — `trade_history.id`, 시간순, id 없는 행은 목록에서만 빠짐, open 은 `sell_trade_ids=[]`)
 - 라우트 테스트는 `src.db.trade_cost.get_daily_range`·`get_trades_by_status`·`src.db.daily_performance.get_performance` **모듈 속성**을 갈아 끼운다 → 구현은 `from src.db import trade_cost as trade_cost_db` 처럼 모듈 경유로 부른다
 
 ### 라우트 응답 칸
@@ -148,7 +148,8 @@ tester 합성 시나리오 x1~x10 이 찾은 결함을 회귀 테스트로 고�
 - **F9.** `te-realized-<id>` 는 세후 값에 「세후」 라벨(위 B4 화면과 같은 칸).
 - **F10.** `BalanceTable` 「예상 매도비용」·「순 평가손익」 머리칸(`columnheader`)과 `sell-cost-<ticker>`·`net-pl-<ticker>` 칸 class 에 `whitespace-nowrap`. `OrderMonitor` 제목 「주문처리 현황」 class 에 `whitespace-nowrap`, 머리줄(제목의 부모) 텍스트에 「추정」 은 **한 번**(라벨 「(추정)」 과 배지 「추정」 중복 금지 — 배지는 `order-monitor-net-pnl` 안에 남는다, OM1).
 - **F11 배분 배지 = 페어 밖과 나눴을 때만 (결정 6 갱신).** 페어 `allocated` = 그 페어 체결 행(`buy_trade_ids` + `sell_trade_ids` + `partial_sell_trade_ids`)이 받은 정산 행 중 **하나라도 이 페어 밖의 체결 행에도 나뉘었을 때만** true. 같은 날 사고 판 단일 페어(정산 1행을 자기 매수·매도 행만 나눠 받음)는 false. 추정 행·open 페어는 기존대로 false. 체결 행 단위 `trade_costs(...)[id]["allocated"]` 의미는 그대로(정산 1행을 2개 이상 체결 행이 나눔). → 위 「메인 세션 결정」 6 을 이 문장이 대체한다.
-- **F12 타입.** `frontend/src/types/trading.ts` — `PerformanceSummary.net_total_profit_rate`·`net_avg_daily_profit_rate` · `DailyPerformance` 비용·세후 6칸(`cost_status` 포함) · `TradeRecord.fee`·`tax`·`net_profit_loss`·`cost_status` · `TradePair.cost_status` · `TradePnLSummary.slippage_n` 에 `| null`. `TradePair` 에 `partial_fee?: number | null`·`partial_tax?: number | null`·`partial_sell_trade_ids?: number[]`(화면 미사용, 타입만). `frontend/src/types/strategy.ts` `TeRrMetrics.realized_net_sum_krw`·`fee_sum`·`tax_sum` 에 `| null`.
+- **F12 타입.** `frontend/src/types/trading.ts` — `PerformanceSummary.net_total_profit_rate`·`net_avg_daily_profit_rate` · `DailyPerformance` 비용·세후 6칸(`cost_status` 포함) · `TradeRecord.fee`·`tax`·`net_profit_loss`·`cost_status` · `TradePair.cost_status` · `TradePnLSummary.slippage_n` 에 `| null`. `TradePair` 에 `partial_fee?: number | null`·`partial_tax?: number | null`·`partial_sell_trade_ids?: string[]`(화면 미사용, 타입만). `frontend/src/types/strategy.ts` `TeRrMetrics.realized_net_sum_krw`·`fee_sum`·`tax_sum` 에 `| null`.
+  - (cycle411d, 3차 검증 후 LOW) `buy_trade_ids`·`sell_trade_ids`·`partial_sell_trade_ids` 는 `string[]` 이다 — `trade_history.id` 가 `UUID`(`supabase/migrations/001_init.sql`)라 `number[]` 는 타입 오기였다.
 - **F13 MSW 기본 목 산수.** `/api/history/pnl`: 페어 `net_profit_loss = profit_loss − fee − tax`, `cost_bp` 정의식 ±0.05, summary 합계 = closed 페어 합(`realized_total_krw`·`realized_net_total_krw`·`fee_sum`·`tax_sum`·`closed_count`), 그 핸들러에 `as never` 없음. `/api/performance/daily`: `daily_net_pnl = daily_realized_pnl − daily_fee − daily_tax`, 세후 ≤ 세전, 첫 행 「창 이전 누적」 `(1+누적)/(1+당일)` 이 세전·세후 같음(1e-7). `/api/balance`: `{holdings: [...], summary: {AccountSummary 7키}}`(보유가 있으면 실비용 4칸 포함). `/api/history`: 행에 `fee`·`cost_status`·`order_price`(SELL 이면 `tax`·`net_profit_loss`).
 - **F14 정본 현재형.** `README.md`·`src/routes/CLAUDE.md` — 굵은 꼬리표 `**cycle411…**`·`cycle411 보완` 금지, 실비용 표 행에 「보완」·문장 끝 「추가」(`… 추가.`·`… 추가 —`) 금지. 값의 출처 괄호 `(cycle411, 사용자 결정 10-08 …)` 는 허용. 걷어낸 경위는 `docs/history/README.history.md`(새 파일)·`docs/history/src-routes-CLAUDE.history.md` 에 append(둘 다 `cycle411` 언급).
 

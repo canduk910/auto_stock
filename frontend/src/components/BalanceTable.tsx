@@ -235,7 +235,12 @@ export default function BalanceTable({ selectedStrategy }: Props) {
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <ScrollPane>
-        <table className="w-full text-sm">
+        {/* cycle411d — 표 전체 줄바꿈 금지(F10 재확인). `white-space` 는 상속되는
+            속성이라 루트에 한 번 달면 거래시장·매입일·손절가·목표가 등 기존 칸도
+            전부 물려받는다 — 1280px 에서 한 자씩 꺾여 행 높이가 51→85px 로 늘던
+            결함의 뿌리가 "새 칸 2개만" 이 아니라 표 전체였다. ScrollPane 이 이미
+            overflow-auto 라 넘치는 폭은 가로 스크롤로 받는다. */}
+        <table className="w-full text-sm whitespace-nowrap">
           <thead className="bg-gray-50 border-b">
             <tr>
               <th className="px-4 py-3 text-left font-medium text-gray-600">종목명</th>
