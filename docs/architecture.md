@@ -993,6 +993,7 @@ flowchart TD
 | `stock_master.master_raw` | 034 | KIS 공식 일일 마스터 파일 raw JSONB + master_raw_updated_at + is_kospi200/is_kosdaq150 BOOLEAN (037, 사이클 153) |
 | `pending_next_day_clear` | 038 | 익일청산큐 DB 영속화 — PK (target_date, ticker, strategy_id). 재기동 시 메모리 휘발 차단 |
 | `llm_buy_evaluations` | 043 | AI 매수평가(LLM)를 주문 발화 시점에 기록 — PK (trade_date, account_no, ticker, order_no) + eval_kind('order'|'blocked'). 주문 1건 = 1행(성공·실패 모두), 매매 hot path 무관한 관측 계층. 열 정의 정본 = 루트 `CLAUDE.md` DB 스키마 표 (cycle276). 프로세스 분리 1단계가 이 테이블을 큐로 재사용한다 → 15.2 |
+| `trade_journal_orders` · `_stops` · `_notes` · `_cursor` | 047 | 거래일지 — 주문 1건 1행 `(order_date, order_no, side)` UNIQUE · 손절선 사건 · 메모 · 로그 커서. 쓰는 쪽은 `journal_worker` 컨테이너의 전용 역할 하나 → 15.8. 칸 정의 정본 = `src/db/CLAUDE.md` 「DB 스키마」 절 |
 
 ---
 
@@ -1396,7 +1397,7 @@ tick blind — 루트 `CLAUDE.md` 운영 가이드 D6 = cycle232. cycle248 이 �
 
 | 단계 | 범위 | 상태 |
 |------|------|------|
-| 0 | 현재 — 컨테이너 3개(backend / frontend / macro) | 가동 중 |
+| 0 | 현재 — compose 서비스 4개(backend / frontend / macro / journal_worker). journal_worker 는 매매 경로 밖 관찰자다 → 15.8 | 가동 중 |
 | 1 | AI 매수평가(LLM)를 `llm_worker` 로 분리 | **진행 중** (cycle279 — 워커 컨테이너 신설) |
 | 2 | 20:00 자문 · 21:30 로그 분석 · 외부 백테스트 분리 (퍼널은 가를 수 없다 → 15.3) | 계획 (착수 미정) |
 | 3 | 시세 감시 ↔ 전략 판정 ↔ 주문 완전 분리 | **보류** (착수하지 않는다) |
@@ -1430,19 +1431,24 @@ flowchart LR
     REST["KIS REST<br/>(주문 · 잔고 · 일봉)"]
     DB[("AWS RDS PostgreSQL")]
     MAC["macro<br/>매크로 API<br/>(매매 판단 없음)"]
+    JW["journal_worker<br/>거래일지 관찰자<br/>(읽기만 · KIS 0)"]
     FE -->|"/api"| BE
     FE -->|"/api/macro"| MAC
     BE <--> WS
     BE <--> REST
     BE -->|"asyncpg (db/pg.py)"| DB
     BE -->|"레짐 조회 (관찰)"| MAC
+    JW -->|"GET G0 · G1 (리포터 키)"| BE
+    BE -.->|"파일 로그 ./logs (:ro 마운트)"| JW
+    JW -->|"trade_journal_* (전용 역할)"| DB
 ```
 
 KIS REST 와의 연결은 backend 상자 안 `api/base.py` 의 `_semaphore = Semaphore(20)` 을 거친다.
 
-`docker-compose.prod.yml` 의 서비스는 `backend` · `frontend` · `macro` 셋이다. `macro` 는 매크로
-화면 API 이고 매매 판단을 하지 않는다. 매매에 관한 일은 전부 backend 상자 안에 있고, 그 안의
-모든 이름은 같은 이벤트 루프 위에서 돈다.
+`docker-compose.prod.yml` 의 서비스는 `backend` · `frontend` · `macro` · `journal_worker` 넷이다.
+`macro` 는 매크로 화면 API 이고 매매 판단을 하지 않는다. `journal_worker` 는 backend 가 남긴
+로그와 조회 응답을 읽어 거래일지를 쓰는 관찰자다(15.8). 매매에 관한 일은 전부 backend 상자 안에
+있고, 그 안의 모든 이름은 같은 이벤트 루프 위에서 돈다.
 
 ### 15.2 1단계 — AI 매수평가 분리 (진행 중 · cycle279 = llm_worker 컨테이너 신설)
 
@@ -1979,9 +1985,11 @@ UDS+JSON 왕복을 직접 재니 25,231 msg/s(p50 39µs · p99 54µs)로 틱 피
 
 ### 15.6 지금 어디까지 됐고 다음에 무엇을 하나
 
-**지금**: 0단계(컨테이너 3개)가 가동 중이고, 1단계는 **설계 단계에서 진행 중**이다 — 코드는
+**지금**: 0단계가 가동 중이고, 1단계는 **설계 단계에서 진행 중**이다 — 코드는
 아직 한 줄도 없다(`src/workers/` 없음 · `llm_worker` 서비스 없음 · migration 043 에 선점 열 없음).
-2·3단계는 착수 전이다.
+2·3단계는 착수 전이다. 별도 워커 컨테이너의 첫 코드는 1단계가 아니라 거래일지 관찰자
+`journal_worker` 다(15.8). 1단계가 풀어야 할 「워커 경로」·「컨테이너 정의」 두 항목은 그 선례를
+그대로 따를 수 있다.
 
 **다음**: 1단계의 다음 할 일은 cycle279 명세를 써서 15.2 의 **미확정 4항목**을 확정하는 것이다.
 얻는 것과 위험은 각 절(15.2 · 15.3 · 15.4)에 적혀 있고, 아래 표에는 **무엇이 있어야 그 단계가
@@ -1994,34 +2002,78 @@ UDS+JSON 왕복을 직접 재니 25,231 msg/s(p50 39µs · p99 54µs)로 틱 피
 | 3 | 15.4 ①~④ 를 프로세스 밖으로 옮기는 별도 설계 + 중복 배달·순서 보장 규약 + 사용자 승인 |
 | 4 | **3단계를 흡수하므로 3단계 선행은 불필요**(15.5.1). 대신 선행 넷 = ① 관측 축(공용 부트스트랩·프로세스 라벨·밀리초·`trace=`) ② 휘발 상태 복구 실증(장외 재시작 1회) ③ scheduler 분해 ④ 1단계 실전 + 15.5.9 의 **미확인 숫자 다섯** 실측 + 15.5.8 제약 A~I 설계 + 사용자 승인 |
 
-### 15.7 배포 모드 — 현재 full · 선택 배포 · none, 1단계 이후 worker 추가(예정)
+### 15.7 배포 모드 — full · 선택 배포(frontend · macro · journal 축) · none
 
 모드 판정의 정본은 `tools/deploy/compose_up_changed.sh` 다(`.deployed_sha` 마커와 HEAD 의
 누적 diff → 모드, cycle248).
 
 | 모드 | 트리거 경로 | compose 호출 | backend 영향 |
 |------|-------------|--------------|--------------|
-| `full` | `BACKEND_RE` (`tools/deploy/compose_up_changed.sh:113`) — `src/`·`requirements.txt`·`Dockerfile`·compose·`deploy.yml`·`tools/deploy/`. 단 `src/` 안 `.md` 는 뺀다(`IMAGE_EXCLUDED_RE`, `:140`) | `up --build -d --remove-orphans` (`:265`) | 재생성 |
-| 선택 배포 — `frontend` · `macro` · `frontend+macro` | backend 축 무변경 + `FRONTEND_RE`(`:121` — `frontend/`·`tools/ops/tls_stage2/`) · `MACRO_RE`(`:128` — `macro/`) 중 바뀐 축. 모드 이름이 곧 서비스 목록이다 | `up --build -d --remove-orphans --no-deps <서비스…>` (`:277`) | 무접촉 |
-| `none` | 그 외(tests·`tools/test_impact`·…) 또는 마커==HEAD | `up -d --remove-orphans` (`:269`) | 빌드 없음 |
-| `worker` (미구현 · 예정) | 워커 전용 경로만 | `up --build -d --remove-orphans --no-deps llm_worker` | 무접촉 **전망** |
+| `full` | `BACKEND_RE` (`tools/deploy/compose_up_changed.sh:113`) — `src/`·`requirements.txt`·`Dockerfile`·compose·`deploy.yml`·`tools/deploy/`. 단 `src/` 안 `.md` 는 뺀다(`IMAGE_EXCLUDED_RE`, `:145`) | `up --build -d --remove-orphans` (`:284`) | 재생성 |
+| 선택 배포 — 걸린 축을 `frontend` · `macro` · `journal` 순서로 `+` 로 이은 이름(`journal` · `frontend+macro` · `frontend+macro+journal` 등) | backend 축 무변경 + `FRONTEND_RE`(`:121` — `frontend/`·`tools/ops/tls_stage2/`) · `MACRO_RE`(`:128` — `macro/`) · `JOURNAL_RE`(`:133` — `journal_worker/`, 서비스 이름은 `journal_worker`) 중 바뀐 축 | `up --build -d --remove-orphans --no-deps <서비스…>` (`:301`) | 무접촉 |
+| `none` | 그 외(tests·`tools/test_impact`·migration 만·…) 또는 마커==HEAD | `up -d --remove-orphans` (`:288`) | 빌드 없음 |
 
-`worker` 모드는 선택 배포와 같은 원리(`--no-deps` 로 그 서비스만 재생성)로 backend
-무접촉이 될 **전망**이다. 아직 코드에는 없다 — 현재 `case "$MODE"` 는 `full` · 선택 배포
-(`frontend`·`macro`·`frontend+macro`) · `none` 이고 그 밖은 `log "internal error: unknown mode"; exit 2` 다(`:263-282`).
+선택 배포는 축 이름 배열 `AXES` 와 서비스 이름 배열 `SERVICES` 를 같은 순서로 모은다.
+`case "$MODE"` 는 `full` · `none` · 그 밖(`*`) 셋이고, `*` 가 선택 배포다(`:282-303`). `*` 에
+왔는데 `SERVICES` 가 비어 있으면 `log "internal error: unknown mode"; exit 2` 로 멈춘다(`:299`).
+새 워커 축을 더하는 일 = 정규식 한 줄 + 분류 블록의 `if` 하나다 — `journal` 축이 그 꼴이다.
 
-⚠️ **`llm_worker` 는 `docker-compose.prod.yml` 본체에 정의한다.** TLS 처럼 오버레이
+⚠️ **워커 서비스는 `docker-compose.prod.yml` 본체에 정의한다.** TLS 처럼 오버레이
 (`docker-compose.tls.yml`/`tls2.yml`)에만 두면, 그 오버레이를 붙이지 않는 `full`·`none` 배포의
-`--remove-orphans`(`:265`/`:269`)가 **돌고 있던 워커 컨테이너를 orphan 으로 삭제한다**.
+`--remove-orphans`(`:284`/`:288`)가 **돌고 있던 워커 컨테이너를 orphan 으로 삭제한다**.
+`journal_worker` 는 본체에 있다. 대가는 compose 의 그 블록을 고치는 배포가 `full` 이라는 점이다.
 
-⚠️ **지금의 `BACKEND_RE` 는 첫 대안이 `src/` 다**(`:113`) — 워커 코드를 `src/` 아래에 그대로
-두면 워커 전용 변경도 `full` 로 분류돼 backend 가 재시작된다(D6 발동). 1단계가 노리는
-"backend 무접촉 배포" 가 경로 설계에 달려 있다는 뜻이라, 어떤 경로를 워커 축으로 뗄지(그리고
-`BACKEND_RE` 에서 어떻게 제외할지)는 cycle279 에서 정한다. 모드 판정 불가는 전부
-`full`(fail-safe)이다.
+⚠️ **`BACKEND_RE` 의 첫 대안은 `src/` 다**(`:113`) — 워커 코드를 `src/` 아래에 두면 워커 전용
+변경도 `full` 로 분류돼 backend 가 재시작된다(D6 발동). 그래서 워커 코드는 `src/` 밖 자기
+디렉터리에 두고 그 디렉터리를 자기 축으로 뗀다(선례 = `journal_worker/` · `JOURNAL_RE`). 모드
+판정 불가는 전부 `full`(fail-safe)이다.
+
+### 15.8 첫 워커 선례 — `journal_worker` (거래일지 관찰자, cycle412)
+
+거래일지는 주문 1건마다 「왜 샀나·왜 팔았나·그때 손절선이 어디였나」를 남긴다. 그 기록을
+주문 경로 안에서 쓰지 않고, **backend 가 이미 남기는 것을 밖에서 읽어** 쓴다. 그래서 주문·청산
+경로 · 8영역 · `scheduler.py` 는 0줄이다(사용자 결정 E1a·E1b·E1c, 설계 =
+`_workspace/design/2026-10-08_trade_journal_observer.md`).
+
+```mermaid
+%%{init: {"flowchart": {"wrappingWidth": 360}}}%%
+flowchart LR
+    subgraph BE["backend (매매 엔진 — 바뀐 줄 = balance.py G1 하나)"]
+        G0["G0 GET /api/trading/status<br/>?include=system,holdings,strategies<br/>(기존 라우트)"]
+        G1["G1 GET /api/balance/exit-lines<br/>(새 읽기 전용 · 5초 캐시)"]
+        LOG["파일 로그<br/>logs/auto_stock.log"]
+    end
+    subgraph JW["journal_worker (src 밖 · KIS 0)"]
+        R["한 회전 (15초)<br/>G0 → G1 → 로그 꼬리 읽기<br/>→ 짝짓기 → 쓰기 → 커서 저장"]
+    end
+    DB[("RDS<br/>trade_journal_orders · _stops<br/>_notes · _cursor (047)")]
+    R -->|"X-API-Key = API_REPORTER_KEY<br/>http://backend:8000 직결"| G0
+    R --> G1
+    LOG -.->|"./logs:/app/logs:ro"| R
+    R -->|"전용 역할 journal_worker<br/>자동커밋 단문"| DB
+```
+
+| 구성 | 하는 일 | 코드 |
+|------|---------|------|
+| G0 | 엔진 상태(`running`·`phase`)와 전략별 `enabled`·`params`·`buy_signals` 를 준다. 매수 행의 신호·파라미터 출처다 | 기존 `routes/trading.py` — src 0줄 |
+| G1 | 보유마다 손절선·목표가·진입 ATR·donchian 무장가를 준다. 엔진 메모리에만 있는 값이라 이 GET 이 유일한 창이다 | `src/routes/balance.py::exit_lines` — read-only(AST 가드 `test_cycle412_g1_purity.py`) |
+| 로그 수확 | 접수·완료·폴백·재주문·수동 매도 줄과 청산 사유 줄을 짝지어 주문 1건 1행을 만든다 | `jw/tailer.py` · `jw/grammar.py` · `jw/pairing.py` |
+| 손절선 사건 | G1 값을 직전 기록과 비교해 `first`·`change`·`boot`·`eod`·`paused`·`exit` 를 쓴다 | `jw/stops.py` |
+| 대사 | 로그 체결 수와 일지 행 수의 항등식 점검 · `trade_history` 로 빠진 행 보강 | `jw/reconcile.py` — ⚠️ 루프(`jw/main.py`)가 부르지 않는다 |
+| 과거분 | 로컬 로그 사본을 한 번 적재한다(D3) | `jw/backfill.py` — ⚠️ `python -m jw backfill` 은 안내 문구만 찍고 종료 코드 1 로 끝난다(DB 적재 경로 없음) |
+
+이 워커가 1단계(15.2)에 남기는 선례는 넷이다.
+
+- **경로** — `src/` 밖 자기 디렉터리, 빌드 컨텍스트도 그 디렉터리(`./journal_worker`). 15.7 의 `BACKEND_RE` 함정을 피한다.
+- **정의 자리** — `docker-compose.prod.yml` 본체. 자원 상한(`mem_limit: 160m` · `cpus: 0.25` · 로그 `10m × 3`)은 첫 배포에 넣는다 — 나중에 고치면 그 배포도 `full` 이다.
+- **KIS 격리** — `src` import 0 · `KIS_` 변수 0 · 메인 `.env` 0 · 체결통보 구독 0 · KIS REST 0. 같은 앱키로 접속하면 메인의 재연결이 거부돼 체결통보가 끊길 수 있다. 가드 = `journal_worker/tests/test_jw_isolation.py`.
+- **DB 격리** — 운영 DSN 을 함께 쓰지 않고 전용 역할로 붙는다(`journal_worker/ops/role.sql` — `trade_history` 는 SELECT 만, `kis_quote_accounts`·`strategy_config`·`positions`·`system_config` 는 접근 0, `statement_timeout=5s`·`lock_timeout=1s`). 트랜잭션을 열지 않는다 — 열면 배포 때 도는 `ALTER TABLE trade_history` 가 뒤에서 기다리고, backend 의 체결 기록이 그 뒤에 줄을 선다.
+
+워커가 죽거나 G0·G1 이 실패해도 매매 영향은 0 이다. G0·G1 이 실패한 회전은 스냅샷 없이
+로그만 수확하고(`degraded`), 연속 실패는 30·60·120·240·300초로 물러난다.
 
 ---
 
-> 본 15장은 **계획 문서**다. 1단계는 진행 중이고, 2·3·4단계는 착수 승인 전이다.
+> 본 15장은 **계획 문서**다(15.1 · 15.7 · 15.8 은 지금 코드의 사실). 1단계는 진행 중이고, 2·3·4단계는 착수 승인 전이다.
 > 4단계(15.5)는 3단계를 흡수하는 **방향 기록**이며, 착수 판단에 필요한 숫자 다섯이 아직 미실측이다.
 > 코드가 실제로 들어오면 각 절의 "예정" 표기를 실제 파일 경로로 바꾼다.

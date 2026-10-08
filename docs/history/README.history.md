@@ -47,3 +47,43 @@
 경위: 비용 조회가 실패하면 `None` 이 되는 summary 칸은 `fee_sum`·`tax_sum`·`realized_net_total_krw`·`realized_net_rate_pct`·`slippage_n` 다섯이다(3차 통합 검증 지적). 같은 동기화에서 `/api/balance` 행에 `sell_cost_rate` 를, 「대시보드 화면」 표의 대시보드·거래 내역 행에 세후 기본·세전 토글·실비용 칸을 덧붙였다(덧붙임이라 걷어낸 원문은 없다).
 
 → CHANGELOG: cycle411 행
+
+---
+
+## 2. 데이터베이스 초기화 · 배포 전 호스트 준비 (하드 게이트) · 프로세스 구성과 분리 로드맵
+
+### 2026-10-08 cycle412 문서 동기화 — migration 목록 001~047 · `journal_worker.env` 결손 효과 정정 · 컨테이너 넷
+
+정본 원문(바뀐 부분):
+
+```
+파일 목록 (현재 `001`~`043`, 실제 집합은 디렉터리가 정본):
+```
+
+```
+- `secrets/journal_worker.env` 가 없으면 `journal_worker` 컨테이너가 기동 실패한다(`env_file` 필수 참조) — 메인 앱 `.env` 를 대신 쓰지 않는다(KIS 앱키·HTS ID·운영 DSN 33개가 그 컨테이너에도 들어간다).
+```
+
+```
+현재 운영 컨테이너는 3개다 (`docker-compose.prod.yml`) — `backend` · `frontend` · `macro`.
+`macro` 는 매크로 화면 API 이고 매매 판단을 하지 않는다. 매매에 관한 일은 전부 `backend` 한 프로세스에 있다.
+```
+
+경위:
+
+- migration 목록은 043 에서 멈춰 있었다. 044(etf_trend 시드, cycle403)·045(실비용 정산, 트랙 C)·
+  046(`order_price`, cycle409)·047(거래일지 4표, cycle412)을 더하고 범위를 `001`~`047` 로 고쳤다.
+  047 뒤에 사람이 한 번 돌리는 `journal_worker/ops/role.sql` 실행 절차를 그 아래에 덧붙였다.
+- `journal_worker.env` 결손 문장은 같은 cycle412 의 백엔드 담당이 쓴 것이다. 로컬 compose
+  v5.1.1 로 재현하니 `env_file` 결손은 그 서비스 하나의 기동 실패가 아니라 compose 명령 전체의
+  오류였다 — 서비스를 지정하지 않은 `docker compose up` 은 종료 코드 1 로 아무것도 만들지 않았고,
+  서비스 하나를 지정한 `up` 은 성공했다. 그래서 `full`·`none` 배포 자체가 실패한다는 문장으로
+  고치고, `.env` 대용 금지는 별도 줄로 나눴다. `chmod 600` 과 그 이유(nginx 가 `./secrets` 를
+  통째로 마운트한다)를 덧붙였다.
+- 컨테이너 수는 `journal_worker` 가 compose 본체에 들어와 넷이다. 「운영 컨테이너」 를
+  「`docker-compose.prod.yml` 의 컨테이너」 로 바꿨다 — 배포 여부와 무관한 코드 사실만 적는다.
+
+같은 동기화에서 덧붙인 것(걷어낸 원문 없음) = API 표 `/api/balance/exit-lines` 행 · 프로젝트 구조
+`journal_worker/` 줄 · 선택적 배포 절의 `journal` 축 설명 줄.
+
+→ CHANGELOG: cycle412 행

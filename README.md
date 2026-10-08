@@ -115,7 +115,7 @@ for f in supabase/migrations/*.sql; do
 done
 ```
 
-파일 목록 (현재 `001`~`043`, 실제 집합은 디렉터리가 정본):
+파일 목록 (현재 `001`~`047`, 실제 집합은 디렉터리가 정본):
 
 ```
 001_init.sql                          # 기본 테이블
@@ -161,7 +161,23 @@ done
 041_stock_master_financial.sql        # KIS 재무 5 TR 정규화 PK(ticker, stac_yymm, div_cls) + 18 NUMERIC + raw JSONB (cycleC1, 마법공식·F-Score-7 원천)
 042_daily_log_reports_external.sql    # daily_log_reports ext_* 6컬럼 (cycle249 외부 리포터 루틴 쓰기 대상)
 043_llm_buy_evaluations.sql           # AI 매수평가(LLM) — 주문이 나갈 때 남기는 기록 PK(trade_date, account_no, ticker, order_no) (cycle276, 관측 전용 — 매매 hot path 무관)
+044_etf_trend_seed.sql                # 신규 전략 etf_trend strategy_config 초기 행 (cycle403, 기본 비활성)
+045_trade_cost_daily.sql              # KIS TTTC8715R 정산 수수료·제세금 저장 PK(trad_dt, pdno) + 기간 합계 표 (트랙 C)
+046_trade_history_order_price.sql     # trade_history.order_price — PENDING 때 주문가 (cycle409, 슬리피지 원천)
+047_trade_journal.sql                 # 거래일지 4표 trade_journal_orders/_stops/_notes/_cursor (cycle412, 쓰는 쪽 = journal_worker 전용 역할)
 ```
+
+`journal_worker/ops/role.sql`(거래일지 워커 전용 DB 역할)은 이 목록에 없다. 마이그레이션이
+아니라서 자동 배포가 돌리지 않는다. 047 을 적용한 뒤 사람이 한 번 실행한다. 두 번 실행해도 오류가
+나지 않는다. 비밀번호는 psql 변수 `journal_pw` 로만 받는다.
+
+```bash
+JPW="$(openssl rand -hex 24)"     # hex = DSN 에 넣을 때 URL 인코딩이 필요 없다
+psql -v ON_ERROR_STOP=1 "$DATABASE_URL" -v journal_pw="$JPW" -f journal_worker/ops/role.sql
+```
+
+그다음 `DATABASE_URL` 과 같은 호스트·DB 에 사용자만 `journal_worker`, 비밀번호만 `$JPW` 로 바꾼
+DSN 을 `secrets/journal_worker.env` 에 넣는다(아래 「배포 전 호스트 준비」 3번).
 
 ### 3. Docker Compose로 실행 (권장)
 
@@ -511,6 +527,7 @@ KIS OpenAPI 가 NXT(넥스트레이드 ATS) 주문·시세를 정식 지원하�
 | GET | `/api/trading/orders` | 주문 추적 상태만 (OrderMonitor 전용 분리) |
 | GET | `/api/balance` | 잔고 조회 (예수금 + 보유종목, 종목별 NXT/KRX 거래시장 정보 join). 보유마다 예상 매도비용 요율 `sell_cost_rate`(ETF 는 수수료율만)와 이미 낸 매수 수수료 `buy_fee_paid`·`buy_fee_status` 를 함께 낸다(비용 조회 실패는 `buy_fee_paid`·`buy_fee_status` 둘 다 `None`) |
 | GET | `/api/balance/buyable` | 매수 가능 금액 조회 |
+| GET | `/api/balance/exit-lines` | 보유마다 손절선·목표가·진입 ATR·무장가(거래일지 워커 전용, 읽기만 · 5초 캐시) |
 | GET | `/api/history?page=&size=` | 거래 내역 (페이징). 체결 행마다 `fee`·`cost_status` + SELL 행 `tax`·`net_profit_loss` 를 낸다. 배분은 페이지가 아니라 그 날짜 전체 체결로 한다 |
 | GET | `/api/history/pnl?page=&size=&strategy=&ticker=` | 매매손익 — 매수/매도 페어 1행 (포지션 0 사이클 단위 가중평균). 보유 중은 open 페어 (미실현 손익은 `ticker_prices` 현재가). 페어마다 `fee`·`tax`·`net_profit_loss`·`net_profit_rate`·`cost_bp`·`slippage_won`·`cost_status`·`allocated` + summary 순손익 합계를 낸다(현재가를 모르면 `fee`~`cost_bp` 는 `None`). 분할 매도 뒤 보유 페어에 `partial_fee`·`partial_tax`, 비용 모름은 summary 5칸(`fee_sum`·`tax_sum`·`realized_net_total_krw`·`realized_net_rate_pct`·`slippage_n`) `None`(0 아님) |
 | GET | `/api/llm-evaluations?order_nos=<CSV>&trade_date=` | **cycle276** AI 매수평가 배치 요약 — 키는 `"<trade_date>\|<order_no>"` 복합 키다(같은 주문번호가 여러 날짜에 있으면 날짜마다 한 키). 거래 내역 두 그리드의 AI 매수평가 버튼 활성 판정용. CSV 는 공백·중복 제거 후 1~200개(0개·초과 422), `trade_date` 형식 위반 422 |
@@ -613,6 +630,7 @@ auto_stock/
 ├── tests/                     # 백엔드 테스트 (pytest)
 ├── e2e/                       # Playwright E2E
 ├── tools/                     # 배포 판정(deploy) · TLS 운영(ops) · 영향 인덱스(test_impact)
+├── journal_worker/            # 거래일지 관찰자 워커 컨테이너 (src 밖 · 로그와 조회 API 를 읽기만 한다)
 ├── supabase/migrations/       # DB 마이그레이션
 ├── docs/
 │   ├── kis/                   # KIS API 스펙 문서
@@ -682,14 +700,17 @@ auto_stock/
 
 ## 프로세스 구성과 분리 로드맵
 
-현재 운영 컨테이너는 3개다 (`docker-compose.prod.yml`) — `backend` · `frontend` · `macro`.
-`macro` 는 매크로 화면 API 이고 매매 판단을 하지 않는다. 매매에 관한 일은 전부 `backend` 한 프로세스에 있다.
+`docker-compose.prod.yml` 의 컨테이너는 4개다 — `backend` · `frontend` · `macro` · `journal_worker`.
+`macro` 는 매크로 화면 API 이고 매매 판단을 하지 않는다. `journal_worker` 는 거래일지를 쓰는 관찰자다.
+backend 가 남긴 로그와 조회 API 응답을 읽기만 하고, KIS 에는 접속하지 않는다. 매매에 관한 일은 전부
+`backend` 한 프로세스에 있다.
 
 ```mermaid
 flowchart LR
     FE["frontend<br/>nginx + SPA<br/>Basic Auth"]
     BE["backend (uvicorn 단일 워커)<br/>시세 감시 · 전략 판정 ·<br/>주문 · 정산 · 관측이 한 곳"]
     MAC["macro<br/>매크로 API"]
+    JW["journal_worker<br/>거래일지 관찰자"]
     KIS["KIS OpenAPI<br/>REST · WebSocket"]
     RDS[("AWS RDS PostgreSQL")]
     FE -->|"/api"| BE
@@ -697,6 +718,9 @@ flowchart LR
     BE -->|"레짐 조회 (관찰)"| MAC
     BE <--> KIS
     BE -->|"asyncpg"| RDS
+    JW -->|"조회 GET 2개 (15초)"| BE
+    BE -.->|"파일 로그 (읽기 전용)"| JW
+    JW -->|"trade_journal_* (전용 DB 역할)"| RDS
 ```
 
 매매에 필요한 모든 일이 한 프로세스 안에 있어서, 프롬프트 한 줄만 고쳐도 backend 전체를
@@ -749,12 +773,15 @@ mkdir -p certbot-www
 # 3) 거래일지 워커(cycle412) DSN — journal_worker 전용 역할의 DSN 하나만 담는다
 #    (메인 .env 와 분리 — journal_worker/ops/role.sql 로 역할을 먼저 만든다)
 printf 'JOURNAL_DATABASE_URL=%s\n' "<journal_worker 역할 DSN>" > secrets/journal_worker.env
+chmod 600 secrets/journal_worker.env
 ```
 
 - 권한 `755 secrets` + `644 secrets/.htpasswd` 는 **필수**다. nginx worker 는 컨테이너 안 **uid 101**, 호스트 파일은 `ubuntu`(uid 1000) 소유라 `700`/`600` 이면 자격 요청이 전부 **500** 이 된다.
 - 자격 파일이 아예 없으면 자격을 보낸 요청이 **403** 이다. 무자격 요청은 어느 상태에서도 401 이라 그것만으로는 결손을 판별할 수 없다.
 - `certbot-www` 를 미리 만들지 않으면 Docker 가 bind mount 소스를 `root:root` 로 만들어 `ubuntu` 가 쓰지 못한다.
-- `secrets/journal_worker.env` 가 없으면 `journal_worker` 컨테이너가 기동 실패한다(`env_file` 필수 참조) — 메인 앱 `.env` 를 대신 쓰지 않는다(KIS 앱키·HTS ID·운영 DSN 33개가 그 컨테이너에도 들어간다).
+- `secrets/journal_worker.env` 가 없으면 `journal_worker` 하나만 못 뜨는 것이 아니다. `env_file` 결손은 compose 명령 전체의 오류라서, 서비스를 지정하지 않는 `full`·`none` 배포의 `docker compose up` 이 아무것도 만들지 않고 실패한다(로컬 compose v5.1.1 실측). 그래서 이 파일은 거래일지 워커가 들어가는 첫 배포보다 먼저 있어야 한다.
+- 이 파일에 메인 앱 `.env` 를 대신 쓰지 않는다 — KIS 앱키·HTS ID·운영 DSN 33개가 그 컨테이너에도 들어간다.
+- 이 파일은 `600` 으로 둔다. frontend(nginx)가 `./secrets` 디렉터리를 통째로 마운트해서 nginx 컨테이너 안에서도 이 파일이 보인다. `600` 이면 nginx worker(uid 101)는 읽지 못하고, `env_file` 은 호스트에서 compose 를 돌리는 `ubuntu` 가 읽으므로 배포에는 지장이 없다.
 - `secrets/` 는 **git 커밋 금지** (`.gitignore` 등재).
 
 ### 자동 배포 (CI/CD)
@@ -790,6 +817,7 @@ EC2 는 모든 push 에 `up --build` 를 돌지 않는다. `compose_up_changed.s
 - **판정 불가는 전부 `full`** 이다(fail-safe) — 마커 없음 · 마커 SHA 미지 · 직전 시도 마커(`.deployed_sha.attempt`) 잔존 · diff 실패.
 - `.tls_enabled` 가 있으면 모든 compose 호출에 `-f docker-compose.tls.yml` 이, `.tls_stage2` 도 함께 있으면 `-f docker-compose.tls2.yml` 까지 base 뒤에 붙는다. 두 마커는 **모드 판정에는 개입하지 않는다**.
 - `.env` 는 git 밖이라 스크립트가 못 본다 — `.env` 를 손댄 뒤에는 운영자가 직접 재생성한다.
+- `journal_worker/` 만 바꾸면 워커만 다시 만든다(`journal_worker/tests/`·`ops/role.sql` 만 바꿔도 `journal`). 하지만 compose 의 `journal_worker` 블록(자원 상한 등)을 고치면 `docker-compose.prod.yml` 이 backend 축이라 `full` 이다. migration 만 바꾸면 `none` 이다(migration 은 compose 전에 `deploy.yml` 이 적용한다).
 - 모드를 미리 확인: 로컬에서 `git diff --name-only <EC2 의 .deployed_sha 값> HEAD` 를 위 표에 대보거나, EC2 에서 `DEPLOY_DRY_RUN=1 bash tools/deploy/compose_up_changed.sh` (docker 미호출 · 마커 미기록).
 
 ### TLS (HTTPS)

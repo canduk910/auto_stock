@@ -1,0 +1,4 @@
+10-08 23:30 syncdocs 착수 — 모드 A feat/cost-overlay...HEAD, 대상 루트 CLAUDE.md·src/routes·src/db·architecture 15장·README
+10-08 23:38 syncdocs 루트 CLAUDE.md·routes·db·architecture 15장(15.8 신설)·README 수정 완료 — 워커 README·history·changelog 진행
+10-08 23:41 syncdocs history 3건·changelog 행·sync-docs 매핑 추가 — 문서 관련 테스트 실행 중
+10-08 23:48 syncdocs 문서 관련 테스트 4427 통과·워커 포함 3842 통과, PAT 17파일 전부 0 유지 — 커밋

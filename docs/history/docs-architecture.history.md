@@ -814,3 +814,75 @@ flowchart TB
 경위(세 절 공통): cycle385 가 매도 체결을 주문 축(`total_filled >= ordered_qty`)과 보유 축(`pos.quantity` 차감 → 0 이면 닫기)으로 나눴다. 보유가 남으면 삭제 대신 `save_position` 으로 차감 수량을 저장하고, `_selling` 은 주문이 끝나면 보유가 남아도 푼다. 구독 해제는 주문이 끝나고 보유가 0 일 때만이다. J-2 가 `_cancel_and_reorder` 의 재조회에서 보유 0 을 보면 재주문하지 않고 `_selling` 을 푸는 해제 지점을 새로 만들었다(HEAD 의 셋 — 체결통보 · KIS 재대조 · `_reset_daily_state` — 에 더해진다). 수동 매도 라우트는 `_selling` 을 `place_order` 앞에서 세운다. 같은 사이클의 부록 R2(2차 검토 H5)가 `_cancel_and_reorder` 에 두 번째 해제를 더했다 — 원주문을 취소했는데 재주문이 확정적으로 안 걸리면(`KisApiError` · 발사 전 종료) 우리 것이 하나도 안 걸린 채 표식만 남기 때문이다. 부록 R2-5 는 동결이 지키던 보유가 닫히면 동결을 푸는 해제를 체결통보 분기에 더했다. 그래서 해제 지점을 체결통보 · 재주문 태스크 · KIS 재대조 · `_reset_daily_state` 「넷」 으로 묶어 적었다. 주문 종료 분기의 해제는 어느 주문의 종료든 조건 없이 한다 — 부록 R 이 「표식을 세운 주문의 종료로만」 좁혔던 규칙은 커밋 전에 걷었다(명세 부록 R2-1).
 
 → CHANGELOG: cycle385 행
+
+---
+
+## 15. 프로세스 분리 로드맵
+
+### 2026-10-08 cycle412 문서 동기화 — 컨테이너 넷 · 15.7 배포 모드 일반화 · 15.8 첫 워커 선례
+
+정본 원문(바뀐 부분):
+
+```
+| 0 | 현재 — 컨테이너 3개(backend / frontend / macro) | 가동 중 |
+```
+
+```
+`docker-compose.prod.yml` 의 서비스는 `backend` · `frontend` · `macro` 셋이다. `macro` 는 매크로
+화면 API 이고 매매 판단을 하지 않는다. 매매에 관한 일은 전부 backend 상자 안에 있고, 그 안의
+모든 이름은 같은 이벤트 루프 위에서 돈다.
+```
+
+```
+**지금**: 0단계(컨테이너 3개)가 가동 중이고, 1단계는 **설계 단계에서 진행 중**이다 — 코드는
+아직 한 줄도 없다(`src/workers/` 없음 · `llm_worker` 서비스 없음 · migration 043 에 선점 열 없음).
+2·3단계는 착수 전이다.
+```
+
+```
+### 15.7 배포 모드 — 현재 full · 선택 배포 · none, 1단계 이후 worker 추가(예정)
+
+모드 판정의 정본은 `tools/deploy/compose_up_changed.sh` 다(`.deployed_sha` 마커와 HEAD 의
+누적 diff → 모드, cycle248).
+
+| 모드 | 트리거 경로 | compose 호출 | backend 영향 |
+|------|-------------|--------------|--------------|
+| `full` | `BACKEND_RE` (`tools/deploy/compose_up_changed.sh:113`) — `src/`·`requirements.txt`·`Dockerfile`·compose·`deploy.yml`·`tools/deploy/`. 단 `src/` 안 `.md` 는 뺀다(`IMAGE_EXCLUDED_RE`, `:140`) | `up --build -d --remove-orphans` (`:265`) | 재생성 |
+| 선택 배포 — `frontend` · `macro` · `frontend+macro` | backend 축 무변경 + `FRONTEND_RE`(`:121` — `frontend/`·`tools/ops/tls_stage2/`) · `MACRO_RE`(`:128` — `macro/`) 중 바뀐 축. 모드 이름이 곧 서비스 목록이다 | `up --build -d --remove-orphans --no-deps <서비스…>` (`:277`) | 무접촉 |
+| `none` | 그 외(tests·`tools/test_impact`·…) 또는 마커==HEAD | `up -d --remove-orphans` (`:269`) | 빌드 없음 |
+| `worker` (미구현 · 예정) | 워커 전용 경로만 | `up --build -d --remove-orphans --no-deps llm_worker` | 무접촉 **전망** |
+
+`worker` 모드는 선택 배포와 같은 원리(`--no-deps` 로 그 서비스만 재생성)로 backend
+무접촉이 될 **전망**이다. 아직 코드에는 없다 — 현재 `case "$MODE"` 는 `full` · 선택 배포
+(`frontend`·`macro`·`frontend+macro`) · `none` 이고 그 밖은 `log "internal error: unknown mode"; exit 2` 다(`:263-282`).
+
+⚠️ **`llm_worker` 는 `docker-compose.prod.yml` 본체에 정의한다.** TLS 처럼 오버레이
+(`docker-compose.tls.yml`/`tls2.yml`)에만 두면, 그 오버레이를 붙이지 않는 `full`·`none` 배포의
+`--remove-orphans`(`:265`/`:269`)가 **돌고 있던 워커 컨테이너를 orphan 으로 삭제한다**.
+
+⚠️ **지금의 `BACKEND_RE` 는 첫 대안이 `src/` 다**(`:113`) — 워커 코드를 `src/` 아래에 그대로
+두면 워커 전용 변경도 `full` 로 분류돼 backend 가 재시작된다(D6 발동). 1단계가 노리는
+"backend 무접촉 배포" 가 경로 설계에 달려 있다는 뜻이라, 어떤 경로를 워커 축으로 뗄지(그리고
+`BACKEND_RE` 에서 어떻게 제외할지)는 cycle279 에서 정한다. 모드 판정 불가는 전부
+`full`(fail-safe)이다.
+```
+
+```
+> 본 15장은 **계획 문서**다. 1단계는 진행 중이고, 2·3·4단계는 착수 승인 전이다.
+```
+
+경위: cycle412(거래일지 1a — 관찰자 방식, 사용자 결정 E1a·E1b·E1c)가 `docker-compose.prod.yml`
+본체에 네 번째 서비스 `journal_worker` 를 넣었다. 코드는 `src/` 밖 `journal_worker/` 이고,
+`compose_up_changed.sh` 에 `journal` 축(`JOURNAL_RE='^journal_worker/'`)이 생겼다. 그 과정에서
+선택 배포가 고정 3모드(`frontend`·`macro`·`frontend+macro`)에서 「걸린 축을 `frontend`·`macro`·
+`journal` 순서로 `+` 로 잇는」 일반 조합으로 바뀌었다(축 이름 배열 `AXES` · 서비스 배열
+`SERVICES`). `case "$MODE"` 의 선택 배포 가지도 `frontend|macro|"frontend+macro")` 가 아니라
+`*)` 가 됐고, internal error 는 `*` 에 왔는데 `SERVICES` 가 빌 때로 옮겨졌다. 15.7 의 줄 번호
+인용(`:140`·`:265`·`:269`·`:277`·`:263-282`)은 `JOURNAL_RE` 와 일반화 블록이 들어오며 밀려
+현재 줄(`:145`·`:284`·`:288`·`:301`·`:282-303`)로 고쳤다. 「`worker` (미구현 · 예정)」 행은
+선택 배포가 축 추가만으로 넓어지는 꼴이 되어 별도 모드 행이 필요 없어졌고, 「어떤 경로를 워커
+축으로 뗄지는 cycle279 에서 정한다」 는 `journal_worker/`·`JOURNAL_RE` 선례로 답이 생겼다.
+워커 컨테이너의 첫 코드가 1단계(`llm_worker`)가 아니라 거래일지 관찰자라는 사실은 15.8 로
+새로 적었다. 9.1 확장 테이블에 047 행을 덧붙였다(걷어낸 원문 없음).
+
+→ CHANGELOG: cycle412 행

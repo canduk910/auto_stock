@@ -371,6 +371,13 @@ list_paged_by_filter(*, market=None, min_market_cap=0, min_trade_amount=0,
 - 마이그레이션 = `supabase/migrations/NNN_*.sql`(디렉터리명은 `supabase/` 유지 — 스키마 SQL 정본, RDS 에 순차 적용). 테이블별 계약은 위 모듈 절이 정본이다.
 - `trade_history.status` CHECK = `PENDING`/`COMPLETED`/`PARTIAL`/`CANCELLED`(PENDING → COMPLETED / PARTIAL → CANCELLED) · `trade_type` CHECK = `BUY`/`SELL`(migration 001). status 값을 바꾸면 CHECK 제약도 새 migration 으로 함께 고친다.
 - `stock_master_history`(migration 032·036, 전용 모듈 없음 — `stock_master.list_history` 가 읽는다): `stock_master` 의 INSERT/UPDATE/DELETE 트리거가 쓰는 직전본 표. PK `(ticker, seq)` — `seq` 0=최신본·1=직전본. UPDATE 는 `raw` 가 바뀔 때만 기록하고, DELETE 는 그 종목 행을 지운다.
+- **거래일지 4표 `trade_journal_*`**(migration 047, 가산형 `CREATE … IF NOT EXISTS` 만 · cycle412). **이 디렉터리에 모듈이 없다** — 쓰는 쪽은 `journal_worker` 컨테이너의 `journal_worker/jw/db.py` 하나이고 전용 DB 역할 `journal_worker`(`journal_worker/ops/role.sql`)로 붙는다. backend 는 지금 읽지도 쓰지도 않는다.
+  - `trade_journal_orders` — 주문 1건 1행. `UNIQUE (order_date, order_no, side)` · `side` = `BUY`/`SELL` · NOT NULL = `order_date`·`order_no`·`side`·`strategy`·`ticker`·`source`·`noted_at`. 나머지(`reason_code`·`reason_sub`·`judge_price`·`order_price`·`order_division`·`exchange`·`parent_order_no`·`fired_line`·`effective_line`·`signal` JSONB·`params` JSONB)는 NULL 허용. 쓰기는 `ON CONFLICT (order_date, order_no, side) DO NOTHING`(처음 값을 지킨다). 예외 하나 = `order_division` 이 NULL 인 행만 나중에 채운다(`… AND order_division IS NULL`). `source` = 상시 루프가 쓰는 `log_harvest` · `fallback_inferred` · `reorder_inferred` · `manual_api` 넷. ⚠️ 코드에 정의만 있고 DB 까지 가는 경로가 없는 값이 셋 있다 — `log_restore`(과거분, `jw/backfill.py`) · `external`·`unmatched`(대사, `jw/reconcile.py` — 루프가 부르지 않는다).
+  - `trade_journal_stops` — 손절선 사건. `event` = `first`·`change`·`boot`·`eod`·`paused`·`exit` · `stop_kind` = G1 `stop_source` · `inputs` JSONB · 인덱스 `(strategy, ticker, observed_at)`. 워커 재시작은 `(strategy, ticker)` 별 마지막 행(`DISTINCT ON`)에서 이어 간다.
+  - `trade_journal_notes` — 메모. `anchor_trade_id` UUID NOT NULL UNIQUE · `body` NOT NULL. 표만 있고 읽고 쓰는 코드는 없다.
+  - `trade_journal_cursor` — 로그 꼬리 읽기 커서(`name` PK, 기본 행 `'main'` · `file_name`·`inode`·`byte_offset`). 칸 이름이 `offset` 이 아닌 것은 SQL 예약어라서다.
+  - 🔴 **이 표들은 지우지 않는다** — 워커 역할에 DELETE·TRUNCATE 권한이 없다.
+  - ⚠️ 워커 풀에는 backend 의 JSONB codec(「pg.py」 절 `_init_conn`)이 없다. 그래서 워커는 `json.dumps` 문자열을 바인딩한다 — 「asyncpg 계약 패턴」 의 「raw dict 바인딩」 은 backend 풀 규약이다. 워커 코드를 그 규약대로 고치면 INSERT 가 실패한다.
 
 ## TIMESTAMPTZ 계약
 
