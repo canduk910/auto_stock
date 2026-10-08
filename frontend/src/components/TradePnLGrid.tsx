@@ -423,7 +423,11 @@ export default function TradePnLGrid() {
         )}
         {summary.slippage_n !== undefined && (
           <span>
-            슬리피지 덮인 건수 <span data-testid="pnl-summary-slippage">{summary.slippage_n}건</span>
+            슬리피지 덮인 건수{' '}
+            {/* cycle411c F4 — 비용 조회 실패는 null(「모름」, 0 아님) */}
+            <span data-testid="pnl-summary-slippage">
+              {summary.slippage_n === null ? '—' : `${summary.slippage_n}건`}
+            </span>
           </span>
         )}
         <span className="text-gray-400">전략: {strategyFilterLabel}</span>

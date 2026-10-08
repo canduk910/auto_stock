@@ -37,10 +37,13 @@ export default function OrderMonitor({ selectedStrategy }: Props) {
   // cycle411 — 오늘 실현 순손익(추정). scheduler 무접촉 경로(`GET /api/costs/today`).
   // 조회 실패여도 기존 「실현 손익」(세전)은 그대로 보인다(OM4) — 이 쿼리는 그 옆에 덧붙일 뿐.
   // cycle411b M6 — 세전 실현손익(`/api/trading/status`)과 같은 주기(5초)로 다시 읽는다.
-  const { data: costsToday } = useQuery({
+  // cycle411c F7 — 실패는 재시도하지 않는다(retry 1회 × 5초 폴링 = 분당 24건 WARNING
+  // 이 쌓이던 결함) — 다음 시도는 5초 폴링이 담당한다. 실패 시 마지막 성공값을 남기지
+  // 않고 「—」 + 오류 표시로 바꾼다(`isError` 우선).
+  const { data: costsToday, isError: costsError } = useQuery({
     queryKey: ['costsToday', isAll ? undefined : selectedStrategy],
     queryFn: () => getCostsToday(isAll ? undefined : selectedStrategy),
-    retry: 1,
+    retry: 0,
     refetchInterval: 5000,
   })
   const costsEstimated = costsToday?.cost_status === 'estimated' || costsToday?.cost_status === 'mixed'
@@ -48,7 +51,7 @@ export default function OrderMonitor({ selectedStrategy }: Props) {
   return (
     <div className="bg-white rounded-lg shadow p-5">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">주문처리 현황</h3>
+        <h3 className="text-lg font-semibold text-gray-900 whitespace-nowrap">주문처리 현황</h3>
         <div className="flex items-center gap-2">
           {aggregated.buyDisabled && (
             <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
@@ -61,20 +64,34 @@ export default function OrderMonitor({ selectedStrategy }: Props) {
               {formatPrice(aggregated.dailyPnl)}원
             </span>
           </span>
-          {costsToday && (
+          {/* cycle411c F7 — 조회 실패도 그린다(「—」 + 오류 표시, 마지막 성공값을 남기지 않는다).
+              F10 — 라벨 자체의 「(추정)」 을 걷어 머리줄의 「추정」 이 배지 1개로만 남는다. */}
+          {(costsToday || costsError) && (
             <span className="text-xs text-gray-500">
-              오늘 실현 순손익(추정):{' '}
-              <span
-                data-testid="order-monitor-net-pnl"
-                className={costsToday.total.net_pnl >= 0 ? 'text-red-500' : 'text-blue-500'}
-              >
-                {formatPrice(Math.round(costsToday.total.net_pnl))}원
-                {costsEstimated && (
-                  <span className="ml-1 px-1 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-700">
-                    추정
+              오늘 실현 순손익:{' '}
+              {costsError ? (
+                <>
+                  <span data-testid="order-monitor-net-pnl" className="text-gray-400">—</span>
+                  <span
+                    data-testid="order-monitor-net-pnl-error"
+                    className="ml-1 text-[10px] font-medium text-red-500"
+                  >
+                    조회 실패
                   </span>
-                )}
-              </span>
+                </>
+              ) : (
+                <span
+                  data-testid="order-monitor-net-pnl"
+                  className={costsToday!.total.net_pnl >= 0 ? 'text-red-500' : 'text-blue-500'}
+                >
+                  {formatPrice(Math.round(costsToday!.total.net_pnl))}원
+                  {costsEstimated && (
+                    <span className="ml-1 px-1 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-700">
+                      추정
+                    </span>
+                  )}
+                </span>
+              )}
             </span>
           )}
         </div>

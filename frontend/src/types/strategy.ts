@@ -101,7 +101,8 @@ export interface TeRrMetrics {
   loss_gross?: number
   rr_gross?: number | null
   verdict_gross?: 'undecided' | 'superior' | 'inferior' | 'flat'
-  realized_net_sum_krw?: number
-  fee_sum?: number
-  tax_sum?: number
+  // cycle411c B4 — 비용 조회 실패(costs_available=false)는 null(「모름」, 세전 값을 담지 않는다).
+  realized_net_sum_krw?: number | null
+  fee_sum?: number | null
+  tax_sum?: number | null
 }

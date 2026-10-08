@@ -68,10 +68,15 @@ export default function PerformanceCard({ selectedStrategy }: Props) {
   const isStrategySynthetic = strategyParam !== undefined
 
   const isNet = costBasis === 'net'
-  const totalReturn = isNet && data.net_total_profit_rate !== undefined
+  // cycle411c B3 — 세후 칸은 비용 조회 실패 시 **null**(undefined 가 아니라 명시적 「모름」)
+  // 로 온다. `!= null` 로 걸러야 null·undefined 둘 다 세전 값으로 폴백한다. 세후 칸이
+  // 없어서(폴백) 보이는 값인지를 따로 추적해 그 카드에 「세전」 을 단다(PC1·PC3).
+  const totalReturnIsGrossFallback = isNet && data.net_total_profit_rate == null
+  const totalReturn = isNet && data.net_total_profit_rate != null
     ? data.net_total_profit_rate
     : data.total_profit_rate
-  const avgDailyReturn = isNet && data.net_avg_daily_profit_rate !== undefined
+  const avgDailyReturnIsGrossFallback = isNet && data.net_avg_daily_profit_rate == null
+  const avgDailyReturn = isNet && data.net_avg_daily_profit_rate != null
     ? data.net_avg_daily_profit_rate
     : data.avg_daily_profit_rate
 
@@ -87,12 +92,14 @@ export default function PerformanceCard({ selectedStrategy }: Props) {
       label: isStrategySynthetic ? '누적 수익률(합성)' : '누적 수익률',
       value: totalReturn.toFixed(2) + '%',
       colorValue: totalReturn,
+      grossFallback: totalReturnIsGrossFallback,
     },
     {
       key: 'avg-daily-return',
       label: isStrategySynthetic ? '일평균 수익률(합성)' : '일평균 수익률',
       value: avgDailyReturn.toFixed(2) + '%',
       colorValue: avgDailyReturn,
+      grossFallback: avgDailyReturnIsGrossFallback,
     },
   ]
 
@@ -119,6 +126,10 @@ export default function PerformanceCard({ selectedStrategy }: Props) {
             >
               {card.value}
             </p>
+            {/* cycle411c B3 — 세후 칸이 null(모름)이라 세전 값으로 폴백한 카드에만 표시 */}
+            {card.grossFallback && (
+              <span className="text-[10px] text-gray-400">세전</span>
+            )}
           </div>
         ))}
       </div>
@@ -192,8 +203,11 @@ export default function PerformanceCard({ selectedStrategy }: Props) {
                     <div className="flex items-center gap-3">
                       {(() => {
                         // cycle411 PN6 — 세후 기본 = realized_net_sum_krw, 세전 = realized_sum_krw.
+                        // cycle411c B3 — 세후 칸이 null(비용 조회 실패, 「모름」)이면 세전으로
+                        // 폴백하고 그 사실을 「세전」 으로 밝힌다(0원으로 치지 않는다).
+                        const realizedIsGrossFallback = isNet && m.realized_net_sum_krw == null
                         const realized =
-                          isNet && m.realized_net_sum_krw !== undefined
+                          isNet && m.realized_net_sum_krw != null
                             ? m.realized_net_sum_krw
                             : m.realized_sum_krw
                         return (
@@ -202,6 +216,9 @@ export default function PerformanceCard({ selectedStrategy }: Props) {
                             className={`text-sm font-semibold ${profitColor(realized)}`}
                           >
                             {formatKRWSigned(realized)}
+                            {realizedIsGrossFallback && (
+                              <span className="ml-1 text-[10px] text-gray-400">세전</span>
+                            )}
                           </span>
                         )
                       })()}

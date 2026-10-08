@@ -243,8 +243,18 @@ function TeRrBody({ strategyKey, metrics: m }: { strategyKey: string; metrics: T
           </span>
         </div>
         <span data-testid={`te-realized-${strategyKey}`} className="text-xs text-gray-500">
-          {/* cycle411 — 세후(net) 기본. 구 서버(realized_net_sum_krw 없음)는 세전으로 폴백(ST2). */}
-          3개월 실현 {formatKrwSigned(m.realized_net_sum_krw ?? m.realized_sum_krw)}
+          {/* cycle411 — 세후(net) 기본. 구 서버·비용 조회 실패(null, 「모름」)는 세전으로
+              폴백한다(ST2 · cycle411c F9·B4) — 어느 쪽인지 라벨로 밝힌다. */}
+          {(() => {
+            const hasNet = m.realized_net_sum_krw != null
+            const realized = hasNet ? m.realized_net_sum_krw! : m.realized_sum_krw
+            return (
+              <>
+                3개월 실현 {formatKrwSigned(realized)}
+                <span className="ml-1 text-[10px] text-gray-400">{hasNet ? '세후' : '세전'}</span>
+              </>
+            )
+          })()}
         </span>
       </div>
 

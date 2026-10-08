@@ -10,6 +10,7 @@ import type {
   LlmEvaluationSummary,
 } from "../types/llm-evaluation";
 import type { TradePair } from "../types/trading";
+import type { Holding } from "../types/balance";
 
 export function wrap<T>(data: T, message = "") {
   return { success: true, data, message };
@@ -32,6 +33,27 @@ export function makePosition(overrides: Partial<Position> = {}): Position {
     strategy: "momentum",
     ...overrides,
   };
+}
+
+// cycle411c F13 (MH10) — /api/balance 기본 목(`{holdings, summary}`) 실제 모양 보유 종목 1건.
+export function makeHolding(overrides: Partial<Holding> = {}): Holding {
+  return {
+    ticker: "005930",
+    name: "삼성전자",
+    quantity: 10,
+    sellable_quantity: 10,
+    avg_price: 70000,
+    purchase_amount: 700000,
+    current_price: 72000,
+    eval_amount: 720000,
+    eval_profit_loss: 20000,
+    eval_profit_rate: 2.86,
+    sell_cost_rate: 0.00341,
+    cost_status: "estimated",
+    buy_fee_paid: 98.6,
+    buy_fee_status: "settled",
+    ...overrides,
+  } as Holding;
 }
 
 export function makeStrategy(overrides: Partial<Strategy> = {}): Strategy {
@@ -98,6 +120,12 @@ export interface Trade {
   status: "PENDING" | "COMPLETED" | "PARTIAL" | "CANCELLED";
   strategy: string;
   order_no: string;
+  // cycle411c F13 (MH11) — 실비용 합친 칸. 화면 미사용 테스트는 생략해도 된다(optional).
+  fee?: number | null;
+  tax?: number | null;
+  net_profit_loss?: number | null;
+  cost_status?: "settled" | "estimated" | "mixed" | null;
+  order_price?: number | null;
 }
 
 // ---------------------------------------------------------------------------

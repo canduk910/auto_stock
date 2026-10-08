@@ -200,8 +200,9 @@ export interface PerformanceSummary {
   avg_daily_profit_rate: number
   latest_asset: number
   // cycle411 — 세후(net) 수익률. 구 서버(net 칸 없음) 는 세전 값으로 폴백한다.
-  net_total_profit_rate?: number
-  net_avg_daily_profit_rate?: number
+  // cycle411c B2 — 비용 조회 실패는 null(「모름」) — 세전 값을 이 칸에 담지 않는다.
+  net_total_profit_rate?: number | null
+  net_avg_daily_profit_rate?: number | null
 }
 
 export interface DailyPerformance {
@@ -213,12 +214,13 @@ export interface DailyPerformance {
   deposit?: number
   cumulative_return_rate?: number
   // cycle411 — 실비용(수수료·세금) 합친 세후 칸. 구 서버는 전부 undefined.
-  daily_fee?: number
-  daily_tax?: number
-  daily_net_pnl?: number
-  net_daily_profit_rate?: number
-  net_cumulative_return_rate?: number
-  cost_status?: 'settled' | 'estimated' | 'mixed'
+  // cycle411c B2 — 비용 조회 실패는 null(「모름」).
+  daily_fee?: number | null
+  daily_tax?: number | null
+  daily_net_pnl?: number | null
+  net_daily_profit_rate?: number | null
+  net_cumulative_return_rate?: number | null
+  cost_status?: 'settled' | 'estimated' | 'mixed' | null
 }
 
 export interface TradeRecord {
@@ -234,10 +236,12 @@ export interface TradeRecord {
   strategy: string
   order_no: string
   // cycle411 — SELL 행 fee/tax/net_profit_loss, BUY 행 fee. 구 서버는 전부 undefined.
-  fee?: number
-  tax?: number
-  net_profit_loss?: number
-  cost_status?: 'settled' | 'estimated' | 'mixed'
+  // cycle411c F3/F5 — 비용 조회 실패·CANCELLED/PENDING 행은 null(「모름」).
+  fee?: number | null
+  tax?: number | null
+  net_profit_loss?: number | null
+  cost_status?: 'settled' | 'estimated' | 'mixed' | null
+  order_price?: number | null
   [key: string]: unknown
 }
 
@@ -279,10 +283,14 @@ export interface TradePair {
   net_profit_rate?: number | null
   cost_bp?: number | null
   slippage_won?: number | null
-  cost_status?: 'settled' | 'estimated' | 'mixed'
+  cost_status?: 'settled' | 'estimated' | 'mixed' | null
   allocated?: boolean
   buy_trade_ids?: number[]
   sell_trade_ids?: number[]
+  // cycle411c L2/F12 — 분할 매도 뒤 남은 수량 몫(open 페어). 화면 미사용, 타입만.
+  partial_fee?: number | null
+  partial_tax?: number | null
+  partial_sell_trade_ids?: number[]
 }
 
 export interface TradePnLSummary {
@@ -299,7 +307,8 @@ export interface TradePnLSummary {
   tax_sum?: number | null
   realized_net_total_krw?: number | null
   realized_net_rate_pct?: number | null
-  slippage_n?: number
+  // cycle411c F4 — 비용 조회 실패는 null(「모름」, 0 아님).
+  slippage_n?: number | null
 }
 
 export interface TradePnLData {
