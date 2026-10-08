@@ -31,3 +31,19 @@
 괄호(`cycle411, 사용자 결정 10-08 §3 …`)는 규약이 허용해 남긴 곳도 있다.
 
 → CHANGELOG: cycle411
+
+---
+
+## API 엔드포인트
+
+### 2026-10-08 cycle411 문서 동기화 — `/api/history/pnl` summary 「모름」 칸 수 정정
+
+정본 원문(바뀐 부분):
+
+```
+| GET | `/api/history/pnl?page=&size=&strategy=&ticker=` | … 분할 매도 뒤 보유 페어에 `partial_fee`·`partial_tax`, 비용 모름은 summary 4칸 `None`(0 아님) |
+```
+
+경위: 비용 조회가 실패하면 `None` 이 되는 summary 칸은 `fee_sum`·`tax_sum`·`realized_net_total_krw`·`realized_net_rate_pct`·`slippage_n` 다섯이다(3차 통합 검증 지적). 같은 동기화에서 `/api/balance` 행에 `sell_cost_rate` 를, 「대시보드 화면」 표의 대시보드·거래 내역 행에 세후 기본·세전 토글·실비용 칸을 덧붙였다(덧붙임이라 걷어낸 원문은 없다).
+
+→ CHANGELOG: cycle411 행

@@ -740,3 +740,25 @@ Hx/Mx**` 태그가 어겼다(2차 통합 검증 F14). 더불어 `/api/performanc
 있다.
 
 → CHANGELOG: cycle411
+
+---
+
+## 엔드포인트 목록
+
+### 2026-10-08 cycle411 문서 동기화 — 실비용 행을 3차 LOW 정리 뒤 코드에 맞춤
+
+정본 원문(바뀐 부분, `…` 은 그대로 남은 앞뒤):
+
+```
+| GET | `/api/history?page=&size=&ticker=&strategy=` | history.py | … 체결 행마다 `fee`·`cost_status`(BUY·SELL 공통) + SELL 행 `tax`·`net_profit_loss`(= 그 행 `profit_loss − fee − tax`, cycle411 — 비용 조회 실패는 새 칸만 비우고 기존 응답 유지, `[cost_overlay_unavailable]`). 배분(`cost_overlay.trade_costs`)은 이 페이지 트래이드가 아니라 그 날짜 범위의 **전체** COMPLETED+PARTIAL … |
+| GET | `/api/history/pnl?page=&size=&strategy=&ticker=` | history.py | … + `buy_trade_ids`/`sell_trade_ids`·`partial_sell_trade_ids`(cycle411, 분할 매도 뒤 판 몫 추적용 체결 id 목록). `data.summary` = 슬라이스 전 closed 페어 집계(생산 `_build_pnl_summary` · TS 사본 `frontend/src/types/trading.ts` `TradePnLSummary` 7필드 — `realized_rate_pct` 가중 round2 · `win_rate_pct` round1, 분모 0 이면 비율 0.0) … summary 에 `fee_sum`·`tax_sum`·`realized_net_total_krw`·`realized_net_rate_pct`·`slippage_n`(closed 페어가 가리키는 체결 행 중 `order_price` 덮인 수) 를 함께 낸다 — 비용 조회 실패 시 저 네 합계는 `0` 이 아니라 `None`(기존 칸은 그대로) |
+| GET | `/api/strategies/te?months=3` | strategies.py | … **5분 monotonic 캐시**(months 키, `invalidate_te_cache()` — 비용 조회가 하나라도 실패한 계산은 60초 이하로만 캐시한다). 전략별 예외 격리. … 실패(None 반환·예외)하면 `costs_available=False` 로 넘겨 그 전략은 `realized_net_sum_krw`·`fee_sum`·`tax_sum` 만 `None` 이고 나머지 지표(n·세전 합 등)는 세전 값으로 그대로 계산한다 |
+```
+
+경위: 3차 통합 검증이 이 행들과 코드의 어긋남을 지적했다.
+- `/api/history/pnl` — summary 비용 칸은 넷이 아니라 다섯(`slippage_n` 포함)이 「모름」 이면 `None` 이다. `TradePnLSummary` 는 7필드가 아니라 12필드다. 체결 id 목록이 UUID 문자열이라는 점이 없었다. 라우트가 `overlay_pairs` 호출 자체를 감싸 계산 예외도 200 을 유지한다는 점이 없었다.
+- `/api/history` — 「새 칸만 비우고」 는 실제 동작(실패하면 새 칸을 싣지 않음)과 달랐다. 「트래이드」 오타.
+- `/api/strategies/te` — 짧은 캐시는 「60초 이하」 가 아니라 `_TE_CACHE_FAILURE_TTL` 60초이고, 비용 조회뿐 아니라 페어 조회 실패에도 걸린다. 모집단 net 칸 혼재 시 세 칸 `None` 이 없었다.
+- `/api/balance`·`/api/performance/*` 는 덧붙임만 했다(요율 조회 실패 = 기본 요율, 매수 수수료 「모름」 의 네 경우, 기록 없음 = 0, 조회·계산 실패).
+
+→ CHANGELOG: cycle411 행

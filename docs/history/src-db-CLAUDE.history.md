@@ -1249,3 +1249,20 @@ target 220 → 마진 34 영업일(사이클196 의 34 와 같다). `fetch_daily
 - **`get_stats()` 8키 목록** — 위 「`get_stats()`」 기록의 사유 「8키 목록은 `src/routes/CLAUDE.md` `/api/stock-master/stats` 행이 적는다」 는 **틀렸다**. 그 행은 키를 적지 않고 `frontend/src/types/stock-master.ts` `StockMasterStats` 를 가리킬 뿐이다. 그래서 `count_all`·`nxt_tradable_count` 가 어느 문서에도 없었다. 정본에 8키 이름을 한 줄로 되살리고 타입 위치를 함께 적었다.
 - **`tick_channel_revert_probe_secs` 의 단일 정의처** — 「단일 정의처는 거기다」(여기서 재정의하지 않는다)가 본문에서 빠졌고, 「미설정 = …」 표현은 다음 줄 「키 부재 = `None` → 현재 값 유지」 와 부딪혀 읽혔다. 정본을 「기본값 = `stale_diagnostics.SUBSCRIBE_GRACE_SECS` 재사용 — 단일 정의처는 거기, 여기서 재정의하지 않는다」 로 고쳤다. 근거 = `src/db/system_config.py:906-908` docstring.
 - **`exclude_etf_like` 의 COALESCE 이유** — 압축본은 기제(「NULL 은 `COALESCE` 가 `''` 로 받는다」)만 남기고 지키는 불변식을 뺐다. 정본에 「`NOT (...)` 이 NULL 이 되어 행이 조용히 빠지지 않게」 를 되살렸다.
+
+---
+
+## trade_history.py — 거래 내역
+
+### 2026-10-08 cycle411 문서 동기화 — 체결 id 목록 타입 정정
+
+정본 원문(`get_trade_pairs` 응답 키 줄 일부 · `partial_sell_trade_ids` 하위 항목):
+
+```
+… 응답 키 = buy_date / buy_time / sell_date / sell_time / ticker / ticker_name / buy_price / buy_qty / sell_price / sell_qty / profit_loss / profit_rate / status('closed'|'open') / strategy **+ `buy_order_nos: list[str]` / `sell_order_nos: list[str]` / `pair_key: str|None`** **+ `buy_trade_ids: list[int]` / `sell_trade_ids: list[int]`**(cycle411) **+ `partial_sell_trade_ids: list[int]`**(cycle411 보완 L2).
+  - **`partial_sell_trade_ids`(cycle411 보완 L2, 사영만)** — open 페어 = 같은 포지션 사이클 안에서 **이미 판** SELL 행 id(시간순, `sell_trade_ids` 와 분리 — open 은 `sell_trade_ids` 그대로 `[]`). closed 페어는 항상 `[]`(판 행은 이미 `sell_trade_ids` 에 있다). 분할 매도 뒤 보유분의 매수 수수료 귀속(남은 수량 비율) 과 판 몫(`partial_fee`/`partial_tax`)을 나누는 입력 — 소비 = `cost_overlay.overlay_pairs`.
+```
+
+경위: `trade_history.id` 는 `UUID`(migration 001)인데 정본이 `list[int]` 라고 적었다. 프론트 타입도 같은 오기(`number[]`)였고 3차 통합 검증에서 `string[]` 로 고쳤다(화면이 이 배열을 그리지 않아 증상은 없었다). 정본은 「원소 UUID, JSON 응답에서는 UUID 문자열」 로 덮어썼고 「보완 L2」 꼬리표를 걷었다. 같은 동기화에서 `stock_master.py` 절에 `get_etf_group_codes` 를 적었다(코드에 있었으나 정본에 없었다).
+
+→ CHANGELOG: cycle411 행
