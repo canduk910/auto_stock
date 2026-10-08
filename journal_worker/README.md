@@ -25,7 +25,7 @@ jw/backfill.py    과거분 1회 적재(기동 경로 밖, `python -m jw backfil
 
 ## 격리 규약
 
-- `src` import 0, `KIS_` 문자열 0, 체결통보·WebSocket 0.
+- `src` import 0, KIS 접속 자격·토큰 관련 식별자 0, 체결통보·WebSocket 0.
 - 읽는 환경변수는 `JOURNAL_DATABASE_URL`(DSN)·`API_REPORTER_KEY`(G0/G1 호출용) 둘뿐.
 - 동시 요청 0(`gather`/`create_task`/`TaskGroup`/`Thread` 금지) — 매 회전 HTTP 호출은 순차.
 - DB 접근은 자동커밋 단문만(`jw/db.py`) — 트랜잭션을 열면 배포 때마다 도는
