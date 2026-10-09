@@ -1014,4 +1014,52 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
       },
     }),
   );
+
+  // cycle416 — 매크로 6번째 섹션 「시장 등락 통계」(`/api/market/breadth`, `/api/macro/` 밑이
+  // 아니다 — 우리 backend 가 직접 낸다). `/macro` 화면 마운트 때 호출돼 없으면 ECONNREFUSED.
+  await page.route("**/api/market/breadth*", (route) =>
+    route.fulfill({
+      json: envelope({
+        asof_kst: "2026-10-09T11:00:03+09:00",
+        window: {
+          from: "2026-10-06",
+          to: "2026-10-08",
+          n_days: 3,
+          requested: 20,
+          complete: true,
+          lookback_from: "2026-08-30",
+        },
+        days: [
+          {
+            date: "2026-10-08",
+            kospi: { rows: 942, traded: 927, up: 252, down: 625, flat: 50, limit_up: 3, limit_down: 0, no_trade: 15, out_of_band: 0, unparsed: 0, up_ratio: 0.2718 },
+            kosdaq: { rows: 1823, traded: 1748, up: 618, down: 1031, flat: 99, limit_up: 13, limit_down: 1, no_trade: 75, out_of_band: 0, unparsed: 0, up_ratio: 0.3535 },
+            total: { rows: 2765, traded: 2675, up: 870, down: 1656, flat: 149, limit_up: 16, limit_down: 1, no_trade: 90, out_of_band: 0, unparsed: 0, up_ratio: 0.3252 },
+          },
+          {
+            date: "2026-10-07",
+            kospi: { rows: 940, traded: 925, up: 500, down: 400, flat: 25, limit_up: 1, limit_down: 0, no_trade: 15, out_of_band: 0, unparsed: 0, up_ratio: 0.5405 },
+            kosdaq: { rows: 1820, traded: 1745, up: 900, down: 780, flat: 65, limit_up: 4, limit_down: 2, no_trade: 75, out_of_band: 1, unparsed: 0, up_ratio: 0.5158 },
+            total: { rows: 2760, traded: 2670, up: 1400, down: 1180, flat: 90, limit_up: 5, limit_down: 2, no_trade: 90, out_of_band: 1, unparsed: 0, up_ratio: 0.5243 },
+          },
+          {
+            date: "2026-10-06",
+            kospi: { rows: 941, traded: 926, up: 300, down: 580, flat: 46, limit_up: 0, limit_down: 1, no_trade: 15, out_of_band: 0, unparsed: 0, up_ratio: 0.324 },
+            kosdaq: { rows: 1822, traded: 1747, up: 700, down: 950, flat: 97, limit_up: 6, limit_down: 0, no_trade: 75, out_of_band: 0, unparsed: 0, up_ratio: 0.4007 },
+            total: { rows: 2763, traded: 2673, up: 1000, down: 1530, flat: 143, limit_up: 6, limit_down: 1, no_trade: 90, out_of_band: 0, unparsed: 0, up_ratio: 0.3741 },
+          },
+        ],
+        summary: {
+          kospi: { n_days: 3, up: 1052, down: 1605, flat: 121, limit_up: 4, limit_down: 1, no_trade: 45, up_ratio: 0.3787, adr: 65.5 },
+          kosdaq: { n_days: 3, up: 2218, down: 2761, flat: 261, limit_up: 23, limit_down: 3, no_trade: 225, up_ratio: 0.4233, adr: 80.3 },
+          total: { n_days: 3, up: 3270, down: 4366, flat: 382, limit_up: 27, limit_down: 4, no_trade: 270, up_ratio: 0.4078, adr: 74.9 },
+        },
+        adr_reference: { oversold: 75, overheated: 120 },
+        source: "KRX 공개 API 일별 매매정보(유가증권·코스닥)",
+        missing_dates: [],
+        empty_dates: [],
+        pending_date: null,
+      }),
+    }),
+  );
 }

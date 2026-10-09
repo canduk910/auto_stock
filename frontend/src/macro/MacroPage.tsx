@@ -1,13 +1,16 @@
 import { useEffect } from "react"
 import { useCommodities, useCreditSpread, useCurrencies, useMacroCycle, useSp500, useYieldCurve } from "./hooks/useMacro"
+import { useMarketBreadth } from "./hooks/useMarketBreadth"
 import MacroCycleSection from "./components/MacroCycleSection"
 import YieldCurveSection from "./components/YieldCurveSection"
 import CreditSpreadSection from "./components/CreditSpreadSection"
 import CurrencySection from "./components/CurrencySection"
 import CommoditySection from "./components/CommoditySection"
+import MarketBreadthSection from "./components/MarketBreadthSection"
 
 // 원본 `macro_lite/MacroLitePage.jsx` 이식 — 5개 섹션 순서(경기사이클 → 금리차 → 하이일드 →
-// 환율 → 원자재)는 원본과 동일하게 보존한다.
+// 환율 → 원자재)는 원본과 동일하게 보존한다. 6번째 「시장 등락 통계」(cycle416)는 우리
+// backend(`/api/market/breadth`)가 직접 내는 섹션이라 그 뒤에 덧붙인다.
 export default function MacroPage() {
   const cycle = useMacroCycle()
   const yieldCurve = useYieldCurve()
@@ -16,6 +19,7 @@ export default function MacroPage() {
   const commodities = useCommodities()
   // cycle310 — 금리차·하이일드 두 차트가 함께 쓰는 붉은 선. 한 번만 받아 둘에 넘긴다.
   const sp500 = useSp500()
+  const breadth = useMarketBreadth()
 
   useEffect(() => {
     cycle.load()
@@ -24,6 +28,7 @@ export default function MacroPage() {
     currencies.load()
     commodities.load()
     sp500.load()
+    breadth.load()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -45,6 +50,7 @@ export default function MacroPage() {
       />
       <CurrencySection data={currencies.data} loading={currencies.loading} error={currencies.error} />
       <CommoditySection data={commodities.data} loading={commodities.loading} error={commodities.error} />
+      <MarketBreadthSection data={breadth.data} loading={breadth.loading} error={breadth.error} />
     </div>
   )
 }

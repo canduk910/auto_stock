@@ -8,9 +8,11 @@
  * 구조를 담보한다(`MacroCycleSection.tsx` 참고).
  */
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
-import { render, screen, waitFor } from "@testing-library/react"
+import { render, screen, waitFor, within } from "@testing-library/react"
 import { http, HttpResponse, delay } from "msw"
 import { server } from "../../test/server"
+import { failed, wrap } from "../../test/factories"
+import { MARKET_BREADTH_FIXTURE } from "../../test/fixtures/marketBreadth.fixture"
 import MacroPage from "../MacroPage"
 
 const MACRO_CYCLE_URL = "/api/macro/macro-cycle"
@@ -18,6 +20,8 @@ const YIELD_CURVE_URL = "/api/macro/yield-curve"
 const CREDIT_SPREAD_URL = "/api/macro/credit-spread"
 const CURRENCIES_URL = "/api/macro/currencies"
 const COMMODITIES_URL = "/api/macro/commodities"
+// cycle416 — 6번째 섹션(우리 것). `/api/macro/` 가 아니라 backend 의 `/api/market/breadth` 다.
+const BREADTH_URL = "/api/market/breadth"
 
 function baseCycleData(overrides: Record<string, unknown> = {}) {
   return {
@@ -109,6 +113,7 @@ function mockAll(overrides: {
   creditSpread?: unknown
   currencies?: unknown
   commodities?: unknown
+  breadth?: unknown
 } = {}) {
   server.use(
     http.get(MACRO_CYCLE_URL, () => HttpResponse.json(overrides.cycle ?? baseCycleData())),
@@ -116,6 +121,7 @@ function mockAll(overrides: {
     http.get(CREDIT_SPREAD_URL, () => HttpResponse.json(overrides.creditSpread ?? emptyCreditSpread())),
     http.get(CURRENCIES_URL, () => HttpResponse.json(overrides.currencies ?? currenciesWith([sampleCurrency]))),
     http.get(COMMODITIES_URL, () => HttpResponse.json(overrides.commodities ?? commoditiesWith([sampleCommodity]))),
+    http.get(BREADTH_URL, () => HttpResponse.json(overrides.breadth ?? wrap(MARKET_BREADTH_FIXTURE))),
   )
 }
 
@@ -434,5 +440,61 @@ describe("MacroPage — /macro 화면 회귀 가드 (cycle303)", () => {
     await screen.findByTestId("macro-section-cycle")
     expect(screen.queryByTestId("macro-section-currency")).toBeNull()
     expect(screen.queryByTestId("macro-section-commodity")).toBeNull()
+  })
+})
+
+describe("MacroPage — 6번째 섹션 시장 등락 통계 (cycle416)", () => {
+  beforeEach(() => {
+    mockAll()
+  })
+
+  afterEach(() => {
+    server.resetHandlers()
+  })
+
+  it("원자재 다음 6번째 자리에 시장 등락 통계 섹션이 렌더된다", async () => {
+    render(<MacroPage />)
+    const breadth = await screen.findByTestId("macro-section-market-breadth")
+    const commodity = await screen.findByTestId("macro-section-commodity")
+    expect(commodity.compareDocumentPosition(breadth) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(await screen.findByTestId("breadth-table")).toBeTruthy()
+  })
+
+  it("마운트 때 /api/market/breadth 를 days=20 으로 한 번 부른다", async () => {
+    const seen: string[] = []
+    server.use(
+      http.get(BREADTH_URL, ({ request }) => {
+        seen.push(new URL(request.url).searchParams.get("days") ?? "")
+        return HttpResponse.json(wrap(MARKET_BREADTH_FIXTURE))
+      }),
+    )
+    render(<MacroPage />)
+    await screen.findByTestId("breadth-table")
+    expect(seen).toEqual(["20"])
+  })
+
+  it("시장 등락 통계가 느려도 다른 섹션은 기다리지 않는다", async () => {
+    server.use(
+      http.get(BREADTH_URL, async () => {
+        await delay(300)
+        return HttpResponse.json(wrap(MARKET_BREADTH_FIXTURE))
+      }),
+    )
+    render(<MacroPage />)
+    expect(await screen.findByTestId("macro-section-cycle")).toBeTruthy()
+    const section = screen.getByTestId("macro-section-market-breadth")
+    expect(section.textContent).toContain("최근 20영업일 전 종목 시세를 받는 중")
+    expect(within(section).queryByTestId("breadth-table")).toBeNull()
+    expect(await screen.findByTestId("breadth-table", {}, { timeout: 3000 })).toBeTruthy()
+  })
+
+  it("success=false 면 서버 문장을 섹션 안 오류로 보여 주고 다른 섹션은 멀쩡하다", async () => {
+    const msg = "KRX 에서 자료를 받지 못했습니다 — 잠시 후 다시 시도하세요"
+    mockAll({ breadth: failed(msg) })
+    render(<MacroPage />)
+    const section = await screen.findByTestId("macro-section-market-breadth")
+    await waitFor(() => expect(section.textContent).toContain(msg))
+    expect(section.textContent).toContain("오류:")
+    expect(await screen.findByTestId("macro-section-currency")).toBeTruthy()
   })
 })
