@@ -1540,3 +1540,20 @@ EC2 사전 생성 규약의 `secrets/journal_worker.env` 문장(`env_file` 결�
 「`TZ` 말고는 둘뿐」 으로 고쳤다(워커 코드가 `os.environ` 에서 읽는 것은 여전히 둘이다).
 
 → CHANGELOG: cycle412 마무리 행
+
+## DB 스키마 (AWS RDS PostgreSQL)
+
+### 2026-10-09 cycle413 문서 동기화 — `trade_journal_*` 표의 읽는 쪽·쓰는 쪽
+
+정본 원문(`trade_journal_orders` · `_stops` · `_notes` · `_cursor` 행의 바뀐 부분):
+
+```
+**쓰는 쪽은 `journal_worker` 컨테이너의 전용 DB 역할 하나**다(`journal_worker/ops/role.sql`). backend 코드에는 이 표를 읽거나 쓰는 모듈이 없다.
+```
+
+경위: cycle412(거래일지 1a)는 기록만 시작했고 화면이 없었다. cycle413(거래일지 화면 1b)이
+`src/db/trade_journal.py` 를 더해 backend 가 `_orders`·`_stops` 를 읽고(`GET /api/history/journal`),
+메모 `_notes` 를 쓴다(`PUT /api/history/journal/notes/{id}`, 사용자 결정 D2 — 메모는 DB).
+워커가 쓰는 표는 여전히 `_orders`·`_stops`·`_cursor` 셋이다.
+
+→ CHANGELOG: cycle413 행

@@ -640,6 +640,31 @@ async def get_trades_in_range(
     return await pg.fetch(sql, *args) or []
 
 
+async def get_trades_by_ids(ids: list[str]) -> list[dict]:
+    """거래일지 카드(cycle413)용 체결 행 조회 — id 목록으로 `trade_history` 를 읽는다.
+
+    열 = 명세 1-1 칸(`id`·`order_no`·`trade_type`·`timestamp`·`price`·`quantity`·
+    `order_price`·`profit_loss`) + `strategy`·`ticker`·`status`. **`profit_loss`
+    는 NULL 이면 None 그대로 반환한다**(「모름 ≠ 0」) — `trade_cost.get_trades_by_status`
+    의 `COALESCE(profit_loss, 0)` 과 다르다(그 함수는 비용 배분용이라 0 폴백이 맞고,
+    이 함수는 실현손익 원천으로 쓰이므로 폴백하면 안 된다).
+
+    빈 목록 = **쿼리 없이** `[]`. 예외는 전파한다 — 호출자(라우트)가 「조회 실패」와
+    「행 없음」을 가른다.
+    """
+    keys = [str(x) for x in (ids or []) if str(x or "").strip()]
+    if not keys:
+        return []
+    sql = f"""
+        SELECT id::text AS id, order_no, trade_type, {_TS_SELECT}, price, quantity,
+               order_price, profit_loss, strategy, ticker, status
+        FROM trade_history t
+        WHERE id = ANY($1::uuid[])
+    """
+    rows = await pg.fetch(sql, keys)
+    return rows or []
+
+
 def _won_floor(x) -> int:
     """가중평균가를 원 단위 내림한 `int` — 매매손익 그리드에 소수를 남기지 않는다(cycle396)."""
     from decimal import ROUND_FLOOR, Decimal

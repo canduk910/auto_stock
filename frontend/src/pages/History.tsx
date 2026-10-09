@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import TradeHistoryGrid from '../components/TradeHistoryGrid'
 import TradePnLGrid from '../components/TradePnLGrid'
+import JournalTab from '../components/JournalTab'
 
-type TabKey = 'orders' | 'pnl'
+type TabKey = 'orders' | 'pnl' | 'journal'
 
 export default function History() {
   const [tab, setTab] = useState<TabKey>('orders')
@@ -32,9 +33,22 @@ export default function History() {
         >
           매매손익
         </button>
+        <button
+          data-testid="history-tab-journal"
+          onClick={() => setTab('journal')}
+          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px ${
+            tab === 'journal'
+              ? 'border-blue-600 text-blue-700'
+              : 'border-transparent text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          거래일지
+        </button>
       </div>
 
-      {tab === 'orders' ? <TradeHistoryGrid /> : <TradePnLGrid />}
+      {tab === 'orders' && <TradeHistoryGrid />}
+      {tab === 'pnl' && <TradePnLGrid />}
+      {tab === 'journal' && <JournalTab />}
     </div>
   )
 }

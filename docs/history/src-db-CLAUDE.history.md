@@ -1310,3 +1310,30 @@ target 220 → 마진 34 영업일(사이클196 의 34 와 같다). `fetch_daily
 경위: 스캐너(`_stock_master_daily_load_once`)는 `max_bas_dd(ticker)` 를 오늘 봉 멱등 skip(`skipped_fresh`)에, `count_by_ticker(ticker)` 를 깊은 backfill vs 증분 분기(`existing_count`)에 쓴다. 문서가 두 역할을 바꿔 적고 있었다. 같은 동기화에서 cycle417 신규 읽기 헬퍼 `earliest_missing_bas_dd` 항목을 넣었다.
 
 → CHANGELOG: cycle417 행
+
+---
+
+## DB 스키마
+
+### 2026-10-09 cycle413 문서 동기화 — backend 의 거래일지 읽기 · 메모 쓰기
+
+정본 원문(「거래일지 4표」 머리 · `trade_journal_notes` 줄 · 지우지 않는다 줄):
+
+```
+- **거래일지 4표 `trade_journal_*`**(migration 047, 가산형 `CREATE … IF NOT EXISTS` 만 · cycle412). **이 디렉터리에 모듈이 없다** — 쓰는 쪽은 `journal_worker` 컨테이너의 `journal_worker/jw/db.py` 하나이고 전용 DB 역할 `journal_worker`(`journal_worker/ops/role.sql`)로 붙는다. backend 는 지금 읽지도 쓰지도 않는다.
+```
+
+```
+  - `trade_journal_notes` — 메모. `anchor_trade_id` UUID NOT NULL UNIQUE · `body` NOT NULL. 표만 있고 읽고 쓰는 코드는 없다.
+```
+
+```
+  - 🔴 **이 표들은 지우지 않는다** — 워커 역할에 DELETE·TRUNCATE 권한이 없다.
+```
+
+경위: cycle413(거래일지 화면 1b)이 `src/db/trade_journal.py` 를 더했다. backend 는 `_orders`·`_stops` 를
+읽기만 하고, `_notes` 는 `upsert_note`·`delete_note` 로 쓴다(빈 본문 PUT = 그 행 DELETE, 명세
+`_workspace/red/cycle413/journal_view_spec.md` 1-3). 그래서 「지우지 않는다」 는 워커가 쓰는 세 표로 좁혔다
+— 워커 역할(`role.sql`)에 DELETE·TRUNCATE 가 없다는 사실은 그대로다.
+
+→ CHANGELOG: cycle413 행

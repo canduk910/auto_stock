@@ -29,6 +29,8 @@ import { STOCK_CHART_RESPONSES } from "./fixtures/stockChart.fixture";
 import { MARKET_REGIME_LABEL_FIXTURE } from "./fixtures/marketRegimeLabel.fixture";
 // cycle416 — 매크로 화면 시장 등락 통계(KRX 일별 매매정보 집계, 관찰 전용).
 import { MARKET_BREADTH_FIXTURE } from "./fixtures/marketBreadth.fixture";
+// cycle413 — 거래일지 화면(1b). 키 정본 = tests/fixtures/cycle413_journal_shape.json(백엔드와 같은 파일).
+import { JOURNAL_FIXTURE } from "./fixtures/journal.fixture";
 
 const base = "/api";
 
@@ -994,5 +996,22 @@ export const handlers = [
       );
     }
     return HttpResponse.json(body);
+  }),
+
+  // ── cycle413 — 거래일지 화면(1b) ──────────────────────────────────────────
+  // JH1·JH2(handlers.honesty): 응답 키 = tests/fixtures/cycle413_journal_shape.json 그대로,
+  // 빈칸 이유 5종(na)이 모두 한 번 이상 나온다 — JOURNAL_FIXTURE 가 이미 그 조건을 만족한다.
+  http.get(`${base}/history/journal`, () => HttpResponse.json(wrap(JOURNAL_FIXTURE))),
+  http.put(`${base}/history/journal/notes/:id`, async ({ request, params }) => {
+    const body = (await request.json().catch(() => ({}))) as { body?: string };
+    const trimmed = (body.body ?? "").trim();
+    const now = "2026-10-09T10:00:00+09:00";
+    return HttpResponse.json(
+      wrap(
+        trimmed === ""
+          ? null
+          : { anchor_trade_id: String(params.id), body: trimmed, created_at: now, updated_at: now },
+      ),
+    );
   }),
 ];

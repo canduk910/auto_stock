@@ -933,3 +933,21 @@ flowchart TB
 경위: 백필 목표 깊이는 cycle299·302 로 225(분할 fetch)가 됐는데 괄호가 T-100 으로 남아 있었다. cycle417 이 증분 창에 빈 날 확대 규칙을 더해 함께 고쳤다.
 
 → CHANGELOG: cycle417 행
+
+---
+
+## 9.1 확장 테이블
+
+### 2026-10-09 cycle413 문서 동기화 — `trade_journal_*` 행의 쓰는 쪽
+
+정본 원문(`trade_journal_orders` · `_stops` · `_notes` · `_cursor` 행의 바뀐 부분):
+
+```
+쓰는 쪽은 `journal_worker` 컨테이너의 전용 역할 하나 → 15.8.
+```
+
+경위: cycle413(거래일지 화면 1b)부터 메모 `_notes` 는 backend 가 쓰고, backend 가 `_orders`·`_stops` 를
+읽는다. 같은 동기화에서 10장 트리의 `History.tsx` 줄을 「2 탭」 → 「3 탭」(거래일지)으로 고치고, 15.8 끝에
+읽는 쪽(backend `GET /api/history/journal`) 문단을 더했다.
+
+→ CHANGELOG: cycle413 행

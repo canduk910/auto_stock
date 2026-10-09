@@ -437,6 +437,9 @@ _ENGINE_PY_FILES: dict[str, tuple[str, ...]] = {
         # meta + `resolve_as_of`/`capture_skip_reason` leaf. 등재해도 "다음 신규 파일"
         # 은 여전히 붉어진다(이름 축 가드는 변경 없음).
         "funnel_capture.py",
+        # cycle413(거래일지 화면 1b) — 카드 조립 순수 leaf(`src.*` import 0). 등재해도
+        # "다음 신규 파일" 은 여전히 붉어진다(이름 축 가드는 변경 없음).
+        "journal_view.py",
         "kojiro_band_observe.py", "kojiro_gap_observe.py",
         "kojiro_indicators.py", "llm_buy_gate.py", "llm_features.py",
         # cycle297 — 주간 회고 조인·집계 순수 leaf(`src.*` import 0). 이름을 등재해도

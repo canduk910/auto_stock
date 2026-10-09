@@ -484,12 +484,12 @@ def test_a8_no_new_leaf_in_src_engine() -> None:
     `src.engine.etf_like` 만 import). 8영역·scheduler import 0(`test_cycle411_ast_scope.py`).
 
     ⚠️ cycle416(매크로 시장 등락 통계, 2026-10-09)이 leaf 1개 `market_breadth.py` 를
-    신설해 83 → **84** 가 됐다 — 표준 라이브러리만 import(`await`·DB·HTTP·`asyncio`·
-    `logging` 0), 소비처 = 라우트 `src/routes/market_breadth.py` 하나(관찰 전용,
-    매매 행위 변경 없음). 8영역·scheduler import 0(`test_cycle416_ast_market_breadth.py`).
+    신설해 83 → 84, cycle413(거래일지 화면 1b)이 leaf 1개 `journal_view.py` 를 신설해
+    84 → **85** 가 됐다(병합 2026-10-09). 둘 다 순수 함수 leaf — 8영역·scheduler import 0
+    (`test_cycle416_ast_market_breadth.py` · `test_cycle413_scope_guard.py`).
     """
     got = len(list((_ROOT / "src" / "engine").glob("*.py")))
-    assert got == 84, f"`src/engine/*.py` 파일 수 {got} (cycle416 기준선 84)"
+    assert got == 85, f"`src/engine/*.py` 파일 수 {got} (cycle416+413 병합 기준선 85)"
 
 
 # ===========================================================================

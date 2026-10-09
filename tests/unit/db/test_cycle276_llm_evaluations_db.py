@@ -679,15 +679,23 @@ def test_p8_buffer_tuple_arity_unchanged() -> None:
 
 
 def test_p9_history_route_stays_untouched() -> None:
-    """§9.4 — `src/routes/history.py` 는 **0줄 변경**.
+    """§9.4 — `GET /api/history`·`/pnl` 는 `pairs`/`trades` 를 그대로 통과시킨다.
 
-    `pairs` 를 그대로 통과시키므로 새 키는 자동으로 응답에 실린다. 키를 명시 열거하는
-    사영을 새로 넣으면 미래에 키가 늘 때 조용히 떨어지는 필터가 생긴다.
+    새 키는 자동으로 응답에 실리므로, 그 두 핸들러가 `buy_order_nos`/`sell_order_nos`/
+    `pair_key` 를 명시 열거하는 응답 사영을 만들면 안 된다(미래에 키가 늘 때 조용히
+    떨어지는 필터가 생긴다).
+
+    🔴 cycle413(거래일지 화면 1b) 이 같은 파일에 `GET/PUT /journal*` 핸들러를 더했고,
+    그 핸들러는 이 세 키를 **응답 사영이 아니라** 체결/손절선 조회 키 모음에 쓴다
+    (다른 목적 — 통과 계약과 무관). 그래서 이 가드는 cycle413 이전 코드 구간(마커
+    앞)만 본다 — `/journal*` 핸들러 영역은 보지 않는다.
     """
     text = (_ROOT / "src" / "routes" / "history.py").read_text(encoding="utf-8")
+    marker = "# 거래일지 화면(1b, cycle413)"
+    pre_journal = text.split(marker, 1)[0] if marker in text else text
     for key in ("buy_order_nos", "sell_order_nos", "pair_key"):
-        assert key not in text, (
-            f"`history.py` 가 `{key}` 를 명시 열거한다 — 통과 계약(§9.4) 위반"
+        assert key not in pre_journal, (
+            f"`history.py` 의 `/history`·`/pnl` 핸들러가 `{key}` 를 명시 열거한다 — 통과 계약(§9.4) 위반"
         )
 
 

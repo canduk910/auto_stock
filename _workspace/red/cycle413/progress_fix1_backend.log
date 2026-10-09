@@ -1,0 +1,39 @@
+[2026-10-09 KST] backend-dev 시작 — cycle413 보완 1차 Green(백엔드), 담당 결함 #1·#4·#5·#8·#9·#10·#11·#12.
+  Red = 987257b0. 대상 파일: src/routes/history.py(#1·#8) · src/engine/journal_view.py(#4·#5·#8·#9·#10·#11·#12).
+[2026-10-09 KST] 구현 완료.
+  - #1(history.py): 페어 id 문자열화를 cost_overlay.overlay_pairs 호출 뒤로 이동(/pnl 과 같은 순서).
+    cost_overlay.py 무접촉(X1 사이클 sha pin 확인).
+  - #8(history.py): get_trades_by_ids 실패 시 fills=[] 위장 대신 fills=None 전달, build_card 호출부도
+    pair_fills=None 전파.
+  - #8(journal_view.py): build_card(fills=None) 지원 — opened_at/closed_at 을 pair.buy_date+buy_time/
+    sell_date+sell_time 로, held_days 도 페어 기준. excursion 은 closes/business_days 를 강제 None 처리해
+    na='lookup_failed'. partial_fills 가드.
+  - #4(journal_view.py): _line_role(code=None) → None(이전엔 'reference' 로 단정).
+  - #5(journal_view.py): TRAILING_STOP generic 분기에서 fired is None and stop_kind=='hard_pct' 면
+    숫자를 쓰지 않고 "트레일선 이탈"만 (momentum/etf_trend 보고만, 수정 범위 밖).
+  - #9(journal_view.py): _build_stop_track 방향 비교를 last_priced_price(값 있는 직전 표시 행) 기준으로.
+  - #10(journal_view.py): _build_costs — 비용 맵에 없는 체결 id 가 있으면 entry_fee/해당 exit.fee·tax 를
+    None(부분합 대신), paid_total 도 전파 None.
+  - #11(journal_view.py): _BOARD_LABEL(main/pre_nxt/post_nxt) 추가, _ring_entry_sentence·_ai_sentence 의
+    VB/LTV 분기에 보드 접두어.
+  - #12(journal_view.py): TAKE_PROFIT 청산에서 fired_line 이 None 이면 signal.target 로 대체(fired_src
+    는 source 기준 restored/live), line_na 재계산.
+  - AST 재핀: tests/unit/ast/test_cycle287_ast_scope.py::_SRC_TREE_DIGEST(181 파일 그대로, 주석 추가).
+[2026-10-09 KST] 검증.
+  - tests/unit/engine/test_cycle413_fix1_journal_view.py + test_cycle413_journal_view.py: 146/146 통과.
+  - tests/unit/routes/test_cycle413_fix1_journal_routes.py + test_cycle413_journal_routes.py: 56/56 통과.
+  - tests/integration/test_cycle413_fix1_journal_pg.py + test_cycle413_journal_pg.py(실 pg): 10/10 통과.
+  - tests/unit/ast/test_cycle413_fix1_scope_guard.py(X1 cost_overlay.py 무접촉) +
+    test_cycle413_scope_guard.py: 25/25 통과.
+  - tests/unit/ast/test_cycle287/290/291_ast_scope.py(digest 재핀 포함): 202/202 통과.
+  - -k cycle413 전체: 250/250 통과.
+  - 전체 스위트 `python -m pytest -q --log-level=DEBUG`: 16458 통과·23 skip·337 xfail·12 xpass·
+    실패 2(tests/unit/replay/test_ra_us.py·test_ra_us_breadth.py, parquet OSError — main 에서도
+    동일 실패, 이번 작업과 무관) — 375.85s.
+  - python tools/test_impact/build_index.py 재생성(backend 184 모듈·1308 테스트·unmapped 9) —
+    old↔new 를 yaml 파싱해 시맨틱 비교, 순서 변동 외 내용 차이 0 확인.
+  - #5(TRAILING_STOP 워커 문법차)는 수정하지 않고 보고만 — momentum·etf_trend 는 워커에 그 패턴이
+    없어 fired_line 이 구조적으로 None(워커 변경은 이 사이클 범위 밖).
+[2026-10-09 KST] 커밋 — 내 경로만(src/engine/journal_view.py · src/routes/history.py ·
+  tests/unit/ast/test_cycle287_ast_scope.py · _workspace/test_index.yaml · 이 로그).
+  sync-docs 가 스테이징해 둔 11개 문서·frontend 커밋(cbee3670)은 건드리지 않음.

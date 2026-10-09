@@ -227,7 +227,7 @@ cd frontend && npm install && npm run dev
 | `market_regime_snapshots` | 매크로 레짐 일일 스냅샷 (출처 = 우리 `macro` 컨테이너, `_boot()` 시점 1행) |
 | `kis_quote_accounts` | 보조 KIS 시세 수신 계좌 (UUID PK, label UNIQUE) |
 | `strategy_funnel_snapshots` | 전략별 조건검색 단계별 후보/탈락 종목 (`(target_date, strategy_id, step_no)` UNIQUE). 잠정 쓰기는 확정 행을 덮지 못한다 |
-| `trade_journal_orders` · `_stops` · `_notes` · `_cursor` | 거래일지 (migration 047) — 주문 1건 1행(`(order_date, order_no, side)` UNIQUE) · 손절선 사건 · 메모 · 로그 커서. **쓰는 쪽은 `journal_worker` 컨테이너의 전용 DB 역할 하나**다(`journal_worker/ops/role.sql`). backend 코드에는 이 표를 읽거나 쓰는 모듈이 없다. 칸·규약 = `src/db/CLAUDE.md` 「DB 스키마」 절 |
+| `trade_journal_orders` · `_stops` · `_notes` · `_cursor` | 거래일지 (migration 047) — 주문 1건 1행(`(order_date, order_no, side)` UNIQUE) · 손절선 사건 · 메모 · 로그 커서. **`_orders`·`_stops`·`_cursor` 를 쓰는 쪽은 `journal_worker` 컨테이너의 전용 DB 역할 하나**다(`journal_worker/ops/role.sql`). backend 는 `src/db/trade_journal.py` 로 `_orders`·`_stops` 를 읽기만 하고(거래일지 탭 `GET /api/history/journal`), 메모 `_notes` 만 쓴다(`PUT /api/history/journal/notes/{id}`). 칸·규약 = `src/db/CLAUDE.md` 「DB 스키마」 절 |
 
 > **`stock_master` / `stock_master_daily` UI 동기화 의무**: `stock_master` 컬럼 / `raw` JSONB 키 / `stock_master_daily` 컬럼을 추가하면 UI 에 노출한다. 절차 = `frontend/CLAUDE.md` 「(6) 신규 데이터 추가 시 UI 동기화 절차 (영구 가드)」 절.
 

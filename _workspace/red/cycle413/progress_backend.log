@@ -1,0 +1,14 @@
+2026-10-09 09:20:12 backend-dev(Green) 착수 — 계약·명세·기존 코드(trade_history/stock_master_daily/llm_buy_evaluations/trade_cost/cost_overlay/history.py) 읽기
+2026-10-09 09:45:30 읽기 끝 — DB 함수 설계(trade_history.get_trades_by_ids · stock_master_daily.get_closes_in_range/list_business_days · trade_journal.py 6함수) 착수
+2026-10-09 09:58:10 DB 계층 구현 끝 — 단위 13건 + pg 통합 P1~P6 7건 모두 초록 확인
+2026-10-09 10:05:00 journal_view.py leaf 설계·구현(조립·체결오차·손절선 변화·진입/청산 이유·목표·비용·MFE/MAE) — leaf 121건 1차 통과
+2026-10-09 10:15:40 history.py 라우트 구현(GET /journal · PUT /journal/notes/{id}) — cost_overlay.overlay_pairs 가산형 확장(체결 행 단위 비용을 trades_by_id 에 얹어 R8 "비용 1회 읽기" 충족)
+2026-10-09 10:22:00 라우트 단위 50건 전부 초록 — pg 통합 P7 라우트 왕복에서 UUID 문자열화 결함 2건 발견·시정(pair trade_ids·trades_by_id 키)
+2026-10-09 10:25:00 통합 8건 전부 초록 — AST 범위 가드(S1~S6) 24건 초록 확인
+2026-10-09 10:28:00 자매 가드 이전(test_cycle287/290/291 재핀 — _SRC_TREE_FILES 179→181 · _PINNED_DIR_FILE_COUNTS[src/engine] 94→95 · _ENGINE_PY_FILES 등재 · 83→84) + test_cycle412_scope_guard.py 삭제(머지 후 삭제 규약)
+2026-10-09 10:33:00 전체 스위트 1차 회전(not integration and not slow) — cycle413 밖 회귀 2건 발견: test_cycle276_llm_evaluations_db.py::test_p9(history.py 리터럴 스캔이 journal 섹션의 buy_order_nos 내부 사용과 충돌) · test_cycle365_change_rate.py::g365_p4_9(journal_view 의 signal.change_rate 를 stock_master_daily.change_rate 로 오인)
+2026-10-09 10:40:00 두 가드 시정(의도 보존 — p9 는 journal 섹션 마커 앞만 스캔 · g365 는 journal_view.py 를 "실시간 신호 스냅샷" 예외로 추가) — 해당 테스트 재초록 확인
+2026-10-09 10:42:00 build_index.py 재생성(백엔드 184모듈·1304테스트) — manual_overrides.yaml 중복 키 0 확인(Red 가 이미 등재)
+2026-10-09 10:45:00 전체 스위트 2차 회전 — cycle413 관련 가드까지 포함 511건 단독 재확인 전부 초록. integration 전체 406건 통과.
+2026-10-09 10:39:xx 최종 정리 — history.py 죽은 상수(_STATUS_VALUES/_OUTCOME_VALUES) 제거 후 test_cycle287 digest 재계산·재핀
+2026-10-09 10:45:xx 전체 스위트 3차 회전(not integration and not slow) — 16015 통과·23 skip·2 실패(replay parquet OSError, cycle413 밖·main 에서도 재현되는 기존 결함)·334 xfail·12 xpass. 커밋 준비

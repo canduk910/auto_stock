@@ -154,11 +154,19 @@ def test_g365_p4_9_no_trading_code_reads_stock_master_daily_change_rate():
     이 테이블과 무관한 별개 변수)는 대상에서 제외한다 — 그 모듈들은 이 테이블의
     row dict 를 애초에 다루지 않는다(`_candle_to_row`/`get_recent_daily*` 반환값을
     `["change_rate"]`/`.get("change_rate")` 로 접근하는 호출부가 있는지만 잰다).
+
+    🔴 cycle413(거래일지 화면 1b) 이 `journal_view.py` 를 추가했는데, 그 leaf 는
+    `trade_journal_orders.signal`(JSONB — momentum/VB/LTV **실시간 매수 신호
+    스냅샷**)의 `change_rate` 키를 읽어 진입 이유 문장을 만든다. 이것도 "이 테이블과
+    무관한 별개 변수"(signal 스냅샷)라 `journal_view.py` 는 스캔에서 뺀다 —
+    `stock_master_daily` 행 dict 를 다루지 않는다(DB 모듈 호출 0, AST S4).
     """
     engine_dir = Path(__file__).resolve().parents[3] / "src" / "engine"
     offenders: list[str] = []
 
     for py_file in engine_dir.rglob("*.py"):
+        if py_file.name == "journal_view.py":
+            continue
         source = py_file.read_text(encoding="utf-8")
         try:
             tree = ast.parse(source, filename=str(py_file))

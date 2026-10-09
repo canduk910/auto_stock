@@ -3,19 +3,31 @@
 from __future__ import annotations
 
 import logging
-from datetime import date, datetime
+import uuid
+from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal
+from typing import Literal
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException, Query
+from pydantic import BaseModel
 
+from src.db import llm_buy_evaluations
+from src.db import stock_master_daily
 from src.db import trade_cost as trade_cost_db
+from src.db import trade_history as trade_history_db
+from src.db import trade_journal
 from src.db.trade_history import get_trade_pairs, get_trades
 from src.engine import cost_overlay
+from src.engine import journal_view
 from src.models.response import ApiResponse
+from src.routes.costs import _parse_range
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/history", tags=["history"])
+
+_KST = timezone(timedelta(hours=9))
+_JOURNAL_ERROR = "[journal_route_error]"
 
 
 def _trade_date(ts) -> date | None:
@@ -238,3 +250,309 @@ def _build_pnl_summary(pairs: list[dict], trades_by_id: dict[int, dict] | None =
         "realized_net_rate_pct": realized_net_rate_pct,
         "slippage_n": slippage_n,
     }
+
+
+# ════════════════════════════════════════════════════════════════════════════
+# 거래일지 화면(1b, cycle413) — GET /journal · PUT /journal/notes/{id}
+# ════════════════════════════════════════════════════════════════════════════
+def _journal_date(s: str | None) -> date | None:
+    if not s:
+        return None
+    try:
+        return date.fromisoformat(str(s)[:10])
+    except ValueError:
+        return None
+
+
+def _pair_amount(pair: dict, basis: str):
+    if basis == "net":
+        v = pair.get("net_profit_loss")
+        if v is not None:
+            return v
+    return pair.get("profit_loss")
+
+
+def _period_overlap(pair: dict, start: date, end: date) -> bool:
+    buy_d = _journal_date(pair.get("buy_date"))
+    if buy_d is None or buy_d > end:
+        return False
+    if pair.get("status") == "open":
+        return True
+    sell_d = _journal_date(pair.get("sell_date"))
+    return sell_d is not None and sell_d >= start
+
+
+def _outcome_match(pair: dict, outcome: str, basis: str) -> bool:
+    if outcome == "all":
+        return True
+    v = _pair_amount(pair, basis)
+    if v is None:
+        return False
+    return v > 0 if outcome == "win" else v < 0
+
+
+def _dt_rank(pair: dict, date_key: str, time_key: str) -> int:
+    d = str(pair.get(date_key) or "").replace("-", "")
+    t = str(pair.get(time_key) or "").replace(":", "")
+    try:
+        return int(d or "0") * 1_000_000 + int(t or "0")
+    except ValueError:
+        return 0
+
+
+def _sort_pairs(pairs: list[dict], sort: str, basis: str) -> list[dict]:
+    if sort == "recent":
+        def key_recent(p):
+            if p.get("status") == "open":
+                return (0, -_dt_rank(p, "buy_date", "buy_time"))
+            return (1, -_dt_rank(p, "sell_date", "sell_time"))
+        return sorted(pairs, key=key_recent)
+
+    def key_pnl(p):
+        v = _pair_amount(p, basis)
+        if v is None:
+            return (1, 0.0)
+        signed = float(v) if sort == "pnl_asc" else -float(v)
+        return (0, signed)
+    return sorted(pairs, key=key_pnl)
+
+
+def _counts(pairs: list[dict]) -> dict:
+    open_n = sum(1 for p in pairs if p.get("status") == "open")
+    return {"total": len(pairs), "open": open_n, "closed": len(pairs) - open_n}
+
+
+def _parse_kst_dt(s: str | None) -> datetime | None:
+    if not s:
+        return None
+    try:
+        v = str(s).replace("Z", "+00:00")
+        dt = datetime.fromisoformat(v)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=_KST)
+        return dt.astimezone(_KST)
+    except ValueError:
+        return None
+
+
+@router.get("/journal", response_model=ApiResponse)
+async def trade_journal_view(
+    from_: str | None = Query(None, alias="from"),
+    to: str | None = Query(None),
+    strategy: str | None = Query(None),
+    ticker: str | None = Query(None),
+    status: Literal["all", "open", "closed"] = Query("all"),
+    outcome: Literal["all", "win", "loss"] = Query("all"),
+    basis: Literal["net", "gross"] = Query("net"),
+    sort: Literal["recent", "pnl_asc", "pnl_desc"] = Query("recent"),
+    page: int = Query(1, ge=1),
+    size: int = Query(20, ge=1, le=100),
+):
+    """거래일지 카드 — 명세 `_workspace/red/cycle413/journal_view_spec.md` 1-1절."""
+    today = datetime.now(_KST).date()
+    to_ = to or today.isoformat()
+    from_q = from_ or (today - timedelta(days=30)).isoformat()
+    start, end = _parse_range(from_q, to_)
+
+    try:
+        record_start = await trade_journal.get_record_start()
+    except Exception as exc:
+        logger.warning("%s get_record_start 실패: %r", _JOURNAL_ERROR, exc, exc_info=True)
+        record_start = {"orders_restored": None, "orders_live": None, "stops": None, "order_price": None}
+
+    pairs = await get_trade_pairs(strategy=strategy, ticker=ticker)
+    from src.engine.scanner import ticker_names
+    for p in pairs:
+        if not p.get("ticker_name"):
+            p["ticker_name"] = ticker_names.get(p.get("ticker", ""), "")
+
+    pairs = [p for p in pairs if _period_overlap(p, start, end)]
+    if status != "all":
+        pairs = [p for p in pairs if p.get("status") == status]
+
+    # cycle413 보완 1차 F1 — `overlay_pairs` 의 비용 맵은 `get_trade_pairs`/
+    # `get_trades_by_status` 가 돌려주는 네이티브 타입(uuid.UUID)으로 키가 걸린다.
+    # 문자열화를 먼저 하면 하나도 맞지 않아 청산 카드 전부 수수료·세금 0 ·
+    # 세후=세전·「추정」이 된다(판정 #1) — `/pnl` 과 같은 순서로 **먼저** 붙이고,
+    # 그 뒤에 이 화면이 체결 행(문자열 id)·메모와 잇기 위해 한 번 문자열화한다.
+    trades_by_id, cost_available = None, False
+    try:
+        trades_by_id = await cost_overlay.overlay_pairs(pairs)
+        cost_available = trades_by_id is not None
+    except Exception as exc:
+        logger.warning("%s overlay_pairs 실패: %r", _JOURNAL_ERROR, exc, exc_info=True)
+
+    # `get_trade_pairs` 는 `trade_history.id`(UUID) 를 asyncpg 네이티브 타입(uuid.UUID)
+    # 그대로 사영한다 — 이 화면은 그 id 로 체결 행(문자열 id)·메모를 잇고 응답
+    # `anchor_trade_id` 도 문자열이어야 하므로 비용을 다 붙인 뒤 한 번 문자열화한다.
+    for p in pairs:
+        for key in ("buy_trade_ids", "sell_trade_ids", "partial_sell_trade_ids"):
+            if p.get(key):
+                p[key] = [str(i) for i in p[key]]
+
+    pairs = [p for p in pairs if _outcome_match(p, outcome, basis)]
+    counts = _counts(pairs)
+    pairs = _sort_pairs(pairs, sort, basis)
+
+    total = len(pairs)
+    total_pages = (total + size - 1) // size if size > 0 else 0
+    page_pairs = pairs[(page - 1) * size: page * size]
+
+    # ── 페이지 카드 세부: 원천마다 1번 ────────────────────────────────────────
+    fill_ids: set = set()
+    order_nos: set[str] = set()
+    anchor_ids: set = set()
+    strategy_ticker_keys: set[tuple[str, str]] = set()
+    tickers: set[str] = set()
+    buy_dates: list[date] = []
+    end_dates: list[date] = []
+    opened_dts: list[datetime] = []
+    now = datetime.now(_KST)
+
+    for p in page_pairs:
+        fill_ids |= {i for i in (p.get("buy_trade_ids") or [])}
+        fill_ids |= {i for i in (p.get("sell_trade_ids") or [])}
+        fill_ids |= {i for i in (p.get("partial_sell_trade_ids") or [])}
+        order_nos |= {o for o in (p.get("buy_order_nos") or []) if o}
+        order_nos |= {o for o in (p.get("sell_order_nos") or []) if o}
+        if p.get("buy_trade_ids"):
+            anchor_ids.add(p["buy_trade_ids"][0])
+        strategy_ticker_keys.add((p.get("strategy"), p.get("ticker")))
+        tickers.add(p.get("ticker"))
+        bd = _journal_date(p.get("buy_date"))
+        if bd:
+            buy_dates.append(bd)
+        sd = _journal_date(p.get("sell_date")) if p.get("status") == "closed" else today
+        if sd:
+            end_dates.append(sd)
+        bdt = _parse_kst_dt(f"{p.get('buy_date')}T{p.get('buy_time') or '00:00:00'}+09:00") \
+            if p.get("buy_date") else None
+        if bdt:
+            opened_dts.append(bdt)
+
+    fills: list[dict] | None = []
+    if fill_ids:
+        try:
+            fills = await trade_history_db.get_trades_by_ids(list(fill_ids))
+        except Exception as exc:
+            logger.warning("%s get_trades_by_ids 실패: %r", _JOURNAL_ERROR, exc, exc_info=True)
+            # cycle413 보완 1차 F8 — 조회 실패를 빈 목록(0건)으로 위장하지 않는다.
+            # `build_card(fills=None)` 이 페어로 시각·보유일을 채우고 MFE/MAE 를
+            # lookup_failed 로 낸다.
+            fills = None
+
+    orders: list[dict] | None = []
+    if order_nos:
+        d_from = min(buy_dates) if buy_dates else start
+        d_to = max(end_dates) if end_dates else end
+        try:
+            orders = await trade_journal.list_orders(list(order_nos), date_from=d_from, date_to=d_to)
+        except Exception as exc:
+            logger.warning("%s list_orders 실패: %r", _JOURNAL_ERROR, exc, exc_info=True)
+            orders = None
+
+    stops: list[dict] | None = []
+    if strategy_ticker_keys:
+        since = (min(opened_dts) - timedelta(seconds=60)) if opened_dts else now
+        until = now + timedelta(seconds=120)
+        try:
+            stops = await trade_journal.list_stops(list(strategy_ticker_keys), since=since, until=until)
+        except Exception as exc:
+            logger.warning("%s list_stops 실패: %r", _JOURNAL_ERROR, exc, exc_info=True)
+            stops = None
+
+    notes_by_id: dict = {}
+    if anchor_ids:
+        try:
+            note_rows = await trade_journal.list_notes(list(anchor_ids))
+            notes_by_id = {n["anchor_trade_id"]: n for n in note_rows}
+        except Exception as exc:
+            logger.warning("%s list_notes 실패: %r", _JOURNAL_ERROR, exc, exc_info=True)
+
+    closes: list[dict] | None = []
+    business_days: list[date] | None = []
+    if tickers:
+        c_from = min(buy_dates) if buy_dates else start
+        c_to = max(end_dates + [today]) if end_dates else end
+        try:
+            closes = await stock_master_daily.get_closes_in_range(list(tickers), c_from, c_to)
+        except Exception as exc:
+            logger.warning("%s get_closes_in_range 실패: %r", _JOURNAL_ERROR, exc, exc_info=True)
+            closes = None
+        try:
+            business_days = await stock_master_daily.list_business_days(c_from, c_to)
+        except Exception as exc:
+            logger.warning("%s list_business_days 실패: %r", _JOURNAL_ERROR, exc, exc_info=True)
+            business_days = None
+
+    llm_evals: list[dict] | None = []
+    if order_nos:
+        try:
+            llm_evals = await llm_buy_evaluations.list_by_order_nos(list(order_nos))
+        except Exception as exc:
+            logger.warning("%s list_by_order_nos 실패: %r", _JOURNAL_ERROR, exc, exc_info=True)
+            llm_evals = None
+
+    per_fill_costs: dict | None = None
+    if trades_by_id is not None:
+        # `trades_by_id` 키는 `get_trades_by_status` 가 돌려주는 네이티브 타입(uuid.UUID)
+        # 그대로다 — 이 화면의 체결 id(위에서 문자열화)와 잇기 위해 문자열화한다.
+        per_fill_costs = {
+            str(tid): {"fee": t.get("fee"), "tax": t.get("tax"), "cost_status": t.get("cost_status"),
+                      "allocated": t.get("allocated")}
+            for tid, t in trades_by_id.items()
+        }
+
+    cards = []
+    for p in page_pairs:
+        want_ids = set(p.get("buy_trade_ids") or []) | set(p.get("sell_trade_ids") or []) \
+            | set(p.get("partial_sell_trade_ids") or [])
+        pair_fills = None if fills is None else [f for f in fills if f.get("id") in want_ids]
+        note = notes_by_id.get(p["buy_trade_ids"][0]) if p.get("buy_trade_ids") else None
+        cards.append(journal_view.build_card(
+            p, fills=pair_fills, orders=orders, stops=stops, note=note, closes=closes,
+            business_days=business_days, llm_evals=llm_evals, costs=per_fill_costs,
+            record_start=record_start, now=now,
+        ))
+
+    return ApiResponse(success=True, data={
+        "record_start": record_start,
+        "filters": {"from": start.isoformat(), "to": end.isoformat(), "strategy": strategy,
+                   "ticker": ticker, "status": status, "outcome": outcome, "basis": basis, "sort": sort},
+        "counts": counts, "page": page, "size": size, "total": total, "total_pages": total_pages,
+        "cost_available": cost_available, "cards": cards,
+    })
+
+
+class _JournalNoteIn(BaseModel):
+    body: str
+
+
+@router.put("/journal/notes/{anchor_trade_id}", response_model=ApiResponse)
+async def put_journal_note(anchor_trade_id: str, payload: _JournalNoteIn):
+    """메모 upsert/삭제 — 명세 1-3절(D2)."""
+    try:
+        uuid.UUID(anchor_trade_id)
+    except ValueError:
+        raise HTTPException(status_code=422, detail="anchor_trade_id 는 UUID 꼴이어야 한다")
+
+    body = payload.body
+    stripped = body.strip()
+    if len(stripped) > 4000:
+        raise HTTPException(status_code=422, detail="메모는 4,000자 이하여야 한다")
+
+    rows = await trade_history_db.get_trades_by_ids([anchor_trade_id])
+    buy_row = next((r for r in rows if str(r.get("trade_type") or "").upper() == "BUY"), None)
+    if buy_row is None:
+        raise HTTPException(status_code=404, detail="그 매수 체결 행이 없다")
+
+    if not stripped:
+        await trade_journal.delete_note(anchor_trade_id)
+        return ApiResponse(success=True, data=None)
+
+    strategy = buy_row.get("strategy")
+    ticker = buy_row.get("ticker")
+    buy_date = _journal_date(buy_row.get("timestamp"))
+    saved = await trade_journal.upsert_note(anchor_trade_id, stripped, strategy=strategy, ticker=ticker,
+                                            buy_date=buy_date)
+    return ApiResponse(success=True, data=saved)

@@ -13,6 +13,9 @@ import { MARKET_STATE_FIXTURE } from "./market-state.fixture";
 import { MARKET_REGIME_LABEL_FIXTURE } from "./market-regime-label.fixture";
 // cycle387 — 종목 차트(일봉·주봉·월봉) 응답 리터럴. MSW 목(`frontend/src/test/fixtures/stockChart.fixture.ts`)과 같은 값.
 import { STOCK_CHART_RESPONSES, type StockChartPeriodKey } from "./stock-chart.fixture";
+// cycle413 보완 1차 — 거래일지 응답. MSW 목과 **같은 파일**을 쓴다(키 정본 = tests/fixtures/cycle413_journal_shape.json,
+// `frontend/src/components/__tests__/handlers.honesty.cycle413.test.ts` 가 그 파일과 대조한다 — 사본을 두지 않는다).
+import { JOURNAL_FIXTURE } from "../../frontend/src/test/fixtures/journal.fixture";
 
 type AnyJson = Record<string, unknown>;
 
@@ -94,6 +97,11 @@ export interface MockOptions {
   teMetrics?: AnyJson[];
   // cycle387 — 종목 차트 응답 덮어쓰기(기간별 `{success, data, message}` 전문). 없으면 기본 리터럴.
   stockChart?: Partial<Record<StockChartPeriodKey, AnyJson>>;
+  // cycle413 보완 1차 — 거래일지 응답 `data` 를 요청 `page` 별로 덮어쓴다(키 = "1"·"2"…). 없으면
+  // `JOURNAL_FIXTURE` 한 벌. 메모는 **상태형**이다 — PUT 한 본문이 다음 GET 의 카드 `note` 에 실린다.
+  journalPages?: Record<string, AnyJson>;
+  // 시나리오가 PUT 본문을 확인하도록 밖으로 내준다(`installApiMocks` 가 push 한다).
+  journalPuts?: Array<{ id: string; body: string }>;
 }
 
 export async function installApiMocks(page: Page, opts: MockOptions = {}) {
@@ -235,6 +243,44 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
           closed_count: 0,
         },
       }),
+    });
+  });
+
+  // cycle413 보완 1차(판정 #13) — 거래일지 탭. `**/api/history*` 글롭은 `/api/history/journal` 을 잡지 못한다
+  // (`*` 는 `/` 를 넘지 않는다) — 이 목이 없으면 탭이 백엔드 없는 프록시로 나가 「불러올 수 없습니다」 가 된다.
+  // 실 라우트와 같은 규약: 공백만 PUT = 메모 삭제(`data: null`), 그 밖은 strip 한 본문 upsert.
+  const journalNotes: Record<string, string> = {};
+  const journalBase = (JOURNAL_FIXTURE as unknown) as AnyJson;
+  for (const c of (journalBase.cards as AnyJson[]) ?? []) {
+    const note = c.note as { body: string } | null;
+    if (note) journalNotes[String(c.anchor_trade_id)] = note.body;
+  }
+  await page.route("**/api/history/journal*", (route) => {
+    if (!isRealApiCall(route.request().url())) return route.continue();
+    if (route.request().resourceType() === "script") return route.continue();
+    const pageNo = new URL(route.request().url()).searchParams.get("page") ?? "1";
+    const src = opts.journalPages?.[pageNo] ?? journalBase;
+    const data = JSON.parse(JSON.stringify(src)) as AnyJson;
+    for (const c of (data.cards as AnyJson[]) ?? []) {
+      const id = String(c.anchor_trade_id);
+      c.note = id in journalNotes ? { body: journalNotes[id], updated_at: "2026-10-09T10:00:01+09:00" } : null;
+    }
+    return route.fulfill({ json: envelope(data) });
+  });
+  await page.route("**/api/history/journal/notes/*", async (route) => {
+    if (!isRealApiCall(route.request().url())) return route.continue();
+    const id = new URL(route.request().url()).pathname.split("/").pop() ?? "";
+    const body = String((route.request().postDataJSON() as { body?: string } | null)?.body ?? "");
+    opts.journalPuts?.push({ id, body });
+    const trimmed = body.trim();
+    if (trimmed === "") {
+      delete journalNotes[id];
+      return route.fulfill({ json: envelope(null) });
+    }
+    journalNotes[id] = trimmed;
+    return route.fulfill({
+      json: envelope({ anchor_trade_id: id, body: trimmed, created_at: "2026-10-09T10:00:00+09:00",
+                       updated_at: "2026-10-09T10:00:01+09:00" }),
     });
   });
 
