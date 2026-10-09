@@ -21,8 +21,9 @@ import type {
 import { formatKstHHMM, kstMinutesOfDay } from '../utils/kst'
 import {
   strategyStatus, funnelBottleneck, finalFunnelStep, entryWindow, signalBaseline, marketUnitBlockLabel,
-  SKIP_REASON_LABELS, type MonitorTone, type StrategyStatusResult,
+  skipReasonLabel, type MonitorTone, type StrategyStatusResult,
   estimateLadderLabelWidth, clampLadderLabelCenter, resolveLadderRowOverlaps,
+  donchianTimeExitState, trendDateLabel, momentumExcludedStageText,
 } from '../utils/strategyMonitor'
 import { computeZeroStreak } from '../utils/strategyFunnelTrend'
 import KojiroMonitor from './KojiroMonitor'
@@ -31,6 +32,9 @@ import ScrollPane from './ScrollPane'
 type Dict = Record<string, unknown>
 
 const FULL_PANEL_SIDS = new Set(['etf_trend', 'donchian_swing', 'vcp_breakout', 'bull_flag_breakout'])
+
+/** L10 — `entry_start`/`entry_end` 파라미터 자체가 없는 전략(보드 시간표로 진입 시각을 정한다). */
+const NO_ENTRY_WINDOW_PARAM_SIDS = new Set(['momentum', 'volatility_breakout', 'long_tail_volatility'])
 
 const PRIMARY_CLS: Record<StrategyStatusResult['primary'], string> = {
   off: 'bg-gray-100 text-gray-600',
@@ -56,6 +60,12 @@ const STOP_TONE_CLS: Record<'normal' | 'orange' | 'red', string> = {
 /** M11 — ETF 보유 구성 선(하드·본전·트레일·채널) 한글 라벨. */
 const CONFIG_LINE_LABEL: Record<'hard' | 'breakeven' | 'trail' | 'channel', string> = {
   hard: '하드', breakeven: '본전', trail: '트레일', channel: '채널',
+}
+
+/** L13 — exit-lines `stop_source` 가 근사·모드별·엔진 정지일 때만 꼬리표를 붙인다
+ * (`'effective'` 는 엔진이 실제로 쓰는 선이라 꼬리표 없음, `src/engine/position_exit_lines.py`). */
+const STOP_SOURCE_NOTE: Record<string, string> = {
+  hard_pct: '근사', mode_dependent: '모드별', engine_idle: '엔진 정지',
 }
 
 /** 라우트 funnel 이 없을 때의 폴백 단계 라벨(엔진 이름 그대로 — 낡은 상수 라벨 금지, §6 C3). */
@@ -199,8 +209,16 @@ function DistanceBar({
     <svg data-testid={testId} width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={label}>
       <title>{label}</title>
       <rect x={0} y={4} width={W} height={4} fill="#e5e7eb" />
-      {capX !== null && capX > greenStartX && <rect x={greenStartX} y={4} width={capX - greenStartX} height={4} fill="#bbf7d0" />}
-      {capX !== null && capX < W && <rect x={capX} y={4} width={W - capX} height={4} fill="#fed7aa" />}
+      {capX !== null ? (
+        <>
+          {capX > greenStartX && <rect x={greenStartX} y={4} width={capX - greenStartX} height={4} fill="#bbf7d0" />}
+          {capX < W && <rect x={capX} y={4} width={W - capX} height={4} fill="#fed7aa" />}
+        </>
+      ) : (
+        // N-c — `cap=null`(상한을 현재가 축에 긋지 않는 경우, 예: ETF `gap_over_line_pct` 는
+        // 시가 기준 1회성 판정)이면 상한 경계(주황)를 그리지 않고 초록을 그림 끝까지 늘린다.
+        greenStartX < W && <rect x={greenStartX} y={4} width={W - greenStartX} height={4} fill="#bbf7d0" />
+      )}
       {!belowLineOk && <line x1={zeroX} y1={0} x2={zeroX} y2={H} stroke="#9ca3af" strokeWidth={1} />}
       <circle cx={curX} cy={6} r={2.5} fill={pct >= 0 ? '#ef4444' : '#3b82f6'} />
       {outLow && <text x={1} y={10} fontSize={7} fill="#3b82f6">◀</text>}
@@ -317,10 +335,15 @@ interface Props {
   now?: Date
   /** H3 — `/api/trading/status` 의 `running`. 모니터 라우트가 실패해도(=null) 엔진 정지를 안다. */
   running?: boolean | null
+  /** N-f — `/api/trading/status` 의 `phase`. `"booting"` 은 `running=true` 이면서도 DB 포지션
+   * 복구가 아직 안 끝난 창(scheduler.start() 가 `_running=True` 를 `_boot()` **앞**에서 세운다)
+   * 이라, 그 사이의 「보유 종목 없음」은 「모름」이지 「실제로 0」이 아니다. */
+  phase?: string | null
 }
 
 export default function StrategyMonitor({
   strategyId, strategies, monitor, exitLines, tickerPrices, tickerNames, subscribedTickers, funnelTrend, now, running,
+  phase,
 }: Props) {
   const info = strategies[strategyId]
   const nowDate = now ?? new Date()
@@ -352,6 +375,8 @@ export default function StrategyMonitor({
   // H3 — 엔진 정지(정산 뒤·부팅 전·휴일). `running` prop(=/trading/status, 모니터 실패에도 안다)
   // 또는 `monitor.running` 둘 중 하나라도 false 면 멈춘 것으로 본다.
   const engineStopped = running === false || monitor?.running === false
+  // N-f — 기동 중(DB 포지션 복구 전)에는 `running=true` 라 `engineStopped` 가 못 잡는다.
+  const booting = phase === 'booting'
 
   const params = (info?.params ?? {}) as Dict
   const prices = tickerPrices ?? {}
@@ -438,9 +463,12 @@ export default function StrategyMonitor({
                   안 보인다. 날짜·값을 두 줄로 나누면 각 줄의 글자 수가 짧아져(최대 5자·값은 보통
                   1~2자) 좁은 칸에서도 값만은 남는다(세로가 더 필요해 `leading-tight`로 줄인다). */}
               <div className="flex gap-0.5 text-[9px] text-gray-400 mt-0.5 leading-tight">
+                {/* N4-1 — 칸이 많아질수록(최대 14칸, 400px 에서 ≈22.6px) "MM-DD" 전체가 잘려
+                    값까지 안 보인다. `trendDateLabel` 이 칸 수에 따라 일(DD)만 쓴다(전체 날짜는
+                    `title` 에 남는다 — 모바일엔 hover 가 없어 완전한 대체는 아니다). */}
                 {funnelTrend.map((d) => (
                   <div key={d.date} className="flex-1 min-w-0 flex flex-col items-center" title={`${mmdd(d.date)}: ${d.count}건`}>
-                    <span className="w-full text-center truncate">{mmdd(d.date)}</span>
+                    <span className="w-full text-center truncate">{trendDateLabel(d.date, funnelTrend.length)}</span>
                     <span className="w-full text-center truncate text-gray-500">{d.count}</span>
                   </div>
                 ))}
@@ -473,11 +501,28 @@ export default function StrategyMonitor({
       const ss = (info.scan_stats ?? {}) as Dict
       return (
         <div className="space-y-1 text-xs text-gray-600">
-          {fallback.map((stg, i) => (
-            <div key={stg.key} data-testid={`${strategyId}-monitor-funnel-row-${i + 1}`}>
-              {i + 1}. {stg.label} — {finiteOrNull(ss[stg.key]) ?? '모름'}
-            </div>
-          ))}
+          {fallback.map((stg, i) => {
+            // N-E — momentum `limit_up_excluded` 는 `scanner.scan_filter_stats` 의 "제외 수"
+            // 카운터다(통과 수가 아니다). 그대로 늘어놓으면 깔때기 숫자가 늘었다 줄었다 하므로,
+            // 이 단계만 직전 단계 값에서 제외 수를 뺀 "통과" 로 보이고 제외 수는 괄호로 덧붙인다.
+            if (stg.key === 'limit_up_excluded') {
+              const prevKey = fallback[i - 1]?.key
+              const prevVal = prevKey ? finiteOrNull(ss[prevKey]) : null
+              const excluded = finiteOrNull(ss[stg.key])
+              const { survived } = momentumExcludedStageText(prevVal, excluded)
+              return (
+                <div key={stg.key} data-testid={`${strategyId}-monitor-funnel-row-${i + 1}`}>
+                  {i + 1}. {stg.label} — {survived ?? '모름'}
+                  {excluded !== null && <> (제외 {excluded}건)</>}
+                </div>
+              )
+            }
+            return (
+              <div key={stg.key} data-testid={`${strategyId}-monitor-funnel-row-${i + 1}`}>
+                {i + 1}. {stg.label} — {finiteOrNull(ss[stg.key]) ?? '모름'}
+              </div>
+            )
+          })}
         </div>
       )
     }
@@ -488,7 +533,16 @@ export default function StrategyMonitor({
   // ───────────────────────────── ② 시간표 ─────────────────────────────
   function renderTimeline() {
     const win = entryWindow(strategyId, params, nowDate)
-    if (!win) return <span>시간표 정보 없음(전략별 설정을 확인하세요)</span>
+    if (!win) {
+      // L10 — VB·momentum·LTV 는 `entry_start`/`entry_end` 파라미터 자체가 없다(보드 시간표를
+      // 따른다, `ScanMonitor` 활성 보드 배지 참고). "설정을 확인하세요" 는 존재하지 않는 설정을
+      // 가리키는 거짓 안내다. BFB·VCP 처럼 그 설정이 있는데 값이 없거나 형식이 깨졌을 때만
+      // "설정 확인"을 말한다.
+      if (NO_ENTRY_WINDOW_PARAM_SIDS.has(strategyId)) {
+        return <span>진입 시간은 파라미터가 아니라 거래소 보드 시간표를 따릅니다(활성 보드 참고)</span>
+      }
+      return <span>시간표 정보 없음(entry_start/entry_end 설정을 확인하세요)</span>
+    }
     const stateLabel = win.state === 'before' ? '열리기 전' : win.state === 'open' ? '열림' : '닫힘'
     return (
       <span>
@@ -500,9 +554,14 @@ export default function StrategyMonitor({
   // ───────────────────────────── ⑤ 사유 ─────────────────────────────
   function renderSkipsPanel() {
     if (status!.primary === 'paused') {
-      const n = routeEntry?.paused_skips?.length ?? 0
+      // N7(suites) — 라우트가 실패하면(routeEntry 없음) 멈춤 중 건너뛴 종목 수를 모른다.
+      // `?? 0` 로 떨어뜨리면 「0종목」(확정)과 「모른다」가 같아진다.
+      const n = routeEntry ? (routeEntry.paused_skips?.length ?? 0) : null
       return (
-        <div>멈춤 중 — 엔진은 멈춤 관문에서 돌아가 다른 사유를 남기지 않습니다. 오늘 멈춤으로 건너뛴 종목 {n}</div>
+        <div>
+          멈춤 중 — 엔진은 멈춤 관문에서 돌아가 다른 사유를 남기지 않습니다. 오늘 멈춤으로 건너뛴 종목{' '}
+          {n === null ? '모름(모니터 라우트 실패)' : n}
+        </div>
       )
     }
     const skips = routeEntry?.skips
@@ -515,7 +574,7 @@ export default function StrategyMonitor({
     return (
       <ul className="space-y-0.5">
         {entries.map(([reason, count]) => (
-          <li key={reason}>{SKIP_REASON_LABELS[reason] ?? reason} — {count}종목</li>
+          <li key={reason}>{skipReasonLabel(reason)} — {count}종목</li>
         ))}
       </ul>
     )
@@ -551,7 +610,8 @@ export default function StrategyMonitor({
         )}
         {shadowBuys.length > 0 && (
           <div className="text-violet-700">
-            섀도 기록 {shadowBuys.length}(실전이었으면 샀을 종목 {shadowBuys.length}): {shadowBuys.join(', ')}
+            섀도 기록 {shadowBuys.length}(실전이었으면 샀을 종목 {shadowBuys.length}):{' '}
+            {shadowBuys.map((t) => `${nameOf(t)}(${t})`).join(', ')}
           </div>
         )}
       </div>
@@ -663,7 +723,7 @@ export default function StrategyMonitor({
 
   /** H2 — 「진입 가능」 은 엔진 조건(아래→위 교차 틱 또는 오늘 무장한 래치)일 때만. 래치 없이
    *  돌파선 위 + 거래량 충족이면 「참고: 돌파선 위」(화면이 「샀을 것」을 단정하지 않는다). */
-  function breakoutCandidateStatus(ticker: string, isBfb: boolean): string {
+  function breakoutCandidateStatus(ticker: string, isBfb: boolean, includePause: boolean): string {
     const sid = isBfb ? 'bull_flag_breakout' : 'vcp_breakout'
     if (engineStopped) return '장 마감/엔진 정지'
     if (!subscribedSet.has(ticker)) return '시세 없음'
@@ -671,7 +731,7 @@ export default function StrategyMonitor({
     if ((info.pending_buy_tickers ?? []).includes(ticker)) return '주문 중'
     const target = targets[ticker] ?? {}
     if (target.bought_today) return '오늘 매수'
-    if (status!.primary === 'paused') return '멈춤'
+    if (includePause && status!.primary === 'paused') return '멈춤'
     if (info.buy_disabled) return '매수 중단'
     const maxPositions = Number(params.max_positions)
     if (Number.isFinite(maxPositions) && maxPositions > 0 && (info.positions ?? 0) >= maxPositions) return '보유 한도'
@@ -679,27 +739,41 @@ export default function StrategyMonitor({
     if (win?.state === 'before') return `진입창 밖 — ${win.start} 부터`
     if (win?.state === 'after') return '진입창 밖 — 다음 거래일'
     if (target.in_cooldown) return '쿨다운'
-    if (isBfb) {
-      const retentionMin = finiteOrNull(params.breakout_retention_minutes)
-      if (retentionMin !== null && retentionMin > 0 && target.breakout_seen_at) return '유지 대기'
-    }
     if (!routeEntry) return '모름'
     const cand = (routeEntry.candidates?.[ticker] ?? {}) as Dict
     const breakoutLine = finiteOrNull(isBfb ? target.flag_high : target.base_high)
     const cur = finiteOrNull(prices[ticker]?.current_price)
+    const latchAt = typeof cand.latch_armed_at === 'string' ? cand.latch_armed_at : null
+    // N-D — 「유지 대기」는 래치·현재가를 본 뒤에만 판정한다. 엔진의 retention 상태기계는
+    // ① 이미 래치됐으면(거래량 게이트로 넘어간 뒤) 다시 대기하지 않고 ② 현재가가 돌파선 아래로
+    // 후퇴하면 그 즉시 대기를 종료한다(`_breakout_first_seen.pop`) — 그 두 조건을 보기 전에
+    // 「유지 대기」를 단정하면 실제로는 생기기 어려운 조합(이미 래치된 종목에 유지 대기)이 뜬다.
+    if (isBfb && !latchAt) {
+      const retentionMin = finiteOrNull(params.breakout_retention_minutes)
+      if (
+        retentionMin !== null && retentionMin > 0 && typeof target.breakout_seen_at === 'string'
+        && breakoutLine !== null && cur !== null && cur >= breakoutLine
+      ) {
+        return '유지 대기'
+      }
+    }
     if (breakoutLine !== null && cur !== null && cur < breakoutLine) return '돌파선 아래'
     const tickEntry = routeEntry.ticks?.[ticker]
     const acmlVol = tickEntry?.acml_vol
     const volThreshold = finiteOrNull(target.volume_threshold)
-    const latchAt = typeof cand.latch_armed_at === 'string' ? cand.latch_armed_at : null
-    // N10(trader) — 임계가 설정돼 있을 때만 거래량을 본다(엔진은 임계 0 또는 미설정이면 관측 없이
-    // 통과시킨다 — 게이트가 꺼진 것과 같다). 임계가 있는데 관측이 없을 때만 「거래량 미관측」.
+    // N10(trader) — 임계가 설정돼 있을 때만 거래량을 본다(VCP 엔진은 임계 0 또는 미설정이면
+    // 관측 없이 통과시킨다 — 게이트가 꺼진 것과 같다). 임계가 있는데 관측이 없을 때만 「거래량
+    // 미관측」. 🔴 N-d — BFB 는 VCP 와 다르다(`_evaluate_vol_gate` 에 `vol_threshold > 0` 가드가
+    // 없다) — 임계가 0·미설정이어도 미관측이면 엔진이 그대로 막는다(no_data fail-closed).
+    const noVolObserved = acmlVol === null || acmlVol === undefined
     if (volThreshold !== null && volThreshold > 0) {
-      if (acmlVol === null || acmlVol === undefined) return '거래량 미관측'
+      if (noVolObserved) return '거래량 미관측'
       if (acmlVol < volThreshold) {
         if (latchAt) return '래치: 거래량 대기 중'
         return `거래량 부족 ${Math.round((acmlVol / volThreshold) * 100)}%`
       }
+    } else if (isBfb && noVolObserved) {
+      return '거래량 미관측'
     }
     const extCap = finiteOrNull(params.max_breakout_extension_pct)
     if (breakoutLine !== null && breakoutLine > 0 && extCap !== null && cur !== null) {
@@ -716,8 +790,10 @@ export default function StrategyMonitor({
 
   function renderEtfCandidatesTable() {
     const tickers = Object.keys(targets)
-    if (tickers.length === 0) return <div className="text-xs text-gray-400">후보 없음</div>
-    const capPct = finiteOrNull(params.gap_over_line_pct)
+    if (tickers.length === 0) {
+      // N5(suites) — 엔진 정지 중엔 「후보 0」이 아니라 「모름」.
+      return <div className="text-xs text-gray-400">{engineStopped ? '모름 — 엔진 정지' : '후보 없음'}</div>
+    }
     return (
       <table className="w-full min-w-[720px] text-xs">
         <thead>
@@ -739,7 +815,7 @@ export default function StrategyMonitor({
             const qty = engineStopped ? null : finiteOrNull(cand.design_qty)
             const qtyText = engineStopped
               ? '모름'
-              : qty === null ? '—' : qty <= 0 ? '1주도 안 됨 — 사지 않음' : `최대 ${qty}주(추정)`
+              : qty === null ? '—' : qty <= 0 ? '1주도 안 됨 — 사지 않음(추정)' : `최대 ${qty}주(추정)`
             const cur = finiteOrNull(prices[ticker]?.current_price)
             const line = finiteOrNull(cand.line)
             const pct = cur !== null && line !== null && line > 0 ? ((cur - line) / line) * 100 : null
@@ -761,7 +837,10 @@ export default function StrategyMonitor({
                     <span className={pct === null ? 'text-gray-400' : pct >= 0 ? 'text-red-500' : 'text-blue-500'}>
                       {pct !== null ? `${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%` : '—'}
                     </span>
-                    <DistanceBar testId={`etf_trend-monitor-distbar-${ticker}`} pct={pct} cap={capPct} belowLineOk />
+                    {/* N-c — `gap_over_line_pct` 는 시가 기준 1회성 판정(그날 시초 갭만 본다,
+                        `etfCandidateStatus` 의 「돌파선 위 과다」)이라 현재가 축의 상한으로 긋지
+                        않는다(과거엔 현재가가 그 경계를 넘으면 "못 산다"로 오독됐다). */}
+                    <DistanceBar testId={`etf_trend-monitor-distbar-${ticker}`} pct={pct} cap={null} belowLineOk />
                   </div>
                 </td>
                 <td className="py-1 px-2 text-right">
@@ -782,7 +861,11 @@ export default function StrategyMonitor({
 
   function renderDonchianCandidatesTable() {
     const tickers = Object.keys(targets)
-    if (tickers.length === 0) return <div className="text-xs text-gray-400">후보 없음</div>
+    if (tickers.length === 0) {
+      // N5(suites) — 엔진 정지 중엔 「후보 0」이 아니라 「모름」(바로 위 깔때기는 정산 전 값을
+      // 들고 있을 수 있어 「최종 N」으로 보이는데, 이 표가 「후보 없음」이면 서로 모순된다).
+      return <div className="text-xs text-gray-400">{engineStopped ? '모름 — 엔진 정지' : '후보 없음'}</div>
+    }
     const capPct = finiteOrNull(params.max_breakout_extension_pct)
     return (
       <table className="w-full min-w-[760px] text-xs">
@@ -801,6 +884,8 @@ export default function StrategyMonitor({
           {tickers.map((ticker) => {
             const cand = (routeEntry?.candidates?.[ticker] ?? {}) as Dict
             const statusText = donchianCandidateStatus(ticker, true)
+            // L8 — ETF·VCP·BFB 와 같은 「풀리면: ○○」 힌트.
+            const hint = statusText === '멈춤' ? donchianCandidateStatus(ticker, false) : null
             const cur = finiteOrNull(prices[ticker]?.current_price)
             const dh = finiteOrNull(targets[ticker]?.donchian_high)
             const pct = cur !== null && dh !== null && dh > 0 ? ((cur - dh) / dh) * 100 : null
@@ -812,6 +897,11 @@ export default function StrategyMonitor({
                 <td className="py-1 pr-2 font-medium text-gray-800">{nameOf(ticker)}({ticker})</td>
                 <td className="py-1 pr-2">
                   <span data-testid={`donchian_swing-monitor-status-${ticker}`} className="text-gray-700">{statusText}</span>
+                  {hint && (
+                    <div data-testid={`donchian_swing-monitor-unpaused-${ticker}`} className="text-[10px] text-gray-400">
+                      풀리면: {hint}
+                    </div>
+                  )}
                 </td>
                 <td className="py-1 px-2 text-right">{cur !== null ? cur.toLocaleString() : '—'}</td>
                 <td className="py-1 px-2 text-right text-indigo-600">{dh !== null ? dh.toLocaleString() : '—'}</td>
@@ -830,7 +920,9 @@ export default function StrategyMonitor({
                   {engineStopped
                     ? <span className="text-gray-500">모름</span>
                     : designLot !== null && designLot <= 0
-                      ? <span className="text-rose-600 font-medium">사지 않음</span>
+                      // trader N5 — 양수 케이스와 같게 "(추정)" 을 붙인다(m=1·전일 종가 기준
+                      // 추정값이라는 전제는 0 일 때도 똑같이 적용된다).
+                      ? <span className="text-rose-600 font-medium">사지 않음(추정)</span>
                       : (designLot !== null ? `${designLot}주(추정)` : '—')}
                 </td>
               </tr>
@@ -844,7 +936,11 @@ export default function StrategyMonitor({
   function renderBreakoutCandidatesTable(isBfb: boolean) {
     const sid = isBfb ? 'bull_flag_breakout' : 'vcp_breakout'
     const tickers = Object.keys(targets)
-    if (tickers.length === 0) return <div className="text-xs text-gray-400">후보 없음</div>
+    if (tickers.length === 0) {
+      // N5(suites) — 엔진 정지 중엔 `targets`(라이브 메모리)가 비어도 「후보 0」이 아니라 「모름」
+      // 이다 — 바로 위 깔때기는 정산 전 마지막 값을 들고 있어 「최종 N」으로 보일 수 있다.
+      return <div className="text-xs text-gray-400">{engineStopped ? '모름 — 엔진 정지' : '후보 없음'}</div>
+    }
     const capPct = finiteOrNull(params.max_breakout_extension_pct)
     return (
       <table className="w-full min-w-[760px] text-xs">
@@ -864,20 +960,26 @@ export default function StrategyMonitor({
           {tickers.map((ticker) => {
             const target = targets[ticker] ?? {}
             const cand = (routeEntry?.candidates?.[ticker] ?? {}) as Dict
-            const statusText = breakoutCandidateStatus(ticker, isBfb)
+            const statusText = breakoutCandidateStatus(ticker, isBfb, true)
+            // L8 — ETF·donchian 과 같은 「풀리면: ○○」 힌트. 멈춤 중일 때만 멈춤을 제외하고
+            // 다시 판정한 값을 보여준다(실제로 풀렸을 때 상태를 미리 알려준다).
+            const pauseHint = statusText === '멈춤' ? breakoutCandidateStatus(ticker, isBfb, false) : null
             const cur = finiteOrNull(prices[ticker]?.current_price)
             const breakoutLine = finiteOrNull(isBfb ? target.flag_high : target.base_high)
             const pct = cur !== null && breakoutLine !== null && breakoutLine > 0 ? ((cur - breakoutLine) / breakoutLine) * 100 : null
             const tickEntry = routeEntry?.ticks?.[ticker]
             const acmlVol = tickEntry?.acml_vol
             const volThreshold = finiteOrNull(target.volume_threshold)
-            // N10 — 임계가 없거나 0 이면 게이트가 꺼진 것(엔진은 관측 없이 통과) — 「거래량
-            // 미관측」 경보를 내지 않는다.
+            const noVolObserved = acmlVol === null || acmlVol === undefined
+            // N10 — VCP 는 임계가 없거나 0 이면 게이트가 꺼진 것(엔진은 관측 없이 통과) — 「거래량
+            // 미관측」 경보를 내지 않는다. 🔴 N-d — BFB 는 임계 0·미설정이어도 미관측이면 엔진이
+            // 그대로 막는다(`_evaluate_vol_gate` 에 `vol_threshold > 0` 가드가 없다, `no_data`
+            // fail-closed). 「게이트 비활성」은 BFB 에서 관측이 있을 때만 맞는 말이다.
             const volText = !routeEntry
               ? '모름'
               : volThreshold === null || volThreshold <= 0
-                ? '게이트 비활성'
-                : (acmlVol === null || acmlVol === undefined)
+                ? (isBfb && noVolObserved ? '거래량 미관측' : '게이트 비활성')
+                : noVolObserved
                   ? '거래량 미관측'
                   : `${Math.round((acmlVol / volThreshold) * 100)}%`
             const volPctNum = typeof acmlVol === 'number' && volThreshold !== null && volThreshold > 0
@@ -885,12 +987,20 @@ export default function StrategyMonitor({
               : null
             const latchAt = typeof cand.latch_armed_at === 'string' ? cand.latch_armed_at : null
             const retentionMin = finiteOrNull(params.breakout_retention_minutes)
+            // L9 — 「유지 대기」는 그 종목이 실제로 retention 대기 중(`breakout_seen_at` 있음)일
+            // 때만. 파라미터가 설정돼 있다는 사실만으로 모든 행에 붙이지 않는다.
             const showRetention = isBfb && retentionMin !== null && retentionMin > 0
+              && typeof target.breakout_seen_at === 'string'
             return (
               <tr key={ticker} data-testid={`${sid}-monitor-candidate-${ticker}`} className="border-b border-gray-100">
                 <td className="py-1 pr-2 font-medium text-gray-800">{nameOf(ticker)}({ticker})</td>
                 <td className="py-1 pr-2">
                   <span data-testid={`${sid}-monitor-status-${ticker}`} className="text-gray-700">{statusText}</span>
+                  {pauseHint && (
+                    <div data-testid={`${sid}-monitor-unpaused-${ticker}`} className="text-[10px] text-gray-400">
+                      풀리면: {pauseHint}
+                    </div>
+                  )}
                   {showRetention && (
                     <div data-testid={`${sid}-monitor-retention-${ticker}`} className="text-[10px] text-amber-600">유지 대기</div>
                   )}
@@ -933,7 +1043,11 @@ export default function StrategyMonitor({
   function renderEtfHoldingsTable() {
     const entries = Object.entries(info.positions_detail ?? {})
     if (entries.length === 0) {
-      return <div className="text-xs text-gray-400">{engineStopped ? '장 마감/엔진 정지 — 보유 정보 모름' : '보유 종목 없음'}</div>
+      return (
+        <div className="text-xs text-gray-400">
+          {engineStopped ? '장 마감/엔진 정지 — 보유 정보 모름' : booting ? '기동 중 — 보유 복원 전(모름)' : '보유 종목 없음'}
+        </div>
+      )
     }
     const breakoutFailMinBars = params.breakout_fail_min_bars
     const maxAge = finiteOrNull(params.breakout_fail_price_max_age_secs)
@@ -982,7 +1096,9 @@ export default function StrategyMonitor({
                 if (nearClose && stale) {
                   countdown = '시세 낡음 — 15:20 판정 건너뜀 위험'
                 } else {
-                  countdown = (cur !== null && cur < bLine) ? '15:20 정리(돌파 실패)' : '15:20 판정 대상'
+                  // trader N6 — 15:20 전에 미리 보는 예측이라 확정 어투("정리") 대신 예상
+                  // 어투를 쓴다(그 사이 가격·시세 신선도가 바뀔 수 있다).
+                  countdown = (cur !== null && cur < bLine) ? '15:20 정리 예상(돌파 실패)' : '15:20 판정 대상'
                 }
               }
             }
@@ -993,6 +1109,9 @@ export default function StrategyMonitor({
                 <td className="py-1 px-2 text-right">{cur !== null ? cur.toLocaleString() : '—'}</td>
                 <td className="py-1 px-2 text-right" data-testid={`etf_trend-monitor-stop-${ticker}`}>
                   {effectiveStop != null ? effectiveStop.toLocaleString() : '—'}
+                  {exitItem?.stop_source && STOP_SOURCE_NOTE[exitItem.stop_source] && (
+                    <span className="ml-1 text-[10px] text-gray-400">({STOP_SOURCE_NOTE[exitItem.stop_source]})</span>
+                  )}
                 </td>
                 <td
                   className={`py-1 px-2 text-right ${STOP_TONE_CLS[tone]}`}
@@ -1039,7 +1158,11 @@ export default function StrategyMonitor({
   function renderDonchianHoldingsTable() {
     const entries = Object.entries(info.positions_detail ?? {})
     if (entries.length === 0) {
-      return <div className="text-xs text-gray-400">{engineStopped ? '장 마감/엔진 정지 — 보유 정보 모름' : '보유 종목 없음'}</div>
+      return (
+        <div className="text-xs text-gray-400">
+          {engineStopped ? '장 마감/엔진 정지 — 보유 정보 모름' : booting ? '기동 중 — 보유 복원 전(모름)' : '보유 종목 없음'}
+        </div>
+      )
     }
     const channelExitPeriod = pnum(params.channel_exit_period)
     return (
@@ -1072,15 +1195,21 @@ export default function StrategyMonitor({
             const timeExitBars = finiteOrNull(holding.time_exit_bars)
             const maxHoldBars = finiteOrNull(holding.max_hold_bars)
             const target1r = finiteOrNull(holding.target_1r)
-            const due = timeExitBars !== null && daysHeld !== null ? timeExitBars - 1 - daysHeld : null
             let countdownClause: string
             if (engineStopped) countdownClause = '장 마감/엔진 정지 — 판정 모름'
             else if (!hasMonitorData) countdownClause = '모름(시간청산 판정 불가)'
-            else if (reachedR1) countdownClause = `+1R 넘음 — 시간청산 면제(최대 ${maxHoldBars ?? '—'}봉)`
-            // H1 — due(=time_exit_bars·days_held) 를 모르면 「모름」 — 거짓 「오늘 15:20」 경보 0.
-            else if (timeExitBars === null || daysHeld === null) countdownClause = '모름(시간청산 판정 불가)'
-            else if (due !== null && due > 0) countdownClause = `${due}영업일 뒤 15:20 시간청산 판정 — +1R(${target1r !== null ? target1r.toLocaleString() : '—'}원) 못 넘으면 정리`
-            else countdownClause = '오늘 15:20 시간청산 대상(+1R 미도달)'
+            else {
+              // L15 — `max_hold_bars` 도달은 `+1R` 면제보다 우선한다(엔진 `check_force_clear`:
+              // (a) `kk_time_exit_bars` 미도달 ∧ R 미도달, 또는 (b) `kk_max_hold_bars` 도달이면
+              // R 과 무관하게 TIME_EXIT). 순서를 지키지 않으면 「+1R 넘음 — 시간청산 면제」가
+              // 최대 보유 봉수에 닿은 포지션에도 뜬다.
+              const exit = donchianTimeExitState({ daysHeld, timeExitBars, maxHoldBars, reachedR1 })
+              if (exit.kind === 'unknown') countdownClause = '모름(시간청산 판정 불가)'
+              else if (exit.kind === 'max_hold_due') countdownClause = `최대 보유 ${maxHoldBars ?? '—'}봉 도달 — 오늘 15:20 시간청산 대상`
+              else if (exit.kind === 'exempt') countdownClause = `+1R 넘음 — 시간청산 면제(최대 ${maxHoldBars ?? '—'}봉)`
+              else if (exit.kind === 'due_today') countdownClause = '오늘 15:20 시간청산 대상(+1R 미도달)'
+              else countdownClause = `${exit.dueInDays}영업일 뒤 15:20 시간청산 판정 — +1R(${target1r !== null ? target1r.toLocaleString() : '—'}원) 못 넘으면 정리`
+            }
             const barsLabel = (!engineStopped && hasMonitorData && daysHeld !== null) ? `보유 ${daysHeld + 1}봉째` : ''
             const fallbackNote = holding.days_fallback === true ? ' (보유일 근사)' : ''
             return (
@@ -1088,7 +1217,12 @@ export default function StrategyMonitor({
                 <td className="py-1 pr-2 font-medium text-gray-800">{pos.name || ticker}</td>
                 <td className="py-1 px-2 text-right">{won(pos.buy_price)}</td>
                 <td className="py-1 px-2 text-right">{cur !== null ? cur.toLocaleString() : '—'}</td>
-                <td className="py-1 px-2 text-right">{effectiveStop != null ? effectiveStop.toLocaleString() : '—'}</td>
+                <td className="py-1 px-2 text-right">
+                  {effectiveStop != null ? effectiveStop.toLocaleString() : '—'}
+                  {exitItem?.stop_source && STOP_SOURCE_NOTE[exitItem.stop_source] && (
+                    <span className="ml-1 text-[10px] text-gray-400">({STOP_SOURCE_NOTE[exitItem.stop_source]})</span>
+                  )}
+                </td>
                 <td
                   className={`py-1 px-2 text-right ${STOP_TONE_CLS[stopTone]}`}
                   data-testid={`donchian_swing-monitor-stopdist-${ticker}`}
@@ -1127,7 +1261,11 @@ export default function StrategyMonitor({
     const sid = isBfb ? 'bull_flag_breakout' : 'vcp_breakout'
     const entries = Object.entries(info.positions_detail ?? {})
     if (entries.length === 0) {
-      return <div className="text-xs text-gray-400">{engineStopped ? '장 마감/엔진 정지 — 보유 정보 모름' : '보유 종목 없음'}</div>
+      return (
+        <div className="text-xs text-gray-400">
+          {engineStopped ? '장 마감/엔진 정지 — 보유 정보 모름' : booting ? '기동 중 — 보유 복원 전(모름)' : '보유 종목 없음'}
+        </div>
+      )
     }
     return (
       <table className="w-full min-w-[720px] text-xs">
@@ -1270,7 +1408,7 @@ export default function StrategyMonitor({
         {renderEntriesPanel()}
         {modeDependentTicker && (
           <div className="mt-2 text-[11px] text-gray-500">
-            보유 {modeDependentTicker.ticker} 손절선은 상한가 모드에 따라 달라 화면이 하나로 고르지 않습니다.
+            보유 {nameOf(modeDependentTicker.ticker)}({modeDependentTicker.ticker}) 손절선은 상한가 모드에 따라 달라 화면이 하나로 고르지 않습니다.
           </div>
         )}
       </div>

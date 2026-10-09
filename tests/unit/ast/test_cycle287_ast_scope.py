@@ -852,8 +852,13 @@ _SRC_TREE_FILES = 183  # 직전 = 트랙 C — 실비용 사후 대사: 신규 4
 # 🔁 merge(cycle417+416+413+414) 재핀 — 네 변경을 합친 트리 다이제스트.
 # 🔁 cycle418-J 재핀 — `journal_view.py`(exits_na·stop_kind·TAKE_PROFIT 부분/전량 익절) 반영.
 # 🔁 merge 재핀 — 병합한 트리 다이제스트.
+# cycle418-M — `routes/strategies.py::_monitor_skips` 가 VCP/BFB `_gate_emit_capped` 에서
+# 센티널 ticker `"_invariant_"`(ρ축 관측 `ext_cap_warn` 전용) 쌍을 걷어낸다(읽기 전용, 행위 무변경).
+# 신규/삭제 파일 0 — 파일 수 183 그대로. 직전 값(merge cycle417+416+413+414) =
+# `bef4d54cb5aef74f82119893ad8bf4f500265bf655edb85c1a8751898af7e508`.
+# 🔁 merge 재핀 — 병합한 트리 다이제스트.
 _SRC_TREE_DIGEST = (
-    "7eee2b0411ebc6717a4220221fc9c94161aa70eec5a14cd9d2e2adbaed0c30cc"
+    "e44bcbe1d577943c1516fc12ca32263effcc6548b1b84deab5ff7941b8790228"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

@@ -196,10 +196,13 @@ export interface MonitorFunnelStep {
   excluded_count: number
 }
 
+/** cycle418-M L15 — `_monitor_prepare`(routes/strategies.py)는 `meta.get("as_of")`·
+ * `meta.get("started_at")` 가 `None` 이면 `null` 을 그대로 보낸다 — `string` 단정은 타입이
+ * 거짓말을 하는 것이다(런타임 크래시는 없다, `mmdd`/`formatKstHHMM` 이 null-safe). */
 export interface MonitorPrepareMeta {
-  as_of: string
+  as_of: string | null
   phase: string
-  started_at: string
+  started_at: string | null
   finished_at: string | null
   ok: boolean | null
 }

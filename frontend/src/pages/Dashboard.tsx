@@ -201,6 +201,7 @@ export default function Dashboard() {
           subscribedTickers={status?.scan?.subscribed_tickers}
           funnelTrend={funnelTrend}
           running={status?.running}
+          phase={status?.phase}
         />
       ) : null}
 

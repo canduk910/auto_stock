@@ -262,6 +262,10 @@ export function entryWindow(
   const startMin = hhmmToMinutes(start)
   const endMin = hhmmToMinutes(end)
   if (startMin === null || endMin === null) return null
+  // L14 — 시작 > 끝(뒤집힌 설정, 예: 오버나이트 창을 당일 창처럼 잘못 적은 값)은 당일 전용 비교
+  // 식(`cur < start ? before : cur > end ? after : open`)으로 추측하지 않는다 — 추측하면 거의
+  // 전 구간이 틀린 상태("닫힘"이어야 할 구간이 "열림")로 읽힌다. 모름으로 둔다.
+  if (startMin > endMin) return null
   const cur = kstMinutesOfDay(now)
   const state: 'before' | 'open' | 'after' = cur < startMin ? 'before' : cur > endMin ? 'after' : 'open'
   return { state, start, end, fixed }
@@ -307,6 +311,26 @@ export const SKIP_REASON_LABELS: Record<string, string> = {
   retreat: '후퇴(돌파선 아래로 복귀)',
 }
 
+/** `latch_released:<reason>` 접두 키(BFB·VCP `_release_latch` 사유) → 한글. */
+const LATCH_RELEASED_LABELS: Record<string, string> = {
+  level_moved: '레벨 이동(prepare 재실행으로 돌파선이 옮겨짐)',
+  stop_line: '손절선 이탈(베이스 소멸)',
+}
+
+/**
+ * 사유 키 → 화면 문구 — L3. `SKIP_REASON_LABELS` 정확 일치 우선, `latch_released:*` 접두는
+ * 서브 사유를 번역해 합성한다. 모르는 키는 추측하지 않고 원문을 그대로 둔다.
+ */
+export function skipReasonLabel(reason: string): string {
+  const exact = SKIP_REASON_LABELS[reason]
+  if (exact) return exact
+  if (reason.startsWith('latch_released:')) {
+    const sub = reason.slice('latch_released:'.length)
+    return `래치 해제 — ${LATCH_RELEASED_LABELS[sub] ?? sub}`
+  }
+  return reason
+}
+
 /** `skips.counts` 에서 가장 많은 사유 하나(0 은 제외). 비어 있으면 `null`. */
 export function topSkipReason(
   counts: Record<string, number> | null | undefined,
@@ -318,7 +342,7 @@ export function topSkipReason(
     if (!best || count > best.count) best = { reason, count }
   }
   if (!best) return null
-  return { reason: best.reason, label: SKIP_REASON_LABELS[best.reason] ?? best.reason, count: best.count }
+  return { reason: best.reason, label: skipReasonLabel(best.reason), count: best.count }
 }
 
 /** 매수 신호(⑥) 한 건을 「기준선」·「기준선 대비 %」 계산용으로 정규화 — §2.8. */
@@ -338,6 +362,56 @@ export function signalBaseline(
     changeRate = ZERO_FILLED_CHANGE_RATE_SIDS.has(sid) && cr === 0 ? null : cr
   }
   return { baseline, changeRate }
+}
+
+// ─────────────────────────────── 보완 5차(cycle418-M) — 잔여 LOW ───────────────────────────────
+
+/**
+ * donchian 15:20 시간청산 판정 상태 — L15. 엔진 `check_force_clear`(깡토식, cycle405)와 같은
+ * 순서: (a) `daysHeld ≥ maxHoldBars−1` 이면 **R 과 무관하게** 그날 정리(`max_hold_due`) —
+ * 화면이 이 조건을 안 보면 「+1R 넘음 — 시간청산 면제」로 잘못 단정한다. (b) `reachedR1` 이면
+ * 면제(`exempt`). (c) `daysHeld`·`timeExitBars` 를 모르면 판정 불가(`unknown`). (d) 남은 날이
+ * 있으면 `pending`(dueInDays), 없으면 오늘(`due_today`).
+ */
+export function donchianTimeExitState(args: {
+  daysHeld: number | null
+  timeExitBars: number | null
+  maxHoldBars: number | null
+  reachedR1: boolean
+}): { kind: 'unknown' | 'max_hold_due' | 'exempt' | 'due_today' | 'pending'; dueInDays: number | null } {
+  const { daysHeld, timeExitBars, maxHoldBars, reachedR1 } = args
+  if (daysHeld !== null && maxHoldBars !== null && daysHeld >= maxHoldBars - 1) {
+    return { kind: 'max_hold_due', dueInDays: null }
+  }
+  if (reachedR1) return { kind: 'exempt', dueInDays: null }
+  if (daysHeld === null || timeExitBars === null) return { kind: 'unknown', dueInDays: null }
+  const due = timeExitBars - 1 - daysHeld
+  if (due <= 0) return { kind: 'due_today', dueInDays: null }
+  return { kind: 'pending', dueInDays: due }
+}
+
+/**
+ * 14일 추이 날짜 칸 라벨 — N4-1. 칸이 많아질수록(400px 폭에서 14칸 ≈22.6px) "MM-DD" 전체가
+ * 잘려 날짜·값이 함께 안 보인다. 칸 수가 11 이상이면(실측 10칸=32.4px 는 안 잘림, 14칸은 잘림)
+ * 일(DD)만 쓴다 — `title` 속성에는 여전히 전체 날짜가 남는다(호출부 책임).
+ */
+export function trendDateLabel(dateStr: string, totalCols: number): string {
+  if (!dateStr || dateStr.length < 10) return dateStr || '—'
+  if (totalCols >= 11) return dateStr.slice(8, 10)
+  return dateStr.slice(5, 10)
+}
+
+/**
+ * momentum 폴백 깔때기의 `limit_up_excluded` 단계 — N-E. 이 키는 "통과 수"가 아니라 "제외 수"
+ * (`scanner.scan_filter_stats`, 상한가 종목을 뺀 건수)다. 그대로 늘어놓으면 숫자가 늘었다
+ * 줄었다 하므로, 직전 단계 통과 수에서 제외 수를 뺀 값을 "통과"로 보여주고 제외 수는 따로 낸다.
+ */
+export function momentumExcludedStageText(
+  prevSurvived: number | null,
+  excluded: number | null,
+): { survived: number | null; excluded: number | null } {
+  if (prevSurvived === null || excluded === null) return { survived: null, excluded }
+  return { survived: prevSurvived - excluded, excluded }
 }
 
 // ─────────────────────────── 보완 4차(N3-1) — 사다리 라벨 x 범위 ───────────────────────────

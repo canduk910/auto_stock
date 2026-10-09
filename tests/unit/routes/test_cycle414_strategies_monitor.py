@@ -617,6 +617,23 @@ def test_r5c_vcp_counts_are_tickers_not_events(engine, mon):
     assert _data(mon)["strategies"]["vcp_breakout"]["skips"]["counts"] == {"no_data": 2, "reject_ext": 1}
 
 
+def test_r5e_vcp_bfb_exclude_invariant_sentinel_ticker(engine, mon):
+    """cycle418-M L3 — `_invariant_` 는 `[ext_cap_warn]` 관측용 센티널(진짜 종목이 아니다,
+    `bull_flag_breakout.py`/`vcp_breakout.py` 의 `_gate_should_emit("_invariant_", "ext_cap_warn")`).
+    `_monitor_skips` 가 이 ticker 를 걸러내지 않으면 화면이 가짜 종목 1건을 세게 된다.
+    `latch_released:<reason>` 접두 키는 **진짜 종목**의 사유라 그대로 남는다(프론트가 번역)."""
+    vcp = _sid(engine, "vcp_breakout")
+    vcp._gate_emit_capped = {
+        (VCP_A, "no_data"),
+        ("_invariant_", "ext_cap_warn"),
+        (VCP_A, "latch_released:level_moved"),
+    }
+    sk = _data(mon)["strategies"]["vcp_breakout"]["skips"]
+    assert "_invariant_" not in sk["by_ticker"]
+    assert "ext_cap_warn" not in sk["counts"]
+    assert sk["counts"] == {"no_data": 1, "latch_released:level_moved": 1}
+
+
 def test_r5d_donchian_two_caps_and_unknown_strategies(engine, mon):
     s = _data(mon)["strategies"]
     d = s["donchian_swing"]["skips"]
