@@ -331,6 +331,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -1292,6 +1294,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -1639,6 +1642,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -2611,6 +2616,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -2978,6 +2984,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -3931,6 +3939,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -4282,6 +4291,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -5249,6 +5260,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -5580,6 +5592,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -6568,6 +6582,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -6900,6 +6915,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -7887,6 +7904,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -8220,6 +8238,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -9206,6 +9226,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -9546,6 +9567,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -10525,6 +10548,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -10863,6 +10887,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -11844,6 +11870,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -12250,6 +12277,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -13232,6 +13261,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -13563,6 +13593,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -14551,6 +14583,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -14900,6 +14933,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -15888,6 +15923,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -16229,6 +16265,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -17208,6 +17246,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -17559,6 +17598,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -18528,6 +18569,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -18856,6 +18898,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -19844,6 +19888,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -20193,6 +20238,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -21164,6 +21211,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -21498,6 +21546,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -22483,6 +22533,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -22816,6 +22867,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -23802,6 +23855,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -24143,6 +24197,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -25121,6 +25177,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -25453,6 +25510,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -26440,6 +26499,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -26778,6 +26838,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -27760,6 +27822,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -28094,6 +28157,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -29078,6 +29143,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -29415,6 +29481,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -30397,6 +30465,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -30731,6 +30800,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -31716,6 +31787,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -32061,6 +32133,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -33035,6 +33109,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -33395,6 +33470,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -34354,6 +34431,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -34738,6 +34816,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -35677,6 +35757,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle90_concurrent_lock.py
       - tests/unit/routes/test_cycle90_emit_persistence.py
@@ -36033,6 +36114,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -36992,6 +37075,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -37326,6 +37410,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -38311,6 +38397,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -38647,6 +38734,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -39630,6 +39719,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -39974,6 +40064,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -40949,6 +41041,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -41284,6 +41377,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -42272,6 +42367,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -42619,6 +42715,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -43592,6 +43690,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -43924,6 +44023,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -44911,6 +45012,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -45266,6 +45368,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -46230,6 +46334,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -46560,6 +46665,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -47548,6 +47655,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -47880,6 +47988,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -48868,6 +48978,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -49200,6 +49311,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -50187,6 +50300,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -50537,6 +50651,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -51506,6 +51622,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -51843,6 +51960,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -52825,6 +52944,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -53159,6 +53279,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -54144,6 +54266,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -54477,6 +54600,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -55463,6 +55588,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -55806,6 +55932,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -56782,6 +56910,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -57113,6 +57242,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -58101,6 +58232,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -58199,6 +58331,7 @@ backend:
       - tests/unit/routes/test_cycle290_killswitch_put.py
       - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -58512,6 +58645,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -59500,6 +59635,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -59562,6 +59698,7 @@ backend:
       - tests/unit/engine/test_risk_silent_skip_emit.py
       - tests/unit/engine/test_sell_rejection_tracker.py
       - tests/unit/realtime/test_cycle264_open_scope_observe.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -59855,6 +59992,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -61152,6 +61291,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -62139,6 +62280,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -62475,6 +62617,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -63458,6 +63602,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -63790,6 +63935,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -64777,6 +64924,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -65109,6 +65257,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -66096,6 +66246,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -66433,6 +66584,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -67415,6 +67568,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -67750,6 +67904,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -68734,6 +68890,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -69069,6 +69226,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -70053,6 +70212,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -70387,6 +70547,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -71372,6 +71534,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -71706,6 +71869,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -72691,6 +72856,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -73023,6 +73189,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -74010,6 +74178,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -74426,6 +74595,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -75398,6 +75569,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -75743,6 +75915,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -76716,6 +76890,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -77048,6 +77223,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -78035,6 +78212,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -78374,6 +78552,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -79354,6 +79534,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -79701,6 +79882,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -80675,6 +80858,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -81083,6 +81267,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -82061,6 +82247,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -82100,6 +82287,7 @@ backend:
     direct_tests:
       - tests/integration/test_cycle382_market_unit_pg.py
       - tests/unit/replay/test_audit_framework.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -82393,6 +82581,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -83712,6 +83902,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -84699,6 +84891,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -85040,6 +85233,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -86018,6 +86213,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -86353,6 +86549,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -87337,6 +87535,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -87671,6 +87870,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -88656,6 +88857,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -88993,6 +89195,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -89975,6 +90179,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -90305,6 +90510,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -91293,6 +91500,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -91721,6 +91929,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -92708,6 +92918,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -93122,6 +93333,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -94106,6 +94319,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -94195,6 +94409,7 @@ backend:
       - tests/unit/routes/test_cycle282_market_state_route.py
       - tests/unit/routes/test_cycle285_market_ops_route.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -94265,6 +94480,7 @@ backend:
       - tests/unit/routes/test_cycle282_market_state_route.py
       - tests/unit/routes/test_cycle285_market_ops_route.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -94578,6 +94794,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -95564,6 +95782,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -95896,6 +96115,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -96883,6 +97104,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -97221,6 +97443,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -98202,6 +98426,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -98570,6 +98795,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -99521,6 +99748,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -99855,6 +100083,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -100840,6 +101070,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -101176,6 +101407,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -102159,6 +102392,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -102489,6 +102723,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -103477,6 +103713,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -103896,6 +104133,7 @@ backend:
       - tests/unit/routes/test_cycle253_channel_probe.py
       - tests/unit/routes/test_cycle293_kill_switch_route.py
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle90_concurrent_lock.py
       - tests/unit/routes/test_cycle90_fetch_top_500_call.py
       - tests/unit/routes/test_cycle90_kst_persistence.py
@@ -104083,6 +104321,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -105304,6 +105544,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -106116,6 +106358,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -106451,6 +106694,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -107436,6 +107681,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -107769,6 +108015,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -108754,6 +109002,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -109086,6 +109335,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -110073,6 +110324,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -110403,6 +110655,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -111391,6 +111645,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -111732,6 +111987,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -112711,6 +112968,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -113078,6 +113336,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -114030,6 +114290,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -114365,6 +114626,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -115349,6 +115612,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -115709,6 +115973,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -116668,6 +116934,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -117002,6 +117269,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -117987,6 +118256,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -118317,6 +118587,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -119305,6 +119577,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -119636,6 +119909,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -120624,6 +120899,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -120957,6 +121233,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -121944,6 +122222,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -122276,6 +122555,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -123263,6 +123544,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -123595,6 +123877,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -124582,6 +124866,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -124922,6 +125207,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -125901,6 +126188,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -125965,6 +126253,7 @@ backend:
       - tests/unit/engine/test_cycle33_bfb_vcp_funnel_fix.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_swing_poll_loop.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
     transitive_tests: []
   src/engine/strategies/bull_flag_breakout.py:
     direct_tests:
@@ -126017,6 +126306,7 @@ backend:
       - tests/unit/routes/test_cycle278_params_validation.py
       - tests/unit/routes/test_cycle290_killswitch_put.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -126308,6 +126598,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -127421,6 +127713,7 @@ backend:
       - tests/unit/routes/test_cycle278_params_validation.py
       - tests/unit/routes/test_cycle290_killswitch_put.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -127641,6 +127934,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -128610,6 +128905,7 @@ backend:
       - tests/unit/engine/test_cycle297_llm_strategy_context.py
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -128904,6 +129200,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -129971,6 +130269,7 @@ backend:
       - tests/unit/routes/test_cycle278_params_validation.py
       - tests/unit/routes/test_cycle290_killswitch_put.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -130263,6 +130562,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -131359,6 +131660,7 @@ backend:
       - tests/unit/routes/test_cycle278_params_validation.py
       - tests/unit/routes/test_cycle290_killswitch_put.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -131576,6 +131878,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -132667,6 +132971,7 @@ backend:
       - tests/unit/routes/test_cycle278_params_validation.py
       - tests/unit/routes/test_cycle290_killswitch_put.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -132886,6 +133191,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -133930,6 +134237,7 @@ backend:
       - tests/unit/routes/test_cycle278_params_validation.py
       - tests/unit/routes/test_cycle290_killswitch_put.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -134221,6 +134529,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -135323,6 +135633,7 @@ backend:
       - tests/unit/routes/test_cycle278_params_validation.py
       - tests/unit/routes/test_cycle290_killswitch_put.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -135540,6 +135851,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -136848,6 +137161,7 @@ backend:
       - tests/unit/replay/test_audit_vcp.py
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycleH_portfolio_route.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
@@ -137057,6 +137371,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -138141,6 +138457,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -139124,6 +139442,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -139312,6 +139631,7 @@ backend:
       - tests/unit/engine/test_tick_coverage.py
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -139532,6 +139852,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -140775,6 +141097,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -141762,6 +142086,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -142099,6 +142424,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -143081,6 +143408,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -143497,6 +143825,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -144481,6 +144811,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -144819,6 +145150,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -145800,6 +146133,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -146134,6 +146468,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -147119,6 +147455,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -147178,6 +147515,7 @@ backend:
       - tests/unit/engine/test_cycle399_shadow_mode_gate.py
       - tests/unit/engine/test_universe_guard.py
       - tests/unit/routes/test_cycle253_channel_probe.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -147472,6 +147810,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -148770,6 +149110,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -149757,6 +150099,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -150088,6 +150431,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -151076,6 +151421,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -151406,6 +151752,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -152394,6 +152742,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -152731,6 +153080,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -153714,6 +154065,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -154047,6 +154399,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -155033,6 +155387,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -155378,6 +155733,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -156355,6 +156712,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -156753,6 +157111,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -157741,6 +158101,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -158072,6 +158433,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -159060,6 +159423,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -159397,6 +159761,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -160383,6 +160749,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -160722,6 +161089,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -161702,6 +162071,7 @@ backend:
       - tests/unit/routes/test_cycle411c_doc_present_tense.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -162106,6 +162476,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -163090,6 +163462,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -163423,6 +163796,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -164409,6 +164784,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -164830,6 +165206,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -165796,6 +166174,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -165987,6 +166366,7 @@ backend:
       - tests/unit/routes/test_cycle369_status_exit_route.py
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -166335,6 +166715,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -167293,6 +167675,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_route_404.py
       - tests/unit/routes/test_cycle84_route_invalid_limit.py
@@ -167717,6 +168100,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -168683,6 +169068,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -169052,6 +169438,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -170002,6 +170390,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -170350,6 +170739,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -171321,6 +171712,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -171688,6 +172080,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -172640,6 +173034,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -173017,6 +173412,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -173959,6 +174356,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -174015,6 +174413,7 @@ backend:
       - tests/unit/routes/test_cycle369_r2_status_exit_route.py
       - tests/unit/routes/test_cycle369_status_exit_route.py
       - tests/unit/routes/test_cycle387_stock_chart_route.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle90_concurrent_lock.py
       - tests/unit/routes/test_cycle90_lock_release.py
       - tests/unit/routes/test_cycleF_te_endpoint.py
@@ -174148,7 +174547,8 @@ backend:
       - tests/unit/routes/test_log_reports_bundle_past_date_db_overlay.py
       - tests/unit/test_cycle243_auth_fixture.py
   src/routes/balance.py:
-    direct_tests: []
+    direct_tests:
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -176077,6 +176477,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -177060,6 +177462,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -177390,6 +177793,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -178377,6 +178782,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -178713,6 +179119,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -179699,6 +180107,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -180027,6 +180436,8 @@ backend:
       - tests/unit/ast/test_cycle412_g1_purity.py
       - tests/unit/ast/test_cycle412_log_phrase_pins.py
       - tests/unit/ast/test_cycle412_scope_guard.py
+      - tests/unit/ast/test_cycle414_monitor_purity.py
+      - tests/unit/ast/test_cycle414_scope_guard.py
       - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
       - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
       - >-
@@ -181015,6 +181426,7 @@ backend:
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
       - tests/unit/routes/test_cycle412_g1_exit_lines.py
+      - tests/unit/routes/test_cycle414_strategies_monitor.py
       - tests/unit/routes/test_cycle65_trade_amount_filter_route.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -181076,6 +181488,7 @@ frontend:
         frontend/src/components/__tests__/BalanceTable.strategyLabel.cycle395.test.tsx
       - frontend/src/components/__tests__/BalanceTable.test.tsx
       - frontend/src/components/__tests__/stockChartOpen.cycle387.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/api/client.ts:
     direct_tests: []
@@ -181149,6 +181562,7 @@ frontend:
       - frontend/src/components/__tests__/stockChartOpen.cycle387.test.tsx
       - frontend/src/contexts/__tests__/TradingStatusContext.test.tsx
       - frontend/src/macro/__tests__/MacroPage.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
@@ -181183,6 +181597,7 @@ frontend:
       - frontend/src/components/__tests__/OrderMonitor.cycle411b.test.tsx
       - frontend/src/components/__tests__/OrderMonitor.cycle411c.test.tsx
       - frontend/src/components/__tests__/OrderMonitor.cycle411d.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/api/history.ts:
     direct_tests:
@@ -181270,6 +181685,7 @@ frontend:
       - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
       - frontend/src/components/__tests__/MarketRegimeLabelCard.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/api/market-state.ts:
     direct_tests: []
@@ -181283,6 +181699,7 @@ frontend:
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
       - frontend/src/components/__tests__/MarketRegimeCard.test.tsx
       - frontend/src/components/__tests__/marketRegimeMocks.cycle315.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/api/performance.ts:
     direct_tests:
@@ -181296,6 +181713,7 @@ frontend:
       - frontend/src/components/__tests__/PerformanceCard.test.tsx
       - frontend/src/components/__tests__/ProfitChart.cost.cycle411.test.tsx
       - frontend/src/components/__tests__/ProfitChart.cycle411b.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/api/portfolio.ts:
     direct_tests: []
@@ -181304,6 +181722,7 @@ frontend:
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
       - frontend/src/components/__tests__/PortfolioRiskCard.accountGate.test.tsx
       - frontend/src/components/__tests__/PortfolioRiskCard.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/api/price-filter.ts:
     direct_tests: []
@@ -181326,6 +181745,7 @@ frontend:
       - >-
         frontend/src/components/__tests__/KisAccountPoolCard.stale_integration.test.tsx
       - frontend/src/components/__tests__/KisAccountPoolCard.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/api/recommendations.ts:
     direct_tests:
@@ -181357,6 +181777,7 @@ frontend:
       - frontend/src/components/__tests__/PerformanceCard.cycle411c.test.tsx
       - frontend/src/components/__tests__/PerformanceCard.test.tsx
       - frontend/src/components/__tests__/StrategyParamsEditor.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
       - >-
         frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
@@ -181414,6 +181835,7 @@ frontend:
       - frontend/src/components/__tests__/StrategyParamsEditor.test.tsx
       - frontend/src/components/__tests__/stockChartOpen.cycle387.test.tsx
       - frontend/src/contexts/__tests__/TradingStatusContext.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
       - frontend/src/pages/__tests__/Recommendations.backtest.test.tsx
       - frontend/src/pages/__tests__/Recommendations.cardOrder.test.tsx
@@ -181444,6 +181866,7 @@ frontend:
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/components/BreakoutCandidateMonitor.tsx:
     direct_tests:
@@ -181457,6 +181880,7 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/components/CashUsageRatioCard.tsx:
     direct_tests:
@@ -181489,6 +181913,7 @@ frontend:
       - frontend/src/components/__tests__/StrategyParamsEditor.test.tsx
       - frontend/src/components/__tests__/marketRegimeMocks.cycle315.test.tsx
       - frontend/src/components/__tests__/stockChartOpen.cycle387.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
       - frontend/src/pages/__tests__/Recommendations.backtest.test.tsx
       - frontend/src/pages/__tests__/Recommendations.cardOrder.test.tsx
@@ -181508,6 +181933,7 @@ frontend:
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/components/CostBasisToggle.tsx:
     direct_tests: []
@@ -181520,6 +181946,7 @@ frontend:
       - frontend/src/components/__tests__/PerformanceCard.test.tsx
       - frontend/src/components/__tests__/ProfitChart.cost.cycle411.test.tsx
       - frontend/src/components/__tests__/ProfitChart.cycle411b.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/components/DailyReportTab.tsx:
     direct_tests:
@@ -181556,6 +181983,7 @@ frontend:
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/components/KisQuoteAccountsCard.tsx:
     direct_tests:
@@ -181576,6 +182004,7 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/components/KrxOpenApiCard.tsx:
     direct_tests:
@@ -181608,6 +182037,7 @@ frontend:
       - frontend/src/components/__tests__/TradePnLGrid.cycle411b.test.tsx
       - frontend/src/components/__tests__/TradePnLGrid.test.tsx
       - frontend/src/components/__tests__/stockChartOpen.cycle387.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/components/LlmEvaluationModal.tsx:
     direct_tests: []
@@ -181642,6 +182072,7 @@ frontend:
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/components/MarketRegimeLabelCard.tsx:
     direct_tests:
@@ -181649,6 +182080,7 @@ frontend:
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/components/MarketStateNow.tsx:
     direct_tests: []
@@ -181675,6 +182107,7 @@ frontend:
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/components/PerformanceCard.tsx:
     direct_tests:
@@ -181685,6 +182118,7 @@ frontend:
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/components/PortfolioRiskCard.tsx:
     direct_tests:
@@ -181693,6 +182127,7 @@ frontend:
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/components/PriceFilterCard.tsx:
     direct_tests:
@@ -181709,6 +182144,7 @@ frontend:
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/components/RefreshProgressBanner.tsx:
     direct_tests: []
@@ -181729,6 +182165,7 @@ frontend:
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/components/ScrollPane.tsx:
     direct_tests:
@@ -181774,6 +182211,7 @@ frontend:
       - frontend/src/components/__tests__/stockChartOpen.cycle387.test.tsx
       - >-
         frontend/src/components/recommendations/__tests__/BacktestComparisonCard.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
       - frontend/src/pages/__tests__/Recommendations.backtest.test.tsx
@@ -181871,6 +182309,7 @@ frontend:
       - frontend/src/components/__tests__/TradePnLGrid.cycle411b.test.tsx
       - frontend/src/components/__tests__/TradePnLGrid.test.tsx
       - frontend/src/components/__tests__/stockChartOpen.cycle387.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/contexts/TradingStatusContext.tsx:
     direct_tests:
@@ -181900,6 +182339,7 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
       - frontend/src/components/__tests__/stockChartOpen.cycle387.test.tsx
       - frontend/src/contexts/__tests__/TradingStatusContext.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - >-
         frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
       - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
@@ -181964,7 +182404,8 @@ frontend:
       - frontend/src/pages/__tests__/Backtest.test.tsx
     transitive_tests: []
   frontend/src/pages/Dashboard.tsx:
-    direct_tests: []
+    direct_tests:
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
@@ -182091,6 +182532,7 @@ frontend:
       - frontend/src/components/__tests__/llmEvalKey.cycle276.test.ts
       - frontend/src/components/__tests__/stockChartOpen.cycle387.test.tsx
       - frontend/src/contexts/__tests__/TradingStatusContext.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
       - frontend/src/pages/__tests__/Recommendations.backtest.test.tsx
@@ -182207,6 +182649,7 @@ frontend:
       - frontend/src/contexts/__tests__/TradingStatusContext.test.tsx
       - frontend/src/macro/__tests__/MacroPage.test.tsx
       - frontend/src/pages/__tests__/Backtest.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
@@ -182311,6 +182754,7 @@ frontend:
       - frontend/src/contexts/__tests__/TradingStatusContext.test.tsx
       - frontend/src/macro/__tests__/MacroPage.test.tsx
       - frontend/src/pages/__tests__/Backtest.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
       - frontend/src/pages/__tests__/RealtimeHealth.cycle186.test.tsx
@@ -182414,6 +182858,7 @@ frontend:
       - frontend/src/contexts/__tests__/TradingStatusContext.test.tsx
       - frontend/src/macro/__tests__/MacroPage.test.tsx
       - frontend/src/pages/__tests__/Backtest.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
@@ -182515,6 +182960,7 @@ frontend:
       - frontend/src/contexts/__tests__/TradingStatusContext.test.tsx
       - frontend/src/macro/__tests__/MacroPage.test.tsx
       - frontend/src/pages/__tests__/Backtest.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
@@ -182541,6 +182987,12 @@ frontend:
       - frontend/src/pages/__tests__/StrategiesTeRr.cycle411d.test.tsx
       - frontend/src/pages/__tests__/StrategiesTeRr.test.tsx
       - frontend/src/pages/__tests__/StrategyFunnel.bottleneckTrend.test.tsx
+  frontend/src/test/fixtures/strategyMonitor.fixture.ts:
+    direct_tests:
+      - frontend/src/components/__tests__/StrategyMonitor.cycle414.test.tsx
+      - frontend/src/components/__tests__/StrategySummaryTable.cycle414.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
+    transitive_tests: []
   frontend/src/test/handlers.ts:
     direct_tests: []
     transitive_tests:
@@ -182617,6 +183069,7 @@ frontend:
       - frontend/src/contexts/__tests__/TradingStatusContext.test.tsx
       - frontend/src/macro/__tests__/MacroPage.test.tsx
       - frontend/src/pages/__tests__/Backtest.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
@@ -182704,6 +183157,7 @@ frontend:
       - frontend/src/components/__tests__/TradePnLGrid.test.tsx
       - frontend/src/components/__tests__/marketRegimeMocks.cycle315.test.tsx
       - frontend/src/components/__tests__/stockChartOpen.cycle387.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/Recommendations.backtest.test.tsx
       - frontend/src/pages/__tests__/Recommendations.cardOrder.test.tsx
@@ -182790,6 +183244,7 @@ frontend:
       - frontend/src/contexts/__tests__/TradingStatusContext.test.tsx
       - frontend/src/macro/__tests__/MacroPage.test.tsx
       - frontend/src/pages/__tests__/Backtest.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
@@ -182908,6 +183363,7 @@ frontend:
       - frontend/src/contexts/__tests__/TradingStatusContext.test.tsx
       - frontend/src/macro/__tests__/MacroPage.test.tsx
       - frontend/src/pages/__tests__/Backtest.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
@@ -183006,6 +183462,7 @@ frontend:
       - frontend/src/components/__tests__/marketRegimeMocks.cycle315.test.tsx
       - frontend/src/components/__tests__/stockChartOpen.cycle387.test.tsx
       - frontend/src/contexts/__tests__/TradingStatusContext.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
@@ -183040,6 +183497,7 @@ frontend:
       - frontend/src/components/__tests__/OrderMonitor.cycle411b.test.tsx
       - frontend/src/components/__tests__/OrderMonitor.cycle411c.test.tsx
       - frontend/src/components/__tests__/OrderMonitor.cycle411d.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/types/integrations.ts:
     direct_tests: []
@@ -183142,6 +183600,7 @@ frontend:
       - frontend/src/contexts/__tests__/TradingStatusContext.test.tsx
       - frontend/src/macro/__tests__/MacroPage.test.tsx
       - frontend/src/pages/__tests__/Backtest.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
@@ -183272,6 +183731,7 @@ frontend:
       - frontend/src/contexts/__tests__/TradingStatusContext.test.tsx
       - frontend/src/macro/__tests__/MacroPage.test.tsx
       - frontend/src/pages/__tests__/Backtest.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
@@ -183310,6 +183770,7 @@ frontend:
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
       - frontend/src/components/__tests__/MarketRegimeCard.test.tsx
       - frontend/src/components/__tests__/marketRegimeMocks.cycle315.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/types/portfolio.ts:
     direct_tests:
@@ -183319,6 +183780,7 @@ frontend:
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
       - frontend/src/components/__tests__/PortfolioRiskCard.accountGate.test.tsx
       - frontend/src/components/__tests__/PortfolioRiskCard.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/types/price-filter.ts:
     direct_tests: []
@@ -183366,6 +183828,7 @@ frontend:
       - frontend/src/components/__tests__/TradePnLGrid.cycle411b.test.tsx
       - frontend/src/components/__tests__/TradePnLGrid.test.tsx
       - frontend/src/components/__tests__/stockChartOpen.cycle387.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/types/stock-master.ts:
     direct_tests: []
@@ -183386,6 +183849,7 @@ frontend:
       - frontend/src/components/__tests__/PerformanceCard.cycle411b.test.tsx
       - frontend/src/components/__tests__/PerformanceCard.cycle411c.test.tsx
       - frontend/src/components/__tests__/PerformanceCard.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
       - >-
         frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
@@ -183438,6 +183902,7 @@ frontend:
       - frontend/src/components/__tests__/stockChartOpen.cycle387.test.tsx
       - >-
         frontend/src/components/recommendations/__tests__/BacktestComparisonCard.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
       - frontend/src/pages/__tests__/Recommendations.backtest.test.tsx
       - frontend/src/pages/__tests__/Recommendations.cardOrder.test.tsx
@@ -183462,6 +183927,9 @@ frontend:
     direct_tests:
       - frontend/src/components/__tests__/BreakoutCandidateMonitor.test.tsx
       - frontend/src/components/__tests__/KojiroMonitor.test.tsx
+      - frontend/src/components/__tests__/StrategyMonitor.cycle414.test.tsx
+      - frontend/src/components/__tests__/StrategySummaryTable.cycle414.test.tsx
+      - frontend/src/utils/__tests__/strategyMonitor.cycle414.test.ts
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
@@ -183537,6 +184005,7 @@ frontend:
       - frontend/src/contexts/__tests__/TradingStatusContext.test.tsx
       - frontend/src/macro/__tests__/MacroPage.test.tsx
       - frontend/src/pages/__tests__/Backtest.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
@@ -183581,6 +184050,7 @@ frontend:
       - frontend/src/components/__tests__/PerformanceCard.test.tsx
       - frontend/src/components/__tests__/ProfitChart.cost.cycle411.test.tsx
       - frontend/src/components/__tests__/ProfitChart.cycle411b.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/utils/kst.ts:
     direct_tests: []
@@ -183613,6 +184083,7 @@ frontend:
       - frontend/src/components/__tests__/TradePnLGrid.test.tsx
       - frontend/src/components/__tests__/stockChartOpen.cycle387.test.tsx
       - frontend/src/pages/__tests__/Backtest.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
@@ -183638,6 +184109,7 @@ frontend:
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
       - frontend/src/components/__tests__/marketRegimeMocks.cycle315.test.tsx
       - frontend/src/macro/__tests__/MacroPage.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/utils/marketRegimeLabel.ts:
     direct_tests:
@@ -183645,6 +184117,7 @@ frontend:
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/utils/paramLabels.ts:
     direct_tests: []
@@ -183683,6 +184156,7 @@ frontend:
       - frontend/src/components/__tests__/ProfitChart.cost.cycle411.test.tsx
       - frontend/src/components/__tests__/ProfitChart.cycle411b.test.tsx
       - frontend/src/components/__tests__/stockChartOpen.cycle387.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
       - frontend/src/pages/__tests__/Recommendations.backtest.test.tsx
@@ -183709,6 +184183,7 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/utils/stockChart.ts:
     direct_tests: []
@@ -183734,12 +184209,14 @@ frontend:
       - frontend/src/components/__tests__/TradePnLGrid.cycle411b.test.tsx
       - frontend/src/components/__tests__/TradePnLGrid.test.tsx
       - frontend/src/components/__tests__/stockChartOpen.cycle387.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/utils/strategyInfo.ts:
     direct_tests: []
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
       - >-
         frontend/src/pages/__tests__/Settings.exchangeSorRetired.cycle287.test.tsx
@@ -183794,6 +184271,7 @@ frontend:
       - >-
         frontend/src/components/recommendations/__tests__/BacktestComparisonCard.test.tsx
       - frontend/src/contexts/__tests__/TradingStatusContext.test.tsx
+      - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
       - frontend/src/pages/__tests__/Recommendations.backtest.test.tsx
       - frontend/src/pages/__tests__/Recommendations.cardOrder.test.tsx
@@ -183809,12 +184287,12 @@ frontend:
       - frontend/src/pages/__tests__/StrategiesTeRr.cycle411d.test.tsx
       - frontend/src/pages/__tests__/StrategiesTeRr.test.tsx
       - frontend/src/pages/__tests__/StrategyFunnel.bottleneckTrend.test.tsx
-generated_at: '2026-10-08T20:02:55.585Z'
+generated_at: '2026-10-09T00:26:05.467Z'
 stats:
   backend_modules: 182
-  backend_tests: 1300
-  frontend_modules: 139
-  frontend_tests: 137
+  backend_tests: 1303
+  frontend_modules: 140
+  frontend_tests: 142
   unmapped_modules:
     - frontend/src/api/backtest.ts
     - frontend/src/api/stock-chart.ts

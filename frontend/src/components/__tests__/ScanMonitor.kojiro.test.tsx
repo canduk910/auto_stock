@@ -83,11 +83,16 @@ describe('kojiro 시각화 정적 배선 가드', () => {
     expect(metaSrc).toContain('고지로 대순환')
   })
 
-  it('STRATEGY_INFO 에 kojiro 엔트리 (대순환 개념 + 다크런치 명시)', () => {
-    const src = readFileSync(resolve(__dirname, '..', '..', 'utils', 'strategyInfo.ts'), 'utf-8')
-    expect(src).toMatch(/kojiro:\s*{/)
-    expect(src).toMatch(/대순환/)
-    expect(src).toMatch(/다크런치|관찰/)
+  it('STRATEGY_INFO 에 kojiro 엔트리 (대순환 개념) — cycle414: 문턱 숫자·「관찰 모드」 문구 제거', async () => {
+    // 정적 문장이 운영 값과 어긋나는 것을 막는다(명세 §4.5 — 3영업일·4.5% 는 운영 5·6% 와 달랐다).
+    // 숫자는 패널 상단의 현재 설정(params)에서 읽는다. 운영 활성 전략에 「관찰 모드로 출시」 는 거짓이다.
+    const { STRATEGY_INFO } = await import('../../utils/strategyInfo')
+    const k = STRATEGY_INFO.kojiro
+    expect(k).toBeTruthy()
+    const text = `${k.tagline}\n${k.description}`
+    expect(text).toMatch(/대순환/)
+    expect(text).not.toMatch(/관찰 모드|다크런치/)
+    expect(text).not.toMatch(/3영업일|4\.5%|1\.0~4\.5|≥5%|≤-4%/)
   })
 
   it('STRATEGY_COLORS 에 kojiro 색상', () => {

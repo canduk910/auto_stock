@@ -78,6 +78,26 @@ export const handlers = [
   http.put(`${base}/strategies/weights`, () => HttpResponse.json(wrap({ updated: true }))),
   // 사이클 F — TE(트레이딩 예지치)/RR(손익비) 성과 (관찰 전용, F-FE6)
   http.get(`${base}/strategies/te`, () => HttpResponse.json(wrap([]))),
+  // cycle414 — 전략 진행상황 읽기 전용 라우트(명세 §3.2 모양). 기본은 「전략 없음」 — 시나리오는
+  //    `test/fixtures/strategyMonitor.fixture.ts` 의 실제 키 고정 데이터로 server.use 오버라이드.
+  http.get(`${base}/strategies/monitor`, () =>
+    HttpResponse.json(wrap({ as_of: "2026-10-12T09:12:03+09:00", running: false, strategies: {} })),
+  ),
+  // cycle412 G1 — 보유 청산선 스냅샷(item 14키). 기본 = 보유 0.
+  http.get(`${base}/balance/exit-lines`, () =>
+    HttpResponse.json(wrap({ running: false, as_of: "2026-10-12T09:12:03+09:00", items: [] })),
+  ),
+  // 사이클 34 — 전략별 최근 N일 깔때기(cycle414 패널의 14일 추이). 기본 = 스냅샷 0.
+  http.get(`${base}/strategy-funnel/recent`, ({ request }) => {
+    const u = new URL(request.url);
+    return HttpResponse.json(
+      wrap({
+        strategy_id: u.searchParams.get("strategy_id") ?? "",
+        days: Number(u.searchParams.get("days") ?? 7),
+        snapshots: [],
+      }),
+    );
+  }),
 
   // balance
   // ⚠️ 응답 키는 실제 라우트(`src/routes/balance.py`) 와 같아야 한다 — 구 목의

@@ -14,6 +14,7 @@
 
 # session.py의 시각 상수는 import만으로는 의존성이 정확히 안 잡힘
 "src/engine/session.py":
+  - "tests/unit/ast/test_cycle414_scope_guard.py"  # cycle414 범위 가드(내용 sha, 병합 후 삭제)
   - "tests/unit/ast/test_cycle411_ast_scope.py"  # cycle411 범위 가드(내용 sha, 머지 후 삭제)
   - "tests/integration/test_force_clear_1520.py"
   - "tests/integration/test_next_day_clear.py"
@@ -21,6 +22,7 @@
 
 # scheduler 시간 분기는 통합 시나리오 전반에 영향
 "src/engine/scheduler.py":
+  - "tests/unit/ast/test_cycle414_scope_guard.py"  # cycle414 범위 가드(내용 sha, 병합 후 삭제)
   - "tests/unit/ast/test_cycle411_ast_scope.py"  # cycle411 범위 가드(내용 sha, 머지 후 삭제)
   - "tests/integration/*"
   # cycle369 — task 배선(S1)을 AST 가드가 소스 파일로 읽는다(import 없음)
@@ -110,6 +112,7 @@
 "src/engine/data_load_tasks.py":
   - "tests/unit/ast/test_cycle363_ast_business_day_gate.py"
 "src/engine/strategies/*.py":
+  - "tests/unit/ast/test_cycle414_scope_guard.py"  # cycle414 범위 가드(내용 sha, 병합 후 삭제)
   - "tests/unit/ast/test_cycle363_ast_business_day_gate.py"
   # cycle380 — ETF 판정 단일 출처 가드(G1~G4)가 전략 소스를 파일로 읽는다(import 없음)
   - "tests/unit/ast/test_cycle380_ast_etf_like.py"
@@ -153,6 +156,7 @@
   - "tests/unit/engine/test_cycle369_status_buy_wiring.py"
 # cycle369 — `_account_soft_gate_blocked` 첫 문장·`_status_buy_blocked` 를 AST 가드가 파일로 읽는다.
 "src/engine/strategy_base.py":
+  - "tests/unit/ast/test_cycle414_scope_guard.py"  # cycle414 범위 가드(내용 sha, 병합 후 삭제)
   - "tests/unit/ast/test_cycle369_ast_status_exit.py"
   # cycle382 — 시장 유닛 헬퍼(`_market_unit_*`)는 leaf 판정 테스트가 전략 객체로 부르고(지원 모듈 경유),
   # AST 가드가 관문 본문 sha(A12)·헬퍼 순수성(A05)을 파일로 읽는다
@@ -190,17 +194,20 @@
 # cycle380 — ETF 판정 단일 출처 가드가 소스를 파일로 읽는다(import 없음): scan_stocks 호출(G5)·
 # SQL 빌더의 상수 재기입 금지(G6)·order_engine 관측 집합 표류(G7)·키워드 순회 자리(G1).
 "src/engine/scanner.py":
+  - "tests/unit/ast/test_cycle414_scope_guard.py"  # cycle414 범위 가드(내용 sha, 병합 후 삭제)
   - "tests/unit/ast/test_cycle411_ast_scope.py"  # cycle411 범위 가드(내용 sha, 머지 후 삭제)
   - "tests/unit/ast/test_cycle380_ast_etf_like.py"
 "src/db/stock_master.py":
   - "tests/unit/ast/test_cycle380_ast_etf_like.py"
 "src/engine/order_engine.py":
+  - "tests/unit/ast/test_cycle414_scope_guard.py"  # cycle414 범위 가드(내용 sha, 병합 후 삭제)
   - "tests/unit/ast/test_cycle411_ast_scope.py"  # cycle411 범위 가드(내용 sha, 머지 후 삭제)
   - "tests/unit/ast/test_cycle380_ast_etf_like.py"
 # cycle382 — 시장 유닛 leaf. 테스트는 `tests/unit/engine/_cycle382_support.mu()` 로 **지연 참조**하고
 # (미구현 단계 FAIL 관례), 전략 prepare 는 `market_unit.compute_snapshot` 을 모듈 속성으로 부른다.
 # AST 가드(A01·A02)는 leaf 소스를 파일로 읽는다 — 정적 분석이 못 잇는다.
 "src/engine/market_unit.py":
+  - "tests/unit/ast/test_cycle414_scope_guard.py"  # cycle414 범위 가드(내용 sha, 병합 후 삭제)
   - "tests/unit/engine/test_cycle382_market_unit_*.py"
   - "tests/unit/engine/strategies/test_cycle382_market_unit_*.py"
   - "tests/unit/ast/test_cycle382_ast_market_unit.py"
@@ -251,6 +258,7 @@
 
 # cycle385 부록 R — AST 가드(A8·AR8·AR2-2·AR3-7)가 manual-sell 라우트 소스를 파일로 읽는다(import 없음).
 "src/routes/trading.py":
+  - "tests/unit/ast/test_cycle414_scope_guard.py"  # cycle414 범위 가드(내용 sha, 병합 후 삭제)
   - "tests/unit/ast/test_cycle385_ast_b7.py"
 
 # cycle411 — MSW 기본 목의 실비용 칸·새 엔드포인트를 정직화 가드가 fetch 로 검사한다(정적 import 아님)
@@ -262,12 +270,61 @@
 # cycle411 — 범위 가드가 8영역·scheduler.py 를 내용 sha 로 읽는다(import 없음, 머지 후 삭제).
 # session·scheduler·scanner·order_engine 은 위 기존 키에 같은 줄을 덧붙였다(YAML 키 중복 금지).
 "src/engine/risk.py":
+  - "tests/unit/ast/test_cycle414_scope_guard.py"  # cycle414 범위 가드(내용 sha, 병합 후 삭제)
   - "tests/unit/ast/test_cycle411_ast_scope.py"
 "src/engine/strategy_registry.py":
+  - "tests/unit/ast/test_cycle414_scope_guard.py"  # cycle414 범위 가드(내용 sha, 병합 후 삭제)
   - "tests/unit/ast/test_cycle411_ast_scope.py"
 "src/api/order.py":
+  - "tests/unit/ast/test_cycle414_scope_guard.py"  # cycle414 범위 가드(내용 sha, 병합 후 삭제)
   - "tests/unit/ast/test_cycle411_ast_scope.py"
 "src/realtime/*.py":
+  - "tests/unit/ast/test_cycle414_scope_guard.py"  # cycle414 범위 가드(내용 sha, 병합 후 삭제)
   - "tests/unit/ast/test_cycle411_ast_scope.py"
 "src/auth/*.py":
+  - "tests/unit/ast/test_cycle414_scope_guard.py"  # cycle414 범위 가드(내용 sha, 병합 후 삭제)
   - "tests/unit/ast/test_cycle411_ast_scope.py"
+
+# cycle414 — 모니터 라우트(`GET /api/strategies/monitor`) 행위 테스트는 `importlib.import_module("src.routes.strategies")`
+# 로 지연 참조하고, 순수성 AST 가드는 소스를 파일로 읽는다(정적 import 없음).
+"src/routes/strategies.py":
+  - "tests/unit/routes/test_cycle414_strategies_monitor.py"
+  - "tests/unit/ast/test_cycle414_monitor_purity.py"
+# cycle414 — 범위 가드가 라우트가 읽는 엔진 이웃·cycle413 소유 파일을 내용 sha 로 읽는다(import 없음, 병합 후 삭제).
+"src/engine/position_exit_lines.py":
+  - "tests/unit/ast/test_cycle414_scope_guard.py"
+"src/engine/funnel_capture.py":
+  - "tests/unit/ast/test_cycle414_scope_guard.py"
+"src/engine/etf_trend_core.py":
+  - "tests/unit/ast/test_cycle414_scope_guard.py"
+"src/engine/tick_volume.py":
+  - "tests/unit/ast/test_cycle414_scope_guard.py"
+"src/engine/daily_emit_cap.py":
+  - "tests/unit/ast/test_cycle414_scope_guard.py"
+"src/engine/boot_manager.py":
+  - "tests/unit/ast/test_cycle414_scope_guard.py"
+"src/routes/balance.py":
+  - "tests/unit/ast/test_cycle414_scope_guard.py"
+"src/routes/history.py":
+  - "tests/unit/ast/test_cycle414_scope_guard.py"
+"frontend/src/pages/History.tsx":
+  - "tests/unit/ast/test_cycle414_scope_guard.py"
+"frontend/src/api/history.ts":
+  - "tests/unit/ast/test_cycle414_scope_guard.py"
+"frontend/src/components/TradeHistoryGrid.tsx":
+  - "tests/unit/ast/test_cycle414_scope_guard.py"
+# cycle414 — KST 규약·낡은 도움말 정적 가드가 이 파일들을 fs 로 읽는다(import 없음).
+"frontend/src/components/KojiroMonitor.tsx":
+  - "frontend/src/components/__tests__/_ast_cycle414_static.test.ts"
+"frontend/src/components/ScanMonitor.tsx":
+  - "frontend/src/components/__tests__/_ast_cycle414_static.test.ts"
+"frontend/src/components/BreakoutCandidateMonitor.tsx":
+  - "frontend/src/components/__tests__/_ast_cycle414_static.test.ts"
+"frontend/src/components/StrategyMonitor.tsx":
+  - "frontend/src/components/__tests__/_ast_cycle414_static.test.ts"
+"frontend/src/components/StrategySummaryTable.tsx":
+  - "frontend/src/components/__tests__/_ast_cycle414_static.test.ts"
+"frontend/src/utils/strategyMonitor.ts":
+  - "frontend/src/components/__tests__/_ast_cycle414_static.test.ts"
+"frontend/src/utils/strategyInfo.ts":
+  - "frontend/src/components/__tests__/_ast_cycle414_static.test.ts"

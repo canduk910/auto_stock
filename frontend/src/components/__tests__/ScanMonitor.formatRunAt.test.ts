@@ -8,8 +8,9 @@
  *
  * 요구 행위:
  *  - `formatRunAt(iso)` 는 host TZ 와 무관하게 KST(Asia/Seoul) 로 환산한다.
- *    UTC `2026-05-25T22:48:21Z` → KST `2026. 5. 26. 7시 48분 21초`.
- *  - null/undefined/빈 문자열은 `-` 반환.
+ *  - cycle414(명세 §2.10) — 자체 `toLocaleString` 을 버리고 `utils/kst.ts::formatKstDateTime` 에 위임한다.
+ *    UTC `2026-05-25T22:48:21Z` → KST `2026-05-26 07:48:21`(24시제 · 초 포함).
+ *  - null/undefined/빈 문자열은 kst.ts 계약대로 `—`(em dash).
  */
 
 import { describe, expect, it, beforeAll, afterAll } from 'vitest'
@@ -37,17 +38,16 @@ describe('ScanMonitor.formatRunAt — KST 강제 (사이클 48)', () => {
 
     // 2026-05-25 22:48:21 UTC = 2026-05-26 07:48:21 KST (07:50 boot 시각 케이스)
     const out = fn('2026-05-25T22:48:21Z')
-    expect(out).toMatch(/5\. 26\./) // KST 일자 (UTC 라면 5. 25.)
-    expect(out).toMatch(/7시 48분 21초/) // KST 시각 (UTC 라면 22시 48분)
-    expect(out).not.toMatch(/22시/) // 로컬(UTC) 시각으로 오표시 금지
-    expect(out).not.toMatch(/25\./) // 로컬(UTC) 일자로 오표시 금지
+    expect(out).toBe('2026-05-26 07:48:21') // formatKstDateTime 위임 — UTC 라면 2026-05-25 22:48:21
+    const { formatKstDateTime } = await import('../../utils/kst')
+    expect(out).toBe(formatKstDateTime('2026-05-25T22:48:21Z'))
   })
 
-  it('null/undefined/빈 문자열은 `-` 반환', async () => {
+  it('null/undefined/빈 문자열은 `—`(kst.ts 계약)', async () => {
     const mod = await import('../ScanMonitor')
     const fn = mod.formatRunAt
-    expect(fn(null)).toBe('-')
-    expect(fn(undefined)).toBe('-')
-    expect(fn('')).toBe('-')
+    expect(fn(null)).toBe('—')
+    expect(fn(undefined)).toBe('—')
+    expect(fn('')).toBe('—')
   })
 })
