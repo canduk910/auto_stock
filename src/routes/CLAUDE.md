@@ -188,9 +188,18 @@ body `{ticker, quantity}`, 시장가. 보유 전략이 있으면 그 전략 id·
 - 🔴 **비중 0 가드**(cycle325) — 보유 종목을 든 전략(DB `positions` ∪ 메모리)에 비중 0 = `success=false` + `[weight_zero_guard]`.
   비중 0 은 `enabled` 자동 해제 = 그 보유분의 손절 정지다(루트 `CLAUDE.md` 「핵심 안전 규칙」). 하한선 검증보다 **앞**이라 부팅
   전(예산 합 0)에도 돈다. DB 보유 조회 실패 = 메모리로 판정 + `[weight_zero_probe_degraded]`.
-- **매수금액 하한선 검증** — 보유 매수금액 ÷ Σ`total_investment` 미만의 비중은 `success=false`(「보유 종목 매도 후 비중을
-  줄여주세요」). Σ`total_investment` 가 0(부팅 전)이면 건너뛴다.
-- 통과 → `registry.update_weights` → 즉시 `allocate_funds`(Σ`total_investment` > 0 일 때) → `save_weights`. 비중 0 인데 메모리에서 켜져 있는 전략(= 섀도 전략, `update_weights` 가 켜짐을 지켰다)은 `save_weights(weights, keep_enabled={…})` 로 DB 에도 켜짐을 적는다 — 없으면 호출 모양은 `save_weights(weights)` 그대로(cycle399).
+- **매수금액 하한선 검증** — 보유 매수금액 ÷ 기준 총액 미만의 비중은 `success=false`(「보유 종목 매도 후 비중을
+  줄여주세요」). 기준 총액이 0(부팅 전)이면 건너뛴다.
+- 🔴 **재배분·하한선 기준 총액 = 이번 변경 *전* 켜진 전략들(`registry.enabled()`)의 `total_investment` 합**(cycle420 —
+  `registry.all()` 이면 비중 0 으로 꺼진 전략의 옛 예산이 그 합에 남아 다음 PUT 마다 기준이 선형으로 불어난다. 자문 =
+  `_workspace/domain_consult/2026-10-09_weight_double_change.md`). 통과 → `registry.update_weights` → 즉시
+  `allocate_funds`(기준 총액 > 0 일 때) → **이번 변경으로 꺼진(비중 0 & `enabled=False`, 섀도 제외) 전략의
+  `total_investment` 를 0 으로 비운다** → `save_weights`. 비중 0 인데 메모리에서 켜져 있는 전략(= 섀도 전략,
+  `update_weights` 가 켜짐을 지켰다)은 `save_weights(weights, keep_enabled={…})` 로 DB 에도 켜짐을 적는다 — 없으면 호출
+  모양은 `save_weights(weights)` 그대로(cycle399).
+- 기준 총액이 0 인데 그 원인이 **「직전 변경이 켜진 전략 비중을 전부 0 으로 만든 것」**일 때만(= 이번 변경 전 켜진
+  전략들의 비중 합도 0) `[weight_realloc_skipped]` WARNING — 21:30 리셋 뒤·부팅 전(그때는 켜진 비중 합이 0 보다 크다)의
+  정상적인 건너뜀에는 울리지 않는다(cycle420).
 - Σ 검증은 **라우트 계층 전용** — `db.strategy_config.save_weights` 에 넣지 않는다(apply 라우트가 `{strategy_id: weight}` 단건
   partial dict 로 불러 Σ 불변식이 성립하지 않는다). apply 는 자체 Σ 검사(증액 한정)를 갖는다(아래).
 
