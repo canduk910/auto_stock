@@ -849,8 +849,11 @@ _SRC_TREE_FILES = 183  # 직전 = 트랙 C — 실비용 사후 대사: 신규 4
 # 내용만 바뀌었다(영구 "휴장" 확정 전 다른 시장의 "정상" 캐시를 교차 확인, 추가 KRX
 # 호출 없음). 신규/삭제 파일 0 — 파일 수 183 그대로. 직전 값(merge cycle417+416+413+414) =
 # `bef4d54cb5aef74f82119893ad8bf4f500265bf655edb85c1a8751898af7e508`.
+# 🔁 merge(cycle417+416+413+414) 재핀 — 네 변경을 합친 트리 다이제스트.
+# 🔁 cycle418-J 재핀 — `journal_view.py`(exits_na·stop_kind·TAKE_PROFIT 부분/전량 익절) 반영.
+# 🔁 merge 재핀 — 병합한 트리 다이제스트.
 _SRC_TREE_DIGEST = (
-    "dd3d38ea0ba63f25d6b2e42099105159ddadd0734c66972b9758fa9f9ac9fba6"
+    "7eee2b0411ebc6717a4220221fc9c94161aa70eec5a14cd9d2e2adbaed0c30cc"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

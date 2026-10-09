@@ -55,6 +55,7 @@ const CARD_OPEN = {
     },
   },
   exits: [],
+  exits_na: null,
   stop_track: {
     na: null, first: 47800, last: 47500, ups: 0, downs: 1, paused: true, hidden_eod: 0,
     rows: [
@@ -135,9 +136,10 @@ const CARD_BFB = {
         text: '측정 목표 13,450 도달 — 전량 익절 (현재가 13,460)', src: 'live', signal_src: null, na: null,
       },
       realized_gross_krw: 44000, fired_line: null, fired_src: null, effective_line: 12350, snapshot_age_s: 8,
-      line_role: 'target', line_na: null,
+      line_role: 'target', line_na: null, stop_kind: 'effective',
     },
   ],
+  exits_na: null,
   stop_track: {
     na: null, first: 11530, last: 12350, ups: 2, downs: 1, paused: false, hidden_eod: 2,
     rows: [
@@ -225,9 +227,10 @@ const CARD_VB = {
         signal_src: null, na: null,
       },
       realized_gross_krw: -10000, fired_line: null, fired_src: null, effective_line: 97000, snapshot_age_s: 5,
-      line_role: 'reference', line_na: null,
+      line_role: 'reference', line_na: null, stop_kind: 'hard_pct',
     },
   ],
+  exits_na: null,
   stop_track: {
     na: null, first: 97000, last: 97000, ups: 0, downs: 0, paused: false, hidden_eod: 0,
     rows: [

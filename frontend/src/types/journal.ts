@@ -66,6 +66,7 @@ export interface JournalCard {
     target: Target
   }
   exits: ExitLine[]
+  exits_na: NaKind | null
   stop_track: StopTrack
   costs: Costs
   excursion: Excursion
@@ -109,6 +110,7 @@ export interface ExitLine extends OrderLine {
   snapshot_age_s: number | null
   line_role: 'fired' | 'reference' | 'target' | null
   line_na: NaKind | null
+  stop_kind: string | null
 }
 
 export interface Reason {

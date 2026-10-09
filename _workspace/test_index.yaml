@@ -990,6 +990,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -2320,6 +2321,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -3661,6 +3663,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -4993,6 +4996,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -6327,6 +6331,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -7663,6 +7668,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -9000,6 +9006,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -10340,6 +10347,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -11672,6 +11680,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -13079,6 +13088,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -14413,6 +14423,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -15767,6 +15778,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -17104,6 +17116,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -18449,6 +18462,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -19774,6 +19788,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -21113,6 +21128,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -22447,6 +22463,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -23783,6 +23800,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -25119,6 +25137,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -26455,6 +26474,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -27793,6 +27813,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -29127,6 +29148,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -30463,6 +30485,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -31799,6 +31822,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -33135,6 +33159,7 @@ backend:
       - tests/unit/engine/test_cycle413_fix2_journal_view.py
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -34474,6 +34499,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -35812,6 +35838,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -37144,6 +37171,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -38479,6 +38507,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -39817,6 +39846,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -41152,6 +41182,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -42491,6 +42522,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -43830,6 +43862,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -45164,6 +45197,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -46503,6 +46537,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -47905,6 +47940,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -49242,6 +49278,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -50578,6 +50615,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -51915,6 +51953,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -53250,6 +53289,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -54587,6 +54627,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -55922,6 +55963,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -57258,6 +57300,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -58594,6 +58637,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -60012,6 +60056,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -61354,6 +61399,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -62685,6 +62731,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -64021,6 +64068,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -65357,6 +65405,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -66694,6 +66743,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -68029,6 +68079,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -69435,6 +69486,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -70771,6 +70823,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -72109,6 +72162,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -73444,6 +73498,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -74779,6 +74834,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -76192,6 +76248,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -77525,6 +77582,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -78927,6 +78985,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -80267,6 +80326,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -81610,6 +81670,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -83004,6 +83065,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -84342,6 +84404,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -85676,6 +85739,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -87012,6 +87076,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -88348,6 +88413,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -89684,6 +89750,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -91020,6 +91087,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -92355,6 +92423,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -93788,6 +93857,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -95205,6 +95275,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -96699,6 +96770,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -98036,6 +98108,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -99372,6 +99445,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -100717,6 +100791,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -102046,6 +102121,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -103383,6 +103459,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -104714,6 +104791,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -106125,6 +106203,7 @@ backend:
       - tests/unit/engine/test_cycle413_fix2_journal_view.py
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -107477,6 +107556,7 @@ backend:
       - tests/unit/engine/test_cycle413_fix2_journal_view.py
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle61_phase2A2_dataclass_completeness.py
@@ -108725,6 +108805,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -110061,6 +110142,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -111395,6 +111477,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -112730,6 +112813,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -114068,6 +114152,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -115424,6 +115509,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -116739,6 +116825,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -118094,6 +118181,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -119412,6 +119500,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -120746,6 +120835,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -122082,6 +122172,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -123419,6 +123510,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -124755,6 +124847,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -126091,6 +126184,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -127431,6 +127525,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -128800,6 +128895,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -130139,6 +130235,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -131467,6 +131564,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -132812,6 +132910,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -134143,6 +134242,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -135479,6 +135579,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -136817,6 +136918,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -138154,6 +138256,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -139523,6 +139626,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle48_stale_tracker_state.py
@@ -140822,6 +140926,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -142179,6 +142284,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -143494,6 +143600,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -144829,6 +144936,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -146248,6 +146356,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -147585,6 +147694,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -148919,6 +149029,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -150258,6 +150369,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -151591,6 +151703,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -152927,6 +153040,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -154262,6 +154376,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -155600,6 +155715,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -156935,6 +157051,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -158278,6 +158395,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -159678,6 +159796,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -161014,6 +161133,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -162354,6 +162474,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -163695,6 +163816,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -165096,6 +165218,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -166434,6 +166557,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -167840,6 +167964,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -169360,6 +169485,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -170765,6 +170891,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -172131,6 +172258,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -173449,6 +173577,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -174802,6 +174931,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -176137,6 +176267,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -179330,6 +179461,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -180663,6 +180795,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -182002,6 +182135,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -183335,6 +183469,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
+      - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -183807,6 +183942,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
@@ -183859,6 +183995,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
   frontend/src/api/integrations.ts:
     direct_tests: []
     transitive_tests:
@@ -183897,6 +184034,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
   frontend/src/api/log_reports.ts:
     direct_tests:
       - frontend/src/api/__tests__/log_reports.test.ts
@@ -184227,6 +184365,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/components/DailyReportTab.tsx:
     direct_tests:
@@ -184261,12 +184400,14 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
   frontend/src/components/JournalTab.tsx:
     direct_tests: []
     transitive_tests:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
   frontend/src/components/KisAccountPoolCard.tsx:
     direct_tests:
       - >-
@@ -184341,6 +184482,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/components/LlmEvaluationModal.tsx:
     direct_tests: []
@@ -184356,6 +184498,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
   frontend/src/components/LlmScoreBadge.tsx:
     direct_tests:
       - frontend/src/components/__tests__/LlmScoreBadge.test.tsx
@@ -184371,6 +184514,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
   frontend/src/components/LogViewer.tsx:
     direct_tests: []
     transitive_tests: []
@@ -184537,6 +184681,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
       - frontend/src/pages/__tests__/Recommendations.backtest.test.tsx
@@ -184624,6 +184769,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
   frontend/src/components/TradePnLGrid.tsx:
     direct_tests:
       - frontend/src/components/__tests__/TradePnLGrid.cost.cycle411.test.tsx
@@ -184634,6 +184780,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
   frontend/src/components/recommendations/BacktestComparisonCard.tsx:
     direct_tests:
       - >-
@@ -184672,6 +184819,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/contexts/TradingStatusContext.tsx:
     direct_tests:
@@ -184796,6 +184944,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
     transitive_tests: []
   frontend/src/pages/Logs.tsx:
     direct_tests:
@@ -184923,6 +185072,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
       - frontend/src/pages/__tests__/Recommendations.backtest.test.tsx
@@ -184967,6 +185117,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
@@ -185154,6 +185305,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
@@ -185262,6 +185414,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
@@ -185372,6 +185525,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
       - frontend/src/pages/__tests__/RealtimeHealth.cycle186.test.tsx
@@ -185481,6 +185635,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
@@ -185588,6 +185743,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
@@ -185712,6 +185868,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
@@ -185804,6 +185961,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/Recommendations.backtest.test.tsx
       - frontend/src/pages/__tests__/Recommendations.cardOrder.test.tsx
@@ -185896,6 +186054,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
@@ -186020,6 +186179,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
@@ -186129,6 +186289,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
@@ -186190,6 +186351,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
       - frontend/src/utils/__tests__/journalLabels.cycle413.test.ts
   frontend/src/types/kis-quote-accounts.ts:
     direct_tests: []
@@ -186289,6 +186451,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
@@ -186414,6 +186577,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
@@ -186535,6 +186699,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
@@ -186638,6 +186803,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/types/stock-master.ts:
     direct_tests: []
@@ -186717,6 +186883,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
       - frontend/src/pages/__tests__/Recommendations.backtest.test.tsx
       - frontend/src/pages/__tests__/Recommendations.cardOrder.test.tsx
@@ -186835,6 +187002,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
@@ -186886,6 +187054,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/utils/journalLabels.ts:
     direct_tests:
@@ -186894,6 +187063,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
   frontend/src/utils/kst.ts:
     direct_tests:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
@@ -186952,6 +187122,7 @@ frontend:
       - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
       - frontend/src/pages/__tests__/Logs.test.tsx
       - frontend/src/pages/__tests__/MarketState.cycle285.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
@@ -187088,6 +187259,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
   frontend/src/utils/strategyFunnelTrend.ts:
     direct_tests: []
@@ -187175,6 +187347,7 @@ frontend:
       - frontend/src/pages/__tests__/History.journal.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix1.cycle413.test.tsx
       - frontend/src/pages/__tests__/History.journal.fix2.cycle413.test.tsx
+      - frontend/src/pages/__tests__/History.journal.fix3.cycle418j.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
       - frontend/src/pages/__tests__/Recommendations.backtest.test.tsx
       - frontend/src/pages/__tests__/Recommendations.cardOrder.test.tsx
@@ -187219,12 +187392,12 @@ frontend:
       - frontend/src/pages/__tests__/Dashboard.fix1.cycle414.test.tsx
       - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
-generated_at: '2026-10-09T08:02:58.843Z'
+generated_at: '2026-10-09T08:18:46.627Z'
 stats:
   backend_modules: 186
-  backend_tests: 1317
+  backend_tests: 1318
   frontend_modules: 155
-  frontend_tests: 162
+  frontend_tests: 163
   unmapped_modules:
     - frontend/src/api/backtest.ts
     - frontend/src/api/stock-chart.ts

@@ -553,7 +553,8 @@ def _line_val(fired, eff) -> int | None:
 
 
 def _exit_sentence(*, code: str | None, sub: str | None, source: str | None,
-                    signal: dict, fired, eff, parent_order_no: str | None = None) -> str | None:
+                    signal: dict, fired, eff, parent_order_no: str | None = None,
+                    position_status: str | None = None) -> str | None:
     phrase = signal.get("phrase")
     if code == "STOP_LOSS":
         if phrase in _STOP_LOSS_PCT_THRESHOLD:
@@ -596,7 +597,12 @@ def _exit_sentence(*, code: str | None, sub: str | None, source: str | None,
             text = f"트레일선 {_won(line)} 이탈" if line is not None else "트레일선 이탈"
     elif code == "TAKE_PROFIT":
         target = signal.get("target")
-        text = f"측정 목표 {_won(target)} 도달 — 전량 익절"
+        # cycle418-J #8 — BFB 측정 목표 도달은 그 체결 뒤 보유가 남으면(페어 status="open")
+        # 「부분 익절」 이다. 전량 매도(문서 position_exit_lines.py 의 "부분 익절 트리거"
+        # 각주와 반대로, 보유가 실제로 0 이 된 경우만) 는 「전량 익절」 그대로 — 기존 닫힌
+        # 페어 문구(byte 동일)는 바뀌지 않는다.
+        label = "전량 익절" if position_status == "closed" else "부분 익절"
+        text = f"측정 목표 {_won(target)} 도달 — {label}"
         if signal.get("current_price") is not None:
             text += f" (현재가 {_won(signal['current_price'])})"
     elif code == "TIME_EXIT":
@@ -682,7 +688,7 @@ def _fired_src(signal: dict, *, source: str | None) -> str | None:
 
 
 def _exit_reason(row: dict | None, *, orders_failed: bool, exit_date: date | None,
-                  record_start: dict, strategy: str) -> dict:
+                  record_start: dict, strategy: str, position_status: str | None = None) -> dict:
     if orders_failed:
         return {"code": None, "sub": None, "phrase": None, "renamed_from": None, "text": None,
                 "src": None, "signal_src": None, "na": NA_LOOKUP_FAILED}
@@ -703,7 +709,7 @@ def _exit_reason(row: dict | None, *, orders_failed: bool, exit_date: date | Non
 
     text = _exit_sentence(code=code, sub=sub, source=source, signal=signal,
                           fired=row.get("fired_line"), eff=row.get("effective_line"),
-                          parent_order_no=row.get("parent_order_no"))
+                          parent_order_no=row.get("parent_order_no"), position_status=position_status)
     if text is None:
         return {"code": code, "sub": sub, "phrase": signal.get("phrase"), "renamed_from": renamed_from,
                 "text": None, "src": None, "signal_src": None,
@@ -1133,7 +1139,7 @@ def build_card(
                       "src": None, "signal_src": None, "na": NA_LOOKUP_FAILED}
         else:
             reason = _exit_reason(row, orders_failed=False, exit_date=d, record_start=record_start,
-                                  strategy=strategy)
+                                  strategy=strategy, position_status=status)
         realized = None
         if all(f.get("profit_loss") is not None for f in line["fills"]):
             realized = int(sum(Decimal(str(f.get("profit_loss"))) for f in line["fills"]))
@@ -1149,6 +1155,10 @@ def build_card(
                 fired = sig_target
                 target_derived = True
         eff = row.get("effective_line") if row else None
+        # cycle418-J #5 — 유효선이 고정%(hard_pct) 근사면 화면이 「유효선 ...」 뒤에
+        # [근사] 를 달 수 있게 신호의 `stop_kind` 를 그대로 싣는다(값은 그대로, 근사
+        # 여부 표시만 화면 몫).
+        stop_kind = (row.get("signal") or {}).get("stop_kind") if row is not None else None
         fired_src = None
         if fired is not None and row is not None:
             if target_derived:
@@ -1163,6 +1173,7 @@ def build_card(
         ln.update({
             "reason": reason, "realized_gross_krw": realized, "fired_line": fired, "fired_src": fired_src,
             "effective_line": eff, "snapshot_age_s": snapshot_age, "line_role": role, "line_na": line_na,
+            "stop_kind": stop_kind,
         })
         exit_order_lines.append(ln)
 
@@ -1292,6 +1303,7 @@ def build_card(
         "record_notice": record_notice, "pnl": pnl,
         "entry": {"avg_price": int(round(avg_price)), "qty": entry_qty, "orders": entry_order_lines,
                  "reason": reason, "initial_stop": initial_stop, "target": target},
-        "exits": exit_order_lines, "stop_track": stop_track, "costs": costs_block,
+        "exits": exit_order_lines, "exits_na": NA_LOOKUP_FAILED if fills_failed else None,
+        "stop_track": stop_track, "costs": costs_block,
         "excursion": excursion, "note": note_out,
     }
