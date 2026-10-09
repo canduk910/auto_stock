@@ -370,7 +370,11 @@ async def boot(scheduler: "TradingScheduler") -> None:
             if fetched_strategy:
                 strategy_id = fetched_strategy
         except Exception:
-            pass
+            # ⑦ 관측 (cycle425) — 전에는 조용히 넘어갔다. 행위 무변경(기본값 유지).
+            logger.warning(
+                "[boot_recover_trade_history_lookup_failed] ticker=%s — 전략 복원 조회 실패, 기본값 유지",
+                h.ticker,
+            )
 
         try:
             orders = await get_daily_orders()
@@ -382,10 +386,26 @@ async def boot(scheduler: "TradingScheduler") -> None:
                     buy_dt = today
                     break
         except Exception:
-            pass
+            # ⑦ 관측 (cycle425) — 전에는 조용히 넘어갔다. 행위 무변경(기본값 유지).
+            logger.warning(
+                "[boot_recover_order_lookup_failed] ticker=%s — 매수일 판정용 주문내역 조회 실패, 기본값 유지",
+                h.ticker,
+            )
 
         target = scheduler.registry.get(strategy_id)
         if target:
+            if strategy_id == FALLBACK_OWNER_ID:
+                # ⑦-F2 선행 관측 (cycle425) — 행위는 바뀌지 않는다(여전히 FALLBACK_OWNER_ID
+                # 가 받는다). 「주인을 모르는 보유를 폴백에 넘겼다」만 보이게 한다.
+                logger.warning(
+                    "[boot_recover_strategy_unknown] path=kis_supplement ticker=%s order_no=",
+                    h.ticker,
+                )
+                await write_log(
+                    "WARNING",
+                    f"[boot_recover_strategy_unknown] path=kis_supplement "
+                    f"ticker={h.ticker} order_no=",
+                )
             target.state.positions[h.ticker] = Position(
                 ticker=h.ticker,
                 buy_price=buy_price,
@@ -417,7 +437,10 @@ async def boot(scheduler: "TradingScheduler") -> None:
         for ticker in kis_tickers:
             await mark_pending_buys_completed(ticker)
     except Exception:
-        pass
+        # ⑦ 관측 (cycle425) — 전에는 조용히 넘어갔다. 행위 무변경(미완료 처리만 skip).
+        logger.warning(
+            "[boot_recover_mark_pending_completed_failed] PENDING 매수 일괄 COMPLETED 처리 실패"
+        )
 
     # 당일 전체 주문 내역 조회 (DB 동기화 + 미체결 복구에 공용)
     all_orders: list[dict] = []
@@ -452,7 +475,10 @@ async def boot(scheduler: "TradingScheduler") -> None:
             if seed_strategy:
                 seed_strategy.state.sold_today.add(row["ticker"])
     except Exception:
-        pass
+        # ⑦ 관측 (cycle425) — 전에는 조용히 넘어갔다. 행위 무변경(db_strategy_map 보강만 skip).
+        logger.warning(
+            "[boot_recover_today_buys_lookup_failed] 오늘 BUY (ticker,strategy) 조회 실패"
+        )
 
     # 미체결 매수 주문 복구 → pending_buys에 등록하여 중복 주문 방지
     unfilled_count = 0
@@ -469,10 +495,25 @@ async def boot(scheduler: "TradingScheduler") -> None:
         if scheduler.registry.is_ticker_held_by_any(ticker):
             continue
         # 미체결 매수 주문 존재 → 해당 전략의 pending_buys에 등록
+        owner_unknown = ticker not in db_strategy_map
         strategy_id = db_strategy_map.get(ticker, FALLBACK_OWNER_ID)
         target_strategy = _resolve_fallback_owner(scheduler, strategy_id)
         order_unpr = int(order.get("ord_unpr", "0"))
         if target_strategy:
+            if owner_unknown:
+                # ⑦-F2 선행 관측 (cycle425) — 행위는 바뀌지 않는다(여전히
+                # FALLBACK_OWNER_ID 가 받는다). 「주인을 모르는 미체결 주문을
+                # 폴백에 넘겼다」만 보이게 한다.
+                _unknown_order_no = order.get("odno", "")
+                logger.warning(
+                    "[boot_recover_strategy_unknown] path=unfilled_order ticker=%s order_no=%s",
+                    ticker, _unknown_order_no,
+                )
+                await write_log(
+                    "WARNING",
+                    f"[boot_recover_strategy_unknown] path=unfilled_order "
+                    f"ticker={ticker} order_no={_unknown_order_no}",
+                )
             target_strategy.state.pending_buys.add(ticker)
             # 잔여 자금 폴백 계산용 — pending_buys 와 동기 등록 (2026-05-11 P1)
             target_strategy.state.pending_buy_amounts[ticker] = order_unpr * rmn_qty
