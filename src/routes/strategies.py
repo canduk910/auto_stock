@@ -560,11 +560,6 @@ _MONITOR_CACHE_TTL_S = 2.0
 _monitor_cache: tuple[float, str] | None = None
 _monitor_clock = time.monotonic
 
-#: 시장 유닛 표시 대상 — 터틀 4전략 + etf_trend(§2.4). 그 밖(VB·모멘텀·LTV)은 None.
-_MONITOR_MU_SIDS = frozenset({
-    "kojiro", "donchian_swing", "vcp_breakout", "bull_flag_breakout", "etf_trend",
-})
-
 
 def _monitor_cap_emitted(cap, today_iso):
     """`KstDailyEmitCap` 의 `_emitted` — `_day` 가 오늘(KST)이 아니면 빈 집합.
@@ -625,8 +620,16 @@ def _monitor_funnel(strategy):
 
 def _monitor_market_unit(strategy, today_date):
     """시장 유닛(§2.4) — 터틀 4전략·etf 만, 오늘 스냅샷 `_market_unit_snaps[오늘]`
-    그대로(어제 것으로 메우지 않는다). 그 밖 전략은 `None`."""
-    if strategy.strategy_id not in _MONITOR_MU_SIDS:
+    그대로(어제 것으로 메우지 않는다). 그 밖 전략은 `None`.
+
+    대상 집합 = `strategy_manifest.MARKET_UNIT_SCALE_IDS`(명부의 `market_unit_policy=="scale"`
+    파생, 리팩토링 카드 #5·cycle423) — 손으로 적은 리터럴을 두지 않는다. 새 전략이 명부에
+    `market_unit_policy="scale"` 로 들어오면 이 라우트는 코드를 고치지 않아도 그 전략의
+    `market_unit` 을 연다.
+    """
+    from src.engine.strategy_manifest import MARKET_UNIT_SCALE_IDS
+
+    if strategy.strategy_id not in MARKET_UNIT_SCALE_IDS:
         return None
     from src.engine import market_unit
 
