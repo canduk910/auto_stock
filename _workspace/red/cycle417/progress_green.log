@@ -6,3 +6,4 @@
 2026-10-09 12:08 green — 전체 스위트(python -m pytest -q) 1회차 포그라운드 실행 중(다른 에이전트 프로세스와 CPU 경쟁으로 지연). 대기.
 2026-10-09 12:10 green — 전체 스위트 1회차 완료: 2 failed(tests/unit/replay/test_ra_us.py·test_ra_us_breadth.py — parquet 파일 10-06/워크트리 밖, cycle417 무관, Red 보고와 동일) + 16287 passed/23 skipped/337 xfailed/12 xpassed. build_index.py(백엔드 182모듈/1303테스트) + build_index_frontend.mjs(프론트 139/137, js-yaml 임시 심링크 생성후 제거) 재생성 — diff는 generated_at 타임스탬프 1줄뿐. DEBUG 재실행 진행 중.
 2026-10-09 12:17 green — 전체 스위트 DEBUG 재실행 완료: 동일 결과(2 failed parquet 무관 + 16287 passed/23 skipped/337 xfailed/12 xpassed, 366.82s). 인덱스 신선도 이상 없음. 커밋 준비.
+2026-10-09 12:20 green — 커밋 완료(8caf018c, fix/daily-gap-fill, push 안 함). 작업 종료.
