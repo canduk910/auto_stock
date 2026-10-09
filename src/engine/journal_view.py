@@ -287,6 +287,11 @@ def _cause(row: dict, prev: dict | None, *, avg_price: float) -> str:
 def _build_stop_track(rows: list[dict], *, avg_price: float) -> dict:
     out_rows: list[dict] = []
     last_shown: dict | None = None
+    # cycle413 보완 1차 F9 — 방향은 「직전에 보인 행 중 값이 있는 것」과 비교한다
+    # (명세 4-3). 바로 앞 행이 값 없음(예: engine_idle eod)이어도 그 앞의 값 있는
+    # 행으로 건너뛴다 — `last_shown` 하나로는 「값 없는 직전 행」 때문에 방향을
+    # 잃는다(400원 내린 재시작 재계산이 「모름」 으로 보였다).
+    last_priced_price = None
     hidden_eod = 0
     for row in rows:
         event = row.get("event")
@@ -300,14 +305,13 @@ def _build_stop_track(rows: list[dict], *, avg_price: float) -> dict:
             continue
 
         price = row.get("stop_price")
-        prev_price = last_shown.get("stop_price") if last_shown else None
-        if last_shown is None or price is None or prev_price is None:
+        if last_priced_price is None or price is None:
             direction = None
             delta = None
-        elif price > prev_price:
-            direction, delta = "up", price - prev_price
-        elif price < prev_price:
-            direction, delta = "down", price - prev_price
+        elif price > last_priced_price:
+            direction, delta = "up", price - last_priced_price
+        elif price < last_priced_price:
+            direction, delta = "down", price - last_priced_price
         else:
             direction, delta = "flat", 0
 
@@ -320,6 +324,8 @@ def _build_stop_track(rows: list[dict], *, avg_price: float) -> dict:
             "snapshot_age_s": (row.get("inputs") or {}).get("snapshot_age_s") if event == "exit" else None,
         })
         last_shown = row
+        if price is not None:
+            last_priced_price = price
 
     ups = sum(1 for r in out_rows if r["direction"] == "up")
     downs = sum(1 for r in out_rows if r["direction"] == "down")
@@ -342,6 +348,10 @@ _AI_BREAKOUT_NAME = {
 }
 _AI_K_STRATEGIES = ("volatility_breakout", "long_tail_volatility")
 _AI_CUTOFF = date(2026, 9, 17)
+
+#: cycle413 보완 1차 F11 — VB·LTV 진입 문장에 보드를 밝힌다(ring `signal.board` ·
+#: AI 평가 `strategy_board`). 보드를 모르면(키 없음) 문장은 그대로 「돌파선 …」.
+_BOARD_LABEL = {"main": "본장", "pre_nxt": "NXT 프리", "post_nxt": "NXT 애프터"}
 
 _STRATEGY_LABEL = {
     "momentum": "모멘텀", "volatility_breakout": "변동성 돌파", "long_tail_volatility": "롱테일 변동성",
@@ -379,6 +389,10 @@ def _find_ai_eval(llm_evals: list[dict] | None, *, trade_date, ticker, order_no)
 def _ai_sentence(strategy: str, ai: dict) -> str:
     target = ai.get("target_won")
     name = _AI_BREAKOUT_NAME.get(strategy, "돌파선")
+    if strategy in _AI_K_STRATEGIES:
+        board_label = _BOARD_LABEL.get(ai.get("strategy_board"))
+        if board_label:
+            name = f"{board_label} {name}"
     parts = [f"{name} {_won(target)} 돌파"]
     k = ai.get("k")
     if strategy in _AI_K_STRATEGIES and k is not None:
@@ -394,7 +408,9 @@ def _ring_entry_sentence(strategy: str, signal: dict, params: dict | None) -> st
             parts.append(f"기준 {_f(params['buy_threshold']):.1f}%")
         return " · ".join(parts)
     if strategy in ("volatility_breakout", "long_tail_volatility"):
-        parts = [f"돌파선 {_won(signal.get('target_price'))} 돌파"]
+        board_label = _BOARD_LABEL.get(signal.get("board"))
+        head = f"{board_label} 돌파선" if board_label else "돌파선"
+        parts = [f"{head} {_won(signal.get('target_price'))} 돌파"]
         if signal.get("k") is not None:
             parts.append(f"K {_f(signal['k']):.2f}")
         if signal.get("change_rate") is not None:
@@ -563,7 +579,14 @@ def _exit_sentence(*, code: str | None, sub: str | None, source: str | None,
             if cur is not None:
                 text += f" (현재가 {_won(cur)})"
         else:
-            line = _line_val(fired, eff)
+            # cycle413 보완 1차 F5 — 워커 문법에 TRAILING_STOP 패턴이 없는 전략
+            # (momentum·etf_trend) 은 fired 가 없다. 그럴 때 스냅샷 손절선이
+            # `hard_pct`(고정% 근사)면 숫자를 쓰지 않는다 — 근사값을 발동선처럼
+            # 보이면 안 된다(값 자체는 `effective_line` 칸에 그대로 남는다).
+            if fired is None and signal.get("stop_kind") == "hard_pct":
+                line = None
+            else:
+                line = _line_val(fired, eff)
             text = f"트레일선 {_won(line)} 이탈" if line is not None else "트레일선 이탈"
     elif code == "TAKE_PROFIT":
         target = signal.get("target")
@@ -625,7 +648,12 @@ def _exit_sentence(*, code: str | None, sub: str | None, source: str | None,
     return text
 
 
-def _line_role(code: str | None) -> str:
+def _line_role(code: str | None) -> str | None:
+    # cycle413 보완 1차 F4 — 사유 코드를 모르면(기록 전 청산·external·unmatched·일지
+    # 조회 실패) 역할을 정하지 않는다. 엔진이 판 것이 아니면 손절 발동 여부도 모른다
+    # — 예전엔 여기서 전부 「reference(손절 미발동)」 로 단정했다.
+    if code is None:
+        return None
     if code in ("STOP_LOSS", "TRAILING_STOP"):
         return "fired"
     if code == "TAKE_PROFIT":
@@ -765,23 +793,40 @@ def _build_costs(pair: dict, *, buy_ids: list, exit_lines: list[dict], costs: di
             "status": None, "allocated": False,
         }
 
-    buy_entries = [costs[i] for i in buy_ids if i in costs]
-    entry_fee = sum(c["fee"] for c in buy_entries) if buy_entries else 0.0
+    # cycle413 보완 1차 F10 — 비용 맵에 없는 체결 id 는 0원이 아니라 None(「모름 ≠ 0」).
+    # 일부라도 맵에 없으면 그 몫(entry_fee·그 청산 줄의 fee/tax)을 통째로 None 으로
+    # 낸다(부분합을 전체인 척 내지 않는다).
+    buy_found_ids = [i for i in buy_ids if i in costs]
+    buy_entries = [costs[i] for i in buy_found_ids]
+    if buy_ids and len(buy_found_ids) < len(buy_ids):
+        entry_fee = None
+    else:
+        entry_fee = sum(c["fee"] for c in buy_entries) if buy_entries else 0.0
     entry_status = _fold_status([c.get("cost_status") for c in buy_entries])
     entry_allocated = any(c.get("allocated") for c in buy_entries)
 
     exits = []
     for ln in exit_lines:
-        entries = [costs[i] for i in ln["trade_ids"] if i in costs]
+        want_ids = ln["trade_ids"]
+        found_ids = [i for i in want_ids if i in costs]
+        entries = [costs[i] for i in found_ids]
+        if want_ids and len(found_ids) < len(want_ids):
+            fee = None
+            tax = None
+        else:
+            fee = sum(c["fee"] for c in entries) if entries else 0.0
+            tax = sum(c["tax"] for c in entries) if entries else 0.0
         exits.append({
             "order_no": ln["order_no"], "at": ln["at"],
-            "fee": sum(c["fee"] for c in entries) if entries else 0.0,
-            "tax": sum(c["tax"] for c in entries) if entries else 0.0,
+            "fee": fee, "tax": tax,
             "status": _fold_status([c.get("cost_status") for c in entries]),
             "allocated": any(c.get("allocated") for c in entries),
         })
 
-    paid_total = entry_fee + sum((x["fee"] or 0.0) + (x["tax"] or 0.0) for x in exits)
+    if entry_fee is None or any(x["fee"] is None or x["tax"] is None for x in exits):
+        paid_total = None
+    else:
+        paid_total = entry_fee + sum((x["fee"] or 0.0) + (x["tax"] or 0.0) for x in exits)
 
     fee_total = pair.get("fee")
     tax_total = pair.get("tax")
@@ -896,9 +941,20 @@ def _build_excursion(*, ticker: str, avg_price: float, buy_fills: list[dict], se
 # ════════════════════════════════════════════════════════════════════════════
 # build_card — 조립 본체
 # ════════════════════════════════════════════════════════════════════════════
+def _pair_kst_iso(d, t) -> str | None:
+    """페어의 `buy_date`/`buy_time`(또는 `sell_date`/`sell_time`) → KST ISO 문자열.
+
+    체결 행 조회 실패(F8)로 fills 가 없을 때 opened_at/closed_at 을 이걸로 채운다.
+    """
+    if d is None or t is None:
+        return None
+    d_str = d.isoformat() if isinstance(d, date) else str(d)
+    return f"{d_str}T{t}+09:00"
+
+
 def build_card(
     pair: dict, *,
-    fills: list[dict],
+    fills: list[dict] | None,
     orders: list[dict] | None,
     stops: list[dict] | None,
     note: dict | None,
@@ -916,20 +972,30 @@ def build_card(
     partial_ids = list(pair.get("partial_sell_trade_ids") or [])
     buy_order_nos = list(pair.get("buy_order_nos") or [])
 
-    buy_fills_all = [f for f in fills if str(f.get("trade_type") or "").upper() == "BUY"]
-    sell_fills_all = [f for f in fills if str(f.get("trade_type") or "").upper() == "SELL"]
+    # cycle413 보완 1차 F8 — 체결 행 조회 실패(fills=None). 화면 칸은 그 칸에만
+    # 번지게 하고(TS non-null 유지) MFE/MAE 만 lookup_failed 로 낸다.
+    fills_failed = fills is None
 
-    entry_lines = _group_order_lines(fills, "BUY")
-    exit_lines_raw = _group_order_lines(fills, "SELL")
+    buy_fills_all = [] if fills_failed else [f for f in fills if str(f.get("trade_type") or "").upper() == "BUY"]
+    sell_fills_all = [] if fills_failed else [f for f in fills if str(f.get("trade_type") or "").upper() == "SELL"]
+
+    entry_lines = [] if fills_failed else _group_order_lines(fills, "BUY")
+    exit_lines_raw = [] if fills_failed else _group_order_lines(fills, "SELL")
 
     anchor_trade_id = buy_ids[0] if buy_ids else None
-    opened_at = entry_lines[0]["at"] if entry_lines else None
+    if fills_failed:
+        opened_at = _pair_kst_iso(pair.get("buy_date"), pair.get("buy_time"))
+    else:
+        opened_at = entry_lines[0]["at"] if entry_lines else None
     opened_dt = _parse_dt(opened_at)
     opened_date = _dateof(opened_at)
 
     closed_at = None
-    if status == "closed" and exit_lines_raw:
-        closed_at = exit_lines_raw[-1]["at"]
+    if status == "closed":
+        if fills_failed:
+            closed_at = _pair_kst_iso(pair.get("sell_date"), pair.get("sell_time"))
+        elif exit_lines_raw:
+            closed_at = exit_lines_raw[-1]["at"]
     closed_dt = _parse_dt(closed_at)
 
     held_days = None
@@ -1067,10 +1133,22 @@ def build_card(
             realized = int(sum(Decimal(str(f.get("profit_loss"))) for f in line["fills"]))
         role = _line_role(reason.get("code"))
         fired = row.get("fired_line") if row else None
+        # cycle413 보완 1차 F12 — 익절(TAKE_PROFIT) 청산의 발동선은 워커가 줄에
+        # 못 남겼어도(`fired_line=None`, 복원분 등) 신호의 목표가(`signal.target`)로
+        # 세운다 — 화면이 「—」 를 그리지 않게.
+        target_derived = False
+        if fired is None and role == "target" and row is not None:
+            sig_target = (row.get("signal") or {}).get("target")
+            if sig_target is not None:
+                fired = sig_target
+                target_derived = True
         eff = row.get("effective_line") if row else None
         fired_src = None
         if fired is not None and row is not None:
-            fired_src = _fired_src(row.get("signal") or {}, source=row.get("source"))
+            if target_derived:
+                fired_src = "restored" if row.get("source") == "log_restore" else "live"
+            else:
+                fired_src = _fired_src(row.get("signal") or {}, source=row.get("source"))
         snapshot_age = (row.get("signal") or {}).get("snapshot_age_s") if row else None
         if fired is None and eff is None:
             line_na = NA_LOOKUP_FAILED if orders_failed else _record_na(d, order_thr)
@@ -1147,7 +1225,7 @@ def build_card(
     net_na = None if net is not None else (NA_LOOKUP_FAILED if costs_failed else
                                            (NA_PENDING if unrealized else NA_UNKNOWN))
 
-    partial_fills = [f for f in fills if f.get("id") in partial_ids]
+    partial_fills = [] if fills_failed else [f for f in fills if f.get("id") in partial_ids]
     if partial_fills and all(f.get("profit_loss") is not None for f in partial_fills):
         partial_gross = int(sum(Decimal(str(f.get("profit_loss"))) for f in partial_fills))
     else:
@@ -1178,9 +1256,11 @@ def build_card(
         costs_block["expected_exit_na"] = None
 
     # ── excursion ────────────────────────────────────────────────────────────
+    # F8 — 체결 행 조회 실패면 종가·영업일이 있어도 보유 수량(fills 기반)을 모르므로
+    # 「해당 없음」 으로 위장하지 않고 조회 실패로 낸다.
     excursion = _build_excursion(
         ticker=ticker, avg_price=avg_price, buy_fills=buy_fills_all, sell_fills=sell_fills_all,
-        closes=closes, business_days=business_days,
+        closes=None if fills_failed else closes, business_days=None if fills_failed else business_days,
     )
 
     note_out = None

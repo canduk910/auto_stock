@@ -365,23 +365,30 @@ async def trade_journal_view(
     for p in pairs:
         if not p.get("ticker_name"):
             p["ticker_name"] = ticker_names.get(p.get("ticker", ""), "")
-        # `get_trade_pairs` 는 `trade_history.id`(UUID) 를 asyncpg 네이티브 타입(uuid.UUID)
-        # 그대로 사영한다 — 이 화면은 그 id 로 체결 행(문자열 id)·메모를 잇고 응답
-        # `anchor_trade_id` 도 문자열이어야 하므로 여기서 한 번 문자열화한다.
-        for key in ("buy_trade_ids", "sell_trade_ids", "partial_sell_trade_ids"):
-            if p.get(key):
-                p[key] = [str(i) for i in p[key]]
 
     pairs = [p for p in pairs if _period_overlap(p, start, end)]
     if status != "all":
         pairs = [p for p in pairs if p.get("status") == status]
 
+    # cycle413 보완 1차 F1 — `overlay_pairs` 의 비용 맵은 `get_trade_pairs`/
+    # `get_trades_by_status` 가 돌려주는 네이티브 타입(uuid.UUID)으로 키가 걸린다.
+    # 문자열화를 먼저 하면 하나도 맞지 않아 청산 카드 전부 수수료·세금 0 ·
+    # 세후=세전·「추정」이 된다(판정 #1) — `/pnl` 과 같은 순서로 **먼저** 붙이고,
+    # 그 뒤에 이 화면이 체결 행(문자열 id)·메모와 잇기 위해 한 번 문자열화한다.
     trades_by_id, cost_available = None, False
     try:
         trades_by_id = await cost_overlay.overlay_pairs(pairs)
         cost_available = trades_by_id is not None
     except Exception as exc:
         logger.warning("%s overlay_pairs 실패: %r", _JOURNAL_ERROR, exc, exc_info=True)
+
+    # `get_trade_pairs` 는 `trade_history.id`(UUID) 를 asyncpg 네이티브 타입(uuid.UUID)
+    # 그대로 사영한다 — 이 화면은 그 id 로 체결 행(문자열 id)·메모를 잇고 응답
+    # `anchor_trade_id` 도 문자열이어야 하므로 비용을 다 붙인 뒤 한 번 문자열화한다.
+    for p in pairs:
+        for key in ("buy_trade_ids", "sell_trade_ids", "partial_sell_trade_ids"):
+            if p.get(key):
+                p[key] = [str(i) for i in p[key]]
 
     pairs = [p for p in pairs if _outcome_match(p, outcome, basis)]
     counts = _counts(pairs)
@@ -423,13 +430,16 @@ async def trade_journal_view(
         if bdt:
             opened_dts.append(bdt)
 
-    fills: list[dict] = []
+    fills: list[dict] | None = []
     if fill_ids:
         try:
             fills = await trade_history_db.get_trades_by_ids(list(fill_ids))
         except Exception as exc:
             logger.warning("%s get_trades_by_ids 실패: %r", _JOURNAL_ERROR, exc, exc_info=True)
-            fills = []
+            # cycle413 보완 1차 F8 — 조회 실패를 빈 목록(0건)으로 위장하지 않는다.
+            # `build_card(fills=None)` 이 페어로 시각·보유일을 채우고 MFE/MAE 를
+            # lookup_failed 로 낸다.
+            fills = None
 
     orders: list[dict] | None = []
     if order_nos:
@@ -497,7 +507,7 @@ async def trade_journal_view(
     for p in page_pairs:
         want_ids = set(p.get("buy_trade_ids") or []) | set(p.get("sell_trade_ids") or []) \
             | set(p.get("partial_sell_trade_ids") or [])
-        pair_fills = [f for f in fills if f.get("id") in want_ids]
+        pair_fills = None if fills is None else [f for f in fills if f.get("id") in want_ids]
         note = notes_by_id.get(p["buy_trade_ids"][0]) if p.get("buy_trade_ids") else None
         cards.append(journal_view.build_card(
             p, fills=pair_fills, orders=orders, stops=stops, note=note, closes=closes,

@@ -816,8 +816,12 @@ _SRC_TREE_FILES = 181  # 직전 = 트랙 C — 실비용 사후 대사: 신규 4
 # 직전 값(cycle411 3차 LOW 보완) = `3c2a9773bc7aedf0ad83acf234923e5ba90ac224508ddfcc2ba61b3a055aed5b`.
 # cycle413(거래일지 화면 1b) — 신규 leaf 2개 + 기존 파일 4개(위 주석) 재핀. 직전 값
 # (cycle412) = `edcd6038ac6bcc6c977b1e17cef42bbcb6400275ea7502ca2f19476b0256b266`.
+# cycle413 보완 1차(판정 verdict1 #1~#12 백엔드 몫) — `routes/history.py`(F1 id
+# 문자열화를 overlay_pairs 뒤로 · F8 fills=None 전달)·`engine/journal_view.py`
+# (F4·F5·F8·F9·F10·F11·F12). 신규/삭제 파일 0 — 파일 수 181 그대로. 직전 값
+# (cycle413 1차) = `19c8bf4dd10e155e106e6c63c26cc743bad176538a950d344fbaab2e87737ab2`.
 _SRC_TREE_DIGEST = (
-    "19c8bf4dd10e155e106e6c63c26cc743bad176538a950d344fbaab2e87737ab2"
+    "3e2d8cc730d4c0c84ab19d7028f74434de4ce27752e7eddc99e7123384015865"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
