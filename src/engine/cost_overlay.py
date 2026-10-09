@@ -412,6 +412,17 @@ async def overlay_pairs(pairs: list[dict]) -> dict[int, dict] | None:
     trades_by_id = {t["id"]: t for t in trades if t.get("id") is not None}
     id_groups = _settlement_id_groups(cost_rows, trades)
 
+    # cycle413(거래일지 화면 1b) C6 — 비용 원천을 한 요청에서 두 번 읽지 않으려고
+    # 체결 행 단위 비용(`costs`)을 **가산형**으로 `trades_by_id` 에 얹는다(새 키만
+    # 더한다 — 기존 소비처 `/api/history/pnl` 는 `order_price`/`id` 만 읽어 영향 0).
+    for tid, t in trades_by_id.items():
+        c = costs.get(tid)
+        if c is not None:
+            t["fee"] = c["fee"]
+            t["tax"] = c["tax"]
+            t["cost_status"] = c["cost_status"]
+            t["allocated"] = c["allocated"]
+
     for p in pairs:
         buy_ids = list(p.get("buy_trade_ids") or [])
         sell_ids = list(p.get("sell_trade_ids") or [])

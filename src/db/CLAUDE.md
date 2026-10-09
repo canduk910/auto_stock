@@ -53,6 +53,7 @@ AWS RDS PostgreSQL CRUD 모듈. DB 클라이언트 정본 = **`pg.py` (asyncpg �
 - **`get_today_buy_trades_for_sync(ticker=None) / get_today_sell_trades_for_sync(ticker=None)`**: **dedupe 없음** + CANCELLED 제외 + optional ticker — `_sync_orders_to_db` 중복 판정 전용. 🔴 **포지션 복구용 dedupe 함수를 sync 중복 판정에 쓰지 않는다** — 다른 `order_no` 가 가려져 재기동마다 신규로 판정된다(5/20 042700 핑퐁 INSERT 사고).
 - `mark_pending_buys_completed(ticker)` / `get_recent_buy_strategy(ticker) -> str|None` / `get_today_buys_ticker_strategy() -> list[dict]`: `boot_manager` 전용.
 - **부분 UNIQUE 인덱스** (migration 029): `uq_trade_history_ticker_order_no_type ON (ticker, order_no, trade_type) WHERE order_no IS NOT NULL AND order_no != ''` — 코드가 회귀하면 PG 가 INSERT 를 거부한다. NULL/빈 `order_no`(수동 매매 등)는 인덱스 밖.
+- **`get_trades_by_ids(ids: list[str]) -> list[dict]`**(cycle413, 거래일지 화면 1b) — id 목록으로 체결 행을 읽는다(`id::text` 캐스트로 문자열 반환). 열 = `id`·`order_no`·`trade_type`·`timestamp`(KST)·`price`·`quantity`·`order_price`·`profit_loss`·`strategy`·`ticker`·`status`. **`profit_loss` 는 NULL 이면 None 그대로**(「모름 ≠ 0」) — `trade_cost.get_trades_by_status` 의 `COALESCE(profit_loss, 0)` 과 다르다(그 함수는 비용 배분용, 이 함수는 실현손익 원천). 빈 목록 = 쿼리 없이 `[]`. 예외는 전파한다.
 
 ## llm_buy_evaluations.py — AI 매수평가 기록
 
@@ -73,6 +74,18 @@ AWS RDS PostgreSQL CRUD 모듈. DB 클라이언트 정본 = **`pg.py` (asyncpg �
 - 읽기 = `get_daily_range(start, end)` · `get_completed_trades(start, end)`(`trade_history` COMPLETED + 주문가 `order_price`, `trade_date` = `(timestamp AT TIME ZONE 'Asia/Seoul')::date`). `trade_history` 는 읽기만 한다
 - **`get_trades_by_status(start, end, statuses=("COMPLETED","PARTIAL"))`**(cycle411, 가산형) — `status` 를 `ANY($n::text[])` 로 받는 일반화 읽기. `get_completed_trades` 와 달리 `id`·`ticker_name`·`status` 도 함께 읽는다(실비용 체결 행 단위 귀속 `engine/cost_overlay.py::trade_costs` 의 입력). `get_completed_trades` 는 그대로 COMPLETED 전용(행위 보존)
 - `trade_history.profit_loss` 의 의미(세전·비용 전 gross)는 바꾸지 않는다 — net 은 `engine/trade_cost.py`·`engine/cost_overlay.py` 가 계산만 한다. 예외는 전파한다
+
+## trade_journal.py — 거래일지 읽기 + 메모 쓰기 (cycle413, 거래일지 화면 1b)
+
+테이블 4종(migration 047) — `trade_journal_orders`·`_stops`·`_notes`·`_cursor`. 쓰는 쪽(`_orders`·`_stops`·`_cursor`)은 `journal_worker` 컨테이너 전용 DB 역할 하나뿐이다(관찰자 방식) — 이 모듈은 그 세 표를 **읽기만** 한다. `trade_journal_notes` 는 이 모듈이 유일한 쓰기 경로다.
+
+- `list_orders(order_nos, *, date_from, date_to) -> list[dict]` — 주문번호 ∩ `[date_from, date_to]`(`order_date`). 표 전 칸 + `noted_at`(KST ISO).
+- `list_stops(keys, *, since, until) -> list[dict]` — `keys=[(strategy, ticker), ...]` 합집합(`unnest($1::text[], $2::text[])`) ∩ `observed_at ∈ [since, until]`.
+- `list_notes(anchor_ids) -> list[dict]` — `anchor_trade_id::text`·`body`·`created_at`·`updated_at`(KST ISO).
+- `get_record_start() -> dict` — `{orders_restored, orders_live, stops, order_price}`(KST `'YYYY-MM-DD'`|`None`). `orders_restored`=`MIN(order_date)` WHERE `source='log_restore'` · `orders_live`=그 반대 · `stops`=`MIN(observed_at)` 의 KST 날짜 · `order_price`=`trade_history.order_price` 가 처음 채워진 체결의 KST 날짜.
+- `upsert_note(anchor_trade_id, body, *, strategy, ticker, buy_date) -> dict` — `ON CONFLICT (anchor_trade_id) DO UPDATE`(`created_at` 보존, `updated_at=now()`).
+- `delete_note(anchor_trade_id) -> bool` — 지운 행이 있으면 `True`.
+- 빈 목록 인자 = **쿼리 없이** `[]`. 예외는 **삼키지 않는다** — 라우트(`src/routes/history.py` `/journal`)가 「조회 실패」(`lookup_failed`)와 「행 없음」을 가른다.
 
 ## positions.py — 보유 포지션 영속화
 
@@ -307,6 +320,8 @@ list_paged_by_filter(*, market=None, min_market_cap=0, min_trade_amount=0,
   - 가드 = `tests/unit/ast/test_cycle386_ast_finalize.py` G5(c1~c4 — `src/` 의 쓰기 SQL · 찍는 자리 · 마이그레이션) + 실 Postgres `tests/integration/test_cycle386_provisional_predicate_pg.py`(충돌 때 다시 찍기 · 트리거 없음).
 - DB 호출 = `pg.fetch`/`pg.execute`/`pg.executemany`. read 는 `_with_retry` 내장, 쓰기 3함수(`upsert_daily`/`upsert_batch`/`purge_old_rows`)는 미경유(AST G-187-A2 영구 불변식). KST timestamp `_kst.now_kst_iso()` · raw JSONB 덮어쓰기 금지(G-AST1) · DATE 바인딩 `_kst.to_date()` 강제
 - **UI 동기화 의무**: 컬럼 추가 시 `GET /api/stock-master/{ticker}/daily?days=N`(`src/routes/stock_master.py`) · `frontend/src/pages/StockMaster.tsx::DailyTab` · `get_stats()` 의 `total_daily_rows`/`last_daily_load_at` 을 함께 고친다. 절차 = `frontend/CLAUDE.md` 「(6) 신규 데이터 추가 시 UI 동기화 절차」 절
+- **`get_closes_in_range(tickers, start, end) -> list[dict]`**(cycle413, 거래일지 화면 1b) — 종목별 종가를 `[start, end]`(`bas_dd` inclusive)에서 읽는다(SELECT 만, 예외 전파). 열 = `ticker`·`bas_dd`·`close_price`·`updated_at`(KST ISO)·`flng_cls_code`·`prtt_rate`(MFE/MAE 의 잠정·락 판정 입력). 빈 `tickers` = 쿼리 없이 `[]`.
+- **`list_business_days(start, end) -> list[date]`**(cycle413) — `[start, end]` 의 `DISTINCT bas_dd`(오름차순, 한 종목이라도 행이 있으면 영업일) — MFE/MAE 의 영업일 집합 입력. SELECT 만, 예외 전파.
 
 ## stock_master_financial.py — KIS 재무 5 TR 정규화
 

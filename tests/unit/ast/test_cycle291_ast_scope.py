@@ -481,9 +481,13 @@ def test_a8_no_new_leaf_in_src_engine() -> None:
     ⚠️ cycle411(실비용 합치기, 사용자 결정 10-08)이 leaf 1개 `cost_overlay.py` 를 신설해
     82 → **83** 이 됐다 — 순수 함수 + async 어댑터(`src.db.trade_cost`·`src.engine.trade_cost`·
     `src.engine.etf_like` 만 import). 8영역·scheduler import 0(`test_cycle411_ast_scope.py`).
+
+    ⚠️ cycle413(거래일지 화면 1b)이 leaf 1개 `journal_view.py` 를 신설해 83 → **84** 가
+    됐다 — 카드 조립 순수 함수(`src.*` import 0). 8영역·scheduler import 0
+    (`test_cycle413_scope_guard.py`).
     """
     got = len(list((_ROOT / "src" / "engine").glob("*.py")))
-    assert got == 83, f"`src/engine/*.py` 파일 수 {got} (cycle411 기준선 83)"
+    assert got == 84, f"`src/engine/*.py` 파일 수 {got} (cycle413 기준선 84)"
 
 
 # ===========================================================================

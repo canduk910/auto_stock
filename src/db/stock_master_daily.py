@@ -1034,6 +1034,42 @@ async def purge_old_rows(
     }
 
 
+# ---------------------------------------------------------------------------
+# cycle413 — 거래일지 화면(1b) MFE/MAE 입력. 읽기 전용(SELECT 만) — 이 모듈의
+# 다른 read 헬퍼(`get_recent_daily` 등)와 달리 **예외를 전파한다**(graceful 로
+# 흡수하면 호출자가 「조회 실패」와 「행 없음」을 가르지 못한다, D2).
+# ---------------------------------------------------------------------------
+
+
+async def get_closes_in_range(tickers: list[str], start: date, end: date) -> list[dict]:
+    """종목별 종가를 `[start, end]`(bas_dd, inclusive)에서 읽는다.
+
+    열 = `ticker`·`bas_dd`·`close_price`·`updated_at`(KST ISO)·`flng_cls_code`·
+    `prtt_rate`(잠정 판정·락 판정 입력). 빈 `tickers` = **쿼리 없이** `[]`.
+    """
+    keys = [str(t) for t in (tickers or []) if str(t or "").strip()]
+    if not keys:
+        return []
+    sql = (
+        "SELECT ticker, bas_dd, close_price, "
+        "to_char(updated_at, 'YYYY-MM-DD\"T\"HH24:MI:SS.US+09:00') AS updated_at, "
+        "flng_cls_code, prtt_rate "
+        "FROM stock_master_daily WHERE ticker = ANY($1::text[]) AND bas_dd BETWEEN $2 AND $3 "
+        "ORDER BY ticker, bas_dd"
+    )
+    return await pg.fetch(sql, keys, to_date(start), to_date(end))
+
+
+async def list_business_days(start: date, end: date) -> list[date]:
+    """`[start, end]` 구간의 `DISTINCT bas_dd`(영업일 집합, 오름차순) — 한 종목이라도
+    행이 있는 날을 영업일로 본다(거래일지 MFE/MAE 의 영업일 집합 입력)."""
+    rows = await pg.fetch(
+        "SELECT DISTINCT bas_dd FROM stock_master_daily WHERE bas_dd BETWEEN $1 AND $2 ORDER BY bas_dd",
+        to_date(start), to_date(end),
+    )
+    return [r["bas_dd"] for r in rows]
+
+
 def _parse_delete_count(status_str) -> int:
     """asyncpg execute() 상태 문자열("DELETE N") → affected int."""
     try:
