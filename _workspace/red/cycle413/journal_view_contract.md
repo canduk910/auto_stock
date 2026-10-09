@@ -126,3 +126,28 @@ async def list_business_days(start: date, end: date) -> list[date]   # DISTINCT 
 | `frontend/src/test/fixtures/journal.fixture.ts` | 공용 | 화면 테스트 응답 — 기본 목에 그대로 써도 된다 |
 
 검산: Red 가 scratch 시제품(커밋 안 함)으로 백엔드 leaf 117 · 라우트·DB 단위 · 통합 21 · 프론트 화면 19 건을 모두 통과시켜 **서로 모순 없이 만족 가능함**을 확인했다. 남은 판단은 구현 쪽 자유다(함수 분할·컴포넌트 이름·정렬 방식).
+
+---
+
+## 6. 보완 1차 (판정 `verdict1.md` #1~#13) — 바뀐 계약
+
+정본 = 아래 Red 파일. 위 1~5절과 갈리면 이 절이 이긴다.
+
+| 결함 | 바뀐 계약 | Red |
+|---|---|---|
+| #1 | 라우트는 페어 id 문자열화를 `overlay_pairs` **뒤**로(`/pnl` 과 같은 순서). `cost_overlay.py` 무접촉(내용 sha 핀) | `tests/unit/routes/test_cycle413_fix1_journal_routes.py` F1(UUID 픽스처 `db_uuid`) · `tests/integration/test_cycle413_fix1_journal_pg.py` G1·G2 · `tests/unit/ast/test_cycle413_fix1_scope_guard.py` X1(사이클 한정) |
+| #8 | `build_card(fills=None)` = 체결 행 조회 실패. `opened_at`·`closed_at` = 페어 `buy_date`+`buy_time` / `sell_date`+`sell_time` 의 `+09:00` ISO, `held_days` 도 페어로(TS non-null 유지) · `excursion.na='lookup_failed'`. 라우트는 `get_trades_by_ids` 실패 시 `fills=None` 을 넘긴다 | leaf F8 · 라우트 F8 |
+| #4 | `exits[].line_role` = 사유 코드가 None 이면 **None**(기록 전·`external`·`unmatched`·일지 조회 실패). 명세 3-3 의 「외부 = reference」 는 이 판정으로 바뀐다 | leaf F4 · 화면 M3 |
+| #5 | TRAILING_STOP 사유 줄 없음 + `fired_line=None` + `signal.stop_kind=='hard_pct'` → 문장 「트레일선 이탈」(숫자 없음). 워커 문법 차이(momentum·etf_trend 트레일 패턴 부재)는 보고만 | leaf F5 |
+| #9 | 손절선 `direction`·`delta_won` = 직전에 보인 행 중 **값이 있는** 것과 비교 | leaf F9 |
+| #10 | 비용 맵에 없는 체결 id → `entry_fee`/`exits[].fee`·`tax` = None, 하나라도 None 이면 `paid_total` = None(`costs.na` 는 그대로 null — 비용 블록 전체 실패가 아니다) | leaf F10 |
+| #11 | VB·LTV 진입 문장 = 「{본장·NXT 프리·NXT 애프터} 돌파선 {가격} 돌파 …」(ring `signal.board` · AI평가 `strategy_board`). 보드가 없으면 「돌파선 …」 | leaf F11 |
+| #12 | TAKE_PROFIT 청산 줄 `fired_line` = `signal.target`(워커 `fired_line` 이 None 일 때), `fired_src` = `restored`(복원 행)/`live`, `line_na=None`. 화면은 목표 역할이면 「목표 {fired_line ?? entry.target.price}」 | leaf F12 · 화면 M6d |
+| #2 | 메모 — 바뀐 것 없으면 저장 버튼 disabled · 저장 성공 시 `invalidateQueries(['journal'])` · `note` 가 바뀌면 편집 중이 아닐 때만 입력칸을 다시 맞춘다 | 화면 M1a~d(운영 캐시 QueryClient + 상태형 MSW) · e2e J-E2 |
+| #3 | 페이지 넘김 testid = `journal-page-info`(「n/m」)·`journal-page-prev`·`journal-page-next` · 요청 `page` · 필터를 바꾸면 1쪽 | 화면 M2 · e2e J-E3 |
+| #6 | 보유 중 분할 매도 = 청산 영역 제목 「분할 매도」 · 머리 아래 「분할 실현 세후 {partial_net_krw}」 | 화면 M4 |
+| #7 | 출처 칩 — 발동선 `fired_src`(스냅샷·계산 등, `valSrcLabel`) · 판단가 `judge.src`(최소 `log_pct` 역산 · `restored_ai`) | 화면 M5 |
+| #12(화면) | 빈칸 배지 `title`(unknown = 「모름 — …」) · 문장과 칩 띄움 · 제목 「익절 목표」·「일별 종가」·「메모」 · `held_days=0` = 「당일」 · 보유 중 「낸 비용」 · `journal-filter-toggle` 의 `aria-expanded` 토글 · 경로 꼬리는 서버 문장 한 번만(화면 사본 제거) | 화면 M6 |
+| #13 | `JournalTab` useQuery `retry:` 명시(가드 등재) · e2e 목 `/api/history/journal`(상태형 메모·page 별 응답, MSW 와 같은 픽스처 파일) | `_ast_useQuery_retry_required.test.ts` · `_ast_api_mocks_coverage.test.ts` G-AST14 · `e2e/journal.spec.ts` |
+
+Green 이 함께 옮길 기존 가드: `tests/unit/ast/test_cycle287_ast_scope.py::_SRC_TREE_DIGEST` 재핀(src 가 바뀐다 — 주석에 cycle413 보완 1차 한 줄).

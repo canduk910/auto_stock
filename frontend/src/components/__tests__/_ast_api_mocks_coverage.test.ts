@@ -494,4 +494,32 @@ describe('사이클 75 카드 #19\' — e2e api-mocks 7 endpoint group 영구 �
       }
     })
   })
+
+  // cycle413 보완 1차 (2026-10-09, 판정 #13) — 거래일지 탭 endpoint 2개.
+  // 「거래 내역」 세 번째 탭이 `GET /api/history/journal` 을, 메모 저장이 `PUT /api/history/journal/notes/{id}` 를
+  // 부른다. ⚠️ `**/api/history*` 글롭은 `*` 가 `/` 를 넘지 않아 `/api/history/journal` 을 잡지 못한다 — 목이
+  // 따로 없으면 vite proxy → ECONNREFUSED → 탭이 「불러올 수 없습니다」. e2e `journal.spec.ts`(G-E2E-12)가 밟는다.
+  describe('G-AST14 (cycle413 보완 1차): 거래일지 endpoint 등록', () => {
+    it('api-mocks.ts 에 /api/history/journal · /api/history/journal/notes 라우트 등록 의무', () => {
+      const apiSource = readFileSync(path.join(FRONTEND_API_DIR, 'history.ts'), 'utf-8')
+      expect(
+        apiSource.includes("'/history/journal'"),
+        '방어 가드: api/history.ts 가 /history/journal 을 호출하지 않음 — 본 가드 갱신 의무.',
+      ).toBe(true)
+      expect(
+        apiSource.includes('`/history/journal/notes/${anchorTradeId}`'),
+        '방어 가드: api/history.ts 가 메모 PUT endpoint 를 호출하지 않음 — 본 가드 갱신 의무.',
+      ).toBe(true)
+
+      const source = loadApiMocksSource()
+      expect(
+        isRouteRegistered(source, '/api/history/journal'),
+        'e2e api-mocks.ts 에 /api/history/journal 라우트 누락 — 거래일지 탭이 ECONNREFUSED.',
+      ).toBe(true)
+      expect(
+        isRouteRegistered(source, '/api/history/journal/notes/'),
+        'e2e api-mocks.ts 에 /api/history/journal/notes/* 라우트 누락 — 메모 저장이 ECONNREFUSED.',
+      ).toBe(true)
+    })
+  })
 })

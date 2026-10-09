@@ -58,6 +58,10 @@ const TARGET_FILES = [
   // `GET /api/stock-chart/candles` 를 기간(일·주·월봉)마다 부른다. e2e `history.spec.ts`(F32·F33)
   // 진입 경로라 retry 미명시 시 ECONNREFUSED 재시도가 누적돼 spec 이 timeout 된다.
   'StockChartModal.tsx',
+  // cycle413 보완 1차(2026-10-09, 판정 #13) — 거래일지 탭. 「거래 내역」 세 번째 탭을 누르면
+  // `GET /api/history/journal` 을 부른다. retry 미명시 시 e2e/백엔드 미기동 환경에서 기본
+  // retry 가 누적돼 탭이 「불러오는 중」 에 머문다(사이클 65 H3 패턴).
+  'JournalTab.tsx',
 ]
 
 // 사이클 80 hotfix — Settings.tsx 본체 useQuery 도 retry:1 명시 의무 (사이클 79 e2e
