@@ -1,0 +1,4 @@
+2026-10-09 13:31:27 sync-docs(report-writer) 보완 1차 재동기화 시작 — 모드 A main...HEAD(86326517), 스테이징 문서 11개 기준
+2026-10-09 13:33:51 routes·engine·frontend CLAUDE.md 수정 완료(⚠️ 결함 문장 2곳 걷음), README·CHANGELOG 진행
+2026-10-09 13:35:09 README·CHANGELOG·etf_trend_core 등재 완료, 덧칠 0·모듈 누락 0 — 문서 읽는 테스트 실행
+2026-10-09 13:38:25 문서 읽는 테스트 2,500 통과·9 skip·35 xfail·4 xpass, 문서 커밋 진행
