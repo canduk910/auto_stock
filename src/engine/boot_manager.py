@@ -397,14 +397,11 @@ async def boot(scheduler: "TradingScheduler") -> None:
             if strategy_id == FALLBACK_OWNER_ID:
                 # ⑦-F2 선행 관측 (cycle425) — 행위는 바뀌지 않는다(여전히 FALLBACK_OWNER_ID
                 # 가 받는다). 「주인을 모르는 보유를 폴백에 넘겼다」만 보이게 한다.
+                # 🔴 write_log 를 또 쓰지 않는다 — logger.* 가 루트 _DbLogHandler 로
+                # system_logs 에 들어간다(cycle72 G-6, 사건당 두 줄 금지).
                 logger.warning(
                     "[boot_recover_strategy_unknown] path=kis_supplement ticker=%s order_no=",
                     h.ticker,
-                )
-                await write_log(
-                    "WARNING",
-                    f"[boot_recover_strategy_unknown] path=kis_supplement "
-                    f"ticker={h.ticker} order_no=",
                 )
             target.state.positions[h.ticker] = Position(
                 ticker=h.ticker,
@@ -504,15 +501,12 @@ async def boot(scheduler: "TradingScheduler") -> None:
                 # ⑦-F2 선행 관측 (cycle425) — 행위는 바뀌지 않는다(여전히
                 # FALLBACK_OWNER_ID 가 받는다). 「주인을 모르는 미체결 주문을
                 # 폴백에 넘겼다」만 보이게 한다.
+                # 🔴 write_log 를 또 쓰지 않는다 — logger.* 가 루트 _DbLogHandler 로
+                # system_logs 에 들어간다(cycle72 G-6, 사건당 두 줄 금지).
                 _unknown_order_no = order.get("odno", "")
                 logger.warning(
                     "[boot_recover_strategy_unknown] path=unfilled_order ticker=%s order_no=%s",
                     ticker, _unknown_order_no,
-                )
-                await write_log(
-                    "WARNING",
-                    f"[boot_recover_strategy_unknown] path=unfilled_order "
-                    f"ticker={ticker} order_no={_unknown_order_no}",
                 )
             target_strategy.state.pending_buys.add(ticker)
             # 잔여 자금 폴백 계산용 — pending_buys 와 동기 등록 (2026-05-11 P1)

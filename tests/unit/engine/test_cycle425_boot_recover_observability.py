@@ -304,8 +304,14 @@ async def test_unfilled_order_known_owner_does_not_emit_marker(caplog):
 
 
 @pytest.mark.asyncio
-async def test_strategy_unknown_marker_also_persists_to_system_logs():
-    """`[boot_recover_strategy_unknown]` 은 logger 외에 write_log 로도 남긴다."""
+async def test_strategy_unknown_marker_does_not_duplicate_write_log():
+    """`[boot_recover_strategy_unknown]` 은 logger.* 단독이다 — write_log 중복 호출 0건.
+
+    cycle72 G-6(「같은 메시지를 write_log 로 또 쓰지 않는다 — 사건당 두 줄 금지」)
+    — logger.warning 이 루트 `_DbLogHandler` 로 system_logs 에 들어가므로 같은
+    사건을 `write_log` 로 또 적으면 AST 가드(`test_cycle72_ast_no_logger_write_log_pair.py`)
+    가 붉어진다.
+    """
     registry = _FakeRegistry({"momentum": _FakeStrategy("momentum")})
     scheduler = _make_scheduler(registry)
 
@@ -324,6 +330,4 @@ async def test_strategy_unknown_marker_also_persists_to_system_logs():
         c for c in write_log_mock.await_args_list
         if "boot_recover_strategy_unknown" in str(c)
     ]
-    assert calls, "write_log 로 [boot_recover_strategy_unknown] 이 남아야 한다"
-    level = calls[0].args[0] if calls[0].args else calls[0].kwargs.get("log_level")
-    assert level == "WARNING"
+    assert not calls, f"write_log 로 [boot_recover_strategy_unknown] 중복 기록: {calls}"
