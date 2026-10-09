@@ -1293,3 +1293,28 @@ target 220 → 마진 34 영업일(사이클196 의 34 와 같다). `fetch_daily
 승격했을 때만」 쓰게 해, `trade_journal_stops` 에 UNIQUE 가 없다는 사실과 함께 정본에 적었다.
 
 → CHANGELOG: cycle412 마무리 행
+
+## DB 스키마
+
+### 2026-10-09 cycle413 문서 동기화 — backend 의 거래일지 읽기 · 메모 쓰기
+
+정본 원문(「거래일지 4표」 머리 · `trade_journal_notes` 줄 · 지우지 않는다 줄):
+
+```
+- **거래일지 4표 `trade_journal_*`**(migration 047, 가산형 `CREATE … IF NOT EXISTS` 만 · cycle412). **이 디렉터리에 모듈이 없다** — 쓰는 쪽은 `journal_worker` 컨테이너의 `journal_worker/jw/db.py` 하나이고 전용 DB 역할 `journal_worker`(`journal_worker/ops/role.sql`)로 붙는다. backend 는 지금 읽지도 쓰지도 않는다.
+```
+
+```
+  - `trade_journal_notes` — 메모. `anchor_trade_id` UUID NOT NULL UNIQUE · `body` NOT NULL. 표만 있고 읽고 쓰는 코드는 없다.
+```
+
+```
+  - 🔴 **이 표들은 지우지 않는다** — 워커 역할에 DELETE·TRUNCATE 권한이 없다.
+```
+
+경위: cycle413(거래일지 화면 1b)이 `src/db/trade_journal.py` 를 더했다. backend 는 `_orders`·`_stops` 를
+읽기만 하고, `_notes` 는 `upsert_note`·`delete_note` 로 쓴다(빈 본문 PUT = 그 행 DELETE, 명세
+`_workspace/red/cycle413/journal_view_spec.md` 1-3). 그래서 「지우지 않는다」 는 워커가 쓰는 세 표로 좁혔다
+— 워커 역할(`role.sql`)에 DELETE·TRUNCATE 가 없다는 사실은 그대로다.
+
+→ CHANGELOG: cycle413 행

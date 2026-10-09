@@ -993,7 +993,7 @@ flowchart TD
 | `stock_master.master_raw` | 034 | KIS 공식 일일 마스터 파일 raw JSONB + master_raw_updated_at + is_kospi200/is_kosdaq150 BOOLEAN (037, 사이클 153) |
 | `pending_next_day_clear` | 038 | 익일청산큐 DB 영속화 — PK (target_date, ticker, strategy_id). 재기동 시 메모리 휘발 차단 |
 | `llm_buy_evaluations` | 043 | AI 매수평가(LLM)를 주문 발화 시점에 기록 — PK (trade_date, account_no, ticker, order_no) + eval_kind('order'|'blocked'). 주문 1건 = 1행(성공·실패 모두), 매매 hot path 무관한 관측 계층. 열 정의 정본 = 루트 `CLAUDE.md` DB 스키마 표 (cycle276). 프로세스 분리 1단계가 이 테이블을 큐로 재사용한다 → 15.2 |
-| `trade_journal_orders` · `_stops` · `_notes` · `_cursor` | 047 | 거래일지 — 주문 1건 1행 `(order_date, order_no, side)` UNIQUE · 손절선 사건 · 메모 · 로그 커서. 쓰는 쪽은 `journal_worker` 컨테이너의 전용 역할 하나 → 15.8. 칸 정의 정본 = `src/db/CLAUDE.md` 「DB 스키마」 절 |
+| `trade_journal_orders` · `_stops` · `_notes` · `_cursor` | 047 | 거래일지 — 주문 1건 1행 `(order_date, order_no, side)` UNIQUE · 손절선 사건 · 메모 · 로그 커서. `_orders`·`_stops`·`_cursor` 를 쓰는 쪽은 `journal_worker` 컨테이너의 전용 역할 하나 → 15.8. backend 는 거래일지 탭을 위해 `_orders`·`_stops` 를 읽고 메모 `_notes` 를 쓴다. 칸 정의 정본 = `src/db/CLAUDE.md` 「DB 스키마」 절 |
 
 ---
 
@@ -1005,7 +1005,7 @@ frontend/src/
 │
 ├── pages/
 │   ├── Dashboard.tsx       # 메인 대시보드 (전략 탭 + 컴포넌트 배치)
-│   ├── History.tsx         # 거래 내역 페이지 (주문체결 / 매매손익 2 탭)
+│   ├── History.tsx         # 거래 내역 페이지 (주문체결 / 매매손익 / 거래일지 3 탭)
 │   ├── Strategies.tsx      # 전략별 실적/스캔 깔때기
 │   ├── StrategyFunnel.tsx  # 조건검색 단계별 추적 (사이클 34)
 │   ├── StockMaster.tsx     # 종목마스터 (사이클 84+, KIS 마스터/일봉/필터/4 작업 trigger + 진행 배너)
@@ -2071,6 +2071,12 @@ flowchart LR
 
 워커가 죽거나 G0·G1 이 실패해도 매매 영향은 0 이다. G0·G1 이 실패한 회전은 스냅샷 없이
 로그만 수확하고(`degraded`), 연속 실패는 30·60·120·240·300초로 물러난다.
+
+기록을 읽는 쪽은 backend 다. 거래 내역 화면의 「거래일지」 탭이 `GET /api/history/journal` 을 부르면
+backend 가 `trade_history` 페어에 `trade_journal_orders`·`_stops`·종가·실비용을 붙여 카드로 조립한다
+(`src/db/trade_journal.py` 읽기 → 순수 leaf `src/engine/journal_view.py::build_card`). 메모(`trade_journal_notes`)는
+backend 가 `PUT /api/history/journal/notes/{id}` 로 쓴다 — 워커는 메모를 쓰지 않는다. 이 경로도 KIS 호출 0 이다.
+8영역에서는 종목명 캐시 `scanner.ticker_names` 하나를 읽기만 한다(`/api/history/pnl` 과 같은 방식).
 
 ---
 

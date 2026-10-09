@@ -79,7 +79,7 @@ AWS RDS PostgreSQL CRUD 모듈. DB 클라이언트 정본 = **`pg.py` (asyncpg �
 
 테이블 4종(migration 047) — `trade_journal_orders`·`_stops`·`_notes`·`_cursor`. 쓰는 쪽(`_orders`·`_stops`·`_cursor`)은 `journal_worker` 컨테이너 전용 DB 역할 하나뿐이다(관찰자 방식) — 이 모듈은 그 세 표를 **읽기만** 한다. `trade_journal_notes` 는 이 모듈이 유일한 쓰기 경로다.
 
-- `list_orders(order_nos, *, date_from, date_to) -> list[dict]` — 주문번호 ∩ `[date_from, date_to]`(`order_date`). 표 전 칸 + `noted_at`(KST ISO).
+- `list_orders(order_nos, *, date_from, date_to) -> list[dict]` — 주문번호 ∩ `[date_from, date_to]`(`order_date`). `id` 를 뺀 표 칸 전부(`noted_at` 은 KST ISO), `noted_at` 순.
 - `list_stops(keys, *, since, until) -> list[dict]` — `keys=[(strategy, ticker), ...]` 합집합(`unnest($1::text[], $2::text[])`) ∩ `observed_at ∈ [since, until]`.
 - `list_notes(anchor_ids) -> list[dict]` — `anchor_trade_id::text`·`body`·`created_at`·`updated_at`(KST ISO).
 - `get_record_start() -> dict` — `{orders_restored, orders_live, stops, order_price}`(KST `'YYYY-MM-DD'`|`None`). `orders_restored`=`MIN(order_date)` WHERE `source='log_restore'` · `orders_live`=그 반대 · `stops`=`MIN(observed_at)` 의 KST 날짜 · `order_price`=`trade_history.order_price` 가 처음 채워진 체결의 KST 날짜.
@@ -386,16 +386,16 @@ list_paged_by_filter(*, market=None, min_market_cap=0, min_trade_amount=0,
 - 마이그레이션 = `supabase/migrations/NNN_*.sql`(디렉터리명은 `supabase/` 유지 — 스키마 SQL 정본, RDS 에 순차 적용). 테이블별 계약은 위 모듈 절이 정본이다.
 - `trade_history.status` CHECK = `PENDING`/`COMPLETED`/`PARTIAL`/`CANCELLED`(PENDING → COMPLETED / PARTIAL → CANCELLED) · `trade_type` CHECK = `BUY`/`SELL`(migration 001). status 값을 바꾸면 CHECK 제약도 새 migration 으로 함께 고친다.
 - `stock_master_history`(migration 032·036, 전용 모듈 없음 — `stock_master.list_history` 가 읽는다): `stock_master` 의 INSERT/UPDATE/DELETE 트리거가 쓰는 직전본 표. PK `(ticker, seq)` — `seq` 0=최신본·1=직전본. UPDATE 는 `raw` 가 바뀔 때만 기록하고, DELETE 는 그 종목 행을 지운다.
-- **거래일지 4표 `trade_journal_*`**(migration 047, 가산형 `CREATE … IF NOT EXISTS` 만 · cycle412). **이 디렉터리에 모듈이 없다** — 쓰는 쪽은 `journal_worker` 컨테이너의 `journal_worker/jw/db.py` 하나이고 전용 DB 역할 `journal_worker`(`journal_worker/ops/role.sql`)로 붙는다. backend 는 지금 읽지도 쓰지도 않는다.
+- **거래일지 4표 `trade_journal_*`**(migration 047, 가산형 `CREATE … IF NOT EXISTS` 만 · cycle412). `_orders`·`_stops`·`_cursor` 를 쓰는 쪽은 `journal_worker` 컨테이너의 `journal_worker/jw/db.py` 하나이고 전용 DB 역할 `journal_worker`(`journal_worker/ops/role.sql`)로 붙는다. backend 는 위 `trade_journal.py` 로 `_orders`·`_stops` 를 읽기만 하고, `_notes`(메모)만 쓴다.
   - `trade_journal_orders` — 주문 1건 1행. `UNIQUE (order_date, order_no, side)` · `side` = `BUY`/`SELL` · NOT NULL = `order_date`·`order_no`·`side`·`strategy`·`ticker`·`source`·`noted_at`. 나머지(`reason_code`·`reason_sub`·`judge_price`·`order_price`·`order_division`·`exchange`·`parent_order_no`·`fired_line`·`effective_line`·`signal` JSONB·`params` JSONB)는 NULL 허용.
     - `source` 는 두 갈래다. **로그 행**(로그 줄을 짝지은 실측) = 상시 루프의 `log_harvest`·`fallback_inferred`·`reorder_inferred`·`manual_api` + 과거분 적재(`python -m jw backfill <경로…>`, `jw/backfill.py`)의 `log_restore`. **빈 행**(대사 `jw/reconcile.py` 가 `trade_history` 의 `COMPLETED`·`PARTIAL` 로 채운 보강 — 사유·판단가 등은 NULL, 전략이 없으면 `'unknown'`) = `external`(접수 통보 `[order_notice]` 만 있고 로그 앵커 줄이 없는 주문)·`unmatched`(그 밖). 대사는 루프(`jw/main.py`)가 60초 간격으로 부른다.
     - 쓰기 기본 = `insert_order` 의 `ON CONFLICT (order_date, order_no, side) DO NOTHING`(처음 값을 지킨다). 과거분 적재는 이것만 쓴다 — 같은 파일을 두 번 적재해도 행이 늘지 않는다.
     - 예외 하나 = **승격** `promote_order`. 상시 루프의 로그 행이 `insert_order` 에서 충돌하면 부른다. 상대가 빈 행(`source IN ('unmatched', 'external')`)일 때만 UPDATE 한다 — NULL 칸은 `COALESCE(기존, 새 값)`, 전략 `'unknown'` 은 새 값, `source` 는 로그 행 것. `ticker`·`noted_at`·키는 그대로다. 이미 실측인 행은 바꾸지 않는다.
     - ⚠️ `JournalDB.fill_order_division`(`… AND order_division IS NULL` UPDATE)은 정의만 있고 `jw/` 안에 부르는 곳이 없다. `order_division` 은 행을 처음 쓸 때 정해진 값 그대로다.
   - `trade_journal_stops` — 손절선 사건. `event` = `first`·`change`·`boot`·`eod`·`paused`·`exit` · `stop_kind` = G1 `stop_source` · `inputs` JSONB · 인덱스 `(strategy, ticker, observed_at)`. 워커 재시작은 `(strategy, ticker)` 별 마지막 행(`DISTINCT ON`)에서 이어 간다. 이 표에는 UNIQUE 가 없어 DB 가 중복을 막지 않는다. 그래서 `exit` 사건은 그 회전에 매도 행을 **새로 넣었거나 승격했을 때만** 쓴다(`jw/main.py` — 커서 저장 실패로 같은 로그 덩어리를 다시 읽어도 겹치지 않는다).
-  - `trade_journal_notes` — 메모. `anchor_trade_id` UUID NOT NULL UNIQUE · `body` NOT NULL. 표만 있고 읽고 쓰는 코드는 없다.
+  - `trade_journal_notes` — 메모. `anchor_trade_id` UUID NOT NULL UNIQUE · `body` NOT NULL. 앵커 = 거래일지 카드의 `anchor_trade_id`(페어 `buy_trade_ids` 첫 원소 — BUY 체결 행 id). 읽기·쓰기 = backend `trade_journal.py`(`list_notes`·`upsert_note`·`delete_note`) 하나 — 워커는 이 표에 쓰지 않는다.
   - `trade_journal_cursor` — 로그 꼬리 읽기 커서(`name` PK, 기본 행 `'main'` · `file_name`·`inode`·`byte_offset`). 칸 이름이 `offset` 이 아닌 것은 SQL 예약어라서다.
-  - 🔴 **이 표들은 지우지 않는다** — 워커 역할에 DELETE·TRUNCATE 권한이 없다.
+  - 🔴 **`_orders`·`_stops`·`_cursor` 는 지우지 않는다** — 워커 역할에 DELETE·TRUNCATE 권한이 없다. `_notes` 행은 backend 가 빈 본문 PUT 때 지운다(`delete_note`).
   - ⚠️ 워커 풀에는 backend 의 JSONB codec(「pg.py」 절 `_init_conn`)이 없다. 그래서 워커는 `json.dumps` 문자열을 바인딩한다 — 「asyncpg 계약 패턴」 의 「raw dict 바인딩」 은 backend 풀 규약이다. 워커 코드를 그 규약대로 고치면 INSERT 가 실패한다.
 
 ## TIMESTAMPTZ 계약
