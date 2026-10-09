@@ -377,21 +377,29 @@ async def test_s3a_when_insufficient_quantity_then_not_registered_in_block_set(
     mock_strategy_exchange,
     mock_stock_master,
     mock_get_balance: AsyncMock,
+    monkeypatch: pytest.MonkeyPatch,
 ):
-    """회귀 가드: 보유 부족 거부는 기존 즉시 break + positions 삭제 동작 보존, 차단 set 미등록."""
+    """cycle429(D1 안A, 사용자 승인 2026-10-10) 재조준 — 보유 부족 거부는
+    여전히 즉시 1회(재시도·폴백 없음) 지만, 삭제 대신 보존 + 5분 진입
+    차단으로 끝난다(이전 「차단 set 미등록」 회귀 가드는 D1 로 뒤집혔다 —
+    자동 삭제 경로가 없으므로 이제 tracker 가 직접 차단을 건다).
+    """
+    import src.api.balance as _balance_mod
+    monkeypatch.setattr(_balance_mod, "get_daily_orders", AsyncMock(return_value=[]))
     mock_place_order.side_effect = [_insufficient_qty_error()]
 
     await engine.execute_sell("064400", Signal.STOP_LOSS, "momentum")
 
     # 기존 동작 보존 — 정확히 1회 호출 (재시도 없음, 폴백 없음)
     assert mock_place_order.await_count == 1
-    # positions 메모리 삭제 (기존 동작)
-    assert "064400" not in strategy.state.positions
-    # 차단 set 미등록 — 본 사이클 신규 가드 침범 안 함
+    # D1 안A — positions 보존(자동 삭제 경로 없음)
+    assert "064400" in strategy.state.positions
+    # D1 안A — 이제 insufficient_quantity 는 5분 진입 차단을 "의도적으로" 건다
     blocked = getattr(engine, "_market_closed_blocked", {})
-    assert "064400" not in blocked, (
-        "is_insufficient_quantity 가 차단 set 에 잘못 등록됨 — 회귀 위반"
+    assert "064400" in blocked, (
+        "D1 안A — insufficient_quantity 설명 안 됨은 5분 진입 차단을 걸어야 한다"
     )
+    assert "064400" not in engine._selling
 
 
 # ===========================================================================

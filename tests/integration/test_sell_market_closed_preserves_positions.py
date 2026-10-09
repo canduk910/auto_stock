@@ -90,7 +90,14 @@ async def test_execute_sell_when_market_closed_then_no_retry_storm(order_env, ki
 async def test_execute_sell_when_real_insufficient_quantity_still_deletes(
     order_env, kis_error
 ):
-    """회귀 가드 — 진짜 보유 부족(APBK1234)일 때는 기존 동작(positions 정리) 유지."""
+    """cycle429(D1 안A, 사용자 승인 2026-10-10) 재조준 — 진짜 보유 부족(APBK1234)
+    이어도 더는 자동으로 지우지 않는다.
+
+    D1 이전엔 「기존 안전장치(positions 정리)」 였다. 이제는 자동 삭제 경로가
+    없다 — `_sell_orders_snapshot` 조회(이 fixture 는 KIS 를 모킹하지 않아
+    실제 호출이 실패해 `fills=None`)가 「설명 안 됨」 으로 판정해 포지션을
+    **보존**하고 5분 진입 차단만 건다.
+    """
     env = order_env
     _seed_position(env.momentum, ticker="012200")
 
@@ -101,6 +108,7 @@ async def test_execute_sell_when_real_insufficient_quantity_still_deletes(
 
     await env.engine.execute_sell("012200", Signal.NEXT_DAY_CLEAR, "momentum")
 
-    # 진짜 보유 부족 → 기존 안전장치(positions 정리)는 유지되어야 함
-    assert "012200" not in env.momentum.state.positions
-    assert env.calls.delete_position == [{"ticker": "012200"}]
+    # D1 안A — 자동 삭제 경로 없음. positions 보존 + DB 삭제 호출 없음.
+    assert "012200" in env.momentum.state.positions
+    assert env.calls.delete_position == []
+    assert "012200" in env.engine._sell_rejection._blocked_until

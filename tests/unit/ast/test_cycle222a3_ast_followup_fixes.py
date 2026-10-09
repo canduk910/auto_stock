@@ -445,9 +445,8 @@ _APPROVED_CONTENT_SHA: dict[str, tuple[str, str]] = {
         "cycle330(2026-09-20) — 합류자 없는 토큰 발급 실패의 고아 Future 회수, 8영역 승인",
     ),
     "src/engine/order_engine.py": (
-        "666e3f62de2e705e2d9f7bfbd7dee1cc80bb8f66030eb995c64e2e5f933cc830",
-        "cycle428 F-422-1 사용자 승인 2026-10-10 — 매도 결과 모름(UNKNOWN) 신설 "
-        "(폴백·1차 주문 비-KisApiError 는 재발사 대신 180초 뒤 단일 종목 확인 조회)",
+        "3e47e4cfdd2f5649f2fe170c648d1449b41da9c27809e3e19a33a2689ae4dbe5",
+        "cycle429 D1 안A 사용자 승인 2026-10-10",
     ),
     "src/engine/risk.py": (
         "a2187b8270446379988d24dfbe39b902d6ab37b112d4b6ce7330ee171434e222",

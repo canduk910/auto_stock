@@ -444,10 +444,18 @@ async def test_c5_when_insufficient_qty_then_reconciliation_log_and_balance_inqu
     mock_strategy_exchange,
     mock_stock_master,
     mock_get_balance: AsyncMock,
+    monkeypatch: pytest.MonkeyPatch,
 ):
-    """C-5 (Q3): insufficient_quantity 거부 → (1) tracker.register_insufficient_quantity 호출
-    (2) [positions_reconciliation] INFO 로그 (3) get_balance() 1회 호출 (4) positions 정리.
+    """C-5 → cycle429(D1 안A, 사용자 승인 2026-10-10) 로 재조준.
+
+    insufficient_quantity 거부(설명 안 됨) → (1) tracker.register_insufficient_quantity
+    호출(history 적재) (2) `[sell_insufficient_unexplained]` ERROR 로그
+    (3) get_balance() 1회 호출(관측 전용) (4) positions **보존**(자동 삭제
+    경로 없음) (5) tracker 가 5분 진입 차단을 건다(D1 이전엔 차단 X 였다 —
+    뒤집힌 축).
     """
+    import src.api.balance as _balance_mod
+    monkeypatch.setattr(_balance_mod, "get_daily_orders", AsyncMock(return_value=[]))
     mock_place_order.side_effect = [_insufficient_qty_err()]
     strategy = registry.get("momentum")
 
@@ -460,29 +468,30 @@ async def test_c5_when_insufficient_qty_then_reconciliation_log_and_balance_inqu
     )
     assert history[0].reason == "insufficient_quantity"
 
-    # (2) [positions_reconciliation] 로그
-    recon_calls = [
+    # (2) [sell_insufficient_unexplained] ERROR 로그 (D1 안A 신규 마커)
+    unexplained_calls = [
         c for c in mock_write_log.await_args_list
-        if len(c.args) >= 2 and "[positions_reconciliation]" in str(c.args[1])
+        if len(c.args) >= 2 and "[sell_insufficient_unexplained]" in str(c.args[1])
     ]
-    assert len(recon_calls) >= 1, (
-        "사이클 55 R-1 Q3: [positions_reconciliation] 로그 미발화"
+    assert len(unexplained_calls) >= 1, (
+        "cycle429 D1 안A: [sell_insufficient_unexplained] 로그 미발화"
     )
 
-    # (3) get_balance() 1회 호출
+    # (3) get_balance() 1회 호출(관측 전용 — held 값만 로그에 남긴다)
     assert mock_get_balance.await_count >= 1, (
-        "사이클 55 R-1 Q3: get_balance() reconciliation 호출 누락"
+        "cycle429 D1 안A: get_balance() 관측 호출 누락"
     )
 
-    # (4) 기존 동작 보존 — positions 메모리 정리
-    assert "064400" not in strategy.state.positions, (
-        "기존 동작 회귀 — insufficient_quantity 후 positions 정리 누락"
+    # (4) D1 안A — positions 보존(자동 삭제 경로 없음)
+    assert "064400" in strategy.state.positions, (
+        "D1 안A 회귀 — insufficient_quantity 가 포지션을 자동으로 지우면 안 된다"
     )
 
-    # tracker 는 차단 X (Q3 도메인 자문)
-    assert "064400" not in engine._sell_rejection._blocked_until, (
-        "Q3: insufficient_quantity 가 차단 set 등록 — positions 제거가 자연 차단인데 중복"
+    # (5) D1 안A — tracker 가 5분 진입 차단을 건다(Q3 기존 「차단 X」 를 뒤집는다)
+    assert "064400" in engine._sell_rejection._blocked_until, (
+        "cycle429 D1 안A: insufficient_quantity 는 5분 진입 차단을 걸어야 한다"
     )
+    assert "064400" not in engine._selling
 
 
 # ===========================================================================

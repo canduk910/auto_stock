@@ -574,7 +574,7 @@ class TestMechanism2OnPositionClosed:
         sig = bfb.check_exit_signal("005930", 14_000, 14_000)
         assert sig != Signal.TRAILING_STOP, "잔량 측정이동 억제 (이미 마킹, ATR 트레일링 경로)"
 
-    # ---- secondary hook (execute_sell reconciliation) + 격리 --------------
+    # ---- insufficient_quantity 보존 경로(D1 안A, cycle429) + 격리 --------
     @pytest.mark.asyncio
     async def test_G2_SECONDARY_COMMON_insufficient_qty_reconciliation_discards(
         self,
@@ -584,12 +584,22 @@ class TestMechanism2OnPositionClosed:
         mock_write_log: AsyncMock,
         mock_strategy_exchange,
         mock_get_balance: AsyncMock,
+        monkeypatch: pytest.MonkeyPatch,
     ) -> None:
-        """G2-SECONDARY-COMMON (Red, HIGH): execute_sell insufficient_quantity → positions pop + discard.
+        """cycle429(D1 안A, 사용자 승인 2026-10-10) 재조준 — execute_sell
+        insufficient_quantity(설명 안 됨) → positions **보존**, `_selling` 해제,
+        5분 진입 차단 등록.
 
-        외부 증발 포지션 (수동 HTS 매도) catch-all — reconciliation site(L793) 직후 on_position_closed.
-        현재 FAIL = positions pop 만, flag 잔존.
+        D1 이전에는 자동 삭제 + on_position_closed 였다. 자동 삭제 경로가
+        없어지면서 `_limit_up_reached` 같은 보유결합 상태도 그대로 남는다
+        (포지션이 안 지워졌으므로 — 지우는 길은 체결통보 보유 축·재기동
+        복구·사람 셋뿐이다).
         """
+        import src.api.balance as _balance_mod
+        monkeypatch.setattr(
+            _balance_mod, "get_daily_orders", AsyncMock(return_value=[]),
+        )
+
         ltv = _make_ltv()
         ltv.state.positions["093370"] = _pos(
             "093370", "long_tail_volatility", buy_price=10_000, quantity=10
@@ -604,9 +614,13 @@ class TestMechanism2OnPositionClosed:
 
         await engine.execute_sell("093370", Signal.STOP_LOSS, "long_tail_volatility")
 
-        assert "093370" not in ltv.state.positions, "insufficient_quantity → positions 강제 정리"
-        assert "093370" not in ltv._limit_up_reached, (
-            "secondary hook (L793 직후) → on_position_closed discard (외부 증발 catch-all)"
+        assert "093370" in ltv.state.positions, "D1 안A — 수량 부족이 자동으로 포지션을 지우면 안 된다"
+        assert "093370" in ltv._limit_up_reached, (
+            "포지션이 보존되므로 on_position_closed 도 불리지 않고 보유결합 상태도 그대로다"
+        )
+        assert "093370" not in engine._selling, "설명 안 됨 경로는 _selling 을 해제한다"
+        assert "093370" in engine._sell_rejection._blocked_until, (
+            "D1 안A — insufficient_quantity 는 5분 진입 차단을 건다"
         )
 
     @pytest.mark.asyncio

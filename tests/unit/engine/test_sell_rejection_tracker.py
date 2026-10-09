@@ -8,7 +8,9 @@
     - Q1: 2단계 TTL — KRX 메인(09:00~15:30) 거부 = 5분 TTL,
                      NXT 시간대(08:00~09:00 / 15:30~20:00) 거부 = 다음 KST 09:00.
     - Q2: market_order_disallowed = 30초 TTL + NXT 폴백 실패 시 익일 청산 전환.
-    - Q3: insufficient_quantity = 차단 X, history 만 적재 (positions 자체 제거가 자연 차단).
+    - Q3: insufficient_quantity = **5분 진입 차단 + history 적재** (cycle429 D1 안A,
+      사용자 승인 2026-10-10 로 재조준 — 과거엔 「차단 X, positions 자체 제거가
+      자연 차단」 이었으나, 자동 삭제 경로가 없어지며 tracker 가 직접 차단한다).
     - Q5: ticker별 deque(maxlen=20) history 사전 도입 (V-1 알람 hook).
 
 테스트 매트릭스 (16 케이스):
@@ -24,8 +26,8 @@
         A2-3: 폴백 실패 (NXT) → next_day=True (Q2 핵심)
         A2-4: 30초 경과 → is_blocked=False
 
-    Q3 — insufficient_quantity (3)
-        A3-1: register_insufficient_quantity → history 등록 + 차단 X
+    Q3 — insufficient_quantity (3, cycle429 D1 안A 재조준)
+        A3-1: register_insufficient_quantity → history 등록 + 5분 진입 차단
         A3-2: history 적재 reason="insufficient_quantity"
         A3-3: 다른 ticker 호출 영향 없음
 
@@ -240,19 +242,27 @@ def test_a2_4_when_30s_elapsed_then_is_blocked_false():
 # Q3 — insufficient_quantity (차단 X, history 만)
 # ===========================================================================
 @freeze_time("2026-06-03 10:00:00", tz_offset=-9)
-def test_a3_1_when_register_insufficient_quantity_then_not_blocked_and_history_added():
-    """A3-1: insufficient_quantity 등록 → 차단 set 무영향, history 만 적재."""
+def test_a3_1_when_register_insufficient_quantity_then_blocked_5min_and_history_added():
+    """A3-1 → cycle429(D1 안A, 사용자 승인 2026-10-10) 로 재조준.
+
+    insufficient_quantity 등록 → **5분 진입 차단** + history 적재 + 당일
+    횟수 1 누적. D1 이전엔 「차단 X」 였다 — 자동 포지션 삭제 경로가
+    없어지면서 positions 가 더는 자연 차단을 만들지 않기 때문에 뒤집혔다.
+    """
     from src.engine.sell_rejection import SellRejectionTracker
 
     tracker = SellRejectionTracker()
     now_kst = datetime.now(KST_TZ)
-    tracker.register_insufficient_quantity("064400", now_kst)
+    expiry = tracker.register_insufficient_quantity("064400", now_kst)
 
-    # 차단 게이트 무영향 (positions 자체 제거가 자연 차단 — Q3 도메인 자문)
-    assert tracker.is_blocked("064400", now_kst) is False, (
-        "insufficient_quantity 차단 누설 — positions 제거가 자연 차단이므로 tracker 차단 금지"
+    assert expiry == now_kst + timedelta(minutes=5)
+    assert tracker.is_blocked("064400", now_kst) is True, (
+        "D1 안A — insufficient_quantity 는 5분 진입 차단을 걸어야 한다"
     )
-    assert "064400" not in tracker._blocked_until
+    assert tracker.is_blocked("064400", now_kst + timedelta(minutes=5, seconds=1)) is False, (
+        "5분 TTL 만료 후에는 차단이 풀려야 한다"
+    )
+    assert tracker.insufficient_quantity_count_today("064400") == 1
     # history 적재 확인
     history = tracker.get_recent_rejections("064400")
     assert len(history) == 1

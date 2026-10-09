@@ -626,8 +626,12 @@ async def test_tr10_other_ticker_and_buy_rows_do_not_become_credit(monkeypatch, 
 # ════════════════════════════════════════════════════════════════════════════
 @pytest.mark.asyncio
 async def test_tr11_ticker_credit_is_dropped_when_the_holding_closes(monkeypatch, drain):
-    """🔴 TR11 — 종목 크레딧(조회 실패)이 남은 채 보유가 다른 경로(실보유 0 → insufficient
-    삭제)로 사라지고, 뒤늦은 외부 통보가 그 주문을 **닫으면** 남은 종목 크레딧도 지운다.
+    """🔴 TR11 → cycle429(D1 안A, 사용자 승인 2026-10-10) 로 재조준.
+
+    종목 크레딧(조회 실패)이 남은 채 실보유 0 거부가 뜨면, D1 이전엔 insufficient
+    삭제 경로가 포지션을 지웠다. 이제는 자동 삭제가 없다 — 포지션이 **보존**된
+    채로 뒤늦은 외부 통보가 그 주문을 **닫으면**(보유 축이 0 이 되면) 남은 종목
+    크레딧도 지운다는 것만 확인한다.
 
     지우지 않으면(MR12) 하루 안에 같은 종목의 다음 매도 통보를 조용히 흡수한다.
     ⚠️ 보유가 있는 채로 닫히면 흡수 규칙상 종목 크레딧은 이미 0 이다(`hold_dec>0` ⇒ 전부
@@ -655,11 +659,18 @@ async def test_tr11_ticker_credit_is_dropped_when_the_holding_closes(monkeypatch
 
     await env.engine.execute_sell(TICKER, Signal.STOP_LOSS, "kojiro")
 
-    assert _held(env, "kojiro") is None, "실보유 0 → insufficient 경로가 포지션을 지웠어야 한다"
-    # (명세는 insufficient 삭제 경로의 종목 크레딧 정리를 정하지 않는다 — 중간값은 단언하지 않는다.
-    #  명세 그대로의 구현이면 여기서 3 이 남아 있고, 아래 통보가 2 를 흡수한 뒤 닫힘이 나머지를 지운다.)
+    # D1 안A — 자동 삭제 경로가 없다. 실보유 0(설명 안 됨)은 포지션을 보존하고
+    # 5분 진입 차단만 건다(첫 재시도의 재대조가 pos.quantity 를 7 로, 종목
+    # 크레딧(`_sell_blind_credit`)을 3 으로 남긴 뒤).
+    held = _held(env, "kojiro")
+    assert held == 7, "D1 안A — 자동 삭제 없음, 재대조된 수량 7 이 보존돼야 한다"
+    assert TICKER in env.engine._sell_rejection._blocked_until
+    assert env.engine._sell_blind_credit.get(TICKER) == 3
 
-    await _sell_notice(env, MTS_NO, 2, payload=2)  # 보유 없음 · 주문 종료
+    # 종목 크레딧 3 을 흡수하고 남은 보유(7)를 정확히 닫으려면 통보 수량 10
+    # (= hold_dec 7 + 흡수 3)이 필요하다 — `hold_dec = quantity - min(quantity, blind_credit)`.
+    await _sell_notice(env, MTS_NO, 10, payload=10)
+    assert _held(env, "kojiro") is None, "전량 통보가 보유 축을 닫아야 한다"
     assert TICKER not in env.engine._sell_blind_credit, (
         f"닫힘 뒤 종목 크레딧 {env.engine._sell_blind_credit.get(TICKER)} 이 남았다"
     )

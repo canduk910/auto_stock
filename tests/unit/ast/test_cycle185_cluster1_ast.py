@@ -6,21 +6,23 @@ source 텍스트 grep 금지 — AST 노드 검사 (사이클 167/179 교훈: �
 
 - G1-WIRING-AST (Red): scheduler `_reset_daily_state` FunctionDef 에
   `<name>._reset_daily_state()` Call 노드 (receiver=Name != self) 존재.
-- G2-OE-AST (Red): order_engine `_handle_sell_fill` + `_handle_sell_final_failure`
-  양쪽 FunctionDef 에 `on_position_closed` Call ≥ 1.
-  🔁 B4-5(cycle426) — `execute_sell` 의 마지막 실패 뒤처리(⑲)가
-  `_handle_sell_final_failure` 로 추출되며 이 자리가 바뀌었다(행위 보존
-  추출, `_workspace/refactor/2026-10-09_execute_sell_baseline.md` §3). 그래서
-  `execute_sell` → `_handle_sell_final_failure` 호출 배선도 함께 검사한다
-  (약화 금지 — G1-WIRING-AST 와 같은 패턴을 이 쪽에도 더한다).
-- G2-STRUCT-INVARIANT (HIGH):
-  (1) site 집합 (양쪽 PASS, 불변식): order_engine 의 `state.positions` 제거
+- G2-OE-AST (Red): order_engine `_handle_sell_fill` FunctionDef 에
+  `on_position_closed` Call ≥ 1.
+  🔁 cycle429(D1 안A, 사용자 승인 2026-10-10) — 수량 부족(APBK1234·APBK0400
+  실보유 0) 자동 삭제 경로가 없어지면서 `_handle_sell_final_failure` 의
+  포지션 제거·`on_position_closed` 분기가 사라졌다(`_handle_sell_insufficient_quantity`
+  로 흡수된 로직은 포지션을 **보존**하므로 on_position_closed 를 부르지
+  않는다). 그래서 이 자리의 의무는 `_handle_sell_fill` 하나로 좁아진다.
+- G2-OE-AST (PASS, 불변): `execute_sell` → `_handle_sell_final_failure`
+  호출 배선(이 메서드는 여전히 미분류 거부의 CRITICAL 1행 뒤처리를 한다 —
+  `_handle_sell_final_failure` 자신은 더 이상 positions 를 건드리지 않는다).
+- G2-STRUCT-INVARIANT (HIGH, cycle429 로 재조준):
+  (1) site 집합(불변식): order_engine 의 `state.positions` 제거
       (`del ...positions[...]` / `...positions.pop(...)`) 직접 포함 함수 집합
-      == `{_handle_sell_fill, _handle_sell_final_failure}` (3번째 site 추가
-      영구 차단). `execute_sell` 자신은 더 이상 제거를 **직접** 하지 않고
-      `_handle_sell_final_failure` 를 불러 위임한다 — 제거 자리는 여전히
-      정확히 둘이다.
-  (2) companion (Red): 위 각 함수에 `on_position_closed` Call 동반 의무.
+      == `{_handle_sell_fill}` **하나뿐**(2번째 site 추가 영구 차단). D1 안A
+      이전에는 `_handle_sell_final_failure` 도 포함된 둘이었으나, 자동 삭제
+      경로가 없어지며 제거 자리가 하나로 줄었다.
+  (2) companion (PASS): 그 함수에 `on_position_closed` Call 동반 의무.
 """
 
 from __future__ import annotations
@@ -141,20 +143,27 @@ def test_G1_WIRING_AST_scheduler_reset_calls_strategy_reset_daily_state() -> Non
 # G2-OE-AST (Red)
 # ---------------------------------------------------------------------------
 def test_G2_OE_AST_both_sell_sites_call_on_position_closed() -> None:
-    """order_engine `_handle_sell_fill` + `_handle_sell_final_failure` 양쪽에
-    on_position_closed Call ≥ 1.
+    """order_engine `_handle_sell_fill` 에 on_position_closed Call ≥ 1.
 
-    B4-5(cycle426) 재조준 — `execute_sell` 의 마지막 실패 뒤처리(⑲)가
-    `_handle_sell_final_failure` 로 추출되며 실제 제거 자리가 그 메서드로
-    옮겨갔다. `execute_sell` 자신은 더 이상 `on_position_closed` 를 직접
-    부르지 않는다(위임).
+    cycle429(D1 안A) 재조준 — `_handle_sell_final_failure` 는 더 이상
+    포지션을 제거하지 않는다(수량 부족 자동 삭제 경로 폐지). 그래서
+    `on_position_closed` 동반 의무는 `_handle_sell_fill` 하나로 좁아진다.
     """
     tree = _parse(_oe_mod)
-    for fname in ("_handle_sell_fill", "_handle_sell_final_failure"):
+    for fname in ("_handle_sell_fill",):
         fn = _find_func(tree, fname)
         assert fn is not None, f"{fname} FunctionDef 존재 의무"
         calls = _on_position_closed_calls(fn)
         assert len(calls) >= 1, f"{fname} 영역 on_position_closed Call 노드 ≥ 1 의무"
+
+    # D1 안A 불변식 — `_handle_sell_final_failure` 는 더 이상 on_position_closed
+    # 를 부르지 않는다(포지션을 건드리지 않으므로). 되살리면 회귀다.
+    final_failure_fn = _find_func(tree, "_handle_sell_final_failure")
+    assert final_failure_fn is not None, "_handle_sell_final_failure FunctionDef 존재 의무"
+    assert not _on_position_closed_calls(final_failure_fn), (
+        "_handle_sell_final_failure 가 on_position_closed 를 부른다 — "
+        "D1 안A 이후 이 함수는 포지션을 제거하지 않아야 한다"
+    )
 
 
 def test_G2_OE_AST_execute_sell_wires_final_failure_handoff() -> None:
@@ -205,11 +214,13 @@ def test_G2_OE_AST_final_failure_called_only_from_execute_sell() -> None:
     """`_handle_sell_final_failure` 의 부르는 자리 == `execute_sell` 정확히 1건.
 
     B4-5(cycle426) 관문 3 보강 — 위 배선 테스트는 「execute_sell 이 ≥1회
-    부른다」 만 본다. 이 메서드는 `insufficient_qty=True` 면 메모리·DB 포지션을
-    지우는 제거 자리라, 다른 메서드가 부르면 「제거 자리 정확히 둘」 불변식이
-    이름만 지켜진 채 실질 3번째 제거 경로가 생긴다(관문 1 돌연변이 M6 —
-    가드·그물 모두 놓쳤다). 그래서 order_engine 전체의 참조 자리를 정확히
-    `["execute_sell"]` 로 묶고, `src/` 의 다른 모듈에서는 참조 0 을 요구한다.
+    부른다」 만 본다. cycle429(D1 안A) 이후 이 메서드는 미분류 거부의
+    CRITICAL 뒤처리만 하지만(포지션 제거 분기는 사라졌다), 다른 메서드가
+    이 메서드를 부르면 「제거 자리는 `_handle_sell_fill` 하나뿐」 불변식이
+    이름만 지켜진 채 실질 2번째 제거 경로가 생길 수 있다(관문 1 돌연변이
+    M6 — 가드·그물 모두 놓쳤다). 그래서 order_engine 전체의 참조 자리를
+    정확히 `["execute_sell"]` 로 묶고, `src/` 의 다른 모듈에서는 참조 0 을
+    요구한다.
     """
     tree = _parse(_oe_mod)
     refs = _final_failure_refs(tree, _func_of_map(tree))
@@ -236,20 +247,20 @@ def test_G2_OE_AST_final_failure_called_only_from_execute_sell() -> None:
 # G2-STRUCT-INVARIANT (HIGH) — site 집합 불변식 (양쪽 PASS) + companion (Red)
 # ---------------------------------------------------------------------------
 def test_G2_STRUCT_INVARIANT_site_set_exactly_two() -> None:
-    """order_engine state.positions 제거 site 집합 ==
-    {_handle_sell_fill, _handle_sell_final_failure} (양쪽 PASS).
+    """order_engine state.positions 제거 site 집합 == {_handle_sell_fill} 하나뿐.
 
-    B4-5(cycle426) 재조준 — 제거는 여전히 정확히 두 자리에서만 일어난다.
-    `execute_sell` 자신은 더 이상 제거를 직접 하지 않고 `_handle_sell_final_failure`
-    에 위임한다(위 wiring 테스트가 위임 자체를 지킨다). 3번째 제거 site 추가
-    시 가드 FAIL → on_position_closed 동반 의무 강제 (누설 silent 재발 영구 차단).
+    cycle429(D1 안A, 사용자 승인 2026-10-10) 재조준 — 수량 부족 거부
+    (APBK1234·APBK0400 실보유 0) 의 자동 삭제 경로를 없앴다. 포지션을
+    지우는 길은 이제 체결통보 보유 축(`_handle_sell_fill`) · 재기동 복구 ·
+    사람(수동 정리) 셋뿐이고, `order_engine.py` 안에서는 `_handle_sell_fill`
+    하나다. 2번째 제거 site 추가 시 가드 FAIL(도메인 권고 B 재확인 의무).
     """
     tree = _parse(_oe_mod)
     func_of = _func_of_map(tree)
     funcs = _positions_removal_funcs(tree, func_of)
-    assert funcs == {"_handle_sell_fill", "_handle_sell_final_failure"}, (
+    assert funcs == {"_handle_sell_fill"}, (
         f"order_engine 메모리 positions 제거 site 불변식 위반: {funcs}. "
-        "3번째 site 추가 시 on_position_closed 동반 의무 (도메인 권고 B)."
+        "D1 안A(cycle429) 이후 제거 자리는 _handle_sell_fill 하나뿐이어야 한다."
     )
 
 
