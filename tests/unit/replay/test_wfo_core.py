@@ -163,6 +163,8 @@ def _run_small(monkeypatch, **kw):
     monkeypatch.setattr(W, "select_year", spy_sel)
     monkeypatch.setattr(W, "chained_mar", spy_mar)
     monkeypatch.setattr(W, "index_stats", lambda *a, **k: {})
+    # 안정성(스피어만)은 scipy 를 쓰는데 CI 의존성에 scipy 가 없다 — 이 검사는 학습 창 전달만 본다
+    monkeypatch.setattr(W, "stability", lambda *a, **k: {})
     book = {"cagr_median": 0.0, "mdd_median": 0.0, "P2_pass": False}
     alt = {c: {y: np.array([100.0, 101.0]) for y in range(1996, 2009)} for c in trades}
     res = W.run_wfo(cal=CAL, combos=list(trades), cfgs=cfgs, trades=trades, current_id="c", fixed_b_id=None,
