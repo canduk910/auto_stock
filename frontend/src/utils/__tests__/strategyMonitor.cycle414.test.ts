@@ -201,10 +201,18 @@ describe('marketUnitEffect — 전략마다 뜻이 다르다 · 명세 §2.4 · 
     }
   })
 
-  it('off · 시장 유닛 없는 전략 · 값 없음 → null(표시 안 함)', () => {
+  it('off · 값 없음 → null(표시 안 함)', () => {
     expect(sm.marketUnitEffect('etf_trend', { mode: 'off', ok: true, m: 1, state: 'up_rising' })).toBeNull()
-    expect(sm.marketUnitEffect('volatility_breakout', { mode: 'shadow', ok: true, m: 0, state: 'x' })).toBeNull()
     expect(sm.marketUnitEffect('momentum', null)).toBeNull()
+  })
+
+  // cycle423 카드 #5 — 대상 판정은 하드코딩 목록이 아니라 응답(`mu` 존재)이다. 실제 라우트는
+  // volatility_breakout 에 market_unit 을 절대 보내지 않지만(명부 밖), 응답이 주어지면 그 자체가
+  // "적용 대상" 신호라 터틀형으로 판정한다 — `TURTLE_SIDS` 재검증 삭제의 의도된 결과.
+  it('카드 #5 — 응답이 주어지면 터틀 4 + etf_trend 밖 sid 도 터틀형으로 판정', () => {
+    const eff = sm.marketUnitEffect('volatility_breakout', { mode: 'shadow', ok: true, m: 0, state: 'x' })
+    expect(eff?.blocks).toBe(false)
+    expect(eff?.label).toMatch(/관찰만/)
   })
 })
 
