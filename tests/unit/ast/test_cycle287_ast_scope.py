@@ -845,9 +845,12 @@ _SRC_TREE_FILES = 183  # 직전 = 트랙 C — 실비용 사후 대사: 신규 4
 # 핸들러 + 2초 캐시 + `_monitor_*` 헬퍼를 더했다(8영역·전략 7파일·`strategy_base.py`
 # 무접촉). 신규/삭제 파일 0 — 파일 수 179 그대로. 직전 값(cycle412 G1) =
 # `edcd6038ac6bcc6c977b1e17cef42bbcb6400275ea7502ca2f19476b0256b266`.
-# 🔁 merge(cycle417+416+413+414) 재핀 — 네 변경을 합친 트리 다이제스트.
+# 🔁 cycle418-B(시장 등락 통계 남은 결함 #1 시정) 재핀 — `routes/market_breadth.py`
+# 내용만 바뀌었다(영구 "휴장" 확정 전 다른 시장의 "정상" 캐시를 교차 확인, 추가 KRX
+# 호출 없음). 신규/삭제 파일 0 — 파일 수 183 그대로. 직전 값(merge cycle417+416+413+414) =
+# `bef4d54cb5aef74f82119893ad8bf4f500265bf655edb85c1a8751898af7e508`.
 _SRC_TREE_DIGEST = (
-    "bef4d54cb5aef74f82119893ad8bf4f500265bf655edb85c1a8751898af7e508"
+    "dd3d38ea0ba63f25d6b2e42099105159ddadd0734c66972b9758fa9f9ac9fba6"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

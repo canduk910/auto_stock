@@ -1,13 +1,17 @@
 /**
  * cycle416 Red — 시장 등락 차트 계산 순수 함수 `src/macro/marketBreadthChart.ts` (C1~C5).
+ * cycle418-B — 남은 결함 #2(C6~C8) — 호출 실패로 빠진 날이 x축에서 칸 없이 붙던 문제 시정.
  *
  * jsdom 은 recharts SVG 를 그리지 않으므로(폭 0) 차트에 들어가는 값은 이 순수 함수로 잰다.
  * 명세 §6.2(4) — x축 = 오래된 것 → 최신, 하락 막대는 음수, 축은 대칭 [-M, M], 상승 비율 선은 0~100%.
  *
  * 봉인하는 계약
- *  - `buildBreadthChartRows(days: BreadthDay[], market: BreadthMarketKey): BreadthChartRow[]`
- *    행 = `{ date, label, up, down, flat, no_trade, limit_up, limit_down, up_ratio_pct }`
+ *  - `buildBreadthChartRows(days: BreadthDay[], market: BreadthMarketKey, missingDates?: string[]): BreadthChartRow[]`
+ *    행 = `{ date, label, up, down, flat, no_trade, limit_up, limit_down, up_ratio_pct, missing }`
  *    (`label` = `MM-DD` 문자열 자르기 · `down` 은 **음수** · `up_ratio_pct` = up_ratio×100, null 은 null)
+ *    `missingDates`(= 응답 `missing_dates`, 기본 `[]`) 는 그 자리에 0/null `missing=true` 칸을 끼워
+ *    넣는다 — 영업일 달력을 새로 계산하지 않고 응답이 준 두 배열(`days`+`missing_dates`)만 날짜
+ *    문자열로 정렬해 합친다(출처는 응답 하나).
  *  - `breadthAxisMax(rows): number` — M ≥ 창 안 max(up, |down|), 언제나 > 0 (빈 창도)
  *  - `mmdd('YYYY-MM-DD')` → `'MM-DD'` (new Date 금지 — 서버가 준 KST 날짜 문자열 그대로)
  *  - `formatUpRatio(r)` → `'32.5%'`(소수 1자리) · null → `'—'`
@@ -70,5 +74,38 @@ describe('marketBreadthChart — 차트 행 계산 (cycle416)', () => {
     expect(formatUpRatio(null)).toBe('—')
     expect(mmdd('2026-10-08')).toBe('10-08')
     expect(mmdd('2026-01-02')).toBe('01-02')
+  })
+
+  it('C6 missing_dates(남은 결함 #2) — 응답이 알려준 빠진 날짜를 x축 자리에 끼워 0/null 로 비우고 missing=true 로 표시한다', () => {
+    const rows = buildBreadthChartRows(MARKET_BREADTH_FIXTURE.days, 'total', ['2026-10-05'])
+    // 날짜 순서는 영업일 달력을 다시 계산하지 않고 응답 두 배열(days + missing_dates)만 합쳐 정렬한다
+    expect(rows.map((r) => r.date)).toEqual(['2026-10-05', '2026-10-06', '2026-10-07', '2026-10-08'])
+    expect(rows.map((r) => r.label)).toEqual(['10-05', '10-06', '10-07', '10-08'])
+
+    const gap = rows.find((r) => r.date === '2026-10-05')!
+    expect(gap.missing).toBe(true)
+    expect(gap.up).toBe(0)
+    expect(gap.down).toBe(0)
+    expect(gap.flat).toBe(0)
+    expect(gap.no_trade).toBe(0)
+    expect(gap.limit_up).toBe(0)
+    expect(gap.limit_down).toBe(0)
+    expect(gap.up_ratio_pct).toBeNull()
+
+    for (const r of rows) {
+      if (r.date !== '2026-10-05') expect(r.missing).toBe(false)
+    }
+  })
+
+  it('C7 missing_dates 기본값 — 생략하면(기존 호출부) 결과가 그대로다(하위호환)', () => {
+    const rows = buildBreadthChartRows(MARKET_BREADTH_FIXTURE.days, 'total')
+    expect(rows.map((r) => r.date)).toEqual(['2026-10-06', '2026-10-07', '2026-10-08'])
+    expect(rows.every((r) => r.missing === false)).toBe(true)
+  })
+
+  it('C8 missing_dates 가 응답 days[] 와 겹치면(이론상 있을 수 없는 입력) 중복 칸을 만들지 않는다', () => {
+    const rows = buildBreadthChartRows(MARKET_BREADTH_FIXTURE.days, 'total', ['2026-10-08'])
+    expect(rows.map((r) => r.date)).toEqual(['2026-10-06', '2026-10-07', '2026-10-08'])
+    expect(rows.find((r) => r.date === '2026-10-08')!.missing).toBe(false)
   })
 })

@@ -656,7 +656,7 @@ Dashboard `MarketRegimeCard` 바로 아래. 장세와 시장 유닛을 한 카�
 - 🔴 시장 등락은 **한국 관례 색**이다 — 상승·상한가 빨강 · 하락·하한가 파랑. 막대 색은 `var(--color-red-500)`·`var(--color-blue-500)` CSS 변수이고 hex 리터럴은 0 이다(FG2).
 - 시장 등락 날짜는 서버가 준 KST `YYYY-MM-DD` 문자열을 자르기만 한다(`marketBreadthChart.ts::mmdd`). 이 섹션과 차트 계산 파일에 `new Date(`·`Intl.DateTimeFormat` 을 쓰지 않는다(FG1). 기준 시각은 `utils/kst.ts::formatKstDateTime` 으로 보인다.
 - 차트 값은 순수 함수 `marketBreadthChart.ts` 로 잰다(jsdom 은 recharts SVG 를 그리지 않는다) — `buildBreadthChartRows`(최신 먼저인 응답을 뒤집되 입력 배열은 바꾸지 않는다) · `breadthAxisMax`(계단 1·1.2·1.5·2·2.5·3·4·5·6·8·10 × 10ⁿ 으로 올림).
-- ⚠️ 빠진 날은 차트 x축에서 칸 없이 이어 붙는다(프론트가 영업일 달력을 다시 계산하지 않는다). 어느 날이 빠졌는지는 `breadth-missing` 이 알린다.
+- 빠진 날은 차트 x축에도 그 날짜 자리를 비워 둔다(`buildBreadthChartRows` 세 번째 인자 `missing_dates` — 영업일 달력을 새로 계산하지 않고 응답의 `days[]`·`missing_dates` 두 배열만 날짜 문자열로 합쳐 정렬한다, 출처는 응답 하나). 그 칸은 `missing=true`·0/null 이라 막대가 비고 툴팁이 「자료 없음 — 빠짐」 을 보인다. 어느 날이 빠졌는지는 `breadth-missing` 과 차트 양쪽에서 보인다.
 - 시장 등락 회귀 = `macro/__tests__/MarketBreadthSection.test.tsx` · `marketBreadthChart.test.ts` · `_ast_market_breadth_guards.test.ts`(FG1~FG5) · `api/__tests__/market-breadth.test.ts` · `MacroPage.test.tsx`(6번째 자리·독립 로딩). MSW = `test/handlers.ts` + `test/fixtures/marketBreadth.fixture.ts` · E2E 목 = `e2e/fixtures/api-mocks.ts`(FG5 — 없으면 `/macro` 마운트가 ECONNREFUSED).
 
 ## Backtest (`/backtest`) — 2026-10-06 30년 전략 성적표

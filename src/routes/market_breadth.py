@@ -132,14 +132,24 @@ def _store_cache(market: str, ymd: str, stats: "leaf.DayStats") -> None:
         _cache[(market, ymd)] = _CacheEntry(status="ok", stats=stats, cached_at=now, permanent=True)
     else:
         d = _ymd_to_date(ymd)
-        permanent = (now.date() - d).days > _EMPTY_PERMANENT_AFTER_DAYS
+        age_days = (now.date() - d).days
+        candidate_permanent = age_days > _EMPTY_PERMANENT_AFTER_DAYS
+        # 남은 결함 #1 시정 — KRX 가 호출 한도 초과 등 실패를 OutBlock_1 없는 HTTP 200(빈 배열)
+        # 으로 줄 가능성을 추가 호출 없이(같은 (시장,날짜) 재호출 금지 — R1 "한 번만" 계약) 배제
+        # 한다. 같은 날짜의 다른 시장이 이미 "정상"(rows>0)으로 캐시돼 있으면 그 날은 휴장이 아니
+        # 라는 뜻이라 이 시장의 빈 결과를 영구로 굳히지 않는다(TTL 로 계속 재시도).
+        # ⚠️ 이 시장이 다른 시장보다 먼저 끝나면(아직 캐시가 없다) 판정 근거가 없어 그냥 넘어간다
+        # — 두 시장이 "같은 원인으로" 동시에 비는 경우(예: 진짜 휴장, 또는 KRX 전면 장애)는 이
+        # 체크로 걸러지지 않는다. 그 잔여 위험은 배포 뒤 `[market_breadth_permanent_empty]` 로그를
+        # 보고 비휴장일에 찍히는지 실측으로 확인한다(verdict 「배포 뒤 확인 항목」).
+        other_market = "kosdaq" if market == "kospi" else "kospi"
+        other_entry = _cache.get((other_market, ymd))
+        other_confirmed_trading = other_entry is not None and other_entry.status == "ok"
+        permanent = candidate_permanent and not other_confirmed_trading
         if permanent:
-            # 검증 결함(LOW, 확정 아님) — KRX 가 호출 한도 초과도 OutBlock_1 없는 HTTP 200 으로
-            # 줄 가능성이 있다면 이 로그가 그 날짜를 영구 "휴장"으로 가두기 전 유일한 흔적이다.
-            # 재현되면 이 WARNING 의 market/date 로 실제 KRX 응답을 다시 받아 대조한다.
             logger.warning(
                 "[market_breadth_permanent_empty] market=%s date=%s age_days=%s",
-                market, _dash(ymd), (now.date() - d).days,
+                market, _dash(ymd), age_days,
             )
         _cache[(market, ymd)] = _CacheEntry(status="empty", stats=stats, cached_at=now, permanent=permanent)
     if len(_cache) > _CACHE_MAX_ENTRIES:

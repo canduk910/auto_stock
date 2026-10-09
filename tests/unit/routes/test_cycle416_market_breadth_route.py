@@ -546,6 +546,42 @@ async def test_w12b_permanent_empty_is_logged(install, caplog):
     assert not any("2026-10-05" in ln for ln in lines), "아직 영구가 아닌 날은 남기지 않는다"
 
 
+async def test_w12c_sibling_market_ok_blocks_premature_permanent(install, monkeypatch, caplog):
+    """W12c (남은 결함 #1 시정) — 같은 날짜의 다른 시장이 이미 "정상"(rows>0)으로 캐시돼 있으면
+    7일 넘은 빈 응답을 영구 "휴장"으로 굳히지 않는다. KRX 가 한쪽 시장만 실패로 빈 OutBlock_1 을
+    줬을 가능성을 **추가 호출 없이**(같은 (시장,날짜) 재호출 금지 — R1 "한 번만" 계약) 배제한다.
+
+    코스닥이 먼저 응답하게(지연 0) 두고 코스피만 50ms 늦춰 코스닥의 "정상" 결과가 먼저 캐시되게
+    만든다 — 코스피가 저장될 때 이미 코스닥 캐시를 볼 수 있다."""
+    caplog.set_level(logging.WARNING)
+    install(None)
+    from src.api import krx
+
+    target = "20260901"  # NOW(2026-09-10) 기준 9일 전 — candidate_permanent(>7일)
+    calls: list[tuple[str, str]] = []
+
+    async def _stk(ymd: str) -> list[dict]:
+        calls.append(("kospi", ymd))
+        if ymd == target:
+            await asyncio.sleep(0.05)  # 코스닥이 먼저 캐시에 "정상" 으로 저장되도록 지연
+            return []
+        return [dict(r) for r in KOSPI_ROWS]
+
+    async def _ksq(ymd: str) -> list[dict]:
+        calls.append(("kosdaq", ymd))
+        return [dict(r) for r in KOSDAQ_ROWS]
+
+    monkeypatch.setattr(krx, "fetch_stk_bydd_trd", _stk)
+    monkeypatch.setattr(krx, "fetch_ksq_bydd_trd", _ksq)
+
+    with freeze_time("2026-09-10 11:00:00+09:00", real_asyncio=True):
+        await _run()
+
+    lines = _warnings(caplog, "[market_breadth_permanent_empty] ")
+    assert not any("market=kospi" in ln and "date=2026-09-01" in ln for ln in lines), lines
+    assert calls.count(("kospi", target)) == 1, "추가 호출 없이 이미 받은 결과만 본다"
+
+
 # ═════════════════════════════════════════════════════════════════════════════
 # W13·W14 — 실패는 HTTP 200 + success=false (명세 §5.5)
 # ═════════════════════════════════════════════════════════════════════════════
