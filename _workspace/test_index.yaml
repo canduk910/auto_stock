@@ -127772,9 +127772,6 @@ backend:
       - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/replay/test_audit_bfb.py
-      - tests/unit/routes/test_cycle278_params_validation.py
-      - tests/unit/routes/test_cycle290_killswitch_put.py
-      - tests/unit/routes/test_cycle412_g1_exit_lines.py
       - tests/unit/routes/test_cycle414_strategies_monitor.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
@@ -128997,9 +128994,11 @@ backend:
       - tests/unit/routes/test_cycle266_daily_route_serialization.py
       - tests/unit/routes/test_cycle276_llm_evaluations_route.py
       - tests/unit/routes/test_cycle278_params_schema.py
+      - tests/unit/routes/test_cycle278_params_validation.py
       - tests/unit/routes/test_cycle282_fixture_sync.py
       - tests/unit/routes/test_cycle282_market_state_route.py
       - tests/unit/routes/test_cycle285_market_ops_route.py
+      - tests/unit/routes/test_cycle290_killswitch_put.py
       - tests/unit/routes/test_cycle293_kill_switch_route.py
       - tests/unit/routes/test_cycle295_gap_route_surface.py
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
@@ -129021,6 +129020,7 @@ backend:
       - tests/unit/routes/test_cycle411c_doc_present_tense.py
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
+      - tests/unit/routes/test_cycle412_g1_exit_lines.py
       - tests/unit/routes/test_cycle413_fix1_journal_routes.py
       - tests/unit/routes/test_cycle413_journal_routes.py
       - tests/unit/routes/test_cycle416_market_breadth_route.py
@@ -129195,9 +129195,6 @@ backend:
       - tests/unit/engine/test_strategy_fallback_budget.py
       - tests/unit/engine/test_swing_poll_loop.py
       - tests/unit/replay/test_audit_framework.py
-      - tests/unit/routes/test_cycle278_params_validation.py
-      - tests/unit/routes/test_cycle290_killswitch_put.py
-      - tests/unit/routes/test_cycle412_g1_exit_lines.py
       - tests/unit/routes/test_cycle414_strategies_monitor.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
@@ -130332,9 +130329,11 @@ backend:
       - tests/unit/routes/test_cycle266_daily_route_serialization.py
       - tests/unit/routes/test_cycle276_llm_evaluations_route.py
       - tests/unit/routes/test_cycle278_params_schema.py
+      - tests/unit/routes/test_cycle278_params_validation.py
       - tests/unit/routes/test_cycle282_fixture_sync.py
       - tests/unit/routes/test_cycle282_market_state_route.py
       - tests/unit/routes/test_cycle285_market_ops_route.py
+      - tests/unit/routes/test_cycle290_killswitch_put.py
       - tests/unit/routes/test_cycle293_kill_switch_route.py
       - tests/unit/routes/test_cycle295_gap_route_surface.py
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
@@ -130356,6 +130355,7 @@ backend:
       - tests/unit/routes/test_cycle411c_doc_present_tense.py
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
+      - tests/unit/routes/test_cycle412_g1_exit_lines.py
       - tests/unit/routes/test_cycle413_fix1_journal_routes.py
       - tests/unit/routes/test_cycle413_journal_routes.py
       - tests/unit/routes/test_cycle416_market_breadth_route.py
@@ -131774,9 +131774,6 @@ backend:
       - tests/unit/replay/test_audit_kojiro.py
       - tests/unit/replay/test_opt_kojiro.py
       - tests/unit/replay/test_y30_kojiro.py
-      - tests/unit/routes/test_cycle278_params_validation.py
-      - tests/unit/routes/test_cycle290_killswitch_put.py
-      - tests/unit/routes/test_cycle412_g1_exit_lines.py
       - tests/unit/routes/test_cycle414_strategies_monitor.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
@@ -133002,9 +132999,11 @@ backend:
       - tests/unit/routes/test_cycle266_daily_route_serialization.py
       - tests/unit/routes/test_cycle276_llm_evaluations_route.py
       - tests/unit/routes/test_cycle278_params_schema.py
+      - tests/unit/routes/test_cycle278_params_validation.py
       - tests/unit/routes/test_cycle282_fixture_sync.py
       - tests/unit/routes/test_cycle282_market_state_route.py
       - tests/unit/routes/test_cycle285_market_ops_route.py
+      - tests/unit/routes/test_cycle290_killswitch_put.py
       - tests/unit/routes/test_cycle293_kill_switch_route.py
       - tests/unit/routes/test_cycle295_gap_route_surface.py
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
@@ -133026,6 +133025,7 @@ backend:
       - tests/unit/routes/test_cycle411c_doc_present_tense.py
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
+      - tests/unit/routes/test_cycle412_g1_exit_lines.py
       - tests/unit/routes/test_cycle413_fix1_journal_routes.py
       - tests/unit/routes/test_cycle413_journal_routes.py
       - tests/unit/routes/test_cycle416_market_breadth_route.py
@@ -133181,9 +133181,6 @@ backend:
       - tests/unit/engine/test_cycle297_llm_strategy_context.py
       - tests/unit/engine/test_cycle331_buy_fill_from_pending.py
       - tests/unit/engine/test_strategy_fallback_budget.py
-      - tests/unit/routes/test_cycle278_params_validation.py
-      - tests/unit/routes/test_cycle290_killswitch_put.py
-      - tests/unit/routes/test_cycle412_g1_exit_lines.py
       - tests/unit/routes/test_cycle414_strategies_monitor.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
@@ -134337,9 +134334,11 @@ backend:
       - tests/unit/routes/test_cycle266_daily_route_serialization.py
       - tests/unit/routes/test_cycle276_llm_evaluations_route.py
       - tests/unit/routes/test_cycle278_params_schema.py
+      - tests/unit/routes/test_cycle278_params_validation.py
       - tests/unit/routes/test_cycle282_fixture_sync.py
       - tests/unit/routes/test_cycle282_market_state_route.py
       - tests/unit/routes/test_cycle285_market_ops_route.py
+      - tests/unit/routes/test_cycle290_killswitch_put.py
       - tests/unit/routes/test_cycle293_kill_switch_route.py
       - tests/unit/routes/test_cycle295_gap_route_surface.py
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
@@ -134361,6 +134360,7 @@ backend:
       - tests/unit/routes/test_cycle411c_doc_present_tense.py
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
+      - tests/unit/routes/test_cycle412_g1_exit_lines.py
       - tests/unit/routes/test_cycle413_fix1_journal_routes.py
       - tests/unit/routes/test_cycle413_journal_routes.py
       - tests/unit/routes/test_cycle416_market_breadth_route.py
@@ -134505,9 +134505,6 @@ backend:
       - tests/unit/engine/test_cycle369_status_isolation.py
       - tests/unit/engine/test_cycle398_strategy_manifest.py
       - tests/unit/engine/test_strategy_fallback_budget.py
-      - tests/unit/routes/test_cycle278_params_validation.py
-      - tests/unit/routes/test_cycle290_killswitch_put.py
-      - tests/unit/routes/test_cycle412_g1_exit_lines.py
       - tests/unit/routes/test_cycle414_strategies_monitor.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
@@ -135672,9 +135669,11 @@ backend:
       - tests/unit/routes/test_cycle266_daily_route_serialization.py
       - tests/unit/routes/test_cycle276_llm_evaluations_route.py
       - tests/unit/routes/test_cycle278_params_schema.py
+      - tests/unit/routes/test_cycle278_params_validation.py
       - tests/unit/routes/test_cycle282_fixture_sync.py
       - tests/unit/routes/test_cycle282_market_state_route.py
       - tests/unit/routes/test_cycle285_market_ops_route.py
+      - tests/unit/routes/test_cycle290_killswitch_put.py
       - tests/unit/routes/test_cycle293_kill_switch_route.py
       - tests/unit/routes/test_cycle295_gap_route_surface.py
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
@@ -135696,6 +135695,7 @@ backend:
       - tests/unit/routes/test_cycle411c_doc_present_tense.py
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
+      - tests/unit/routes/test_cycle412_g1_exit_lines.py
       - tests/unit/routes/test_cycle413_fix1_journal_routes.py
       - tests/unit/routes/test_cycle413_journal_routes.py
       - tests/unit/routes/test_cycle416_market_breadth_route.py
@@ -135781,9 +135781,6 @@ backend:
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_multiday_strategies_registry.py
       - tests/unit/replay/test_audit_vcp.py
-      - tests/unit/routes/test_cycle278_params_validation.py
-      - tests/unit/routes/test_cycle290_killswitch_put.py
-      - tests/unit/routes/test_cycle412_g1_exit_lines.py
       - tests/unit/routes/test_cycle414_strategies_monitor.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
@@ -137007,9 +137004,11 @@ backend:
       - tests/unit/routes/test_cycle266_daily_route_serialization.py
       - tests/unit/routes/test_cycle276_llm_evaluations_route.py
       - tests/unit/routes/test_cycle278_params_schema.py
+      - tests/unit/routes/test_cycle278_params_validation.py
       - tests/unit/routes/test_cycle282_fixture_sync.py
       - tests/unit/routes/test_cycle282_market_state_route.py
       - tests/unit/routes/test_cycle285_market_ops_route.py
+      - tests/unit/routes/test_cycle290_killswitch_put.py
       - tests/unit/routes/test_cycle293_kill_switch_route.py
       - tests/unit/routes/test_cycle295_gap_route_surface.py
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
@@ -137031,6 +137030,7 @@ backend:
       - tests/unit/routes/test_cycle411c_doc_present_tense.py
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
+      - tests/unit/routes/test_cycle412_g1_exit_lines.py
       - tests/unit/routes/test_cycle413_fix1_journal_routes.py
       - tests/unit/routes/test_cycle413_journal_routes.py
       - tests/unit/routes/test_cycle416_market_breadth_route.py
@@ -137193,9 +137193,6 @@ backend:
       - tests/unit/engine/test_vb_force_clear_at_15_20.py
       - tests/unit/engine/test_vb_next_day_clear_safety_net.py
       - tests/unit/replay/test_audit_vb.py
-      - tests/unit/routes/test_cycle278_params_validation.py
-      - tests/unit/routes/test_cycle290_killswitch_put.py
-      - tests/unit/routes/test_cycle412_g1_exit_lines.py
       - tests/unit/routes/test_cycle414_strategies_monitor.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
@@ -138342,9 +138339,11 @@ backend:
       - tests/unit/routes/test_cycle266_daily_route_serialization.py
       - tests/unit/routes/test_cycle276_llm_evaluations_route.py
       - tests/unit/routes/test_cycle278_params_schema.py
+      - tests/unit/routes/test_cycle278_params_validation.py
       - tests/unit/routes/test_cycle282_fixture_sync.py
       - tests/unit/routes/test_cycle282_market_state_route.py
       - tests/unit/routes/test_cycle285_market_ops_route.py
+      - tests/unit/routes/test_cycle290_killswitch_put.py
       - tests/unit/routes/test_cycle293_kill_switch_route.py
       - tests/unit/routes/test_cycle295_gap_route_surface.py
       - tests/unit/routes/test_cycle295_manual_sell_exempt.py
@@ -138366,6 +138365,7 @@ backend:
       - tests/unit/routes/test_cycle411c_doc_present_tense.py
       - tests/unit/routes/test_cycle411d_balance_unknown_defaults.py
       - tests/unit/routes/test_cycle411d_route_try_wrap.py
+      - tests/unit/routes/test_cycle412_g1_exit_lines.py
       - tests/unit/routes/test_cycle413_fix1_journal_routes.py
       - tests/unit/routes/test_cycle413_journal_routes.py
       - tests/unit/routes/test_cycle416_market_breadth_route.py
@@ -139744,9 +139744,11 @@ backend:
       - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/strategy_manifest.py:
     direct_tests:
+      - tests/contract/test_cycle382_market_unit_params_route.py
       - tests/unit/ast/test_cycle399_ast_shadow_mode.py
       - tests/unit/engine/strategies/test_cycle405_donchian_kk_force_clear.py
       - tests/unit/engine/test_cycle142_ltv_defect_fix.py
+      - tests/unit/engine/test_cycle242_fallback_notional_cap.py
       - tests/unit/engine/test_cycle398_strategy_manifest.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_kojiro_wiring.py
@@ -139755,7 +139757,6 @@ backend:
       - tests/contract/test_cycle171_snapshot_route_steps.py
       - tests/contract/test_cycle223f2_manual_apply_param_ranges.py
       - tests/contract/test_cycle243_auth_wiring.py
-      - tests/contract/test_cycle382_market_unit_params_route.py
       - tests/contract/test_cycle384_buy_paused_params_route.py
       - tests/contract/test_cycle397_balance_buy_date.py
       - tests/contract/test_cycle399_shadow_mode_route.py
@@ -140569,7 +140570,6 @@ backend:
       - tests/unit/engine/test_cycle238_pre_market_clock_gate.py
       - tests/unit/engine/test_cycle239_gate_freshness.py
       - tests/unit/engine/test_cycle241_silent_inactive_relative.py
-      - tests/unit/engine/test_cycle242_fallback_notional_cap.py
       - tests/unit/engine/test_cycle245_ratio_notional_cap.py
       - tests/unit/engine/test_cycle249_collect_metrics.py
       - tests/unit/engine/test_cycle250_watch_timeout.py
@@ -187181,7 +187181,7 @@ frontend:
       - frontend/src/pages/__tests__/Dashboard.fix1.cycle414.test.tsx
       - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
-generated_at: '2026-10-09T12:01:28.172Z'
+generated_at: '2026-10-09T13:06:27.785Z'
 stats:
   backend_modules: 186
   backend_tests: 1316

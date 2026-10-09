@@ -260,3 +260,198 @@ def test_cross_strategy_census_equals_manifest():
     from tests._strategy_census import STRATEGY_IDS
 
     assert set(STRATEGY_IDS) == {e.strategy_id for e in STRATEGY_MANIFEST}
+
+
+# ---------------------------------------------------------------------------
+# 원형 계약 (리팩토링 카드 #4, cycle421) — 명부 칸이 약속하는 메서드·표식을 클래스가 실제로 갖는다
+#
+# `scheduler.py` 는 원형별 메서드·표식을 **이름으로** 찾고, 없으면 `hasattr`/`getattr(…, set())`
+# 로 조용히 건너뛴다. 칸만 채우고 메서드를 빠뜨린 새 전략은 예외 없이 무매매(또는 거름 없음)가
+# 된다. 아래 표가 「scheduler 를 읽어야 아는 약속」 을 실패 메시지로 바꾼다.
+#
+# | 명부 칸 | 요구 | scheduler/엔진이 읽는 자리 | 빠지면 |
+# |---|---|---|---|
+# | `eval_driver="tick_breakout"` | `get_scanned_tickers()` | `_collect_breakout_tickers` · `_reprepare_breakout_if_empty` (hasattr) | 구독 0 = 무매매 |
+# | `eval_driver="swing_poll"` | `get_scanned_tickers()` | `_swing_buy_poll_loop` · `_collect_swing_tickers` | 예외 로그 뒤 후보 0 = 무매매 |
+# | 〃 | 인스턴스 `_bought_today: set` | `_swing_buy_poll_loop` (`getattr(…, set())`) | 폴 중복 진입 거름이 조용히 빈다 |
+# | 〃 | `async recompute_held_atr()` | `_boot` 보유 재계산 (hasattr) | 재시작 뒤 보유 ATR·단계 미복구 |
+# | `open_price_target=True` | `on_open_price_confirmed()` · `get_targets_status()` · 인스턴스 `_targets`·`_open_confirmed: dict` | `_confirm_breakout_open_prices` (hasattr 둘 다) · 재시도 | 시가 목표가 미확정 = 무매매 |
+# | `close_at_1520=True` | `check_force_clear()` | `_force_clear_main_only` (hasattr) | 15:20 청산이 조용히 안 나간다 |
+# | `market_unit_policy="scale"` | 클래스 `_MARKET_UNIT_ATR_KEY` ∈ `StrategyBase._SIZING_ATR_KEYS` · `DEFAULT_PARAMS["market_unit_mode"]` · 소스에서 `self._refresh_market_unit` · `self._market_unit_sizing` · `self._market_unit_blocks_entry` 호출 | `StrategyBase` 시장 유닛 헬퍼 · PUT params | 축소 없음(조용히 m=1) |
+# | `market_unit_policy="none"` | `_MARKET_UNIT_ATR_KEY is None` · `market_unit_mode` 키 없음 | PUT params `unknown_key` | 끄지 못할 키가 화면에 뜬다 |
+#
+# `eval_driver="tick_scan"`(momentum)은 전략 메서드가 아니라 `scanner.scan_stocks()` 전역을 쓴다 — 요구 없음.
+# 「정의」 = 전략 쪽 클래스 체인(`StrategyBase` 제외)에 있다. `StrategyBase` 에 기본 구현이 생겨도
+# 그것으로 통과하지 않는다(빈 기본값 = 조용한 무매매의 재현이다). `force_clear_signal` 은 선택이다
+# (없으면 `resolve_force_clear_signal` 이 `FORCE_CLEAR` 로 떨어진다).
+# ---------------------------------------------------------------------------
+_MU_CALLS = ("_refresh_market_unit", "_market_unit_sizing", "_market_unit_blocks_entry")
+
+
+def _defined_by_strategy(cls, name: str) -> bool:
+    """`StrategyBase`·`object` 를 뺀 클래스 체인이 `name` 을 정의하는가(상속받은 기본값은 아니다)."""
+    from src.engine.strategy_base import StrategyBase
+
+    for k in cls.__mro__:
+        if k is StrategyBase or k is object:
+            return False
+        if name in vars(k):
+            return True
+    return False
+
+
+def _self_calls(cls) -> set[str]:
+    """클래스 소스 안 `self.<이름>(…)` 호출 이름들(AST — 주석·docstring 제외)."""
+    import ast
+    import inspect
+    import textwrap
+
+    tree = ast.parse(textwrap.dedent(inspect.getsource(cls)))
+    return {
+        n.func.attr for n in ast.walk(tree)
+        if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
+        and isinstance(n.func.value, ast.Name) and n.func.value.id == "self"
+    }
+
+
+def _archetype_violations(e: StrategyEntry) -> list[str]:
+    """명부 행 하나의 원형 계약 위반 목록(빈 목록 = 통과). 메시지는 「무엇이 · 어느 칸 때문에」."""
+    import inspect
+
+    from src.engine.strategy_base import StrategyBase, StrategyConfig
+
+    cls = e.cls
+    out: list[str] = []
+
+    def need_method(name: str, why: str, *, coroutine: bool = False) -> None:
+        if not _defined_by_strategy(cls, name) or not callable(getattr(cls, name, None)):
+            out.append(f"{name}() 없음 ({why})")
+        elif coroutine and not inspect.iscoroutinefunction(getattr(cls, name)):
+            out.append(f"{name}() 가 async 가 아니다 ({why} — scheduler 가 await 한다)")
+
+    inst = cls(StrategyConfig(strategy_id=e.strategy_id, name=e.name))
+
+    def need_instance(name: str, typ: type, why: str) -> None:
+        if not isinstance(vars(inst).get(name), typ):
+            out.append(f"인스턴스 {name}: {typ.__name__} 없음 ({why})")
+
+    if e.eval_driver == "tick_breakout":
+        need_method("get_scanned_tickers", "eval_driver=tick_breakout — 돌파 구독 후보")
+    if e.eval_driver == "swing_poll":
+        need_method("get_scanned_tickers", "eval_driver=swing_poll — 폴 후보")
+        need_instance("_bought_today", set, "eval_driver=swing_poll — 폴 중복 진입 거름")
+        need_method("recompute_held_atr", "eval_driver=swing_poll — 재시작 보유 재계산", coroutine=True)
+    if e.open_price_target:
+        need_method("on_open_price_confirmed", "open_price_target=True — 시가 확정 통지")
+        need_method("get_targets_status", "open_price_target=True — 시가 확정 계측")
+        need_instance("_targets", dict, "open_price_target=True — 목표가 표")
+        need_instance("_open_confirmed", dict, "open_price_target=True — 보드별 시가 확정")
+    if e.close_at_1520:
+        need_method("check_force_clear", "close_at_1520=True — 15:20 청산 대상")
+
+    defaults = getattr(cls, "DEFAULT_PARAMS", {}) or {}
+    atr_key = getattr(cls, "_MARKET_UNIT_ATR_KEY", None)
+    if e.market_unit_policy == "scale":
+        if not _defined_by_strategy(cls, "_MARKET_UNIT_ATR_KEY") or atr_key not in StrategyBase._SIZING_ATR_KEYS:
+            out.append(f"_MARKET_UNIT_ATR_KEY={atr_key!r} — market_unit_policy=scale 은 "
+                       f"{StrategyBase._SIZING_ATR_KEYS} 중 하나를 클래스에 둔다")
+        if "market_unit_mode" not in defaults:
+            out.append("DEFAULT_PARAMS 에 market_unit_mode 없음 (market_unit_policy=scale — 킬스위치)")
+        missing = [c for c in _MU_CALLS if c not in _self_calls(cls)]
+        if missing:
+            out.append(f"시장 유닛 헬퍼 호출 없음 {missing} (market_unit_policy=scale)")
+    else:
+        if atr_key is not None:
+            out.append(f"_MARKET_UNIT_ATR_KEY={atr_key!r} — market_unit_policy=none 인데 값이 있다")
+        if "market_unit_mode" in defaults:
+            out.append("DEFAULT_PARAMS 에 market_unit_mode 가 있다 (market_unit_policy=none — 끄지 못할 키)")
+    return out
+
+
+@pytest.mark.parametrize("entry", STRATEGY_MANIFEST, ids=lambda e: e.strategy_id)
+def test_archetype_contract_every_manifest_entry_has_what_its_columns_promise(entry):
+    """카드 #4 — 명부 행마다 원형 칸이 약속하는 메서드·표식을 그 클래스가 실제로 갖는다."""
+    assert _archetype_violations(entry) == [], (
+        f"{entry.strategy_id}({entry.cls.__name__}) 원형 계약 위반 — scheduler 는 이것들을 "
+        f"이름으로 찾고 없으면 조용히 건너뛴다: {_archetype_violations(entry)}"
+    )
+
+
+def _bare_class():
+    """원형 메서드를 하나도 갖지 않은 최소 전략(음성 대조용)."""
+    from src.engine.strategy_base import Signal, StrategyBase
+
+    class _BareStrategy(StrategyBase):
+        async def prepare(self, *, as_of=None):  # pragma: no cover
+            return None
+
+        def check_buy_signal(self, ticker, current_price, open_price):  # pragma: no cover
+            return Signal.NONE
+
+        def check_exit_signal(self, ticker, current_price, open_price):  # pragma: no cover
+            return Signal.NONE
+
+        def calc_buy_quantity(self, current_price, ticker=None):  # pragma: no cover
+            return self._apply_budget_limit(0, current_price, ticker)
+
+    return _BareStrategy
+
+
+def _bare_entry(**cols) -> StrategyEntry:
+    base = dict(eval_driver="tick_scan", breakout_rank=None, open_price_target=False,
+                close_at_1520=False, market_unit_policy="none")
+    base.update(cols)
+    return StrategyEntry(cls=_bare_class(), strategy_id="zz_bare", name="zz_bare",
+                         enabled=False, weight=0.0, **base)
+
+
+@pytest.mark.parametrize(("cols", "must_name"), [
+    (dict(eval_driver="swing_poll"), ("get_scanned_tickers", "_bought_today", "recompute_held_atr")),
+    (dict(eval_driver="tick_breakout", breakout_rank=9), ("get_scanned_tickers",)),
+    (dict(eval_driver="tick_breakout", breakout_rank=9, open_price_target=True),
+     ("on_open_price_confirmed", "get_targets_status", "_targets", "_open_confirmed")),
+    (dict(close_at_1520=True), ("check_force_clear",)),
+    (dict(market_unit_policy="scale"), ("_MARKET_UNIT_ATR_KEY", "market_unit_mode", "_refresh_market_unit")),
+], ids=["swing_poll", "tick_breakout", "open_price_target", "close_at_1520", "scale"])
+def test_archetype_contract_negative_control_bare_class_is_flagged(cols, must_name):
+    """음성 대조 — 칸만 채우고 메서드를 빠뜨린 전략은 위반으로 잡힌다(검사가 공허하지 않다)."""
+    got = _archetype_violations(_bare_entry(**cols))
+    for name in must_name:
+        assert any(name in v for v in got), f"{cols}: {name} 누락을 잡지 못했다 — {got}"
+
+
+def test_archetype_contract_bare_tick_scan_none_has_no_requirements():
+    """대조 — 요구가 없는 원형(tick_scan · none)은 빈 클래스도 통과한다(검사가 무조건 붉지 않다)."""
+    assert _archetype_violations(_bare_entry()) == []
+
+
+def test_archetype_contract_base_class_default_does_not_satisfy(monkeypatch):
+    """「상속 아님」 — `StrategyBase` 에 빈 기본 구현이 생겨도 그것으로 통과하지 않는다."""
+    from src.engine.strategy_base import StrategyBase
+
+    monkeypatch.setattr(StrategyBase, "get_scanned_tickers", lambda self: [], raising=False)
+    monkeypatch.setattr(StrategyBase, "check_force_clear", lambda self: [], raising=False)
+    got = _archetype_violations(_bare_entry(eval_driver="tick_breakout", breakout_rank=9, close_at_1520=True))
+    assert any("get_scanned_tickers" in v for v in got), got
+    assert any("check_force_clear" in v for v in got), got
+
+
+def test_archetype_contract_sync_recompute_is_flagged():
+    """`recompute_held_atr` 가 동기 함수면 scheduler 의 `await` 가 TypeError — 원형 위반으로 잡는다."""
+    bare = _bare_class()
+
+    class _SyncRecompute(bare):
+        def __init__(self, config):
+            super().__init__(config)
+            self._bought_today: set[str] = set()
+
+        def get_scanned_tickers(self):  # pragma: no cover
+            return []
+
+        def recompute_held_atr(self):  # pragma: no cover
+            return None
+
+    e = dataclasses.replace(_bare_entry(eval_driver="swing_poll"), cls=_SyncRecompute)
+    got = _archetype_violations(e)
+    assert got == [next(v for v in got if "recompute_held_atr" in v)], got
+    assert "async" in got[0]
