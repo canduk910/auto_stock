@@ -22,6 +22,7 @@ import { formatKstHHMM, kstMinutesOfDay } from '../utils/kst'
 import {
   strategyStatus, funnelBottleneck, finalFunnelStep, entryWindow, signalBaseline, marketUnitBlockLabel,
   SKIP_REASON_LABELS, type MonitorTone, type StrategyStatusResult,
+  estimateLadderLabelWidth, clampLadderLabelCenter, resolveLadderRowOverlaps,
 } from '../utils/strategyMonitor'
 import { computeZeroStreak } from '../utils/strategyFunnelTrend'
 import KojiroMonitor from './KojiroMonitor'
@@ -251,6 +252,21 @@ function Ladder({ testId, points }: { testId: string; points: LadderPoint[] }) {
   const TEXT_ABOVE_Y = CY - 8
   const TEXT_BELOW_Y = CY + 14
 
+  // N3-1 — 합친 그룹의 글자(`text`)는 점 x 그대로 쓰면 그림 폭 [0,W] 밖으로 잘린다. 1) 글자폭을
+  // 추정해 각 그룹의 중심 x 를 [글자폭/2, W−글자폭/2] 로 클램프하고(`clampLadderLabelCenter`),
+  // 2) 같은 줄(위/아래 교대)에 선 그룹끼리는 x 오름차순으로 겹침을 없앤다(`resolveLadderRowOverlaps`)
+  // — 클램프가 중심을 안쪽으로 당기면서 인접 그룹과 겹칠 수 있기 때문이다.
+  const texts = groups.map((g) => g.pts.map((p) => `${p.label} ${fmt(p.value)}`).join(' / '))
+  const rawLayouts = texts.map((t, i) => clampLadderLabelCenter(groups[i].x, estimateLadderLabelWidth(t), W))
+  const finalX = rawLayouts.map((l) => l.x)
+  for (const parity of [0, 1] as const) {
+    const rowIdx = groups.map((_, i) => i).filter((i) => i % 2 === parity)
+    if (rowIdx.length < 2) continue
+    const items = rowIdx.map((i) => ({ center: finalX[i], width: estimateLadderLabelWidth(texts[i]) }))
+    const resolved = resolveLadderRowOverlaps(items, W)
+    rowIdx.forEach((i, k) => { finalX[i] = resolved[k] })
+  }
+
   return (
     <svg data-testid={testId} width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={fullLabel}>
       <title>{fullLabel}</title>
@@ -259,14 +275,14 @@ function Ladder({ testId, points }: { testId: string; points: LadderPoint[] }) {
         const above = i % 2 === 0 // 인접 그룹끼리 겹치지 않게 두 줄로 번갈아
         const textY = above ? TEXT_ABOVE_Y : TEXT_BELOW_Y
         const tickEndY = above ? textY + 3 : textY - 9
-        // N-A — 합친 그룹은 "라벨 값"을 점별로 적어 "/" 로 잇는다(모두가 같은 값을 대표하지 않는다).
-        const text = g.pts.map((p) => `${p.label} ${fmt(p.value)}`).join(' / ')
+        const text = texts[i]
         const color = LADDER_COLORS[g.pts[0].label] ?? '#6366f1'
+        const anchor = rawLayouts[i].anchor === 'start' ? 'start' : 'middle'
         return (
           <g key={`${g.x}-${i}`}>
             <line x1={g.x} y1={CY} x2={g.x} y2={tickEndY} stroke="#d1d5db" strokeWidth={1} />
             <circle cx={g.x} cy={CY} r={3} fill={color} />
-            <text x={g.x} y={textY} fontSize={7} textAnchor="middle" fill="#374151">{text}</text>
+            <text x={finalX[i]} y={textY} fontSize={7} textAnchor={anchor} fill="#374151">{text}</text>
           </g>
         )
       })}
@@ -417,10 +433,16 @@ export default function StrategyMonitor({
                 ))}
               </div>
               {/* N-B — 막대와 같은 `flex-1` 폭 분배를 써서 날짜·값 줄이 그 막대 바로 아래에 선다
-                  (`flex-wrap` 는 좌측에 몰려 인덱스가 막대와 어긋난다). */}
-              <div className="flex gap-0.5 text-[9px] text-gray-400 mt-0.5">
+                  (`flex-wrap` 는 좌측에 몰려 인덱스가 막대와 어긋난다).
+                  N3-2 — 「날짜:값」한 줄은 칸이 좁아지면(14칸 배분 시 약 22~32px) 통째로 잘려 값이
+                  안 보인다. 날짜·값을 두 줄로 나누면 각 줄의 글자 수가 짧아져(최대 5자·값은 보통
+                  1~2자) 좁은 칸에서도 값만은 남는다(세로가 더 필요해 `leading-tight`로 줄인다). */}
+              <div className="flex gap-0.5 text-[9px] text-gray-400 mt-0.5 leading-tight">
                 {funnelTrend.map((d) => (
-                  <span key={d.date} className="flex-1 text-center truncate">{mmdd(d.date)}:{d.count}</span>
+                  <div key={d.date} className="flex-1 min-w-0 flex flex-col items-center" title={`${mmdd(d.date)}: ${d.count}건`}>
+                    <span className="w-full text-center truncate">{mmdd(d.date)}</span>
+                    <span className="w-full text-center truncate text-gray-500">{d.count}</span>
+                  </div>
                 ))}
               </div>
               {trendZeroStreak > 0 && (

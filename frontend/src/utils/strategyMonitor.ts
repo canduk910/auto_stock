@@ -339,3 +339,61 @@ export function signalBaseline(
   }
   return { baseline, changeRate }
 }
+
+// ─────────────────────────── 보완 4차(N3-1) — 사다리 라벨 x 범위 ───────────────────────────
+// `components/StrategyMonitor.tsx` 의 `Ladder`(SVG, §2.9)가 라벨 글자가 그림 폭 밖으로 잘리지
+// 않게 x·textAnchor 를 고르는 순수 함수. jsdom 에는 실제 글자폭이 없어(getBBox=0) playwright
+// 좌표 실측으로만 검증할 수 있고, 여기 둔 숫자 상수는 그 실측을 보정한 값이다.
+
+/** fontSize=7 SVG text 한글자당 평균 폭(px) 근사치 — 한글·숫자·구두점 혼용 문자열(라벨+값, 보완
+ * 3차 N3-1 실측 두 건: 36자→141.2px·23자→94.6px, 자당 3.92~4.11px)에 안전마진을 더한 값이다.
+ * 실제 렌더 폭보다 넓게 잡아(과대추정) 잘림보다 과한 클램프 쪽으로 기운다. */
+export const LADDER_LABEL_CHAR_WIDTH_PX = 4.3
+
+/** 라벨 글자폭 근사치(px) — `text.length × 글자당 폭`. */
+export function estimateLadderLabelWidth(text: string): number {
+  return text.length * LADDER_LABEL_CHAR_WIDTH_PX
+}
+
+export interface LadderLabelLayout { x: number; anchor: 'start' | 'middle' | 'end' }
+
+/** 라벨 중심 x 를 그림 폭 `[0, boardWidth]` 안으로 당긴다(N3-1) — `textAnchor="middle"` 기준으로
+ * `[글자폭/2, boardWidth − 글자폭/2]` 범위로 클램프한다. 글자폭이 그림 폭 이상이면(기형적으로 긴
+ * 합친 라벨) 왼쪽 경계(`x=0`, `anchor="start"`)에 붙여 **왼쪽 잘림만은** 항상 막는다(오른쪽은
+ * 이 경우 불가피하게 넘칠 수 있다 — 더 줄일 글자가 없다). */
+export function clampLadderLabelCenter(centerX: number, labelWidth: number, boardWidth: number): LadderLabelLayout {
+  if (labelWidth >= boardWidth) return { x: 0, anchor: 'start' }
+  const half = labelWidth / 2
+  const x = Math.min(Math.max(centerX, half), boardWidth - half)
+  return { x, anchor: 'middle' }
+}
+
+/** 같은 줄(위/아래 교대 배치)에 선 라벨끼리의 겹침을 없앤다 — 입력은 x 오름차순으로 정렬된
+ * `{ center, width }` 목록(그림 폭 클램프까지 적용된 값)이다. 왼→오른쪽으로 한 번(왼쪽 라벨의
+ * 오른쪽 가장자리를 다음 라벨이 넘지 않게 밀고), 그 결과를 오른→왼쪽으로 한 번 더(오른쪽 끝이
+ * 그림 밖으로 밀려났으면 안쪽으로 되밀어) 보정해 그림 폭 경계를 우선 지킨다. 입력이 1개뿐이면
+ * 그대로 돌려준다. */
+export function resolveLadderRowOverlaps(
+  items: Array<{ center: number; width: number }>,
+  boardWidth: number,
+  gapPx = 2,
+): number[] {
+  const n = items.length
+  if (n === 0) return []
+  const centers = items.map((it) => it.center)
+  for (let i = 1; i < n; i++) {
+    const prevRight = centers[i - 1] + items[i - 1].width / 2 + gapPx
+    const curLeft = centers[i] - items[i].width / 2
+    if (curLeft < prevRight) centers[i] = prevRight + items[i].width / 2
+  }
+  const lastIdx = n - 1
+  const lastRight = centers[lastIdx] + items[lastIdx].width / 2
+  if (lastRight > boardWidth) centers[lastIdx] = boardWidth - items[lastIdx].width / 2
+  for (let i = n - 2; i >= 0; i--) {
+    const nextLeft = centers[i + 1] - items[i + 1].width / 2 - gapPx
+    const curRight = centers[i] + items[i].width / 2
+    if (curRight > nextLeft) centers[i] = nextLeft - items[i].width / 2
+  }
+  if (centers[0] - items[0].width / 2 < 0) centers[0] = items[0].width / 2
+  return centers
+}

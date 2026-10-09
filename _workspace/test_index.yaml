@@ -184180,6 +184180,7 @@ frontend:
       - frontend/src/pages/__tests__/StrategyFunnel.bottleneckTrend.test.tsx
       - frontend/src/test/sample.test.ts
       - frontend/src/utils/__tests__/strategyMonitor.fix1.cycle414.test.ts
+      - frontend/src/utils/__tests__/strategyMonitor.fix4.cycle414.test.ts
   frontend/src/utils/contentWidth.ts:
     direct_tests: []
     transitive_tests:
@@ -184270,6 +184271,7 @@ frontend:
       - frontend/src/pages/__tests__/StrategiesTeRr.cycle411d.test.tsx
       - frontend/src/pages/__tests__/StrategiesTeRr.test.tsx
       - frontend/src/utils/__tests__/strategyMonitor.fix1.cycle414.test.ts
+      - frontend/src/utils/__tests__/strategyMonitor.fix4.cycle414.test.ts
   frontend/src/utils/marketRegime.ts:
     direct_tests:
       - frontend/src/components/__tests__/MarketRegimeCard.test.tsx
@@ -184487,6 +184489,7 @@ frontend:
   frontend/src/utils/strategyMonitor.ts:
     direct_tests:
       - frontend/src/utils/__tests__/strategyMonitor.fix1.cycle414.test.ts
+      - frontend/src/utils/__tests__/strategyMonitor.fix4.cycle414.test.ts
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
@@ -184512,12 +184515,12 @@ frontend:
       - frontend/src/pages/__tests__/Dashboard.fix1.cycle414.test.tsx
       - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
-generated_at: '2026-10-09T04:23:39.583Z'
+generated_at: '2026-10-09T04:41:06.701Z'
 stats:
   backend_modules: 182
   backend_tests: 1303
   frontend_modules: 144
-  frontend_tests: 152
+  frontend_tests: 153
   unmapped_modules:
     - frontend/src/api/backtest.ts
     - frontend/src/api/stock-chart.ts

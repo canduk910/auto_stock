@@ -138,7 +138,10 @@ describe('N-B — 14일 추이: 날짜·값 줄이 막대와 같은 폭 분배�
     const chips = Array.from(labelRow.children)
     expect(chips.length).toBe(3)
     for (const c of chips) expect((c as HTMLElement).className).toMatch(/flex-1/)
-    // 순서도 막대와 같은 날짜 순서여야 인덱스로 맞출 수 있다.
-    expect(chips.map((c) => c.textContent)).toEqual(['09-29:3', '09-30:0', '10-01:5'])
+    // N3-2(보완 4차) — 「날짜:값」한 줄은 칸이 좁아지면 통째로 잘려 값이 안 보여, 날짜·값을
+    // 두 줄(span 2개)로 나눴다. 순서는 막대와 같은 날짜 순서여야 인덱스로 맞출 수 있다.
+    expect(chips.map((c) => Array.from(c.querySelectorAll('span')).map((s) => s.textContent))).toEqual([
+      ['09-29', '3'], ['09-30', '0'], ['10-01', '5'],
+    ])
   })
 })
