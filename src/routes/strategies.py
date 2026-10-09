@@ -888,6 +888,23 @@ def _monitor_extra(strategy, today_date):
     return {"daily_entries": {"count": count, "cap": strategy._kk("max_daily_entries")}}
 
 
+def _monitor_bought_today(strategy):
+    """오늘 매수 시도 종목(`_bought_today`, 폴·래치형 5전략만 갖는다) — 읍기 전용 복사본
+    (정렬 리스트). 속성이 없는 전략은 `None`(「추적 안 함」 — 빈 리스트 `[]`(오늘 0건)와
+    구별, 리팩토링 카드 #6 N-e)."""
+    s = getattr(strategy, "_bought_today", None)
+    if not isinstance(s, set):
+        return None
+    return sorted(s)
+
+
+def _monitor_sold_today(strategy):
+    """오늘 매도 완료 종목(`state.sold_today`, 전 전략 공통 필드 — `registry.is_ticker_blocked_for_buy`
+    의 당일매도 재매수 차단과 같은 집합) — 읍기 전용 복사본(정렬 리스트, 카드 #6 N-e)."""
+    s = strategy.state.sold_today
+    return sorted(s) if isinstance(s, set) else []
+
+
 def _monitor_strategy_entry(strategy, today_date, today_iso, ticker_last_tick, tick_volume_mod):
     candidates_raw = getattr(strategy, "_candidates", None)
     candidates_raw = candidates_raw if isinstance(candidates_raw, dict) else {}
@@ -905,6 +922,8 @@ def _monitor_strategy_entry(strategy, today_date, today_iso, ticker_last_tick, t
         "candidates": _monitor_candidates(strategy, candidates_raw, today_date),
         "holdings": _monitor_holdings(strategy, positions, today_date),
         "extra": _monitor_extra(strategy, today_date),
+        "bought_today": _monitor_bought_today(strategy),
+        "sold_today": _monitor_sold_today(strategy),
     }
 
 
