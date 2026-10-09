@@ -588,6 +588,13 @@ def test_c2_1_sell_paths_have_no_hook() -> None:
     assert sell_fn is not None
     assert not _hook_calls(sell_fn), "`execute_sell` 안에 훅이 있다"
 
+    # B4-3(cycle424) — 폴백 블록(⑰)이 `_handle_sell_market_disallowed` 로
+    # 뽑혔다. 그 메서드도 매도 경로라 훅 0건이 그대로 적용돼야 한다(약화 금지,
+    # 대상 함수 목록에 더한다).
+    fallback_fn = _func(tree, "_handle_sell_market_disallowed")
+    assert fallback_fn is not None, "B4-3 추출 메서드가 없다"
+    assert not _hook_calls(fallback_fn), "`_handle_sell_market_disallowed` 안에 훅이 있다"
+
     for call in _place_order_calls(tree):
         seg = ast.get_source_segment(src, call) or ""
         if "OrderSide.SELL" not in seg:

@@ -183,52 +183,92 @@ def test_a3_execute_sell_uses_fixed_send_qty_everywhere(oe):
     B7 뒤로는 발사 창에 착지한 통보가 `pos.quantity` 를 **await 도중에** 줄인다.
     발사 뒤 다시 읽으면 깎인 값이 매핑·PENDING 에 적혀 다음 통보가 overrun 클램프에
     잘리고 유령 보유가 남는다(§a-2).
+
+    🔴 B4-3(cycle424) — 폴백 경로(블록 ⑰)가 `_handle_sell_market_disallowed` 로
+    뽑혔다. 주 경로 1(`execute_sell`) + 폴백 1(추출 메서드) = 합산 2, `quantity=`
+    인자 이름은 두 곳 다 `send_qty` 그대로다(기준선 =
+    `_workspace/refactor/2026-10-09_execute_sell_baseline.md` 가드 표).
     """
     _, tree = oe
-    fn = _func(tree, "execute_sell")
-    places = _calls(fn, "place_order")
-    assert len(places) == 2, f"execute_sell `place_order` {len(places)}곳 (기대 2)"
-    for c in places:
-        q = _kw(c, "quantity")
-        assert isinstance(q, ast.Name) and q.id == "send_qty", (
-            f"L{c.lineno} `place_order(quantity=…)` 가 `send_qty` 가 아니다: "
-            f"{ast.unparse(q) if q is not None else None}"
-        )
+    fn_main = _func(tree, "execute_sell")
+    fn_fallback = _func(tree, "_handle_sell_market_disallowed")
+    assert fn_fallback is not None, "B4-3 추출 메서드 `_handle_sell_market_disallowed` 가 없다"
 
-    qty_maps = [
-        n for n in ast.walk(fn)
-        if isinstance(n, ast.Assign) and len(n.targets) == 1
-        and isinstance(n.targets[0], ast.Subscript)
-        and isinstance(n.targets[0].value, ast.Attribute)
-        and n.targets[0].value.attr == "_order_qty"
-    ]
-    assert len(qty_maps) == 2, f"`_order_qty[...] =` {len(qty_maps)}곳 (기대 2)"
-    for n in qty_maps:
-        assert isinstance(n.value, ast.Name) and n.value.id == "send_qty", (
-            f"L{n.lineno} `_order_qty[...] = {ast.unparse(n.value)}` — `send_qty` 여야 한다"
-        )
+    all_places: list[ast.Call] = []
+    all_qty_maps: list[ast.Assign] = []
+    all_helpers: list[ast.Call] = []
 
-    helpers = _calls(fn, "_persist_sell_pending_after_send")
-    assert len(helpers) == 2
-    for c in helpers:
-        q = _kw(c, "quantity")
-        assert isinstance(q, ast.Name) and q.id == "send_qty", (
-            f"L{c.lineno} PENDING 수량이 `send_qty` 가 아니다: "
-            f"{ast.unparse(q) if q is not None else None}"
-        )
+    for fn in (fn_main, fn_fallback):
+        places = _calls(fn, "place_order")
+        assert len(places) == 1, f"{fn.name} `place_order` {len(places)}곳 (기대 1)"
+        for c in places:
+            q = _kw(c, "quantity")
+            assert isinstance(q, ast.Name) and q.id == "send_qty", (
+                f"L{c.lineno} `place_order(quantity=…)` 가 `send_qty` 가 아니다: "
+                f"{ast.unparse(q) if q is not None else None}"
+            )
+        all_places.extend(places)
 
-    pos_qty_reads = sorted(
-        n.lineno for n in ast.walk(fn)
-        if isinstance(n, ast.Attribute) and n.attr == "quantity"
-        and isinstance(n.value, ast.Name) and n.value.id == "pos"
-        and isinstance(n.ctx, ast.Load)
+        qty_maps = [
+            n for n in ast.walk(fn)
+            if isinstance(n, ast.Assign) and len(n.targets) == 1
+            and isinstance(n.targets[0], ast.Subscript)
+            and isinstance(n.targets[0].value, ast.Attribute)
+            and n.targets[0].value.attr == "_order_qty"
+        ]
+        assert len(qty_maps) == 1, f"{fn.name} `_order_qty[...] =` {len(qty_maps)}곳 (기대 1)"
+        for n in qty_maps:
+            assert isinstance(n.value, ast.Name) and n.value.id == "send_qty", (
+                f"L{n.lineno} `_order_qty[...] = {ast.unparse(n.value)}` — `send_qty` 여야 한다"
+            )
+        all_qty_maps.extend(qty_maps)
+
+        helpers = _calls(fn, "_persist_sell_pending_after_send")
+        assert len(helpers) == 1, f"{fn.name} PENDING 헬퍼 {len(helpers)}곳 (기대 1)"
+        for c in helpers:
+            q = _kw(c, "quantity")
+            assert isinstance(q, ast.Name) and q.id == "send_qty", (
+                f"L{c.lineno} PENDING 수량이 `send_qty` 가 아니다: "
+                f"{ast.unparse(q) if q is not None else None}"
+            )
+        all_helpers.extend(helpers)
+
+        pos_qty_reads = sorted(
+            n.lineno for n in ast.walk(fn)
+            if isinstance(n, ast.Attribute) and n.attr == "quantity"
+            and isinstance(n.value, ast.Name) and n.value.id == "pos"
+            and isinstance(n.ctx, ast.Load)
+        )
+        for pc, hc in zip(sorted(c.lineno for c in places), sorted(c.lineno for c in helpers)):
+            between = [ln for ln in pos_qty_reads if pc <= ln <= hc]
+            assert not between, (
+                f"{fn.name}: `await place_order`(L{pc}) ~ PENDING 헬퍼(L{hc}) 사이에 "
+                f"`pos.quantity` 읽기: {between} — 발사 창 체결이 그 값을 이미 깎았을 수 있다"
+            )
+
+    assert len(all_places) == 2, (
+        f"execute_sell + 추출 메서드 합산 `place_order` {len(all_places)}곳 (기대 2)"
     )
-    for pc, hc in zip(sorted(c.lineno for c in places), sorted(c.lineno for c in helpers)):
-        between = [ln for ln in pos_qty_reads if pc <= ln <= hc]
-        assert not between, (
-            f"`await place_order`(L{pc}) ~ PENDING 헬퍼(L{hc}) 사이에 `pos.quantity` 읽기: "
-            f"{between} — 발사 창 체결이 그 값을 이미 깎았을 수 있다"
-        )
+    assert len(all_qty_maps) == 2, f"합산 `_order_qty[...] =` {len(all_qty_maps)}곳 (기대 2)"
+    assert len(all_helpers) == 2, f"합산 PENDING 헬퍼 {len(all_helpers)}곳 (기대 2)"
+
+    # 🔴 B4-3 관문 3 보강(cycle424) — 추출 메서드 안의 이름 `send_qty` 만 보면 호출부가
+    # 무엇을 넘기는지는 안 보인다. `execute_sell` 의 호출이 `send_qty=pos.quantity` 로
+    # 바뀌면(돌연변이 M1) 위 단언은 전부 초록인 채 폴백이 회차 상한(`sell_cap`)을 무시하고
+    # 추적 전량을 낸다. 호출부 키워드 값과 메서드 매개변수 이름까지 묶는다.
+    params = {a.arg for a in fn_fallback.args.args + fn_fallback.args.kwonlyargs}
+    assert "send_qty" in params, (
+        f"`_handle_sell_market_disallowed` 매개변수에 `send_qty` 가 없다: {sorted(params)}"
+    )
+    fb_calls = _calls(fn_main, "_handle_sell_market_disallowed")
+    assert len(fb_calls) == 1, (
+        f"execute_sell 의 `_handle_sell_market_disallowed` 호출 {len(fb_calls)}곳 (기대 1)"
+    )
+    sq = _kw(fb_calls[0], "send_qty")
+    assert isinstance(sq, ast.Name) and sq.id == "send_qty", (
+        f"L{fb_calls[0].lineno} `_handle_sell_market_disallowed(send_qty=…)` 가 그 회차 "
+        f"`send_qty` 가 아니다: {ast.unparse(sq) if sq is not None else None}"
+    )
 
 
 def test_a3b_send_qty_is_taken_from_loop_top_requery(oe):
