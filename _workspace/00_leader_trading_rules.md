@@ -277,15 +277,18 @@ KIS MCP 4질의 결과(2026-05-11) **CTPF1002R(주식기본조회) 응답의 두
 - NXT 시간대 폴백 실패 시(`is_nxt_session=True AND fallback_succeeded=False`) → `_pending_next_day_clear.add((ticker, strategy_id))` 자동 등록 + `[next_day_clear_deferred]` WARNING → 다음 영업일 09:00 KRX 시장가 일괄 청산 자연 전환
 - 지정가 매도(`limit_price>0`)는 폴백/TTL 등록 모두 안 함 (운영자 명시 지정가 의도 보존)
 
-**`insufficient_quantity` reconciliation**
-- 거부 발생 시 tracker history 적재(차단 X — positions 메모리/DB 제거가 자연 차단)
-- 즉시 `[positions_reconciliation] ticker=... strategy=... reason=insufficient_quantity` INFO 1행
-- 1회 `get_balance()` 호출 → 실제 잔량 > 0 인 경우 (수동 부분매도 보호 시나리오) INFO `실제 잔량 확인: ... qty=N — positions 재등록 권고` (자동 재등록 미구현 — 운영자 수동 확인 권고)
-- `get_balance()` 실패 graceful (DEBUG 로그만, positions 제거는 이미 완료)
+**`insufficient_quantity` — 수량 부족(APBK1234·APBK0400 실보유 0) 통합 판정 (cycle429 D1 안A, 사용자 승인 2026-10-10)**
+
+자동 삭제 경로는 **없다** — 포지션을 지우는 길은 체결통보 보유 축(`_handle_sell_fill`) · 재기동 복구(`boot_manager`) · 사람(수동 정리) 셋뿐이다. `OrderEngine._handle_sell_insufficient_quantity`(`is_insufficient_quantity`·#1.5 「실보유 0」(`is_sell_qty_exceeded ∧ sellable==0 ∧ held_qty==0`) 두 호출부가 이 메서드 하나로 수렴한다)가 `_sell_orders_snapshot`(TTTC0081R 1건)으로 「거래소는 체결, 통보는 아직」 수량(`pending`)을 센다:
+
+- **`pending > 0`(전부·일부 설명됨)** — 지우지 않고 `_selling_locked_wait` 로 통보를 기다린다(`_selling` 유지, TTL 등록 없음 — #1.5 의 `[sell_qty_unnoticed_fills]` 와 같은 처리). 늦은 통보가 오면 `_handle_sell_fill` 이 손익까지 정확히 닫는다. 안 오면 `selling_reconcile`(15분 재대조, 보유 잔존 ∧ 열린 매도 없음 ∧ 180초 aged 면 해제)이 마지막 방어선이다.
+- **설명 안 됨(`pending == 0`) 또는 조회 실패(`fills is None`)** — 포지션을 **보존**하고 `_selling` 을 풀고 `SellRejectionTracker.register_insufficient_quantity` 로 **5분 진입 차단** TTL 을 건다(과거엔 「차단 X」 였다 — 자동 삭제가 없어지며 tracker 가 직접 막아야 한다). `[sell_insufficient_unexplained]` 1행(그날 같은 종목 3회째부터 CRITICAL, 그 전엔 ERROR). 잔고 1회 조회는 **관측 전용**(held 값을 로그에만 남긴다 — 판정에 쓰지 않는다).
+- 보존 분기에서는 `sold_today.add` 도 구독 해제(`_unsubscribe_if_no_other_strategy`)도 **하지 않는다**(보유 종목 구독 유지 금기와 같은 이유).
+- 액면병합·입고 지연처럼 주문내역에 흔적이 없는 사건은 영구 「설명 안 됨」 이 되어 매일 ERROR·TTL 이 반복된다 — 사람이 정리해야 끝난다(의도된 설계).
 
 **호환 layer + reset 정책**
 - `OrderEngine._market_closed_blocked` / `_market_closed_blocked_logged_today` 2 property 보존 (사이클 52 테스트 코드 무수정, dict/set 인스턴스 동일성 보장)
-- `OrderEngine.reset_daily_state()` → `self._sell_rejection.reset_daily()` 4 필드 (`_blocked_until` / `_blocked_reason` / `_logged_today` / `_history`) 일괄 위임 + `_nxt_downgrade_logged_today.clear()` 보존
+- `OrderEngine.reset_daily_state()` → `self._sell_rejection.reset_daily()` 5 필드 (`_blocked_until` / `_blocked_reason` / `_logged_today` / `_history` / `_insufficient_count_today`) 일괄 위임 + `_nxt_downgrade_logged_today.clear()` 보존
 - ticker별 history `deque(maxlen=20)` — 시간당 과다 거부 알람 hook 용 버퍼.
 
 ### 트레일링 스탑 상세
