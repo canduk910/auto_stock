@@ -1,0 +1,7 @@
+2026-10-09 09:31:55 [green_frontend] 시작 - 워크트리 확인
+2026-10-09 09:42 [green_frontend] utils/strategyMonitor.ts 작성 완료 — 38/38 테스트 통과. types/trading.ts 에 Monitor* / ExitLine* 타입 추가.
+2026-10-09 09:50 [green_frontend] KojiroMonitor/ScanMonitor/BreakoutCandidateMonitor/strategyInfo kst 위임+도움말 교체 완료. 관련 테스트 전부 통과(static S1-S3, KojiroMonitor 21/21, ScanMonitor.kojiro 4/4, formatRunAt 2/2, BreakoutCandidateMonitor 20/20). 다음: StrategyMonitor.tsx / StrategySummaryTable.tsx 신설.
+2026-10-09 10:03 [green_frontend] StrategyMonitor.tsx 신설 완료 — 63/63 테스트 1차 통과. 다음: StrategySummaryTable.tsx.
+2026-10-09 10:08 [green_frontend] StrategySummaryTable.tsx 신설 완료 — 22/22. 전체 cycle414 전용 스위트 185/185 통과. 다음: Dashboard.tsx 배선.
+2026-10-09 10:09 [green_frontend] Dashboard.tsx 배선 완료(StrategySummaryTable/StrategyMonitor + monitor/exitLines/funnelTrend 쿼리, ScanMonitor에 monitor/exitLines 전달). Dashboard cycle414 테스트 5/5 통과. 다음: 전체 스위트 회귀 확인 + tsc build.
+2026-10-09 10:15 [green_frontend] 완료. 커밋 2b8f2f7d(frontend 본체) + 5e7d1a42(신규 파일 3개 보정, 공유 디렉터리 race로 첫 커밋에서 빠진 것 수습). npm test -- --run: 142 files/1288 tests 통과. npm run build 통과. frontend/e2e 범위만 커밋, backend(src/routes/strategies.py 등)는 손대지 않음.
