@@ -252,6 +252,24 @@ def test_a3_execute_sell_uses_fixed_send_qty_everywhere(oe):
     assert len(all_qty_maps) == 2, f"합산 `_order_qty[...] =` {len(all_qty_maps)}곳 (기대 2)"
     assert len(all_helpers) == 2, f"합산 PENDING 헬퍼 {len(all_helpers)}곳 (기대 2)"
 
+    # 🔴 B4-3 관문 3 보강(cycle424) — 추출 메서드 안의 이름 `send_qty` 만 보면 호출부가
+    # 무엇을 넘기는지는 안 보인다. `execute_sell` 의 호출이 `send_qty=pos.quantity` 로
+    # 바뀌면(돌연변이 M1) 위 단언은 전부 초록인 채 폴백이 회차 상한(`sell_cap`)을 무시하고
+    # 추적 전량을 낸다. 호출부 키워드 값과 메서드 매개변수 이름까지 묶는다.
+    params = {a.arg for a in fn_fallback.args.args + fn_fallback.args.kwonlyargs}
+    assert "send_qty" in params, (
+        f"`_handle_sell_market_disallowed` 매개변수에 `send_qty` 가 없다: {sorted(params)}"
+    )
+    fb_calls = _calls(fn_main, "_handle_sell_market_disallowed")
+    assert len(fb_calls) == 1, (
+        f"execute_sell 의 `_handle_sell_market_disallowed` 호출 {len(fb_calls)}곳 (기대 1)"
+    )
+    sq = _kw(fb_calls[0], "send_qty")
+    assert isinstance(sq, ast.Name) and sq.id == "send_qty", (
+        f"L{fb_calls[0].lineno} `_handle_sell_market_disallowed(send_qty=…)` 가 그 회차 "
+        f"`send_qty` 가 아니다: {ast.unparse(sq) if sq is not None else None}"
+    )
+
 
 def test_a3b_send_qty_is_taken_from_loop_top_requery(oe):
     """🔴 A3b (= AR5, 부록 R-2 개정) — 루프 안 `send_qty` 대입은 **정확히 2개**다.
