@@ -640,7 +640,9 @@ describe('고정 데이터 실제 키', () => {
     const m = makeMonitorEntries() as Dict
     for (const sid of Object.keys(m)) {
       expect(Object.keys(m[sid]).sort()).toEqual(
-        ['candidates', 'extra', 'funnel', 'holdings', 'market_unit', 'paused_skips', 'prepare', 'shadow_buys', 'skips', 'ticks'],
+        // cycle423 카드 #6(N-e) — bought_today·sold_today 추가.
+        ['bought_today', 'candidates', 'extra', 'funnel', 'holdings', 'market_unit', 'paused_skips',
+          'prepare', 'shadow_buys', 'skips', 'sold_today', 'ticks'],
       )
     }
     expect(Object.keys((makeExitLines() as Dict).items[0]).length).toBe(14)
