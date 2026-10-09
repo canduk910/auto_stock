@@ -286,6 +286,8 @@ export function makeMonitorEntries(): Record<string, Dict> {
         },
       },
       extra: {},
+      bought_today: [],
+      sold_today: [],
     },
     donchian_swing: {
       prepare: PREPARE_OK,
@@ -308,6 +310,8 @@ export function makeMonitorEntries(): Record<string, Dict> {
         },
       },
       extra: { daily_entries: { count: 0, cap: 3 } },
+      bought_today: [],
+      sold_today: [],
     },
     vcp_breakout: {
       prepare: PREPARE_OK,
@@ -324,6 +328,8 @@ export function makeMonitorEntries(): Record<string, Dict> {
       candidates: { [VCP_A]: { latch_armed_at: null, first_cross_at: null, max: null } },
       holdings: {},
       extra: {},
+      bought_today: [],
+      sold_today: [],
     },
     bull_flag_breakout: {
       prepare: PREPARE_OK,
@@ -336,6 +342,8 @@ export function makeMonitorEntries(): Record<string, Dict> {
       candidates: { [BFB_A]: { latch_armed_at: null } },
       holdings: {},
       extra: {},
+      bought_today: [],
+      sold_today: [],
     },
     kojiro: {
       prepare: PREPARE_OK,
@@ -350,6 +358,8 @@ export function makeMonitorEntries(): Record<string, Dict> {
       candidates: {},
       holdings: {},
       extra: {},
+      bought_today: [],
+      sold_today: [],
     },
     volatility_breakout: {
       prepare: PREPARE_OK,
@@ -362,14 +372,18 @@ export function makeMonitorEntries(): Record<string, Dict> {
       candidates: {},
       holdings: {},
       extra: {},
+      bought_today: null,
+      sold_today: [],
     },
     momentum: {
       prepare: null, funnel: [], market_unit: null, skips: { known: false }, paused_skips: [],
       shadow_buys: [], ticks: {}, candidates: {}, holdings: {}, extra: {},
+      bought_today: null, sold_today: [],
     },
     long_tail_volatility: {
       prepare: null, funnel: [], market_unit: null, skips: { known: false }, paused_skips: [],
       shadow_buys: [], ticks: {}, candidates: {}, holdings: {}, extra: {},
+      bought_today: null, sold_today: [],
     },
   }
 }

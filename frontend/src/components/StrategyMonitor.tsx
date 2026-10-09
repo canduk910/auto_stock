@@ -350,6 +350,37 @@ export default function StrategyMonitor({
   const routeEntry = monitor?.strategies?.[strategyId] ?? null
   const marketUnit = routeEntry?.market_unit ?? null
 
+  /** 카드 #6(N-e, cycle423) — `routeEntry.bought_today`/`sold_today` 는 라우트가 이미 읍기 전용
+   * 복사본으로 싣는다. 여기서는 그 값을 읽기만 한다(엔진 호출·판정 재계산 0). `sold_today` 는
+   * `registry.is_ticker_blocked_for_buy()` 의 당일매도 재매수 차단과 같은 뜻이라 배지 문구에
+   * 그 뜻을 적는다. */
+  function todayActivityBadges(ticker: string) {
+    const bought = (routeEntry?.bought_today ?? []).includes(ticker)
+    const sold = (routeEntry?.sold_today ?? []).includes(ticker)
+    if (!bought && !sold) return null
+    return (
+      <span className="ml-1 inline-flex gap-1">
+        {bought && (
+          <span
+            data-testid={`${strategyId}-monitor-bought-today-${ticker}`}
+            className="text-[10px] px-1 rounded bg-sky-100 text-sky-700"
+          >
+            오늘 매수함
+          </span>
+        )}
+        {sold && (
+          <span
+            data-testid={`${strategyId}-monitor-sold-today-${ticker}`}
+            className="text-[10px] px-1 rounded bg-rose-100 text-rose-700"
+            title="당일 재매수 막힘"
+          >
+            오늘 매도함
+          </span>
+        )}
+      </span>
+    )
+  }
+
   // L1 — 훅은 전부 조기 return(고지로 분기) 보다 앞에 둔다(rules-of-hooks).
   const status = useMemo(() => (info ? strategyStatus(strategyId, info, marketUnit) : null), [strategyId, info, marketUnit])
   const subscribedSet = useMemo(() => new Set(subscribedTickers ?? []), [subscribedTickers])
@@ -821,7 +852,7 @@ export default function StrategyMonitor({
             const pct = cur !== null && line !== null && line > 0 ? ((cur - line) / line) * 100 : null
             return (
               <tr key={ticker} data-testid={`etf_trend-monitor-candidate-${ticker}`} className="border-b border-gray-100">
-                <td className="py-1 pr-2 font-medium text-gray-800">{nameOf(ticker)}({ticker})</td>
+                <td className="py-1 pr-2 font-medium text-gray-800">{nameOf(ticker)}({ticker}){todayActivityBadges(ticker)}</td>
                 <td className="py-1 pr-2">
                   <span data-testid={`etf_trend-monitor-status-${ticker}`} className="text-gray-700">{actual}</span>
                   {hint && (
@@ -894,7 +925,7 @@ export default function StrategyMonitor({
             const designLot = engineStopped ? null : finiteOrNull(cand.design_lot)
             return (
               <tr key={ticker} data-testid={`donchian_swing-monitor-candidate-${ticker}`} className="border-b border-gray-100">
-                <td className="py-1 pr-2 font-medium text-gray-800">{nameOf(ticker)}({ticker})</td>
+                <td className="py-1 pr-2 font-medium text-gray-800">{nameOf(ticker)}({ticker}){todayActivityBadges(ticker)}</td>
                 <td className="py-1 pr-2">
                   <span data-testid={`donchian_swing-monitor-status-${ticker}`} className="text-gray-700">{statusText}</span>
                   {hint && (
@@ -993,7 +1024,7 @@ export default function StrategyMonitor({
               && typeof target.breakout_seen_at === 'string'
             return (
               <tr key={ticker} data-testid={`${sid}-monitor-candidate-${ticker}`} className="border-b border-gray-100">
-                <td className="py-1 pr-2 font-medium text-gray-800">{nameOf(ticker)}({ticker})</td>
+                <td className="py-1 pr-2 font-medium text-gray-800">{nameOf(ticker)}({ticker}){todayActivityBadges(ticker)}</td>
                 <td className="py-1 pr-2">
                   <span data-testid={`${sid}-monitor-status-${ticker}`} className="text-gray-700">{statusText}</span>
                   {pauseHint && (
@@ -1104,7 +1135,7 @@ export default function StrategyMonitor({
             }
             return (
               <tr key={ticker} data-testid={`etf_trend-monitor-holding-${ticker}`} className="border-b border-gray-100">
-                <td className="py-1 pr-2 font-medium text-gray-800">{pos.name || ticker}</td>
+                <td className="py-1 pr-2 font-medium text-gray-800">{pos.name || ticker}{todayActivityBadges(ticker)}</td>
                 <td className="py-1 px-2 text-right">{won(pos.buy_price)}</td>
                 <td className="py-1 px-2 text-right">{cur !== null ? cur.toLocaleString() : '—'}</td>
                 <td className="py-1 px-2 text-right" data-testid={`etf_trend-monitor-stop-${ticker}`}>
@@ -1214,7 +1245,7 @@ export default function StrategyMonitor({
             const fallbackNote = holding.days_fallback === true ? ' (보유일 근사)' : ''
             return (
               <tr key={ticker} data-testid={`donchian_swing-monitor-holding-${ticker}`} className="border-b border-gray-100">
-                <td className="py-1 pr-2 font-medium text-gray-800">{pos.name || ticker}</td>
+                <td className="py-1 pr-2 font-medium text-gray-800">{pos.name || ticker}{todayActivityBadges(ticker)}</td>
                 <td className="py-1 px-2 text-right">{won(pos.buy_price)}</td>
                 <td className="py-1 px-2 text-right">{cur !== null ? cur.toLocaleString() : '—'}</td>
                 <td className="py-1 px-2 text-right">
@@ -1289,7 +1320,7 @@ export default function StrategyMonitor({
             const tone: 'normal' | 'orange' | 'red' = distPct === null ? 'normal' : distPct < 1 ? 'red' : distPct < 3 ? 'orange' : 'normal'
             return (
               <tr key={ticker} data-testid={`${sid}-monitor-holding-${ticker}`} className="border-b border-gray-100">
-                <td className="py-1 pr-2 font-medium text-gray-800">{pos.name || ticker}</td>
+                <td className="py-1 pr-2 font-medium text-gray-800">{pos.name || ticker}{todayActivityBadges(ticker)}</td>
                 <td className="py-1 px-2 text-right">{won(pos.buy_price)}</td>
                 <td className="py-1 px-2 text-right">{cur !== null ? cur.toLocaleString() : '—'}</td>
                 <td className="py-1 px-2 text-right" data-testid={`${sid}-monitor-stop-${ticker}`}>{stop != null ? stop.toLocaleString() : '—'}</td>

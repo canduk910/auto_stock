@@ -35,16 +35,20 @@ export interface StrategyStatusResult {
   chips: StrategyStatusChip[]
 }
 
-/** 터틀 4전략(시장 유닛 사이징 대상) — §2.4. */
-const TURTLE_SIDS = new Set(['kojiro', 'donchian_swing', 'vcp_breakout', 'bull_flag_breakout'])
-
 function isBool(v: unknown): v is boolean {
   return typeof v === 'boolean'
 }
 
 /**
- * 시장 유닛이 그 전략에서 뜻하는 것 — §2.4. 전략이 대상이 아니거나(터틀 4 + etf 가 아님) `mode==='off'`
- * 또는 스냅샷이 없으면 `null`(표시 안 함).
+ * 시장 유닛이 그 전략에서 뜻하는 것 — §2.4. `mode==='off'` 또는 값 자체가 없으면 `null`(표시 안 함).
+ *
+ * 🔴 **대상 판정은 하드코딩 목록이 아니라 응답 그대로다 (cycle423 카드 #5)** — 라우트
+ * `GET /api/strategies/monitor` 가 이미 `strategy_manifest.MARKET_UNIT_SCALE_IDS`(명부의
+ * `market_unit_policy=="scale"` 파생)로 걸러 그 집합 밖 전략에는 `market_unit: null` 만
+ * 보낸다. 그래서 `mu` 가 주어졌다는 사실 자체가 "적용 대상" 신호다 — 여기서 `TURTLE_SIDS`
+ * 같은 Set 을 또 들면 명부에 새 scale 전략이 들어와도 프론트가 못 따라간다(라우트는 값을
+ * 보내는데 화면에서만 사라진다). `etf_trend` 만 차단 규약이 달라(결손이면 shadow 에서도
+ * 차단) 별도 분기이고, 그 밖은 전부 "응답이 있으면 터틀형" 으로 본다.
  */
 export function marketUnitEffect(
   sid: string,
@@ -52,8 +56,6 @@ export function marketUnitEffect(
 ): { blocks: boolean; label: string } | null {
   if (!mu || mu.mode === 'off') return null
   const isEtf = sid === 'etf_trend'
-  const isTurtle = TURTLE_SIDS.has(sid)
-  if (!isEtf && !isTurtle) return null
 
   if (mu.mode === 'shadow') {
     if (!mu.ok) {

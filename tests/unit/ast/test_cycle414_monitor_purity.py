@@ -85,6 +85,7 @@ _ALLOWED_LOCAL_IMPORTS = {
     ("src.engine.scheduler", "trading_scheduler"),
     ("src.engine", "scanner"), ("src.engine", "tick_volume"), ("src.engine", "etf_trend_core"),
     ("src.engine", "market_unit"),
+    ("src.engine.strategy_manifest", "MARKET_UNIT_SCALE_IDS"),
     ("src.engine.scanner", "ticker_last_tick"),
     ("src.engine.tick_volume", "get_observed_acml_vol"),
     ("src.engine.market_unit", "normalize_mode"), ("src.engine.market_unit", "MODE_KEY"),

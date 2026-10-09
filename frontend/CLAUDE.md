@@ -175,7 +175,7 @@ leaf 12개를 **상위 9개**로 묶는다(사용자 지정 묶음·순서 — �
 - `strategyStatus(sid, info, marketUnit?)` — 주 배지 하나. 위에서 처음 맞는 것: `enabled === false` 「꺼짐」 → `params.buy_paused === true` 「신규 매수 멈춤 · 청산은 작동」 → `params.shadow_mode === true` 「섀도 · 주문 없이 기록만」 → 「실매매」.
   - 🔴 **`=== true` 일 때만** 켜짐으로 본다(엔진의 `is True` 와 같다). `"true"`·`1` 은 멈춤·섀도가 아니라 빨강 「설정 모양 오류」 칩이다.
   - 보조 칩 `kind` = `off_with_holdings`(꺼짐 + 보유 n — 손절 정지, 빨강) · `paused_shadow` · `paused_config_invalid` · `shadow_config_invalid` · `zero_budget`(켜짐 ∧ 비중 0 ∧ 섀도 아님) · `buy_disabled` · `max_positions` · `market_unit`.
-- `marketUnitEffect(sid, mu)` — 시장 유닛의 뜻은 전략마다 다르다. 대상 = 터틀 4전략 + `etf_trend` 이고, `mode === 'off'` 면 표시하지 않는다.
+- `marketUnitEffect(sid, mu)` — 시장 유닛의 뜻은 전략마다 다르다. 대상 판정은 하드코딩 목록이 아니라 **라우트 응답**이다(cycle423 카드 #5) — `mu` 가 주어지면(= 라우트가 명부 `MARKET_UNIT_SCALE_IDS` 로 이미 걸렀다) `etf_trend` 만 별도 분기, 그 밖은 전부 터틀형으로 본다. `mode === 'off'` 면 표시하지 않는다.
   - 🔴 `etf_trend` 는 **`shadow` 에서도** m≤0 이거나 스냅샷이 없으면(`ok === false`) 「사지 않음」(차단)이다. `enforce` + 스냅샷 없음도 차단이다(`etf_trend.py` 가 `state == "unavailable"` 을 직접 거른다).
   - 터틀 4전략: `shadow` = 「관찰만」(스냅샷이 없어도 차단 아님) · `enforce` = m≤0 차단, m<1 「랏 ×m」, 스냅샷 없음 = 「m=1(차단 아님)」 — 엔진 `strategy_base._market_unit_view` 가 그때 `m=1.0` 으로 산다.
 - `marketUnitBlockLabel(sid, mu)` — 위 판정이 차단일 때만 「시장 유닛 미계산」/「시장 유닛 0배」, 아니면 `null`. 후보 상태 체인과 요약표 「왜 안 사나」 가 이것 하나로 판정한다.
@@ -198,6 +198,7 @@ leaf 12개를 **상위 9개**로 묶는다(사용자 지정 묶음·순서 — �
   - donchian 은 `max_breakout_extension_pct` 가 있으면 마지막 판정이 「참고: 진입 조건 충족(당일 고가 미반영)」 다 — 엔진 `check_buy_signal` 은 「현재가 ≥ 돌파선」을 보지 않고(갭·추격상한·시장유닛·랏만), 추격 상한은 당일 고가도 보는데 화면은 현재가·시가만 가진다.
   - etf 「오늘 갭 스킵」 = 그 종목 오늘 사유(`skips.by_ticker`)가 `gap_up`·`gap_over_line` 일 때만. 엔진은 갭일 때만 그날 평가를 닫는다.
   - 수량은 추정이다 — etf 「최대 n주(추정)」·「1주도 안 됨 — 사지 않음(추정)」, donchian 「n주(추정)」·「사지 않음(추정)」(m=1·전일 종가 기준, 0주일 때도 "(추정)" 을 붙인다).
+  - 🔴 **오늘 매수·매도 배지(cycle423 카드 #6 N-e)** — 라우트 `bought_today`(엔진 `_bought_today`, 있는 전략만)·`sold_today`(`state.sold_today`, 전 전략)에 그 종목이 있으면 종목명 옆에 「오늘 매수함」·「오늘 매도함」(title="당일 재매수 막힘") 배지를 단다(`utils/strategyMonitor.ts` 가 아니라 `StrategyMonitor.tsx` 의 `todayActivityBadges` 가 라우트 값을 읽기만 한다 — 재판정 없음). `sold_today` 는 `registry.is_ticker_blocked_for_buy()` 의 당일매도 재매수 차단과 같은 집합이다. ④ 후보표·⑦ 보유표 양쪽 모두에 붙는다.
 - ⑤ 🔴 「0건」 과 「모름」 을 가른다. 멈춤 중이면 「멈춤 중 — 엔진은 다른 사유를 남기지 않는다」 + 멈춤으로 건너뛴 종목 수(`paused_skips`)다. 사유를 남기지 않는 전략(`skips.known === false`)은 「기록하지 않습니다」 다. 둘 다 0 으로 쓰지 않는다.
 - ⑥ 오늘 매수 신호 + 기준선 대비. donchian 은 「오늘 신규 진입 n / 상한」(`extra.daily_entries`)을 함께 보인다.
 - ⑦ 🔴 **실효 손절선 = exit-lines `stop_price`(엔진 값)** — 화면이 손절선을 다시 계산하지 않는다. exit-lines 에 그 종목이 없을 때만 라우트 `holdings` 의 엔진 값(etf `effective_stop` · donchian `stop`)을 쓰고, VCP·BFB 는 `—` 다. 네 전략 모두 「손절까지」 칸이 있고 <1% `text-rose-600` · <3% `text-amber-600`(`STOP_TONE_CLS`, `data-tone` 속성도 단다). etf·donchian 은 손절선 값 옆에 `exit-lines stop_source` 꼴표를 단다 — `hard_pct`(근사) · `mode_dependent`(모드별) · `engine_idle`(엔진 정지), `effective`(엔진이 실제로 쓰는 선)는 꼬리표 없음.
@@ -217,7 +218,7 @@ leaf 12개를 **상위 9개**로 묶는다(사용자 지정 묶음·순서 — �
 | 요약표 미니 선 `MiniTrend` | 요약표 「14일」 칸 · `strategy-summary-trend-{sid}` | 14일 최종 후보 수 꺾은선 |
 | 요약표 보유·예산 막대 | 「보유」·「예산」 칸 | 보유 = `max_positions` 칸 막대(≤20일 때, 채운 칸 `data-filled="true"`) · 예산 = 사용률 가로 막대 |
 
-testid = `{sid}-monitor` · `-badge` · `-chip-{kind}` · `-status` · `-engine-stopped` · `-asof` · `-timeline` · `-funnel` · `-funnel-row-{step_no}` · `-trend` · `-candidates` · `-candidate-{ticker}` · `-status-{ticker}` · `-unpaused-{ticker}` · `-qty-{ticker}` · `-distbar-{ticker}` · `-volgauge-{ticker}` · `-latch-{ticker}` · `-skips` · `-entries` · `-holdings` · `-holding-{ticker}` · `-stop-{ticker}` · `-stopdist-{ticker}` · `-line-{ticker}-{hard|breakeven|trail|channel}` · `-countdown-{ticker}` · `-ladder-{ticker}` · `-empty` · `donchian_swing-monitor-daily-entries` · `donchian_swing-monitor-exit-rules`.
+testid = `{sid}-monitor` · `-badge` · `-chip-{kind}` · `-status` · `-engine-stopped` · `-asof` · `-timeline` · `-funnel` · `-funnel-row-{step_no}` · `-trend` · `-candidates` · `-candidate-{ticker}` · `-status-{ticker}` · `-unpaused-{ticker}` · `-qty-{ticker}` · `-distbar-{ticker}` · `-volgauge-{ticker}` · `-latch-{ticker}` · `-bought-today-{ticker}` · `-sold-today-{ticker}` · `-skips` · `-entries` · `-holdings` · `-holding-{ticker}` · `-stop-{ticker}` · `-stopdist-{ticker}` · `-line-{ticker}-{hard|breakeven|trail|channel}` · `-countdown-{ticker}` · `-ladder-{ticker}` · `-empty` · `donchian_swing-monitor-daily-entries` · `donchian_swing-monitor-exit-rules`.
 
 **요약표 — `components/StrategySummaryTable.tsx`**
 
@@ -232,7 +233,7 @@ testid = `{sid}-monitor` · `-badge` · `-chip-{kind}` · `-status` · `-engine-
 
 testid = `strategy-summary-table` · `strategy-summary-row-{sid}` · `strategy-summary-{badge,why,trend,holdings,budget,stopmargin,exitdue,signals}-{sid}`.
 
-가드 = `components/__tests__/StrategyMonitor.{cycle414,fix1.cycle414,fix2.cycle414,fix3.cycle414,fix.cycle418}.test.tsx` · `StrategySummaryTable.{cycle414,fix1.cycle414,fix2.cycle414,fix3.cycle414,fix.cycle418}.test.tsx` · `KojiroMonitor.{fix2.cycle414,fix.cycle418}.test.tsx` · `ScanMonitor.fix.cycle418.test.tsx`(N2 로딩 전 요약칸) · `utils/__tests__/strategyMonitor.{cycle414,fix1.cycle414,fix4.cycle414,fix.cycle418}.test.ts` · `pages/__tests__/Dashboard.{strategyMonitor,fix1}.cycle414.test.tsx` · 정적 `components/__tests__/_ast_cycle414_static.test.ts`(S1 자체 날짜 포맷 0 · S2 `utils/kst` 위임 · S3 돈키언 낡은 청산 문구 0 · S4 탭 설명 `utils/strategyInfo.ts::STRATEGY_INFO` — etf_trend 항목 존재·퍼센트 문턱 0, donchian 깡토식. kojiro 항목의 숫자·「관찰 모드」 0 은 `ScanMonitor.kojiro.test.tsx` 가 본다) · `_ast_cycle414_fix1_static.test.ts`(두 컴포넌트 rules-of-hooks 위반 0 — 인라인 disable 도 0 · `pages/StrategyFunnel` 정적 import 0). 고정 데이터 = `test/fixtures/strategyMonitor.fixture.ts`(라우트 실제 키). MSW 기본 핸들러 = `/strategies/monitor` · `/balance/exit-lines` · `/strategy-funnel/recent`.
+가드 = `components/__tests__/StrategyMonitor.{cycle414,fix1.cycle414,fix2.cycle414,fix3.cycle414,fix.cycle418,cycle423}.test.tsx` · `StrategySummaryTable.{cycle414,fix1.cycle414,fix2.cycle414,fix3.cycle414,fix.cycle418}.test.tsx` · `KojiroMonitor.{fix2.cycle414,fix.cycle418}.test.tsx` · `ScanMonitor.fix.cycle418.test.tsx`(N2 로딩 전 요약칸) · `utils/__tests__/strategyMonitor.{cycle414,fix1.cycle414,fix4.cycle414,fix.cycle418,cycle423}.test.ts` · `pages/__tests__/Dashboard.{strategyMonitor,fix1}.cycle414.test.tsx` · 정적 `components/__tests__/_ast_cycle414_static.test.ts`(S1 자체 날짜 포맷 0 · S2 `utils/kst` 위임 · S3 돈키언 낡은 청산 문구 0 · S4 탭 설명 `utils/strategyInfo.ts::STRATEGY_INFO` — etf_trend 항목 존재·퍼센트 문턱 0, donchian 깡토식. kojiro 항목의 숫자·「관찰 모드」 0 은 `ScanMonitor.kojiro.test.tsx` 가 본다) · `_ast_cycle414_fix1_static.test.ts`(두 컴포넌트 rules-of-hooks 위반 0 — 인라인 disable 도 0 · `pages/StrategyFunnel` 정적 import 0). 고정 데이터 = `test/fixtures/strategyMonitor.fixture.ts`(라우트 실제 키, bought_today·sold_today 포함). MSW 기본 핸들러 = `/strategies/monitor` · `/balance/exit-lines` · `/strategy-funnel/recent`.
 
 ## ScanMonitor
 

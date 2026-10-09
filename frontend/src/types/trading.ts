@@ -231,6 +231,11 @@ export interface StrategyMonitorEntry {
   candidates: Record<string, Record<string, unknown>>
   holdings: Record<string, Record<string, unknown>>
   extra: Record<string, unknown>
+  /** cycle423 카드 #6(N-e) — 엔진 `_bought_today`(폴·래치형 5전략만). 그 속성이 없는 전략은
+   * `null`("추적 안 함" — 빈 배열 `[]`(오늘 0건)과 다르다). */
+  bought_today: string[] | null
+  /** cycle423 카드 #6(N-e) — `state.sold_today`(전 전략 공통, 당일 재매수 차단 집합). */
+  sold_today: string[]
 }
 
 export interface StrategyMonitorResponse {

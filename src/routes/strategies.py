@@ -560,11 +560,6 @@ _MONITOR_CACHE_TTL_S = 2.0
 _monitor_cache: tuple[float, str] | None = None
 _monitor_clock = time.monotonic
 
-#: 시장 유닛 표시 대상 — 터틀 4전략 + etf_trend(§2.4). 그 밖(VB·모멘텀·LTV)은 None.
-_MONITOR_MU_SIDS = frozenset({
-    "kojiro", "donchian_swing", "vcp_breakout", "bull_flag_breakout", "etf_trend",
-})
-
 
 def _monitor_cap_emitted(cap, today_iso):
     """`KstDailyEmitCap` 의 `_emitted` — `_day` 가 오늘(KST)이 아니면 빈 집합.
@@ -625,8 +620,16 @@ def _monitor_funnel(strategy):
 
 def _monitor_market_unit(strategy, today_date):
     """시장 유닛(§2.4) — 터틀 4전략·etf 만, 오늘 스냅샷 `_market_unit_snaps[오늘]`
-    그대로(어제 것으로 메우지 않는다). 그 밖 전략은 `None`."""
-    if strategy.strategy_id not in _MONITOR_MU_SIDS:
+    그대로(어제 것으로 메우지 않는다). 그 밖 전략은 `None`.
+
+    대상 집합 = `strategy_manifest.MARKET_UNIT_SCALE_IDS`(명부의 `market_unit_policy=="scale"`
+    파생, 리팩토링 카드 #5·cycle423) — 손으로 적은 리터럴을 두지 않는다. 새 전략이 명부에
+    `market_unit_policy="scale"` 로 들어오면 이 라우트는 코드를 고치지 않아도 그 전략의
+    `market_unit` 을 연다.
+    """
+    from src.engine.strategy_manifest import MARKET_UNIT_SCALE_IDS
+
+    if strategy.strategy_id not in MARKET_UNIT_SCALE_IDS:
         return None
     from src.engine import market_unit
 
@@ -885,6 +888,23 @@ def _monitor_extra(strategy, today_date):
     return {"daily_entries": {"count": count, "cap": strategy._kk("max_daily_entries")}}
 
 
+def _monitor_bought_today(strategy):
+    """오늘 매수 시도 종목(`_bought_today`, 폴·래치형 5전략만 갖는다) — 읍기 전용 복사본
+    (정렬 리스트). 속성이 없는 전략은 `None`(「추적 안 함」 — 빈 리스트 `[]`(오늘 0건)와
+    구별, 리팩토링 카드 #6 N-e)."""
+    s = getattr(strategy, "_bought_today", None)
+    if not isinstance(s, set):
+        return None
+    return sorted(s)
+
+
+def _monitor_sold_today(strategy):
+    """오늘 매도 완료 종목(`state.sold_today`, 전 전략 공통 필드 — `registry.is_ticker_blocked_for_buy`
+    의 당일매도 재매수 차단과 같은 집합) — 읍기 전용 복사본(정렬 리스트, 카드 #6 N-e)."""
+    s = strategy.state.sold_today
+    return sorted(s) if isinstance(s, set) else []
+
+
 def _monitor_strategy_entry(strategy, today_date, today_iso, ticker_last_tick, tick_volume_mod):
     candidates_raw = getattr(strategy, "_candidates", None)
     candidates_raw = candidates_raw if isinstance(candidates_raw, dict) else {}
@@ -902,6 +922,8 @@ def _monitor_strategy_entry(strategy, today_date, today_iso, ticker_last_tick, t
         "candidates": _monitor_candidates(strategy, candidates_raw, today_date),
         "holdings": _monitor_holdings(strategy, positions, today_date),
         "extra": _monitor_extra(strategy, today_date),
+        "bought_today": _monitor_bought_today(strategy),
+        "sold_today": _monitor_sold_today(strategy),
     }
 
 
