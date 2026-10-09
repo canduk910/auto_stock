@@ -989,7 +989,7 @@ flowchart TD
 | `trade_history` 부분 UNIQUE | 029 | `(ticker, order_no, trade_type) WHERE order_no IS NOT NULL AND order_no != ''` — 핑퐁 INSERT 영구 차단 (사이클 30) |
 | `strategy_funnel_snapshots` | 030 (+035, 040) | 전략별 조건검색 단계별 후보/탈락 영구 추적 — UNIQUE `(target_date, strategy_id, step_no)` + UPSERT. 잠정(`is_provisional`) 쓰기는 확정 행을 덮지 못한다 |
 | `stock_master_history` | 032 (+036) | stock_master 갱신 이력 — PK (ticker, seq=0/1) + trigger |
-| `stock_master_daily` | 033 | KIS FHKST03010100 일봉 정규화 — PK (ticker, bas_dd) + OHLCV + change_rate + raw JSONB. 매일 **20:30** KST 적재(`TIME_STOCK_MASTER_DAILY_LOAD`, T-100 백필 → D-1 증분). 그 시각 그날 봉의 종가·고저는 잠정이고 다음 거래일 부팅이 확정한다(`daily_bar_finalize`, 판정 = `updated_at`) |
+| `stock_master_daily` | 033 | KIS FHKST03010100 일봉 정규화 — PK (ticker, bas_dd) + OHLCV + change_rate + raw JSONB. 매일 **20:30** KST 적재(`TIME_STOCK_MASTER_DAILY_LOAD`. 225봉 미만 종목은 분할 백필, 그 뒤는 종목당 1콜 증분 — 빈 날이 있으면 창을 넓혀 채운다). 그 시각 그날 봉의 종가·고저는 잠정이고 다음 거래일 부팅이 확정한다(`daily_bar_finalize`, 판정 = `updated_at`) |
 | `stock_master.master_raw` | 034 | KIS 공식 일일 마스터 파일 raw JSONB + master_raw_updated_at + is_kospi200/is_kosdaq150 BOOLEAN (037, 사이클 153) |
 | `pending_next_day_clear` | 038 | 익일청산큐 DB 영속화 — PK (target_date, ticker, strategy_id). 재기동 시 메모리 휘발 차단 |
 | `llm_buy_evaluations` | 043 | AI 매수평가(LLM)를 주문 발화 시점에 기록 — PK (trade_date, account_no, ticker, order_no) + eval_kind('order'|'blocked'). 주문 1건 = 1행(성공·실패 모두), 매매 hot path 무관한 관측 계층. 열 정의 정본 = 루트 `CLAUDE.md` DB 스키마 표 (cycle276). 프로세스 분리 1단계가 이 테이블을 큐로 재사용한다 → 15.2 |

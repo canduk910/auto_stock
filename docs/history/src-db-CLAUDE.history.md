@@ -1293,3 +1293,20 @@ target 220 → 마진 34 영업일(사이클196 의 34 와 같다). `fetch_daily
 승격했을 때만」 쓰게 해, `trade_journal_stops` 에 UNIQUE 가 없다는 사실과 함께 정본에 적었다.
 
 → CHANGELOG: cycle412 마무리 행
+
+---
+
+## stock_master_daily.py — KIS 일봉 정규화
+
+### 2026-10-09 cycle417 문서 동기화 — 분기 키 두 줄을 코드 사실에 맞춤
+
+정본 원문(덮어쓰기 전 2줄):
+
+```
+  - `count_all()` / `count_by_ticker(ticker)` — 적재 진단
+  - `max_bas_dd(ticker=None)` — 백필 vs 증분 분기 키(스캐너). `None` = 테이블 전체 최대값. DB 예외는 삼키고 `None`(ERROR 로그만)
+```
+
+경위: 스캐너(`_stock_master_daily_load_once`)는 `max_bas_dd(ticker)` 를 오늘 봉 멱등 skip(`skipped_fresh`)에, `count_by_ticker(ticker)` 를 깊은 backfill vs 증분 분기(`existing_count`)에 쓴다. 문서가 두 역할을 바꿔 적고 있었다. 같은 동기화에서 cycle417 신규 읽기 헬퍼 `earliest_missing_bas_dd` 항목을 넣었다.
+
+→ CHANGELOG: cycle417 행

@@ -1,0 +1,3 @@
+2026-10-09 11:58 tester 착수 — 범위·핀 점검 완료, 신규 43 통과(pg 통합 6 실 Postgres). 전체 스위트 1회차 시작.
+2026-10-09 12:04 tester — 1회차: 2 failed(replay parquet) 16287 passed 23 skipped 336 xfailed 13 xpassed. DEBUG 재실행 시작.
+2026-10-09 12:13 tester — DEBUG 2회차 동일(2 failed replay parquet). 인덱스 의미 동일(generated_at 외 diff 0). 돌연변이 11/11 사살. 판정 정리.
