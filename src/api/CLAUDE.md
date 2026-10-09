@@ -195,11 +195,16 @@ KRX Data Marketplace(openapi.krx.co.kr) 정식 OPEN API — KIS 와 별개 시�
 - KRX 1차 — `_full_universe_load_krx_primary` 가 4 endpoint 를 50ms 간격으로 부른다(KIS LMS chain). `KrxApiError`(비활성 · 키 부재 · 401 · 4xx/5xx · timeout · 네트워크 · JSON 오류)는 전파되고, 매매정보 2건이 7일 연속(basDd 7개) 비어도 `KrxApiError` 다 → `_full_universe_load_once` 가 KIS market-cap 으로 자동 폴백, 양쪽 모두 실패면 raise
 - 🔴 `system_config.krx_open_api_enabled` 를 끄는 것은 「제거」가 아니라 KIS 폴백으로의 **경로 변경**이다 — 폴백이 유니버스를 크게 줄인다. 끄기 전후 검증 = 루트 `CLAUDE.md` 「핵심 안전 규칙」 비활성화 심층 검증 의무
 
+### 시장 등락 통계 (`routes/market_breadth.py`, cycle416)
+
+- 매매정보 2건(`fetch_stk_bydd_trd`·`fetch_ksq_bydd_trd`)을 매크로 화면의 「시장 등락 통계」 가 날짜마다 부른다. 관찰 전용이고 유니버스 적재와 무관하다. 캐시·동시성·재시도·하루 상한 = `src/routes/CLAUDE.md` 엔드포인트 목록의 `/api/market/breadth` 행
+- 🔴 이 클라이언트는 그 라우트를 위해 고치지 않는다 — `tests/unit/ast/test_cycle416_ast_market_breadth.py::test_g416_6_krx_client_unchanged` 가 최상위 정의 이름 집합과 각 정의 본문 sha256 을 핀한다
+
 ### 보안
 
 - 평문 key 는 query parameter 에만 — **URL 전체 로그 금지**(endpoint_path 만 로그). `KrxApiError` 메시지에도 평문 key 노출 0건
 
-**Rate Limit**: 키당 일일 10,000 호출. 적재는 보통 하루 4회. 매매정보 2건은 basDd 를 전일부터 하루씩 거슬러 최대 7번(첫 시도 포함) 부른다 — 둘 다 비었을 때만 하루 전으로 넘어가고, 하나라도 오면 멈춘다.
+**Rate Limit**: 키당 일일 10,000 호출. 적재는 보통 하루 4회. 시장 등락 통계는 KST 하루 1,000회 상한을 따로 건다(재시도 포함 · 프로세스 메모리 카운터라 재시작하면 0 부터). 매매정보 2건은 basDd 를 전일부터 하루씩 거슬러 최대 7번(첫 시도 포함) 부른다 — 둘 다 비었을 때만 하루 전으로 넘어가고, 하나라도 오면 멈춘다.
 
 **회귀 가드**: `tests/unit/api/test_cycle112_krx_client.py` · `tests/unit/api/test_cycle115_krx_endpoints.py` · `tests/unit/engine/scanner/test_cycle115_full_universe_load_krx_fallback.py` · `tests/unit/ast/test_cycle115_krx_endpoint_urls.py` · `tests/unit/ast/test_cycle115_krx_no_plaintext_key.py`
 

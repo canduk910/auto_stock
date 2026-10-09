@@ -443,6 +443,11 @@ _ENGINE_PY_FILES: dict[str, tuple[str, ...]] = {
         # "다음 신규 파일" 은 여전히 붉어진다(이름 축 가드는 변경 없음).
         "llm_retrospective.py",
         "log_analysis_engine.py", "log_metrics_collector.py",
+        # cycle416(매크로 시장 등락 통계) — KRX 일별 매매정보 상승/하락/상한/하한 집계
+        # 순수 leaf(표준 라이브러리만 import, `await`·DB·HTTP·`asyncio`·`logging` 0).
+        # 소비처 = 라우트 `src/routes/market_breadth.py` 하나(관찰 전용). 등재해도
+        # "다음 신규 파일" 은 여전히 붉어진다(이름 축 가드는 변경 없음).
+        "market_breadth.py",
         # cycle292 — `scheduler._subscribe_market_operation_tickers` 본체 leaf.
         # 형제 `market_operation_monitor.py`(H0UNMKO0 수신·상태 추적) 와 역할이 반대다
         # (이쪽은 송신·구독 배치). 이름 축을 개수 축으로 바꾸지 말 것 — 등재해도

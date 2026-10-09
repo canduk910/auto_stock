@@ -1,0 +1,5 @@
+2026-10-09 12:20:00 backend-dev(검증 지적 반영) 시작 — suites/screens/trader 결함 통합 11건 처리 계획
+2026-10-09 12:40:00 프론트: 툴팁 커스텀 컴포넌트·ratio 축 틱+50% 기준선·LabelList 상하한가·Y축 절댓값 틱·niceCeil 계단 세분화·단일점 dot 표시·missing 박스를 차트 위로 이동·pending/missing 문구 명세화·footnote 중앙값/정의 추가. e2e 픽스처 requested=3 정합.
+2026-10-09 12:50:00 백엔드: `_store_cache` 영구캐시 전환 시 `[market_breadth_permanent_empty]` WARNING 추가(suites#1 LOW, 관찰용) + W12b 테스트.
+2026-10-09 13:05:00 vitest 141/141·tsc build·eslint 0·pytest 전체 16383 통과(2 실패는 main 동일 재현되는 로컬 pyarrow 환경 결함, cycle416 무관) — 영향 인덱스 재생성(backend 184/1303·frontend 145/141), test_cycle287 whole-tree digest 재핀(내 수정분 반영).
+2026-10-09 13:10:00 완료 — 커밋 준비.

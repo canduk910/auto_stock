@@ -264,7 +264,7 @@ cd .. && npx playwright install && npx playwright test --config=e2e/playwright.c
 
 ### 대시보드 화면
 
-메뉴는 상위 7개 2단 구성이다(cycle288) — 대시보드 · 거래 내역 · 로그 · **종목**{조건검색 추적, 종목마스터} · **전략**{전략 현황, 전략수정 AI자문} · 설정 · **운영상태**{장운영상태, 실시간 상태}. 아래 표의 화면 이름은 그 메뉴 라벨과 같다.
+메뉴는 상위 9개 2단 구성이다(cycle288) — 대시보드 · 거래 내역 · 로그 · **종목**{조건검색 추적, 종목마스터} · **전략**{전략 현황, 전략수정 AI자문} · 매크로 · 백테스팅 · 설정 · **운영상태**{장운영상태, 실시간 상태}. 아래 표의 화면 이름은 그 메뉴 라벨과 같다.
 
 | 화면 | 기능 |
 |------|------|
@@ -277,6 +277,8 @@ cd .. && npx playwright install && npx playwright test --config=e2e/playwright.c
 | 종목마스터 (`/stock-master`) | KIS 마스터(시총·거래대금·NXT가능·거래정지·관리종목·KOSPI200/KOSDAQ150 플래그) + 일봉·시총 분포 카드 + 4종 필터(시장·시총·거래대금·종목명) + 수동 실행 버튼 4개(유니버스·기본정보·일봉·공식 마스터). 상단 진행률 배너(`RefreshProgressBanner`)는 5초마다 갱신된다 (cycle84+·127) |
 | 장운영상태 (`/market-state`) | 「지금 시장은」(실시간 VI · 거래정지 · 서킷브레이커**(추정)** 배지 + 관측 커버리지 "이벤트 수신 N종목 기준" 항상 표시) + 「오늘 야간작업」 타임라인(`GET /api/market-ops` 14행 시각순, 상태 어휘 10종) + 장 운영 시간표 + 주문유형 카탈로그. 읽기 전용 — 작업 재실행 버튼은 없다 (cycle282·285) |
 | 실시간 상태 (`/realtime-health`) | WebSocket 구독 슬롯(total/acked/fresh_60s/stale_60s/limit) + 세션별 종목 expand + KIS `inquire_ccnl` 캐시(last_cntg_hour·today_volume, TTL 5분) + 수동 재구독 버튼. 다섯 번째 카드 **「장운영 요약」**(VI 활성·거래정지·종목상태 이상 + 서킷브레이커 추정 배지 + 종목별 상세, 관찰 전용). 독립 화면 **장운영상태(`/market-state`)** 의 「지금 시장은」 과 **같은 응답**(`GET /api/realtime/market-operation`)을 쓰는 축약판이다 (cycle103+·186) |
+| 매크로 (`/macro`) | 6섹션 — 경기사이클·투자체제 · 장단기 금리차 · 하이일드 스프레드 · 환율 · 원자재(5섹션 출처 = 자체 `macro` 컨테이너, 운영 가이드 [`docs/macro-lite.md`](docs/macro-lite.md)) + **시장 등락 통계**(cycle416). 시장 등락 통계는 오늘을 뺀 최근 20영업일의 코스피·코스닥·합계 상승·하락·보합·상한가·하한가·거래 없음 종목 수와 상승 비율, 기간 ADR(등락비율)을 차트와 날짜별 표로 보여 준다. 이 섹션만 backend 가 KRX 공개 API 로 만든다. 전부 관찰용이라 매매에 영향이 없다 |
+| 백테스팅 (`/backtest`) | 30년 전략 성적표 연구 보고서를 그대로 띄운다. 실제 매매 설정과 무관하다 |
 | 설정 (`/settings`) | 전략 파라미터 조정, 자금 비중, 자동 시작 토글, 가격/거래대금 필터, 매수 가드 4모드(**표시/관찰 전용** — 매수를 차단·축소하지 않는다), 외부 통합 토글 |
 
 ### 실전 전환
@@ -576,6 +578,7 @@ KIS OpenAPI 가 NXT(넥스트레이드 ATS) 주문·시세를 정식 지원하�
 | GET | `/api/backtest/mcp/health` | 외부 MCP 백테스트 서버 헬스체크. `KIS_MCP_ENABLED=false`(기본)면 외부 호출 0회로 `reachable=false`. 어떤 경우에도 200 (graceful) |
 | GET | `/api/market-regime/current` | 현재 매크로 레짐 + `cash_usage_ratio` + `auto_regime_adjust` + ETF 레짐(관찰). 🔴 `buy_blocked` 는 **항상 false** — 레짐은 매수에 개입하지 않는다(cycleI). `block_reason` 은 관찰용 사유로만 남는다 |
 | GET | `/api/market-regime/history?days=30` | `market_regime_snapshots` 최근 N일 (`days` 는 1~365 로 클램프) |
+| GET | `/api/market/breadth?days=20` | 매크로 화면 「시장 등락 통계」(cycle416, 관찰 전용). 오늘을 뺀 최근 `days` 영업일(1~60)의 코스피·코스닥·합계 등락 종목 수 · 상승 비율 · 기간 ADR. KRX 공개 API 일별 매매정보를 날짜마다 받아 서버 메모리에 캐시한다(재시작 때 비워진다 · KRX 호출은 하루 1,000회까지). KIS 호출은 없다. 인자 위반만 422, KRX 꺼짐·키 없음·조회 실패는 200 + `success=false` |
 | GET | `/api/strategy-funnel?strategy_id=&target_date=` | cycle34: 전략별 조건검색 단계별 후보/탈락 종목 (`survived_tickers` cap 200 / `excluded_sample` cap 20) |
 | GET | `/api/strategy-funnel/recent?strategy_id=&days=7` | 최근 N영업일 추이 |
 | POST | `/api/strategy-funnel/snapshot` | 수동 trigger — `scheduler.capture_funnel_snapshots(registry, is_provisional=False)` 로 09:30 자동 hook 과 같은 단계별 + `step_no=99` 캡처. prepare 는 재실행하지 않고 최근 결과(`_funnel_steps`)만 담는다. 날짜는 항상 오늘이다 — 메모리 목록이 다른 날짜 기준(밤의 다음 거래일 미리보기)인 전략은 저장하지 않고 `message` 로 알린다. 응답 `{target_date, saved_count, count}` |

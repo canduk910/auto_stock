@@ -4,6 +4,10 @@
 API 컨테이너를 운영자가 직접 켜고 점검하는 절차. `docs/backtest-monitoring.md` 와 같은 결로
 쉬운 말로 적는다.
 
+매크로 화면의 6번째 섹션 「시장 등락 통계」 는 이 컨테이너에서 오지 않는다. 매매 backend 가
+KRX 공개 API 로 직접 만든다(`GET /api/market/breadth` — 계약은 `src/routes/CLAUDE.md`).
+그래서 이 가이드의 점검 대상이 아니다.
+
 > 코드 정본:
 > - vendor 패키지: `macro/macro_lite/`(원본 = stock-manager `packaging/macro_lite/`, 무수정 — `macro/README.md`)
 > - 진입점: `macro/main.py` · 이미지: `macro/Dockerfile`
@@ -24,7 +28,8 @@ API 컨테이너를 운영자가 직접 켜고 점검하는 절차. `docs/backte
   인증은 없다(같은 도커 네트워크 안). 외부 `dkstock.cloud` 는 2026-08-18 철거됐고 의존은 끝났다.
   다만 레짐은 여전히 **관찰 지표**라 매수를 차단·축소하지 않는다.
 - `macro` 컨테이너가 죽어 있어도 매매 엔진·주문·손절·익일청산은 전부 정상 동작한다.
-  대시보드의 「매크로」 메뉴 한 화면만 못 뜬다(502).
+  대시보드 「매크로」 화면의 5섹션만 못 뜬다(502). 6번째 「시장 등락 통계」 는 backend 에서
+  오므로 그대로 뜬다.
 - 인증도 별도다 — `macro` 프로세스 자체에는 `X-API-Key` 같은 미들웨어가 없다
   (`macro/main.py` 의 `AUTH_DEPENDENCY=None`). 보호는 nginx Basic Auth 한 겹뿐이고,
   compose 는 이 컨테이너의 포트를 호스트에 게시하지 않는다(`ports:` 없음) — 외부에서

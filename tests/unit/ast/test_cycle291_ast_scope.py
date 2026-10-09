@@ -482,9 +482,14 @@ def test_a8_no_new_leaf_in_src_engine() -> None:
     ⚠️ cycle411(실비용 합치기, 사용자 결정 10-08)이 leaf 1개 `cost_overlay.py` 를 신설해
     82 → **83** 이 됐다 — 순수 함수 + async 어댑터(`src.db.trade_cost`·`src.engine.trade_cost`·
     `src.engine.etf_like` 만 import). 8영역·scheduler import 0(`test_cycle411_ast_scope.py`).
+
+    ⚠️ cycle416(매크로 시장 등락 통계, 2026-10-09)이 leaf 1개 `market_breadth.py` 를
+    신설해 83 → **84** 가 됐다 — 표준 라이브러리만 import(`await`·DB·HTTP·`asyncio`·
+    `logging` 0), 소비처 = 라우트 `src/routes/market_breadth.py` 하나(관찰 전용,
+    매매 행위 변경 없음). 8영역·scheduler import 0(`test_cycle416_ast_market_breadth.py`).
     """
     got = len(list((_ROOT / "src" / "engine").glob("*.py")))
-    assert got == 83, f"`src/engine/*.py` 파일 수 {got} (cycle411 기준선 83)"
+    assert got == 84, f"`src/engine/*.py` 파일 수 {got} (cycle416 기준선 84)"
 
 
 # ===========================================================================
