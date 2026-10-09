@@ -17,11 +17,11 @@
 핀하는 것(분기마다): 주문 호출 인자·횟수 · `_selling`(그리고 `_selling_since`) 상태 · 매핑 5종 ·
 PENDING 행 · TTL 등록 인자 · 익일청산 큐 · 로그 마커 · return/continue/전파 · 재시도 backoff.
 
-⚠️ 현행 핀(결함 후보) 1건 — `test_f07_*`: 폴백 `place_order` 가 `KisApiError` 가 **아닌** 예외(전송
-오류·타임아웃)를 내면 `execute_sell` 밖으로 전파되고 `_selling` 이 남는다. 형제 `except Exception`
-은 `except KisApiError` 핸들러 **안**에서 난 예외를 받지 못한다. 고치는 일은 매매 행위 변경이라
-별도 승인 사이클이고, 그때 이 테스트를 의도적으로 뒤집는다. B4-3 추출은 이 행위를 **그대로** 옮겨야
-한다(추출한 메서드를 `try` 안에서 부르면 바깥 `except Exception` 이 받아 재시도 = 재발사가 된다).
+🔄 cycle428(F-422-1, 사용자 승인 2026-10-10) — `test_f07_*` 는 뒤집힌 핀이다: 폴백 `place_order`
+가 `KisApiError` 가 **아닌** 예외(전송 오류·타임아웃)를 내면 더 이상 `execute_sell` 밖으로 전파되지
+않는다. `_handle_sell_market_disallowed` 안의 새 `except Exception` 이 `SellFallbackOutcome.UNKNOWN`
+을 돌려주고, 호출부는 `_selling`·`_selling_since` 를 유지한 채 `return` 한다(재발사 0). 상세 =
+`src/engine/CLAUDE.md` `order_engine.py` 절 「매도 결과 모름(UNKNOWN)」.
 
 결정성 — 벽시계 의존 차단: 정규장 절은 `settings.kis_env="vts"`(애프터 변환 불가) + `is_nxt_session_hours`
 주입, 애프터 절은 `freeze_time` + 실전(`real`). `asyncio.sleep` 은 order_engine 모듈 안에서만
@@ -529,29 +529,34 @@ async def test_f06_no_current_price_then_no_fallback_and_plain_retry(monkeypatch
 
 
 @pytest.mark.asyncio
-async def test_f07_fallback_place_order_transport_error_propagates_current_behavior_pin(monkeypatch, caplog):
-    """⚠️ 현행 핀(결함 후보 F-422-1) — 폴백 `place_order` 의 비-`KisApiError` 예외는 `execute_sell` 밖으로
-    전파된다. 형제 `except Exception` 은 `except KisApiError` 핸들러 안에서 난 예외를 못 받는다.
+async def test_f07_fallback_place_order_transport_error_becomes_unknown_kept_selling(monkeypatch, caplog):
+    """🔄 cycle428(F-422-1) — 폴백 `place_order` 의 비-`KisApiError` 예외는 더 이상 `execute_sell`
+    밖으로 전파되지 않는다. `_handle_sell_market_disallowed` 의 새 `except Exception` 이 받아
+    `SellFallbackOutcome.UNKNOWN` 을 돌려주고, 호출부는 `return` 한다(재발사 0).
 
-    결과: `_selling` 이 남고(손절 재평가 정지 — `selling_reconcile` 이 풀 때까지) 호출자
-    `risk.on_tick` 의 그 틱이 끊긴다. 고치는 일은 별도 승인 사이클 — 그때 이 테스트를 뒤집는다.
-    B4-3 추출은 이 전파를 바꾸면 안 된다(추출 메서드를 `try` 안에서 부르면 재시도 = 재발사).
+    결과: `_selling`·`_selling_since` 는 유지된다(해제는 180초 확인 조회 또는 15분
+    `selling_reconcile` 이 한다) — 예외는 올라오지 않고 `risk.on_tick` 의 그 틱은 끊기지 않는다.
     """
+    caplog.set_level(logging.DEBUG, logger=_OE)
     r = _build(monkeypatch)
     r.place.side_effect = [_disallowed(), httpx.ReadTimeout("read timed out")]
-    with pytest.raises(httpx.ReadTimeout):
-        await _sell(r)
+    await _sell(r)  # 예외 없이 반환
 
     assert r.place.await_count == 2
-    assert _T in r.eng._selling
+    assert _T in r.eng._selling, "UNKNOWN 은 `_selling` 을 유지한다 — 해제하면 stale 좀비 위험"
     assert _T in r.eng._selling_since
-    assert r.insert.await_count == 0
-    assert len(r.eng._order_qty) == 0
-    r.ttl.assert_not_called()
-    assert r.pending == set()
+    assert r.insert.await_count == 0, "주문번호가 없으니 PENDING 은 쓰지 않는다"
+    assert len(r.eng._order_qty) == 0, "매핑도 쓰지 않는다"
+    r.ttl.assert_not_called(), "TTL·포기 래치는 거부의 증거가 있을 때만"
+    assert r.pending == set(), "익일청산 큐도 등록하지 않는다"
     assert r.write_log.await_count == 0
-    assert r.aio.sleeps == []
+    assert r.aio.sleeps == [], "재시도·backoff 0"
     assert r.strat.state.positions[_T].quantity == _QTY
+    err = _recs(caplog, logging.ERROR, "[sell_send_unknown] ")
+    assert len(err) == 1
+    assert err[0] == (
+        f"[sell_send_unknown] ticker={_T} strategy={_SID} path=fallback exc=ReadTimeout"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -851,24 +856,30 @@ async def test_p05_reconciliation_balance_failure_is_swallowed(monkeypatch, capl
 
 
 @pytest.mark.asyncio
-async def test_p06_exhausted_generic_failures_emit_critical_and_keep_position(monkeypatch, caplog):
-    """일반 예외 3회 — backoff 1s·2s → `_selling` 해제(CRITICAL 장부 await 전) · 포지션 보존 ·
-    CRITICAL 로거+장부 같은 문장(`last_error` = 마지막 예외) · 정리 경로 미진입."""
+async def test_p06_generic_failure_becomes_unknown_single_attempt_keeps_selling(monkeypatch, caplog):
+    """🔄 cycle428(F-422-1, 항목 5) — 1차 주문의 비-`KisApiError` 예외는 더 이상 3회
+    재시도 + CRITICAL 로 끝나지 않는다. 결과 모름(UNKNOWN) — 발사 1회 · backoff 0 ·
+    `_selling` 유지 · ERROR `[sell_send_unknown] path=primary` · 포지션 보존 ·
+    잔고부족 정리 경로 미진입."""
+    caplog.set_level(logging.DEBUG, logger=_OE)
     r = _build(monkeypatch)
     errs = [RuntimeError("하나"), RuntimeError("둘"), RuntimeError("셋")]
     r.place.side_effect = errs
     await _sell(r, Signal.TRAILING_STOP)
 
-    assert r.place.await_count == SELL_MAX_RETRIES
-    assert r.aio.sleeps == [SELL_RETRY_DELAY, SELL_RETRY_DELAY * 2]
-    _assert_final_critical(r, caplog, errs[-1], Signal.TRAILING_STOP)
-    assert r.selling_at_write_log is False
-    assert _T not in r.eng._selling
+    assert r.place.await_count == 1, "결과 모름은 재발사하지 않는다 — 발사 1회뿐"
+    assert r.aio.sleeps == [], "backoff 없이 즉시 멈춘다"
+    assert _recs(caplog, logging.CRITICAL) == []
+    err = _recs(caplog, logging.ERROR, "[sell_send_unknown] ")
+    assert err == [
+        f"[sell_send_unknown] ticker={_T} strategy={_SID} path=primary exc=RuntimeError"
+    ]
+    assert _T in r.eng._selling, "`_selling` 은 유지한다 — 해제는 확인 조회·15분 재대조 몫"
+    assert _T in r.eng._selling_since
     assert r.strat.state.positions[_T].quantity == _QTY
     r.delete_position.assert_not_awaited()
     r.on_closed.assert_not_called()
-    assert r.get_balance.await_count == 0
-    assert r.safe_write_log.await_count == 0
+    assert r.write_log.await_count == 0
 
 
 # ===========================================================================

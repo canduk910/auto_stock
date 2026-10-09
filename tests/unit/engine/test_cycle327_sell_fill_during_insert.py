@@ -274,8 +274,17 @@ async def test_sell_does_not_refire_when_position_vanished_between_retries(
     `pos` 는 루프 밖에서 잡은 지역 참조였다. 체결통보가 재시도 대기 중에
     완주해 포지션을 지워도 옛 수량으로 발사했다.
 
-    피라미딩이 들어오면 이 재조회는 **수량의 유일한 진실**이 된다 —
-    사다리로 나눠 사고 파는 구조에서 옛 참조의 수량은 사실이 아니다.
+    🔄 cycle428(F-422-1, 항목 5) — 1차 주문의 비-`KisApiError` 예외(이 테스트의
+    `TimeoutError`)는 더 이상 재시도하지 않는다(결과 모름 = 발사 1회로 멈춘다).
+    그래서 "재시도 사이" 자체가 생기지 않아 루프 상단 재조회(`[sell_position_gone]`,
+    `test_cycle385r_recount_credit.py` 가 KisApiError 재대조 `continue` 경로에서
+    여전히 검증한다)에 닿지 않는다 — 재발사 금지 보장은 이제 `[sell_send_unknown]`
+    경로가 대신한다. 이 테스트는 "포지션이 사라져도 재발사하지 않는다"는 결론을
+    그대로 유지하되, 증거를 새 마커로 바꾼다.
+
+    피라미딩이 들어오면 KisApiError 재대조 루프의 재조회가 **수량의 유일한
+    진실**이 된다 — 사다리로 나눠 사고 파는 구조에서 옛 참조의 수량은 사실이
+    아니다.
     """
     import logging
 
@@ -284,8 +293,9 @@ async def test_sell_does_not_refire_when_position_vanished_between_retries(
 
     async def fail_then_record(ticker, side, quantity, price=0, **kwargs):
         env.calls.place_order.append({"side": side, "quantity": quantity})
-        # 첫 발사는 전송 자체가 실패한다(=주문 안 나감 → 재시도가 정당하다).
-        # 그 사이에 체결통보가 완주해 포지션을 지운 상황을 만든다.
+        # 전송 자체가 실패한다(=주문 안 나감). 그 사이에 체결통보가 완주해
+        # 포지션을 지운 상황을 만든다 — cycle428 이후는 이 실패 하나로
+        # "결과 모름" 이 되어 재시도를 아예 하지 않는다.
         env.strategy.state.positions.pop(TICKER, None)
         raise TimeoutError("전송 실패 — 주문 미접수")
 
@@ -298,7 +308,7 @@ async def test_sell_does_not_refire_when_position_vanished_between_retries(
         f"발사가 {len(env.calls.place_order)}회 — 포지션이 사라졌는데 재시도했다.\n"
         f"  내역: {env.calls.place_order}"
     )
-    assert any("[sell_position_gone]" in r.getMessage() for r in caplog.records), (
+    assert any("[sell_send_unknown]" in r.getMessage() for r in caplog.records), (
         "재발사는 막았지만 관측 마커가 없다."
     )
 
