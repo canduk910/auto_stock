@@ -272,7 +272,8 @@ _PINNED = {
     "src/engine/risk.py": "a2187b8270446379988d24dfbe39b902d6ab37b112d4b6ce7330ee171434e222",
     "src/engine/order_engine.py": "08c479841352fb579f767c109de3e8f901d1c27bdce705b39b5ba6556fc0b3e1",
     "src/engine/session.py": "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
-    "src/engine/scanner.py": "611568c078c6f3779344e05b3dfa308c792c64e1c5e02480de6313200282f54f",
+    # 🔁 cycle417(2026-10-09) 재핀 — cycle417 사용자 승인 10-09 — 일봉 증분 적재 구멍(증분 분기 창 확대 + 구멍 판정 1회 호출). 나머지 7영역 diff 0.
+    "src/engine/scanner.py": "b570762dfd92df49471dab261d44ecd364d376300ffe9e2f5b7ac19cceb9efcc",
     "src/engine/strategy_registry.py": "3b6366c3cdb6e83907428435b95611880f1b8223e572c361a1cad2d00b13a067",
     "src/api/order.py": "08c5cafd7b8678ec0d0fa85f856fdea3cce38ad92488c6d74c03cd13faa415bb",
     "src/engine/scheduler.py": "f53d41a11fe162f80e113c6ff48cf6d235581769be7979499c5782ff11d49646",

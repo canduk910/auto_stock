@@ -281,8 +281,14 @@ list_paged_by_filter(*, market=None, min_market_cap=0, min_trade_amount=0,
     - ⚠️ 상한은 관문이지 읽는 양이 아니다. 100행 초과 요청 = VCP `daily_fetch_depth_mode="full"` · `market_unit`(`FETCH_ROWS = 120`) · 야간 `pyramid_shadow`(400)뿐이다.
   - `get_donchian_high(ticker, days=20)` — 직전 N일 최고가(당일 제외)
   - `get_atr(ticker, days=14)` — True Range = 와일더 3-way `max(고−저, |고−전종|, |저−전종|)`, 평활 = **단순평균(SMA) baseline**. Wilder 지수평활은 호출자 책임이고 실제 Wilder ATR 은 `kojiro_indicators.atr`(ewm α=1/N) 뿐
-  - `count_all()` / `count_by_ticker(ticker)` — 적재 진단
-  - `max_bas_dd(ticker=None)` — 백필 vs 증분 분기 키(스캐너). `None` = 테이블 전체 최대값. DB 예외는 삼키고 `None`(ERROR 로그만)
+  - `count_all()` — 적재 진단 · `count_by_ticker(ticker)` — 깊은 backfill vs 증분 분기 키(스캐너 `existing_count`)
+  - `max_bas_dd(ticker=None)` — 스캐너의 오늘 봉 멱등 skip 키(`skipped_fresh`). `None` = 테이블 전체 최대값. DB 예외는 삼키고 `None`(ERROR 로그만)
+  - **`earliest_missing_bas_dd(tickers, *, before, horizon=GAP_HORIZON, min_rows=GAP_CALENDAR_MIN_ROWS) -> dict[str, date]`**(cycle417) — 증분 적재의 빈 날 판정(소비처 = `scanner._stock_master_daily_load_once` 하나, 규칙 = `src/engine/CLAUDE.md` 「증분 창 — 빈 날 메우기」).
+    - 달력 = `bas_dd < before` 인 날 중 그날 행 수 `>= min_rows`(`GAP_CALENDAR_MIN_ROWS`=300)인 **최근 `horizon`**(`GAP_HORIZON`=100)개. 우리 DB 로 만든다(KIS 휴장 API 0). `before` 는 키워드 전용이고 호출자가 오늘을 넘긴다 — 확정 전 오늘 봉을 달력에서 뺀다.
+    - 빈 날 = 종목마다 첫 행(`min(bas_dd)`) **이후** 달력 날짜 중 그 종목 행이 없는 날. 첫 행 이전은 빈 날이 아니다(신규 상장). 마지막 행 뒤의 달력 날짜는 빈 날이다(대상에서 빠졌다 돌아온 종목).
+    - 반환 = 빈 날이 있는 **요청 종목만** `{ticker: 가장 이른 빈 날}`. DB 에 없는 종목·요청 밖 종목·빈 날 없는 종목은 키가 없다.
+    - 쿼리 1회 — `ticker = ANY($1::text[])` + CTE 반조인이라 종목 수와 무관하다(종목당 쿼리 금지, 루프 안 `await` 0).
+    - 🔴 **예외를 삼키지 않는다**(`list_provisional_rows` 와 같다) — 빈 dict 로 접으면 「판정 실패」가 「빈 날 없음」으로 둔갑한다. fail-open 은 호출자가 한다. 재시도는 `pg.fetch`.
   - **`max_bas_dd_before(today) -> date | None`**(cycle386) — 전일 잠정 봉 확정의 헤드(`SELECT max(bas_dd) FROM stock_master_daily WHERE bas_dd < $1`, `today` = 호출자가 정한 KST `date`). 🔴 **예외를 삼키지 않는다**(`max_bas_dd(None)` 과 다르다) — 삼키면 조회 실패가 「오늘 앞 봉 없음」 = `result=noop`(INFO)으로 둔갑한다. 실패는 호출자가 `result=error stage=head` 로 남긴다. 재시도는 `pg.fetchval`.
   - **`list_provisional_rows(*, since, head, today_boundary) -> list[dict]`**(cycle386) — 전일 「잠정 봉」 조회(계약 = `src/engine/CLAUDE.md` 「저녁 데이터 적재」 절). `bas_dd` 가 `[since, head]` 안이고 아래 조건인 행의 `ticker, bas_dd, open_price, high_price, low_price, close_price` 를 `ticker, bas_dd` 순으로 돌려준다. 이 함수와 `max_bas_dd_before` 의 소비처는 `src/engine/daily_bar_finalize.py` 하나다.
     - 헤드 행(`bas_dd = head`) = `updated_at < today_boundary`(호출자가 오늘 06:00 KST 를 넘긴다)

@@ -304,16 +304,39 @@ run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, recor
 
 ### 분할 backfill 분기 — 대상은 적재 대상 전부
 
-- 분기 = **깊이 하나**: `existing_count`(= `stock_master_daily.count_by_ticker`) `< _DAILY_LOAD_VCP_BACKFILL_DAYS(=225)` → `condition.fetch_daily_candles_backfill(ticker, total_days=225)`(분할 fetch, 마지막 윈도우 클램프) / `>=225` → 증분 7일(재 backfill 금지). 지수 소속·자격·보호는 깊이 무관(cycle302).
+- 분기 = **깊이 하나**: `existing_count`(= `stock_master_daily.count_by_ticker`) `< _DAILY_LOAD_VCP_BACKFILL_DAYS(=225)` → `condition.fetch_daily_candles_backfill(ticker, total_days=225)`(분할 fetch, 마지막 윈도우 클램프) / `>=225` → 증분 `fetch_daily_candles(ticker, days=fetch_days)` 1콜(재 backfill 금지, 창 = 아래 「증분 창 — 빈 날 메우기」). 지수 소속·자격·보호는 깊이 무관(cycle302).
 - 🔴 **`_DAILY_LOAD_VCP_BACKFILL_DAYS` 는 VCP 전용이 아니다** — 적재 대상(index ∪ 시총·거래대금 자격 ∪ 보유·익일청산 보호) 전부의 목표 깊이(개명 = `src/api/condition.py` 호출자 주석과 함께 옮길 후속 과제).
 - 🔴 **225 인 이유** = `effective_ema_long = min(ema_long, 보유 − uptrend_days(20) − 5)` → 보유 **225 영업일에서 실효 장기선 정확히 200**. 깊이를 가르면 얕은 종목의 VCP 정배열 판정이 흔들린다.
 - 🔴 **target·retention 동행** — `DAILY_RETENTION_DAYS=390`cal ≈ 261영업일 = 225 위 **36 영업일 마진**. target 이 보유 영업일을 넘으면 매 load 전량 재backfill(churn).
-- 🔴 **비용 1회성** — 깊이 도달 뒤 증분(7일·1콜), retention 이 225 아래로 안 떨어뜨린다(수렴 = 종목당 1콜, 가드 `tests/unit/engine/test_cycle302_backfill_scope_expansion.py::test_g302_3_converged_universe_costs_one_call_per_ticker`). 첫 채움(종목당 3콜) = **수동 trigger**(`POST /api/stock-master/daily/refresh`, 기본 `force=true`) 장 종료 후 — 20:30 에 얹으면 `quote_token_refresh.TIME_QUOTE_TOKEN_REFRESH`(20:45) 불변식 창(20:35~) 침범.
+- 🔴 **비용 1회성** — 깊이 도달 뒤 증분(종목당 1콜), retention 이 225 아래로 안 떨어뜨린다(수렴 = 종목당 1콜, 가드 `tests/unit/engine/test_cycle302_backfill_scope_expansion.py::test_g302_3_converged_universe_costs_one_call_per_ticker`). 첫 채움(종목당 3콜) = **수동 trigger**(`POST /api/stock-master/daily/refresh`, 기본 `force=true`) 장 종료 후 — 20:30 에 얹으면 `quote_token_refresh.TIME_QUOTE_TOKEN_REFRESH`(20:45) 불변식 창(20:35~) 침범.
 - **1회 backfill > target** — `condition.fetch_daily_candles_backfill` 환산 `total_days=225` = 347 달력일 ≈ **232 영업일**(한 밤에 채운다). 🔴 환산 **stride 7/5 고정**(키우면 윈도우 사이 구멍 — `src/api/CLAUDE.md`). 가드 `tests/unit/engine/test_cycle299_backfill_target_expansion.py::test_g299_9_one_pass_reaches_target`.
 - ⚠️ `existing_count < _DAILY_LOAD_INCREMENTAL_THRESHOLD(=50)` → 100일 단발(`_DAILY_LOAD_FETCH_DAYS`) = **225 > 50 인 한 도달 불가**한 구조적 폴백(목표 깊이 < 50 이면 부활 — 관계 핀 `test_cycle302...::test_g302_8b_deep_target_dominates_incremental_threshold`).
 - ⚠️ **상장 이력 < 225 영업일 종목은 수렴 안 함**(매일 밤 3콜, 자본 위험 0). 관측 = `[stock_master_daily_load_summary]` `mode=`(전량 backfill `full` · 수렴 `incremental` · 혼합 `mixed`)·`elapsed_ms`.
 - 읽기 = `db/stock_master_daily.get_recent_daily` 상한 `_MAX_DAILY_ROWS`(400). VCP 깊이 = `daily_fetch_depth_mode`(기본 `"cap100"` = 100봉, `"full"` = `ema_long + base_max_days + 10` — 200일 EMA 실사용은 `"full"`, `strategies/CLAUDE.md` VCP 절).
 - backfill 실패 = `failed++` 후 다음 ticker. 🔴 장중 자동 실행 없음(20:30 task + 수동 trigger 뿐).
+
+### 증분 창 — 빈 날 메우기 (cycle417)
+
+적재 대상은 밤마다 바뀐다. 깊이 분기는 행 수만 보므로, 7영업일 넘게 대상 밖에 있다 돌아온 종목은 7봉 창으로 그 사이를 채우지 못한다. 빈 날이 있으면 20일 고가·ATR·EMA 가 그날을 건너뛰고 계산된다. 신선도 게이트(`DAILY_STALENESS_DAYS`)는 마지막 날짜만 봐서 이 구멍을 못 잡는다. 그래서 증분 분기가 빈 날을 보고 창을 넓힌다.
+
+- **판정 = 실행당 1회, 종목 루프 밖** — `today = today_kst()` 뒤 `stock_master_daily.earliest_missing_bas_dd(all_tickers, before=today)`(보호 종목 포함 적재 대상 전부, 쿼리 1회, 종목당 조회 0). 반환 = 빈 날이 있는 종목의 가장 이른 빈 날. 달력·빈 날의 정의 = `src/db/CLAUDE.md` `stock_master_daily.py` 절.
+- **창 = 증분 분기(`existing_count >= 225`)에서만 정한다.**
+  - 빈 날 없음 → `_DAILY_LOAD_INCREMENTAL_DAYS`(=7).
+  - 빈 날 있음 → `min(max(_gap_fill_need_days(빈 날, today), 7), _DAILY_LOAD_FETCH_DAYS(=100))`.
+  - `_gap_fill_need_days(earliest_missing, today)` = 빈 날부터 오늘까지 **평일 수(양 끝 포함, 휴일 미차감)** + `_DAILY_LOAD_GAP_MARGIN_DAYS`(=2). 순수 함수(KIS·DB 0).
+  - 휴일을 빼지 않는 이유 = `fetch_daily_candles` 는 최근 N봉(`output[:N]`)만 준다. N 이 크면 빈 날을 반드시 덮고, 작으면 놓친다. 남는 봉은 upsert 멱등이 흡수한다.
+- 🔴 **KIS 호출 수는 그대로 종목당 1콜이다** — 창만 넓힌다(수렴 가드 G-302-3 그대로). 🔴 이 경로(적재 함수·`_gap_fill_need_days`)에서 휴장 조회(`trading_calendar`·`is_trading_day`)와 `kis_get` 을 부르지 않는다(AST 가드 A3).
+- **그대로인 것** — 깊은 backfill 분기(< 225, 빈 날과 무관) · `skipped_fresh`(오늘 봉이 있으면 빈 날이 있어도 skip, 다음 밤에 메운다) · `force`(skip 만 우회) · 보호 종목 규약과 `[daily_load_protected_forced]` · `_drop_today_bars` · upsert `ON CONFLICT DO UPDATE`.
+- **100 영업일보다 오래된 빈 날** = 100봉만 받아 최근 쪽만 채운다(`beyond_horizon` 으로 센다).
+- **KIS 가 봉을 주지 않는 날(거래정지 등)** = 빈 날이 남아 밤마다 넓은 창을 다시 요청한다. 호출은 1콜 그대로이고 창은 100 에서 멈춘다. 그날이 달력(최근 `GAP_HORIZON`=100개) 밖으로 밀리면 판정에서 빠진다.
+- **fail-open** — 판정 예외 = 전 종목 7 + `[daily_load_gap_fill_skipped] reason=gap_scan_error` WARNING **실행당 1행** + `errors=1`. 값이 날짜가 아니면 그 종목만 7 + `errors` 증가(같은 WARNING, 실행당 1행). 적재 대상 밖 키는 버린다. 판정 실패는 `failed`(KIS 실패 전용)에 세지 않는다.
+- **관측** = `[daily_load_gap_fill] tickers=%d widened=%d max_fetch_days=%d beyond_horizon=%d errors=%d` **실행당 1행** INFO(종목당 금지) + `summary["gap_fill"]`(같은 5칸, int).
+  - 빈 날이 0 이어도 1행 남긴다 — 「판정이 돌았고 0」 과 「판정이 안 돌았다」 를 가른다. 종목 루프 뒤에 남기므로 `candidates=0` 조기 return 이면 0행이다.
+  - `tickers` = 빈 날을 보고받은 적재 대상 종목 수. `widened` = 7 보다 큰 창을 요청한 종목 수. 둘은 다를 수 있다(fresh skip·깊은 backfill 종목, 필요 창 ≤ 7 인 종목은 넓히지 않는다).
+  - `max_fetch_days` = 넓힌 창의 최댓값(`widened=0` 이면 0). `beyond_horizon` = 필요 창 > 100 이라 100 으로 자른 종목 수(정확히 100 은 아니다). `errors` = fail-open 수.
+  - ⚠️ `beyond_horizon` 은 평일 과대 계산이라 실제로는 100봉 안에 드는 빈 날도 셀 수 있다.
+- **알려진 한계** — 그날 전체 행 수가 `GAP_CALENDAR_MIN_ROWS`(300) 미만인 날(대규모 적재 실패일)은 달력에 없어 그날의 빈 날을 못 잡는다(7영업일 안이면 다음 밤 7봉 창이 덮는다). 첫 행보다 오래된 이력 부족(신규 상장·retention)은 깊은 backfill 의 몫이다.
+- 가드 `tests/unit/engine/test_cycle417_daily_gap_fill.py` · `tests/unit/db/test_cycle417_gap_scan_contract.py` · `tests/integration/test_cycle417_daily_gap_scan_pg.py`.
 
 ### 확정 전 오늘봉 시각 필터 (`_drop_today_bars`)
 
@@ -325,7 +348,7 @@ run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, recor
 - **fail-open** — 판정 예외 = 전량 upsert + `[daily_load_today_filter_skipped]` WARNING **실행당 1행**(fail-closed 금지 — 유령 키가 두 전략을 전 기간 체결 0건으로 만든 방향). 실패 단위 = **캔들**(`isinstance(candle, dict)` 방어 — 이상 원소 하나가 종목 필터 전체를 무력화하지 않게).
 - **수동 실행(`POST /api/stock-master/daily/refresh`, 기본 `force=true`)도 필터 통과** — `force` 는 `latest >= today` 멱등 skip **만** 우회(장중·시간외 수동 실행만 잠정봉을 버린다).
 - **관측** = `[daily_load_today_bar_filter]` 실행당 1행 INFO(`mode` / `cutoff` / `now` / `today` / `dropped_rows` / `tickers_affected` / `filter_errors`, 종목당 금지). `dropped_rows`(행) ≠ `tickers_affected`(종목). `filter_errors > 0` = fail-open 발생(없으면 `dropped_rows=0` 이 「버릴 봉 없음」·「필터 전멸」을 못 가른다). `candidates=0` 조기 return 이면 0행 — `[stock_master_daily_load_begin] candidates=` 를 먼저 본다. `mode=` = 20:00 경계 keep/drop.
-- **D 봉 확정 경로 둘** — 1차 = 다음 거래일 아침 부팅 `daily_bar_finalize`(DB 행 기준 — 유니버스 밖 종목도). 2차 = D+1 20:30 정기 실행 7일 증분 창(`fetch_days=7` → `ON CONFLICT DO UPDATE`, 유니버스 안만). 🔴 7일 창을 1~2일로 줄이지 않는다 — 1차가 꺼졌거나(`daily_bar_finalize_mode=off`) 실패한 날의 안전망(가드 cycle263 G2 「보정 창 존치」).
+- **D 봉 확정 경로 둘** — 1차 = 다음 거래일 아침 부팅 `daily_bar_finalize`(DB 행 기준 — 유니버스 밖 종목도). 2차 = D+1 20:30 정기 실행 증분 창(하한 `_DAILY_LOAD_INCREMENTAL_DAYS`=7 → `ON CONFLICT DO UPDATE`, 유니버스 안만). 🔴 7일 하한을 1~2일로 줄이지 않는다 — 1차가 꺼졌거나(`daily_bar_finalize_mode=off`) 실패한 날의 안전망(가드 cycle263 G2 「보정 창 존치」).
 - **부작용** — 신규 상장·유니버스 진입 종목 backfill = 같은 날 20:30(그 사이 `get_recent_daily_normalized` = `reason="miss"` KIS 폴백, 장중 KIS 호출 증가). UI `last_daily_load_at` 은 낮 동안 어제 날짜.
 - 가드 `tests/unit/engine/test_cycle263_daily_load_stub_filter.py` + `tests/unit/ast/test_cycle193_ast_fresh_gate.py`.
 

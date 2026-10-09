@@ -132,6 +132,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -425,6 +426,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -976,6 +978,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -1416,6 +1419,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -1734,6 +1738,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -2290,6 +2295,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -2680,6 +2686,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -3073,6 +3080,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -3614,6 +3622,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -4068,6 +4077,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -4375,6 +4385,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -4929,6 +4940,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -5351,6 +5363,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -5675,6 +5688,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -6246,6 +6260,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -6672,6 +6687,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -6995,6 +7011,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -7565,6 +7582,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -7992,6 +8010,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -8315,6 +8334,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -8884,6 +8904,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -9320,6 +9341,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -9641,6 +9663,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -10208,6 +10231,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -10635,6 +10659,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -10958,6 +10983,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -11523,6 +11549,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -12021,6 +12048,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -12345,6 +12373,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -12912,6 +12941,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -13333,6 +13363,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -13658,6 +13689,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -14229,6 +14261,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -14670,6 +14703,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -14995,6 +15029,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -15566,6 +15601,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -16008,6 +16044,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -16319,6 +16356,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -16886,6 +16924,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -17336,6 +17375,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -17654,6 +17694,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -18213,6 +18254,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -18626,6 +18668,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -18951,6 +18994,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -19522,6 +19566,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -19964,6 +20009,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -20287,6 +20333,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -20844,6 +20891,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -21270,6 +21318,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -21592,6 +21641,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -22161,6 +22211,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -22588,6 +22639,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -22911,6 +22963,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -23480,6 +23533,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -23915,6 +23969,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -24236,6 +24291,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -24799,6 +24855,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -25223,6 +25280,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -25548,6 +25606,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -26118,6 +26177,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -26550,6 +26610,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -26871,6 +26932,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -27439,6 +27501,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -27866,6 +27929,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -28189,6 +28253,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -28756,6 +28821,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -29187,6 +29253,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -29510,6 +29577,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -30075,6 +30143,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -30503,6 +30572,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -30825,6 +30895,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -31394,6 +31465,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -31766,6 +31838,7 @@ backend:
       - tests/unit/db/test_cycle273b_trade_status_order_no_and_multi_update.py
       - tests/unit/db/test_cycle369_status_mode_config.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycleM0_init_conn_codec.py
       - tests/unit/db/test_cycleM0_pg_helpers.py
       - tests/unit/engine/strategies/test_cycle386_prev_close_regression.py
@@ -31773,6 +31846,7 @@ backend:
       - tests/unit/engine/test_cycle369_r2_kill_switch.py
       - tests/unit/engine/test_cycle386_daily_bar_finalize.py
       - tests/unit/engine/test_cycle404_account_cluster.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -31835,6 +31909,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -33104,6 +33179,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -33489,6 +33565,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -34035,6 +34112,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -34515,6 +34593,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -34815,6 +34894,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -35356,6 +35436,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -35711,6 +35792,7 @@ backend:
   src/db/stock_master_daily.py:
     direct_tests:
       - tests/integration/test_cycle386_provisional_predicate_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycleM2b_universe_daily_roundtrip.py
       - tests/integration/test_cycleM6_date_column_str_binding_roundtrip.py
       - tests/unit/ast/test_cycle122_kis_tr_id_persistence.py
@@ -35728,6 +35810,7 @@ backend:
       - tests/unit/db/test_cycle363_expected_head.py
       - tests/unit/db/test_cycle365_change_rate.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycleM2b_safety_diff0.py
       - tests/unit/db/test_cycleM2b_stock_master_daily_pg.py
       - tests/unit/db/test_cycleM6_date_column_str_binding.py
@@ -36671,6 +36754,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -37097,6 +37181,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -37421,6 +37506,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -37989,6 +38075,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -38418,6 +38505,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -38741,6 +38829,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -39310,6 +39399,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -39746,6 +39836,7 @@ backend:
       - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -40065,6 +40156,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -40628,6 +40720,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -41054,6 +41147,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -41379,6 +41473,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -41950,6 +42045,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -42395,6 +42491,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -42711,6 +42808,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -43272,6 +43370,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -43695,6 +43794,7 @@ backend:
       - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -44018,6 +44118,7 @@ backend:
       - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -44589,6 +44690,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -45037,6 +45139,7 @@ backend:
       - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -45352,6 +45455,7 @@ backend:
       - tests/unit/db/test_cycle385r_positions_name_keep.py
       - tests/unit/db/test_cycle386_list_provisional_rows.py
       - tests/unit/db/test_cycle401_save_params_seed.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -45911,6 +46015,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -46330,6 +46435,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -46655,6 +46761,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -47226,6 +47333,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -47650,6 +47758,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -47975,6 +48084,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -48546,6 +48656,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -48970,6 +49081,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -49295,6 +49407,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -49865,6 +49978,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -50309,6 +50423,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -50632,6 +50747,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -51185,6 +51301,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -51613,6 +51730,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -51938,6 +52056,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -52503,6 +52622,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -52930,6 +53050,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -53254,6 +53375,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -53823,6 +53945,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -54247,6 +54370,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -54572,6 +54696,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -55141,6 +55266,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -55576,6 +55702,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -55901,6 +56028,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -56460,6 +56588,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -56883,6 +57012,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -57208,6 +57338,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -57779,6 +57910,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -58282,6 +58414,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -58607,6 +58740,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -59178,6 +59312,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -59626,6 +59761,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -59950,6 +60086,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -60502,6 +60639,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -60922,6 +61060,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -61246,6 +61385,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -61817,6 +61957,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -62247,6 +62388,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -62570,6 +62712,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -63136,6 +63279,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -63561,6 +63705,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -63885,6 +64030,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -64455,6 +64601,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -64879,6 +65026,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -65204,6 +65352,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -65775,6 +65924,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -66203,6 +66353,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -66528,6 +66679,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -67093,6 +67245,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -67520,6 +67673,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -67845,6 +67999,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -68412,6 +68567,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -68839,6 +68995,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -69164,6 +69321,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -69731,6 +69889,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -70157,6 +70316,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -70482,6 +70642,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -71052,6 +71213,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -71476,6 +71638,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -71801,6 +71964,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -72370,6 +72534,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -72793,6 +72958,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -73118,6 +73284,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -73688,6 +73855,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -74196,6 +74364,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -74520,6 +74689,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -75083,6 +75253,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -75513,6 +75684,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -75838,6 +76010,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -76399,6 +76572,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -76820,6 +76994,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -77143,6 +77318,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -77714,6 +77890,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -78144,6 +78321,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -78469,6 +78647,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -79037,6 +79216,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -79472,6 +79652,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -79796,6 +79977,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -80363,6 +80545,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -80854,6 +81037,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -81178,6 +81362,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -81739,6 +81924,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -82163,6 +82349,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -82488,6 +82675,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -83059,6 +83247,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -83482,6 +83671,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -83807,6 +83997,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -84377,6 +84568,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -84810,6 +85002,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -85135,6 +85328,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -85696,6 +85890,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -86123,6 +86318,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -86448,6 +86644,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -87015,6 +87212,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -87441,6 +87639,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -87766,6 +87965,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -88334,6 +88534,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -88763,6 +88964,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -89088,6 +89290,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -89653,6 +89856,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -90075,6 +90279,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -90400,6 +90605,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -90971,6 +91177,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -91491,6 +91698,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -91816,6 +92024,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -92386,6 +92595,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -92892,6 +93102,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -93217,6 +93428,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -93785,6 +93997,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -94348,6 +94561,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -94673,6 +94887,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -95242,6 +95457,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -95666,6 +95882,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -95991,6 +96208,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -96562,6 +96780,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -96993,6 +97212,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -97316,6 +97536,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -97881,6 +98102,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -98360,6 +98582,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -98665,6 +98888,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -99209,6 +99433,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -99625,6 +99850,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -99950,6 +100176,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -100521,6 +100748,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -100946,6 +101174,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -101271,6 +101500,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -101841,6 +102071,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -102259,6 +102490,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -102584,6 +102816,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -103155,6 +103388,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -103578,6 +103812,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -103831,6 +104066,7 @@ backend:
       - tests/unit/engine/test_cycle403_etf_trend_strategy.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle64_price_filter_scanner_apply.py
@@ -104168,6 +104404,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -104897,6 +105134,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -105036,6 +105274,7 @@ backend:
       - tests/unit/engine/test_cycle402_exit_reasons.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
       - tests/unit/engine/test_cycle408_l1_funnel_protect_confirmed.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -105397,6 +105636,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -106221,6 +106461,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -106546,6 +106787,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -107115,6 +107357,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -107539,6 +107782,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -107864,6 +108108,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -108434,6 +108679,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -108856,6 +109102,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -109181,6 +109428,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -109751,6 +109999,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -110173,6 +110422,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -110498,6 +110748,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -111069,6 +111320,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -111502,6 +111754,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -111827,6 +112080,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -112390,6 +112644,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -112848,6 +113103,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -113173,6 +113429,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -113729,6 +113986,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -114135,6 +114393,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -114460,6 +114719,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -115027,6 +115287,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -115479,6 +115740,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -115804,6 +116066,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -116365,6 +116628,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -116772,6 +117036,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -117097,6 +117362,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -117666,6 +117932,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -118087,6 +118354,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -118412,6 +118680,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -118983,6 +119252,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -119406,6 +119676,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -119731,6 +120002,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -120302,6 +120574,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -120727,6 +121000,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -121052,6 +121326,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -121622,6 +121897,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -122047,6 +122323,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -122371,6 +122648,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -122941,6 +123219,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -123365,6 +123644,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -123690,6 +123970,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -124260,6 +124541,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -124693,6 +124975,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -125017,6 +125300,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -125583,6 +125867,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -126081,6 +126366,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -126403,6 +126689,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -126933,6 +127220,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -127319,6 +127607,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -127735,6 +128024,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -128255,6 +128545,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -128674,6 +128965,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -128999,6 +129291,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -129566,6 +129859,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -130035,6 +130329,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -130357,6 +130652,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -130894,6 +131190,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -131276,6 +131573,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -131671,6 +131969,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -132208,6 +132507,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -132595,6 +132895,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -132981,6 +133282,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -133527,6 +133829,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -133994,6 +134297,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -134316,6 +134620,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -134848,6 +135153,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -135233,6 +135539,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -135635,6 +135942,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -136168,6 +136476,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -136559,6 +136868,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -137150,6 +137460,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -137520,6 +137831,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle48_stale_tracker_state.py
@@ -137912,6 +138224,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -138236,6 +138549,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -138803,6 +139117,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -139193,6 +139508,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -139627,6 +139943,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -140142,6 +140459,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -140545,6 +140863,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -140870,6 +141189,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -141441,6 +141761,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -141870,6 +142191,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -142194,6 +142516,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -142759,6 +143082,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -143267,6 +143591,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -143592,6 +143917,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -144160,6 +144486,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -144589,6 +144916,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -144914,6 +145242,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -145480,6 +145809,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -145904,6 +146234,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -146229,6 +146560,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -146797,6 +147129,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -147242,6 +147575,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -147567,6 +147901,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -148118,6 +148453,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -148540,6 +148876,7 @@ backend:
       - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -148865,6 +149202,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -149435,6 +149773,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -149858,6 +150197,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -150183,6 +150523,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -150754,6 +151095,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -151176,6 +151518,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -151501,6 +151844,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -152072,6 +152416,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -152501,6 +152846,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -152826,6 +153172,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -153393,6 +153740,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -153817,6 +154165,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -154142,6 +154491,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -154711,6 +155061,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -155148,6 +155499,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -155473,6 +155825,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -156037,6 +156390,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -156523,6 +156877,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -156848,6 +157203,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -157419,6 +157775,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -157842,6 +158199,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -158167,6 +158525,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -158738,6 +159097,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -159168,6 +159528,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -159492,6 +159853,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -160061,6 +160423,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -160483,6 +160846,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -160817,6 +161181,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -161385,6 +161750,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -161876,6 +162242,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -162201,6 +162568,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -162768,6 +163136,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -163196,6 +163565,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -163517,6 +163887,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -164088,6 +164459,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -164546,6 +164918,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -164925,6 +165298,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -165477,6 +165851,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -166110,6 +166485,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
       - tests/integration/test_cycle98_fluctuation_kis_api.py
       - tests/integration/test_cycle99_fluctuation_single_call.py
@@ -166430,6 +166806,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -166977,6 +167354,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -167489,6 +167867,7 @@ backend:
       - tests/integration/test_cycle401_save_params_seed_pg.py
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -167807,6 +168186,7 @@ backend:
       - tests/unit/db/test_cycle401_save_params_seed.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -168364,6 +168744,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -168828,6 +169209,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -169147,6 +169529,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -169713,6 +170096,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -170122,6 +170506,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -170445,6 +170830,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -171014,6 +171400,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -171459,6 +171846,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -171783,6 +172171,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -172350,6 +172739,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -172792,6 +173182,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -173112,6 +173503,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -173668,6 +174060,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -175848,6 +176241,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -176172,6 +176566,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -176739,6 +177134,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -177160,6 +177556,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -177485,6 +177882,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -178055,6 +178453,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -178484,6 +178883,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -178808,6 +179208,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -179377,6 +179778,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -179798,6 +180200,7 @@ backend:
       - tests/integration/test_cycle408_l1_funnel_protect_confirmed_pg.py
       - tests/integration/test_cycle409_order_price_pg.py
       - tests/integration/test_cycle412_trade_journal_pg.py
+      - tests/integration/test_cycle417_daily_gap_scan_pg.py
       - tests/integration/test_cycle64_price_filter_scanner_integration.py
       - tests/integration/test_cycle65_trade_amount_filter_e2e.py
       - tests/integration/test_cycle65_trade_amount_filter_option_c_race.py
@@ -180122,6 +180525,7 @@ backend:
       - tests/unit/db/test_cycle409_order_price.py
       - tests/unit/db/test_cycle411_cost_overlay_db.py
       - tests/unit/db/test_cycle411b_partial_sell_ids.py
+      - tests/unit/db/test_cycle417_gap_scan_contract.py
       - tests/unit/db/test_cycle64_price_filter_scanner_system_config.py
       - tests/unit/db/test_cycle65_trade_amount_filter_config.py
       - tests/unit/db/test_cycle68_date_today_kst_g12.py
@@ -180693,6 +181097,7 @@ backend:
       - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
       - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
       - tests/unit/engine/test_cycle411d_te_net_mixed_guard.py
+      - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -183809,10 +184214,10 @@ frontend:
       - frontend/src/pages/__tests__/StrategiesTeRr.cycle411d.test.tsx
       - frontend/src/pages/__tests__/StrategiesTeRr.test.tsx
       - frontend/src/pages/__tests__/StrategyFunnel.bottleneckTrend.test.tsx
-generated_at: '2026-10-08T20:02:55.585Z'
+generated_at: '2026-10-09T02:50:02.216Z'
 stats:
   backend_modules: 182
-  backend_tests: 1300
+  backend_tests: 1303
   frontend_modules: 139
   frontend_tests: 137
   unmapped_modules:

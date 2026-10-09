@@ -3187,3 +3187,21 @@ cycle359 조사). cycle368 이 파서 기준점을 고치고, VI 수명 600초(�
 - `cost_overlay.py` 는 DB 를 읽는 async 어댑터와 KST 오늘을 쓰는데 「순수 함수 leaf (DB · HTTP · 시계 미접촉…)」 절에 있었다. `trade_cost.py` 옆으로 옮겼다.
 
 → CHANGELOG: cycle411 행
+
+---
+
+## 저녁 데이터 적재 (scanner + data_load_tasks) — 「분할 backfill 분기」 · 「확정 전 오늘봉 시각 필터」
+
+### 2026-10-09 cycle417 — 증분 분기의 고정 7일 창을 빈 날 확대 규칙으로
+
+정본 원문(덮어쓰기 전 3곳):
+
+```
+- 분기 = **깊이 하나**: `existing_count`(= `stock_master_daily.count_by_ticker`) `< _DAILY_LOAD_VCP_BACKFILL_DAYS(=225)` → `condition.fetch_daily_candles_backfill(ticker, total_days=225)`(분할 fetch, 마지막 윈도우 클램프) / `>=225` → 증분 7일(재 backfill 금지). 지수 소속·자격·보호는 깊이 무관(cycle302).
+- 🔴 **비용 1회성** — 깊이 도달 뒤 증분(7일·1콜), retention 이 225 아래로 안 떨어뜨린다(…)
+- **D 봉 확정 경로 둘** — … 2차 = D+1 20:30 정기 실행 7일 증분 창(`fetch_days=7` → `ON CONFLICT DO UPDATE`, 유니버스 안만). 🔴 7일 창을 1~2일로 줄이지 않는다 — …
+```
+
+경위: 증분 분기가 `fetch_days = 7` 리터럴 하나였다. `fetch_daily_candles(days=7)` 은 달력 창 20일에서 최근 7봉(`output[:7]`)만 받고, 깊이 판정은 행 수뿐이라 7영업일 넘게 적재 대상 밖에 있다 돌아온 종목은 그 사이가 영영 비었다. 메인 세션 운영 DB 실측(읽기 전용, 10-09) — 10-08 대상 1,029종목 중 14종목·34일(전부 09-21~09-28, 추석 연휴 낀 구간). 날짜별 종목 수 감소(09-01 1,646 → 10-08 1,029)는 유실이 아니라 대상에서 빠진 종목의 이후 날짜가 안 쌓인 것이었다. 7 은 상수 `_DAILY_LOAD_INCREMENTAL_DAYS` 로 바뀌어 하한으로 남았다.
+
+→ CHANGELOG: cycle417 행

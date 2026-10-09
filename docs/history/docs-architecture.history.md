@@ -917,3 +917,19 @@ flowchart TB
 (`_snapshot_exit`)가 만든다. 대사가 `trade_history` 를 SELECT 하므로 DB 화살표 이름에 그것을 더했다.
 
 → CHANGELOG: cycle412 마무리 행
+
+---
+
+## 9. DB 스키마 — `stock_master_daily` 행
+
+### 2026-10-09 cycle417 — 적재 방식 괄호를 현재 분기에 맞춤
+
+정본 원문(덮어쓰기 전 괄호):
+
+```
+(`TIME_STOCK_MASTER_DAILY_LOAD`, T-100 백필 → D-1 증분)
+```
+
+경위: 백필 목표 깊이는 cycle299·302 로 225(분할 fetch)가 됐는데 괄호가 T-100 으로 남아 있었다. cycle417 이 증분 창에 빈 날 확대 규칙을 더해 함께 고쳤다.
+
+→ CHANGELOG: cycle417 행

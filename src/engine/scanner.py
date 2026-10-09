@@ -2817,6 +2817,12 @@ def _emit_stock_master_age_warning(ticker: str, age_days: int) -> None:
 _DAILY_LOAD_FETCH_DAYS = 100   # KIS 1회 호출 한도 (Q2=C, 사이클 33 KIS_DAILY_CANDLES_MAX)
 _DAILY_LOAD_RATE_LIMIT_SLEEP_SECS = 0.05  # 50ms (사이클 83/91/97/107 답습)
 _DAILY_LOAD_INCREMENTAL_THRESHOLD = 50  # 50일 이상 적재된 ticker 는 증분 적재 (Q3=B)
+
+# cycle417 (2026-10-09, 사용자 승인 10-09 — 일봉 증분 적재 구멍) — 증분 분기의 현행
+# 7일 보정 창(하한, cycle263 G2 직전 영업일 봉 재기록 보존) + 구멍 메우기 여유.
+# `_DAILY_LOAD_FETCH_DAYS`(100) 는 KIS 1회 호출 상한 그대로가 증분 분기의 상한이다.
+_DAILY_LOAD_INCREMENTAL_DAYS = 7
+_DAILY_LOAD_GAP_MARGIN_DAYS = 2
 # 사이클 299 — retention 390cal≈261영업일 보유 → target 225(36영업일 마진). 225 인 이유 =
 # 실효 장기선이 정확히 200 이 되는 깊이다(effective_ema_long = min(ema_long, 보유 − 20 − 5)).
 # DB 깊이 < 225 이면 분할 backfill. VCP 가 실제로 읽는 깊이는 전략 파라미터
@@ -2854,6 +2860,32 @@ _DAILY_LOAD_TODAY_BAR_CUTOFF = _dtime(20, 0)
 
 # 사이클 273 D5 — 보유/익일청산 강제 포함 관측 마커 (실행당 1행, 사이클 237 교훈 — 종목당 emit 금지)
 _DAILY_LOAD_PROTECTED_FORCED_MARKER = "[daily_load_protected_forced]"
+
+# cycle417 — 구멍 메우기 관측 마커 (실행당 1행, 종목당 금지 — 같은 교훈).
+_DAILY_LOAD_GAP_FILL_MARKER = "[daily_load_gap_fill]"
+_DAILY_LOAD_GAP_FILL_SKIPPED_MARKER = "[daily_load_gap_fill_skipped]"
+
+
+def _gap_fill_need_days(earliest_missing: date, today: date) -> int:
+    """빈 날부터 오늘까지 필요한 fetch 깊이 — 평일 수(양 끝 포함, 휴일 미차감) + 여유.
+
+    cycle417 순수 함수(KIS 호출·DB 조회 0) — `_stock_master_daily_load_once` 가
+    구멍이 있는 종목마다 이 값을 `_DAILY_LOAD_INCREMENTAL_DAYS`(7)~
+    `_DAILY_LOAD_FETCH_DAYS`(100) 사이로 자른다.
+
+    휴일을 빼지 않는 것이 **안전 방향**이다 — `fetch_daily_candles` 는 최근 N봉
+    (`output[:N]`)만 받으므로, N 이 실제 영업일 수보다 크면 구멍 날짜를 반드시
+    포함하고 작으면 놓친다. 과대 계산의 대가는 upsert 멱등으로 흡수된다(KIS 호출
+    수는 종목당 1콜 그대로). KIS 휴장 조회 모듈은 이 경로에서 부르지 않는다 —
+    평일 산술로 충분하고 정확도보다 안전 방향이 우선이다.
+    """
+    need = 0
+    d = earliest_missing
+    while d <= today:
+        if d.weekday() < 5:  # 0=월 ~ 4=금
+            need += 1
+        d += timedelta(days=1)
+    return need + _DAILY_LOAD_GAP_MARGIN_DAYS
 
 
 def _drop_today_bars(
@@ -3042,6 +3074,44 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
     from src.db._kst import today_kst
     today = today_kst()
 
+    # cycle417 (2026-10-09, 사용자 승인 10-09 — 일봉 증분 적재 구멍) — 구멍 판정은
+    # 실행당 **한 번**, 종목 루프 **밖**(쿼리 1회, 종목당 조회 0). 대상 = 보호 종목
+    # 포함 적재 대상 전부(`all_tickers`), `before=` 오늘(오늘 봉은 달력에서 뺀다).
+    # 예외·날짜 아닌 값은 fail-open — 그 종목은 현행 7봉으로 진행한다
+    # (`[daily_load_gap_fill_skipped]` 실행당 1행).
+    all_tickers_set = set(all_tickers)
+    gap_fill_tickers: dict[str, date] = {}
+    gap_fill_errors = 0
+    gap_fill_warned = False
+    try:
+        _raw_gap_scan = await stock_master_daily.earliest_missing_bas_dd(
+            all_tickers, before=today
+        )
+    except Exception:
+        logger.warning(
+            "%s reason=gap_scan_error", _DAILY_LOAD_GAP_FILL_SKIPPED_MARKER, exc_info=True,
+        )
+        gap_fill_warned = True
+        gap_fill_errors += 1
+        _raw_gap_scan = {}
+
+    for _gap_ticker, _gap_date in (_raw_gap_scan or {}).items():
+        if _gap_ticker not in all_tickers_set:
+            continue  # 대상 밖 키 — 헬퍼 계약 위반 방어(정상 구현은 보내지 않는다)
+        if isinstance(_gap_date, date):
+            gap_fill_tickers[_gap_ticker] = _gap_date
+        else:
+            gap_fill_errors += 1
+            if not gap_fill_warned:
+                logger.warning(
+                    "%s reason=gap_scan_error", _DAILY_LOAD_GAP_FILL_SKIPPED_MARKER,
+                )
+                gap_fill_warned = True
+
+    gap_fill_widened = 0
+    gap_fill_max_days = 0
+    gap_fill_beyond_horizon = 0
+
     filter_dropped_rows = 0
     filter_dropped_tickers = 0
     filter_errors = 0
@@ -3091,7 +3161,22 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
             fetch_days = _DAILY_LOAD_FETCH_DAYS  # 백필 모드 (T-100일)
             backfill_count += 1
         else:
-            fetch_days = 7  # 증분 모드 (T-7일, 영업일 마진)
+            # cycle417 — 증분 모드. 구멍이 없으면 현행 7일(영업일 마진) 그대로.
+            # 구멍이 있으면 「빈 날부터 오늘까지 필요한 창」 을 7~100 사이로 잘라
+            # KIS 호출 수(종목당 1콜)는 그대로 두고 창만 넓힌다.
+            _earliest_missing = gap_fill_tickers.get(ticker)
+            if _earliest_missing is not None:
+                _need = _gap_fill_need_days(_earliest_missing, today)
+                fetch_days = min(
+                    max(_need, _DAILY_LOAD_INCREMENTAL_DAYS), _DAILY_LOAD_FETCH_DAYS
+                )
+                if fetch_days > _DAILY_LOAD_INCREMENTAL_DAYS:
+                    gap_fill_widened += 1
+                    gap_fill_max_days = max(gap_fill_max_days, fetch_days)
+                if _need > _DAILY_LOAD_FETCH_DAYS:
+                    gap_fill_beyond_horizon += 1
+            else:
+                fetch_days = _DAILY_LOAD_INCREMENTAL_DAYS  # 증분 모드 (T-7일, 영업일 마진)
             incremental_count += 1
 
         # 3) KIS 호출 — 목표 깊이 backfill 은 분할 fetch (사이클 172),
@@ -3196,6 +3281,23 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
         filter_dropped_tickers,
         filter_errors,  # >0 = fail-open 발생 (dropped_rows=0 과 "버릴 봉 없음" 을 구분)
     )
+
+    # cycle417 — 구멍 메우기 관측: **실행당 1행**(종목당 금지, 사이클 237 교훈 답습).
+    # 구멍이 0 이어도 1행은 남긴다 — 「판정이 돌았고 구멍 0」 과 「판정이 안 돌았다」 를
+    # 가른다. `errors` > 0 은 fail-open 발생(예외 또는 날짜 아닌 값)을 뜻한다.
+    logger.info(
+        "%s tickers=%d widened=%d max_fetch_days=%d beyond_horizon=%d errors=%d",
+        _DAILY_LOAD_GAP_FILL_MARKER,
+        len(gap_fill_tickers), gap_fill_widened, gap_fill_max_days,
+        gap_fill_beyond_horizon, gap_fill_errors,
+    )
+    summary["gap_fill"] = {
+        "tickers": len(gap_fill_tickers),
+        "widened": gap_fill_widened,
+        "max_fetch_days": gap_fill_max_days,
+        "beyond_horizon": gap_fill_beyond_horizon,
+        "errors": gap_fill_errors,
+    }
 
     summary["elapsed_ms"] = int((time.monotonic() - start) * 1000)
     # mode 결정: 백필 우세 → "full" / 증분 우세 → "incremental" / 혼합 → "mixed"

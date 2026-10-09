@@ -266,8 +266,9 @@ _BASE_SHA = {
     #    구 값은 cycle299 기준선(3b7366cc…)이다.
     # 🔁 2026-09-25 (cycle363 F-1) 재핀 — `_scan_pool_eager_refresh_loop` upsert 전 기존 raw 머지(사이클 176 basics 경로 답습, 사용자 승인 8영역). 장전 0값 키(acml_tr_pbmn 등)가 raw 통째 교체로 지워지던 결함 시정. 나머지 7영역 diff 0.
     # 🔁 cycle380(2026-09-27) 재핀 — ETF 판정을 이름 키워드에서 증권그룹코드(`scty_grp_id_cd`)로 전환(사용자 승인, 8영역). ETF_KEYWORDS 를 정본 leaf `src/engine/etf_like.py` 로 이전 + import, `scan_stocks` 판정 자리를 `is_etf_like` 로 교체. 값만 이동, 값 자체는 유일값.
+    # 🔁 cycle417(2026-10-09) 재핀 — cycle417 사용자 승인 10-09 — 일봉 증분 적재 구멍(증분 분기 창 확대 + 구멍 판정 1회 호출). 나머지 7영역 diff 0.
     "src/engine/scanner.py":
-        "611568c078c6f3779344e05b3dfa308c792c64e1c5e02480de6313200282f54f",
+        "b570762dfd92df49471dab261d44ecd364d376300ffe9e2f5b7ac19cceb9efcc",
     # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). 8영역 `update_weights` 의 enabled 대입 한 줄(섀도 전략은 비중 0 이어도 켜짐 유지). 값만 이동.
     "src/engine/strategy_registry.py":
         "3b6366c3cdb6e83907428435b95611880f1b8223e572c361a1cad2d00b13a067",
