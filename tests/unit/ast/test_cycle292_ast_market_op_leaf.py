@@ -14,7 +14,7 @@
 | G-292-3 | scheduler wrapper 는 **위임만** 한다(본체 재인라인 금지) | 두 번째 사본 차단 |
 | G-292-4 | `cap` 기본값 60 · KEYWORD_ONLY — wrapper **와** leaf 양쪽 | 요약 로그 `cap=%d` |
 | G-292-5 | 마커 5종이 leaf **밖** `src/**` 에 0건 | D+1 판독 세대 합산 차단 |
-| G-292-6 | `scheduler.py` 정확 라인 핀 + 영구 상한 | cycle292 자신의 후속 기준선 |
+| G-292-6 | `scheduler.py` 영구 라인 상한(`< 3,900`) | cycle292 가 확보한 예산의 상한 |
 | G-292-7 | leaf 는 scheduler 를 import 하지 않는다 | `data_load_tasks` 배너 계약(순환 0) |
 | G-292-8 | 요약 로그 **서식 + 인자 순서** 고정 | D+1 판독 계약(`main_tick`↔`main_total` 스왑 차단) |
 | G-292-9 | 메인 세션 **별칭·수집 금지** + 구독 owner 출처 증명 | 이름 기반 봉인의 별칭 우회 차단 (구현은 `test_cycle221_ast_market_op_no_main.py` — 그 파일이 "메인 0건" 의 집이다) |
@@ -23,9 +23,8 @@
 `ast.dump` sha 핀 금지(3.12 CI ↔ 3.13 로컬 출력 차이로 CI 만 붉어진다) ·
 `git grep`/`git ls-files` 금지(미추적 파일 실종) ·
 **기준선 소실은 명시 FAIL**(vacuous PASS 차단 — 모든 테스트가 `_LEAF.exists()` 를 먼저 통과).
-모듈 레벨 sha dict 이름은 `_BASE_SHA` 다 — `*_CONTENT_SHA` 로 지으면
-`test_cycle223g3_ast_guard_sees_staged.py::test_g3_9a` 의 `_PIN_GUARD_FILES`(고정 4개)와
-불일치해 즉시 붉어진다.
+`scheduler.py` 파일 내용 sha 는 정본 `test_cycle222a3_ast_followup_fixes.py::_APPROVED_CONTENT_SHA`
+한 곳에만 둔다(cycle419 — 이 파일의 G-292-6 정확 줄 수 핀·6b 파일 핀은 걷었다).
 
 ## 🔴 왜 부정 단언만으로는 부족한가
 
@@ -44,7 +43,6 @@ scheduler 를 떠나면 `_get_function_node(tree, "_subscribe_market_operation_t
 from __future__ import annotations
 
 import ast
-import hashlib
 import inspect
 from pathlib import Path
 
@@ -88,49 +86,8 @@ _MARKERS = (
 #: `system_logs` 접두가 통째로 바뀐다 = 판독 사슬 파괴 = 행위 변경(명세 §4).
 _LOGGER_NAME = "src.engine.scheduler"
 
-#: `scheduler.py` 정확 라인 수 + cycle257 이 세운 영구 상한.
-_SCHEDULER_LINES = 3737  # cycle409 재핀 +1 — 사용자 결정 10-04 Q1·Q4 매일 자동 대사 task 배선. 직전 3736 = cycle408-L1
+#: cycle257 이 세운 `scheduler.py` 영구 상한.
 _SCHEDULER_LINE_CAP = 3_900
-
-#: cycle292 가 만진 **전부**인 프로덕션 3파일의 내용 sha. 붉어지면 핀을 갱신하기 전에
-#: "행위 변경 0" 계약이 여전히 성립하는지(§3.1 금지 목록) 먼저 확인한다.
-#: 셋째 파일은 **docstring 1곳**만 바뀌었다(코드/AST 불변) — 적대 검증이
-#: `get_market_op_active_tickers()` docstring 의 소비처 서술 2개가 둘 다 거짓임을
-#: 확인했다(프로덕션 호출자 0건 · 델타는 `scheduler._market_op_subs` 로 잰다).
-_BASE_SHA = {
-    # 🔁 cycle364(2026-09-26) 재핀 — 저녁 A1 미리보기 도입 + 저녁 캡처 본체 leaf 이관.
-    # 🔁 cycle369 재핀 — 관리종목51·단기과열59 청산·매수차단 leaf 배선(값만 이동)
-    # 🔁 cycle408-L1 재핀 — 사용자 승인 10-04 8영역 관측 결함 해결: 09:30 자동 퍼널 캡처에 `protect_confirmed=True` 전달(+6줄, 값 없는 키워드 배선)
-    "src/engine/scheduler.py":
-        # 🔁 cycle409 재핀 — 사용자 결정 10-04 Q1·Q4: 매일 자동 대사 task 배선(leaf import · create_task 1줄 · cancel 목록 3곳, +1줄). 직전 값 = cycle408-L1 `2bacaa149ab6…`
-        "f53d41a11fe162f80e113c6ff48cf6d235581769be7979499c5782ff11d49646",
-    "src/engine/market_op_subscribe.py":
-        "7d58f9464c1ed35e4fa8706d801beb5a6b5c062d5a2941f0db6482d028d3d4ac",
-    # 🔁 cycle368(2026-09-25) 재핀 — halt 판정을 `_is_code_active` → `is_iscd_stat_blocking`
-    # (58 단독, USER DECISION)으로 좁히고, VI·거래정지 둘 다 마지막 활성 프레임 뒤 600초
-    # 지연 해제를 받는다(VI 수명은 USER DECISION, 거래정지도 같은 수명을 받는 것과 만료
-    # sweep 을 `record_market_op_event` 첫머리에 두는 것은 적대적 검토 뒤 MAIN-SESSION
-    # DECISION, 사용자 승인 범위 안). 신규 `_now()` 시계 + `datetime`/`timezone` import +
-    # 신규 dict 2(`_vi_last_active_at`·`_halt_last_active_at`, 서로 완전 독립) + 신규
-    # 상수 2(`VI_ACTIVE_TTL_SECONDS`·`HALT_ACTIVE_TTL_SECONDS`) + `is_iscd_stat_blocking`
-    # import. sweep 호출부 = `record_market_op_event` 첫머리 + 읽기 함수 5곳
-    # (`is_ticker_stale_excluded`·`get_market_op_active_tickers`·`get_halt_active_tickers`·
-    # `get_circuit_breaker_state`·`get_market_op_state_summary`, 기존 `get_vi_active_tickers`
-    # 는 그대로 VI sweep 만 부른다). `seed_vi_active_from_rest` 도 시드 시각을 스탬프한다.
-    # `iscd_stat_active_count` 는 표시 집합(`_ISCD_STAT_DISPLAY_CODES`)으로 센다. 방어적
-    # 분기 — 활성 집합에 시각 없이 있는 종목은 무기한 유지하지 않고 발견 시각을 찍어
-    # 그로부터 TTL 뒤 해제한다(`reset_market_op_state` 가 새 dict 2 개도 clear). 나머지
-    # leaf 는 무접촉이다. 직전 값 =
-    # `b9bd158b1503546a2d214b1269b2ae961f7c09241035149081e65eb61ac4c509`.
-    # 🔁 cycle371(2026-09-26) 재핀 — `get_iscd_stat_active_tickers()`/
-    # `_ISCD_STAT_DETAIL_ONLY_CODES` 신규 추가(값만 이동, 다른 함수 본체 무변경).
-    # `GET /api/realtime/market-operation` 의 `details` 가 VI ∪ 거래정지만 훑어 관리종목
-    # (51)·단기과열(59) 단독 종목의 상세 행이 없던 것을 라우트가 이 함수로 메운다(58 은
-    # 거래정지 TTL 이 이미 관리하므로 제외). 직전 값 =
-    # `49de2441198cf1dee2c34deed50ded6fb8a5536bec0f475a0feba8237c977961`.
-    "src/engine/market_operation_monitor.py":
-        "51441c07e9ea9ccf1b0fa7ac9df4eb263fbdf8bbe5e51ed417f5d64fa33c35e2",
-}
 
 
 # ---------------------------------------------------------------------------
@@ -399,37 +356,19 @@ def test_g292_5b_leaf_writes_no_db_and_adds_no_io() -> None:
 
 
 # ===========================================================================
-# G-292-6 — 라인 상한 + 정확 핀 + 내용 sha
+# G-292-6 — 라인 상한
 # ===========================================================================
-def test_g292_6_scheduler_line_count_is_pinned_under_the_permanent_cap() -> None:
-    """G-292-6 — `scheduler.py` 정확 라인 핀 + cycle257 영구 상한(3,900 미만).
+def test_g292_6_scheduler_line_count_is_under_the_permanent_cap() -> None:
+    """G-292-6 — `scheduler.py` cycle257 영구 상한(3,900 미만).
 
-    cycle292 가 확보한 예산은 **174줄**이다(3,726 → 3,900). 🔴 정확 핀을 상한 핀으로
-    바꾸지 않는다 — 그러면 그 174줄의 무단 증식을 아무도 못 잡는다. 예산을 확보하자고
-    예산 감시자를 끄는 일이다.
+    정확 줄 수 핀과 파일 내용 sha 핀은 cycle419 에서 걷었다 — `scheduler.py` 「무접촉」 은
+    정본 승인 도장(`test_cycle222a3_ast_followup_fixes.py::_APPROVED_CONTENT_SHA`)이 잰다.
     """
     _require_baseline()
     lines = len(_SCHEDULER.read_text(encoding="utf-8").splitlines())
     assert lines < _SCHEDULER_LINE_CAP, (
         f"scheduler.py {lines}L ≥ 영구 상한 {_SCHEDULER_LINE_CAP} (cycle257 A4)"
     )
-    assert lines == _SCHEDULER_LINES, (
-        f"scheduler.py {lines}L (cycle292 기준선 {_SCHEDULER_LINES}) — 정당한 변경이면 "
-        "이 값과 자매 라인 핀 6곳(cycle274/276/286/287/290/291)을 함께 옮긴다"
-    )
-
-
-@pytest.mark.parametrize("rel", sorted(_BASE_SHA))
-def test_g292_6b_touched_files_content_sha(rel: str) -> None:
-    """G-292-6b — cycle292 가 만진 2파일의 내용 sha.
-
-    붉어지면 먼저 "행위 변경 0"(§3.1 금지 목록 — 로그 문구·레벨·필드 순서·`%` 인자
-    순서·호출 순서·예외 분기·`pop`↔`unsubscribe` 순서·커서 전진 조건·`sleep` 자리)이
-    여전히 성립하는지 확인하고, 그다음에 값을 옮긴다.
-    """
-    _require_baseline()
-    got = hashlib.sha256((_ROOT / rel).read_bytes()).hexdigest()
-    assert got == _BASE_SHA[rel], f"{rel} 가 바뀌었다. 현재 sha={got}"
 
 
 # ===========================================================================

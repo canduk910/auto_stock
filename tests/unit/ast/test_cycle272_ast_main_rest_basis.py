@@ -15,17 +15,13 @@
 | G-272-24 | `start()` 에서 `_drain_pending_next_day_clear` 가 confirm(board="main") **직후** | 호출 순서 불변(익일청산 앞당김은 부수 효과이지 순서 변경이 아니다) |
 | G-272-26 | REST 폴백 호출**만** `source="rest"` 명시, 나머지 3곳은 미명시 | 기본 `"ws"` 의존이 계약 |
 | G-272-27 | `scheduler.py ≤ 3,899` ∧ cycle257 리터럴과 대조 | 라인 예산(느슨한 자체 가드 재발 차단) |
-| G-272-28 | 키 ∉ `PARAM_RANGES`/`INT_PARAMS` · glob 전수 {VB,LTV} · 8영역 diff 0 · 문서 2곳 | 진입 정체성 상수 + 접촉 범위 |
+| G-272-28 | 키 ∉ `PARAM_RANGES`/`INT_PARAMS` · glob 전수 {VB,LTV} · 문서 2곳 | 진입 정체성 상수 |
 
-## ⚠️ 사이클 한정 — **커밋 후 삭제 의무**
+## 범위 가드는 지웠다
 
-- `test_g272_28d_untouchable_areas_untouched`
-- `test_g272_28e_other_strategy_files_untouched`
-
-두 가드는 `git diff HEAD` 로 **워킹트리 범위**를 잰다. 커밋 직후 공허해지고 다음 편집에서
-무조건 RED 가 된다(cycle240 A11b · cycle252 G-252-5b · cycle262 C12 의 고아 가드 사고).
-**cycle272 커밋 직후 이 두 테스트를 삭제한다.** 8영역의 **영구** 가드는
-`tests/unit/ast/test_cycle222a3_ast_followup_fixes.py` 가 계속 들고 있으므로 잃는 커버리지는 없다.
+사이클 한정이던 `test_g272_28d`(8영역 diff 0)·`test_g272_28e`(다른 전략 파일 diff 0)는 커밋 뒤
+삭제했고, 그 둘이 쓰던 상수·`git` 헬퍼도 cycle419 에서 걷었다. 8영역 무접촉은 정본
+`tests/unit/ast/test_cycle222a3_ast_followup_fixes.py::_APPROVED_CONTENT_SHA` 가 진다.
 나머지 가드는 전부 영구다.
 
 ## 비-공허성
@@ -47,7 +43,6 @@ from __future__ import annotations
 import ast
 import hashlib
 import re
-import subprocess
 from pathlib import Path
 
 import pytest
@@ -73,26 +68,6 @@ _MARKERS = (
     "[main_rest_basis_confirmed]", "[main_rest_basis_unresolved]",
 )
 
-# 8영역 (루트 CLAUDE.md 정본, 9경로)
-_UNTOUCHABLE_FILES = (
-    "src/engine/risk.py",
-    "src/engine/order_engine.py",
-    "src/engine/session.py",
-    "src/engine/scanner.py",
-    "src/engine/strategy_registry.py",
-    "src/api/order.py",
-)
-_UNTOUCHABLE_DIRS = ("src/auth/", "src/realtime/")
-
-_OTHER_STRATEGY_FILES = (
-    "src/engine/strategies/momentum.py",
-    "src/engine/strategies/donchian_swing.py",
-    "src/engine/strategies/kojiro.py",
-    "src/engine/strategies/vcp_breakout.py",
-    "src/engine/strategies/bull_flag_breakout.py",
-)
-
-
 # ---------------------------------------------------------------------------
 # 헬퍼
 # ---------------------------------------------------------------------------
@@ -115,16 +90,6 @@ def _method(tree: ast.Module, cls_name: str, name: str):
                 if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n.name == name:
                     return n
     return None
-
-
-def _git(*args: str) -> str:
-    res = subprocess.run(["git", *args], cwd=_ROOT, capture_output=True, text=True)
-    assert res.returncode == 0, f"git {' '.join(args)} 실패: {res.stderr}"
-    return res.stdout
-
-
-def _changed_paths() -> list[str]:
-    return [p for p in _git("diff", "--name-only", "HEAD").splitlines() if p.strip()]
 
 
 # ===========================================================================

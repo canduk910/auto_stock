@@ -28,8 +28,8 @@
 
 - **내용 sha 핀 dict**(`*_CONTENT_SHA`)는 **8영역 승인 사이클 전용**이고,
   `test_cycle223g3_ast_guard_sees_staged.py::test_g3_9a` 가 그 dict 를 가진 파일이
-  **정확히 4개**임을 강제한다. cycle268 은 8영역을 한 글자도 만지지 않으므로 그
-  기전에 편입될 사유가 없고, 편입하면 오히려 "핀은 항상 4곳" 목록을 깨뜨린다.
+  **정본 한 파일**(`test_cycle222a3_ast_followup_fixes.py`)뿐임을 강제한다(cycle419).
+  cycle268 은 8영역을 한 글자도 만지지 않으므로 그 기전에 편입될 사유가 없다.
   ⇒ **이 파일은 `*_CONTENT_SHA` 이름의 모듈 레벨 dict 를 정의하지 않는다.**
 - **메서드 세그먼트 sha 핀**(cycle264 `_STRATEGY_PINS`)은 VB/LTV 6 메서드를 이미
   덮고 있고 **아직 살아 있다**(cycle265 가 갱신·삭제 예정). 같은 성격의 핀을 나머지

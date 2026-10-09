@@ -1,31 +1,31 @@
 """cycle264 — 접촉 범위(C7) + 행위 불변 핀(C4) 가드.
 
-## ⚠️ 이 파일의 절반은 **사이클 한정**이다 — 커밋 후 삭제/갱신 의무
+## 범위 가드는 지웠다
 
 - `test_c7_working_tree_touches_only_allowed_files` (범위 가드)
   → **cycle264 커밋(38f2560) 직후 삭제 완료.** bare `git diff HEAD` 는 커밋 뒤
     공허해지고 다음 편집에서 무조건 RED 가 된다(cycle240 A11b · cycle252 G-252-5b).
+    그 가드가 쓰던 상수·`git` 헬퍼도 cycle419 에서 걷었다.
 - `test_c4_strategy_entry_methods_pinned` (전략 7파일 무접촉 sha 핀)
   → ✅ **cycle272(기준가 시정)가 VB/LTV 를 실제로 바꿨지만 이 핀은 갱신하지
     않았다** — `source` 기본값을 `"ws"`(불신)로 둬 이 여섯 메서드는 손대지
     않는 설계를 택했다(자문 §9 O-I, 예고 문장을 이 사실에 맞춰 정정한다).
     cycle264 안에서 sha 가 바뀌면 계약 위반이다.
 
-나머지(`scheduler.py` 라인 상한, 8영역 무접촉)는 영구 가드다.
+나머지(`scheduler.py` 라인 상한 · task 수명 · 마커 범위)는 영구 가드다. 8영역 무접촉은
+정본 `test_cycle222a3_ast_followup_fixes.py::_APPROVED_CONTENT_SHA` 가 진다.
 
 ## 왜 `git grep`/`git ls-files` 로 소스를 스캔하지 않는가
 
 추적 파일만 보므로 Green 이 새로 만든 미추적 파일을 로컬에서는 못 보고
 CI(커밋 후)에서만 잡는다(cycle259 S4b). 소스 스캔은 `Path(...).rglob` + AST 로
-한다. 여기서 `git` 을 쓰는 곳은 **워킹트리 diff 범위 판정** 한 곳뿐이고,
-그것은 git 없이는 정의되지 않는 질문이다.
+한다.
 """
 
 from __future__ import annotations
 
 import ast
 import hashlib
-import subprocess
 from pathlib import Path
 
 import pytest
@@ -53,24 +53,6 @@ _ALLOWED_SRC = {
     # 형제 sha 핀 4곳에 함께 등록했다(커밋 후 같이 비운다).
     "src/realtime/CLAUDE.md",
 }
-
-# 8영역 (CLAUDE.md 정본) + 이 사이클이 특별히 지키는 파일
-_UNTOUCHABLE_GLOBS = (
-    "src/engine/risk.py",
-    "src/engine/order_engine.py",
-    "src/engine/session.py",
-    "src/engine/scanner.py",
-    "src/engine/strategy_registry.py",
-    "src/api/order.py",
-)
-_UNTOUCHABLE_DIRS = ("src/auth/", "src/realtime/", "src/engine/strategies/")
-
-
-def _git(*args: str) -> str:
-    return subprocess.run(
-        ["git", *args], cwd=_ROOT, capture_output=True, text=True, check=True,
-    ).stdout
-
 
 # ===========================================================================
 # C7 — 접촉 범위 (⚠️ 사이클 한정 — cycle264 커밋 직후 삭제)

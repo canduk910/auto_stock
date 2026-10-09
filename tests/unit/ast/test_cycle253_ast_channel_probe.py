@@ -12,16 +12,10 @@
 | g253_1a | probe 핸들러 3개(POST/GET/DELETE) 존재 + 경로 | 배선 누락 |
 | g253_1b | 3 핸들러 본문에 `bypass_limit=True` 0 | 41 cap 우회 → HIGH 보유 시세 강탈 |
 | g253_1c | 허용 tr_id 집합에 `"H0UNCNT0"` 0 (+ H0STCNT0·H0NXCNT0 존재) | 라이브 채널 중복 구독 |
-| g253_1d | 8영역 · `scheduler.py` · `stale_*` diff 0 | 범위 이탈 |
-| g253_1e | 변경 파일이 §1 화이트리스트 안 | 범위 이탈 |
 | g253_1f | 3 핸들러 + 이행 호출 모듈 헬퍼 **폐쇄**에 `write_log` 참조 0 (+ 추적기 자기 검증) | logger.info 와 write_log 병행 = system_logs 이중 INSERT(cycle72 G-6) |
 
-⚠️ **g253_1d / g253_1e / g253_1e2 는 사이클 한정 가드 — cycle253 배포(커밋) 후 폐기 대상**이다.
-bare `git diff HEAD` 를 영구 동결하면 그 파일의 모든 후속 시정이 무조건 RED 가 된다
-(cycle222a `test_a11b_stale_watcher_core_untouched` 를 cycle240 이 재스코프해야 했던
-선례, cycle252 G-252-5b 가 고아로 남아 cycle253 워킹트리에서 FAIL 한 선례 — Verify F11).
-HEAD 의 `src/routes/realtime.py` 에 프로브가 들어가는 순간 세 케이스는 `pytest.skip` 으로
-**자기 은퇴**한다(`_skip_if_cycle_committed`) — skip 메시지가 삭제 신호다.
+사이클 한정 범위 가드였던 g253_1d / g253_1e / g253_1e2(8영역·`scheduler.py`·`stale_*`·프론트
+`git diff HEAD` 0)는 cycle253 커밋 뒤 skip 으로 은퇴해 있던 것을 cycle419 에서 지웠다.
 
 g253_1b / g253_1c / g253_1f 는 **영구 가드**다 — 프로브가 사는 한 유효한 안전 경계다.
 
@@ -35,7 +29,6 @@ g253_1f 의 종전 판본("핸들러 본문의 write_log 는 try 안")은 **공�
 from __future__ import annotations
 
 import ast
-import subprocess
 import textwrap
 from pathlib import Path
 
@@ -53,36 +46,6 @@ _PROBE_PATH = "/channel-probe"
 #: 허용 채널 = KRX 단독 + NXT 단독. 통합 채널은 **라이브** 라 프로브 대상이 아니다.
 _ALLOWED_TR_IDS = {"H0STCNT0", "H0NXCNT0"}
 _LIVE_TICK_TR_ID = "H0UNCNT0"
-
-
-def _git(*args: str) -> str:
-    res = subprocess.run(
-        ["git", *args], cwd=_REPO_ROOT, capture_output=True, text=True,
-    )
-    if getattr(res, "returncode", 0) != 0:
-        raise AssertionError(
-            f"git {' '.join(args)} 실패 (rc={res.returncode}) — fail-closed. "
-            f"stderr: {(res.stderr or '').strip()}"
-        )
-    return res.stdout
-
-
-def _cycle253_committed() -> bool:
-    """HEAD 의 `src/routes/realtime.py` 에 이미 프로브가 있으면 True — 사이클 한정 가드 은퇴 신호."""
-    res = subprocess.run(
-        ["git", "grep", "-q", "channel-probe", "HEAD", "--", _ROUTE_REL],
-        cwd=_REPO_ROOT, capture_output=True, text=True,
-    )
-    return getattr(res, "returncode", 1) == 0
-
-
-def _skip_if_cycle_committed() -> None:
-    """사이클 한정 diff 가드의 자기 은퇴 — 고아 가드가 다음 사이클을 붉히지 않게 (Verify F11)."""
-    if _cycle253_committed():
-        pytest.skip(
-            "cycle253 이 HEAD 에 커밋됨 — 사이클 한정 diff 가드 자기 은퇴. "
-            "이 케이스를 삭제하라 (cycle252 G-252-5b 고아 선례)."
-        )
 
 
 def _tree() -> ast.Module:
@@ -245,83 +208,6 @@ def test_g253_1c_allowed_tr_id_set_excludes_live_unified_channel():
         f"허용 집합에 {sorted(_ALLOWED_TR_IDS)} 가 모두 있어야 한다 — "
         f"발견={[sorted(v) for _l, v in allowed]}"
     )
-
-
-# ===========================================================================
-# g253_1d / g253_1e — 범위 이탈 0 (⚠️ 사이클 한정 가드, 배포 후 폐기)
-# ===========================================================================
-_EIGHT_AREAS = [
-    "src/engine/risk.py",
-    "src/engine/order_engine.py",
-    "src/engine/scanner.py",
-    "src/engine/session.py",
-    "src/engine/strategy_registry.py",
-    "src/api/order.py",
-    "src/realtime",
-    "src/auth",
-]
-_FROZEN_PATHS = _EIGHT_AREAS + [
-    "src/engine/scheduler.py",
-    "src/engine/stale_watcher_core.py",
-    "src/engine/stale_diagnostics.py",
-    "src/engine/stale_universe_guard.py",
-    "src/engine/stale_session_recovery.py",
-]
-
-
-def test_g253_1d_out_of_scope_files_untouched():
-    """명세 §1 금지 — 8영역 · `scheduler.py` · `stale_*` 4파일 diff 0.
-
-    ⚠️ **사이클 한정 가드다.** cycle253 이 커밋되면 `_skip_if_cycle_committed` 가 skip
-    으로 은퇴시키고, 그때 이 케이스를 **삭제**한다.
-    """
-    _skip_if_cycle_committed()
-    tracked = _git("diff", "HEAD", "--name-only", "--", *_FROZEN_PATHS).split()
-    untracked = _git(
-        "ls-files", "--others", "--exclude-standard", "--", *_FROZEN_PATHS,
-    ).split()
-    changed = sorted(set(tracked) | set(untracked))
-    assert changed == [], (
-        f"cycle253 범위 밖 변경 감지: {changed} — 프로브는 8영역 무접촉이 존재 이유다"
-        "(무접촉이 깨지면 승인·sha 재핀 비용이 가설 검증에 얹힌다)"
-    )
-
-
-def test_g253_1e_changed_files_are_within_declared_scope():
-    """변경 파일 화이트리스트 — 명세 §1 목록 밖 소스 변경 0 (프론트 무접촉 포함).
-
-    ⚠️ 사이클 한정 — 커밋 후 `_skip_if_cycle_committed` 가 은퇴시킨다(삭제 대상).
-    """
-    _skip_if_cycle_committed()
-    allowed_prefixes = (
-        "src/routes/realtime.py",
-        "tests/",
-        "_workspace/",
-        "docs/",
-        "CLAUDE.md",
-    )
-    tracked = _git("diff", "HEAD", "--name-only").split()
-    untracked = _git("ls-files", "--others", "--exclude-standard").split()
-    changed = sorted(set(tracked) | set(untracked))
-    offenders = [
-        p for p in changed
-        if not p.startswith(allowed_prefixes) and not p.endswith(".md")
-    ]
-    assert offenders == [], f"명세 §1 범위 밖 파일 변경: {offenders}"
-
-
-def test_g253_1e2_frontend_untouched():
-    """프론트 무접촉 — 수동 curl 프로브가 목적이므로 UI 배선 0.
-
-    ⚠️ 사이클 한정 — 커밋 후 `_skip_if_cycle_committed` 가 은퇴시킨다(삭제 대상).
-    """
-    _skip_if_cycle_committed()
-    tracked = _git("diff", "HEAD", "--name-only", "--", "frontend", "e2e").split()
-    untracked = _git(
-        "ls-files", "--others", "--exclude-standard", "--", "frontend", "e2e",
-    ).split()
-    changed = sorted(set(tracked) | set(untracked))
-    assert changed == [], f"프론트/E2E 변경 감지: {changed} — 명세 §1 금지"
 
 
 # ===========================================================================

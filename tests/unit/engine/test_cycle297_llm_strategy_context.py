@@ -302,10 +302,9 @@ def test_g1_5b_na_keys_are_absent_not_null(sid: str, na: tuple[str, ...]) -> Non
 #: cycle297 착수 시점(HEAD `a4580b6`) `build_messages(_payload(sid), _TECH, _BARS30)[1]["content"]`
 #: 의 sha256 앞 16자. 🔴 **이 값을 갱신하지 마라** — 갱신해야 할 것 같으면 VB·LTV 프롬프트를
 #: 바꾼 것이고, 그건 이 사이클의 범위 밖이다(09-11~09-16 표본과의 연속성이 끊긴다).
-# ⚠️ 이름에 `_CONTENT_SHA` 를 쓰지 않는다 — `test_cycle223g3::_discover_pin_guard_files`
-# 가 그 토큰으로 **8영역 한시 승인 핀**을 찾는다. 이 핀은 8영역과 무관한
-# 프롬프트 byte 불변 증거이므로 그 목록에 섞이면 8영역 변경마다 여기에도
-# 한시 등록을 요구하게 된다(2026-09-17 실측: `src/auth/CLAUDE.md` 변경에서 발화).
+# ⚠️ 이름에 `_CONTENT_SHA` 를 쓰지 않는다 — `test_cycle223g3::test_g3_9a`
+# 가 그 토큰의 모듈 레벨 dict 를 **8영역 승인 도장 정본 한 파일에만** 허용한다. 이 핀은
+# 8영역과 무관한 프롬프트 byte 불변 증거다.
 _VBLTV_USER_PROMPT_SHA: dict[str, str] = {
     "volatility_breakout": "cb6f843cdb1d1d9e",
     "long_tail_volatility": "b095a46c416ba13e",

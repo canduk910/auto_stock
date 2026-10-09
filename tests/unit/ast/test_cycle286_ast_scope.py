@@ -9,9 +9,9 @@
 - `src/engine/strategies/long_tail_volatility.py` (C2-a — `main` 보드 15:20 매수 컷)
 - `src/engine/order_engine.py` (C4-a — `nxt_tradable=False` 사후 보강 판정축, **8영역 승인**)
 
-그 주장을 사람의 선언이 아니라 **sha** 로 증명한다(G1). 두 파일은 정당하게 바뀌므로
-`_BASE_SHA` 에서 **의도적으로 빠져 있고**(G1c 가 그 사실을 고정), 대신 손대지 않기로 한
-메서드는 세그먼트 sha 로 따로 잠근다(G2).
+손대지 않기로 한 LTV 메서드는 세그먼트 sha 로 잠근다(G2). 8영역 + `scheduler.py` 파일
+내용 sha 는 정본 `test_cycle222a3_ast_followup_fixes.py::_APPROVED_CONTENT_SHA` 한 곳에만
+둔다(cycle419 — 이 파일의 G1 파일 핀·디렉터리 목록 핀·정확 줄 수 핀은 걷었다).
 
 ## 왜 `ast.dump` 의 sha 를 핀하지 않는가
 
@@ -25,33 +25,17 @@
 잡는다(cycle259 S4b). bare `git diff HEAD` 는 커밋 직후 공허해지고 다음 편집에서 무조건
 RED 가 된다(cycle240 A11b · cycle252 G-252-5b). 소스 스캔은 `Path(...).rglob("*.py")` + AST.
 
-## ⚠️ 사이클 한정 — **커밋 후 갱신/삭제 의무**
+## 핀의 자리
 
-`_BASE_SHA` 와 `_LTV_FROZEN_METHODS` 는 base `686cdb4` 의 blob 을 고정한 것이라 cycle286 의
-무접촉 증거로만 유효하다. 그 파일들을 **정당하게** 바꾸는 다음 사이클이 이 dict 를 갱신하거나
-이 테스트를 삭제한다(고아 가드 방지).
-
-⚠️ dict 이름을 `*_CONTENT_SHA` 로 **짓지 않았다** — `tests/unit/ast/test_cycle223g3_ast_guard_sees_staged.py`
-의 `test_g3_9a` 가 모듈 레벨 `*_CONTENT_SHA` dict 를 가진 테스트 파일 집합을
-`_PIN_GUARD_FILES`(4개)와 정확히 일치하도록 고정하고 있다. cycle274/278/282 관례대로
-`_BASE_SHA` 를 쓴다.
-
-## Green 이 함께 해야 하는 핀 갱신 12곳 (이 파일 밖)
-
-`order_engine.py` 내용 sha 7곳(자매 4곳 = `test_g3_9b` 계약상 **넷 전부 같은 값**) +
-LTV 파일 내용 sha 3곳 + LTV `check_buy_signal` 세그먼트 4곳. 세그먼트 4곳은
-**해소 불가능한 매듭**이다 — cycle274 `test_c18_3`(= `_STRATEGY_PINS` 를 현재값으로 재핀)과
-cycle276 `test_c6_4a`(= `_STRATEGY_PINS` 를 cycle272 값으로 고정)가 동시에 성립할 수 없다.
-자문 권고 = 청산·수량 2핀은 불변 유지, `check_buy_signal` 엔트리는 cycle274 방향으로
-재핀하고 cycle276 의 해당 항목을 자기소멸 규약(cycle223 헤더 TODO 선례)으로 은퇴.
-**그 은퇴 결정은 메인 세션이 내린다.**
+`_LTV_FROZEN_METHODS` 는 LTV 메서드 세그먼트 sha 로 이 파일의 내용 계약이다 — 그 메서드를
+정당하게 바꾸는 사이클이 값을 옮긴다. `scheduler.py` 라인 **상한**(`< 3,900`, cycle257)은
+G1b 가 계속 복창한다.
 """
 
 from __future__ import annotations
 
 import ast
 import hashlib
-import os
 from datetime import datetime, time, timedelta
 from pathlib import Path
 
@@ -61,113 +45,6 @@ pytestmark = pytest.mark.unit
 
 _ROOT = Path(__file__).resolve().parents[3]
 
-#: 이 사이클이 정당하게 바꾸는 두 파일 — `_BASE_SHA` 에서 의도적으로 제외한다.
-_CHANGED = (
-    "src/engine/strategies/long_tail_volatility.py",
-    "src/engine/order_engine.py",
-)
-
-#: base `686cdb4` blob 의 파일 내용 sha256. **두 변경 파일은 없다**(G1c).
-_BASE_SHA = {
-    # 8영역 — 엔진 4파일 (order_engine 은 승인된 변경 대상이라 제외)
-    "src/engine/risk.py":
-        "a2187b8270446379988d24dfbe39b902d6ab37b112d4b6ce7330ee171434e222",
-    "src/engine/session.py":
-        "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
-    # 🔁 cycle302(2026-09-18) 재핀 — 사용자 승인 일봉 backfill **대상** 확대
-    #    (분기에서 지수 소속 판정 제거 · `vcp_universe_tickers` 집합 소멸.
-    #    목표 깊이 상수는 불변). 값만 옮긴다 — 단언은 그대로다.
-    #    구 값은 cycle299 기준선(3b7366cc…)이다.
-    # 🔁 2026-09-25 (cycle363 F-1) 재핀 — `_scan_pool_eager_refresh_loop` upsert 전 기존 raw 머지(사이클 176 basics 경로 답습, 사용자 승인 8영역). 장전 0값 키(acml_tr_pbmn 등)가 raw 통째 교체로 지워지던 결함 시정. 나머지 7영역 diff 0.
-    # 🔁 cycle380(2026-09-27) 재핀 — ETF 판정을 이름 키워드에서 증권그룹코드(`scty_grp_id_cd`)로 전환(사용자 승인, 8영역). ETF_KEYWORDS 를 정본 leaf `src/engine/etf_like.py` 로 이전 + import, `scan_stocks` 판정 자리를 `is_etf_like` 로 교체. 값만 이동, 값 자체는 유일값.
-    # 🔁 cycle417(2026-10-09) 재핀 — cycle417 사용자 승인 10-09 — 일봉 증분 적재 구멍(증분 분기 창 확대 + 구멍 판정 1회 호출). 나머지 7영역 diff 0.
-    "src/engine/scanner.py":
-        "b570762dfd92df49471dab261d44ecd364d376300ffe9e2f5b7ac19cceb9efcc",
-    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). 8영역 `update_weights` 의 enabled 대입 한 줄(섀도 전략은 비중 0 이어도 켜짐 유지). 값만 이동.
-    "src/engine/strategy_registry.py":
-        "3b6366c3cdb6e83907428435b95611880f1b8223e572c361a1cad2d00b13a067",
-    # 8영역 — 주문 API
-    "src/api/order.py":
-        "08c5cafd7b8678ec0d0fa85f856fdea3cce38ad92488c6d74c03cd13faa415bb",
-    # 8영역 — realtime 전부
-    "src/realtime/__init__.py":
-        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    # 🔁 cycle368(2026-09-25) 재핀 — 장운영정보 칸 밀림 수정 세트. USER DECISION: 칸
-    #    기준점 판별(`parse_market_op_payload` 단일 판별자)을 handler 에도 적용해
-    #    handler 가 더 이상 `payload.split` 을 직접 하지 않고 파싱된
-    #    `event.mkop_cls_code` 를 쓴다. MAIN-SESSION DECISION(적대적 검토 뒤, 사용자
-    #    승인 범위 안): 두 import(`parse_market_op_payload`·`record_market_op_event`)를
-    #    각자의 try 안에 둔다 — HEAD 도 이미 import 를 (하나의) try 안에 두어 보드
-    #    콜백은 원래도 안전했고, 이번 변경은 그 try 를 파싱/기록 둘로 나눠 한쪽이
-    #    깨져도 다른 쪽 결과가 살아남게 한 것이지 없던 보호를 처음 넣은 게 아니다.
-    #    docstring 을 현재 계약만 서술하도록 다시 썼다(세션 행위 영향은 AB1 조건부
-    #    라는 서술 포함). 그 밖 로직 무변경. 직전 값 =
-    #    `37b1755210c83cdb2a462e6a37f919b326f8b48bee73d924adcc277d770a8d17`.
-    # 🔁 cycle374(2026-09-27) 재핀 — 접수 전문(`CNTG_YN=1`) INFO `[order_notice]` + 거부 WARNING `[order_rejected_notice]` 기록 추가(사용자 승인, 8영역). 콜백/상태 변경 0 — 체결(`CNTG_YN=2`) 경로는 byte 동일. 직전 값 = `cc8af0de831e98d79f558d0c56f1360ce5ee5438ec59f23dbe79ca6725d472bc`.
-    "src/realtime/handler.py":
-        "e1a484e9ac82d43f0fa85cba693ea5a206ecfbae1076dfee0f4e6bf6d4f2a2d4",
-    "src/realtime/websocket.py":
-        "d4c443bde2ed7aeafba3e9471db0ca4efc15a654610555435145a9b305150c5b",
-    "src/realtime/websocket_pool.py":
-        "8b02442bcf5f558d6f7095b47d2016f004e3746e07ddc91dae8768b1dd46a10d",
-    # 8영역 — auth 전부
-    "src/auth/__init__.py":
-        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "src/auth/hashkey.py":
-        "7c2aacc703839bdc274b463ee48777006504d70e4d59a1e57120ac5b612396d2",
-    # 🔁 cycle296(2026-09-17) 재핀 — 사용자 승인 `issue()` 매니저 단위 in-flight 합류(`src/auth/**`). 같은 값을 10곳 동시 갱신했다.
-    "src/auth/token.py":
-        "4125c271b4147e59922f4f000e523429fb4bbef37058dc754fd92b9475ec58f1",
-    # 8영역은 아니지만 이 사이클이 무접촉을 약속한 파일
-    # 🔁 cycle364(2026-09-26) 재핀 — 저녁 A1 미리보기(`prepare(as_of=)`) 도입(사용자 승인 D3).
-    # 🔁 cycle369 R2 재핀 — buy-block 게이트(`_status_buy_blocked` 승격) + STATUS_EXIT Signal + Q7 edge-baseline clear 배선(전략 7파일은 무변경, 배선은 이 파일)
-    # 🔁 cycle382 리뷰 재핀(값만) — `_market_unit_tally_roll` 을 `tally.date != day`
-    # 에서 `tally.date < day`(더 늦은 날짜에서만 롤)로 시정(§8, 사용자 승인 범위 밖 무접촉).
-    # 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27). 게이트 2번째 문장 + 헬퍼 4개 + `__init__` cap 1개 추가. 값만 이동.
-    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). 섀도 관문 `_shadow_buy_intercepted` + 정적 판정 `shadow_mode_on` + 마커 헬퍼 2개 + `__init__` cap 1개 + `SHADOW_MODE_KEY` 상수. 값만 이동.
-    # 🔁 cycle403 재핀 — ETF 추세 전략(etf_trend) 신설. `_MULTIDAY_STRATEGIES` frozenset 에 "etf_trend" 추가. 값만 이동.
-    "src/engine/strategy_base.py":
-        "f4c2c5619fb3b2f70fa0b4faab0fd38d55c83d0b9370c986c97de4f564430822",
-    # 나머지 전략 6파일 (LTV 만 변경 대상) — 🔁 cycle290(킬스위치 등재, 2026-09-13)
-    # 재핀. `DEFAULT_PARAMS` 말미 2키 추가뿐.
-    # 🔁 cycle364 재핀 — `prepare(as_of=)` 시그니처 확장(+ donchian·kojiro PV-1, vcp P3).
-    # 🔁 cycle364 round 2 — PV-1 BFB·VCP 확대 + keep/skip 분리(R1).
-    "src/engine/strategies/__init__.py":
-        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
-    "src/engine/strategies/bull_flag_breakout.py":
-        "879d85e779f9594ffbd9da93ce3ec41986f02abc78cc751cb22d022c20b0f298",
-    # cycle403 — ETF 추세 전략(etf_trend) 신설 — 새로 생긴 파일을 이 시점 sha 로 고정한다.
-    "src/engine/strategies/etf_trend.py":
-        "31776865ec1c206df7f61020966fa2e21be17e39939f1c9e443557834f54c318",
-    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
-    # 🔁 cycle405 재핀 — 깡토식 청산·사이징 개조(donchian_swing.py 전면 재작성, DEFAULT_PARAMS 7키 추가 + 값 3개 변경 포함).
-    # 🔁 cycle405 재핀 2 — 독립 검토 반영(L6): `_kk_design_lot` 에 R ≥ 0.5×가격이면 0 반환 가드 추가.
-    "src/engine/strategies/donchian_swing.py":
-        "c8c7172e8e33fa164e2d11c30641562e8ab2d6474e7a84f241320bf2fbab58f3",
-    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
-    "src/engine/strategies/kojiro.py":
-        "1d04d3d6dc0c72ff6c7e7d930be9da63f2408fb709e889906a133a9c5480fc74",
-    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
-    "src/engine/strategies/momentum.py":
-        "686171e29ac365e8ea66f7659f2e02962f58bbac9d9ab9545095c7b3544bb403",
-    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
-    "src/engine/strategies/vcp_breakout.py":
-        "9a53b5b6d9a5dcf96966b168291640df6b258daf059f03e4cdd5b12324589706",
-    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
-    "src/engine/strategies/volatility_breakout.py":
-        "c07e7298743496129601e79598b799472242d2f02b60eb2f92217b6bed1ee1b4",
-}
-
-#: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
-_PINNED_DIRS = ("src/realtime", "src/auth", "src/engine/strategies")
-
-#: `scheduler.py` 정확 라인 수 (cycle276 `test_c5_2` · cycle283 실측).
-#: ⚠️ cycle292(2026-09-14) 가 `_subscribe_market_operation_tickers` 176줄을
-#: 신규 leaf `src/engine/market_op_subscribe.py` 로 추출해(행위 변경 0 · 5줄
-#: 위임 wrapper) 3,897 → 3,726 이 됐다. 값만 옮긴다 — 정확 핀을 상한 핀으로
-#: 완화하면 cycle286 의 무접촉 대리 지표가 사라진다.
-_SCHEDULER_LINES = 3737  # cycle409 재핀 +1 — 사용자 결정 10-04 Q1·Q4 매일 자동 대사 task 배선. 직전 3736 = cycle408-L1
 #: cycle257 이 세운 영구 상한 (종전 표기 4,000 은 느슨한 쪽이라 폐기 — 두 수가 갈라지면
 #: 항상 **더 조인 쪽**이 정본이다).
 _SCHEDULER_LINE_CAP = 3900
@@ -199,10 +76,6 @@ _BOARD_LITERALS = frozenset(
 # ---------------------------------------------------------------------------
 # 공통 헬퍼
 # ---------------------------------------------------------------------------
-def _content_sha(rel: str) -> str:
-    return hashlib.sha256((_ROOT / rel).read_bytes()).hexdigest()
-
-
 def _class_body(rel: str, cls_name: str):
     src = (_ROOT / rel).read_text(encoding="utf-8")
     tree = ast.parse(src)
@@ -228,70 +101,19 @@ def _method_sha(rel: str, cls_name: str, method: str) -> str:
 
 
 # ===========================================================================
-# G1 — 두 파일 외 프로덕션 코드 diff 0
+# G1 — `scheduler.py` 라인 상한
 # ===========================================================================
-@pytest.mark.parametrize("rel", sorted(_BASE_SHA))
-def test_g1_untouched_files_are_byte_identical(rel: str) -> None:
-    """G1 — 8영역(order_engine 제외)·strategy_base·전략 6파일 **diff 0**.
+def test_g1b_scheduler_line_count_is_under_cap() -> None:
+    """G1 — `scheduler.py` 라인 상한(cycle257 영구 상한 **< 3,900**).
 
-    이 중 한 파일이라도 바뀌면 "cycle286 은 두 파일만 바꾼다" 가 더 이상 참이 아니고,
-    별도 승인(8영역 승인 + `domain-consult` 선행)이 필요하다.
-    """
-    path = _ROOT / rel
-    assert path.exists(), f"{rel} 이 사라졌다 — 무접촉 계약 위반"
-    got = _content_sha(rel)
-    assert got == _BASE_SHA[rel], (
-        f"{rel} 이 base(686cdb4) 에서 바뀌었다 — {got} != {_BASE_SHA[rel]}. "
-        "cycle286 의 프로덕션 범위는 LTV + order_engine 두 파일뿐이다"
-    )
-
-
-def test_g1b_scheduler_line_count_is_exact_and_under_cap() -> None:
-    """G1 — `scheduler.py` 무접촉의 대리 지표 = 정확 라인 수 + 영구 상한.
-
-    cycle257 이 세운 상한 **< 3,900** 이 정본이고 자매 가드 7곳이 복창한다. 종전 표기
-    `< 4,000` 은 느슨한 쪽이라 폐기 — 두 수가 갈라지면 항상 **더 조인 쪽**이 정본이다.
+    두 수가 갈라지면 항상 **더 조인 쪽**이 정본이다. 정확 줄 수 핀은 cycle419 에서 걷었다 —
+    「무접촉」 은 정본 승인 도장(`test_cycle222a3_ast_followup_fixes.py::_APPROVED_CONTENT_SHA`)이
+    파일 내용 sha 로 잰다.
     """
     n = len((_ROOT / "src/engine/scheduler.py").read_text(encoding="utf-8").splitlines())
     assert n < _SCHEDULER_LINE_CAP, (
         f"`scheduler.py` 가 {n}L — cycle257 영구 상한 {_SCHEDULER_LINE_CAP} 위반"
     )
-    assert n == _SCHEDULER_LINES, (
-        f"`scheduler.py` 가 {n}L 로 바뀌었다 (기대 {_SCHEDULER_LINES}L) — "
-        "cycle286 은 scheduler 무접촉이다"
-    )
-
-
-@pytest.mark.parametrize("rel_dir", _PINNED_DIRS)
-def test_g1c_no_new_files_slip_into_pinned_dirs(rel_dir: str) -> None:
-    """G1 — 잠근 디렉터리에 **새 .py 가 생기는 것**도 접촉이다.
-
-    `src/engine/strategies/` 는 cycle282 `test_h3b` 도 잠그고 있어 leaf 분리가 불가능하다
-    — C2-a 의 컷 헬퍼는 **LTV 파일 안**에 둔다.
-    """
-    found = {
-        str(p.relative_to(_ROOT)).replace(os.sep, "/")
-        for p in (_ROOT / rel_dir).rglob("*.py")
-    }
-    pinned = {rel for rel in _BASE_SHA if rel.startswith(rel_dir + "/")}
-    pinned |= {rel for rel in _CHANGED if rel.startswith(rel_dir + "/")}
-    assert found == pinned, (
-        f"{rel_dir}: 신규 {sorted(found - pinned)} / 삭제 {sorted(pinned - found)} — "
-        "무접촉 영역의 파일 구성이 바뀌었다"
-    )
-
-
-def test_g1d_changed_files_are_excluded_from_the_pin_on_purpose() -> None:
-    """G1 — 이 사이클의 변경 대상 두 파일은 `_BASE_SHA` 에 **없다**.
-
-    있으면 정당한 변경이 이 가드에 막혀 Green 이 "핀을 재산출하지 마라" 문구를 만나고,
-    그 문구가 승인된 변경을 되돌리도록 오도한다(cycle263 실측 사고 계열).
-    """
-    for rel in _CHANGED:
-        assert (_ROOT / rel).exists(), f"{rel} 이 없다 — 변경 대상 경로 오류"
-        assert rel not in _BASE_SHA, (
-            f"{rel} 이 무접촉 핀 목록 안이다 — 범위 설계 오류"
-        )
 
 
 # ===========================================================================
@@ -491,9 +313,8 @@ def test_g3_4_cycle229_targets_does_not_gain_ltv() -> None:
 def test_g4_1_ttl_axis_and_classifier_modules_exist_untouched(rel: str) -> None:
     """G4 — TTL 축·거부 분류기·세션 표는 이 사이클의 접촉 대상이 아니다.
 
-    ⚠️ `sell_rejection.py`/`balance.py` 는 내용 sha 로 잠그지 않는다 — 이 사이클이 두
-    파일을 바꿀 이유가 없다는 사실은 `_CHANGED` 목록이 이미 말하고, 그 목록을
-    `test_g1d` 가 고정한다. 여기서는 **경로 존재 + 판정 함수 시그니처**만 확인해
+    ⚠️ `sell_rejection.py`/`balance.py` 는 내용 sha 로 잠그지 않는다. 여기서는
+    **경로 존재 + 판정 함수 시그니처**만 확인해
     "판정을 이쪽으로 옮겼다" 는 은밀한 이동을 막는다.
     """
     assert (_ROOT / rel).exists(), f"{rel} 이 사라졌다"

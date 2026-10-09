@@ -22,7 +22,7 @@
 
 | ID | §12 | 잠그는 것 |
 |----|-----|-----------|
-| A1~A2 | G-294-12/13 | 금지 파일 byte 동일 · `scheduler.py` 3,726L · 앞 두 사이클 미회귀 |
+| A2 | G-294-12 | `scheduler.py` 영구 라인 상한 3,900 미만 · 앞 두 사이클 미회귀 (8영역·scheduler 파일 sha 는 정본 `test_cycle222a3::_APPROVED_CONTENT_SHA` 한 곳 — cycle419) |
 | A3~A7 | G-294-1/2 | 시각축 leaf 존재·순수 · **시각 리터럴 0건** · `get_market_table` 공개 API · `match_kind` 질의 · **통합 반환 0건** |
 | A8~A10 | §1-E | `_resolve_channel` 합성 · `_classify_channel` byte 동일 · `now` 주입구 |
 | A11~A15 | 🔴 G-294-6 | **매수 축 코호트** — 게이트가 채널이 아니라 코호트를 읽는다 |
@@ -204,158 +204,8 @@ def _num_constants(src: str) -> list:
 
 
 # ===========================================================================
-# A1 (G-294-13) — 금지 파일 sha (착수 시점 = cycle292+293 워크트리, 2026-09-14)
+# A2 (G-294-12) — `scheduler.py` 라인 상한 · 앞 두 사이클 미회귀
 # ===========================================================================
-#: 접촉 **허용** = 8영역 4파일(`scanner.py`·`risk.py`·`websocket.py`·
-#: `websocket_pool.py`) + 8영역 밖 보조(`stale_watcher_core`·`tick_channel_mode`·
-#: `db/system_config`·`routes/realtime`) + 신규 leaf 2파일.
-#: 승인받은 5파일 중 `order_engine.py` 는 **쓰지 않는다**(§10-A) — 아래 별도 핀.
-_BASE_SHA: dict[str, str] = {
-    # 8영역 — 미승인
-    "src/engine/session.py":
-        "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
-    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). 8영역 `update_weights` 의 enabled 대입 한 줄(섀도 전략은 비중 0 이어도 켜짐 유지). 값만 이동.
-    "src/engine/strategy_registry.py":
-        "3b6366c3cdb6e83907428435b95611880f1b8223e572c361a1cad2d00b13a067",
-    "src/api/order.py":
-        "08c5cafd7b8678ec0d0fa85f856fdea3cce38ad92488c6d74c03cd13faa415bb",
-    "src/auth/__init__.py":
-        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "src/auth/hashkey.py":
-        "7c2aacc703839bdc274b463ee48777006504d70e4d59a1e57120ac5b612396d2",
-    # 🔁 cycle296(2026-09-17) 재핀 — 사용자 승인 `issue()` 매니저 단위 in-flight 합류(`src/auth/**`). 같은 값을 10곳 동시 갱신했다.
-    "src/auth/token.py":
-        "4125c271b4147e59922f4f000e523429fb4bbef37058dc754fd92b9475ec58f1",
-    # 🔴 `handler.py` = N-4. tr_id 를 `_handle_tick` 에 넘기는 근본 시정은
-    #    미승인 8영역이라 이 사이클 밖이다(이중 채널 **금지**로만 닫는다).
-    # 🔁 cycle368(2026-09-25) 재핀 — 장운영정보 칸 밀림 수정 세트. USER DECISION: 칸
-    #    기준점 판별(`parse_market_op_payload` 단일 판별자)을 handler 에도 적용해
-    #    handler 가 더 이상 `payload.split` 을 직접 하지 않고 파싱된
-    #    `event.mkop_cls_code` 를 쓴다. MAIN-SESSION DECISION(적대적 검토 뒤, 사용자
-    #    승인 범위 안): 두 import(`parse_market_op_payload`·`record_market_op_event`)를
-    #    각자의 try 안에 둔다 — HEAD 도 이미 import 를 (하나의) try 안에 두어 보드
-    #    콜백은 원래도 안전했고, 이번 변경은 그 try 를 파싱/기록 둘로 나눠 한쪽이
-    #    깨져도 다른 쪽 결과가 살아남게 한 것이지 없던 보호를 처음 넣은 게 아니다.
-    #    docstring 을 현재 계약만 서술하도록 다시 썼다(세션 행위 영향은 AB1 조건부
-    #    라는 서술 포함). 그 밖 로직 무변경. 직전 값 =
-    #    `37b1755210c83cdb2a462e6a37f919b326f8b48bee73d924adcc277d770a8d17`.
-    # 🔁 cycle374(2026-09-27) 재핀 — 접수 전문(`CNTG_YN=1`) INFO `[order_notice]` + 거부 WARNING `[order_rejected_notice]` 기록 추가(사용자 승인, 8영역). 콜백/상태 변경 0 — 체결(`CNTG_YN=2`) 경로는 byte 동일. 직전 값 = `cc8af0de831e98d79f558d0c56f1360ce5ee5438ec59f23dbe79ca6725d472bc`.
-    "src/realtime/handler.py":
-        "e1a484e9ac82d43f0fa85cba693ea5a206ecfbae1076dfee0f4e6bf6d4f2a2d4",
-    "src/realtime/__init__.py":
-        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    # 🔴 `scheduler.py` 무접촉 (절대 규칙 7). `:1382`/`:2728` 두 줄은 §7-B
-    #    레거시 재라우팅이 흡수한다. 근본 시정(2줄 치환)은 결정 카드 D-4.
-    # 🔁 cycle364(2026-09-26) 재핀 — 저녁 A1 미리보기(`prepare(as_of=)`) 도입 + 저녁
-    # 캡처 본체 leaf 이관(전략 7파일 전부 + strategy_base + scheduler, 사용자 승인 D3).
-    # 🔁 cycle369 재핀 — 관리종목51·단기과열59 청산·매수차단 leaf 배선(값만 이동)
-    # 🔁 cycle408-L1 재핀 — 사용자 승인 10-04 8영역 관측 결함 해결: 09:30 자동 퍼널 캡처에 `protect_confirmed=True` 전달(+6줄, 값 없는 키워드 배선)
-    "src/engine/scheduler.py":
-        # 🔁 cycle409 재핀 — 사용자 결정 10-04 Q1·Q4: 매일 자동 대사 task 배선(leaf import · create_task 1줄 · cancel 목록 3곳, +1줄). 직전 값 = cycle408-L1 `2bacaa149ab6…`
-        "f53d41a11fe162f80e113c6ff48cf6d235581769be7979499c5782ff11d49646",
-    "src/engine/market_op_subscribe.py":
-        "7d58f9464c1ed35e4fa8706d801beb5a6b5c062d5a2941f0db6482d028d3d4ac",
-    # 전략 7파일 + 베이스 — 매매 행위 변경 0 의 구조적 증거
-    # 🔁 cycle369 R2 재핀 — buy-block 게이트(`_status_buy_blocked` 승격) + STATUS_EXIT Signal + Q7 edge-baseline clear 배선(전략 7파일은 무변경, 배선은 이 파일)
-    # 🔁 cycle382 리뷰 재핀(값만) — `_market_unit_tally_roll` 을 `tally.date != day`
-    # 에서 `tally.date < day`(더 늦은 날짜에서만 롤)로 시정(§8, 사용자 승인 범위 밖 무접촉).
-    # 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27). 게이트 2번째 문장 + 헬퍼 4개 + `__init__` cap 1개 추가. 값만 이동.
-    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). 섀도 관문 `_shadow_buy_intercepted` + 정적 판정 `shadow_mode_on` + 마커 헬퍼 2개 + `__init__` cap 1개 + `SHADOW_MODE_KEY` 상수. 값만 이동.
-    # 🔁 cycle403 재핀 — ETF 추세 전략(etf_trend) 신설. `_MULTIDAY_STRATEGIES` frozenset 에 "etf_trend" 추가. 값만 이동.
-    "src/engine/strategy_base.py":
-        "f4c2c5619fb3b2f70fa0b4faab0fd38d55c83d0b9370c986c97de4f564430822",
-    "src/engine/strategies/__init__.py":
-        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
-    "src/engine/strategies/bull_flag_breakout.py":
-        "879d85e779f9594ffbd9da93ce3ec41986f02abc78cc751cb22d022c20b0f298",
-    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
-    # 🔁 cycle405 재핀 — 깡토식 청산·사이징 개조(donchian_swing.py 전면 재작성, DEFAULT_PARAMS 7키 추가 + 값 3개 변경 포함).
-    # 🔁 cycle405 재핀 2 — 독립 검토 반영(L6): `_kk_design_lot` 에 R ≥ 0.5×가격이면 0 반환 가드 추가.
-    "src/engine/strategies/donchian_swing.py":
-        "c8c7172e8e33fa164e2d11c30641562e8ab2d6474e7a84f241320bf2fbab58f3",
-    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
-    "src/engine/strategies/kojiro.py":
-        "1d04d3d6dc0c72ff6c7e7d930be9da63f2408fb709e889906a133a9c5480fc74",
-    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
-    "src/engine/strategies/long_tail_volatility.py":
-        "44f7f103b3c714522b09da7de5a4de2ec0423ffc2a3032f43540c4c70943778d",
-    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
-    "src/engine/strategies/momentum.py":
-        "686171e29ac365e8ea66f7659f2e02962f58bbac9d9ab9545095c7b3544bb403",
-    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
-    "src/engine/strategies/vcp_breakout.py":
-        "9a53b5b6d9a5dcf96966b168291640df6b258daf059f03e4cdd5b12324589706",
-    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). `DEFAULT_PARAMS` 에 `"shadow_mode": False` 1줄 + BUY 반환 앞 섀도 관문 1문장. 값만 이동.
-    "src/engine/strategies/volatility_breakout.py":
-        "c07e7298743496129601e79598b799472242d2f02b60eb2f92217b6bed1ee1b4",
-    # 파라미터 축 — 리졸버 5키는 `system_config` 다(§9-E). 전략 축으로 새지 않는다.
-    # 🔁 cycle365(2026-09-25) 재핀 — 사용자 승인 P5a·P5b:
-    # trailing_stop_rate 도움말에 적용 범위 명시 + max_scan_stocks range_src
-    # none→param_ranges 전환(PARAM_RANGES 상한 500→4000). 값 변경이 이 사이클의
-    # 정당한 목적이라 재핀했다.
-    # 🔁 cycle382 리뷰 재핀(값만) — `market_unit_mode` 「off」 선택지·도움말 텍스트
-    # 정정("계산·기록 없음" → "매수 수량·신호에 관여하지 않는다. 장세 계산·기록은
-    # 계속된다", prepare 가 off 에서도 `_refresh_market_unit` 을 부르는 실제 계약과 정합).
-    # 🔁 cycle384 재핀 — buy_paused 카탈로그 행 추가(사용자 결정 09-27) + `CATALOG_VERSION` cycle382.1→cycle384.1. 값만 이동.
-    # 🔁 cycle384 리뷰 재핀(값만) — `buy_paused` 도움말 두 문장 정정(WARNING 은
-    # 매일이 아니라 그 전략이 그날 매수를 평가한 날에만 남는다 + 키 부재는 INFO,
-    # 모양 오류만 WARNING) + 그룹 헤더 주석 카운트 정정(entry 47→49·sizing_risk
-    # 8→9, 실제 `group=` 값 전수 재계산). 매매 행위·값 변경 없음 — 주석·도움말
-    # 텍스트만 바뀌었다.
-    # cycle390(2026-09-29) — `sizing_mode` 도움말 정정(보유 중 전환 시 기보유분도 새 손절을 탄다).
-    # 도움말 텍스트만 바뀌었고 키·범위·값 무변경. 직전 값 = `7120d37ff2ab392c7f59519ede3c19cd80e9dea80db6ec3146de74dd575f4326`.
-    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). shadow_mode 카탈로그 행 + `CATALOG_VERSION` cycle384.1→cycle399.1 + 개수 주석(106·identity 19·진입 50). 값만 이동.
-    # 🔁 cycle403 재핀 — ETF 추세 전략(etf_trend) 신설. STRATEGY_IDS·_TURTLE_SIZED(옛 _TURTLE4)·applies_to·신규 키 13개 + CATALOG_VERSION cycle399.1→cycle403.1. 값만 이동.
-    # 🔁 cycle405 재핀 — donchian 깡토식 신규 키 7개 등록(PARAM_SPECS 추가 + CATALOG_VERSION).
-    "src/engine/param_catalog.py":
-        "d1a8f10973942e56fec97acf8e64dd4bfb335818647cd33a435f8e53336a7463",
-    "src/engine/param_validation.py":
-        "b4c5c029800191523bcc511919d6de3774e9ab49ca2fc0a0558ee3907868ee17",
-    # 🔴 시각·거래소 표의 유일 정본 — 3단계는 이 표를 **읽기만** 한다(§1-A).
-    #    `_is_effective` 는 private 이고 `get_market_table(on_date)` 이 공개 API 다.
-    "src/engine/market_state.py":
-        "7cef2efeb55a7184391ac2cc447c90102fdd7ba507fd6e3834d24a8ad9ce006b",
-    # last-write-wins 거래량 기록기 — 이중 채널이면 비결정론이 된다(N-4).
-    "src/engine/tick_volume.py":
-        "457bd43d80e3cb46c64ae33cb6c1c5d0c12df54246c383bb3d81292d013ef267",
-}
-
-#: 승인은 받았지만 **쓰지 않는다**(§10-A) — 해제가 이미 `subscribed_tick_tr_id`
-#: (구독 사실)를 거치므로 3단계에 할 일이 없다. 붉어지면 "왜 필요해졌는가" 를
-#: 먼저 적고 나서 핀을 옮겨라.
-_PIN_APPROVED_BUT_UNUSED: dict[str, str] = {
-    # 🔁 2026-09-25 (cycle358) 재핀 — 카드 D(관측 전용). PARTIAL/CANCELLED UPDATE
-    # `affected==0` 무흔적에 `[trade_status_update_miss]` WARNING 추가(사용자 승인,
-    # 워크리스트 ⑨). 매매·상태전이 로직 무변경.
-    # 🔁 2026-09-27 (cycle385 B7) 재핀 — 매도 판정 주문/보유 두 축 분리 + J-2 재주문
-    # 직전 보유 재조회 + J-1 주석 정정. 사용자 승인(8영역). 계속 미사용(§10-A).
-    # 🔁 2026-09-28 (cycle385 부록 R4) 재핀 — 4차 검토 결정: 「안 걸렸다」 판정 한 곳
-    #    _sell_not_placed_reason(APBK0400 · 시장가 불가 · 장운영시간 외, D2) · 재주문
-    #    해제 로그 reject= 칸 · 조회 실패 걸린 것 없음 보류 문구 분리(D4). 사용자
-    #    승인(8영역), 나머지 7영역 diff 0.
-    "src/engine/order_engine.py":
-    # 🔁 2026-09-27 (cycle385 부록 R) 재핀 — 리뷰 반영: F-1(재대조 스냅샷·통보 차감
-    #    멱등 크레딧) · F-2(manual 라우트 주문의 잔여 재주문은 보유와 무관하게
-    #    `remaining` 을 쏜다 — `_manual_sell_orders` 표식) · F-3(잠금 중 판매
-    #    가능분은 판다) + docstring/이름캐시 보존/뮤턴트 회귀. 나머지 7영역 diff 0.
-    # 🔁 2026-09-27 (cycle385 부록 R2) 재핀 — 2차 검토 반영: _selling 주인 규칙(R-3)
-    #    제거(B7 해제 의미 복귀) · 재주문이 안 걸리면 _selling 해제(H5) · F-3 이 걸린
-    #    외부 체결 통보를 먼저 뺀다(H3) · 종목 크레딧 누적(H2) · 주문 조회 2초 상한·
-    #    환경별 쪽 크기(H6·H7) · 동결 보유가 닫히면 동결 해제. 사용자 승인(8영역),
-    #    나머지 7영역 diff 0.
-    # 🔁 2026-09-28 (cycle385 부록 R3) 재핀 — 3차 검토 반영: 원장 시작 전 접수 주문은
-    #    pending 에서 빼고 그 재대조 크레딧에 상한(K1) · 걸린 것 없는 보류 문구
-    #    분리 · 재주문 거부는 APBK0400 만 해제(K2) · 동결이면 손님 manual 재주문
-    #    거부도 해제(K3). 사용자 승인(8영역), 나머지 7영역 diff 0.
-    # 🔁 2026-10-02 (cycle392) 재핀 — 다건 체결통보 매도의 장부 손익·가격을 주문 누적(증분
-    #    합·체결 가중평균)으로 기록. 사용자 승인(8영역, 결정 4), 나머지 7영역 diff 0.
-    # 🔁 2026-10-02 (cycle396) 재핀 — cycle396 사용자 요청(10-02) 가중평균가 절사: 매도 장부
-    #    가격을 원 단위 내림 int 로(`_vwap_2dp`→`_vwap_floor`). 사용자 승인(8영역), 나머지 7영역 diff 0.
-        # 🔁 cycle409 재핀 — 사용자 결정 10-04 Q4 8영역 승인: 매도 PENDING 에 주문가(`order_price`) 전달 — 모듈 함수 `_sell_order_price`(never-raise, await 0) + 매도 래퍼 `order_unpr` 키워드 + 주·폴백 호출 각 1줄. 발사·매핑·send_qty·재시도·_selling 흐름 불변, 나머지 7영역 diff 0. 직전 값 = cycle408-L3 `a6d677259fe7…`
-        "08c479841352fb579f767c109de3e8f901d1c27bdce705b39b5ba6556fc0b3e1",
-}
-
 #: cycle293 착지 값(= cycle294 **착수 시점**) — 기록용이다. 이 두 파일은 이 사이클의
 #: 접촉 대상이라 byte 동일 핀을 걸 수 없고, "되돌리지 않았다" 는 `test_a2b` 의 내용
 #: 핀과 `test_a2c` 의 `_classify_channel` 세그먼트 sha 가 지킨다.
@@ -374,46 +224,16 @@ _CLASSIFY_CHANNEL_SEGMENT_SHA = (
     "9e36c8a54ce695c73f104dcd3342477fe9d9b3593f63c1916a3acdc08538be99"
 )
 
-_SCHEDULER_LINES = 3737  # cycle409 재핀 +1 — 사용자 결정 10-04 Q1·Q4 매일 자동 대사 task 배선. 직전 3736 = cycle408-L1
+#: cycle257 이 세운 `scheduler.py` 영구 상한.
 _SCHEDULER_LINE_CAP = 3900
 
 
-@pytest.mark.parametrize("rel", sorted(_BASE_SHA))
-def test_a1_forbidden_files_are_byte_identical(rel: str) -> None:
-    """A1 (G-294-13) — 금지 파일이 착수 시점과 byte 동일하다.
-
-    붉어지면 핀을 옮기지 말고 **변경을 되돌려라.**
-    """
-    got = _sha(_src(rel))
-    assert got == _BASE_SHA[rel], (
-        f"{rel} 가 바뀌었다 — cycle294 접촉 허용 밖이다(§10-A). 현재 sha={got}"
-    )
-
-
-@pytest.mark.parametrize("rel", sorted(_PIN_APPROVED_BUT_UNUSED))
-def test_a1b_approved_but_unused_file_stays_untouched(rel: str) -> None:
-    """A1b (§10-A) — `order_engine.py` 는 승인 5파일 중 **유일하게 diff 0** 이다.
-
-    해제 경로가 이미 `scanner.subscribed_tick_tr_id`(구독 **사실**)를 읽으므로
-    (`order_engine.py:1952` 부근) 채널이 시각축으로 갈려도 해제는 스스로
-    맞는다. 승인은 "필요하면 써도 된다" 이지 "쓴다" 가 아니다.
-    """
-    got = _sha(_src(rel))
-    assert got == _PIN_APPROVED_BUT_UNUSED[rel], (
-        f"{rel} 가 바뀌었다 — §10-A 는 diff 0 을 선언했다. 현재 sha={got}"
-    )
-
-
 def test_a2_scheduler_untouched_line_count() -> None:
-    """A2 (G-294-12 · 절대 규칙 7) — `scheduler.py` 라인 수 정확 일치.
+    """A2 (G-294-12 · 절대 규칙 7) — `scheduler.py` cycle257 영구 상한(3,900 미만).
 
-    cycle292 가 3,897→3,726 으로 만든 여유 171줄은 이 사이클의 예산이 아니다.
-    `:1382`/`:2728` 의 통합 구독 2곳은 `websocket.py` 재라우팅이 흡수한다.
+    통합 구독 2곳은 `websocket.py` 재라우팅이 흡수한다(scheduler 무접촉 — 정본 승인 도장).
     """
     lines = len(_src("src/engine/scheduler.py").splitlines())
-    assert lines == _SCHEDULER_LINES, (
-        f"scheduler.py = {lines}L (착수 시점 {_SCHEDULER_LINES}L) — 무접촉 계약 위반"
-    )
     assert lines < _SCHEDULER_LINE_CAP
 
 

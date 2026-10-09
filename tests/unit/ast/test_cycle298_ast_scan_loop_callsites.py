@@ -254,15 +254,15 @@ def test_g298_6_scheduler_line_cap() -> None:
 
 
 # ---------------------------------------------------------------------------
-# G-298-7 — 자매 핀 동기: scheduler.py 를 고치면 **전부** 같은 값으로 옮긴다
+# G-298-7 — `scheduler.py` 핀은 **정본 한 곳**에만 있다 (다시 흩어지지 않는다)
 #
-#   `scheduler.py` 는 8영역이 아니지만 지난 10 사이클이 "무접촉" 대리 지표로
-#   ① 파일 내용 sha ② 정확 라인 수를 **21곳**에 흩어 핀해 두었다. cycle292 주석의
-#   경고가 정본이다 — "한 곳만 넣으면 나머지가 '코드를 되돌려라' 로 붉어져 승인된
-#   변경을 되돌리도록 오도한다".
-#
-#   이 가드는 그 21곳을 한 번에 세어 **하나의 실패 메시지**로 만든다. 값을 느슨하게
-#   고치는 것이 아니라, 재핀을 빠뜨린 자리를 이름으로 지목하는 것이 목적이다.
+#   `scheduler.py` 는 8영역이 아니지만 라인 상한 때문에 같은 승인 대상이다. 지난 사이클들이
+#   「무접촉」 대리 지표로 ① 파일 내용 sha ② 정확 라인 수를 21곳에 흩어 핀해 두었고, 한 곳만
+#   고치면 나머지가 「코드를 되돌려라」 로 붉어져 승인된 변경을 되돌리도록 오도했다(cycle292).
+#   cycle419 가 그 핀들을 정본 `test_cycle222a3_ast_followup_fixes.py::_APPROVED_CONTENT_SHA`
+#   한 곳으로 모았다. 이 가드는 그 상태를 지킨다 — 다른 테스트 파일에 `scheduler.py` 파일 sha
+#   dict 항목이나 정확 라인 수 단언(`lines == N` · `_SCHEDULER_LINES = N`)이 다시 생기면 붉다.
+#   라인 **상한**(`lines < 3900`)은 정확 핀이 아니라 여기 해당하지 않는다.
 # ---------------------------------------------------------------------------
 def _collect_scheduler_pins() -> tuple[dict[str, str], dict[str, int]]:
     sha_pins: dict[str, str] = {}
@@ -316,23 +316,16 @@ def _collect_scheduler_pins() -> tuple[dict[str, str], dict[str, int]]:
     return sha_pins, line_pins
 
 
-def test_g298_7_sibling_scheduler_pins_agree_with_the_file() -> None:
-    actual_sha = hashlib.sha256(_SCHED.read_bytes()).hexdigest()
-    actual_lines = len(_SCHED.read_text(encoding="utf-8").splitlines())
+def test_g298_7_scheduler_pins_live_only_in_the_canonical_registry() -> None:
     sha_pins, line_pins = _collect_scheduler_pins()
-
-    assert sha_pins, "G-298-7 자기검증 실패 — `scheduler.py` 내용 sha 핀을 한 곳도 못 찾았다"
-    assert line_pins, "G-298-7 자기검증 실패 — `scheduler.py` 라인 수 핀을 한 곳도 못 찾았다"
-
-    stale_sha = {k: v for k, v in sha_pins.items() if v != actual_sha}
-    stale_lines = {k: v for k, v in line_pins.items() if v != actual_lines}
-
-    assert not stale_sha and not stale_lines, (
-        "G-298-7 위반 — `scheduler.py` 무접촉 대리 핀이 파일과 어긋난다.\n"
-        f"  실측 sha={actual_sha}\n"
-        f"  실측 라인={actual_lines}\n"
-        f"  낡은 sha 핀 {len(stale_sha)}곳: {sorted(stale_sha)}\n"
-        f"  낡은 라인 핀 {len(stale_lines)}곳: {sorted(stale_lines)}\n"
-        "cycle292 선례대로 **전부 한 값으로 동시에** 옮긴다 — 한 곳만 고치면 나머지가 "
-        "'코드를 되돌려라' 로 붉어져 승인된 변경을 되돌리도록 오도한다."
+    assert not sha_pins and not line_pins, (
+        "G-298-7 위반 — `scheduler.py` 파일 sha 핀·정확 라인 수 핀이 정본 밖에 다시 생겼다.\n"
+        f"  sha 핀 {sorted(sha_pins)}\n"
+        f"  라인 핀 {sorted(line_pins)}\n"
+        "정본 `test_cycle222a3_ast_followup_fixes.py::_APPROVED_CONTENT_SHA` 한 곳에만 둔다 — "
+        "흩어 두면 scheduler 를 한 줄 고칠 때 재핀 자리가 여럿이 된다(cycle292·cycle419)."
     )
+    from tests.unit.ast.test_cycle222a3_ast_followup_fixes import _APPROVED_CONTENT_SHA
+
+    pinned, _reason = _APPROVED_CONTENT_SHA[_SCHED_REL]
+    assert len(pinned) == 64, "정본에 `scheduler.py` 승인 도장이 없다"
