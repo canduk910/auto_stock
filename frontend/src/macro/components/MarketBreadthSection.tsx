@@ -3,8 +3,10 @@ import {
   Bar,
   CartesianGrid,
   ComposedChart,
+  LabelList,
   Legend,
   Line,
+  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -14,6 +16,7 @@ import LoadingSpinner from "./LoadingSpinner"
 import ErrorAlert from "./ErrorAlert"
 import { formatKstDateTime } from "../../utils/kst"
 import { breadthAxisMax, buildBreadthChartRows, formatUpRatio, mmdd } from "../marketBreadthChart"
+import type { BreadthChartRow } from "../marketBreadthChart"
 import type { BreadthMarketKey, MarketBreadthData } from "../../types/market-breadth"
 
 // cycle416 — 매크로 6번째 섹션 「시장 등락 통계」(KRX 공개 API 일별 매매정보 집계, 관찰 전용).
@@ -41,6 +44,64 @@ const COLUMNS: { key: ColumnKey; label: string; colorClass?: string }[] = [
   { key: "limit_down", label: "하한가", colorClass: BLUE_CLASS },
   { key: "no_trade", label: "거래 없음" },
 ]
+
+// 검증 결함(screens#1·trader#4) — 기본 <Tooltip/> 은 하락을 음수로("하락 : -625"), 비율을 "%" 없이
+// 보여준다. 명세 §6.2-4 「날짜 · 상승 n(상한가 m) · 하락 n(하한가 m) · 보합 · 거래 없음 · 상승 비율 %」를
+// 그대로 그리는 커스텀 툴팁으로 바꾼다.
+function BreadthTooltip({ active, payload }: { active?: boolean; payload?: { payload: BreadthChartRow }[] }) {
+  if (!active || !payload || payload.length === 0) return null
+  const row = payload[0].payload
+  return (
+    <div className="rounded-lg border bg-white px-3 py-2 text-xs shadow-sm">
+      <div className="mb-1 font-medium text-gray-700">{row.label}</div>
+      <div className={RED_CLASS}>
+        상승 {row.up.toLocaleString()}
+        {row.limit_up > 0 ? `(상한가 ${row.limit_up.toLocaleString()})` : ""}
+      </div>
+      <div className={BLUE_CLASS}>
+        하락 {Math.abs(row.down).toLocaleString()}
+        {row.limit_down > 0 ? `(하한가 ${row.limit_down.toLocaleString()})` : ""}
+      </div>
+      <div className="text-gray-600">보합 {row.flat.toLocaleString()}</div>
+      <div className="text-gray-600">거래 없음 {row.no_trade.toLocaleString()}</div>
+      <div className="text-gray-600">상승 비율 {formatUpRatio(row.up_ratio_pct == null ? null : row.up_ratio_pct / 100)}</div>
+    </div>
+  )
+}
+
+// recharts `LabelList` 의 `content` 콜백 타입은 패키지 안에서만 쓰이는 제네릭이라 여기서
+// 그대로 흉내 내지 않는다 — 실제로 넘어오는 필드(x·y·width·height·value)만 느슨하게 받는다.
+const num = (v: unknown): number => (v == null ? 0 : Number(v))
+
+// 검증 결함(trader#5) — 상한가·하한가 막대 라벨. 0 이면 아무것도 그리지 않는다(명세 §6.2-4).
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function LimitUpLabel(props: any) {
+  const x = num(props?.x)
+  const y = num(props?.y)
+  const width = num(props?.width)
+  const value = props?.value as number | string | undefined
+  if (!value) return null
+  return (
+    <text x={x + width / 2} y={y - 4} textAnchor="middle" fontSize={10} fill="var(--color-red-700)">
+      {value}
+    </text>
+  )
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function LimitDownLabel(props: any) {
+  const x = num(props?.x)
+  const y = num(props?.y)
+  const width = num(props?.width)
+  const height = num(props?.height)
+  const value = props?.value as number | string | undefined
+  if (!value) return null
+  return (
+    <text x={x + width / 2} y={y + height + 10} textAnchor="middle" fontSize={10} fill="var(--color-blue-700)">
+      {value}
+    </text>
+  )
+}
 
 interface MarketBreadthSectionProps {
   data: MarketBreadthData | null
@@ -133,37 +194,55 @@ function BreadthBody({
         </div>
       </div>
 
+      {showMissing && (
+        <div
+          data-testid="breadth-missing"
+          className="mb-3 rounded border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-800"
+        >
+          {data.missing_dates.length}일 자료를 받지 못했습니다: {data.missing_dates.map(mmdd).join(', ')} — 잠시 뒤 새로 고치면 채워질 수 있습니다
+        </div>
+      )}
+
       <div data-testid="breadth-chart" data-market={market} className="h-64 mb-2">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={chartRows}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--color-gray-200)" />
             <XAxis dataKey="label" fontSize={12} />
-            <YAxis yAxisId="count" domain={[-axisMax, axisMax]} fontSize={12} />
-            <YAxis yAxisId="ratio" orientation="right" domain={[0, 100]} fontSize={12} hide />
-            <Tooltip />
+            <YAxis
+              yAxisId="count"
+              domain={[-axisMax, axisMax]}
+              fontSize={12}
+              tickFormatter={(v: number) => Math.abs(v).toLocaleString()}
+            />
+            <YAxis
+              yAxisId="ratio"
+              orientation="right"
+              domain={[0, 100]}
+              ticks={[0, 50, 100]}
+              tickFormatter={(v: number) => `${v}%`}
+              fontSize={12}
+            />
+            <ReferenceLine yAxisId="ratio" y={50} stroke="var(--color-gray-400)" strokeDasharray="3 3" />
+            <Tooltip content={<BreadthTooltip />} />
             <Legend />
-            <Bar yAxisId="count" dataKey="up" name="상승" fill="var(--color-red-500)" />
-            <Bar yAxisId="count" dataKey="down" name="하락" fill="var(--color-blue-500)" />
+            <Bar yAxisId="count" dataKey="up" name="상승" fill="var(--color-red-500)">
+              <LabelList dataKey="limit_up" content={LimitUpLabel} />
+            </Bar>
+            <Bar yAxisId="count" dataKey="down" name="하락" fill="var(--color-blue-500)">
+              <LabelList dataKey="limit_down" content={LimitDownLabel} />
+            </Bar>
             <Line
               yAxisId="ratio"
               dataKey="up_ratio_pct"
               name="상승 비율"
               stroke="var(--color-gray-700)"
-              dot={false}
+              dot={{ r: 2, fill: "var(--color-gray-700)" }}
               connectNulls={false}
             />
           </ComposedChart>
         </ResponsiveContainer>
       </div>
 
-      {showMissing && (
-        <div
-          data-testid="breadth-missing"
-          className="mb-3 rounded border border-yellow-300 bg-yellow-50 p-3 text-sm text-yellow-800"
-        >
-          {data.missing_dates.length}일 자료를 받지 못했습니다: {data.missing_dates.map(mmdd).join(', ')}
-        </div>
-      )}
       {showShort && (
         <div data-testid="breadth-short" className="mb-3 text-sm text-gray-500">
           요청한 영업일을 다 채우지 못해 {data.window.n_days}일뿐 보여드립니다
@@ -171,7 +250,7 @@ function BreadthBody({
       )}
       {data.pending_date && (
         <div data-testid="breadth-pending" className="mb-3 text-sm text-gray-500">
-          {mmdd(data.pending_date)} 자료는 아직 KRX 에 올라오지 않았습니다 — 다음 영업일 10시 이후 반영됩니다
+          {mmdd(data.pending_date)} 자료는 아직 KRX 에 올라오지 않았습니다(보통 다음 날 아침 8시쯤 — 휴장일이었다면 그대로 빠집니다)
         </div>
       )}
 
@@ -233,7 +312,10 @@ function BreadthBody({
       </div>
 
       <p data-testid="breadth-footnote" className="mt-2 text-xs text-gray-500">
-        ADR 참고선 — 하단 {data.adr_reference.oversold} · 상단 {data.adr_reference.overheated}(보조 지표, 단독 판단 기준 아님)
+        ADR = 기간 상승 종목 수 합 ÷ 하락 종목 수 합 × 100. 업계 통상 기준선 {data.adr_reference.oversold} 이하
+        침체권 · {data.adr_reference.overheated} 이상 과열권(보조 지표, 단독 판단 기준 아님). 이 화면 방식의 과거
+        20일 ADR 중앙값(2020-10~2025-10): 코스피 92 · 코스닥 88 · 합계 89. 상한가·하한가는 그날 ±30% 가격제한폭
+        값에 닫힌 종목(신규상장일·정리매매 제외), 거래 없음은 거래량 0 종목.
       </p>
     </div>
   )

@@ -275,7 +275,9 @@ _BASE_SHA = {
 # `db/trade_history.py`(buy_trade_ids/sell_trade_ids)·`engine/te_metrics.py`(net 판정)·
 # `routes/{performance,history,strategies,balance,costs}.py` 도 바뀌었으나 전부 기존 파일
 # (신규 파일 1개뿐). 8영역·scheduler.py 무접촉(`test_cycle411_ast_scope.py`).
-_SRC_TREE_FILES = 179  # 직전 = 트랙 C — 실비용 사후 대사: 신규 4파일(`api/trade_profit.py`·`db/trade_cost.py`·`engine/trade_cost.py`·`routes/costs.py`) 로 171 → 175. 직전 = cycle404 — 계좌 묶음 배정 기록(단계 0): 신규 leaf
+_SRC_TREE_FILES = 181  # cycle416(매크로 시장 등락 통계) — 신규 leaf `engine/market_breadth.py` +
+# 신규 라우트 `routes/market_breadth.py` 2파일로 179 → 181. 8영역·scheduler.py 무접촉
+# (`test_cycle416_ast_market_breadth.py`). 직전 = 트랙 C — 실비용 사후 대사: 신규 4파일(`api/trade_profit.py`·`db/trade_cost.py`·`engine/trade_cost.py`·`routes/costs.py`) 로 171 → 175. 직전 = cycle404 — 계좌 묶음 배정 기록(단계 0): 신규 leaf
 # `src/engine/account_cluster.py` 하나로 170 → 171. `src/db/system_config.py` 에
 # `get_account_cluster_mode_raw()` 1함수 추가(신규 파일 아님). 직전 값 = 170(cycle403).
 #: ⚠️ 값은 **cycle285 적대 검증 반영** 기준선이다. 그 직전(초판 cycle285 배포)
@@ -809,8 +811,15 @@ _SRC_TREE_FILES = 179  # 직전 = 트랙 C — 실비용 사후 대사: 신규 4
 # cycle412 G1(거래일지 1a, 사용자 결정 E1b) — `routes/balance.py` 에 `GET /exit-lines`
 # 핸들러 + 5초 캐시 + `_exit_lines_*` 헬퍼를 더했다. 신규/삭제 파일 0 — 파일 수 179 그대로.
 # 직전 값(cycle411 3차 LOW 보완) = `3c2a9773bc7aedf0ad83acf234923e5ba90ac224508ddfcc2ba61b3a055aed5b`.
+# cycle416(매크로 시장 등락 통계) — 신규 leaf `engine/market_breadth.py` + 신규 라우트
+# `routes/market_breadth.py`(+ `main.py` 등록 2줄) 로 파일 수 179 → **181**. KRX 공개 API
+# 전용 — KIS·8영역·scheduler.py 무접촉(`test_cycle416_ast_market_breadth.py`). 직전 값
+# (cycle412 G1) = `edcd6038ac6bcc6c977b1e17cef42bbcb6400275ea7502ca2f19476b0256b266`.
+# cycle416 검증 지적 반영(LOW suites#1) — `routes/market_breadth.py::_store_cache` 에
+# `[market_breadth_permanent_empty]` WARNING 1줄 추가(관찰 전용, KIS·8영역 무접촉). 파일
+# 수 181 그대로. 직전 값 = `d5a6267ffaf8ac87fef47900fb85a03ce35f5ba7f5f3dc7d1e2aeaeb446b6821`.
 _SRC_TREE_DIGEST = (
-    "edcd6038ac6bcc6c977b1e17cef42bbcb6400275ea7502ca2f19476b0256b266"
+    "2d6407b84173cdf45adfda9cc4cfd36216756d1d93fc0f15ba2cfd1e6167bc6d"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
@@ -848,7 +857,8 @@ _PINNED_DIR_FILE_COUNTS = {
     # cycle409(사용자 결정 10-04 Q1·Q4) — 신규 leaf `trade_cost_reconcile_task.py`(매일 자동 대사 훅) 로 91 → 92.
     # cycle410(사용자 결정 10-05) — 신규 leaf `market_regime_label.py`(6장세 라벨, 관찰 전용) 로 92 → 93.
     # cycle411(실비용 합치기, 사용자 결정 10-08) — 신규 leaf `cost_overlay.py` 로 93 → 94.
-    "src/engine": 94,
+    # cycle416(매크로 시장 등락 통계) — 신규 leaf `market_breadth.py` 로 94 → 95.
+    "src/engine": 95,
 }
 
 #: `scheduler.py` 정확 라인 수 + cycle257 영구 상한.

@@ -1025,7 +1025,7 @@ export async function installApiMocks(page: Page, opts: MockOptions = {}) {
           from: "2026-10-06",
           to: "2026-10-08",
           n_days: 3,
-          requested: 20,
+          requested: 3,
           complete: true,
           lookback_from: "2026-08-30",
         },

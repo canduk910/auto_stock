@@ -55,9 +55,12 @@ export function buildBreadthChartRows(days: BreadthDay[], market: BreadthMarketK
   })
 }
 
-const NICE_STEPS = [1, 2, 5, 10]
+// cycle416 검증 결함(screens#4) — 1/2/5/10 만으로는 올림 간격이 최대 2배까지 벌어져
+// (예: raw=2,140 → 5,000, 막대가 축의 43%만 쓴다) 중간 계단(1.2/1.5/2.5/4/6/8)을 더해
+// 가장 큰 막대도 축의 80% 이상을 쓰게 좁힌다.
+const NICE_STEPS = [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10]
 
-/** `raw` 이상이면서 "보기 좋은 수"(1/2/5/10 × 10^n)로 올림. `raw<=0` 이면 고정 기본값. */
+/** `raw` 이상이면서 "보기 좋은 수"(NICE_STEPS × 10^n)로 올림. `raw<=0` 이면 고정 기본값. */
 function niceCeil(raw: number): number {
   if (raw <= 0) return 10
   const exp = Math.floor(Math.log10(raw))

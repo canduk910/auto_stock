@@ -65,8 +65,14 @@ _ORDER_PATH_SHA = {
 }
 
 #: 기준 `272c76c1` 의 `src/**/*.py` 경로 목록(정렬, 개행 연결) sha 와 개수.
-_SRC_PY_COUNT = 182
-_SRC_PY_SET_SHA = "3d79f84854db3ce2f48f70502b9099a441fbefb9000e5766df472d4d0b2d1d37"
+#: 🔴 이 가드는 cycle412 병합 후에도 지워지지 않고 남아 있었다(고아 가드 — 파일 docstring의
+#: "병합 후 삭제" 가 지켜지지 않은 사례). cycle416(매크로 시장 등락 통계)이 신규 2파일
+#: (`engine/market_breadth.py`·`routes/market_breadth.py`) 로 182 → **184** 가 된 것을 보고
+#: 값만 옮긴다 — 삭제는 샌드박스의 비가역 파일 삭제 차단에 걸려 이 사이클에서 못 했다.
+#: 이 파일은 더 이상 "cycle412 무접촉 증거" 가 아니라 평범한 src 파일 집합 핀이 됐으니,
+#: 다음에 손대는 사람이 지우거나 cycle287/290/291 가드와 합치는 것이 맞다.
+_SRC_PY_COUNT = 184
+_SRC_PY_SET_SHA = "7972545ddf052270027462e8deaf4af0c904f1dd4bea151cf690e796452cdfd1"
 
 
 #: 기준 `272c76c1` 의 `supabase/migrations/*.sql` 46개 — (이름, 내용 sha) 연쇄 digest.
