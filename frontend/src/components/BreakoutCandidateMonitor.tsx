@@ -5,6 +5,7 @@
 import { useMemo } from 'react'
 import type { BreakoutDiagTarget, StrategyInfo, TickerPrice } from '../types/trading'
 import { strategyLabel } from '../utils/strategyMeta'
+import { formatKstHHMM, kstTodayISO } from '../utils/kst'
 import ScrollPane from './ScrollPane'
 
 function num(v: unknown, dflt: number): number {
@@ -18,15 +19,11 @@ function signColor(v: number | null): string {
   return v > 0 ? 'text-red-600 font-medium' : 'text-blue-600 font-medium'
 }
 
-// KST 기준 오늘 날짜 문자열 (YYYY-MM-DD) — cooldown_until(date) 비교용.
-function kstTodayStr(): string {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Seoul' }).format(new Date())
-}
-
 // cooldown_until 까지 남은 일수. 파싱 실패 시 null (배지는 "쿨다운" 로 폴백).
+// cycle414(§2.10) — KST 오늘 날짜는 `utils/kst.ts::kstTodayISO` 단일 진실원에 위임한다.
 function daysUntil(cooldownUntil?: string | null): number | null {
   if (!cooldownUntil) return null
-  const todayMs = Date.parse(`${kstTodayStr()}T00:00:00Z`)
+  const todayMs = Date.parse(`${kstTodayISO()}T00:00:00Z`)
   const untilMs = Date.parse(`${cooldownUntil}T00:00:00Z`)
   if (Number.isNaN(todayMs) || Number.isNaN(untilMs)) return null
   return Math.max(0, Math.round((untilMs - todayMs) / 86_400_000))
@@ -69,11 +66,12 @@ function computeStatus(t: BreakoutDiagTarget, subscribed: boolean, isBfb: boolea
   return { label: '대기', cls: 'bg-gray-100 text-gray-500' }
 }
 
-/** 현재 KST 시각을 `HH:MM` 로. 브라우저 로컬타임 추출 금지 규약 — `Intl` 명시. */
+/**
+ * 현재 KST 시각을 `HH:MM` 로. cycle414(§2.10) — 자체 Intl 대신 `utils/kst.ts::formatKstHHMM`
+ * 에 위임한다(브라우저 로컬타임 추출 금지 규약은 그 단일 진실원이 지킨다).
+ */
 export function kstNowHhmm(now: Date = new Date()): string {
-  return new Intl.DateTimeFormat('en-GB', {
-    timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit', hour12: false,
-  }).format(now)
+  return formatKstHHMM(now.toISOString())
 }
 
 /**

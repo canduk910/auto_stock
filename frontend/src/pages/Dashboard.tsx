@@ -1,8 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useTradingStatus } from '../contexts/TradingStatusContext'
 import { getStrategyColor } from '../types/strategy'
 import { STRATEGY_INFO, ALL_STRATEGIES_INFO } from '../utils/strategyInfo'
 import { strategyLabel } from '../utils/strategyMeta'
+import { getStrategiesMonitor } from '../api/strategies'
+import { getExitLines } from '../api/balance'
+import { getRecentFunnel } from '../api/strategy-funnel'
 import ControlPanel from '../components/ControlPanel'
 import MarketRegimeCard from '../components/MarketRegimeCard'
 import MarketRegimeLabelCard from '../components/MarketRegimeLabelCard'
@@ -13,7 +17,14 @@ import OrderMonitor from '../components/OrderMonitor'
 import PerformanceCard from '../components/PerformanceCard'
 import ProfitChart from '../components/ProfitChart'
 import BalanceTable from '../components/BalanceTable'
+import StrategyMonitor from '../components/StrategyMonitor'
+import StrategySummaryTable from '../components/StrategySummaryTable'
+import { extractDailyFinalCounts } from './StrategyFunnel'
 // 사이클 6 (2026-05-17): LogViewer 는 /logs 메뉴로 분리됨. Dashboard 하단 제거.
+
+// cycle414 — 전략별 진행상황(§2.1): 「전체」 탭은 요약표, 전략 탭은 상세 패널. 고지로는
+// 기존 ScanMonitor 내 KojiroMonitor 가 이미 그리므로 중복 렌더를 피해 여기서는 건너뛴다.
+const RECENT_FUNNEL_DAYS = 14
 
 export default function Dashboard() {
   const [selectedStrategy, setSelectedStrategy] = useState<string>('all')
@@ -24,6 +35,30 @@ export default function Dashboard() {
 
   const strategies = status?.strategies ?? {}
   const strategyKeys = Object.keys(strategies)
+
+  // cycle414 §2.10 — 10초 폴링(탭 무관, 캐시 가벼움). 실패해도 null 폴백(status 데이터로 그린다).
+  const monitorQuery = useQuery({
+    queryKey: ['strategies-monitor'],
+    queryFn: getStrategiesMonitor,
+    refetchInterval: 10_000,
+    retry: false,
+  })
+  const exitLinesQuery = useQuery({
+    queryKey: ['balance-exit-lines'],
+    queryFn: getExitLines,
+    refetchInterval: 10_000,
+    retry: false,
+  })
+  // 14일 추이는 전략 탭을 열 때만(고지로는 KojiroMonitor 전용 — 이번 범위 밖), 10분 캐시.
+  const showDetailPanel = selectedStrategy !== 'all' && selectedStrategy !== 'kojiro'
+  const recentFunnelQuery = useQuery({
+    queryKey: ['strategy-funnel-recent-panel', selectedStrategy],
+    queryFn: () => getRecentFunnel(selectedStrategy, RECENT_FUNNEL_DAYS),
+    enabled: showDetailPanel,
+    staleTime: 10 * 60_000,
+    retry: false,
+  })
+  const funnelTrend = recentFunnelQuery.data ? extractDailyFinalCounts(recentFunnelQuery.data.snapshots) : null
 
   useEffect(() => {
     if (!showTabTooltip) return
@@ -124,8 +159,34 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* cycle414 — 「전체」 탭 = 전략 요약표, 전략 탭 = 상세 패널(고지로는 아래 ScanMonitor 가 그린다). */}
+      {selectedStrategy === 'all' ? (
+        <StrategySummaryTable
+          strategies={strategies}
+          monitor={monitorQuery.data ?? null}
+          exitLines={exitLinesQuery.data?.items ?? null}
+          tickerPrices={status?.scan?.ticker_prices}
+          onSelect={setSelectedStrategy}
+        />
+      ) : showDetailPanel ? (
+        <StrategyMonitor
+          strategyId={selectedStrategy}
+          strategies={strategies}
+          monitor={monitorQuery.data ?? null}
+          exitLines={exitLinesQuery.data?.items ?? null}
+          tickerPrices={status?.scan?.ticker_prices}
+          tickerNames={status?.scan?.ticker_names}
+          subscribedTickers={status?.scan?.subscribed_tickers}
+          funnelTrend={funnelTrend}
+        />
+      ) : null}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ScanMonitor selectedStrategy={selectedStrategy} />
+        <ScanMonitor
+          selectedStrategy={selectedStrategy}
+          monitor={monitorQuery.data ?? null}
+          exitLines={exitLinesQuery.data?.items ?? null}
+        />
         <OrderMonitor selectedStrategy={selectedStrategy} />
       </div>
       <BalanceTable selectedStrategy={selectedStrategy} />
