@@ -809,8 +809,12 @@ _SRC_TREE_FILES = 179  # 직전 = 트랙 C — 실비용 사후 대사: 신규 4
 # cycle412 G1(거래일지 1a, 사용자 결정 E1b) — `routes/balance.py` 에 `GET /exit-lines`
 # 핸들러 + 5초 캐시 + `_exit_lines_*` 헬퍼를 더했다. 신규/삭제 파일 0 — 파일 수 179 그대로.
 # 직전 값(cycle411 3차 LOW 보완) = `3c2a9773bc7aedf0ad83acf234923e5ba90ac224508ddfcc2ba61b3a055aed5b`.
+# cycle414(전략별 진행상황 화면) — `routes/strategies.py` 에 읽기 전용 `GET /monitor`
+# 핸들러 + 2초 캐시 + `_monitor_*` 헬퍼를 더했다(8영역·전략 7파일·`strategy_base.py`
+# 무접촉). 신규/삭제 파일 0 — 파일 수 179 그대로. 직전 값(cycle412 G1) =
+# `edcd6038ac6bcc6c977b1e17cef42bbcb6400275ea7502ca2f19476b0256b266`.
 _SRC_TREE_DIGEST = (
-    "edcd6038ac6bcc6c977b1e17cef42bbcb6400275ea7502ca2f19476b0256b266"
+    "64a856bf2f734d6cb3e80ac1c42126c3080475efd9bc8d5648c342dc4cb805f7"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.
