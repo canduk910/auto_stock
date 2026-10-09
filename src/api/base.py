@@ -35,6 +35,22 @@ MAX_RETRIES = 3
 BACKOFF_BASE = 0.5  # 초
 BACKOFF_JITTER = 0.25  # thundering herd 완화
 
+# cycle428(F-422-1, 항목 4 — D2, 사용자 승인 2026-10-10) — 주문 경로는 「보냈을 수
+# 있는」 실패를 재시도하지 않는다. KIS 주문 POST 에는 중복을 막는 클라이언트 키가
+# 없어, 응답만 잃은 재시도가 같은 주문을 두 번 낼 수 있다(cycle327 「주문이 나간
+# 뒤의 실패로 재발사 금지」와 같은 원리를 전송 계층에서 막는다).
+_ORDER_RETRY_RESTRICTED_PATHS: frozenset[str] = frozenset({
+    "/uapi/domestic-stock/v1/trading/order-cash",
+    "/uapi/domestic-stock/v1/trading/order-rvsecncl",
+})
+# 서버에 닿지 않았다고 볼 수 있는 전송 예외만 재시도 — ReadTimeout·ReadError·
+# WriteError·RemoteProtocolError 는 요청이 서버에 도달했을 수 있어 첫 회에 바로
+# 올린다(호출자가 응답 없음을 「결과 모름」으로 다룬다, `src/engine/CLAUDE.md`
+# `order_engine.py` 절 「매도 결과 모름(UNKNOWN)」).
+_ORDER_RETRYABLE_TRANSPORT_ERRORS: tuple[type[Exception], ...] = (
+    httpx.ConnectError, httpx.ConnectTimeout, httpx.PoolTimeout,
+)
+
 # 사이클 181 (2026-06-28) — 토큰만료 분기 msg_cd 화이트리스트 (access token 3종)
 # token_manager.issue() 로 복구 가능한 코드만 포함.
 # EGW00120 (예수금부족 변형, "기간이 만료된 code") / EGW00124~126 (session_key) 제외.
@@ -559,7 +575,12 @@ async def _request(
                         )
                 if should_emit_warning:
                     _warn_http_status(status, attempt, MAX_RETRIES, path)
-                if attempt == MAX_RETRIES:
+                # cycle428(F-422-1 D2) — 주문 경로의 5xx 는 서버가 요청을 받았을
+                # 수 있어 재시도하지 않는다(첫 회에 바로 올린다).
+                _order_path_blocks_retry = (
+                    500 <= status < 600 and path in _ORDER_RETRY_RESTRICTED_PATHS
+                )
+                if attempt == MAX_RETRIES or _order_path_blocks_retry:
                     # PR-B 보강 (Copilot, 2026-05-14): 5xx 한정 — 영구 4xx 는
                     # exhausted 의미 아님 (retry 자체가 무의미한 클라이언트 에러).
                     if 500 <= status < 600:
@@ -589,7 +610,15 @@ async def _request(
                     path,
                     e,
                 )
-                if attempt == MAX_RETRIES:
+                # cycle428(F-422-1 D2) — 주문 경로는 「서버에 닿지 않음」이 보장된
+                # 전송 예외(ConnectError/ConnectTimeout/PoolTimeout)만 재시도한다.
+                # ReadTimeout·ReadError·WriteError·RemoteProtocolError 는 요청이
+                # 이미 서버에 도달했을 수 있어 첫 회에 바로 올린다.
+                _order_path_blocks_retry = (
+                    path in _ORDER_RETRY_RESTRICTED_PATHS
+                    and not isinstance(e, _ORDER_RETRYABLE_TRANSPORT_ERRORS)
+                )
+                if attempt == MAX_RETRIES or _order_path_blocks_retry:
                     # PR-B (2026-05-14): 최종 실패 카운터 + 영구 로그
                     _request_metrics["retry_exhausted"] += 1
                     try:

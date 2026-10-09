@@ -445,8 +445,9 @@ _APPROVED_CONTENT_SHA: dict[str, tuple[str, str]] = {
         "cycle330(2026-09-20) — 합류자 없는 토큰 발급 실패의 고아 Future 회수, 8영역 승인",
     ),
     "src/engine/order_engine.py": (
-        "2a371863ca55fc4a391345902359915c6d9b628f261669778d48a07ecb2d770a",
-        "cycle426 B4-5 사용자 승인 10-09 — 매도 마지막 실패 뒤처리 추출(행위 보존)",
+        "666e3f62de2e705e2d9f7bfbd7dee1cc80bb8f66030eb995c64e2e5f933cc830",
+        "cycle428 F-422-1 사용자 승인 2026-10-10 — 매도 결과 모름(UNKNOWN) 신설 "
+        "(폴백·1차 주문 비-KisApiError 는 재발사 대신 180초 뒤 단일 종목 확인 조회)",
     ),
     "src/engine/risk.py": (
         "a2187b8270446379988d24dfbe39b902d6ab37b112d4b6ce7330ee171434e222",
@@ -457,8 +458,9 @@ _APPROVED_CONTENT_SHA: dict[str, tuple[str, str]] = {
         "cycle417(2026-10-09) — 일봉 증분 적재 구멍 메우기(증분 창 확대 + 구멍 판정 1회), 8영역 승인",
     ),
     "src/engine/scheduler.py": (
-        "f53d41a11fe162f80e113c6ff48cf6d235581769be7979499c5782ff11d49646",
-        "cycle409(2026-10-04 Q1·Q4) — 매일 자동 대사 task 배선(+1줄), 승인",
+        "691b6387fb03eb3dce908951991e7ae048eb881143ce9fe0f17f20fd8d810550",
+        "cycle428 F-422-1 사용자 승인 2026-10-10 — 15:20 강제청산 종목별 try/except "
+        "(한 종목 예외가 루프를 끊지 않는다), 승인",
     ),
     "src/engine/session.py": (
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",

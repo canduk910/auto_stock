@@ -2013,8 +2013,17 @@ class TradingScheduler:
             await write_log("INFO", f"{strategy.config.name} 15:20 강제 청산 대상: {clear_tickers}")
             for ticker in clear_tickers:
                 if ticker in strategy.state.positions:
-                    await self.order_engine.execute_sell(ticker, resolve_force_clear_signal(strategy, ticker), sid)
-                    logger.info("%s 강제 청산: %s", strategy.config.name, t(ticker))
+                    # cycle428(F-422-1, 항목 3) — 종목 하나의 예상 밖 예외가 루프
+                    # 전체를 끊지 않는다. 그 종목은 재발사하지 않고 다음 종목으로
+                    # 진행한다(그날 15:30 `_scan_loop` 재기동·정산은 그대로 돈다).
+                    try:
+                        await self.order_engine.execute_sell(ticker, resolve_force_clear_signal(strategy, ticker), sid)
+                        logger.info("%s 강제 청산: %s", strategy.config.name, t(ticker))
+                    except Exception as exc:
+                        logger.error(
+                            "[force_clear_ticker_error] ticker=%s strategy=%s err=%r",
+                            ticker, sid, exc,
+                        )
 
     async def _preissue_all_tokens(self) -> None:
         """사이클 20 (2026-05-20) — 모든 매니저 토큰 사전 순차 발급.

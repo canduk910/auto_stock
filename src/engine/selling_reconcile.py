@@ -73,6 +73,34 @@ def reset_selling_hold_cap() -> None:
     _hold_cap = KstDailyEmitCap()
 
 
+# ---------------------------------------------------------------------------
+# cycle428(F-422-1) — 15분 재대조와 180초 단일 종목 확인이 공유하는 판정 규칙.
+# ---------------------------------------------------------------------------
+def _stale_selling_verdict(
+    *, held_qty: int, has_open_sell_order: bool, since, now_kst, min_age_s: float,
+) -> "str | None":
+    """stale `_selling` 유지 사유 — 「같은 3사유 판정」의 유일한 정본.
+
+    반환 = 유지 사유(``held_zero``/``open_order``/``too_young``) 또는 ``None``
+    (해제 — 보유 잔존 ∧ 열린 매도주문 없음 ∧ aged). 15분 전체 재대조
+    (`reconcile_stale_selling`)와 180초 단일 종목 확인
+    (`reconcile_selling_unknown_one`)이 이 함수 하나를 공유한다 — 규칙이
+    둘이 되면 안 된다(F-422-1 자문 지시).
+    """
+    if held_qty <= 0:
+        return "held_zero"
+    if has_open_sell_order:
+        return "open_order"
+    if since is not None:
+        try:
+            elapsed_s = (now_kst - since).total_seconds()
+        except Exception:
+            elapsed_s = 0.0
+        if elapsed_s < min_age_s:
+            return "too_young"
+    return None
+
+
 def _emit_hold(ticker: str, reason: str, elapsed_s: float, *, now: "datetime | None" = None) -> None:
     """유지 판정 관측 1행. **never-raise** — 호출부 자체 폭발(모의 포함)도 흡수한다."""
     try:
@@ -128,15 +156,15 @@ async def reconcile_stale_selling(order_engine, holdings, *, min_age_s: float, n
                 # 도달하지 않지만, 도달해도 관측용 값 하나만 0.0 으로 낙하시키고
                 # 판정(held/open_order/too_young/해제)은 그대로 진행한다.
                 elapsed_s = 0.0
-            if held_qty.get(tk, 0) <= 0:
-                _emit_hold(tk, "held_zero", elapsed_s, now=now_kst)
-                continue  # 보유 없음 — 정상 매도 진행/체결 가능성, 건드리지 않음
-            if tk in open_sell_tickers:
-                _emit_hold(tk, "open_order", elapsed_s, now=now_kst)
-                continue  # 열린 매도주문 존재 — double-sell 방지, 유지
-            if since is not None and elapsed_s < min_age_s:
-                _emit_hold(tk, "too_young", elapsed_s, now=now_kst)
-                continue  # 갓 접수된 매도 — KIS 전파 지연 레이스 방지
+            verdict = _stale_selling_verdict(
+                held_qty=held_qty.get(tk, 0),
+                has_open_sell_order=tk in open_sell_tickers,
+                since=since, now_kst=now_kst, min_age_s=min_age_s,
+            )
+            if verdict is not None:
+                _emit_hold(tk, verdict, elapsed_s, now=now_kst)
+                continue  # 유지 — held_zero(보유 없음)/open_order(double-sell 방지)/
+                # too_young(KIS 전파 지연 레이스 방지), 건드리지 않음
             order_engine._selling.discard(tk)
             order_engine._selling_since.pop(tk, None)
             logger.warning(
@@ -146,3 +174,85 @@ async def reconcile_stale_selling(order_engine, holdings, *, min_age_s: float, n
             await write_log("WARNING", f"[selling_reconcile] stale _selling 해제: {tk}")
     except Exception:
         logger.exception("stale _selling 재대조 실패 — graceful (다음 주기 재시도)")
+
+
+# ---------------------------------------------------------------------------
+# cycle428(F-422-1) — 매도 결과 모름(UNKNOWN) 단일 종목 확인 조회.
+# ---------------------------------------------------------------------------
+SELL_SEND_UNKNOWN_RESOLVED_MARKER = "[sell_send_unknown_resolved]"
+
+# 15분 재대조의 held_zero/open_order/too_young → 단일 종목 확인의 어휘(사용자안
+# 2 가 지정한 4값). 해제(verdict=None)는 `not_accepted`(주문이 접수되지 않았다
+# — 다음 틱 손절이 새 발사 1회로 재평가한다).
+_UNKNOWN_RESOLVE_RESULT_BY_VERDICT = {
+    None: "not_accepted",
+    "held_zero": "closed",
+    "open_order": "open_order",
+    "too_young": "too_young",
+}
+
+
+async def reconcile_selling_unknown_one(
+    order_engine, ticker: str, strategy_id: str, *,
+    min_age_s: float, now: "datetime | None" = None,
+) -> str:
+    """F-422-1 — 매도 결과 모름(UNKNOWN) 뒤 그 종목만 확인 조회한다.
+
+    `reconcile_stale_selling`(15분 전체 재대조)과 **같은 판정 규칙**
+    (`_stale_selling_verdict`)을 그 종목 하나에만 쓴다 — 조회는
+    `get_balance()`(그 종목 보유) + `get_daily_orders(pdno=ticker)`(그 종목
+    열린 매도주문)로 좁힌다.
+
+    반환 = ``not_accepted``(해제 — 주문이 접수되지 않은 것으로 판정, 다음 틱
+    손절이 새로 발사한다) / ``closed``(보유 0 — 유지, 15분 sync 가 정리) /
+    ``open_order``(열린 매도주문 있음 — 유지) / ``too_young``(아직 이르다 —
+    유지, 보통 180초 뒤 호출이라 드물다) / ``lookup_failed``(조회 실패 —
+    **기본값 = 유지**, 15분 `reconcile_stale_selling` 로 넘긴다).
+
+    never-raise — 조회·판정 중 예외는 `lookup_failed` 로 흡수한다(재발사보다
+    지연이 낫다, 자문 2026-10-10 「조회 실패의 기본값 = 유지」).
+    """
+    from src.api.balance import get_balance, get_daily_orders
+    from src.engine.scanner import KST_TZ as _KST
+
+    now_kst = now if now is not None else datetime.now(_KST)
+    try:
+        holdings, _summary = await get_balance()
+        held_qty = next((h.quantity for h in holdings if h.ticker == ticker), 0)
+        daily_orders = await get_daily_orders(pdno=ticker)
+        has_open_sell_order = any(
+            o.get("sll_buy_dvsn_cd") == "01" and int(o.get("rmn_qty", "0") or 0) > 0
+            for o in daily_orders
+        )
+    except Exception:
+        logger.debug(
+            "[sell_send_unknown_resolve] 확인 조회 실패 — 유지: %s", ticker, exc_info=True,
+        )
+        result = "lookup_failed"
+        logger.warning(
+            "%s ticker=%s strategy=%s result=%s",
+            SELL_SEND_UNKNOWN_RESOLVED_MARKER, ticker, strategy_id, result,
+        )
+        return result
+
+    since = order_engine._selling_since.get(ticker)
+    verdict = _stale_selling_verdict(
+        held_qty=held_qty, has_open_sell_order=has_open_sell_order,
+        since=since, now_kst=now_kst, min_age_s=min_age_s,
+    )
+    result = _UNKNOWN_RESOLVE_RESULT_BY_VERDICT[verdict]
+    if verdict is None:
+        # not_accepted — 180초가 지났는데도 보유>0 · 열린 주문 없음 =
+        # 폴백/1차 주문이 접수되지 않았다고 본다. 해제해 다음 틱 손절이
+        # 새로 발사(= 재발사가 아니라 새 발사)할 수 있게 한다.
+        order_engine._selling.discard(ticker)
+        order_engine._selling_since.pop(ticker, None)
+        logger.warning(
+            "매도 결과 모름 확인 — 접수 안 됨으로 판정, 해제 → on_tick 손절 재평가 "
+            "재개: %s", ticker,
+        )
+    logger.warning(
+        "%s ticker=%s strategy=%s result=%s",
+        SELL_SEND_UNKNOWN_RESOLVED_MARKER, ticker, strategy_id, result,
+    )
+    return result

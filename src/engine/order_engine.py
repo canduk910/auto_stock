@@ -437,18 +437,21 @@ class SellFallbackOutcome(Enum):
     떨어질지)은 호출부가 그대로 정한다(행위 보존 추출, 설계 =
     `_workspace/refactor/2026-10-09_execute_sell_baseline.md` §2.3).
 
-    🔴 비-`KisApiError` 예외(F-422-1, 고치지 않음)는 이 enum 으로 표현하지
-    않는다 — 그 경로는 `_handle_sell_market_disallowed` 밖으로, 결국
-    `execute_sell` 밖으로 그대로 전파된다(의도적 보존). 호출부가 이 메서드를
-    추가 `try` 로 감싸면 바깥 `except Exception` 이 받아 재발사가 된다
-    (「주문이 나간 뒤의 실패로 재발사 금지」, cycle327) — 호출 자리는 이미
-    들어와 있는 `except KisApiError as e:` 블록 안, 추가 `try` 없이 그대로
+    🔴 cycle428(F-422-1, 사용자 승인 2026-10-10) — 비-`KisApiError` 예외는 더 이상
+    전파되지 않는다. `UNKNOWN` 으로 표현하고 호출부는 (`NO_PRICE` 가 아니므로)
+    그대로 `return` 한다 — `_selling`·`_selling_since` 유지, 매핑·PENDING·TTL·
+    익일청산 등록은 전혀 하지 않는다(거부의 증거가 없다). 180초 뒤 그 종목만
+    확인 조회(`selling_reconcile.reconcile_selling_unknown_one`)를 1회 예약한다.
+    호출부가 이 메서드를 추가 `try` 로 감싸면 바깥 `except Exception` 이 받아
+    재발사가 된다(「주문이 나간 뒤의 실패로 재발사 금지」, cycle327) — 호출 자리는
+    이미 들어와 있는 `except KisApiError as e:` 블록 안, 추가 `try` 없이 그대로
     둔다.
     """
 
     SENT = "sent"          # 폴백 접수 성공 — 호출부는 return
     REJECTED = "rejected"  # 폴백도 KisApiError 로 거부 — 호출부는 return
     NO_PRICE = "no_price"  # 현재가 미확보 — 폴백 시도 못함, 일반 재시도로 낙하
+    UNKNOWN = "unknown"    # cycle428 — 폴백 발사 결과 모름(비-KisApiError) — 호출부는 return
 
 
 SELL_MAX_RETRIES = 3     # 매도 실패 시 최대 재시도 횟수
@@ -456,6 +459,11 @@ SELL_RETRY_DELAY = 1.0   # 재시도 간격(초)
 BUYABLE_CACHE_TTL = 60.0  # get_buyable 캐시 유효시간(초)
 BUY_BLOCK_DURATION = 900.0  # 잔고 부족 락 기본 지속(초) — 다음 잔고 sync(15분)와 정합
 LOW_FUNDS_COOLDOWN = 900.0  # per-ticker 매수 수량 0 cooldown — 잔고 sync(15분)와 동일 주기
+# cycle428(F-422-1) — 매도 결과 모름(UNKNOWN) 확인 조회 지연(초). 값은
+# `selling_reconcile.SELLING_RECONCILE_MIN_AGE_S`(15분 재대조 min_age)와 같다
+# (KIS 주문내역 반영 지연을 막는 그 기준을 그대로 쓴다) — import 로 묶지 않고
+# 값만 맞춘다(scheduler 소유 상수를 order_engine 이 참조하면 역방향 import).
+SELL_UNKNOWN_RECONCILE_DELAY_S = 180.0
 
 
 class OrderEngine:
@@ -2383,7 +2391,8 @@ class OrderEngine:
                     # 낙하는 재시도 = 재발사라, 폴백이 이미 나갔을 수 있는 결과를
                     # 그쪽으로 떨어뜨리면 「주문이 나간 뒤의 실패로 재발사 금지」를 깬다.
                     # SENT = 폴백 성공(_selling 은 체결통보에서 해제) · REJECTED =
-                    # positions/DB 보존, 다음 사이클 자연 재트리거.
+                    # positions/DB 보존, 다음 사이클 자연 재트리거 · UNKNOWN(cycle428) =
+                    # 접수됐는지 모름, `_selling` 유지 + 180초 뒤 확인 조회.
                     if outcome is not SellFallbackOutcome.NO_PRICE:
                         return
                     # NO_PRICE — 폴백을 시도조차 못함, 아래 일반 재시도로 낙하
@@ -2394,13 +2403,18 @@ class OrderEngine:
                 if attempt < SELL_MAX_RETRIES:
                     await asyncio.sleep(SELL_RETRY_DELAY * (2 ** (attempt - 1)))
             except Exception as e:
-                last_error = e
-                logger.warning(
-                    "매도 주문 실패 (시도 %d/%d): %s — %s",
-                    attempt, SELL_MAX_RETRIES, ticker, e,
+                # cycle428(F-422-1, 항목 5) — 1차(시장가/지정가) 주문의 비-`KisApiError`
+                # 예외는 "결과 모름" 이다. 응답만 유실됐을 수도 있어(실제 접수는 몰라),
+                # 재시도하면 이미 나간 주문 위에 또 쏘는 것과 같다(cycle327 금기).
+                # 그래서 더는 backoff + continue 하지 않는다 — `_selling` 유지 +
+                # `_selling_since` 갱신 + 180초 뒤 그 종목만 확인 조회 예약 후 return.
+                logger.error(
+                    "[sell_send_unknown] ticker=%s strategy=%s path=primary exc=%s",
+                    ticker, strategy_id, type(e).__name__,
                 )
-                if attempt < SELL_MAX_RETRIES:
-                    await asyncio.sleep(SELL_RETRY_DELAY * (2 ** (attempt - 1)))
+                self._selling_since[ticker] = datetime.now(_KST_TZ)
+                self._schedule_sell_unknown_reconcile(ticker, strategy_id)
+                return
 
         # 모든 시도 실패 — 뒤처리는 별도 메서드(B4-5, cycle426)로 넘긴다.
         await self._handle_sell_final_failure(
@@ -2482,6 +2496,48 @@ class OrderEngine:
         logger.critical(error_msg)
         await write_log("CRITICAL", error_msg)
 
+    def _schedule_sell_unknown_reconcile(self, ticker: str, strategy_id: str) -> None:
+        """cycle428(F-422-1) — 매도 결과 모름(UNKNOWN) 뒤 그 종목만 확인 조회를
+        `SELL_UNKNOWN_RECONCILE_DELAY_S`(180초) 뒤 1회 예약한다.
+
+        동기 · never-raise — `asyncio.create_task` 등록 실패(이벤트 루프 없음)는
+        DEBUG 흔적만 남기고 삼킨다(`_observe_after_exit_etp` 선례와 동일). 등록을
+        못 해도 15분 `selling_reconcile`(`scheduler._sync_positions_from_balance`)
+        이 결국 같은 종목을 본다 — 이 예약은 그 15분을 180초로 좁히는 보강일 뿐이다.
+        """
+        try:
+            asyncio.create_task(
+                self._sell_unknown_reconcile_after_delay(ticker, strategy_id)
+            )
+        except RuntimeError:
+            logger.debug(
+                "[sell_send_unknown_resolve] 확인 조회 task 등록 실패 — 이벤트 루프 없음: %s",
+                ticker, exc_info=True,
+            )
+
+    async def _sell_unknown_reconcile_after_delay(
+        self, ticker: str, strategy_id: str,
+    ) -> None:
+        """cycle428(F-422-1) — 180초 대기 후 단일 종목 확인 조회를 1회 실행한다.
+
+        `selling_reconcile.reconcile_selling_unknown_one` 은 자체적으로
+        never-raise(조회 실패 = 유지, `lookup_failed`)지만, 이 래퍼도 2차 방어로
+        한 번 더 흡수한다 — 예약된 백그라운드 task 의 미처리 예외는 아무도
+        기다리지 않아 조용히 사라지거나 `asyncio` 가 경고만 남기기 때문이다.
+        """
+        await asyncio.sleep(SELL_UNKNOWN_RECONCILE_DELAY_S)
+        try:
+            from src.engine.selling_reconcile import reconcile_selling_unknown_one
+            await reconcile_selling_unknown_one(
+                self, ticker, strategy_id,
+                min_age_s=SELL_UNKNOWN_RECONCILE_DELAY_S,
+            )
+        except Exception:
+            logger.debug(
+                "[sell_send_unknown_resolve] 확인 조회 실패 — 유지: %s",
+                ticker, exc_info=True,
+            )
+
     async def _handle_sell_market_disallowed(
         self,
         *,
@@ -2505,16 +2561,15 @@ class OrderEngine:
 
         🔴 **호출부는 이 메서드를 추가 `try` 로 감싸지 않는다.** 폴백
         `place_order`(아래)가 `KisApiError` 가 **아닌** 예외(전송 오류·타임아웃
-        등 — F-422-1, 이번 추출에서 고치지 않는다)를 내면 이 메서드 안의
-        `except KisApiError as fb_err:` 가 받지 못해 그대로 전파되고, 이미
-        들어와 있는 호출부의 `except KisApiError as e:` 도 비-`KisApiError`
-        예외를 못 받는다 — `execute_sell` 밖, 결국 `risk.on_tick` 그 틱 전체로
-        전파되는 것이 **지금 행위**다. 추가 `try/except Exception` 으로 감싸면
-        그 예외가 재시도 루프로 되돌아가 「주문이 나간 뒤의 실패로 재발사
-        금지」(cycle327)를 깬다 — 호출 자리는 그대로 둔다.
+        등)를 내면 **이 메서드 안의** 새 `except Exception as fb_unknown_err:`
+        가 받아 `UNKNOWN` 을 돌려준다(cycle428, F-422-1 — 전파하지 않는다).
+        추가 `try/except Exception` 으로 호출 자리를 또 감싸면 그 예외가
+        재시도 루프로 되돌아가 「주문이 나간 뒤의 실패로 재발사 금지」
+        (cycle327)를 깬다 — 잡는 자리는 이 메서드 **안**, 호출 자리는 그대로
+        둔다.
 
-        반환 = `SellFallbackOutcome` — `SENT`/`REJECTED` 는 호출부가 `return`,
-        `NO_PRICE` 는 호출부가 일반 재시도 로그 + backoff 로 낙하한다.
+        반환 = `SellFallbackOutcome` — `SENT`/`REJECTED`/`UNKNOWN` 은 호출부가
+        `return`, `NO_PRICE` 는 호출부가 일반 재시도 로그 + backoff 로 낙하한다.
         """
         _after_market_primary = primary_div is not OrderDivision.MARKET
         if _after_market_primary:
@@ -2682,6 +2737,21 @@ class OrderEngine:
                     ticker, strategy_id, _now_kst_fb,
                 )
             return SellFallbackOutcome.REJECTED
+        except Exception as fb_unknown_err:
+            # cycle428(F-422-1, 사용자 승인 2026-10-10 — 항목 1·2) — 폴백 `place_order`
+            # 가 `KisApiError` 가 아닌 예외(전송 오류·타임아웃)를 내면 "접수됐는지
+            # 모른다" 다. 재시도하면 이미 나갔을 주문 위에 또 쏘는 것과 같아서
+            # (cycle327 금기) 멈춘다 — 매핑·PENDING·TTL·익일청산 등록은 전혀
+            # 하지 않는다(거부의 증거가 없다). `_selling` 은 유지하고
+            # `_selling_since` 를 이 시각으로 갱신해 180초 뒤 그 종목만 확인
+            # 조회한다(`selling_reconcile.reconcile_selling_unknown_one`).
+            logger.error(
+                "[sell_send_unknown] ticker=%s strategy=%s path=fallback exc=%s",
+                ticker, strategy_id, type(fb_unknown_err).__name__,
+            )
+            self._selling_since[ticker] = datetime.now(_KST_TZ)
+            self._schedule_sell_unknown_reconcile(ticker, strategy_id)
+            return SellFallbackOutcome.UNKNOWN
 
     async def handle_execution_notice(
         self,

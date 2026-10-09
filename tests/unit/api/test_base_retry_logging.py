@@ -85,8 +85,13 @@ def reset_metrics_before():
     reset_request_metrics()
 
 
-_PATH = "/uapi/domestic-stock/v1/trading/order-cash"
-_TR_ID = "TTTC0012U"
+# cycle428(F-422-1 D2) — 이 파일은 **경로 무관** 재시도/관찰성 일반 계약을 다룬다.
+# 주문 경로(`order-cash`/`order-rvsecncl`)는 5xx·일부 전송 예외를 더는 재시도하지
+# 않는다(새 계약 = `tests/unit/api/test_cycle428_order_path_retry_restriction.py`).
+# 그 경로를 여기서 계속 쓰면 recovered(2회차 성공) 시나리오가 1회차에서 바로
+# raise 돼 깨진다 — 주문이 아닌 조회성 경로로 바꿔 둘을 분리한다.
+_PATH = "/uapi/domestic-stock/v1/trading/inquire-balance"
+_TR_ID = "TTTC8434R"
 
 
 # ---------------------------------------------------------------------------

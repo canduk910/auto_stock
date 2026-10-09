@@ -11,7 +11,7 @@ KIS OpenAPI REST 호출 모듈. 모든 호출은 `base.py` 공통 래퍼를 거�
 - 헤더(`TokenManager.build_headers`) = authorization · appkey · appsecret · `tr_id`(`settings.get_tr_id(tr_id)`, 「새 API 추가 절차」 3번) · custtype("P")
 - Rate Limit = `_rate_limit()` 초당 20건(시세 풀 공용) + `asyncio.Semaphore(20)` 동시 20건
 - 재시도 = HTTP 오류(4xx·5xx)·네트워크 오류를 `MAX_RETRIES=3` 회까지. 백오프 `BACKOFF_BASE=0.5s × 2^(attempt-1)` + jitter `0~BACKOFF_JITTER=0.25s`
-  - 🔴 **주문 POST 도 다시 보낸다** — 응답만 잃고 앞 전송이 접수됐을 수 있어, 전송 예외·5xx 는 「주문이 안 걸렸다」의 증거가 아니다(판정 = `src/engine/CLAUDE.md` 「매도 체결 — 주문 축과 보유 축」)
+  - 🔴 **주문 경로(`order-cash`·`order-rvsecncl`)는 D2(cycle428, F-422-1) 로 재시도 범위가 좁다** — `ConnectError`·`ConnectTimeout`·`PoolTimeout`(서버에 닿지 않은 것이 보장)만 재시도하고, `ReadTimeout`·`ReadError`·`WriteError`·`RemoteProtocolError`·5xx 는 첫 회에 바로 올린다(`_ORDER_RETRY_RESTRICTED_PATHS` + `_ORDER_RETRYABLE_TRANSPORT_ERRORS`) — 응답만 잃고 앞 전송이 서버에 닿았을 수 있는 실패를 재전송하면 같은 주문을 두 번 낼 수 있다(판정 = `src/engine/CLAUDE.md` 「매도 결과 모름(UNKNOWN)」). 🔴 **그 조회 경로는 무변경** — 5xx·모든 `RequestError` 를 여전히 `MAX_RETRIES=3` 까지 재시도한다. 4xx(영구 클라이언트 에러)는 경로 무관 변경 없음(원래도 `exhausted` 로 세지 않는다)
 - 토큰 만료 → `token_manager.issue()` 후 재시도(끝까지 실패 = `[api_retry_exhausted] last_status=token_expired`). 판정(`_request`·`_request_via_quote_pool` 공용) = `msg_cd ∈ _TOKEN_EXPIRED_MSG_CODES = {EGW00121, EGW00122, EGW00123}` 또는 (`"token" in msg1.lower()` ∧ `msg_cd ∉ _TOKEN_BRANCH_EXCLUDE_CODES = {EGW00120, APBK0919, APBK0918}` ∧ `"부족" not in msg1`)
   - 🔴 **`"만료" in msg1` 로 판정 금지** — `EGW00120`("기간이 만료된 code" = 예수금부족 변형, `is_insufficient_cash` 화이트리스트)을 토큰만료로 읽으면 `auth/token.py` `_ISSUE_GAP_SECS=61` 전역 직렬 락이 그리드락을 만들고 같은 주문 body 를 재전송한다(중복 체결)
   - session_key 코드 `EGW00124`~`EGW00126` 은 `issue()` 로 풀리지 않아 뺀다
