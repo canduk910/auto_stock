@@ -500,6 +500,68 @@ async def max_bas_dd_before(today: date) -> Optional[date]:
     return _parse_bas_dd(result)
 
 
+# cycle417 (2026-10-09, 사용자 승인 10-09 — 일봉 증분 적재 구멍) — 「대상에서 빠졌다
+# 돌아온 종목」 의 빈 날 판정. 증분 적재(`scanner._stock_master_daily_load_once`)가
+# `existing_count >= 225` 종목에는 최근 7봉만 받아 왔는데, 7영업일 넘게 적재 대상
+# 밖에 있다 돌아온 종목은 그 사이가 영영 빈다(10-08 실측: 1,029종목 중 14종목·34일).
+#
+# 달력 = 우리 DB 로 만든다(KIS 휴장 API 0건) — `bas_dd < before` 인 날짜 중 그날
+# 행 수 `>= min_rows` 인 날의 최근 `horizon` 개. 종목마다 「첫 행(`min(bas_dd)`)
+# 이후 달력 날짜 중 그 종목 행이 없는 가장 이른 날」. 첫 행 이전은 신규 상장이라
+# 구멍이 아니다. 마지막 행 뒤의 달력 날짜는 구멍이다(이번 결함의 본체).
+GAP_HORIZON = 100
+GAP_CALENDAR_MIN_ROWS = 300
+
+_GAP_SCAN_SQL = """
+    WITH cal AS (
+        SELECT bas_dd FROM stock_master_daily
+        WHERE bas_dd < $2
+        GROUP BY bas_dd HAVING count(*) >= $4
+        ORDER BY bas_dd DESC LIMIT $3
+    ),
+    firsts AS (
+        SELECT ticker, min(bas_dd) AS first_dd FROM stock_master_daily
+        WHERE ticker = ANY($1::text[]) GROUP BY ticker
+    )
+    SELECT f.ticker, min(c.bas_dd) AS earliest_missing
+    FROM firsts f JOIN cal c ON c.bas_dd > f.first_dd
+    WHERE NOT EXISTS (
+        SELECT 1 FROM stock_master_daily d WHERE d.ticker = f.ticker AND d.bas_dd = c.bas_dd
+    )
+    GROUP BY f.ticker
+"""
+
+
+async def earliest_missing_bas_dd(
+    tickers,
+    *,
+    before: date,
+    horizon: int = GAP_HORIZON,
+    min_rows: int = GAP_CALENDAR_MIN_ROWS,
+) -> dict[str, date]:
+    """종목별 「첫 행 이후 시장 달력에서 빠진 가장 이른 날」 — 요청 종목·구멍 있는 것만.
+
+    쿼리 1회(종목 수와 무관한 상수) — CTE 하나로 달력 구성 + 반조인을 끝낸다.
+    `tickers` 가 커져도 쿼리 수는 그대로다(계약 = 통합 테스트 I6).
+
+    🔴 예외를 삼키지 않는다(`list_provisional_rows` 선례) — 빈 dict 로 접으면
+    「판정 실패」 가 「구멍 없음」 으로 둔갑한다. 호출부(`scanner.py`)가 fail-open 한다.
+
+    Args:
+        tickers: 판정 대상 종목 리스트(적재 대상 전부 — 보호 종목 포함).
+        before: 달력에 넣을 날짜의 상한(미포함) — 보통 오늘. 오늘 봉은 아직 확정
+            전일 수 있어 달력에서 뺀다.
+        horizon: 달력에 쓸 최근 날짜 개수(기본 100 영업일 안).
+        min_rows: 그날을 달력에 넣는 최소 행 수(기본 300 — 대규모 적재 실패일 제외).
+
+    Returns:
+        {ticker: date} — 구멍이 있는 요청 종목만. DB 에 없는 종목·요청 밖 종목·
+        구멍 없는 종목은 키에 없다.
+    """
+    rows = await pg.fetch(_GAP_SCAN_SQL, list(tickers), before, horizon, min_rows)
+    return {r["ticker"]: r["earliest_missing"] for r in (rows or [])}
+
+
 _PROVISIONAL_ROWS_SQL = """
     SELECT ticker, bas_dd, open_price, high_price, low_price, close_price
     FROM stock_master_daily

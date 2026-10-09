@@ -1,0 +1,8 @@
+2026-10-09 11:43 green 착수 — Red 계약 §2/§3 확인. stock_master_daily.earliest_missing_bas_dd 구현(단일 CTE 쿼리) 완료, 단위4 + 통합6 전부 통과.
+2026-10-09 11:48 green — scanner.py 상수(_DAILY_LOAD_INCREMENTAL_DAYS/_DAILY_LOAD_GAP_MARGIN_DAYS) + _gap_fill_need_days 순수함수 + 증분분기 구멍처리 + 관측 마커/summary 구현. 신규 43테스트 전부 통과(39+4).
+2026-10-09 11:52 green — 기존 15개 일봉적재 테스트파일 + tests/unit/db 전수 1133 passed 확인.
+2026-10-09 11:58 green — 8영역 승인 sha 재핀: scanner.py 16곳(222a3/223/223f/274/276/278/282/286/287/290/291/297/405/411/412/226) 전부 교체 + 코멘트 추가. test_cycle287 _SRC_TREE_DIGEST 재계산(파일수 179 그대로, 신규 함수 1개뿐). 승인전 21건 전부(722 passed) 확인.
+2026-10-09 12:00 green — tests/unit/ast + tests/unit/engine + tests/unit/db 전수 12449 passed(0 failed). 전체 스위트(pytest -q) 백그라운드 실행 중.
+2026-10-09 12:08 green — 전체 스위트(python -m pytest -q) 1회차 포그라운드 실행 중(다른 에이전트 프로세스와 CPU 경쟁으로 지연). 대기.
+2026-10-09 12:10 green — 전체 스위트 1회차 완료: 2 failed(tests/unit/replay/test_ra_us.py·test_ra_us_breadth.py — parquet 파일 10-06/워크트리 밖, cycle417 무관, Red 보고와 동일) + 16287 passed/23 skipped/337 xfailed/12 xpassed. build_index.py(백엔드 182모듈/1303테스트) + build_index_frontend.mjs(프론트 139/137, js-yaml 임시 심링크 생성후 제거) 재생성 — diff는 generated_at 타임스탬프 1줄뿐. DEBUG 재실행 진행 중.
+2026-10-09 12:17 green — 전체 스위트 DEBUG 재실행 완료: 동일 결과(2 failed parquet 무관 + 16287 passed/23 skipped/337 xfailed/12 xpassed, 366.82s). 인덱스 신선도 이상 없음. 커밋 준비.

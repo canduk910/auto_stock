@@ -368,8 +368,9 @@ _PREEXISTING_CONTENT_SHA: dict[str, str] = {
     #    TODO(cycle302 커밋 후): 이 항목을 **삭제**한다.
     # 🔁 2026-09-25 (cycle363 F-1) 재핀 — `_scan_pool_eager_refresh_loop` upsert 전 기존 raw 머지(사이클 176 basics 경로 답습, 사용자 승인 8영역). 장전 0값 키(acml_tr_pbmn 등)가 raw 통째 교체로 지워지던 결함 시정. 나머지 7영역 diff 0.
     # 🔁 cycle380(2026-09-27) 재핀 — ETF 판정을 이름 키워드에서 증권그룹코드(`scty_grp_id_cd`)로 전환(사용자 승인, 8영역). ETF_KEYWORDS 를 정본 leaf `src/engine/etf_like.py` 로 이전 + import, `scan_stocks` 판정 자리를 `is_etf_like` 로 교체. 값만 이동, 값 자체는 유일값.
+    # 🔁 cycle417(2026-10-09) 재핀 — cycle417 사용자 승인 10-09 — 일봉 증분 적재 구멍(증분 분기 창 확대 + 구멍 판정 1회 호출). 나머지 7영역 diff 0.
     "src/engine/scanner.py":
-        "611568c078c6f3779344e05b3dfa308c792c64e1c5e02480de6313200282f54f",
+        "b570762dfd92df49471dab261d44ecd364d376300ffe9e2f5b7ac19cceb9efcc",
     # 등록은 승인된 사이클의 Green 이, 비우기는 병합 후속 커밋이 한다.
     # (cycle273 그룹 1·2 + cycle274 항목은 병합 뒤 2026-09-11 정리했고, 아래 1건은
     #  cycle276 이 사용자 명시 승인 하에 등록했고 cycle286 이 같은 승인 하에 재핀했다.)
