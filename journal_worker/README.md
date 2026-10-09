@@ -6,7 +6,7 @@
 `trade_journal_orders`/`trade_journal_stops`에 행을 쌓는다.
 
 - G0 = 기존 `GET /api/trading/status?include=system,holdings,strategies` — 엔진 상태·전략별 매수 신호·파라미터
-- G1 = `GET /api/balance/exit-lines` — 보유마다 손절선·목표가·진입 ATR·무장가(이 워커 전용, 읽기만)
+- G1 = `GET /api/balance/exit-lines` — 보유마다 손절선·목표가·진입 ATR·무장가(읽기만 · 대시보드 전략 패널도 같은 GET 을 읽는다)
 
 정본 설계: `_workspace/design/2026-10-08_trade_journal_observer.md` · 인터페이스 계약:
 `_workspace/red/cycle412/journal_contract.md` 3절. 금기·DB 역할의 정본은 루트 `CLAUDE.md`

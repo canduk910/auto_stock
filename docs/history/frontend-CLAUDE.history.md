@@ -1671,3 +1671,24 @@ nginx 계약(`auth_basic off;` 금지 · 옛 `nginx.conf` 부활 금지)은 루�
 경위: `TeRrMetrics` 는 19필드가 아니라 29필드(기본 19 + 실비용 선택 칸 10)다. 「3개월 실현」 옆 「세후」/「세전」 라벨과, 비용을 못 얹었을 때 배지 옆 `te-pretax-{key}` 「세전」 이 빠져 있었다. 「화면은 아직 쓰지 않는다」 는 「이 섹션은 그리지 않는다」 로 바꿨다(`PerformanceCard` 세전 모드는 `win_rate_gross` 를 쓴다).
 
 → CHANGELOG: cycle411 행
+
+## ScanMonitor — ### kojiro 탭 (`KojiroMonitor.tsx`)
+
+### 2026-10-09 cycle414 문서 동기화 — 상태 배너는 공통 배지, 실효 손절선은 엔진 값
+
+정본 원문(바뀐 부분):
+
+```
+`selectedStrategy === 'kojiro'` 분기의 전용 6패널. 데이터는 `strategies.kojiro`(scan_stats/targets/buy_signals/positions_detail/params)에 있고, 백엔드는 `get_targets_status` 에 `atr_ratio` 1키**만** 더한다.
+
+- ① 상태 배너(`kojiro-darklaunch-banner`, **`kojiro.enabled` 조건부** — 활성=amber "실매매 진행" / 비활성=navy "관찰 모드", last_run_at)
+- ② 대순환 사이클(`kojiro-stage-cycle`, 6스테이지 1→2→…→6↩1 + `targets.stage` 분포 `kojiro-stage-count-{s}`)
+- ③ 유니버스 깔때기(`kojiro-scan-funnel` 9단계, `universe_union`→…→`final_prepared`, 0단계 rose)
+- ④ 후보 그리드(`kojiro-candidate-{ticker}`) — 종목명(`t.name || ticker`, `_candidates[ticker]` 저장값이라 **정산 후·주말에도 유지**) · stage 배지 · EMA 5/20/40 정배열 · ATR 밴드 게이지(`atr_ratio` 또는 atr/prev_close, `params.atr_ratio_min~max`)
+- ⑤ 진입 이벤트(`kojiro-entry-feed`, buy_signals)
+- ⑥ 보유 방어선(`kojiro-defense-{ticker}`) — 4중 청산선 `buy−stop_atr×atr` / `high−trail_atr×atr` / `buy×(1+hard_stop_pct/100)` / stage3. **프론트 계산**(targets.atr + positions + params), 활성 방어선 = 현재가 아래 max.
+```
+
+경위: 배너가 `enabled` 하나만 보아서 「신규 매수 멈춤」·「섀도」 를 「실매매 진행」 으로 보였다. 방어선은 후보표의 ATR(`targets.atr`)로 화면이 다시 계산했는데, 보유 종목이 후보에서 빠지면 `-` 로 비거나 엔진 손절선과 달랐다. 밴드 게이지는 `params` 가 없을 때 코드 상수(1.0~4.5%)로 메웠고, 깔때기 라벨과 진입 문구에 운영 DB 와 다른 숫자 문턱이 박혀 있었다. 명세 = `_workspace/red/cycle414/monitor_spec.md` §1.3 · §4.5.
+
+→ CHANGELOG: cycle414 행

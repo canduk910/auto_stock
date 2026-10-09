@@ -113,6 +113,7 @@
   - 🔴 **momentum 은 이름 폴백만** — 원천 KIS 등락률 순위(`FHPST01700000`) 행에 `scty_grp_id_cd` 가 없다. 키워드에 안 걸리는 ETF(KIWOOM·TIME·1Q 등)는 이 경로에서 안 막힌다.
   - RT·FS·DR·IF·MF 는 ETF 아님(시총·거래대금 컷을 넘으면 유니버스 편입).
   - 🔴 판정 재구현 금지 — `ETF_KEYWORDS` 순회는 이 파일·`stock_master.py` SQL 빌더 두 곳뿐(G1) · 전략 파일 `ETF_KEYWORDS` 비참조(G2) · `stock_master.py` 코드·키워드 문자열 재기재 금지(G6) · `order_engine._observe_after_exit_etp` 코드 집합과 동일(G7 표류 감시). 가드 = `tests/unit/ast/test_cycle380_ast_etf_like.py`.
+- **`etf_trend_core.py`** — `etf_trend` 전략의 순수 leaf(지표·진입 판정·청산선·묶음 상관). 표준 라이브러리(`math`·`typing`)만 import — `src.*` import 0 · I/O 0 · `await` 0 · 로깅 0. 식은 재현 정본 `_workspace/domain_consult/cycle391_etf_s0_remeasure.py` 와 같다. 함수 = `ema`·`true_ranges`·`atr_wilder`·`n14`·`breakout_line`·`tv20`·`tv_prev20`·`entry_signal`(→ `EntrySignal`)·`gap_skip_reason`·`hard_stop`·`stop_line`·`channel_low`·`breakout_failed`·`simulate_exit`·`return_correlation`. 소비자 = `strategies/etf_trend.py` · `routes/strategies.py` 의 `_monitor_holding_etf`(보유 구성 선 중 하드 선 = `hard_stop` — 화면이 선을 따로 계산하지 않게 엔진과 같은 함수를 쓴다). 전략 규칙의 정본 = `src/engine/strategies/CLAUDE.md` `etf_trend` 행.
 - **`backtest_yaml.py`** — 전략 → 외부 MCP 백테스트 YAML DSL. `build_yaml(strategy_id, params)` 변환 = `momentum` · `volatility_breakout` · `donchian_swing` 셋, 그 밖(LTV·BFB·VCP·kojiro 등) = `BacktestNotSupportedError`. 유일 import 처 = `backtest_engine.py`(20:00 자문 INSERT 직후 자문 행마다 `current`·`recommended` 2 job fire-and-forget, 미지원 = `skipped`). hot path 무관.
 
 ### 시세 채널 (통합 채널 소멸 후)
