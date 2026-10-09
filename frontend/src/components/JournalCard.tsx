@@ -59,9 +59,12 @@ function NaBadge({ na }: { na: NaKind }) {
   )
 }
 
-function Chip({ children }: { children: React.ReactNode }) {
+function Chip({ children, title }: { children: React.ReactNode; title?: string }) {
   return (
-    <span className="inline-block px-1 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600 mr-1">
+    <span
+      title={title}
+      className="inline-block px-1 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600 mr-1"
+    >
       {children}
     </span>
   )
@@ -177,7 +180,9 @@ function TargetBlock({ target }: { target: Target }) {
 }
 
 // ── 청산 줄의 손절/목표선 정보 ───────────────────────────────────────────────
-function exitLineInfo(exit: ExitLine, entryTargetPrice: number | null): { text: string; na: NaKind | null } {
+function exitLineInfo(
+  exit: ExitLine, entryTargetPrice: number | null,
+): { text: string; na: NaKind | null; approx: boolean } {
   const parts: string[] = []
   const tail = exit.snapshot_age_s !== null ? ` (${exit.snapshot_age_s}초 전)` : ''
   if (exit.line_role === 'target') {
@@ -185,27 +190,31 @@ function exitLineInfo(exit: ExitLine, entryTargetPrice: number | null): { text: 
     const targetPrice = entryTargetPrice ?? exit.fired_line
     if (targetPrice !== null) parts.push(`목표 ${fmtInt(targetPrice)}`)
     if (exit.effective_line !== null) parts.push(`참고 손절선 ${fmtInt(exit.effective_line)}${tail}`)
-    if (parts.length === 0) return { text: '', na: exit.line_na ?? 'unknown' }
-    return { text: parts.join(' · '), na: null }
+    if (parts.length === 0) return { text: '', na: exit.line_na ?? 'unknown', approx: false }
+    return { text: parts.join(' · '), na: null, approx: false }
   }
   if (exit.line_role === 'fired') {
     if (exit.fired_line !== null) parts.push(`발동선 ${fmtInt(exit.fired_line)}`)
+    // cycle418-J #5 — 유효선이 고정%(hard_pct) 근사면 「유효선 ...」 이 정확한 값처럼 보이지
+    // 않게 [근사] 를 단다(InitialStopBlock 의 hard_pct 표시와 같은 전제).
+    let approx = false
     if (exit.effective_line !== null && exit.effective_line !== exit.fired_line) {
       parts.push(`유효선 ${fmtInt(exit.effective_line)}${tail}`)
+      approx = exit.stop_kind === 'hard_pct'
     }
-    if (parts.length === 0) return { text: '', na: exit.line_na ?? 'unknown' }
-    return { text: parts.join(' · '), na: null }
+    if (parts.length === 0) return { text: '', na: exit.line_na ?? 'unknown', approx: false }
+    return { text: parts.join(' · '), na: null, approx }
   }
   if (exit.line_role === 'reference') {
     parts.push('손절 미발동')
     if (exit.effective_line !== null) {
       parts.push(`참고 손절선 ${fmtInt(exit.effective_line)}${tail}`)
-      return { text: parts.join(' · '), na: null }
+      return { text: parts.join(' · '), na: null, approx: false }
     }
-    return { text: '손절 미발동', na: exit.line_na ?? 'unknown' }
+    return { text: '손절 미발동', na: exit.line_na ?? 'unknown', approx: false }
   }
   // cycle413 보완 1차 #4 — 사유 코드를 모르면(line_role=null) 「손절 미발동」을 단정하지 않는다.
-  return { text: '', na: exit.line_na ?? 'unknown' }
+  return { text: '', na: exit.line_na ?? 'unknown', approx: false }
 }
 
 function ExitLineInfoBlock({ exit, entryTargetPrice }: { exit: ExitLine; entryTargetPrice: number | null }) {
@@ -215,8 +224,11 @@ function ExitLineInfoBlock({ exit, entryTargetPrice }: { exit: ExitLine; entryTa
   return (
     <div data-testid="journal-exit-line" className="text-sm text-gray-600">
       {info.text && <span>{info.text}</span>}
-      {firedSrcChip && <Chip>{firedSrcChip}</Chip>}
-      {info.na && <NaBadge na={info.na} />}
+      {info.approx && <span className="text-xs text-amber-600"> [근사]</span>}
+      {/* cycle418-J C — 문장과 칩·배지가 띄어쓰기 없이 붙는 결함(「발동선 4,827계산」·
+          「손절 미발동—」). TargetBlock·ReasonBlock 과 같은 전제로 사이에 공백을 둔다. */}
+      {firedSrcChip && <>{' '}<Chip>{firedSrcChip}</Chip></>}
+      {info.na && <>{info.text ? ' ' : ''}<NaBadge na={info.na} /></>}
     </div>
   )
 }
@@ -308,10 +320,20 @@ function CostsBlock({ costs, isOpen }: { costs: Costs; isOpen: boolean }) {
         ))}
       </div>
       <div>
-        {totalLabel} {costs.paid_total !== null ? fmtInt(costs.paid_total) : <NaBadge na="unknown" />}
-        {/* cycle413 보완 2차 N3(#12 잔여) — 합계 숫자 뒤에 칩이 띄어쓰기 없이 붙었다. */}
-        {costs.status && <>{' '}<Chip>{costStatusLabel(costs.status)}</Chip></>}
-        {costs.allocated && <>{' '}<Chip>배분</Chip></>}
+        {/* cycle418-J A — paid_total 이 null(체결 조회 실패 등으로 합계를 모름)인데
+            `확정/추정` 상태 칩과 `배분` 칩이 그대로 붙어 "합계는 모르지만 확정됨" 처럼
+            모순되게 보였다. paid_total 을 알 때만 상태·배분 칩을 보이고, 모르면
+            하드코딩된 "unknown" 대신 `lookup_failed`(조회 실패, amber)로 낸다. */}
+        {totalLabel}{' '}
+        {costs.paid_total !== null ? (
+          <>
+            {fmtInt(costs.paid_total)}
+            {costs.status && <>{' '}<Chip>{costStatusLabel(costs.status)}</Chip></>}
+            {costs.allocated && <>{' '}<Chip>배분</Chip></>}
+          </>
+        ) : (
+          <NaBadge na="lookup_failed" />
+        )}
         {costs.expected_exit !== null ? (
           <span className="text-xs text-gray-500"> · 예상 청산비용 {fmtInt(costs.expected_exit)}</span>
         ) : (
@@ -356,9 +378,13 @@ function ExcursionBlock({ excursion }: { excursion: Excursion }) {
         {excursion.na ? <NaBadge na={excursion.na} /> : excursion.mae ? renderExPoint(excursion.mae, false) : <NaBadge na="unknown" />}
       </div>
       {!excursion.na && (
-        <div className="text-xs text-gray-400">
+        <div data-testid="journal-excursion-closes" className="text-xs text-gray-400">
           종가 {excursion.closes_k}/{excursion.closes_n}일
-          {excursion.lock_dates.length > 0 && <Chip>락</Chip>}
+          {/* cycle418-J C — 「종가 n/n일」 뒤 락 칩이 띄어쓰기 없이 붙었다(「종가 5/5일락」).
+              명세 툴팁("락 — 수정주가 미보정")도 이 칩에 없었다. */}
+          {excursion.lock_dates.length > 0 && (
+            <>{' '}<Chip title="락 — 수정주가 미보정">락</Chip></>
+          )}
         </div>
       )}
     </div>
@@ -516,6 +542,18 @@ export default function JournalCard({ card, basis, stopsRecordStart }: Props) {
       <div className="border-t pt-2">
         <StopTrackBlock track={card.stop_track} />
       </div>
+
+      {/* cycle418-J B — 체결 조회가 실패하면(`exits_na="lookup_failed"`) 서버가 exits 를
+          빈 배열로 내는데, 화면이 「청산이 없다」(정상)와 「청산이 있는데 못 받았다」(조회 실패)를
+          둘 다 아무 표시 없이 똑같이 그렸다. exits_na 가 서면 배지로 표시 없음을 밝힌다. */}
+      {card.exits.length === 0 && card.exits_na && (
+        <div className="border-t pt-2">
+          <div className="text-xs font-medium text-gray-500">{card.status === 'open' ? '분할 매도' : '청산'}</div>
+          <div data-testid="journal-exits-na" className="text-sm">
+            <NaBadge na={card.exits_na} />
+          </div>
+        </div>
+      )}
 
       {card.exits.length > 0 && (
         <div className="border-t pt-2 space-y-2">
