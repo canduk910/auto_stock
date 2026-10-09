@@ -41,41 +41,21 @@ from types import SimpleNamespace
 
 import pytest
 
+from tests import _strategy_census as census
+
 pytestmark = pytest.mark.unit
 
 _MODE_KEY = "order_exchange_clock_mode"
 _DIAL_KEY = "after_market_exit_division"
 _NEW_KEYS: tuple[str, ...] = (_MODE_KEY, _DIAL_KEY)
 
-_STRATEGY_IDS: tuple[str, ...] = (
-    "momentum",
-    "volatility_breakout",
-    "long_tail_volatility",
-    "donchian_swing",
-    "bull_flag_breakout",
-    "vcp_breakout",
-    "kojiro",
-)
+#: 리팩토링 카드 #3(cycle421) — 킬스위치 2키는 **모든 전략**에서 PUT 이 통해야 한다(보유 중인 전략을
+#: 장중에 끌 수단). 이름을 손으로 적지 않고 전략 명부를 돈다.
+_STRATEGY_IDS: tuple[str, ...] = census.STRATEGY_IDS
 
 
 def _class_defaults() -> dict[str, dict]:
-    from src.engine.strategies.bull_flag_breakout import BullFlagBreakoutStrategy
-    from src.engine.strategies.donchian_swing import DonchianSwingStrategy
-    from src.engine.strategies.kojiro import KojiroStrategy
-    from src.engine.strategies.long_tail_volatility import LongTailVolatilityStrategy
-    from src.engine.strategies.momentum import MomentumStrategy
-    from src.engine.strategies.vcp_breakout import VcpBreakoutStrategy
-    from src.engine.strategies.volatility_breakout import VolatilityBreakoutStrategy
-
-    return {
-        "momentum": dict(MomentumStrategy.DEFAULT_PARAMS),
-        "volatility_breakout": dict(VolatilityBreakoutStrategy.DEFAULT_PARAMS),
-        "long_tail_volatility": dict(LongTailVolatilityStrategy.DEFAULT_PARAMS),
-        "donchian_swing": dict(DonchianSwingStrategy.DEFAULT_PARAMS),
-        "bull_flag_breakout": dict(BullFlagBreakoutStrategy.DEFAULT_PARAMS),
-        "vcp_breakout": dict(VcpBreakoutStrategy.DEFAULT_PARAMS),
-        "kojiro": dict(KojiroStrategy.DEFAULT_PARAMS),
-    }
+    return {sid: dict(cls.DEFAULT_PARAMS) for sid, cls in census.strategy_classes().items()}
 
 
 class _FakeStrategy:

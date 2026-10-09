@@ -9,7 +9,7 @@
 | E1 | 응답 = `{success, data:{running, as_of(KST), items:[…]}}` · item 키 14개 · 전략마다 보유마다 1 item |
 | E2 | 값 = `resolve_exit_lines([s], t)` 그대로 + 같은 순간 Position 값 + `entry_atr`(kojiro 는 `_position_atr`) |
 | E3 | donchian 무장가 = `ceil(E + kk_breakeven_r × (E − 손절선))` — 차분: 고점이 무장가면 무장, 1원 아래면 미무장 |
-| E4 | **변이 0** — 7전략 registry(보유·래치·params·ATR·buy_signals)를 deepcopy 해 두고 호출 전후 값 `==` · 컨테이너 `is` 동일 · `buy_date` 는 여전히 date |
+| E4 | **변이 0** — 명부 전 전략 registry(보유·래치·params·ATR·buy_signals)를 deepcopy 해 두고 호출 전후 값 `==` · 컨테이너 `is` 동일 · `buy_date` 는 여전히 date |
 | E5 | KIS(`get_balance`)·DB(`pg.*`) 호출 0 |
 | E6 | 5초 캐시 — 직전 성공 응답 뒤 5초 안 재호출은 바이트 동일, 5초 뒤엔 새로 |
 | E7 | 실패 → HTTP 200 `success=false` · `src.routes.balance` 로거 INFO 이상 0줄 |
@@ -30,6 +30,8 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+from tests import _strategy_census as census
+
 pytestmark = pytest.mark.unit
 
 T = "005930"
@@ -38,23 +40,19 @@ ITEM_KEYS = {"strategy_id", "ticker", "stop_price", "stop_source", "target_price
              "kk_arm_price"}
 
 
+#: 전략별 보유 종목(서로 겹치지 않게). 명부에 새 전략이 들어오면 합성 코드 `99xxxx` 가 자동 배정된다.
+_TICKERS = {"kojiro": "000520", "donchian_swing": T, "bull_flag_breakout": "003160",
+            "long_tail_volatility": "457370", "momentum": "393210", "volatility_breakout": "010170",
+            "vcp_breakout": "006120"}
+
+
 def _strategies():
+    """명부(census) 전 전략 — 리팩토링 카드 #3(cycle421). G1 은 **모든 전략**의 보유를 변이 없이 내보내야 한다."""
     from src.engine.strategy_base import Position, StrategyConfig
-    from src.engine.strategies.bull_flag_breakout import BullFlagBreakoutStrategy
-    from src.engine.strategies.donchian_swing import DonchianSwingStrategy
-    from src.engine.strategies.kojiro import KojiroStrategy
-    from src.engine.strategies.long_tail_volatility import LongTailVolatilityStrategy
-    from src.engine.strategies.momentum import MomentumStrategy
-    from src.engine.strategies.vcp_breakout import VcpBreakoutStrategy
-    from src.engine.strategies.volatility_breakout import VolatilityBreakoutStrategy
 
     out = []
-    for cls, sid, ticker in [(KojiroStrategy, "kojiro", "000520"), (DonchianSwingStrategy, "donchian_swing", T),
-                             (BullFlagBreakoutStrategy, "bull_flag_breakout", "003160"),
-                             (LongTailVolatilityStrategy, "long_tail_volatility", "457370"),
-                             (MomentumStrategy, "momentum", "393210"),
-                             (VolatilityBreakoutStrategy, "volatility_breakout", "010170"),
-                             (VcpBreakoutStrategy, "vcp_breakout", "006120")]:
+    for i, (sid, cls) in enumerate(census.strategy_classes().items()):
+        ticker = _TICKERS.get(sid, f"99{i:04d}")
         s = cls(StrategyConfig(strategy_id=sid, name=sid))
         s.state.positions[ticker] = Position(ticker, 10000, 3, f"O-{sid}", sid, date(2026, 10, 6), 10500)
         s.state.buy_signals.append({"ticker": ticker, "price": 10000, "time": "09:05:00"})
@@ -133,7 +131,7 @@ def test_e1_shape(engine, bal):
     data = _data(bal)
     assert data["running"] is True
     assert datetime.fromisoformat(data["as_of"]).utcoffset().total_seconds() == 9 * 3600
-    assert len(data["items"]) == 7
+    assert len(data["items"]) == len(census.STRATEGY_IDS)
     for it in data["items"]:
         assert set(it) == ITEM_KEYS, it
 

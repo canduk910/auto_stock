@@ -68,6 +68,7 @@ from freezegun import freeze_time
 
 from src.engine import strategy_base as sb_mod
 from src.engine.strategy_base import Signal, StrategyBase, StrategyConfig
+from tests import _strategy_census as census
 
 pytestmark = pytest.mark.unit
 
@@ -218,20 +219,8 @@ def _kj(*, turtle: bool = True, budget: int = 774_640, **extra):
 
 
 def _real(strategy_id: str, *, budget: int, **extra):
-    """7 전략 실클래스 인스턴스 (DEFAULT_PARAMS 병합 경로)."""
-    import importlib
-
-    mapping = {
-        "momentum": ("momentum", "MomentumStrategy"),
-        "volatility_breakout": ("volatility_breakout", "VolatilityBreakoutStrategy"),
-        "long_tail_volatility": ("long_tail_volatility", "LongTailVolatilityStrategy"),
-        "bull_flag_breakout": ("bull_flag_breakout", "BullFlagBreakoutStrategy"),
-        "vcp_breakout": ("vcp_breakout", "VcpBreakoutStrategy"),
-        "donchian_swing": ("donchian_swing", "DonchianSwingStrategy"),
-        "kojiro": ("kojiro", "KojiroStrategy"),
-    }
-    mod_name, cls_name = mapping[strategy_id]
-    cls = getattr(importlib.import_module(f"src.engine.strategies.{mod_name}"), cls_name)
+    """명부(census) 전략 실클래스 인스턴스 (DEFAULT_PARAMS 병합 경로)."""
+    cls = census.strategy_classes()[strategy_id]
     s = cls(StrategyConfig(strategy_id=strategy_id, name=strategy_id, weight=0.2,
                            params=dict(extra)))
     s.state.total_investment = budget
@@ -246,14 +235,9 @@ def _recs(caplog, marker: str) -> list[logging.LogRecord]:
     return [r for r in caplog.records if marker in r.getMessage()]
 
 
-ALL_STRATEGY_IDS = (
-    "momentum", "volatility_breakout", "long_tail_volatility",
-    "bull_flag_breakout", "vcp_breakout", "donchian_swing", "kojiro",
-)
-NON_TURTLE_IDS = (
-    "momentum", "volatility_breakout", "long_tail_volatility",
-    "bull_flag_breakout", "vcp_breakout",
-)
+#: 리팩토링 카드 #3(cycle421) — ρ축 키는 **모든 전략**의 `DEFAULT_PARAMS` 에 있어야 하므로(루트
+#: CLAUDE.md 「키는 전 전략에 둔다」) 이름을 손으로 적지 않고 전략 명부를 돈다.
+ALL_STRATEGY_IDS = census.STRATEGY_IDS
 
 
 # ===========================================================================
@@ -1109,10 +1093,16 @@ def test_f245_18_cycle242_markers_still_emitted(maker, caplog):
 # ===========================================================================
 # F-19 — 기존 회귀 (7 전략 정상 경로 · 관문 시그니처)
 # ===========================================================================
-@freeze_time("2026-09-04 10:00:00+09:00")
 #: cycle405 — donchian 은 비중 사이징을 쓰지 않는다(깡토식 설계 랏). 그 랏이 ρ축에 닿지 않는다는
 #: 계약은 `test_cycle405_donchian_kk_sizing.py::test_r10_k_and_rho_caps_do_not_change_design_lot` 가 지킨다.
-@pytest.mark.parametrize("strategy_id", [x for x in ALL_STRATEGY_IDS if x != "donchian_swing"])
+#: cycle421(카드 #3) — etf_trend 도 같은 이유로 뺀다: 터틀 전용이라 비중 경로 자체가 없고(후보 ATR 이
+#: 없으면 0 — 1주 폴백·비중 낙하 금지, `etf_trend.calc_buy_quantity`), 이 검사의 전제(「비중 랏」)가
+#: 성립하지 않는다. 명부로 바꾼 뒤 실제로 붉어진 항목이라 이름을 남긴다(보고 = HARNESS_CHANGELOG cycle421).
+_NO_RATIO_LOT = ("donchian_swing", "etf_trend")
+
+
+@freeze_time("2026-09-04 10:00:00+09:00")
+@pytest.mark.parametrize("strategy_id", [x for x in ALL_STRATEGY_IDS if x not in _NO_RATIO_LOT])
 def test_f245_19a_normal_sized_lot_unchanged_for_all_strategies(strategy_id):
     s = _real(strategy_id, budget=1_000_000)
     ratio = s.config.params["position_ratio"]

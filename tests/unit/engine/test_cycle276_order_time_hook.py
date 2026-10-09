@@ -64,6 +64,7 @@ from src.engine.strategy_base import StrategyConfig
 from src.engine.strategy_registry import StrategyRegistry
 from src.models.balance import BuyableInfo
 from src.models.order import OrderResult, OrderSide
+from tests import _strategy_census as census
 
 pytestmark = pytest.mark.unit
 
@@ -765,8 +766,10 @@ async def test_c19_2_mode_off_still_emits_config_canary(monkeypatch, caplog):
     assert _field(lines[0], "mode") == "off"
 
 
+#: 리팩토링 카드 #3(cycle421) — 「VB·LTV 말고 나머지 전부」 를 이름으로 적지 않고 명부에서 뺀다.
+#: 새 전략도 파일을 두는 순간 `llm_gate_mode="shadow"` 4키 계약의 대상이 된다.
 @pytest.mark.parametrize("strategy_id", [
-    "momentum", "donchian_swing", "bull_flag_breakout", "vcp_breakout", "kojiro",
+    sid for sid in census.STRATEGY_IDS if sid not in ("volatility_breakout", "long_tail_volatility")
 ])
 async def test_c19_3_five_other_strategies_now_shadow_evaluate(monkeypatch, strategy_id, caplog):
     """C16 — 🔁 cycle297 반전(2026-09-17). 원래 이 테스트는 "나머지 5전략은 task 0·기록

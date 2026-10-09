@@ -40,6 +40,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from tests import _strategy_census as census
 from tests.unit.engine._cycle369_support import (
     ALL_SIDS,
     LIVE,
@@ -104,28 +105,23 @@ def quote(monkeypatch):
     condition.clear_caches()
 
 
-_STRATS = {
-    "momentum": ("src.engine.strategies.momentum", "MomentumStrategy"),
-    "volatility_breakout": ("src.engine.strategies.volatility_breakout", "VolatilityBreakoutStrategy"),
-    "long_tail_volatility": ("src.engine.strategies.long_tail_volatility", "LongTailVolatilityStrategy"),
-    "donchian_swing": ("src.engine.strategies.donchian_swing", "DonchianSwingStrategy"),
-    "bull_flag_breakout": ("src.engine.strategies.bull_flag_breakout", "BullFlagBreakoutStrategy"),
-    "vcp_breakout": ("src.engine.strategies.vcp_breakout", "VcpBreakoutStrategy"),
-    "kojiro": ("src.engine.strategies.kojiro", "KojiroStrategy"),
-}
-_GATE_FIRST = ("long_tail_volatility", "donchian_swing", "bull_flag_breakout", "vcp_breakout", "kojiro")
+#: 리팩토링 카드 #3(cycle421) — 전략 이름을 손으로 적지 않는다. 게이트가 **발사 직전**에 있는
+#: 두 전략(momentum·VB — 기준가 갱신 뒤, cycle233 `GATE_PRE_BUY_FILES`)만 예외로 적고, 나머지
+#: 명부 전부가 「첫 문장 게이트」 검사의 대상이다(두 원형 분류의 닫힘은 cycle233 AST G-0 이 잰다).
+_GATE_PRE_BUY = ("momentum", "volatility_breakout")
+_GATE_FIRST = tuple(sid for sid in census.STRATEGY_IDS if sid not in _GATE_PRE_BUY)
 
 
 def _module(sid):
     import importlib
 
-    return importlib.import_module(_STRATS[sid][0])
+    return importlib.import_module(f"src.engine.strategies.{sid}")
 
 
 def _make(sid, **params):
     from src.engine.strategy_base import StrategyConfig
 
-    cls = getattr(_module(sid), _STRATS[sid][1])
+    cls = census.strategy_classes()[sid]
     s = cls(StrategyConfig(strategy_id=sid, name=sid, params={"exchange": "KRX", **params}))
     s.state.total_investment = 10_000_000
     return s
@@ -157,7 +153,7 @@ def _vb_ready(monkeypatch, s, ticker=_T):
 # ===========================================================================
 @pytest.mark.parametrize("sid", _GATE_FIRST)
 def test_j10_gate_first_strategies_consult_status_gate(sid, clock, monkeypatch):
-    """폴·래치형 5전략 — 상태 차단이 켜지면 `check_buy_signal` 즉시 NONE, 게이트가 실제로 불렸다."""
+    """폴·래치형(명부에서 발사 직전 2전략을 뺀 전부) — 상태 차단이 켜지면 `check_buy_signal` 즉시 NONE, 게이트가 실제로 불렸다."""
     from src.engine.strategy_base import Signal
 
     clock.set(9, 10)
@@ -229,7 +225,7 @@ def test_j10_vb_crossing_blocked_and_positive_control(clock, monkeypatch):
 
 
 def test_j10_all_seven_account_gates_see_real_registry(clock):
-    """spy 없이 — 실제 레지스트리 기록 하나로 7전략 공통 게이트가 전부 True."""
+    """spy 없이 — 실제 레지스트리 기록 하나로 명부(census) 전 전략의 공통 게이트가 전부 True."""
     record(_T, LIVE[_T], kst(10, 0), src="p1")
     clock.set(10, 0)
     for sid in ALL_SIDS:

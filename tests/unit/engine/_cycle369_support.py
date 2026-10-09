@@ -42,20 +42,16 @@ from types import SimpleNamespace
 
 import pytest
 
+from tests import _strategy_census as census
+
 KST = timezone(timedelta(hours=9))
 LEAF_LOGGER = "src.engine.status_exit_watch"
 DAY = date(2026, 9, 28)        # 월요일 — 영업일
 NEXT_DAY = date(2026, 9, 29)
 
-ALL_SIDS: tuple[str, ...] = (
-    "momentum",
-    "volatility_breakout",
-    "long_tail_volatility",
-    "donchian_swing",
-    "bull_flag_breakout",
-    "vcp_breakout",
-    "kojiro",
-)
+#: 전략 명부 전부(리팩토링 카드 #3, cycle421) — 종목상태 매수 차단은 **모든 전략**의 공통 게이트가
+#: 지켜야 하는 성질이라 이름을 손으로 적지 않는다. 새 전략은 파일을 두는 순간 이 검사의 대상이 된다.
+ALL_SIDS: tuple[str, ...] = census.STRATEGY_IDS
 
 
 def leaf():

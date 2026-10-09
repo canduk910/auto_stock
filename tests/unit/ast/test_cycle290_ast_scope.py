@@ -49,6 +49,8 @@ from pathlib import Path
 
 import pytest
 
+from tests import _strategy_census as census
+
 pytestmark = pytest.mark.unit
 
 _ROOT = Path(__file__).resolve().parents[3]
@@ -395,10 +397,13 @@ def test_g290_5c_history_keeps_the_pre_registration_story() -> None:
 _CYCLE287_SCOPE = "tests/unit/ast/test_cycle287_ast_scope.py"
 
 
-@pytest.mark.parametrize("rel", [f"src/engine/strategies/{m}.py" for m, _ in _STRATEGY_META])
+@pytest.mark.parametrize("rel", sorted(census.STRATEGY_RELS))
 @pytest.mark.parametrize("key", _NEW_PARAM_KEYS)
 def test_g290_6_two_keys_present_in_every_strategy_source(rel: str, key: str) -> None:
-    """S6 (RED) — 두 키가 전략 **7파일 소스 전부**에 있다.
+    """S6 (RED) — 두 키가 전략 **파일 소스 전부**(명부 = `tests/_strategy_census.py`)에 있다.
+
+    리팩토링 카드 #3(cycle421) — 옛 7파일 고정 목록(`_STRATEGY_META`)을 돌던 것을 명부로 바꿨다.
+    `_STRATEGY_META` 는 S2 세그먼트 핀(cycle290 시점 7전략의 메서드 본문 동결)에만 남는다.
 
     cycle287 `test_s5b` 의 정반대다(그쪽은 "어느 전략 파일에도 없다"를 단언했다).
     라우팅·애프터 청산은 `strategy_id` 로 params 를 조회하는 **전 전략 공통 경로**라

@@ -50,6 +50,8 @@ from typing import Any
 
 import pytest
 
+from tests import _strategy_census as census
+
 pytestmark = pytest.mark.unit
 
 
@@ -58,23 +60,8 @@ pytestmark = pytest.mark.unit
 # ---------------------------------------------------------------------------
 @lru_cache(maxsize=1)
 def _class_defaults() -> dict[str, dict]:
-    from src.engine.strategies.bull_flag_breakout import BullFlagBreakoutStrategy
-    from src.engine.strategies.donchian_swing import DonchianSwingStrategy
-    from src.engine.strategies.kojiro import KojiroStrategy
-    from src.engine.strategies.long_tail_volatility import LongTailVolatilityStrategy
-    from src.engine.strategies.momentum import MomentumStrategy
-    from src.engine.strategies.vcp_breakout import VcpBreakoutStrategy
-    from src.engine.strategies.volatility_breakout import VolatilityBreakoutStrategy
-
-    return {
-        "momentum": dict(MomentumStrategy.DEFAULT_PARAMS),
-        "volatility_breakout": dict(VolatilityBreakoutStrategy.DEFAULT_PARAMS),
-        "long_tail_volatility": dict(LongTailVolatilityStrategy.DEFAULT_PARAMS),
-        "donchian_swing": dict(DonchianSwingStrategy.DEFAULT_PARAMS),
-        "bull_flag_breakout": dict(BullFlagBreakoutStrategy.DEFAULT_PARAMS),
-        "vcp_breakout": dict(VcpBreakoutStrategy.DEFAULT_PARAMS),
-        "kojiro": dict(KojiroStrategy.DEFAULT_PARAMS),
-    }
+    """명부(census) 전 전략의 `DEFAULT_PARAMS` — 리팩토링 카드 #3(cycle421), 이름을 손으로 적지 않는다."""
+    return {sid: dict(cls.DEFAULT_PARAMS) for sid, cls in census.strategy_classes().items()}
 
 
 class _FakeStrategy:
@@ -587,15 +574,9 @@ async def test_put_when_identity_key_then_saved_without_extra_server_gate(
 #
 # 왜 200 이면 안 되는가 — 빈 목록의 효과가 전략마다 **정반대**다. 아래 두 테스트가
 # 그 비대칭을 실측으로 못박는다.
-_ALL_SEVEN = (
-    "momentum",
-    "volatility_breakout",
-    "long_tail_volatility",
-    "donchian_swing",
-    "bull_flag_breakout",
-    "vcp_breakout",
-    "kojiro",
-)
+#: 리팩토링 카드 #3(cycle421) — 빈 보드 422 는 **모든 전략**의 계약이라 전략 명부를 돈다
+#: (이름은 옛 「7 전략」 시절 그대로 둔다 — 값은 명부 전부다).
+_ALL_SEVEN = census.STRATEGY_IDS
 
 #: `session._DEFAULT_TRADABLE_BOARDS` 에 폴백 항목이 **있는** 전략 (빈 목록 → 매수 계속).
 _BOARD_FALLBACK_STRATEGIES = (
@@ -604,8 +585,11 @@ _BOARD_FALLBACK_STRATEGIES = (
     "long_tail_volatility",
     "donchian_swing",
 )
-#: 폴백 항목이 **없는** 전략 (빈 목록 → 허용 보드 공집합 → 매수 전면 중단).
-_BOARD_NO_FALLBACK_STRATEGIES = ("bull_flag_breakout", "vcp_breakout", "kojiro")
+#: 폴백 항목이 **없는** 전략 (빈 목록 → 허용 보드 공집합 → 매수 전면 중단) = 명부의 나머지 전부.
+#: 새 전략은 세션 폴백 표에 행을 두지 않는 한 이쪽이고, 아래 비대칭 테스트가 실제 효과를 잰다.
+_BOARD_NO_FALLBACK_STRATEGIES = tuple(
+    s for s in census.STRATEGY_IDS if s not in _BOARD_FALLBACK_STRATEGIES
+)
 
 
 def test_empty_boards_effect_is_asymmetric_across_strategies():
