@@ -13,6 +13,7 @@ import asyncio
 import logging
 import time
 from datetime import datetime, timedelta, timezone
+from enum import Enum
 
 from src.api.balance import (
     get_buyable,
@@ -426,6 +427,28 @@ def _sell_orders_placed_before(rows, ticker: str, since) -> "frozenset[str]":
         return frozenset(k for k, v in latest.items() if k not in bad and v < since)
     except Exception:
         return frozenset()
+
+
+class SellFallbackOutcome(Enum):
+    """B4-3(cycle424) — `_handle_sell_market_disallowed` 가 호출부(`execute_sell`)에
+    돌려주는 제어 신호.
+
+    이 값은 "무엇이 끝났는가" 만 말한다 — 다음 동작(루프를 끝낼지 일반 재시도로
+    떨어질지)은 호출부가 그대로 정한다(행위 보존 추출, 설계 =
+    `_workspace/refactor/2026-10-09_execute_sell_baseline.md` §2.3).
+
+    🔴 비-`KisApiError` 예외(F-422-1, 고치지 않음)는 이 enum 으로 표현하지
+    않는다 — 그 경로는 `_handle_sell_market_disallowed` 밖으로, 결국
+    `execute_sell` 밖으로 그대로 전파된다(의도적 보존). 호출부가 이 메서드를
+    추가 `try` 로 감싸면 바깥 `except Exception` 이 받아 재발사가 된다
+    (「주문이 나간 뒤의 실패로 재발사 금지」, cycle327) — 호출 자리는 이미
+    들어와 있는 `except KisApiError as e:` 블록 안, 추가 `try` 없이 그대로
+    둔다.
+    """
+
+    SENT = "sent"          # 폴백 접수 성공 — 호출부는 return
+    REJECTED = "rejected"  # 폴백도 KisApiError 로 거부 — 호출부는 return
+    NO_PRICE = "no_price"  # 현재가 미확보 — 폴백 시도 못함, 일반 재시도로 낙하
 
 
 SELL_MAX_RETRIES = 3     # 매도 실패 시 최대 재시도 횟수
@@ -2337,176 +2360,30 @@ class OrderEngine:
                 # 프리장은 `primary_div is MARKET` 이라 이 조건이 기존
                 # `is_market_order_disallowed(e) and order_division == MARKET`
                 # 과 논리적으로 항등이다.
+                # B4-3(cycle424) — 관문 판정은 호출부에 남긴다(설계
+                # `_workspace/refactor/2026-10-09_execute_sell_baseline.md` §2).
+                # 폴백 몸체(블록 a~g)는 `_handle_sell_market_disallowed` 로
+                # 뽑았다 — 🔴 추가 `try` 로 감싸지 않는다(그 메서드 docstring 참조,
+                # F-422-1 은 고치지 않고 그대로 옮긴다).
                 if order_division == primary_div and (
                     is_market_order_disallowed(e) or primary_div is not OrderDivision.MARKET
                 ):
-                    _after_market_primary = primary_div is not OrderDivision.MARKET
-                    if _after_market_primary:
-                        # K7 — 애프터 1차 거부 직후 ETP 관측(fail-open, 행위 분기 없음).
-                        # 적대 검증 시정(MEDIUM) — 자문 §S5/§4-F 는 "관측을 행복
-                        # 경로에 두면 손절에 DB 왕복 지연이 붙으므로 거부 후로
-                        # 옮긴다" 고 명시했는데, 거부 후라도 `await` 로 41 폴백
-                        # 주문 발사 앞을 막으면 지연이 그대로 남는다 — 41 발사와
-                        # 무관하게 fire-and-forget 한다(`_log_stale_async` 선례,
-                        # `:471` 과 동일 RuntimeError 흡수).
-                        try:
-                            asyncio.create_task(self._observe_after_exit_etp(ticker))
-                        except RuntimeError:
-                            logger.debug(
-                                "[after_etp_exit_observe] task 등록 실패 — 이벤트 루프 없음",
-                                exc_info=True,
-                            )
-                        logger.info(
-                            "[after_exit_rejected] ticker=%s div=%s msg_cd=%s classified=%s "
-                            "ttl_registered=1 msg1=%s",
-                            ticker, order_division.value, e.msg_cd,
-                            _classify_after_exit_rejection(e), e.msg1,
-                        )
-                    from src.engine.scanner import ticker_prices as _ticker_prices
-                    px_info = _ticker_prices.get(ticker) or {}
-                    cur_price = int(px_info.get("current_price") or 0)
-                    if cur_price <= 0:
-                        # 현재가 미확보 — 폴백 불가, 일반 재시도 흐름으로 폴백 (매도 의무 보존)
-                        logger.warning(
-                            "매도 시장가 호가 불가 — 현재가 캐시 미확보로 폴백 불가, 재시도 진행: %s "
-                            "(전략: %s, [%s] %s)",
-                            t(ticker), strategy_id, e.msg_cd, e.msg1,
-                        )
-                        if _after_market_primary:
-                            # 적대 검증 시정(CRITICAL) — 이 분기는 폴백을
-                            # 시도조차 못 하는데, 종전엔 봉인①(TTL 항상 등록)·
-                            # 봉인②(그날 저녁 포기 래치)가 모두 미적용이었다.
-                            # 그 결과 다음 틱에도 아무 차단이 없어 애프터마켓
-                            # (16:00~20:00, 실시간 연속체결) 동안 매 틱 최대
-                            # SELL_MAX_RETRIES(3)발씩 무제한 재발사할 수 있었다
-                            # — 정확히 자문 §1-E 가 막으려던 폭주다.
-                            _now_np = datetime.now(_KST_TZ)
-                            _ttl_np_ok = self._register_after_exit_disallowed(
-                                ticker, _now_np, fallback_succeeded=False,
-                            )
-                            logger.info(
-                                "[after_exit_rejected] ticker=%s div=%s msg_cd=%s "
-                                "classified=%s ttl_registered=%d msg1=no_price_for_fallback",
-                                ticker, order_division.value, e.msg_cd,
-                                _classify_after_exit_rejection(e), int(_ttl_np_ok),
-                            )
-                            self._bump_after_exit_fails_and_maybe_giveup(
-                                ticker, strategy_id, _now_np,
-                            )
-                    else:
-                        fallback_price = step_down(cur_price, steps=5)
-                        try:
-                            fb_result = await place_order(
-                                ticker=ticker,
-                                side=OrderSide.SELL,
-                                quantity=send_qty,
-                                price=fallback_price,
-                                order_division=fallback_div,
-                                exchange=target_exchange,
-                            )
-
-                            # 주문번호 매핑 즉시 등록 — await insert_trade 진입 전 동기 영역 (매수 패턴 동일).
-                            # 🔴 cycle385 §a-2 — 같은 회차의 `send_qty`(루프 상단 값) 그대로.
-                            # 1차 주문은 거부돼 체결이 없으므로 이 값이 여전히 유효하다.
-                            self._order_qty[fb_result.order_no] = send_qty
-                            self._order_strategy[fb_result.order_no] = strategy_id
-                            self._order_ticker[fb_result.order_no] = ticker
-                            self._order_exchange[fb_result.order_no] = target_exchange
-                            # cycle291 — 매도 폴백(`fallback_div` — 정규장/
-                            # 프리장 `00`, 애프터 `41`)의 실제 전송값을 기록한다.
-                            self._order_division[fb_result.order_no] = fallback_div.value
-
-                            # 🔴 cycle327 ⓑ — 폴백 주문도 이미 나갔다. 주 경로와 같은
-                            # 헬퍼가 경계를 닫는다(문맥이 아니라 헬퍼가 예외를 막는다).
-                            await self._persist_sell_pending_after_send(
-                                ticker=ticker,
-                                order_no=fb_result.order_no,
-                                strategy_id=strategy_id,
-                                record_price=fallback_price,
-                                quantity=send_qty,
-                                path="fallback",
-                                order_unpr=fallback_price,  # cycle409 — 주문가 = 폴백 지정가
-                            )
-
-                            logger.warning(
-                                "매도 시장가 거부 → 지정가 5호가 폴백: %s @ %d "
-                                "(원인 [%s] %s, 주문번호: %s, 전략: %s)",
-                                t(ticker), fallback_price, e.msg_cd, e.msg1,
-                                fb_result.order_no, strategy_id,
-                            )
-                            if _after_market_primary:
-                                logger.info(
-                                    "[after_exit_division] ticker=%s div=%s unpr=%d cur=%d "
-                                    "exchange=%s dial=%s",
-                                    ticker, fallback_div.value, fallback_price, cur_price,
-                                    target_exchange, _after_market_dial,
-                                )
-                            # 사이클 55 R-1 Q2 — 폴백 성공 시에도 30초 TTL 등록 (동일 tick 폭주 차단).
-                            # KRX/NXT 무관. next_day_clear_required = is_nxt AND NOT fallback_succeeded
-                            # → 성공이므로 False.
-                            _now_kst_fb = datetime.now(_KST_TZ)
-                            self._sell_rejection.register_market_order_disallowed(
-                                ticker, _now_kst_fb,
-                                is_nxt_session=is_nxt_session_hours(_now_kst_fb),
-                                fallback_succeeded=True,
-                            )
-                            return  # 폴백 성공 — _selling 은 체결통보에서 해제
-                        except KisApiError as fb_err:
-                            last_error = fb_err
-                            logger.error(
-                                "매도 지정가 폴백도 거부 — 재시도 중단, 포지션 보존: %s "
-                                "([%s] %s → [%s] %s)",
-                                t(ticker), e.msg_cd, e.msg1, fb_err.msg_cd, fb_err.msg1,
-                            )
-                            self._selling.discard(ticker)
-                            await write_log(
-                                "WARNING",
-                                f"매도 시장가+지정가 폴백 모두 거부 — 포지션 보존: {t(ticker)} "
-                                f"(전략: {strategy_id}, [{fb_err.msg_cd}] {fb_err.msg1})",
-                            )
-                            if _after_market_primary:
-                                logger.info(
-                                    "[after_exit_rejected] ticker=%s div=%s msg_cd=%s "
-                                    "classified=%s ttl_registered=1 msg1=%s",
-                                    ticker, fallback_div.value, fb_err.msg_cd,
-                                    _classify_after_exit_rejection(fb_err), fb_err.msg1,
-                                )
-                            # 사이클 55 R-1 Q2 — 폴백 실패 30초 TTL + NXT 시 익일 청산 전환.
-                            _now_kst_fb = datetime.now(_KST_TZ)
-                            _is_nxt = is_nxt_session_hours(_now_kst_fb)
-                            _result = self._sell_rejection.register_market_order_disallowed(
-                                ticker, _now_kst_fb,
-                                is_nxt_session=_is_nxt,
-                                fallback_succeeded=False,
-                            )
-                            if _result.next_day_clear_required:
-                                # NXT 폴백 실패 → 익일 09:00 KRX 시장가 청산 큐 등록
-                                try:
-                                    _pending = self._pending_next_day_clear_provider()
-                                    if _pending is not None:
-                                        _pending.add((ticker, strategy_id))
-                                        await write_log(
-                                            "WARNING",
-                                            f"[next_day_clear_deferred] ticker={ticker} "
-                                            f"strategy={strategy_id} "
-                                            f"reason=market_order_disallowed_nxt_fallback_fail",
-                                        )
-                                except Exception:
-                                    logger.debug(
-                                        "[next_day_clear_deferred] _pending_next_day_clear 등록 실패: %s",
-                                        ticker, exc_info=True,
-                                    )
-                            if _after_market_primary:
-                                # cycle287 K9 봉인2 — 일일 포기 래치. 30초 TTL 만으로는
-                                # 저녁 4시간에 ticker 당 ≈1,440 요청이 남는다. 임계
-                                # 도달 시 그날 밤은 포기(다음 09:00 래치) — 위 30초
-                                # TTL 등록보다 **뒤**에서 덮어써야 next-09:00 이 이긴다.
-                                # 공용 헬퍼(적대 검증 시정) — `cur_price<=0` 분기와
-                                # 같은 카운터·같은 임계를 공유한다.
-                                self._bump_after_exit_fails_and_maybe_giveup(
-                                    ticker, strategy_id, _now_kst_fb,
-                                )
-                            return  # positions/DB 보존, 다음 사이클 자연 재트리거
+                    outcome = await self._handle_sell_market_disallowed(
+                        e=e,
+                        ticker=ticker,
+                        strategy_id=strategy_id,
+                        order_division=order_division,
+                        primary_div=primary_div,
+                        fallback_div=fallback_div,
+                        target_exchange=target_exchange,
+                        send_qty=send_qty,
+                        after_market_dial=_after_market_dial,
+                    )
+                    if outcome is SellFallbackOutcome.SENT:
+                        return  # 폴백 성공 — _selling 은 체결통보에서 해제
+                    if outcome is SellFallbackOutcome.REJECTED:
+                        return  # positions/DB 보존, 다음 사이클 자연 재트리거
+                    # NO_PRICE — 폴백을 시도조차 못함, 아래 일반 재시도로 낙하
                 logger.warning(
                     "매도 주문 실패 (시도 %d/%d): %s — [%s] %s",
                     attempt, SELL_MAX_RETRIES, ticker, e.msg_cd, e.msg1,
@@ -2573,6 +2450,207 @@ class OrderEngine:
         error_msg = f"매도 주문 최종 실패: {ticker} {signal.value} — {last_error}"
         logger.critical(error_msg)
         await write_log("CRITICAL", error_msg)
+
+    async def _handle_sell_market_disallowed(
+        self,
+        *,
+        e: KisApiError,
+        ticker: str,
+        strategy_id: str,
+        order_division: OrderDivision,
+        primary_div: OrderDivision,
+        fallback_div: OrderDivision,
+        target_exchange: str,
+        send_qty: int,
+        after_market_dial: str,
+    ) -> SellFallbackOutcome:
+        """⑰ — 시장가 거부 → 지정가 5호가 폴백 (B4-3, cycle424 추출, 행위 보존).
+
+        `execute_sell` 의 `except KisApiError as e:` 안, 관문
+        (`order_division == primary_div and (is_market_order_disallowed(e) or
+        primary_div is not OrderDivision.MARKET)`) 을 지난 **뒤에만** 불린다 —
+        관문 판정 자체는 호출부에 남아 있다(설계 =
+        `_workspace/refactor/2026-10-09_execute_sell_baseline.md` §2).
+
+        🔴 **호출부는 이 메서드를 추가 `try` 로 감싸지 않는다.** 폴백
+        `place_order`(아래)가 `KisApiError` 가 **아닌** 예외(전송 오류·타임아웃
+        등 — F-422-1, 이번 추출에서 고치지 않는다)를 내면 이 메서드 안의
+        `except KisApiError as fb_err:` 가 받지 못해 그대로 전파되고, 이미
+        들어와 있는 호출부의 `except KisApiError as e:` 도 비-`KisApiError`
+        예외를 못 받는다 — `execute_sell` 밖, 결국 `risk.on_tick` 그 틱 전체로
+        전파되는 것이 **지금 행위**다. 추가 `try/except Exception` 으로 감싸면
+        그 예외가 재시도 루프로 되돌아가 「주문이 나간 뒤의 실패로 재발사
+        금지」(cycle327)를 깬다 — 호출 자리는 그대로 둔다.
+
+        반환 = `SellFallbackOutcome` — `SENT`/`REJECTED` 는 호출부가 `return`,
+        `NO_PRICE` 는 호출부가 일반 재시도 로그 + backoff 로 낙하한다.
+        """
+        _after_market_primary = primary_div is not OrderDivision.MARKET
+        if _after_market_primary:
+            # K7 — 애프터 1차 거부 직후 ETP 관측(fail-open, 행위 분기 없음).
+            # 적대 검증 시정(MEDIUM) — 자문 §S5/§4-F 는 "관측을 행복
+            # 경로에 두면 손절에 DB 왕복 지연이 붙으므로 거부 후로
+            # 옮긴다" 고 명시했는데, 거부 후라도 `await` 로 41 폴백
+            # 주문 발사 앞을 막으면 지연이 그대로 남는다 — 41 발사와
+            # 무관하게 fire-and-forget 한다(`_log_stale_async` 선례,
+            # `:471` 과 동일 RuntimeError 흡수).
+            try:
+                asyncio.create_task(self._observe_after_exit_etp(ticker))
+            except RuntimeError:
+                logger.debug(
+                    "[after_etp_exit_observe] task 등록 실패 — 이벤트 루프 없음",
+                    exc_info=True,
+                )
+            logger.info(
+                "[after_exit_rejected] ticker=%s div=%s msg_cd=%s classified=%s "
+                "ttl_registered=1 msg1=%s",
+                ticker, order_division.value, e.msg_cd,
+                _classify_after_exit_rejection(e), e.msg1,
+            )
+        from src.engine.scanner import ticker_prices as _ticker_prices
+        px_info = _ticker_prices.get(ticker) or {}
+        cur_price = int(px_info.get("current_price") or 0)
+        if cur_price <= 0:
+            # 현재가 미확보 — 폴백 불가, 일반 재시도 흐름으로 폴백 (매도 의무 보존)
+            logger.warning(
+                "매도 시장가 호가 불가 — 현재가 캐시 미확보로 폴백 불가, 재시도 진행: %s "
+                "(전략: %s, [%s] %s)",
+                t(ticker), strategy_id, e.msg_cd, e.msg1,
+            )
+            if _after_market_primary:
+                # 적대 검증 시정(CRITICAL) — 이 분기는 폴백을
+                # 시도조차 못 하는데, 종전엔 봉인①(TTL 항상 등록)·
+                # 봉인②(그날 저녁 포기 래치)가 모두 미적용이었다.
+                # 그 결과 다음 틱에도 아무 차단이 없어 애프터마켓
+                # (16:00~20:00, 실시간 연속체결) 동안 매 틱 최대
+                # SELL_MAX_RETRIES(3)발씩 무제한 재발사할 수 있었다
+                # — 정확히 자문 §1-E 가 막으려던 폭주다.
+                _now_np = datetime.now(_KST_TZ)
+                _ttl_np_ok = self._register_after_exit_disallowed(
+                    ticker, _now_np, fallback_succeeded=False,
+                )
+                logger.info(
+                    "[after_exit_rejected] ticker=%s div=%s msg_cd=%s "
+                    "classified=%s ttl_registered=%d msg1=no_price_for_fallback",
+                    ticker, order_division.value, e.msg_cd,
+                    _classify_after_exit_rejection(e), int(_ttl_np_ok),
+                )
+                self._bump_after_exit_fails_and_maybe_giveup(
+                    ticker, strategy_id, _now_np,
+                )
+            return SellFallbackOutcome.NO_PRICE
+        fallback_price = step_down(cur_price, steps=5)
+        try:
+            fb_result = await place_order(
+                ticker=ticker,
+                side=OrderSide.SELL,
+                quantity=send_qty,
+                price=fallback_price,
+                order_division=fallback_div,
+                exchange=target_exchange,
+            )
+
+            # 주문번호 매핑 즉시 등록 — await insert_trade 진입 전 동기 영역 (매수 패턴 동일).
+            # 🔴 cycle385 §a-2 — 같은 회차의 `send_qty`(루프 상단 값) 그대로.
+            # 1차 주문은 거부돼 체결이 없으므로 이 값이 여전히 유효하다.
+            self._order_qty[fb_result.order_no] = send_qty
+            self._order_strategy[fb_result.order_no] = strategy_id
+            self._order_ticker[fb_result.order_no] = ticker
+            self._order_exchange[fb_result.order_no] = target_exchange
+            # cycle291 — 매도 폴백(`fallback_div` — 정규장/
+            # 프리장 `00`, 애프터 `41`)의 실제 전송값을 기록한다.
+            self._order_division[fb_result.order_no] = fallback_div.value
+
+            # 🔴 cycle327 ⓑ — 폴백 주문도 이미 나갔다. 주 경로와 같은
+            # 헬퍼가 경계를 닫는다(문맥이 아니라 헬퍼가 예외를 막는다).
+            await self._persist_sell_pending_after_send(
+                ticker=ticker,
+                order_no=fb_result.order_no,
+                strategy_id=strategy_id,
+                record_price=fallback_price,
+                quantity=send_qty,
+                path="fallback",
+                order_unpr=fallback_price,  # cycle409 — 주문가 = 폴백 지정가
+            )
+
+            logger.warning(
+                "매도 시장가 거부 → 지정가 5호가 폴백: %s @ %d "
+                "(원인 [%s] %s, 주문번호: %s, 전략: %s)",
+                t(ticker), fallback_price, e.msg_cd, e.msg1,
+                fb_result.order_no, strategy_id,
+            )
+            if _after_market_primary:
+                logger.info(
+                    "[after_exit_division] ticker=%s div=%s unpr=%d cur=%d "
+                    "exchange=%s dial=%s",
+                    ticker, fallback_div.value, fallback_price, cur_price,
+                    target_exchange, after_market_dial,
+                )
+            # 사이클 55 R-1 Q2 — 폴백 성공 시에도 30초 TTL 등록 (동일 tick 폭주 차단).
+            # KRX/NXT 무관. next_day_clear_required = is_nxt AND NOT fallback_succeeded
+            # → 성공이므로 False.
+            _now_kst_fb = datetime.now(_KST_TZ)
+            self._sell_rejection.register_market_order_disallowed(
+                ticker, _now_kst_fb,
+                is_nxt_session=is_nxt_session_hours(_now_kst_fb),
+                fallback_succeeded=True,
+            )
+            return SellFallbackOutcome.SENT
+        except KisApiError as fb_err:
+            logger.error(
+                "매도 지정가 폴백도 거부 — 재시도 중단, 포지션 보존: %s "
+                "([%s] %s → [%s] %s)",
+                t(ticker), e.msg_cd, e.msg1, fb_err.msg_cd, fb_err.msg1,
+            )
+            self._selling.discard(ticker)
+            await write_log(
+                "WARNING",
+                f"매도 시장가+지정가 폴백 모두 거부 — 포지션 보존: {t(ticker)} "
+                f"(전략: {strategy_id}, [{fb_err.msg_cd}] {fb_err.msg1})",
+            )
+            if _after_market_primary:
+                logger.info(
+                    "[after_exit_rejected] ticker=%s div=%s msg_cd=%s "
+                    "classified=%s ttl_registered=1 msg1=%s",
+                    ticker, fallback_div.value, fb_err.msg_cd,
+                    _classify_after_exit_rejection(fb_err), fb_err.msg1,
+                )
+            # 사이클 55 R-1 Q2 — 폴백 실패 30초 TTL + NXT 시 익일 청산 전환.
+            _now_kst_fb = datetime.now(_KST_TZ)
+            _is_nxt = is_nxt_session_hours(_now_kst_fb)
+            _result = self._sell_rejection.register_market_order_disallowed(
+                ticker, _now_kst_fb,
+                is_nxt_session=_is_nxt,
+                fallback_succeeded=False,
+            )
+            if _result.next_day_clear_required:
+                # NXT 폴백 실패 → 익일 09:00 KRX 시장가 청산 큐 등록
+                try:
+                    _pending = self._pending_next_day_clear_provider()
+                    if _pending is not None:
+                        _pending.add((ticker, strategy_id))
+                        await write_log(
+                            "WARNING",
+                            f"[next_day_clear_deferred] ticker={ticker} "
+                            f"strategy={strategy_id} "
+                            f"reason=market_order_disallowed_nxt_fallback_fail",
+                        )
+                except Exception:
+                    logger.debug(
+                        "[next_day_clear_deferred] _pending_next_day_clear 등록 실패: %s",
+                        ticker, exc_info=True,
+                    )
+            if _after_market_primary:
+                # cycle287 K9 봉인2 — 일일 포기 래치. 30초 TTL 만으로는
+                # 저녁 4시간에 ticker 당 ≈1,440 요청이 남는다. 임계
+                # 도달 시 그날 밤은 포기(다음 09:00 래치) — 위 30초
+                # TTL 등록보다 **뒤**에서 덮어써야 next-09:00 이 이긴다.
+                # 공용 헬퍼(적대 검증 시정) — `cur_price<=0` 분기와
+                # 같은 카운터·같은 임계를 공유한다.
+                self._bump_after_exit_fails_and_maybe_giveup(
+                    ticker, strategy_id, _now_kst_fb,
+                )
+            return SellFallbackOutcome.REJECTED
 
     async def handle_execution_notice(
         self,

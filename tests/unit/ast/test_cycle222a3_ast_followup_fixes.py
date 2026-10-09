@@ -445,8 +445,9 @@ _APPROVED_CONTENT_SHA: dict[str, tuple[str, str]] = {
         "cycle330(2026-09-20) — 합류자 없는 토큰 발급 실패의 고아 Future 회수, 8영역 승인",
     ),
     "src/engine/order_engine.py": (
-        "08c479841352fb579f767c109de3e8f901d1c27bdce705b39b5ba6556fc0b3e1",
-        "cycle409(2026-10-04 Q4) — 매도 PENDING 에 주문가(order_price) 전달, 8영역 승인",
+        "2d051756c364b0fac73740d3e334bddaa33ae1c02edcd5ba3001a07fca8d455e",
+        "cycle424(2026-10-09) — 리팩토링 카드 #12 B4-3: execute_sell 시장가 거부 "
+        "폴백 블록(⑰) 을 _handle_sell_market_disallowed 로 추출(행위 보존), 8영역 승인",
     ),
     "src/engine/risk.py": (
         "a2187b8270446379988d24dfbe39b902d6ab37b112d4b6ce7330ee171434e222",

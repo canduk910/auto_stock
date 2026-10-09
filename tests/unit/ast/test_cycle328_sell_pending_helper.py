@@ -52,6 +52,9 @@ _HELPER = "_persist_sell_pending_after_send"   # 경계 래퍼(매도 전용)
 _BUY_HELPER = "_persist_buy_pending_after_send"  # 경계 래퍼(매수 전용, cycle335)
 _CORE = "_persist_pending_after_send"          # 4경로 공용 코어(cycle334)
 _MAPPING_TARGETS = ("_order_qty", "_order_strategy", "_order_ticker")
+#: B4-3(cycle424) — 매도 폴백 블록(⑰)이 뽑혀 나간 메서드. 매도 축의 PENDING
+#: 헬퍼·매핑·`place_order` 호출이 이제 `execute_sell` 과 이 메서드로 **1+1** 갈린다.
+_SELL_FALLBACK = "_handle_sell_market_disallowed"
 
 #: 축별 경계 래퍼 — 두 축이 **같은 구조 계약**을 진다(cycle335 가 매수를 더했다).
 #: 🔴 한 축만 검사하면 다른 축의 경계가 조용히 좁혀지거나 사라진다.
@@ -125,12 +128,19 @@ def test_g328_0a_helper_exists():
 
 
 def test_g328_0b_helper_is_called_exactly_twice_from_execute_sell():
-    """호출부는 매도 주 경로·폴백 **정확히 2곳**이다.
+    """호출부는 매도 주 경로·폴백에 걸쳐 **정확히 2곳**이다.
 
     3곳이 되면 이 가드의 순서 단언이 그 신규 경로를 안 본 채 통과할 수 있다.
+
+    🔴 B4-3(cycle424) — 폴백 호출부가 `_handle_sell_market_disallowed` 로
+    옮겨가 `execute_sell` 1 + 추출 메서드 1 로 갈린다(합산 2는 그대로).
     """
-    calls = _helper_call_linenos(_func("execute_sell"))
-    assert len(calls) == 2, f"호출부 {len(calls)}곳 (기대 2곳): {calls}"
+    calls_sell = _helper_call_linenos(_func("execute_sell"))
+    calls_fallback = _helper_call_linenos(_func(_SELL_FALLBACK))
+    assert len(calls_sell) == 1, f"execute_sell 안 호출 {len(calls_sell)}곳 (기대 1곳): {calls_sell}"
+    assert len(calls_fallback) == 1, (
+        f"{_SELL_FALLBACK} 안 호출 {len(calls_fallback)}곳 (기대 1곳): {calls_fallback}"
+    )
 
 
 def test_g328_0c_core_is_shared_by_all_four_paths():
@@ -147,23 +157,36 @@ def test_g328_0c_core_is_shared_by_all_four_paths():
     않는다** — 직접 부르면 그 경로만 경계 없이 돌아 cycle327 결함이 되살아난다.
 
     🔴 이 구조가 `4곳 → 1코어 + 축별 경계 2` 라는 성과 그 자체다.
+
+    🔴 B4-3(cycle424) — 매도 폴백 호출부가 `_handle_sell_market_disallowed` 로
+    옮겨가 `execute_sell` 과 그 메서드에 걸쳐 1+1 이 된다. 매도 축의
+    "caller_fns" 를 둘로 늘려 둘 다 보되, 둘 다 코어는 직접 부르지 않는다는
+    단언은 유지한다.
     """
+    _CALLER_FNS = {
+        "execute_buy": ("execute_buy",),
+        "execute_sell": ("execute_sell", _SELL_FALLBACK),
+    }
     for axis, fn_name, wrapper_name in (
         ("매수", "execute_buy", _BUY_HELPER),
         ("매도", "execute_sell", _HELPER),
     ):
-        wrapper_calls = _calls_named(_func(fn_name), wrapper_name)
+        caller_fns = _CALLER_FNS[fn_name]
+        wrapper_calls = [
+            ln for cfn in caller_fns for ln in _calls_named(_func(cfn), wrapper_name)
+        ]
         assert len(wrapper_calls) == 2, (
-            f"`{fn_name}` 의 {axis} 경계 래퍼 호출이 {len(wrapper_calls)}곳 "
+            f"`{caller_fns}` 의 {axis} 경계 래퍼 호출이 {len(wrapper_calls)}곳 "
             f"(기대 2곳 = 주·폴백): {wrapper_calls}. 축이 승격되지 않았거나 "
             "다시 인라인으로 풀렸다"
         )
         assert len(_core_call_linenos(_func(wrapper_name))) == 1, (
             f"{axis} 경계 래퍼가 코어를 정확히 한 번 부르지 않는다"
         )
-        assert _core_call_linenos(_func(fn_name)) == [], (
-            f"`{fn_name}` 이 코어를 직접 부른다 — 그 경로는 접수 후 경계가 없다"
-        )
+        for cfn in caller_fns:
+            assert _core_call_linenos(_func(cfn)) == [], (
+                f"`{cfn}` 이 코어를 직접 부른다 — 그 경로는 접수 후 경계가 없다"
+            )
 
 
 def test_g328_0d_core_does_not_close_the_boundary():
@@ -193,33 +216,39 @@ def test_g328_1_mapping_precedes_helper_with_no_await_between():
     금기 = 「주문번호 매핑 등록은 `place_order` 응답 직후 동기 영역,
     `await insert_trade` 진입 전」. 매핑 누락은 체결통보가 기본값 "momentum" 으로
     잘못 INSERT 되는 경로다.
+
+    🔴 B4-3(cycle424) — 주 경로(`execute_sell`)·폴백(`_handle_sell_market_disallowed`)
+    이 각자의 함수 본문 안에서 이 전제를 **각 1곳씩** 지킨다(둘로 나뉘기 전엔
+    같은 함수 안 2곳이었다).
     """
-    fn = _func("execute_sell")
-    calls = _helper_call_linenos(fn)
-    mappings = _mapping_assign_linenos(fn)
-    awaits = _await_linenos(fn)
+    for fn_name in ("execute_sell", _SELL_FALLBACK):
+        fn = _func(fn_name)
+        calls = _helper_call_linenos(fn)
+        mappings = _mapping_assign_linenos(fn)
+        awaits = _await_linenos(fn)
 
-    assert len(calls) == 2, f"호출부 2곳 전제가 깨졌다: {calls}"
-    assert len(mappings) >= 2 * len(_MAPPING_TARGETS), (
-        f"매핑 대입이 {len(mappings)}건 — 두 경로 × {len(_MAPPING_TARGETS)}키 미만이다: {mappings}"
-    )
+        assert len(calls) == 1, f"{fn_name} 호출부 1곳 전제가 깨졌다: {calls}"
+        assert len(mappings) >= len(_MAPPING_TARGETS), (
+            f"{fn_name} 매핑 대입이 {len(mappings)}건 — {len(_MAPPING_TARGETS)}키 미만이다: "
+            f"{mappings}"
+        )
 
-    for call_lineno in calls:
-        before = [m for m in mappings if m < call_lineno]
-        assert before, (
-            f"헬퍼 호출(line {call_lineno}) **앞**에 매핑 대입이 없다 — "
-            "호출이 매핑보다 먼저 오면 매핑 누락 창이 열린다"
-        )
-        block_start = max(before)
-        between = [
-            a for a in awaits
-            if block_start < a < call_lineno
-        ]
-        assert not between, (
-            f"매핑(line {block_start}) 과 헬퍼 호출(line {call_lineno}) 사이에 "
-            f"`await` 가 있다: {between}. 그 자리에 양보점이 생기면 매핑 등록 전에 "
-            "체결통보가 들어와 기본 전략으로 잘못 INSERT 된다"
-        )
+        for call_lineno in calls:
+            before = [m for m in mappings if m < call_lineno]
+            assert before, (
+                f"{fn_name}: 헬퍼 호출(line {call_lineno}) **앞**에 매핑 대입이 없다 — "
+                "호출이 매핑보다 먼저 오면 매핑 누락 창이 열린다"
+            )
+            block_start = max(before)
+            between = [
+                a for a in awaits
+                if block_start < a < call_lineno
+            ]
+            assert not between, (
+                f"{fn_name}: 매핑(line {block_start}) 과 헬퍼 호출(line {call_lineno}) 사이에 "
+                f"`await` 가 있다: {between}. 그 자리에 양보점이 생기면 매핑 등록 전에 "
+                "체결통보가 들어와 기본 전략으로 잘못 INSERT 된다"
+            )
 
 
 # ---------------------------------------------------------------------------
