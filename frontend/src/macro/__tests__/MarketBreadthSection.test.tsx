@@ -214,6 +214,15 @@ describe('MarketBreadthSection — 시장 등락 통계 (cycle416)', () => {
     expect(text('macro-section-market-breadth')).not.toContain('10-05')
   })
 
+  it('S12c 아직 없음 안내 문구 — 대기 판정 기준(10:00)과 맞춘다(남은 결함 #3)', () => {
+    // 백엔드 `src/engine/market_breadth.py::PUBLISH_PENDING_CUTOFF = time(10, 0)` —
+    // "보통 다음 날 아침 8시쯤" 은 실제 대기 해제 기준(10시)과 다른 숫자라 문구를 10시로 맞춘다.
+    renderData(fixture({ pending_date: '2026-10-09' }))
+    const msg = text('breadth-pending')
+    expect(msg).toContain('10시')
+    expect(msg).not.toContain('8시')
+  })
+
   it('S12b 정상 상태에는 상태 줄이 하나도 없다', () => {
     renderData()
     for (const id of ['breadth-missing', 'breadth-short', 'breadth-pending']) {

@@ -187219,7 +187219,7 @@ frontend:
       - frontend/src/pages/__tests__/Dashboard.fix1.cycle414.test.tsx
       - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
-generated_at: '2026-10-09T05:47:31.080Z'
+generated_at: '2026-10-09T08:02:58.843Z'
 stats:
   backend_modules: 186
   backend_tests: 1317

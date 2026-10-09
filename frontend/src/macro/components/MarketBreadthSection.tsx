@@ -51,6 +51,14 @@ const COLUMNS: { key: ColumnKey; label: string; colorClass?: string }[] = [
 function BreadthTooltip({ active, payload }: { active?: boolean; payload?: { payload: BreadthChartRow }[] }) {
   if (!active || !payload || payload.length === 0) return null
   const row = payload[0].payload
+  if (row.missing) {
+    return (
+      <div className="rounded-lg border bg-white px-3 py-2 text-xs shadow-sm">
+        <div className="mb-1 font-medium text-gray-700">{row.label}</div>
+        <div className="text-gray-500">자료 없음 — 빠짐</div>
+      </div>
+    )
+  }
   return (
     <div className="rounded-lg border bg-white px-3 py-2 text-xs shadow-sm">
       <div className="mb-1 font-medium text-gray-700">{row.label}</div>
@@ -133,7 +141,7 @@ function BreadthBody({
   onMarketChange: (m: BreadthMarketKey) => void
 }) {
   const summary = data.summary[market]
-  const chartRows = buildBreadthChartRows(data.days, market)
+  const chartRows = buildBreadthChartRows(data.days, market, data.missing_dates)
   const axisMax = breadthAxisMax(chartRows)
   const adrLabel = summary.n_days === data.window.requested ? "ADR" : `ADR(${summary.n_days}일)`
   const adrValue = summary.adr == null ? "—" : summary.adr.toFixed(1)
@@ -250,7 +258,7 @@ function BreadthBody({
       )}
       {data.pending_date && (
         <div data-testid="breadth-pending" className="mb-3 text-sm text-gray-500">
-          {mmdd(data.pending_date)} 자료는 아직 KRX 에 올라오지 않았습니다(보통 다음 날 아침 8시쯤 — 휴장일이었다면 그대로 빠집니다)
+          {mmdd(data.pending_date)} 자료는 아직 KRX 에 올라오지 않았습니다(다음 평일 오전 10시까지는 정상 — 휴장일이었다면 그대로 빠집니다)
         </div>
       )}
 

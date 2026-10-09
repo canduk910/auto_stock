@@ -21,6 +21,8 @@ export interface BreadthChartRow {
   limit_up: number
   limit_down: number
   up_ratio_pct: number | null
+  /** 호출 실패로 빠진 날(응답 `missing_dates`) — x축 자리를 0/null 로 비워 둔 칸. */
+  missing: boolean
 }
 
 /** `'YYYY-MM-DD'` → `'MM-DD'`. `new Date` 를 쓰지 않는다. */
@@ -37,9 +39,19 @@ export function formatUpRatio(ratio: number | null): string {
 /**
  * 응답 `days[]`(최신 먼저)를 차트용(오래된 → 최신)으로 뒤집어 행을 만든다.
  * 입력 배열은 제자리에서 바꾸지 않는다 — 표는 같은 배열을 최신 먼저 그대로 쓴다.
+ *
+ * `missingDates`(= 응답 `missing_dates`, cycle418-B 남은 결함 #2) — 호출 실패로 빠진 날을
+ * 0/null · `missing=true` 칸으로 x축에 끼워 넣는다. 영업일 달력을 새로 계산하지 않고 응답이
+ * 이미 준 두 날짜 배열(`days` + `missing_dates`)만 `YYYY-MM-DD` 문자열 그대로 정렬해 합친다 —
+ * 출처는 응답 하나다. `days[]` 에 이미 있는 날짜는 중복으로 끼우지 않는다(정상 입력에서는
+ * 두 배열이 겹치지 않지만, 겹치는 입력이 와도 x축에 같은 날짜 칸이 두 번 생기지 않게 막는다).
  */
-export function buildBreadthChartRows(days: BreadthDay[], market: BreadthMarketKey): BreadthChartRow[] {
-  return [...days].reverse().map((day) => {
+export function buildBreadthChartRows(
+  days: BreadthDay[],
+  market: BreadthMarketKey,
+  missingDates: string[] = [],
+): BreadthChartRow[] {
+  const present: BreadthChartRow[] = [...days].reverse().map((day) => {
     const stats = day[market]
     return {
       date: day.date,
@@ -51,8 +63,25 @@ export function buildBreadthChartRows(days: BreadthDay[], market: BreadthMarketK
       limit_up: stats.limit_up,
       limit_down: stats.limit_down,
       up_ratio_pct: stats.up_ratio == null ? null : stats.up_ratio * 100,
+      missing: false,
     }
   })
+  const presentDates = new Set(present.map((row) => row.date))
+  const gaps: BreadthChartRow[] = missingDates
+    .filter((date) => !presentDates.has(date))
+    .map((date) => ({
+      date,
+      label: mmdd(date),
+      up: 0,
+      down: 0,
+      flat: 0,
+      no_trade: 0,
+      limit_up: 0,
+      limit_down: 0,
+      up_ratio_pct: null,
+      missing: true,
+    }))
+  return [...present, ...gaps].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
 }
 
 // cycle416 검증 결함(screens#4) — 1/2/5/10 만으로는 올림 간격이 최대 2배까지 벌어져
