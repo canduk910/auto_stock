@@ -204,11 +204,17 @@ export default function StrategySummaryTable({ strategies, monitor, exitLines, t
 
               const myExitLines = (exitLines ?? []).filter((it) => it.strategy_id === sid)
               let stopMarginPct: number | null = null
+              // L13 — 최소 여유를 낸 종목의 `stop_source` 가 근사(`hard_pct`)면 함께 표시한다
+              // (여러 보유의 min 이라 엔진 값과 근사값이 섞일 수 있다).
+              let stopMarginApprox = false
               for (const item of myExitLines) {
                 const cur = finiteOrNull(prices[item.ticker]?.current_price)
                 if (cur === null || cur <= 0 || item.stop_price == null) continue
                 const d = ((cur - item.stop_price) / cur) * 100
-                if (stopMarginPct === null || d < stopMarginPct) stopMarginPct = d
+                if (stopMarginPct === null || d < stopMarginPct) {
+                  stopMarginPct = d
+                  stopMarginApprox = item.stop_source === 'hard_pct'
+                }
               }
               const stopTone: 'normal' | 'orange' | 'red' = stopMarginPct === null
                 ? 'normal'
@@ -248,7 +254,11 @@ export default function StrategySummaryTable({ strategies, monitor, exitLines, t
 
               const steps = (routeEntry?.funnel as Array<{ step_no: number; step_name: string; survived_count: number }> | undefined) ?? []
               const finalStep = finalFunnelStep(steps)
-              const candidateCount = finalStep ? finalStep.survived_count : Object.keys(info.targets ?? {}).length
+              // N6(suites) — 엔진 정지 중엔 funnel·targets 둘 다 정산이 비운 값일 수 있어 「0」
+              // 이 「후보 없음」의 확정이 아니라 「모른다」다.
+              const candidateCount = engineStopped
+                ? null
+                : (finalStep ? finalStep.survived_count : Object.keys(info.targets ?? {}).length)
               const bottleneckNo = funnelBottleneck(steps)
               const bottleneckStep = bottleneckNo != null ? steps.find((s) => s.step_no === bottleneckNo) : null
 
@@ -274,8 +284,8 @@ export default function StrategySummaryTable({ strategies, monitor, exitLines, t
                   <td data-testid={`strategy-summary-why-${sid}`} className="py-1 pr-2 text-gray-600">
                     {summaryWhy(sid, info, status, routeEntry, nowDate, engineStopped)}
                   </td>
-                  <td className="py-1 px-2 text-right text-gray-600">
-                    {candidateCount}
+                  <td data-testid={`strategy-summary-candidates-${sid}`} className="py-1 px-2 text-right text-gray-600">
+                    {candidateCount === null ? <span className="text-gray-400">모름</span> : candidateCount}
                     {candidateCount === 0 && bottleneckStep && (
                       <div className="text-[10px] text-rose-500">병목: {bottleneckStep.step_name}</div>
                     )}
@@ -319,6 +329,7 @@ export default function StrategySummaryTable({ strategies, monitor, exitLines, t
                     className={`py-1 px-2 text-right ${STOP_TONE_CLS[stopTone]}`}
                   >
                     {stopMarginPct !== null ? `${stopMarginPct.toFixed(1)}%` : '—'}
+                    {stopMarginPct !== null && stopMarginApprox && <span className="ml-0.5 text-[10px] text-gray-400">(근사)</span>}
                   </td>
                   <td data-testid={`strategy-summary-exitdue-${sid}`} className="py-1 px-2 text-right">
                     {exitDueUnknown ? <span className="text-gray-400">모름</span> : exitDue}

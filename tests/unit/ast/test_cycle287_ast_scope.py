@@ -846,8 +846,12 @@ _SRC_TREE_FILES = 183  # 직전 = 트랙 C — 실비용 사후 대사: 신규 4
 # 무접촉). 신규/삭제 파일 0 — 파일 수 179 그대로. 직전 값(cycle412 G1) =
 # `edcd6038ac6bcc6c977b1e17cef42bbcb6400275ea7502ca2f19476b0256b266`.
 # 🔁 merge(cycle417+416+413+414) 재핀 — 네 변경을 합친 트리 다이제스트.
+# cycle418-M — `routes/strategies.py::_monitor_skips` 가 VCP/BFB `_gate_emit_capped` 에서
+# 센티널 ticker `"_invariant_"`(ρ축 관측 `ext_cap_warn` 전용) 쌍을 걷어낸다(읽기 전용, 행위 무변경).
+# 신규/삭제 파일 0 — 파일 수 183 그대로. 직전 값(merge cycle417+416+413+414) =
+# `bef4d54cb5aef74f82119893ad8bf4f500265bf655edb85c1a8751898af7e508`.
 _SRC_TREE_DIGEST = (
-    "bef4d54cb5aef74f82119893ad8bf4f500265bf655edb85c1a8751898af7e508"
+    "73a54dc1ab0aac5298f752641c07aaa5f3ad094a3fddfef39e5f69219b093dbc"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

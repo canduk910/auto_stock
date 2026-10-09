@@ -183781,9 +183781,11 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.bfb_vcp.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.cycle414.test.tsx
+      - frontend/src/components/__tests__/StrategyMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix1.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix2.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix3.cycle414.test.tsx
@@ -184057,6 +184059,7 @@ frontend:
       - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.cycle414.test.tsx
+      - frontend/src/components/__tests__/StrategyMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix1.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix2.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix3.cycle414.test.tsx
@@ -184101,6 +184104,7 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.bfb_vcp.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
       - frontend/src/components/__tests__/StrategyParamsEditor.test.tsx
@@ -184151,6 +184155,7 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.bfb_vcp.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
       - frontend/src/pages/__tests__/Dashboard.fix1.cycle414.test.tsx
@@ -184287,6 +184292,7 @@ frontend:
       - frontend/src/pages/__tests__/Settings.weightUnits.test.tsx
   frontend/src/components/KojiroMonitor.tsx:
     direct_tests:
+      - frontend/src/components/__tests__/KojiroMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/KojiroMonitor.fix2.cycle414.test.tsx
       - frontend/src/components/__tests__/KojiroMonitor.test.tsx
     transitive_tests:
@@ -184296,9 +184302,11 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.bfb_vcp.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.cycle414.test.tsx
+      - frontend/src/components/__tests__/StrategyMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix1.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix2.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix3.cycle414.test.tsx
@@ -184475,6 +184483,7 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.bfb_vcp.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
     transitive_tests:
@@ -184504,6 +184513,7 @@ frontend:
         frontend/src/components/__tests__/KisAccountPoolCard.stale_integration.test.tsx
       - frontend/src/components/__tests__/KisAccountPoolCard.test.tsx
       - frontend/src/components/__tests__/KisQuoteAccountsCard.test.tsx
+      - frontend/src/components/__tests__/KojiroMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/KojiroMonitor.fix2.cycle414.test.tsx
       - frontend/src/components/__tests__/KojiroMonitor.test.tsx
       - frontend/src/components/__tests__/OrderMonitor.cost.cycle411.test.tsx
@@ -184516,9 +184526,11 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.bfb_vcp.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.cycle414.test.tsx
+      - frontend/src/components/__tests__/StrategyMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix1.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix2.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix3.cycle414.test.tsx
@@ -184564,6 +184576,7 @@ frontend:
   frontend/src/components/StrategyMonitor.tsx:
     direct_tests:
       - frontend/src/components/__tests__/StrategyMonitor.cycle414.test.tsx
+      - frontend/src/components/__tests__/StrategyMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix1.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix2.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix3.cycle414.test.tsx
@@ -184589,6 +184602,8 @@ frontend:
   frontend/src/components/StrategySummaryTable.tsx:
     direct_tests:
       - frontend/src/components/__tests__/StrategySummaryTable.cycle414.test.tsx
+      - >-
+        frontend/src/components/__tests__/StrategySummaryTable.fix.cycle418.test.tsx
       - >-
         frontend/src/components/__tests__/StrategySummaryTable.fix1.cycle414.test.tsx
       - >-
@@ -184697,6 +184712,7 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.bfb_vcp.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
       - frontend/src/components/__tests__/stockChartOpen.cycle387.test.tsx
@@ -184942,6 +184958,7 @@ frontend:
       - frontend/src/test/sample.test.ts
     transitive_tests:
       - frontend/src/api/__tests__/trading.params.test.ts
+      - frontend/src/components/__tests__/ScanMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/StockChartModal.cycle387.test.tsx
       - frontend/src/components/__tests__/StockChartModal.cycle388.test.tsx
       - frontend/src/components/__tests__/handlers.honesty.cycle276.test.ts
@@ -185023,6 +185040,7 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.bfb_vcp.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
       - frontend/src/components/__tests__/StockChartModal.cycle387.test.tsx
@@ -185131,6 +185149,7 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.bfb_vcp.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
       - frontend/src/components/__tests__/StockChartModal.cycle387.test.tsx
@@ -185238,6 +185257,7 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.bfb_vcp.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
       - frontend/src/components/__tests__/StockChartModal.cycle387.test.tsx
@@ -185348,6 +185368,7 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.bfb_vcp.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
       - frontend/src/components/__tests__/StockChartModal.cycle387.test.tsx
@@ -185458,6 +185479,7 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.bfb_vcp.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
       - frontend/src/components/__tests__/StockChartModal.cycle387.test.tsx
@@ -185567,6 +185589,7 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.bfb_vcp.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
       - frontend/src/components/__tests__/StrategyParamsEditor.test.tsx
@@ -185617,10 +185640,13 @@ frontend:
   frontend/src/test/fixtures/strategyMonitor.fixture.ts:
     direct_tests:
       - frontend/src/components/__tests__/StrategyMonitor.cycle414.test.tsx
+      - frontend/src/components/__tests__/StrategyMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix1.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix2.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix3.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategySummaryTable.cycle414.test.tsx
+      - >-
+        frontend/src/components/__tests__/StrategySummaryTable.fix.cycle418.test.tsx
       - >-
         frontend/src/components/__tests__/StrategySummaryTable.fix1.cycle414.test.tsx
       - >-
@@ -185688,6 +185714,7 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.bfb_vcp.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
       - frontend/src/components/__tests__/StockChartModal.cycle387.test.tsx
@@ -185784,6 +185811,7 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.bfb_vcp.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
       - frontend/src/components/__tests__/StockChartModal.cycle387.test.tsx
@@ -185872,6 +185900,7 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.bfb_vcp.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
       - frontend/src/components/__tests__/StockChartModal.cycle387.test.tsx
@@ -185996,6 +186025,7 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.bfb_vcp.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
       - frontend/src/components/__tests__/StockChartModal.cycle387.test.tsx
@@ -186103,9 +186133,11 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.bfb_vcp.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.cycle414.test.tsx
+      - frontend/src/components/__tests__/StrategyMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix1.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix2.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix3.cycle414.test.tsx
@@ -186265,6 +186297,7 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.bfb_vcp.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
       - frontend/src/components/__tests__/StockChartModal.cycle387.test.tsx
@@ -186389,6 +186422,7 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.bfb_vcp.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
       - frontend/src/components/__tests__/StockChartModal.cycle387.test.tsx
@@ -186511,6 +186545,7 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.bfb_vcp.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
       - frontend/src/components/__tests__/StockChartModal.cycle387.test.tsx
@@ -186699,6 +186734,7 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.bfb_vcp.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
       - frontend/src/components/__tests__/StrategyParamsEditor.test.tsx
@@ -186740,13 +186776,17 @@ frontend:
   frontend/src/types/trading.ts:
     direct_tests:
       - frontend/src/components/__tests__/BreakoutCandidateMonitor.test.tsx
+      - frontend/src/components/__tests__/KojiroMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/KojiroMonitor.fix2.cycle414.test.tsx
       - frontend/src/components/__tests__/KojiroMonitor.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.cycle414.test.tsx
+      - frontend/src/components/__tests__/StrategyMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix1.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix2.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix3.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategySummaryTable.cycle414.test.tsx
+      - >-
+        frontend/src/components/__tests__/StrategySummaryTable.fix.cycle418.test.tsx
       - >-
         frontend/src/components/__tests__/StrategySummaryTable.fix1.cycle414.test.tsx
       - >-
@@ -186810,6 +186850,7 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.bfb_vcp.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
       - frontend/src/components/__tests__/StockChartModal.cycle387.test.tsx
@@ -186862,6 +186903,7 @@ frontend:
       - frontend/src/pages/__tests__/StrategiesTeRr.test.tsx
       - frontend/src/pages/__tests__/StrategyFunnel.bottleneckTrend.test.tsx
       - frontend/src/test/sample.test.ts
+      - frontend/src/utils/__tests__/strategyMonitor.fix.cycle418.test.ts
       - frontend/src/utils/__tests__/strategyMonitor.fix1.cycle414.test.ts
       - frontend/src/utils/__tests__/strategyMonitor.fix4.cycle414.test.ts
   frontend/src/utils/contentWidth.ts:
@@ -186914,6 +186956,7 @@ frontend:
       - frontend/src/components/__tests__/DailyReportTab.ext.test.tsx
       - frontend/src/components/__tests__/DailyReportTab.gross.cycle411.test.tsx
       - frontend/src/components/__tests__/DailyReportTab.holiday.test.tsx
+      - frontend/src/components/__tests__/KojiroMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/KojiroMonitor.fix2.cycle414.test.tsx
       - frontend/src/components/__tests__/KojiroMonitor.test.tsx
       - frontend/src/components/__tests__/LazyStockChartModal.cycle387.test.tsx
@@ -186923,14 +186966,18 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.bfb_vcp.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.cycle414.test.tsx
+      - frontend/src/components/__tests__/StrategyMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix1.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix2.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix3.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyParamsEditor.test.tsx
       - frontend/src/components/__tests__/StrategySummaryTable.cycle414.test.tsx
+      - >-
+        frontend/src/components/__tests__/StrategySummaryTable.fix.cycle418.test.tsx
       - >-
         frontend/src/components/__tests__/StrategySummaryTable.fix1.cycle414.test.tsx
       - >-
@@ -186968,6 +187015,7 @@ frontend:
       - frontend/src/pages/__tests__/StrategiesTeRr.cycle411c.test.tsx
       - frontend/src/pages/__tests__/StrategiesTeRr.cycle411d.test.tsx
       - frontend/src/pages/__tests__/StrategiesTeRr.test.tsx
+      - frontend/src/utils/__tests__/strategyMonitor.fix.cycle418.test.ts
       - frontend/src/utils/__tests__/strategyMonitor.fix1.cycle414.test.ts
       - frontend/src/utils/__tests__/strategyMonitor.fix4.cycle414.test.ts
   frontend/src/utils/marketRegime.ts:
@@ -187054,6 +187102,7 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.bfb_vcp.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
       - frontend/src/pages/__tests__/Dashboard.fix1.cycle414.test.tsx
@@ -187095,6 +187144,7 @@ frontend:
       - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.cycle414.test.tsx
+      - frontend/src/components/__tests__/StrategyMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix1.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix2.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix3.cycle414.test.tsx
@@ -187149,10 +187199,13 @@ frontend:
       - frontend/src/components/__tests__/ScanMonitor.bfb_vcp.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
       - frontend/src/components/__tests__/StrategyParamsEditor.test.tsx
       - frontend/src/components/__tests__/StrategySummaryTable.cycle414.test.tsx
+      - >-
+        frontend/src/components/__tests__/StrategySummaryTable.fix.cycle418.test.tsx
       - >-
         frontend/src/components/__tests__/StrategySummaryTable.fix1.cycle414.test.tsx
       - >-
@@ -187192,24 +187245,30 @@ frontend:
       - frontend/src/pages/__tests__/StrategyFunnel.bottleneckTrend.test.tsx
   frontend/src/utils/strategyMonitor.ts:
     direct_tests:
+      - frontend/src/utils/__tests__/strategyMonitor.fix.cycle418.test.ts
       - frontend/src/utils/__tests__/strategyMonitor.fix1.cycle414.test.ts
       - frontend/src/utils/__tests__/strategyMonitor.fix4.cycle414.test.ts
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
+      - frontend/src/components/__tests__/KojiroMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/KojiroMonitor.fix2.cycle414.test.tsx
       - frontend/src/components/__tests__/KojiroMonitor.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.activeBoard.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.bfb_vcp.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.boards.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.breakout_label.test.tsx
+      - frontend/src/components/__tests__/ScanMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.funnel.test.tsx
       - frontend/src/components/__tests__/ScanMonitor.kojiro.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.cycle414.test.tsx
+      - frontend/src/components/__tests__/StrategyMonitor.fix.cycle418.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix1.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix2.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix3.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategySummaryTable.cycle414.test.tsx
+      - >-
+        frontend/src/components/__tests__/StrategySummaryTable.fix.cycle418.test.tsx
       - >-
         frontend/src/components/__tests__/StrategySummaryTable.fix1.cycle414.test.tsx
       - >-
@@ -187219,12 +187278,12 @@ frontend:
       - frontend/src/pages/__tests__/Dashboard.fix1.cycle414.test.tsx
       - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
-generated_at: '2026-10-09T05:47:31.080Z'
+generated_at: '2026-10-09T08:08:04.718Z'
 stats:
   backend_modules: 186
   backend_tests: 1317
   frontend_modules: 155
-  frontend_tests: 162
+  frontend_tests: 167
   unmapped_modules:
     - frontend/src/api/backtest.ts
     - frontend/src/api/stock-chart.ts

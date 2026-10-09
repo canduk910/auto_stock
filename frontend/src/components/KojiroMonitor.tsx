@@ -98,9 +98,13 @@ export default function KojiroMonitor({
   const routeEntry = monitor?.strategies?.kojiro ?? null
   const routeFunnel = routeEntry?.funnel ?? []
 
-  const stopAtr = num(params.stop_atr, 2.0)
-  const trailAtr = num(params.trail_atr, 2.5)
-  const hardStopPct = num(params.hard_stop_pct, -8.0)
+  // L11 — params 결측을 코드 기본값(2.0·2.5·-8.0)으로 채우지 않는다. 운영 DB 가 다른 값을
+  // 들고 있는데 로딩 전·전략 데이터 손상 등으로 params 가 비면, 기본값으로 채운 화면이 실제
+  // 설정값처럼 보인다(「모름」을 숫자로 둔갑). 결측이면 「—」.
+  const stopAtr = finiteOrNull(params.stop_atr)
+  const trailAtr = finiteOrNull(params.trail_atr)
+  const hardStopPct = finiteOrNull(params.hard_stop_pct)
+  const breakevenAtr = finiteOrNull(params.breakeven_promote_atr)
   const bandMinRaw = finiteOrNull(params.atr_ratio_min)
   const bandMaxRaw = finiteOrNull(params.atr_ratio_max)
   const hasBand = bandMinRaw !== null && bandMaxRaw !== null && bandMaxRaw > bandMinRaw
@@ -379,7 +383,14 @@ export default function KojiroMonitor({
       <div data-testid="kojiro-defense-panel" className="rounded border border-gray-200 p-3">
         <h4 className="text-sm font-medium text-gray-700 mb-1">보유 종목 방어선</h4>
         <div className="text-[11px] text-gray-500 mb-2">
-          4중 청산: 고정 {hardStopPct}% backstop · {stopAtr}ATR 하드손절 · 스테이지3 진입 · {trailAtr}ATR 샹들리에 트레일링
+          4중 청산: 고정 {hardStopPct !== null ? `${hardStopPct}%` : '—'} backstop ·{' '}
+          {stopAtr !== null ? `${stopAtr}ATR` : '—ATR'} 하드손절 · 스테이지3 진입 ·{' '}
+          {trailAtr !== null ? `${trailAtr}ATR` : '—ATR'} 샹들리에 트레일링
+          {/* L11 — 본전 승격(breakeven_promote_atr)은 기본 0(비활성)이라 운영에서 켜져 있을 때만
+              보인다. 0 이면 문구 자체를 안 달아 "본전 승격 ×0배" 같은 공허한 표시를 막는다. */}
+          {breakevenAtr !== null && breakevenAtr > 0 && (
+            <> · 고점이 매수+{breakevenAtr}ATR 넘으면 본전 승격</>
+          )}
         </div>
         {Object.keys(positions).length === 0 ? (
           <div className="text-xs text-gray-400">{engineStopped ? '엔진 정지 — 보유 정보 모름' : '보유 종목 없음'}</div>
@@ -392,9 +403,9 @@ export default function KojiroMonitor({
                   <th className="text-center py-1 px-1">스테이지</th>
                   <th className="text-right py-1 px-2">매수가</th>
                   <th className="text-right py-1 px-2">현재가</th>
-                  <th className="text-right py-1 px-2">2ATR 하드</th>
-                  <th className="text-right py-1 px-2">2.5ATR 트레일</th>
-                  <th className="text-right py-1 px-2">{hardStopPct}% backstop</th>
+                  <th className="text-right py-1 px-2">{stopAtr !== null ? `${stopAtr}ATR 하드` : '—ATR 하드'}</th>
+                  <th className="text-right py-1 px-2">{trailAtr !== null ? `${trailAtr}ATR 트레일` : '—ATR 트레일'}</th>
+                  <th className="text-right py-1 px-2">{hardStopPct !== null ? `${hardStopPct}%` : '—'} backstop</th>
                   <th className="text-right py-1 pl-2">실효 손절선</th>
                 </tr>
               </thead>
@@ -407,9 +418,9 @@ export default function KojiroMonitor({
                   const buy = num(pos.buy_price, 0)
                   const high = num(pos.high_since_buy, 0) || buy
                   const cur = num(prices[ticker]?.current_price, 0)
-                  const hard2 = entryAtr !== null && entryAtr > 0 ? Math.round(buy - stopAtr * entryAtr) : null
-                  const trail = entryAtr !== null && entryAtr > 0 ? Math.round(high - trailAtr * entryAtr) : null
-                  const backstop = Math.round(buy * (1 + hardStopPct / 100))
+                  const hard2 = stopAtr !== null && entryAtr !== null && entryAtr > 0 ? Math.round(buy - stopAtr * entryAtr) : null
+                  const trail = trailAtr !== null && entryAtr !== null && entryAtr > 0 ? Math.round(high - trailAtr * entryAtr) : null
+                  const backstop = hardStopPct !== null ? Math.round(buy * (1 + hardStopPct / 100)) : null
                   const effective = exitLine != null ? finiteOrNull(exitLine.stop_price) : null
                   const isActive = (v: number | null) => effective !== null && v !== null && Math.abs(v - effective) <= 1
                   const distPct = cur > 0 && effective !== null ? ((cur - effective) / cur) * 100 : null
@@ -425,7 +436,7 @@ export default function KojiroMonitor({
                       <td className="py-1 px-2 text-right text-gray-800">{cur > 0 ? cur.toLocaleString() : '—'}</td>
                       <td className={`py-1 px-2 text-right ${isActive(hard2) ? 'font-semibold text-rose-600' : 'text-gray-500'}`}>{hard2 !== null ? hard2.toLocaleString() : '—'}</td>
                       <td className={`py-1 px-2 text-right ${isActive(trail) ? 'font-semibold text-rose-600' : 'text-gray-500'}`}>{trail !== null ? trail.toLocaleString() : '—'}</td>
-                      <td className={`py-1 px-2 text-right ${isActive(backstop) ? 'font-semibold text-rose-600' : 'text-gray-500'}`}>{backstop.toLocaleString()}</td>
+                      <td className={`py-1 px-2 text-right ${isActive(backstop) ? 'font-semibold text-rose-600' : 'text-gray-500'}`}>{backstop !== null ? backstop.toLocaleString() : '—'}</td>
                       <td className="py-1 pl-2 text-right text-gray-700">
                         {effective !== null ? effective.toLocaleString() : '—'}
                         {distPct != null && <span className="ml-1 text-[10px] text-gray-400">({distPct.toFixed(1)}%)</span>}

@@ -166,8 +166,9 @@ leaf 12개를 **상위 9개**로 묶는다(사용자 지정 묶음·순서 — �
 **「모름」 을 「없음」 으로 그리지 않는다** — 세 경우를 회색 「모름」 계열로 그린다.
 
 - **엔진 정지** = `running === false || monitor?.running === false`(`running` = `/api/trading/status` — 모니터 라우트가 실패해도 안다. `KojiroMonitor` 는 `running === false` 만 본다). 21:30 정산의 `_reset_daily_state` 가 보유·예산·신호를 비운 뒤부터 부팅 전까지와 휴일이다. 이때 후보 상태는 「장 마감/엔진 정지」, 수량·예산·보유·청산 판정·매수 신호는 「모름」 이고, 상태 칸에 `{sid}-monitor-engine-stopped` 회색 띠를 단다. 「사지 않음」·「1주도 안 됨」·「예산 0원」·「보유 종목 없음」 으로 쓰지 않는다.
-- **모니터 라우트 실패**(`routeEntry` 없음) = 라우트 전용 판정(후보 상태 체인 뒤쪽·거래량·15:20 판정·섀도 기록 수·청산 예정)은 「모름」. 시세 신선도 경보를 내지 않는다.
+- **모니터 라우트 실패**(`routeEntry` 없음) = 라우트 전용 판정(후보 상태 체인 뒤쪽·거래량·15:20 판정·섀도 기록 수·청산 예정)은 「모름」. 시세 신선도 경보를 내지 않는다. 멈춤 중 건너뛴 종목 수도 라우트 실패면 「모름(모니터 라우트 실패)」(`?? 0` 로 떨어뜨리지 않는다).
 - **값 결측** = `finiteOrNull` 은 `null`·`undefined` 를 `null` 로 둔다(`Number(null) === 0` 이라 0 으로 둔갑시키지 않는다). 폴백 깔때기의 빠진 단계도 「모름」 이다.
+- **기동 중**(`phase === "booting"`) = `running` 이 `_boot()`(DB 포지션 복구 등) **앞**에서 `true` 가 되므로, 그 창에선 `running=true` 인데도 보유가 아직 메모리에 없다. `StrategyMonitor`·`StrategySummaryTable` 은 `Dashboard` 가 내려주는 `phase` prop 으로 이 창을 가려 보유표 「보유 종목 없음」을 「기동 중 — 보유 복원 전(모름)」으로 낮춘다.
 
 **공통 판정 — `utils/strategyMonitor.ts`** (순수 함수. 요약표·상세 패널·`KojiroMonitor` 가 함께 쓴다)
 
@@ -180,8 +181,8 @@ leaf 12개를 **상위 9개**로 묶는다(사용자 지정 묶음·순서 — �
 - `marketUnitBlockLabel(sid, mu)` — 위 판정이 차단일 때만 「시장 유닛 미계산」/「시장 유닛 0배」, 아니면 `null`. 후보 상태 체인과 요약표 「왜 안 사나」 가 이것 하나로 판정한다.
 - `finalFunnelStep(steps)` = 최종 단계 — `step_no===99` 우선, 없으면 그 목록의 최대 `step_no`. donchian·VCP·BFB·kojiro 의 엔진 funnel 은 9단계라 99 고정 매칭은 늘 빈손이다.
 - `funnelBottleneck(steps)` = **처음 0 이 되는 단계**. ⚠️ `/strategy-funnel` 화면의 병목(직전 대비 절대 감소 최대)과 정의가 다르다.
-- `entryWindow(sid, params, now)` — `etf_trend`·`donchian_swing`·`kojiro` 는 09:05~09:30 코드 고정. VCP·BFB 는 `params.entry_start`~`entry_end` 이고, 둘 중 하나가 없으면 `null`(추측하지 않는다). 시각은 `kstMinutesOfDay`.
-- `SKIP_REASON_LABELS` = 엔진 거르기 사유 키 → 화면 문구. `topSkipReason` 이 요약표의 「오늘 주 사유」 를 고른다.
+- `entryWindow(sid, params, now)` — `etf_trend`·`donchian_swing`·`kojiro` 는 09:05~09:30 코드 고정. VCP·BFB 는 `params.entry_start`~`entry_end` 이고, 둘 중 하나가 없거나 `entry_start > entry_end`(뒤집힌 설정)면 `null`(추측하지 않는다). 시각은 `kstMinutesOfDay`.
+- `skipReasonLabel(reason)` = 엔진 거르기 사유 키 → 화면 문구. `SKIP_REASON_LABELS` 정확 일치 우선, `latch_released:<reason>`(BFB·VCP `_release_latch`) 접두는 서브 사유를 번역해 합성한다. 모르는 키는 원문 그대로(추측 금지). `topSkipReason` 이 요약표의 「오늘 주 사유」 를 고른다.
 - `signalBaseline` — 매수 신호의 기준선 키를 전략별로 맞춘다. 엔진이 `change_rate` 를 0 으로 채우는 5전략(etf·donchian·VCP·BFB·kojiro)은 「+0%」 대신 빈 값이다.
 
 **상세 패널 — `components/StrategyMonitor.tsx`**
@@ -191,17 +192,17 @@ leaf 12개를 **상위 9개**로 묶는다(사용자 지정 묶음·순서 — �
 
 - ① 주 배지 + 칩 + 비중·예산. 그 아래 기준일 머리말 = 라우트 `prepare`(준비 단계·완료 시각, `ok === false` 면 빨강).
 - ② 진입창 한 줄 — 시각 · 「코드 고정」 여부 · 열리기 전/열림/닫힘.
-- ③ 라우트 `funnel[]` 의 엔진 `step_name`·`step_conditions` 를 그대로 쓴다. 병목 행에 「← 여기서 0」, 최종 0 이면 한 줄 설명을 단다. 그 아래 「14일 최종 후보 추이」 막대(0 인 날 장미색 · 막대 `title` = `MM-DD: n건`) + 날짜:값 줄 + 「0 연속 n일」. 라우트 funnel 이 없으면 etf 는 `scan_stats` 2행(1·99), 그 밖은 `FALLBACK_STAGES`(`scan_stats` 키 → `ScanMonitor` 의 STAGES 와 같은 한글 라벨 — 키·순서는 두 파일이 같게 유지한다)다.
-- ④ 후보표 칸은 전략마다 다르다 — etf 돌파선·거리·예상 수량·묶음 / donchian 20일 신고가·거리·1R·설계 수량 / VCP·BFB 돌파선·거리·거래량·래치(BFB 는 측정목표 칸이 더 있다). 후보가 없으면 「후보 없음」. 종목 상태 = 엔진이 그 종목을 거르는 **첫 관문**(맨 앞은 엔진 정지, 그다음 시세 없음·보유 중·주문 중). etf 는 멈춤 중이면 회색 「풀리면: ○○」(화면 추정)을 덧붙인다.
-  - 🔴 VCP·BFB 「진입 가능」 = 오늘 무장한 래치(`candidates[t].latch_armed_at`)가 있을 때만이다. 엔진은 아래에서 위로 넘는 틱이나 오늘 래치가 있어야 사므로, 래치 없이 돌파선 위면 「참고: 돌파선 위」 다. 거래량은 `volume_threshold > 0` 일 때만 본다(0·미설정이면 엔진이 관측 없이 통과시킨다).
+- ③ 라우트 `funnel[]` 의 엔진 `step_name`·`step_conditions` 를 그대로 쓴다. 병목 행에 「← 여기서 0」, 최종 0 이면 한 줄 설명을 단다. 그 아래 「14일 최종 후보 추이」 막대(0 인 날 장미색 · 막대 `title` = `MM-DD: n건`) + 날짜:값 줄(`trendDateLabel` — 칸이 11개 이상이면 날짜를 일(DD)만 쓴다, 전체 날짜는 `title` 에 남는다) + 「0 연속 n일」. 라우트 funnel 이 없으면 etf 는 `scan_stats` 2행(1·99), 그 밖은 `FALLBACK_STAGES`(`scan_stats` 키 → `ScanMonitor` 의 STAGES 와 같은 한글 라벨 — 키·순서는 두 파일이 같게 유지한다)다. momentum 의 `limit_up_excluded` 는 "제외 수"(통과 수 아님)라 `momentumExcludedStageText` 가 직전 단계 값에서 뺀 "통과" 와 제외 건수를 따로 보인다.
+- ④ 후보표 칸은 전략마다 다르다 — etf 돌파선·거리·예상 수량·묶음 / donchian 20일 신고가·거리·1R·설계 수량 / VCP·BFB 돌파선·거리·거래량·래치(BFB 는 측정목표 칸이 더 있다). 엔진 정지 중엔 「후보 없음」이 아니라 「모름」(정산이 비운 `targets` 를 0건으로 확정하지 않는다). 종목 상태 = 엔진이 그 종목을 거르는 **첫 관문**(맨 앞은 엔진 정지, 그다음 시세 없음·보유 중·주문 중). 멈춤 중이면 etf·donchian·VCP·BFB 전부 회색 「풀리면: ○○」(화면 추정)을 덧붙인다.
+  - 🔴 VCP·BFB 「진입 가능」 = 오늘 무장한 래치(`candidates[t].latch_armed_at`)가 있을 때만이다. 엔진은 아래에서 위로 넘는 틱이나 오늘 래치가 있어야 사므로, 래치 없이 돌파선 위면 「참고: 돌파선 위」 다. 거래량은 `volume_threshold > 0` 일 때만 본다(0·미설정이면 VCP 엔진이 관측 없이 통과시킨다 — 🔴 BFB 는 다르다, `_evaluate_vol_gate` 에 같은 가드가 없어 임계 0·미설정이어도 미관측이면 「거래량 미관측」으로 막는다). BFB 「유지 대기」는 그 종목이 실제로 retention 대기 중(`breakout_seen_at` 있음 · 아직 래치 안 됨 · 현재가가 돌파선 위)일 때만 보인다.
   - donchian 은 `max_breakout_extension_pct` 가 있으면 마지막 판정이 「참고: 진입 조건 충족(당일 고가 미반영)」 다 — 엔진 `check_buy_signal` 은 「현재가 ≥ 돌파선」을 보지 않고(갭·추격상한·시장유닛·랏만), 추격 상한은 당일 고가도 보는데 화면은 현재가·시가만 가진다.
   - etf 「오늘 갭 스킵」 = 그 종목 오늘 사유(`skips.by_ticker`)가 `gap_up`·`gap_over_line` 일 때만. 엔진은 갭일 때만 그날 평가를 닫는다.
-  - 수량은 추정이다 — etf 「최대 n주(추정)」, donchian 「n주(추정)」(m=1·전일 종가 기준).
+  - 수량은 추정이다 — etf 「최대 n주(추정)」·「1주도 안 됨 — 사지 않음(추정)」, donchian 「n주(추정)」·「사지 않음(추정)」(m=1·전일 종가 기준, 0주일 때도 "(추정)" 을 붙인다).
 - ⑤ 🔴 「0건」 과 「모름」 을 가른다. 멈춤 중이면 「멈춤 중 — 엔진은 다른 사유를 남기지 않는다」 + 멈춤으로 건너뛴 종목 수(`paused_skips`)다. 사유를 남기지 않는 전략(`skips.known === false`)은 「기록하지 않습니다」 다. 둘 다 0 으로 쓰지 않는다.
 - ⑥ 오늘 매수 신호 + 기준선 대비. donchian 은 「오늘 신규 진입 n / 상한」(`extra.daily_entries`)을 함께 보인다.
-- ⑦ 🔴 **실효 손절선 = exit-lines `stop_price`(엔진 값)** — 화면이 손절선을 다시 계산하지 않는다. exit-lines 에 그 종목이 없을 때만 라우트 `holdings` 의 엔진 값(etf `effective_stop` · donchian `stop`)을 쓰고, VCP·BFB 는 `—` 다. 네 전략 모두 「손절까지」 칸이 있고 <1% `text-rose-600` · <3% `text-amber-600`(`STOP_TONE_CLS`, `data-tone` 속성도 단다).
-  - etf: 구성 선 칸(하드·본전·트레일·채널, 실효선과 1원 이내면 `data-active="true"`) + 15:20 판정 — 돌파선 없음 = 「돌파선 모름」 · 미활성 = 「n봉째부터 15:20 판정」 · 활성 = 현재가 < 돌파선이면 「15:20 정리(돌파 실패)」, 아니면 「15:20 판정 대상」. 시세 낡음 경고는 15:00 이후에만 낸다.
-  - donchian: 사다리 + 시간청산 — 🔴 `time_exit_bars`·`days_held` 를 모르면 「모름(시간청산 판정 불가)」 이다(「오늘 15:20」 으로 떨어뜨리지 않는다). +1R 을 넘었으면 면제, 남은 날이 있으면 「n영업일 뒤 15:20 시간청산 판정」.
+- ⑦ 🔴 **실효 손절선 = exit-lines `stop_price`(엔진 값)** — 화면이 손절선을 다시 계산하지 않는다. exit-lines 에 그 종목이 없을 때만 라우트 `holdings` 의 엔진 값(etf `effective_stop` · donchian `stop`)을 쓰고, VCP·BFB 는 `—` 다. 네 전략 모두 「손절까지」 칸이 있고 <1% `text-rose-600` · <3% `text-amber-600`(`STOP_TONE_CLS`, `data-tone` 속성도 단다). etf·donchian 은 손절선 값 옆에 `exit-lines stop_source` 꼴표를 단다 — `hard_pct`(근사) · `mode_dependent`(모드별) · `engine_idle`(엔진 정지), `effective`(엔진이 실제로 쓰는 선)는 꼬리표 없음.
+  - etf: 구성 선 칸(하드·본전·트레일·채널, 실효선과 1원 이내면 `data-active="true"`) + 15:20 판정 — 돌파선 없음 = 「돌파선 모름」 · 미활성 = 「n봉째부터 15:20 판정」 · 활성 = 현재가 < 돌파선이면 「15:20 정리 예상(돌파 실패)」(아직 15:20 전이라 확정 어투를 쓰지 않는다), 아니면 「15:20 판정 대상」. 시세 낡음 경고는 15:00 이후에만 낸다.
+  - donchian: 사다리 + 시간청산 — `donchianTimeExitState` 판정 순서 = ① `time_exit_bars`·`days_held` 를 모르면 「모름(시간청산 판정 불가)」 ② `max_hold_bars` 도달은 **+1R 달성과 무관하게** 오늘 시간청산 대상(엔진 `check_force_clear` 의 (a)(b) 중 (b)가 R 과 무관하다 — +1R 넘었다고 최대 보유 봉수까지 면제되지 않는다) ③ +1R 을 넘었으면 면제 ④ 남은 날이 있으면 「n영업일 뒤 15:20 시간청산 판정」, 없으면 오늘 대상.
 - 문턱 숫자는 `params` 에서 읽고 없으면 `—` 다 — 화면 문자열에 숫자를 박지 않는다.
 - 표는 `ScrollPane` 안에서 최소 폭(`min-w-[720px]`·`min-w-[920px]`)을 갖는다 — 좁은 화면에서 한글이 세로로 눌리지 않고 가로로 스크롤된다.
 
@@ -209,7 +210,7 @@ leaf 12개를 **상위 9개**로 묶는다(사용자 지정 묶음·순서 — �
 
 | 요소 | 자리 · testid | 그리는 것 |
 |---|---|---|
-| 거리 막대 `DistanceBar` | ④ 거리 칸 · `{sid}-monitor-distbar-{ticker}` | 돌파선 대비 −10% ~ 상한+3% 눈금. 0%(돌파선) 세로선(etf·donchian 은 없음) · 살 수 있는 구간 연초록 · 상한 밖 주황 · 현재가 점(상승 빨강·하락 파랑) · 범위 밖 화살표. 상한 = etf `gap_over_line_pct`, 그 밖 `max_breakout_extension_pct`. etf·donchian 은 `belowLineOk` 로 초록이 0% 아래까지 걸친다(엔진이 현재가 하한을 보지 않는다 — etf 는 「현재가 ≥ 시가」만, donchian 은 갭·추격상한·시장유닛·랏만). VCP·BFB 는 돌파선 아래를 명시 거르므로(「돌파선 아래」 상태) 기본값(0% 위부터) 유지 |
+| 거리 막대 `DistanceBar` | ④ 거리 칸 · `{sid}-monitor-distbar-{ticker}` | 돌파선 대비 −10% ~ 상한+3% 눈금. 0%(돌파선) 세로선(etf·donchian 은 없음) · 살 수 있는 구간 연초록 · 상한 밖 주황 · 현재가 점(상승 빨강·하락 파랑) · 범위 밖 화살표. 상한 = donchian·VCP·BFB `max_breakout_extension_pct`(당일 고가도 보는 연속 판정이라 경계가 유효하다). 🔴 **etf 는 `cap=null`** — `gap_over_line_pct` 는 시가 기준 1회성 판정(그날 시초 갭만 본다)이라 현재가 축에 상한 경계를 긋지 않는다(그었을 때 현재가가 그 경계를 넘으면 "못 산다"로 오독됐다, cap=null 이면 초록이 그림 끝까지). etf·donchian 은 `belowLineOk` 로 초록이 0% 아래까지 걸친다(엔진이 현재가 하한을 보지 않는다 — etf 는 「현재가 ≥ 시가」만, donchian 은 갭·추격상한·시장유닛·랏만). VCP·BFB 는 돌파선 아래를 명시 거르므로(「돌파선 아래」 상태) 기본값(0% 위부터) 유지 |
 | 거래량 게이지 `VolumeGauge` | VCP·BFB ④ 거래량 칸 · `{sid}-monitor-volgauge-{ticker}` | 0~150% 막대 + 100% 선. 100% 이상 초록, 미만 주황 |
 | 보유 사다리 `Ladder` | ⑦ 사다리 칸 · `{sid}-monitor-ladder-{ticker}` | 손절·매수·현재 + donchian 무장(무장했으면 매수가) + BFB 목표(exit-lines `target_price`). 30px 안 점은 한 묶음으로 합치고 이웃 묶음은 두 줄로 번갈아 둔다. 전체 라벨·값은 `aria-label`·`<title>` 에도 담는다 |
 | 14일 막대 | ③ 아래 · `{sid}-monitor-trend` | 위 ③ 항목 |
@@ -231,7 +232,7 @@ testid = `{sid}-monitor` · `-badge` · `-chip-{kind}` · `-status` · `-engine-
 
 testid = `strategy-summary-table` · `strategy-summary-row-{sid}` · `strategy-summary-{badge,why,trend,holdings,budget,stopmargin,exitdue,signals}-{sid}`.
 
-가드 = `components/__tests__/StrategyMonitor.{cycle414,fix1.cycle414,fix2.cycle414}.test.tsx` · `StrategySummaryTable.{cycle414,fix1.cycle414,fix2.cycle414}.test.tsx` · `KojiroMonitor.fix2.cycle414.test.tsx` · `utils/__tests__/strategyMonitor.{cycle414,fix1.cycle414}.test.ts` · `pages/__tests__/Dashboard.{strategyMonitor,fix1}.cycle414.test.tsx` · 정적 `components/__tests__/_ast_cycle414_static.test.ts`(S1 자체 날짜 포맷 0 · S2 `utils/kst` 위임 · S3 돈키언 낡은 청산 문구 0 · S4 탭 설명 `utils/strategyInfo.ts::STRATEGY_INFO` — etf_trend 항목 존재·퍼센트 문턱 0, donchian 깡토식. kojiro 항목의 숫자·「관찰 모드」 0 은 `ScanMonitor.kojiro.test.tsx` 가 본다) · `_ast_cycle414_fix1_static.test.ts`(두 컴포넌트 rules-of-hooks 위반 0 — 인라인 disable 도 0 · `pages/StrategyFunnel` 정적 import 0). 고정 데이터 = `test/fixtures/strategyMonitor.fixture.ts`(라우트 실제 키). MSW 기본 핸들러 = `/strategies/monitor` · `/balance/exit-lines` · `/strategy-funnel/recent`.
+가드 = `components/__tests__/StrategyMonitor.{cycle414,fix1.cycle414,fix2.cycle414,fix3.cycle414,fix.cycle418}.test.tsx` · `StrategySummaryTable.{cycle414,fix1.cycle414,fix2.cycle414,fix3.cycle414,fix.cycle418}.test.tsx` · `KojiroMonitor.{fix2.cycle414,fix.cycle418}.test.tsx` · `ScanMonitor.fix.cycle418.test.tsx`(N2 로딩 전 요약칸) · `utils/__tests__/strategyMonitor.{cycle414,fix1.cycle414,fix4.cycle414,fix.cycle418}.test.ts` · `pages/__tests__/Dashboard.{strategyMonitor,fix1}.cycle414.test.tsx` · 정적 `components/__tests__/_ast_cycle414_static.test.ts`(S1 자체 날짜 포맷 0 · S2 `utils/kst` 위임 · S3 돈키언 낡은 청산 문구 0 · S4 탭 설명 `utils/strategyInfo.ts::STRATEGY_INFO` — etf_trend 항목 존재·퍼센트 문턱 0, donchian 깡토식. kojiro 항목의 숫자·「관찰 모드」 0 은 `ScanMonitor.kojiro.test.tsx` 가 본다) · `_ast_cycle414_fix1_static.test.ts`(두 컴포넌트 rules-of-hooks 위반 0 — 인라인 disable 도 0 · `pages/StrategyFunnel` 정적 import 0). 고정 데이터 = `test/fixtures/strategyMonitor.fixture.ts`(라우트 실제 키). MSW 기본 핸들러 = `/strategies/monitor` · `/balance/exit-lines` · `/strategy-funnel/recent`.
 
 ## ScanMonitor
 
@@ -265,9 +266,9 @@ testid = `strategy-summary-table` · `strategy-summary-row-{sid}` · `strategy-s
 - ③ 유니버스 깔때기(`kojiro-scan-funnel`) — 라우트 `funnel[]` 이 있으면 엔진 단계 이름·조건(`kojiro-funnel-row-{step_no}`), 없으면 `scan_stats` 9단계 폴백(`universe_union`→…→`final_prepared`). 0단계 rose. 단계 라벨에 숫자 문턱을 박지 않는다
 - ④ 후보 그리드(`kojiro-candidate-{ticker}`) — 종목명(`t.name || ticker`, `_candidates[ticker]` 저장값이라 **정산 후·주말에도 유지**) · stage 배지 · EMA 5/20/40 정배열 · ATR 밴드 게이지(`atr_ratio` 또는 atr/prev_close, `params.atr_ratio_min~max` — 둘 중 하나라도 없거나 min ≥ max 면 `—`. 기본값으로 메우지 않는다)
 - ⑤ 진입 이벤트(`kojiro-entry-feed`, buy_signals). 갭 스킵 문턱 = `params.gap_up_skip_pct`·`gap_down_skip_pct`(없으면 `—`)
-- ⑥ 보유 방어선(`kojiro-defense-{ticker}`) — 🔴 **실효 손절선 = exit-lines `stop_price`(엔진 값)**. 구성 선 `buy−stop_atr×entry_atr` / `high−trail_atr×entry_atr` 는 exit-lines `entry_atr` 로 그린다 — 후보 ATR 로 다시 계산하지 않는다(보유 종목은 후보에서 빠질 수 있다). `buy×(1+hard_stop_pct/100)` backstop · stage3 를 함께 보이고, 실효선과 1원 이내인 구성 선만 강조한다. exit-lines 에 그 종목이 없으면 실효선과 ATR 구성 선 둘은 `—` 다(backstop 은 매수가로 그린다).
+- ⑥ 보유 방어선(`kojiro-defense-{ticker}`) — 🔴 **실효 손절선 = exit-lines `stop_price`(엔진 값)**. 구성 선 `buy−stop_atr×entry_atr` / `high−trail_atr×entry_atr` 는 exit-lines `entry_atr` 로 그린다 — 후보 ATR 로 다시 계산하지 않는다(보유 종목은 후보에서 빠질 수 있다). `buy×(1+hard_stop_pct/100)` backstop · stage3 를 함께 보이고, 실효선과 1원 이내인 구성 선만 강조한다. exit-lines 에 그 종목이 없으면 실효선과 ATR 구성 선 둘은 `—` 다(backstop 은 매수가로 그린다). 🔴 **`stop_atr`·`trail_atr`·`hard_stop_pct` 는 params 값으로 머리글·subtitle 을 그린다** — 고정 글자 "2ATR"·"2.5ATR" 가 아니다. params 결측이면 코드 기본값(2.0·2.5·−8.0)으로 채우지 않고 `—ATR`(「모름」을 숫자로 둔갑시키지 않는다). `breakeven_promote_atr > 0`(본전 승격 활성)이면 subtitle 에 그 배수를 밝힌다.
 
-가드 `KojiroMonitor.test.tsx` + `ScanMonitor.kojiro.test.tsx`.
+가드 `KojiroMonitor.{test,fix.cycle418.test}.tsx` + `ScanMonitor.kojiro.test.tsx`.
 
 ### VCP/BFB 탭 (`BreakoutCandidateMonitor.tsx`)
 

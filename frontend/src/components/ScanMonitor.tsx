@@ -299,6 +299,9 @@ export default function ScanMonitor({ selectedStrategy, monitor, exitLines, hide
   const [swingHelpOpen, setSwingHelpOpen] = useState(false)
 
   const { data: status } = useTradingStatus()
+  // N2(suites) — 최초 로딩(아직 `/api/trading/status` 응답 전)엔 `status` 가 `undefined` 다.
+  // 이 순간 `?? 0` 로 떨어지는 요약 숫자(필터링·구독 중)는 "실제로 0" 이 아니라 "아직 모른다".
+  const dataLoaded = !!status
 
   // 사이클 21 — 구독 인프라 (tick_coverage / stale-context-label / 끊김 종목 펼치기 /
   // 수동 재구독) 영역은 KisAccountPoolCard 로 이전됨. ScanMonitor 는 필터링 가시성에 집중.
@@ -412,11 +415,11 @@ export default function ScanMonitor({ selectedStrategy, monitor, exitLines, hide
           <>
             <div className="grid grid-cols-3 gap-3 mb-2">
               <div className="text-center p-2 bg-gray-50 rounded">
-                <div className="text-lg font-bold text-gray-900">{summaryCount}</div>
+                <div className="text-lg font-bold text-gray-900">{dataLoaded ? summaryCount : '—'}</div>
                 <div className="text-xs text-gray-500">{summaryLabel}</div>
               </div>
               <div className="text-center p-2 bg-gray-50 rounded">
-                <div className="text-lg font-bold text-gray-900">{scan?.subscribed_count ?? 0}</div>
+                <div className="text-lg font-bold text-gray-900">{dataLoaded ? (scan?.subscribed_count ?? 0) : '—'}</div>
                 <div className="text-xs text-gray-500">구독 중</div>
               </div>
               <div className="text-center p-2 bg-gray-50 rounded">

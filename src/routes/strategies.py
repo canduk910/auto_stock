@@ -650,6 +650,10 @@ def _monitor_skips(strategy, today_iso, today_date):
         capped = getattr(strategy, "_gate_emit_capped", None)
         capped = capped if isinstance(capped, set) else set()
         active = capped if gate_day == today_date else set()
+        # cycle418-M L3 — `"_invariant_"` 는 ρ축 관측(`[oversized_fallback]` 자매, cycle245)의
+        # 센티널 ticker(`_gate_should_emit("_invariant_", "ext_cap_warn")`)다. 실제 종목이 아니라
+        # 화면의 「오늘 거르기 사유」가 가짜 1종목을 세게 되므로 걷어낸다.
+        active = [pair for pair in active if pair[0] != "_invariant_"]
         day = gate_day.isoformat() if gate_day is not None else None
         return _monitor_skips_result(list(active), day)
     return {"known": False}
