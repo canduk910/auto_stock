@@ -7,7 +7,8 @@
 - ⑰ 시장가 거부 → 지정가 폴백 블록(`order_engine.py` `if order_division == primary_div and (...)`
   부터 폴백 거부 `return` 까지) — 진입 관문 · ETP 관측 · 현재가 미확보 · 발사 · 매핑 · 접수 후
   영속화 · 성공 TTL · 거부 후처리(익일청산·포기 래치) 전 분기.
-- ⑲ 마지막 실패 뒤처리(재시도 루프 다음 ~ 함수 끝) — 잔고부족 정리 경로 전 분기 + 최종 실패 CRITICAL.
+- ⑲ 마지막 실패 뒤처리(재시도 루프 다음 ~ 함수 끝) — 최종 실패 CRITICAL(cycle429 D1 안A 이후
+  잔고부족/수량부족 정리 분기는 `_handle_sell_insufficient_quantity` 로 이동, P 절 참조).
 - 부록 B4-4 대비 — `test_cycle236_sell_qty_exceeded.py` 가 APBK0400 5분기에서 빠뜨린
   `_selling` 유지·해제와 continue/return/break 핀만 더한다(G 절).
 
@@ -766,92 +767,93 @@ async def test_a04_etp_observe_task_registration_failure_does_not_block_fallback
 # ===========================================================================
 @pytest.mark.asyncio
 async def test_p01_insufficient_cleanup_order_and_effects(monkeypatch, caplog):
-    """잔고부족 정리 — `_selling` 해제(첫 줄) → 메모리 포지션 제거 → 보유결합 훅 → DB 삭제 →
-    WARNING 장부 → `[positions_reconciliation]` INFO → 잔고 1회 재조회 → return(CRITICAL 없음)."""
+    """cycle429(D1 안A, 사용자 승인 2026-10-10) 재조준 — 자동 삭제 경로 폐지.
+
+    수량 부족(APBK1234, 설명 안 됨 — `get_daily_orders` 기본 `[]`) → `_selling`·
+    `_selling_locked_wait` 해제 → 5분 진입 차단 등록 → 잔고 1회 관측 조회 →
+    `[sell_insufficient_unexplained]` ERROR 1행 → return(CRITICAL 없음, 삭제 없음).
+    """
     caplog.set_level(logging.DEBUG, logger=_OE)
     r = _build(monkeypatch)
     r.place.side_effect = [_insufficient()]
     await _sell(r)
 
-    assert r.place.await_count == 1  # break — 재시도 없음
+    assert r.place.await_count == 1  # 통합 판정 위임 — 재시도 없음
     assert r.aio.sleeps == []
-    assert _T not in r.strat.state.positions
-    r.on_closed.assert_called_once_with(_T)
-    assert r.held_at_closed is False  # 훅은 포지션 제거 **뒤**
-    r.delete_position.assert_awaited_once_with(_T)
-    assert r.selling_at_delete is False  # `_selling` 해제가 첫 await 앞
+    assert _T in r.strat.state.positions  # D1 안A — 자동 삭제 없음
+    r.on_closed.assert_not_called()
+    r.delete_position.assert_not_awaited()
     assert r.write_log.await_count == 1
     lvl, msg = r.write_log.await_args.args[:2]
-    assert lvl == "WARNING"
-    assert msg.startswith("매도가능수량 부족 — 메모리 포지션 정리: ") and msg.endswith(f"(전략: {_SID})")
-    r.safe_write_log.assert_awaited_once()
-    assert r.safe_write_log.await_args.args[:2] == (
-        "INFO", f"[positions_reconciliation] ticker={_T} strategy={_SID} reason=insufficient_quantity",
-    )
-    assert r.events == [
-        "place", "on_position_closed", "delete_position", "write_log:WARNING",
-        "safe_write_log:INFO", "get_balance",
-    ]
+    assert lvl == "ERROR"
+    assert msg.startswith("[sell_insufficient_unexplained] ")
+    assert f"ticker={_T}" in msg and f"strategy={_SID}" in msg and "held=0" in msg
+    assert r.events == ["place", "get_balance", "write_log:ERROR"]
     assert _recs(caplog, logging.CRITICAL) == []
-    assert _recs(caplog, logging.INFO, "[positions_reconciliation] 실제 잔량 확인") == []
     assert _T not in r.eng._selling
+    assert _T not in r.eng._selling_locked_wait
+    assert _T in r.eng._sell_rejection._blocked_until
 
 
 @pytest.mark.asyncio
-async def test_p02_on_position_closed_failure_is_logged_and_cleanup_continues(monkeypatch, caplog):
+async def test_p02_on_position_closed_is_never_called_for_insufficient(monkeypatch, caplog):
+    """cycle429(D1 안A) 재조준 — 포지션을 보존하므로 `on_position_closed` 훅을 안 부른다."""
     r = _build(monkeypatch)
     r.on_closed.side_effect = ValueError("boom")
     r.place.side_effect = [_insufficient()]
-    await _sell(r)
+    await _sell(r)  # on_closed 가 raise 해도 호출 자체가 없어 전파되지 않는다
 
-    assert _recs(caplog, logging.ERROR, "[on_position_closed_skip] ") == [
-        f"[on_position_closed_skip] ticker={_T} strategy={_SID} err=ValueError('boom')"
-    ]
-    r.delete_position.assert_awaited_once_with(_T)
-    assert r.events[-3:] == ["write_log:WARNING", "safe_write_log:INFO", "get_balance"]
+    r.on_closed.assert_not_called()
+    r.delete_position.assert_not_awaited()
+    assert r.events == ["place", "get_balance", "write_log:ERROR"]
 
 
 @pytest.mark.asyncio
-async def test_p03_delete_position_failure_is_logged_and_cleanup_continues(monkeypatch, caplog):
+async def test_p03_delete_position_is_never_called_for_insufficient(monkeypatch, caplog):
+    """cycle429(D1 안A) 재조준 — DB `delete_position` 자체가 호출되지 않는다."""
     r = _build(monkeypatch)
     r.delete_position.side_effect = OSError("db down")
     r.place.side_effect = [_insufficient()]
-    await _sell(r)
+    await _sell(r)  # delete_position 이 raise 해도 호출 자체가 없어 전파되지 않는다
 
-    assert _recs(caplog, logging.ERROR, "잔고부족 매도 후 DB positions 삭제 실패: ") == [
-        f"잔고부족 매도 후 DB positions 삭제 실패: {_T}"
-    ]
-    assert _T not in r.strat.state.positions
-    assert r.events[-3:] == ["write_log:WARNING", "safe_write_log:INFO", "get_balance"]
+    r.delete_position.assert_not_awaited()
+    assert _T in r.strat.state.positions
+    assert r.events == ["place", "get_balance", "write_log:ERROR"]
     assert _recs(caplog, logging.CRITICAL) == []
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("actual, logged", [(3, True), (0, False)], ids=["residual_3", "residual_0"])
-async def test_p04_reconciliation_logs_only_when_actual_quantity_positive(monkeypatch, caplog, actual, logged):
+@pytest.mark.parametrize("actual", [3, 0], ids=["residual_3", "residual_0"])
+async def test_p04_held_value_is_observational_only_in_unexplained_message(monkeypatch, caplog, actual):
+    """cycle429(D1 안A) 재조준 — 잔고 조회값은 판정에 안 쓰이고 `held=` 로만 로그에 남는다.
+
+    옛 `[positions_reconciliation] 실제 잔량 확인` 조건부 로그는 사라졌다 — 단일
+    ERROR 메시지의 `held=` 필드가 항상(0 이든 양수든) 실린다.
+    """
     caplog.set_level(logging.DEBUG, logger=_OE)
     r = _build(monkeypatch)
     r.get_balance.return_value = ([SimpleNamespace(ticker=_T, quantity=actual)], None)
     r.place.side_effect = [_insufficient()]
     await _sell(r)
 
-    lines = _recs(caplog, logging.INFO, "[positions_reconciliation] 실제 잔량 확인: ")
-    expected = [f"[positions_reconciliation] 실제 잔량 확인: {_T} qty={actual} — positions 재등록 권고"]
-    assert lines == (expected if logged else [])
-    assert _T not in r.strat.state.positions  # 잔량이 있어도 재등록하지 않는다(권고만)
+    lvl, msg = r.write_log.await_args.args[:2]
+    assert lvl == "ERROR"
+    assert f"held={actual}" in msg
+    assert _T in r.strat.state.positions  # D1 안A — 잔량과 무관하게 보존
 
 
 @pytest.mark.asyncio
 async def test_p05_reconciliation_balance_failure_is_swallowed(monkeypatch, caplog):
+    """cycle429(D1 안A) 재조준 — 관측 조회 실패는 `held=?` 로 흡수된다(전파 없음)."""
     caplog.set_level(logging.DEBUG, logger=_OE)
     r = _build(monkeypatch)
     r.get_balance.side_effect = RuntimeError("KIS down")
     r.place.side_effect = [_insufficient()]
     await _sell(r)  # 전파 없음
 
-    assert _recs(caplog, logging.DEBUG, "[positions_reconciliation] get_balance 조회 실패: ") == [
-        f"[positions_reconciliation] get_balance 조회 실패: {_T}"
-    ]
+    lvl, msg = r.write_log.await_args.args[:2]
+    assert lvl == "ERROR"
+    assert "held=?" in msg
     assert _recs(caplog, logging.CRITICAL) == []
 
 
@@ -907,7 +909,8 @@ async def test_g1_qty_exceeded_balance_unavailable_falls_to_plain_retry_and_rele
 
 @pytest.mark.asyncio
 async def test_g2_qty_exceeded_zero_holding_breaks_into_cleanup_and_releases(monkeypatch, caplog):
-    """분기 ④(실보유 0) — break(재시도·backoff 0) → 잔고부족 정리 · `_selling` 해제 · CRITICAL 없음."""
+    """분기 ④(실보유 0) → cycle429(D1 안A) 재조준 — 통합 판정 위임(재시도·backoff 0) →
+    보존 + `_selling` 해제 + 5분 진입 차단 · CRITICAL 없음(자동 삭제 없음)."""
     r = _build(monkeypatch)
     r.get_balance.return_value = ([], SimpleNamespace(net_asset=0))
     r.place.side_effect = [_qty_exceeded()]
@@ -916,9 +919,13 @@ async def test_g2_qty_exceeded_zero_holding_breaks_into_cleanup_and_releases(mon
     assert r.place.await_count == 1
     assert r.aio.sleeps == []
     assert _T not in r.eng._selling
-    assert _T not in r.strat.state.positions
-    r.delete_position.assert_awaited_once_with(_T)
+    assert _T in r.strat.state.positions  # D1 안A — 자동 삭제 없음
+    r.delete_position.assert_not_awaited()
     assert _recs(caplog, logging.CRITICAL) == []
+    assert _T in r.eng._sell_rejection._blocked_until
+    # 이 경로는 외부(`is_sell_qty_exceeded`) 재대조용 get_balance 1회 +
+    # 통합 판정 내부 관측용 1회 = 총 2회.
+    assert r.events.count("get_balance") == 2
 
 
 @pytest.mark.asyncio

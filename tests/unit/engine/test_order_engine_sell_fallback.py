@@ -360,7 +360,12 @@ async def test_execute_sell_when_insufficient_quantity_then_no_fallback_and_posi
     mock_strategy_exchange,
     mock_get_balance: AsyncMock,
 ):
-    """`is_insufficient_quantity` True → 폴백 분기 진입 *안 함*, 즉시 break + DB 삭제."""
+    """`is_insufficient_quantity` True → 폴백 분기 진입 *안 함*, 즉시 1회.
+
+    cycle429(D1 안A, 사용자 승인 2026-10-10) 재조준 — 과거엔 즉시 삭제였다.
+    이제는 자동 삭제 경로가 없다 — `get_daily_orders` 가 빈 목록(설명 안
+    됨)이라 포지션 보존 + 5분 진입 차단으로 끝난다.
+    """
     qty_reject = KisApiError(
         rt_cd="1", msg_cd="APBK1234", msg1="매도가능수량이 부족합니다.",
     )
@@ -371,10 +376,11 @@ async def test_execute_sell_when_insufficient_quantity_then_no_fallback_and_posi
     # 정확히 1회 — 폴백 없음, 재시도 없음
     assert mock_place_order.await_count == 1
 
-    # positions 메모리 삭제
-    assert "012200" not in strategy.state.positions
-    # DB positions 삭제 호출
-    assert mock_delete_position.await_count == 1
+    # D1 안A — positions 보존(자동 삭제 경로 없음)
+    assert "012200" in strategy.state.positions
+    # DB positions 삭제 호출 없음
+    assert mock_delete_position.await_count == 0
+    assert "012200" in engine._sell_rejection._blocked_until
 
 
 # ---------------------------------------------------------------------------

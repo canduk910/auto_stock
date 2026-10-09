@@ -4,7 +4,11 @@
     사이클 52 (B-1) 단일 책임 진입 차단 → 사이클 55 (R-1) 4 분류 통합:
     - is_market_closed_rejection (KRX 메인 5분 TTL / NXT 시간대 다음 09:00 TTL)
     - is_market_order_disallowed (30초 TTL + NXT 폴백 실패 시 익일 청산 전환)
-    - is_insufficient_quantity (기록만 + reconciliation 트리거, 차단 X)
+    - is_insufficient_quantity (cycle429 D1 안A — 2026-10-10 사용자 승인으로
+      「기록만, 차단 X」 를 「5분 TTL 진입 차단 + 당일 3회째 CRITICAL」 로 바꿨다.
+      자동 포지션 삭제 경로가 없어지면서 positions 가 더는 자연 차단을 만들지
+      않기 때문이다. 통보 대기(거래소 체결 ∧ 통보 미착)는 이 분류를 타지
+      않고 `OrderEngine._selling_locked_wait` 로만 재발사를 막는다)
     - (정상/기타 거부 — tracker 통과)
 
 선례 답습:
@@ -18,7 +22,8 @@
 
 안전 가드:
     reset_daily() 가 _blocked_until / _blocked_reason / _logged_today / _history /
-    _alarm_last_emitted 일괄 clear (사이클 57 V-1 추가).
+    _alarm_last_emitted / _insufficient_count_today 일괄 clear
+    (사이클 57 V-1 + cycle429 D1 안A 추가).
     record_rejection() 은 항상 history 적재 + V-1 알람 임계 자동 검사.
 
 사이클 57 V-1 (2026-06-04):
@@ -94,6 +99,9 @@ class SellRejectionTracker:
     _history: dict[str, deque[RejectionEvent]] = field(default_factory=dict)
     # 사이클 57 V-1 — per-ticker 알람 cooldown 시각
     _alarm_last_emitted: dict[str, datetime] = field(default_factory=dict)
+    # cycle429 D1 안A (사용자 승인 2026-10-10) — insufficient_quantity 당일
+    # 등록 횟수(ticker 당). 호출자(order_engine)가 3회째부터 CRITICAL 로 올린다.
+    _insufficient_count_today: dict[str, int] = field(default_factory=dict)
 
     # 사이클 57 V-1 — class-level 상수 (모듈 상수와 동기화)
     _ALARM_WINDOW_SECONDS: ClassVar[int] = ALARM_WINDOW_SECONDS
@@ -195,17 +203,44 @@ class SellRejectionTracker:
         self,
         ticker: str,
         now_kst: datetime,
-    ) -> None:
-        """Q3 — 차단 X (positions 제거가 자연 차단). history 만 적재.
+    ) -> datetime:
+        """Q3(cycle429 D1 안A — 사용자 승인 2026-10-10) — 설명 안 됨·주문조회
+        실패 수량 부족. **5분 진입 차단 TTL** + history 적재 + 당일 등록
+        횟수 누적(`insufficient_quantity_count_today`).
 
-        호출자(execute_sell)가 별도로:
-          1) state.positions / DB positions 제거 (현행 보존)
-          2) inquire_balance() 1회 호출 + [positions_reconciliation] 로그
+        과거(cycle55 R-1)에는 「차단 X — positions 제거가 자연 차단」이었다.
+        D1 이 자동 삭제 경로를 없애면서 포지션이 더는 자연 차단을 만들지
+        않으므로, 이 메서드가 직접 진입 차단(TTL)을 건다 — 그래야
+        `risk.on_tick` 이 같은 거부를 매 틱 재발사하지 않는다.
+
+        호출자(`OrderEngine._handle_sell_insufficient_quantity`)는 **거래소
+        체결이 있었는데 통보만 아직 안 온**(통보 대기) 경로에서는 이 메서드를
+        부르지 않는다 — 그 경로는 `_selling_locked_wait` 만으로 재발사를
+        막는다(거부가 아니라 대기라서 TTL 차단이 필요 없다).
+
+        Returns:
+            등록된 expiry datetime(= now_kst + 5분) — 호출자가 로그에 쓴다.
         """
+        expiry = now_kst + timedelta(minutes=5)
+        self._blocked_until[ticker] = expiry
+        self._blocked_reason[ticker] = "insufficient_quantity"
+        # 만료 후 재폭주 시 INFO 1줄 emit 보장 — register_market_closed 와 동일 이유.
+        self._logged_today.discard(ticker)
+        self._insufficient_count_today[ticker] = (
+            self._insufficient_count_today.get(ticker, 0) + 1
+        )
         self._append_history(
             ticker,
             RejectionEvent("insufficient_quantity", "", "", now_kst),
         )
+        return expiry
+
+    def insufficient_quantity_count_today(self, ticker: str) -> int:
+        """오늘 그 종목의 `register_insufficient_quantity` 호출 횟수(1부터, 미등록 0).
+
+        cycle429 D1 안A — 3회째부터 호출자가 CRITICAL 로 올리는 판정 근거.
+        """
+        return self._insufficient_count_today.get(ticker, 0)
 
     def record_rejection(
         self,
@@ -242,6 +277,7 @@ class SellRejectionTracker:
         self._logged_today.clear()
         self._history.clear()
         self._alarm_last_emitted.clear()  # 사이클 57 V-1
+        self._insufficient_count_today.clear()  # cycle429 D1 안A
 
     # ──────────────────────────── internal
 

@@ -367,6 +367,10 @@ SELL_ORDERS_QUERY_TIMEOUT = 2.0
 _DAILY_ORDERS_PAGE_REAL = 100
 _DAILY_ORDERS_PAGE_VTS = 15
 
+# cycle429 D1 안A (사용자 승인 2026-10-10) — 수량 부족(APBK1234·APBK0400 실보유 0)이
+# 설명 안 됨으로 그날 같은 종목에서 이 횟수째 등록되면 CRITICAL 로 올린다.
+SELL_INSUFFICIENT_CRITICAL_THRESHOLD = 3
+
 
 def _sell_fills_by_order(rows, ticker: str, page_size: int) -> "dict[str, int] | None":
     """TTTC0081R `output1` → {정규화 주문번호: 그 종목 매도 누적 체결}. 못 믿으면 None."""
@@ -1848,7 +1852,6 @@ class OrderEngine:
             return
 
         last_error: Exception | None = None
-        insufficient_qty = False
         sell_cap: int | None = None
         # 지정가 매도 분기 (P1(B))
         order_division = (
@@ -2331,15 +2334,17 @@ class OrderEngine:
                         self._selling_locked_wait.add(ticker)
                         return
                     elif sellable == 0 and held_qty == 0:
-                        # 실보유 0 — 기존 insufficient 경로 재사용 (삭제 + reconciliation)
-                        insufficient_qty = True
+                        # 실보유 0 — D1 안A(cycle429) 통합 판정으로 위임
+                        # (자동 삭제 경로 없음 — 아래 메서드가 통보 대기/보존을 가른다).
                         logger.warning(
-                            "매도 매도가능수량 부족(APBK0400·실보유 0) — 재시도 중단: %s "
+                            "매도 매도가능수량 부족(APBK0400·실보유 0) — 통합 판정 위임: %s "
                             "(전략: %s)", t(ticker), strategy_id,
                         )
-                        self._sell_rejection.register_insufficient_quantity(
-                            ticker, now_kst)
-                        break
+                        await self._handle_sell_insufficient_quantity(
+                            ticker=ticker, strategy_id=strategy_id,
+                            strategy=strategy, pos=pos, now_kst=now_kst,
+                        )
+                        return
                     else:
                         # sellable >= pos.quantity — 수량은 충분한데 초과 거부(이상).
                         logger.warning(
@@ -2347,16 +2352,19 @@ class OrderEngine:
                             "인데 APBK0400 — 이상 상태, 일반 재시도 지속",
                             ticker, sellable, pos.quantity,
                         )
-                # 2) 진짜 보유 부족(APBK1234 등) — 기존 동작 유지 + Q3 history 적재
+                # 2) 진짜 보유 부족(APBK1234 등) — D1 안A(cycle429) 통합 판정 위임.
+                #    #1.5 「실보유 0」(APBK0400) 분기와 같은 메서드로 모은다 —
+                #    자동 삭제 경로 없음(루트 CLAUDE.md 「D1」).
                 if is_insufficient_quantity(e):
-                    insufficient_qty = True
                     logger.warning(
-                        "매도 매도가능수량 부족 — 재시도 중단: %s (전략: %s, [%s] %s)",
+                        "매도 매도가능수량 부족 — 통합 판정 위임: %s (전략: %s, [%s] %s)",
                         t(ticker), strategy_id, e.msg_cd, e.msg1,
                     )
-                    # 사이클 55 R-1 Q3 — history 적재 (차단 X: positions 제거가 자연 차단)
-                    self._sell_rejection.register_insufficient_quantity(ticker, now_kst)
-                    break
+                    await self._handle_sell_insufficient_quantity(
+                        ticker=ticker, strategy_id=strategy_id,
+                        strategy=strategy, pos=pos, now_kst=now_kst,
+                    )
+                    return
                 # 3) 시장가 호가 불가(APBK1943 등) — 지정가 5호가 폴백 1회 (매수 패턴과 대칭).
                 #    매도는 `step_down(current_price, 5)` 로 호가 깊이로 내려 체결률 확보.
                 #    `limit_price>0` 인 지정가 매도에서는 이미 지정가 → 폴백 의미 없음, 기존 재시도 유지.
@@ -2422,9 +2430,82 @@ class OrderEngine:
             strategy_id=strategy_id,
             strategy=strategy,
             signal=signal,
-            insufficient_qty=insufficient_qty,
             last_error=last_error,
         )
+
+    async def _handle_sell_insufficient_quantity(
+        self,
+        *,
+        ticker: str,
+        strategy_id: str,
+        strategy: StrategyBase,
+        pos: Position,
+        now_kst: datetime,
+    ) -> None:
+        """D1 안A(cycle429 — 사용자 승인 2026-10-10) — 수량 부족 거부(APBK1234)와
+        #1.5 「실보유 0」(APBK0400) 분기를 한 판정으로 모은다.
+
+        명세 = `_workspace/domain_consult/
+        2026-10-10_d1_insufficient_qty_position_delete.md` Q3. 자동 삭제
+        경로는 **없다** — 포지션을 지우는 길은 체결통보 보유 축
+        (`_handle_sell_fill`) · 재기동 복구(`boot_manager`) · 사람(수동 정리)
+        셋뿐이다.
+
+        순서 — ① `_sell_orders_snapshot`(TTTC0081R 1건)으로 「거래소는 체결,
+        통보는 아직」 수량(`pending`)을 센다. ② `pending > 0`(전부든 일부든
+        설명됨) 이면 지우지 않고 `_selling_locked_wait` 로 통보를 기다린다
+        (#1.5 의 `[sell_qty_unnoticed_fills]` 와 같은 처리 — `_selling` 은
+        유지, TTL 등록 없음, `return`). ③ 설명 안 됨(`pending == 0`) 또는
+        조회 실패(`fills is None`) 면 포지션을 **보존**하고 `_selling` 을
+        풀고 `SellRejectionTracker.register_insufficient_quantity` 로 5분
+        진입 차단을 건 뒤 `[sell_insufficient_unexplained]` 를 남긴다(그날
+        3회째부터 CRITICAL). 잔고 1회 조회는 **관측 전용**(held 값을 로그에
+        남기는 용도일 뿐 판정에 쓰지 않는다).
+
+        호출부는 이 메서드가 끝나면 항상 `return` 한다 — 이 메서드가 재시도
+        여부를 전부 결정했으므로 execute_sell 재시도 루프로 되돌아가지 않는다.
+        """
+        fills, reason, pre = await self._sell_orders_snapshot(ticker)
+        if strategy.state.positions.get(ticker) is not pos:
+            logger.info(
+                "[sell_insufficient_reconcile_skipped] ticker=%s "
+                "reason=position_replaced", ticker,
+            )
+            return
+        pending = self._sell_pending_dec(fills, pre) if fills is not None else 0
+        if fills is not None and pending > 0:
+            # 거래소는 체결, 통보는 아직 — #1.5 와 동일 처리(삭제 없음, 통보 대기).
+            logger.warning(
+                "[sell_qty_unnoticed_fills] ticker=%s strategy=%s positions=%d "
+                "pending=%d orders=%s — 수량 부족 거부(통보 대기), 삭제 없음",
+                ticker, strategy_id, pos.quantity, pending, reason,
+            )
+            self._selling_locked_wait.add(ticker)
+            return
+        # 설명 안 됨(조회 성공 ∧ pending==0) 또는 조회 실패 — 보존 + 해제 + TTL.
+        self._selling.discard(ticker)
+        self._selling_locked_wait.discard(ticker)
+        expiry = self._sell_rejection.register_insufficient_quantity(ticker, now_kst)
+        count = self._sell_rejection.insufficient_quantity_count_today(ticker)
+        held_text = "?"
+        try:
+            from src.api.balance import get_balance
+            holdings, _ = await get_balance()
+            h = next((x for x in holdings if x.ticker == ticker), None)
+            held_text = str(int(getattr(h, "quantity", 0) or 0)) if h else "0"
+        except Exception:
+            held_text = "?"
+        msg = (
+            f"[sell_insufficient_unexplained] ticker={t(ticker)} strategy={strategy_id} "
+            f"positions={pos.quantity} orders={reason} pending={pending} count={count} "
+            f"held={held_text} blocked_until={expiry.isoformat()}"
+        )
+        if count >= SELL_INSUFFICIENT_CRITICAL_THRESHOLD:
+            logger.critical(msg)
+            await write_log("CRITICAL", msg)
+        else:
+            logger.error(msg)
+            await write_log("ERROR", msg)
 
     async def _handle_sell_final_failure(
         self,
@@ -2433,65 +2514,21 @@ class OrderEngine:
         strategy_id: str,
         strategy: StrategyBase,
         signal: Signal,
-        insufficient_qty: bool,
         last_error: Exception | None,
     ) -> None:
         """B4-5(cycle426) — `execute_sell` 마지막 실패 뒤처리(⑲) 추출. 행위 보존.
 
-        재시도를 다 쓴 뒤 호출된다. 순서가 계약이다 — `_selling` 해제(무조건·
-        첫 `await` 앞) → 잔고부족(`insufficient_qty`)이면 메모리 포지션 정리 +
-        보유결합 상태 정리 훅 + DB 포지션 삭제 + 로그 + 잔고 1회 재조회(권고
-        로그) 뒤 `return` → 그 밖은 CRITICAL 1행. 설계 =
-        `_workspace/refactor/2026-10-09_execute_sell_baseline.md` §3. 🔴 순서·
-        로그 마커·return 의미를 바꾸지 않는다.
+        재시도를 다 쓴 뒤 호출된다 — 이 지점에 도달하는 실패는 전부
+        미분류(수량 부족이 아닌) 거부라, `_selling` 해제 뒤 CRITICAL 1행만
+        남긴다. 🔴 D1 안A(cycle429) 가 수량 부족(APBK1234·APBK0400 실보유 0)
+        분기를 `_handle_sell_insufficient_quantity` 로 옮기면서 이 메서드의
+        포지션 삭제 분기(옛 `insufficient_qty` 매개변수)를 제거했다 — 자동
+        삭제 경로가 아예 없어졌기 때문이다(루트 CLAUDE.md 「D1」). 설계 =
+        `_workspace/refactor/2026-10-09_execute_sell_baseline.md` §3 +
+        `_workspace/domain_consult/
+        2026-10-10_d1_insufficient_qty_position_delete.md` Q3.
         """
         self._selling.discard(ticker)
-        if insufficient_qty:
-            # KIS에 보유 수량이 없으므로 메모리 포지션도 제거. trade_history는 sync 시 보정.
-            strategy.state.positions.pop(ticker, None)
-            # 사이클 185 클러스터 ① 메커니즘 2 (secondary) — 보유결합 상태 정리 훅
-            try:
-                strategy.on_position_closed(ticker)
-            except Exception as exc:
-                logger.error(
-                    "[on_position_closed_skip] ticker=%s strategy=%s err=%r",
-                    ticker, strategy_id, exc,
-                )
-            from src.db.positions import delete_position
-            try:
-                await delete_position(ticker)
-            except Exception:
-                logger.exception("잔고부족 매도 후 DB positions 삭제 실패: %s", ticker)
-            await write_log(
-                "WARNING",
-                f"매도가능수량 부족 — 메모리 포지션 정리: {t(ticker)} (전략: {strategy_id})",
-            )
-            # 사이클 55 R-1 Q3 — [positions_reconciliation] + get_balance() 1회.
-            # 수동 부분매도 등으로 실제 잔량이 남아있는 경우를 대비해 잔고를 1회 재조회.
-            # 실패 graceful — positions 제거는 이미 완료, 재조회는 보호 목적.
-            await safe_write_log(
-                "INFO",
-                f"[positions_reconciliation] ticker={ticker} strategy={strategy_id} "
-                f"reason=insufficient_quantity",
-                fallback_debug="[positions_reconciliation] write_log 실패",
-            )
-            try:
-                from src.api.balance import get_balance
-                holdings, _ = await get_balance()
-                actual_qty = next(
-                    (h.quantity for h in holdings if h.ticker == ticker), 0
-                )
-                if actual_qty > 0:
-                    logger.info(
-                        "[positions_reconciliation] 실제 잔량 확인: %s qty=%d — positions 재등록 권고",
-                        ticker, actual_qty,
-                    )
-            except Exception:
-                logger.debug(
-                    "[positions_reconciliation] get_balance 조회 실패: %s",
-                    ticker, exc_info=True,
-                )
-            return
         error_msg = f"매도 주문 최종 실패: {ticker} {signal.value} — {last_error}"
         logger.critical(error_msg)
         await write_log("CRITICAL", error_msg)

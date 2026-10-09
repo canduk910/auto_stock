@@ -289,7 +289,12 @@ class TestR2SelfHeal257720:
     async def test_zero_holding_falls_to_insufficient_path(
         self, engine, registry, mock_env, monkeypatch,
     ):
-        """실보유 0 → 기존 insufficient 경로(삭제 + reconciliation) 재사용."""
+        """실보유 0 → D1 안A(cycle429, 사용자 승인 2026-10-10) 통합 판정 위임.
+
+        D1 이전에는 자동 삭제(기존 insufficient 경로) 였다. 이제는 자동
+        삭제 경로가 없다 — `get_daily_orders` 가 빈 목록(설명 안 됨)이라
+        포지션 보존 + `_selling` 해제 + 5분 진입 차단으로 끝난다.
+        """
         import src.engine.order_engine as _oe
         _patch_balance(monkeypatch, quantity=0, sellable=0)
         place = AsyncMock(side_effect=_qty_exceeded_error())
@@ -298,8 +303,10 @@ class TestR2SelfHeal257720:
         await engine.execute_sell("257720", Signal.FORCE_CLEAR,
                                   "volatility_breakout")
         assert place.await_count == 1
-        assert "257720" not in strat.state.positions  # 삭제 (기존 계약)
-        assert mock_env.delete_position.await_count == 1
+        assert "257720" in strat.state.positions  # D1 안A — 자동 삭제 없음
+        assert mock_env.delete_position.await_count == 0
+        assert "257720" not in engine._selling
+        assert "257720" in engine._sell_rejection._blocked_until
 
     @pytest.mark.asyncio
     async def test_balance_failure_falls_back_to_retries(
@@ -325,7 +332,12 @@ class TestR2SelfHeal257720:
     async def test_apbk1234_path_unchanged(
         self, engine, registry, mock_env, monkeypatch,
     ):
-        """R6 — 기존 insufficient(APBK1234) 경로 불변 (즉시 break + 삭제)."""
+        """R6 → cycle429(D1 안A, 사용자 승인 2026-10-10) 로 재조준.
+
+        APBK1234 는 여전히 즉시 재시도 중단(place 1회)이지만, 삭제 대신
+        보존 + 통합 판정(설명 안 됨 → `_selling` 해제 + 5분 진입 차단)으로
+        끝난다. `mock_env` 가 `get_daily_orders` 를 빈 목록으로 패치한다.
+        """
         import src.engine.order_engine as _oe
         _patch_balance(monkeypatch, quantity=0, sellable=0)
         place = AsyncMock(side_effect=_insufficient_error())
@@ -334,4 +346,6 @@ class TestR2SelfHeal257720:
         await engine.execute_sell("257720", Signal.FORCE_CLEAR,
                                   "volatility_breakout")
         assert place.await_count == 1
-        assert "257720" not in strat.state.positions
+        assert "257720" in strat.state.positions  # D1 안A — 자동 삭제 없음
+        assert "257720" not in engine._selling
+        assert "257720" in engine._sell_rejection._blocked_until

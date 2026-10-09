@@ -64,6 +64,7 @@ backend:
       - tests/unit/engine/test_cycle369_status_buy_wiring.py
       - tests/unit/engine/test_cycle369_status_isolation.py
       - tests/unit/engine/test_cycle37_ccnl_cache.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_log_analysis_metrics.py
@@ -1384,6 +1385,7 @@ backend:
       - tests/unit/engine/test_cycle385r_recount_credit.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
@@ -2842,6 +2844,7 @@ backend:
       - tests/unit/engine/test_cycle385r_recount_credit.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_log_analysis_metrics.py
       - tests/unit/engine/test_order_engine_buy.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
@@ -5040,6 +5043,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -6386,6 +6390,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -7734,6 +7739,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -9083,6 +9089,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -10435,6 +10442,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -11779,6 +11787,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -13199,6 +13208,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -14545,6 +14555,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -15912,6 +15923,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -17261,6 +17273,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -18618,6 +18631,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -19955,6 +19969,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -21306,6 +21321,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -22652,6 +22668,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -24000,6 +24017,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -25348,6 +25366,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -26696,6 +26715,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -28046,6 +28066,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -29392,6 +29413,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -30740,6 +30762,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -32088,6 +32111,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -33436,6 +33460,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -33904,6 +33929,7 @@ backend:
       - tests/unit/engine/test_cycle386_daily_bar_finalize.py
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
       - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
@@ -36137,6 +36163,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -37481,6 +37508,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -38828,6 +38856,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -40178,6 +40207,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -41524,6 +41554,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -42876,6 +42907,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -44227,6 +44259,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -45573,6 +45606,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -46924,6 +46958,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -48339,6 +48374,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -49688,6 +49724,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -51036,6 +51073,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -52385,6 +52423,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -53732,6 +53771,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -55081,6 +55121,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -56428,6 +56469,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -57776,6 +57818,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -59124,6 +59167,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -60557,6 +60601,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -61911,6 +61956,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -63254,6 +63300,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -64602,6 +64649,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -65950,6 +65998,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -67299,6 +67348,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -68646,6 +68696,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -70065,6 +70116,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -71413,6 +71465,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -72763,6 +72816,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -74110,6 +74164,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -75457,6 +75512,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -76883,6 +76939,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -78228,6 +78285,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -79643,6 +79701,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -80995,6 +81054,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -82350,6 +82410,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -83757,6 +83818,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -85107,6 +85169,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -86453,6 +86516,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -87801,6 +87865,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -89149,6 +89214,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -90497,6 +90563,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -91845,6 +91912,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -93192,6 +93260,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -94640,6 +94709,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -96072,6 +96142,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -97584,6 +97655,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -98933,6 +99005,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -100281,6 +100354,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -101638,6 +101712,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -102979,6 +103054,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -104328,6 +104404,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -105671,6 +105748,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -107093,6 +107171,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -108457,6 +108536,7 @@ backend:
       - tests/unit/engine/test_cycle427_boot_unfilled_order_owner.py
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle61_phase2A2_dataclass_completeness.py
@@ -109718,6 +109798,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -111066,6 +111147,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -111430,6 +111512,7 @@ backend:
     direct_tests:
       - tests/unit/engine/test_cycle379_sync_wiring.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -113759,6 +113842,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -115109,6 +115193,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -116477,6 +116562,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -117804,6 +117890,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -119171,6 +119258,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -120501,6 +120589,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -121847,6 +121936,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -123195,6 +123285,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -124544,6 +124635,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -125892,6 +125984,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -127240,6 +127333,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -128592,6 +128686,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -129970,6 +130065,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -131321,6 +131417,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -132664,6 +132761,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -134018,6 +134116,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -135361,6 +135460,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -136709,6 +136809,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -138059,6 +138160,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -139408,6 +139510,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -140067,6 +140170,7 @@ backend:
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle425_boot_fallback_owner.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -142104,6 +142208,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -142600,6 +142705,7 @@ backend:
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
       - tests/unit/engine/test_kojiro_wiring.py
       - tests/unit/engine/test_observability_logs.py
@@ -144799,6 +144905,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -146146,6 +146253,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -147580,6 +147688,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -148929,6 +149038,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -150275,6 +150385,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -151626,6 +151737,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -152971,6 +153083,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -154319,6 +154432,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -155666,6 +155780,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -157016,6 +157131,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -158363,6 +158479,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -159718,6 +159835,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -161131,6 +161249,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -162479,6 +162598,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -163831,6 +163951,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -165184,6 +165305,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -166598,6 +166720,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -167948,6 +168071,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -168480,6 +168604,7 @@ backend:
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_order_engine_buy.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
@@ -170903,6 +171028,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -172321,6 +172447,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -173699,6 +173826,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -175029,6 +175157,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -176394,6 +176523,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -177741,6 +177871,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -180976,6 +181107,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -182321,6 +182453,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -183672,6 +183805,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -185017,6 +185151,7 @@ backend:
       - tests/unit/engine/test_cycle428_execute_buy_generic_exception_pin.py
       - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
       - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
+      - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -189013,10 +189148,10 @@ frontend:
       - frontend/src/pages/__tests__/Dashboard.fix1.cycle414.test.tsx
       - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
-generated_at: '2026-10-09T23:22:51.016Z'
+generated_at: '2026-10-09T23:49:41.688Z'
 stats:
   backend_modules: 186
-  backend_tests: 1329
+  backend_tests: 1330
   frontend_modules: 155
   frontend_tests: 170
   unmapped_modules:
