@@ -64,6 +64,47 @@ def _resolve_fallback_owner(scheduler: "TradingScheduler", strategy_id: str):
     return scheduler.registry.get(strategy_id) or scheduler.registry.get(FALLBACK_OWNER_ID)
 
 
+async def _resolve_unfilled_buy_owner(ticker: str, order_no: str) -> str | None:
+    """미체결 매수 주문의 소유 전략을 **주문번호**로 해석한다 (⑦-F2 안3, cycle427).
+
+    순서 — ① `trade_history` 의 PENDING/PARTIAL 행 중 그 주문번호가 일치하는 행
+    (`_lookup_strategy_from_trade_history` 재사용) ② `llm_buy_evaluations` 의 같은
+    주문번호 `strategy_id`. 둘 다 없으면 `None`(미상). **종목 기준 당일 BUY 는 근거에서
+    뺀다** — 주문번호가 다른 행은 「다른 주문」의 증거다(COMPLETED 행도 근거 아님,
+    ①이 PENDING/PARTIAL 만 본다). DB 조회 실패는 그 단계만 미상으로 보고 다음 단계로
+    넘어간다(실패 방향 = 타이머 없음 — 우리 주문이면 잔량 30초 취소 하나를 잃을 뿐이고
+    KRX 정규장 마감 자동취소가 회수한다).
+
+    자문 = `_workspace/domain_consult/2026-10-09_boot_unknown_order_owner.md` (안3).
+    """
+    try:
+        from src.db.trade_history import _lookup_strategy_from_trade_history
+        from src.models.trade import TradeType
+
+        sid = await _lookup_strategy_from_trade_history(ticker, order_no, TradeType.BUY)
+        if sid:
+            return sid
+    except Exception:
+        logger.warning(
+            "[boot_recover_order_owner_lookup_failed] stage=trade_history ticker=%s order_no=%s",
+            ticker, order_no,
+        )
+
+    try:
+        from src.db.llm_buy_evaluations import get_by_order
+
+        row = await get_by_order(order_no)
+        if row and row.get("strategy_id"):
+            return row["strategy_id"]
+    except Exception:
+        logger.warning(
+            "[boot_recover_order_owner_lookup_failed] stage=llm_eval ticker=%s order_no=%s",
+            ticker, order_no,
+        )
+
+    return None
+
+
 async def _previous_trading_day(today):
     """`today` 직전 **영업일**을 돌려준다 (주말 + KIS 휴장일 역산).
 
@@ -452,32 +493,34 @@ async def boot(scheduler: "TradingScheduler") -> None:
     except Exception:
         logger.warning("DB 동기화 실패")
 
-    # 미체결 매수 주문의 전략 매핑 (DB 포지션 + trade_history 기반)
-    db_strategy_map: dict[str, str] = {
-        row["ticker"]: row["strategy_id"]
-        for row in db_positions if row.get("strategy_id")
-    }
+    # 당일 매수 종목을 sold_today 에 시드(종목 기준 — 서버 재기동 race로 같은 종목이
+    # 짧은 시간에 여러 번 매수되던 결함 차단: 모멘텀 `_prev_prdy_rate` 휘발 + 보유
+    # 가드 race). 의미적으론 매도가 아니지만 모든 전략의 check_buy_signal 이 sold_today
+    # 를 가드로 사용하므로 같은 영업일 재매수 차단 효과를 즉시 확보한다.
+    # 🔴 ⑦-F2(cycle427) — 이 시드는 종목 기준으로 **유지**한다(재매수 차단 용도이지
+    # 소유 판정이 아니다). 아래 미체결 주문 복구는 이 맵을 쓰지 않고 주문번호로만
+    # 소유를 해석한다.
     try:
         from src.db.trade_history import get_today_buys_ticker_strategy
         th_buys_rows = await get_today_buys_ticker_strategy()
         for row in th_buys_rows:
-            if row["ticker"] not in db_strategy_map:
-                db_strategy_map[row["ticker"]] = row.get("strategy", FALLBACK_OWNER_ID)
-            # 당일 매수 종목을 해당 전략 sold_today에 시드 — 서버 재기동 race로 같은 종목이
-            # 짧은 시간에 여러 번 매수되던 결함 차단(모멘텀 `_prev_prdy_rate` 휘발 + 보유 가드 race).
-            # 의미적으론 매도가 아니지만 모든 전략의 check_buy_signal이 sold_today를 가드로 사용하므로
-            # 같은 영업일 재매수 차단 효과 즉시 확보.
             seed_sid = row.get("strategy") or FALLBACK_OWNER_ID
             seed_strategy = scheduler.registry.get(seed_sid)
             if seed_strategy:
                 seed_strategy.state.sold_today.add(row["ticker"])
     except Exception:
-        # ⑦ 관측 (cycle425) — 전에는 조용히 넘어갔다. 행위 무변경(db_strategy_map 보강만 skip).
+        # ⑦ 관측 (cycle425) — 전에는 조용히 넘어갔다. 행위 무변경(sold_today 시드만 skip).
         logger.warning(
             "[boot_recover_today_buys_lookup_failed] 오늘 BUY (ticker,strategy) 조회 실패"
         )
 
     # 미체결 매수 주문 복구 → pending_buys에 등록하여 중복 주문 방지
+    # ⑦-F2 안3 (cycle427 — domain-consult 2026-10-09 + 사용자 승인 10-10) — 소유
+    # 전략은 **주문번호**로 해석한다(종목 기준 금지: 같은 날 그 종목을 사고판 전략이
+    # 있다고 해서, 다른 주문번호로 들어온 사람 주문까지 그 전략 것으로 보지 않는다).
+    # 해석 안 되면 "미상" — pending_buys/_pending_buy_orders/_order_qty/
+    # _order_strategy/pending_buy_amounts 어디에도 올리지 않는다(체결되면
+    # `order_engine` 의 고아 귀속 가드 + CRITICAL 이 처리한다, 타이머 없음).
     unfilled_count = 0
     for order in all_orders:
         if order.get("sll_buy_dvsn_cd") != "02":  # 매수만
@@ -491,27 +534,24 @@ async def boot(scheduler: "TradingScheduler") -> None:
         # 이미 어떤 전략에 포지션이 있으면 건너뜀
         if scheduler.registry.is_ticker_held_by_any(ticker):
             continue
-        # 미체결 매수 주문 존재 → 해당 전략의 pending_buys에 등록
-        owner_unknown = ticker not in db_strategy_map
-        strategy_id = db_strategy_map.get(ticker, FALLBACK_OWNER_ID)
-        target_strategy = _resolve_fallback_owner(scheduler, strategy_id)
+        order_no = order.get("odno", "")
         order_unpr = int(order.get("ord_unpr", "0"))
+
+        strategy_id = await _resolve_unfilled_buy_owner(ticker, order_no)
+        if strategy_id is None:
+            # 🔴 write_log 를 또 쓰지 않는다 — logger.* 가 루트 _DbLogHandler 로
+            # system_logs 에 들어간다(cycle72 G-6, 사건당 두 줄 금지).
+            logger.warning(
+                "[boot_recover_strategy_unknown] path=unfilled_order ticker=%s order_no=%s — 장부 미등록",
+                ticker, order_no,
+            )
+            continue
+
+        target_strategy = _resolve_fallback_owner(scheduler, strategy_id)
         if target_strategy:
-            if owner_unknown:
-                # ⑦-F2 선행 관측 (cycle425) — 행위는 바뀌지 않는다(여전히
-                # FALLBACK_OWNER_ID 가 받는다). 「주인을 모르는 미체결 주문을
-                # 폴백에 넘겼다」만 보이게 한다.
-                # 🔴 write_log 를 또 쓰지 않는다 — logger.* 가 루트 _DbLogHandler 로
-                # system_logs 에 들어간다(cycle72 G-6, 사건당 두 줄 금지).
-                _unknown_order_no = order.get("odno", "")
-                logger.warning(
-                    "[boot_recover_strategy_unknown] path=unfilled_order ticker=%s order_no=%s",
-                    ticker, _unknown_order_no,
-                )
             target_strategy.state.pending_buys.add(ticker)
             # 잔여 자금 폴백 계산용 — pending_buys 와 동기 등록 (2026-05-11 P1)
             target_strategy.state.pending_buy_amounts[ticker] = order_unpr * rmn_qty
-        order_no = order.get("odno", "")
         scheduler.order_engine._pending_buy_orders[order_no] = {
             "ticker": ticker,
             "price": order_unpr,

@@ -12,6 +12,13 @@
 이 테스트는 리팩토링 전후로 **바이트 동일**해야 한다(행위 0) — 커밋 순서:
 이 파일(현행 고정) → 상수(`FALLBACK_OWNER_ID`)·헬퍼 도입 리팩토링. 리팩토링 커밋은
 이 파일을 건드리지 않는다.
+
+🔴 **cycle427 갱신** — 위 3번(미체결 매수 주문 복구)은 ⑦-F2 안3(domain-consult
+2026-10-09 + 사용자 승인 10-10)으로 **행위가 바뀐다**. 소유는 더 이상 종목 기준
+(`db_strategy_map`)이 아니라 **주문번호**로 해석하고, 해석 안 되면 "미상" —
+momentum 폴백 없이 어느 장부에도 올리지 않는다. 그 변경을 반영한 시나리오는
+`test_cycle427_boot_unfilled_order_owner.py` 가 정본이고, 아래 3번 섹션 두 테스트는
+새 행위에 맞춰 갱신했다(1·2번 — DB positions 복구·KIS 잔고 보완 복구 — 는 무변경).
 """
 from __future__ import annotations
 
@@ -282,8 +289,10 @@ async def test_kis_supplement_known_owner_overrides_momentum_default():
 
 
 # ---------------------------------------------------------------------------
-# 3. 미체결 매수 주문 복구 — db_strategy_map.get(ticker, "momentum") +
-#    registry.get(strategy_id) or registry.get("momentum")
+# 3. 미체결 매수 주문 복구 — cycle427 안3: 소유는 **주문번호**로 해석한다.
+#    종목 기준(`db_strategy_map`)도 momentum 폴백도 없다 — 해석 안 되면 미상(미등록).
+#    주문번호 해석 자체(trade_history/llm_buy_evaluations 히트)는
+#    `test_cycle427_boot_unfilled_order_owner.py` 가 정본으로 고정한다.
 # ---------------------------------------------------------------------------
 def _unfilled_order(ticker: str, order_no: str, *, price: int, qty: int) -> dict:
     return {
@@ -297,8 +306,8 @@ def _unfilled_order(ticker: str, order_no: str, *, price: int, qty: int) -> dict
 
 
 @pytest.mark.asyncio
-async def test_unfilled_order_unknown_ticker_falls_back_to_momentum():
-    """db_strategy_map 에 없는 종목의 미체결 매수는 momentum 의 pending 으로 등록된다."""
+async def test_unfilled_order_unresolved_order_no_is_not_registered():
+    """주문번호로 소유를 못 해석하면 momentum 폴백 없이 미등록이다(cycle427 안3)."""
     registry = _FakeRegistry({"momentum": _FakeStrategy("momentum")})
     scheduler = _make_scheduler(registry)
 
@@ -314,14 +323,21 @@ async def test_unfilled_order_unknown_ticker_falls_back_to_momentum():
     )
 
     momentum = registry.get("momentum")
-    assert "555555" in momentum.state.pending_buys
-    assert momentum.state.pending_buy_amounts["555555"] == 10_000
-    assert scheduler.order_engine._order_strategy["ORDER1"] == "momentum"
+    assert "555555" not in momentum.state.pending_buys
+    assert "555555" not in momentum.state.pending_buy_amounts
+    assert "ORDER1" not in scheduler.order_engine._order_strategy
 
 
 @pytest.mark.asyncio
-async def test_unfilled_order_known_ticker_does_not_fall_back():
-    """db_strategy_map 에 있는 종목의 미체결 매수는 그 전략의 pending 으로 등록된다."""
+async def test_unfilled_order_ticker_based_evidence_alone_is_not_registered():
+    """같은 종목의 **다른 주문번호** 당일 매매 이력만으로는 소유가 해석되지 않는다.
+
+    cycle425 까지는 `db_strategy_map`(`get_today_buys_ticker_strategy` 의 종목→전략
+    맵)이 이 미체결 주문(다른 odno)을 그 전략 것으로 삼았다. 안3 은 종목 기준 귀속을
+    근거에서 뺀다 — 여기서는 trade_history/llm_buy_evaluations 조회가 그 odno 로
+    미스되는 기본 동작(real_network 미접속 환경의 DB 조회 실패 = 미상)만으로
+    "종목 기준 보강 경로가 더는 없다" 는 것을 확인한다.
+    """
     registry = _FakeRegistry(
         {
             "momentum": _FakeStrategy("momentum"),
@@ -331,7 +347,8 @@ async def test_unfilled_order_known_ticker_does_not_fall_back():
     scheduler = _make_scheduler(registry)
 
     orders = [_unfilled_order("666666", "ORDER2", price=2_000, qty=5)]
-    # db_strategy_map 은 db_positions ∪ today_buys_rows 에서 만들어진다.
+    # 전략 X(volatility_breakout)가 오늘 이 종목을 사고판 이력은 있지만, 미체결
+    # 주문(ORDER2)의 주문번호와는 무관하다 — 더 이상 귀속 근거가 되지 않는다.
     today_buys_rows = [{"ticker": "666666", "strategy": "volatility_breakout"}]
 
     await _run_boot(
@@ -345,7 +362,6 @@ async def test_unfilled_order_known_ticker_does_not_fall_back():
 
     vb = registry.get("volatility_breakout")
     momentum = registry.get("momentum")
-    assert "666666" in vb.state.pending_buys
-    assert vb.state.pending_buy_amounts["666666"] == 10_000
+    assert "666666" not in vb.state.pending_buys
     assert "666666" not in momentum.state.pending_buys
-    assert scheduler.order_engine._order_strategy["ORDER2"] == "volatility_breakout"
+    assert "ORDER2" not in scheduler.order_engine._order_strategy
