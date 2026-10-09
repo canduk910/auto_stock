@@ -7,17 +7,12 @@
 **프로덕션 코드는 `src/engine/strategies/*.py` 7파일의 `DEFAULT_PARAMS` 와
 `src/engine/param_catalog.py` 만 바뀐다.**
 
-`order_engine.py` 는 이미 두 키를 읽는 코드를 갖고 있으므로 **손댈 이유가 없다** —
-그래서 cycle287 과 달리 이 파일이 핀 목록에 **들어 있다**(S1).
+`order_engine.py` 는 이미 두 키를 읽는 코드를 갖고 있으므로 **손댈 이유가 없다**.
+`param_validation.py` 도 무접촉이다 — **등재만으로 판정이 통해야** 한다.
 
-⚠️ 반대로 **`src/models/order.py` 는 일부러 핀하지 않는다** — cycle287
-`test_s4b_models_order_is_not_pinned_anywhere` 가 "어느 sha 핀 dict 에도 그 경로가
-키로 등장하지 않는다" 를 계약으로 잠갔다(`OrderDivision` enum 확장의 가드 비용을 0 으로
-유지하려는 의도). 초안에서 그 파일을 `_BASE_SHA` 에 넣었다가 그 가드가 즉시 잡아냈다. 주석 정직화조차 8영역
-승인 사유이므로 이번 사이클에서는 `src/engine/CLAUDE.md` 가 대신 기록한다(자문 §S3-2).
-
-`param_validation.py` 도 무접촉이다 — **등재만으로 판정이 통해야** 한다. 검증 로직을
-고쳐 통과시키는 것은 이 사이클이 고치려는 것과 반대 방향이다(S1).
+8영역 + `scheduler.py` 파일 내용 sha 는 정본 `test_cycle222a3_ast_followup_fixes.py::
+_APPROVED_CONTENT_SHA` 한 곳에만 둔다(cycle419 — 이 파일의 S1 파일 핀·정확 줄 수 핀·S3
+`src/engine` 파일 이름 목록은 걷었다. 새 `.py` 를 짚는 파일 수 핀은 cycle287 S1d 한 곳이다).
 
 ## 왜 세그먼트 sha 를 따로 잠그는가 (S2)
 
@@ -38,17 +33,11 @@
 (cycle259 S4b). bare `git diff HEAD` 는 커밋 직후 공허해지고 다음 편집에서 무조건 RED 가
 된다(cycle240 A11b · cycle252 G-252-5b). 스캔은 `Path(...).rglob("*.py")` + AST.
 
-## ⚠️ dict 이름을 `*_CONTENT_SHA` 로 짓지 않았다
+## 핀의 자리
 
-`test_cycle223g3_ast_guard_sees_staged.py::test_g3_9a` 가 모듈 레벨 `*_CONTENT_SHA`
-dict 를 가진 테스트 파일 집합을 `_PIN_GUARD_FILES`(4개)로 고정한다. cycle274/278/282/
-286/287 관례대로 `_BASE_SHA` 를 쓴다.
-
-## ⚠️ 사이클 한정 — 다음 사이클의 갱신 의무
-
-`_BASE_SHA` · `_SEGMENT_SHA` · `_ENGINE_PY_FILES` 는 cycle290 착수 시점(HEAD `b985938`
-기준 워크트리)의 blob 을 고정한 것이라 cycle290 의 무접촉 증거로만 유효하다. 그 파일들을
-**정당하게** 바꾸는 다음 사이클이 이 dict 를 갱신한다(고아 가드 방지).
+`_SEGMENT_SHA`(S2, 전략 메서드 세그먼트 28핀)는 이 파일의 내용 계약이다 — 그 메서드를
+정당하게 바꾸는 사이클이 값을 옮긴다. `scheduler.py` 라인 **상한**(`< 3,900`, cycle257)은
+S1b 가 계속 복창한다.
 """
 
 from __future__ import annotations
@@ -91,155 +80,15 @@ def _sha(text: str) -> str:
 
 
 # ===========================================================================
-# S1 — 프로덕션 무접촉 파일의 내용 sha
-#
-# cycle287 의 `_BASE_SHA` 와 달리 `order_engine.py`·`api/order.py`·`models/order.py`
-# 가 **들어 있다** — cycle290 은 그 셋을 읽기만 한다.
+# S1 — `scheduler.py` 라인 상한 (cycle257 영구 상한 복창)
 # ===========================================================================
-_BASE_SHA: dict[str, str] = {
-    # 8영역 — 엔진 5파일 전부 (order_engine 포함! cycle290 은 무접촉)
-    # 🔁 2026-09-25 (cycle358) 재핀 — 카드 D(관측 전용). PARTIAL/CANCELLED UPDATE
-    # `affected==0` 무흔적에 `[trade_status_update_miss]` WARNING 추가(사용자 승인,
-    # 워크리스트 ⑨). 매매·상태전이 로직 무변경.
-    # 🔁 2026-09-27 (cycle385 B7) 재핀 — 매도 판정 주문/보유 두 축 분리 + J-2 재주문
-    # 직전 보유 재조회 + J-1 주석 정정. 사용자 승인(8영역). cycle290 은 이번에도 무접촉.
-    # 🔁 2026-09-28 (cycle385 부록 R4) 재핀 — 4차 검토 결정: 「안 걸렸다」 판정 한 곳
-    #    _sell_not_placed_reason(APBK0400 · 시장가 불가 · 장운영시간 외, D2) · 재주문
-    #    해제 로그 reject= 칸 · 조회 실패 걸린 것 없음 보류 문구 분리(D4). 사용자
-    #    승인(8영역), 나머지 7영역 diff 0.
-    "src/engine/order_engine.py":
-    # 🔁 2026-09-27 (cycle385 부록 R) 재핀 — 리뷰 반영: F-1(재대조 스냅샷·통보 차감
-    #    멱등 크레딧) · F-2(manual 라우트 주문의 잔여 재주문은 보유와 무관하게
-    #    `remaining` 을 쏜다 — `_manual_sell_orders` 표식) · F-3(잠금 중 판매
-    #    가능분은 판다) + docstring/이름캐시 보존/뮤턴트 회귀. 나머지 7영역 diff 0.
-    # 🔁 2026-09-27 (cycle385 부록 R2) 재핀 — 2차 검토 반영: _selling 주인 규칙(R-3)
-    #    제거(B7 해제 의미 복귀) · 재주문이 안 걸리면 _selling 해제(H5) · F-3 이 걸린
-    #    외부 체결 통보를 먼저 뺀다(H3) · 종목 크레딧 누적(H2) · 주문 조회 2초 상한·
-    #    환경별 쪽 크기(H6·H7) · 동결 보유가 닫히면 동결 해제. 사용자 승인(8영역),
-    #    나머지 7영역 diff 0.
-    # 🔁 2026-09-28 (cycle385 부록 R3) 재핀 — 3차 검토 반영: 원장 시작 전 접수 주문은
-    #    pending 에서 빼고 그 재대조 크레딧에 상한(K1) · 걸린 것 없는 보류 문구
-    #    분리 · 재주문 거부는 APBK0400 만 해제(K2) · 동결이면 손님 manual 재주문
-    #    거부도 해제(K3). 사용자 승인(8영역), 나머지 7영역 diff 0.
-    # 🔁 2026-10-02 (cycle392) 재핀 — 다건 체결통보 매도의 장부 손익·가격을 주문 누적(증분
-    #    합·체결 가중평균)으로 기록. 사용자 승인(8영역, 결정 4), 나머지 7영역 diff 0.
-    # 🔁 2026-10-02 (cycle396) 재핀 — cycle396 사용자 요청(10-02) 가중평균가 절사: 매도 장부
-    #    가격을 원 단위 내림 int 로(`_vwap_2dp`→`_vwap_floor`). 사용자 승인(8영역), 나머지 7영역 diff 0.
-        # 🔁 cycle409 재핀 — 사용자 결정 10-04 Q4 8영역 승인: 매도 PENDING 에 주문가(`order_price`) 전달 — 모듈 함수 `_sell_order_price`(never-raise, await 0) + 매도 래퍼 `order_unpr` 키워드 + 주·폴백 호출 각 1줄. 발사·매핑·send_qty·재시도·_selling 흐름 불변, 나머지 7영역 diff 0. 직전 값 = cycle408-L3 `a6d677259fe7…`
-        "08c479841352fb579f767c109de3e8f901d1c27bdce705b39b5ba6556fc0b3e1",
-    "src/engine/risk.py":
-        "a2187b8270446379988d24dfbe39b902d6ab37b112d4b6ce7330ee171434e222",
-    "src/engine/session.py":
-        "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
-    # 🔁 cycle302(2026-09-18) 재핀 — 사용자 승인 일봉 backfill **대상** 확대
-    #    (분기에서 지수 소속 판정 제거 · `vcp_universe_tickers` 집합 소멸.
-    #    목표 깊이 상수는 불변). 값만 옮긴다 — 단언은 그대로다.
-    #    구 값은 cycle299 기준선(3b7366cc…)이다.
-    # 🔁 2026-09-25 (cycle363 F-1) 재핀 — `_scan_pool_eager_refresh_loop` upsert 전 기존 raw 머지(사이클 176 basics 경로 답습, 사용자 승인 8영역). 장전 0값 키(acml_tr_pbmn 등)가 raw 통째 교체로 지워지던 결함 시정. 나머지 7영역 diff 0.
-    # 🔁 cycle380(2026-09-27) 재핀 — ETF 판정을 이름 키워드에서 증권그룹코드(`scty_grp_id_cd`)로 전환(사용자 승인, 8영역). ETF_KEYWORDS 를 정본 leaf `src/engine/etf_like.py` 로 이전 + import, `scan_stocks` 판정 자리를 `is_etf_like` 로 교체. 값만 이동, 값 자체는 유일값.
-    # 🔁 cycle417(2026-10-09) 재핀 — cycle417 사용자 승인 10-09 — 일봉 증분 적재 구멍(증분 분기 창 확대 + 구멍 판정 1회 호출). 나머지 7영역 diff 0.
-    "src/engine/scanner.py":
-        "b570762dfd92df49471dab261d44ecd364d376300ffe9e2f5b7ac19cceb9efcc",
-    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). 8영역 `update_weights` 의 enabled 대입 한 줄(섀도 전략은 비중 0 이어도 켜짐 유지). 값만 이동.
-    "src/engine/strategy_registry.py":
-        "3b6366c3cdb6e83907428435b95611880f1b8223e572c361a1cad2d00b13a067",
-    # 8영역 — api/order
-    "src/api/order.py":
-        "08c5cafd7b8678ec0d0fa85f856fdea3cce38ad92488c6d74c03cd13faa415bb",
-    # 8영역 — realtime 전부
-    "src/realtime/__init__.py":
-        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    # 🔁 cycle368(2026-09-25) 재핀 — 장운영정보 칸 밀림 수정 세트. USER DECISION: 칸
-    #    기준점 판별(`parse_market_op_payload` 단일 판별자)을 handler 에도 적용해
-    #    handler 가 더 이상 `payload.split` 을 직접 하지 않고 파싱된
-    #    `event.mkop_cls_code` 를 쓴다. MAIN-SESSION DECISION(적대적 검토 뒤, 사용자
-    #    승인 범위 안): 두 import(`parse_market_op_payload`·`record_market_op_event`)를
-    #    각자의 try 안에 둔다 — HEAD 도 이미 import 를 (하나의) try 안에 두어 보드
-    #    콜백은 원래도 안전했고, 이번 변경은 그 try 를 파싱/기록 둘로 나눠 한쪽이
-    #    깨져도 다른 쪽 결과가 살아남게 한 것이지 없던 보호를 처음 넣은 게 아니다.
-    #    docstring 을 현재 계약만 서술하도록 다시 썼다(세션 행위 영향은 AB1 조건부
-    #    라는 서술 포함). 그 밖 로직 무변경. 직전 값 =
-    #    `37b1755210c83cdb2a462e6a37f919b326f8b48bee73d924adcc277d770a8d17`.
-    # 🔁 cycle374(2026-09-27) 재핀 — 접수 전문(`CNTG_YN=1`) INFO `[order_notice]` + 거부 WARNING `[order_rejected_notice]` 기록 추가(사용자 승인, 8영역). 콜백/상태 변경 0 — 체결(`CNTG_YN=2`) 경로는 byte 동일. 직전 값 = `cc8af0de831e98d79f558d0c56f1360ce5ee5438ec59f23dbe79ca6725d472bc`.
-    "src/realtime/handler.py":
-        "e1a484e9ac82d43f0fa85cba693ea5a206ecfbae1076dfee0f4e6bf6d4f2a2d4",
-    "src/realtime/websocket.py":
-        "d4c443bde2ed7aeafba3e9471db0ca4efc15a654610555435145a9b305150c5b",
-    "src/realtime/websocket_pool.py":
-        "8b02442bcf5f558d6f7095b47d2016f004e3746e07ddc91dae8768b1dd46a10d",
-    # 8영역 — auth 전부
-    "src/auth/__init__.py":
-        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "src/auth/hashkey.py":
-        "7c2aacc703839bdc274b463ee48777006504d70e4d59a1e57120ac5b612396d2",
-    # 🔁 cycle296(2026-09-17) 재핀 — 사용자 승인 `issue()` 매니저 단위 in-flight 합류(`src/auth/**`). 같은 값을 10곳 동시 갱신했다.
-    "src/auth/token.py":
-        "4125c271b4147e59922f4f000e523429fb4bbef37058dc754fd92b9475ec58f1",
-    # ⚠️ cycle292(2026-09-14) 재핀 — `_subscribe_market_operation_tickers` 176줄을
-    # 신규 leaf `src/engine/market_op_subscribe.py` 로 추출(행위 변경 0 · 5줄 위임
-    # wrapper · 3,897→3,726L, 사용자 승인). 여섯 자매 핀(cycle274/276/278/282/290/291)
-    # 을 **한 값으로 동시에** 옮겼다 — 한 곳만 넣으면 나머지가 "코드를 되돌려라" 로
-    # 붉어져 승인된 변경을 되돌리도록 오도한다. 직전 값 =
-    # `50658e06062a0d38afecab1baa08871b89212e295cc95f2a3af62a2ae076115d`.
-    # 8영역은 아니지만 이 사이클이 무접촉을 약속한 파일
-    # 🔁 cycle364(2026-09-26) 재핀 — 저녁 A1 미리보기(`prepare(as_of=)`) 도입(사용자 승인 D3).
-    # 🔁 cycle364 round 2(적대적 검토 반영, 같은 날) 재핀 — `scheduler.py` 는 죽은
-    # try/except 2곳 제거 + 「16:20」 주석 정직화(라인 3,758→3,755). `strategy_base.py`
-    # 는 `_preview_keep_tickers`/`_preview_skip_tickers`(R1, 자기 보유·자기 익일청산만
-    # 보존 / 보호 종목 전부 건너뜀) 로 `_preview_protected_tickers` 를 대체했다.
-    # 🔁 cycle369 재핀 — 관리종목51·단기과열59 청산·매수차단 leaf 배선(값만 이동)
-    # 🔁 cycle379 재핀 — buying_reconcile leaf 4줄 위임 배선(사용자 승인, 값만 이동)
-    # 🔁 cycle408-L1 재핀 — 사용자 승인 10-04 8영역 관측 결함 해결: 09:30 자동 퍼널 캡처에 `protect_confirmed=True` 전달(+6줄, 값 없는 키워드 배선)
-    "src/engine/scheduler.py":
-        # 🔁 cycle409 재핀 — 사용자 결정 10-04 Q1·Q4: 매일 자동 대사 task 배선(leaf import · create_task 1줄 · cancel 목록 3곳, +1줄). 직전 값 = cycle408-L1 `2bacaa149ab6…`
-        "f53d41a11fe162f80e113c6ff48cf6d235581769be7979499c5782ff11d49646",
-    # 🔁 cycle369 R2 재핀 — buy-block 게이트(`_status_buy_blocked` 승격) + STATUS_EXIT Signal + Q7 edge-baseline clear 배선(전략 7파일은 무변경, 배선은 이 파일)
-    # 🔁 cycle382 재핀 — 시장 유닛 `_market_unit_*` 헬퍼 추가(사용자 결정 09-27).
-    # 🔁 cycle382 리뷰 재핀(값만) — `_market_unit_tally_roll` 을 `tally.date != day`
-    # 에서 `tally.date < day`(더 늦은 날짜에서만 롤)로 시정(§8). 직전 값 =
-    # `4516f1a94f2d05de24dfed24d165b62b11a230374795c593247f9906803d085f`.
-    # 🔁 cycle384 재핀 — buy_paused 공통 파라미터(사용자 결정 09-27). 게이트 2번째 문장 + 헬퍼 4개 + `__init__` cap 1개 추가. 값만 이동.
-    # 🔁 cycle399 재핀 — 공통 섀도 모드 shadow_mode(사용자 승인 10-02 R1). 섀도 관문 `_shadow_buy_intercepted` + 정적 판정 `shadow_mode_on` + 마커 헬퍼 2개 + `__init__` cap 1개 + `SHADOW_MODE_KEY` 상수. 값만 이동.
-    # 🔁 cycle403 재핀 — ETF 추세 전략(etf_trend) 신설. `_MULTIDAY_STRATEGIES` frozenset 에 "etf_trend" 추가. 값만 이동.
-    "src/engine/strategy_base.py":
-        "f4c2c5619fb3b2f70fa0b4faab0fd38d55c83d0b9370c986c97de4f564430822",
-    # 🔴 등재만으로 판정이 통해야 한다 — 검증 로직을 고쳐 통과시키면 안 된다.
-    "src/engine/param_validation.py":
-        "b4c5c029800191523bcc511919d6de3774e9ab49ca2fc0a0558ee3907868ee17",
-    # 시각 표의 유일 정본 — 바꾸면 픽스처 동기 사슬이 통째로 딸려 온다(cycle282 i1~i3).
-    "src/engine/market_state.py":
-        "7cef2efeb55a7184391ac2cc447c90102fdd7ba507fd6e3834d24a8ad9ce006b",
-}
-
 #: cycle257 이 세운 영구 상한(정본). 종전 표기 `4,000` 은 느슨한 쪽이라 폐기됐다.
 _SCHEDULER_LINE_CAP = 3900
-#: ⚠️ cycle292(2026-09-14) 가 `_subscribe_market_operation_tickers` 176줄을
-#: 신규 leaf `src/engine/market_op_subscribe.py` 로 추출해(행위 변경 0 · 5줄
-#: 위임 wrapper) 3,897 → 3,726 이 됐다. 값만 옮긴다 — 정확 핀을 상한 핀으로
-#: 완화하면 cycle290 의 무접촉 대리 지표가 사라진다.
-_SCHEDULER_LINES = 3737  # cycle409 재핀 +1 — 사용자 결정 10-04 Q1·Q4 매일 자동 대사 task 배선. 직전 3736 = cycle408-L1
-
-
-@pytest.mark.parametrize("rel", sorted(_BASE_SHA))
-def test_g290_1_untouched_production_files_are_byte_identical(rel: str) -> None:
-    """S1 — 무접촉 약속 파일의 내용 sha 가 착수 시점과 같다.
-
-    🔴 `order_engine.py` 가 이 목록에 있는 것이 cycle287 과의 차이다 — 두 키를 읽는
-    코드는 **이미 있다**. 주석이 낡았더라도 그 파일을 고치는 것은 8영역 승인 사안이고,
-    자매 4핀(`test_cycle222a3`·`test_cycle223`·`test_cycle223f`·`test_cycle226`)과
-    무조건 3핀까지 함께 붉어진다.
-    """
-    got = _sha(_src(rel))
-    assert got == _BASE_SHA[rel], (
-        f"{rel} 가 바뀌었다 — cycle290 은 전략 7파일 `DEFAULT_PARAMS` 와 "
-        f"`param_catalog.py` 만 바꾼다. 현재 sha={got}"
-    )
 
 
 def test_g290_1b_scheduler_line_count_is_under_the_permanent_cap() -> None:
-    """S1 — `scheduler.py` 라인 상한(cycle257 정본 3,900) 유지 + 착수 시점 값 고정."""
+    """S1 — `scheduler.py` 라인 상한(cycle257 정본 3,900) 유지."""
     lines = len(_src("src/engine/scheduler.py").splitlines())
-    assert lines == _SCHEDULER_LINES, f"scheduler.py = {lines}L (착수 시점 {_SCHEDULER_LINES}L)"
     assert lines < _SCHEDULER_LINE_CAP, f"라인 상한 {_SCHEDULER_LINE_CAP} 초과: {lines}"
 
 
@@ -394,154 +243,6 @@ def test_g290_2_strategy_entry_exit_segments_are_byte_identical(
     assert got == _SEGMENT_SHA[(module, method)], (
         f"{module}.{method} 세그먼트가 바뀌었다 — cycle290 은 `DEFAULT_PARAMS` 만 "
         f"건드린다. 🔴 핀을 갱신하지 말고 코드를 되돌려라. 현재 sha={got}"
-    )
-
-
-# ===========================================================================
-# S3 — `src/engine/` 아래 신규 `.py` 금지 (cycle287 `_PINNED_DIRS` 계약 승계)
-# ===========================================================================
-_ENGINE_PY_FILES: dict[str, tuple[str, ...]] = {
-    "src/engine": (
-        "__init__.py",
-        # cycle404 — 계좌 묶음 배정 기록(단계 0, 자문 cycle400 R1~R5) 순수 leaf.
-        # import = 표준 라이브러리 + `src.db.stock_master_daily`·`src.db.system_config`
-        # 뿐(8영역·scheduler·strategy_registry import 0, 소비처도 0). 등재해도
-        # "다음 신규 파일" 은 여전히 붉어진다(이름 축 가드는 변경 없음).
-        "account_cluster.py",
-        "account_risk_guard.py", "account_risk_watcher.py",
-        "backtest_engine.py", "backtest_orchestration.py", "backtest_yaml.py",
-        "boot_manager.py",
-        # cycle379 — ⑨A 체결 0 으로 끝난 매수의 pending 회수 leaf(`selling_reconcile.py`
-        # 대칭, 8영역 import 0). 등재해도 "다음 신규 파일" 은 여전히 붉어진다(이름 축 가드는
-        # 변경 없음).
-        "buying_reconcile.py",
-        # cycle411(실비용 합치기, 사용자 결정 10-08) — 실적 화면 수수료·세금 overlay
-        # 순수 함수 + async 어댑터 leaf. 8영역·scheduler import 0(`test_cycle411_ast_scope.py`).
-        # 등재해도 "다음 신규 파일" 은 여전히 붉어진다(이름 축 가드는 변경 없음).
-        "cost_overlay.py",
-        # cycle386 — 부팅 prepare 직전 전일 「잠정 봉」(20:30 적재의 애프터마켓 종가·고저)을
-        # KIS 확정값으로 덮는 leaf. 8영역·scheduler·scanner·boot_manager·strategies import 0.
-        # 등재해도 "다음 신규 파일" 은 여전히 붉어진다(이름 축 가드는 변경 없음).
-        "daily_bar_finalize.py",
-        "daily_emit_cap.py", "daily_metrics_snapshot.py",
-        "data_load_tasks.py",
-        # cycle380 — ETF/ETN(류) 판정 단일 leaf(표준 라이브러리만 import). 판정 정본
-        # `is_etf_like(raw, name)` + `ETF_GROUP_CODES`/`ETF_KEYWORDS` 상수를 scanner.py
-        # 와 db/stock_master.py 가 공유한다(사용자 승인, 8영역 scanner.py 변경 포함).
-        # 등재해도 "다음 신규 파일" 은 여전히 붉어진다(이름 축 가드는 변경 없음).
-        "etf_like.py",
-        # cycle403 — ETF 추세 전략(etf_trend) 순수 leaf(지표·신호·청산 시뮬레이션·상관).
-        # 등재해도 "다음 신규 파일" 은 여전히 붉어진다(이름 축 가드는 변경 없음).
-        "etf_trend_core.py",
-        # cycle364 — 저녁 A1 미리보기(`prepare(as_of=)`) 라이브 준비 wrapper + 잠금 +
-        # meta + `resolve_as_of`/`capture_skip_reason` leaf. 등재해도 "다음 신규 파일"
-        # 은 여전히 붉어진다(이름 축 가드는 변경 없음).
-        "funnel_capture.py",
-        # cycle413(거래일지 화면 1b) — 카드 조립 순수 leaf(`src.*` import 0). 등재해도
-        # "다음 신규 파일" 은 여전히 붉어진다(이름 축 가드는 변경 없음).
-        "journal_view.py",
-        "kojiro_band_observe.py", "kojiro_gap_observe.py",
-        "kojiro_indicators.py", "llm_buy_gate.py", "llm_features.py",
-        # cycle297 — 주간 회고 조인·집계 순수 leaf(`src.*` import 0). 이름을 등재해도
-        # "다음 신규 파일" 은 여전히 붉어진다(이름 축 가드는 변경 없음).
-        "llm_retrospective.py",
-        "log_analysis_engine.py", "log_metrics_collector.py",
-        # cycle416(매크로 시장 등락 통계) — KRX 일별 매매정보 상승/하락/상한/하한 집계
-        # 순수 leaf(표준 라이브러리만 import, `await`·DB·HTTP·`asyncio`·`logging` 0).
-        # 소비처 = 라우트 `src/routes/market_breadth.py` 하나(관찰 전용). 등재해도
-        # "다음 신규 파일" 은 여전히 붉어진다(이름 축 가드는 변경 없음).
-        "market_breadth.py",
-        # cycle292 — `scheduler._subscribe_market_operation_tickers` 본체 leaf.
-        # 형제 `market_operation_monitor.py`(H0UNMKO0 수신·상태 추적) 와 역할이 반대다
-        # (이쪽은 송신·구독 배치). 이름 축을 개수 축으로 바꾸지 말 것 — 등재해도
-        # "다음 신규 파일"은 여전히 붉어진다.
-        "market_op_subscribe.py",
-        "market_operation_monitor.py", "market_regime.py",
-        # cycle410(사용자 결정 10-05) — 6장세 라벨 leaf(관찰 전용, 표준 라이브러리만). 등재해도
-        # "다음 신규 파일" 은 여전히 붉어진다(이름 축 가드는 변경 없음).
-        "market_regime_label.py",
-        "market_state.py",
-        # cycle382 — 시장 유닛(단계형, KODEX200 60일선) 판정 leaf. 표준 라이브러리만
-        # import(A01). 이름을 등재해도 "다음 신규 파일" 은 여전히 붉어진다(이름 축
-        # 가드는 변경 없음).
-        "market_unit.py",
-        "metrics_collector.py", "no_feed_registry.py", "observer_trace.py",
-        "open_price_observe.py", "open_price_rest.py", "order_engine.py",
-        "param_catalog.py", "param_drift.py", "param_validation.py", "portfolio_risk.py",
-        # cycle397 — 잔고 화면 매입일(최초 매입일) 해석 leaf(`position_exit_lines.py`
-        # 와 같은 패턴, read-only·never-raise). 등재해도 "다음 신규 파일" 은 여전히
-        # 붉어진다(이름 축 가드는 변경 없음).
-        "position_buy_date.py",
-        "position_exit_lines.py",
-        # cycle351 — 피라미딩 가상 사다리(셰도) leaf. 이름을 등재해도 "다음 신규 파일" 은
-        # 여전히 붉어진다(이름 축 가드는 변경 없음).
-        "pyramid_shadow.py",
-        "quant_score.py", "quote_token_refresh.py", "recommendation_engine.py",
-        "recommendation_metrics.py", "refresh_progress.py", "risk.py", "scanner.py",
-        "scheduler.py", "sector_naming.py", "sell_rejection.py",
-        "selling_reconcile.py", "session.py", "stale_diagnostics.py",
-        "stale_manager.py", "stale_session_recovery.py", "stale_tracker.py",
-        "stale_universe_guard.py", "stale_watcher_core.py",
-        # cycle369 — 관리종목51·단기과열59 보유 청산 + 당일 매수 차단 leaf. 이름을
-        # 등재해도 "다음 신규 파일" 은 여전히 붉어진다(이름 축 가드는 변경 없음).
-        "status_exit_watch.py",
-        "stock_master_basics_metrics.py", "stock_master_daily_metrics.py",
-        "stock_master_master_metrics.py", "stock_master_metrics.py", "strategy.py",
-        "strategy_base.py",
-        # cycle398 PR1(리팩토링 카드 #2, 사용자 승인 10-02) — 전략 등록 명부 leaf. 등재해도
-        # "다음 신규 파일" 은 여전히 붉어진다(이름 축 가드는 변경 없음).
-        "strategy_manifest.py",
-        "strategy_registry.py", "ta_indicators.py",
-        "task_loop_helper.py", "te_metrics.py", "tick_channel_clock.py",
-        "tick_channel_mode.py", "tick_channel_switch.py",
-        "tick_volume.py",
-        # 트랙 C — 실비용 사후 대사 leaf(KIS 정산값 조회·귀속·요약·경보, 관측 전용). 8영역·
-        # scheduler import 0. 등재해도 "다음 신규 파일" 은 여전히 붉어진다.
-        "trade_cost.py",
-        # cycle409(사용자 결정 10-04 Q1·Q4) — 매일 자동 대사 훅 leaf(시각 = system_config 키,
-        # 키 없음 = 실행 안 함). 8영역·scheduler import 0(AST `test_cycle409_ast_reconcile_hook.py`).
-        "trade_cost_reconcile_task.py",
-        # cycle363 — 휴장일 판정 공용 leaf(`src.*` import 0). 영업일 기준 신선도(①) +
-        # 일봉 신선도 직전 영업일 기준(①′) 이 공유한다. 등재해도 "다음 신규 파일" 은
-        # 여전히 붉어진다(이름 축 가드는 변경 없음).
-        "trading_calendar.py",
-        "turtle_sizing.py", "uptime_monitor.py",
-    ),
-    "src/engine/strategies": (
-        "__init__.py", "bull_flag_breakout.py", "donchian_swing.py",
-        # cycle403 — ETF 추세 전략 신설. 등재해도 "다음 신규 파일" 은 여전히 붉어진다.
-        "etf_trend.py",
-        "kojiro.py",
-        "long_tail_volatility.py", "momentum.py", "vcp_breakout.py",
-        "volatility_breakout.py",
-    ),
-}
-
-
-@pytest.mark.parametrize("rel_dir", sorted(_ENGINE_PY_FILES))
-def test_g290_3_no_new_module_under_src_engine(rel_dir: str) -> None:
-    """S3 — 이 사이클은 신규 모듈을 만들지 않는다(등재는 기존 파일 편집이다).
-
-    cycle287 `_PINNED_DIRS` + `_SRC_TREE_FILES` 가 같은 계약을 잠근다 — 신규
-    `.py` 를 만들면 그 가드까지 함께 붉어진다.
-
-    ⚠️ **이름 축 기준선 이동 이력** — 승인된 신설만 여기에 더한다. 단언 형태는
-    그대로라 무단 신규 파일은 여전히 붉어진다.
-      * cycle292 `market_op_subscribe.py`(장운영 구독 leaf)
-      * cycle293 `tick_channel_mode.py`(리졸버 킬스위치 leaf)
-      * cycle339 `position_exit_lines.py`(잔고 화면 청산선 해석 leaf — 순수·read-only·
-        never-raise). `strategy_registry.positions_detail` 에 한 필드만 더하면 됐지만
-        그 파일이 8영역이라 라우트에서 읽는 leaf 로 뺐다.
-      * cycle294 `tick_channel_clock.py`(시각축 판정) · `tick_channel_switch.py`
-        (살아 있는 구독의 채널 전환 + 자동 원복) — 둘 다 8영역 **밖**이고,
-        `scheduler.py` 무접촉 계약 때문에 판정·전환을 기존 주기 루프
-        (`stale_watcher_core`)에 얹으려면 leaf 가 필요했다.
-    """
-    got = tuple(sorted(p.name for p in (_ROOT / rel_dir).glob("*.py")))
-    assert got == _ENGINE_PY_FILES[rel_dir], (
-        f"{rel_dir} 의 `.py` 파일 집합이 바뀌었다 — 신규: "
-        f"{sorted(set(got) - set(_ENGINE_PY_FILES[rel_dir]))} / 삭제: "
-        f"{sorted(set(_ENGINE_PY_FILES[rel_dir]) - set(got))}"
     )
 
 

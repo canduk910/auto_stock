@@ -1466,21 +1466,17 @@ async def test_h1_off_is_indistinguishable_from_the_pre_deploy_world(
 # 스코프 (G-294-12) — 행위 파일에서도 한 번 더 못박는다
 # ===========================================================================
 def test_scope_scheduler_and_strategies_are_untouched() -> None:
-    """스코프 — `scheduler.py` 3,785L(cycle298 재핀) · 전략 7파일 무접촉.
+    """스코프 — `scheduler.py` cycle257 영구 상한(3,900 미만).
 
-    상세 sha 핀은 AST 자매 파일(A1/A2)에 있다. 여기 한 줄을 둔 이유는 행위 파일만
-    돌린 사람도 스코프 위반을 즉시 보게 하기 위해서다.
+    `scheduler.py` 파일 내용 sha(무접촉)는 정본 승인 도장
+    `tests/unit/ast/test_cycle222a3_ast_followup_fixes.py::_APPROVED_CONTENT_SHA` 한 곳이 진다
+    (cycle419 — 이 자리의 정확 줄 수 핀은 걷었다). 여기 상한 한 줄을 둔 이유는 행위 파일만
+    돌린 사람도 예산 초과를 즉시 보게 하기 위해서다.
     """
     import pathlib
 
     root = pathlib.Path(__file__).resolve().parents[3]
     lines = len((root / "src/engine/scheduler.py").read_text(encoding="utf-8").splitlines())
-    assert lines == 3737, (
-        f"scheduler.py = {lines}L (착수 시점 3,726L → cycle298 재핀 3,785L → cycle354 재핀 3,812L → "
-        "cycle364 S1 저녁 캡처 leaf 이관 재핀 3,758L → cycle364 S1 round 2(R7) 죽은 try/except "
-        "2곳 제거 + 문서 정직화 재핀 3,755L → cycle364 S1 round 3(F4 skipped_out + F5 중복 ERROR "
-        "제거 + F7 docstring 정직화) 재핀 3,777L → cycle369 재핀 — 관리종목51·단기과열59 "
-        "청산·매수차단 task 배선 +4 → cycle379 재핀 — buying_reconcile leaf 위임 배선 +5 → "
-        "cycle398 재핀 — 전략 등록 명부 추출(PR1 카드 #2, 사용자 승인 10-02) -54) → cycle398 PR2 재핀(카드 #3) 3,730 → cycle408-L1 재핀(사용자 승인 10-04, 09:30 자동 퍼널 캡처 protect_confirmed) 3,736 → cycle409 재핀(사용자 결정 10-04 Q1·Q4, 매일 자동 대사 task 배선) 3,737)"
-        "— 무접촉 계약 위반(절대 규칙 7)"
+    assert lines < 3900, (
+        f"scheduler.py = {lines}L — cycle257 영구 상한 3,900 초과(절대 규칙 7)"
     )

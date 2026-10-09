@@ -4,26 +4,22 @@
 
 | # | 계약 |
 |---|---|
-| S1 | 8영역(`src/engine/{risk,order_engine,session,scanner,strategy_registry}.py`·`src/api/order.py`·`src/realtime/**`·`src/auth/**`) + `scheduler.py` 내용 sha = 기준 main `8c28e9a6` 그대로 · 그 디렉터리에 새 `.py` 0 |
-| S2 | `journal_worker/` 0줄 — 파일 (경로, 내용 sha) digest 그대로(계약 차이는 보고만, 명세 7절) |
-| S3 | 마이그레이션 0 — 001~047 이름·내용 그대로, 048 없음(메모 표는 047 에 있다) |
 | S4 | `src/engine/journal_view.py` 는 순수 leaf — `async def`·`await` 0 · `src.db`·`src.api`·`src.realtime`·`src.auth`·`src.services`·`scheduler`·8영역·`asyncpg`·`httpx` import 0 |
 | S5 | KIS 호출 0 — `journal_view.py`·`src/db/trade_journal.py`·`src/routes/history.py` 가 `src.api`·`src.auth` 를 import 하지 않는다 |
 | S6 | `stock_master_daily.get_closes_in_range`·`list_business_days` 는 SELECT 만 · `trade_journal.py` 의 쓰기 SQL 대상은 `trade_journal_notes` 하나 |
 
-왜 내용 sha 인가 — `ast.dump` 는 3.12(CI)/3.13(로컬) 출력이 달라 핀하지 않는다(cycle256·259).
 스캔은 `Path.rglob` — `git ls-files` 는 미추적 새 파일을 못 본다(cycle259 S4b). SQL 검사는 문자열 상수만 본다(주석·docstring 제외 —
 docstring 은 함수 본문 첫 문장 상수라 걷어낸다).
 
-⚠️ **사이클 한정 — cycle413 병합 후 S1·S2 삭제.** 이 dict 들은 기준 `8c28e9a6` blob 이라 cycle413 의 무접촉 증거로만
-유효하다. 다음 사이클이 정당하게 바꾸면 지운다(고아 가드 방지). dict 이름을 `*_CONTENT_SHA` 로 짓지 않는다
-(`test_cycle223g3` `_PIN_GUARD_FILES` 관례). S4~S6 은 이 모듈들의 영구 성질이라 남겨도 된다.
+S1·S2·S3(8영역·`scheduler.py` 파일 sha · `journal_worker/` digest · 마이그레이션 digest)은 사이클 한정
+범위 가드였다 — 병합 뒤 역할이 끝나 걷었다(cycle419). 8영역·`scheduler.py` 무접촉은 정본
+`test_cycle222a3_ast_followup_fixes.py::_APPROVED_CONTENT_SHA` 가, `journal_worker` 격리는
+`journal_worker/tests/test_jw_isolation.py` 가 진다. S4~S6 은 이 모듈들의 영구 성질이다.
 """
 
 from __future__ import annotations
 
 import ast
-import hashlib
 import re
 from pathlib import Path
 
@@ -32,32 +28,6 @@ import pytest
 pytestmark = pytest.mark.unit
 
 _ROOT = Path(__file__).resolve().parents[3]
-
-_BASE_SHA = {
-    "src/engine/risk.py": "a2187b8270446379988d24dfbe39b902d6ab37b112d4b6ce7330ee171434e222",
-    "src/engine/order_engine.py": "08c479841352fb579f767c109de3e8f901d1c27bdce705b39b5ba6556fc0b3e1",
-    "src/engine/session.py": "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
-    # cycle417 사용자 승인 10-09 — 일봉 증분 적재 구멍(병합 재핀, 직전 611568c0…)
-    "src/engine/scanner.py": "b570762dfd92df49471dab261d44ecd364d376300ffe9e2f5b7ac19cceb9efcc",
-    "src/engine/strategy_registry.py": "3b6366c3cdb6e83907428435b95611880f1b8223e572c361a1cad2d00b13a067",
-    "src/api/order.py": "08c5cafd7b8678ec0d0fa85f856fdea3cce38ad92488c6d74c03cd13faa415bb",
-    "src/engine/scheduler.py": "f53d41a11fe162f80e113c6ff48cf6d235581769be7979499c5782ff11d49646",
-    "src/auth/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "src/auth/hashkey.py": "7c2aacc703839bdc274b463ee48777006504d70e4d59a1e57120ac5b612396d2",
-    "src/auth/token.py": "4125c271b4147e59922f4f000e523429fb4bbef37058dc754fd92b9475ec58f1",
-    "src/realtime/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "src/realtime/handler.py": "e1a484e9ac82d43f0fa85cba693ea5a206ecfbae1076dfee0f4e6bf6d4f2a2d4",
-    "src/realtime/websocket.py": "d4c443bde2ed7aeafba3e9471db0ca4efc15a654610555435145a9b305150c5b",
-    "src/realtime/websocket_pool.py": "8b02442bcf5f558d6f7095b47d2016f004e3746e07ddc91dae8768b1dd46a10d",
-}
-
-#: 기준 `8c28e9a6` 의 `journal_worker/` 파일(캐시 제외) — (경로, 내용 sha) 연쇄 digest.
-_JW_FILE_COUNT = 36
-_JW_DIGEST = "150cbc5cdfd87dbc7bccafdeadddb534644cb902fb51ce8b8f248e0623d6e898"
-
-#: 기준 `8c28e9a6` 의 `supabase/migrations/*.sql` 47개 — (이름, 내용 sha) 연쇄 digest.
-_MIG_COUNT = 47
-_MIG_DIGEST = "139124d7b24c0bf16ffa0614c700afaffe68be6b98df4b0645d02793e32c6b4a"
 
 _LEAF = "src/engine/journal_view.py"
 _JOURNAL_DB = "src/db/trade_journal.py"
@@ -70,10 +40,6 @@ _EIGHT_AREA_MODULES = {
 }
 _LEAF_BANNED_PREFIXES = ("src.db", "src.api", "src.realtime", "src.auth", "src.services", "src.routes",
                          "asyncpg", "httpx", "aiohttp", "requests")
-
-
-def _sha(rel: str) -> str:
-    return hashlib.sha256((_ROOT / rel).read_bytes()).hexdigest()
 
 
 def _tree(rel: str) -> ast.Module:
@@ -116,20 +82,6 @@ def _module_sql_strings(tree: ast.Module) -> list[str]:
                 if isinstance(sub, ast.Constant) and isinstance(sub.value, str):
                     out.append(sub.value)
     return out
-
-
-# ── S1·S2 — main 병합(2026-10-09)으로 역할 끝, 걷어냄(모듈 머리 「머지 후 S1·S2 삭제」).
-# 8영역 무접촉은 test_cycle222a3·test_cycle287 이, journal_worker 격리는 journal_worker/tests/test_jw_isolation.py 가 계속 지킨다.
-
-# ── S3 ──────────────────────────────────────────────────────────────────────
-
-def test_s3_no_migration_change():
-    files = sorted((_ROOT / "supabase" / "migrations").glob("*.sql"))
-    h = hashlib.sha256()
-    for f in files:
-        h.update(f.name.encode() + b"\0" + hashlib.sha256(f.read_bytes()).hexdigest().encode() + b"\n")
-    assert len(files) == _MIG_COUNT, f"마이그레이션 {len(files)}개 — 1b 는 마이그레이션 0(메모 표는 047)"
-    assert h.hexdigest() == _MIG_DIGEST, "기존 마이그레이션을 고치지 않는다"
 
 
 # ── S4 ──────────────────────────────────────────────────────────────────────

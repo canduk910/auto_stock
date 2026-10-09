@@ -46,7 +46,7 @@ cycle293 스스로 "아래 fail-open `H0UNCNT0` 는 **2단계 한정 과도기 �
 오케스트레이션 지시는 (a) `risk.py` **diff 0** 과 (b) `nxt_false` 종목이 5전략
 매수 평가에 **도달하지 않음**을 동시에 요구한다. (b)의 유일한 자리가
 `risk.on_tick` 의 매수 분기라 둘은 동시에 성립하지 않는다. 선택지 둘은 AST 자매
-파일의 `test_a1b_risk_py_pin_is_the_open_decision` docstring 에 적혀 있다.
+파일(`test_cycle293_ast_channel_resolver.py`)의 「A1b 결정 기록」 주석에 적혀 있다.
 
 그래서 매수 축은 **두 층**으로 잠근다 —
 

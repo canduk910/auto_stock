@@ -2,19 +2,21 @@
 
 - G-A3-1 (F-B): 앵커 채택 제외는 **명시 상수**로만 판정 — `tradable_boards` 게이팅 금지
 - G-A3-2 (F-C): 관측 로그 두 지점이 hot path 계약(logger 전용)을 지킨다 + 일일 리셋 동행
-- G-A3-3 (F-D → G-2): 면제 핀이 **파일 내용 바이트** 해시다 (git config 전 축 면역)
+- G-A3-3 (F-D → G-2): 승인 핀이 **파일 내용 바이트** 해시다 (git config 전 축 면역)
 - G-A3-4 (F-F): REST 폴의 KRX 스코프 전제 — `fetch_stock_detail` 이 `"J"`(KRX 단독)를 보낸다
-- G-A3-5 (F-G): 모든 git 헬퍼가 `returncode` 를 검사한다 (fail-closed)
-- G-A3-6 (F-A): 8영역 접촉은 여전히 `handler.py`·`risk.py` 둘뿐
+- G-A3-5 (F-G): 승인 도장 검사는 git 을 거치지 않는다 (fail-closed)
+- G-A3-6: **8영역 + `scheduler.py` 승인 도장의 정본** — 파일 내용 sha 를 이 파일
+  `_APPROVED_CONTENT_SHA` 한 곳에만 둔다(cycle419). 8영역 파일 하나를 고치면 여기 한 줄을
+  (새 sha, 승인 사유) 로 고친다. 절차 = 아래 G-A3-6 절 머리 주석
 """
 
 from __future__ import annotations
 
 import ast
 import hashlib
-import importlib
 import inspect
-import subprocess
+import sys
+import textwrap
 from pathlib import Path
 
 import pytest
@@ -23,25 +25,6 @@ pytestmark = pytest.mark.unit
 
 _REPO_ROOT = Path(__file__).resolve().parents[3]
 _SRC = _REPO_ROOT / "src"
-_AST_DIR = _REPO_ROOT / "tests" / "unit" / "ast"
-
-# `_git` / `_diff_sha` 를 정의한 가드 파일 전수
-#
-# 🔁 2026-09-02 (cycle240) — `test_cycle222a_ast_day_high_scope.py` **제외**.
-#    그 파일의 유일한 `_git` 사용처였던 `test_a11b_stale_watcher_core_untouched`
-#    (bare `git diff HEAD -- stale_watcher_core.py` **영구 동결**)를 내용 검사
-#    (`test_a11b_stale_watcher_core_no_anchor_coupling`)로 재스코프하면서 `_git`
-#    헬퍼 자체가 사라졌다. 사이클 한정 스코프 선언이 수명을 넘겨 그 파일의 모든
-#    후속 시정을 무조건 RED 로 만들던 것을 끊은 것이라, 여기 목록에 남겨 두면
-#    "탐지기 스테일" 로 잘못 경보한다. 남은 2파일은 여전히 sha 핀 기전을 쓴다.
-_GIT_HELPER_FILES = [
-    _AST_DIR / "test_cycle223_ast_donchian_exit_fix.py",
-    _AST_DIR / "test_cycle223f_ast_manual_apply_safeguard.py",
-]
-_CONTENT_SHA_MODULES = [
-    "tests.unit.ast.test_cycle223_ast_donchian_exit_fix",
-    "tests.unit.ast.test_cycle223f_ast_manual_apply_safeguard",
-]
 
 
 def _read(p: Path) -> str:
@@ -207,14 +190,13 @@ def test_ga3_2c_handler_scope_skip_is_logger_only_and_daily_reset():
 # 막았다. 같은 실패 클래스(코드 변경 0인데 FAIL → "핀 재산출" 유도 → 실제 8영역
 # 변경까지 함께 봉인)가 다른 git config 축에 그대로 남아 있었다 — 아래 G-2 실증.
 
-@pytest.mark.parametrize("modname", _CONTENT_SHA_MODULES)
-def test_ga3_3_content_sha_is_pure_file_bytes(modname):
+def test_ga3_3_content_sha_is_pure_file_bytes():
     """핀 입력이 **파일 바이트**다 — git 을 아예 거치지 않는다.
 
     git 을 거치지 않으면 git config 축(포맷 옵션)에 **구조적으로** 면역이다.
     정규화 규칙을 축마다 추가하는 싸움이 필요 없어진다.
     """
-    mod = importlib.import_module(modname)
+    mod = sys.modules[__name__]
     target = "src/engine/risk.py"
     expected = hashlib.sha256((_REPO_ROOT / target).read_bytes()).hexdigest()
     assert mod._content_sha(target) == expected, (
@@ -228,35 +210,33 @@ def test_ga3_3_content_sha_is_pure_file_bytes(modname):
         )
 
 
-@pytest.mark.parametrize("modname", _CONTENT_SHA_MODULES)
-def test_ga3_3b_content_sha_still_detects_real_content_change(modname, monkeypatch):
+def test_ga3_3b_content_sha_still_detects_real_content_change(monkeypatch):
     """탐지력은 그대로 — 내용이 1바이트만 달라져도 sha 가 바뀐다."""
-    mod = importlib.import_module(modname)
+    mod = sys.modules[__name__]
     target = "src/engine/risk.py"
     before = mod._content_sha(target)
     monkeypatch.setattr(mod, "_read_bytes", lambda path: b"tampered")
     assert mod._content_sha(target) != before
 
 
-@pytest.mark.parametrize("modname", _CONTENT_SHA_MODULES)
-def test_ga3_3c_failure_message_tells_you_to_check_first(modname):
+def test_ga3_3c_failure_message_tells_you_to_check_first():
     """실패 메시지가 "무조건 재산출" 로 유도하면 안 된다 (F-D 2차 결함)."""
-    src = _read(Path(inspect.getfile(importlib.import_module(modname))))
+    src = inspect.getsource(_check_pin)
     assert "핀을 먼저 재산출하지 마라" in src, (
         "실패 메시지가 8영역 실제 변경 확인을 먼저 요구하지 않는다 — "
         "핀 재산출이 실제 변경을 봉인하는 경로가 남는다"
     )
 
 
-@pytest.mark.parametrize("modname", _CONTENT_SHA_MODULES)
-def test_ga3_3d_no_diff_text_hashing_left(modname):
-    """`_stabilize_diff` / diff 텍스트 해시 잔존 금지 — 되돌아가면 같은 사각 재발."""
-    src = _read(Path(inspect.getfile(importlib.import_module(modname))))
-    assert "_stabilize_diff" not in src, (
+def test_ga3_3d_no_diff_text_hashing_left():
+    """diff 텍스트 해시 잔존 금지 — 되돌아가면 같은 사각 재발."""
+    mod = sys.modules[__name__]
+    assert not hasattr(mod, "_stabilize_diff"), (
         "diff **텍스트** 정규화 헬퍼가 남아 있다 — 그 접근은 git config 축마다 "
         "규칙을 추가해야 하고 실제로 `diff.noprefix` 등에서 뚫렸다(G-2)"
     )
-    assert "_content_sha" in src and "_read_bytes" in src
+    src = inspect.getsource(_content_sha)
+    assert "_read_bytes(" in src, "`_content_sha` 가 파일 바이트 seam(`_read_bytes`)을 거치지 않는다"
 
 
 def test_ga3_3e_diff_text_hash_breaks_on_git_config_but_content_hash_does_not(tmp_path):
@@ -372,59 +352,61 @@ def test_ga3_4b_rest_poll_still_feeds_day_high_from_that_response():
 
 
 # ===========================================================================
-# G-A3-5 (F-G) — git 헬퍼 fail-closed
+# G-A3-5 (F-G) — 승인 도장 검사는 git 을 거치지 않는다 (fail-closed)
 # ===========================================================================
-
-@pytest.mark.parametrize("path", _GIT_HELPER_FILES, ids=lambda p: p.name)
-def test_ga3_5_git_helper_checks_returncode(path):
-    """`.stdout` 만 읽으면 git 실패 시 `changed == []` 로 **조용히 통과**한다."""
-    tree = ast.parse(_read(path))
-    fn = _func(tree, "_git")
-    assert fn is not None, f"{path.name} 에 `_git` 헬퍼가 없다 (탐지기 스테일)"
-    body = ast.unparse(fn)
-    assert "returncode" in body, (
-        f"{path.name}::_git 이 returncode 를 검사하지 않는다 — git 실패 시 "
-        "stdout='' → 변경 없음 → 가드가 가장 필요한 순간에 초록이 된다(fail-open)"
-    )
-    assert "raise" in body or "assert" in body, (
-        f"{path.name}::_git 이 실패를 **알리지** 않는다 — fail-closed 필요"
-    )
-
-
-@pytest.mark.parametrize("path", _GIT_HELPER_FILES, ids=lambda p: p.name)
-def test_ga3_5b_no_bare_stdout_only_subprocess_run_left(path):
-    """`subprocess.run(...).stdout` 직접 체이닝이 남아 있으면 같은 사각 재발."""
-    src = _read(path)
-    assert ").stdout" not in src.replace("res.stdout", ""), (
-        f"{path.name} 에 `subprocess.run(...).stdout` 체이닝 잔존 — returncode 미검사"
-    )
-
-
-def test_ga3_5c_git_helper_actually_raises_on_failure(monkeypatch):
-    """런타임 실증 — rc≠0 이면 AssertionError."""
-    mod = importlib.import_module("tests.unit.ast.test_cycle223_ast_donchian_exit_fix")
-
-    class _R:
-        stdout = ""
-        stderr = "fatal: not a git repository"
-        returncode = 128
-
-    monkeypatch.setattr(mod.subprocess, "run", lambda *a, **kw: _R())
-    with pytest.raises(AssertionError, match="fail-closed"):
-        mod._git("diff", "HEAD", "--name-only")
-
-
-# ===========================================================================
-# G-A3-6 (F-A 범위) — 8영역 접촉은 handler.py · risk.py 둘뿐
 #
-# ⚠️ 이 문장은 **8영역 한정**이다. cycle222-a 의 실제 소스 footprint 는 **3파일**이고
-#    `src/engine/scheduler.py` 가 그 세 번째다 — REST 스윙 폴이 응답의 당일고가를
-#    뽑아 `on_tick(..., day_high=...)` 로 넘기는 배선(+ 09:05 확장창·F3)이 거기 있다.
-#    `scheduler.py` 는 8영역이 **아니라서** 이 diff-0 가드가 잡지 않는다. 그 경로는
-#    대신 `test_cycle222a_ast_day_high_scope.py::test_a11_*` 와 본 파일의
-#    `test_ga3_4*`(KRX 전용 market code 전제 + 배선 존치)가 지킨다.
-#    "cycle222-a 는 2파일" 로 읽고 scheduler 를 리뷰 범위에서 빼면, **시각 판별자 없이**
-#    앵커에 값을 먹이는 유일한 경로가 아무도 읽지 않은 채 배포된다.
+# 옛 가드는 `git diff HEAD --name-only` 로 「무엇이 바뀌었나」 를 물었고, git 이 실패하면
+# stdout="" → 「변경 없음」 → 조용히 통과하는 사각이 있어 `_git` 헬퍼에 returncode 검사를
+# 강제했다. cycle419 정본(`_check_pin`·`_check_complete`)은 git 을 아예 부르지 않고 파일
+# 바이트를 직접 읽는다 — git 실패가 통과로 바뀌는 길 자체가 없다. 파일을 못 읽으면
+# 예외로 붉다.
+
+_PIN_GATE_FUNCS = ("_read_bytes", "_content_sha", "_protected_files_on_disk",
+                   "_check_pin", "_check_complete")
+
+
+@pytest.mark.parametrize("fn_name", _PIN_GATE_FUNCS)
+def test_ga3_5_pin_gate_never_shells_out_to_git(fn_name):
+    """정본 도장 검사 함수에 `subprocess`·`_git` 호출이 없다."""
+    fn = ast.parse(textwrap.dedent(inspect.getsource(globals()[fn_name])))
+    names = {n.id for n in ast.walk(fn) if isinstance(n, ast.Name)}
+    names |= {n.attr for n in ast.walk(fn) if isinstance(n, ast.Attribute)}
+    for banned in ("subprocess", "_git", "Popen", "check_output"):
+        assert banned not in names, (
+            f"`{fn_name}` 이 `{banned}` 를 쓴다 — git 출력에 기대면 실패가 「변경 없음」 으로 "
+            "읽혀 조용히 통과한다(fail-open)"
+        )
+
+
+def test_ga3_5b_unreadable_file_fails_loudly(monkeypatch):
+    """파일을 못 읽으면 통과가 아니라 예외다(fail-closed)."""
+    def boom(path):
+        raise OSError("disk gone")
+
+    monkeypatch.setattr(sys.modules[__name__], "_read_bytes", boom)
+    with pytest.raises(OSError):
+        _check_pin("src/engine/order_engine.py")
+
+
+# ===========================================================================
+# G-A3-6 — 8영역 + `scheduler.py` 승인 도장 (정본 한 곳, cycle419)
+#
+# 8영역 파일과 `scheduler.py` 의 **파일 내용 sha256 은 이 dict 한 곳에만** 둔다.
+# 그중 한 파일이 한 글자라도 바뀌면 이 파일의 `test_ga3_6_*` 만 붉어진다.
+# 다른 테스트 파일은 같은 sha 를 복사해 두지 않는다(`test_cycle223g3::test_g3_9b`).
+#
+# 승인된 8영역·scheduler 변경을 넣는 절차
+#   1) `git diff -- <path>` 를 눈으로 읽고 바뀐 것이 승인 범위 안인지 확인한다.
+#      ⚠️ 핀을 먼저 재산출하지 마라 — 그 순간 범위 밖 변경까지 승인된 것으로 봉인된다.
+#   2) 아래 `_APPROVED_CONTENT_SHA[<path>]` 한 줄을 (새 sha, 승인 사유) 로 고친다.
+#      sha = `shasum -a 256 <path>` · 사유 = 사이클 번호 + 승인 날짜 + 한 줄 요약.
+#   3) 8영역 디렉터리에 파일이 생기거나 사라졌으면 그 항목을 더하거나 뺀다
+#      (`test_ga3_6b` 가 디스크와 dict 의 파일 집합을 대조한다).
+#
+# 이 검사는 git 을 거치지 않는다 — 파일 바이트를 직접 읽으므로 staged·unstaged·커밋된
+# 변경과 미추적 새 파일을 모두 보고, git config 축(diff.noprefix 등)에 면역이다(G-2).
+# `scheduler.py` 는 8영역이 아니지만 라인 상한 `<3,900`(cycle257 영구 상한) 때문에 같은
+# 승인 대상이라 함께 둔다. 라인 상한 자체는 `test_cycle257_ast_dead_code_removed.py` 가 잰다.
 # ===========================================================================
 
 _EIGHT_AREAS = [
@@ -437,195 +419,163 @@ _EIGHT_AREAS = [
     "src/realtime",
     "src/auth",
 ]
-_ALLOWED = {"src/engine/risk.py", "src/realtime/handler.py"}
+#: 8영역은 아니지만 같은 승인 대상 — 라인 상한 `<3,900`(cycle257).
+_SAME_APPROVAL_FILES = ["src/engine/scheduler.py"]
 
-# 🔁 2026-08-29 (cycle235) — 파일명 영구 허용(_ALLOWED)과 별개로, **승인 사이클의
-#    in-flight 변경**은 내용 sha 로 한시 면제한다(cycle223 계열 자기소멸 기전 이식 —
-#    커밋되면 diff 에서 사라져 죽은 값이 되고, 내용이 1 byte 라도 더 바뀌면 FAIL).
-#    cycle235 승인 = "N1부터 작업 시작"(handler·order_engine + realtime/CLAUDE.md 문서):
-#    체결수량 fields[16]→fields[9] 정본 전환 + overrun 클램프. 명세
-#    `_workspace/red/cycle235_fill_qty_spec.md`.
-# TODO(cycle235 커밋 후): 아래 dict 를 비운다.
-# ✅ 2026-09-11 (cycle276) — AI 매수평가 **주문 발화 시점 이동**. 사용자가
-#    `src/engine/order_engine.py` 접촉을 명시 승인했다("매수신호가 실제로 발생하고
-#    …실제로 매수주문을 발화하는 시점으로 함"). 변경은 import 1줄 + `execute_buy`
-#    두 매수 경로의 관측 훅 2곳(각각 `try` / 1문 / `except Exception` 흡수기)뿐이고,
-#    A-ATOMIC 구간(`calc_buy_quantity` ~ `pending_buys.add`)은 byte 동일이다.
-#    TODO(cycle276 커밋 후): 아래 dict 를 다시 **비운다**.
-# ✅ 2026-09-11 (cycle283) — 저녁 창 재설계. 사용자 명시 승인 범위 = `src/engine/scanner.py`
-#    **단독**(커트오프 상수 `_DAILY_LOAD_TODAY_BAR_CUTOFF` 15:40 → 20:00 + 근거 주석·
-#    docstring 정직화). 판정식 2줄은 **텍스트 동일**이고 나머지 7영역은 diff 0 이다.
-#    자매 가드 **네 곳 전부**에 같은 값으로 핀한다.
-# TODO(cycle283 커밋 후): 아래 항목을 **삭제**한다.
-# ✅ 2026-09-12 (cycle286, C4-a) — `nxt_tradable=False` 사후 보강의 판정축을 시계
-#    단독(`08:00~09:00 ∪ 15:30~20:00`)에서 **거래소(`target_exchange ∈ {"NXT","SOR"}`)
-#    ∧ 좁힌 프리장 창(08:00~08:50)** 으로 교체 — 사용자가 8영역 `order_engine.py` 접촉을
-#    명시 승인했다. `execute_sell` 의 `is_market_closed_rejection` 분기 안 학습 write
-#    조건식만 바뀌고 분류 순서·TTL 등록·positions 보존은 byte 동일이다.
-#    TODO(cycle286 커밋 후): 아래 항목을 **삭제**한다.
-# ✅ 2026-09-12 (cycle287) — 시각이 거래소·호가유형을 정한다(규칙 1 라우팅 +
-#    규칙 2 KRX 애프터마켓 41/44). 사용자 명시 8영역 승인, 범위 =
-#    `src/engine/order_engine.py` + `src/api/order.py`(docstring 만, 본문 byte
-#    동일). 자매 가드 네 곳 전부 같은 값. TODO(cycle287 커밋 후): 아래 항목을 **삭제**한다.
-_APPROVED_CONTENT_SHA: dict[str, str] = {
-    # ✅ 2026-10-03 (cycle399) — 공통 섀도 모드. 사용자 승인(10-02 R1, 8영역 `strategy_registry.py`
-    #    `update_weights` 한 줄): `config.enabled = weight > 0 or (was_enabled and
-    #    StrategyBase.shadow_mode_on(s))` — 섀도 전략은 비중 0 이어도 켜짐 유지, 섀도가 아닌
-    #    전략은 현행 그대로. 나머지 7영역 diff 0. 자매 가드 네 곳 전부 같은 값(`test_g3_9b` 계약).
-    #    TODO(cycle399 커밋 후): 이 항목을 **삭제**한다.
-    "src/engine/strategy_registry.py":
-        "3b6366c3cdb6e83907428435b95611880f1b8223e572c361a1cad2d00b13a067",
-    # ✅ 2026-09-18 (cycle302) 재핀 — 일봉 backfill 의 **대상**을 지수에서 적재 대상
-    #    전부로 확대. 사용자 명시 8영역 승인("전부 담는게 좋을듯한데? VCP평가대상이
-    #    어떻게 바뀔지 모르잖아"), 범위 = `src/engine/scanner.py` **단독**이고 이
-    #    사이클의 프로덕션 변경은 이 한 파일뿐이다. 바뀐 것 = backfill 분기에서 지수
-    #    소속 판정 제거 + 그 판정에만 쓰이던 `vcp_universe_tickers` 집합 소멸.
-    #    목표 깊이 상수(`_DAILY_LOAD_VCP_BACKFILL_DAYS`=225)는 그대로다.
-    #    나머지 7영역과 `scheduler.py` 는 diff 0.
-    #    자매 가드 **네 곳 전부** 같은 값(`test_g3_9b` 계약).
-    #    TODO(cycle302 커밋 후): 이 항목을 **삭제**한다.
-    # 🔁 2026-09-25 (cycle363 F-1) 재핀 — `_scan_pool_eager_refresh_loop` upsert 전 기존 raw 머지(사이클 176 basics 경로 답습, 사용자 승인 8영역). 장전 0값 키(acml_tr_pbmn 등)가 raw 통째 교체로 지워지던 결함 시정. 나머지 7영역 diff 0.
-    # 🔁 cycle380(2026-09-27) 재핀 — ETF 판정을 이름 키워드에서 증권그룹코드(`scty_grp_id_cd`)로 전환(사용자 승인, 8영역). ETF_KEYWORDS 를 정본 leaf `src/engine/etf_like.py` 로 이전 + import, `scan_stocks` 판정 자리를 `is_etf_like` 로 교체. 값만 이동, 값 자체는 유일값.
-    # 🔁 cycle417(2026-10-09) 재핀 — cycle417 사용자 승인 10-09 — 일봉 증분 적재 구멍(증분 분기 창 확대 + 구멍 판정 1회 호출). 나머지 7영역 diff 0.
-    "src/engine/scanner.py":
-        "b570762dfd92df49471dab261d44ecd364d376300ffe9e2f5b7ac19cceb9efcc",
-    # 🔁 2026-09-25 (cycle358) 재핀 — 카드 D(관측 전용). `trade_history` PARTIAL/
-    #    CANCELLED UPDATE 가 `affected==0` 이어도 무흔적이던 결함에 `[trade_status_
-    #    update_miss]` WARNING 을 추가한다(사용자 승인, 워크리스트 ⑨). 매매·상태전이
-    #    로직 무변경 — 로그 호출만 추가. 자매 가드 네 곳 전부 같은 값(`test_g3_9b` 계약).
-    #    TODO(cycle358 커밋 후): 이 항목을 **삭제**한다.
-    # 🔁 2026-09-27 (cycle385 B7) 재핀 — `_handle_sell_fill` 판정을 주문/보유 두 축으로
-    #    분리(부분 매도 뒤 잔여 보유를 계속 추적) + `execute_sell` 발사 수량 고정
-    #    (`send_qty`) + `_cancel_and_reorder` 재주문 직전 보유 재조회(J-2) + 주석 정정
-    #    (J-1). 사용자 승인(8영역), 나머지 7영역 diff 0. 자매 가드 네 곳 전부 같은 값.
-    # 🔁 2026-09-27 (cycle385 부록 R) 재핀 — 리뷰 반영: F-1(재대조 스냅샷·통보 차감
-    #    멱등 크레딧) · F-2(manual 라우트 주문의 잔여 재주문은 보유와 무관하게
-    #    `remaining` 을 쏜다 — `_manual_sell_orders` 표식) · F-3(잠금 중 판매
-    #    가능분은 판다) + docstring/이름캐시 보존/뮤턴트 회귀. 나머지 7영역 diff 0.
-    # 🔁 2026-09-27 (cycle385 부록 R2) 재핀 — 2차 검토 반영: _selling 주인 규칙(R-3)
-    #    제거(B7 해제 의미 복귀) · 재주문이 안 걸리면 _selling 해제(H5) · F-3 이 걸린
-    #    외부 체결 통보를 먼저 뺀다(H3) · 종목 크레딧 누적(H2) · 주문 조회 2초 상한·
-    #    환경별 쪽 크기(H6·H7) · 동결 보유가 닫히면 동결 해제. 사용자 승인(8영역),
-    #    나머지 7영역 diff 0.
-    # 🔁 2026-09-28 (cycle385 부록 R3) 재핀 — 3차 검토 반영: 원장 시작 전 접수 주문은
-    #    pending 에서 빼고 그 재대조 크레딧에 상한(K1) · 걸린 것 없는 보류 문구
-    #    분리 · 재주문 거부는 APBK0400 만 해제(K2) · 동결이면 손님 manual 재주문
-    #    거부도 해제(K3). 사용자 승인(8영역), 나머지 7영역 diff 0.
-    # 🔁 2026-09-28 (cycle385 부록 R4) 재핀 — 4차 검토 결정: 「안 걸렸다」 판정 한 곳
-    #    _sell_not_placed_reason(APBK0400 · 시장가 불가 · 장운영시간 외, D2) · 재주문
-    #    해제 로그 reject= 칸 · 조회 실패 걸린 것 없음 보류 문구 분리(D4). 사용자
-    #    승인(8영역), 나머지 7영역 diff 0.
-    # 🔁 2026-10-02 (cycle392) 재핀 — 다건 체결통보 매도의 장부 손익·가격을 주문 누적(증분
-    #    합·체결 가중평균)으로 기록. 사용자 승인(8영역, 결정 4), 나머지 7영역 diff 0.
-    # 🔁 2026-10-02 (cycle396) 재핀 — cycle396 사용자 요청(10-02) 가중평균가 절사: 매도 장부
-    #    가격을 원 단위 내림 int 로(`_vwap_2dp`→`_vwap_floor`). 사용자 승인(8영역), 나머지 7영역 diff 0.
-    # 🔁 2026-10-04 (cycle408-L3) 재핀 — cycle408-L3 — 사용자 승인 10-04 8영역 관측 결함 해결:
-    #    `execute_buy` 「매수 수량 0 → 900s cooldown」 WARNING 꼬리에 `원인: funds|cap|unknown, 잔여:`
-    #    추가(동기 읽기만, 쿨다운·순서 불변). 나머지 7영역 diff 0. 자매 가드 네 곳 전부 같은 값.
-    # 🔁 cycle409 재핀 — 사용자 결정 10-04 Q4 8영역 승인: 매도 PENDING 에 주문가(`order_price`) 전달 — 모듈 함수 `_sell_order_price`(never-raise, await 0) + 매도 래퍼 `order_unpr` 키워드 + 주·폴백 호출 각 1줄. 발사·매핑·send_qty·재시도·_selling 흐름 불변, 나머지 7영역 diff 0. 직전 값 = cycle408-L3 `a6d677259fe7…`
-    "src/engine/order_engine.py":
-        "08c479841352fb579f767c109de3e8f901d1c27bdce705b39b5ba6556fc0b3e1",
-    "src/api/order.py":
+#: 경로 → (파일 내용 sha256, 마지막 승인 사유). 승인 도장을 찍는 **유일한** 자리.
+_APPROVED_CONTENT_SHA: dict[str, tuple[str, str]] = {
+    "src/api/order.py": (
         "08c5cafd7b8678ec0d0fa85f856fdea3cce38ad92488c6d74c03cd13faa415bb",
-    # ✅ 2026-09-14 (cycle293) — 시세 채널 리졸버 2단계(속성축 배관). 사용자 승인
-    #    8영역 4파일(`scanner`·`websocket`·`websocket_pool`·`order_engine`) +
-    #    §3-E B-1 매수 축 보존 게이트 때문에 `risk.py` 1건(별도 승인 대상, 근거는
-    #    `test_cycle293_ast_channel_resolver.py::test_a1b` docstring).
-    #    자매 가드 **네 곳 전부** 같은 값이어야 한다(`_PIN_GUARD_FILES` 정본).
-    #    등록은 승인된 사이클의 Green 이, 비우기는 병합 후속 커밋이 한다.
-    "src/engine/risk.py":
-        "a2187b8270446379988d24dfbe39b902d6ab37b112d4b6ce7330ee171434e222",
-    "src/realtime/websocket.py":
-        "d4c443bde2ed7aeafba3e9471db0ca4efc15a654610555435145a9b305150c5b",
-    "src/realtime/websocket_pool.py":
-        "8b02442bcf5f558d6f7095b47d2016f004e3746e07ddc91dae8768b1dd46a10d",
-    # 📄 2026-09-14 (cycle293) — **문서 전용 변경**(`src/realtime/**` 이 8영역 디렉터리라
-    #    `.md` 도 이 가드에 잡힌다). 「시세 채널」 절이 속성축 리졸버 2단계 착지·프로브
-    #    격리 기준 전환·`get_subscribed_tickers()` 합집합 서술을 담도록 갱신됐다.
-    #    프로덕션 코드 영향 0. 등록은 Green 이, 비우기는 병합 후속 커밋이 한다.
-    # 📄 2026-09-15 (cycle295, A축) — **문서 전용 변경**. 갭 홀드 CRITICAL-1 절이
-    #    철회 서술로 재작성됐고(§6-4 — 삭제 아님), 다이얼 표·런북 curl·전환 창
-    #    라벨이 「전환 1회」로 되돌아갔다. 프로덕션 코드 영향 0(이 사이클의 코드
-    #    영향은 8영역 밖 4파일 — `_APPROVED_CONTENT_SHA` 대상이 아니다).
-    # 📄 2026-09-17 — **문서 전용 변경**(덧칠 정리). 경위·실측 수치·폐기 값은
-    #    `docs/history/src-realtime-CLAUDE.history.md` 로 verbatim 이관하고 정본엔
-    #    현재 계약만 남겼다. 프로덕션 코드 영향 0.
-    # 📄 2026-09-27 (cycle374) — **문서 전용 변경**. `handler.py` 절에 「접수 전문 기록」
-    #    (`[order_notice]`·`[order_rejected_notice]`, 기록만·개인정보 칸 제외) 소절을
-    #    더했다. 프로덕션 코드 영향 0. 직전 값 = `7c3d432254a9f71a8341d371cb14bbc8e58112a16cc536301620c7f1ab62f58d`.
-    "src/realtime/CLAUDE.md":
-        "45817e18bff13cef49af02704f1fae7a5f73b7b0be49d84a42d409b7fc4237aa",
-    # ✅ 2026-09-17 (cycle296) — `TokenManager.issue()` 매니저 단위 in-flight
-    #    합류. 사용자 명시 8영역 승인(`src/auth/**`), 범위 = `src/auth/token.py`
-    #    `issue()` + `__init__` 신규 필드뿐(`get_token`/`revoke`/`_is_valid` 무접촉).
-    #    자매 가드 네 곳 전부 같은 값(`test_g3_9b`/`test_g223f_9`/`test_g223_10` 계약).
-    #    TODO(cycle296 커밋 후): 아래 항목을 **삭제**한다.
-    "src/auth/token.py":
-        "4125c271b4147e59922f4f000e523429fb4bbef37058dc754fd92b9475ec58f1",
-    # 📄 2026-09-17 — **문서 전용 변경**(`src/auth/**` 이 8영역 디렉터리라 `.md` 도
-    #    이 가드에 잡힌다 — `src/realtime/CLAUDE.md` 와 같은 계열). 소제목의 사이클
-    #    번호를 규칙 이름으로 바꾸고, 걷어낸 경위를 `docs/history/src-auth-CLAUDE.history.md`
-    #    로 옮겼다(정본 규약 = 루트 `CLAUDE.md` 「문서 규약」 절). 프로덕션 코드 영향 0.
-    #    자매 가드 네 곳 전부 같은 값(`test_g3_9b` 계약).
-    #    TODO(커밋 후): 아래 항목을 **삭제**한다.
-    "src/auth/CLAUDE.md":
+        "cycle291(2026-09-13) — NXT 프리장 매수 GTP(27) + 취소 호가유형 배관, 8영역 승인",
+    ),
+    "src/auth/CLAUDE.md": (
         "1d155e95d386b3ecb19f138e966464490ac4912b055f1f8f9da2a154d14ea363",
-    # ✅ 2026-09-20 (cycle329) — 체결통보 **주문수량**(`fields[16] ODER_QTY`) 배선.
-    #    사용자 결정("체결통보 주문수량 쓰자") + `domain-consult` 선행. 고치는 것 =
-    #    `await place_order` 도중 착지한 통보는 `order_no` 매핑이 비어 `ordered_qty` 가
-    #    **증분 체결량으로 폴백**되고, `total_filled >= ordered_qty` 가 항상 참이 되어
-    #    **부분 체결이 전량으로 오판**된다(매도 = 잔량이 손절 감시 밖으로 소멸,
-    #    매수 = `_completed_buy_orders` 무장으로 잔여 통보 소실 + 영구 과소 수량).
-    #    `handler.py` 변경은 파싱 1블록 + 콜백 인자 1개뿐이고 체결수량 소스
-    #    `fields[9]` 는 무접촉이다(`test_cycle235_ast_execution_qty.py` 봉인 유지).
-    #    자매 가드 **네 곳 전부** 같은 값(`test_g3_9b` 계약).
-    #    TODO(cycle368 커밋 후): 이 항목을 삭제한다
-    # 🔁 cycle368(2026-09-25) 재핀 — 장운영정보 칸 밀림 수정 세트. USER DECISION: 칸
-    #    기준점 판별(`parse_market_op_payload` 단일 판별자)을 handler 에도 적용해
-    #    handler 가 더 이상 `payload.split` 을 직접 하지 않고 파싱된
-    #    `event.mkop_cls_code` 를 쓴다. MAIN-SESSION DECISION(적대적 검토 뒤, 사용자
-    #    승인 범위 안): 두 import(`parse_market_op_payload`·`record_market_op_event`)를
-    #    각자의 try 안에 둔다 — HEAD 도 이미 import 를 (하나의) try 안에 두어 보드
-    #    콜백은 원래도 안전했고, 이번 변경은 그 try 를 파싱/기록 둘로 나눠 한쪽이
-    #    깨져도 다른 쪽 결과가 살아남게 한 것이지 없던 보호를 처음 넣은 게 아니다.
-    #    docstring 을 현재 계약만 서술하도록 다시 썼다(세션 행위 영향은 AB1 조건부
-    #    라는 서술 포함). 그 밖 로직 무변경. 직전 값 =
-    #    `37b1755210c83cdb2a462e6a37f919b326f8b48bee73d924adcc277d770a8d17`.
-    # 🔁 cycle374(2026-09-27) 재핀 — 접수 전문(`CNTG_YN=1`) INFO `[order_notice]` + 거부 WARNING `[order_rejected_notice]` 기록 추가(사용자 승인, 8영역). 콜백/상태 변경 0 — 체결(`CNTG_YN=2`) 경로는 byte 동일. 직전 값 = `cc8af0de831e98d79f558d0c56f1360ce5ee5438ec59f23dbe79ca6725d472bc`.
-    "src/realtime/handler.py":
+        "cycle330(2026-09-20) — 문서 전용(토큰 발급 실패 고아 Future 회수 서술)",
+    ),
+    "src/auth/__init__.py": (
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "빈 파일 — 초기 구현 이후 무변경",
+    ),
+    "src/auth/hashkey.py": (
+        "7c2aacc703839bdc274b463ee48777006504d70e4d59a1e57120ac5b612396d2",
+        "초기 구현(2026-04-22) 이후 무변경",
+    ),
+    "src/auth/token.py": (
+        "4125c271b4147e59922f4f000e523429fb4bbef37058dc754fd92b9475ec58f1",
+        "cycle330(2026-09-20) — 합류자 없는 토큰 발급 실패의 고아 Future 회수, 8영역 승인",
+    ),
+    "src/engine/order_engine.py": (
+        "08c479841352fb579f767c109de3e8f901d1c27bdce705b39b5ba6556fc0b3e1",
+        "cycle409(2026-10-04 Q4) — 매도 PENDING 에 주문가(order_price) 전달, 8영역 승인",
+    ),
+    "src/engine/risk.py": (
+        "a2187b8270446379988d24dfbe39b902d6ab37b112d4b6ce7330ee171434e222",
+        "cycle403(2026-10-03) — etf_trend 를 틱 매수 평가 건너뛰기 목록에 한 줄, 8영역 승인",
+    ),
+    "src/engine/scanner.py": (
+        "b570762dfd92df49471dab261d44ecd364d376300ffe9e2f5b7ac19cceb9efcc",
+        "cycle417(2026-10-09) — 일봉 증분 적재 구멍 메우기(증분 창 확대 + 구멍 판정 1회), 8영역 승인",
+    ),
+    "src/engine/scheduler.py": (
+        "f53d41a11fe162f80e113c6ff48cf6d235581769be7979499c5782ff11d49646",
+        "cycle409(2026-10-04 Q1·Q4) — 매일 자동 대사 task 배선(+1줄), 승인",
+    ),
+    "src/engine/session.py": (
+        "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
+        "사이클 182(2026-06-28) — 시가 단일가 코드 분기 시간창 게이트",
+    ),
+    "src/engine/strategy_registry.py": (
+        "3b6366c3cdb6e83907428435b95611880f1b8223e572c361a1cad2d00b13a067",
+        "cycle399(2026-10-03, 10-02 R1) — update_weights 섀도 전략 켜짐 유지 한 줄, 8영역 승인",
+    ),
+    "src/realtime/CLAUDE.md": (
+        "45817e18bff13cef49af02704f1fae7a5f73b7b0be49d84a42d409b7fc4237aa",
+        "cycle374(2026-09-27) — 문서 전용(handler 「접수 전문 기록」 소절)",
+    ),
+    "src/realtime/__init__.py": (
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "빈 파일 — 초기 구현 이후 무변경",
+    ),
+    "src/realtime/handler.py": (
         "e1a484e9ac82d43f0fa85cba693ea5a206ecfbae1076dfee0f4e6bf6d4f2a2d4",
+        "cycle374(2026-09-27) — 접수 전문 [order_notice]·거부 [order_rejected_notice] 기록, 8영역 승인",
+    ),
+    "src/realtime/websocket.py": (
+        "d4c443bde2ed7aeafba3e9471db0ca4efc15a654610555435145a9b305150c5b",
+        "cycle292·293·294(2026-09-14) — 시세 채널 KRX/NXT 전용 2채널 분리, 8영역 승인",
+    ),
+    "src/realtime/websocket_pool.py": (
+        "8b02442bcf5f558d6f7095b47d2016f004e3746e07ddc91dae8768b1dd46a10d",
+        "cycle292·293·294(2026-09-14) — 시세 채널 KRX/NXT 전용 2채널 분리, 8영역 승인",
+    ),
 }
 
-
-def _approved_and_intact(path: str) -> bool:
-    pin = _APPROVED_CONTENT_SHA.get(path)
-    if pin is None:
-        return False
-    return hashlib.sha256((_REPO_ROOT / path).read_bytes()).hexdigest() == pin
+def _read_bytes(path: str) -> bytes:
+    """`path` 의 **현재 내용 바이트** — 테스트가 이 seam 만 갈아끼워 워킹트리 오염 없이
+    「내용이 달라지면 붉은가」 를 확인한다(`test_cycle223g3`)."""
+    return (_REPO_ROOT / path).read_bytes()
 
 
-def _git(*args: str) -> str:
-    res = subprocess.run(
-        ["git", *args], cwd=_REPO_ROOT, capture_output=True, text=True,
+def _content_sha(path: str) -> str:
+    """`path` 파일 내용의 sha256 (`shasum -a 256 <path>` 와 같다)."""
+    return hashlib.sha256(_read_bytes(path)).hexdigest()
+
+
+#: 디렉터리를 훑을 때 파일로 세지 않는 것 — 파이썬 캐시와 OS 부산물뿐이다.
+_IGNORED_PARTS = frozenset({"__pycache__"})
+_IGNORED_SUFFIXES = frozenset({".pyc", ".pyo"})
+_IGNORED_NAMES = frozenset({".DS_Store"})
+
+
+def _protected_files_on_disk() -> list[str]:
+    """8영역 + `scheduler.py` 의 **디스크 위** 파일 목록 — git 을 거치지 않는다.
+
+    `Path.rglob` 로 훑으므로 미추적 새 파일도 보인다(`git ls-files` 는 추적 파일만 본다 —
+    cycle259 S4b). 디렉터리 항목은 그 아래 모든 파일(`.md` 포함)이다.
+    """
+    out: set[str] = set()
+    for entry in [*_EIGHT_AREAS, *_SAME_APPROVAL_FILES]:
+        target = _REPO_ROOT / entry
+        if target.is_dir():
+            for p in target.rglob("*"):
+                if not p.is_file():
+                    continue
+                if _IGNORED_PARTS & set(p.parts):
+                    continue
+                if p.suffix in _IGNORED_SUFFIXES or p.name in _IGNORED_NAMES:
+                    continue
+                out.add(p.relative_to(_REPO_ROOT).as_posix())
+        elif target.is_file():
+            out.add(entry)
+    return sorted(out)
+
+
+def _check_pin(path: str) -> None:
+    """`path` 의 현재 내용이 승인 도장과 같은지 — 다르면 AssertionError."""
+    assert path in _APPROVED_CONTENT_SHA, f"{path} 는 승인 도장 목록에 없다"
+    pinned, reason = _APPROVED_CONTENT_SHA[path]
+    assert (_REPO_ROOT / path).is_file(), (
+        f"{path} 가 사라졌다 — 승인된 삭제라면 `_APPROVED_CONTENT_SHA` 에서 이 항목을 뺀다"
     )
-    if getattr(res, "returncode", 0) != 0:
-        raise AssertionError(
-            f"git {' '.join(args)} 실패 (rc={res.returncode}) — fail-closed. "
-            f"stderr: {(res.stderr or '').strip()}"
-        )
-    return res.stdout
+    actual = _content_sha(path)
+    assert actual == pinned, (
+        f"8영역/scheduler 파일 `{path}` 가 마지막 승인({reason}) 뒤에 바뀌었다.\n"
+        "⚠️ **핀을 먼저 재산출하지 마라** — 그 순간 범위 밖 변경까지 승인된 것으로 봉인된다.\n"
+        f"  1) `git diff -- {path}` 를 눈으로 읽어라.\n"
+        "  2) 승인 없는 변경이면 되돌려라.\n"
+        "  3) 사용자 승인을 받은 변경이면 이 파일 `_APPROVED_CONTENT_SHA` 의 그 한 줄을 "
+        f"(새 sha, 승인 사유) 로 고친다. 새 sha = {actual}"
+    )
 
 
-def test_ga3_6_eight_areas_touched_are_only_handler_and_risk():
-    tracked = _git("diff", "HEAD", "--name-only", "--", *_EIGHT_AREAS).split()
-    untracked = _git(
-        "ls-files", "--others", "--exclude-standard", "--", *_EIGHT_AREAS,
-    ).split()
-    changed = sorted(set(tracked) | set(untracked))
-    unexpected = sorted(
-        p for p in set(changed) - _ALLOWED if not _approved_and_intact(p)
+def _check_complete() -> None:
+    """디스크의 8영역·scheduler 파일 집합 == 승인 도장 목록 — 다르면 AssertionError."""
+    on_disk = set(_protected_files_on_disk())
+    pinned = set(_APPROVED_CONTENT_SHA)
+    assert on_disk == pinned, (
+        f"8영역 파일 집합이 승인 도장 목록과 다르다 — 새 파일 {sorted(on_disk - pinned)} · "
+        f"사라진 파일 {sorted(pinned - on_disk)}. 승인된 추가·삭제라면 "
+        "`_APPROVED_CONTENT_SHA` 에 항목을 더하거나 뺀다"
     )
-    assert unexpected == [], (
-        f"8영역 범위 밖 변경 감지: {unexpected} — 파일명 영구 허용(handler.py·risk.py) "
-        "또는 승인 사이클 sha 핀(_APPROVED_CONTENT_SHA, 내용 일치 시 한정)만 통과한다"
-    )
+
+
+@pytest.mark.parametrize("path", sorted(_APPROVED_CONTENT_SHA))
+def test_ga3_6_protected_file_matches_its_approval_pin(path):
+    """8영역·scheduler 파일 하나가 바뀌면 **이 케이스 하나만** 붉어진다(재핀 자리 = 1줄)."""
+    _check_pin(path)
+
+
+def test_ga3_6b_protected_file_set_matches_disk():
+    """8영역 디렉터리에 새 파일이 생기거나 파일이 사라지면 붉어진다(미추적 파일 포함)."""
+    _check_complete()
+
+
+def test_ga3_6c_every_pin_is_a_sha_with_an_approval_reason():
+    """도장 = 64자리 sha256 + 비어 있지 않은 승인 사유. 파일명만으로 면제하는 길은 없다."""
+    for path, value in _APPROVED_CONTENT_SHA.items():
+        assert isinstance(value, tuple) and len(value) == 2, f"{path}: (sha, 사유) 형식이 아니다"
+        sha, reason = value
+        assert isinstance(sha, str) and len(sha) == 64 and all(
+            c in "0123456789abcdef" for c in sha
+        ), f"{path}: sha256 16진 64자리가 아니다"
+        assert isinstance(reason, str) and reason.strip(), f"{path}: 승인 사유가 비었다"

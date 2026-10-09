@@ -9,7 +9,7 @@
 | G-405-3 | donchian 청산·사이징·신호 함수(같은 폐포)가 끄는 키 7개를 문자열로 읽지 않는다 |
 | G-405-4 | `check_exit_signal` 과 `get_effective_stop_price` 가 같은 헬퍼를 부르고, R·무장 키는 그 헬퍼에만 있다 |
 | G-405-5 | `DEFAULT_PARAMS` 리터럴에 `buy_paused: False` · `position_ratio × max_positions ≤ 1.0` |
-| G-405-6 | 8영역 · `scheduler.py` 파일 내용 sha256 = 이 사이클 착수 시점 값 (🔁 **사이클 한정 — cycle405 커밋 뒤 이 핀은 지운다**) |
+| G-405-6 | (cycle419 에서 걷음 — 8영역·`scheduler.py` 파일 sha 는 정본 `test_cycle222a3_ast_followup_fixes.py::_APPROVED_CONTENT_SHA` 한 곳) |
 | G-405-7 | `calc_buy_quantity` 의 모든 return = 상수 `0` 또는 `self._apply_budget_limit(...)` · `_fallback_one_share` 직접 호출 0 |
 | G-405-8 | `StrategyBase._apply_budget_limit` 소스 세그먼트 sha256 불변(관문 무접촉) |
 | G-405-9 | `_position_atr` 신설 금지(R 은 매수 시점 값으로만 정한다 — 명세 §1) |
@@ -259,48 +259,6 @@ def test_g405_5_buy_paused_and_budget_invariant_in_literal():
     pr, mp = d["position_ratio"], d["max_positions"]
     assert isinstance(pr, ast.Constant) and isinstance(mp, ast.Constant)
     assert pr.value * mp.value <= 1.0 + 1e-12
-
-
-# ===========================================================================
-# G-405-6 — 🔁 사이클 한정(cycle405 커밋 뒤 삭제). 착수 시점(77cfe334) 파일 내용 sha256.
-# 🔁 병합 재핀 — cycle405 × main(7431ae48): main 의 승인된 8영역 변경(cycle409 `order_engine.py`
-# 매도 PENDING 주문가 · cycle408-L1/cycle409 `scheduler.py` 배선)을 받아 두 값만 옮긴다(이 브랜치는 무접촉).
-# 직전 값 = order_engine.py `4d46edd1f863c03b5a79a4c8d23b7d5c8aae6f1cf7d8d0612bf91224db906a0e` /
-# scheduler.py `084f114f2aa415dec16a55e5df5d89c233c37d55c5714c66b10460839435d10c`.
-# ===========================================================================
-_PINNED = {
-    "src/engine/risk.py": "a2187b8270446379988d24dfbe39b902d6ab37b112d4b6ce7330ee171434e222",
-    "src/engine/order_engine.py": "08c479841352fb579f767c109de3e8f901d1c27bdce705b39b5ba6556fc0b3e1",
-    "src/engine/session.py": "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
-    # 🔁 cycle417(2026-10-09) 재핀 — cycle417 사용자 승인 10-09 — 일봉 증분 적재 구멍(증분 분기 창 확대 + 구멍 판정 1회 호출). 나머지 7영역 diff 0.
-    "src/engine/scanner.py": "b570762dfd92df49471dab261d44ecd364d376300ffe9e2f5b7ac19cceb9efcc",
-    "src/engine/strategy_registry.py": "3b6366c3cdb6e83907428435b95611880f1b8223e572c361a1cad2d00b13a067",
-    "src/api/order.py": "08c5cafd7b8678ec0d0fa85f856fdea3cce38ad92488c6d74c03cd13faa415bb",
-    "src/engine/scheduler.py": "f53d41a11fe162f80e113c6ff48cf6d235581769be7979499c5782ff11d49646",
-    "src/realtime/CLAUDE.md": "45817e18bff13cef49af02704f1fae7a5f73b7b0be49d84a42d409b7fc4237aa",
-    "src/realtime/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "src/realtime/handler.py": "e1a484e9ac82d43f0fa85cba693ea5a206ecfbae1076dfee0f4e6bf6d4f2a2d4",
-    "src/realtime/websocket.py": "d4c443bde2ed7aeafba3e9471db0ca4efc15a654610555435145a9b305150c5b",
-    "src/realtime/websocket_pool.py": "8b02442bcf5f558d6f7095b47d2016f004e3746e07ddc91dae8768b1dd46a10d",
-    "src/auth/CLAUDE.md": "1d155e95d386b3ecb19f138e966464490ac4912b055f1f8f9da2a154d14ea363",
-    "src/auth/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "src/auth/hashkey.py": "7c2aacc703839bdc274b463ee48777006504d70e4d59a1e57120ac5b612396d2",
-    "src/auth/token.py": "4125c271b4147e59922f4f000e523429fb4bbef37058dc754fd92b9475ec58f1",
-}
-
-
-@pytest.mark.parametrize("rel", sorted(_PINNED))
-def test_g405_6_eight_areas_and_scheduler_untouched(rel):
-    got = hashlib.sha256((ROOT / rel).read_bytes()).hexdigest()
-    assert got == _PINNED[rel], f"{rel} 가 바뀌었다 — 8영역·scheduler.py 무접촉 계약(G-405-6)"
-
-
-@pytest.mark.parametrize("rel_dir", ["src/realtime", "src/auth"])
-def test_g405_6_no_new_files_in_pinned_dirs(rel_dir):
-    have = {str(p.relative_to(ROOT)) for p in (ROOT / rel_dir).rglob("*")
-            if p.is_file() and p.suffix in (".py", ".md") and "__pycache__" not in p.parts}
-    want = {k for k in _PINNED if k.startswith(rel_dir + "/")}
-    assert have == want
 
 
 # ===========================================================================
