@@ -4,7 +4,7 @@
 // 코드(`division`·`source`·`judge.src`·`stop_kind`·`event`·`na`)만 `utils/journalLabels.ts` 로
 // 바꾼다. 테이블을 쓰지 않는다(400px 요건 — 명세 8-3) · 메모는 글자 그대로 보인다(HTML 해석 없음, textarea 값으로만 노출).
 import { useState } from 'react'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { putJournalNote } from '../api/history'
 import { strategyLabel } from '../utils/strategyMeta'
 import { formatKstDateTime } from '../utils/kst'
@@ -15,8 +15,8 @@ import type {
 } from '../types/journal'
 import type { NaKind } from '../types/journal'
 import {
-  costStatusLabel, divisionLabel, naLabel, reasonCodeLabel, sourceLabel, stopEventLabel,
-  stopKindLabel, valSrcLabel,
+  costStatusLabel, divisionLabel, judgeSrcLabel, naLabel, naTooltip, reasonCodeLabel, sourceLabel,
+  stopEventLabel, stopKindLabel, valSrcLabel,
 } from '../utils/journalLabels'
 
 const NOTE_MAX = 4000
@@ -51,6 +51,7 @@ function NaBadge({ na }: { na: NaKind }) {
   return (
     <span
       data-testid={`journal-na-${na}`}
+      title={naTooltip(na)}
       className={na === 'lookup_failed' ? 'text-amber-600 text-xs' : 'text-gray-400 text-xs'}
     >
       {naLabel(na)}
@@ -89,10 +90,16 @@ function OrderLineRow({ line }: { line: OrderLine | ExitLine }) {
         line.slip_order_na && <NaBadge na={line.slip_order_na} />
       )}
       {line.judge.price !== null && (
-        <span className="text-xs text-gray-500">판단가 {fmtInt(line.judge.price)}</span>
+        <span className="text-xs text-gray-500">
+          판단가 {fmtInt(line.judge.price)}
+          {judgeSrcLabel(line.judge.src) && <Chip>{judgeSrcLabel(line.judge.src)}</Chip>}
+        </span>
       )}
       {line.judge.price === null && line.judge.upper !== null && (
-        <span className="text-xs text-gray-500">판단가 ≤{fmtInt(line.judge.upper)}</span>
+        <span className="text-xs text-gray-500">
+          판단가 ≤{fmtInt(line.judge.upper)}
+          {judgeSrcLabel(line.judge.src) && <Chip>{judgeSrcLabel(line.judge.src)}</Chip>}
+        </span>
       )}
       {line.slip_judge && (
         <span className="text-xs text-gray-500">
@@ -110,7 +117,7 @@ function ReasonBlock({ reason, testId }: { reason: Reason; testId: string }) {
   return (
     <div data-testid={testId} className="text-sm text-gray-700">
       {reason.text ? <span>{reason.text}</span> : reason.na && <NaBadge na={reason.na} />}
-      {srcLabel && <Chip>{srcLabel}</Chip>}
+      {srcLabel && <>{' '}<Chip>{srcLabel}</Chip></>}
       {reason.renamed_from && (
         <span className="text-xs text-gray-400"> (접수 이름 {reason.renamed_from} — 사유 줄로 보정)</span>
       )}
@@ -152,6 +159,7 @@ function InitialStopBlock({ stop }: { stop: StopPoint }) {
 function TargetBlock({ target }: { target: Target }) {
   return (
     <div data-testid="journal-target" className="text-sm text-gray-700">
+      <span className="text-xs font-medium text-gray-500">익절 목표 </span>
       {target.text && <span>{target.text}</span>}
       {target.na && <NaBadge na={target.na} />}
     </div>
@@ -163,7 +171,9 @@ function exitLineInfo(exit: ExitLine, entryTargetPrice: number | null): { text: 
   const parts: string[] = []
   const tail = exit.snapshot_age_s !== null ? ` (${exit.snapshot_age_s}초 전)` : ''
   if (exit.line_role === 'target') {
-    if (entryTargetPrice !== null) parts.push(`목표 ${fmtInt(entryTargetPrice)}`)
+    // cycle413 보완 1차 #12(M6d) — 진입 목표가가 기록 전이어도 발동선을 목표로 쓴다(TAKE_PROFIT 은 발동선=목표).
+    const targetPrice = entryTargetPrice ?? exit.fired_line
+    if (targetPrice !== null) parts.push(`목표 ${fmtInt(targetPrice)}`)
     if (exit.effective_line !== null) parts.push(`참고 손절선 ${fmtInt(exit.effective_line)}${tail}`)
     if (parts.length === 0) return { text: '', na: exit.line_na ?? 'unknown' }
     return { text: parts.join(' · '), na: null }
@@ -176,20 +186,26 @@ function exitLineInfo(exit: ExitLine, entryTargetPrice: number | null): { text: 
     if (parts.length === 0) return { text: '', na: exit.line_na ?? 'unknown' }
     return { text: parts.join(' · '), na: null }
   }
-  // reference(가격 무관 청산) 또는 null
-  parts.push('손절 미발동')
-  if (exit.effective_line !== null) {
-    parts.push(`참고 손절선 ${fmtInt(exit.effective_line)}${tail}`)
-    return { text: parts.join(' · '), na: null }
+  if (exit.line_role === 'reference') {
+    parts.push('손절 미발동')
+    if (exit.effective_line !== null) {
+      parts.push(`참고 손절선 ${fmtInt(exit.effective_line)}${tail}`)
+      return { text: parts.join(' · '), na: null }
+    }
+    return { text: '손절 미발동', na: exit.line_na ?? 'unknown' }
   }
-  return { text: '손절 미발동', na: exit.line_na ?? 'unknown' }
+  // cycle413 보완 1차 #4 — 사유 코드를 모르면(line_role=null) 「손절 미발동」을 단정하지 않는다.
+  return { text: '', na: exit.line_na ?? 'unknown' }
 }
 
 function ExitLineInfoBlock({ exit, entryTargetPrice }: { exit: ExitLine; entryTargetPrice: number | null }) {
   const info = exitLineInfo(exit, entryTargetPrice)
+  // cycle413 보완 1차 #7(M5) — 발동선 출처 칩(스냅샷·계산 등). 근사·역산 값이 정확한 값처럼 보이지 않게.
+  const firedSrcChip = exit.line_role === 'fired' && exit.fired_line !== null ? valSrcLabel(exit.fired_src) : null
   return (
     <div data-testid="journal-exit-line" className="text-sm text-gray-600">
       {info.text && <span>{info.text}</span>}
+      {firedSrcChip && <Chip>{firedSrcChip}</Chip>}
       {info.na && <NaBadge na={info.na} />}
     </div>
   )
@@ -260,7 +276,9 @@ function StopTrackBlock({ track }: { track: StopTrack }) {
 }
 
 // ── 비용 ─────────────────────────────────────────────────────────────────────
-function CostsBlock({ costs }: { costs: Costs }) {
+function CostsBlock({ costs, isOpen }: { costs: Costs; isOpen: boolean }) {
+  // cycle413 보완 1차 #12(M6f) — 보유 중인 카드는 「낸 비용」(아직 전체 합계가 아니다), 청산 카드만 「합계」.
+  const totalLabel = isOpen ? '낸 비용' : '합계'
   if (costs.na) {
     return (
       <div data-testid="journal-cost-total" className="text-sm">
@@ -280,7 +298,7 @@ function CostsBlock({ costs }: { costs: Costs }) {
         ))}
       </div>
       <div>
-        합계 {costs.paid_total !== null ? fmtInt(costs.paid_total) : <NaBadge na="unknown" />}
+        {totalLabel} {costs.paid_total !== null ? fmtInt(costs.paid_total) : <NaBadge na="unknown" />}
         {costs.status && <Chip>{costStatusLabel(costs.status)}</Chip>}
         {costs.allocated && <Chip>배분</Chip>}
         {costs.expected_exit !== null ? (
@@ -317,6 +335,7 @@ function renderExPoint(p: ExPoint, isMfe: boolean): React.ReactNode {
 function ExcursionBlock({ excursion }: { excursion: Excursion }) {
   return (
     <div className="text-sm text-gray-700 space-y-0.5">
+      <div className="text-xs font-medium text-gray-500">보유 중 평가 (일별 종가)</div>
       <div data-testid="journal-mfe">
         최대 이익{' '}
         {excursion.na ? <NaBadge na={excursion.na} /> : excursion.mfe ? renderExPoint(excursion.mfe, true) : <NaBadge na="unknown" />}
@@ -341,12 +360,18 @@ function NoteBlock({ anchorTradeId, note }: { anchorTradeId: string; note: { bod
   const [draft, setDraft] = useState(savedBody)
   const [lastSaved, setLastSaved] = useState(savedBody)
   const [status, setStatus] = useState<'idle' | 'saved' | 'error'>('idle')
+  const queryClient = useQueryClient()
 
   const mutation = useMutation({
     mutationFn: (body: string) => putJournalNote(anchorTradeId, body),
     onSuccess: () => {
       setLastSaved(draft)
       setStatus('saved')
+      // cycle413 보완 1차 #2 — 저장 성공은 일지 캐시를 무효화해, 탭을 오가도(remount) 운영
+      // QueryClient(staleTime 3초·gcTime 5분)가 저장 전 캐시를 그대로 돌려주지 않게 한다.
+      // 다른 카드가 편집 중이어도, 그 카드의 입력칸 로컬 state 는 이 refetch 로 덮이지 않는다
+      // (`draft`/`lastSaved` 는 prop 변화로 재동기화하지 않는다 — 아래 useState 초기값으로만 쓴다).
+      void queryClient.invalidateQueries({ queryKey: ['journal'] })
     },
     onError: () => {
       setStatus('error')
@@ -379,7 +404,7 @@ function NoteBlock({ anchorTradeId, note }: { anchorTradeId: string; note: { bod
           <button
             type="button"
             data-testid="journal-note-save"
-            disabled={tooLong || mutation.isPending}
+            disabled={tooLong || mutation.isPending || !dirty}
             onClick={() => mutation.mutate(draft)}
             className="px-2 py-1 border rounded text-gray-700 disabled:opacity-50"
           >
@@ -430,7 +455,8 @@ interface Props {
 }
 
 export default function JournalCard({ card, basis, stopsRecordStart }: Props) {
-  const heldLabel = `보유 ${card.held_days}일`
+  // cycle413 보완 1차 #12(M6e) — 당일 매매는 「보유 0일」 이 아니라 「당일」.
+  const heldLabel = card.held_days === 0 ? '당일' : `보유 ${card.held_days}일`
   return (
     <div
       data-testid={`journal-card-${card.anchor_trade_id}`}
@@ -478,7 +504,13 @@ export default function JournalCard({ card, basis, stopsRecordStart }: Props) {
 
       {card.exits.length > 0 && (
         <div className="border-t pt-2 space-y-2">
-          <div className="text-xs font-medium text-gray-500">청산</div>
+          {/* cycle413 보완 1차 #6(M4) — 보유 중인데 체결이 있으면 「청산」 이 아니라 「분할 매도」. */}
+          <div className="text-xs font-medium text-gray-500">{card.status === 'open' ? '분할 매도' : '청산'}</div>
+          {card.status === 'open' && card.pnl.partial_net_krw !== null && (
+            <div className={`text-sm font-medium ${pnlClass(card.pnl.partial_net_krw)}`}>
+              분할 실현 세후 {fmtSignedKRW(card.pnl.partial_net_krw)}
+            </div>
+          )}
           {card.exits.map((ex, i) => (
             <div key={ex.order_no ?? i} data-testid={`journal-exit-${ex.order_no ?? i}`} className="space-y-1">
               <OrderLineRow line={ex} />
@@ -486,11 +518,9 @@ export default function JournalCard({ card, basis, stopsRecordStart }: Props) {
                 <span className="inline-block px-1 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-700">
                   {reasonCodeLabel(ex.reason.code)}
                 </span>
-                {ex.path === 'reorder' && ex.parent_order_no && (
-                  <span className="text-xs text-gray-400">· 잔여 재주문(원주문 {ex.parent_order_no})</span>
-                )}
-                {ex.path === 'fallback' && <span className="text-xs text-gray-400">· 5호가 폴백</span>}
               </div>
+              {/* cycle413 보완 1차 #12(M6h) — 경로 꼬리(5호가 폴백·잔여 재주문)는 서버 문장(`reason.text`)
+                  에 이미 들어 있다(계약 6절). 여기서 다시 붙이면 같은 말이 두 번 보인다. */}
               <ReasonBlock reason={ex.reason} testId="journal-exit-reason" />
               <ExitLineInfoBlock exit={ex} entryTargetPrice={card.entry.target.price} />
             </div>
@@ -505,7 +535,7 @@ export default function JournalCard({ card, basis, stopsRecordStart }: Props) {
       )}
 
       <div className="border-t pt-2">
-        <CostsBlock costs={card.costs} />
+        <CostsBlock costs={card.costs} isOpen={card.status === 'open'} />
       </div>
 
       <div className="border-t pt-2">
@@ -513,6 +543,7 @@ export default function JournalCard({ card, basis, stopsRecordStart }: Props) {
       </div>
 
       <div className="border-t pt-2">
+        <div className="text-xs font-medium text-gray-500 mb-1">메모</div>
         <NoteBlock anchorTradeId={card.anchor_trade_id} note={card.note} />
       </div>
     </div>

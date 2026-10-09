@@ -1,0 +1,37 @@
+[2026-10-09 12:10 KST] frontend-dev 시작 — cycle413 보완 1차 Green(프론트), 담당 결함 #2·#3·#4·#6·#7·#12(화면 몫)·#13.
+  Red = 987257b0. 대상 파일: frontend/src/components/JournalCard.tsx · JournalTab.tsx · frontend/src/utils/journalLabels.ts.
+  node_modules 없어 ../auto_stock 심볼릭 링크로 임시 해결(끝나면 제거).
+
+[2026-10-09 12:20 KST] 구현 완료.
+  - #2(M1): NoteBlock 저장 버튼 `!dirty` 로 비활성 추가 · onSuccess 에서 `queryClient.invalidateQueries(['journal'])`.
+    draft/lastSaved 는 prop 변화로 재동기화하지 않음(편집 중인 다른 카드를 덮지 않음, 탭 왕복은 unmount/remount 로 해결).
+  - #3(M2): JournalTab 에 page state 추가, size=20 고정, 필터 변경 시 page=1 로 리셋(`setFilter` 래퍼),
+    journal-page-info/prev/next 추가.
+  - #4(M3): exitLineInfo 가 line_role==null 일 때 「손절 미발동」 을 단정하지 않고 na 만 반환하도록 분리.
+  - #6(M4): exits 헤더를 status==='open' 이면 「분할 매도」로, 그 아래 「분할 실현 세후 ±x」(pnl.partial_net_krw) 추가.
+  - #7(M5): OrderLineRow 판단가 옆에 judgeSrcLabel 칩, ExitLineInfoBlock 발동선(line_role=fired) 옆에
+    valSrcLabel(fired_src) 칩 추가.
+  - #12(M6): NaBadge title 툴팁(journalLabels.naTooltip, unknown 은 '모름' 로 시작) · ReasonBlock 서버 문장과
+    출처 칩 사이 공백 · TargetBlock "익절 목표" 제목 · ExcursionBlock "일별 종가" 제목 · NoteBlock 위에 "메모" 제목 ·
+    exitLineInfo 'target' 분기가 `entryTargetPrice ?? fired_line` 으로 익절 목표 선 폴백 · held_days===0 이면
+    "당일"(「보유 0일」 아님) · CostsBlock 에 isOpen prop 추가해 보유중 "낸 비용" / 청산 "합계" 분리 ·
+    JournalTab 필터 토글에 aria-expanded state 추가(400px 「필터」) · 청산 블록의 client-side 「· 5호가 폴백」/
+    「· 잔여 재주문」 중복 렌더 제거(서버 reason.text 가 이미 포함, 계약 6절).
+  - #13: JournalTab useQuery 에 `retry: false` 명시(가드는 Red 가 이미 등재).
+
+[2026-10-09 12:30 KST] 검증.
+  - vitest History.journal.fix1.cycle413.test.tsx: 19/19 통과.
+  - vitest 전체: 141 files / 1189 tests 전부 통과(회귀 0).
+  - eslint src/components/JournalCard.tsx JournalTab.tsx src/utils/journalLabels.ts: 오류·경고 0.
+  - npm run build: 통과(청크 크기 경고는 기존 것, 무관).
+  - e2e: ../frontend 에서 `npx vite --port 3413` 수동 기동(다른 워크트리 :3000 충돌 회피, Red 와 동일 패턴) →
+    `E2E_BASE_URL=http://localhost:3413 npx playwright test --config=e2e/playwright.config.ts` 전체 52/52 통과
+    (journal.spec.ts 3/3 포함). 서버 종료 + test-results/playwright-report 제거.
+  - node 영향 인덱스 재생성(`node tools/test_impact/build_index_frontend.mjs`) — frontend modules 144 ·
+    tests 141 · unmapped 6(기존과 동일, timestamp 만 갱신).
+  - node_modules 심볼릭 링크 2개 제거 완료.
+
+[2026-10-09 12:32 KST] 커밋 — 내 경로만(`git commit -- frontend/src/components/JournalCard.tsx
+  frontend/src/components/JournalTab.tsx frontend/src/utils/journalLabels.ts _workspace/test_index.yaml
+  _workspace/red/cycle413/progress_fix1_green_frontend.log`). sync-docs 가 스테이징해 둔 11개 문서·
+  backend 가 편집 중인 src/engine/journal_view.py 등은 건드리지 않음.

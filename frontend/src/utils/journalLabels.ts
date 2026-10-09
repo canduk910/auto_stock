@@ -201,3 +201,18 @@ const NA_LABELS: Record<NaKind, string> = {
 export function naLabel(na: NaKind): string {
   return NA_LABELS[na]
 }
+
+// cycle413 보완 1차(판정 #12 M6a) — 빈칸 배지마다 사유 툴팁. 「모름」(unknown) 은 반드시
+// 「모름」 으로 시작한다(테스트 단언). 나머지도 짧게 왜 비었는지를 적는다 — 「0」 으로 보이지 않게.
+const NA_TOOLTIPS: Record<NaKind, string> = {
+  unknown: '모름 — 출처를 가려낼 수 없음',
+  before_record: '기록 전 — 그 시점엔 이 값을 저장하지 않았음',
+  not_applicable: '해당 없음 — 이 전략·상황에는 없는 값',
+  pending: '대기 — 아직 계산되지 않음',
+  lookup_failed: '조회 실패 — 원천 조회가 실패함',
+}
+
+/** 5절. 빈칸 배지 `title` 툴팁. */
+export function naTooltip(na: NaKind): string {
+  return NA_TOOLTIPS[na]
+}
