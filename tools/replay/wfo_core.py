@@ -189,13 +189,18 @@ def score_min_lo90(versions=("r", "pes")):
 
 
 def select_year(yi: YearIndex, y: int, combos: "list[str]", trades: "dict[str, Trades]", cfgs: "dict[str, dict]",
-                base_cfg: dict, min_tpy: float, current_id: str, score_fn=score_lo90) -> dict:
-    """§1-3·4 — 자격 조합 중 학습 점수 최대. 반환 = 고른 id · 표(조합별 학습 n · 점수 · 평균)."""
+                base_cfg: dict, min_tpy: float, current_id: str, score_fn=score_lo90,
+                train_years: int = TRAIN_YEARS) -> dict:
+    """§1-3·4 — 자격 조합 중 학습 점수 최대. 반환 = 고른 id · 표(조합별 학습 n · 점수 · 평균).
+
+    ``train_years`` = 학습 창 길이 K(``wfo_window_20261009/prereg.md`` §1). 학습 창 = [Y−K, Y−1] 진입 ∧ Y 첫 거래일 전
+    청산, 자격 = 학습 거래 수 ≥ ``min_tpy`` × K. ``train_mask`` 의 기본값은 정의 시점에 묶이므로 여기서 명시로 넘긴다.
+    """
     rows = []
     for ci, cid in enumerate(combos):
-        tr = trades[cid].take(yi.train_mask(trades[cid], y))
+        tr = trades[cid].take(yi.train_mask(trades[cid], y, years=train_years))
         n = len(tr)
-        elig = n >= min_tpy * TRAIN_YEARS
+        elig = n >= min_tpy * train_years
         sc, mn = score_fn(tr) if elig else (float("nan"), float(tr.r.mean()) if n else float("nan"))
         rows.append({"id": cid, "order": ci, "n": n, "eligible": bool(elig), "score": sc, "mean": mn,
                      "changed": n_changed(cfgs[cid], base_cfg)})
@@ -387,13 +392,17 @@ def product_cfgs(grid: dict) -> "list[dict]":
 
 def run_wfo(*, cal, combos, cfgs, trades, current_id, fixed_b_id, base_cfg, min_tpy, book_fn,
             score_fn=score_lo90, versions=("r",), years=OOS_YEARS, select_fn=None, alt_curves=None,
-            alt_select_fn=None, start_equity=float(C.BUDGET_C7), log=print) -> dict:
-    """§1 ~ §4 를 한 전략에 대해 돈다. ``book_fn(path, version) -> book_summary`` 는 어댑터가 준다."""
+            alt_select_fn=None, start_equity=float(C.BUDGET_C7), log=print, train_years: int = TRAIN_YEARS) -> dict:
+    """§1 ~ §4 를 한 전략에 대해 돈다. ``book_fn(path, version) -> book_summary`` 는 어댑터가 준다.
+
+    ``train_years`` 는 기본 선택(``select_year``)과 대안 규칙의 학습 MAR 범위 [Y−K, Y−1] 에만 쓰인다 —
+    ``select_fn`` · ``alt_select_fn`` 을 준 어댑터는 그 함수가 창을 정한다.
+    """
     yi = YearIndex(cal)
     sel = {}
     for y in years:
         sel[y] = select_fn(y) if select_fn else select_year(yi, y, combos, trades, cfgs, base_cfg, min_tpy,
-                                                               current_id, score_fn)
+                                                               current_id, score_fn, train_years=train_years)
         log(f"[wfo] {y} → {sel[y]['chosen']} (자격 {sel[y].get('n_eligible')}, 점수 {sel[y].get('chosen_score')})")
     path = {y: sel[y]["chosen"] for y in years}
     paths = {"wfo": path, "current": {y: current_id for y in years}}
@@ -407,7 +416,7 @@ def run_wfo(*, cal, combos, cfgs, trades, current_id, fixed_b_id, base_cfg, min_
         alt = {}
         for y in years:
             elig = {r["id"]: r["eligible"] for r in sel[y]["rows"]} if "rows" in sel[y] else {c: True for c in combos}
-            metric = {c: chained_mar(alt_curves[c], list(range(y - TRAIN_YEARS, y)), start_equity)
+            metric = {c: chained_mar(alt_curves[c], list(range(y - train_years, y)), start_equity)
                       if c in alt_curves else float("nan") for c in combos}
             alt[y] = select_year_by_metric(y, combos, metric, elig, cfgs, base_cfg, current_id)
         paths["alt_mar"] = {y: alt[y]["chosen"] for y in years}

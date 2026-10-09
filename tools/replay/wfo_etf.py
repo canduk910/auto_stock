@@ -5,10 +5,16 @@
 그대로 쓴다. ETF 유니버스가 2015 년부터라 10년 학습이 되는 첫 해 = 2025 → 표본 밖 = 2025 ~ 2026-10-02.
 계좌 = ``etf_book30`` 과 같은 하루 순서에 신호마다 그 해 조합(L · 트레일링 · 채널 · 손익분기 · m 규칙).
 
-실행: python tools/replay/wfo_etf.py [--no-alt]
+표본 밖 해(``years``) · 학습 창 길이(``train_years``) · 출력 폴더(``out``)는 인자다(``wfo_window_20261009/prereg.md``
+§7). 기본값 = 원 등록 그대로(2025·2026 · 10년 · ``wfo_20261006/etf_trend``)라 인자 없이 돌리면 원 결과와 같다.
+창과 무관한 앞부분(적재 · 신호 · 청산 · 거래 묶음 · 계좌 함수)은 ``prepare()`` 로 한 번 만들어 ``main(ctx=…)`` 에
+넘겨 여러 창에서 다시 쓸 수 있다.
+
+실행: python tools/replay/wfo_etf.py [--no-alt] [--train-years K] [--years 2020,2021,…] [--out 폴더]
 """
 from __future__ import annotations
 
+import argparse
 import hashlib
 import itertools
 import json
@@ -34,6 +40,7 @@ OUT = os.path.join(_REPO, "_workspace/analysis/wfo_20261006/etf_trend")
 YEARS = (2025, 2026)
 FIXED_B = (20, 3.0, 10, True, "ge075")
 END = "2026-10-02"
+ETF_FIRST_YEAR = 2015            # ETF 유니버스 첫 해 — 대안 규칙 1년 계좌 곡선의 첫 해
 
 
 def log(*a):
@@ -49,7 +56,8 @@ def cname(cb) -> str:
     return f"L{L}|tr{tr}|ch{ch}|bl{int(bl)}|{mu}"
 
 
-def main(do_alt=True):
+def prepare(log=log) -> dict:
+    """창과 무관한 앞부분 — 적재 · 신호 · 청산 · 조합별 거래 묶음 · 계좌 함수 · 자기 대조. ``main(ctx=…)`` 이 다시 쓴다."""
     from replay.audit.sizing import OpSizer
     from replay.strategies import etf_trend_b as EB
     from replay.strategies import etf_trend_b_audit as EA
@@ -167,32 +175,64 @@ def main(do_alt=True):
     self_check = float(rr[0]["equity"][-1] - ref["equity_seed0"][-1])
     log("self_check Δ최종자산", self_check)
 
+    return {"t0": t0, "V": V, "cal": cal, "yi": yi, "sigs": sigs, "ids": ids, "cb_of": cb_of, "cfgs": cfgs,
+            "cur_id": cur_id, "b_id": b_id, "trades": trades, "book": book, "self_check": self_check,
+            "min_tpy": EO.MIN_TRADES_PER_YEAR, "alt_cache": {}}
+
+
+def alt_curves(ctx: dict, alt_years, log=log) -> dict:
+    """대안 규칙(학습 MAR)용 — 조합 × 해마다 C7 로 새로 시작한 1년 계좌(씨앗 0) 일별 자산. ``ctx`` 에 캐시한다."""
+    cache, book = ctx["alt_cache"], ctx["book"]
+    for c in ctx["ids"]:
+        for y in alt_years:
+            if (c, y) not in cache:
+                cache[(c, y)] = book({y: c}, f"{y}-01-01", f"{y}-12-31", (0,))[0][0]["equity"]
+    log("alt", f"{time.time()-ctx['t0']:.0f}s")
+    return {c: {y: cache[(c, y)] for y in alt_years} for c in ctx["ids"]}
+
+
+def main(do_alt=True, years=YEARS, train_years=W.TRAIN_YEARS, out=OUT, ctx=None, log=log) -> dict:
+    years = tuple(int(y) for y in years)
+    if ctx is None:
+        ctx = prepare(log=log)
+    t0, cal, book = ctx["t0"], ctx["cal"], ctx["book"]
+    cfgs, ids, cur_id, b_id = ctx["cfgs"], ctx["ids"], ctx["cur_id"], ctx["b_id"]
+
     alt = None
     if do_alt:
-        alt = {c: {y: book({y: c}, f"{y}-01-01", f"{y}-12-31", (0,))[0][0]["equity"] for y in range(2015, 2025)}
-               for c in ids}
-        log("alt", f"{time.time()-t0:.0f}s")
+        # 원 등록과 같은 범위 — 표본 밖 첫해 이전 해의 1년 곡선만(기본 = 2015 ~ 2024). 그 뒤 해의 학습 MAR 에는
+        # 표본 밖 첫해 이후의 곡선이 빠진다(원 결과와 같게 두려고 그대로 둔다 — 창 비교에서는 대안 규칙을 돌리지 않는다).
+        alt = alt_curves(ctx, range(max(ETF_FIRST_YEAR, years[0] - train_years), years[0]), log=log)
 
     def book_fn(path, version):
-        runs, dates = book(path, f"{YEARS[0]}-01-02", END, C.BOOK_SEEDS)
+        runs, dates = book(path, f"{years[0]}-01-02", END, C.BOOK_SEEDS)
         return W.book_summary([r["equity"] for r in runs], dates, float(C.BUDGET_C7), fills=[r["fills"] for r in runs],
-                              eras=((f"{YEARS[0]}-01-01", "2026-12-31"),))
+                              eras=((f"{years[0]}-01-01", "2026-12-31"),))
 
-    res = W.run_wfo(cal=cal, combos=ids, cfgs=cfgs, trades=trades, current_id=cur_id, fixed_b_id=b_id,
-                    base_cfg=cfgs[cur_id], min_tpy=EO.MIN_TRADES_PER_YEAR, book_fn=book_fn, years=YEARS,
-                    alt_curves=alt, log=log)
+    res = W.run_wfo(cal=cal, combos=ids, cfgs=cfgs, trades=ctx["trades"], current_id=cur_id, fixed_b_id=b_id,
+                    base_cfg=cfgs[cur_id], min_tpy=ctx["min_tpy"], book_fn=book_fn, years=years,
+                    alt_curves=alt, log=log, train_years=train_years)
     res["strategy"] = "etf_trend"
+    res["train_years"] = int(train_years)
     res["cfgs"] = cfgs
-    res["self_check_final_equity_diff"] = self_check
+    res["self_check_final_equity_diff"] = ctx["self_check"]
     res["n_oos_trades_wfo"] = res["trade"]["wfo"]["r"]["n"]
     res["small_sample"] = bool(res["n_oos_trades_wfo"] < 100)
     res["elapsed_s"] = time.time() - t0
     res["code_sha256"] = {f: sha(os.path.join(os.path.dirname(__file__), f)) for f in ("wfo_core.py", "wfo_etf.py")}
-    os.makedirs(OUT, exist_ok=True)
-    with open(os.path.join(OUT, "result.json"), "w") as fh:
-        json.dump(res, fh, ensure_ascii=False, indent=1, default=W.js)
-    log("done", f"{res['elapsed_s']:.0f}s", res["judge"]["r"]["label"])
+    if out:
+        os.makedirs(out, exist_ok=True)
+        with open(os.path.join(out, "result.json"), "w") as fh:
+            json.dump(res, fh, ensure_ascii=False, indent=1, default=W.js)
+    log("done", f"K={train_years}", f"{years[0]}–{years[-1]}", f"{res['elapsed_s']:.0f}s", res["judge"]["r"]["label"])
+    return res
 
 
 if __name__ == "__main__":
-    main(do_alt="--no-alt" not in sys.argv)
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--no-alt", action="store_true")
+    ap.add_argument("--train-years", type=int, default=W.TRAIN_YEARS)
+    ap.add_argument("--years", default=",".join(map(str, YEARS)), help="표본 밖 해(쉼표) — 예 2020,2021,…,2026")
+    ap.add_argument("--out", default=OUT)
+    a = ap.parse_args()
+    main(do_alt=not a.no_alt, years=tuple(int(x) for x in a.years.split(",")), train_years=a.train_years, out=a.out)

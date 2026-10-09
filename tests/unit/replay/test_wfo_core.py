@@ -86,3 +86,103 @@ def test_book_summary_eras_use_segment_start():
     eq = np.linspace(100, 200, len(d))
     s = W.book_summary([eq], d, 100.0)
     assert s["cagr_median"] > 0 and "2012–2016" in s["eras"] and s["mdd_median"] == 0.0
+
+
+# ── 학습 창 길이 K(``wfo_window_20261009/prereg.md`` §1) ────────────────────
+
+def _mean_score(tr):
+    m = float(tr.r.mean()) if len(tr) else float("nan")
+    return m, m
+
+
+def _window_trades(yi, y):
+    """K=3 이면 [Y−3, Y−1] 진입 ∧ Y 첫 거래일 전 청산만 남는다. Y−8 진입은 K=10 에서만 들어간다."""
+    f = yi.first
+    gin = [f(y - 8) + 5, f(y - 4) + 5, f(y - 3), f(y - 2) + 7, f(y - 1) + 3, f(y) - 4, f(y) - 2, f(y) + 1]
+    gout = [f(y - 8) + 9, f(y - 4) + 9, f(y - 3) + 4, f(y - 2) + 9, f(y - 1) + 8, f(y) - 1, f(y) + 2, f(y) + 6]
+    r = [9.0, 8.0, 0.1, 0.2, 0.3, 0.4, 7.0, 6.0]
+    return _tr(gin, gout, r)
+
+
+def test_select_year_train_years_window_and_eligibility():
+    yi = W.YearIndex(CAL)
+    tr = _window_trades(yi, 2010)
+    cfg = {"a": {"x": 1}, "cur": {"x": 0}}
+    trades = {"a": tr, "cur": _tr([yi.first(2003)], [yi.first(2003) + 1], [0.0])}
+    # 남는 거래 = Y−3 첫날 진입 · Y−2 · Y−1 · Y 첫 거래일 직전 청산(4건) — Y−4 · Y−8 진입 · Y 에 청산 · Y 진입은 빠진다
+    m = yi.train_mask(tr, 2010, years=3)
+    assert m.tolist() == [False, False, True, True, True, True, False, False]
+    s = W.select_year(yi, 2010, ["a", "cur"], trades, cfg, {"x": 0}, min_tpy=4 / 3, current_id="cur",
+                      score_fn=_mean_score, train_years=3)
+    row = {r["id"]: r for r in s["rows"]}["a"]
+    assert row["n"] == 4 and row["eligible"]                       # 4 ≥ (4/3)×3
+    assert s["chosen"] == "a" and not s["fallback"]
+    assert abs(s["chosen_train_mean"] - 0.25) < 1e-12              # (0.1+0.2+0.3+0.4)/4
+    # 자격 하한 = min_tpy × 3 — 1.34 × 3 = 4.02 > 4 이면 자격 없음(K=10 이었다면 13.4 라 더 일찍 떨어진다)
+    s2 = W.select_year(yi, 2010, ["a", "cur"], trades, cfg, {"x": 0}, min_tpy=1.34, current_id="cur",
+                       score_fn=_mean_score, train_years=3)
+    assert not {r["id"]: r for r in s2["rows"]}["a"]["eligible"] and s2["fallback"] and s2["chosen"] == "cur"
+
+
+def test_select_year_default_train_years_is_ten():
+    yi = W.YearIndex(CAL)
+    tr = _window_trades(yi, 2010)
+    cfg = {"a": {"x": 1}}
+    kw = dict(min_tpy=0.5, current_id="a", score_fn=_mean_score)
+    d = W.select_year(yi, 2010, ["a"], {"a": tr}, cfg, {"x": 1}, **kw)
+    t10 = W.select_year(yi, 2010, ["a"], {"a": tr}, cfg, {"x": 1}, train_years=10, **kw)
+    t3 = W.select_year(yi, 2010, ["a"], {"a": tr}, cfg, {"x": 1}, train_years=3, **kw)
+    assert W.TRAIN_YEARS == 10
+    assert d["rows"] == t10["rows"] and d["chosen"] == t10["chosen"]
+    assert d["rows"][0]["n"] == 6 and t3["rows"][0]["n"] == 4     # K=10 은 Y−8 · Y−4 진입까지 넣는다
+    # 자격 하한도 10 배 — 0.5×10 = 5 ≤ 6 (자격) / 0.7×10 = 7 > 6 (자격 없음)
+    assert d["rows"][0]["eligible"]
+    assert not W.select_year(yi, 2010, ["a"], {"a": tr}, cfg, {"x": 1}, min_tpy=0.7, current_id="a",
+                             score_fn=_mean_score)["rows"][0]["eligible"]
+
+
+def _run_small(monkeypatch, **kw):
+    yi = W.YearIndex(CAL)
+    rng = np.random.default_rng(7)
+
+    def mk(mu):
+        g = np.sort(rng.integers(yi.first(1998), yi.first(2009) - 10, 300))
+        return _tr(g, g + 3, rng.normal(mu, 0.01, 300), tick=f"T{mu}")
+    trades = {"a": mk(0.01), "b": mk(-0.01), "c": mk(0.0)}
+    cfgs = {"a": {"x": 1}, "b": {"x": 2}, "c": {"x": 3}}
+    calls = {"select": [], "mar": []}
+    real_sel, real_mar = W.select_year, W.chained_mar
+
+    def spy_sel(*a, **k):
+        calls["select"].append(k.get("train_years"))
+        return real_sel(*a, **k)
+
+    def spy_mar(curves, years, start):
+        calls["mar"].append(list(years))
+        return real_mar(curves, years, start)
+    monkeypatch.setattr(W, "select_year", spy_sel)
+    monkeypatch.setattr(W, "chained_mar", spy_mar)
+    monkeypatch.setattr(W, "index_stats", lambda *a, **k: {})
+    book = {"cagr_median": 0.0, "mdd_median": 0.0, "P2_pass": False}
+    alt = {c: {y: np.array([100.0, 101.0]) for y in range(1996, 2009)} for c in trades}
+    res = W.run_wfo(cal=CAL, combos=list(trades), cfgs=cfgs, trades=trades, current_id="c", fixed_b_id=None,
+                    base_cfg=cfgs["c"], min_tpy=3, book_fn=lambda p, v: dict(book), years=(2007, 2008),
+                    alt_curves=alt, log=lambda *a: None, **kw)
+    return res, calls, trades, cfgs
+
+
+def test_run_wfo_passes_train_years_to_select_and_alt(monkeypatch):
+    res, calls, trades, cfgs = _run_small(monkeypatch, train_years=3)
+    assert calls["select"] == [3, 3]
+    assert calls["mar"][:3] == [[2004, 2005, 2006]] * 3 and calls["mar"][3:] == [[2005, 2006, 2007]] * 3
+    yi = W.YearIndex(CAL)
+    for y in (2007, 2008):
+        ref = W.select_year(yi, y, list(trades), trades, cfgs, cfgs["c"], 3, "c", train_years=3)
+        assert res["selection"][y]["chosen"] == ref["chosen"]
+        assert res["selection"][y]["chosen_train_n"] == ref["chosen_train_n"]
+
+
+def test_run_wfo_default_train_years_is_ten(monkeypatch):
+    res, calls, _, _ = _run_small(monkeypatch)
+    assert calls["select"] == [10, 10]
+    assert calls["mar"][0] == list(range(1997, 2007))
