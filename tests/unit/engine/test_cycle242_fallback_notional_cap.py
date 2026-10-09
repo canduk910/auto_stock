@@ -51,6 +51,7 @@ from freezegun import freeze_time
 from src.engine import strategy_base as sb_mod
 from src.engine.strategy_base import Signal, StrategyBase, StrategyConfig
 from src.engine.turtle_sizing import compute_unit_qty_guarded
+from tests import _strategy_census as census
 
 pytestmark = pytest.mark.unit
 
@@ -700,37 +701,35 @@ def test_f242_10e_k_zero_is_not_total_blockade(caplog):
 # ===========================================================================
 # F-11 — DEFAULT_PARAMS · DB 병합(롤백 경로 전제)
 # ===========================================================================
-_TURTLE_STRATEGY_MODULES = [
-    ("donchian_swing", "DonchianSwingStrategy"),
-    ("kojiro", "KojiroStrategy"),
-    ("vcp_breakout", "VcpBreakoutStrategy"),
-    ("bull_flag_breakout", "BullFlagBreakoutStrategy"),
-]
-_NON_TURTLE_STRATEGY_MODULES = [
-    ("momentum", "MomentumStrategy"),
-    ("volatility_breakout", "VolatilityBreakoutStrategy"),
-    ("long_tail_volatility", "LongTailVolatilityStrategy"),
-]
+#: 리팩토링 카드 #3(cycle421) — 이름을 손으로 적지 않는다. 「손절이 ATR 기반 = 터틀 사이징이 가능한
+#: 전략」 은 등록 명부의 `market_unit_policy == "scale"` 칸과 같은 집합이다(`param_catalog._TURTLE_SIZED`
+#: 와 교차 검사 = `test_cycle398_strategy_manifest.py`). 나머지 명부 전부가 고정%손절 쪽이다.
+def _turtle_ids() -> tuple[str, ...]:
+    from src.engine.strategy_manifest import MARKET_UNIT_SCALE_IDS
+
+    return MARKET_UNIT_SCALE_IDS
 
 
-def _strategy_cls(module: str, cls_name: str):
-    import importlib
-
-    return getattr(importlib.import_module(f"src.engine.strategies.{module}"), cls_name)
+_TURTLE_STRATEGY_IDS = _turtle_ids()
+_NON_TURTLE_STRATEGY_IDS = tuple(s for s in census.STRATEGY_IDS if s not in _TURTLE_STRATEGY_IDS)
 
 
-@pytest.mark.parametrize("module,cls_name", _TURTLE_STRATEGY_MODULES)
-def test_f242_11a_turtle_defaults_carry_max_lot_units(module, cls_name):
-    cls = _strategy_cls(module, cls_name)
+def _strategy_cls(sid: str):
+    return census.strategy_classes()[sid]
+
+
+@pytest.mark.parametrize("sid", _TURTLE_STRATEGY_IDS)
+def test_f242_11a_turtle_defaults_carry_max_lot_units(sid):
+    cls = _strategy_cls(sid)
     assert cls.DEFAULT_PARAMS.get("max_lot_units") == pytest.approx(2.0)
     assert cls.DEFAULT_PARAMS["max_lot_units"] == pytest.approx(
         sb_mod._MAX_LOT_UNITS_DEFAULT
     )
 
 
-@pytest.mark.parametrize("module,cls_name", _NON_TURTLE_STRATEGY_MODULES)
-def test_f242_11b_fixed_stop_defaults_omit_max_lot_units(module, cls_name):
-    cls = _strategy_cls(module, cls_name)
+@pytest.mark.parametrize("sid", _NON_TURTLE_STRATEGY_IDS)
+def test_f242_11b_fixed_stop_defaults_omit_max_lot_units(sid):
+    cls = _strategy_cls(sid)
     assert "max_lot_units" not in cls.DEFAULT_PARAMS, (
         "고정%손절 전략에 키가 있으면 '적용 대상'으로 오독된다 (범위 밖 계약)"
     )

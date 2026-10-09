@@ -19,6 +19,7 @@ import pytest
 
 from src.engine import account_risk_watcher as watcher
 from src.engine.strategy_base import Signal, StrategyConfig
+from tests import _strategy_census as census
 
 
 def _fake_scheduler(strategies, *, buy_disabled=False):
@@ -223,31 +224,18 @@ class TestWatchLoopLifecycle:
         watcher._watch_task = None
 
 
-_ALL_STRATEGIES = [
-    ("src.engine.strategies.momentum", "MomentumStrategy", "momentum"),
-    ("src.engine.strategies.volatility_breakout", "VolatilityBreakoutStrategy",
-     "volatility_breakout"),
-    ("src.engine.strategies.long_tail_volatility", "LongTailVolatilityStrategy",
-     "long_tail_volatility"),
-    ("src.engine.strategies.donchian_swing", "DonchianSwingStrategy",
-     "donchian_swing"),
-    ("src.engine.strategies.bull_flag_breakout", "BullFlagBreakoutStrategy",
-     "bull_flag_breakout"),
-    ("src.engine.strategies.vcp_breakout", "VcpBreakoutStrategy", "vcp_breakout"),
-    ("src.engine.strategies.kojiro", "KojiroStrategy", "kojiro"),
-]
-
-
 class TestR7StrategyWiring:
-    """gate True → 7전략 전수 check_buy_signal NONE (F3 — AST 가드와 이중 봉인)."""
+    """gate True → 명부(census) 전 전략 check_buy_signal NONE (F3 — AST 가드와 이중 봉인).
+
+    리팩토링 카드 #3(cycle421) — 전략 이름을 손으로 적지 않는다(새 전략도 파일을 두는 순간 대상).
+    """
 
     def _gate_on(self, monkeypatch):
         monkeypatch.setattr(watcher, "is_soft_gated", lambda: True)
 
-    @pytest.mark.parametrize("mod,cls,sid", _ALL_STRATEGIES)
-    def test_all_strategies_return_none_when_gated(self, monkeypatch, mod, cls, sid):
-        import importlib
-        strategy_cls = getattr(importlib.import_module(mod), cls)
+    @pytest.mark.parametrize("sid", census.STRATEGY_IDS)
+    def test_all_strategies_return_none_when_gated(self, monkeypatch, sid):
+        strategy_cls = census.strategy_classes()[sid]
         s = strategy_cls(StrategyConfig(
             strategy_id=sid, name=sid, params={"exchange": "KRX"}))
         self._gate_on(monkeypatch)

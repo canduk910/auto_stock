@@ -228,6 +228,18 @@ def test_cross_market_unit_turtle_files_matches_market_unit_scale_ids():
     assert set(TURTLE_FILES.values()) | {"etf_trend"} == set(MARKET_UNIT_SCALE_IDS)
 
 
+def test_cross_cycle382_support_turtle4_matches_ast_turtle_files():
+    """리팩토링 카드 #3(cycle421) — 시장 유닛 행위 테스트의 픽스처 목록(`_cycle382_support.TURTLE4`)도
+    위 AST 목록과 같은 이유로 `etf_trend` 를 일부러 뺀다(후보 dict·`_scan_universe`·`_turtle_buy_quantity`
+    등 donchian 모양 픽스처 — cycle421 실측: 넣으면 14건이 픽스처 모양 탓으로 붉다). 두 목록이 갈라지면
+    여기서 붉어진다 — 새 `"scale"` 전략은 위 단언(명부 ↔ AST 목록)에서 먼저 결정을 강요받는다.
+    """
+    from tests.unit.ast.test_cycle382_ast_market_unit import TURTLE_FILES
+    from tests.unit.engine._cycle382_support import TURTLE4
+
+    assert set(TURTLE4) == set(TURTLE_FILES.values())
+
+
 def test_cross_multiday_and_status_gate_sids_subset_of_manifest():
     from src.engine import strategy_base
 

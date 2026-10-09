@@ -44,6 +44,7 @@ from freezegun import freeze_time
 
 from src.engine.strategies.momentum import MomentumStrategy
 from src.engine.strategy_base import StrategyBase, StrategyConfig
+from tests import _strategy_census as census
 from tests.unit.engine.strategies import _cycle364_harness as H
 
 pytestmark = pytest.mark.unit
@@ -125,8 +126,10 @@ async def test_a1_1c_prepare_as_of_today_when_same_process_then_exactly_equals_n
 # ══════════════════════════════════════════════════════════════════════
 # 시그니처 — 7전략 + 추상 선언
 # ══════════════════════════════════════════════════════════════════════
+#: 리팩토링 카드 #3(cycle421) — 저녁 미리보기는 **모든 전략**의 `prepare(as_of=)` 를 부른다. 시그니처
+#: 계약은 하네스의 골든 6전략(`H.STRATEGIES`)이 아니라 전략 명부 전부에 건다.
 @pytest.mark.parametrize(
-    "cls", [StrategyBase, MomentumStrategy, *H.STRATEGIES.values()],
+    "cls", [StrategyBase, *census.strategy_classes().values()],
     ids=lambda c: c.__name__,
 )
 def test_a1_sig_prepare_when_inspected_then_keyword_only_as_of_default_none(cls):
