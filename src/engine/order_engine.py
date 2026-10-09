@@ -2379,10 +2379,13 @@ class OrderEngine:
                         send_qty=send_qty,
                         after_market_dial=_after_market_dial,
                     )
-                    if outcome is SellFallbackOutcome.SENT:
-                        return  # 폴백 성공 — _selling 은 체결통보에서 해제
-                    if outcome is SellFallbackOutcome.REJECTED:
-                        return  # positions/DB 보존, 다음 사이클 자연 재트리거
+                    # 🔴 NO_PRICE 만 낙하한다 — 모르는 값(None·새 enum 값)은 멈춘다.
+                    # 낙하는 재시도 = 재발사라, 폴백이 이미 나갔을 수 있는 결과를
+                    # 그쪽으로 떨어뜨리면 「주문이 나간 뒤의 실패로 재발사 금지」를 깬다.
+                    # SENT = 폴백 성공(_selling 은 체결통보에서 해제) · REJECTED =
+                    # positions/DB 보존, 다음 사이클 자연 재트리거.
+                    if outcome is not SellFallbackOutcome.NO_PRICE:
+                        return
                     # NO_PRICE — 폴백을 시도조차 못함, 아래 일반 재시도로 낙하
                 logger.warning(
                     "매도 주문 실패 (시도 %d/%d): %s — [%s] %s",
