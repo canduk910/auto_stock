@@ -279,8 +279,43 @@ async def test_unfilled_order_unknown_owner_emits_marker_with_order_no(caplog):
 
 
 @pytest.mark.asyncio
-async def test_unfilled_order_known_owner_does_not_emit_marker(caplog):
-    """db_strategy_map 히트면 path=unfilled_order 마커가 뜨지 않는다."""
+async def test_unfilled_order_resolved_by_order_no_does_not_emit_marker(caplog):
+    """주문번호로 소유가 해석되면 path=unfilled_order 마커가 뜨지 않는다(cycle427 안3).
+
+    cycle425 까지는 종목 기준 `db_strategy_map` 히트가 마커를 막았다. 안3 은 그
+    근거를 뺐으므로, 여기서는 `_lookup_strategy_from_trade_history` 를 그 주문번호
+    로 직접 해석되게 해 "해석됨" 경로를 재현한다 — 종목 기준 `today_buys_rows` 는
+    더 이상 이 마커를 막지 못한다는 것을 대조로 함께 확인한다.
+    """
+    registry = _FakeRegistry(
+        {
+            "momentum": _FakeStrategy("momentum"),
+            "volatility_breakout": _FakeStrategy("volatility_breakout"),
+        }
+    )
+    scheduler = _make_scheduler(registry)
+
+    caplog.set_level(logging.WARNING, logger="src.engine.boot_manager")
+    with patch(
+        "src.db.trade_history._lookup_strategy_from_trade_history",
+        new=AsyncMock(return_value="volatility_breakout"),
+    ):
+        await _run_boot(
+            scheduler,
+            holdings=[],
+            db_positions=[],
+            recent_buy_strategy_map={},
+            all_orders=[_unfilled_order("777888", "ORDERY", price=1_000, qty=3)],
+            today_buys_rows=[{"ticker": "777888", "strategy": "volatility_breakout"}],
+        )
+
+    msgs = _warning_messages(caplog, "[boot_recover_strategy_unknown]")
+    assert not any("777888" in m for m in msgs), f"해석된 주문인데 마커 발화: {caplog.text}"
+
+
+@pytest.mark.asyncio
+async def test_unfilled_order_ticker_based_evidence_still_emits_marker(caplog):
+    """종목 기준 당일 매매 이력만으로는 더 이상 마커를 막지 못한다(cycle427 안3 대조)."""
     registry = _FakeRegistry(
         {
             "momentum": _FakeStrategy("momentum"),
@@ -295,12 +330,14 @@ async def test_unfilled_order_known_owner_does_not_emit_marker(caplog):
         holdings=[],
         db_positions=[],
         recent_buy_strategy_map={},
-        all_orders=[_unfilled_order("777888", "ORDERY", price=1_000, qty=3)],
-        today_buys_rows=[{"ticker": "777888", "strategy": "volatility_breakout"}],
+        all_orders=[_unfilled_order("777889", "ORDERZ", price=1_000, qty=3)],
+        today_buys_rows=[{"ticker": "777889", "strategy": "volatility_breakout"}],
     )
 
     msgs = _warning_messages(caplog, "[boot_recover_strategy_unknown]")
-    assert not any("777888" in m for m in msgs), f"알려진 출처인데 마커 발화: {caplog.text}"
+    assert any(
+        "path=unfilled_order" in m and "777889" in m and "ORDERZ" in m for m in msgs
+    ), f"미상 마커가 안 떴다: {caplog.text}"
 
 
 @pytest.mark.asyncio
