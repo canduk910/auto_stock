@@ -6,12 +6,20 @@ source 텍스트 grep 금지 — AST 노드 검사 (사이클 167/179 교훈: �
 
 - G1-WIRING-AST (Red): scheduler `_reset_daily_state` FunctionDef 에
   `<name>._reset_daily_state()` Call 노드 (receiver=Name != self) 존재.
-- G2-OE-AST (Red): order_engine `_handle_sell_fill` + `execute_sell` 양쪽 FunctionDef 에
-  `on_position_closed` Call ≥ 1.
+- G2-OE-AST (Red): order_engine `_handle_sell_fill` + `_handle_sell_final_failure`
+  양쪽 FunctionDef 에 `on_position_closed` Call ≥ 1.
+  🔁 B4-5(cycle426) — `execute_sell` 의 마지막 실패 뒤처리(⑲)가
+  `_handle_sell_final_failure` 로 추출되며 이 자리가 바뀌었다(행위 보존
+  추출, `_workspace/refactor/2026-10-09_execute_sell_baseline.md` §3). 그래서
+  `execute_sell` → `_handle_sell_final_failure` 호출 배선도 함께 검사한다
+  (약화 금지 — G1-WIRING-AST 와 같은 패턴을 이 쪽에도 더한다).
 - G2-STRUCT-INVARIANT (HIGH):
   (1) site 집합 (양쪽 PASS, 불변식): order_engine 의 `state.positions` 제거
       (`del ...positions[...]` / `...positions.pop(...)`) 직접 포함 함수 집합
-      == `{_handle_sell_fill, execute_sell}` (3번째 site 추가 영구 차단).
+      == `{_handle_sell_fill, _handle_sell_final_failure}` (3번째 site 추가
+      영구 차단). `execute_sell` 자신은 더 이상 제거를 **직접** 하지 않고
+      `_handle_sell_final_failure` 를 불러 위임한다 — 제거 자리는 여전히
+      정확히 둘이다.
   (2) companion (Red): 위 각 함수에 `on_position_closed` Call 동반 의무.
 """
 
@@ -132,30 +140,63 @@ def test_G1_WIRING_AST_scheduler_reset_calls_strategy_reset_daily_state() -> Non
 # G2-OE-AST (Red)
 # ---------------------------------------------------------------------------
 def test_G2_OE_AST_both_sell_sites_call_on_position_closed() -> None:
-    """order_engine `_handle_sell_fill` + `execute_sell` 양쪽에 on_position_closed Call ≥ 1.
+    """order_engine `_handle_sell_fill` + `_handle_sell_final_failure` 양쪽에
+    on_position_closed Call ≥ 1.
 
-    현재 FAIL = 양쪽 모두 0건.
+    B4-5(cycle426) 재조준 — `execute_sell` 의 마지막 실패 뒤처리(⑲)가
+    `_handle_sell_final_failure` 로 추출되며 실제 제거 자리가 그 메서드로
+    옮겨갔다. `execute_sell` 자신은 더 이상 `on_position_closed` 를 직접
+    부르지 않는다(위임).
     """
     tree = _parse(_oe_mod)
-    for fname in ("_handle_sell_fill", "execute_sell"):
+    for fname in ("_handle_sell_fill", "_handle_sell_final_failure"):
         fn = _find_func(tree, fname)
         assert fn is not None, f"{fname} FunctionDef 존재 의무"
         calls = _on_position_closed_calls(fn)
         assert len(calls) >= 1, f"{fname} 영역 on_position_closed Call 노드 ≥ 1 의무"
 
 
+def test_G2_OE_AST_execute_sell_wires_final_failure_handoff() -> None:
+    """execute_sell → `_handle_sell_final_failure` 호출 배선 의무 (약화 금지).
+
+    위 테스트가 제거 자리를 `_handle_sell_final_failure` 로 재조준하는 대신,
+    `execute_sell` 이 실제로 그 메서드를 부르는지를 이 테스트가 지킨다 —
+    안 그러면 추출된 메서드가 죽은 코드로 방치돼도 위 테스트는 계속 통과한다
+    (G1-WIRING-AST 와 같은 패턴).
+    """
+    tree = _parse(_oe_mod)
+    fn = _find_func(tree, "execute_sell")
+    assert fn is not None, "execute_sell FunctionDef 존재 의무"
+    hits = [
+        n
+        for n in ast.walk(fn)
+        if isinstance(n, ast.Call)
+        and isinstance(n.func, ast.Attribute)
+        and n.func.attr == "_handle_sell_final_failure"
+        and isinstance(n.func.value, ast.Name)
+        and n.func.value.id == "self"
+    ]
+    assert len(hits) >= 1, (
+        "execute_sell 안에 self._handle_sell_final_failure(...) 호출(배선) 의무"
+    )
+
+
 # ---------------------------------------------------------------------------
 # G2-STRUCT-INVARIANT (HIGH) — site 집합 불변식 (양쪽 PASS) + companion (Red)
 # ---------------------------------------------------------------------------
 def test_G2_STRUCT_INVARIANT_site_set_exactly_two() -> None:
-    """order_engine state.positions 제거 site 집합 == {_handle_sell_fill, execute_sell} (양쪽 PASS).
+    """order_engine state.positions 제거 site 집합 ==
+    {_handle_sell_fill, _handle_sell_final_failure} (양쪽 PASS).
 
-    3번째 제거 site 추가 시 가드 FAIL → on_position_closed 동반 의무 강제 (누설 silent 재발 영구 차단).
+    B4-5(cycle426) 재조준 — 제거는 여전히 정확히 두 자리에서만 일어난다.
+    `execute_sell` 자신은 더 이상 제거를 직접 하지 않고 `_handle_sell_final_failure`
+    에 위임한다(위 wiring 테스트가 위임 자체를 지킨다). 3번째 제거 site 추가
+    시 가드 FAIL → on_position_closed 동반 의무 강제 (누설 silent 재발 영구 차단).
     """
     tree = _parse(_oe_mod)
     func_of = _func_of_map(tree)
     funcs = _positions_removal_funcs(tree, func_of)
-    assert funcs == {"_handle_sell_fill", "execute_sell"}, (
+    assert funcs == {"_handle_sell_fill", "_handle_sell_final_failure"}, (
         f"order_engine 메모리 positions 제거 site 불변식 위반: {funcs}. "
         "3번째 site 추가 시 on_position_closed 동반 의무 (도메인 권고 B)."
     )

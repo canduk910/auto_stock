@@ -143,12 +143,16 @@ def test_A2_on_position_closed_calls_register(mod) -> None:
 # A-3 (불변식 PASS) — order_engine on_position_closed 호출 site 정확히 2곳
 # ---------------------------------------------------------------------------
 def test_A3_order_engine_on_position_closed_two_sites() -> None:
-    """order_engine `_handle_sell_fill` + `execute_sell` 양쪽 on_position_closed Call ≥ 1 (사이클 185 계약).
+    """order_engine `_handle_sell_fill` + `_handle_sell_final_failure` 양쪽
+    on_position_closed Call ≥ 1 (사이클 185 계약).
 
     사이클 191 은 훅 계약 불변 재사용 → order_engine 변경 0. 참조 가드.
+    🔁 B4-5(cycle426) — `execute_sell` 의 마지막 실패 뒤처리(⑲)가
+    `_handle_sell_final_failure` 로 추출되며 호출 site 가 그 메서드로
+    옮겨갔다(정본 재조준 = `test_cycle185_cluster1_ast.py`).
     """
     tree = _parse(_oe_mod)
-    for fname in ("_handle_sell_fill", "execute_sell"):
+    for fname in ("_handle_sell_fill", "_handle_sell_final_failure"):
         fn = _find_func(tree, fname)
         assert fn is not None, f"{fname} FunctionDef 존재 의무"
         calls = _on_position_closed_calls(fn)
