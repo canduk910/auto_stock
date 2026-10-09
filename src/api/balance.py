@@ -223,12 +223,38 @@ async def get_balance(afhr_flpr: str = "N") -> tuple[list[StockHolding], Account
     return holdings, summary
 
 
+DAILY_ORDERS_URL = "/uapi/domestic-stock/v1/trading/inquire-daily-ccld"
+
+# 다음 쪽이 있다는 응답 헤더 tr_cont 값 (KIS 공지 — F/M = 다음 데이터 있음, D/E = 마지막).
+_DAILY_ORDERS_NEXT_PAGE_FLAGS = ("M", "F")
+
+
+class DailyOrdersPaginationStuckError(Exception):
+    """`get_daily_orders` 연속조회가 진행하지 않는다.
+
+    응답 헤더 `tr_cont` 가 `M`/`F`(다음 쪽 있음)인데 본문 `ctx_area_fk100`·
+    `ctx_area_nk100` 이 둘 다 비었거나 바로 앞 요청에 실었던 값과 똑같으면 다음
+    요청이 같은 쪽을 또 받게 된다 — 잘린 것이 아니라 KIS 응답 이상이므로 목록을
+    부분 반환하지 않고 예외를 올린다. 소비처는 `except Exception` 으로 받아
+    "조회 실패 = 유지" 로 간다.
+    """
+
+
 async def get_daily_orders(
     target_date: str = "", exchange: str = "ALL", *, odno: str = "", pdno: str = "",
 ) -> list[dict]:
-    """당일(또는 지정일) 주문체결내역을 조회한다.
+    """당일(또는 지정일) 주문체결내역을 조회한다 — 연속조회 전 쪽을 모두 이어 붙인다.
 
-    KIS 주식일별주문체결조회 API (TTTC0081R).
+    KIS 주식일별주문체결조회 API (TTTC0081R). 실전 한 쪽 최대 100건 · 모의(vts)
+    15건(KIS 공지) — `tr_cont`(cycle430, `src/api/CLAUDE.md` 「연속조회(메인)」)로
+    다음 쪽을 끝까지 이어 붙인다. 쪽수 상한은 없다 — 응답 헤더 `tr_cont` 가
+    `M`/`F` 인 동안 계속 받고 `D`/`E`(또는 그 밖의 값)면 멈춘다. 첫 쪽은
+    `tr_cont=""`, 이후는 `"N"` + 직전 쪽의 `ctx_area_fk100`/`ctx_area_nk100` 을
+    그대로 되돌린다. `rt_cd != "0"` 은 어느 쪽에서 나든 `KisApiError` 로 그대로
+    올라오고(부분 결과 없음), 연속조회가 진행하지 않으면(위
+    `DailyOrdersPaginationStuckError`) 예외를 올린다. 같은 행이 두 쪽에 겹쳐
+    와도 추측으로 dedupe 하지 않고 그대로 이어 붙인다.
+
     `exchange`: `ALL`(기본, KRX+NXT+SOR) / `KRX` / `NXT` / `SOR`.
     `odno`(cycle379, keyword-only): 그 주문번호 1건만 필터한다(`ODNO`). 기본값(``""``)
     이면 전체 목록 — params 는 기존과 byte 동일하다. `buying_reconcile` 이 자기 주문
@@ -240,30 +266,53 @@ async def get_daily_orders(
         _KST = _timezone(_timedelta(hours=9))
         target_date = _datetime.now(_KST).date().strftime("%Y%m%d")
 
-    params = {
-        "CANO": settings.kis_account_no,
-        "ACNT_PRDT_CD": settings.kis_account_product,
-        "INQR_STRT_DT": target_date,
-        "INQR_END_DT": target_date,
-        "SLL_BUY_DVSN_CD": "00",  # 전체
-        "INQR_DVSN": "00",
-        "PDNO": pdno,
-        "CCLD_DVSN": "00",  # 전체
-        "ORD_GNO_BRNO": "",
-        "ODNO": odno,
-        "INQR_DVSN_3": "00",
-        "INQR_DVSN_1": "",
-        "EXCG_ID_DVSN_CD": exchange,
-        "CTX_AREA_FK100": "",
-        "CTX_AREA_NK100": "",
-    }
+    rows: list[dict] = []
+    cur_fk = cur_nk = ""
+    tr_cont = ""
+    pages = 0
+    while True:
+        params = {
+            "CANO": settings.kis_account_no,
+            "ACNT_PRDT_CD": settings.kis_account_product,
+            "INQR_STRT_DT": target_date,
+            "INQR_END_DT": target_date,
+            "SLL_BUY_DVSN_CD": "00",  # 전체
+            "INQR_DVSN": "00",
+            "PDNO": pdno,
+            "CCLD_DVSN": "00",  # 전체
+            "ORD_GNO_BRNO": "",
+            "ODNO": odno,
+            "INQR_DVSN_3": "00",
+            "INQR_DVSN_1": "",
+            "EXCG_ID_DVSN_CD": exchange,
+            "CTX_AREA_FK100": cur_fk,
+            "CTX_AREA_NK100": cur_nk,
+        }
 
-    data = await kis_get(
-        "/uapi/domestic-stock/v1/trading/inquire-daily-ccld",
-        settings.get_tr_id("TTTC0081R"),
-        params,
-    )
-    return data.get("output1", [])
+        data = await kis_get(
+            DAILY_ORDERS_URL, settings.get_tr_id("TTTC0081R"), params, tr_cont=tr_cont,
+        )
+        pages += 1
+        rows.extend(data.get("output1", []))
+
+        flag = (data.get("_response_headers") or {}).get("tr_cont", "")
+        if flag not in _DAILY_ORDERS_NEXT_PAGE_FLAGS:
+            return rows
+
+        next_fk = str(data.get("ctx_area_fk100") or "")
+        next_nk = str(data.get("ctx_area_nk100") or "")
+        no_progress = (not next_fk.strip() and not next_nk.strip()) or (
+            next_fk == cur_fk and next_nk == cur_nk
+        )
+        if no_progress:
+            logger.warning(
+                "[daily_orders_pagination_stuck] pages=%s rows=%s", pages, len(rows)
+            )
+            raise DailyOrdersPaginationStuckError(
+                f"get_daily_orders pagination stuck at page {pages} (rows={len(rows)})"
+            )
+        cur_fk, cur_nk = next_fk, next_nk
+        tr_cont = "N"
 
 
 async def get_buyable(ticker: str = "", price: int = 0) -> BuyableInfo:
