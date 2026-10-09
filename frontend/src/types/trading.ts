@@ -29,6 +29,24 @@ export interface ScanStats {
   stage_valid_pass?: number
   stage1_uptrend_pass?: number
   strict_entry_pass?: number
+  // cycle414 — VCP/BFB 관문 카운터(라우트 funnel 이 없을 때의 폴백 그리기용, 옵셔널).
+  mcap_pass?: number
+  trend_filter_pass?: number
+  base_pass?: number
+  pullback_pass?: number
+  volume_contraction_pass?: number
+  vol_gate_pass?: number
+  vol_gate_reject_ext?: number
+  vol_gate_no_data?: number
+  latch_armed_count?: number
+  pole_pass?: number
+  flag_pass?: number
+  breakout_seen_count?: number
+  breakout_retreat_count?: number
+  // cycle414 — etf_trend 는 scan_stats 가 universe/candidates/clusters 셋뿐이다(§4.1).
+  universe?: number
+  candidates?: number
+  clusters?: number
 }
 
 // 고지로 후보 종목 상태 (get_targets_status). StrategyInfo.targets 엔트리 캐스팅용.
@@ -154,6 +172,93 @@ export interface PositionDetail {
   quantity: number
   high_since_buy: number
   is_next_day: boolean
+  // cycle414 (C8) — 백엔드는 이미 보낸다(`strategy_registry.py:115`). 보유 사다리의 날짜 계산용.
+  buy_date?: string
+}
+
+// ── cycle414 — 전략 진행상황 읽기 전용 라우트 `GET /api/strategies/monitor` 모양(명세 §3.2) ──
+
+/** 라우트 `market_unit` — 엔진 스냅샷 `_market_unit_snaps[오늘]` 직접 읽기. `ok=false` 면 `m`·`state` 없음. */
+export interface MonitorMarketUnit {
+  mode: string
+  ok: boolean
+  m?: number
+  state?: string
+  bar_date?: string | null
+  reason?: string
+}
+
+export interface MonitorFunnelStep {
+  step_no: number
+  step_name: string
+  step_conditions?: string | null
+  survived_count: number
+  excluded_count: number
+}
+
+export interface MonitorPrepareMeta {
+  as_of: string
+  phase: string
+  started_at: string
+  finished_at: string | null
+  ok: boolean | null
+}
+
+export interface MonitorSkips {
+  known: boolean
+  day?: string
+  counts?: Record<string, number>
+  by_ticker?: Record<string, string[]>
+}
+
+export interface MonitorTick {
+  last_tick_at: string | null
+  acml_vol: number | null
+}
+
+/** 전략 하나의 모니터 엔트리 — 전략 고유 필드(`candidates`·`holdings`·`extra`)는 §4 참조, 느슨한 타입. */
+export interface StrategyMonitorEntry {
+  prepare: MonitorPrepareMeta | null
+  funnel: MonitorFunnelStep[]
+  market_unit: MonitorMarketUnit | null
+  skips: MonitorSkips
+  paused_skips: string[]
+  shadow_buys: string[]
+  ticks: Record<string, MonitorTick>
+  candidates: Record<string, Record<string, unknown>>
+  holdings: Record<string, Record<string, unknown>>
+  extra: Record<string, unknown>
+}
+
+export interface StrategyMonitorResponse {
+  as_of: string
+  running: boolean
+  strategies: Record<string, StrategyMonitorEntry>
+}
+
+// ── cycle412 G1 — 보유 청산선 스냅샷 `GET /api/balance/exit-lines` (item 14키) ──
+
+export interface ExitLineItem {
+  strategy_id: string
+  ticker: string
+  stop_price: number | null
+  stop_source: string | null
+  target_price: number | null
+  target_source: string | null
+  buy_price: number
+  quantity: number
+  high_since_buy: number
+  buy_date: string | null
+  order_no: string
+  entry_atr: number | null
+  kk_armed: boolean | null
+  kk_arm_price: number | null
+}
+
+export interface ExitLinesResponse {
+  running: boolean
+  as_of: string
+  items: ExitLineItem[]
 }
 
 export interface OrderFill {

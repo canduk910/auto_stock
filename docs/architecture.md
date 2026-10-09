@@ -1016,6 +1016,8 @@ frontend/src/
 │
 ├── components/
 │   ├── ControlPanel.tsx    # 시작/정지/재기동 버튼 + 환경 배너
+│   ├── StrategySummaryTable.tsx # 전략 진행상황 요약표 (「전체」 탭)
+│   ├── StrategyMonitor.tsx # 전략 진행상황 상세 패널 (전략 탭 — 고지로는 KojiroMonitor)
 │   ├── ScanMonitor.tsx     # 조건검색 현황 + VB 타겟가 테이블
 │   ├── OrderMonitor.tsx    # 주문처리 현황 + 보유 포지션
 │   ├── BalanceTable.tsx    # 잔고 현황 (실시간 시세 + 수동매도)
@@ -1055,7 +1057,8 @@ flowchart TB
         MR["MarketRegimeCard (시장 레짐 — 관찰 전용)"]
         PR["PortfolioRiskCard (포트폴리오 리스크 — 관찰 전용)"]
         KP["KisAccountPoolCard (KIS 시세 계좌 풀)"]
-        TAB["전략 탭 [전체] + 등록 전략마다 1개<br/>(7전략 · 이름 옆에 보유 수)"]
+        TAB["전략 탭 [전체] + 등록 전략마다 1개<br/>(8전략 · 이름 옆에 보유 수)"]
+        SP["전략 진행상황<br/>· 「전체」 탭 = StrategySummaryTable<br/>· 전략 탭 = StrategyMonitor<br/>(고지로 탭은 없음 — ScanMonitor 안 KojiroMonitor)"]
         SM["ScanMonitor<br/>· 스캔 요약<br/>· 종목 리스트<br/>· VB 타겟가<br/>· 매수 신호"]
         OM["OrderMonitor<br/>· 투자가능금액<br/>· 매수 대기<br/>· 보유 포지션<br/>· 체결 진행"]
         BT["BalanceTable<br/>· 예수금/총평가금/순자산/총평가손익 카드<br/>· 잔고 내역 (실시간 시세 + 전략 라벨 + 매도)"]
@@ -1065,8 +1068,9 @@ flowchart TB
         MR ~~~ PR
         PR ~~~ KP
         KP ~~~ TAB
-        TAB ~~~ SM
-        TAB ~~~ OM
+        TAB ~~~ SP
+        SP ~~~ SM
+        SP ~~~ OM
         SM ~~~ BT
         OM ~~~ BT
         BT ~~~ PC
@@ -1076,6 +1080,8 @@ flowchart TB
 
 위에서 아래로 화면 행 순서다. ScanMonitor(좌)·OrderMonitor(우)만 한 행을 반씩 나눠 쓰고, 나머지 행은 전체 폭이다.
 전략 탭은 `/api/trading/status` 의 전략 목록으로 그린다 — 코드가 전략 이름을 고정하지 않는다.
+전략 진행상황 행은 `/api/strategies/monitor`(엔진 메모리 읽기 전용)·`/api/balance/exit-lines`(실효 손절선)를 10초마다 읽는다.
+전략 탭(고지로 제외)에서는 ScanMonitor 가 상세 패널과 겹치는 깔때기·후보·매수 신호를 숨기고 스캔 요약과 종목 리스트만 남긴다.
 시스템 로그는 대시보드가 아니라 `/logs` 메뉴에 있다.
 
 ---

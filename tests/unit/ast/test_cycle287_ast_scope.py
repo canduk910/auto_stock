@@ -841,9 +841,13 @@ _SRC_TREE_FILES = 183  # 직전 = 트랙 C — 실비용 사후 대사: 신규 4
 # lookup_failed 로 · entry.reason.na 도 unknown 대신 lookup_failed). 신규/삭제
 # 파일 0 — 파일 수 181 그대로. 직전 값(cycle413 보완 1차) =
 # `3e2d8cc730d4c0c84ab19d7028f74434de4ce27752e7eddc99e7123384015865`.
-# 🔁 merge(cycle417+416+413) 재핀 — 세 변경을 합친 트리 다이제스트.
+# cycle414(전략별 진행상황 화면) — `routes/strategies.py` 에 읽기 전용 `GET /monitor`
+# 핸들러 + 2초 캐시 + `_monitor_*` 헬퍼를 더했다(8영역·전략 7파일·`strategy_base.py`
+# 무접촉). 신규/삭제 파일 0 — 파일 수 179 그대로. 직전 값(cycle412 G1) =
+# `edcd6038ac6bcc6c977b1e17cef42bbcb6400275ea7502ca2f19476b0256b266`.
+# 🔁 merge(cycle417+416+413+414) 재핀 — 네 변경을 합친 트리 다이제스트.
 _SRC_TREE_DIGEST = (
-    "b9b046913cbbbd2a7905c433d0d73dc4875b2443dac55d240d85513e9b231222"
+    "bef4d54cb5aef74f82119893ad8bf4f500265bf655edb85c1a8751898af7e508"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

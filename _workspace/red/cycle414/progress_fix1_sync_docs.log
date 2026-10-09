@@ -1,0 +1,3 @@
+2026-10-09 12:59:23 sync-docs fix1 시작 — HEAD 2ee3eae2, 스테이징 문서 9개 재대조
+2026-10-09 13:04:30 frontend/CLAUDE 절 재작성·ScanMonitor/kojiro/VCP-BFB 보강·README·architecture·CHANGELOG 보완 행 — 검사 단계
+2026-10-09 13:09:25 검사 끝 — 덧칠 0 · 모듈 누락 0 · 문서 가드(백엔드 1093·워커 격리 30·프론트 152) 통과 — 커밋

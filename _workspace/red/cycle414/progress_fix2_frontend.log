@@ -1,0 +1,19 @@
+cycle414 보완 2차(frontend-dev) — 재검증(suites·screens·trader) N1~N10 중 HIGH/MEDIUM 전부 + 선정 LOW.
+
+대상
+- N1(screens·trader, MEDIUM): 보유 사다리 겹침/잘림 — Ladder 재설계(값 병합 + 2행 배치 + aria-label/title).
+- N2(trader, MEDIUM): 돈키언 추격 상한 판정이 당일 고가·오늘매도를 못 봄 — 「진입 가능」→「참고」로 하향.
+- N3(trader, MEDIUM) / N3·N7(screens·suites, LOW): ETF 거리 막대 초록구간 belowLineOk, VB·모멘텀·LTV 한글 라벨.
+- N4(suites)·N8(trader, LOW): 폴백 단계 결측 0→모름.
+- N4(screens·suites)·N1(suites) 요약표, N5(screens) 고지로 탭(MEDIUM, H3 잔여): running prop 전달 +
+  엔진 정지/라우트 실패 조합에서 보유·청산예정·신호·고지로 보유/신호를 「모름」으로.
+- N6(screens, LOW): 돈키언 엔진 정지 시 매수신호/오늘신규진입 0 확정 금지.
+- N10(trader, LOW): VCP/BFB volume_threshold<=0 이면 관측 없이도 「거래량 미관측」 금지.
+
+범위: frontend/ 전용. 8영역·scheduler·전략 파일·strategy_base 무접촉(diff 0). src/ 무접촉.
+테스트: Red 3파일 신규(StrategyMonitor.fix2/StrategySummaryTable.fix2/KojiroMonitor.fix2) → Green.
+전체 vitest 150 files / 1407 tests 통과. tsc 통과. vite build 통과. 영향 인덱스 재생성(diff 32줄) +
+test_cycle318/320 9건 통과.
+
+커밋은 frontend/ 와 _workspace/red/cycle414/progress_fix2_frontend.log · _workspace/test_index.yaml 경로만
+(스테이징된 /sync-docs 문서 9개는 건드리지 않음).

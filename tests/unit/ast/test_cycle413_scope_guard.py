@@ -118,31 +118,8 @@ def _module_sql_strings(tree: ast.Module) -> list[str]:
     return out
 
 
-# ── S1 ──────────────────────────────────────────────────────────────────────
-
-@pytest.mark.parametrize("rel", sorted(_BASE_SHA))
-def test_s1_eight_areas_and_scheduler_unchanged(rel):
-    assert _sha(rel) == _BASE_SHA[rel], f"{rel} 가 바뀌었다 — cycle413 은 8영역·scheduler.py 0줄"
-
-
-def test_s1_no_new_py_in_eight_area_dirs():
-    found = {p.relative_to(_ROOT).as_posix() for d in ("src/realtime", "src/auth")
-             for p in (_ROOT / d).rglob("*.py") if "__pycache__" not in p.parts}
-    assert found == {k for k in _BASE_SHA if k.startswith(("src/realtime/", "src/auth/"))}
-
-
-# ── S2 ──────────────────────────────────────────────────────────────────────
-
-def test_s2_journal_worker_untouched():
-    files = sorted(p for p in (_ROOT / "journal_worker").rglob("*")
-                   if p.is_file() and "__pycache__" not in p.parts and ".pytest_cache" not in p.parts)
-    h = hashlib.sha256()
-    for p in files:
-        rel = p.relative_to(_ROOT).as_posix()
-        h.update(rel.encode() + b"\0" + hashlib.sha256(p.read_bytes()).hexdigest().encode() + b"\n")
-    assert len(files) == _JW_FILE_COUNT and h.hexdigest() == _JW_DIGEST, (
-        "journal_worker/ 가 바뀌었다 — 1b 는 워커를 고치지 않는다(계약 차이는 명세 7절에 보고만)")
-
+# ── S1·S2 — main 병합(2026-10-09)으로 역할 끝, 걷어냄(모듈 머리 「머지 후 S1·S2 삭제」).
+# 8영역 무접촉은 test_cycle222a3·test_cycle287 이, journal_worker 격리는 journal_worker/tests/test_jw_isolation.py 가 계속 지킨다.
 
 # ── S3 ──────────────────────────────────────────────────────────────────────
 

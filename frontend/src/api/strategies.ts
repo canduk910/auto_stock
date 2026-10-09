@@ -7,6 +7,7 @@ import apiClient from './client'
 import type { ApiResponse } from '../types/common'
 import type { TeRrMetrics } from '../types/strategy'
 import type { ParamsSchemaData } from '../types/strategy-params'
+import type { StrategyMonitorResponse } from '../types/trading'
 
 export async function getStrategyTeRr(months = 3): Promise<TeRrMetrics[]> {
   const resp = await apiClient.get<ApiResponse<TeRrMetrics[]>>('/strategies/te', {
@@ -26,4 +27,22 @@ export async function getStrategyTeRr(months = 3): Promise<TeRrMetrics[]> {
 export async function getStrategyParamsSchema(): Promise<ParamsSchemaData> {
   const resp = await apiClient.get<ApiResponse<ParamsSchemaData>>('/strategies/params-schema')
   return resp.data.data
+}
+
+/**
+ * cycle414 — 전략 진행상황 읽기 전용 라우트(명세 §3). `/api/trading/status` 에 없는
+ * 엔진 메모리 값(깔때기 단계 이름·보유 방어선 구성·래치·오늘 거르기 사유·준비 기준일)을 담는다.
+ *
+ * 라우트는 실패해도 HTTP 200 + `success=false` 로 응답한다(exit-lines 와 같은 이유 — 화면
+ * 폴링이 500 을 로그에 쌓지 않게). 이 클라이언트는 `success=false` 를 던지지 않고 `null` 로
+ * 돌려준다 — 호출부가 `/status` 의 `scan_stats` 폴백으로 전환한다(§3.2 머리말).
+ */
+export async function getStrategiesMonitor(): Promise<StrategyMonitorResponse | null> {
+  try {
+    const { data } = await apiClient.get<ApiResponse<StrategyMonitorResponse | null>>('/strategies/monitor')
+    if (!data.success || !data.data) return null
+    return data.data
+  } catch {
+    return null
+  }
 }

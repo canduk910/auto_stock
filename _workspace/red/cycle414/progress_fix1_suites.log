@@ -1,0 +1,5 @@
+2026-10-09 12:01:38 시작 — HEAD 00bb7360, 재검증 1차(suites)
+2026-10-09 12:09:41 범위 0(8영역·scheduler·전략·package.json·lock=main) · 백엔드 청크A 5633/0 · 인덱스 신선 9/9(작업트리·HEAD 스냅샷+main node_modules 둘 다). 엔진 청크 시작
+2026-10-09 12:12:21 엔진 9113/0 · integration+contract+journal 935/0 · replay 644/2(pyarrow 환경, 무관). 프론트 시작
+2026-10-09 12:13:14 프론트 147/1387 · tsc 0 · build 0(StrategyFunnel 별도 청크, 동적import 경고 소멸) · eslint 기존과 동수. 결함별 코드 확인 시작
+2026-10-09 12:16:55 결함 확인 완료 — 1차 대상 22건 해결 확인, 새 결함 N1(MEDIUM 요약표 엔진정지/라우트실패 시 보유 0/N·청산예정 0) · N2~N4 LOW. 판정: 결함 있음

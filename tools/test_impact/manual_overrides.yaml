@@ -326,3 +326,45 @@
   - "tests/unit/ast/test_cycle413_scope_guard.py"
 "supabase/migrations/*.sql":
   - "tests/unit/ast/test_cycle413_scope_guard.py"
+  - "tests/unit/ast/test_cycle411_ast_scope.py"
+"src/engine/strategy_registry.py":
+  - "tests/unit/ast/test_cycle411_ast_scope.py"
+"src/api/order.py":
+  - "tests/unit/ast/test_cycle411_ast_scope.py"
+"src/realtime/*.py":
+  - "tests/unit/ast/test_cycle411_ast_scope.py"
+"src/auth/*.py":
+  - "tests/unit/ast/test_cycle411_ast_scope.py"
+
+# cycle414 — 모니터 라우트(`GET /api/strategies/monitor`) 행위 테스트는 `importlib.import_module("src.routes.strategies")`
+# 로 지연 참조하고, 순수성 AST 가드는 소스를 파일로 읽는다(정적 import 없음).
+"src/routes/strategies.py":
+  - "tests/unit/routes/test_cycle414_strategies_monitor.py"
+  - "tests/unit/ast/test_cycle414_monitor_purity.py"
+# cycle414 — 범위 가드가 라우트가 읽는 엔진 이웃·cycle413 소유 파일을 내용 sha 로 읽는다(import 없음, 병합 후 삭제).
+"src/engine/position_exit_lines.py":
+"src/engine/funnel_capture.py":
+"src/engine/etf_trend_core.py":
+"src/engine/tick_volume.py":
+"src/engine/daily_emit_cap.py":
+"src/engine/boot_manager.py":
+"src/routes/balance.py":
+"src/routes/history.py":
+"frontend/src/pages/History.tsx":
+"frontend/src/api/history.ts":
+"frontend/src/components/TradeHistoryGrid.tsx":
+# cycle414 — KST 규약·낡은 도움말 정적 가드가 이 파일들을 fs 로 읽는다(import 없음).
+"frontend/src/components/KojiroMonitor.tsx":
+  - "frontend/src/components/__tests__/_ast_cycle414_static.test.ts"
+"frontend/src/components/ScanMonitor.tsx":
+  - "frontend/src/components/__tests__/_ast_cycle414_static.test.ts"
+"frontend/src/components/BreakoutCandidateMonitor.tsx":
+  - "frontend/src/components/__tests__/_ast_cycle414_static.test.ts"
+"frontend/src/components/StrategyMonitor.tsx":
+  - "frontend/src/components/__tests__/_ast_cycle414_static.test.ts"
+"frontend/src/components/StrategySummaryTable.tsx":
+  - "frontend/src/components/__tests__/_ast_cycle414_static.test.ts"
+"frontend/src/utils/strategyMonitor.ts":
+  - "frontend/src/components/__tests__/_ast_cycle414_static.test.ts"
+"frontend/src/utils/strategyInfo.ts":
+  - "frontend/src/components/__tests__/_ast_cycle414_static.test.ts"

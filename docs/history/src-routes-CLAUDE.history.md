@@ -762,3 +762,17 @@ Hx/Mx**` 태그가 어겼다(2차 통합 검증 F14). 더불어 `/api/performanc
 - `/api/balance`·`/api/performance/*` 는 덧붙임만 했다(요율 조회 실패 = 기본 요율, 매수 수수료 「모름」 의 네 경우, 기록 없음 = 0, 조회·계산 실패).
 
 → CHANGELOG: cycle411 행
+
+## 엔드포인트 목록
+
+### 2026-10-09 cycle414 문서 동기화 — exit-lines 소비자가 둘이 됐다
+
+정본 원문(바뀐 부분):
+
+```
+| GET | `/api/balance/exit-lines` | balance.py | **거래일지 워커 전용 청산선 스냅샷**(G1, cycle412 — 사용자 결정 E1b). …
+```
+
+경위: cycle414 대시보드 전략 패널·요약표가 같은 GET 을 10초마다 읽어 실효 손절선의 정본으로 쓴다(`frontend/src/api/balance.ts::getExitLines`). 「워커 전용」 이 사실과 달라졌다. 응답 모양·캐시·순수성 계약은 그대로다.
+
+→ CHANGELOG: cycle414 행

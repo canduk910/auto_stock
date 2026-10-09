@@ -1,0 +1,5 @@
+2026-10-09 10:32:46 sync-docs 시작 — 모드 A main...HEAD 대상 수집
+2026-10-09 10:35:46 코드 사실 수집 끝(라우트·패널·요약표·고지로·ScanMonitor) — 문서 대조 중
+2026-10-09 10:40:04 frontend/CLAUDE.md 수정 끝(전략 진행상황 절·kojiro 탭·ScanMonitor·KST) — routes/README/architecture/CHANGELOG 진행
+2026-10-09 10:42:30 routes/README/architecture/journal README·history 2 끝 — CHANGELOG 행 작성
+2026-10-09 10:43:29 CHANGELOG 행·history 2 끝, 덧칠 검사 0, 문서 가드 128+30 통과 — 보고 작성

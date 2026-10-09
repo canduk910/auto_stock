@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { useTradingStatus } from '../contexts/TradingStatusContext'
 import { getStrategyColor } from '../types/strategy'
-import type { BuySignal, ScanStats } from '../types/trading'
+import type { BuySignal, ScanStats, StrategyMonitorResponse, ExitLineItem } from '../types/trading'
 import { getKstMinutes } from '../utils/stale-context'
 import { strategyLabel } from '../utils/strategyMeta'
+import { formatKstDateTime, kstMinutesOfDay } from '../utils/kst'
 import KojiroMonitor from './KojiroMonitor'
 import BreakoutCandidateMonitor from './BreakoutCandidateMonitor'
 import ScrollPane from './ScrollPane'
@@ -230,15 +231,12 @@ function ScanFunnelBars({ testId, title, stages, stats, theme = 'teal' }: ScanFu
   )
 }
 
+/**
+ * cycle414(명세 §2.10) — 자체 `toLocaleString` 을 버리고 `utils/kst.ts::formatKstDateTime` 에
+ * 위임한다(단일 진실원 — 호스트 TZ 와 무관하게 KST `yyyy-MM-dd HH:mm:ss`).
+ */
 export function formatRunAt(iso?: string | null): string {
-  if (!iso) return '-'
-  try {
-    // 시각 표시 KST 강제 (frontend/CLAUDE.md 컨벤션) — timeZone 누락 시 비-KST 환경
-    // (도커 UTC / 해외) 에서 07:48 boot 이 "0:48" 등으로 오표시됨
-    return new Date(iso).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', hour12: false })
-  } catch {
-    return iso
-  }
+  return formatKstDateTime(iso)
 }
 
 // 사이클 21 — getKstMinutes 는 utils/stale-context 로 이전 (재사용).
@@ -283,9 +281,19 @@ const BREAKOUT_KEYS = [
 
 interface Props {
   selectedStrategy: string
+  // cycle414 — kojiro 탭(KojiroMonitor)에 라우트 모니터·exit-lines 를 전달한다(둘 다 옵셔널·생략 가능).
+  monitor?: StrategyMonitorResponse | null
+  exitLines?: ExitLineItem[] | null
+  /**
+   * cycle414 보완 1차 (M10) — Dashboard 가 선택한 탭에 `StrategyMonitor`(또는 가벼운 패널) 상세
+   * 패널을 이미 그렸을 때 true. 그러면 이 컴포넌트 안의 중복(전략별 깔때기·VCP/BFB 후보 그리드·
+   * 돈키언 전용 블록·돌파 운영시간 안내·매수 신호 이력)을 끈다 — 「전체」·고지로 탭은 ScanMonitor 가
+   * 유일한 출처라 그대로 둔다. 기본값 false — 이 컴포넌트를 단독으로 쓰는 기존 테스트는 영향 없음.
+   */
+  hideDuplicateDetail?: boolean
 }
 
-export default function ScanMonitor({ selectedStrategy }: Props) {
+export default function ScanMonitor({ selectedStrategy, monitor, exitLines, hideDuplicateDetail = false }: Props) {
   const [expanded, setExpanded] = useState(false)
   const [swingExpanded, setSwingExpanded] = useState(false)
   const [swingHelpOpen, setSwingHelpOpen] = useState(false)
@@ -336,15 +344,10 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
     signals = status?.strategy?.buy_signals ?? []
   }
 
-  // KST 기준 활성 보드 (시각 기반 — SessionTracker와 동일 매핑)
+  // KST 기준 활성 보드 (시각 기반 — SessionTracker와 동일 매핑). cycle414 §2.10 — 자체 Intl
+  // 포맷터 대신 `utils/kst.ts::kstMinutesOfDay` 에 위임한다(단일 진실원).
   const activeBoards = (() => {
-    const fmt = new Intl.DateTimeFormat('en-US', {
-      timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit', hour12: false,
-    })
-    const parts = fmt.formatToParts(new Date())
-    const h = Number(parts.find((p) => p.type === 'hour')?.value ?? '0')
-    const m = Number(parts.find((p) => p.type === 'minute')?.value ?? '0')
-    const t = h * 60 + m
+    const t = kstMinutesOfDay()
     const result: { code: string; label: string; color: string }[] = []
     // cycle261 후속 — BOARD_META 와 동일한 색 배정(blue/sky/navy/beige/brown 5계열
     // 서로 다른 hex). pre_nxt(08:00~09:00)∩krx_open(08:30~09:00), post_nxt(15:30~20:00)
@@ -449,8 +452,10 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
               </div>
             )}
 
-            {/* 돌파 탭(VB/LTV): 운영시각 안내 — NXT 통합 (보드별 분리) */}
-            {isBreakout && (
+            {/* 돌파 탭(VB/LTV): 운영시각 안내 — NXT 통합 (보드별 분리).
+                cycle414 보완 1차 (M10) — 상세 패널이 ②시간표를 이미 그리므로 중복·모순(VCP/BFB 의
+                실제 진입창과 다른 시각)을 피해 전략 탭에서는 끈다. 「전체」 탭은 그대로. */}
+            {isBreakout && !hideDuplicateDetail && (
               <div className="mb-3 px-2 py-1.5 bg-teal-50 rounded text-xs text-teal-700 flex items-center justify-between">
                 <span>매매 시간: NXT 프리 08:00 / KRX 메인 09:00:05 / NXT 애프터 15:30~19:50 (보드별 K값 분리)</span>
                 <span className="text-teal-500">
@@ -462,7 +467,9 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
             {/* 사이클 21 — 5 전략 깔때기 시각화 (donchian SWING_STAGES 패턴 동일 적용).
                 백엔드 _scan_stats 기반. 미반영 시점 fallback "아직 스캔 전" 표시. */}
             {(() => {
-              const conf = FUNNEL_CONF[selectedStrategy]
+              // cycle414 보완 1차 (M10) — 상세 패널의 ③ 깔때기가 이미 같은 내용을 그린다
+              // (낡은 상수 라벨 「50/150/200 EMA」 포함). 전략 탭에서는 끈다.
+              const conf = hideDuplicateDetail ? null : FUNNEL_CONF[selectedStrategy]
               if (!conf) return null
               return (
                 <ScanFunnelBars
@@ -538,10 +545,20 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
             )}
 
             {/* 고지로 대순환 전용 탭 (다크런치) — KojiroMonitor 6 패널 */}
-            {isKojiro && <KojiroMonitor strategies={strategies} tickerPrices={scan?.ticker_prices} />}
+            {isKojiro && (
+              <KojiroMonitor
+                strategies={strategies}
+                tickerPrices={scan?.ticker_prices}
+                monitor={monitor ?? undefined}
+                exitLines={exitLines ?? undefined}
+                running={status?.running}
+              />
+            )}
 
-            {/* 스윙 전용 탭(donchian_swing): 깔때기 통계 + 후보 종목 테이블 */}
-            {isSwing && (() => {
+            {/* 스윙 전용 탭(donchian_swing): 깔때기 통계 + 후보 종목 테이블.
+                cycle414 보완 1차 (M10) — 상세 패널(①②③⑥⑦)이 이미 그린다. 「멈춤 중에도 진입
+                대기」 같은 모순 배지도 함께 사라진다. 「전체」 탭 요약 줄은 그대로(위 isAll 블록). */}
+            {isSwing && !hideDuplicateDetail && (() => {
               const stats = swingStats
               const universeMax = Math.max(
                 stats?.universe_candidates ?? 0,
@@ -559,9 +576,20 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
 
               const positionsDetail = swingStrat?.positions_detail ?? {}
               const kstMin = getKstMinutes()
-              const gapSkipPct =
-                Number((swingStrat?.params as Record<string, unknown> | undefined)?.gap_skip_threshold) ||
-                SWING_GAP_SKIP_PCT
+              const swingParams = (swingStrat?.params ?? {}) as Record<string, unknown>
+              const gapSkipPct = Number(swingParams.gap_skip_threshold) || SWING_GAP_SKIP_PCT
+              // cycle414 — 깡토식 청산(cycle405) 문턱은 params 에서(낡은 「ATR×2 트레일링·-7%·시간
+              // 청산 없음」 설명 폐기, 명세 §4.2 · C2). 값이 없으면 메우지 않고 '—'.
+              const pnum = (v: unknown): string => {
+                const n = Number(v)
+                return Number.isFinite(n) ? String(n) : '—'
+              }
+              const kkBreakevenR = pnum(swingParams.kk_breakeven_r)
+              const kkTimeExitBars = pnum(swingParams.kk_time_exit_bars)
+              const kkTimeExitMinR = pnum(swingParams.kk_time_exit_min_r)
+              const kkMaxHoldBars = pnum(swingParams.kk_max_hold_bars)
+              const maxDailyEntries = pnum(swingParams.max_daily_entries)
+              const channelExitPeriod = pnum(swingParams.channel_exit_period)
 
               return (
                 <div className="mb-4">
@@ -595,7 +623,11 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
                       <li>전일 종가가 <b>20일 신고가 돌파</b> + 60일 EMA 우상향 + 종가&gt;EMA + 거래대금 ≥ 20일평균×1.5 (prepare 단계 통과)</li>
                       <li>익일 09:05~09:30 사이 시장가 매수 — <b>1종목당 1회</b>만 시도</li>
                       <li>시가가 전일 종가 대비 <b>+{gapSkipPct.toFixed(0)}%↑ 갭상승</b>이면 스킵 (추격 방지)</li>
-                      <li>청산: ATR(14)×2 트레일링 + 하드 손절 -7% (시간 청산 없음, 멀티데이 보유)</li>
+                      <li>
+                        청산(깡토식): 매수가 − 1R 손절 · 고점이 매수가+{kkBreakevenR}R 닿으면 무장(손절선 본전 +{' '}
+                        {channelExitPeriod}일 채널 이탈 감시) · {kkTimeExitBars}봉째 15:20 까지 +{kkTimeExitMinR}R 못 넘으면 정리 ·
+                        최대 {kkMaxHoldBars}봉 · 하루 신규 진입 최대 {maxDailyEntries}종목
+                      </li>
                     </ul>
                     <div className="mt-1 text-emerald-500">마지막 스캔 {formatRunAt(lastRunAt)}</div>
                   </div>
@@ -661,32 +693,31 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
                       </div>
 
                       <div>
-                        <div className="font-semibold text-emerald-700 mb-1">3. 청산 — 언제 파는가</div>
-                        <p className="mb-2">donchian은 추세 끝까지 따라가는 전략이라 정해진 청산 시간이 없습니다(VB는 KRX 메인 15:20 강제 청산—POST_NXT 활성 시 19:50까지 보유, momentum은 익일 NXT 프리 08:00 청산이지만 donchian은 모두 해당 없음). 두 가지 중 하나만 맞으면 매도.</p>
+                        <div className="font-semibold text-emerald-700 mb-1">3. 청산 — 언제 파는가 (깡토식, cycle405)</div>
+                        <p className="mb-2">진입가 기준 1R(손실 단위) 로 손절선을 잡고, 추세가 살아서 고점이 충분히 오르면 손절선을 본전으로 올려 "무장" 한다. 아래 조건 중 먼저 닿는 것이 청산을 결정한다.</p>
 
                         <div className="mb-2">
-                          <div className="font-medium mb-0.5">A. ATR 트레일링 스탑 (= Chandelier Exit)</div>
+                          <div className="font-medium mb-0.5">A. 1R 손절</div>
                           <ul className="list-disc pl-5 space-y-0.5">
-                            <li>기준선 = <b>매수 후 최고가 − ATR(14) × 2</b></li>
-                            <li>주가가 오르면 기준선도 따라 올라감 (말 그대로 "끌고 가는" stop)</li>
-                            <li>주가가 떨어져 기준선 아래로 내려가면 매도 → "추세가 꺾였다" 신호</li>
-                            <li><b>ATR(Average True Range)</b>: 그 종목 최근 14일의 일평균 진폭. 변동성 큰 종목은 stop이 멀리, 작은 종목은 가까이 — 종목 특성 자동 반영</li>
-                            <li>예: 매수 후 고점 30만원, ATR 5천 → 기준선 = 30만 − 1만 = 29만. 28.9만 찍으면 매도</li>
+                            <li><b>1R</b> = 매수가 기준 비율(%)과 ATR 기준 중 더 큰 쪽(패널 상단 현재 설정)</li>
+                            <li>손절선 = <b>매수가 − 1R</b> — 여기 닿으면 즉시 매도</li>
                           </ul>
                         </div>
 
                         <div className="mb-2">
-                          <div className="font-medium mb-0.5">B. 하드 손절 (-7%)</div>
+                          <div className="font-medium mb-0.5">B. 무장(Armed) — 본전 승격 + 채널 감시</div>
                           <ul className="list-disc pl-5 space-y-0.5">
-                            <li>매수가 대비 7% 손실에 도달하면 트레일링 무관하게 <b>즉시 매도</b></li>
-                            <li>최악의 경우 손실을 7%로 한정하는 안전장치</li>
+                            <li>매수 뒤 고점이 <b>매수가 + {kkBreakevenR}R</b> 에 닿으면 무장 — 손절선이 매수가(본전)로 올라간다</li>
+                            <li>무장 후에는 {channelExitPeriod}일 저가 채널 이탈도 청산 신호</li>
                           </ul>
                         </div>
 
                         <div>
-                          <div className="font-medium mb-0.5">시간 청산 없음</div>
+                          <div className="font-medium mb-0.5">C. 시간청산</div>
                           <ul className="list-disc pl-5 space-y-0.5">
-                            <li>추세가 살아있으면 며칠이든 몇 주든 그대로 보유 (평균 5~15 영업일)</li>
+                            <li>매수 뒤 {kkTimeExitBars}봉째 15:20 까지 +{kkTimeExitMinR}R 를 못 넘으면 그날 정리(무장 뒤에는 면제)</li>
+                            <li>최대 {kkMaxHoldBars}봉까지만 보유 — 그 전에 무장·시간청산·1R 손절 중 하나로 대부분 정리된다</li>
+                            <li>하루 신규 진입은 전략당 최대 {maxDailyEntries}종목</li>
                           </ul>
                         </div>
                       </div>
@@ -703,7 +734,7 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
                           <tbody className="divide-y divide-gray-100">
                             <tr><td className="px-2 py-1 font-mono">20일 신고가</td><td className="px-2 py-1">진입 기준이 된 가격 (어제 종가가 이 위로 뚫고 올라온 것)</td></tr>
                             <tr><td className="px-2 py-1 font-mono">EMA60</td><td className="px-2 py-1">60일 지수이동평균선 (장기 추세). 종가가 이 위면 추세 살아있음</td></tr>
-                            <tr><td className="px-2 py-1 font-mono">ATR(14)</td><td className="px-2 py-1">14일 평균 진폭. 트레일링 stop 거리(×2) 산정 기준</td></tr>
+                            <tr><td className="px-2 py-1 font-mono">ATR(14)</td><td className="px-2 py-1">14일 평균 진폭. 1R·채널 감시 거리 산정 기준</td></tr>
                             <tr><td className="px-2 py-1 font-mono">갭률</td><td className="px-2 py-1">시초가가 어제 종가 대비 얼마나 점프했는지 (+{gapSkipPct.toFixed(0)}%↑면 스킵)</td></tr>
                             <tr><td className="px-2 py-1 font-mono">진입 상태</td><td className="px-2 py-1">보유 중 / 진입 대기 / 갭 스킵 / 장 시작 전 / 진입 시간 종료</td></tr>
                           </tbody>
@@ -1130,8 +1161,9 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
             })()}
 
             {/* VCP/BFB 전용 탭: 후보 진단 그리드 (구독 커버리지 + 돌파선 거리 + 상태 배지).
-                장 외 시간에도 렌더 — 보드/시가 의존 없음 (KojiroMonitor 배선 패턴 답습). */}
-            {isVcpOrBfb && (
+                장 외 시간에도 렌더 — 보드/시가 의존 없음 (KojiroMonitor 배선 패턴 답습).
+                cycle414 보완 1차 (M10) — 상세 패널 ④ 후보 종목이 이미 그린다. 전략 탭에서는 끈다. */}
+            {isVcpOrBfb && !hideDuplicateDetail && (
               <BreakoutCandidateMonitor
                 strategyId={selectedStrategy as 'vcp_breakout' | 'bull_flag_breakout'}
                 strategies={strategies}
@@ -1143,7 +1175,10 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
         )
       })()}
 
-      {/* 매수 신호 이력 */}
+      {/* 매수 신호 이력 — cycle414 보완 1차 (M10): 전략 탭에서는 상세 패널 ⑥ 진입 기록이 이미
+          같은 신호를 그린다(기준선 정규화·change_rate=0 「—」 처리까지 포함). 「전체」·고지로 탭은
+          여기가 유일한 출처라 그대로 둔다. */}
+      {!hideDuplicateDetail && (
       <div>
         <h4 className="text-sm font-medium text-gray-700 mb-2">최근 매수 신호</h4>
         {signals.length === 0 ? (
@@ -1196,7 +1231,11 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
                         {s.target_price ? s.target_price.toLocaleString() : '-'}
                       </td>
                       <td className="py-1 pr-2 text-right">{s.price.toLocaleString()}</td>
-                      <td className="py-1 text-right text-red-500">+{s.change_rate}%</td>
+                      {/* M10 — change_rate=0 은 「+0%」 거짓 표기가 아니라 「—」(엔진이 0 으로
+                          채우는 전략이 섞여 있다 — etf·donchian·VCP·BFB·kojiro). */}
+                      <td className={`py-1 text-right ${s.change_rate > 0 ? 'text-red-500' : s.change_rate < 0 ? 'text-blue-500' : 'text-gray-300'}`}>
+                        {s.change_rate > 0 ? `+${s.change_rate}%` : s.change_rate < 0 ? `${s.change_rate}%` : '—'}
+                      </td>
                     </tr>
                   )
                 })}
@@ -1205,6 +1244,7 @@ export default function ScanMonitor({ selectedStrategy }: Props) {
           </ScrollPane>
         )}
       </div>
+      )}
     </div>
   )
 }
