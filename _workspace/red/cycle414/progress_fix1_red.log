@@ -1,0 +1,3 @@
+2026-10-09 10:53:34 tdd-engineer(fix1 Red) 시작 — verdict1·명세·코드·엔진 판독 끝, 결함별 Red 테스트 작성 착수
+2026-10-09 11:00:32 Red 작성 중 — StrategyMonitor.fix1(58 실패/2 통과 가드)·SummaryTable.fix1(15 실패)·static L1/L2(3 실패)·utils M1 — 다음: Dashboard M10/M11·기존 테스트 2건 계약 갱신
+2026-10-09 11:06:03 Red 전부 작성 — vitest 98 실패(전부 이번 Red·계약 갱신 2건)/1289 통과 · tsc·eslint 통과 · 프론트 읽는 백엔드 가드 519 통과/3 실패(인덱스 도구 node 모듈 해석 — 작업 트리 루트 node_modules 없음, 기존 실패 그대로) — 커밋 준비

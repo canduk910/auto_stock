@@ -392,9 +392,11 @@ describe('ETF 추세 — ⑤ 사유 · ⑦ 보유 방어선', () => {
     expect(screen.getByTestId(`etf_trend-monitor-countdown-${ETF_HELD}`).textContent).toMatch(/2봉째부터/)
   })
 
-  it('⑦ 보유 ETF 틱이 breakout_fail_price_max_age_secs(180초)보다 낡으면 「시세 낡음」', () => {
+  it('⑦ 보유 ETF 틱이 breakout_fail_price_max_age_secs(180초)보다 낡으면 「시세 낡음」(15:20 직전)', () => {
+    // 보완 1차(M5) — 시각이 먼저다: 15:20 판정 직전(15:15)의 4분 낡은 틱만 「15:20 판정 건너뜀 위험」.
     renderPanel('etf_trend', {
-      monitor: (m) => { m.etf_trend.ticks[ETF_HELD].last_tick_at = '2026-10-12T09:08:00+09:00' }, // 4분 전
+      now: at('15:15'),
+      monitor: (m) => { m.etf_trend.ticks[ETF_HELD].last_tick_at = '2026-10-12T15:11:00+09:00' }, // 4분 전
     })
     expect(screen.getByTestId(`etf_trend-monitor-countdown-${ETF_HELD}`).textContent).toMatch(/시세 낡음/)
   })
@@ -502,7 +504,12 @@ describe('VCP·BFB — 거래량 게이지 · 추격 상한 · 래치 · F5', ()
     [10_750, false], // 정확히 7.5% → 허용(엔진은 > 만 거부)
     [10_751, true],  // 7.51% → 추격 상한 초과
   ])('VCP 추격 상한 — 현재가 %s → 초과=%s', (cur, over) => {
-    renderPanel('vcp_breakout', { now: at('10:00'), prices: (p) => { p[VCP_A] = { ...p[VCP_A], current_price: cur } } })
+    // 보완 1차(H2) — 「진입 가능」 은 오늘 무장한 래치(또는 아래→위 교차 틱)가 있을 때만이라 래치를 둔다.
+    renderPanel('vcp_breakout', {
+      now: at('10:00'),
+      prices: (p) => { p[VCP_A] = { ...p[VCP_A], current_price: cur } },
+      monitor: (m) => { m.vcp_breakout.candidates[VCP_A].latch_armed_at = '2026-10-12T00:10:00Z' },
+    })
     const s = statusOf('vcp_breakout', VCP_A)
     if (over) expect(s).toMatch(/추격 상한 초과/)
     else {
