@@ -345,8 +345,19 @@ async def update_weights(req: WeightsRequest):
                 ),
             )
 
-    # 매수금액 하한선 검증
-    total_asset = sum(s.state.total_investment for s in registry.all())
+    # 매수금액 하한선 검증 + 재배분 기준 총액
+    #
+    # cycle420 (리팩토링 카드 #7) — 기준 총액은 「이번 변경 **전** 켜진 전략들의
+    # total_investment 합」이다. `registry.all()` 로 재면 비중 0 으로 꺼진(=
+    # `enabled=False`) 전략의 옛 예산이 그 합에 그대로 남는다 — `allocate_funds`
+    # 가 `enabled()` 만 다시 채우기 때문에, 그 전략을 다시 건드리지 않는 한
+    # 다음 PUT 마다 기준 총액이 그 잔존분만큼 선형으로 불어난다(동시에 매수금액
+    # 하한선도 느슨해진다). 자문 = `_workspace/domain_consult/2026-10-09_weight_double_change.md`.
+    enabled_before_update = registry.enabled()
+    total_asset = sum(s.state.total_investment for s in enabled_before_update)
+    pre_enabled_weight_sum = sum(
+        float(getattr(s.config, "weight", 0.0) or 0.0) for s in enabled_before_update
+    )
     if total_asset > 0:
         for sid, new_weight in weights.items():
             strategy = registry.get(sid)
@@ -373,6 +384,34 @@ async def update_weights(req: WeightsRequest):
     # 즉시 자금 재분배
     if total_asset > 0:
         registry.allocate_funds(total_asset)
+    else:
+        # cycle420 — 기준이 0 인 원인이 「직전 변경이 켜진 전략 비중을 전부 0 으로
+        # 만든 것」일 때만 경고한다. 21:30 리셋 뒤·부팅 전(이번 PUT 전 켜진 비중
+        # 합이 이미 0 보다 크다)의 정상적인 건너뜀에는 울리지 않는다.
+        post_enabled_has_positive = any(
+            float(getattr(s.config, "weight", 0.0) or 0.0) > 0
+            for s in registry.enabled()
+        )
+        if pre_enabled_weight_sum <= 0 and post_enabled_has_positive:
+            logger.warning(
+                "[weight_realloc_skipped] weights=%s — 직전 변경이 켜진 전략 비중을 "
+                "전부 0 으로 만들어 재배분 기준이 0 입니다. 이번 PUT 의 자금 배분이 "
+                "건너뛰어졌습니다(다음 _boot 전까지 예산 0 유지).",
+                weights,
+            )
+
+    # cycle420 — 이번 PUT 으로 꺼진(비중 0 & enabled=False, 섀도 제외) 전략의
+    # 예산을 0 으로 비운다. `allocate_funds` 는 `enabled()` 만 다시 채우므로
+    # 꺼진 전략의 옛 예산을 그대로 두면 `Σall`(화면 투자금 합)이 오염되고
+    # 다음 PUT 의 기준 총액에도 잔존해 부풀어난다. 섀도 전략(cycle399 — 비중 0
+    # 이어도 켜짐 유지)은 `enabled=True` 라 이 분기에 걸리지 않고, `allocate_funds`
+    # 가 비율 0 으로 이미 0 을 써 준다.
+    for sid, new_weight in weights.items():
+        if new_weight > 0:
+            continue
+        strat = registry.get(sid)
+        if strat is not None and strat.config.enabled is False:
+            strat.state.total_investment = 0
 
     # DB 영속화 (비율 단위로 저장)
     from src.db.strategy_config import save_weights
