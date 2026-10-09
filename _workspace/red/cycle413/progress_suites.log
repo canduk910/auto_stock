@@ -1,0 +1,7 @@
+2026-10-09 10:40:04 suites 시작 — HEAD b8351731
+2026-10-09 10:42:20 c413 단독 216 통과 · unit/engine 9234 통과 — 전체 -q 시작
+2026-10-09 10:48:41 전체 -q: 16424 통과·2 실패(parquet, main 동일 재현) — DEBUG 전체 시작
+2026-10-09 10:55:18 DEBUG 전체: 16424 통과·5 실패(parquet 2 + 인덱스 3 — 실행 중 frontend/node_modules 만 있고 루트 node_modules 없던 환경 탓 의심). node_modules 심링크 2개(frontend/·루트) 생성 — 검증 끝나면 지움
+2026-10-09 10:56:57 프론트 vitest 140파일/1168 통과 · build 통과 · eslint 0 · 백엔드 인덱스 가드 cycle318 frontend 낡음 확인(Journal* 4 모듈 누락) — 목 E2E 시작
+2026-10-09 11:02:00 목 E2E 49 통과 · TS 타입 대조(카드 242장·fixture·실 pg 탐침) — 결함: 일지 세후=세전(UUID 키, 실 pg 재현), opened_at/held_days null(타입 위반) · 인덱스 재생성 시작
+2026-10-09 11:06:42 인덱스 재생성(백엔드 184/1304 · 프론트 144/140) — deploy 가드 280 통과 · 8영역/scheduler/마이그레이션/journal_worker diff 0 · 커밋 후 심링크·vite 정리
