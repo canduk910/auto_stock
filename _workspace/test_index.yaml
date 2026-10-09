@@ -188202,7 +188202,7 @@ frontend:
       - frontend/src/pages/__tests__/Dashboard.fix1.cycle414.test.tsx
       - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
-generated_at: '2026-10-09T14:22:52.313Z'
+generated_at: '2026-10-09T15:01:30.961Z'
 stats:
   backend_modules: 186
   backend_tests: 1323
