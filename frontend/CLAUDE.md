@@ -523,7 +523,7 @@ Dashboard `MarketRegimeCard` 바로 아래. 장세와 시장 유닛을 한 카�
 
 `stock-manager` 의 `macro_lite` 패키지(`packaging/macro_lite/`) 이식 — 백엔드 = 독립 `macro` 컨테이너(포트 미노출, nginx `/api/macro/` 프록시), 프론트 = `frontend/src/macro/` 아래 `.tsx`. 🔴 `src/engine/market_regime.py` 도 이 컨테이너를 본다(cycle315). 그래도 레짐은 **관찰 지표**라 매수를 차단·축소하지 않는다.
 
-- **5섹션**(원본 순서 고정): 경기사이클+투자체제(`MacroCycleSection`) → 장단기 금리차(`YieldCurveSection`) → 하이일드 스프레드(`CreditSpreadSection`) → 환율(`CurrencySection`) → 원자재(`CommoditySection`). 루트 `data-testid="macro-section-{cycle|yield-curve|credit-spread|currency|commodity}"`.
+- **5섹션**(원본 순서 고정): 경기사이클+투자체제(`MacroCycleSection`) → 장단기 금리차(`YieldCurveSection`) → 하이일드 스프레드(`CreditSpreadSection`) → 환율(`CurrencySection`) → 원자재(`CommoditySection`). 루트 `data-testid="macro-section-{cycle|yield-curve|credit-spread|currency|commodity}"`. 6번째 「시장 등락 통계」 는 그 뒤에 붙고 출처가 다르다(아래 「시장 등락 통계」 항목).
 - **경기사이클 보존 7항목**(구조 재설계 금지) — 국면 4칸(`macro-cycle-phase-{phase}`) · 체제 4칸(`macro-cycle-regime-{regime}`, `RegimeDetail` 안 보조 스트립) · 두 카드 `grid-cols-2` 나란히 · 지표 카드 5종(`macro-cycle-indicator-{key}`) · `DivergenceNote`(국면·체제 엇갈릴 때만, `macro-cycle-divergence-note`) · 체제 상세(공포탐욕/버핏지수/VIX) · `InfoTooltip` 해설 2종.
 - 🔴 **두 단계이동 스트립은 각자의 카드 안 같은 자리에 있다** — 두 카드가 「제목 → 큰 배지 → 부제 → 4칸 스트립(`grid-cols-4 gap-1.5`) → 상세」 순서를 공유하므로 바꿀 땐 둘을 같이 바꾼다. 국면 쪽 화살표(→)는 두지 않는다 — 반쪽 폭 카드에서 60px 를 먹어 4칸 라벨이 찌그러진다. 가드 `MacroPage.test.tsx` 「각자의 카드 안 같은 자리」(카드 내 자식 인덱스까지).
 - 🔴 **`confidence` 는 「1·2위 점수차」로 보여 준다 — 확률이 아니다.** 값 = `cycle.py` 의 `(1위 총점 − 2위 총점) × 200`(적중률 교정 없음). `macro-cycle-gap` 이 지키는 넷: (a) 라벨에 「신뢰」 금지 (b) 단위는 `%` 가 아니라 `점` (c) 눈금은 **1위를 100% 로 잡은 상대 막대** — 0~1.00 공통 눈금 금지(국면별 도달 가능 최대 총점이 달라 1.00 은 거짓 분모) (d) 2위 국면 **이름은 응답에 없으니**(`final_scores` 미반환) 「이름 없음」. 구간 배지(팽팽/보통/뚜렷)는 고정 컷이 아니라 `2 × 기여 > 격차` 에서 끌어낸다.
@@ -536,6 +536,18 @@ Dashboard `MarketRegimeCard` 바로 아래. 장세와 시장 유닛을 한 카�
 - 훅은 원본 `useAsyncState` 계열이라 「테스트 규약」 1(`useQuery` `retry:1`)이 적용되지 않는다.
 - `EventLabelsOverlay` 음영 alpha 는 원본 값(약세장 0.10 · 침체 0.18) 그대로, 색 hex 리터럴은 전부 `var(--color-...)` CSS 변수로 치환(신규 hex 금지).
 - 회귀 가드 `frontend/src/macro/__tests__/MacroPage.test.tsx`.
+- **6번째 섹션 「시장 등락 통계」(cycle416)** — 원자재 뒤에 붙는다. 이 섹션만 `macro` 컨테이너가 아니라 **우리 backend** 의 `GET /api/market/breadth` 에서 온다(라우트 계약 = `src/routes/CLAUDE.md` 엔드포인트 목록). 그래서 위 5섹션 규약과 다른 점이 넷이다:
+  - 응답은 `ApiResponse<MarketBreadthData>` 래퍼다(`types/market-breadth.ts`).
+  - 🔴 경로는 `/market/breadth` 다 — `/macro/` 밑에 두지 않는다. 그 접두사는 nginx·vite 가 `macro` 컨테이너로 보낸다(가드 FG4).
+  - 훅은 `hooks/useMarketBreadth.ts`(`useAsyncState` 기반, `days` 기본 20)다. 원본 이식 파일 `useMacro.ts` 는 건드리지 않는다(FG3).
+  - 섹션 래퍼 `macro-section-market-breadth` 는 로딩·실패·정상 모든 상태에서 보인다. 조회가 최대 45초라 로딩 문구(「최근 N영업일 전 종목 시세를 받는 중...」)로 무엇을 기다리는지 알린다. 다른 섹션은 이 섹션을 기다리지 않고, `macro` 컨테이너가 죽어도 이 섹션은 뜬다.
+- 시장 등락 조회 = `api/market-breadth.ts::getMarketBreadth(days = 20)`. `MARKET_BREADTH_TIMEOUT_MS = 60_000`(= nginx `location /api/` 기본 `proxy_read_timeout`, 백엔드 시한 45초를 덮는다). 본문 `success:false` → 서버 문장 그대로 `Error(message)` · HTTP·네트워크 오류 → 「시장 등락 통계를 불러오지 못했습니다」 한 문장.
+- 시장 등락 화면 구성 — 시장 토글 `breadth-market-{kospi|kosdaq|total}`(기본 합계, `aria-pressed`) · 칩 6 `breadth-chip-{adr|up|down|limit-up|limit-down|up-ratio}`(채운 날이 요청보다 적으면 ADR 라벨이 `ADR(n일)`) · 차트 `breadth-chart`(recharts `ComposedChart` — 상승 막대는 위·하락 막대는 아래인 대칭 축, 상·하한가 수는 막대 끝 라벨(0 이면 생략), 오른쪽 축 상승 비율 선 0~100% + 50% 점선, 커스텀 툴팁) · 날짜별 표 `breadth-table`(가로 스크롤 상자 · 행 `breadth-row-{date}` + 합계 `breadth-row-total` · 칸 `breadth-cell-{key}`) · 상태 줄 `breadth-missing`(빠진 날, 차트 위 노란 상자) · `breadth-short`(빠진 날 없이 요청 일수 미달) · `breadth-pending`(아직 KRX 미게시) · 각주 `breadth-footnote`(ADR 산식·기준선·용어 정의).
+- 🔴 시장 등락은 **한국 관례 색**이다 — 상승·상한가 빨강 · 하락·하한가 파랑. 막대 색은 `var(--color-red-500)`·`var(--color-blue-500)` CSS 변수이고 hex 리터럴은 0 이다(FG2).
+- 시장 등락 날짜는 서버가 준 KST `YYYY-MM-DD` 문자열을 자르기만 한다(`marketBreadthChart.ts::mmdd`). 이 섹션과 차트 계산 파일에 `new Date(`·`Intl.DateTimeFormat` 을 쓰지 않는다(FG1). 기준 시각은 `utils/kst.ts::formatKstDateTime` 으로 보인다.
+- 차트 값은 순수 함수 `marketBreadthChart.ts` 로 잰다(jsdom 은 recharts SVG 를 그리지 않는다) — `buildBreadthChartRows`(최신 먼저인 응답을 뒤집되 입력 배열은 바꾸지 않는다) · `breadthAxisMax`(계단 1·1.2·1.5·2·2.5·3·4·5·6·8·10 × 10ⁿ 으로 올림).
+- ⚠️ 빠진 날은 차트 x축에서 칸 없이 이어 붙는다(프론트가 영업일 달력을 다시 계산하지 않는다). 어느 날이 빠졌는지는 `breadth-missing` 이 알린다.
+- 시장 등락 회귀 = `macro/__tests__/MarketBreadthSection.test.tsx` · `marketBreadthChart.test.ts` · `_ast_market_breadth_guards.test.ts`(FG1~FG5) · `api/__tests__/market-breadth.test.ts` · `MacroPage.test.tsx`(6번째 자리·독립 로딩). MSW = `test/handlers.ts` + `test/fixtures/marketBreadth.fixture.ts` · E2E 목 = `e2e/fixtures/api-mocks.ts`(FG5 — 없으면 `/macro` 마운트가 ECONNREFUSED).
 
 ## Backtest (`/backtest`) — 2026-10-06 30년 전략 성적표
 
