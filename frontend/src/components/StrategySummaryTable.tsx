@@ -39,7 +39,16 @@ function finiteOrNull(v: unknown): number | null {
   return Number.isFinite(n) ? n : null
 }
 
-/** M11 — 14일 최종 후보 수 선(svg). 요약표 한 칸용으로 작게. */
+/** `mmdd` — `StrategyMonitor.tsx` 와 같은 포맷("MM-DD"). 이 파일은 별도 로컬 복사본을 둔다
+ * (공유 모듈로 올릴 만큼 쓰는 곳이 늘기 전까지는 분리 비용이 더 크다). */
+function mmdd(dateStr: string | undefined | null): string {
+  if (!dateStr) return '—'
+  return dateStr.length >= 10 ? dateStr.slice(5, 10) : dateStr
+}
+
+/** M11 — 14일 최종 후보 수 선(svg). 요약표 한 칸용으로 작게.
+ * 보완 3차(N-C) — `<title>`·`aria-label` 에 날짜·값을 담는다(정적 문구만으로는 스크린리더가 값을
+ * 읽을 수 없다 — 사다리(Ladder)·14일 추이(StrategyMonitor) 와 같은 규약). */
 function MiniTrend({ data }: { data: Array<{ date: string; count: number }> | null | undefined }) {
   if (!data || data.length === 0) return <span className="text-gray-300 text-[10px]">—</span>
   const max = Math.max(1, ...data.map((d) => d.count))
@@ -52,8 +61,10 @@ function MiniTrend({ data }: { data: Array<{ date: string; count: number }> | nu
       return `${x.toFixed(1)},${y.toFixed(1)}`
     })
     .join(' ')
+  const fullLabel = `14일 최종 후보 추이 — ${data.map((d) => `${mmdd(d.date)}:${d.count}`).join(' · ')}`
   return (
-    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} role="img" aria-label="14일 최종 후보 추이">
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} role="img" aria-label={fullLabel}>
+      <title>{fullLabel}</title>
       <polyline points={points} fill="none" stroke="#6366f1" strokeWidth={1.5} />
     </svg>
   )

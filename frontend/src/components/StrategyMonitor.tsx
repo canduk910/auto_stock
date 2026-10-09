@@ -170,7 +170,10 @@ function prepareHeader(prepare: MonitorPrepareMeta | null | undefined): { text: 
  * §2.6 거리 막대 — 0% 눈금(돌파선) · 상한까지 연초록(살 수 있는 구간) · 상한 밖은 주황(추격 상한
  * 초과) · 현재가 표식. 보완 2차(N3) — ETF 는 엔진 조건이 시가 기준이고 현재가 하한이 없어
  * (`etf_trend.py`, 「현재가≥시가」만 본다) `belowLineOk` 로 초록 구간을 0% 아래까지 늘린다.
- * 돈키언·VCP·BFB 는 현재가가 돌파선 위라는 전제가 있어 기본값(0% 위부터)을 유지한다.
+ * 보완 3차(N-b) — 돈키언도 같다: 엔진 `donchian_swing.check_buy_signal` 은 갭·추격상한·시장유닛·
+ * 랏만 보고 「현재가≥돌파선」을 보지 않으므로 `belowLineOk` 를 쓴다. VCP·BFB 는 돌파선 아래를
+ * 명시적으로 거르는 조건(`breakoutCandidateStatus` 의 「돌파선 아래」)이 있어 기본값(0% 위부터)을
+ * 유지한다.
  */
 function DistanceBar({
   testId, pct, cap, belowLineOk = false,
@@ -210,7 +213,10 @@ interface LadderPoint { label: string; value: number }
 /** §2.9 보유 사다리 — 눈금 위에 라벨+값을 글자(SVG text)로 둔다(스크린리더·텍스트 단언 양쪽 호환).
  * 보완 2차(N1) — 값이 같거나 가까운 점(예: 돈키언 무장가=매수가)은 한 그룹으로 합쳐 라벨·숫자가
  * 겹치지 않게 하고, 인접 그룹은 두 줄로 번갈아 배치해 숫자가 서로 겹치지 않게 한다. 전체 라벨·값은
- * `aria-label`·`<title>` 에도 그대로 담아 시각 배치와 무관하게 읽을 수 있다. */
+ * `aria-label`·`<title>` 에도 그대로 담아 시각 배치와 무관하게 읽을 수 있다.
+ * 보완 3차(N-A) — 합친 그룹도 라벨마다 값을 따로 적는다(첫 점 값만 대표해 다른 점의 값이 가려지는
+ * 것을 막는다). 렌더된 글자는 항상 점(circle, 중심 y=H/2) 범위 밖에 둔다(겹침 금지 — 위 줄은
+ * 중심에서 더 위로, 아래 줄은 더 아래로 떨어뜬다). */
 const LADDER_COLORS: Record<string, string> = {
   손절: '#dc2626', 매수: '#6366f1', 현재: '#0ea5e9', 무장: '#059669', 목표: '#7c3aed',
 }
@@ -225,35 +231,42 @@ function Ladder({ testId, points }: { testId: string; points: LadderPoint[] }) {
   const W = 220
   const MARGIN = 26
   const H = 44
+  const CY = H / 2
   const toX = (v: number) => MARGIN + ((v - lo) / span) * (W - MARGIN * 2)
 
   const MIN_GAP = 30 // 라벨·값 글자(최대 7자리 숫자)가 겹치지 않을 최소 간격(px)
-  type Group = { x: number; value: number; labels: string[] }
+  type Group = { x: number; pts: LadderPoint[] }
   const groups: Group[] = []
   for (const p of valid.map((p) => ({ ...p, x: toX(p.value) })).sort((a, b) => a.x - b.x)) {
     const last = groups[groups.length - 1]
-    if (last && p.x - last.x < MIN_GAP) last.labels.push(p.label)
-    else groups.push({ x: p.x, value: p.value, labels: [p.label] })
+    if (last && p.x - last.x < MIN_GAP) last.pts.push(p)
+    else groups.push({ x: p.x, pts: [p] })
   }
 
-  const fullLabel = valid.map((p) => `${p.label} ${Math.round(p.value).toLocaleString()}`).join(' · ')
+  const fmt = (v: number) => Math.round(v).toLocaleString()
+  const fullLabel = valid.map((p) => `${p.label} ${fmt(p.value)}`).join(' · ')
+
+  // N-A — 위 줄 y=CY-8(점 위 가장자리 CY-3 보다 5px 더 위) · 아래 줄 y=CY+14(점 아래 가장자리
+  // CY+3 보다 9px 더 아래, 숫자 아래쪽 여유를 더 둔다) — 둘 다 점 범위와 겹치지 않는다.
+  const TEXT_ABOVE_Y = CY - 8
+  const TEXT_BELOW_Y = CY + 14
 
   return (
     <svg data-testid={testId} width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={fullLabel}>
       <title>{fullLabel}</title>
-      <line x1={MARGIN} y1={H / 2} x2={W - MARGIN} y2={H / 2} stroke="#d1d5db" strokeWidth={2} />
+      <line x1={MARGIN} y1={CY} x2={W - MARGIN} y2={CY} stroke="#d1d5db" strokeWidth={2} />
       {groups.map((g, i) => {
-        const row = i % 2 // 인접 그룹끼리 겹치지 않게 두 줄로 번갈아
-        const labelY = row === 0 ? 11 : H - 22
-        const valueY = row === 0 ? 21 : H - 12
-        const text = g.labels.join('/')
-        const color = LADDER_COLORS[g.labels[0]] ?? '#6366f1'
+        const above = i % 2 === 0 // 인접 그룹끼리 겹치지 않게 두 줄로 번갈아
+        const textY = above ? TEXT_ABOVE_Y : TEXT_BELOW_Y
+        const tickEndY = above ? textY + 3 : textY - 9
+        // N-A — 합친 그룹은 "라벨 값"을 점별로 적어 "/" 로 잇는다(모두가 같은 값을 대표하지 않는다).
+        const text = g.pts.map((p) => `${p.label} ${fmt(p.value)}`).join(' / ')
+        const color = LADDER_COLORS[g.pts[0].label] ?? '#6366f1'
         return (
           <g key={`${g.x}-${i}`}>
-            <line x1={g.x} y1={H / 2} x2={g.x} y2={row === 0 ? labelY + 4 : valueY - 4} stroke="#d1d5db" strokeWidth={1} />
-            <circle cx={g.x} cy={H / 2} r={3} fill={color} />
-            <text x={g.x} y={labelY} fontSize={7} textAnchor="middle" fill="#374151">{text}</text>
-            <text x={g.x} y={valueY} fontSize={7} textAnchor="middle" fill="#374151">{Math.round(g.value).toLocaleString()}</text>
+            <line x1={g.x} y1={CY} x2={g.x} y2={tickEndY} stroke="#d1d5db" strokeWidth={1} />
+            <circle cx={g.x} cy={CY} r={3} fill={color} />
+            <text x={g.x} y={textY} fontSize={7} textAnchor="middle" fill="#374151">{text}</text>
           </g>
         )
       })}
@@ -403,9 +416,11 @@ export default function StrategyMonitor({
                   />
                 ))}
               </div>
-              <div className="flex gap-1.5 text-[9px] text-gray-400 mt-0.5 flex-wrap">
+              {/* N-B — 막대와 같은 `flex-1` 폭 분배를 써서 날짜·값 줄이 그 막대 바로 아래에 선다
+                  (`flex-wrap` 는 좌측에 몰려 인덱스가 막대와 어긋난다). */}
+              <div className="flex gap-0.5 text-[9px] text-gray-400 mt-0.5">
                 {funnelTrend.map((d) => (
-                  <span key={d.date}>{mmdd(d.date)}:{d.count}</span>
+                  <span key={d.date} className="flex-1 text-center truncate">{mmdd(d.date)}:{d.count}</span>
                 ))}
               </div>
               {trendZeroStreak > 0 && (
@@ -617,7 +632,10 @@ export default function StrategyMonitor({
     // 현재가·시가만 가진다(엔진은 `stck_hgpr`/`high_price` 도 본다 — `donchian_swing.py`). 과소
     // 추정이면 엔진이 거를 종목을 화면이 「진입 가능」으로 단정할 수 있어, 추격 상한 설정이
     // 있을 때는(=그 판정이 실제로 매수를 가를 때) 「참고」로 낮춘다.
-    if (extCap !== null) return '참고: 돌파선 위(당일 고가 미반영)'
+    // 보완 3차(N-b) — 엔진 `check_buy_signal` 은 갭·추격상한·시장유닛·랏만 보고 「현재가≥돌파선」을
+    // 보지 않는다(여기까지 온 후보가 돌파선 위인지는 화면이 확인한 적이 없다) — 「돌파선 위」를
+    // 주장하지 않는다.
+    if (extCap !== null) return '참고: 진입 조건 충족(당일 고가 미반영)'
     return '진입 가능'
   }
 
@@ -780,7 +798,7 @@ export default function StrategyMonitor({
                     <span className={pct === null ? 'text-gray-400' : pct >= 0 ? 'text-red-500' : 'text-blue-500'}>
                       {pct !== null ? `${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%` : '—'}
                     </span>
-                    <DistanceBar testId={`donchian_swing-monitor-distbar-${ticker}`} pct={pct} cap={capPct} />
+                    <DistanceBar testId={`donchian_swing-monitor-distbar-${ticker}`} pct={pct} cap={capPct} belowLineOk />
                   </div>
                 </td>
                 <td className="py-1 px-2 text-right">

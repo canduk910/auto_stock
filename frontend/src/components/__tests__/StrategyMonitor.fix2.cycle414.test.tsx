@@ -108,21 +108,16 @@ describe('N2 — 돈키언 「진입 가능」은 당일 고가·오늘 매도�
 })
 
 // ─────────────────────────────────────────────────────────────────────────────
-describe('N3 — 거리 막대 초록 구간: ETF 는 현재가 하한이 없고, 돈키언은 있다', () => {
+// 보완 3차(N-b) — 「돈키언은 현재가 하한이 있다」 전제는 틀렸다(엔진 `donchian_swing.
+// check_buy_signal` 은 갭·추격상한·시장유닛·랏만 보고 「현재가≥돌파선」을 보지 않는다). 돈키언
+// 케이스는 `StrategyMonitor.fix3.cycle414.test.tsx` N-b 로 옮기고 정정했다 — ETF 케이스만 남긴다.
+describe('N3 — 거리 막대 초록 구간: ETF 는 현재가 하한이 없다', () => {
   it('ETF — 현재가가 돌파선 아래(pct<0)여도 초록 구간이 0% 밑까지 걸친다', () => {
     renderPanel('etf_trend', { prices: (p) => { p[ETF_A] = { ...p[ETF_A], current_price: 9_750 } } })
     const bar = screen.getByTestId(`etf_trend-monitor-distbar-${ETF_A}`)
     const green = bar.querySelector('rect[fill="#bbf7d0"]')
     expect(green).not.toBeNull()
     expect(Number(green!.getAttribute('x'))).toBeLessThanOrEqual(2)
-  })
-
-  it('돈키언 — 초록 구간은 0% 위부터만(현재가가 20일 신고가 위라는 전제 유지)', () => {
-    renderPanel('donchian_swing', { strategies: unpause('donchian_swing') })
-    const bar = screen.getByTestId(`donchian_swing-monitor-distbar-${DC_CAND}`)
-    const green = bar.querySelector('rect[fill="#bbf7d0"]')
-    expect(green).not.toBeNull()
-    expect(Number(green!.getAttribute('x'))).toBeGreaterThan(2)
   })
 })
 

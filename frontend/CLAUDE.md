@@ -194,7 +194,7 @@ leaf 12개를 **상위 9개**로 묶는다(사용자 지정 묶음·순서 — �
 - ③ 라우트 `funnel[]` 의 엔진 `step_name`·`step_conditions` 를 그대로 쓴다. 병목 행에 「← 여기서 0」, 최종 0 이면 한 줄 설명을 단다. 그 아래 「14일 최종 후보 추이」 막대(0 인 날 장미색 · 막대 `title` = `MM-DD: n건`) + 날짜:값 줄 + 「0 연속 n일」. 라우트 funnel 이 없으면 etf 는 `scan_stats` 2행(1·99), 그 밖은 `FALLBACK_STAGES`(`scan_stats` 키 → `ScanMonitor` 의 STAGES 와 같은 한글 라벨 — 키·순서는 두 파일이 같게 유지한다)다.
 - ④ 후보표 칸은 전략마다 다르다 — etf 돌파선·거리·예상 수량·묶음 / donchian 20일 신고가·거리·1R·설계 수량 / VCP·BFB 돌파선·거리·거래량·래치(BFB 는 측정목표 칸이 더 있다). 후보가 없으면 「후보 없음」. 종목 상태 = 엔진이 그 종목을 거르는 **첫 관문**(맨 앞은 엔진 정지, 그다음 시세 없음·보유 중·주문 중). etf 는 멈춤 중이면 회색 「풀리면: ○○」(화면 추정)을 덧붙인다.
   - 🔴 VCP·BFB 「진입 가능」 = 오늘 무장한 래치(`candidates[t].latch_armed_at`)가 있을 때만이다. 엔진은 아래에서 위로 넘는 틱이나 오늘 래치가 있어야 사므로, 래치 없이 돌파선 위면 「참고: 돌파선 위」 다. 거래량은 `volume_threshold > 0` 일 때만 본다(0·미설정이면 엔진이 관측 없이 통과시킨다).
-  - donchian 은 `max_breakout_extension_pct` 가 있으면 마지막 판정이 「참고: 돌파선 위(당일 고가 미반영)」 다 — 엔진의 추격 상한은 당일 고가도 보는데 화면은 현재가·시가만 가진다.
+  - donchian 은 `max_breakout_extension_pct` 가 있으면 마지막 판정이 「참고: 진입 조건 충족(당일 고가 미반영)」 다 — 엔진 `check_buy_signal` 은 「현재가 ≥ 돌파선」을 보지 않고(갭·추격상한·시장유닛·랏만), 추격 상한은 당일 고가도 보는데 화면은 현재가·시가만 가진다.
   - etf 「오늘 갭 스킵」 = 그 종목 오늘 사유(`skips.by_ticker`)가 `gap_up`·`gap_over_line` 일 때만. 엔진은 갭일 때만 그날 평가를 닫는다.
   - 수량은 추정이다 — etf 「최대 n주(추정)」, donchian 「n주(추정)」(m=1·전일 종가 기준).
 - ⑤ 🔴 「0건」 과 「모름」 을 가른다. 멈춤 중이면 「멈춤 중 — 엔진은 다른 사유를 남기지 않는다」 + 멈춤으로 건너뛴 종목 수(`paused_skips`)다. 사유를 남기지 않는 전략(`skips.known === false`)은 「기록하지 않습니다」 다. 둘 다 0 으로 쓰지 않는다.
@@ -209,7 +209,7 @@ leaf 12개를 **상위 9개**로 묶는다(사용자 지정 묶음·순서 — �
 
 | 요소 | 자리 · testid | 그리는 것 |
 |---|---|---|
-| 거리 막대 `DistanceBar` | ④ 거리 칸 · `{sid}-monitor-distbar-{ticker}` | 돌파선 대비 −10% ~ 상한+3% 눈금. 0%(돌파선) 세로선(etf 는 없음) · 살 수 있는 구간 연초록 · 상한 밖 주황 · 현재가 점(상승 빨강·하락 파랑) · 범위 밖 화살표. 상한 = etf `gap_over_line_pct`, 그 밖 `max_breakout_extension_pct`. etf 는 `belowLineOk` 로 초록이 0% 아래까지 걸친다(엔진이 현재가 하한 없이 「현재가 ≥ 시가」 만 본다) |
+| 거리 막대 `DistanceBar` | ④ 거리 칸 · `{sid}-monitor-distbar-{ticker}` | 돌파선 대비 −10% ~ 상한+3% 눈금. 0%(돌파선) 세로선(etf·donchian 은 없음) · 살 수 있는 구간 연초록 · 상한 밖 주황 · 현재가 점(상승 빨강·하락 파랑) · 범위 밖 화살표. 상한 = etf `gap_over_line_pct`, 그 밖 `max_breakout_extension_pct`. etf·donchian 은 `belowLineOk` 로 초록이 0% 아래까지 걸친다(엔진이 현재가 하한을 보지 않는다 — etf 는 「현재가 ≥ 시가」만, donchian 은 갭·추격상한·시장유닛·랏만). VCP·BFB 는 돌파선 아래를 명시 거르므로(「돌파선 아래」 상태) 기본값(0% 위부터) 유지 |
 | 거래량 게이지 `VolumeGauge` | VCP·BFB ④ 거래량 칸 · `{sid}-monitor-volgauge-{ticker}` | 0~150% 막대 + 100% 선. 100% 이상 초록, 미만 주황 |
 | 보유 사다리 `Ladder` | ⑦ 사다리 칸 · `{sid}-monitor-ladder-{ticker}` | 손절·매수·현재 + donchian 무장(무장했으면 매수가) + BFB 목표(exit-lines `target_price`). 30px 안 점은 한 묶음으로 합치고 이웃 묶음은 두 줄로 번갈아 둔다. 전체 라벨·값은 `aria-label`·`<title>` 에도 담는다 |
 | 14일 막대 | ③ 아래 · `{sid}-monitor-trend` | 위 ③ 항목 |

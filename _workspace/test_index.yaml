@@ -181575,6 +181575,7 @@ frontend:
       - frontend/src/components/__tests__/StrategyMonitor.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix1.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix2.cycle414.test.tsx
+      - frontend/src/components/__tests__/StrategyMonitor.fix3.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyParamsEditor.test.tsx
       - frontend/src/components/__tests__/SystemLogsTab.test.tsx
       - frontend/src/components/__tests__/TradeAmountFilterCard.test.tsx
@@ -181833,6 +181834,7 @@ frontend:
       - frontend/src/components/__tests__/StrategyMonitor.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix1.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix2.cycle414.test.tsx
+      - frontend/src/components/__tests__/StrategyMonitor.fix3.cycle414.test.tsx
       - frontend/src/pages/__tests__/Dashboard.fix1.cycle414.test.tsx
       - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
@@ -182059,6 +182061,7 @@ frontend:
       - frontend/src/components/__tests__/StrategyMonitor.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix1.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix2.cycle414.test.tsx
+      - frontend/src/components/__tests__/StrategyMonitor.fix3.cycle414.test.tsx
       - frontend/src/pages/__tests__/Dashboard.fix1.cycle414.test.tsx
       - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
@@ -182269,6 +182272,7 @@ frontend:
       - frontend/src/components/__tests__/StrategyMonitor.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix1.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix2.cycle414.test.tsx
+      - frontend/src/components/__tests__/StrategyMonitor.fix3.cycle414.test.tsx
       - >-
         frontend/src/components/__tests__/TradeHistoryGrid.cost.cycle411.test.tsx
       - frontend/src/components/__tests__/TradeHistoryGrid.cycle411b.test.tsx
@@ -182310,6 +182314,7 @@ frontend:
       - frontend/src/components/__tests__/StrategyMonitor.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix1.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix2.cycle414.test.tsx
+      - frontend/src/components/__tests__/StrategyMonitor.fix3.cycle414.test.tsx
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
@@ -182336,6 +182341,8 @@ frontend:
         frontend/src/components/__tests__/StrategySummaryTable.fix1.cycle414.test.tsx
       - >-
         frontend/src/components/__tests__/StrategySummaryTable.fix2.cycle414.test.tsx
+      - >-
+        frontend/src/components/__tests__/StrategySummaryTable.fix3.cycle414.test.tsx
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
       - frontend/src/__tests__/ContentWidthSlider.test.tsx
@@ -183093,11 +183100,14 @@ frontend:
       - frontend/src/components/__tests__/StrategyMonitor.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix1.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix2.cycle414.test.tsx
+      - frontend/src/components/__tests__/StrategyMonitor.fix3.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategySummaryTable.cycle414.test.tsx
       - >-
         frontend/src/components/__tests__/StrategySummaryTable.fix1.cycle414.test.tsx
       - >-
         frontend/src/components/__tests__/StrategySummaryTable.fix2.cycle414.test.tsx
+      - >-
+        frontend/src/components/__tests__/StrategySummaryTable.fix3.cycle414.test.tsx
       - frontend/src/pages/__tests__/Dashboard.fix1.cycle414.test.tsx
       - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
     transitive_tests: []
@@ -183563,6 +183573,7 @@ frontend:
       - frontend/src/components/__tests__/StrategyMonitor.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix1.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix2.cycle414.test.tsx
+      - frontend/src/components/__tests__/StrategyMonitor.fix3.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyParamsEditor.test.tsx
       - frontend/src/components/__tests__/SystemLogsTab.test.tsx
       - frontend/src/components/__tests__/TradeAmountFilterCard.test.tsx
@@ -184055,11 +184066,14 @@ frontend:
       - frontend/src/components/__tests__/StrategyMonitor.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix1.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix2.cycle414.test.tsx
+      - frontend/src/components/__tests__/StrategyMonitor.fix3.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategySummaryTable.cycle414.test.tsx
       - >-
         frontend/src/components/__tests__/StrategySummaryTable.fix1.cycle414.test.tsx
       - >-
         frontend/src/components/__tests__/StrategySummaryTable.fix2.cycle414.test.tsx
+      - >-
+        frontend/src/components/__tests__/StrategySummaryTable.fix3.cycle414.test.tsx
       - frontend/src/utils/__tests__/strategyMonitor.cycle414.test.ts
     transitive_tests:
       - frontend/src/__tests__/AppShell.test.tsx
@@ -184219,12 +184233,15 @@ frontend:
       - frontend/src/components/__tests__/StrategyMonitor.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix1.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix2.cycle414.test.tsx
+      - frontend/src/components/__tests__/StrategyMonitor.fix3.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyParamsEditor.test.tsx
       - frontend/src/components/__tests__/StrategySummaryTable.cycle414.test.tsx
       - >-
         frontend/src/components/__tests__/StrategySummaryTable.fix1.cycle414.test.tsx
       - >-
         frontend/src/components/__tests__/StrategySummaryTable.fix2.cycle414.test.tsx
+      - >-
+        frontend/src/components/__tests__/StrategySummaryTable.fix3.cycle414.test.tsx
       - >-
         frontend/src/components/__tests__/TradeHistoryGrid.cost.cycle411.test.tsx
       - frontend/src/components/__tests__/TradeHistoryGrid.cycle411b.test.tsx
@@ -184377,6 +184394,7 @@ frontend:
       - frontend/src/components/__tests__/StrategyMonitor.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix1.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix2.cycle414.test.tsx
+      - frontend/src/components/__tests__/StrategyMonitor.fix3.cycle414.test.tsx
       - frontend/src/pages/__tests__/Dashboard.fix1.cycle414.test.tsx
       - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
@@ -184437,6 +184455,8 @@ frontend:
       - >-
         frontend/src/components/__tests__/StrategySummaryTable.fix2.cycle414.test.tsx
       - >-
+        frontend/src/components/__tests__/StrategySummaryTable.fix3.cycle414.test.tsx
+      - >-
         frontend/src/components/__tests__/TradeHistoryGrid.cost.cycle411.test.tsx
       - frontend/src/components/__tests__/TradeHistoryGrid.cycle411b.test.tsx
       - frontend/src/components/__tests__/TradeHistoryGrid.test.tsx
@@ -184481,20 +184501,23 @@ frontend:
       - frontend/src/components/__tests__/StrategyMonitor.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix1.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategyMonitor.fix2.cycle414.test.tsx
+      - frontend/src/components/__tests__/StrategyMonitor.fix3.cycle414.test.tsx
       - frontend/src/components/__tests__/StrategySummaryTable.cycle414.test.tsx
       - >-
         frontend/src/components/__tests__/StrategySummaryTable.fix1.cycle414.test.tsx
       - >-
         frontend/src/components/__tests__/StrategySummaryTable.fix2.cycle414.test.tsx
+      - >-
+        frontend/src/components/__tests__/StrategySummaryTable.fix3.cycle414.test.tsx
       - frontend/src/pages/__tests__/Dashboard.fix1.cycle414.test.tsx
       - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
-generated_at: '2026-10-09T03:38:35.189Z'
+generated_at: '2026-10-09T04:23:39.583Z'
 stats:
   backend_modules: 182
   backend_tests: 1303
   frontend_modules: 144
-  frontend_tests: 150
+  frontend_tests: 152
   unmapped_modules:
     - frontend/src/api/backtest.ts
     - frontend/src/api/stock-chart.ts
