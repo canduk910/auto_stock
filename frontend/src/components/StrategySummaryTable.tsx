@@ -119,7 +119,9 @@ function summaryWhy(
   }
 
   if (status.primary === 'shadow') {
-    const shadowBuys = (routeEntry?.shadow_buys as string[] | undefined) ?? []
+    // N8(screens) — 모니터 라우트가 실패하면(routeEntry 없음) 섀도 기록 수를 모른다 — 0 단정 금지.
+    if (!routeEntry) return '섀도 기록 모름(모니터 라우트 실패)'
+    const shadowBuys = (routeEntry.shadow_buys as string[] | undefined) ?? []
     return `섀도 기록 ${shadowBuys.length}`
   }
 
@@ -135,15 +137,19 @@ interface Props {
   /** M11 — 전략별 14일 최종 후보 추이(`/api/strategy-funnel/recent`). */
   funnelTrends?: Record<string, Array<{ date: string; count: number }>> | null
   now?: Date
+  /** N4(screens)·N1(suites) — `/api/trading/status` 의 `running`. 모니터 라우트가 실패해도(=null)
+   * 엔진 정지를 안다. 이게 없으면 「정산 뒤 라우트 실패」 조합에서 「왜 안 사나」가 평소 판정으로
+   * 되돌아간다. */
+  running?: boolean | null
   onSelect: (sid: string) => void
 }
 
-export default function StrategySummaryTable({ strategies, monitor, exitLines, tickerPrices, funnelTrends, now, onSelect }: Props) {
+export default function StrategySummaryTable({ strategies, monitor, exitLines, tickerPrices, funnelTrends, now, running, onSelect }: Props) {
   const nowDate = now ?? new Date()
   const prices = tickerPrices ?? {}
-  // H3 — `/trading/status` 의 running 은 이 컴포넌트에 직접 오지 않는다(모니터 라우트 실패 조합은
-  // StrategyMonitor 쪽 전용 prop 으로 다룬다) — 요약표는 `monitor.running===false` 만으로 판정한다.
-  const engineStopped = monitor?.running === false
+  // H3/N4 — running(=/trading/status) 또는 monitor.running 둘 중 하나라도 false 면 멈춘 것으로 본다
+  // (모니터 라우트가 실패해도(monitor=null) running prop 으로 엔진 정지를 안다).
+  const engineStopped = running === false || monitor?.running === false
   const rows = Object.entries(strategies)
     .map(([sid, info]) => {
       const routeEntry = (monitor?.strategies?.[sid] ?? null) as unknown as Dict | null
@@ -198,6 +204,7 @@ export default function StrategySummaryTable({ strategies, monitor, exitLines, t
                 : stopMarginPct < 1 ? 'red' : stopMarginPct < 3 ? 'orange' : 'normal'
 
               let exitDue = 0
+              const exitDueApplies = sid === 'etf_trend' || sid === 'donchian_swing'
               if (sid === 'etf_trend') {
                 // M3 — ETF 「청산 예정」은 가격이 돌파선 아래일 때만(엔진은 missing_line 이면 판정 안 함).
                 for (const [ticker, t] of Object.entries((routeEntry?.holdings ?? {}) as Record<string, Dict>)) {
@@ -217,8 +224,13 @@ export default function StrategySummaryTable({ strategies, monitor, exitLines, t
                   if (timeExitBars - 1 - daysHeld <= 0) exitDue += 1
                 }
               }
+              // N4(screens)·N1(suites) — 엔진 정지 중에는 「0」이 「청산 대상 없음」으로 읽히면
+              // 안 된다(정산이 비운 값일 수 있다). 모니터 라우트가 실패하면(routeEntry 없음)
+              // 애초에 이 계산에 쓸 holdings 자체가 없어 0 이 「모른다」의 둔갑일 수 있다.
+              const exitDueUnknown = engineStopped || (exitDueApplies && !routeEntry)
 
               const shadowBuys = (routeEntry?.shadow_buys as string[] | undefined) ?? []
+              const signalsUnknown = engineStopped || (status.primary === 'shadow' && !routeEntry)
               const signalsText = status.primary === 'shadow' ? `섀도 ${shadowBuys.length}` : `${(info.buy_signals ?? []).length}`
 
               const redChips = status.chips.filter((c) => c.tone === 'red')
@@ -261,20 +273,24 @@ export default function StrategySummaryTable({ strategies, monitor, exitLines, t
                     <MiniTrend data={funnelTrends?.[sid] ?? null} />
                   </td>
                   <td data-testid={`strategy-summary-holdings-${sid}`} className="py-1 px-2 text-right">
-                    <div className="flex items-center justify-end gap-1.5">
-                      <span>{positions} / {maxPositions ?? '—'}</span>
-                      {maxPositions !== null && maxPositions > 0 && maxPositions <= 20 && (
-                        <span className="inline-flex gap-0.5">
-                          {Array.from({ length: maxPositions }).map((_, i) => (
-                            <span
-                              key={i}
-                              data-filled={i < positions ? 'true' : 'false'}
-                              className={`inline-block w-1.5 h-3 rounded-sm ${i < positions ? 'bg-emerald-400' : 'bg-gray-200'}`}
-                            />
-                          ))}
-                        </span>
-                      )}
-                    </div>
+                    {engineStopped ? (
+                      <span className="text-gray-400">모름</span>
+                    ) : (
+                      <div className="flex items-center justify-end gap-1.5">
+                        <span>{positions} / {maxPositions ?? '—'}</span>
+                        {maxPositions !== null && maxPositions > 0 && maxPositions <= 20 && (
+                          <span className="inline-flex gap-0.5">
+                            {Array.from({ length: maxPositions }).map((_, i) => (
+                              <span
+                                key={i}
+                                data-filled={i < positions ? 'true' : 'false'}
+                                className={`inline-block w-1.5 h-3 rounded-sm ${i < positions ? 'bg-emerald-400' : 'bg-gray-200'}`}
+                              />
+                            ))}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </td>
                   <td data-testid={`strategy-summary-budget-${sid}`} className="py-1 px-2 text-right">
                     <div className="flex items-center justify-end gap-1.5">
@@ -294,10 +310,10 @@ export default function StrategySummaryTable({ strategies, monitor, exitLines, t
                     {stopMarginPct !== null ? `${stopMarginPct.toFixed(1)}%` : '—'}
                   </td>
                   <td data-testid={`strategy-summary-exitdue-${sid}`} className="py-1 px-2 text-right">
-                    {exitDue}
+                    {exitDueUnknown ? <span className="text-gray-400">모름</span> : exitDue}
                   </td>
                   <td data-testid={`strategy-summary-signals-${sid}`} className="py-1 pl-2 text-right">
-                    {signalsText}
+                    {signalsUnknown ? <span className="text-gray-400">모름</span> : signalsText}
                   </td>
                 </tr>
               )

@@ -551,6 +551,7 @@ export default function ScanMonitor({ selectedStrategy, monitor, exitLines, hide
                 tickerPrices={scan?.ticker_prices}
                 monitor={monitor ?? undefined}
                 exitLines={exitLines ?? undefined}
+                running={status?.running}
               />
             )}
 

@@ -187,6 +187,7 @@ export default function Dashboard() {
           exitLines={exitLinesQuery.data?.items ?? null}
           tickerPrices={status?.scan?.ticker_prices}
           funnelTrends={funnelTrends}
+          running={status?.running}
           onSelect={setSelectedStrategy}
         />
       ) : showDetailPanel ? (

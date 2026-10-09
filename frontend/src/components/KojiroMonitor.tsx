@@ -76,13 +76,18 @@ export default function KojiroMonitor({
   tickerPrices,
   exitLines,
   monitor,
+  running,
 }: {
   strategies: Record<string, StrategyInfo>
   tickerPrices?: Record<string, TickerPrice>
   exitLines?: ExitLineItem[] | null
   monitor?: StrategyMonitorResponse | null
+  /** cycle414 보완 2차(N5 screens/screens-H3 잔여) — `/api/trading/status` 의 `running`. 모니터
+   * 라우트가 실패해도(=null) 엔진 정지를 안다. `=== false` 일 때만 「모름」으로 낮춘다. */
+  running?: boolean | null
 }) {
   const kojiro = strategies['kojiro']
+  const engineStopped = running === false
 
   const scanStats = kojiro?.scan_stats ?? null
   const targets = (kojiro?.targets ?? {}) as Record<string, KojiroTarget>
@@ -159,6 +164,11 @@ export default function KojiroMonitor({
                 {c.label}
               </span>
             ))}
+          </div>
+        )}
+        {engineStopped && (
+          <div data-testid="kojiro-engine-stopped" className="mt-1.5 inline-block px-2 py-0.5 rounded bg-gray-100 text-gray-600 text-[11px]">
+            장 마감/엔진 정지 — 값이 최신이 아닐 수 있습니다(정산 뒤 · 부팅 전 · 휴일)
           </div>
         )}
       </div>
@@ -346,7 +356,7 @@ export default function KojiroMonitor({
           매수 창 09:05~09:30 · 갭업 ≥{gapUpPct !== null ? `${gapUpPct}%` : '—'} / 갭다운 ≤{gapDownPct !== null ? `${gapDownPct}%` : '—'} / 장중 붕괴(현재가&lt;시가) 스킵 · 종목당 1회
         </div>
         {buySignals.length === 0 ? (
-          <div className="text-xs text-gray-400">매수 신호 없음</div>
+          <div className="text-xs text-gray-400">{engineStopped ? '엔진 정지 — 매수 신호 모름' : '매수 신호 없음'}</div>
         ) : (
           <ul className="space-y-1">
             {buySignals.slice().reverse().map((sig, i) => {
@@ -372,7 +382,7 @@ export default function KojiroMonitor({
           4중 청산: 고정 {hardStopPct}% backstop · {stopAtr}ATR 하드손절 · 스테이지3 진입 · {trailAtr}ATR 샹들리에 트레일링
         </div>
         {Object.keys(positions).length === 0 ? (
-          <div className="text-xs text-gray-400">보유 종목 없음</div>
+          <div className="text-xs text-gray-400">{engineStopped ? '엔진 정지 — 보유 정보 모름' : '보유 종목 없음'}</div>
         ) : (
           <ScrollPane>
             <table className="w-full text-xs">

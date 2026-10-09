@@ -91,6 +91,32 @@ const FALLBACK_STAGES: Record<string, Array<{ key: string; label: string }>> = {
     { key: 'atr_pass', label: 'ATR(14) > 0' },
     { key: 'final_prepared', label: '최종 후보' },
   ],
+  // 보완 2차(N3 suites·screens / N7 trader) — VB·모멘텀·LTV 도 `ScanMonitor.tsx` 의 VB_STAGES·
+  // MOMENTUM_STAGES·LTV_STAGES 와 같은 한글 라벨을 쓴다(scan_stats 영문 키 그대로 노출 금지).
+  // 같은 파일에 두면 import 순환 위험이 있어 라벨 목록만 복제한다 — 키·순서는 두 파일이 같게 유지한다.
+  volatility_breakout: [
+    { key: 'universe_candidates', label: '시총+거래대금 컷 통과' },
+    { key: 'universe_filtered', label: '유니버스 확정 (ETF/가격 제외)' },
+    { key: 'candle_fetch_ok', label: '일봉 fetch 성공' },
+    { key: 'k_value_computed', label: 'K값/Target 계산 완료' },
+    { key: 'final_prepared', label: '최종 prepared' },
+  ],
+  long_tail_volatility: [
+    { key: 'universe_candidates', label: '시총+거래대금 컷 통과' },
+    { key: 'universe_filtered', label: '유니버스 확정 (ETF/가격 제외)' },
+    { key: 'candle_fetch_ok', label: '일봉 fetch 성공' },
+    { key: 'consecutive_limit_pass', label: '연속상한가 제외 통과' },
+    { key: 'k_value_computed', label: 'K값/Target 계산' },
+    { key: 'final_prepared', label: '최종 prepared' },
+  ],
+  momentum: [
+    { key: 'universe_candidates', label: '등락률 순위 응답 (raw)' },
+    { key: 'rate_pass', label: '등락률 ≥ 15% 통과' },
+    { key: 'mcap_pass', label: '시총 ≥ 1,000억' },
+    { key: 'trade_amount_pass', label: '거래대금 ≥ 200억' },
+    { key: 'limit_up_excluded', label: '상한가 (+30%) 제외' },
+    { key: 'final_prepared', label: '최종 후보' },
+  ],
 }
 
 function pnum(v: unknown): string {
@@ -140,8 +166,15 @@ function prepareHeader(prepare: MonitorPrepareMeta | null | undefined): { text: 
 
 // ─────────────────────────────── M11 시각 요소 — 작은 그림 컴포넌트 ───────────────────────────────
 
-/** §2.6 거리 막대 — 0% 눈금(매수선) · 상한까지 연초록(살 수 있는 구간) · 현재가 표식. */
-function DistanceBar({ testId, pct, cap }: { testId: string; pct: number | null; cap: number | null }) {
+/**
+ * §2.6 거리 막대 — 0% 눈금(돌파선) · 상한까지 연초록(살 수 있는 구간) · 상한 밖은 주황(추격 상한
+ * 초과) · 현재가 표식. 보완 2차(N3) — ETF 는 엔진 조건이 시가 기준이고 현재가 하한이 없어
+ * (`etf_trend.py`, 「현재가≥시가」만 본다) `belowLineOk` 로 초록 구간을 0% 아래까지 늘린다.
+ * 돈키언·VCP·BFB 는 현재가가 돌파선 위라는 전제가 있어 기본값(0% 위부터)을 유지한다.
+ */
+function DistanceBar({
+  testId, pct, cap, belowLineOk = false,
+}: { testId: string; pct: number | null; cap: number | null; belowLineOk?: boolean }) {
   const W = 64
   const H = 12
   if (pct === null) {
@@ -154,20 +187,34 @@ function DistanceBar({ testId, pct, cap }: { testId: string; pct: number | null;
   const zeroX = toX(0)
   const capX = cap !== null ? toX(cap) : null
   const curX = toX(pct)
+  const greenStartX = belowLineOk ? 0 : zeroX
   const label = `매수선 대비 ${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%`
+  const outLow = pct < lo
+  const outHigh = pct > hi
   return (
     <svg data-testid={testId} width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={label}>
+      <title>{label}</title>
       <rect x={0} y={4} width={W} height={4} fill="#e5e7eb" />
-      {capX !== null && capX > zeroX && <rect x={zeroX} y={4} width={capX - zeroX} height={4} fill="#bbf7d0" />}
-      <line x1={zeroX} y1={0} x2={zeroX} y2={H} stroke="#9ca3af" strokeWidth={1} />
+      {capX !== null && capX > greenStartX && <rect x={greenStartX} y={4} width={capX - greenStartX} height={4} fill="#bbf7d0" />}
+      {capX !== null && capX < W && <rect x={capX} y={4} width={W - capX} height={4} fill="#fed7aa" />}
+      {!belowLineOk && <line x1={zeroX} y1={0} x2={zeroX} y2={H} stroke="#9ca3af" strokeWidth={1} />}
       <circle cx={curX} cy={6} r={2.5} fill={pct >= 0 ? '#ef4444' : '#3b82f6'} />
+      {outLow && <text x={1} y={10} fontSize={7} fill="#3b82f6">◀</text>}
+      {outHigh && <text x={W - 7} y={10} fontSize={7} fill="#ef4444">▶</text>}
     </svg>
   )
 }
 
 interface LadderPoint { label: string; value: number }
 
-/** §2.9 보유 사다리 — 눈금 위에 라벨+값을 글자(SVG text)로 둔다(스크린리더·텍스트 단언 양쪽 호환). */
+/** §2.9 보유 사다리 — 눈금 위에 라벨+값을 글자(SVG text)로 둔다(스크린리더·텍스트 단언 양쪽 호환).
+ * 보완 2차(N1) — 값이 같거나 가까운 점(예: 돈키언 무장가=매수가)은 한 그룹으로 합쳐 라벨·숫자가
+ * 겹치지 않게 하고, 인접 그룹은 두 줄로 번갈아 배치해 숫자가 서로 겹치지 않게 한다. 전체 라벨·값은
+ * `aria-label`·`<title>` 에도 그대로 담아 시각 배치와 무관하게 읽을 수 있다. */
+const LADDER_COLORS: Record<string, string> = {
+  손절: '#dc2626', 매수: '#6366f1', 현재: '#0ea5e9', 무장: '#059669', 목표: '#7c3aed',
+}
+
 function Ladder({ testId, points }: { testId: string; points: LadderPoint[] }) {
   const valid = points.filter((p) => Number.isFinite(p.value))
   if (valid.length === 0) return <svg data-testid={testId} width={1} height={1} />
@@ -175,18 +222,41 @@ function Ladder({ testId, points }: { testId: string; points: LadderPoint[] }) {
   const lo = Math.min(...values)
   const hi = Math.max(...values)
   const span = hi - lo || 1
-  const W = 200
-  const toX = (v: number) => 10 + ((v - lo) / span) * (W - 20)
+  const W = 220
+  const MARGIN = 26
+  const H = 44
+  const toX = (v: number) => MARGIN + ((v - lo) / span) * (W - MARGIN * 2)
+
+  const MIN_GAP = 30 // 라벨·값 글자(최대 7자리 숫자)가 겹치지 않을 최소 간격(px)
+  type Group = { x: number; value: number; labels: string[] }
+  const groups: Group[] = []
+  for (const p of valid.map((p) => ({ ...p, x: toX(p.value) })).sort((a, b) => a.x - b.x)) {
+    const last = groups[groups.length - 1]
+    if (last && p.x - last.x < MIN_GAP) last.labels.push(p.label)
+    else groups.push({ x: p.x, value: p.value, labels: [p.label] })
+  }
+
+  const fullLabel = valid.map((p) => `${p.label} ${Math.round(p.value).toLocaleString()}`).join(' · ')
+
   return (
-    <svg data-testid={testId} width={W} height={36} viewBox={`0 0 ${W} 36`} role="img">
-      <line x1={10} y1={18} x2={W - 10} y2={18} stroke="#d1d5db" strokeWidth={2} />
-      {valid.map((p, i) => (
-        <g key={`${p.label}-${i}`}>
-          <circle cx={toX(p.value)} cy={18} r={3} fill="#6366f1" />
-          <text x={toX(p.value)} y={9} fontSize={7} textAnchor="middle" fill="#374151">{p.label}</text>
-          <text x={toX(p.value)} y={30} fontSize={7} textAnchor="middle" fill="#374151">{Math.round(p.value).toLocaleString()}</text>
-        </g>
-      ))}
+    <svg data-testid={testId} width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={fullLabel}>
+      <title>{fullLabel}</title>
+      <line x1={MARGIN} y1={H / 2} x2={W - MARGIN} y2={H / 2} stroke="#d1d5db" strokeWidth={2} />
+      {groups.map((g, i) => {
+        const row = i % 2 // 인접 그룹끼리 겹치지 않게 두 줄로 번갈아
+        const labelY = row === 0 ? 11 : H - 22
+        const valueY = row === 0 ? 21 : H - 12
+        const text = g.labels.join('/')
+        const color = LADDER_COLORS[g.labels[0]] ?? '#6366f1'
+        return (
+          <g key={`${g.x}-${i}`}>
+            <line x1={g.x} y1={H / 2} x2={g.x} y2={row === 0 ? labelY + 4 : valueY - 4} stroke="#d1d5db" strokeWidth={1} />
+            <circle cx={g.x} cy={H / 2} r={3} fill={color} />
+            <text x={g.x} y={labelY} fontSize={7} textAnchor="middle" fill="#374151">{text}</text>
+            <text x={g.x} y={valueY} fontSize={7} textAnchor="middle" fill="#374151">{Math.round(g.value).toLocaleString()}</text>
+          </g>
+        )
+      })}
     </svg>
   )
 }
@@ -245,6 +315,7 @@ export default function StrategyMonitor({
         tickerPrices={tickerPrices}
         exitLines={exitLines ?? undefined}
         monitor={monitor ?? undefined}
+        running={running}
       />
     )
   }
@@ -358,6 +429,8 @@ export default function StrategyMonitor({
         </div>
       )
     }
+    // M9/N3/N4 — 라우트 funnel 이 없을 때의 폴백. scan_stats 가 있으면 한글 라벨로 그린다
+    // (「아직 스캔 전」을 「아침 준비 완료」 머리말과 모순시키지 않는다 · 결측 단계는 0 이 아니라 「모름」).
     const fallback = FALLBACK_STAGES[strategyId]
     if (fallback) {
       const ss = (info.scan_stats ?? {}) as Dict
@@ -365,29 +438,11 @@ export default function StrategyMonitor({
         <div className="space-y-1 text-xs text-gray-600">
           {fallback.map((stg, i) => (
             <div key={stg.key} data-testid={`${strategyId}-monitor-funnel-row-${i + 1}`}>
-              {i + 1}. {stg.label} — {finiteOrNull(ss[stg.key]) ?? 0}
+              {i + 1}. {stg.label} — {finiteOrNull(ss[stg.key]) ?? '모름'}
             </div>
           ))}
         </div>
       )
-    }
-
-    // M9 — 가벼운 패널(VB·모멘텀·LTV): 라우트 funnel 이 없어도 scan_stats 가 있으면 숫자로 그린다
-    // (「아직 스캔 전」을 「아침 준비 완료」 머리말과 모순시키지 않는다).
-    const ss = (info.scan_stats ?? null) as Dict | null
-    if (ss) {
-      const entries = Object.entries(ss).filter(([k, v]) => k !== 'last_run_at' && typeof v === 'number')
-      if (entries.length > 0) {
-        return (
-          <div className="space-y-0.5 text-xs text-gray-600">
-            {entries.map(([k, v]) => (
-              <div key={k} data-testid={`${strategyId}-monitor-funnel-row-${k}`}>
-                {k} — {v as number}
-              </div>
-            ))}
-          </div>
-        )
-      }
     }
     if (prepareOk) return <div className="text-xs text-gray-400">단계 기록 없음</div>
     return <div className="text-xs text-gray-400">아직 스캔 전</div>
@@ -437,8 +492,9 @@ export default function StrategyMonitor({
     return (
       <div className="space-y-2 text-xs">
         <div className="text-gray-600">
-          매수 신호 {buySignals.length}
-          {isShadow && buySignals.length === 0 && (
+          {/* N6(screens) — 엔진 정지 중에는 정산으로 비워진 0 이 「오늘 신호가 없었다」로 읽히지 않게 「모름」. */}
+          {engineStopped ? '매수 신호 모름 — 엔진 정지' : `매수 신호 ${buySignals.length}`}
+          {!engineStopped && isShadow && buySignals.length === 0 && (
             <span className="ml-1 text-gray-400">(섀도 BUY 는 매수 신호에 남지 않습니다 — 「매수 신호 0」이 「섀도가 안 돈다」가 아닙니다)</span>
           )}
         </div>
@@ -557,6 +613,11 @@ export default function StrategyMonitor({
     const count = finiteOrNull(daily.count)
     const cap = finiteOrNull(daily.cap)
     if (count !== null && cap !== null && count >= cap) return '하루 신규 상한'
+    // N2(trader) — 추격 상한 판정은 당일 고가(장중 최고가)·오늘 매도 여부가 필요하지만 화면은
+    // 현재가·시가만 가진다(엔진은 `stck_hgpr`/`high_price` 도 본다 — `donchian_swing.py`). 과소
+    // 추정이면 엔진이 거를 종목을 화면이 「진입 가능」으로 단정할 수 있어, 추격 상한 설정이
+    // 있을 때는(=그 판정이 실제로 매수를 가를 때) 「참고」로 낮춘다.
+    if (extCap !== null) return '참고: 돌파선 위(당일 고가 미반영)'
     return '진입 가능'
   }
 
@@ -589,12 +650,16 @@ export default function StrategyMonitor({
     if (breakoutLine !== null && cur !== null && cur < breakoutLine) return '돌파선 아래'
     const tickEntry = routeEntry.ticks?.[ticker]
     const acmlVol = tickEntry?.acml_vol
-    if (acmlVol === null || acmlVol === undefined) return '거래량 미관측'
     const volThreshold = finiteOrNull(target.volume_threshold)
     const latchAt = typeof cand.latch_armed_at === 'string' ? cand.latch_armed_at : null
-    if (volThreshold !== null && volThreshold > 0 && acmlVol < volThreshold) {
-      if (latchAt) return '래치: 거래량 대기 중'
-      return `거래량 부족 ${Math.round((acmlVol / volThreshold) * 100)}%`
+    // N10(trader) — 임계가 설정돼 있을 때만 거래량을 본다(엔진은 임계 0 또는 미설정이면 관측 없이
+    // 통과시킨다 — 게이트가 꺼진 것과 같다). 임계가 있는데 관측이 없을 때만 「거래량 미관측」.
+    if (volThreshold !== null && volThreshold > 0) {
+      if (acmlVol === null || acmlVol === undefined) return '거래량 미관측'
+      if (acmlVol < volThreshold) {
+        if (latchAt) return '래치: 거래량 대기 중'
+        return `거래량 부족 ${Math.round((acmlVol / volThreshold) * 100)}%`
+      }
     }
     const extCap = finiteOrNull(params.max_breakout_extension_pct)
     if (breakoutLine !== null && breakoutLine > 0 && extCap !== null && cur !== null) {
@@ -656,7 +721,7 @@ export default function StrategyMonitor({
                     <span className={pct === null ? 'text-gray-400' : pct >= 0 ? 'text-red-500' : 'text-blue-500'}>
                       {pct !== null ? `${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%` : '—'}
                     </span>
-                    <DistanceBar testId={`etf_trend-monitor-distbar-${ticker}`} pct={pct} cap={capPct} />
+                    <DistanceBar testId={`etf_trend-monitor-distbar-${ticker}`} pct={pct} cap={capPct} belowLineOk />
                   </div>
                 </td>
                 <td className="py-1 px-2 text-right">
@@ -766,13 +831,15 @@ export default function StrategyMonitor({
             const tickEntry = routeEntry?.ticks?.[ticker]
             const acmlVol = tickEntry?.acml_vol
             const volThreshold = finiteOrNull(target.volume_threshold)
+            // N10 — 임계가 없거나 0 이면 게이트가 꺼진 것(엔진은 관측 없이 통과) — 「거래량
+            // 미관측」 경보를 내지 않는다.
             const volText = !routeEntry
               ? '모름'
-              : (acmlVol === null || acmlVol === undefined)
-                ? '거래량 미관측'
-                : volThreshold !== null && volThreshold > 0
-                  ? `${Math.round((acmlVol / volThreshold) * 100)}%`
-                  : '—'
+              : volThreshold === null || volThreshold <= 0
+                ? '게이트 비활성'
+                : (acmlVol === null || acmlVol === undefined)
+                  ? '거래량 미관측'
+                  : `${Math.round((acmlVol / volThreshold) * 100)}%`
             const volPctNum = typeof acmlVol === 'number' && volThreshold !== null && volThreshold > 0
               ? Math.round((acmlVol / volThreshold) * 100)
               : null
@@ -1132,7 +1199,9 @@ export default function StrategyMonitor({
         <>
           {strategyId === 'donchian_swing' && dailyEntries && (
             <div data-testid="donchian_swing-monitor-daily-entries" className="text-xs text-gray-600">
-              오늘 신규 진입 {dailyEntries.count ?? 0} / {dailyEntries.cap ?? '—'}
+              {engineStopped
+                ? '오늘 신규 진입 모름 — 엔진 정지'
+                : <>오늘 신규 진입 {dailyEntries.count ?? '모름'} / {dailyEntries.cap ?? '—'}</>}
             </div>
           )}
 
