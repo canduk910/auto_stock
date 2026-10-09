@@ -993,6 +993,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -2327,6 +2329,8 @@ backend:
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -3672,6 +3676,8 @@ backend:
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -5008,6 +5014,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -6346,6 +6354,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -7686,6 +7696,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -9027,6 +9039,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -10371,6 +10385,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -11707,6 +11723,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -13119,6 +13137,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -14457,6 +14477,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -15815,6 +15837,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -17156,6 +17180,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -18505,6 +18531,8 @@ backend:
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -19834,6 +19862,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -21177,6 +21207,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -22515,6 +22547,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -23855,6 +23889,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -25195,6 +25231,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -26535,6 +26573,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -27877,6 +27917,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -29215,6 +29257,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -30555,6 +30599,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -31895,6 +31941,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -33235,6 +33283,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -34578,6 +34628,8 @@ backend:
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -35920,6 +35972,8 @@ backend:
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -37256,6 +37310,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -38595,6 +38651,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -39937,6 +39995,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -41275,6 +41335,8 @@ backend:
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -42619,6 +42681,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -43962,6 +44026,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -45300,6 +45366,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -46643,6 +46711,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -48050,6 +48120,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -49391,6 +49463,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -50731,6 +50805,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -52072,6 +52148,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -53411,6 +53489,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -54752,6 +54832,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -56091,6 +56173,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -56467,6 +56551,8 @@ backend:
       - tests/unit/engine/test_cycle386_daily_bar_finalize.py
       - tests/unit/engine/test_cycle386_finalize_neutralization.py
       - tests/unit/engine/test_cycle398_strategy_wiring_golden.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
       - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -58771,6 +58857,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -60196,6 +60284,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -61542,6 +61632,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -62877,6 +62969,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -64217,6 +64311,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -65557,6 +65653,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -66898,6 +66996,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -68237,6 +68337,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -69648,6 +69750,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -70988,6 +71092,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -72330,6 +72436,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -73669,6 +73777,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -75008,6 +75118,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -76426,6 +76538,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -77763,6 +77877,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -79170,6 +79286,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -80514,6 +80632,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -81861,6 +81981,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -83260,6 +83382,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -84602,6 +84726,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -85940,6 +86066,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -87280,6 +87408,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -88620,6 +88750,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -89960,6 +90092,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -91300,6 +91434,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -92639,6 +92775,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -94079,6 +94217,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -95503,6 +95643,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -97007,6 +97149,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -98348,6 +98492,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -99688,6 +99834,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -101037,6 +101185,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -102370,6 +102520,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -103711,6 +103863,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -105046,6 +105200,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -106460,6 +106616,8 @@ backend:
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -107816,6 +107974,8 @@ backend:
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle61_phase2A2_dataclass_completeness.py
@@ -109069,6 +109229,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -110409,6 +110571,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -111747,6 +111911,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -113086,6 +113252,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -114428,6 +114596,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -115788,6 +115958,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -117107,6 +117279,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -118466,6 +118640,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -119788,6 +119964,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -121126,6 +121304,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -122466,6 +122646,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -123807,6 +123989,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -125147,6 +125331,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -126487,6 +126673,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -127831,6 +128019,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -129201,6 +129391,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -130544,6 +130736,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -131879,6 +132073,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -133225,6 +133421,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -134560,6 +134758,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -135900,6 +136100,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -137242,6 +137444,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -138583,6 +138787,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -139240,6 +139446,7 @@ backend:
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -139958,6 +140165,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle48_stale_tracker_state.py
@@ -141263,6 +141471,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -142623,6 +142833,8 @@ backend:
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -143942,6 +144154,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -145281,6 +145495,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -146707,6 +146923,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -148048,6 +148266,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -149386,6 +149606,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -150729,6 +150951,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -152066,6 +152290,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -153406,6 +153632,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -154745,6 +154973,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -156087,6 +156317,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -157426,6 +157658,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -158773,6 +159007,8 @@ backend:
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -160178,6 +160414,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -161518,6 +161756,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -162862,6 +163102,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -163338,6 +163580,7 @@ backend:
       - tests/unit/engine/test_cycle271_execute_buy_fill_during_insert.py
       - tests/unit/engine/test_cycle276_order_time_hook.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
       - tests/unit/engine/test_order_engine_buy.py
       - tests/unit/routes/test_cycle411_cost_overlay_routes.py
       - tests/unit/routes/test_cycle411b_cost_overlay_route_fixes.py
@@ -164207,6 +164450,7 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -165613,6 +165857,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -166955,6 +167201,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -168366,6 +168614,8 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -169894,6 +170144,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -171304,6 +171556,8 @@ backend:
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -172674,6 +172928,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -173996,6 +174252,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -175353,6 +175611,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -176692,6 +176952,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -179919,6 +180181,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -181256,6 +181520,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -182599,6 +182865,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -183936,6 +184204,8 @@ backend:
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
       - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle424_sell_fallback_unknown_outcome.py
+      - tests/unit/engine/test_cycle425_boot_fallback_owner.py
+      - tests/unit/engine/test_cycle425_boot_recover_observability.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -187932,10 +188202,10 @@ frontend:
       - frontend/src/pages/__tests__/Dashboard.fix1.cycle414.test.tsx
       - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
-generated_at: '2026-10-09T14:12:21.732Z'
+generated_at: '2026-10-09T14:22:52.313Z'
 stats:
   backend_modules: 186
-  backend_tests: 1321
+  backend_tests: 1323
   frontend_modules: 155
   frontend_tests: 170
   unmapped_modules:
