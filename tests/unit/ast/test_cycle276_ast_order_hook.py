@@ -595,6 +595,12 @@ def test_c2_1_sell_paths_have_no_hook() -> None:
     assert fallback_fn is not None, "B4-3 추출 메서드가 없다"
     assert not _hook_calls(fallback_fn), "`_handle_sell_market_disallowed` 안에 훅이 있다"
 
+    # B4-5(cycle426) — 마지막 실패 뒤처리(⑲)가 `_handle_sell_final_failure` 로
+    # 뽑혔다. 같은 이유로 대상 함수 목록에 더한다(약화 금지).
+    final_failure_fn = _func(tree, "_handle_sell_final_failure")
+    assert final_failure_fn is not None, "B4-5 추출 메서드가 없다"
+    assert not _hook_calls(final_failure_fn), "`_handle_sell_final_failure` 안에 훅이 있다"
+
     for call in _place_order_calls(tree):
         seg = ast.get_source_segment(src, call) or ""
         if "OrderSide.SELL" not in seg:

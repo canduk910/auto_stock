@@ -2402,7 +2402,35 @@ class OrderEngine:
                 if attempt < SELL_MAX_RETRIES:
                     await asyncio.sleep(SELL_RETRY_DELAY * (2 ** (attempt - 1)))
 
-        # 모든 시도 실패 — 잔고부족이면 메모리 포지션 즉시 정리(스케줄러 sync로 후속 보정)
+        # 모든 시도 실패 — 뒤처리는 별도 메서드(B4-5, cycle426)로 넘긴다.
+        await self._handle_sell_final_failure(
+            ticker=ticker,
+            strategy_id=strategy_id,
+            strategy=strategy,
+            signal=signal,
+            insufficient_qty=insufficient_qty,
+            last_error=last_error,
+        )
+
+    async def _handle_sell_final_failure(
+        self,
+        *,
+        ticker: str,
+        strategy_id: str,
+        strategy: StrategyBase,
+        signal: Signal,
+        insufficient_qty: bool,
+        last_error: Exception | None,
+    ) -> None:
+        """B4-5(cycle426) — `execute_sell` 마지막 실패 뒤처리(⑲) 추출. 행위 보존.
+
+        재시도를 다 쓴 뒤 호출된다. 순서가 계약이다 — `_selling` 해제(무조건·
+        첫 `await` 앞) → 잔고부족(`insufficient_qty`)이면 메모리 포지션 정리 +
+        보유결합 상태 정리 훅 + DB 포지션 삭제 + 로그 + 잔고 1회 재조회(권고
+        로그) 뒤 `return` → 그 밖은 CRITICAL 1행. 설계 =
+        `_workspace/refactor/2026-10-09_execute_sell_baseline.md` §3. 🔴 순서·
+        로그 마커·return 의미를 바꾸지 않는다.
+        """
         self._selling.discard(ticker)
         if insufficient_qty:
             # KIS에 보유 수량이 없으므로 메모리 포지션도 제거. trade_history는 sync 시 보정.
