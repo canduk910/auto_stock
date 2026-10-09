@@ -69,7 +69,14 @@ export function marketUnitEffect(
   }
 
   if (mu.mode === 'enforce') {
-    if (!mu.ok) return { blocks: true, label: '시장 유닛 미계산 — 차단' }
+    if (!mu.ok) {
+      // 보완 1차(M1) — 엔진 `_market_unit_view` 는 오늘 스냅샷이 없거나(`not_computed`)
+      // `ok=false` 면 터틀 4전략엔 `m=1.0`(차단 아님)을 돌려준다. etf_trend 만 `state==
+      // "unavailable"` 을 직접 거른다(`etf_trend.py`) — 그래서 etf 는 여기서 그대로 차단.
+      return isEtf
+        ? { blocks: true, label: '시장 유닛 미계산 — 차단' }
+        : { blocks: false, label: '시장 유닛 미계산 — m=1(차단 아님)' }
+    }
     const m = mu.m ?? 0
     if (m <= 0) return { blocks: true, label: '시장 유닛 0배 — 신규 진입 0배(사지 않음)' }
     if (m < 1) return { blocks: false, label: `시장 유닛 랏 ×${m} 적용` }
@@ -185,6 +192,19 @@ export function marketUnitBlockLabel(sid: string, mu: MonitorMarketUnit | null |
   const eff = marketUnitEffect(sid, mu)
   if (!eff || !eff.blocks) return null
   return mu && mu.ok === false ? '시장 유닛 미계산' : '시장 유닛 0배'
+}
+
+/**
+ * 전략별 최종 단계 — step_no===99(명세 공통 계약) 우선, 없으면 그 목록의 최대 step_no(M7).
+ * donchian·VCP·BFB·kojiro 실제 엔진 funnel 은 9단계(최종=9)라 고정 99 매칭은 늘 빈손이었다.
+ */
+export function finalFunnelStep<T extends { step_no: number }>(
+  steps: T[] | null | undefined,
+): T | null {
+  if (!steps || steps.length === 0) return null
+  const exact99 = steps.find((s) => s.step_no === 99)
+  if (exact99) return exact99
+  return steps.reduce((a, b) => (b.step_no > a.step_no ? b : a))
 }
 
 /** 처음 0 이 되는 단계의 `step_no`(정렬 = step_no 오름차순). 0 이 없거나 빈 목록이면 `null`. */

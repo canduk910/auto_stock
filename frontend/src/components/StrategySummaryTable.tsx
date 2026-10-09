@@ -1,16 +1,18 @@
 /**
  * cycle414 — 대시보드 「전체」 탭 전략 요약표(명세 `_workspace/red/cycle414/monitor_spec.md` §5).
+ * 보완 1차 — 1차 검수 verdict(H3·M1·M3·M6·M7·M11·M12·L5) 반영.
  *
  * 행 = 전략 하나(주 배지 실매매→멈춤→섀도→꺼짐 순서, 같은 묶음은 비중 내림차순). 행을 누르면
- * 그 전략 탭으로 간다(`onSelect`). 「왜 안 사나」 한 줄은 §5.2 12단계 우선순위(처음 맞는 하나).
+ * 그 전략 탭으로 간다(`onSelect`). 「왜 안 사나」 한 줄은 §5.2 12단계 우선순위(처음 맞는 하나) —
+ * 보완 1차에서 「엔진 정지」를 꺼짐 다음 우선순위로 더했다(H3).
  */
 import type { ExitLineItem, StrategyInfo, StrategyMonitorResponse, TickerPrice } from '../types/trading'
 import {
-  strategyStatus, funnelBottleneck, entryWindow, marketUnitBlockLabel, topSkipReason,
+  strategyStatus, funnelBottleneck, finalFunnelStep, entryWindow, marketUnitBlockLabel, topSkipReason,
   type StrategyStatusResult,
 } from '../utils/strategyMonitor'
+import { strategyLabel } from '../utils/strategyMeta'
 import { formatKstHHMM } from '../utils/kst'
-import ScrollPane from './ScrollPane'
 
 type Dict = Record<string, unknown>
 
@@ -23,23 +25,55 @@ const PRIMARY_CLS: Record<StrategyStatusResult['primary'], string> = {
   live: 'bg-emerald-100 text-emerald-800',
 }
 
+/** M6 — 손절 여유 근접은 색 클래스로(data-tone 속성만으로는 안 보인다). */
+const STOP_TONE_CLS: Record<'normal' | 'orange' | 'red', string> = {
+  normal: '',
+  orange: 'text-amber-600 font-semibold',
+  red: 'text-rose-600 font-semibold',
+}
+
 function finiteOrNull(v: unknown): number | null {
+  // 「모름」을 「0」으로 둔갑시키지 않는다 — `Number(null) === 0`.
+  if (v === null || v === undefined) return null
   const n = typeof v === 'number' ? v : Number(v)
   return Number.isFinite(n) ? n : null
 }
 
-/** 「왜 안 사나」 한 줄 — §5.2, 처음 맞는 것 하나. */
+/** M11 — 14일 최종 후보 수 선(svg). 요약표 한 칸용으로 작게. */
+function MiniTrend({ data }: { data: Array<{ date: string; count: number }> | null | undefined }) {
+  if (!data || data.length === 0) return <span className="text-gray-300 text-[10px]">—</span>
+  const max = Math.max(1, ...data.map((d) => d.count))
+  const w = 56
+  const h = 18
+  const points = data
+    .map((d, i) => {
+      const x = data.length > 1 ? (i / (data.length - 1)) * w : w / 2
+      const y = h - (d.count / max) * h
+      return `${x.toFixed(1)},${y.toFixed(1)}`
+    })
+    .join(' ')
+  return (
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} role="img" aria-label="14일 최종 후보 추이">
+      <polyline points={points} fill="none" stroke="#6366f1" strokeWidth={1.5} />
+    </svg>
+  )
+}
+
+/** 「왜 안 사나」 한 줄 — §5.2, 처음 맞는 것 하나(H3 — 엔진 정지를 꺼짐 다음 최우선으로 더했다). */
 function summaryWhy(
   sid: string,
   info: StrategyInfo,
   status: StrategyStatusResult,
   routeEntry: Dict | null | undefined,
   now: Date,
+  engineStopped: boolean,
 ): string {
   if (status.primary === 'off') {
     const positions = info.positions ?? 0
     return positions > 0 ? `꺼짐 — 보유 ${positions} 손절 정지!` : '꺼짐'
   }
+  // H3 — 엔진이 안 돌면(정산 뒤·부팅 전·휴일) 그 밖 어떤 판정도 지금 값으로는 믈 수 없다.
+  if (engineStopped) return '장 마감/엔진 정지'
   if (status.primary === 'paused') return '신규 매수 멈춤(운영자 설정)'
 
   const prepare = routeEntry?.prepare as Dict | null | undefined
@@ -52,7 +86,8 @@ function summaryWhy(
   }
 
   const steps = (routeEntry?.funnel as Array<{ step_no: number; step_name: string; survived_count: number }> | undefined) ?? []
-  const finalStep = steps.find((s) => s.step_no === 99)
+  // M7 — 최종 단계 = 전략별 최종 step_no(donchian·VCP·BFB·kojiro = 9, 고정 99 매칭 금지).
+  const finalStep = finalFunnelStep(steps)
   if (finalStep && finalStep.survived_count === 0) {
     const bn = funnelBottleneck(steps)
     const bStep = bn != null ? steps.find((s) => s.step_no === bn) : null
@@ -97,13 +132,18 @@ interface Props {
   monitor?: StrategyMonitorResponse | null
   exitLines?: ExitLineItem[] | null
   tickerPrices?: Record<string, TickerPrice>
+  /** M11 — 전략별 14일 최종 후보 추이(`/api/strategy-funnel/recent`). */
+  funnelTrends?: Record<string, Array<{ date: string; count: number }>> | null
   now?: Date
   onSelect: (sid: string) => void
 }
 
-export default function StrategySummaryTable({ strategies, monitor, exitLines, tickerPrices, now, onSelect }: Props) {
+export default function StrategySummaryTable({ strategies, monitor, exitLines, tickerPrices, funnelTrends, now, onSelect }: Props) {
   const nowDate = now ?? new Date()
   const prices = tickerPrices ?? {}
+  // H3 — `/trading/status` 의 running 은 이 컴포넌트에 직접 오지 않는다(모니터 라우트 실패 조합은
+  // StrategyMonitor 쪽 전용 prop 으로 다룬다) — 요약표는 `monitor.running===false` 만으로 판정한다.
+  const engineStopped = monitor?.running === false
   const rows = Object.entries(strategies)
     .map(([sid, info]) => {
       const routeEntry = (monitor?.strategies?.[sid] ?? null) as unknown as Dict | null
@@ -120,13 +160,16 @@ export default function StrategySummaryTable({ strategies, monitor, exitLines, t
     <div className="bg-white rounded-lg shadow p-4">
       <h3 className="text-sm font-semibold text-gray-700 mb-2">전략 진행상황 요약</h3>
       <div data-testid="strategy-summary-table">
-        <ScrollPane>
-          <table className="w-full text-xs">
+        {/* M12 — 요약표는 높이 상한 상자(ScrollPane maxHeight)에 가두지 않는다. 가로 스크롤만. */}
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[920px] text-xs">
           <thead>
             <tr className="text-gray-500 border-b text-left">
               <th className="py-1 pr-2">전략</th>
               <th className="py-1 pr-2">상태</th>
               <th className="py-1 pr-2">왜 안 사나</th>
+              <th className="py-1 px-2 text-right">후보</th>
+              <th className="py-1 px-2 text-right">14일</th>
               <th className="py-1 px-2 text-right">보유</th>
               <th className="py-1 px-2 text-right">예산</th>
               <th className="py-1 px-2 text-right">손절 여유</th>
@@ -156,9 +199,14 @@ export default function StrategySummaryTable({ strategies, monitor, exitLines, t
 
               let exitDue = 0
               if (sid === 'etf_trend') {
-                for (const t of Object.values((routeEntry?.holdings ?? {}) as Record<string, Dict>)) {
+                // M3 — ETF 「청산 예정」은 가격이 돌파선 아래일 때만(엔진은 missing_line 이면 판정 안 함).
+                for (const [ticker, t] of Object.entries((routeEntry?.holdings ?? {}) as Record<string, Dict>)) {
                   const bf = (t.breakout_fail ?? {}) as Dict
-                  if (bf.active === true) exitDue += 1
+                  if (bf.active !== true) continue
+                  const bLine = finiteOrNull(bf.line)
+                  if (bLine === null) continue
+                  const cur = finiteOrNull(prices[ticker]?.current_price)
+                  if (cur !== null && cur < bLine) exitDue += 1
                 }
               } else if (sid === 'donchian_swing') {
                 for (const t of Object.values((routeEntry?.holdings ?? {}) as Record<string, Dict>)) {
@@ -175,6 +223,12 @@ export default function StrategySummaryTable({ strategies, monitor, exitLines, t
 
               const redChips = status.chips.filter((c) => c.tone === 'red')
 
+              const steps = (routeEntry?.funnel as Array<{ step_no: number; step_name: string; survived_count: number }> | undefined) ?? []
+              const finalStep = finalFunnelStep(steps)
+              const candidateCount = finalStep ? finalStep.survived_count : Object.keys(info.targets ?? {}).length
+              const bottleneckNo = funnelBottleneck(steps)
+              const bottleneckStep = bottleneckNo != null ? steps.find((s) => s.step_no === bottleneckNo) : null
+
               return (
                 <tr
                   key={sid}
@@ -182,7 +236,7 @@ export default function StrategySummaryTable({ strategies, monitor, exitLines, t
                   onClick={() => onSelect(sid)}
                   className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
                 >
-                  <td className="py-1 pr-2 font-medium text-gray-800">{info.name || sid}</td>
+                  <td className="py-1 pr-2 font-medium text-gray-800">{strategyLabel(sid, info.name)}</td>
                   <td className="py-1 pr-2">
                     <span
                       data-testid={`strategy-summary-badge-${sid}`}
@@ -195,18 +249,47 @@ export default function StrategySummaryTable({ strategies, monitor, exitLines, t
                     ))}
                   </td>
                   <td data-testid={`strategy-summary-why-${sid}`} className="py-1 pr-2 text-gray-600">
-                    {summaryWhy(sid, info, status, routeEntry, nowDate)}
+                    {summaryWhy(sid, info, status, routeEntry, nowDate, engineStopped)}
+                  </td>
+                  <td className="py-1 px-2 text-right text-gray-600">
+                    {candidateCount}
+                    {candidateCount === 0 && bottleneckStep && (
+                      <div className="text-[10px] text-rose-500">병목: {bottleneckStep.step_name}</div>
+                    )}
+                  </td>
+                  <td data-testid={`strategy-summary-trend-${sid}`} className="py-1 px-2 text-right">
+                    <MiniTrend data={funnelTrends?.[sid] ?? null} />
                   </td>
                   <td data-testid={`strategy-summary-holdings-${sid}`} className="py-1 px-2 text-right">
-                    {positions} / {maxPositions ?? '—'}
+                    <div className="flex items-center justify-end gap-1.5">
+                      <span>{positions} / {maxPositions ?? '—'}</span>
+                      {maxPositions !== null && maxPositions > 0 && maxPositions <= 20 && (
+                        <span className="inline-flex gap-0.5">
+                          {Array.from({ length: maxPositions }).map((_, i) => (
+                            <span
+                              key={i}
+                              data-filled={i < positions ? 'true' : 'false'}
+                              className={`inline-block w-1.5 h-3 rounded-sm ${i < positions ? 'bg-emerald-400' : 'bg-gray-200'}`}
+                            />
+                          ))}
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td data-testid={`strategy-summary-budget-${sid}`} className="py-1 px-2 text-right">
-                    {budgetPct !== null ? `${budgetPct}%` : '—'}
+                    <div className="flex items-center justify-end gap-1.5">
+                      <span>{budgetPct !== null ? `${budgetPct}%` : '—'}</span>
+                      {budgetPct !== null && (
+                        <span className="inline-block w-10 h-1.5 bg-gray-200 rounded overflow-hidden align-middle">
+                          <span style={{ width: `${Math.min(100, Math.max(0, budgetPct))}%` }} className="block h-full bg-blue-400" />
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td
                     data-testid={`strategy-summary-stopmargin-${sid}`}
                     data-tone={stopTone}
-                    className="py-1 px-2 text-right"
+                    className={`py-1 px-2 text-right ${STOP_TONE_CLS[stopTone]}`}
                   >
                     {stopMarginPct !== null ? `${stopMarginPct.toFixed(1)}%` : '—'}
                   </td>
@@ -221,7 +304,7 @@ export default function StrategySummaryTable({ strategies, monitor, exitLines, t
             })}
           </tbody>
           </table>
-        </ScrollPane>
+        </div>
       </div>
     </div>
   )

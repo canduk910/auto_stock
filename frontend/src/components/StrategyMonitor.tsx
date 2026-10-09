@@ -1,8 +1,13 @@
 /**
  * cycle414 — 전략별 진행상황 상세 패널(명세 `_workspace/red/cycle414/monitor_spec.md` §2·§4).
+ * 보완 1차 — 1차 검수 verdict(H1~H3·M1~M13·L1·L2·L6·L7) 반영.
  *
  * 공통 7칸(①상태 ②시간표 ③깔때기 ④후보 ⑤사유 ⑥진입기록 ⑦보유방어선) 틀로 전략별 진행상황을
  * 그린다. 가벼운 패널(VB·momentum·LTV)은 ①②③⑥만, 고지로는 기존 `KojiroMonitor` 로 그린다.
+ *
+ * 화면 원칙(보완 1차) — 「모름」 을 「없음」·「차단」·「경보」 로 그리지 않는다(데이터 결손·라우트
+ * 실패·엔진 정지·정산 뒤·휴일은 회색 「모름/장 마감」 계열로), 엔진 판정과 다른 판정을 화면이
+ * 만들지 않는다(엔진 코드와 같은 조건만 「진입 가능」, 아니면 「참고」), 추정값은 「추정」으로.
  *
  * 데이터 출처 — `/api/trading/status`(strategies) · `/api/strategies/monitor`(funnel·candidates·
  * holdings·skips·market_unit·prepare·ticks, 실패 시 null → scan_stats 폴백) · `/api/balance/exit-lines`
@@ -13,12 +18,12 @@ import type {
   StrategyInfo, TickerPrice, ExitLineItem, StrategyMonitorResponse,
   MonitorFunnelStep, MonitorPrepareMeta,
 } from '../types/trading'
-import { formatKstHHMM } from '../utils/kst'
+import { formatKstHHMM, kstMinutesOfDay } from '../utils/kst'
 import {
-  strategyStatus, funnelBottleneck, entryWindow, signalBaseline, marketUnitBlockLabel,
+  strategyStatus, funnelBottleneck, finalFunnelStep, entryWindow, signalBaseline, marketUnitBlockLabel,
   SKIP_REASON_LABELS, type MonitorTone, type StrategyStatusResult,
 } from '../utils/strategyMonitor'
-import { computeZeroStreak } from '../pages/StrategyFunnel'
+import { computeZeroStreak } from '../utils/strategyFunnelTrend'
 import KojiroMonitor from './KojiroMonitor'
 import ScrollPane from './ScrollPane'
 
@@ -38,6 +43,18 @@ const CHIP_CLS: Record<MonitorTone, string> = {
   orange: 'bg-amber-100 text-amber-700',
   gray: 'bg-gray-100 text-gray-600',
   violet: 'bg-violet-100 text-violet-700',
+}
+
+/** M6 — 손절(여유) 근접은 색 클래스로(data-tone 속성만으로는 안 보인다). KojiroMonitor 와 같은 팔레트. */
+const STOP_TONE_CLS: Record<'normal' | 'orange' | 'red', string> = {
+  normal: '',
+  orange: 'text-amber-600 font-semibold',
+  red: 'text-rose-600 font-semibold',
+}
+
+/** M11 — ETF 보유 구성 선(하드·본전·트레일·채널) 한글 라벨. */
+const CONFIG_LINE_LABEL: Record<'hard' | 'breakeven' | 'trail' | 'channel', string> = {
+  hard: '하드', breakeven: '본전', trail: '트레일', channel: '채널',
 }
 
 /** 라우트 funnel 이 없을 때의 폴백 단계 라벨(엔진 이름 그대로 — 낡은 상수 라벨 금지, §6 C3). */
@@ -82,6 +99,9 @@ function pnum(v: unknown): string {
 }
 
 function finiteOrNull(v: unknown): number | null {
+  // H1·M3 — 「모름」을 「0」으로 둔갑시키지 않는다. `Number(null) === 0` 이라 명시적
+  // null(「값을 모른다」)이 숫자 0(「값이 0 이다」)으로 조용히 바뀌어 거짓 경보를 만든다.
+  if (v === null || v === undefined) return null
   const n = typeof v === 'number' ? v : Number(v)
   return Number.isFinite(n) ? n : null
 }
@@ -118,6 +138,74 @@ function prepareHeader(prepare: MonitorPrepareMeta | null | undefined): { text: 
   return { text: `기준일 ${day} · ${label} ${hhmm} 완료`, fail: false }
 }
 
+// ─────────────────────────────── M11 시각 요소 — 작은 그림 컴포넌트 ───────────────────────────────
+
+/** §2.6 거리 막대 — 0% 눈금(매수선) · 상한까지 연초록(살 수 있는 구간) · 현재가 표식. */
+function DistanceBar({ testId, pct, cap }: { testId: string; pct: number | null; cap: number | null }) {
+  const W = 64
+  const H = 12
+  if (pct === null) {
+    return <svg data-testid={testId} width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label="매수선 대비 모름" />
+  }
+  const lo = -10
+  const hi = (cap ?? 10) + 3
+  const span = hi - lo || 1
+  const toX = (v: number) => ((Math.max(lo, Math.min(hi, v)) - lo) / span) * W
+  const zeroX = toX(0)
+  const capX = cap !== null ? toX(cap) : null
+  const curX = toX(pct)
+  const label = `매수선 대비 ${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%`
+  return (
+    <svg data-testid={testId} width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={label}>
+      <rect x={0} y={4} width={W} height={4} fill="#e5e7eb" />
+      {capX !== null && capX > zeroX && <rect x={zeroX} y={4} width={capX - zeroX} height={4} fill="#bbf7d0" />}
+      <line x1={zeroX} y1={0} x2={zeroX} y2={H} stroke="#9ca3af" strokeWidth={1} />
+      <circle cx={curX} cy={6} r={2.5} fill={pct >= 0 ? '#ef4444' : '#3b82f6'} />
+    </svg>
+  )
+}
+
+interface LadderPoint { label: string; value: number }
+
+/** §2.9 보유 사다리 — 눈금 위에 라벨+값을 글자(SVG text)로 둔다(스크린리더·텍스트 단언 양쪽 호환). */
+function Ladder({ testId, points }: { testId: string; points: LadderPoint[] }) {
+  const valid = points.filter((p) => Number.isFinite(p.value))
+  if (valid.length === 0) return <svg data-testid={testId} width={1} height={1} />
+  const values = valid.map((p) => p.value)
+  const lo = Math.min(...values)
+  const hi = Math.max(...values)
+  const span = hi - lo || 1
+  const W = 200
+  const toX = (v: number) => 10 + ((v - lo) / span) * (W - 20)
+  return (
+    <svg data-testid={testId} width={W} height={36} viewBox={`0 0 ${W} 36`} role="img">
+      <line x1={10} y1={18} x2={W - 10} y2={18} stroke="#d1d5db" strokeWidth={2} />
+      {valid.map((p, i) => (
+        <g key={`${p.label}-${i}`}>
+          <circle cx={toX(p.value)} cy={18} r={3} fill="#6366f1" />
+          <text x={toX(p.value)} y={9} fontSize={7} textAnchor="middle" fill="#374151">{p.label}</text>
+          <text x={toX(p.value)} y={30} fontSize={7} textAnchor="middle" fill="#374151">{Math.round(p.value).toLocaleString()}</text>
+        </g>
+      ))}
+    </svg>
+  )
+}
+
+/** §4.3 VCP·BFB 거래량 게이지 — 0~150% 막대 + 100% 선. */
+function VolumeGauge({ testId, pct, text }: { testId: string; pct: number | null; text: string }) {
+  const capped = pct !== null ? Math.max(0, Math.min(150, pct)) : 0
+  return (
+    <span data-testid={testId} className="inline-flex items-center gap-1 text-gray-700">
+      <svg width={40} height={10} viewBox="0 0 40 10" role="img" aria-label={text}>
+        <rect x={0} y={3} width={40} height={4} fill="#e5e7eb" />
+        <rect x={0} y={3} width={(capped / 150) * 40} height={4} fill={pct !== null && pct >= 100 ? '#10b981' : '#f59e0b'} />
+        <line x1={(100 / 150) * 40} y1={0} x2={(100 / 150) * 40} y2={10} stroke="#9ca3af" />
+      </svg>
+      <span>{text}</span>
+    </span>
+  )
+}
+
 interface Props {
   strategyId: string
   strategies: Record<string, StrategyInfo>
@@ -128,13 +216,26 @@ interface Props {
   subscribedTickers?: string[]
   funnelTrend?: Array<{ date: string; count: number }> | null
   now?: Date
+  /** H3 — `/api/trading/status` 의 `running`. 모니터 라우트가 실패해도(=null) 엔진 정지를 안다. */
+  running?: boolean | null
 }
 
 export default function StrategyMonitor({
-  strategyId, strategies, monitor, exitLines, tickerPrices, tickerNames, subscribedTickers, funnelTrend, now,
+  strategyId, strategies, monitor, exitLines, tickerPrices, tickerNames, subscribedTickers, funnelTrend, now, running,
 }: Props) {
   const info = strategies[strategyId]
   const nowDate = now ?? new Date()
+  const routeEntry = monitor?.strategies?.[strategyId] ?? null
+  const marketUnit = routeEntry?.market_unit ?? null
+
+  // L1 — 훅은 전부 조기 return(고지로 분기) 보다 앞에 둔다(rules-of-hooks).
+  const status = useMemo(() => (info ? strategyStatus(strategyId, info, marketUnit) : null), [strategyId, info, marketUnit])
+  const subscribedSet = useMemo(() => new Set(subscribedTickers ?? []), [subscribedTickers])
+  const exitLineMap = useMemo(() => {
+    const m = new Map<string, ExitLineItem>()
+    for (const item of exitLines ?? []) if (item.strategy_id === strategyId) m.set(item.ticker, item)
+    return m
+  }, [exitLines, strategyId])
 
   // 고지로는 기존 KojiroMonitor(id 보존)로 그린다 — §4.5.
   if (strategyId === 'kojiro') {
@@ -148,20 +249,13 @@ export default function StrategyMonitor({
     )
   }
 
-  const routeEntry = monitor?.strategies?.[strategyId] ?? null
-  const marketUnit = routeEntry?.market_unit ?? null
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const status = useMemo(() => (info ? strategyStatus(strategyId, info, marketUnit) : null), [strategyId, info, marketUnit])
+  // H3 — 엔진 정지(정산 뒤·부팅 전·휴일). `running` prop(=/trading/status, 모니터 실패에도 안다)
+  // 또는 `monitor.running` 둘 중 하나라도 false 면 멈춘 것으로 본다.
+  const engineStopped = running === false || monitor?.running === false
 
   const params = (info?.params ?? {}) as Dict
   const prices = tickerPrices ?? {}
   const names = tickerNames ?? {}
-  const subscribedSet = useMemo(() => new Set(subscribedTickers ?? []), [subscribedTickers])
-  const exitLineMap = useMemo(() => {
-    const m = new Map<string, ExitLineItem>()
-    for (const item of exitLines ?? []) if (item.strategy_id === strategyId) m.set(item.ticker, item)
-    return m
-  }, [exitLines, strategyId])
 
   if (!info || !status) {
     return (
@@ -184,7 +278,8 @@ export default function StrategyMonitor({
   // ───────────────────────────── ③ 깔때기 ─────────────────────────────
   const steps: MonitorFunnelStep[] = routeEntry?.funnel ?? []
   const bottleneckNo = funnelBottleneck(steps)
-  const finalStep = steps.find((s) => s.step_no === 99)
+  // M7 — 최종 단계 = 전략별 최종 step_no(step_no===99 우선, 없으면 최대) — donchian·VCP·BFB·kojiro 는 9.
+  const finalStep = finalFunnelStep(steps)
   const finalZero = finalStep ? finalStep.survived_count === 0 : false
   const bottleneckStep = bottleneckNo != null ? steps.find((s) => s.step_no === bottleneckNo) : null
   const trendZeroStreak = funnelTrend && funnelTrend.length > 0 ? computeZeroStreak(funnelTrend) : 0
@@ -225,15 +320,21 @@ export default function StrategyMonitor({
             </div>
           )}
           {funnelTrend && funnelTrend.length > 0 && (
-            <div className="mt-2">
+            <div data-testid={`${strategyId}-monitor-trend`} className="mt-2">
+              <div className="text-[10px] text-gray-500 mb-0.5">14일 최종 후보 추이</div>
               <div className="flex items-end gap-0.5 h-8">
                 {funnelTrend.map((d) => (
                   <div
                     key={d.date}
-                    title={`${d.date}: ${d.count}건`}
+                    title={`${mmdd(d.date)}: ${d.count}건`}
                     className={`flex-1 rounded-t ${d.count === 0 ? 'bg-rose-300' : 'bg-blue-300'}`}
                     style={{ height: `${Math.max(4, Math.round((d.count / trendMax) * 100))}%` }}
                   />
+                ))}
+              </div>
+              <div className="flex gap-1.5 text-[9px] text-gray-400 mt-0.5 flex-wrap">
+                {funnelTrend.map((d) => (
+                  <span key={d.date}>{mmdd(d.date)}:{d.count}</span>
                 ))}
               </div>
               {trendZeroStreak > 0 && (
@@ -270,6 +371,25 @@ export default function StrategyMonitor({
         </div>
       )
     }
+
+    // M9 — 가벼운 패널(VB·모멘텀·LTV): 라우트 funnel 이 없어도 scan_stats 가 있으면 숫자로 그린다
+    // (「아직 스캔 전」을 「아침 준비 완료」 머리말과 모순시키지 않는다).
+    const ss = (info.scan_stats ?? null) as Dict | null
+    if (ss) {
+      const entries = Object.entries(ss).filter(([k, v]) => k !== 'last_run_at' && typeof v === 'number')
+      if (entries.length > 0) {
+        return (
+          <div className="space-y-0.5 text-xs text-gray-600">
+            {entries.map(([k, v]) => (
+              <div key={k} data-testid={`${strategyId}-monitor-funnel-row-${k}`}>
+                {k} — {v as number}
+              </div>
+            ))}
+          </div>
+        )
+      }
+    }
+    if (prepareOk) return <div className="text-xs text-gray-400">단계 기록 없음</div>
     return <div className="text-xs text-gray-400">아직 스캔 전</div>
   }
 
@@ -349,16 +469,17 @@ export default function StrategyMonitor({
   const modeDependentTicker = [...exitLineMap.values()].find((it) => it.stop_source === 'mode_dependent')
 
   // ───────────────────────────── ④ 후보 (full 전용) ─────────────────────────────
+
+  /** M5 — 라우트 실패는 「모름」(시세 신선도 경보 0) · 자격·시각을 시세 신선도보다 먼저 본다. */
   function etfCandidateStatus(ticker: string, includePause: boolean): string {
-    const age = tickAgeSec(routeEntry?.ticks?.[ticker]?.last_tick_at, nowDate)
-    if (!subscribedSet.has(ticker) || age === null || age > 60) return '시세 없음'
+    if (engineStopped) return '장 마감/엔진 정지'
+    if (!subscribedSet.has(ticker)) return '시세 없음'
     if ((info.position_tickers ?? []).includes(ticker)) return '보유 중'
     if ((info.pending_buy_tickers ?? []).includes(ticker)) return '주문 중'
+    // M2 — 「오늘 시도함」은 갭 사유일 때만(엔진은 갭 때만 _bought_today 에 넣는다). 그 밖 사유는
+    // 흘려보내 평소 체인을 계속 타게 둔다(⑤ 사유 칸이 그 사유 수를 이미 보여 준다).
     const byTicker = (routeEntry?.skips?.by_ticker?.[ticker] ?? []) as string[]
-    if (byTicker.length > 0) {
-      if (byTicker.includes('gap_up') || byTicker.includes('gap_over_line')) return '오늘 갭 스킵'
-      return '오늘 시도함'
-    }
+    if (byTicker.includes('gap_up') || byTicker.includes('gap_over_line')) return '오늘 갭 스킵'
     if (includePause && status!.primary === 'paused') return '멈춤'
     if (info.buy_disabled) return '매수 중단'
     const maxPositions = Number(params.max_positions)
@@ -376,7 +497,8 @@ export default function StrategyMonitor({
       const gapPct = ((openPrice - prevClose) / prevClose) * 100
       if (gapPct >= gapSkipPct) return '갭 초과'
     }
-    const cand = (routeEntry?.candidates?.[ticker] ?? {}) as Dict
+    if (!routeEntry) return '모름'
+    const cand = (routeEntry.candidates?.[ticker] ?? {}) as Dict
     const line = finiteOrNull(cand.line)
     const gapOverLinePct = finiteOrNull(params.gap_over_line_pct)
     if (line !== null && line > 0 && gapOverLinePct !== null) {
@@ -395,8 +517,8 @@ export default function StrategyMonitor({
   }
 
   function donchianCandidateStatus(ticker: string, includePause: boolean): string {
-    const age = tickAgeSec(routeEntry?.ticks?.[ticker]?.last_tick_at, nowDate)
-    if (!subscribedSet.has(ticker) || age === null || age > 60) return '시세 없음'
+    if (engineStopped) return '장 마감/엔진 정지'
+    if (!subscribedSet.has(ticker)) return '시세 없음'
     if ((info.position_tickers ?? []).includes(ticker)) return '보유 중'
     if ((info.pending_buy_tickers ?? []).includes(ticker)) return '주문 중'
     if (includePause && status!.primary === 'paused') return '멈춤'
@@ -423,22 +545,27 @@ export default function StrategyMonitor({
       const extPct = ((hi - donchianHigh) / donchianHigh) * 100
       if (extPct > extCap) return '추격 상한 초과'
     }
+    if (!routeEntry) return '모름'
+    // M1 — 터틀 4전략은 enforce + 오늘 스냅샷 결손이면 엔진 m=1(차단 아님). marketUnitBlockLabel
+    // 이 이미 그 식을 담는다(utils/strategyMonitor.ts) — 여기서 따로 판정하지 않는다.
     const muBlock = marketUnitBlockLabel('donchian_swing', marketUnit)
     if (muBlock) return muBlock
-    const cand = (routeEntry?.candidates?.[ticker] ?? {}) as Dict
+    const cand = (routeEntry.candidates?.[ticker] ?? {}) as Dict
     const designLot = finiteOrNull(cand.design_lot)
     if (designLot !== null && designLot <= 0) return '설계 랏 0'
-    const daily = (routeEntry?.extra?.daily_entries ?? {}) as Dict
+    const daily = (routeEntry.extra?.daily_entries ?? {}) as Dict
     const count = finiteOrNull(daily.count)
     const cap = finiteOrNull(daily.cap)
     if (count !== null && cap !== null && count >= cap) return '하루 신규 상한'
     return '진입 가능'
   }
 
+  /** H2 — 「진입 가능」 은 엔진 조건(아래→위 교차 틱 또는 오늘 무장한 래치)일 때만. 래치 없이
+   *  돌파선 위 + 거래량 충족이면 「참고: 돌파선 위」(화면이 「샀을 것」을 단정하지 않는다). */
   function breakoutCandidateStatus(ticker: string, isBfb: boolean): string {
     const sid = isBfb ? 'bull_flag_breakout' : 'vcp_breakout'
-    const age = tickAgeSec(routeEntry?.ticks?.[ticker]?.last_tick_at, nowDate)
-    if (!subscribedSet.has(ticker) || age === null || age > 60) return '시세 없음'
+    if (engineStopped) return '장 마감/엔진 정지'
+    if (!subscribedSet.has(ticker)) return '시세 없음'
     if ((info.position_tickers ?? []).includes(ticker)) return '보유 중'
     if ((info.pending_buy_tickers ?? []).includes(ticker)) return '주문 중'
     const target = targets[ticker] ?? {}
@@ -455,15 +582,18 @@ export default function StrategyMonitor({
       const retentionMin = finiteOrNull(params.breakout_retention_minutes)
       if (retentionMin !== null && retentionMin > 0 && target.breakout_seen_at) return '유지 대기'
     }
-    const cand = (routeEntry?.candidates?.[ticker] ?? {}) as Dict
-    if (cand.latch_armed_at) return '래치: 거래량 대기 중'
+    if (!routeEntry) return '모름'
+    const cand = (routeEntry.candidates?.[ticker] ?? {}) as Dict
     const breakoutLine = finiteOrNull(isBfb ? target.flag_high : target.base_high)
     const cur = finiteOrNull(prices[ticker]?.current_price)
     if (breakoutLine !== null && cur !== null && cur < breakoutLine) return '돌파선 아래'
-    const acmlVol = routeEntry?.ticks?.[ticker]?.acml_vol
+    const tickEntry = routeEntry.ticks?.[ticker]
+    const acmlVol = tickEntry?.acml_vol
     if (acmlVol === null || acmlVol === undefined) return '거래량 미관측'
     const volThreshold = finiteOrNull(target.volume_threshold)
+    const latchAt = typeof cand.latch_armed_at === 'string' ? cand.latch_armed_at : null
     if (volThreshold !== null && volThreshold > 0 && acmlVol < volThreshold) {
+      if (latchAt) return '래치: 거래량 대기 중'
       return `거래량 부족 ${Math.round((acmlVol / volThreshold) * 100)}%`
     }
     const extCap = finiteOrNull(params.max_breakout_extension_pct)
@@ -473,19 +603,25 @@ export default function StrategyMonitor({
     }
     const muBlock = marketUnitBlockLabel(sid, marketUnit)
     if (muBlock) return muBlock
+    // H2 — 오늘 무장한 래치가 있을 때만 「진입 가능」. 래치 없이 돌파선 위인 것은 엔진이 지난
+    // 틱에서 이미 거른 상태일 수 있어(지금 막 교차한 증거가 없다) 「참고」로 낮춘다.
+    if (!latchAt) return '참고: 돌파선 위'
     return '진입 가능'
   }
 
   function renderEtfCandidatesTable() {
     const tickers = Object.keys(targets)
+    if (tickers.length === 0) return <div className="text-xs text-gray-400">후보 없음</div>
+    const capPct = finiteOrNull(params.gap_over_line_pct)
     return (
-      <table className="w-full text-xs">
+      <table className="w-full min-w-[720px] text-xs">
         <thead>
           <tr className="text-gray-500 border-b">
             <th className="text-left py-1 pr-2">종목</th>
             <th className="text-left py-1 pr-2">상태</th>
             <th className="text-right py-1 px-2">현재가</th>
             <th className="text-right py-1 px-2">돌파선</th>
+            <th className="text-right py-1 px-2">거리</th>
             <th className="text-right py-1 px-2">예상 수량</th>
             <th className="text-left py-1 pl-2">묶음</th>
           </tr>
@@ -495,10 +631,13 @@ export default function StrategyMonitor({
             const cand = (routeEntry?.candidates?.[ticker] ?? {}) as Dict
             const actual = etfCandidateStatus(ticker, true)
             const hint = actual === '멈춤' ? etfCandidateStatus(ticker, false) : null
-            const qty = finiteOrNull(cand.design_qty)
-            const qtyText = qty === null ? '—' : qty <= 0 ? '1주도 안 됨 — 사지 않음' : `최대 ${qty}주`
+            const qty = engineStopped ? null : finiteOrNull(cand.design_qty)
+            const qtyText = engineStopped
+              ? '모름'
+              : qty === null ? '—' : qty <= 0 ? '1주도 안 됨 — 사지 않음' : `최대 ${qty}주(추정)`
             const cur = finiteOrNull(prices[ticker]?.current_price)
             const line = finiteOrNull(cand.line)
+            const pct = cur !== null && line !== null && line > 0 ? ((cur - line) / line) * 100 : null
             return (
               <tr key={ticker} data-testid={`etf_trend-monitor-candidate-${ticker}`} className="border-b border-gray-100">
                 <td className="py-1 pr-2 font-medium text-gray-800">{nameOf(ticker)}({ticker})</td>
@@ -512,6 +651,14 @@ export default function StrategyMonitor({
                 </td>
                 <td className="py-1 px-2 text-right">{cur !== null ? cur.toLocaleString() : '—'}</td>
                 <td className="py-1 px-2 text-right text-indigo-600">{line !== null ? line.toLocaleString() : '—'}</td>
+                <td className="py-1 px-2 text-right">
+                  <div className="flex items-center justify-end gap-1">
+                    <span className={pct === null ? 'text-gray-400' : pct >= 0 ? 'text-red-500' : 'text-blue-500'}>
+                      {pct !== null ? `${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%` : '—'}
+                    </span>
+                    <DistanceBar testId={`etf_trend-monitor-distbar-${ticker}`} pct={pct} cap={capPct} />
+                  </div>
+                </td>
                 <td className="py-1 px-2 text-right">
                   <span data-testid={`etf_trend-monitor-qty-${ticker}`} className={qty !== null && qty <= 0 ? 'text-rose-600 font-medium' : 'text-gray-700'}>
                     {qtyText}
@@ -530,16 +677,19 @@ export default function StrategyMonitor({
 
   function renderDonchianCandidatesTable() {
     const tickers = Object.keys(targets)
+    if (tickers.length === 0) return <div className="text-xs text-gray-400">후보 없음</div>
+    const capPct = finiteOrNull(params.max_breakout_extension_pct)
     return (
-      <table className="w-full text-xs">
+      <table className="w-full min-w-[760px] text-xs">
         <thead>
           <tr className="text-gray-500 border-b">
             <th className="text-left py-1 pr-2">종목</th>
             <th className="text-left py-1 pr-2">상태</th>
             <th className="text-right py-1 px-2">현재가</th>
             <th className="text-right py-1 px-2">20일 신고가</th>
+            <th className="text-right py-1 px-2">거리</th>
             <th className="text-right py-1 px-2">1R / R%</th>
-            <th className="text-right py-1 pl-2">설계 랏</th>
+            <th className="text-right py-1 pl-2">설계 수량</th>
           </tr>
         </thead>
         <tbody>
@@ -548,9 +698,10 @@ export default function StrategyMonitor({
             const statusText = donchianCandidateStatus(ticker, true)
             const cur = finiteOrNull(prices[ticker]?.current_price)
             const dh = finiteOrNull(targets[ticker]?.donchian_high)
+            const pct = cur !== null && dh !== null && dh > 0 ? ((cur - dh) / dh) * 100 : null
             const rWon = finiteOrNull(cand.r_won)
             const rPct = finiteOrNull(cand.r_pct)
-            const designLot = finiteOrNull(cand.design_lot)
+            const designLot = engineStopped ? null : finiteOrNull(cand.design_lot)
             return (
               <tr key={ticker} data-testid={`donchian_swing-monitor-candidate-${ticker}`} className="border-b border-gray-100">
                 <td className="py-1 pr-2 font-medium text-gray-800">{nameOf(ticker)}({ticker})</td>
@@ -560,12 +711,22 @@ export default function StrategyMonitor({
                 <td className="py-1 px-2 text-right">{cur !== null ? cur.toLocaleString() : '—'}</td>
                 <td className="py-1 px-2 text-right text-indigo-600">{dh !== null ? dh.toLocaleString() : '—'}</td>
                 <td className="py-1 px-2 text-right">
+                  <div className="flex items-center justify-end gap-1">
+                    <span className={pct === null ? 'text-gray-400' : pct >= 0 ? 'text-red-500' : 'text-blue-500'}>
+                      {pct !== null ? `${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%` : '—'}
+                    </span>
+                    <DistanceBar testId={`donchian_swing-monitor-distbar-${ticker}`} pct={pct} cap={capPct} />
+                  </div>
+                </td>
+                <td className="py-1 px-2 text-right">
                   {rWon !== null ? rWon.toLocaleString() : '—'} {rPct !== null ? `(${rPct.toFixed(1)}%)` : ''}
                 </td>
                 <td className="py-1 pl-2 text-right">
-                  {designLot !== null && designLot <= 0
-                    ? <span className="text-rose-600 font-medium">사지 않음</span>
-                    : (designLot !== null ? `${designLot}랏` : '—')}
+                  {engineStopped
+                    ? <span className="text-gray-500">모름</span>
+                    : designLot !== null && designLot <= 0
+                      ? <span className="text-rose-600 font-medium">사지 않음</span>
+                      : (designLot !== null ? `${designLot}주(추정)` : '—')}
                 </td>
               </tr>
             )
@@ -578,14 +739,17 @@ export default function StrategyMonitor({
   function renderBreakoutCandidatesTable(isBfb: boolean) {
     const sid = isBfb ? 'bull_flag_breakout' : 'vcp_breakout'
     const tickers = Object.keys(targets)
+    if (tickers.length === 0) return <div className="text-xs text-gray-400">후보 없음</div>
+    const capPct = finiteOrNull(params.max_breakout_extension_pct)
     return (
-      <table className="w-full text-xs">
+      <table className="w-full min-w-[760px] text-xs">
         <thead>
           <tr className="text-gray-500 border-b">
             <th className="text-left py-1 pr-2">종목</th>
             <th className="text-left py-1 pr-2">상태</th>
             <th className="text-right py-1 px-2">현재가</th>
             <th className="text-right py-1 px-2">돌파선</th>
+            <th className="text-right py-1 px-2">거리</th>
             <th className="text-right py-1 px-2">거래량</th>
             {isBfb && <th className="text-right py-1 px-2">측정목표</th>}
             <th className="text-right py-1 pl-2">래치</th>
@@ -598,9 +762,18 @@ export default function StrategyMonitor({
             const statusText = breakoutCandidateStatus(ticker, isBfb)
             const cur = finiteOrNull(prices[ticker]?.current_price)
             const breakoutLine = finiteOrNull(isBfb ? target.flag_high : target.base_high)
-            const acmlVol = routeEntry?.ticks?.[ticker]?.acml_vol
+            const pct = cur !== null && breakoutLine !== null && breakoutLine > 0 ? ((cur - breakoutLine) / breakoutLine) * 100 : null
+            const tickEntry = routeEntry?.ticks?.[ticker]
+            const acmlVol = tickEntry?.acml_vol
             const volThreshold = finiteOrNull(target.volume_threshold)
-            const volPct = typeof acmlVol === 'number' && volThreshold !== null && volThreshold > 0
+            const volText = !routeEntry
+              ? '모름'
+              : (acmlVol === null || acmlVol === undefined)
+                ? '거래량 미관측'
+                : volThreshold !== null && volThreshold > 0
+                  ? `${Math.round((acmlVol / volThreshold) * 100)}%`
+                  : '—'
+            const volPctNum = typeof acmlVol === 'number' && volThreshold !== null && volThreshold > 0
               ? Math.round((acmlVol / volThreshold) * 100)
               : null
             const latchAt = typeof cand.latch_armed_at === 'string' ? cand.latch_armed_at : null
@@ -618,9 +791,15 @@ export default function StrategyMonitor({
                 <td className="py-1 px-2 text-right">{cur !== null ? cur.toLocaleString() : '—'}</td>
                 <td className="py-1 px-2 text-right text-indigo-600">{breakoutLine !== null ? breakoutLine.toLocaleString() : '—'}</td>
                 <td className="py-1 px-2 text-right">
-                  <span data-testid={`${sid}-monitor-volgauge-${ticker}`} className="text-gray-700">
-                    {volPct !== null ? `${volPct}%` : '거래량 미관측'}
-                  </span>
+                  <div className="flex items-center justify-end gap-1">
+                    <span className={pct === null ? 'text-gray-400' : pct >= 0 ? 'text-red-500' : 'text-blue-500'}>
+                      {pct !== null ? `${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%` : '—'}
+                    </span>
+                    <DistanceBar testId={`${sid}-monitor-distbar-${ticker}`} pct={pct} cap={capPct} />
+                  </div>
+                </td>
+                <td className="py-1 px-2 text-right">
+                  <VolumeGauge testId={`${sid}-monitor-volgauge-${ticker}`} pct={volPctNum} text={volText} />
                 </td>
                 {isBfb && (
                   <td className="py-1 px-2 text-right text-gray-600">
@@ -628,11 +807,9 @@ export default function StrategyMonitor({
                   </td>
                 )}
                 <td className="py-1 pl-2 text-right">
-                  {!isBfb && (
-                    <span data-testid={`vcp_breakout-monitor-latch-${ticker}`} className="text-gray-600">
-                      {latchAt ? formatKstHHMM(latchAt) : '—'}
-                    </span>
-                  )}
+                  <span data-testid={`${sid}-monitor-latch-${ticker}`} className="text-gray-600">
+                    {latchAt ? formatKstHHMM(latchAt) : '—'}
+                  </span>
                 </td>
               </tr>
             )
@@ -643,13 +820,18 @@ export default function StrategyMonitor({
   }
 
   // ───────────────────────────── ⑦ 보유 방어선 (full 전용) ─────────────────────────────
+
+  const NEAR_1520_START_MIN = 15 * 60 // 15:00 — 15:20 판정이 가까울 때만 틱 신선도를 본다(M5).
+
   function renderEtfHoldingsTable() {
     const entries = Object.entries(info.positions_detail ?? {})
-    if (entries.length === 0) return <div className="text-xs text-gray-400">보유 종목 없음</div>
+    if (entries.length === 0) {
+      return <div className="text-xs text-gray-400">{engineStopped ? '장 마감/엔진 정지 — 보유 정보 모름' : '보유 종목 없음'}</div>
+    }
     const breakoutFailMinBars = params.breakout_fail_min_bars
     const maxAge = finiteOrNull(params.breakout_fail_price_max_age_secs)
     return (
-      <table className="w-full text-xs">
+      <table className="w-full min-w-[920px] text-xs">
         <thead>
           <tr className="text-gray-500 border-b">
             <th className="text-left py-1 pr-2">종목</th>
@@ -657,7 +839,9 @@ export default function StrategyMonitor({
             <th className="text-right py-1 px-2">현재가</th>
             <th className="text-right py-1 px-2">실효 손절선</th>
             <th className="text-right py-1 px-2">손절까지</th>
-            <th className="text-left py-1 pl-2">15:20 판정</th>
+            <th className="text-left py-1 px-2">구성 선</th>
+            <th className="text-left py-1 px-2">15:20 판정</th>
+            <th className="text-left py-1 pl-2">사다리</th>
           </tr>
         </thead>
         <tbody>
@@ -669,18 +853,31 @@ export default function StrategyMonitor({
             const cur = finiteOrNull(prices[ticker]?.current_price)
             const distPct = cur !== null && cur > 0 && effectiveStop != null ? ((cur - effectiveStop) / cur) * 100 : null
             const tone: 'normal' | 'orange' | 'red' = distPct === null ? 'normal' : distPct < 1 ? 'red' : distPct < 3 ? 'orange' : 'normal'
+            const hasMonitorData = !!monitor && Object.keys(holding).length > 0
             const breakoutFail = (holding.breakout_fail ?? {}) as Dict
             const tickAge = tickAgeSec(routeEntry?.ticks?.[ticker]?.last_tick_at, nowDate)
             let countdown: string
-            if (tickAge === null || (maxAge !== null && tickAge > maxAge)) {
-              countdown = '시세 낡음 — 15:20 판정 건너뜀 위험'
-            } else if (breakoutFail.active) {
-              const bLine = finiteOrNull(breakoutFail.line)
-              countdown = (cur !== null && bLine !== null && cur < bLine)
-                ? '15:20 정리(돌파 실패)'
-                : '15:20 판정 대상'
+            if (engineStopped) {
+              countdown = '장 마감/엔진 정지 — 모름'
+            } else if (!hasMonitorData) {
+              countdown = '모름 — 모니터 데이터 없음'
             } else {
-              countdown = `${breakoutFailMinBars ?? '—'}봉째부터 15:20 판정`
+              // M3 — 돌파선이 없으면 판정 대상이 아니다(엔진 missing_line).
+              const bLine = finiteOrNull(breakoutFail.line)
+              if (bLine === null) {
+                countdown = '돌파선 모름'
+              } else if (!breakoutFail.active) {
+                countdown = `${breakoutFailMinBars ?? '—'}봉째부터 15:20 판정`
+              } else {
+                // M5 — 시세 신선도는 15:20 이 가까울 때만 본다(자격·시각이 먼저).
+                const nearClose = kstMinutesOfDay(nowDate) >= NEAR_1520_START_MIN
+                const stale = tickAge === null || (maxAge !== null && tickAge > maxAge)
+                if (nearClose && stale) {
+                  countdown = '시세 낡음 — 15:20 판정 건너뜀 위험'
+                } else {
+                  countdown = (cur !== null && cur < bLine) ? '15:20 정리(돌파 실패)' : '15:20 판정 대상'
+                }
+              }
             }
             return (
               <tr key={ticker} data-testid={`etf_trend-monitor-holding-${ticker}`} className="border-b border-gray-100">
@@ -690,20 +887,39 @@ export default function StrategyMonitor({
                 <td className="py-1 px-2 text-right" data-testid={`etf_trend-monitor-stop-${ticker}`}>
                   {effectiveStop != null ? effectiveStop.toLocaleString() : '—'}
                 </td>
-                <td className="py-1 px-2 text-right" data-testid={`etf_trend-monitor-stopdist-${ticker}`} data-tone={tone}>
+                <td
+                  className={`py-1 px-2 text-right ${STOP_TONE_CLS[tone]}`}
+                  data-testid={`etf_trend-monitor-stopdist-${ticker}`}
+                  data-tone={tone}
+                >
                   {distPct !== null ? `${distPct.toFixed(1)}%` : '—'}
                 </td>
-                <td className="py-1 pl-2" data-testid={`etf_trend-monitor-countdown-${ticker}`}>{countdown}</td>
-                <td className="hidden">
+                <td className="py-1 px-2 text-[10px] text-gray-500 whitespace-nowrap">
                   {(['hard', 'breakeven', 'trail', 'channel'] as const).map((k) => {
                     const v = typeof lines[k] === 'number' ? (lines[k] as number) : null
                     const active = v != null && effectiveStop != null && Math.abs(v - effectiveStop) <= 1
                     return (
-                      <span key={k} data-testid={`etf_trend-monitor-line-${ticker}-${k}`} data-active={active ? 'true' : 'false'}>
-                        {v != null ? v.toLocaleString() : '—'}
+                      <span
+                        key={k}
+                        data-testid={`etf_trend-monitor-line-${ticker}-${k}`}
+                        data-active={active ? 'true' : 'false'}
+                        className={active ? 'font-semibold text-gray-700 mr-1.5' : 'mr-1.5'}
+                      >
+                        {CONFIG_LINE_LABEL[k]} {v != null ? v.toLocaleString() : '—'}
                       </span>
                     )
                   })}
+                </td>
+                <td className="py-1 px-2" data-testid={`etf_trend-monitor-countdown-${ticker}`}>{countdown}</td>
+                <td className="py-1 pl-2">
+                  <Ladder
+                    testId={`etf_trend-monitor-ladder-${ticker}`}
+                    points={[
+                      { label: '손절', value: effectiveStop ?? NaN },
+                      { label: '매수', value: finiteOrNull(pos.buy_price) ?? NaN },
+                      { label: '현재', value: cur ?? NaN },
+                    ]}
+                  />
                 </td>
               </tr>
             )
@@ -715,16 +931,19 @@ export default function StrategyMonitor({
 
   function renderDonchianHoldingsTable() {
     const entries = Object.entries(info.positions_detail ?? {})
-    if (entries.length === 0) return <div className="text-xs text-gray-400">보유 종목 없음</div>
+    if (entries.length === 0) {
+      return <div className="text-xs text-gray-400">{engineStopped ? '장 마감/엔진 정지 — 보유 정보 모름' : '보유 종목 없음'}</div>
+    }
     const channelExitPeriod = pnum(params.channel_exit_period)
     return (
-      <table className="w-full text-xs">
+      <table className="w-full min-w-[920px] text-xs">
         <thead>
           <tr className="text-gray-500 border-b">
             <th className="text-left py-1 pr-2">종목</th>
             <th className="text-right py-1 px-2">매수가</th>
             <th className="text-right py-1 px-2">현재가</th>
             <th className="text-right py-1 px-2">손절선</th>
+            <th className="text-right py-1 px-2">손절까지</th>
             <th className="text-left py-1 px-2">사다리</th>
             <th className="text-left py-1 pl-2">시간청산</th>
           </tr>
@@ -732,9 +951,12 @@ export default function StrategyMonitor({
         <tbody>
           {entries.map(([ticker, pos]) => {
             const holding = (routeEntry?.holdings?.[ticker] ?? {}) as Dict
+            const hasMonitorData = !!monitor && Object.keys(holding).length > 0
             const exitItem = exitLineMap.get(ticker)
             const effectiveStop = exitItem ? exitItem.stop_price : (typeof holding.stop === 'number' ? holding.stop : null)
             const cur = finiteOrNull(prices[ticker]?.current_price)
+            const distPct = cur !== null && cur > 0 && effectiveStop != null ? ((cur - effectiveStop) / cur) * 100 : null
+            const stopTone: 'normal' | 'orange' | 'red' = distPct === null ? 'normal' : distPct < 1 ? 'red' : distPct < 3 ? 'orange' : 'normal'
             const armed = holding.armed === true
             const channelVal = finiteOrNull(holding.channel)
             const armPrice = finiteOrNull(holding.arm_price)
@@ -745,23 +967,46 @@ export default function StrategyMonitor({
             const target1r = finiteOrNull(holding.target_1r)
             const due = timeExitBars !== null && daysHeld !== null ? timeExitBars - 1 - daysHeld : null
             let countdownClause: string
-            if (reachedR1) countdownClause = `+1R 넘음 — 시간청산 면제(최대 ${maxHoldBars ?? '—'}봉)`
+            if (engineStopped) countdownClause = '장 마감/엔진 정지 — 판정 모름'
+            else if (!hasMonitorData) countdownClause = '모름(시간청산 판정 불가)'
+            else if (reachedR1) countdownClause = `+1R 넘음 — 시간청산 면제(최대 ${maxHoldBars ?? '—'}봉)`
+            // H1 — due(=time_exit_bars·days_held) 를 모르면 「모름」 — 거짓 「오늘 15:20」 경보 0.
+            else if (timeExitBars === null || daysHeld === null) countdownClause = '모름(시간청산 판정 불가)'
             else if (due !== null && due > 0) countdownClause = `${due}영업일 뒤 15:20 시간청산 판정 — +1R(${target1r !== null ? target1r.toLocaleString() : '—'}원) 못 넘으면 정리`
             else countdownClause = '오늘 15:20 시간청산 대상(+1R 미도달)'
-            const barsLabel = daysHeld !== null ? `보유 ${daysHeld + 1}봉째` : ''
+            const barsLabel = (!engineStopped && hasMonitorData && daysHeld !== null) ? `보유 ${daysHeld + 1}봉째` : ''
             const fallbackNote = holding.days_fallback === true ? ' (보유일 근사)' : ''
-            const ladderText = armed
-              ? `무장 ✓ 손절선 본전 · ${channelExitPeriod}일 채널 ${channelVal !== null ? channelVal.toLocaleString() : '—'}`
-              : `무장가 ${armPrice !== null ? armPrice.toLocaleString() : '—'}`
             return (
               <tr key={ticker} data-testid={`donchian_swing-monitor-holding-${ticker}`} className="border-b border-gray-100">
                 <td className="py-1 pr-2 font-medium text-gray-800">{pos.name || ticker}</td>
                 <td className="py-1 px-2 text-right">{won(pos.buy_price)}</td>
                 <td className="py-1 px-2 text-right">{cur !== null ? cur.toLocaleString() : '—'}</td>
                 <td className="py-1 px-2 text-right">{effectiveStop != null ? effectiveStop.toLocaleString() : '—'}</td>
-                <td className="py-1 px-2 text-gray-600">{ladderText}</td>
+                <td
+                  className={`py-1 px-2 text-right ${STOP_TONE_CLS[stopTone]}`}
+                  data-testid={`donchian_swing-monitor-stopdist-${ticker}`}
+                  data-tone={stopTone}
+                >
+                  {distPct !== null ? `${distPct.toFixed(1)}%` : '—'}
+                </td>
+                <td className="py-1 px-2">
+                  <Ladder
+                    testId={`donchian_swing-monitor-ladder-${ticker}`}
+                    points={[
+                      { label: '손절', value: effectiveStop ?? NaN },
+                      { label: '매수', value: finiteOrNull(pos.buy_price) ?? NaN },
+                      { label: '현재', value: cur ?? NaN },
+                      { label: '무장', value: armed ? (finiteOrNull(pos.buy_price) ?? NaN) : (armPrice ?? NaN) },
+                    ]}
+                  />
+                  {armed && (
+                    <div className="text-[10px] text-emerald-600 mt-0.5">
+                      무장 ✓ 손절선 본전 · {channelExitPeriod}일 채널 {channelVal !== null ? channelVal.toLocaleString() : '—'}
+                    </div>
+                  )}
+                </td>
                 <td className="py-1 pl-2 text-gray-600" data-testid={`donchian_swing-monitor-countdown-${ticker}`}>
-                  {barsLabel} · {countdownClause}{fallbackNote}
+                  {barsLabel} {barsLabel && '·'} {countdownClause}{fallbackNote}
                 </td>
               </tr>
             )
@@ -771,33 +1016,56 @@ export default function StrategyMonitor({
     )
   }
 
-  function renderGenericHoldingsTable(sid: string) {
+  function renderBreakoutHoldingsTable(isBfb: boolean) {
+    const sid = isBfb ? 'bull_flag_breakout' : 'vcp_breakout'
     const entries = Object.entries(info.positions_detail ?? {})
-    if (entries.length === 0) return <div className="text-xs text-gray-400">보유 종목 없음</div>
+    if (entries.length === 0) {
+      return <div className="text-xs text-gray-400">{engineStopped ? '장 마감/엔진 정지 — 보유 정보 모름' : '보유 종목 없음'}</div>
+    }
     return (
-      <table className="w-full text-xs">
+      <table className="w-full min-w-[720px] text-xs">
         <thead>
           <tr className="text-gray-500 border-b">
             <th className="text-left py-1 pr-2">종목</th>
             <th className="text-right py-1 px-2">매수가</th>
             <th className="text-right py-1 px-2">현재가</th>
             <th className="text-right py-1 px-2">손절선</th>
-            <th className="text-right py-1 pl-2">손절까지</th>
+            <th className="text-right py-1 px-2">손절까지</th>
+            <th className="text-left py-1 pl-2">사다리</th>
           </tr>
         </thead>
         <tbody>
           {entries.map(([ticker, pos]) => {
             const exitItem = exitLineMap.get(ticker)
             const stop = exitItem ? exitItem.stop_price : null
+            const target = isBfb && exitItem ? exitItem.target_price : null
             const cur = finiteOrNull(prices[ticker]?.current_price)
             const distPct = cur !== null && cur > 0 && stop != null ? ((cur - stop) / cur) * 100 : null
+            const tone: 'normal' | 'orange' | 'red' = distPct === null ? 'normal' : distPct < 1 ? 'red' : distPct < 3 ? 'orange' : 'normal'
             return (
               <tr key={ticker} data-testid={`${sid}-monitor-holding-${ticker}`} className="border-b border-gray-100">
                 <td className="py-1 pr-2 font-medium text-gray-800">{pos.name || ticker}</td>
                 <td className="py-1 px-2 text-right">{won(pos.buy_price)}</td>
                 <td className="py-1 px-2 text-right">{cur !== null ? cur.toLocaleString() : '—'}</td>
-                <td className="py-1 px-2 text-right">{stop != null ? stop.toLocaleString() : '—'}</td>
-                <td className="py-1 pl-2 text-right">{distPct !== null ? `${distPct.toFixed(1)}%` : '—'}</td>
+                <td className="py-1 px-2 text-right" data-testid={`${sid}-monitor-stop-${ticker}`}>{stop != null ? stop.toLocaleString() : '—'}</td>
+                <td
+                  className={`py-1 px-2 text-right ${STOP_TONE_CLS[tone]}`}
+                  data-testid={`${sid}-monitor-stopdist-${ticker}`}
+                  data-tone={tone}
+                >
+                  {distPct !== null ? `${distPct.toFixed(1)}%` : '—'}
+                </td>
+                <td className="py-1 pl-2">
+                  <Ladder
+                    testId={`${sid}-monitor-ladder-${ticker}`}
+                    points={[
+                      { label: '손절', value: stop ?? NaN },
+                      { label: '매수', value: finiteOrNull(pos.buy_price) ?? NaN },
+                      { label: '현재', value: cur ?? NaN },
+                      ...(isBfb && target !== null ? [{ label: '목표', value: target as number }] : []),
+                    ]}
+                  />
+                </td>
               </tr>
             )
           })}
@@ -807,12 +1075,14 @@ export default function StrategyMonitor({
   }
 
   const prepare = prepareHeader(routeEntry?.prepare)
+  const prepareOk = routeEntry?.prepare?.ok === true
   const dailyEntries = (routeEntry?.extra?.daily_entries ?? null) as { count?: number; cap?: number } | null
 
   return (
     <div data-testid={`${strategyId}-monitor`} className="space-y-3">
       {/* ① 상태 */}
       <div data-testid={`${strategyId}-monitor-status`} className="rounded border border-gray-200 p-3 text-xs">
+        <h4 className="text-xs font-semibold text-gray-600 mb-1.5">상태</h4>
         <div className="flex items-center gap-2 flex-wrap">
           <span
             data-testid={`${strategyId}-monitor-badge`}
@@ -821,7 +1091,7 @@ export default function StrategyMonitor({
             {status.label}
           </span>
           <span className="text-gray-500">
-            비중 {weightPct}% · 예산 {won(info.total_investment)}원
+            비중 {weightPct}% · {engineStopped ? '예산 모름' : `예산 ${won(info.total_investment)}원`}
             {status.primary === 'shadow' && weightPct === 0 && ' (섀도는 비중 0 이 정상)'}
           </span>
           {status.chips.map((c) => (
@@ -834,6 +1104,11 @@ export default function StrategyMonitor({
             </span>
           ))}
         </div>
+        {engineStopped && (
+          <div data-testid={`${strategyId}-monitor-engine-stopped`} className="mt-1.5 inline-block px-2 py-0.5 rounded bg-gray-100 text-gray-600 text-[11px]">
+            장 마감/엔진 정지 — 값이 최신이 아닐 수 있습니다(정산 뒤 · 부팅 전 · 휴일)
+          </div>
+        )}
       </div>
 
       {/* 기준일 머리말 */}
@@ -843,11 +1118,13 @@ export default function StrategyMonitor({
 
       {/* ② 시간표 */}
       <div data-testid={`${strategyId}-monitor-timeline`} className="text-xs text-gray-600">
+        <h4 className="text-xs font-semibold text-gray-600 mb-1">오늘의 시간표</h4>
         {renderTimeline()}
       </div>
 
       {/* ③ 깔때기 */}
       <div data-testid={`${strategyId}-monitor-funnel`} className="rounded border border-gray-200 p-3">
+        <h4 className="text-xs font-semibold text-gray-600 mb-1.5">후보 깔때기</h4>
         {renderFunnelPanel()}
       </div>
 
@@ -861,6 +1138,7 @@ export default function StrategyMonitor({
 
           {/* ④ 후보 */}
           <div data-testid={`${strategyId}-monitor-candidates`} className="rounded border border-gray-200 p-3">
+            <h4 className="text-xs font-semibold text-gray-600 mb-1.5">후보 종목</h4>
             <ScrollPane>
               {strategyId === 'etf_trend' && renderEtfCandidatesTable()}
               {strategyId === 'donchian_swing' && renderDonchianCandidatesTable()}
@@ -871,6 +1149,7 @@ export default function StrategyMonitor({
 
           {/* ⑤ 사유 */}
           <div data-testid={`${strategyId}-monitor-skips`} className="text-xs text-gray-600">
+            <h4 className="text-xs font-semibold text-gray-600 mb-1">오늘 거르기 사유</h4>
             {renderSkipsPanel()}
           </div>
         </>
@@ -878,6 +1157,7 @@ export default function StrategyMonitor({
 
       {/* ⑥ 진입 기록 */}
       <div data-testid={`${strategyId}-monitor-entries`} className="rounded border border-gray-200 p-3">
+        <h4 className="text-xs font-semibold text-gray-600 mb-1.5">진입 기록</h4>
         {renderEntriesPanel()}
         {modeDependentTicker && (
           <div className="mt-2 text-[11px] text-gray-500">
@@ -889,11 +1169,12 @@ export default function StrategyMonitor({
       {/* ⑦ 보유 방어선 */}
       {isFull && (
         <div data-testid={`${strategyId}-monitor-holdings`} className="rounded border border-gray-200 p-3">
+          <h4 className="text-xs font-semibold text-gray-600 mb-1.5">보유 방어선</h4>
           <ScrollPane>
             {strategyId === 'etf_trend' && renderEtfHoldingsTable()}
             {strategyId === 'donchian_swing' && renderDonchianHoldingsTable()}
-            {strategyId === 'vcp_breakout' && renderGenericHoldingsTable('vcp_breakout')}
-            {strategyId === 'bull_flag_breakout' && renderGenericHoldingsTable('bull_flag_breakout')}
+            {strategyId === 'vcp_breakout' && renderBreakoutHoldingsTable(false)}
+            {strategyId === 'bull_flag_breakout' && renderBreakoutHoldingsTable(true)}
           </ScrollPane>
           {strategyId === 'donchian_swing' && (
             <div data-testid="donchian_swing-monitor-exit-rules" className="mt-2 text-[11px] text-gray-500">

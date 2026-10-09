@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQueries, useQuery } from '@tanstack/react-query'
 import { useTradingStatus } from '../contexts/TradingStatusContext'
 import { getStrategyColor } from '../types/strategy'
 import { STRATEGY_INFO, ALL_STRATEGIES_INFO } from '../utils/strategyInfo'
@@ -19,7 +19,7 @@ import ProfitChart from '../components/ProfitChart'
 import BalanceTable from '../components/BalanceTable'
 import StrategyMonitor from '../components/StrategyMonitor'
 import StrategySummaryTable from '../components/StrategySummaryTable'
-import { extractDailyFinalCounts } from './StrategyFunnel'
+import { extractDailyFinalCounts } from '../utils/strategyFunnelTrend'
 // 사이클 6 (2026-05-17): LogViewer 는 /logs 메뉴로 분리됨. Dashboard 하단 제거.
 
 // cycle414 — 전략별 진행상황(§2.1): 「전체」 탭은 요약표, 전략 탭은 상세 패널. 고지로는
@@ -59,6 +59,26 @@ export default function Dashboard() {
     retry: false,
   })
   const funnelTrend = recentFunnelQuery.data ? extractDailyFinalCounts(recentFunnelQuery.data.snapshots) : null
+
+  // cycle414 보완 1차 (M11) — 「전체」 탭 요약표 14일 칸. 전략마다 1개씩, 탭이 「전체」일
+  // 때만 켠다(다른 탭에서는 상세 패널의 recentFunnelQuery 하나로 충분).
+  const showSummary = selectedStrategy === 'all'
+  const summaryTrendQueries = useQueries({
+    queries: strategyKeys.map((sid) => ({
+      queryKey: ['strategy-funnel-recent-summary', sid],
+      queryFn: () => getRecentFunnel(sid, RECENT_FUNNEL_DAYS),
+      enabled: showSummary && strategyKeys.length > 0,
+      staleTime: 10 * 60_000,
+      retry: false,
+    })),
+  })
+  const funnelTrends = showSummary
+    ? strategyKeys.reduce<Record<string, Array<{ date: string; count: number }>>>((acc, sid, i) => {
+        const data = summaryTrendQueries[i]?.data
+        if (data) acc[sid] = extractDailyFinalCounts(data.snapshots)
+        return acc
+      }, {})
+    : null
 
   useEffect(() => {
     if (!showTabTooltip) return
@@ -166,6 +186,7 @@ export default function Dashboard() {
           monitor={monitorQuery.data ?? null}
           exitLines={exitLinesQuery.data?.items ?? null}
           tickerPrices={status?.scan?.ticker_prices}
+          funnelTrends={funnelTrends}
           onSelect={setSelectedStrategy}
         />
       ) : showDetailPanel ? (
@@ -178,6 +199,7 @@ export default function Dashboard() {
           tickerNames={status?.scan?.ticker_names}
           subscribedTickers={status?.scan?.subscribed_tickers}
           funnelTrend={funnelTrend}
+          running={status?.running}
         />
       ) : null}
 
@@ -186,6 +208,10 @@ export default function Dashboard() {
           selectedStrategy={selectedStrategy}
           monitor={monitorQuery.data ?? null}
           exitLines={exitLinesQuery.data?.items ?? null}
+          // cycle414 보완 1차 (M10) — 전략 탭에 위 상세 패널이 이미 깔때기·후보·매수신호를
+          // 그리므로 ScanMonitor 쪽 중복(깔때기·VCP/BFB 후보 그리드·돈키언 전용 블록·운영시간
+          // 안내·매수 신호 이력)을 끈다. 「전체」·고지로 탭은 그대로(ScanMonitor 가 유일한 출처).
+          hideDuplicateDetail={showDetailPanel}
         />
         <OrderMonitor selectedStrategy={selectedStrategy} />
       </div>

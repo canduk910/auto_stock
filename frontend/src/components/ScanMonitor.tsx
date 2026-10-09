@@ -284,9 +284,16 @@ interface Props {
   // cycle414 — kojiro 탭(KojiroMonitor)에 라우트 모니터·exit-lines 를 전달한다(둘 다 옵셔널·생략 가능).
   monitor?: StrategyMonitorResponse | null
   exitLines?: ExitLineItem[] | null
+  /**
+   * cycle414 보완 1차 (M10) — Dashboard 가 선택한 탭에 `StrategyMonitor`(또는 가벼운 패널) 상세
+   * 패널을 이미 그렸을 때 true. 그러면 이 컴포넌트 안의 중복(전략별 깔때기·VCP/BFB 후보 그리드·
+   * 돈키언 전용 블록·돌파 운영시간 안내·매수 신호 이력)을 끈다 — 「전체」·고지로 탭은 ScanMonitor 가
+   * 유일한 출처라 그대로 둔다. 기본값 false — 이 컴포넌트를 단독으로 쓰는 기존 테스트는 영향 없음.
+   */
+  hideDuplicateDetail?: boolean
 }
 
-export default function ScanMonitor({ selectedStrategy, monitor, exitLines }: Props) {
+export default function ScanMonitor({ selectedStrategy, monitor, exitLines, hideDuplicateDetail = false }: Props) {
   const [expanded, setExpanded] = useState(false)
   const [swingExpanded, setSwingExpanded] = useState(false)
   const [swingHelpOpen, setSwingHelpOpen] = useState(false)
@@ -445,8 +452,10 @@ export default function ScanMonitor({ selectedStrategy, monitor, exitLines }: Pr
               </div>
             )}
 
-            {/* 돌파 탭(VB/LTV): 운영시각 안내 — NXT 통합 (보드별 분리) */}
-            {isBreakout && (
+            {/* 돌파 탭(VB/LTV): 운영시각 안내 — NXT 통합 (보드별 분리).
+                cycle414 보완 1차 (M10) — 상세 패널이 ②시간표를 이미 그리므로 중복·모순(VCP/BFB 의
+                실제 진입창과 다른 시각)을 피해 전략 탭에서는 끈다. 「전체」 탭은 그대로. */}
+            {isBreakout && !hideDuplicateDetail && (
               <div className="mb-3 px-2 py-1.5 bg-teal-50 rounded text-xs text-teal-700 flex items-center justify-between">
                 <span>매매 시간: NXT 프리 08:00 / KRX 메인 09:00:05 / NXT 애프터 15:30~19:50 (보드별 K값 분리)</span>
                 <span className="text-teal-500">
@@ -458,7 +467,9 @@ export default function ScanMonitor({ selectedStrategy, monitor, exitLines }: Pr
             {/* 사이클 21 — 5 전략 깔때기 시각화 (donchian SWING_STAGES 패턴 동일 적용).
                 백엔드 _scan_stats 기반. 미반영 시점 fallback "아직 스캔 전" 표시. */}
             {(() => {
-              const conf = FUNNEL_CONF[selectedStrategy]
+              // cycle414 보완 1차 (M10) — 상세 패널의 ③ 깔때기가 이미 같은 내용을 그린다
+              // (낡은 상수 라벨 「50/150/200 EMA」 포함). 전략 탭에서는 끈다.
+              const conf = hideDuplicateDetail ? null : FUNNEL_CONF[selectedStrategy]
               if (!conf) return null
               return (
                 <ScanFunnelBars
@@ -543,8 +554,10 @@ export default function ScanMonitor({ selectedStrategy, monitor, exitLines }: Pr
               />
             )}
 
-            {/* 스윙 전용 탭(donchian_swing): 깔때기 통계 + 후보 종목 테이블 */}
-            {isSwing && (() => {
+            {/* 스윙 전용 탭(donchian_swing): 깔때기 통계 + 후보 종목 테이블.
+                cycle414 보완 1차 (M10) — 상세 패널(①②③⑥⑦)이 이미 그린다. 「멈춤 중에도 진입
+                대기」 같은 모순 배지도 함께 사라진다. 「전체」 탭 요약 줄은 그대로(위 isAll 블록). */}
+            {isSwing && !hideDuplicateDetail && (() => {
               const stats = swingStats
               const universeMax = Math.max(
                 stats?.universe_candidates ?? 0,
@@ -1147,8 +1160,9 @@ export default function ScanMonitor({ selectedStrategy, monitor, exitLines }: Pr
             })()}
 
             {/* VCP/BFB 전용 탭: 후보 진단 그리드 (구독 커버리지 + 돌파선 거리 + 상태 배지).
-                장 외 시간에도 렌더 — 보드/시가 의존 없음 (KojiroMonitor 배선 패턴 답습). */}
-            {isVcpOrBfb && (
+                장 외 시간에도 렌더 — 보드/시가 의존 없음 (KojiroMonitor 배선 패턴 답습).
+                cycle414 보완 1차 (M10) — 상세 패널 ④ 후보 종목이 이미 그린다. 전략 탭에서는 끈다. */}
+            {isVcpOrBfb && !hideDuplicateDetail && (
               <BreakoutCandidateMonitor
                 strategyId={selectedStrategy as 'vcp_breakout' | 'bull_flag_breakout'}
                 strategies={strategies}
@@ -1160,7 +1174,10 @@ export default function ScanMonitor({ selectedStrategy, monitor, exitLines }: Pr
         )
       })()}
 
-      {/* 매수 신호 이력 */}
+      {/* 매수 신호 이력 — cycle414 보완 1차 (M10): 전략 탭에서는 상세 패널 ⑥ 진입 기록이 이미
+          같은 신호를 그린다(기준선 정규화·change_rate=0 「—」 처리까지 포함). 「전체」·고지로 탭은
+          여기가 유일한 출처라 그대로 둔다. */}
+      {!hideDuplicateDetail && (
       <div>
         <h4 className="text-sm font-medium text-gray-700 mb-2">최근 매수 신호</h4>
         {signals.length === 0 ? (
@@ -1213,7 +1230,11 @@ export default function ScanMonitor({ selectedStrategy, monitor, exitLines }: Pr
                         {s.target_price ? s.target_price.toLocaleString() : '-'}
                       </td>
                       <td className="py-1 pr-2 text-right">{s.price.toLocaleString()}</td>
-                      <td className="py-1 text-right text-red-500">+{s.change_rate}%</td>
+                      {/* M10 — change_rate=0 은 「+0%」 거짓 표기가 아니라 「—」(엔진이 0 으로
+                          채우는 전략이 섞여 있다 — etf·donchian·VCP·BFB·kojiro). */}
+                      <td className={`py-1 text-right ${s.change_rate > 0 ? 'text-red-500' : s.change_rate < 0 ? 'text-blue-500' : 'text-gray-300'}`}>
+                        {s.change_rate > 0 ? `+${s.change_rate}%` : s.change_rate < 0 ? `${s.change_rate}%` : '—'}
+                      </td>
                     </tr>
                   )
                 })}
@@ -1222,6 +1243,7 @@ export default function ScanMonitor({ selectedStrategy, monitor, exitLines }: Pr
           </ScrollPane>
         )}
       </div>
+      )}
     </div>
   )
 }

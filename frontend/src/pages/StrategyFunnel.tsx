@@ -21,6 +21,11 @@ import {
   type FunnelSnapshot,
 } from '../api/strategy-funnel'
 import { strategyLabel } from '../utils/strategyMeta'
+// cycle414 보완 1차 (L2) — 날짜별 최종 집계 두 함수는 `utils/strategyFunnelTrend` 가 정본이다.
+// 이 페이지 자체가 지연 로딩 대상이라, 다른 모듈이 이 두 함수만 쓰자고 이 페이지를
+// 정적 import 하면 안 된다(§2.10) — 재수출만 해서 기존 import 경로(`../StrategyFunnel`)를 보존한다.
+import { computeZeroStreak, extractDailyFinalCounts } from '../utils/strategyFunnelTrend'
+export { computeZeroStreak, extractDailyFinalCounts, type DailyFinalCount } from '../utils/strategyFunnelTrend'
 
 // cycle395 — 표시명은 utils/strategyMeta.ts 중앙 정본(strategyLabel)을 거친다.
 const STRATEGY_OPTIONS = [
@@ -93,46 +98,6 @@ export function computeBottleneck(rows: FunnelSnapshot[]): BottleneckInfo | null
     }
   }
   return best
-}
-
-export interface DailyFinalCount {
-  date: string
-  count: number
-}
-
-/**
- * getRecentFunnel 응답(여러 날짜×여러 단계 혼재)에서 날짜별 "최종 단계" 통과 수만 추출.
- * 최종 단계 = step_no===99 우선(수동 trigger/자동 09:30 캡처 공통 계약), 없으면 그 날짜의 최대 step_no.
- */
-export function extractDailyFinalCounts(snapshots: FunnelSnapshot[]): DailyFinalCount[] {
-  const byDate = new Map<string, FunnelSnapshot[]>()
-  for (const snap of snapshots) {
-    const list = byDate.get(snap.target_date)
-    if (list) {
-      list.push(snap)
-    } else {
-      byDate.set(snap.target_date, [snap])
-    }
-  }
-  const result: DailyFinalCount[] = []
-  for (const [date, rows] of byDate.entries()) {
-    const finalRow =
-      rows.find((r) => r.step_no === 99) ??
-      rows.reduce((a, b) => (b.step_no > a.step_no ? b : a))
-    result.push({ date, count: finalRow.survived_count })
-  }
-  result.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0))
-  return result
-}
-
-/** daily 배열 끝(최근일)부터 역순으로 count===0 이 연속되는 길이. */
-export function computeZeroStreak(daily: DailyFinalCount[]): number {
-  let streak = 0
-  for (let i = daily.length - 1; i >= 0; i--) {
-    if (daily[i].count !== 0) break
-    streak++
-  }
-  return streak
 }
 
 /** "YYYY-MM-DD" → "MM-DD". 날짜 전용 문자열이라 Date() 파싱/타임존 변환 불필요(KST 강제 컨벤션 무관). */
