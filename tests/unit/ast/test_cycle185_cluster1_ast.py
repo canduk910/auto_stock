@@ -26,6 +26,7 @@ source 텍스트 grep 금지 — AST 노드 검사 (사이클 167/179 교훈: �
 from __future__ import annotations
 
 import ast
+from pathlib import Path
 
 import pytest
 
@@ -178,6 +179,56 @@ def test_G2_OE_AST_execute_sell_wires_final_failure_handoff() -> None:
     ]
     assert len(hits) >= 1, (
         "execute_sell 안에 self._handle_sell_final_failure(...) 호출(배선) 의무"
+    )
+
+
+def _final_failure_refs(tree: ast.AST, func_of: dict) -> list:
+    """`_handle_sell_final_failure` 를 가리키는 노드의 직속 enclosing 함수명 목록.
+
+    호출뿐 아니라 맨 참조(`cb = self._handle_sell_final_failure`)와
+    `getattr(..., "_handle_sell_final_failure")` 문자열 상수까지 센다 —
+    우회 배선도 「다른 자리에서 부른다」 와 같기 때문이다. 정의(FunctionDef
+    이름)는 노드가 아니라 세지 않는다. docstring 은 백틱 등으로 이름과
+    정확히 같지 않아 걸리지 않는다.
+    """
+    name = "_handle_sell_final_failure"
+    out: list = []
+    for n in ast.walk(tree):
+        if (isinstance(n, ast.Attribute) and n.attr == name) or (
+            isinstance(n, ast.Constant) and n.value == name
+        ):
+            out.append(func_of.get(n))
+    return out
+
+
+def test_G2_OE_AST_final_failure_called_only_from_execute_sell() -> None:
+    """`_handle_sell_final_failure` 의 부르는 자리 == `execute_sell` 정확히 1건.
+
+    B4-5(cycle426) 관문 3 보강 — 위 배선 테스트는 「execute_sell 이 ≥1회
+    부른다」 만 본다. 이 메서드는 `insufficient_qty=True` 면 메모리·DB 포지션을
+    지우는 제거 자리라, 다른 메서드가 부르면 「제거 자리 정확히 둘」 불변식이
+    이름만 지켜진 채 실질 3번째 제거 경로가 생긴다(관문 1 돌연변이 M6 —
+    가드·그물 모두 놓쳤다). 그래서 order_engine 전체의 참조 자리를 정확히
+    `["execute_sell"]` 로 묶고, `src/` 의 다른 모듈에서는 참조 0 을 요구한다.
+    """
+    tree = _parse(_oe_mod)
+    refs = _final_failure_refs(tree, _func_of_map(tree))
+    assert refs == ["execute_sell"], (
+        "order_engine 안 `_handle_sell_final_failure` 참조 자리는 execute_sell "
+        f"1건뿐이어야 한다(실질 3번째 포지션 제거 경로 차단): {refs}"
+    )
+
+    oe_path = Path(_oe_mod.__file__).resolve()
+    src_root = oe_path.parents[1]  # src/
+    outside: list = []
+    for py in sorted(src_root.rglob("*.py")):
+        if py.resolve() == oe_path:
+            continue
+        mod_tree = ast.parse(py.read_text(encoding="utf-8"))
+        hits = _final_failure_refs(mod_tree, _func_of_map(mod_tree))
+        outside.extend(f"{py.relative_to(src_root.parent)}:{fn}" for fn in hits)
+    assert outside == [], (
+        f"order_engine 밖에서 `_handle_sell_final_failure` 를 참조한다: {outside}"
     )
 
 
