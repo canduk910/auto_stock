@@ -990,6 +990,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -1368,6 +1369,7 @@ backend:
       - tests/unit/engine/test_cycle385r4_round4.py
       - tests/unit/engine/test_cycle385r_partial_locked_sell.py
       - tests/unit/engine/test_cycle385r_recount_credit.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
     transitive_tests:
       - tests/contract/test_backtest_mcp_health.py
@@ -2813,6 +2815,7 @@ backend:
       - tests/unit/engine/test_cycle385r_partial_locked_sell.py
       - tests/unit/engine/test_cycle385r_recount_credit.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_log_analysis_metrics.py
       - tests/unit/engine/test_order_engine_buy.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
@@ -4990,6 +4993,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -6323,6 +6327,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -7658,6 +7663,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -8994,6 +9000,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -10333,6 +10340,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -11664,6 +11672,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -13070,6 +13079,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -14403,6 +14413,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -15756,6 +15767,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -17092,6 +17104,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -17478,6 +17491,7 @@ backend:
       - tests/unit/engine/test_cycle385_b7_partial_sell.py
       - tests/unit/engine/test_cycle385_reorder_requery.py
       - tests/unit/engine/test_cycle394_gpt6_luna.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_recommendation_backtest_hook.py
       - tests/unit/middleware/test_cycle243_api_auth.py
       - tests/unit/realtime/test_cycle235_execution_qty_parse.py
@@ -19760,6 +19774,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -21098,6 +21113,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -22431,6 +22447,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -23766,6 +23783,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -25101,6 +25119,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -26436,6 +26455,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -27773,6 +27793,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -29106,6 +29127,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -30441,6 +30463,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -31776,6 +31799,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -33111,6 +33135,7 @@ backend:
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -33576,6 +33601,7 @@ backend:
       - tests/unit/engine/test_cycle385r_recount_credit.py
       - tests/unit/engine/test_cycle386_daily_bar_finalize.py
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
       - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
@@ -34865,6 +34891,7 @@ backend:
       - tests/unit/engine/test_cycle385_reorder_requery.py
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle403_etf_trend_wiring.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_strategy_exchange_nxt_downgrade.py
       - tests/unit/routes/test_cycle84_api_response_envelope.py
       - tests/unit/routes/test_cycle84_route_404.py
@@ -37117,6 +37144,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -38451,6 +38479,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -39788,6 +39817,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -41121,6 +41151,7 @@ backend:
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -42460,6 +42491,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -43798,6 +43830,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -45131,6 +45164,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -46469,6 +46503,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -47870,6 +47905,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -49206,6 +49242,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -50541,6 +50578,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -51877,6 +51915,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -53211,6 +53250,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -54547,6 +54587,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -55881,6 +55922,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -57216,6 +57258,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -58551,6 +58594,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -59968,6 +60012,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -61309,6 +61354,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -62639,6 +62685,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -63974,6 +64021,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -65309,6 +65357,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -66645,6 +66694,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -67979,6 +68029,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -69384,6 +69435,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -70719,6 +70771,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -72056,6 +72109,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -73390,6 +73444,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -74724,6 +74779,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -76136,6 +76192,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -77468,6 +77525,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -78869,6 +78927,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -80208,6 +80267,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -81550,6 +81610,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -82943,6 +83004,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -84280,6 +84342,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -85613,6 +85676,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -86948,6 +87012,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -88283,6 +88348,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -89618,6 +89684,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -90953,6 +91020,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -92287,6 +92355,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -93719,6 +93788,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -95135,6 +95205,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -96628,6 +96699,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -97964,6 +98036,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -99299,6 +99372,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -100643,6 +100717,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -101971,6 +102046,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -103307,6 +103383,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -104637,6 +104714,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -105321,6 +105399,7 @@ backend:
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle64_price_filter_scanner_apply.py
       - tests/unit/engine/test_cycle64_price_filter_scanner_cache.py
@@ -107397,6 +107476,7 @@ backend:
       - tests/unit/engine/test_cycle413_journal_view.py
       - tests/unit/engine/test_cycle416_market_breadth_leaf.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle61_phase2A2_dataclass_completeness.py
@@ -108645,6 +108725,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -109980,6 +110061,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -111313,6 +111395,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -112647,6 +112730,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -113984,6 +114068,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -115339,6 +115424,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -116653,6 +116739,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -118007,6 +118094,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -119324,6 +119412,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -120657,6 +120746,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -121992,6 +122082,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -123328,6 +123419,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -124663,6 +124755,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -125998,6 +126091,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -127337,6 +127431,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -128705,6 +128800,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -130043,6 +130139,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -131370,6 +131467,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -132714,6 +132812,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -134044,6 +134143,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -135379,6 +135479,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -136716,6 +136817,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -138052,6 +138154,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -138702,6 +138805,7 @@ backend:
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -140718,6 +140822,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -141212,6 +141317,7 @@ backend:
       - tests/unit/engine/test_cycle399_shadow_weights.py
       - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
       - tests/unit/engine/test_kojiro_wiring.py
       - tests/unit/engine/test_observability_logs.py
@@ -143388,6 +143494,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -144722,6 +144829,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -146140,6 +146248,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -147476,6 +147585,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -148809,6 +148919,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -150147,6 +150258,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -151479,6 +151591,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -152814,6 +152927,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -154148,6 +154262,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -155485,6 +155600,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -156819,6 +156935,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -157191,6 +157308,7 @@ backend:
       - tests/unit/engine/test_cycle291_pre_nxt_gtp.py
       - tests/unit/engine/test_cycle369_status_exit_integration.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_order_engine_buy.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
       - tests/unit/engine/test_order_engine_sell_pre_nxt_preconvert.py
@@ -159560,6 +159678,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -160895,6 +161014,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -162234,6 +162354,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -163574,6 +163695,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -164974,6 +165096,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -166311,6 +166434,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -166838,6 +166962,7 @@ backend:
       - tests/unit/engine/test_cycle385r_partial_locked_sell.py
       - tests/unit/engine/test_cycle385r_recount_credit.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_order_engine_buy.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
       - tests/unit/routes/test_cycle385_manual_sell_selling.py
@@ -169235,6 +169360,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -169688,6 +169814,7 @@ backend:
       - tests/unit/engine/test_cycle385r2_round2.py
       - tests/unit/engine/test_cycle392_sell_book_cumulative.py
       - tests/unit/engine/test_cycle409_sell_order_price.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_order_engine_buy.py
       - tests/unit/engine/test_order_engine_sell_fallback.py
       - tests/unit/engine/test_p1b_buy_fill_duplicate_race.py
@@ -172004,6 +172131,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -173321,6 +173449,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -174673,6 +174802,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -176007,6 +176137,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -179199,6 +179330,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -180531,6 +180663,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -181869,6 +182002,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -183201,6 +183335,7 @@ backend:
       - tests/unit/engine/test_cycle417_daily_gap_fill.py
       - tests/unit/engine/test_cycle418j_journal_view_fixes.py
       - tests/unit/engine/test_cycle41_funnel_name_reason.py
+      - tests/unit/engine/test_cycle422_sell_fallback_net.py
       - tests/unit/engine/test_cycle44_resolve_ticker_name.py
       - tests/unit/engine/test_cycle45_cache_auto_evict.py
       - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -187181,10 +187316,10 @@ frontend:
       - frontend/src/pages/__tests__/Dashboard.fix1.cycle414.test.tsx
       - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
       - frontend/src/pages/__tests__/MarketState.test.tsx
-generated_at: '2026-10-09T12:01:28.172Z'
+generated_at: '2026-10-09T13:03:54.158Z'
 stats:
   backend_modules: 186
-  backend_tests: 1316
+  backend_tests: 1317
   frontend_modules: 155
   frontend_tests: 168
   unmapped_modules:
