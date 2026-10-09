@@ -74,6 +74,9 @@ export default function JournalTab() {
   const onSort = setFilter(setSort)
   const onStrategy = setFilter(setStrategy)
   const onTicker = setFilter(setTicker)
+  // cycle413 보완 2차 N3 — 세후/세전도 필터다. 2쪽을 보던 중 바꾸면 그 페이지에 결과가
+  // 없을 수 있어(「데이터가 없습니다」) 다른 필터와 같이 1쪽으로 되돌린다.
+  const onBasis = setFilter(setBasis)
 
   const recordStart = data?.record_start
 
@@ -93,7 +96,7 @@ export default function JournalTab() {
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <span className="text-sm text-gray-500">거래일지</span>
-        <CostBasisToggle value={basis} onChange={setBasis} />
+        <CostBasisToggle value={basis} onChange={onBasis} />
       </div>
 
       <div data-testid="journal-record-start" className="text-xs text-gray-400">
@@ -198,7 +201,9 @@ export default function JournalTab() {
         )}
       </div>
 
-      {/* cycle413 보완 1차 #3 — 페이지 넘김. 「총 n」 이 size(20)를 넘으면 다음 쪽으로 봐야 한다. */}
+      {/* cycle413 보완 1차 #3 — 페이지 넘김. 「총 n」 이 size(20)를 넘으면 다음 쪽으로 봐야 한다.
+          cycle413 보완 2차 N3 — `total_pages=0`(결과 0건, `/pnl` 과 같은 규약)을 「1 / 0」 그대로
+          내지 않고 `max(1, …)` 으로 가린다(다음 버튼은 여전히 비활성 — 0 과 비교해도 꺼진다). */}
       {data && (
         <div className="flex items-center gap-2 text-xs text-gray-500">
           <button
@@ -211,7 +216,7 @@ export default function JournalTab() {
             이전
           </button>
           <span data-testid="journal-page-info">
-            {page} / {data.total_pages}
+            {page} / {Math.max(1, data.total_pages)}
           </span>
           <button
             type="button"

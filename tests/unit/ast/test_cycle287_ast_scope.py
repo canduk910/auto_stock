@@ -820,8 +820,13 @@ _SRC_TREE_FILES = 181  # 직전 = 트랙 C — 실비용 사후 대사: 신규 4
 # 문자열화를 overlay_pairs 뒤로 · F8 fills=None 전달)·`engine/journal_view.py`
 # (F4·F5·F8·F9·F10·F11·F12). 신규/삭제 파일 0 — 파일 수 181 그대로. 직전 값
 # (cycle413 1차) = `19c8bf4dd10e155e106e6c63c26cc743bad176538a950d344fbaab2e87737ab2`.
+# cycle413 보완 2차(재검증 N1·N2 백엔드 몫) — `engine/journal_view.py`
+# (fills_failed 면 costs.paid_total·expected_exit 를 부분합·왜곡값 대신
+# lookup_failed 로 · entry.reason.na 도 unknown 대신 lookup_failed). 신규/삭제
+# 파일 0 — 파일 수 181 그대로. 직전 값(cycle413 보완 1차) =
+# `3e2d8cc730d4c0c84ab19d7028f74434de4ce27752e7eddc99e7123384015865`.
 _SRC_TREE_DIGEST = (
-    "3e2d8cc730d4c0c84ab19d7028f74434de4ce27752e7eddc99e7123384015865"
+    "cc4443184020e57cbaf377b1f319b6274aa0aabcc80f0c39081567852612fa76"
 )
 
 #: 디렉터리 통째로 잠그는 영역 — 새 파일이 조용히 들어오는 것도 접촉이다.

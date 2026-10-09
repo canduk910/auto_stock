@@ -89,16 +89,18 @@ function OrderLineRow({ line }: { line: OrderLine | ExitLine }) {
       ) : (
         line.slip_order_na && <NaBadge na={line.slip_order_na} />
       )}
+      {/* cycle413 보완 2차 N3(#12 잔여) — JSX 는 줄바꿈뿐인 공백을 지운다. 숫자와 칩이
+          띄어쓰기 없이 붙어 「판단가 16,250역산」처럼 한 낱말로 읽힌다 — 명시 공백을 둔다. */}
       {line.judge.price !== null && (
         <span className="text-xs text-gray-500">
           판단가 {fmtInt(line.judge.price)}
-          {judgeSrcLabel(line.judge.src) && <Chip>{judgeSrcLabel(line.judge.src)}</Chip>}
+          {judgeSrcLabel(line.judge.src) && <>{' '}<Chip>{judgeSrcLabel(line.judge.src)}</Chip></>}
         </span>
       )}
       {line.judge.price === null && line.judge.upper !== null && (
         <span className="text-xs text-gray-500">
           판단가 ≤{fmtInt(line.judge.upper)}
-          {judgeSrcLabel(line.judge.src) && <Chip>{judgeSrcLabel(line.judge.src)}</Chip>}
+          {judgeSrcLabel(line.judge.src) && <>{' '}<Chip>{judgeSrcLabel(line.judge.src)}</Chip></>}
         </span>
       )}
       {line.slip_judge && (
@@ -157,11 +159,19 @@ function InitialStopBlock({ stop }: { stop: StopPoint }) {
 
 // ── 익절 목표 ────────────────────────────────────────────────────────────────
 function TargetBlock({ target }: { target: Target }) {
+  // cycle413 보완 2차 N3(#12 잔여) — 문장(`text`)과 빈칸 배지(`na`)가 동시에 설 수 있다
+  // (예: 돈키언 1R 면제선 문장 + `not_applicable`). 띄어쓰기 없이 붙으면
+  // 「…17,710해당 없음」처럼 한 낱말로 읽힌다 — ReasonBlock 과 같이 사이에 공백을 둔다.
   return (
     <div data-testid="journal-target" className="text-sm text-gray-700">
       <span className="text-xs font-medium text-gray-500">익절 목표 </span>
       {target.text && <span>{target.text}</span>}
-      {target.na && <NaBadge na={target.na} />}
+      {target.na && (
+        <>
+          {target.text ? ' ' : ''}
+          <NaBadge na={target.na} />
+        </>
+      )}
     </div>
   )
 }
@@ -299,8 +309,9 @@ function CostsBlock({ costs, isOpen }: { costs: Costs; isOpen: boolean }) {
       </div>
       <div>
         {totalLabel} {costs.paid_total !== null ? fmtInt(costs.paid_total) : <NaBadge na="unknown" />}
-        {costs.status && <Chip>{costStatusLabel(costs.status)}</Chip>}
-        {costs.allocated && <Chip>배분</Chip>}
+        {/* cycle413 보완 2차 N3(#12 잔여) — 합계 숫자 뒤에 칩이 띄어쓰기 없이 붙었다. */}
+        {costs.status && <>{' '}<Chip>{costStatusLabel(costs.status)}</Chip></>}
+        {costs.allocated && <>{' '}<Chip>배분</Chip></>}
         {costs.expected_exit !== null ? (
           <span className="text-xs text-gray-500"> · 예상 청산비용 {fmtInt(costs.expected_exit)}</span>
         ) : (
@@ -364,8 +375,12 @@ function NoteBlock({ anchorTradeId, note }: { anchorTradeId: string; note: { bod
 
   const mutation = useMutation({
     mutationFn: (body: string) => putJournalNote(anchorTradeId, body),
-    onSuccess: () => {
-      setLastSaved(draft)
+    // cycle413 보완 2차 N1 — `draft`(현재 입력칸)가 아니라 `body`(실제로 전송한 값)로
+    // `lastSaved` 를 맞춘다. 전송 뒤 응답이 오기 전에 입력칸을 더 고치면, 리렌더로 갈아끼워진
+    // 최신 `draft` 클로저를 쓰면 전송 뒤 덧붙인 글자까지 「저장됨」으로 둔갑해 다시 저장할
+    // 길(dirty)이 막힌다. `body` 는 `mutate()` 호출 시점의 변수(variables)라 클로저 문제가 없다.
+    onSuccess: (_data, body) => {
+      setLastSaved(body)
       setStatus('saved')
       // cycle413 보완 1차 #2 — 저장 성공은 일지 캐시를 무효화해, 탭을 오가도(remount) 운영
       // QueryClient(staleTime 3초·gcTime 5분)가 저장 전 캐시를 그대로 돌려주지 않게 한다.
@@ -530,7 +545,8 @@ export default function JournalCard({ card, basis, stopsRecordStart }: Props) {
       {card.status === 'open' && (
         <div className="border-t pt-2 text-sm text-gray-600">
           보유 중 · 지금 손절선 {fmtInt(card.stop_track.last)}
-          {card.entry.initial_stop.kind && <Chip>{stopKindLabel(card.entry.initial_stop.kind)}</Chip>}
+          {/* cycle413 보완 2차 N3(#12 잔여) — 손절선 숫자 뒤 칩이 띄어쓰기 없이 붙었다. */}
+          {card.entry.initial_stop.kind && <>{' '}<Chip>{stopKindLabel(card.entry.initial_stop.kind)}</Chip></>}
         </div>
       )}
 

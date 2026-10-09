@@ -453,7 +453,7 @@ def _ring_entry_sentence(strategy: str, signal: dict, params: dict | None) -> st
 
 def _entry_reason(anchor_row: dict | None, *, strategy: str, orders_failed: bool,
                    buy_date: date | None, record_start: dict, llm_evals: list[dict] | None,
-                   order_no: str | None, ticker: str) -> dict:
+                   order_no: str | None, ticker: str, fills_failed: bool = False) -> dict:
     if orders_failed:
         return {"code": None, "sub": None, "phrase": None, "renamed_from": None, "text": None,
                 "src": None, "signal_src": None, "na": NA_LOOKUP_FAILED}
@@ -472,6 +472,12 @@ def _entry_reason(anchor_row: dict | None, *, strategy: str, orders_failed: bool
         if ai is not None:
             return {"code": None, "sub": None, "phrase": None, "renamed_from": None,
                     "text": _ai_sentence(strategy, ai), "src": "restored_ai", "signal_src": None, "na": None}
+        if fills_failed:
+            # cycle413 보완 2차 N2(screens 재검증) — 체결 조회 실패로 `order_no` 자체를 몰라
+            # 일지 행을 찾아보지도 못했다. 기록이 없어서(`_record_na`="unknown")가 아니라
+            # 우리가 조회에 실패해서다 — lookup_failed 로 낸다(「모름」의 이유를 흐리지 않는다).
+            return {"code": None, "sub": None, "phrase": None, "renamed_from": None, "text": None,
+                    "src": None, "signal_src": None, "na": NA_LOOKUP_FAILED}
         return {"code": None, "sub": None, "phrase": None, "renamed_from": None, "text": None,
                 "src": None, "signal_src": None, "na": _record_na(buy_date, _orders_threshold(record_start))}
 
@@ -1168,6 +1174,7 @@ def build_card(
     reason = _entry_reason(
         anchor_row, strategy=strategy, orders_failed=orders_failed, buy_date=opened_date,
         record_start=record_start, llm_evals=llm_evals, order_no=anchor_order_no, ticker=ticker,
+        fills_failed=fills_failed,
     )
 
     stops_failed = stops is None
@@ -1245,7 +1252,18 @@ def build_card(
 
     # ── costs ─────────────────────────────────────────────────────────────────
     costs_block = _build_costs(pair, buy_ids=buy_ids, exit_lines=exit_order_lines, costs=costs, status=status)
-    if status != "closed" and costs_block["na"] is None and costs_block["fee_total"] is not None:
+    if fills_failed:
+        # cycle413 보완 2차 N1 — 체결 조회 실패면 청산분(수량·비용)을 전혀 모른다.
+        # `exit_lines=[]` 로 들어가 `paid_total` 이 진입 수수료만으로 「합계」인 척 나오고
+        # (부분합을 전체처럼 내는 「모름 ≠ 0」 위반), `entry_qty=0` 폴백(`or 1`)이
+        # `ratio_remaining` 을 비율이 아닌 보유수량 그 자체로 왜곡시켜 `expected_exit` 가
+        # 음수로 나온다(screens·trader 재현: ≈ −17,877). 둘 다 lookup_failed 로 낸다.
+        costs_block["paid_total"] = None
+        if status != "closed":
+            costs_block["expected_exit"] = None
+            costs_block["expected_exit_na"] = NA_LOOKUP_FAILED
+    elif (status != "closed" and costs_block["na"] is None and costs_block["fee_total"] is not None
+          and costs_block["entry_fee"] is not None):
         total_buy_qty = entry_qty or 1
         remaining_qty = _f(pair.get("buy_qty")) or 0.0
         ratio_remaining = remaining_qty / total_buy_qty if total_buy_qty else 1.0

@@ -1,0 +1,41 @@
+[cycle413 보완 2차 — backend-dev] 재검증(suites·screens·trader) N1~N3 처리
+
+- 판정 원문 읽음: scratchpad c413/fix/verdict1.md + 이번 작업 지시의 재검증 3렌즈 요약.
+- N1(중, frontend) JournalCard.tsx NoteBlock onSuccess 레이스 — Red 테스트 작성
+  (History.journal.fix2.cycle413.test.tsx) → fireEvent.click(동기) 로 레이스 창 재현 →
+  onSuccess(_data, body) 로 lastSaved 를 variables(전송값) 기준으로 고침 → Green.
+- N2/N1(하, backend) journal_view.py fills_failed → costs.paid_total 부분합·
+  expected_exit 음수 왜곡(entry_qty=0 폴백) — Red 테스트 작성
+  (test_cycle413_fix2_journal_view.py) → fills_failed 분기에서 paid_total·
+  expected_exit 를 lookup_failed 로 고정 → Green. 재검증 수치(−17,877.6) 그대로 재현 확인.
+- N2(하, screens 「entry.reason.na=unknown」) — _entry_reason 에 fills_failed 매개변수
+  추가, anchor_row 없고 ai 없고 fills_failed 면 na=lookup_failed(기존 _record_na
+  대신) → Red/Green 테스트 추가.
+- N3(하, frontend) JournalTab.tsx 세후/세전 토글이 page 를 1로 안 돌림 + total_pages=0
+  일 때 "1 / 0" 노출 — setFilter(setBasis) 로 토글도 다른 필터와 동일 경로 태움,
+  표시는 Math.max(1, total_pages) 로 가림 → Red/Green.
+- N3(하, screens 「#12 잔여 — 칩 띄어쓰기」) TargetBlock·OrderLineRow 판단가·
+  CostsBlock 합계·보유중 지금 손절선 4곳 — JSX 줄바꿈 공백이 사라져 숫자+칩이
+  붙던 문제, 명시 공백({' '}) 추가 → Red(git stash 로 사전수정 되돌려 확인)/Green.
+- N2(하, trader 「유효선 근사 표시」) — 보류. exit line 에 stop_kind 가 안 실려 있어
+  frontend 가 hard_pct 근사인지 구분 못하는 구조적 공백(fix1 자체 주석이 이미
+  예견한 미완 배선). 고치려면 shape.json 키 계약(`exit_line` 키 목록)·TS 타입·
+  journal.fixture.ts·라우트/MSW 정직성 테스트까지 번져 이번 사이클 범위를
+  넘는다고 판단 — suites 렌즈가 #5 잔여를 "다음 사이클 몫"으로 이미 분류한 것과
+  같은 결로 보류. 사용자/team-leader 보고에 명시.
+- 전체 스위트: 백엔드 python -m pytest -q 전체 재실행(2회) — 1회차는 test_index.yaml
+  이 아직 구버전이라 freshness 2건 + AST scope sha-pin 1건 추가 실패, 둘 다 조치:
+  (a) test_index.yaml 재생성(순서를 node→python 으로 바꿔 포맷 잡동사니 제거 —
+  js-yaml 4.x 기본 들여쓰기가 PyYAML 과 달라 전량 재포맷 diff가 났던 것을
+  정상화) (b) tests/unit/ast/test_cycle287_ast_scope.py 의 _SRC_TREE_DIGEST 재핀
+  (journal_view.py 변경 반영, 파일 수 181 불변). 재실행 후 전부 통과(parquet
+  OSError 2건만 pre-existing·무관, main 도 동일).
+- vitest 142 files/1196 tests 통과, tsc --noEmit 통과, vite build 통과,
+  eslint(변경 파일만) 오류 0.
+- 영향 인덱스 python→node→(재검증용 node→python 재정렬) 최종 재생성 완료,
+  diff 는 신규 테스트 2건 매핑 + 통계 숫자만(174줄).
+- 8영역·scheduler.py·journal_worker/·supabase/migrations/·cost_overlay.py 무접촉.
+  KIS 호출 추가 0. 매매 행위 무변경(화면·비용 표시 로직만).
+- 정리: node_modules 심볼릭 링크(frontend/, 루트) 는 js-yaml/vitest 실행용으로
+  임시 생성 — 다른 역할이 지운 것과 같은 임시물이라 커밋 대상 아님(.gitignore
+  대상, 혹은 작업 종료 시 제거 예정).
