@@ -445,8 +445,8 @@ _APPROVED_CONTENT_SHA: dict[str, tuple[str, str]] = {
         "cycle330(2026-09-20) — 합류자 없는 토큰 발급 실패의 고아 Future 회수, 8영역 승인",
     ),
     "src/engine/order_engine.py": (
-        "4ec9a8ab094f802a2b8b5a0f4b23254f74b5949ef5bd7bf3cdae9b1013806f54",
-        "cycle432 page_full 제거 사용자 승인 2026-10-10",
+        "3fa8f54855450bcad6ffade62cad99b68b36753ab8d14eaa17c7fa92e8137775",
+        "cycle436(2026-10-10) — 카드 E 커밋 ①: pending_buy_amounts 넣기·빼기를 StrategyState.reserve_buy/release_buy 단일 진입점으로(키는 아직 ticker, 행위 0), 사용자 승인",
     ),
     "src/engine/risk.py": (
         "a2187b8270446379988d24dfbe39b902d6ab37b112d4b6ce7330ee171434e222",
@@ -457,8 +457,8 @@ _APPROVED_CONTENT_SHA: dict[str, tuple[str, str]] = {
         "cycle417(2026-10-09) — 일봉 증분 적재 구멍 메우기(증분 창 확대 + 구멍 판정 1회), 8영역 승인",
     ),
     "src/engine/scheduler.py": (
-        "4859e1b326fc89c18e59f41eff5571c4f5797b83b9c63c09d1fb5d8a5b34258a",
-        "cycle435(2026-10-10) — stale _selling 재대조 최소 경과 상수 사본을 지우고 leaf `selling_reconcile.SELLING_RECONCILE_MIN_AGE_S` 를 호출 자리에서 import, 사용자 승인",
+        "ae8ff8d0741881aec72d4f54ed214a26a4ae935c77d0ef535b6b97007850afdc",
+        "cycle436(2026-10-10) — 카드 E: `_reset_daily_state` 의 `pending_buy_amounts.clear()` 를 `StrategyState.clear_buy_reservations()` 단일 진입점 호출로, 사용자 승인",
     ),
     "src/engine/session.py": (
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",

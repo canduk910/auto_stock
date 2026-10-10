@@ -122,10 +122,14 @@ _FROZEN_SEGMENTS = {
     # byte 동일해야 한다는 원 계약은 유지되고, 그 안에 GTP 승격이 순수 추가됐다.
     # sha 는 cycle291 적대 검증(3렌즈) 시정 반영 후 값으로 한 번 더 갱신됐다
     # (B5 카나리아 `[pre_nxt_division_config]` 배관이 이 구간 안에 순수 추가).
+    # cycle436(2026-10-10, 사용자 승인) — 카드 E 커밋 ①: `pending_buy_amounts[ticker]
+    # = ...` 직접 대입이 `state.reserve_buy(ticker, "", ...)` 단일 진입점 호출로
+    # 바뀌었다. 순수 교체 — 분기·순서·값은 그대로다. (커밋 ②가 `""` 를 임시 키로
+    # 다시 바꾼다 — 그때 sha 가 한 번 더 갱신된다.)
     "execute_buy_prf": (
         "        order_division = OrderDivision.MARKET\n        order_price = 0\n",
         "            order_price = 0\n",
-        "8d8b23a042f33020d0c4339201777ec7f45baa872af8df08f5295a9fdbc8f039",
+        "bb7b7526dae896f10395793869af3db792ec1dcd18a991f5bcf1bacb7077054b",
     ),
     # 매도 프리장 사전 지정가 변환 — 애프터 분기는 이 블록 **뒤**에 순수 추가한다.
     "execute_sell_pre_nxt_preconvert": (

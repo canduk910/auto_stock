@@ -6,13 +6,18 @@
 |---|---|
 | G1 | leaf 는 8영역(`src.realtime`·`src.auth`·`src.api.order`·`src.engine.{order_engine,risk,strategy_registry,session,scanner}`)과 `scheduler` 를 import 하지 않는다 — 함수 안 지연 import 포함 |
 | G2 | `write_log`·`create_task`·`ensure_future`·`execute_buy`·`execute_sell`·`place_order`·`cancel_order` 식별자 0 |
-| G3 | 상태 변이는 `pending_buys.discard` · `pending_buy_amounts.pop` · `_pending_buy_orders.pop` **셋뿐**(셋 다 있어야 한다). 매핑 5종·`sold_today`·`buy_blocked_until`·`low_funds_tickers`·`_completed_buy_orders` 는 **참조조차 0** |
+| G3 | 상태 변이는 `pending_buys.discard` · `state.release_buy` · `_pending_buy_orders.pop` **셋뿐**(셋 다 있어야 한다). 매핑 5종·`sold_today`·`buy_blocked_until`·`low_funds_tickers`·`_completed_buy_orders` 는 **참조조차 0** |
 | G4 | `update_trade_status` 호출은 전부 `order_no=` 를 넘기고 `match_partial` 도 `**kwargs` 도 넘기지 않는다 |
 | G5 | 재검증(`has_position` 호출 + `… in/not in ….pending_buys` 또는 `is_buy_pending` 호출 + `_pending_buy_orders` 참조)이 세 변이 **직전**, 마지막 `await` **뒤**에 있고, 세 변이 사이에 `await` 0 |
 | G6 | scheduler: `_sync_positions_from_balance` 안에서 `reconcile_stale_buying` 을 `reconcile_stale_selling` **뒤**에 await · `pending_buys` 조건 `if` 아래 · `_selling` 조건 `if` 밖 · 인자 `(self.registry, self.order_engine, holdings)` · 지연 import · `scheduler.py` < 3,900L |
 
 G3 은 변이를 **직접 속성 호출**로 쓰라는 뜻이기도 하다 — `pb = s.state.pending_buys; pb.discard(t)` 같은
 별칭은 가드가 추적하지 못하므로 쓰지 않는다(쓰면 "셋 다 있어야 한다" 가 붉어진다).
+
+cycle436 카드 E — `pending_buy_amounts.pop(ticker, None)` 직접 호출이 `StrategyState.release_buy(ticker)`
+단일 진입점 호출로 바뀌었다(`pending_buy_amounts` 직접 접근 0 이 전역 계약, AST =
+`test_cycle436_ast_pending_buy_reservation.py`). `pending_buys.discard` 는 그대로 직접 호출이다
+(이 leaf 의 해제는 종목 전체 해제 — 커밋 ① 은 키가 `ticker` 라 `release_buy` 도 종목 전체를 지운다).
 
 G5 는 재검증을 변이와 **같은 함수**에 두거나, 같은 모듈의 **동기** 헬퍼 한 단계로 불러도 된다.
 동기 `def` 안에서 재검증+변이를 하면 `await` 이 원천적으로 없어 자동으로 만족한다.
@@ -53,12 +58,13 @@ _FORBIDDEN_IDENTS = {
 }
 _ALLOWED_MUTATIONS = {
     ("pending_buys", "discard"),
-    ("pending_buy_amounts", "pop"),
+    ("state", "release_buy"),
     ("_pending_buy_orders", "pop"),
 }
 _MUTATORS = {
     "add", "discard", "remove", "pop", "popitem", "clear", "update", "setdefault",
     "append", "extend", "insert", "__setitem__", "__delitem__",
+    "release_buy",  # cycle436 카드 E — pending_buy_amounts 해제 단일 진입점
 }
 _STATE_ATTRS = {
     "state", "positions", "pending_buys", "pending_buy_amounts", "_pending_buy_orders",

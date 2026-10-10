@@ -1486,8 +1486,10 @@ class OrderEngine:
             return
 
         state.pending_buys.add(ticker)
-        # 1주 폴백 잔여 자금 계산용 — pending_buys 와 동기 라이프사이클 (2026-05-11 P1)
-        state.pending_buy_amounts[ticker] = current_price * quantity
+        # 1주 폴백 잔여 자금 계산용 — pending_buys 와 동기 라이프사이클 (2026-05-11 P1).
+        # cycle436 카드 E — 넣기는 `reserve_buy` 단일 진입점을 거친다(order_no 는
+        # 아직 모른다, 커밋 ① 은 키가 ticker 라 무시된다).
+        state.reserve_buy(ticker, "", current_price * quantity)
         state.order_attempt_today += 1
 
         # exchange 결정 — stock_master 사전 차단 (Phase G) + cycle287 규칙 1 라우팅.
@@ -1586,8 +1588,8 @@ class OrderEngine:
                     )
                 except Exception:
                     logger.debug("[pre_nxt_division_config] 발화 실패", exc_info=True)
-                # pending_buy_amounts 도 변환된 가격 기준으로 동기 갱신 (1주 폴백 잔여 자금 정합성)
-                state.pending_buy_amounts[ticker] = order_price * quantity
+                # pending_buy_amounts 도 변환된 가격 기준으로 동기 갱신 (1주 폴백 잔여 자금 정합성).
+                state.reserve_buy(ticker, "", order_price * quantity)
         except Exception:
             # 사전 차단 실패는 swallow — 기존 사후 폴백 분기에서 자연 회복.
             # session import / session_tracker 접근 예외가 매수 흐름 자체를 막으면 안 됨.
@@ -1695,7 +1697,7 @@ class OrderEngine:
 
         except KisApiError as e:
             state.pending_buys.discard(ticker)
-            state.pending_buy_amounts.pop(ticker, None)
+            state.release_buy(ticker)
             if is_insufficient_cash(e):
                 state.block_buy(time.time() + BUY_BLOCK_DURATION)
                 logger.warning(
@@ -1724,7 +1726,7 @@ class OrderEngine:
                 try:
                     state.pending_buys.add(ticker)  # 폴백 진입 — 재등록
                     # 폴백 가격 기준으로 예정 금액 재등록 (시장가 경로와 동일 규약)
-                    state.pending_buy_amounts[ticker] = fallback_price * quantity
+                    state.reserve_buy(ticker, "", fallback_price * quantity)
                     result = await place_order(
                         ticker=ticker,
                         side=OrderSide.BUY,
@@ -1799,7 +1801,7 @@ class OrderEngine:
                     return
                 except KisApiError as e2:
                     state.pending_buys.discard(ticker)
-                    state.pending_buy_amounts.pop(ticker, None)
+                    state.release_buy(ticker)
                     state.block_low_funds(ticker, time.time() + LOW_FUNDS_COOLDOWN)
                     logger.error(
                         "지정가 폴백도 거부 → cooldown: %s ([%s] %s → [%s] %s)",
@@ -1809,7 +1811,7 @@ class OrderEngine:
             raise
         except Exception:
             state.pending_buys.discard(ticker)
-            state.pending_buy_amounts.pop(ticker, None)
+            state.release_buy(ticker)
             raise
 
     async def execute_sell(
@@ -2834,7 +2836,7 @@ class OrderEngine:
                     strat = self.registry.get(sid)
                     if strat:
                         strat.state.pending_buys.discard(pending_info["ticker"])
-                        strat.state.pending_buy_amounts.pop(pending_info["ticker"], None)
+                        strat.state.release_buy(pending_info["ticker"], order_no)
                         logger.warning("체결통보 매핑 실패 → pending_buys 제거: %s (전략: %s)", pending_info["ticker"], sid)
                 return
             logger.warning("체결통보: 주문번호 %s에 대한 종목 매핑 없음, payload ticker 사용: %s", order_no, ticker)
@@ -3144,7 +3146,7 @@ class OrderEngine:
 
         # pending_buys에서 제거 + 예정 금액 정리 (잔여 자금 폴백 계산용 동기 dict)
         state.pending_buys.discard(ticker)
-        state.pending_buy_amounts.pop(ticker, None)
+        state.release_buy(ticker, order_no)
         # _pending_buy_orders 정리
         self._pending_buy_orders.pop(order_no, None)
 

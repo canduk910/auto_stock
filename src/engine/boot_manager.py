@@ -737,8 +737,9 @@ async def boot(scheduler: "TradingScheduler") -> None:
         target_strategy = _resolve_fallback_owner(scheduler, strategy_id)
         if target_strategy:
             target_strategy.state.pending_buys.add(ticker)
-            # 잔여 자금 폴백 계산용 — pending_buys 와 동기 등록 (2026-05-11 P1)
-            target_strategy.state.pending_buy_amounts[ticker] = order_unpr * rmn_qty
+            # 잔여 자금 폴백 계산용 — pending_buys 와 동기 등록 (2026-05-11 P1).
+            # cycle436 카드 E — order_no 를 아는 자리라 그대로 넘긴다(커밋 ① 은 무시).
+            target_strategy.state.reserve_buy(ticker, order_no, order_unpr * rmn_qty)
         scheduler.order_engine._pending_buy_orders[order_no] = {
             "ticker": ticker,
             "price": order_unpr,
