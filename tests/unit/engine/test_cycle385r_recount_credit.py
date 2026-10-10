@@ -528,16 +528,16 @@ async def test_tr7b_blind_credit_is_not_netted_by_a_later_f3(monkeypatch, drain)
         ([_row(MTS_NO, "")], "bad_row"),
         ([_row("", 3)], "bad_row"),
         ([_row(MTS_NO, "3주")], "bad_row"),
-        ([_row(f"{i:010d}", 1, pdno="000660") for i in range(1, 101)], "page_full"),
     ],
-    ids=["qty_blank", "odno_blank", "qty_not_int", "page_full"],
+    ids=["qty_blank", "odno_blank", "qty_not_int"],
 )
 async def test_tr8_untrusted_rows_fall_back_to_ticker_credit(
     monkeypatch, caplog, drain, rows, reason,
 ):
-    """🔴 TR8 — 행 불량(수량 공백·비정수, 주문번호 공백)·1쪽 가득(≥100)은 **전체를 못 믿는다**
-    → TR7 과 같은 결과 + `reason=`. 불량 행을 0 으로 읽으면(MR9) 그 주문 크레딧이 빠져
-    늦은 통보가 이중 차감된다(부분 신뢰 금지 — R-1-4 4)."""
+    """🔴 TR8 (cycle432 로 `page_full` 사례 제거 — 쪽 크기 판정 자체가 없다) — 행 불량
+    (수량 공백·비정수, 주문번호 공백)은 **전체를 못 믿는다** → TR7 과 같은 결과 +
+    `reason=`. 불량 행을 0 으로 읽으면(MR9) 그 주문 크레딧이 빠져 늦은 통보가
+    이중 차감된다(부분 신뢰 금지 — R-1-4 4)."""
     caplog.set_level(logging.DEBUG, logger=_OE_LOGGER)
     env = _env(monkeypatch, drain, {"kojiro": 10})
     _install_place_order(monkeypatch, env, first_error=_apbk0400())
@@ -708,9 +708,10 @@ def test_tr12_reset_daily_state_clears_r_structures(name, fill):
 # 순수 함수 — 파서 · 주문번호 정규화 (R-1-2 · R-1-4)
 # ════════════════════════════════════════════════════════════════════════════
 def test_tr_parser_filters_sums_and_refuses_partial_trust():
-    """🔴 R-1-4 — 이 종목 매도만 · 같은 주문 합 · 필터를 통과한 행 하나라도 불량(주문번호 공백 ·
-    수량 공백/비정수)이면 전체 None · list 아님/1쪽 가득 None · 예외를 던지지 않는다.
-    쪽 크기는 부록 R2-10 부터 호출자가 넘기는 세 번째 인자(여기서는 실전 100)."""
+    """🔴 R-1-4 (cycle432 — `page_size` 인자·쪽 가득 판정 제거) — 이 종목 매도만 ·
+    같은 주문 합 · 필터를 통과한 행 하나라도 불량(주문번호 공백 · 수량
+    공백/비정수)이면 전체 None · list 아님이면 None · 예외를 던지지 않는다.
+    행 수 자체는 더는 못 믿을 이유가 아니다(연속조회가 전 쪽을 이어 붙인다)."""
     from src.engine.order_engine import _sell_fills_by_order as parse
 
     rows = [
@@ -720,14 +721,17 @@ def test_tr_parser_filters_sums_and_refuses_partial_trust():
         _row("0000050001", 4, side="02"),                  # 매수 — 무시
         _row("0000050002", "", pdno="000660"),             # 다른 종목의 불량 행 — 무시(필터 뒤 검사)
     ]
-    assert parse(rows, TICKER, 100) == {"31001": 3, "31002": 0}
-    assert parse([], TICKER, 100) == {}
-    assert parse(None, TICKER, 100) is None
-    assert parse({"output1": []}, TICKER, 100) is None
-    assert parse([_row("0000031001", "")], TICKER, 100) is None
-    assert parse([_row("", 1)], TICKER, 100) is None
-    assert parse([_row(f"{i:010d}", 1, pdno="000660") for i in range(100)], TICKER, 100) is None
-    assert parse(["garbage"], TICKER, 100) in (None, {})  # never-raise(모양 불량 행)
+    assert parse(rows, TICKER) == {"31001": 3, "31002": 0}
+    assert parse([], TICKER) == {}
+    assert parse(None, TICKER) is None
+    assert parse({"output1": []}, TICKER) is None
+    assert parse([_row("0000031001", "")], TICKER) is None
+    assert parse([_row("", 1)], TICKER) is None
+    # cycle432(뒤집음) — 100행이어도(옛 page_full 임계) 전부 다른 종목이면 그냥 빈 dict.
+    assert parse([_row(f"{i:010d}", 1, pdno="000660") for i in range(100)], TICKER) == {}
+    # 150행(실전 쪽 크기 초과)이 이 종목 매도면 150건 전부 돌려준다 — 더는 불신하지 않는다.
+    assert len(parse([_row(f"{i:010d}", 1) for i in range(150)], TICKER)) == 150
+    assert parse(["garbage"], TICKER) in (None, {})  # never-raise(모양 불량 행)
 
 
 def test_tr_odno_key_absorbs_zero_padding_only():
