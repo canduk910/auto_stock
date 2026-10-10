@@ -62,6 +62,17 @@ logger = logging.getLogger("src.engine.scheduler")  # 사이클 60 I1 영속 (ca
 
 SELLING_HOLD_MARKER = "[selling_hold]"
 
+# cycle432 — 정본 상수. `scheduler.py` 가 갓 접수된 매도로 볼 최소 경과 초로
+# 쓰는 같은 이름의 모듈 상수(15분 전체 재대조 `min_age_s` 인자)와 값이 같다.
+# `order_engine.SELL_UNKNOWN_RECONCILE_DELAY_S`(180초 단일 종목 확인 지연)도
+# 같은 값이지만 **import 로 묶지 않는다** — order_engine.py 의 모듈 최상단
+# `src.*` import 증가분을 정확히 `src.engine.llm_buy_gate` 1건으로 고정한
+# 구조 가드(`test_cycle276_ast_order_hook.py::test_c4_2_...` 외 cycle286·
+# 287·291 사본)가 이 leaf 의 신규 top-level import 에도 붉어진다. 그래서
+# 세 리터럴(이 상수 · `order_engine.SELL_UNKNOWN_RECONCILE_DELAY_S` ·
+# `scheduler.py` 의 같은 이름 상수, 전부 180.0/180)은 값만 맞춘다.
+SELLING_RECONCILE_MIN_AGE_S: float = 180.0
+
 # 1회/(ticker, reason)/일 — cycle258 카드 #4 (reason 을 키에서 빼면 사유 전이가
 # 첫 사유에 먹힌다).
 _hold_cap: "KstDailyEmitCap[tuple[str, str]]" = KstDailyEmitCap()
@@ -203,15 +214,29 @@ async def reconcile_selling_unknown_one(
     `get_balance()`(그 종목 보유) + `get_daily_orders(pdno=ticker)`(그 종목
     열린 매도주문)로 좁힌다.
 
-    반환 = ``not_accepted``(해제 — 주문이 접수되지 않은 것으로 판정, 다음 틱
-    손절이 새로 발사한다) / ``closed``(보유 0 — 유지, 15분 sync 가 정리) /
-    ``open_order``(열린 매도주문 있음 — 유지) / ``too_young``(아직 이르다 —
-    유지, 보통 180초 뒤 호출이라 드물다) / ``lookup_failed``(조회 실패 —
-    **기본값 = 유지**, 15분 `reconcile_stale_selling` 로 넘긴다).
+    반환 = ``already_released``(cycle432 — 180초 전에 체결통보가 먼저 `_selling`
+    을 풀었다. 그 사이 다른 체결(완결 또는 부분)로 주문이 끝났다는 뜻이라 이
+    종목을 다시 판정하지 않는다. **KIS 조회 0회**) / ``not_accepted``(해제 —
+    주문이 접수되지 않은 것으로 판정, 다음 틱 손절이 새로 발사한다) /
+    ``closed``(보유 0 — 유지, 15분 sync 가 정리) / ``open_order``(열린
+    매도주문 있음 — 유지) / ``too_young``(아직 이르다 — 유지, 보통 180초 뒤
+    호출이라 드물다) / ``lookup_failed``(조회 실패 — **기본값 = 유지**, 15분
+    `reconcile_stale_selling` 로 넘긴다).
 
     never-raise — 조회·판정 중 예외는 `lookup_failed` 로 흡수한다(재발사보다
     지연이 낫다, 자문 2026-10-10 「조회 실패의 기본값 = 유지」).
     """
+    if ticker not in order_engine._selling:
+        # cycle432(F-422-1 후속 LOW #1) — 체결통보가 먼저 풀었다. 판정할
+        # `_selling` 표식이 이미 없으니 KIS 를 묻지 않는다(지금까지는 조회
+        # 뒤 `not_accepted` 로 잘못 기록됐다).
+        result = "already_released"
+        logger.warning(
+            "%s ticker=%s strategy=%s result=%s",
+            SELL_SEND_UNKNOWN_RESOLVED_MARKER, ticker, strategy_id, result,
+        )
+        return result
+
     from src.api.balance import get_balance, get_daily_orders
     from src.engine.scanner import KST_TZ as _KST
 

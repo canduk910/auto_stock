@@ -445,8 +445,8 @@ _APPROVED_CONTENT_SHA: dict[str, tuple[str, str]] = {
         "cycle330(2026-09-20) — 합류자 없는 토큰 발급 실패의 고아 Future 회수, 8영역 승인",
     ),
     "src/engine/order_engine.py": (
-        "3e47e4cfdd2f5649f2fe170c648d1449b41da9c27809e3e19a33a2689ae4dbe5",
-        "cycle429 D1 안A 사용자 승인 2026-10-10",
+        "4ec9a8ab094f802a2b8b5a0f4b23254f74b5949ef5bd7bf3cdae9b1013806f54",
+        "cycle432 page_full 제거 사용자 승인 2026-10-10",
     ),
     "src/engine/risk.py": (
         "a2187b8270446379988d24dfbe39b902d6ab37b112d4b6ce7330ee171434e222",
