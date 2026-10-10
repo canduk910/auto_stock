@@ -769,14 +769,15 @@ def test_s6c_exit_capable_krx_phases_are_the_three_sendable_ones() -> None:
 def test_s6d_apply_clock_is_the_single_application_seam() -> None:
     """S6 (RED) — 적용은 `_apply_clock` **하나**를 경유한다(자문 §S4).
 
-    라우터를 호출부마다 직접 부르면 마커·mode 조회·예외 흡수가 네 군데로 복제되고,
+    라우터를 호출부마다 직접 부르면 마커·mode 조회·예외 흡수가 세 군데로 복제되고,
     한 곳을 빠뜨리면 그 경로만 조용히 라우팅을 비켜간다. `_apply_clock` 은 **동기**여야
-    한다 — 동기 취소 3경로(`_cancel_after_wait`·`_cancel_and_reorder`·`cancel_remaining`)가
-    같은 seam 을 쓰기 때문이다(자문 §4-C2).
+    한다 — 동기 취소 2경로(`_cancel_after_wait`·`_cancel_and_reorder`)가
+    같은 seam 을 쓰기 때문이다(자문 §4-C2). cycle440 — 운영 호출 0 이던
+    `cancel_remaining` 은 삭제됐다.
     """
     _s, fn = _method(_ORDER_ENGINE_REL, "OrderEngine", "_apply_clock")
     assert not isinstance(fn, ast.AsyncFunctionDef), (
-        "`_apply_clock` 이 async 다 — 동기 취소 3경로가 이 seam 을 쓸 수 없다"
+        "`_apply_clock` 이 async 다 — 동기 취소 2경로가 이 seam 을 쓸 수 없다"
     )
     kwonly = [a.arg for a in fn.args.kwonlyargs]
     assert "side" in kwonly, f"`side` 키워드 전용 인자 부재: {kwonly}"
@@ -784,13 +785,16 @@ def test_s6d_apply_clock_is_the_single_application_seam() -> None:
 
 @pytest.mark.parametrize(
     "method",
-    ["_cancel_after_wait", "_cancel_and_reorder", "cancel_remaining"],
+    ["_cancel_after_wait", "_cancel_and_reorder"],
 )
 def test_s6e_sync_cancel_paths_go_through_apply_clock(method: str) -> None:
-    """S6 (RED) — 동기 취소·재주문 3경로가 `_apply_clock` 을 경유한다(자문 §4-C2).
+    """S6 (RED) — 동기 취소·재주문 2경로가 `_apply_clock` 을 경유한다(자문 §4-C2).
 
-    셋은 `self._strategy_exchange(strategy_id)`(DB 값 직독 = 전부 `SOR`)를 쓴다.
+    둘은 `self._strategy_exchange(strategy_id)`(DB 값 직독 = 전부 `SOR`)를 쓴다.
     라우팅을 async 관문에만 넣으면 **주문은 KRX, 취소는 SOR** 로 갈린다.
+
+    cycle440 — 운영 호출 0 이던 `cancel_remaining`(배선하면 매수 주문번호를
+    취소하는 함정)이 삭제되며 셋에서 둘로 줄었다.
     """
     _s, fn = _method(_ORDER_ENGINE_REL, "OrderEngine", method)
     calls = {

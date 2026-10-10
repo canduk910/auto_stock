@@ -1098,12 +1098,13 @@ async def test_k11_cancel_uses_the_exchange_the_order_was_sent_to(
 ) -> None:
     """K11 (RED) — 취소는 **원주문이 나간 거래소**로 나간다.
 
-    취소 3경로(`_cancel_after_wait` `:1644` · `_cancel_and_reorder` `:1672` ·
-    `cancel_remaining` `:1722`)는 **동기** `_strategy_exchange(strategy_id)`(DB 값 직독
+    취소 2경로(`_cancel_after_wait` `:1644` · `_cancel_and_reorder` `:1672`,
+    cycle440 — 운영 호출 0 이던 `cancel_remaining` 은 삭제됐다)는 **동기**
+    `_strategy_exchange(strategy_id)`(DB 값 직독
     = 현재 전부 `SOR`)를 쓴다. 규칙 1 을 async 관문에만 넣으면 **주문은 KRX, 취소는
     SOR** 로 갈린다(자문 §4-C 발견 4-α = 신규 계약 위반).
 
-    시정 수단은 자문 §4-C2 가 명세한다 — 동기 3 호출부도 라우터를 통과시킨다:
+    시정 수단은 자문 §4-C2 가 명세한다 — 동기 2 호출부도 라우터를 통과시킨다:
     `ex = self._apply_clock(self._strategy_exchange(sid), sid, side="sell")`.
     (라우터가 **순수 동기** 함수여야 하는 이유가 이것이다.)
 
@@ -1126,7 +1127,7 @@ async def test_k11_cancel_uses_the_exchange_the_order_was_sent_to(
     assert mock_cancel_order.await_count == 1
     assert mock_cancel_order.await_args.kwargs["exchange"] == "KRX", (
         f"원주문은 KRX 인데 취소가 {mock_cancel_order.await_args.kwargs.get('exchange')!r} "
-        "로 나갔다 — 동기 3 호출부가 라우터를 안 탄다(자문 §4-C2)"
+        "로 나갔다 — 동기 2 호출부가 라우터를 안 탄다(자문 §4-C2)"
     )
 
 

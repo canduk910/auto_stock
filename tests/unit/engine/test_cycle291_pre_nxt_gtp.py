@@ -1254,25 +1254,9 @@ async def test_c8c_cancel_and_reorder_marker_carries_orig_dvsn(
     assert "dvsn_src=map" in lines[0], f"출처 축 부재 — {lines[0]!r}"
 
 
-@pytest.mark.asyncio
-async def test_c8d_cancel_remaining_marker_carries_orig_dvsn(
-    monkeypatch: pytest.MonkeyPatch,
-    mock_cancel_order: AsyncMock,
-    caplog,
-) -> None:
-    """C8d (적대 검증 시정) — `cancel_remaining` 도 `orig_dvsn=`/`dvsn_src=` 를
-    남긴다(같은 뮤테이션이 이 경로도 무가드로 통과했다).
-    """
-    engine, strat = _make_engine(with_position=True)
-    engine._order_exchange["ORDER-PRE"] = "NXT"
-    engine._order_division["ORDER-PRE"] = "27"
-    caplog.set_level(logging.INFO, logger=_OE_LOGGER)
-    await engine.cancel_remaining(_TICKER, _SID)
-    lines = _marker_lines(caplog, _M_CANCEL)
-    assert len(lines) == 1, f"{len(lines)}행: {lines}"
-    assert "ord_dvsn=00" in lines[0], f"실제 전송 값 축이 사라졌다 — {lines[0]!r}"
-    assert "orig_dvsn=27" in lines[0], f"원주문 호가유형 축 부재 — {lines[0]!r}"
-    assert "dvsn_src=map" in lines[0], f"출처 축 부재 — {lines[0]!r}"
+# cycle440 — `test_c8d_cancel_remaining_marker_carries_orig_dvsn` 삭제. 운영
+# 호출 0 이고 배선하면 매수 주문번호를 취소하는 함정이던 `cancel_remaining`
+# 자체가 삭제됐다(카드 #9).
 
 
 # ===========================================================================

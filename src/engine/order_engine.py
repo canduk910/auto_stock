@@ -660,15 +660,15 @@ class OrderEngine:
     ) -> str:
         """규칙 1(시각이 거래소를 정한다) 적용 지점 — 자문 §S4.
 
-        `limit_price>0` 분기 + 동기 취소 3경로(§S6e, `_cancel_after_wait`·
-        `_cancel_and_reorder`·`cancel_remaining`)가 전부 이 메서드를 거친다
+        `limit_price>0` 분기 + 동기 취소 2경로(§S6e, `_cancel_after_wait`·
+        `_cancel_and_reorder`)가 전부 이 메서드를 거친다
         (`_strategy_exchange_async` 는 이미 async 라 §S3g 에 따라 라우터를
         직접 부르고 같은 emit 헬퍼로 마커를 남긴다 — 로직 중복 없이 동일
         서식). 라우터를 호출부마다 직접 부르면 마커·mode 조회·예외 흡수가
-        네 군데로 복제되고, 한 곳을 빠뜨리면 그 경로만 조용히 라우팅을
+        세 군데로 복제되고, 한 곳을 빠뜨리면 그 경로만 조용히 라우팅을
         비켜간다.
 
-        **동기 함수**여야 한다 — 동기 취소 3경로가 이 seam 을 쓴다. 예외는
+        **동기 함수**여야 한다 — 동기 취소 2경로가 이 seam 을 쓴다. 예외는
         전부 흡수하고 `base` 를 반환한다(fail-safe — 판정 실패가 주문 자체를
         막으면 안 된다).
         """
@@ -1691,10 +1691,10 @@ class OrderEngine:
             self._order_strategy[result.order_no] = strategy.strategy_id
             self._order_ticker[result.order_no] = ticker
             # 적대 검증 시정(HIGH) — 이 주문이 실제로 나간 거래소를 기억한다.
-            # 취소 경로(`_cancel_after_wait`/`_cancel_and_reorder`/`cancel_remaining`)
+            # 취소 경로(`_cancel_after_wait`/`_cancel_and_reorder`)
             # 가 취소 시각의 라우터 재평가 대신 이 값을 우선 사용해야 원주문·취소가
             # 시간 경계를 사이에 두고 다른 거래소로 갈리지 않는다(자문 §4-C2 의도
-            # — "동기 3 호출부도 라우터를 거친다" 는 "매번 새로 판정한다" 를
+            # — "동기 2 호출부도 라우터를 거친다" 는 "매번 새로 판정한다" 를
             # 뜻하지 않았다. `cancel_order` 계약도 "원주문이 접수된 거래소" 다).
             self._order_exchange[result.order_no] = buy_exchange
             # cycle291 — 전송한 값만 기록한다(`place_kwargs` 에서 뽑는다, 지역
@@ -4044,13 +4044,14 @@ class OrderEngine:
             await asyncio.sleep(PARTIAL_FILL_WAIT)
             strategy_id = self._order_strategy.get(order_no, "momentum")
 
-            # cycle295 (B) — 쌍 게이트(§3-5③). 이 함수만 취소 3경로 중 유일하게
+            # cycle295 (B) — 쌍 게이트(§3-5③). 이 함수만 취소 2경로 중 유일하게
             # `sleep(30) → cancel_order → place_order` 의 atomic replace 다.
             # 절반만 막으면 "호가창의 손절을 우리가 빼고 아무것도 안 넣은" 상태가
             # 된다 — 컷이면 취소도 하지 않고 작동 중인 주문을 그대로 둔다.
-            # 🔴 그 잔량을 우리가 거두는 경로는 없다 — `cancel_remaining` 은 호출자가
-            # 0 이고(배선해도 매수 주문번호를 취소한다), `risk.on_tick` 재평가는 새
-            # 매도를 낼 뿐 걸린 주문을 취소하지 않는다. KRX 잔량은 정규장 마감 뒤
+            # 🔴 그 잔량을 우리가 거두는 경로는 없다 — `risk.on_tick` 재평가는 새
+            # 매도를 낼 뿐 걸린 주문을 취소하지 않는다(cycle440 — 배선하면 매수
+            # 주문번호를 취소하는 함정이던 `cancel_remaining` 은 운영 호출 0 이라
+            # 걷어냈다). KRX 잔량은 정규장 마감 뒤
             # 거래소가 자동 취소한다. NXT 잔량은 20:00 까지 남는데, 그런 매도는
             # 프리장 `pre_nxt_keep` · `order_exchange_clock_mode="off"` · `probe_error`
             # 로 base 를 유지했을 때만 생긴다. 정본 = `src/engine/CLAUDE.md` 규칙 3.
@@ -4238,43 +4239,3 @@ class OrderEngine:
         self._sell_fill_book.clear()  # cycle392
         self._selling_locked_wait.clear()
         self._sell_ledger_since = datetime.now(_KST_TZ)
-
-    async def cancel_remaining(self, ticker: str, strategy_id: str) -> None:
-        """미체결 잔량을 취소한다."""
-        strategy = self.registry.get(strategy_id)
-        if not strategy:
-            return
-        pos = strategy.state.positions.get(ticker)
-        if not pos:
-            return
-        try:
-            # 적대 검증 시정(HIGH) — 원주문 거래소 우선(`_order_exchange`), 매핑
-            # 없을 때만 라우터 재평가로 fail-open(`_cancel_after_wait` 동일 이유).
-            ex = self._order_exchange.get(pos.order_no)
-            if ex is None:
-                ex = self._apply_clock(
-                    self._strategy_exchange(strategy_id), strategy_id,
-                    side="sell", ticker=ticker,
-                )
-            # cycle291 — Stage A 관측(`_cancel_after_wait` 와 동일 규약).
-            _orig_div = self._order_division.get(pos.order_no)
-            _cancel_ok = False
-            _cancel_err = ""
-            try:
-                await cancel_order(pos.order_no, pos.quantity, cancel_all=True, exchange=ex)
-                _cancel_ok = True
-            except KisApiError as _cancel_exc:
-                _cancel_err = f"[{_cancel_exc.msg_cd}] {_cancel_exc.msg1}"
-                raise
-            finally:
-                # K11(자문 §4-C1) — 관측만.
-                logger.info(
-                    "[after_cancel_result] ticker=%s order_no=%s ord_dvsn=00 "
-                    "orig_dvsn=%s dvsn_src=%s exchange=%s result=%s err=%s",
-                    ticker, pos.order_no, _orig_div if _orig_div else "-",
-                    "map" if _orig_div else "absent",
-                    ex, "ok" if _cancel_ok else "error", _cancel_err,
-                )
-            logger.info("미체결 취소: %s (주문번호: %s)", t(ticker), pos.order_no)
-        except Exception:
-            logger.exception("미체결 취소 실패: %s", ticker)

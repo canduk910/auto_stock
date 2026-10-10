@@ -191953,7 +191953,7 @@ frontend:
     - frontend/src/pages/__tests__/Dashboard.fix1.cycle414.test.tsx
     - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
     - frontend/src/pages/__tests__/MarketState.test.tsx
-generated_at: '2026-10-10T19:47:17.684875+09:00'
+generated_at: '2026-10-10T20:02:55.661722+09:00'
 stats:
   backend_modules: 188
   backend_tests: 1347

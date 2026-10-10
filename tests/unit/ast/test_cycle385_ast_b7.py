@@ -453,9 +453,11 @@ def test_a6_sell_fill_resolves_owner_via_holders_without_momentum_default(oe):
 def test_a7_j1_false_recovery_promise_is_gone(oe):
     """🔴 A7 — 「`cancel_remaining` 또는 `risk.on_tick` 재평가에 위임」 약속은 거짓이다.
 
-    `cancel_remaining` 은 호출자가 0 이고(배선해도 매수 주문번호를 취소한다),
     `risk.on_tick` 은 걸린 주문을 취소하지 않는다. 정본 = `src/engine/CLAUDE.md` 규칙 3.
     이 가드는 주석을 **의도적으로** 읽는다(J-1 은 주석 정정이다).
+
+    cycle440 — 호출자가 0 이고 배선하면 매수 주문번호를 취소하는 함정이던
+    `cancel_remaining` 자체는 삭제됐다(카드 #9).
     """
     src, tree = oe
     assert "`cancel_remaining` 또는 `risk.on_tick` 재평가에 위임" not in src, (
