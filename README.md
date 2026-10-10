@@ -562,6 +562,7 @@ KIS OpenAPI 가 NXT(넥스트레이드 ATS) 주문·시세를 정식 지원하�
 | GET | `/api/log-reports/{YYYY-MM-DD}` | 단일 영업일 리포트 상세 |
 | POST | `/api/log-reports/run?force=0` | 수동 트리거 — 즉시 분석 실행. **기본은 비파괴다**(cycle283): 오늘 **완성** 리포트가 이미 있으면 재분석을 실행조차 하지 않고 `success=false` 를 돌려준다. 막지 않는 네 경우 = 행이 없음 · 20:05 1차 스냅샷만 있는 구간(`metrics.snapshot_pass`) · `summary` 가 비었거나 OpenAI 실패 placeholder 인 날 · `model` 이 비어 LLM 경로가 돌지 않은 행. 덮어쓰려면 `?force=1` — 단 21:30 정산 뒤의 force 는 `api_metrics`/`strategy_funnel` 을 0 으로 덮는다 |
 | POST | `/api/log-reports/{YYYY-MM-DD}/external` | 외부 분석 결과 저장 — 리포터 스코프 키(`API_REPORTER_KEY`)의 **유일한 쓰기 경로**(cycle249). findings 는 OpenAI 경로와 같은 정규화기를 거친다 |
+| GET | `/api/system/alerts` | **대시보드 경고등**(cycle434). 오늘(KST) 장부 불일치·주문 결과 모름/청산 실패(red)·일일 작업 실패(yellow)를 `system_logs` 에서 집계해 범주별 건수·최고 레벨·첫/마지막 시각·최근 메시지를 돌려준다. `status` ∈ `red`/`yellow`/`green`/`unknown`(DB 조회 실패는 `unknown` — `green` 으로 내리지 않는다). 매매 행위 무접촉 |
 | GET | `/api/system/memory` | 프로세스 메모리 (RSS/VMS·스레드·열린 파일·소켓). `MEMORY_PROFILE=true` 면 tracemalloc top 20 동봉 |
 | GET | `/api/system/metrics` | endpoint 별 응답시간 분포 (p50/p95/p99 + count/min/max) — `MetricsMiddleware` 누적값 |
 | POST | `/api/system/metrics/reset` | 누적 metrics 초기화 (실험 베이스라인 리셋용) |
