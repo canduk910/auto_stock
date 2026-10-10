@@ -691,31 +691,6 @@ async def _get_int_or_default(key: str, default: int) -> int:
         return default
 
 
-async def _get_str_or_default_UNUSED(key: str, default: str, valid: tuple) -> str:  # noqa: N802
-    """JSONB {"value": str} 조회 (사이클 64 미사용 — price_filter_mode 폐기).
-
-    참고: 하위 코드 잔재 방지용 더미 선언. 실제 호출처 없음.
-    """
-    try:
-        raw = await _select_value(key)
-        if raw is _MISSING:
-            return default
-        candidate: Optional[str] = None
-        if isinstance(raw, dict):
-            v = raw.get("value")
-            if isinstance(v, str):
-                candidate = v
-        elif isinstance(raw, str):
-            candidate = raw
-        if candidate in valid:
-            return candidate
-        logger.warning("[price_filter] invalid stored value=%r key=%s — 기본 %s 사용", candidate, key, default)
-        return default
-    except Exception:
-        logger.exception("[price_filter] get %s 실패 — 기본 %s 사용", key, default)
-        return default
-
-
 async def _set_int(key: str, value: int) -> None:
     """JSONB {"value": int} upsert."""
     await _upsert_value(key, {"value": int(value)})

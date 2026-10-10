@@ -19,7 +19,7 @@
 """
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, timedelta
 
 import pytest
 
@@ -180,3 +180,43 @@ async def test_i6_query_count_is_constant(clean_stock_master_daily, monkeypatch)
     assert big == {t: D2 for t in many}
     assert n_small == n_big, f"쿼리 수가 종목 수를 따라 변한다 — 2종목 {n_small} / 40종목 {n_big}"
     assert 1 <= n_big <= 2, f"쿼리 1~2회 계약 — 실측 {n_big}"
+
+
+# ══════════════════════════════════════════════════════════════════════
+# 7 — cycle437(카드 #10 ③) `calendar_size` — `earliest_missing_bas_dd` 와 같은 달력
+# ══════════════════════════════════════════════════════════════════════
+@pytest.mark.asyncio
+async def test_i7_calendar_size_matches_earliest_missing_calendar(clean_stock_master_daily):
+    """`cal` CTE 행 수 — 행 수 >= min_rows 인 날만, horizon 개 상한, `before` 미포함."""
+    from src.db import stock_master_daily as smd
+
+    pg = clean_stock_master_daily
+    p, q = date(2026, 9, 18), date(2026, 9, 16)   # P=300행 달력 포함 / Q=299행 제외
+    bg = [f"8{i:05d}" for i in range(300)]
+    await _seed(pg, [(t, p) for t in bg])
+    await _seed(pg, [(t, q) for t in bg[:299]])
+
+    got = await smd.calendar_size(TODAY)
+    assert got == 1, f"행 수 >= 300 인 날만 달력 — 실측 {got}"
+
+
+@pytest.mark.asyncio
+async def test_i8_calendar_size_capped_at_horizon(clean_stock_master_daily):
+    """달력 일수가 horizon 을 넘으면 horizon 에서 멈춘다 — `earliest_missing_bas_dd` 와 동치."""
+    from src.db import stock_master_daily as smd
+
+    pg = clean_stock_master_daily
+    dates = [date(2026, 1, 1) + timedelta(days=i) for i in range(5)]
+    await _seed_bg(pg, dates)   # BG = 3종목 — min_rows=3 으로 호출
+
+    got = await smd.calendar_size(TODAY, horizon=3, min_rows=3)
+    assert got == 3, f"horizon=3 상한 — 실측 {got}"
+
+
+@pytest.mark.asyncio
+async def test_i9_calendar_size_empty_table_is_zero(clean_stock_master_daily):
+    """빈 테이블 = 0(예외 아님)."""
+    from src.db import stock_master_daily as smd
+
+    got = await smd.calendar_size(TODAY)
+    assert got == 0

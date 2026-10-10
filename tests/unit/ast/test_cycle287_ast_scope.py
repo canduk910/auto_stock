@@ -106,7 +106,10 @@ _PINNED_DIR_FILE_COUNTS = {
     # cycle431(액면병합 대사, 사용자 결정 2026-10-10 안1) — 신규 leaf
     # `corporate_action_reconcile.py` 로 96 → 97.
     # cycle434(대시보드 경고등) — 신규 leaf `alert_markers.py` 로 97 → 98.
-    "src/engine": 98,
+    # cycle437 커밋 C(리팩토링 카드 #8, 사용자 승인 2026-10-10) — 참조 0인 옛
+    # `strategy.py`(Signal·Position·StrategyState·calc_buy_quantity 모듈 프로토타입,
+    # 호출부·테스트 0 재확인) 삭제로 98 → 97.
+    "src/engine": 97,
 }
 
 #: `scheduler.py` cycle257 영구 상한.

@@ -48,17 +48,19 @@ class TestCycle138MigrationPersistence:
     """사이클 138 3차 마이그레이션 영역 영속 (≥ 10 파일 영속 의무)."""
 
     def test_g_138_a1_migrated_files_use_helpers(self):
-        """G-138-A1 — 3차 마이그레이션 영역 ≥ 10 파일 영역 헬퍼 import 영속.
+        """G-138-A1 — 3차 마이그레이션 영역 ≥ 9 파일 영역 헬퍼 import 영속.
 
-        잔존 22 파일 중 read 빈도 상위 10 파일 마이그레이션.
-        사이클 139 = 잔존 12 파일 마무리 (카드 #25 종결 예정).
+        잔존 22 파일 중 read 빈도 상위 10 파일 마이그레이션. 그중
+        `test_cycle103_ast_no_dead_strategy_funcs.py` 는 cycle437 카드 #8(2026-10-10,
+        사용자 승인) 이 그 대상 `src/engine/strategy.py`(참조 0 재확인) 와 함께
+        삭제했다 — 목록·하한을 9 로 내린다. 사이클 139 = 잔존 12 파일 마무리
+        (카드 #25 종결 예정).
         """
         candidate_files = [
             "test_cycle92_g_reject_persistence.py",
             "test_external_llm_reject_patterns.py",
             "test_cycle112_security_ast.py",
             "test_cycle89_g_reject_persistence.py",
-            "test_cycle103_ast_no_dead_strategy_funcs.py",
             "test_cycle115_krx_endpoint_urls.py",
             "test_cycle76_ast_api_retry_helper.py",
             "test_cycle115_krx_no_plaintext_key.py",
@@ -81,8 +83,8 @@ class TestCycle138MigrationPersistence:
             ):
                 migrated_count += 1
 
-        assert migrated_count >= 10, (
-            f"사이클 138 3차 마이그레이션 ≥ 10 파일 의무 위반 — "
+        assert migrated_count >= 9, (
+            f"사이클 138 3차 마이그레이션 ≥ 9 파일 의무 위반 — "
             f"got {migrated_count}. 사이클 138 카드 #25 3차 마이그레이션 영속 의무."
         )
 

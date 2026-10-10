@@ -62,3 +62,60 @@ def test_d4_no_await_inside_loop():
         if isinstance(loop, loops):
             offenders += [n for n in ast.walk(loop) if isinstance(n, ast.Await)]
     assert offenders == [], f"루프 안 await {len(offenders)}건 — 종목당 쿼리가 된다"
+
+
+# ══════════════════════════════════════════════════════════════════════
+# cycle437 (리팩토링 카드 #10 ③) — `calendar_size` 계약(DB 없이 재는 부분).
+# SQL 의미(실제 달력 행 수)는 통합 테스트 `tests/integration/test_cycle417_daily_gap_scan_pg.py`.
+# ══════════════════════════════════════════════════════════════════════
+_CAL = "calendar_size"
+
+
+def test_d5_calendar_size_signature():
+    """`before` 는 첫 위치 인자 · `horizon`/`min_rows` 는 키워드 전용, 헬퍼와 같은 기본값."""
+    sig = inspect.signature(getattr(smd, _CAL))
+    params = sig.parameters
+    assert list(params)[0] == "before"
+    assert params["before"].kind in (
+        inspect.Parameter.POSITIONAL_OR_KEYWORD, inspect.Parameter.POSITIONAL_ONLY,
+    )
+    assert params["horizon"].kind is inspect.Parameter.KEYWORD_ONLY
+    assert params["horizon"].default == smd.GAP_HORIZON
+    assert params["min_rows"].kind is inspect.Parameter.KEYWORD_ONLY
+    assert params["min_rows"].default == smd.GAP_CALENDAR_MIN_ROWS
+
+
+async def test_d6_calendar_size_db_error_propagates(monkeypatch):
+    """조회 실패를 삼키지 않는다 — `earliest_missing_bas_dd` 와 같은 규약.
+
+    호출부(scanner)가 fail-open(0) + WARNING 으로 받는다.
+    """
+    async def _boom(*_a, **_k):
+        raise RuntimeError("db down")
+
+    for name in ("fetch", "fetchrow", "fetchval"):
+        monkeypatch.setattr(pg, name, _boom)
+    with pytest.raises(RuntimeError, match="db down"):
+        await getattr(smd, _CAL)(date(2026, 10, 12))
+
+
+def test_d7_calendar_size_no_await_inside_loop():
+    """루프·컴프리헨션이 없는 순수 쿼리 1회 함수(종목 인자가 없다)."""
+    tree = ast.parse(textwrap.dedent(inspect.getsource(getattr(smd, _CAL))))
+    loops = (ast.For, ast.AsyncFor, ast.While, ast.ListComp, ast.SetComp,
+             ast.DictComp, ast.GeneratorExp)
+    offenders = []
+    for loop in ast.walk(tree):
+        if isinstance(loop, loops):
+            offenders += [n for n in ast.walk(loop) if isinstance(n, ast.Await)]
+    assert offenders == [], f"루프 안 await {len(offenders)}건"
+
+
+async def test_d8_calendar_size_none_scalar_becomes_zero(monkeypatch):
+    """`pg.fetchval` 이 `None`(빈 테이블 등)을 주면 0 — 예외와 구분된다."""
+    async def _none(*_a, **_k):
+        return None
+
+    monkeypatch.setattr(pg, "fetchval", _none)
+    got = await getattr(smd, _CAL)(date(2026, 10, 12))
+    assert got == 0

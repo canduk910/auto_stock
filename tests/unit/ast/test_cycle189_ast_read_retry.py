@@ -7,7 +7,7 @@ Call 카운트 헬퍼 재사용. 사이클 187 A1/A2 패턴 100% 답습.
 가드 (설계 메모 영역 A):
 - A-1: kis_quote_accounts read 4함수 = `execute_with_retry` 경유 + 직접 `to_thread` 0건.
   → 현재 FAIL (Red).
-- A-2: system_config read 9함수 = 동일 (UNUSED 포함). → 현재 FAIL (Red).
+- A-2: system_config read 8함수 = 동일. → 현재 FAIL (Red).
 - A-3: 양 모듈 쓰기 계열 = `to_thread` 직접 유지 + `execute_with_retry` 0건 (불변식).
   → 현재 PASS (187 A2 패턴 = 멱등 SELECT 전용 제외 영구 보장).
 """
@@ -42,7 +42,6 @@ _SC_READ_FUNCS = (
     "_get_float_or_default",
     "_get_bool_or_default",
     "_get_int_or_default",
-    "_get_str_or_default_UNUSED",
     "_get_string_or_none",
 )
 _SC_WRITE_FUNCS = (
@@ -149,7 +148,7 @@ def test_A1_kqa_read_funcs_use_execute_with_retry():
     strict=False,
 )
 def test_A2_sc_read_funcs_use_execute_with_retry():
-    """system_config read 9함수 (UNUSED 포함) 본체 execute_with_retry ≥ 1 + to_thread 0.
+    """system_config read 8함수 본체 execute_with_retry ≥ 1 + to_thread 0.
 
     사이클 M2a 전환 후 — pg.fetch 직접 호출(내부 _with_retry 자동 경유)로
     바뀌어 supabase execute_with_retry Call 이 0건 → xfail (의미 전환).

@@ -84,10 +84,6 @@ _KNOWN_ABSOLUTE_ASSIGNS: dict[tuple[str, str], tuple[str, str | None, str]] = {
         "init", None,
         "Position 생성 시 `high_since_buy == 0` 이면 buy_price 로 초기화",
     ),
-    ("src/engine/strategy.py", "__post_init__"): (
-        "init", None,
-        "구 Position dataclass 생성 초기화 (동형)",
-    ),
     ("src/engine/strategy_base.py", "_apply_high_since_buy_from_candles"): (
         "raise_only", None,
         "`candidate <= pos.high_since_buy` 면 return — H-1 복구는 올리기 전용",

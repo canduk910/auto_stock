@@ -302,6 +302,7 @@ list_paged_by_filter(*, market=None, min_market_cap=0, min_trade_amount=0,
     - 반환 = 빈 날이 있는 **요청 종목만** `{ticker: 가장 이른 빈 날}`. DB 에 없는 종목·요청 밖 종목·빈 날 없는 종목은 키가 없다.
     - 쿼리 1회 — `ticker = ANY($1::text[])` + CTE 반조인이라 종목 수와 무관하다(종목당 쿼리 금지, 루프 안 `await` 0).
     - 🔴 **예외를 삼키지 않는다**(`list_provisional_rows` 와 같다) — 빈 dict 로 접으면 「판정 실패」가 「빈 날 없음」으로 둔갑한다. fail-open 은 호출자가 한다. 재시도는 `pg.fetch`.
+  - **`calendar_size(before, *, horizon=GAP_HORIZON, min_rows=GAP_CALENDAR_MIN_ROWS) -> int`**(cycle437) — `earliest_missing_bas_dd` 와 같은 `cal` CTE 의 **행 수**(= 실제 달력 일수, ≤ `horizon`). 소비처 = `scanner._stock_master_daily_load_once` 하나, 같은 호출의 `before`/`horizon`/`min_rows` 를 그대로 넘겨 같은 달력을 센다(서로 참조하지 않고 SQL 조각만 같다). 쿼리 1회, 종목 인자 없음. 🔴 예외를 삼키지 않는다(같은 규약) — `pg.fetchval` 이 `None` 을 주면 0(빈 테이블과 조회 실패를 가른다).
   - **`max_bas_dd_before(today) -> date | None`**(cycle386) — 전일 잠정 봉 확정의 헤드(`SELECT max(bas_dd) FROM stock_master_daily WHERE bas_dd < $1`, `today` = 호출자가 정한 KST `date`). 🔴 **예외를 삼키지 않는다**(`max_bas_dd(None)` 과 다르다) — 삼키면 조회 실패가 「오늘 앞 봉 없음」 = `result=noop`(INFO)으로 둔갑한다. 실패는 호출자가 `result=error stage=head` 로 남긴다. 재시도는 `pg.fetchval`.
   - **`list_provisional_rows(*, since, head, today_boundary) -> list[dict]`**(cycle386) — 전일 「잠정 봉」 조회(계약 = `src/engine/CLAUDE.md` 「저녁 데이터 적재」 절). `bas_dd` 가 `[since, head]` 안이고 아래 조건인 행의 `ticker, bas_dd, open_price, high_price, low_price, close_price` 를 `ticker, bas_dd` 순으로 돌려준다. 이 함수와 `max_bas_dd_before` 의 소비처는 `src/engine/daily_bar_finalize.py` 하나다.
     - 헤드 행(`bas_dd = head`) = `updated_at < today_boundary`(호출자가 오늘 06:00 KST 를 넘긴다)

@@ -209,7 +209,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -343,7 +342,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -1002,7 +1000,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -1546,7 +1543,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -1684,7 +1680,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -2345,7 +2340,6 @@ backend:
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -2914,7 +2908,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -3050,7 +3043,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -3699,7 +3691,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -4248,7 +4239,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -4382,7 +4372,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -5044,7 +5033,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -5572,7 +5560,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -5710,7 +5697,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -6391,7 +6377,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -6921,7 +6906,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -7059,7 +7043,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -7740,7 +7723,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -8271,7 +8253,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -8409,7 +8390,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -9089,7 +9069,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -9621,7 +9600,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -9759,7 +9737,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -10439,7 +10416,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -10979,7 +10955,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -11115,7 +11090,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -11792,7 +11766,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -12325,7 +12298,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -12462,7 +12434,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -13137,7 +13108,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -13744,7 +13714,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -13882,7 +13851,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -14559,7 +14527,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -15087,7 +15054,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -15225,7 +15191,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -15906,7 +15871,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -16455,7 +16419,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -16593,7 +16556,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -17274,7 +17236,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -17815,7 +17776,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -17952,7 +17912,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -18624,7 +18583,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -19179,7 +19137,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -19315,7 +19272,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -19982,7 +19938,6 @@ backend:
     - tests/unit/engine/test_cycle432_followup.py
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -20501,7 +20456,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -20639,7 +20593,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -21320,7 +21273,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -21867,7 +21819,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -22005,7 +21956,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -22672,7 +22622,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -23203,7 +23152,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -23341,7 +23289,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -24019,7 +23966,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -24551,7 +24497,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -24689,7 +24634,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -25368,7 +25312,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -25909,7 +25852,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -26046,7 +25988,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -26717,7 +26658,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -27248,7 +27188,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -27386,7 +27325,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -28066,7 +28004,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -28603,7 +28540,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -28741,7 +28677,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -29417,7 +29352,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -29949,7 +29883,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -30087,7 +30020,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -30764,7 +30696,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -31300,7 +31231,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -31438,7 +31368,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -32113,7 +32042,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -32646,7 +32574,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -32784,7 +32711,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -33462,7 +33388,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -34008,7 +33933,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -34146,7 +34070,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -34811,7 +34734,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -35373,7 +35295,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -35511,7 +35432,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -36163,7 +36083,6 @@ backend:
     - tests/unit/engine/test_cycle432_followup.py
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -36745,7 +36664,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -36883,7 +36801,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -37514,7 +37431,6 @@ backend:
     - tests/unit/engine/test_cycle432_followup.py
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -38073,7 +37989,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -38207,7 +38122,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -38859,7 +38773,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -39391,7 +39304,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -39529,7 +39441,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -40207,7 +40118,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -40742,7 +40652,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -40880,7 +40789,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -41558,7 +41466,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -42099,7 +42006,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -42237,7 +42143,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -42905,7 +42810,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -43439,7 +43343,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -43577,7 +43480,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -44258,7 +44160,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -44805,7 +44706,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -44943,7 +44843,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -45610,7 +45509,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -46139,7 +46037,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -46277,7 +46174,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -46957,7 +46853,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -47511,7 +47406,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -47649,7 +47543,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -48309,7 +48202,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -48907,7 +48799,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -49045,7 +48936,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -49726,7 +49616,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -50257,7 +50146,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -50395,7 +50283,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -51076,7 +50963,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -51607,7 +51493,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -51745,7 +51630,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -52425,7 +52309,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -52976,7 +52859,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -53112,7 +52994,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -53775,7 +53656,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -54382,7 +54262,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -54520,7 +54399,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -55195,7 +55073,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -55728,7 +55605,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -55866,7 +55742,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -56545,7 +56420,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -57076,7 +56950,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -57214,7 +57087,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -57893,7 +57765,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -58441,7 +58312,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -58579,7 +58449,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -59242,7 +59111,6 @@ backend:
     - tests/unit/engine/test_cycle432_followup.py
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -59772,7 +59640,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -59910,7 +59777,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -60591,7 +60457,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -61127,7 +60992,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -61265,7 +61129,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -61940,7 +61803,6 @@ backend:
     - tests/unit/engine/test_cycle432_followup.py
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -62556,7 +62418,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -62694,7 +62555,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -63375,7 +63235,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -63930,7 +63789,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -64067,7 +63925,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -64730,7 +64587,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -65256,7 +65112,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -65394,7 +65249,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -66074,7 +65928,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -66611,7 +66464,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -66747,7 +66599,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -67423,7 +67274,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -67955,7 +67805,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -68092,7 +67941,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -68772,7 +68620,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -69303,7 +69150,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -69441,7 +69287,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -70122,7 +69967,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -70657,7 +70501,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -70795,7 +70638,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -71470,7 +71312,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -72076,7 +71917,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -72214,7 +72054,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -72891,7 +72730,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -73425,7 +73263,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -73563,7 +73400,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -74240,7 +74076,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -74773,7 +74608,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -74911,7 +74745,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -75591,7 +75424,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -76122,7 +75954,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -76260,7 +76091,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -76939,7 +76769,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -77469,7 +77298,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -77607,7 +77435,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -78287,7 +78114,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -78905,7 +78731,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -79043,7 +78868,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -79715,7 +79539,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -80252,7 +80075,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -80390,7 +80212,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -81061,7 +80882,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -81661,7 +81481,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -81797,7 +81616,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -82478,7 +82296,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -83015,7 +82832,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -83153,7 +82969,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -83831,7 +83646,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -84372,7 +84186,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -84510,7 +84323,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -85187,7 +84999,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -85788,7 +85599,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -85925,7 +85735,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -86596,7 +86405,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -87128,7 +86936,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -87266,7 +87073,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -87947,7 +87753,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -88476,7 +88281,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -88614,7 +88418,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -89294,7 +89097,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -89834,7 +89636,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -89972,7 +89773,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -90643,7 +90443,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -91176,7 +90975,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -91314,7 +91112,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -91992,7 +91789,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -92525,7 +92321,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -92663,7 +92458,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -93341,7 +93135,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -93877,7 +93670,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -94015,7 +93807,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -94690,7 +94481,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -95219,7 +95009,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -95357,7 +95146,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -96038,7 +95826,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -96670,7 +96457,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -96808,7 +96594,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -97488,7 +97273,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -98106,7 +97890,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -98244,7 +98027,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -98922,7 +98704,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -99620,7 +99401,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -99758,7 +99538,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -100437,7 +100216,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -100968,7 +100746,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -101106,7 +100883,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -101787,7 +101563,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -102325,7 +102100,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -102461,7 +102235,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -103136,7 +102909,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -103719,7 +103491,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -103840,7 +103611,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -104494,7 +104264,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -105017,7 +104786,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -105155,7 +104923,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -105836,7 +105603,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -106368,7 +106134,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -106506,7 +106271,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -107186,7 +106950,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -107711,7 +107474,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -107849,7 +107611,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -108530,7 +108291,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -109339,7 +109099,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -109474,7 +109233,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -109953,7 +109711,6 @@ backend:
     - tests/unit/engine/test_cycle432_followup.py
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -110591,7 +110348,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -110722,7 +110478,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -111317,7 +111072,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle61_phase2A2_dataclass_completeness.py
@@ -111763,7 +111517,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -111901,7 +111654,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -112580,7 +112332,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -113111,7 +112862,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -113249,7 +112999,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -113929,7 +113678,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -114461,7 +114209,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -114599,7 +114346,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -115276,7 +115022,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -115805,7 +115550,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -115943,7 +115687,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -116624,7 +116367,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -117163,7 +116905,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -117301,7 +117042,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -117975,7 +117715,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -118534,7 +118273,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -118672,7 +118410,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -119343,7 +119080,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -119856,7 +119592,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -119994,7 +119729,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -120672,7 +120406,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -121227,7 +120960,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -121365,7 +121097,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -122039,7 +121770,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -122554,7 +122284,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -122692,7 +122421,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -123371,7 +123099,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -123899,7 +123626,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -124037,7 +123763,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -124718,7 +124443,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -125248,7 +124972,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -125386,7 +125109,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -126067,7 +125789,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -126599,7 +126320,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -126737,7 +126457,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -127417,7 +127136,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -127949,7 +127667,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -128086,7 +127803,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -128766,7 +128482,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -129297,7 +129012,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -129435,7 +129149,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -130115,7 +129828,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -130654,7 +130366,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -130792,7 +130503,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -131468,7 +131178,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -132069,7 +131778,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -132204,7 +131912,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -132845,7 +132552,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -133428,7 +133134,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -133566,7 +133271,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -134197,7 +133901,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -134726,7 +134429,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -134864,7 +134566,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -135541,7 +135242,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -136115,7 +135815,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -136251,7 +135950,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -136896,7 +136594,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -137457,7 +137154,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -137592,7 +137288,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -138240,7 +137935,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -138795,7 +138489,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -138932,7 +138625,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -139589,7 +139281,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -140162,7 +139853,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -140297,7 +139987,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -140940,7 +140629,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -141511,7 +141199,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -141646,7 +141333,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -142290,7 +141976,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -142647,9 +142332,6 @@ backend:
     - tests/unit/tools/test_pg_harness_container_cleanup.py
     - tests/unit/tools/test_slot_utilization_review.py
     - tests/unit/workflows/test_cycle145_deploy_migration.py
-  src/engine/strategy.py:
-    direct_tests: []
-    transitive_tests: []
   src/engine/strategy_base.py:
     direct_tests:
     - tests/contract/test_cycle384_buy_paused_params_route.py
@@ -142742,7 +142424,6 @@ backend:
     - tests/unit/ast/test_cycle369_ast_status_exit.py
     - tests/unit/ast/test_cycle382_ast_market_unit.py
     - tests/unit/ast/test_cycle384_ast_buy_paused.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_strategy_census.py
     - tests/unit/db/test_cycle170_card_a_stage_counts.py
     - tests/unit/engine/scheduler/test_confirm_open_prices_main_only.py
@@ -142954,7 +142635,6 @@ backend:
     - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -143075,7 +142755,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -144175,7 +143854,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -144312,7 +143990,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -144988,7 +144665,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -145598,7 +145274,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -145736,7 +145411,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -146357,7 +146031,6 @@ backend:
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle432_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -146866,7 +146539,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -147004,7 +146676,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -147685,7 +147356,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -148221,7 +147891,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -148358,7 +148027,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -149033,7 +148701,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -149653,7 +149320,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -149791,7 +149457,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -150469,7 +150134,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -151005,7 +150669,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -151143,7 +150806,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -151819,7 +151481,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -152350,7 +152011,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -152488,7 +152148,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -153166,7 +152825,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -153719,7 +153377,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -153857,7 +153514,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -154518,7 +154174,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -155046,7 +154701,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -155184,7 +154838,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -155864,7 +155517,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -156394,7 +156046,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -156532,7 +156183,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -157213,7 +156863,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -157742,7 +157391,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -157880,7 +157528,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -158561,7 +158208,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -159097,7 +158743,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -159235,7 +158880,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -159912,7 +159556,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -160443,7 +160086,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -160581,7 +160223,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -161260,7 +160901,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -161805,7 +161445,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -161943,7 +161582,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -162616,7 +162254,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -163212,7 +162849,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -163350,7 +162986,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -164031,7 +163666,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -164561,7 +164195,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -164699,7 +164332,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -165380,7 +165012,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -165916,7 +165547,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -166054,7 +165684,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -166733,7 +166362,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -167276,7 +166904,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -167414,7 +167041,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -168087,7 +167713,6 @@ backend:
     - tests/unit/engine/test_cycle432_followup.py
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -168688,7 +168313,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -168826,7 +168450,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -169503,7 +169126,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -170037,7 +169659,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -170174,7 +169795,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -170854,7 +170474,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -171480,7 +171099,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -171616,7 +171234,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -172275,7 +171892,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -173018,7 +172634,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -173156,7 +172771,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -173814,7 +173428,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -174435,7 +174048,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -174573,7 +174185,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -175234,7 +174845,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -175803,7 +175413,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -175937,7 +175546,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -176613,7 +176221,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -177129,7 +176736,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -177265,7 +176871,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -177944,7 +177549,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -178495,7 +178099,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -178633,7 +178236,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -179310,7 +178912,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -179855,7 +179456,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -179991,7 +179591,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -180658,7 +180257,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -183105,7 +182703,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -183243,7 +182840,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -183920,7 +183516,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -184448,7 +184043,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -184586,7 +184180,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -185266,7 +184859,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -185801,7 +185393,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -185939,7 +185530,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -186618,7 +186208,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -187145,7 +186734,6 @@ backend:
     - tests/unit/ast/test_cycle102_ast_callback_exception.py
     - tests/unit/ast/test_cycle102_ast_flush_call_sites.py
     - tests/unit/ast/test_cycle103_ast_momentum_log_format.py
-    - tests/unit/ast/test_cycle103_ast_no_dead_strategy_funcs.py
     - tests/unit/ast/test_cycle107_ast_inquire_price_tr_id.py
     - tests/unit/ast/test_cycle108_ast_no_kis_volume_rank.py
     - tests/unit/ast/test_cycle110_ast_no_deprecated_imports.py
@@ -187283,7 +186871,6 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
-    - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -187964,7 +187551,6 @@ backend:
     - tests/unit/engine/test_cycle432_page_full_removal.py
     - tests/unit/engine/test_cycle433_corporate_action_followup.py
     - tests/unit/engine/test_cycle434_alert_markers.py
-    - tests/unit/engine/test_cycle436_pending_buy_reservation.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -191819,10 +191405,10 @@ frontend:
     - frontend/src/pages/__tests__/Dashboard.fix1.cycle414.test.tsx
     - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
     - frontend/src/pages/__tests__/MarketState.test.tsx
-generated_at: '2026-10-10T19:09:17.119941+09:00'
+generated_at: '2026-10-10T18:51:26.737980+09:00'
 stats:
-  backend_modules: 189
-  backend_tests: 1346
+  backend_modules: 188
+  backend_tests: 1343
   frontend_modules: 158
   frontend_tests: 171
   unmapped_modules:
@@ -191832,7 +191418,6 @@ stats:
   - frontend/src/components/StockChartModal.tsx
   - frontend/src/main.tsx
   - frontend/src/test/setup.ts
-  - src/engine/strategy.py
   - src/engine/util/__init__.py
   - src/models/__init__.py
 version: 1
