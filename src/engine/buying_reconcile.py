@@ -217,9 +217,6 @@ def _release_if_unchanged(registry, strategy, order_engine, ticker: str, odnos):
     가로챘거나 먼저 체결돼 지워졌으면 실패) ② 어느 전략도 ``has_position`` 이
     아닌가 ③ 연결 주문 집합이 평가 시점과 같은가. 하나라도 어긋나면 아무것도
     건드리지 않고 ``(False, None)``.
-
-    cycle436 카드 E (커밋 ①) — ``pending_buy_amounts`` 해제는
-    ``StrategyState.release_buy`` 단일 진입점을 거친다(키는 아직 ticker).
     """
     strategies = registry.all()
     owners = [s for s in strategies if ticker in s.state.pending_buys]
@@ -235,9 +232,13 @@ def _release_if_unchanged(registry, strategy, order_engine, ticker: str, odnos):
         return False, None
 
     strategy.state.pending_buys.discard(ticker)
-    # cycle436 카드 E (커밋 ①) — 단일 진입점을 거친다. 키는 아직 ticker 다.
-    amount = strategy.state.release_buy(ticker)
+    # cycle436 카드 E — `pending_buy_amounts` 키가 `(ticker, order_no)` 라 해제도
+    # 그 주문번호만 푼다(종목 전체를 지우면 다른 주문의 예약까지 지운다).
+    amount: "int | None" = None
     for o in odnos:
+        released = strategy.state.release_buy(ticker, o)
+        if released is not None:
+            amount = (amount or 0) + released
         order_engine._pending_buy_orders.pop(o, None)
     return True, amount
 

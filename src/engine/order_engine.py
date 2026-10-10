@@ -12,6 +12,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
+import uuid
 from datetime import datetime, timedelta, timezone
 from enum import Enum
 
@@ -1360,6 +1361,54 @@ class OrderEngine:
                 ticker, order_no, strategy_id, path,
             )
 
+    def _rekey_buy_reservation_after_send(
+        self,
+        state: "StrategyState",
+        ticker: str,
+        reserve_key: str,
+        order_no: str,
+        quantity: int,
+        record_price: int,
+    ) -> None:
+        """cycle436 카드 E + J-4 자문(domain-consult 2026-10-10) — 임시 키 예약을
+        `place_order` 가 돌려준 실제 `order_no` 로 옮긴다.
+
+        `pending_buy_amounts` 키가 `(ticker, order_no)` 라 `order_no` 를 모르는
+        접수 전 구간은 `reserve_key`(임시 키)로 예약해 둔다. 하지만 `await
+        place_order(...)` 가 걸려 있는 **발사 창** 동안 그 주문이 이미 체결통보로
+        처리됐을 수 있다(cycle331 「발사 창 귀속」과 같은 창 — 매핑이 서기 전
+        통보가 `pending_buys` 멤버십만으로 이 전략에 귀속돼 포지션을 세운다).
+        그 경우 임시 키 예약을 실제 order_no 로 그대로 옮기면 **이미 포지션에
+        반영된 금액이 예약에도 남아 이중 계산된다** — 자금이 묶인 걸로 두 번
+        잡혀 21:30 정산까지 유령 예약이 남는다.
+
+        판정(자문 J4-3):
+        - 전량 체결(`order_no in self._completed_buy_orders`) — 포지션이 이미
+          전액을 담았다. 임시 키 예약만 지우고 끝낸다(되살리지 않는다).
+        - 부분 체결(`order_no in self._filled_qty`, 아직 전량 아님) — 체결된
+          수량만큼은 포지션에 반영됐으니, **남은 수량만** 실제 order_no 로
+          다시 건다.
+        - 그 밖(발사 창에 체결이 없었다, 압도적 다수) — 원래 금액 그대로
+          실제 order_no 로 옮긴다(현행과 동일).
+
+        🔴 동기 · `await` 0 — `place_order` 응답 직후 매핑 등록과 **같은 동기
+        영역**에서 호출한다(A-ATOMIC 불변식 — 이 함수와 호출 자리 사이에
+        `await` 를 넣지 않는다).
+        """
+        amount = state.release_buy(ticker, reserve_key)
+        if amount is None:
+            return
+        if order_no in self._completed_buy_orders:
+            return
+        filled = self._filled_qty.get(order_no, 0)
+        if filled > 0:
+            remaining_qty = quantity - filled
+            if remaining_qty <= 0:
+                return
+            state.reserve_buy(ticker, order_no, record_price * remaining_qty)
+            return
+        state.reserve_buy(ticker, order_no, amount)
+
     async def execute_buy(
         self,
         ticker: str,
@@ -1487,9 +1536,12 @@ class OrderEngine:
 
         state.pending_buys.add(ticker)
         # 1주 폴백 잔여 자금 계산용 — pending_buys 와 동기 라이프사이클 (2026-05-11 P1).
-        # cycle436 카드 E — 넣기는 `reserve_buy` 단일 진입점을 거친다(order_no 는
-        # 아직 모른다, 커밋 ① 은 키가 ticker 라 무시된다).
-        state.reserve_buy(ticker, "", current_price * quantity)
+        # cycle436 카드 E — `pending_buy_amounts` 키가 `(ticker, order_no)` 라 `order_no`
+        # 를 아직 모르는 이 자리는 임시 키로 예약한다. `place_order` 응답 직후(아래
+        # 매핑 등록과 같은 동기 영역)에서 `_rekey_buy_reservation_after_send` 로
+        # 실제 order_no 로 옮긴다 — 그 사이 `await` 는 0 (A-ATOMIC).
+        reserve_key = uuid.uuid4().hex
+        state.reserve_buy(ticker, reserve_key, current_price * quantity)
         state.order_attempt_today += 1
 
         # exchange 결정 — stock_master 사전 차단 (Phase G) + cycle287 규칙 1 라우팅.
@@ -1589,7 +1641,8 @@ class OrderEngine:
                 except Exception:
                     logger.debug("[pre_nxt_division_config] 발화 실패", exc_info=True)
                 # pending_buy_amounts 도 변환된 가격 기준으로 동기 갱신 (1주 폴백 잔여 자금 정합성).
-                state.reserve_buy(ticker, "", order_price * quantity)
+                # 같은 임시 키(reserve_key) 아래 금액만 갱신 — 아직 place_order 전이다.
+                state.reserve_buy(ticker, reserve_key, order_price * quantity)
         except Exception:
             # 사전 차단 실패는 swallow — 기존 사후 폴백 분기에서 자연 회복.
             # session import / session_tracker 접근 예외가 매수 흐름 자체를 막으면 안 됨.
@@ -1640,6 +1693,12 @@ class OrderEngine:
                 "quantity": quantity,
                 "strategy_id": strategy.strategy_id,
             }
+            # cycle436 카드 E — 임시 키 예약을 실제 order_no 로 옮긴다(J-4 자문 —
+            # 발사 창에 이미 체결됐으면 되살리지 않는다). 매핑 등록과 같은 동기
+            # 영역, 다음 `await` 앞.
+            self._rekey_buy_reservation_after_send(
+                state, ticker, reserve_key, result.order_no, quantity, record_price,
+            )
 
             # cycle276 — AI 매수평가(shadow) 주문 시점 훅. 주문은 이미 KIS 에 접수됐고
             # 이 호출은 기록만 한다. 동기·never-raise·반환 미사용(Expr statement).
@@ -1697,7 +1756,7 @@ class OrderEngine:
 
         except KisApiError as e:
             state.pending_buys.discard(ticker)
-            state.release_buy(ticker)
+            state.release_buy(ticker, reserve_key)
             if is_insufficient_cash(e):
                 state.block_buy(time.time() + BUY_BLOCK_DURATION)
                 logger.warning(
@@ -1725,8 +1784,11 @@ class OrderEngine:
                 fallback_price = step_up(current_price, steps=5)
                 try:
                     state.pending_buys.add(ticker)  # 폴백 진입 — 재등록
-                    # 폴백 가격 기준으로 예정 금액 재등록 (시장가 경로와 동일 규약)
-                    state.reserve_buy(ticker, "", fallback_price * quantity)
+                    # 폴백 가격 기준으로 예정 금액 재등록 (시장가 경로와 동일 규약).
+                    # cycle436 카드 E — 주 경로의 reserve_key 는 위에서 이미 해제됐다
+                    # (이 except 블록 시작부). 폴백은 새 임시 키로 다시 예약한다.
+                    fallback_reserve_key = uuid.uuid4().hex
+                    state.reserve_buy(ticker, fallback_reserve_key, fallback_price * quantity)
                     result = await place_order(
                         ticker=ticker,
                         side=OrderSide.BUY,
@@ -1750,6 +1812,11 @@ class OrderEngine:
                         "quantity": quantity,
                         "strategy_id": strategy.strategy_id,
                     }
+                    # cycle436 카드 E — 임시 키 예약을 실제 order_no 로 옮긴다(J-4 자문).
+                    self._rekey_buy_reservation_after_send(
+                        state, ticker, fallback_reserve_key, result.order_no,
+                        quantity, fallback_price,
+                    )
 
                     # cycle276 — 지정가 5호가 폴백 경로의 AI 매수평가(shadow) 훅.
                     # 주 경로와 같은 형태·같은 자리. 흡수기가 `except Exception` 인
@@ -1801,7 +1868,7 @@ class OrderEngine:
                     return
                 except KisApiError as e2:
                     state.pending_buys.discard(ticker)
-                    state.release_buy(ticker)
+                    state.release_buy(ticker, fallback_reserve_key)
                     state.block_low_funds(ticker, time.time() + LOW_FUNDS_COOLDOWN)
                     logger.error(
                         "지정가 폴백도 거부 → cooldown: %s ([%s] %s → [%s] %s)",
@@ -1811,7 +1878,7 @@ class OrderEngine:
             raise
         except Exception:
             state.pending_buys.discard(ticker)
-            state.release_buy(ticker)
+            state.release_buy(ticker, reserve_key)
             raise
 
     async def execute_sell(
