@@ -64,7 +64,9 @@ def _resolve_fallback_owner(scheduler: "TradingScheduler", strategy_id: str):
     return scheduler.registry.get(strategy_id) or scheduler.registry.get(FALLBACK_OWNER_ID)
 
 
-async def _reconcile_corporate_actions(scheduler: "TradingScheduler", holdings, today, yesterday) -> None:
+async def _reconcile_corporate_actions(
+    scheduler: "TradingScheduler", holdings, today, yesterday_trading_day,
+) -> None:
     """07:45 부팅 1차 복구 직후 — KIS 잔고와 추적 수량이 다른 보유를 대사한다.
 
     cycle431 — 사용자 결정 2026-10-10(안1). 자문 =
@@ -80,6 +82,14 @@ async def _reconcile_corporate_actions(scheduler: "TradingScheduler", holdings, 
       KIS 값으로 맞춘다(매입가·스탬프 무접촉, 사용자 결정 ②).
     - `merger_split_detected`/`unexplained` — 장부·보유·구독 전부 보존, 그날
       신규 매수만 차단(`block_buy_today`) + `[holding_qty_unexplained]` ERROR.
+
+    `yesterday_trading_day` — 사용자 결정 ②(통보 유실 맞추기)가 보는 "어제" 는
+    달력 어제가 아니라 **직전 영업일**이다(cycle431 follow-up Fix1). 월요일·연휴
+    다음 날 아침에 달력 어제(일요일·공휴일)의 빈 주문내역을 보면 금요일 체결
+    유실분을 영원히 설명할 수 없다. 호출자가 `src.engine.trading_calendar
+    .previous_trading_day(today)`(KIS 휴장일 역산, never-raise → 모르면
+    `None`)로 구해 넘긴다. **`None` 이면 대사 ②만 건너뛴다** — ①(비율 증거
+    `apply_scale`)은 어제 주문내역과 무관해 그대로 진행한다.
     """
     from src.api import corporate_actions as _ca
     from src.engine import corporate_action_reconcile as _car
@@ -87,7 +97,14 @@ async def _reconcile_corporate_actions(scheduler: "TradingScheduler", holdings, 
     from src.engine.scanner import ticker_names as _ticker_names
 
     holdings_by_ticker = {h.ticker: h for h in holdings}
-    yesterday_str = yesterday.strftime("%Y%m%d")
+    if yesterday_trading_day is None:
+        yesterday_str = None
+        logger.warning(
+            "[corporate_action_yesterday_unknown] 직전 영업일 조회 실패 — "
+            "대사 ②(통보 유실 맞추기) 건너뛰고 ①(비율 반영)만 진행",
+        )
+    else:
+        yesterday_str = yesterday_trading_day.strftime("%Y%m%d")
 
     for strategy in scheduler.registry.all():
         for ticker, pos in list(strategy.state.positions.items()):
@@ -120,13 +137,14 @@ async def _reconcile_corporate_actions(scheduler: "TradingScheduler", holdings, 
                 )
 
             yesterday_net: int | None = None
-            try:
-                yesterday_orders = await get_daily_orders(target_date=yesterday_str, pdno=ticker)
-                yesterday_net = _car.net_qty_from_order_rows(yesterday_orders)
-            except Exception:
-                logger.warning(
-                    "[corporate_action_reconcile] 어제 주문내역 조회 실패: %s", ticker, exc_info=True,
-                )
+            if yesterday_str is not None:
+                try:
+                    yesterday_orders = await get_daily_orders(target_date=yesterday_str, pdno=ticker)
+                    yesterday_net = _car.net_qty_from_order_rows(yesterday_orders)
+                except Exception:
+                    logger.warning(
+                        "[corporate_action_reconcile] 어제 주문내역 조회 실패: %s", ticker, exc_info=True,
+                    )
 
             verdict = _car.classify(
                 tracked_qty=pos.quantity, kis_qty=kis.quantity,
@@ -532,8 +550,18 @@ async def boot(scheduler: "TradingScheduler") -> None:
     # `_eager_refresh_stock_master_for_held_positions` 의 recompute_held_atr 등)
     # 보다 **앞**이어야 한다 — 늦으면 재도출이 옛 눈금 일봉으로 스탬프를
     # 덮어쓴다(자문 「재도출이 옮긴 눈금을 덮어쓰는 함정」).
+    #
+    # cycle431 follow-up Fix1 — 대사 ②(통보 유실 맞추기)가 보는 "어제" 는
+    # 달력 어제(`yesterday` — 바로 위 `buy_dt` 기본값 용도는 바꾸지 않는다)가
+    # 아니라 **직전 영업일**이어야 한다. 월요일·연휴 다음 날 아침은 달력
+    # 어제가 주말·공휴일이라 그날의 빈 주문내역을 봐서 금요일 매도체결
+    # 통보 유실을 영원히 설명 못 한다. `trading_calendar.previous_trading_day`
+    # 는 never-raise(KIS 조회 실패·예외 모두 `None`) — `None` 이면 `_reconcile_
+    # corporate_actions` 가 대사 ②만 건너뛰고 ①(비율 반영)은 그대로 돈다.
+    from src.engine import trading_calendar as _trading_calendar
+    yesterday_trading_day = await _trading_calendar.previous_trading_day(today)
     try:
-        await _reconcile_corporate_actions(scheduler, holdings, today, yesterday)
+        await _reconcile_corporate_actions(scheduler, holdings, today, yesterday_trading_day)
     except Exception:
         logger.exception("[corporate_action_reconcile] 부팅 대사 실패 graceful — 부팅 계속")
 

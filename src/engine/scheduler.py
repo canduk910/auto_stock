@@ -3454,17 +3454,18 @@ class TradingScheduler:
         """
         from src.db.trade_history import get_today_trades_for_settlement
 
-        # cycle431 — 액면병합 등 CTRGA011R 사후 대사(감지·로그만, 쓰지 않는다). leaf 위임.
         try:
-            from src.engine.corporate_action_reconcile import emit_settlement_detection
-            await emit_settlement_detection(self.registry)
-        except Exception:
-            logger.exception("[corporate_action_reconcile] 정산 감지 실패 graceful")
-
-        try:
-            _, summary = await get_balance()
+            holdings, summary = await get_balance()
             from src.engine.scanner import KST_TZ as _KST_TZ_SETTLE
             today = datetime.now(_KST_TZ_SETTLE).date()
+
+            # cycle431 — 액면병합 등 CTRGA011R 사후 대사(감지·로그만, 쓰지 않는다).
+            # 이 잔고 조회를 재사용(KIS 추가 호출 0). leaf 위임, 독립 try.
+            try:
+                from src.engine.corporate_action_reconcile import emit_settlement_detection
+                await emit_settlement_detection(self.registry, holdings)
+            except Exception:
+                logger.exception("[corporate_action_reconcile] 정산 감지 실패 graceful")
 
             # 전체('total') 정산
             prev_total = await get_latest_performance(strategy="total")

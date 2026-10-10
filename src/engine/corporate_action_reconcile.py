@@ -22,7 +22,7 @@ from __future__ import annotations
 import logging
 import math
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, timedelta
 from typing import Literal
 
 # ---------------------------------------------------------------------------
@@ -321,9 +321,10 @@ def is_buy_blocked_today(ticker: str, *, today: date | None = None) -> bool:
 
 
 def reset_state_for_test() -> None:
-    """테스트 전용 — 두 날짜 키 레지스트리를 비운다."""
+    """테스트 전용 — 날짜 키 레지스트리를 비운다."""
     _RESCALED_TODAY.clear()
     _BUY_BLOCKED_TODAY.clear()
+    _CTRGA_EMITTED_TODAY.clear()
 
 
 # ---------------------------------------------------------------------------
@@ -393,27 +394,80 @@ async def observe_mid_session_sync(registry, holdings) -> None:
         )
 
 
-async def emit_settlement_detection(registry) -> None:
-    """21:30 정산 — 보유 종목의 CTRGA011R(계좌 권리 내역)을 감지·로그만 한다.
+#: CTRGA011R 사후 대사(21:30) 조회 창 — 한 권리의 `bass_dt`(기준일)가 매매정지
+#: ·변경상장일보다 며칠 앞설 수 있어(액면교체는 기준일 → 매매정지 → 변경상장
+#: 순) 1일 창이면 그 행을 "영원히" 못 잡는다(cycle431 follow-up Fix2, 사용자
+#: 결정 2026-10-10). 영업일 수 대신 달력일을 쓴다 — 영업일 판정은 KIS 호출을
+#: 더 늘리고, 창이 넓어 경계 하루 차이의 득실이 크지 않다.
+CTRGA_LOOKBACK_CALENDAR_DAYS = 45
+
+#: 수량이 바뀌는 권리 유형(14 액면분할·15 액면병합·17 감자) — 비율 계산 대상.
+#: `rght_type_cd` 는 2자리 문자열이라 int 로 비교해 앞 0(예: "15")을 무시한다.
+_CTRGA_QTY_RIGHT_TYPES = frozenset({14, 15, 17})
+
+#: 합병(11)·회사분할(12) — 새 종목이 생겨 자동 반영 범위 밖(사용자 결정).
+#: 존재만 ERROR 로 알린다.
+_CTRGA_MERGER_SPLIT_RIGHT_TYPES = frozenset({11, 12})
+
+#: KST 날짜(ISO) → {(ticker, bass_dt), ...} — 오늘 이미 로그를 낸 (종목, 기준일).
+#: 창이 겹쳐 같은 행이 **여러 날에 걸쳐** 다시 로그되는 것은 허용한다(잔존
+#: 불일치는 매일 보여야 한다) — 이 레지스트리는 "하루 안"(같은 실행) 중복만
+#: 막는다.
+_CTRGA_EMITTED_TODAY: dict[str, set[tuple[str, str]]] = {}
+
+
+def _ctrga_mark_emitted(ticker: str, bass_dt: str, *, today: date | None = None) -> bool:
+    """오늘 이미 (ticker, bass_dt) 를 로그했으면 False, 아니면 mark 하고 True."""
+    key = _today_key(today)
+    seen = _CTRGA_EMITTED_TODAY.setdefault(key, set())
+    pair = (ticker, bass_dt)
+    if pair in seen:
+        return False
+    seen.add(pair)
+    return True
+
+
+async def emit_settlement_detection(registry, holdings) -> None:
+    """21:30 정산 — 보유 종목의 CTRGA011R(계좌 권리 내역)을 사후 대사한다.
 
     쓰지 않는다 — 반영 지점은 07:45 부팅 하나(사용자 결정 ①). CTRGA011R 은
     실전 전용(`fetch_period_rights` 가 모의에서 빈 목록을 돌려준다). 행이
     없어도 그 자체로 오류가 아니다(「행 부재는 반영을 막지 않는다」, 사용자
     결정 「둘 다 체크」).
+
+    cycle431 follow-up Fix2(사용자 결정 2026-10-10) — 최근
+    `CTRGA_LOOKBACK_CALENDAR_DAYS` 달력일 창으로 넓혀 수량 변경 권리
+    (14·15·17)만 비율(`tot_alct_qty / cblc_qty`)을 계산하고, 추적 수량(전
+    전략 합) 대 KIS 보유수량을 대조해 일치(`match`)·불일치(`mismatch`)를
+    로그한다. 합병·회사분할(11·12)은 그 행이 있다는 사실만 ERROR(자동 반영
+    없음). `holdings` 는 호출자(`scheduler._settle()`)가 이미 부른 잔고
+    조회를 넘긴다 — 이 함수가 KIS 잔고를 추가로 부르지 않는다. 단수주
+    (`last_ftsk_qty`)는 KIS 수량에 이미 반영됐다고 보고 비교에 넣지 않는다.
+    같은 (ticker, bass_dt) 는 이 호출(하루 1회, 21:30) 안에서 1회만 로그한다
+    — 창이 겹쳐 다음 날 다시 로그되는 것은 막지 않는다(잔존 불일치는 매일
+    보이는 게 맞다).
     """
-    held_tickers = sorted({
-        ticker for strategy in registry.all() for ticker in strategy.state.positions
-    })
+    tracked_by_ticker: dict[str, int] = {}
+    for strategy in registry.all():
+        for ticker, pos in strategy.state.positions.items():
+            tracked_by_ticker[ticker] = tracked_by_ticker.get(ticker, 0) + pos.quantity
+
+    held_tickers = sorted(tracked_by_ticker)
     if not held_tickers:
         return
+
+    holdings_by_ticker = {h.ticker: h for h in holdings}
 
     from src.api import corporate_actions as _ca
     from src.db._kst import today_kst
 
-    today_str = today_kst().strftime("%Y%m%d")
+    today = today_kst()
+    start_date = (today - timedelta(days=CTRGA_LOOKBACK_CALENDAR_DAYS)).strftime("%Y%m%d")
+    end_date = today.strftime("%Y%m%d")
+
     for ticker in held_tickers:
         try:
-            rows = await _ca.fetch_period_rights(ticker, start_date=today_str, end_date=today_str)
+            rows = await _ca.fetch_period_rights(ticker, start_date=start_date, end_date=end_date)
         except Exception:
             _sched_logger.warning(
                 "[corporate_action_ctrga_check_failed] ticker=%s", ticker, exc_info=True,
@@ -421,8 +475,61 @@ async def emit_settlement_detection(registry) -> None:
             continue
         if not rows:
             continue
-        codes = sorted({str(r.get("rght_type_cd", "")) for r in rows})
-        _sched_logger.info(
-            "[corporate_action_ctrga_detected] ticker=%s codes=%s rescaled_today=%s",
-            ticker, ",".join(codes), is_rescaled_today(ticker),
-        )
+
+        for row in rows:
+            raw_code = str(row.get("rght_type_cd", "")).strip()
+            try:
+                code = int(raw_code)
+            except (TypeError, ValueError):
+                continue
+            bass_dt = str(row.get("bass_dt", "")).strip()
+            dedup_key = bass_dt or raw_code
+
+            if code in _CTRGA_MERGER_SPLIT_RIGHT_TYPES:
+                if not _ctrga_mark_emitted(ticker, f"merger:{dedup_key}"):
+                    continue
+                _sched_logger.error(
+                    "[corporate_action_ctrga_merger_held] ticker=%s bass_dt=%s rght_type_cd=%s",
+                    ticker, bass_dt, raw_code,
+                )
+                continue
+
+            if code not in _CTRGA_QTY_RIGHT_TYPES:
+                continue
+
+            if not _ctrga_mark_emitted(ticker, dedup_key):
+                continue
+
+            try:
+                cblc_qty = float(row.get("cblc_qty") or 0)
+                tot_alct_qty = float(row.get("tot_alct_qty") or 0)
+            except (TypeError, ValueError):
+                _sched_logger.warning(
+                    "[corporate_action_ctrga_check_failed] ticker=%s reason=bad_qty bass_dt=%s",
+                    ticker, bass_dt,
+                )
+                continue
+            if cblc_qty <= 0:
+                _sched_logger.warning(
+                    "[corporate_action_ctrga_check_failed] ticker=%s reason=zero_cblc bass_dt=%s",
+                    ticker, bass_dt,
+                )
+                continue
+            ratio = tot_alct_qty / cblc_qty
+
+            tracked = tracked_by_ticker.get(ticker, 0)
+            kis = holdings_by_ticker.get(ticker)
+            kis_qty = kis.quantity if kis is not None else None
+
+            if kis_qty is not None and tracked == kis_qty:
+                _sched_logger.info(
+                    "[corporate_action_ctrga_reconciled] result=match ticker=%s bass_dt=%s "
+                    "ratio=%.6f",
+                    ticker, bass_dt, ratio,
+                )
+            else:
+                _sched_logger.error(
+                    "[corporate_action_ctrga_reconciled] result=mismatch ticker=%s bass_dt=%s "
+                    "ratio=%.6f tracked=%s kis=%s alct=%s",
+                    ticker, bass_dt, ratio, tracked, kis_qty, tot_alct_qty,
+                )
