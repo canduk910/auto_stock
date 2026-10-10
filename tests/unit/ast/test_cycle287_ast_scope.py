@@ -105,7 +105,8 @@ _PINNED_DIR_FILE_COUNTS = {
     # 신규 leaf `journal_view.py`(`db/trade_journal.py` 는 이 재귀 집계 밖) → 94 → 96(병합).
     # cycle431(액면병합 대사, 사용자 결정 2026-10-10 안1) — 신규 leaf
     # `corporate_action_reconcile.py` 로 96 → 97.
-    "src/engine": 97,
+    # cycle434(대시보드 경고등) — 신규 leaf `alert_markers.py` 로 97 → 98.
+    "src/engine": 98,
 }
 
 #: `scheduler.py` cycle257 영구 상한.
