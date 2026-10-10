@@ -80,7 +80,7 @@ KIS OpenAPI REST 호출 모듈. 모든 호출은 `base.py` 공통 래퍼를 거�
 
   **`27`(GTP지정가)은 NXT 프리마켓 매수 전용이다**(미체결은 거래소가 08:50 에 일괄취소, **매도는 `00` 그대로**). 게이트 4중(실패·예외면 `00` — fail-safe)·`27` 거부 시 같은 가격 `00` 1회 폴백의 정본 = 같은 절 규칙 4.
 
-  **취소(`cancel_order`)의 `ORD_DVSN`** — `cancel_order(..., order_division: str | None = None)`, falsy 면 `"00"`. `order_engine` 취소 3경로(`_cancel_after_wait`/`_cancel_and_reorder`/`cancel_remaining`)는 이 인자를 **넘기지 않는다**(`41`/`44`/`27` 원주문 취소는 실적 0건이라 미검증, docstring 명시). 🔴 **원주문 호가유형 승계 전송은 매매 행위 변경이라 별도 승인 대상**이다 — 켜면 정규장 부분체결 취소가 `"00"`→`"01"` 로 바뀐다. 관측 `[after_cancel_result]`·선결 실측 = 같은 절 규칙 4 「취소 축 Stage A」.
+  **취소(`cancel_order`)의 `ORD_DVSN`** — `cancel_order(..., order_division: str | None = None)`, falsy 면 `"00"`. `order_engine` 취소 2경로(`_cancel_after_wait`/`_cancel_and_reorder`)는 이 인자를 **넘기지 않는다**(`41`/`44`/`27` 원주문 취소는 실적 0건이라 미검증, docstring 명시). 🔴 **원주문 호가유형 승계 전송은 매매 행위 변경이라 별도 승인 대상**이다 — 켜면 정규장 부분체결 취소가 `"00"`→`"01"` 로 바뀐다. 관측 `[after_cancel_result]`·선결 실측 = 같은 절 규칙 4 「취소 축 Stage A」.
 
 ## balance.py — 잔고/조회
 

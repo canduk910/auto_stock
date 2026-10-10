@@ -34,13 +34,15 @@ cycle294 A5 는 **원시 소스 정규식** 3종(`time(H,M)` 호출 · `"HH:MM"`
 | C3b | 술어가 표를 읽는다 | `_market_rest_now` 가 `get_market_state` 를 **이름으로** 참조 | — |
 | C4 | 재주문 결과 바인딩 | `_cancel_and_reorder` 안 `place_order` 호출이 **값으로 쓰인다**(bare `await place_order(...)` 금지) | C4b |
 | C4b | 자매 4곳 대조 | 나머지 `place_order` 호출 4곳은 원래부터 값을 받는다 | — |
-| C5 | byte 동일 4함수 | `_route_exchange_by_clock`·`_apply_clock`·`_cancel_after_wait`·`cancel_remaining` 소스 세그먼트 sha 고정 | C5b |
-| C5b | 핀 대상 생존 | 그 넷이 전부 존재한다(이름이 바뀌면 sha 비교가 아니라 이 단언이 먼저 붉어진다) | — |
+| C5 | byte 동일 3함수 | `_route_exchange_by_clock`·`_apply_clock`·`_cancel_after_wait` 소스 세그먼트 sha 고정 | C5b |
+| C5b | 핀 대상 생존 | 그 셋이 전부 존재한다(이름이 바뀌면 sha 비교가 아니라 이 단언이 먼저 붉어진다) | — |
 
-⚠️ **C5 는 cycle295 착지 전용 핀이다.** Green 이 이 넷을 정말로 건드리지 않았음을
-기계로 증명하는 것이 목적이고, cycle295 커밋 **이후** 다른 사이클이 이 넷을 바꿀
-때는 sha 를 갱신하는 것이 정상이다(공허해지는 가드가 아니라 «그 사이클이 이 넷을
-건드렸다»는 신호다). 핀은 `ast.dump` 가 아니라 **소스 세그먼트 sha** 다 —
+⚠️ **C5 는 cycle295 착지 전용 핀이다.** Green 이 이 셋을 정말로 건드리지 않았음을
+기계로 증명하는 것이 목적이고, cycle295 커밋 **이후** 다른 사이클이 이 셋을 바꿀
+때는 sha 를 갱신하는 것이 정상이다(공허해지는 가드가 아니라 «그 사이클이 이 셋을
+건드렸다»는 신호다). cycle440 — `cancel_remaining`(운영 호출 0, 배선하면 매수
+주문번호를 취소하는 함정)이 삭제돼 핀이 4함수에서 3함수로 줄었다. 핀은
+`ast.dump` 가 아니라 **소스 세그먼트 sha** 다 —
 CI(3.12)와 로컬(3.13)의 `ast.dump` 출력이 달라 로컬 초록·CI 실패가 난다
 (메모리 「CI 환경 차이 교훈 2건」).
 """
@@ -71,13 +73,15 @@ _CLOCK_LITERAL_ALLOWLIST: tuple[str, ...] = ("_compute_next_market_open_kst",)
 #: §2-5 — 이 넷은 cycle295 가 **byte 동일**로 남긴다고 선언한 함수다.
 _BYTE_IDENTICAL_PINS: dict[str, str] = {
     "_route_exchange_by_clock": "d403317f602318acade625b0540f839c706669aae92b86f13909a5d478512450",
-    "_apply_clock": "5b9f0a10cf5291b90b2107a575ef8d7a9e110463d51a1d45fae865820f942c39",
+    # 🔁 2026-10-10 (cycle440) 재핀 — 카드 #9 죽은 코드 정리로 `cancel_remaining`
+    # 이 삭제되며 이 docstring 의 "동기 취소 3경로" 언급이 "2경로" 로 바뀌었다
+    # (취소·라우팅 **행위**는 무변경 — 문구만 정정).
+    "_apply_clock": "0547e4eae1d070baf30f150df71fb1506f3b165fdfccdaa064a6a5fc5a23fc03",
     # 🔁 2026-09-25 (cycle358) 재핀 — 카드 D(관측 전용). CANCELLED UPDATE
     # `affected==0` 무흔적에 `[trade_status_update_miss]` WARNING 을 추가했다(사용자
     # 승인, 워크리스트 ⑨). 🔴 cycle295 가 이 함수에 대해 선언한 것은 **휴식 컷을
     # 넣지 않는다**이고, 그 계약은 그대로다 — `_market_rest_now` 참조는 여전히 0건.
     "_cancel_after_wait": "c07871aa2502c87e0307b949ed6634a0f16e5117bfe9127c3230db3f0774be53",
-    "cancel_remaining": "c9a2216d15ece58e212402a6edde10c8a9fcf1133cff44814950041bfe879162",
 }
 
 _PREDICATE = "_market_rest_now"
@@ -387,19 +391,22 @@ def test_c4b_sibling_place_order_sites_already_bind_their_result() -> None:
 # ═══════════════════════════ C5 · C5b ══════════════════════════════════════
 @pytest.mark.parametrize("name", sorted(_BYTE_IDENTICAL_PINS))
 def test_c5_byte_identical_functions_are_untouched(name: str) -> None:
-    """🔴 G-295-C5 (§2-5) — 이 넷은 cycle295 가 **건드리지 않는다**.
+    """🔴 G-295-C5 (§2-5) — 이 셋은 cycle295 가 **건드리지 않는다**.
 
     · `_route_exchange_by_clock`·`_apply_clock` — 컷을 라우터 **안**에 넣으면
       `_probe_nxt_downgrade_base` 가 `nxt_tradable=False` 코호트(마스터 83.2%)를
       `base="KRX"` 로 만들어 clause 1 에서 즉시 반환되고, **컷이 가장 필요한
       다수 코호트를 통째로 비껴간다**(§3-2 실행값 반증).
-    · `_cancel_after_wait`·`cancel_remaining` — **순수 취소**라 노출 축소다.
-      함께 막으면 호가창의 손절을 빼고 아무것도 안 넣는 상태가 된다(§3-5).
+    · `_cancel_after_wait` — **순수 취소**라 노출 축소다. 함께 막으면
+      호가창의 손절을 빼고 아무것도 안 넣는 상태가 된다(§3-5).
+
+    cycle440 — 넷째 핀 `cancel_remaining`(운영 호출 0, 배선하면 매수 주문번호를
+    취소하는 함정)이 삭제되며 셋으로 줄었다.
 
     ⚠️ 이 핀은 `ast.dump` 가 아니라 **소스 세그먼트 sha** 다(3.12 CI ↔ 3.13 로컬
     표현 차 — 메모리 「CI 환경 차이 교훈 2건」). cycle295 **이후** 다른 사이클이
-    이 넷을 정당하게 바꿀 때는 sha 를 갱신한다 — 그때 이 테스트가 붉어지는 것은
-    «그 사이클이 이 넷을 건드렸다»는 신호이지 결함이 아니다.
+    이 셋을 정당하게 바꿀 때는 sha 를 갱신한다 — 그때 이 테스트가 붉어지는 것은
+    «그 사이클이 이 셋을 건드렸다»는 신호이지 결함이 아니다.
     """
     src = _src()
     tree = ast.parse(src)
@@ -412,7 +419,7 @@ def test_c5_byte_identical_functions_are_untouched(name: str) -> None:
 
 
 def test_c5b_pinned_functions_all_exist() -> None:
-    """🔵 G-295-C5b (양성 대조군) — 핀 대상 4개가 전부 실재한다.
+    """🔵 G-295-C5b (양성 대조군) — 핀 대상 3개가 전부 실재한다.
 
     이름이 바뀌면 sha 비교가 아니라 이 단언이 **먼저** 붉어져야 한다
     (`_segment_sha` 의 assert 메시지보다 의도가 분명하다).

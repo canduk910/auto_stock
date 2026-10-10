@@ -1946,10 +1946,6 @@ class TradingScheduler:
             logger.debug("시가 KIS API 조회 실패: %s", ticker)
             return 0
 
-    async def _force_clear_intraday_strategies(self) -> None:
-        """[Backwards-compat] 호출자가 남아있을 경우 main 전용 강제 청산으로 위임."""
-        await self._force_clear_main_only()
-
     async def _force_clear_main_only(self) -> None:
         """15:20 KRX 메인 강제 청산 — `tradable_boards`에 POST_NXT가 없는 전략의 종목만 청산.
 

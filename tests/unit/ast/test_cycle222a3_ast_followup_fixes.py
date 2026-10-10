@@ -445,8 +445,8 @@ _APPROVED_CONTENT_SHA: dict[str, tuple[str, str]] = {
         "cycle330(2026-09-20) — 합류자 없는 토큰 발급 실패의 고아 Future 회수, 8영역 승인",
     ),
     "src/engine/order_engine.py": (
-        "f5340662865b7a634011e8e68ac702650b213b9c1ea60c89b96f60758c0c5bc8",
-        "cycle436(2026-10-10) — 카드 E: pending_buy_amounts 넣기·빼기를 StrategyState.reserve_buy/release_buy 단일 진입점으로, 발사 창 임시 키 + J-4 자문 반영 되살리지 않기, 사용자 승인",
+        "6eeab4bc5b614a933df6ca4d8e1b4bde0d991716eb665db2fcb240bc7559a435",
+        "cycle440(2026-10-10) — 카드 #9: 참조 0인 cancel_remaining 삭제 + 3경로→2경로 주석 정정, 사용자 승인",
     ),
     "src/engine/risk.py": (
         "a2187b8270446379988d24dfbe39b902d6ab37b112d4b6ce7330ee171434e222",
@@ -457,8 +457,8 @@ _APPROVED_CONTENT_SHA: dict[str, tuple[str, str]] = {
         "cycle437(2026-10-10) — 카드 #9: 참조 0인 scan_kospi200/scan_kosdaq150 삭제, 8영역 승인",
     ),
     "src/engine/scheduler.py": (
-        "ae8ff8d0741881aec72d4f54ed214a26a4ae935c77d0ef535b6b97007850afdc",
-        "cycle436(2026-10-10) — 카드 E: `_reset_daily_state` 의 `pending_buy_amounts.clear()` 를 `StrategyState.clear_buy_reservations()` 단일 진입점 호출로, 사용자 승인",
+        "84ac4f2891efc50710cb07447bfadbf53aeb34f6ab7032f8896f64fbe32ec6b6",
+        "cycle440(2026-10-10) — 카드 #9: 참조 0인 _force_clear_intraday_strategies 삭제, 사용자 승인",
     ),
     "src/engine/session.py": (
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",

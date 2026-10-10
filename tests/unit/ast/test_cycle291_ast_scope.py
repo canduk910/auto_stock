@@ -372,14 +372,17 @@ def test_a10a_buy_main_registration_reads_from_place_kwargs_not_a_local_name() -
 
 
 def test_a10ab_cancel_order_call_sites_never_pass_order_division_yet() -> None:
-    """A10 (봉인, 적대 검증 시정 — 테스트 HIGH #1) — 취소 호출 3곳 전부 `order_division`
+    """A10 (봉인, 적대 검증 시정 — 테스트 HIGH #1) — 취소 호출 2곳 전부 `order_division`
     키워드를 전달하지 않는다(Stage A).
 
     `test_c9` 는 런타임으로 `_cancel_after_wait` **한 곳만** 잰다. 실측 뮤테이션
     — `_cancel_and_reorder`(정규장 부분체결 손절 잔여, **실적 있는 유일한 취소
-    경로군**)나 `cancel_remaining` 에 `order_division=<매핑값>` 을 몰래 추가해도
-    그 런타임 테스트는 통과했다. 소스 전수로 3곳을 함께 잠근다 — 호출부 수가
-    3에서 벗어나도(신규 취소 경로 추가) 이 가드가 먼저 반응한다.
+    경로군**)에 `order_division=<매핑값>` 을 몰래 추가해도
+    그 런타임 테스트는 통과했다. 소스 전수로 2곳을 함께 잠근다 — 호출부 수가
+    2에서 벗어나도(신규 취소 경로 추가) 이 가드가 먼저 반응한다.
+
+    cycle440 — 운영 호출 0 이던 `cancel_remaining`(배선하면 매수 주문번호를
+    취소하는 함정)이 삭제되며 3곳에서 2곳으로 줄었다.
     """
     tree = ast.parse(_src(_ORDER_ENGINE_REL))
     calls = [
@@ -387,9 +390,9 @@ def test_a10ab_cancel_order_call_sites_never_pass_order_division_yet() -> None:
         if isinstance(n, ast.Call)
         and isinstance(n.func, ast.Name) and n.func.id == "cancel_order"
     ]
-    assert len(calls) == 3, (
-        f"`cancel_order(` 호출부 수가 {len(calls)} — 3(`_cancel_after_wait`/"
-        "`_cancel_and_reorder`/`cancel_remaining`)에서 벗어났다. 새 취소 경로라면 "
+    assert len(calls) == 2, (
+        f"`cancel_order(` 호출부 수가 {len(calls)} — 2(`_cancel_after_wait`/"
+        "`_cancel_and_reorder`)에서 벗어났다. 새 취소 경로라면 "
         "이 가드에 그 경로도 명시적으로 포함하라"
     )
     for call in calls:

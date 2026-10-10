@@ -564,23 +564,26 @@ async def test_t8_execute_sell_cut_contract(
     assert "base=None" not in lines[0] and "base= " not in lines[0], lines[0]
 
 
-# ═══════════════════════════ T9 · T10 — 취소 3경로 ═════════════════════════
+# ═══════════════════════════ T9 · T10 — 취소 2경로 ═════════════════════════
 @pytest.mark.asyncio
 @freeze_time(_F_1545)
 async def test_t9_pure_cancel_paths_are_untouched(
     engine_pair, mock_cancel_order: AsyncMock, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    """🔵 T9 (§3-5 · M16) — 순수 취소 2경로는 **막지 않는다**.
+    """🔵 T9 (§3-5 · M16) — 순수 취소 경로는 **막지 않는다**.
 
-    `_cancel_after_wait`(매수 잔여)·`cancel_remaining` 은 호가창에서 주문을
-    빼기만 하므로 **노출 축소**다. 함께 막으면 컷이 "주문을 안 내는 것"이
+    `_cancel_after_wait`(매수 잔여)는 호가창에서 주문을
+    빼기만 하므로 **노출 축소**다. 막으면 컷이 "주문을 안 내는 것"이
     아니라 "이미 낸 주문을 못 거두는 것"이 된다.
 
     `_order_exchange` 매핑을 일부러 **비워** `_apply_clock` fail-open 경로를
     태운다 — 라우터가 "거부"를 내는 설계였다면 여기서 취소할 거래소를 못 얻어
     빈 문자열이 나간다(§3-2 두 번째 반증).
+
+    cycle440 — 운영 호출 0 이고 배선하면 매수 주문번호를 취소하는 함정이던
+    `cancel_remaining` 은 삭제됐다(카드 #9). 이 테스트가 잰 두 번째 경로였다.
     """
-    engine, strat = engine_pair
+    engine, _strat = engine_pair
     _pin_boards(monkeypatch, _kst(_DAY, 15, 45))
     assert "ORD-X" not in engine._order_exchange
 
@@ -588,12 +591,6 @@ async def test_t9_pure_cancel_paths_are_untouched(
     assert mock_cancel_order.await_count == 1, "`_cancel_after_wait` 취소가 막혔다"
     ex1 = mock_cancel_order.await_args.kwargs.get("exchange")
     assert ex1, f"취소 거래소가 비었다({ex1!r}) — 라우터 fail-open 이 깨졌다"
-
-    strat.state.positions[_TICKER].order_no = "ORD-Y"
-    await engine.cancel_remaining(_TICKER, _SID)
-    assert mock_cancel_order.await_count == 2, "`cancel_remaining` 취소가 막혔다"
-    ex2 = mock_cancel_order.await_args.kwargs.get("exchange")
-    assert ex2, f"취소 거래소가 비었다({ex2!r})"
 
 
 @pytest.mark.asyncio
@@ -604,7 +601,7 @@ async def test_t10_cancel_and_reorder_is_gated_as_a_pair(
 ) -> None:
     """🔴 T10 (§3-5 ③ · M13) — `_cancel_and_reorder` 는 **쌍으로** 막는다.
 
-    취소 3경로 중 이것만 다르다. 유일 호출자가 `is_stop_loss=True` 이고 내용은
+    취소 2경로 중 이것만 다르다. 유일 호출자가 `is_stop_loss=True` 이고 내용은
     `sleep(30) → cancel_order → place_order` 의 **atomic replace** 다.
     절반만 막으면 결과는 "주문을 안 낸 것"이 아니라 **"호가창에 있던 손절을
     우리가 빼고 아무것도 안 넣은 것"** 이다.
@@ -614,8 +611,9 @@ async def test_t10_cancel_and_reorder_is_gated_as_a_pair(
     `_cancel_and_reorder` → 취소 성공 → 재주문만 컷 → **잔여가 15분 무주문**.
 
     ⇒ 컷이면 취소도 하지 않고 작동 중인 주문을 그대로 둔다. 그 잔량을 우리가
-    거두는 경로는 없다 — `cancel_remaining` 은 프로덕션 호출자가 0 이고,
-    `risk.on_tick` 재평가는 걸린 주문을 취소하지 않는다. KRX 잔량은 정규장
+    거두는 경로는 없다 — `risk.on_tick` 재평가는 걸린 주문을 취소하지 않는다
+    (cycle440 — 운영 호출 0 이고 배선하면 매수 주문번호를 취소하는 함정이던
+    `cancel_remaining` 은 삭제됐다). KRX 잔량은 정규장
     마감 후 거래소가 자동 취소한다. NXT 잔량(프리장 `pre_nxt_keep` ·
     `order_exchange_clock_mode="off"` · `probe_error` 로 base 를 유지한 매도)은
     20:00 까지 남는다. 정본 = `src/engine/CLAUDE.md` 규칙 3.
