@@ -95,6 +95,10 @@ class LongTailVolatilityStrategy(StrategyBase):
     # 어떤 시간대에서도 보드 가드 *없이* 항상 작동 (`risk.on_tick` 의 `check_exit_signal` 분기).
     DEFAULT_TRADABLE_BOARDS = ("pre_nxt", "main", "post_nxt")
 
+    # cycle431 — 액면병합·분할 대사 가격 차원 스탬프 선언(사용자 결정 2026-10-10 안1).
+    # `_prev_price[ticker]` = {board: price} — 보드별 값을 전부 `/r` 로 옮긴다.
+    _PRICE_DIM_BOARD_ATTRS = ("_prev_price",)
+
     DEFAULT_PARAMS = {
         "tradable_boards": list(DEFAULT_TRADABLE_BOARDS),
         # 진입 조건

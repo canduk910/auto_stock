@@ -60,6 +60,9 @@ class EtfTrendStrategy(StrategyBase):
     _PREPARE_LOG_LABEL = "et"
     _ENTRY_ATR_REDERIVE_LABEL = "et"
 
+    # cycle431 — 액면병합·분할 대사 가격 차원 스탬프 선언(사용자 결정 2026-10-10 안1).
+    _PRICE_DIM_SIMPLE_ATTRS = ("_entry_atr", "_breakout_line", "_hsb_closed", "_channel_low")
+
     DEFAULT_PARAMS = {
         # ── donchian 과 같은 뜻 = 같은 이름(L12) ──────────────────────────
         # 🔴 팀장 검토 MED-3 — donchian_period·long_ma_period·volume_period·atr_period·
@@ -766,6 +769,17 @@ class EtfTrendStrategy(StrategyBase):
         held_closes: dict[str, dict] = {}
 
         for ticker, pos in positions:
+            # cycle431 — 오늘 액면병합·분할 등을 반영한 종목은 그날 재도출을
+            # 통째로 건너뛴다(사용자 결정 2026-10-10 안1). `_hsb_closed`·
+            # `_channel_low` 는 "매 부팅 무조건 덮어쓴다"라 옛 눈금 일봉을
+            # 그대로 받으면 방금 옮긴 스탬프가 즉시 지워진다.
+            from src.engine import corporate_action_reconcile as _car
+            if _car.is_rescaled_today(ticker):
+                logger.info(
+                    "[corporate_action_rederive_guard_skip] attr=etf_trend_recompute ticker=%s",
+                    ticker,
+                )
+                continue
             try:
                 rows = self._clean_rows(await get_recent_daily(ticker, fetch_rows))
             except Exception:

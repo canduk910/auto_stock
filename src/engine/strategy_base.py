@@ -1412,6 +1412,13 @@ class StrategyBase(ABC):
         멈춤) → 계좌 SOFT. 멈춤이 계좌 SOFT 보다 먼저인 이유는 멈춘 전략에서
         `[account_gate_skip]` 이 찍히면 원인이 「계좌 오픈리스크」로 오귀인되기
         때문이다 — 멈춤은 운영자가 정한 결정적 상태라 먼저 판정한다.
+
+        cycle431 — 액면병합·분할 등 장부 불일치가 설명 안 된 종목의 당일 매수
+        차단은 **첫 문장 `_status_buy_blocked` 안에서 함께 본다**(사용자 결정
+        2026-10-10 안1) — 게이트 바디 3문장(상태차단 → `buy_paused`(M03,
+        둘째 자리 고정) → 계좌 SOFT try)은 cycle384 AST 가드가 구조째 고정해
+        새 top-level 문장을 끼워 넣을 자리가 없다. 새 차단은 "첫 문장이 보는
+        당일 매수 차단 묶음" 에 합류한다.
         """
         if self._status_buy_blocked(ticker):
             return True
@@ -1458,6 +1465,12 @@ class StrategyBase(ABC):
         - Q7: 막힌 순간 이 전략의 이 종목 edge-crossing 기준가를 비운다 —
           첫 문장 게이트(LTV) 는 차단 동안 기준가 갱신 자체가 안 돌아 얼고,
           해제 뒤 첫 틱이 그 옛 기준가 대비 거짓 돌파가 된다.
+
+        cycle431 — 이 종목의 액면병합·분할 등 장부 불일치가 그날 설명 안 됐으면
+        `_corporate_action_buy_blocked` 도 함께 본다(사용자 결정 2026-10-10
+        안1) — 게이트 바디 3문장은 cycle384 AST 가드가 고정해 새 top-level
+        문장을 끼울 자리가 없어, 같은 "당일 매수 차단" 범주인 이 첫 문장에
+        합류한다.
         """
         if not ticker:
             return False
@@ -1467,7 +1480,9 @@ class StrategyBase(ABC):
             blocked = bool(status_exit_watch.buy_gate(ticker, self.strategy_id, cand=cand))
         except Exception:
             logger.debug("[status_block_gate_failed] ticker=%s", ticker, exc_info=True)
-            return False
+            blocked = False
+        if not blocked:
+            blocked = self._corporate_action_buy_blocked(ticker)
         if blocked:
             self._clear_edge_baseline_on_block(ticker)
         return blocked
@@ -1520,6 +1535,24 @@ class StrategyBase(ABC):
                 rate.pop(ticker, None)
         except Exception:
             logger.debug("[status_block_baseline_clear_failed] ticker=%s", ticker, exc_info=True)
+
+    def _corporate_action_buy_blocked(self, ticker: str | None) -> bool:
+        """cycle431 — 액면병합·분할 등 장부 불일치가 그날 설명 안 된 종목의 당일
+
+        신규 매수 차단(순수 메모리 · never-raise, 사용자 결정 2026-10-10 안1).
+        `corporate_action_reconcile.is_buy_blocked_today` 가 07:45 부팅 대사에서
+        설명 안 된(merger_split_detected·unexplained) 종목을 그날 하루 표시한다
+        — 자동 삭제가 없는 설계라 장부가 틀린 종목에 더 사지 않는 것이 유일한
+        방어선이다. 보유·구독·손절은 이 게이트와 무관(계속 작동).
+        """
+        if not ticker:
+            return False
+        try:
+            from src.engine import corporate_action_reconcile
+            return bool(corporate_action_reconcile.is_buy_blocked_today(ticker))
+        except Exception:
+            logger.debug("[corporate_action_buy_gate_failed] ticker=%s", ticker, exc_info=True)
+            return False
 
     def _buy_paused_blocked(self, ticker: str | None) -> bool:
         """cycle384 — `buy_paused` 신규 매수 멈춤(순수 메모리 · 매 호출 읽기 · never-raise).
@@ -1775,6 +1808,56 @@ class StrategyBase(ABC):
     # 재진입 쿨다운 영업일 정정 실패 로그 접두사 — bfb/vcp/ltv/vb (refactor-review A3).
     _COOLDOWN_LOG_LABEL: ClassVar[str | None] = None
 
+    # ──────────── 가격 차원 스탬프 선언 (cycle431 — 액면병합·분할 대사) ────────────
+    # 사용자 결정 2026-10-10(안1). 액면병합·분할·감자 등 "눈금 사건" 이 반영되면
+    # `on_scale_event(ticker, r)` 가 아래 세 선언을 보고 보유 종목의 가격 차원
+    # 스탬프를 `/r` 로 옮긴다(거래량 차원은 `×r` — 지금은 소비처 없음). 서브클래스가
+    # 선언하지 않은 ticker 키 dict 속성은 건드리지 않는다 — 새 전략이 가격 차원
+    # 스탬프를 추가하면 여기도 선언해야 사건 당일 손절선이 제자리에 남는다
+    # (전수 점검 = `tests/unit/ast/test_cycle431_ast_price_dim_stamps.py`).
+    #: ticker 키 → 값(가격) 인 단순 dict 속성 이름들.
+    _PRICE_DIM_SIMPLE_ATTRS: ClassVar[tuple[str, ...]] = ()
+    #: ticker 키 → {board: 가격} 인 dict 속성 이름들(VB·LTV `_prev_price`).
+    _PRICE_DIM_BOARD_ATTRS: ClassVar[tuple[str, ...]] = ()
+    #: ticker 키 → {그 안의 price_keys: 값} 인 dict 속성 — {속성 이름: (가격 키, ...)}.
+    _PRICE_DIM_NESTED_ATTRS: ClassVar[dict[str, tuple[str, ...]]] = {}
+
+    def on_scale_event(self, ticker: str, r: float) -> None:
+        """액면병합·분할 등 눈금 사건 — 보유 종목의 가격 차원 스탬프를 `/r` 로 옮긴다.
+
+        cycle431 — 사용자 결정 2026-10-10(안1). 호출자(`boot_manager`)가
+        `Position.buy_price`/`high_since_buy` 는 직접 옮기고, 전략별 가격 스탬프
+        (`_entry_atr`·kojiro `_stop_floor`·donchian `_breakout_high` 등)만 이
+        메서드에 위임한다. **never-raise** — 한 전략의 스탬프 오류가 부팅의 다른
+        종목 대사를 끊으면 안 된다. 선언 없는 전략(momentum 등)은 no-op.
+        """
+        if not r or r <= 0:
+            return
+        try:
+            for attr in self._PRICE_DIM_SIMPLE_ATTRS:
+                d = getattr(self, attr, None)
+                if isinstance(d, dict) and ticker in d:
+                    v = d[ticker]
+                    if isinstance(v, (int, float)) and not isinstance(v, bool):
+                        d[ticker] = v / r
+            for attr in self._PRICE_DIM_BOARD_ATTRS:
+                d = getattr(self, attr, None)
+                inner = d.get(ticker) if isinstance(d, dict) else None
+                if isinstance(inner, dict):
+                    for k, v in list(inner.items()):
+                        if isinstance(v, (int, float)) and not isinstance(v, bool):
+                            inner[k] = v / r
+            for attr, keys in self._PRICE_DIM_NESTED_ATTRS.items():
+                d = getattr(self, attr, None)
+                inner = d.get(ticker) if isinstance(d, dict) else None
+                if isinstance(inner, dict):
+                    for k in keys:
+                        v = inner.get(k)
+                        if isinstance(v, (int, float)) and not isinstance(v, bool):
+                            inner[k] = v / r
+        except Exception:
+            logger.exception("[corporate_action_scale] on_scale_event 실패: %s", ticker)
+
     @staticmethod
     def _candle_trade_date(candle: dict) -> date | None:
         """일봉 1행에서 영업일을 뽑는다 — KIS 원본 키 / 정규화 컬럼 양쪽 수용.
@@ -1835,7 +1918,20 @@ class StrategyBase(ABC):
         단일 진실원 — donchian_swing / vcp_breakout / kojiro 공유. 로그 접두사만
         다른 복사본이 전략 파일마다 생기면 세 곳이 드리프트한다(회귀 가드
         `test_kojiro_high_since_buy_recovery.py::test_no_duplicate_helper_definition_in_strategy_files`).
+
+        cycle431 — 오늘 액면병합·분할 등으로 반영한 종목은 **그날 재도출을
+        건너뛴다**(사용자 결정 2026-10-10 안1). `candles` 는 아직 옛 눈금일 수
+        있어, 분할(가격 하락) 종목이면 옛 고가가 새로 옮긴 `high_since_buy` 보다
+        훨씬 커 보여 "보정" 이라며 끌어올려 샹들리에 트레일링을 즉발시킨다.
         """
+        from src.engine import corporate_action_reconcile as _car
+        if _car.is_rescaled_today(pos.ticker):
+            logger.info(
+                "[corporate_action_rederive_guard_skip] attr=high_since_buy ticker=%s — "
+                "그날 재도출 결과를 버린다", pos.ticker,
+            )
+            return
+
         eligible_highs: list[int] = []
         for c in candles:
             bd = self._candle_trade_date(c)
@@ -1905,7 +2001,16 @@ class StrategyBase(ABC):
 
         단일 진실원 — donchian/VCP/BFB 공유 (refactor-review A5). 로그 접두사는
         `_ENTRY_ATR_REDERIVE_LABEL` 로 전략별 보존(운영자 grep 이력, _HIGH_RECOVER_LABEL 선례).
+
+        cycle431 — 오늘 반영한 종목은 그날 재도출을 건너뛴다(사용자 결정
+        2026-10-10 안1, `_apply_high_since_buy_from_candles` 와 같은 가드).
         """
+        from src.engine import corporate_action_reconcile as _car
+        if _car.is_rescaled_today(ticker):
+            logger.info(
+                "[corporate_action_rederive_guard_skip] attr=entry_atr ticker=%s", ticker,
+            )
+            return
         label = self._ENTRY_ATR_REDERIVE_LABEL or self.strategy_id
         try:
             buy_dd = pos.buy_date.strftime("%Y%m%d")

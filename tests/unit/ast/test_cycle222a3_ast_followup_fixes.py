@@ -457,9 +457,10 @@ _APPROVED_CONTENT_SHA: dict[str, tuple[str, str]] = {
         "cycle417(2026-10-09) — 일봉 증분 적재 구멍 메우기(증분 창 확대 + 구멍 판정 1회), 8영역 승인",
     ),
     "src/engine/scheduler.py": (
-        "691b6387fb03eb3dce908951991e7ae048eb881143ce9fe0f17f20fd8d810550",
-        "cycle428 F-422-1 사용자 승인 2026-10-10 — 15:20 강제청산 종목별 try/except "
-        "(한 종목 예외가 루프를 끊지 않는다), 승인",
+        "391542b58b3a89d1db2e79afbb1fbb0082c766383e88a4966a7a493ef9ef5d9d",
+        "cycle431 follow-up Fix2(2026-10-10) — 21:30 정산의 CTRGA011R 사후 대사가"
+        "`holdings` 잔고(이미 조회한 것)를 재사용하도록 호출부 재배치, 8영역 승인"
+        "(원 승인 = cycle431 안1 액면병합 대사 관측 호출 2줄)",
     ),
     "src/engine/session.py": (
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",

@@ -143,6 +143,12 @@ class KojiroStrategy(StrategyBase):
     # 멀티데이 스윙 — KRX 메인 단독 (donchian 동형, NXT 무관).
     DEFAULT_TRADABLE_BOARDS = ("main",)
 
+    # cycle431 — 액면병합·분할 대사 가격 차원 스탬프 선언(사용자 결정 2026-10-10 안1).
+    _PRICE_DIM_SIMPLE_ATTRS = ("_stop_floor", "_position_atr")
+    _PRICE_DIM_NESTED_ATTRS = {
+        "_candidates": ("prev_close", "atr", "ema_s", "ema_m", "ema_l"),
+    }
+
     DEFAULT_PARAMS = {
         "tradable_boards": list(DEFAULT_TRADABLE_BOARDS),
         "exchange": "KRX",
@@ -789,6 +795,20 @@ class KojiroStrategy(StrategyBase):
         today_str = today.strftime("%Y%m%d")
 
         for ticker in list(self.state.positions.keys()):
+            # cycle431 — 오늘 액면병합·분할 등을 반영한 종목은 그날 재도출을
+            # 통째로 건너뛴다(사용자 결정 2026-10-10 안1). `_candidates`·
+            # `_position_atr`·`_stop_floor` 전부 옛 눈금 KIS 일봉으로 덮일 수
+            # 있어 하루 전부 보류한다 — `_stop_floor` 는 tighten-only 라 덮이면
+            # 옛(높은) 바닥이 즉발 손절을 만든다.
+            from src.engine import corporate_action_reconcile as _car
+            if _car.is_rescaled_today(ticker):
+                logger.info(
+                    "[corporate_action_rederive_guard_skip] attr=kojiro_recompute ticker=%s",
+                    ticker,
+                )
+                self._held_stage3[ticker] = (today, False)
+                continue
+
             pos = self.state.positions.get(ticker)
             try:
                 candles = await get_recent_daily_normalized(

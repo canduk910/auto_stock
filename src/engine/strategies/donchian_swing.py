@@ -752,6 +752,17 @@ class DonchianSwingStrategy(StrategyBase):
                 )
                 continue
 
+            # cycle431 — 오늘 액면병합·분할 등을 반영한 종목은 그날 재도출을
+            # 통째로 건너뛴다(사용자 결정 2026-10-10 안1). ATR·고점·돌파선 전부
+            # 옛 눈금 KIS 일봉으로 덮일 수 있어 하루 전부 보류한다.
+            from src.engine import corporate_action_reconcile as _car
+            if _car.is_rescaled_today(ticker):
+                logger.info(
+                    "[corporate_action_rederive_guard_skip] attr=donchian_recompute ticker=%s",
+                    ticker,
+                )
+                continue
+
             try:
                 candles = await fetch_daily_candles(ticker, days=fetch_days)
             except Exception:
@@ -1439,7 +1450,17 @@ class DonchianSwingStrategy(StrategyBase):
         로 동반 조정한다 — 안 하면 IndexError 가 아니라 19봉으로 20일 신고가를 만드는
         **조용한 과소 표본**이 된다.
         근거: `_workspace/domain_consult/donchian_exit_retune.md` §2-6 / C0.
+
+        cycle431 — 오늘 반영한 종목은 그날 재도출을 건너뛴다(사용자 결정
+        2026-10-10 안1, `strategy_base._apply_high_since_buy_from_candles` 와
+        같은 가드).
         """
+        from src.engine import corporate_action_reconcile as _car
+        if _car.is_rescaled_today(ticker):
+            logger.info(
+                "[corporate_action_rederive_guard_skip] attr=breakout_high ticker=%s", ticker,
+            )
+            return
         try:
             buy_dd = pos.buy_date.strftime("%Y%m%d")
             prior = [c for c in candles if str(c.get("stck_bsop_date", "")) < buy_dd]
@@ -1542,6 +1563,12 @@ class DonchianSwingStrategy(StrategyBase):
     # 운영자가 과거 인시던트를 한글 표기로 grep 하는 경로가 끊기지 않게.
     _HIGH_RECOVER_LABEL = "도치안 스윙"
     _ENTRY_ATR_REDERIVE_LABEL = "donchian"
+
+    # cycle431 — 액면병합·분할 대사 가격 차원 스탬프 선언(사용자 결정 2026-10-10 안1).
+    _PRICE_DIM_SIMPLE_ATTRS = ("_entry_atr", "_breakout_high", "_channel_low")
+    _PRICE_DIM_NESTED_ATTRS = {
+        "_candidates": ("prev_close", "atr", "ema60", "donchian_high"),
+    }
 
     def get_scanned_tickers(self) -> list[str]:
         """WebSocket 사전 구독용."""

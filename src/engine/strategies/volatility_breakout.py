@@ -91,6 +91,10 @@ class VolatilityBreakoutStrategy(StrategyBase):
     # 매도(손절/트레일링/익일청산)는 보드 가드 무관 — risk.on_tick check_exit_signal 직접 평가.
     DEFAULT_TRADABLE_BOARDS = ("main",)
 
+    # cycle431 — 액면병합·분할 대사 가격 차원 스탬프 선언(사용자 결정 2026-10-10 안1).
+    # `_prev_price[ticker]` = {board: price} — 보드별 값을 전부 `/r` 로 옮긴다.
+    _PRICE_DIM_BOARD_ATTRS = ("_prev_price",)
+
     DEFAULT_PARAMS = {
         "tradable_boards": list(DEFAULT_TRADABLE_BOARDS),
         "stop_loss_rate": -3.0,

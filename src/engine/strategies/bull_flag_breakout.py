@@ -1558,6 +1558,12 @@ class BullFlagBreakoutStrategy(StrategyBase):
     _ENTRY_ATR_REDERIVE_LABEL = "bfb"
     _COOLDOWN_LOG_LABEL = "[bfb]"  # refactor-review A3 — base 위임 로그 접두사
 
+    # cycle431 — 액면병합·분할 대사 가격 차원 스탬프 선언(사용자 결정 2026-10-10 안1).
+    _PRICE_DIM_SIMPLE_ATTRS = ("_entry_atr", "_prev_price")
+    _PRICE_DIM_NESTED_ATTRS = {
+        "_position_setup": ("flag_low", "flag_high", "pole_high", "pole_start", "atr14"),
+    }
+
     _SETUP_LEVEL_KEYS = ("flag_low", "flag_high", "pole_high", "pole_start")
 
     def _refresh_position_setup_from_candles(self, ticker: str, pos, candles: list[dict]) -> None:
@@ -1643,6 +1649,16 @@ class BullFlagBreakoutStrategy(StrategyBase):
         for ticker in list(self.state.positions.keys()):
             pos = self.state.positions.get(ticker)
             if not pos:
+                continue
+            # cycle431 — 오늘 액면병합·분할 등을 반영한 종목은 그날 재도출을
+            # 통째로 건너뛴다(사용자 결정 2026-10-10 안1) — `_entry_atr`·
+            # `_position_setup`(atr14 등)·`high_since_buy` 전부 옛 눈금 KIS
+            # 일봉으로 덮일 수 있다.
+            from src.engine import corporate_action_reconcile as _car
+            if _car.is_rescaled_today(ticker):
+                logger.info(
+                    "[corporate_action_rederive_guard_skip] attr=bfb_recompute ticker=%s", ticker,
+                )
                 continue
             if pos.buy_date >= today:
                 if pos.buy_date > today:

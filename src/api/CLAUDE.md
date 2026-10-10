@@ -108,6 +108,44 @@ KIS OpenAPI REST 호출 모듈. 모든 호출은 `base.py` 공통 래퍼를 거�
 - 연속조회 = 응답 헤더 `tr_cont` 가 `M`/`F` 면 다음 쪽(헤더 `tr_cont="N"` + 본문 `ctx_area_fk100`/`ctx_area_nk100` 되돌림). `_MAX_PAGES=50` 에서 멈추면 `truncated=True`. 어느 쪽이든 `rt_cd != "0"` 은 `KisApiError` 로 올라와 부분 결과를 돌려주지 않는다
 - 소비처 = `engine/trade_cost.reconcile`. 8영역 `order.py` 와 분리한 비주문 조회 모듈이다. 가드 `tests/unit/api/test_trackc_period_trade_profit.py`
 
+## corporate_actions.py — 예탁원정보 + 계좌 기간별 권리현황 (cycle431)
+
+액면병합·분할 등 "주문 밖 수량 변경" 대사(`src/engine/corporate_action_reconcile.py` ·
+`boot_manager._reconcile_corporate_actions`)의 근거 조회. 판정(비율 계산·분류)은
+이 모듈에 없다 — KIS REST 호출만.
+
+- `fetch_face_value_change(ticker, *, today=None)` — 예탁원정보(액면교체일정,
+  **HHKDB669105C0**) `/uapi/domestic-stock/v1/ksdinfo/rev-split`. 응답
+  `inter_bf_face_amt`/`inter_af_face_amt`(0 패딩 문자열)가 액면가 변경 전·후 —
+  r(수량 배율) = 옛/새(판정은 `corporate_action_reconcile.ratio_from_face_value`).
+- `fetch_capital_decrease(ticker, *, today=None)` — 예탁원정보(자본감소일정,
+  **HHKDB669106C0**) `/uapi/domestic-stock/v1/ksdinfo/cap-dcrs`. `reduce_cap_rate`×
+  `comp_way=="곱하기"` 일 때만 r = `reduce_cap_rate`.
+- `fetch_merger_split(ticker, *, today=None)` — 예탁원정보(합병_분할일정,
+  **HHKDB669104C0**) `/uapi/domestic-stock/v1/ksdinfo/merger-split`. **감지만** —
+  회사분할·합병은 새 종목이 생겨 자동 반영 범위 밖(사용자 결정).
+- 셋 다 모의투자 미지원 TR 이지만 호출 자체는 `settings.get_tr_id()` 경유(변환
+  실효 없음). 쿼리 창 = `[today − DEPOSITORY_LOOKBACK_DAYS(30일), today]`(`SHT_CD`
+  지정 조회). 🔴 **연속조회는 CTS 가 아니라 `tr_cont` 로 한다** — 각 TR 문서 표의
+  "tr_cont 를 이용한 다음조회 불가" 는 **요청 바디 `CTS` 축** 얘기다. 사용자 결정
+  (2026-10-10, KIS 공식 예제)은 응답 헤더 `tr_cont` 가 `M`/`F` 면 다음 요청을
+  `tr_cont="N"` + `CTS` 는 항상 빈칸으로 보낸다. 쪽수 상한 없음 — `M`/`F` 인데 새
+  행이 0개(진행 없음)면 `CorporateActionPaginationStuckError`(`get_daily_orders`
+  와 같은 규약).
+- `fetch_period_rights(ticker="", *, start_date, end_date, right_type_cd="")` —
+  기간별계좌권리현황조회(**CTRGA011R**) `/uapi/domestic-stock/v1/trading/period-rights`.
+  **실전 전용**(모의 → 빈 목록, KIS 호출 0건). 🔴 **응답 목록 키는 실제 `output`**
+  이다(스펙 표의 `output1` 과 다르다 — 2026-10-10 운영 탐침 실측). 연속조회는
+  `balance.get_daily_orders` 와 같은 모양(`CTX_AREA_FK100`/`CTX_AREA_NK100`
+  되돌림, `tr_cont` M/F). `rght_type_cd` 2자리(14 액면분할·15 액면병합·17 감자·
+  11 합병·12 회사분할 등) — 21:30 사후 대사 전용(`emit_settlement_detection`,
+  보유 종목마다 **최근 45 달력일** 창으로 조회한다 — 권리 기준일(`bass_dt`)이
+  변경상장일보다 며칠 앞설 수 있어 "오늘 하루" 창이면 그 행을 영원히 못
+  잡는다. 행 부재는 그 자체로 오류가 아니다 — 아침 반영을 막지 않는다).
+- 소비처 = `boot_manager._reconcile_corporate_actions`(예탁원 3종) ·
+  `corporate_action_reconcile.emit_settlement_detection`(CTRGA011R). 가드 =
+  `tests/unit/api/test_cycle431_corporate_actions_api.py`.
+
 ## kis_master.py — KIS 공식 일일 마스터 파일
 
 KIS 공식 일일 마스터 파일 cp949 fixed-width 파싱 → `list[dict]` → upsert. 매일 **16:30** KST 자동 갱신(fire-and-forget). `struct.unpack` 순수 파싱 + `httpx.AsyncClient` 메모리 처리(`io.BytesIO`, 디스크 I/O 0, pandas 없음). field_specs·필드 순서는 KIS 공식 샘플과 같다.
