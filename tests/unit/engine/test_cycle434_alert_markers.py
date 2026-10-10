@@ -68,6 +68,21 @@ def test_all_patterns_nonempty_and_deduped():
         ("[boot_recover_strategy_unknown] path=kis_supplement ticker=005930 order_no=", "ledger_mismatch"),
         ("[buy_fill_fallback_orphan] order_no=123 ticker=005930 신규 포지션 등록됨", "ledger_mismatch"),
         ("[no_feed_held] ticker=005930 strategy=momentum", "ledger_mismatch"),
+        (
+            "[fill_notice_missing] ticker=005930 strategy=momentum order_no=1 elapsed_min=35",
+            "ledger_mismatch",
+        ),
+        # cycle433 — holding_qty_unexplained 의 3영업일 연속 승격 서브 분류도 접두사 매칭으로 걸린다.
+        (
+            "[holding_qty_unexplained] ticker=005930 tracked=10 kis=8 delta=-2 streak_days=3 escalate=true",
+            "ledger_mismatch",
+        ),
+        # cycle433 — corporate_action_midsync 는 INFO 뿐이라 명부에 없다(categorize 도 모른다).
+        ("[corporate_action_midsync] ticker=005930 result=in_progress", None),
+        ("[corporate_action_midsync] ticker=005930 result=pending_notice", None),
+        ("[corporate_action_midsync] ticker=005930 result=operator_share", None),
+        ("[corporate_action_midsync] ticker=005930 result=explained_by_orders", None),
+        ("[corporate_action_midsync] ticker=005930 result=lookup_failed", None),
         ("[sell_send_unknown] ticker=005930 strategy=momentum path=primary exc=TimeoutError", "order_unknown_or_exit_failure"),
         ("[force_clear_ticker_error] ticker=005930 strategy=momentum err=ValueError", "order_unknown_or_exit_failure"),
         ("[sell_post_send_error] ticker=005930 order_no=1 strategy=momentum path=x", "order_unknown_or_exit_failure"),
@@ -142,6 +157,46 @@ def test_build_summary_red_wins_over_yellow():
     assert by_key["ledger_mismatch"]["max_level"] == "CRITICAL"
     assert by_key["daily_job_failure"]["count"] == 1
     assert by_key["order_unknown_or_exit_failure"]["count"] == 0
+
+
+def test_build_summary_cycle433_holding_qty_unexplained_escalation_and_fill_notice_missing():
+    """cycle433 동시 작업 — 가짜 system_logs 행 3개로 확인(진행 중, main 미병합).
+
+    - holding_qty_unexplained 의 3영업일 승격 서브 분류(log_level=CRITICAL)가
+      최고 레벨에 반영된다.
+    - fill_notice_missing(ERROR, 신규)도 같은 범주(ledger_mismatch)에 집계된다.
+    - corporate_action_midsync(INFO)는 설계상 WARNING+ 조회를 안 타지만, 혹시 뒤섞여
+      들어와도 categorize() 가 모르는 마커라 집계에 영향이 없다(방어적 확인).
+    """
+    m = _import()
+    rows = [
+        {
+            "log_level": "CRITICAL",
+            "message": "[holding_qty_unexplained] ticker=005930 streak_days=3 escalate=true",
+            "timestamp": "2026-10-10T09:30:00+09:00",
+        },
+        {
+            "log_level": "ERROR",
+            "message": "[fill_notice_missing] ticker=000660 strategy=kojiro order_no=55 elapsed_min=31",
+            "timestamp": "2026-10-10T10:00:00+09:00",
+        },
+        {
+            # 방어적 — 실제로는 이 쿼리가 INFO 를 거르므로 들어오지 않지만, 섞여도
+            # categorize() 가 None 을 돌려줘 집계에 끼지 않아야 한다.
+            "log_level": "WARNING",
+            "message": "[corporate_action_midsync] ticker=005930 result=in_progress",
+            "timestamp": "2026-10-10T09:00:00+09:00",
+        },
+    ]
+    out = m.build_summary(rows, as_of_iso="2026-10-10T12:00:00+09:00")
+    by_key = {c["key"]: c for c in out["categories"]}
+    ledger = by_key["ledger_mismatch"]
+    assert ledger["count"] == 2, "corporate_action_midsync 는 명부에 없어 집계되지 않아야 한다"
+    assert ledger["max_level"] == "CRITICAL"
+    messages = " ".join(m["message"] for m in ledger["recent_messages"])
+    assert "fill_notice_missing" in messages
+    assert "holding_qty_unexplained" in messages
+    assert out["status"] == "red"
 
 
 def test_build_summary_first_last_at_and_max_level_accumulate():

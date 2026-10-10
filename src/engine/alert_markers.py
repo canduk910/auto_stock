@@ -23,6 +23,11 @@
   "KRX 전용 보유 종목의 WS 결손 증거"라 넣는다(장부 불일치 쪽 — 아래 참조).
 - `[weight_config_anomaly]`, `[weight_unit_violation]` 등 즉시 422/거부로 끝나는 쓰기
   경로 가드 — 그 호출이 이미 실패를 반환해 운영자가 즉시 안다(경고등 없이도 보인다).
+- `[corporate_action_midsync]`(cycle433, 진행 중 — 15분 잔고 동기화 중간 관측,
+  `result=in_progress|pending_notice|operator_share|explained_by_orders|lookup_failed`) —
+  **INFO 뿐이라 WARNING 이상만 보는 이 쿼리에 안 걸린다**(명부에 패턴을 올려도 효과가 없어
+  올리지 않는다). 그 종목이 끝까지 안 풀리면 `[holding_qty_unexplained]`(ERROR 이상)로
+  승격해 여기 명부가 잡는다 — 중간 관측 자체를 경고등 재료로 쓰지 않는다.
 """
 
 from __future__ import annotations
@@ -69,7 +74,15 @@ MARKERS: tuple[AlertMarker, ...] = (
     AlertMarker(
         "%[holding_qty_unexplained]%",
         "ledger_mismatch",
-        "보유수량이 KIS 잔고와 다른데 설명이 안 됨 (corporate_action_reconcile/boot_manager)",
+        "보유수량이 KIS 잔고와 다른데 설명이 안 됨 (corporate_action_reconcile/boot_manager)."
+        " cycle433 — 3영업일 연속이면 그 행이 CRITICAL 로 올라간다. 접두사 매칭이라 그 승격도"
+        " 그대로 걸린다(이 모듈이 레벨을 가정하지 않고 system_logs 의 실제 log_level 을 읽는다).",
+    ),
+    AlertMarker(
+        "%[fill_notice_missing]%",
+        "ledger_mismatch",
+        "cycle433(진행 중, main 미병합) — 우리 주문의 체결통보가 30분 넘게 안 옴(통보 유실"
+        " 확정). ERROR.",
     ),
     AlertMarker(
         "%[corporate_action_ctrga_reconciled] result=mismatch%",
