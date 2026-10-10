@@ -343,6 +343,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -1684,6 +1685,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -3050,6 +3052,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -4382,6 +4385,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -5710,6 +5714,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -7059,6 +7064,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -8409,6 +8415,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -9759,6 +9766,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -11115,6 +11123,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -12462,6 +12471,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -13882,6 +13892,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -15225,6 +15236,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -16593,6 +16605,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -17952,6 +17965,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -19315,6 +19329,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -20639,6 +20654,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -22005,6 +22021,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -23341,6 +23358,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -24689,6 +24707,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -26046,6 +26065,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -27386,6 +27406,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -28741,6 +28762,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -30087,6 +30109,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -31438,6 +31461,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -32784,6 +32808,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -34146,6 +34171,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -35512,6 +35538,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -36883,6 +36910,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -38207,6 +38235,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -39529,6 +39558,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -40880,6 +40910,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -42237,6 +42268,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -43577,6 +43609,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -44943,6 +44976,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -46277,6 +46311,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -47649,6 +47684,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -49045,6 +49081,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -50395,6 +50432,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -51745,6 +51783,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -53112,6 +53151,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -54520,6 +54560,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -55866,6 +55907,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -57214,6 +57256,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -58579,6 +58622,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -59910,6 +59954,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -61265,6 +61310,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -62694,6 +62740,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -64067,6 +64114,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -65394,6 +65442,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -66747,6 +66796,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -68092,6 +68142,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -69441,6 +69492,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -70795,6 +70847,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -72214,6 +72267,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -73563,6 +73617,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -74911,6 +74966,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -76260,6 +76316,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -77607,6 +77664,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -79043,6 +79101,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -80390,6 +80449,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -81797,6 +81857,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -83153,6 +83214,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -84510,6 +84572,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -85925,6 +85988,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -87266,6 +87330,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -88614,6 +88679,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -89972,6 +90038,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -91314,6 +91381,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -92663,6 +92731,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -94015,6 +94084,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -95357,6 +95427,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -96808,6 +96879,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -98244,6 +98316,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -99758,6 +99831,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -101106,6 +101180,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -102461,6 +102536,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -103840,6 +103916,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -105155,6 +105232,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -106506,6 +106584,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -107849,6 +107928,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -109475,6 +109555,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -110722,6 +110803,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -111901,6 +111983,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -113249,6 +113332,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -114599,6 +114683,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -115943,6 +116028,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -117301,6 +117387,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -118672,6 +118759,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -119994,6 +120082,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -121365,6 +121454,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -122692,6 +122782,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -124037,6 +124128,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -125386,6 +125478,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -126737,6 +126830,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -128086,6 +128180,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -129435,6 +129530,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -130792,6 +130888,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -132204,6 +132301,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -133567,6 +133665,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -134864,6 +134963,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -136252,6 +136352,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -137593,6 +137694,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -138933,6 +139035,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -140297,6 +140400,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -141646,6 +141750,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -143203,6 +143308,7 @@ backend:
     - tests/unit/ast/test_cycle414_monitor_purity.py
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -144309,6 +144415,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -145734,6 +145841,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -147001,6 +147109,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -148355,6 +148464,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -149788,6 +149898,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -151140,6 +151251,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -152485,6 +152597,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -153854,6 +153967,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -155181,6 +155295,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -156529,6 +156644,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -157877,6 +157993,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -159232,6 +159349,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -160578,6 +160696,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -161940,6 +162059,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -163347,6 +163467,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -164696,6 +164817,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -166051,6 +166173,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -167411,6 +167534,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -168823,6 +168947,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -170171,6 +170296,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -171613,6 +171739,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -173153,6 +173280,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -174570,6 +174698,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -175934,6 +176063,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -177262,6 +177392,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -178630,6 +178761,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -179988,6 +180120,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -183240,6 +183373,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -184583,6 +184717,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -185936,6 +186071,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -187280,6 +187416,7 @@ backend:
     - tests/unit/ast/test_cycle416_ast_market_breadth.py
     - tests/unit/ast/test_cycle431_ast_price_dim_stamps.py
     - tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py
+    - tests/unit/ast/test_cycle439_ast_sell_qty_exceeded.py
     - tests/unit/ast/test_cycle72_ast_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_realtime_no_logger_write_log_pair.py
     - tests/unit/ast/test_cycle73_ast_swing_rest_poll_no_logger_write_log_pair.py
@@ -191816,10 +191953,10 @@ frontend:
     - frontend/src/pages/__tests__/Dashboard.fix1.cycle414.test.tsx
     - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
     - frontend/src/pages/__tests__/MarketState.test.tsx
-generated_at: '2026-10-10T19:33:27.931201+09:00'
+generated_at: '2026-10-10T19:47:17.684875+09:00'
 stats:
   backend_modules: 188
-  backend_tests: 1346
+  backend_tests: 1347
   frontend_modules: 158
   frontend_tests: 171
   unmapped_modules:

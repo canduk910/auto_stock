@@ -648,9 +648,13 @@ def test_ar3_realized_pnl_still_counts_every_filled_share(oe):
 
 
 def test_ar4b_full_lock_marks_the_freeze_before_return(oe):
-    """🔴 AR4b (R-2-2) — `[sell_qty_locked]`(sellable == 0 ∧ held > 0) return 앞에도 동결 표식."""
+    """🔴 AR4b (R-2-2) — `[sell_qty_locked]`(sellable == 0 ∧ held > 0) return 앞에도 동결 표식.
+
+    B4-4(cycle439) — 이 분기는 `OrderEngine._handle_sell_qty_exceeded` 로 옮겨졌다
+    (행위 보존 추출, `execute_sell` 은 그 메서드를 부를 뿐이다).
+    """
     src, tree = oe
-    fn = _func(tree, "execute_sell")
+    fn = _func(tree, "_handle_sell_qty_exceeded")
     hits = [
         n for n in ast.walk(fn)
         if isinstance(n, ast.If) and "[sell_qty_locked]" in (ast.get_source_segment(src, n) or "")
@@ -1084,18 +1088,19 @@ def test_ar2_3_reorder_releases_selling_only_when_nothing_of_ours_rests(oe):
 
 
 def test_ar2_4_ticker_credit_accumulates(oe):
-    """🔴 AR2-4 (H2) — `execute_sell` 의 `self._sell_blind_credit[ticker]` 대입은 전부 누적
+    """🔴 AR2-4 (H2) — `_handle_sell_qty_exceeded`(B4-4, cycle439 — 전에는 `execute_sell`
+    안이었다)의 `self._sell_blind_credit[ticker]` 대입은 전부 누적
     (`self._sell_blind_credit.get(ticker, 0) + _blind` 또는 `+= _blind`)이고, 맨 `_blind` 대입 0.
     덮어쓰면 소진 전 첫 몫의 통보가 보유를 다시 뺀다(과소 추적 — money A3)."""
     _, tree = oe
-    fn = _func(tree, "execute_sell")
+    fn = _func(tree, "_handle_sell_qty_exceeded")
     stores = _subscript_stores(fn, "_sell_blind_credit")
     augs = [
         n for n in ast.walk(fn)
         if isinstance(n, ast.AugAssign) and isinstance(n.target, ast.Subscript)
         and isinstance(n.target.value, ast.Attribute) and n.target.value.attr == "_sell_blind_credit"
     ]
-    assert stores or augs, "`execute_sell` 에 종목 크레딧 기록이 없다"
+    assert stores or augs, "`_handle_sell_qty_exceeded` 에 종목 크레딧 기록이 없다"
     for n in stores:
         v = ast.unparse(n.value).replace(" ", "")
         assert v in (
@@ -1107,18 +1112,19 @@ def test_ar2_4_ticker_credit_accumulates(oe):
 
 
 def test_ar2_5_f3_and_reconcile_share_one_query_then_recheck_then_eff(oe):
-    """🔴 AR2-5 (H3 — AR1·AR4 대체) — `execute_sell`:
+    """🔴 AR2-5 (H3 — AR1·AR4 대체) — `_handle_sell_qty_exceeded`(B4-4, cycle439 —
+    전에는 `execute_sell` 안이었다):
     - `await self._sell_orders_snapshot(ticker)` 정확히 1개, `await get_balance()` 뒤.
     - 그 문장의 바로 다음 문장 = `if strategy.state.positions.get(ticker) is not pos:`(동일성 재검증).
-    - 그 뒤 ~ `pos.quantity = target_qty` · `sell_cap = fire` 사이 `Await` 0.
-    - F-3 If 테스트 = `held_qty >= eff`(1개). 본문: `pos.quantity` 대입 0 · `sell_cap = fire` 1 ·
-      `return` 앞 `_selling_locked_wait.add`.
+    - 그 뒤 ~ `pos.quantity = target_qty` · `return SellQtyExceededOutcome.RETRY, fire` 사이 `Await` 0.
+    - F-3 If 테스트 = `held_qty >= eff`(1개). 본문: `pos.quantity` 대입 0 ·
+      `return SellQtyExceededOutcome.RETRY, fire` 1 · `return` 앞 `_selling_locked_wait.add`.
     - `eff` 우변에 `pos.quantity - pending` · `fire` 우변(또는 감싼 If)에 `fills is not None` 조건.
     분기 술어를 `held_qty >= pos.quantity` 로 되돌리면(MQ5) 오늘 주문으로 설명되는 차이를 재대조가
     받아들여 운영자 몫을 추적에 싣는다.
     """
     _, tree = oe
-    fn = _func(tree, "execute_sell")
+    fn = _func(tree, "_handle_sell_qty_exceeded")
     snaps = [
         n for n in ast.walk(fn)
         if isinstance(n, ast.Await) and isinstance(n.value, ast.Call)
@@ -1142,13 +1148,19 @@ def test_ar2_5_f3_and_reconcile_share_one_query_then_recheck_then_eff(oe):
 
     tgt = _pos_qty_assigns(fn, "target_qty")
     assert len(tgt) == 1, f"`pos.quantity = target_qty` {len(tgt)}개 (기대 1)"
+    # B4-4(cycle439) — 「`sell_cap = fire`」 는 `return SellQtyExceededOutcome.RETRY, fire`
+    # 가 됐다(이 메서드가 더는 `execute_sell` 의 `sell_cap` 지역변수를 직접 대입하지 않고,
+    # 새 값을 호출부에 돌려준다).
     caps = [
         n for n in ast.walk(fn)
-        if isinstance(n, ast.Assign) and any(isinstance(t, ast.Name) and t.id == "sell_cap"
-                                             for t in n.targets)
-        and isinstance(n.value, ast.Name) and n.value.id == "fire"
+        if isinstance(n, ast.Return) and isinstance(n.value, ast.Tuple)
+        and len(n.value.elts) == 2
+        and ast.unparse(n.value.elts[0]).replace(" ", "") == "SellQtyExceededOutcome.RETRY"
+        and isinstance(n.value.elts[1], ast.Name) and n.value.elts[1].id == "fire"
     ]
-    assert len(caps) == 1, f"`sell_cap = fire` {len(caps)}개 (기대 1)"
+    assert len(caps) == 1, (
+        f"`return SellQtyExceededOutcome.RETRY, fire` {len(caps)}개 (기대 1)"
+    )
     for end in (tgt[0].lineno, caps[0].lineno):
         between = [ln for ln in _awaits(fn) if sn.lineno < ln < end]
         assert not between, f"주문 조회(L{sn.lineno}) ~ 행동(L{end}) 사이 await: {between}"
@@ -1164,7 +1176,9 @@ def test_ar2_5_f3_and_reconcile_share_one_query_then_recheck_then_eff(oe):
     ], "`held_qty >= pos.quantity` 분기가 남았다(분기 술어는 eff)"
     body = ast.Module(body=f3[0].body, type_ignores=[])
     assert not _pos_qty_assigns(body), "F-3 분기가 추적 수량(`pos.quantity`)을 바꾼다"
-    assert caps[0] in list(ast.walk(body)), "`sell_cap = fire` 가 F-3 분기 밖에 있다"
+    assert caps[0] in list(ast.walk(body)), (
+        "`return SellQtyExceededOutcome.RETRY, fire` 가 F-3 분기 밖에 있다"
+    )
     rets = [n.lineno for n in ast.walk(body) if isinstance(n, ast.Return)]
     waits = [c.lineno for c in _attr_calls(body, "_selling_locked_wait", "add")]
     assert rets and waits and min(waits) < max(rets), "F-3 동결 return 앞에 동결 표식이 없다"
@@ -1430,7 +1444,8 @@ def _loop_skip_test(loop: ast.For) -> str | None:
 
 
 def test_ar3_5_recount_credit_caps_pre_ledger_orders(oe):
-    """🔴 AR3-5 (R3-1-4 · R3-1-5) — `execute_sell`:
+    """🔴 AR3-5 (R3-1-4 · R3-1-5) — `_handle_sell_qty_exceeded`(B4-4, cycle439 —
+    전에는 `execute_sell` 안이었다):
     - 주문 조회 대입 대상 = `fills, _reason, _pre` · `self._sell_pending_dec(fills, _pre)` 정확히 1.
     - 재대조 블록: `_old_credit` 대입 1(우변이 `_sell_reflected_credit`·`_sell_blind_credit` 를 읽는다)이
       첫 `self._sell_reflected_credit[...] =` 저장보다 **앞**(덮어쓰기 전에 센다 — MK21).
@@ -1440,7 +1455,7 @@ def test_ar3_5_recount_credit_caps_pre_ledger_orders(oe):
     - `min(…, _pre_cap)` 은 정확히 1 · 그 `if k not in _pre: continue` 루프 안에만.
     """
     _, tree = oe
-    fn = _func(tree, "execute_sell")
+    fn = _func(tree, "_handle_sell_qty_exceeded")
     par = _parents(fn)
 
     snaps = [
@@ -1505,10 +1520,11 @@ def test_ar3_5_recount_credit_caps_pre_ledger_orders(oe):
 def test_ar3_6_hold_label_splits_on_whether_anything_rests(oe):
     """🔴 AR3-6 (R3-1-6) — F-3 If(`held_qty >= eff`) 본문의 보류 경로: `if held_qty > sellable:` 본문에
     `[sell_qty_partial_locked]` · orelse 에 `[sell_qty_unnoticed_fills]` · 그 If 바로 뒤
-    `self._selling_locked_wait.add(ticker)` → `return`. `execute_sell` 안 `[sell_qty_partial_locked]`
+    `self._selling_locked_wait.add(ticker)` → `return`. `_handle_sell_qty_exceeded`(B4-4, cycle439 —
+    전에는 `execute_sell` 안이었다) 안 `[sell_qty_partial_locked]`
     문자열은 그 If 본문에만(걸린 매도가 없는데 「외부 부분 매도주문 잠김」 을 쓰지 않는다 — MK8)."""
     _, tree = oe
-    fn = _func(tree, "execute_sell")
+    fn = _func(tree, "_handle_sell_qty_exceeded")
 
     def _marker_consts(node, prefix):
         return [n for n in ast.walk(node)
@@ -1713,13 +1729,14 @@ def test_ar4_1_not_placed_reason_composes_existing_classifiers_only(oe):
 
 
 def test_ar4_2_query_failure_hold_does_not_use_the_unnoticed_fills_label(oe):
-    """🔴 AR4-2 (부록 R4 D4) — `execute_sell` F-3 If(`held_qty >= eff`) 안에서:
+    """🔴 AR4-2 (부록 R4 D4) — `_handle_sell_qty_exceeded`(B4-4, cycle439 — 전에는
+    `execute_sell` 안이었다) F-3 If(`held_qty >= eff`) 안에서:
     `[sell_qty_hold_orders_unavailable]`(1) 에 닿는 조건 = **걸린 매도 없음 ∧ `fills is None`**,
     `[sell_qty_unnoticed_fills]`(1) 에 닿는 조건 = **걸린 매도 없음 ∧ `fills is not None`**(조건을 실행해
     잰다 — 이름 `fire`·`held_qty`·`sellable`·`fills`·`eff`·`pending`). 조회 실패 보류 문구는 `orders=%s`
     칸에 조회 결과 이유(`_reason`)를 싣는다."""
     _, tree = oe
-    fn = _func(tree, "execute_sell")
+    fn = _func(tree, "_handle_sell_qty_exceeded")
     par = _parents(fn)
     f3 = [n for n in ast.walk(fn)
           if isinstance(n, ast.If) and ast.unparse(n.test).replace(" ", "") == "held_qty>=eff"]

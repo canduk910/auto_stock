@@ -445,8 +445,8 @@ _APPROVED_CONTENT_SHA: dict[str, tuple[str, str]] = {
         "cycle330(2026-09-20) — 합류자 없는 토큰 발급 실패의 고아 Future 회수, 8영역 승인",
     ),
     "src/engine/order_engine.py": (
-        "ffe36bfdccb0a0bafa95f003026d2eeba6a09f8322e2867204001f35c136c755",
-        "cycle438(2026-10-10) — J-4: 매수 두 번째 부분 체결 정확 일치 귀속(pending 단 뒤·B-2 앞 elif), 사용자 승인",
+        "d1fc8bfbe92f29e8751f4e86547a971547eb72051fe67eba87295495166a0ebd",
+        "cycle439(2026-10-10) — B4-4: execute_sell 수량 초과(APBK0400) #1.5 재대조 분기를 _handle_sell_qty_exceeded 로 추출(행위 보존), 사용자 승인",
     ),
     "src/engine/risk.py": (
         "a2187b8270446379988d24dfbe39b902d6ab37b112d4b6ce7330ee171434e222",

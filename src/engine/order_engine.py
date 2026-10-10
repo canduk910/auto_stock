@@ -466,6 +466,21 @@ class SellFallbackOutcome(Enum):
     UNKNOWN = "unknown"    # cycle428 — 폴백 발사 결과 모름(비-KisApiError) — 호출부는 return
 
 
+class SellQtyExceededOutcome(Enum):
+    """B4-4(cycle439) — `_handle_sell_qty_exceeded` 가 호출부(`execute_sell`)에
+    돌려주는 제어 신호.
+
+    B4-3·B4-5 와 같은 설계(행위 보존 추출, `_workspace/refactor/2026-10-09_review.md`
+    B4-4행) — 이 값은 "이 분기가 무엇으로 끝났는가" 만 말하고, 다음 동작은
+    호출부가 그대로 정한다.
+    """
+
+    RETRY = "retry"              # 이번 시도는 끝 — 재시도 루프의 다음 attempt 로(= 기존 `continue`)
+    STOP = "stop"                # 더 할 일 없음 — 호출부는 return(positions 보존 또는 위임 완료)
+    FALL_THROUGH = "fall_through"  # 수량 초과로 판정되지 않음(이상 상태·재대조 불가) — 호출부는
+                                    # 기존 except 블록의 다음 분기(실보유 부족 등)로 그대로 진행
+
+
 SELL_MAX_RETRIES = 3     # 매도 실패 시 최대 재시도 횟수
 SELL_RETRY_DELAY = 1.0   # 재시도 간격(초)
 BUYABLE_CACHE_TTL = 60.0  # get_buyable 캐시 유효시간(초)
@@ -2247,193 +2262,20 @@ class OrderEngine:
                 #    `sellable_quantity`(ord_psbl_qty — 기주문 잔량 차감 반영) 기준으로:
                 #    부분 보유 = 보정+재시도(자기 치유) / 전량 잠김 = 보존+중단 /
                 #    실보유 0 = 기존 insufficient 경로 / 조회 실패 = 현행 재시도(graceful).
+                # B4-4(cycle439) — 관문 판정(`is_sell_qty_exceeded`)은 호출부에 남긴다
+                # (B4-3·B4-5 와 같은 설계, `_workspace/refactor/2026-10-09_review.md`
+                # B4-4행). 몸체는 `_handle_sell_qty_exceeded` 로 뽑았다 — 🔴 추가 `try`
+                # 로 감싸지 않는다(그 메서드가 이미 재대조 실패를 graceful 하게 흡수한다).
                 if is_sell_qty_exceeded(e):
-                    sellable = None
-                    try:
-                        from src.api.balance import get_balance
-                        holdings, _summary = await get_balance()
-                        h = next((x for x in holdings if x.ticker == ticker), None)
-                        held_qty = int(getattr(h, "quantity", 0) or 0) if h else 0
-                        sellable = int(getattr(h, "sellable_quantity", 0) or 0) if h else 0
-                    except Exception:
-                        logger.warning(
-                            "[sell_qty_exceeded] %s 잔고 재대조 실패 — 현행 재시도 유지 "
-                            "(graceful)", ticker, exc_info=True,
-                        )
-                    if sellable is None:
-                        pass  # 재대조 불가 — 아래 일반 재시도 흐름
-                    elif 0 < sellable < pos.quantity:
-                        # 부록 R2-8 — 주문 조회 1건(재대조·F-3 공유) → 동일성 재검증 → eff.
-                        fills, _reason, _pre = await self._sell_orders_snapshot(ticker)
-                        if strategy.state.positions.get(ticker) is not pos:
-                            logger.info(
-                                "[sell_qty_reconcile_skipped] ticker=%s reason=position_replaced",
-                                ticker,
-                            )
-                            continue
-                        pending = self._sell_pending_dec(fills, _pre) if fills is not None else None
-                        eff = pos.quantity - pending if pending is not None else pos.quantity
-                        if held_qty >= eff:
-                            surplus = held_qty - eff
-                            fire = sellable - surplus if fills is not None else 0
-                            if fire >= 1:
-                                sell_cap = fire
-                                logger.warning(
-                                    "[sell_qty_partial_sellable] ticker=%s strategy=%s held=%d "
-                                    "sellable=%d positions=%d surplus=%d fire=%d pending=%d",
-                                    ticker, strategy_id, held_qty, sellable, pos.quantity,
-                                    surplus, fire, pending or 0,
-                                )
-                                continue
-                            if held_qty > sellable:
-                                logger.warning(
-                                    "[sell_qty_partial_locked] ticker=%s strategy=%s held=%d "
-                                    "sellable=%d positions=%d — 외부 부분 매도주문 잠김, 보정 "
-                                    "없이 보존 + 중단 (기주문 체결통보/selling_reconcile 대기) "
-                                    "surplus=%d fire=%d pending=%s orders=%s",
-                                    ticker, strategy_id, held_qty, sellable, pos.quantity,
-                                    surplus, fire, pending if pending is not None else "?", _reason,
-                                )
-                            elif fills is None:
-                                # 부록 R4 D4 — 조회를 못 믿는데 걸린 매도가 없다(조회 await 중 통보가
-                                # 추적을 줄였다). 거래소가 확인한 미통보 체결이 있는지 모른다.
-                                logger.warning(
-                                    "[sell_qty_hold_orders_unavailable] ticker=%s strategy=%s "
-                                    "held=%d sellable=%d positions=%d orders=%s — 걸린 매도 없음 · "
-                                    "주문 조회 실패로 미통보 체결 여부를 알 수 없어 발사 없이 보류"
-                                    "(종료 통보·보유 닫힘·selling_reconcile 이 푼다)",
-                                    ticker, strategy_id, held_qty, sellable, pos.quantity, _reason,
-                                )
-                            else:
-                                logger.warning(
-                                    "[sell_qty_unnoticed_fills] ticker=%s strategy=%s held=%d "
-                                    "sellable=%d positions=%d pending=%d eff=%d — 걸린 매도 없음, "
-                                    "거래소가 확인한 미통보 체결이 추적 전부를 덮는다 — 발사 없이 "
-                                    "통보 대기(종료 통보·보유 닫힘·selling_reconcile 이 푼다)",
-                                    ticker, strategy_id, held_qty, sellable, pos.quantity,
-                                    pending or 0, eff,
-                                )
-                            self._selling_locked_wait.add(ticker)
-                            return
-                        target_qty = held_qty if 0 < held_qty < pos.quantity else sellable
-                        _credit_orders = 0
-                        _credit_qty = 0
-                        _pre_orders = 0
-                        _pre_cap = 0
-                        if fills is not None:
-                            # 부록 R3 K1 — 원장 시작 뒤 주문 = 정확한 크레딧(부록 R-1-3 ⑥ 그대로).
-                            # 원장 시작 전 주문 = 「이번 재대조가 내리는 폭 + 남은 크레딧 − 뒤 주문
-                            # 크레딧」 을 넘지 않게. 남은 크레딧은 덮어쓰기 **전에** 센다.
-                            _old_credit = sum(
-                                self._sell_reflected_credit.get(_o, 0) for _o in fills
-                            ) + self._sell_blind_credit.get(ticker, 0)
-                            _post_credit = 0
-                            for _o, _filled in fills.items():
-                                if _o in _pre:
-                                    continue
-                                _c = _filled - self._sell_notice_seen.get(_o, 0)
-                                if _c > 0:
-                                    self._sell_reflected_credit[_o] = _c
-                                    _credit_orders += 1
-                                    _credit_qty += _c
-                                    _post_credit += _c
-                                else:
-                                    self._sell_reflected_credit.pop(_o, None)
-                            _pre_cap = max(
-                                0, pos.quantity - target_qty - _post_credit + _old_credit
-                            )
-                            for _o, _filled in fills.items():
-                                if _o not in _pre:
-                                    continue
-                                _pre_orders += 1
-                                _c = min(_filled - self._sell_notice_seen.get(_o, 0), _pre_cap)
-                                if _c > 0:
-                                    self._sell_reflected_credit[_o] = _c
-                                    _credit_orders += 1
-                                    _credit_qty += _c
-                                else:
-                                    self._sell_reflected_credit.pop(_o, None)
-                            self._sell_blind_credit.pop(ticker, None)
-                            _credit_src = "orders"
-                        else:
-                            _blind = max(0, pos.quantity - target_qty)
-                            self._sell_blind_credit[ticker] = (
-                                self._sell_blind_credit.get(ticker, 0) + _blind
-                            )
-                            _credit_qty = _blind
-                            _credit_src = "blind"
-                            logger.warning(
-                                "[sell_qty_reconcile_orders_unavailable] ticker=%s reason=%s "
-                                "blind_credit=%d",
-                                ticker, _reason, _blind,
-                            )
-                        logger.warning(
-                            "[sell_qty_reconciled] ticker=%s strategy=%s positions=%d → "
-                            "%d 로 수량 보정 후 재시도 (%d/%d) — APBK0400 오염 자기 치유 "
-                            "(held=%d sellable=%d) credit_src=%s credit_orders=%d credit_qty=%d "
-                            "pre_orders=%d pre_cap=%d",
-                            ticker, strategy_id, pos.quantity, target_qty,
-                            attempt, SELL_MAX_RETRIES, held_qty, sellable,
-                            _credit_src, _credit_orders, _credit_qty, _pre_orders, _pre_cap,
-                        )
-                        pos.quantity = target_qty
-                        sell_cap = None
-                        try:
-                            from src.db.positions import save_position
-                            await save_position(
-                                ticker=ticker,
-                                ticker_name=t(ticker).split("(")[0] if "(" in t(ticker) else "",
-                                buy_price=pos.buy_price,
-                                quantity=target_qty,
-                                order_no=pos.order_no,
-                                strategy_id=strategy_id,
-                                buy_date=pos.buy_date,
-                                high_since_buy=pos.high_since_buy,
-                            )
-                        except Exception:
-                            logger.exception(
-                                "[sell_qty_reconciled] DB positions 수량 보정 실패: %s "
-                                "(메모리는 보정 완료 — 단 sync 는 기보유 종목 수량을 "
-                                "갱신하지 않으므로 DB 는 다음 보정/청산까지 구값 잔존)",
-                                ticker,
-                            )
+                    outcome, sell_cap = await self._handle_sell_qty_exceeded(
+                        ticker=ticker, strategy_id=strategy_id, strategy=strategy,
+                        pos=pos, attempt=attempt, now_kst=now_kst, sell_cap=sell_cap,
+                    )
+                    if outcome is SellQtyExceededOutcome.RETRY:
                         continue
-                    elif sellable == 0 and held_qty > 0:
-                        # 전량이 기주문에 잠김 — 보정해도 거부 반복. 보존 + 중단.
-                        # ⚠️ `_selling` 은 **의도적으로 유지**한다(discard 금지) —
-                        # sellable=0·보유>0 = 열린 매도 기주문이 실재 = "매도 진행 중"
-                        # 표식이 참이고, 유지가 on_tick 매 틱 재진입(APBK0400+
-                        # get_balance 폭주)을 차단한다. 기주문 체결 시 통보가,
-                        # 미체결 만료 시 `[selling_reconcile]`(180s age gate,
-                        # 열린주문 존재 검사 포함)가 정확히 수습한다 — market_closed
-                        # 분기의 discard 와 다른 이유는 그쪽엔 열린 주문이 없어서다.
-                        logger.warning(
-                            "[sell_qty_locked] ticker=%s strategy=%s held=%d sellable=0 "
-                            "— 전량 기주문 잠김, positions 보존 + 재시도 중단 (기주문 "
-                            "체결통보 또는 selling_reconcile 대기)", ticker, strategy_id,
-                            held_qty,
-                        )
-                        self._selling_locked_wait.add(ticker)
+                    if outcome is SellQtyExceededOutcome.STOP:
                         return
-                    elif sellable == 0 and held_qty == 0:
-                        # 실보유 0 — D1 안A(cycle429) 통합 판정으로 위임
-                        # (자동 삭제 경로 없음 — 아래 메서드가 통보 대기/보존을 가른다).
-                        logger.warning(
-                            "매도 매도가능수량 부족(APBK0400·실보유 0) — 통합 판정 위임: %s "
-                            "(전략: %s)", t(ticker), strategy_id,
-                        )
-                        await self._handle_sell_insufficient_quantity(
-                            ticker=ticker, strategy_id=strategy_id,
-                            strategy=strategy, pos=pos, now_kst=now_kst,
-                        )
-                        return
-                    else:
-                        # sellable >= pos.quantity — 수량은 충분한데 초과 거부(이상).
-                        logger.warning(
-                            "[sell_qty_exceeded] ticker=%s sellable=%d >= positions=%d "
-                            "인데 APBK0400 — 이상 상태, 일반 재시도 지속",
-                            ticker, sellable, pos.quantity,
-                        )
+                    # FALL_THROUGH — 아래 "진짜 보유 부족" 판정으로 그대로 진행
                 # 2) 진짜 보유 부족(APBK1234 등) — D1 안A(cycle429) 통합 판정 위임.
                 #    #1.5 「실보유 0」(APBK0400) 분기와 같은 메서드로 모은다 —
                 #    자동 삭제 경로 없음(루트 CLAUDE.md 「D1」).
@@ -2514,6 +2356,224 @@ class OrderEngine:
             signal=signal,
             last_error=last_error,
         )
+
+    async def _handle_sell_qty_exceeded(
+        self,
+        *,
+        ticker: str,
+        strategy_id: str,
+        strategy: StrategyBase,
+        pos: Position,
+        attempt: int,
+        now_kst: datetime,
+        sell_cap: int | None,
+    ) -> tuple["SellQtyExceededOutcome", int | None]:
+        """B4-4(cycle439, 리팩토링 카드 #12 — `_workspace/refactor/2026-10-09_review.md`
+        B4-4행) — `execute_sell` 의 수량 초과(APBK0400) #1.5 잔고 재대조 분기를
+        **판정·로그·순서는 바이트 동일**하게 메서드로 옮긴다(B4-3·B4-5 와 같은
+        설계 — 관문 판정 `is_sell_qty_exceeded(e)` 는 호출부에 남긴다).
+
+        반환 = `(SellQtyExceededOutcome, sell_cap)`:
+        - `RETRY` — 이번 attempt 는 끝, 재시도 루프의 다음 attempt 로(기존
+          `continue`). `sell_cap` 은 "부분 잠김 판매"(fire) 에서 양의 정수,
+          "수량 보정"(reconciled) 에서 `None`(상한 해제) — 둘 다 바뀐 값을
+          반드시 돌려준다(그대로면 호출부 다음 attempt 의 `send_qty` 계산이
+          옛 값을 쓴다).
+        - `STOP` — 호출부는 `return`(positions 보존 또는
+          `_handle_sell_insufficient_quantity` 위임 완료). `sell_cap` 은
+          입력값 그대로(이 출구들은 건드리지 않는다).
+        - `FALL_THROUGH` — 수량 초과로 판정되지 않음(재대조 불가·이상 상태) —
+          호출부는 기존 except 블록의 다음 분기(「진짜 보유 부족」)로 그대로
+          진행한다. `sell_cap` 도 입력값 그대로.
+
+        🔴 `pos.quantity` 는 "수량 보정" 출구에서 직접 변경한다(같은 `Position`
+        객체 — `execute_sell` 의 다음 attempt 재조회가 그 값을 그대로 본다).
+        """
+        sellable = None
+        try:
+            from src.api.balance import get_balance
+            holdings, _summary = await get_balance()
+            h = next((x for x in holdings if x.ticker == ticker), None)
+            held_qty = int(getattr(h, "quantity", 0) or 0) if h else 0
+            sellable = int(getattr(h, "sellable_quantity", 0) or 0) if h else 0
+        except Exception:
+            logger.warning(
+                "[sell_qty_exceeded] %s 잔고 재대조 실패 — 현행 재시도 유지 "
+                "(graceful)", ticker, exc_info=True,
+            )
+        if sellable is None:
+            return SellQtyExceededOutcome.FALL_THROUGH, sell_cap  # 재대조 불가 — 아래 일반 재시도 흐름
+        elif 0 < sellable < pos.quantity:
+            # 부록 R2-8 — 주문 조회 1건(재대조·F-3 공유) → 동일성 재검증 → eff.
+            fills, _reason, _pre = await self._sell_orders_snapshot(ticker)
+            if strategy.state.positions.get(ticker) is not pos:
+                logger.info(
+                    "[sell_qty_reconcile_skipped] ticker=%s reason=position_replaced",
+                    ticker,
+                )
+                return SellQtyExceededOutcome.RETRY, sell_cap
+            pending = self._sell_pending_dec(fills, _pre) if fills is not None else None
+            eff = pos.quantity - pending if pending is not None else pos.quantity
+            if held_qty >= eff:
+                surplus = held_qty - eff
+                fire = sellable - surplus if fills is not None else 0
+                if fire >= 1:
+                    logger.warning(
+                        "[sell_qty_partial_sellable] ticker=%s strategy=%s held=%d "
+                        "sellable=%d positions=%d surplus=%d fire=%d pending=%d",
+                        ticker, strategy_id, held_qty, sellable, pos.quantity,
+                        surplus, fire, pending or 0,
+                    )
+                    return SellQtyExceededOutcome.RETRY, fire
+                if held_qty > sellable:
+                    logger.warning(
+                        "[sell_qty_partial_locked] ticker=%s strategy=%s held=%d "
+                        "sellable=%d positions=%d — 외부 부분 매도주문 잠김, 보정 "
+                        "없이 보존 + 중단 (기주문 체결통보/selling_reconcile 대기) "
+                        "surplus=%d fire=%d pending=%s orders=%s",
+                        ticker, strategy_id, held_qty, sellable, pos.quantity,
+                        surplus, fire, pending if pending is not None else "?", _reason,
+                    )
+                elif fills is None:
+                    # 부록 R4 D4 — 조회를 못 믿는데 걸린 매도가 없다(조회 await 중 통보가
+                    # 추적을 줄였다). 거래소가 확인한 미통보 체결이 있는지 모른다.
+                    logger.warning(
+                        "[sell_qty_hold_orders_unavailable] ticker=%s strategy=%s "
+                        "held=%d sellable=%d positions=%d orders=%s — 걸린 매도 없음 · "
+                        "주문 조회 실패로 미통보 체결 여부를 알 수 없어 발사 없이 보류"
+                        "(종료 통보·보유 닫힘·selling_reconcile 이 푼다)",
+                        ticker, strategy_id, held_qty, sellable, pos.quantity, _reason,
+                    )
+                else:
+                    logger.warning(
+                        "[sell_qty_unnoticed_fills] ticker=%s strategy=%s held=%d "
+                        "sellable=%d positions=%d pending=%d eff=%d — 걸린 매도 없음, "
+                        "거래소가 확인한 미통보 체결이 추적 전부를 덮는다 — 발사 없이 "
+                        "통보 대기(종료 통보·보유 닫힘·selling_reconcile 이 푼다)",
+                        ticker, strategy_id, held_qty, sellable, pos.quantity,
+                        pending or 0, eff,
+                    )
+                self._selling_locked_wait.add(ticker)
+                return SellQtyExceededOutcome.STOP, sell_cap
+            target_qty = held_qty if 0 < held_qty < pos.quantity else sellable
+            _credit_orders = 0
+            _credit_qty = 0
+            _pre_orders = 0
+            _pre_cap = 0
+            if fills is not None:
+                # 부록 R3 K1 — 원장 시작 뒤 주문 = 정확한 크레딧(부록 R-1-3 ⑥ 그대로).
+                # 원장 시작 전 주문 = 「이번 재대조가 내리는 폭 + 남은 크레딧 − 뒤 주문
+                # 크레딧」 을 넘지 않게. 남은 크레딧은 덮어쓰기 **전에** 센다.
+                _old_credit = sum(
+                    self._sell_reflected_credit.get(_o, 0) for _o in fills
+                ) + self._sell_blind_credit.get(ticker, 0)
+                _post_credit = 0
+                for _o, _filled in fills.items():
+                    if _o in _pre:
+                        continue
+                    _c = _filled - self._sell_notice_seen.get(_o, 0)
+                    if _c > 0:
+                        self._sell_reflected_credit[_o] = _c
+                        _credit_orders += 1
+                        _credit_qty += _c
+                        _post_credit += _c
+                    else:
+                        self._sell_reflected_credit.pop(_o, None)
+                _pre_cap = max(
+                    0, pos.quantity - target_qty - _post_credit + _old_credit
+                )
+                for _o, _filled in fills.items():
+                    if _o not in _pre:
+                        continue
+                    _pre_orders += 1
+                    _c = min(_filled - self._sell_notice_seen.get(_o, 0), _pre_cap)
+                    if _c > 0:
+                        self._sell_reflected_credit[_o] = _c
+                        _credit_orders += 1
+                        _credit_qty += _c
+                    else:
+                        self._sell_reflected_credit.pop(_o, None)
+                self._sell_blind_credit.pop(ticker, None)
+                _credit_src = "orders"
+            else:
+                _blind = max(0, pos.quantity - target_qty)
+                self._sell_blind_credit[ticker] = (
+                    self._sell_blind_credit.get(ticker, 0) + _blind
+                )
+                _credit_qty = _blind
+                _credit_src = "blind"
+                logger.warning(
+                    "[sell_qty_reconcile_orders_unavailable] ticker=%s reason=%s "
+                    "blind_credit=%d",
+                    ticker, _reason, _blind,
+                )
+            logger.warning(
+                "[sell_qty_reconciled] ticker=%s strategy=%s positions=%d → "
+                "%d 로 수량 보정 후 재시도 (%d/%d) — APBK0400 오염 자기 치유 "
+                "(held=%d sellable=%d) credit_src=%s credit_orders=%d credit_qty=%d "
+                "pre_orders=%d pre_cap=%d",
+                ticker, strategy_id, pos.quantity, target_qty,
+                attempt, SELL_MAX_RETRIES, held_qty, sellable,
+                _credit_src, _credit_orders, _credit_qty, _pre_orders, _pre_cap,
+            )
+            pos.quantity = target_qty
+            try:
+                from src.db.positions import save_position
+                await save_position(
+                    ticker=ticker,
+                    ticker_name=t(ticker).split("(")[0] if "(" in t(ticker) else "",
+                    buy_price=pos.buy_price,
+                    quantity=target_qty,
+                    order_no=pos.order_no,
+                    strategy_id=strategy_id,
+                    buy_date=pos.buy_date,
+                    high_since_buy=pos.high_since_buy,
+                )
+            except Exception:
+                logger.exception(
+                    "[sell_qty_reconciled] DB positions 수량 보정 실패: %s "
+                    "(메모리는 보정 완료 — 단 sync 는 기보유 종목 수량을 "
+                    "갱신하지 않으므로 DB 는 다음 보정/청산까지 구값 잔존)",
+                    ticker,
+                )
+            return SellQtyExceededOutcome.RETRY, None
+        elif sellable == 0 and held_qty > 0:
+            # 전량이 기주문에 잠김 — 보정해도 거부 반복. 보존 + 중단.
+            # ⚠️ `_selling` 은 **의도적으로 유지**한다(discard 금지) —
+            # sellable=0·보유>0 = 열린 매도 기주문이 실재 = "매도 진행 중"
+            # 표식이 참이고, 유지가 on_tick 매 틱 재진입(APBK0400+
+            # get_balance 폭주)을 차단한다. 기주문 체결 시 통보가,
+            # 미체결 만료 시 `[selling_reconcile]`(180s age gate,
+            # 열린주문 존재 검사 포함)가 정확히 수습한다 — market_closed
+            # 분기의 discard 와 다른 이유는 그쪽엔 열린 주문이 없어서다.
+            logger.warning(
+                "[sell_qty_locked] ticker=%s strategy=%s held=%d sellable=0 "
+                "— 전량 기주문 잠김, positions 보존 + 재시도 중단 (기주문 "
+                "체결통보 또는 selling_reconcile 대기)", ticker, strategy_id,
+                held_qty,
+            )
+            self._selling_locked_wait.add(ticker)
+            return SellQtyExceededOutcome.STOP, sell_cap
+        elif sellable == 0 and held_qty == 0:
+            # 실보유 0 — D1 안A(cycle429) 통합 판정으로 위임
+            # (자동 삭제 경로 없음 — 아래 메서드가 통보 대기/보존을 가른다).
+            logger.warning(
+                "매도 매도가능수량 부족(APBK0400·실보유 0) — 통합 판정 위임: %s "
+                "(전략: %s)", t(ticker), strategy_id,
+            )
+            await self._handle_sell_insufficient_quantity(
+                ticker=ticker, strategy_id=strategy_id,
+                strategy=strategy, pos=pos, now_kst=now_kst,
+            )
+            return SellQtyExceededOutcome.STOP, sell_cap
+        else:
+            # sellable >= pos.quantity — 수량은 충분한데 초과 거부(이상).
+            logger.warning(
+                "[sell_qty_exceeded] ticker=%s sellable=%d >= positions=%d "
+                "인데 APBK0400 — 이상 상태, 일반 재시도 지속",
+                ticker, sellable, pos.quantity,
+            )
+            return SellQtyExceededOutcome.FALL_THROUGH, sell_cap
 
     async def _handle_sell_insufficient_quantity(
         self,
