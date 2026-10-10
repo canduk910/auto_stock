@@ -20,8 +20,8 @@
 cycle273b 착수 시점 3,898L — 유지 3분기 안에 로그 한 줄도 인라인으로 넣을 여유가
 없다. cycle233 `account_risk_watcher` · cycle259 `log_metrics_collector` ·
 cycle264 `open_price_observe` 가 같은 이유로 쓴 **블록 통째 leaf 위임** 패턴을
-답습한다. `SELLING_RECONCILE_MIN_AGE_S` 상수는 scheduler 소유로 남고(이동하면
-무행위 diff 가 커진다) 인자로 전달된다.
+답습한다. `SELLING_RECONCILE_MIN_AGE_S` 상수는 이 leaf 가 정본이고 scheduler 가
+호출 자리에서 import 해 인자로 전달한다.
 
 ## 안전 계약
 
@@ -62,15 +62,14 @@ logger = logging.getLogger("src.engine.scheduler")  # 사이클 60 I1 영속 (ca
 
 SELLING_HOLD_MARKER = "[selling_hold]"
 
-# cycle432 — 정본 상수. `scheduler.py` 가 갓 접수된 매도로 볼 최소 경과 초로
-# 쓰는 같은 이름의 모듈 상수(15분 전체 재대조 `min_age_s` 인자)와 값이 같다.
-# `order_engine.SELL_UNKNOWN_RECONCILE_DELAY_S`(180초 단일 종목 확인 지연)도
-# 같은 값이지만 **import 로 묶지 않는다** — order_engine.py 의 모듈 최상단
-# `src.*` import 증가분을 정확히 `src.engine.llm_buy_gate` 1건으로 고정한
-# 구조 가드(`test_cycle276_ast_order_hook.py::test_c4_2_...` 외 cycle286·
-# 287·291 사본)가 이 leaf 의 신규 top-level import 에도 붉어진다. 그래서
-# 세 리터럴(이 상수 · `order_engine.SELL_UNKNOWN_RECONCILE_DELAY_S` ·
-# `scheduler.py` 의 같은 이름 상수, 전부 180.0/180)은 값만 맞춘다.
+# 정본 상수 — 갓 접수된 매도로 볼 최소 경과 초. `scheduler.py` 는 15분 전체 재대조
+# 호출 자리에서 이 상수를 지연 import 해 `min_age_s` 로 넘긴다(자기 사본 없음 —
+# `test_cycle432_followup.py::test_scheduler_has_no_own_selling_reconcile_min_age_constant`).
+# `order_engine.SELL_UNKNOWN_RECONCILE_DELAY_S`(180초 단일 종목 확인 지연)는 같은
+# 값의 별도 리터럴이다 — order_engine.py 의 모듈 최상단 `src.*` import 증가분을
+# `src.engine.llm_buy_gate` 1건으로 고정한 구조 가드(`test_cycle276_ast_order_hook.py::
+# test_c4_2_...` 외 cycle286·287·291 사본) 때문이고, 두 값의 일치는
+# `test_order_engine_delay_equals_selling_reconcile_min_age_by_value` 가 지킨다.
 SELLING_RECONCILE_MIN_AGE_S: float = 180.0
 
 # 1회/(ticker, reason)/일 — cycle258 카드 #4 (reason 을 키에서 빼면 사유 전이가

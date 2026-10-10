@@ -76,7 +76,6 @@ TIME_METRICS_SNAPSHOT = time(20, 5)      # cycle283 D5 — metrics 1차 스냅�
 SCAN_INTERVAL = 300                         # 5분마다 스캔
 SESSION_TICK_INTERVAL = 30                  # 보드 전환 감시 주기 (초)
 NEXT_DAY_STABILIZE_SECS = 30                # 익일 청산 시가 안정화 (Q2=B 단축)
-SELLING_RECONCILE_MIN_AGE_S = 180           # stale _selling 재대조 최소 경과(초). 갓 접수된 매도의 KIS 전파지연 레이스 방지.
 
 # K (2026-05-12) — WebSocket 시세 silent inactive 자동 복구 stale_watcher
 # F1(재연결 1회) + `_scan_loop`(5분) 으로 못 잡는 silent inactive 즉시 회복.
@@ -3430,7 +3429,7 @@ class TradingScheduler:
         # cycle273b F-7 — 유지 3분기 가시화([selling_hold])는 라인 상한 때문에
         # leaf `selling_reconcile.reconcile_stale_selling` 로 위임(판정 byte 동일 이동).
         if self.order_engine._selling:
-            from src.engine.selling_reconcile import reconcile_stale_selling
+            from src.engine.selling_reconcile import SELLING_RECONCILE_MIN_AGE_S, reconcile_stale_selling
             await reconcile_stale_selling(
                 self.order_engine, holdings, min_age_s=SELLING_RECONCILE_MIN_AGE_S,
             )

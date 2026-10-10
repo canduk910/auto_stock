@@ -457,10 +457,8 @@ _APPROVED_CONTENT_SHA: dict[str, tuple[str, str]] = {
         "cycle417(2026-10-09) — 일봉 증분 적재 구멍 메우기(증분 창 확대 + 구멍 판정 1회), 8영역 승인",
     ),
     "src/engine/scheduler.py": (
-        "391542b58b3a89d1db2e79afbb1fbb0082c766383e88a4966a7a493ef9ef5d9d",
-        "cycle431 follow-up Fix2(2026-10-10) — 21:30 정산의 CTRGA011R 사후 대사가"
-        "`holdings` 잔고(이미 조회한 것)를 재사용하도록 호출부 재배치, 8영역 승인"
-        "(원 승인 = cycle431 안1 액면병합 대사 관측 호출 2줄)",
+        "4859e1b326fc89c18e59f41eff5571c4f5797b83b9c63c09d1fb5d8a5b34258a",
+        "cycle435(2026-10-10) — stale _selling 재대조 최소 경과 상수 사본을 지우고 leaf `selling_reconcile.SELLING_RECONCILE_MIN_AGE_S` 를 호출 자리에서 import, 사용자 승인",
     ),
     "src/engine/session.py": (
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",

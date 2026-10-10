@@ -117,3 +117,30 @@ def test_order_engine_has_no_new_top_level_import_of_selling_reconcile():
         "selling_reconcile 이 order_engine.py 최상단 import 에 들어갔다 — "
         "top-level src import 증가분 가드가 붉어진다"
     )
+
+
+def test_scheduler_has_no_own_selling_reconcile_min_age_constant():
+    """🔴 cycle435 — `scheduler.py` 는 stale `_selling` 재대조 최소 경과를 자기 리터럴로
+    두지 않는다. 정본 = leaf `selling_reconcile.SELLING_RECONCILE_MIN_AGE_S` 이고
+    scheduler 는 호출 자리(함수 안 지연 import)에서 그 값을 그대로 넘긴다.
+    """
+    import ast
+    from pathlib import Path
+
+    src = Path("src/engine/scheduler.py").read_text(encoding="utf-8")
+    tree = ast.parse(src)
+    own = [
+        n for n in ast.walk(tree)
+        if isinstance(n, (ast.Assign, ast.AnnAssign))
+        and any(
+            isinstance(t, ast.Name) and t.id == "SELLING_RECONCILE_MIN_AGE_S"
+            for t in (n.targets if isinstance(n, ast.Assign) else [n.target])
+        )
+    ]
+    assert own == [], "scheduler.py 에 SELLING_RECONCILE_MIN_AGE_S 사본이 있다"
+    leaf_imports = [
+        n for n in ast.walk(tree)
+        if isinstance(n, ast.ImportFrom) and n.module == "src.engine.selling_reconcile"
+        and any(a.name == "SELLING_RECONCILE_MIN_AGE_S" for a in n.names)
+    ]
+    assert leaf_imports, "scheduler.py 가 leaf 정본 상수를 import 하지 않는다"
