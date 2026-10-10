@@ -453,9 +453,8 @@ _APPROVED_CONTENT_SHA: dict[str, tuple[str, str]] = {
         "cycle403(2026-10-03) — etf_trend 를 틱 매수 평가 건너뛰기 목록에 한 줄, 8영역 승인",
     ),
     "src/engine/scanner.py": (
-        "6b5df4ebfc2368918c0ed3576c6f9061d4c008211a2a75802691ab75a01de9c8",
-        "cycle437(2026-10-10) — 카드 #10: datetime 통과 차단(isinstance) · 종목별 예외 격리 · "
-        "beyond_horizon→need_over_100_weekdays 개명 · calendar_days 마커 칸 추가, 8영역 승인",
+        "1412d55727442ec7a3f1a9eefa5649e161a452d58f0761ed3cbef7774fde95d0",
+        "cycle437(2026-10-10) — 카드 #9: 참조 0인 scan_kospi200/scan_kosdaq150 삭제, 8영역 승인",
     ),
     "src/engine/scheduler.py": (
         "4859e1b326fc89c18e59f41eff5571c4f5797b83b9c63c09d1fb5d8a5b34258a",

@@ -1539,16 +1539,6 @@ KOSDAQ_150_TICKERS = [
 ]
 
 
-def scan_kosdaq150() -> list[str]:
-    """KOSDAQ 150 종목 리스트를 반환한다."""
-    return list(KOSDAQ_150_TICKERS)
-
-
-def scan_kospi200() -> list[str]:
-    """KOSPI 200 종목 리스트를 반환한다."""
-    return list(KOSPI_200_TICKERS)
-
-
 # 정적 종목명 dict — KOSPI_200_TICKERS / KOSDAQ_150_TICKERS의 인라인 코멘트(`# 종목명`)를
 # 모듈 import 시 1회 정규식으로 추출. KIS API가 hts_kor_isnm을 빈 문자열로 응답하는 케이스
 # (예: 일부 종목, 모의/실전 차이)에서 프론트가 "KOSPI200(005930)" 같은 시장명 표시로
