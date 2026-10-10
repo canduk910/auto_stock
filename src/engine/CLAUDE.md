@@ -367,22 +367,23 @@ run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, recor
 
 적재 대상은 밤마다 바뀐다. 깊이 분기는 행 수만 보므로, 7영업일 넘게 대상 밖에 있다 돌아온 종목은 7봉 창으로 그 사이를 채우지 못한다. 빈 날이 있으면 20일 고가·ATR·EMA 가 그날을 건너뛰고 계산된다. 신선도 게이트(`DAILY_STALENESS_DAYS`)는 마지막 날짜만 봐서 이 구멍을 못 잡는다. 그래서 증분 분기가 빈 날을 보고 창을 넓힌다.
 
-- **판정 = 실행당 1회, 종목 루프 밖** — `today = today_kst()` 뒤 `stock_master_daily.earliest_missing_bas_dd(all_tickers, before=today)`(보호 종목 포함 적재 대상 전부, 쿼리 1회, 종목당 조회 0). 반환 = 빈 날이 있는 종목의 가장 이른 빈 날. 달력·빈 날의 정의 = `src/db/CLAUDE.md` `stock_master_daily.py` 절.
+- **판정 = 실행당 1회, 종목 루프 밖** — `today = today_kst()` 뒤 `stock_master_daily.earliest_missing_bas_dd(all_tickers, before=today)`(보호 종목 포함 적재 대상 전부, 쿼리 1회, 종목당 조회 0) + 바로 뒤 `stock_master_daily.calendar_size(today)`(같은 달력의 실제 날 수, 쿼리 1회 — cycle437). 둘 다 같은 `try` 안이라 어느 한쪽이 실패해도 그 실행은 「판정 실패」로 통째로 접힌다(아래 fail-open). 반환 = 빈 날이 있는 종목의 가장 이른 빈 날. 달력·빈 날의 정의 = `src/db/CLAUDE.md` `stock_master_daily.py` 절.
+- **빈 날 값은 `datetime` 을 받지 않는다** — `isinstance(x, date) and not isinstance(x, datetime)` 로 정확히 날짜만 받는다(`datetime` 은 `date` 의 서브클래스라 `isinstance(x, date)` 단독으로는 통과한다). 🔴 `type(x) is date` 로 좁히지 않는다 — `freeze_time` 안에서는 freezegun 이 `scanner.date` 자체를 `FakeDate` 로 바꿔(모듈 전역 `from datetime import date` 이름까지 패치) 동결 밖에서 만든 진짜 `date` 값도 `type(x) is date` 가 거짓이 된다(테스트 전부가 그 경로). 받지 못한 값은 그 종목만 구멍 없음 취급(7일) + `errors` 증가.
 - **창 = 증분 분기(`existing_count >= 225`)에서만 정한다.**
   - 빈 날 없음 → `_DAILY_LOAD_INCREMENTAL_DAYS`(=7).
-  - 빈 날 있음 → `min(max(_gap_fill_need_days(빈 날, today), 7), _DAILY_LOAD_FETCH_DAYS(=100))`.
+  - 빈 날 있음 → `min(max(_gap_fill_need_days(빈 날, today), 7), _DAILY_LOAD_FETCH_DAYS(=100))`. 이 계산은 **종목별로 격리**된다 — 예외가 나도 그 종목만 7로 떨어지고 `errors` 가 늘 뿐, 다음 종목 처리가 멈추지 않는다(한 종목의 예외가 그날 밤 적재 전체를 멈추던 결함, cycle437).
   - `_gap_fill_need_days(earliest_missing, today)` = 빈 날부터 오늘까지 **평일 수(양 끝 포함, 휴일 미차감)** + `_DAILY_LOAD_GAP_MARGIN_DAYS`(=2). 순수 함수(KIS·DB 0).
   - 휴일을 빼지 않는 이유 = `fetch_daily_candles` 는 최근 N봉(`output[:N]`)만 준다. N 이 크면 빈 날을 반드시 덮고, 작으면 놓친다. 남는 봉은 upsert 멱등이 흡수한다.
 - 🔴 **KIS 호출 수는 그대로 종목당 1콜이다** — 창만 넓힌다(수렴 가드 G-302-3 그대로). 🔴 이 경로(적재 함수·`_gap_fill_need_days`)에서 휴장 조회(`trading_calendar`·`is_trading_day`)와 `kis_get` 을 부르지 않는다(AST 가드 A3).
 - **그대로인 것** — 깊은 backfill 분기(< 225, 빈 날과 무관) · `skipped_fresh`(오늘 봉이 있으면 빈 날이 있어도 skip, 다음 밤에 메운다) · `force`(skip 만 우회) · 보호 종목 규약과 `[daily_load_protected_forced]` · `_drop_today_bars` · upsert `ON CONFLICT DO UPDATE`.
-- **100 영업일보다 오래된 빈 날** = 100봉만 받아 최근 쪽만 채운다(`beyond_horizon` 으로 센다).
+- **100 영업일보다 오래된 빈 날** = 100봉만 받아 최근 쪽만 채운다(`need_over_100_weekdays` 로 센다 — 이름 그대로 「필요 창(평일 수)이 100 을 넘었다」는 뜻이고, `fetch_days` 의 실제 클램프는 그대로 리터럴 100 이다. 바로 아래 ⚠️ 참조).
 - **KIS 가 봉을 주지 않는 날(거래정지 등)** = 빈 날이 남아 밤마다 넓은 창을 다시 요청한다. 호출은 1콜 그대로이고 창은 100 에서 멈춘다. 그날이 달력(최근 `GAP_HORIZON`=100개) 밖으로 밀리면 판정에서 빠진다.
-- **fail-open** — 판정 예외 = 전 종목 7 + `[daily_load_gap_fill_skipped] reason=gap_scan_error` WARNING **실행당 1행** + `errors=1`. 값이 날짜가 아니면 그 종목만 7 + `errors` 증가(같은 WARNING, 실행당 1행). 적재 대상 밖 키는 버린다. 판정 실패는 `failed`(KIS 실패 전용)에 세지 않는다.
-- **관측** = `[daily_load_gap_fill] tickers=%d widened=%d max_fetch_days=%d beyond_horizon=%d errors=%d` **실행당 1행** INFO(종목당 금지) + `summary["gap_fill"]`(같은 5칸, int).
+- **fail-open** — 판정 예외(`earliest_missing_bas_dd` 또는 `calendar_size`) = 전 종목 7 + `[daily_load_gap_fill_skipped] reason=gap_scan_error` WARNING **실행당 1행** + `errors=1` + `calendar_days=0`. 값이 날짜가 아니면 그 종목만 7 + `errors` 증가(같은 WARNING, 실행당 1행). 적재 대상 밖 키는 버린다. 판정 실패는 `failed`(KIS 실패 전용)에 세지 않는다.
+- **관측** = `[daily_load_gap_fill] tickers=%d widened=%d max_fetch_days=%d need_over_100_weekdays=%d errors=%d calendar_days=%d` **실행당 1행** INFO(종목당 금지) + `summary["gap_fill"]`(같은 6칸, int).
   - 빈 날이 0 이어도 1행 남긴다 — 「판정이 돌았고 0」 과 「판정이 안 돌았다」 를 가른다. 종목 루프 뒤에 남기므로 `candidates=0` 조기 return 이면 0행이다.
   - `tickers` = 빈 날을 보고받은 적재 대상 종목 수. `widened` = 7 보다 큰 창을 요청한 종목 수. 둘은 다를 수 있다(fresh skip·깊은 backfill 종목, 필요 창 ≤ 7 인 종목은 넓히지 않는다).
-  - `max_fetch_days` = 넓힌 창의 최댓값(`widened=0` 이면 0). `beyond_horizon` = 필요 창 > 100 이라 100 으로 자른 종목 수(정확히 100 은 아니다). `errors` = fail-open 수.
-  - ⚠️ `beyond_horizon` 은 평일 과대 계산이라 실제로는 100봉 안에 드는 빈 날도 셀 수 있다.
+  - `max_fetch_days` = 넓힌 창의 최댓값(`widened=0` 이면 0). `need_over_100_weekdays` = 필요 창(평일 수) > 100 인 종목 수(정확히 100 영업일을 넘었다는 뜻이 아니다). `errors` = fail-open 수. `calendar_days` = `earliest_missing_bas_dd` 가 쓰는 DB 달력(행 수 ≥300 인 최근 100일)의 실제 일수 — 달력이 쪼그라들어도(최근 적재 실패가 늘어 min_rows 미달 날이 늘면) 구멍 판정이 그만큼 못 미더워지는데, cycle437 전에는 그 사실이 안 보였다.
+  - ⚠️ `need_over_100_weekdays`(옛 이름 `beyond_horizon`, cycle437 이 이름을 고쳤다)는 평일 과대 계산(휴일 미차감) 때문에 실제 영업일 기준으로는 100봉 안에 드는 빈 날도 셀 수 있다 — 칸 이름이 「100 을 실제로 넘었다」가 아니라 「평일 수로 계산해 100 을 넘겼다」는 뜻임을 그대로 드러낸다. `fetch_days` 클램프 자체는 이 칸과 무관하게 항상 리터럴 100(`_DAILY_LOAD_FETCH_DAYS`)을 쓴다.
 - **알려진 한계** — 그날 전체 행 수가 `GAP_CALENDAR_MIN_ROWS`(300) 미만인 날(대규모 적재 실패일)은 달력에 없어 그날의 빈 날을 못 잡는다(7영업일 안이면 다음 밤 7봉 창이 덮는다). 첫 행보다 오래된 이력 부족(신규 상장·retention)은 깊은 backfill 의 몫이다.
 - 가드 `tests/unit/engine/test_cycle417_daily_gap_fill.py` · `tests/unit/db/test_cycle417_gap_scan_contract.py` · `tests/integration/test_cycle417_daily_gap_scan_pg.py`.
 

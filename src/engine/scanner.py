@@ -2938,10 +2938,14 @@ def _is_daily_load_universe(row: dict) -> bool:
 async def _stock_master_daily_load_once(force: bool = False) -> dict:
     """사이클 122 — stock_master 전체 ticker 의 일봉을 stock_master_daily 에 적재.
 
-    사용자 결정 Q3=B 점진 적재:
+    사용자 결정 Q3=B 점진 적재(cycle302 가 목표 깊이를 225일로 확대, cycle417 이
+    증분 분기의 빈 날을 메운다 — 아래 둘은 이 docstring 이 낡아 있던 자리다):
     - max_bas_dd 가 오늘이면 skip (idempotency)
-    - count_by_ticker(ticker) < 50 → 백필 모드 (T-100일 전수, KIS 1회)
-    - count_by_ticker(ticker) >= 50 → 증분 모드 (T-7일만 fetch, 영업일 마진)
+    - count_by_ticker(ticker) < `_DAILY_LOAD_VCP_BACKFILL_DAYS`(225) → 분할 backfill
+      모드(목표 225일, KIS 3콜)
+    - count_by_ticker(ticker) >= 225 → 증분 모드(KIS 1콜) — 빈 날이 없으면
+      `_DAILY_LOAD_INCREMENTAL_DAYS`(7)일, 있으면 7~100일로 창을 넓힌다
+      (「증분 창 — 빈 날 메우기」 절, `_gap_fill_need_days`)
 
     Returns:
         summary dict: {total, fetched, upserted_rows, skipped_fresh, failed,
@@ -3083,10 +3087,15 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
     gap_fill_tickers: dict[str, date] = {}
     gap_fill_errors = 0
     gap_fill_warned = False
+    gap_fill_calendar_days = 0
     try:
         _raw_gap_scan = await stock_master_daily.earliest_missing_bas_dd(
             all_tickers, before=today
         )
+        # cycle437(카드 #10 ③) — 같은 달력의 실제 날 수. `earliest_missing_bas_dd` 가
+        # 성공했을 때만 묻는다(실패하면 아래 except 에서 0 그대로 — 판정 실패 1건으로
+        # 묶어 `errors` 가 두 번 늘지 않는다).
+        gap_fill_calendar_days = await stock_master_daily.calendar_size(today)
     except Exception:
         logger.warning(
             "%s reason=gap_scan_error", _DAILY_LOAD_GAP_FILL_SKIPPED_MARKER, exc_info=True,
@@ -3098,7 +3107,17 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
     for _gap_ticker, _gap_date in (_raw_gap_scan or {}).items():
         if _gap_ticker not in all_tickers_set:
             continue  # 대상 밖 키 — 헬퍼 계약 위반 방어(정상 구현은 보내지 않는다)
-        if isinstance(_gap_date, date):
+        # cycle437(카드 #10 ①) — `isinstance(_gap_date, date)` 만으로는 `datetime` 도
+        # 통과시킨다(`datetime` 은 `date` 의 서브클래스). 그 값이 아래
+        # `_gap_fill_need_days` 의 `d <= today`(date vs datetime)에서 실제 파이썬이
+        # `TypeError: can't compare datetime.datetime to datetime.date` 를 낸다.
+        # 🔴 `type(x) is date` 로 좁히지 않는다 — freezegun `freeze_time` 안에서는
+        # `scanner.date` 자체가 `FakeDate` 로 바뀌어(freezegun 이 `from datetime
+        # import date` 로 받은 모듈 전역 이름까지 패치한다) **동결 밖에서 만든 진짜
+        # `date` 값도 `type(x) is date` 가 거짓이 된다 — 테스트가 전부 그 경로다.
+        # `isinstance` 는 freezegun 이 `__instancecheck__` 로 양방향을 받아 주므로
+        # 그대로 두고, `datetime` 만 별도로 걸러낸다.
+        if isinstance(_gap_date, date) and not isinstance(_gap_date, datetime):
             gap_fill_tickers[_gap_ticker] = _gap_date
         else:
             gap_fill_errors += 1
@@ -3110,7 +3129,7 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
 
     gap_fill_widened = 0
     gap_fill_max_days = 0
-    gap_fill_beyond_horizon = 0
+    gap_fill_need_over_100_weekdays = 0
 
     filter_dropped_rows = 0
     filter_dropped_tickers = 0
@@ -3166,15 +3185,36 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
             # KIS 호출 수(종목당 1콜)는 그대로 두고 창만 넓힌다.
             _earliest_missing = gap_fill_tickers.get(ticker)
             if _earliest_missing is not None:
-                _need = _gap_fill_need_days(_earliest_missing, today)
-                fetch_days = min(
-                    max(_need, _DAILY_LOAD_INCREMENTAL_DAYS), _DAILY_LOAD_FETCH_DAYS
-                )
-                if fetch_days > _DAILY_LOAD_INCREMENTAL_DAYS:
-                    gap_fill_widened += 1
-                    gap_fill_max_days = max(gap_fill_max_days, fetch_days)
-                if _need > _DAILY_LOAD_FETCH_DAYS:
-                    gap_fill_beyond_horizon += 1
+                # cycle437(카드 #10 ①) — 이 종목의 판정이 예외를 내도(이론상 도달
+                # 불가 — 위 타입 가드가 이미 막는다. 그래도 방어선을 둔다) 그 종목만
+                # 현행 7일로 떨어지고 다음 종목으로 넘어간다. `try` 없으면 한 종목의
+                # 예외가 그날 밤 적재 전체(최대 ~1,000종목)를 멈춘다.
+                try:
+                    _need = _gap_fill_need_days(_earliest_missing, today)
+                except Exception:
+                    gap_fill_errors += 1
+                    if not gap_fill_warned:
+                        logger.warning(
+                            "%s reason=gap_scan_error", _DAILY_LOAD_GAP_FILL_SKIPPED_MARKER,
+                            exc_info=True,
+                        )
+                        gap_fill_warned = True
+                    fetch_days = _DAILY_LOAD_INCREMENTAL_DAYS
+                else:
+                    fetch_days = min(
+                        max(_need, _DAILY_LOAD_INCREMENTAL_DAYS), _DAILY_LOAD_FETCH_DAYS
+                    )
+                    if fetch_days > _DAILY_LOAD_INCREMENTAL_DAYS:
+                        gap_fill_widened += 1
+                        gap_fill_max_days = max(gap_fill_max_days, fetch_days)
+                    if _need > _DAILY_LOAD_FETCH_DAYS:
+                        # cycle437(카드 #10 ②) — `_need` 는 휴일을 안 빼고 +2 여유까지
+                        # 더한 **평일 수**다. 실제 영업일 기준으로는 100봉 안에 드는
+                        # 종목도 이 조건에 걸릴 수 있다 — 칸 이름이 그 뜻이다
+                        # (`need_over_100_weekdays`, 「100 을 실제로 넘었다」가 아니다).
+                        # `fetch_days` 클램프는 그대로 리터럴 100(`_DAILY_LOAD_FETCH_DAYS`)을
+                        # 쓴다 — 이 칸은 관측값일 뿐 그 클램프를 바꾸지 않는다.
+                        gap_fill_need_over_100_weekdays += 1
             else:
                 fetch_days = _DAILY_LOAD_INCREMENTAL_DAYS  # 증분 모드 (T-7일, 영업일 마진)
             incremental_count += 1
@@ -3285,18 +3325,24 @@ async def _stock_master_daily_load_once(force: bool = False) -> dict:
     # cycle417 — 구멍 메우기 관측: **실행당 1행**(종목당 금지, 사이클 237 교훈 답습).
     # 구멍이 0 이어도 1행은 남긴다 — 「판정이 돌았고 구멍 0」 과 「판정이 안 돌았다」 를
     # 가른다. `errors` > 0 은 fail-open 발생(예외 또는 날짜 아닌 값)을 뜻한다.
+    # cycle437(카드 #10 ③) — `calendar_days=` 는 `earliest_missing_bas_dd` 가 쓰는
+    # DB 달력(행 수 ≥300 인 최근 100일)의 실제 일수다. 달력이 쪼그라들어도(최근
+    # 적재 실패가 늘어 min_rows 미달 날이 늘면) 구멍 판정이 그만큼 못 미더워지는데
+    # 종전에는 그 사실이 안 보였다.
     logger.info(
-        "%s tickers=%d widened=%d max_fetch_days=%d beyond_horizon=%d errors=%d",
+        "%s tickers=%d widened=%d max_fetch_days=%d need_over_100_weekdays=%d "
+        "errors=%d calendar_days=%d",
         _DAILY_LOAD_GAP_FILL_MARKER,
         len(gap_fill_tickers), gap_fill_widened, gap_fill_max_days,
-        gap_fill_beyond_horizon, gap_fill_errors,
+        gap_fill_need_over_100_weekdays, gap_fill_errors, gap_fill_calendar_days,
     )
     summary["gap_fill"] = {
         "tickers": len(gap_fill_tickers),
         "widened": gap_fill_widened,
         "max_fetch_days": gap_fill_max_days,
-        "beyond_horizon": gap_fill_beyond_horizon,
+        "need_over_100_weekdays": gap_fill_need_over_100_weekdays,
         "errors": gap_fill_errors,
+        "calendar_days": gap_fill_calendar_days,
     }
 
     summary["elapsed_ms"] = int((time.monotonic() - start) * 1000)

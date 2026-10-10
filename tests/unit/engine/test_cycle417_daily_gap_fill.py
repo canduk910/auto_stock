@@ -19,7 +19,7 @@
   `_gap_fill_need_days` = 빈 날부터 오늘까지 **평일 수(양 끝 포함, 휴일 미차감)** + 2.
 - KIS 호출은 여전히 **종목당 1콜**(창만 넓힌다).
 - 관측 = 실행당 1행 INFO `[daily_load_gap_fill] tickers= widened= max_fetch_days=
-  beyond_horizon= errors=` + `summary["gap_fill"]`. 판정 예외 = fail-open(7봉) + WARNING
+  need_over_100_weekdays= errors= calendar_days=` + `summary["gap_fill"]`. 판정 예외 = fail-open(7봉) + WARNING
   `[daily_load_gap_fill_skipped]` 실행당 1행.
 
 ## 무변경 (이 파일이 함께 잠근다)
@@ -98,13 +98,17 @@ class _Load:
     - `counts`      : 종목별 행 수(기본 240 = 증분 분기)
     - `latest`      : 종목별 max_bas_dd(기본 10-08 = 신선하지 않음)
     - `patch_helper`: False 면 헬퍼를 대역하지 않는다(기존 15파일과 같은 상태)
+    - `calendar_days` / `calendar_days_exc`: cycle437 `calendar_size` 대역값/예외
     """
 
     def __init__(self, rows: list[dict], *, gaps: dict | None = None,
                  gap_exc: BaseException | None = None,
                  counts: dict[str, int] | None = None,
                  latest: dict[str, date] | None = None,
-                 patch_helper: bool = True) -> None:
+                 patch_helper: bool = True,
+                 calendar_days: int = 100,
+                 calendar_days_exc: BaseException | None = None,
+                 need_days_exc_for: date | None = None) -> None:
         self.rows = rows
         self.counts = counts or {}
         self.latest = latest or {}
@@ -115,6 +119,13 @@ class _Load:
         else:
             self.helper = AsyncMock(return_value=dict(gaps or {}))
         self.patch_helper = patch_helper
+        if calendar_days_exc is not None:
+            self.calendar_helper = AsyncMock(side_effect=calendar_days_exc)
+        else:
+            self.calendar_helper = AsyncMock(return_value=calendar_days)
+        # cycle437 — `_gap_fill_need_days` 가 특정 빈 날짜에만 예외를 내도록(종목 하나의
+        # 예외가 루프 전체를 멈추지 않는지 확인하는 테스트 전용 seam).
+        self.need_days_exc_for = need_days_exc_for
 
     async def _max_bas_dd(self, ticker=None):
         return self.latest.get(ticker, _LAST_LOADED)
@@ -142,6 +153,19 @@ class _Load:
         )
         if self.patch_helper:
             daily_kwargs[_HELPER] = self.helper
+            daily_kwargs["calendar_size"] = self.calendar_helper
+        patches = []
+        if self.need_days_exc_for is not None:
+            _orig_need_days = scanner._gap_fill_need_days
+            _boom_date = self.need_days_exc_for
+
+            def _need_days(earliest_missing, today_, *, _orig=_orig_need_days,
+                            _boom=_boom_date):
+                if earliest_missing == _boom:
+                    raise RuntimeError("need_days boom")
+                return _orig(earliest_missing, today_)
+
+            patches.append(patch.object(scanner, "_gap_fill_need_days", _need_days))
         with patch.multiple("src.db.stock_master",
                             list_all=AsyncMock(side_effect=[self.rows, []])), \
              patch.multiple("src.db.stock_master_daily", create=True, **daily_kwargs), \
@@ -149,7 +173,13 @@ class _Load:
                             fetch_daily_candles=AsyncMock(side_effect=self._fetch),
                             fetch_daily_candles_backfill=AsyncMock(side_effect=self._backfill)), \
              patch("asyncio.sleep", new=AsyncMock()):
-            return await scanner._stock_master_daily_load_once(force=force)
+            for p in patches:
+                p.start()
+            try:
+                return await scanner._stock_master_daily_load_once(force=force)
+            finally:
+                for p in patches:
+                    p.stop()
 
 
 def _records(caplog, prefix: str, *, min_level: int) -> list[logging.LogRecord]:
@@ -256,7 +286,7 @@ async def test_w2_no_gap_ticker_keeps_seven():
 
 
 @pytest.mark.parametrize(
-    ("earliest", "expected", "widened", "beyond"),
+    ("earliest", "expected", "widened", "over100"),
     [
         (date(2026, 10, 8), 7, 0, 0),      # need 5 → 하한 7 (확대 아님)
         (date(2026, 10, 6), 7, 0, 0),      # need 7 → 7 (경계, 확대 아님)
@@ -267,10 +297,10 @@ async def test_w2_no_gap_ticker_keeps_seven():
     ],
     ids=["floor_need5", "floor_need7", "need8", "cap_need100", "cap_need101", "cap_need141"],
 )
-async def test_w3_fetch_days_clamped_between_7_and_100(earliest, expected, widened, beyond):
+async def test_w3_fetch_days_clamped_between_7_and_100(earliest, expected, widened, over100):
     """하한 7 = 현행 보정 창(직전 영업일 봉 재기록, cycle263 G2) 보존 · 상한 100 = KIS 1회 한도.
 
-    `widened` = 7 보다 큰 창을 요청했는가 · `beyond_horizon` = 필요 창이 100 을 **넘어** 잘렸는가
+    `widened` = 7 보다 큰 창을 요청했는가 · `need_over_100_weekdays` = 필요 창(평일 수)이 100 을 **넘었는가**
     (정확히 100 은 잘린 것이 아니다).
     """
     load = _Load([_qualifier("001060")], gaps={"001060": earliest})
@@ -279,7 +309,7 @@ async def test_w3_fetch_days_clamped_between_7_and_100(earliest, expected, widen
     assert load.days_of("001060") == [expected], f"실측 {load.fetch_calls}"
     assert load.backfill_calls == []
     assert summary["gap_fill"]["widened"] == widened
-    assert summary["gap_fill"]["beyond_horizon"] == beyond
+    assert summary["gap_fill"]["need_over_100_weekdays"] == over100
     assert summary["gap_fill"]["max_fetch_days"] == (expected if widened else 0)
 
 
@@ -413,7 +443,7 @@ async def test_o1_marker_once_per_run_with_exact_fields(caplog):
 
     tickers = 판정이 구멍을 보고한 **적재 대상** 종목 수(A·B·C·E = 4, 대상 밖 999999 제외)
     widened = 증분 분기에서 7 보다 큰 창을 요청한 종목 수(A·C = 2)
-    max_fetch_days = widened 종목 창의 최댓값(100) · beyond_horizon = 필요 창 > 100 이라 잘린 수(C = 1)
+    max_fetch_days = widened 종목 창의 최댓값(100) · need_over_100_weekdays = 필요 창(평일 수) > 100 종목 수(C = 1)
     """
     rows = [_qualifier(t) for t in ("000010", "000020", "000030", "000040", "000050")]
     load = _Load(rows, gaps={
@@ -433,12 +463,12 @@ async def test_o1_marker_once_per_run_with_exact_fields(caplog):
     msg = lines[0].getMessage()
     assert lines[0].levelno == logging.INFO
     want = {"tickers": "4", "widened": "2", "max_fetch_days": "100",
-            "beyond_horizon": "1", "errors": "0"}
+            "need_over_100_weekdays": "1", "errors": "0", "calendar_days": "100"}
     got = {k: _field(msg, k) for k in want}
     assert got == want, f"실측 {msg!r}"
     assert summary["gap_fill"] == {
         "tickers": 4, "widened": 2, "max_fetch_days": 100,
-        "beyond_horizon": 1, "errors": 0,
+        "need_over_100_weekdays": 1, "errors": 0, "calendar_days": 100,
     }
     # 호출 모양: 증분 4콜(18·7·100·7) + backfill 1
     assert sorted(load.fetch_calls) == [
@@ -459,9 +489,10 @@ async def test_o2_marker_on_clean_run_is_all_zero(caplog):
     assert len(lines) == 1
     msg = lines[0].getMessage()
     assert {k: _field(msg, k) for k in
-            ("tickers", "widened", "max_fetch_days", "beyond_horizon", "errors")} == {
+            ("tickers", "widened", "max_fetch_days", "need_over_100_weekdays", "errors",
+             "calendar_days")} == {
         "tickers": "0", "widened": "0", "max_fetch_days": "0",
-        "beyond_horizon": "0", "errors": "0",
+        "need_over_100_weekdays": "0", "errors": "0", "calendar_days": "100",
     }, f"실측 {msg!r}"
     assert summary["gap_fill"]["tickers"] == 0
     assert _records(caplog, _GAP_WARN, min_level=logging.WARNING) == []
@@ -519,6 +550,120 @@ async def test_f3_non_date_value_is_ignored_and_counted(caplog):
     assert len(_records(caplog, _GAP_WARN, min_level=logging.WARNING)) == 1
 
 
+async def test_f4_calendar_size_exception_fails_open_with_zero_days(caplog):
+    """`calendar_size` 예외 → 같은 판정 블록(try) 안이라 구멍 판정도 버리고 전 종목 7일.
+
+    `earliest_missing_bas_dd` 와 `calendar_size` 는 같은 실행의 같은 달력을 묻는
+    한 쌍이라 — 한쪽만 실패해도 그 실행은 「판정 실패」로 통째로 접는다(단일 WARNING,
+    errors 가 두 번 늘지 않는다).
+    """
+    rows = [_qualifier(t) for t in ("000010", "000020")]
+    load = _Load(rows, gaps={"000010": date(2026, 9, 21)},
+                 calendar_days_exc=RuntimeError("calendar boom"))
+    with freeze_time(_NIGHT), caplog.at_level(logging.INFO, logger=_SCANNER_LOGGER):
+        summary = await load.run()
+
+    assert sorted(load.fetch_calls) == [("000010", 7), ("000020", 7)], (
+        f"구멍 판정이 버려져 전 종목 현행 7 — 실측 {load.fetch_calls}"
+    )
+    assert summary["gap_fill"]["errors"] == 1
+    assert summary["gap_fill"]["calendar_days"] == 0
+    assert len(_records(caplog, _GAP_WARN, min_level=logging.WARNING)) == 1, (
+        "실행당 WARNING 1행 — earliest_missing_bas_dd 성공 뒤 calendar_size 실패도 1건"
+    )
+
+
+# ══════════════════════════════════════════════════════════════════════
+# D — datetime 통과 차단 + 종목별 예외 격리 (cycle437 리팩토링 카드 #10 ①)
+# ══════════════════════════════════════════════════════════════════════
+async def test_d1_datetime_value_rejected_like_non_date(caplog):
+    """`datetime` 은 `date` 의 서브클래스라 `isinstance` 는 통과시키지만 우리는 거른다.
+
+    고치기 전(Red) = `isinstance(_gap_date, date)` 가 참 → `_gap_fill_need_days` 의
+    `d <= today`(date vs datetime)가 `TypeError` → 그 예외가 종목 루프 밖에서 터져
+    **그날 적재 전체가 멈춘다**(다른 종목까지 전혀 처리되지 않는다).
+    고친 뒤(Green) = `type(x) is date` 가 거짓이라 그 종목만 7 + errors 증가, 다른
+    종목은 정상 처리된다.
+    """
+    from datetime import datetime
+
+    rows = [_qualifier("000010"), _qualifier("000020")]
+    load = _Load(rows, gaps={
+        "000010": datetime(2026, 9, 21, 10, 30, 0),   # 서브클래스 — 거부 대상
+        "000020": date(2026, 9, 21),                   # 정상 date — 영향받지 않는다
+    })
+    with freeze_time(_NIGHT), caplog.at_level(logging.INFO, logger=_SCANNER_LOGGER):
+        summary = await load.run()
+
+    assert load.days_of("000010") == [7], (
+        f"datetime 값은 구멍 없음 취급(현행 7) — 실측 {load.fetch_calls}"
+    )
+    assert load.days_of("000020") == [18], (
+        "다른 종목의 정상 처리가 datetime 값 때문에 멈추면 안 된다 — "
+        f"실측 {load.fetch_calls}"
+    )
+    assert summary["gap_fill"]["errors"] == 1
+    assert summary["gap_fill"]["tickers"] == 1
+    assert len(_records(caplog, _GAP_WARN, min_level=logging.WARNING)) == 1
+
+
+async def test_d2_per_ticker_need_days_exception_does_not_halt_loop(caplog):
+    """`_gap_fill_need_days` 가 특정 종목에서만 예외를 내도 — 그 종목만 7 + 다른 종목은 정상.
+
+    실무에서는 위 D1 수정이 이 경로를 사실상 봉인하지만(`_gap_fill_need_days` 에
+    닿는 값은 전부 `type(x) is date` 를 통과한 뒤라 TypeError 가 안 난다), 예측하지
+    못한 예외(예: 미래 변경으로 `earliest_missing` 이 다시 이상값을 받는 경우)가 한
+    종목의 계산을 넘어 그날 밤 적재 전체(최대 ~1,000종목)를 멈추지 않는지는 별도로
+    확인한다 — 방어선 자체가 격리를 하는지 보는 테스트다.
+    """
+    boom_date = date(2026, 9, 21)
+    rows = [_qualifier(t) for t in ("000010", "000020", "000030")]
+    load = _Load(rows, gaps={
+        "000010": boom_date,
+        "000020": date(2026, 10, 6),
+    }, need_days_exc_for=boom_date)
+    with freeze_time(_NIGHT), caplog.at_level(logging.INFO, logger=_SCANNER_LOGGER):
+        summary = await load.run()
+
+    assert load.days_of("000010") == [7], (
+        f"예외가 난 종목은 현행 7로 떨어진다 — 실측 {load.fetch_calls}"
+    )
+    assert load.days_of("000020") == [7], (
+        f"예외가 안 난 다른 구멍 종목은 정상 확대된다 — 실측 {load.fetch_calls}"
+    )
+    assert load.days_of("000030") == [7], (
+        f"구멍이 없는 종목까지 처리됐다 — 루프가 멈추지 않았다는 증거, 실측 {load.fetch_calls}"
+    )
+    assert summary["gap_fill"]["errors"] == 1
+    assert len(_records(caplog, _GAP_WARN, min_level=logging.WARNING)) == 1
+
+
+# ══════════════════════════════════════════════════════════════════════
+# E — 달력 크기 마커 (cycle437 리팩토링 카드 #10 ③)
+# ══════════════════════════════════════════════════════════════════════
+async def test_e1_calendar_days_in_marker_and_summary(caplog):
+    """마커·summary 둘 다 `calendar_size` 가 돌려준 실제 달력 일수를 싣는다."""
+    load = _Load([_qualifier("005930")], gaps={}, calendar_days=85)
+    with freeze_time(_NIGHT), caplog.at_level(logging.INFO, logger=_SCANNER_LOGGER):
+        summary = await load.run()
+
+    lines = _records(caplog, _GAP_INFO, min_level=logging.INFO)
+    assert len(lines) == 1
+    assert _field(lines[0].getMessage(), "calendar_days") == "85"
+    assert summary["gap_fill"]["calendar_days"] == 85
+
+
+async def test_e2_calendar_size_called_once_with_today(caplog):
+    """`calendar_size` 는 실행당 한 번, `earliest_missing_bas_dd` 와 같은 `before=오늘`."""
+    load = _Load([_qualifier("005930")], gaps={}, calendar_days=42)
+    with freeze_time(_NIGHT):
+        await load.run()
+    assert load.calendar_helper.await_count == 1
+    call = load.calendar_helper.await_args
+    sent = call.args[0] if call.args else call.kwargs.get("before")
+    assert sent == _TODAY, f"실측 {call}"
+
+
 # ══════════════════════════════════════════════════════════════════════
 # A — 소스 구조 (행위 테스트가 못 보는 우회 구현 차단)
 # ══════════════════════════════════════════════════════════════════════
@@ -553,6 +698,14 @@ def test_a1_gap_scan_called_once_outside_ticker_loop():
     calls = _calls_named(tree, _HELPER)
     assert len(calls) == 1, f"`{_HELPER}` 호출 자리 {len(calls)}곳 (기대 1)"
     assert not _inside_loop(tree, calls[0]), "판정 호출이 루프 안에 있다 — 종목당 쿼리가 된다"
+
+
+def test_a1b_calendar_size_called_once_outside_ticker_loop():
+    """`calendar_size` 호출도 정확히 1곳, 종목 루프 밖(카드 #10 ③)."""
+    tree = _load_once_tree()
+    calls = _calls_named(tree, "calendar_size")
+    assert len(calls) == 1, f"`calendar_size` 호출 자리 {len(calls)}곳 (기대 1)"
+    assert not _inside_loop(tree, calls[0]), "종목당 쿼리가 된다"
 
 
 def test_a2_kis_call_sites_unchanged():

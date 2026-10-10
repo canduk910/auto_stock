@@ -562,6 +562,38 @@ async def earliest_missing_bas_dd(
     return {r["ticker"]: r["earliest_missing"] for r in (rows or [])}
 
 
+# cycle437 (2026-10-10, 리팩토링 카드 #10) — `earliest_missing_bas_dd` 가 쓰는 시장 달력의
+# **실제 날 수**(≤ horizon). scanner 의 관측 마커 `[daily_load_gap_fill]`에 `calendar_days=`
+# 로 싣는다 — 달력이 쪼그라들어도(행 수 미달 날이 늘면) 그 사실이 보이지 않던 결함(카드 #10 ③).
+_CALENDAR_SIZE_SQL = """
+    SELECT count(*) AS n FROM (
+        SELECT bas_dd FROM stock_master_daily
+        WHERE bas_dd < $1
+        GROUP BY bas_dd HAVING count(*) >= $3
+        ORDER BY bas_dd DESC LIMIT $2
+    ) cal
+"""
+
+
+async def calendar_size(
+    before: date, *, horizon: int = GAP_HORIZON, min_rows: int = GAP_CALENDAR_MIN_ROWS,
+) -> int:
+    """`earliest_missing_bas_dd` 와 같은 `cal` CTE 의 **행 수**(= 실제 달력 일수, ≤ horizon).
+
+    쿼리 1회, 종목 무관(인자가 없다). `earliest_missing_bas_dd` 와 같은 `before`/`horizon`/
+    `min_rows` 를 넘기면 같은 달력을 센다 — 두 함수는 서로를 참조하지 않고 SQL 조각만 같다.
+
+    🔴 예외를 삼키지 않는다(`earliest_missing_bas_dd` 와 같은 규약) — 호출부(scanner)가
+    fail-open(0) 한다.
+
+    Returns:
+        그 달력에 든 날짜 수. 0 이면 「행 수 >= min_rows 인 날이 하나도 없다」 는 뜻이지
+        「쿼리가 실패했다」 와는 다르다(실패는 예외로 올라간다).
+    """
+    n = await pg.fetchval(_CALENDAR_SIZE_SQL, before, horizon, min_rows)
+    return int(n or 0)
+
+
 _PROVISIONAL_ROWS_SQL = """
     SELECT ticker, bas_dd, open_price, high_price, low_price, close_price
     FROM stock_master_daily
