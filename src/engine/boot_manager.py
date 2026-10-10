@@ -64,6 +64,134 @@ def _resolve_fallback_owner(scheduler: "TradingScheduler", strategy_id: str):
     return scheduler.registry.get(strategy_id) or scheduler.registry.get(FALLBACK_OWNER_ID)
 
 
+async def _reconcile_corporate_actions(scheduler: "TradingScheduler", holdings, today, yesterday) -> None:
+    """07:45 부팅 1차 복구 직후 — KIS 잔고와 추적 수량이 다른 보유를 대사한다.
+
+    cycle431 — 사용자 결정 2026-10-10(안1). 자문 =
+    `_workspace/domain_consult/2026-10-10_corporate_action_qty_reconcile.md`.
+
+    그날 체결은 구조적으로 0(NXT 프리장 08:00 전)이라 자문의 증거 A 는 공짜다.
+    판정은 leaf `corporate_action_reconcile.classify()` 가 순수하게 한다 —
+    이 함수는 예탁원 조회·어제 주문내역 조회·결과 적용(메모리+DB)만 한다.
+
+    - `apply_scale` — Position·DB·전략 가격 스탬프(`on_scale_event`)를 r 로
+      옮기고, 그날 재도출 가드(`mark_rescaled_today`)를 세운다.
+    - `sync_qty_only` — 어제 주문내역이 정확히 설명하는 통보 유실분만 수량을
+      KIS 값으로 맞춘다(매입가·스탬프 무접촉, 사용자 결정 ②).
+    - `merger_split_detected`/`unexplained` — 장부·보유·구독 전부 보존, 그날
+      신규 매수만 차단(`block_buy_today`) + `[holding_qty_unexplained]` ERROR.
+    """
+    from src.api import corporate_actions as _ca
+    from src.engine import corporate_action_reconcile as _car
+    from src.db.positions import save_position as _save_position
+    from src.engine.scanner import ticker_names as _ticker_names
+
+    holdings_by_ticker = {h.ticker: h for h in holdings}
+    yesterday_str = yesterday.strftime("%Y%m%d")
+
+    for strategy in scheduler.registry.all():
+        for ticker, pos in list(strategy.state.positions.items()):
+            kis = holdings_by_ticker.get(ticker)
+            if kis is None or pos.quantity == kis.quantity:
+                continue
+
+            ratio_candidates: list = []
+            merger_split_found = False
+            try:
+                rev_rows = await _ca.fetch_face_value_change(ticker, today=today)
+                ratio_candidates += _car.ratio_candidates_from_rev_split_rows(rev_rows)
+            except Exception:
+                logger.warning(
+                    "[corporate_action_reconcile] rev-split 조회 실패: %s", ticker, exc_info=True,
+                )
+            try:
+                cap_rows = await _ca.fetch_capital_decrease(ticker, today=today)
+                ratio_candidates += _car.ratio_candidates_from_cap_decrease_rows(cap_rows)
+            except Exception:
+                logger.warning(
+                    "[corporate_action_reconcile] cap-dcrs 조회 실패: %s", ticker, exc_info=True,
+                )
+            try:
+                merger_rows = await _ca.fetch_merger_split(ticker, today=today)
+                merger_split_found = bool(merger_rows)
+            except Exception:
+                logger.warning(
+                    "[corporate_action_reconcile] merger-split 조회 실패: %s", ticker, exc_info=True,
+                )
+
+            yesterday_net: int | None = None
+            try:
+                yesterday_orders = await get_daily_orders(target_date=yesterday_str, pdno=ticker)
+                yesterday_net = _car.net_qty_from_order_rows(yesterday_orders)
+            except Exception:
+                logger.warning(
+                    "[corporate_action_reconcile] 어제 주문내역 조회 실패: %s", ticker, exc_info=True,
+                )
+
+            verdict = _car.classify(
+                tracked_qty=pos.quantity, kis_qty=kis.quantity,
+                tracked_buy_price=pos.buy_price, kis_avg_price=kis.avg_price,
+                ratio_candidates=ratio_candidates, merger_split_found=merger_split_found,
+                yesterday_fills_net_qty=yesterday_net,
+            )
+
+            if verdict.action == "apply_scale":
+                applied = _car.compute_applied_scale(
+                    ticker=ticker, kis_qty=kis.quantity, tracked_buy_price=pos.buy_price,
+                    tracked_high_since_buy=pos.high_since_buy, r=verdict.r, source=verdict.source,
+                )
+                prev_qty, prev_price = pos.quantity, pos.buy_price
+                pos.quantity = applied.new_qty
+                pos.buy_price = applied.new_buy_price
+                pos.high_since_buy = applied.new_high_since_buy
+                try:
+                    strategy.on_scale_event(ticker, verdict.r)
+                except Exception:
+                    logger.exception("[corporate_action_reconcile] on_scale_event 실패: %s", ticker)
+                _car.mark_rescaled_today(ticker, today=today)
+                try:
+                    await _save_position(
+                        ticker=ticker, ticker_name=_ticker_names.get(ticker, ""),
+                        buy_price=pos.buy_price, quantity=pos.quantity, order_no=pos.order_no,
+                        strategy_id=strategy.strategy_id, buy_date=pos.buy_date,
+                        high_since_buy=int(pos.high_since_buy),
+                    )
+                except Exception:
+                    logger.exception("[corporate_action_reconcile] DB 반영 실패: %s", ticker)
+                logger.warning(
+                    "[corporate_action_applied] ticker=%s source=%s r=%.6f qty=%d->%d "
+                    "buy_price=%d->%d strategy=%s",
+                    ticker, verdict.source, verdict.r, prev_qty, pos.quantity,
+                    prev_price, pos.buy_price, strategy.strategy_id,
+                )
+            elif verdict.action == "sync_qty_only":
+                prev_qty = pos.quantity
+                pos.quantity = kis.quantity
+                try:
+                    await _save_position(
+                        ticker=ticker, ticker_name=_ticker_names.get(ticker, ""),
+                        buy_price=pos.buy_price, quantity=pos.quantity, order_no=pos.order_no,
+                        strategy_id=strategy.strategy_id, buy_date=pos.buy_date,
+                        high_since_buy=int(pos.high_since_buy),
+                    )
+                except Exception:
+                    logger.exception(
+                        "[corporate_action_reconcile] DB 반영 실패(통보 유실): %s", ticker,
+                    )
+                logger.warning(
+                    "[corporate_action_qty_synced] ticker=%s qty=%d->%d detail=%s strategy=%s",
+                    ticker, prev_qty, pos.quantity, verdict.detail, strategy.strategy_id,
+                )
+            else:
+                _car.block_buy_today(ticker, today=today)
+                logger.error(
+                    "[holding_qty_unexplained] ticker=%s tracked=%d kis=%d avg_ours=%d "
+                    "avg_kis=%d strategy=%s verdict=%s",
+                    ticker, pos.quantity, kis.quantity, pos.buy_price, kis.avg_price,
+                    strategy.strategy_id, verdict.action,
+                )
+
+
 async def _resolve_unfilled_buy_owner(ticker: str, order_no: str) -> str | None:
     """미체결 매수 주문의 소유 전략을 **주문번호**로 해석한다 (⑦-F2 안3, cycle427).
 
@@ -352,14 +480,27 @@ async def boot(scheduler: "TradingScheduler") -> None:
 
     for row in db_positions:
         ticker = row["ticker"]
+        strategy_id = row["strategy_id"]
         # KIS 잔고에도 있는 종목만 복구 (이미 매도된 종목 방지)
         if ticker not in kis_tickers:
             from src.db.positions import delete_position
             await delete_position(ticker)
             logger.info("DB 포지션 정리 (KIS 미보유): %s", ticker)
+            # cycle431 ④ (사용자 결정 2026-10-10) — 삭제만 하면 전략별 가격
+            # 스탬프(kojiro `_stop_floor`·터틀 `_entry_atr` 등)가 남아 같은
+            # 종목 재매수 시 즉발 손절 위험이 남는다. 보존 경로(수량 부족
+            # D1 안A)는 이 훅을 부르지 않는다 — 여기는 실보유 자체가 없다는
+            # KIS 증거가 있는 "지우는" 경로뿐이다.
+            _owner_for_cleanup = _resolve_fallback_owner(scheduler, strategy_id)
+            if _owner_for_cleanup is not None:
+                try:
+                    _owner_for_cleanup.on_position_closed(ticker)
+                except Exception:
+                    logger.exception(
+                        "[corporate_action_reconcile] on_position_closed 실패(DB 정리): %s", ticker,
+                    )
             continue
 
-        strategy_id = row["strategy_id"]
         target = _resolve_fallback_owner(scheduler, strategy_id)
         if not target:
             continue
@@ -385,6 +526,16 @@ async def boot(scheduler: "TradingScheduler") -> None:
             "당일매수" if buy_dt == today else "익일청산",
             target.strategy_id,
         )
+
+    # cycle431 — 액면병합·분할 등 "주문 밖 수량 변경" 대사 (사용자 결정
+    # 2026-10-10 안1). 1차 복구 **직후**·재도출(아래 KIS 잔고 보완 복구,
+    # `_eager_refresh_stock_master_for_held_positions` 의 recompute_held_atr 등)
+    # 보다 **앞**이어야 한다 — 늦으면 재도출이 옛 눈금 일봉으로 스탬프를
+    # 덮어쓴다(자문 「재도출이 옮긴 눈금을 덮어쓰는 함정」).
+    try:
+        await _reconcile_corporate_actions(scheduler, holdings, today, yesterday)
+    except Exception:
+        logger.exception("[corporate_action_reconcile] 부팅 대사 실패 graceful — 부팅 계속")
 
     # 2차: KIS 잔고에 있지만 DB에 없는 종목 보완
     db_tickers = {row["ticker"] for row in db_positions}

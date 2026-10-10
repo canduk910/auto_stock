@@ -457,9 +457,9 @@ _APPROVED_CONTENT_SHA: dict[str, tuple[str, str]] = {
         "cycle417(2026-10-09) — 일봉 증분 적재 구멍 메우기(증분 창 확대 + 구멍 판정 1회), 8영역 승인",
     ),
     "src/engine/scheduler.py": (
-        "691b6387fb03eb3dce908951991e7ae048eb881143ce9fe0f17f20fd8d810550",
-        "cycle428 F-422-1 사용자 승인 2026-10-10 — 15:20 강제청산 종목별 try/except "
-        "(한 종목 예외가 루프를 끊지 않는다), 승인",
+        "96a8c2a1e41f22fcd0d8efe8a7d101405af58de5f9bcb6b0c6b25a6f850aada5",
+        "cycle431 사용자 승인 2026-10-10 안1 — 액면병합 대사 관측 호출 2줄"
+        "(15분 동기화·21:30 정산, corporate_action_reconcile leaf 위임), 승인",
     ),
     "src/engine/session.py": (
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",

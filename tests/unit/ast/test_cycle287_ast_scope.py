@@ -103,7 +103,9 @@ _PINNED_DIR_FILE_COUNTS = {
     # cycle411(실비용 합치기, 사용자 결정 10-08) — 신규 leaf `cost_overlay.py` 로 93 → 94.
     # cycle416(매크로 시장 등락 통계) — 신규 leaf `market_breadth.py` · cycle413(거래일지 화면 1b) —
     # 신규 leaf `journal_view.py`(`db/trade_journal.py` 는 이 재귀 집계 밖) → 94 → 96(병합).
-    "src/engine": 96,
+    # cycle431(액면병합 대사, 사용자 결정 2026-10-10 안1) — 신규 leaf
+    # `corporate_action_reconcile.py` 로 96 → 97.
+    "src/engine": 97,
 }
 
 #: `scheduler.py` cycle257 영구 상한.

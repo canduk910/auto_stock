@@ -3440,6 +3440,10 @@ class TradingScheduler:
             from src.engine.buying_reconcile import reconcile_stale_buying
             await reconcile_stale_buying(self.registry, self.order_engine, holdings)
 
+        # cycle431 — 액면병합 등 수량 불일치 관측(쓰지 않는다, 사용자 결정 ①). leaf 위임.
+        from src.engine.corporate_action_reconcile import observe_mid_session_sync
+        await observe_mid_session_sync(self.registry, holdings)
+
     async def _settle(self) -> None:
         """일일 정산: 잔고 조회 후 전략별 + 합산 daily_performance 기록.
 
@@ -3449,6 +3453,13 @@ class TradingScheduler:
         - 누적 수익률 = TWR 복리: (1 + prev_cum) × (1 + daily_rate) - 1
         """
         from src.db.trade_history import get_today_trades_for_settlement
+
+        # cycle431 — 액면병합 등 CTRGA011R 사후 대사(감지·로그만, 쓰지 않는다). leaf 위임.
+        try:
+            from src.engine.corporate_action_reconcile import emit_settlement_detection
+            await emit_settlement_detection(self.registry)
+        except Exception:
+            logger.exception("[corporate_action_reconcile] 정산 감지 실패 graceful")
 
         try:
             _, summary = await get_balance()

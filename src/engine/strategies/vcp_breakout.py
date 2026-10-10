@@ -1870,6 +1870,14 @@ class VcpBreakoutStrategy(StrategyBase):
             pos = self.state.positions.get(ticker)
             if not pos:
                 continue
+            # cycle431 — 오늘 액면병합·분할 등을 반영한 종목은 그날 재도출을
+            # 통째로 건너뛴다(사용자 결정 2026-10-10 안1).
+            from src.engine import corporate_action_reconcile as _car
+            if _car.is_rescaled_today(ticker):
+                logger.info(
+                    "[corporate_action_rederive_guard_skip] attr=vcp_recompute ticker=%s", ticker,
+                )
+                continue
             if pos.buy_date >= today:
                 if pos.buy_date > today:
                     logger.warning(
@@ -1974,6 +1982,10 @@ class VcpBreakoutStrategy(StrategyBase):
     _HIGH_RECOVER_LABEL = "VCP"
     _ENTRY_ATR_REDERIVE_LABEL = "vcp"
     _COOLDOWN_LOG_LABEL = "[vcp]"  # refactor-review A3 — base 위임 로그 접두사
+
+    # cycle431 — 액면병합·분할 대사 가격 차원 스탬프 선언(사용자 결정 2026-10-10 안1).
+    _PRICE_DIM_SIMPLE_ATTRS = ("_entry_atr", "_prev_price")
+    _PRICE_DIM_NESTED_ATTRS = {"_position_setup": ("base_low", "atr14", "ema50")}
 
     def on_position_closed(self, ticker: str) -> None:
         """사이클 191 — 포지션 청산 시 재진입 쿨다운 등록 (VCP override, BFB 패턴 답습).

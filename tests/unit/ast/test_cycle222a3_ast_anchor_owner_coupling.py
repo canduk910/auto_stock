@@ -74,6 +74,11 @@ _ANCHOR_ATTR = "high_since_buy"
 #   "raise_only" — 직전 가드(`candidate <= pos.high_since_buy: return`)로 실질
 #                  올리기 전용. `max()` 와 동치라 두 번째 writer 문제가 없다.
 #   "owner"      — 진짜 외부 소유자(절대 대입). 소유 전략은 반드시 채택 제외 집합에.
+#   "rescale"    — cycle431 액면병합·분할 대사(07:45 부팅 1차 복구 직후, 장이
+#                  열리기 전·`on_tick` 이 그날 아직 한 번도 안 돈 시점 한정)가
+#                  단위(원/주)를 바꾸는 절대 대입. 트레이딩데이 고점 "채택" 이
+#                  아니라 "단위 환산" 이라 day_high 두 번째 writer 문제가
+#                  구조적으로 없다(그 종목의 첫 틱이 아직 안 왔다).
 _KNOWN_ABSOLUTE_ASSIGNS: dict[tuple[str, str], tuple[str, str | None, str]] = {
     ("src/engine/strategy_base.py", "__post_init__"): (
         "init", None,
@@ -95,6 +100,12 @@ _KNOWN_ABSOLUTE_ASSIGNS: dict[tuple[str, str], tuple[str, str | None, str]] = {
         "`high_since_buy` 와 비교하지 않으므로, 연속 갭업이면 today_open 이 직전 "
         "앵커보다 **높아 올릴 수도** 있다. 화이트리스트 근거는 '내린다' 가 아니라 "
         "'외부 소유자가 있다' 이다.",
+    ),
+    ("src/engine/boot_manager.py", "_reconcile_corporate_actions"): (
+        "rescale", None,
+        "cycle431 — 액면병합·분할 등 눈금 사건 반영(`verdict.action == 'apply_scale'`). "
+        "07:45 부팅 1차 복구 직후, 장 개장(그날 첫 틱) 이전에만 실행돼 "
+        "`on_tick` day_high 채택과 겹치지 않는다. 사용자 결정 2026-10-10 안1.",
     ),
 }
 
