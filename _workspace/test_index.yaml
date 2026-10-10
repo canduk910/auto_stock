@@ -992,6 +992,8 @@ backend:
     - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -2325,6 +2327,8 @@ backend:
     - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -3669,6 +3673,8 @@ backend:
     - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -5004,6 +5010,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -6341,6 +6349,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -7680,6 +7690,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -9019,6 +9031,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -10359,6 +10373,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -11702,6 +11718,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -13037,6 +13055,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -14448,6 +14468,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -15785,6 +15807,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -17143,6 +17167,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -18483,6 +18509,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -19831,6 +19859,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -21159,6 +21189,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -22501,6 +22533,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -23838,6 +23872,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -25177,6 +25213,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -26516,6 +26554,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -27855,6 +27895,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -29196,6 +29238,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -30533,6 +30577,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -31872,6 +31918,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -33211,6 +33259,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -34550,6 +34600,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -35892,6 +35944,8 @@ backend:
     - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -37233,6 +37287,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -38568,6 +38624,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -39906,6 +39964,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -41247,6 +41307,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -42584,6 +42646,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -43927,6 +43991,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -45269,6 +45335,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -46606,6 +46674,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -47948,6 +48018,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -49354,6 +49426,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -50694,6 +50768,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -52033,6 +52109,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -53373,6 +53451,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -54711,6 +54791,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -56051,6 +56133,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -57389,6 +57473,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -57769,6 +57855,7 @@ backend:
     - tests/unit/engine/test_cycle425_boot_recover_observability.py
     - tests/unit/engine/test_cycle427_boot_unfilled_order_owner.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -58728,6 +58815,7 @@ backend:
     - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -60067,6 +60155,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -60434,6 +60524,8 @@ backend:
     - tests/unit/engine/strategies/test_cycle431_rederive_guard.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -62830,6 +62922,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -64175,6 +64269,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -65509,6 +65605,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -66848,6 +66946,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -68187,6 +68287,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -69527,6 +69629,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -70865,6 +70969,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -72275,6 +72381,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -73614,6 +73722,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -74955,6 +75065,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -76293,6 +76405,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -77631,6 +77745,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -79048,6 +79164,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -80384,6 +80502,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -81790,6 +81910,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -83133,6 +83255,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -84479,6 +84603,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -85877,6 +86003,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -87218,6 +87346,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -88555,6 +88685,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -89894,6 +90026,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -91233,6 +91367,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -92572,6 +92708,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -93911,6 +94049,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -95249,6 +95389,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -96688,6 +96830,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -98111,6 +98255,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -99614,6 +99760,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -100954,6 +101102,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -102293,6 +102443,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -103641,6 +103793,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -104973,6 +105127,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -106313,6 +106469,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -107647,6 +107805,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -109060,6 +109220,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
@@ -110414,6 +110576,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -111667,6 +111831,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -113006,6 +113172,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -114343,6 +114511,8 @@ backend:
     - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -115681,6 +115851,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -117022,6 +117194,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -118380,6 +118554,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -119699,6 +119875,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -121056,6 +121234,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -122378,6 +122558,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -123715,6 +123897,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -125054,6 +125238,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -126394,6 +126580,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -127733,6 +127921,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -129072,6 +129262,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -130415,6 +130607,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -131782,6 +131976,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -133124,6 +133320,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -134458,6 +134656,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -135803,6 +136003,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -137137,6 +137339,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -138476,6 +138680,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -139817,6 +140023,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -141157,6 +141365,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -141816,6 +142026,8 @@ backend:
     - tests/unit/engine/test_cycle428_force_clear_ticker_error.py
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -143835,6 +144047,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -145194,6 +145408,8 @@ backend:
     - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -146512,6 +146728,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -147850,6 +148068,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -149275,6 +149495,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -150615,6 +150837,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -151952,6 +152176,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -153294,6 +153520,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -154630,6 +154858,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -155969,6 +156199,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -157307,6 +157539,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -158648,6 +158882,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -159986,6 +160222,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -161332,6 +161570,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -162736,6 +162976,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -164075,6 +164317,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -165418,6 +165662,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -165896,6 +166142,8 @@ backend:
     - tests/unit/engine/test_cycle408_l3_zero_qty_cause.py
     - tests/unit/engine/test_cycle425_boot_fallback_owner.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_order_engine_buy.py
     - tests/unit/routes/test_cycle411_cost_overlay_routes.py
     - tests/unit/routes/test_cycle411b_cost_overlay_route_fixes.py
@@ -168167,6 +168415,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -169508,6 +169758,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -170918,6 +171170,8 @@ backend:
     - tests/unit/engine/test_cycle428_sell_unknown_reconcile.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -172445,6 +172699,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -173854,6 +174110,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -175223,6 +175481,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -176544,6 +176804,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -177900,6 +178162,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -179238,6 +179502,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -182464,6 +182730,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -183800,6 +184068,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -185142,6 +185412,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -186478,6 +186750,8 @@ backend:
     - tests/unit/engine/test_cycle429_insufficient_qty_preserve.py
     - tests/unit/engine/test_cycle431_boot_reconcile.py
     - tests/unit/engine/test_cycle431_corporate_action_reconcile.py
+    - tests/unit/engine/test_cycle431_followup1_yesterday_tradingday.py
+    - tests/unit/engine/test_cycle431_followup2_ctrga_settlement.py
     - tests/unit/engine/test_cycle431_on_scale_event.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
@@ -190294,10 +190568,10 @@ frontend:
     - frontend/src/pages/__tests__/Dashboard.fix1.cycle414.test.tsx
     - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
     - frontend/src/pages/__tests__/MarketState.test.tsx
-generated_at: '2026-10-10T09:44:31.057098+09:00'
+generated_at: '2026-10-10T10:30:51.766075+09:00'
 stats:
   backend_modules: 188
-  backend_tests: 1336
+  backend_tests: 1338
   frontend_modules: 155
   frontend_tests: 170
   unmapped_modules:

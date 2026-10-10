@@ -139,7 +139,9 @@ KIS OpenAPI REST 호출 모듈. 모든 호출은 `base.py` 공통 래퍼를 거�
   `balance.get_daily_orders` 와 같은 모양(`CTX_AREA_FK100`/`CTX_AREA_NK100`
   되돌림, `tr_cont` M/F). `rght_type_cd` 2자리(14 액면분할·15 액면병합·17 감자·
   11 합병·12 회사분할 등) — 21:30 사후 대사 전용(`emit_settlement_detection`,
-  행 부재는 그 자체로 오류가 아니다 — 아침 반영을 막지 않는다).
+  보유 종목마다 **최근 45 달력일** 창으로 조회한다 — 권리 기준일(`bass_dt`)이
+  변경상장일보다 며칠 앞설 수 있어 "오늘 하루" 창이면 그 행을 영원히 못
+  잡는다. 행 부재는 그 자체로 오류가 아니다 — 아침 반영을 막지 않는다).
 - 소비처 = `boot_manager._reconcile_corporate_actions`(예탁원 3종) ·
   `corporate_action_reconcile.emit_settlement_detection`(CTRGA011R). 가드 =
   `tests/unit/api/test_cycle431_corporate_actions_api.py`.
