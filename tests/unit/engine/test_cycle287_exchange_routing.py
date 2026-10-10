@@ -1015,4 +1015,5 @@ async def test_r9d_routing_does_not_add_await_before_pending_buys_add(
         _pin_boards(monkeypatch, datetime.now(KST_TZ))
         await _run_buy(engine, strat)
     assert _TICKER in strat.state.pending_buys
-    assert strat.state.pending_buy_amounts[_TICKER] == 10_000 * 1
+    # cycle436 카드 E — 키 = (ticker, order_no). mock_place_order 는 "ORD-1" 을 돌려준다.
+    assert strat.state.pending_buy_amounts[(_TICKER, "ORD-1")] == 10_000 * 1

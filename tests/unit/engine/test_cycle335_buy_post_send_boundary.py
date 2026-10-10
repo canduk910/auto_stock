@@ -116,7 +116,7 @@ async def test_1_market_path_post_send_failure_does_not_release_pending(env, mon
         "접수된 주문의 pending 이 풀렸다 — `is_ticker_blocked_for_buy` 가 False 가 되어 "
         "같은 종목을 다시 산다"
     )
-    assert state.pending_buy_amounts.get(TICKER, 0) > 0, (
+    assert state.total_pending_buy_amount() > 0, (
         "접수된 주문의 예정 금액이 사라졌다 — `_calc_used_funds` 가 그만큼 덜 세어 "
         "전략 예산이 이중으로 쓰인다"
     )
@@ -195,7 +195,7 @@ async def test_4_fallback_path_post_send_failure_does_not_escape_execute_buy(
     )
     state = env.momentum.state
     assert TICKER in state.pending_buys, "폴백 접수 뒤 pending 이 풀렸다"
-    assert state.pending_buy_amounts.get(TICKER, 0) > 0, "폴백 예정 금액이 사라졌다"
+    assert state.total_pending_buy_amount() > 0, "폴백 예정 금액이 사라졌다"
     assert state.cached_buyable_at == 0.0, "폴백 경로의 캐시 무효화가 실행되지 않았다"
     fb = [
         r.getMessage() for r in caplog.records
@@ -425,7 +425,7 @@ async def test_11_genuine_send_failure_still_releases_pending(env, monkeypatch):
         "주문이 **나가지 못했는데** pending 이 남았다 — 그 종목이 하루 종일 "
         "재매수 차단에 걸리고 예산을 점유한다"
     )
-    assert TICKER not in state.pending_buy_amounts, (
+    assert not [k for k in state.pending_buy_amounts if k[0] == TICKER], (
         "나가지 못한 주문의 예정 금액이 남았다 — 전략 예산이 과대계상된다"
     )
     assert not env.registry.is_ticker_blocked_for_buy(TICKER)

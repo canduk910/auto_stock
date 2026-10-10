@@ -232,8 +232,13 @@ def _release_if_unchanged(registry, strategy, order_engine, ticker: str, odnos):
         return False, None
 
     strategy.state.pending_buys.discard(ticker)
-    amount = strategy.state.pending_buy_amounts.pop(ticker, None)
+    # cycle436 카드 E — `pending_buy_amounts` 키가 `(ticker, order_no)` 라 해제도
+    # 그 주문번호만 푼다(종목 전체를 지우면 다른 주문의 예약까지 지운다).
+    amount: "int | None" = None
     for o in odnos:
+        released = strategy.state.release_buy(ticker, o)
+        if released is not None:
+            amount = (amount or 0) + released
         order_engine._pending_buy_orders.pop(o, None)
     return True, amount
 

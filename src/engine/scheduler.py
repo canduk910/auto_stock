@@ -3565,7 +3565,7 @@ class TradingScheduler:
         for strategy in self.registry.all():
             strategy.state.positions.clear()
             strategy.state.pending_buys.clear()
-            strategy.state.pending_buy_amounts.clear()
+            strategy.state.clear_buy_reservations()
             strategy.state.sold_today.clear()
             strategy.state.daily_realized_pnl = 0
             strategy.state.total_investment = 0

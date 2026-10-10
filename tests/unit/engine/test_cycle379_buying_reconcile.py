@@ -64,6 +64,8 @@ TICKER = "437730"
 ODNO = "0000454500"
 SID = "momentum"
 PRICE = 52_400
+#: cycle436 카드 E — `order_no` 를 아직 모르는 접수 전 임시 등록을 흉내낼 때 쓰는 키.
+_TEMP_ORDER_NO = "_pending"
 DAY_STR = "20260915"
 
 #: 명세 §3 — `[buying_hold]` 사유별 레벨. 쉬는 지정가(`open_order`)가 매일 WARNING 을 내면
@@ -231,7 +233,8 @@ def _arm(w, ticker: str = TICKER, odno: str = ODNO, sid: str = SID, *, qty: int 
     """`execute_buy` 가 `place_order` 응답 직후 동기 영역에서 세우는 상태를 그대로 재현한다."""
     s = w.strats[sid]
     s.state.pending_buys.add(ticker)
-    s.state.pending_buy_amounts[ticker] = price * qty
+    # cycle436 카드 E — `pending_buy_amounts` 키가 `(ticker, order_no)`.
+    s.state.reserve_buy(ticker, odno, price * qty)
     e = w.engine
     e._order_qty[odno] = qty
     e._order_strategy[odno] = sid
@@ -331,8 +334,9 @@ def _assert_untouched(
 ) -> None:
     s = w.strats[sid]
     assert ticker in s.state.pending_buys, f"{ticker} pending 이 풀렸다 — 유지여야 한다"
-    assert s.state.pending_buy_amounts.get(ticker) == amount, (
-        f"pending_buy_amounts[{ticker}] = {s.state.pending_buy_amounts.get(ticker)} (기대 {amount})"
+    got_total = sum(s.state.pending_buy_amounts.get((ticker, o), 0) for o in odnos)
+    assert got_total == amount, (
+        f"pending_buy_amounts[{ticker}, {odnos}] 합계 = {got_total} (기대 {amount})"
     )
     for o in odnos:
         assert o in w.engine._pending_buy_orders, f"_pending_buy_orders[{o}] 가 사라졌다"
@@ -380,7 +384,7 @@ async def test_t1_rejected_row_releases_pending_keeps_mappings_and_marks_cancell
     e = world.engine
     # 해제 = `_handle_buy_fill` 첫 체결 경로가 지우는 것과 같은 세 가지
     assert TICKER not in s.state.pending_buys
-    assert TICKER not in s.state.pending_buy_amounts
+    assert (TICKER, ODNO) not in s.state.pending_buy_amounts
     assert ODNO not in e._pending_buy_orders
     # 🔴 매핑 5종은 남긴다 — 판단이 틀려 늦은 체결통보가 와도 올바른 전략·수량으로 선다
     assert e._order_qty.get(ODNO) == 1
@@ -584,7 +588,8 @@ async def test_t8b_padded_odno_and_pdno_still_match(world, cap) -> None:
 async def test_t9_no_order_mapping_holds_without_kis(world, cap) -> None:
     s = world.strats[SID]
     s.state.pending_buys.add(TICKER)
-    s.state.pending_buy_amounts[TICKER] = PRICE
+    # 아직 `order_no` 를 모르는 접수 전 임시 등록 — 임시 키로 예약한다.
+    s.state.reserve_buy(TICKER, _TEMP_ORDER_NO, PRICE)
     # 다른 종목의 매핑은 있어도 이 종목의 연결 주문은 0 개 (`await place_order` 창)
     world.engine._pending_buy_orders["0000777700"] = {
         "ticker": "005930", "price": 70_000, "quantity": 1, "strategy_id": SID,
@@ -592,7 +597,7 @@ async def test_t9_no_order_mapping_holds_without_kis(world, cap) -> None:
     world.kis.all_rows = [_row(rjct=1)]
     await _run(world)
     assert TICKER in s.state.pending_buys
-    assert s.state.pending_buy_amounts.get(TICKER) == PRICE
+    assert s.state.pending_buy_amounts.get((TICKER, _TEMP_ORDER_NO)) == PRICE
     world.uts.assert_not_awaited()
     _assert_hold(cap, "no_order_no")
     assert world.kis.calls == []
@@ -655,7 +660,7 @@ def _race_fill(w):
         # `_handle_buy_fill` 첫 체결 경로를 흉내 — pending 3종 정리 + 포지션 등록
         s = w.strats[SID]
         s.state.pending_buys.discard(TICKER)
-        s.state.pending_buy_amounts.pop(TICKER, None)
+        s.state.release_buy(TICKER, ODNO)
         w.engine._pending_buy_orders.pop(ODNO, None)
         s.state.positions[TICKER] = Position(
             ticker=TICKER, buy_price=PRICE, quantity=1, order_no=ODNO, strategy_id=SID,
@@ -767,7 +772,7 @@ async def test_t15b_order_lookup_error_holds_only_that_candidate(world, cap) -> 
     world.kis.fail_odno = {ODNO: RuntimeError("timeout")}
     await _run(world)
     s = world.strats[SID]
-    assert TICKER in s.state.pending_buys and s.state.pending_buy_amounts.get(TICKER) == PRICE
+    assert TICKER in s.state.pending_buys and s.state.pending_buy_amounts.get((TICKER, ODNO)) == PRICE
     assert ODNO in world.engine._pending_buy_orders
     _assert_hold(cap, "lookup_error")
     assert tk2 not in world.strats["volatility_breakout"].state.pending_buys, "다른 후보는 풀려야 한다"
@@ -860,7 +865,9 @@ async def test_t16a_one_live_order_keeps_the_ticker(world, cap, b_rows, reason) 
     world.kis.all_rows = []
     world.kis.by_odno = {ODNO: [_row(rjct=1)], _ODNO_B: b_rows}
     await _run(world)
-    _assert_untouched(world, cap, odnos=(ODNO, _ODNO_B))
+    # cycle436 카드 E — 같은 종목에 주문이 둘이면 둘 다 독립적으로 예약된다
+    # (`pending_buy_amounts` 키가 `(ticker, order_no)`) — 합계는 PRICE 의 2배다.
+    _assert_untouched(world, cap, odnos=(ODNO, _ODNO_B), amount=PRICE * 2)
     _assert_hold(cap, reason)
 
 
@@ -926,7 +933,7 @@ async def test_t19b_all_candidates_fail_memory_stage_means_no_kis_call(world, ca
     world.holdings = [SimpleNamespace(ticker=TICKER, quantity=1)]
     s = world.strats["volatility_breakout"]  # no_order_no
     s.state.pending_buys.add("005930")
-    s.state.pending_buy_amounts["005930"] = 70_000
+    s.state.reserve_buy("005930", _TEMP_ORDER_NO, 70_000)
     for sid in ("volatility_breakout", "long_tail_volatility"):  # ambiguous_owner
         world.strats[sid].state.pending_buys.add("000660")
     await _run(world)

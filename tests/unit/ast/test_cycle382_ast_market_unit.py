@@ -594,7 +594,10 @@ def test_a11_breakout_filter_sits_in_vol_gate_before_latch_pop(fname):
 _GATE_SHA = {
     "_apply_budget_limit": "fe40eea083f894925c93dabf538c4fe045624b9db4c1ea5fd75ed50a16a3ac09",
     "_fallback_one_share": "6795f4bf9dffb6c44eca8bc8c6f04250e6ed3a8822c153f1927ce0ff5ea7ae29",
-    "_calc_used_funds": "16fefc6b8ddd86ef1808b0f9a6163fb9d9f702348b3fe0a3117de947fb7354ed",
+    # cycle436(2026-10-10, 사용자 승인) — `sum(pending_buy_amounts.values())` 가
+    # `self.state.total_pending_buy_amount()` 단일 진입점 호출로 바뀌었다(카드 E).
+    # 순수 교체 — 계산 결과는 그대로다.
+    "_calc_used_funds": "e56e749d32290033439a73e3c42291e392ad9c4302b4281b6f8ec427e2ca0936",
     "_apply_lot_units_cap": "993b6c0c59fdf183527fddcbb23423910f6f79527e2b1122433d2cf8b0d461a9",
     "_apply_ratio_notional_cap": "15fd15c74f8d9282751b095a89d0ded8de248e9bd5ea1dcb2c9f25fa30fa99a8",
 }

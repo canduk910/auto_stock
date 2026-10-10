@@ -301,13 +301,13 @@ async def test_execute_buy_when_market_success_then_pending_amount_registered(
     mock_insert_trade: AsyncMock,
     mock_place_order: AsyncMock,
 ):
-    """시장가 성공 — pending_buy_amounts[ticker] = current_price × quantity."""
+    """시장가 성공 — pending_buy_amounts[(ticker, order_no)] = current_price × quantity."""
     mock_place_order.return_value = _success_result("ORDER-PA-1")
 
     await engine.execute_buy("012200", 4500, strategy)
 
-    # 동기 등록: ticker → 4500 × 10 = 45000
-    assert strategy.state.pending_buy_amounts.get("012200") == 45_000
+    # 동기 등록(cycle436 카드 E — 키 = (ticker, order_no)): 4500 × 10 = 45000
+    assert strategy.state.pending_buy_amounts.get(("012200", "ORDER-PA-1")) == 45_000
 
 
 @pytest.mark.asyncio
@@ -318,7 +318,7 @@ async def test_execute_buy_when_fallback_success_then_pending_amount_uses_fallba
     mock_insert_trade: AsyncMock,
     mock_place_order: AsyncMock,
 ):
-    """지정가 폴백 성공 — pending_buy_amounts[ticker]는 폴백 가격 기준 재계산."""
+    """지정가 폴백 성공 — pending_buy_amounts[(ticker, order_no)]는 폴백 가격 기준 재계산."""
     from src.engine.util.tick_size import step_up
 
     current_price = 4500
@@ -329,8 +329,8 @@ async def test_execute_buy_when_fallback_success_then_pending_amount_uses_fallba
 
     await engine.execute_buy("012200", current_price, strategy)
 
-    # 폴백 가격 × 수량 으로 재등록
-    assert strategy.state.pending_buy_amounts.get("012200") == expected_fallback * 10
+    # 폴백 가격 × 수량 으로 재등록(cycle436 카드 E — 키 = (ticker, order_no))
+    assert strategy.state.pending_buy_amounts.get(("012200", "ORDER-PA-2")) == expected_fallback * 10
 
 
 @pytest.mark.asyncio
@@ -348,9 +348,9 @@ async def test_execute_buy_when_both_rejected_then_pending_amount_cleared(
 
     await engine.execute_buy("012200", 4500, strategy)
 
-    # pending_buys 회수 시 pending_buy_amounts 도 동시 정리
+    # pending_buys 회수 시 pending_buy_amounts 도 동시 정리(그 종목의 예약 0건)
     assert "012200" not in strategy.state.pending_buys
-    assert "012200" not in strategy.state.pending_buy_amounts
+    assert not [k for k in strategy.state.pending_buy_amounts if k[0] == "012200"]
 
 
 @pytest.mark.asyncio
@@ -368,7 +368,7 @@ async def test_execute_buy_when_insufficient_cash_then_pending_amount_cleared(
     await engine.execute_buy("012200", 4500, strategy)
 
     assert "012200" not in strategy.state.pending_buys
-    assert "012200" not in strategy.state.pending_buy_amounts
+    assert not [k for k in strategy.state.pending_buy_amounts if k[0] == "012200"]
 
 
 # ---------------------------------------------------------------------------
@@ -724,3 +724,75 @@ async def test_buy_fallback_pending_record_carries_fallback_price_symmetrically(
     assert record.trade_type == TradeType.BUY
     assert record.status == TradeStatus.PENDING
     assert record.strategy == "momentum"
+
+
+# ---------------------------------------------------------------------------
+# cycle436 카드 E + J-4 자문(domain_consult/2026-10-10_j4_exact_fill_attribution.md
+# §(c)·J4-3) — 발사 창(place_order 응답 대기) 동안 그 주문이 이미 체결통보로
+# 처리됐으면 임시 키 예약을 되살리지 않는다.
+# ---------------------------------------------------------------------------
+@pytest.mark.asyncio
+async def test_j4_3_full_fill_during_launch_window_does_not_revive_reservation(
+    engine: OrderEngine,
+    strategy: StrategyBase,
+    mock_get_buyable: AsyncMock,
+    mock_insert_trade: AsyncMock,
+    mock_place_order: AsyncMock,
+):
+    """발사 창에 전량 체결(`_completed_buy_orders`)이 먼저 끝났으면 예약을
+    되살리지 않는다 — 되살리면 포지션과 예약에 금액이 두 번 잡힌다."""
+
+    async def fake_place_order(**kwargs):
+        # `await place_order(...)` 가 돌아오기 **전** 체결통보가 이미 이 주문을
+        # 전량 체결로 끝낸 상황을 흉내낸다(발사 창 경합).
+        engine._completed_buy_orders.add("ORDER-RACE-1")
+        return _success_result("ORDER-RACE-1")
+
+    mock_place_order.side_effect = fake_place_order
+
+    await engine.execute_buy("012200", 4500, strategy)
+
+    assert not [k for k in strategy.state.pending_buy_amounts if k[0] == "012200"], (
+        "발사 창에 전량 체결된 주문의 예약이 되살아났다 — 이중 계산(J4-3)"
+    )
+
+
+@pytest.mark.asyncio
+async def test_j4_3_partial_fill_during_launch_window_reserves_only_remaining(
+    engine: OrderEngine,
+    strategy: StrategyBase,
+    mock_get_buyable: AsyncMock,
+    mock_insert_trade: AsyncMock,
+    mock_place_order: AsyncMock,
+):
+    """발사 창에 일부만 체결(`_filled_qty`)됐으면 남은 수량만 다시 예약한다."""
+
+    async def fake_place_order(**kwargs):
+        # 10주 주문 중 4주가 발사 창에서 이미 체결됐다고 흉내낸다.
+        engine._filled_qty["ORDER-RACE-2"] = 4
+        return _success_result("ORDER-RACE-2")
+
+    mock_place_order.side_effect = fake_place_order
+
+    await engine.execute_buy("012200", 4500, strategy)
+
+    remaining = strategy.state.pending_buy_amounts.get(("012200", "ORDER-RACE-2"))
+    assert remaining == 4500 * (10 - 4), (
+        f"남은 6주만 재예약돼야 한다(4500×6=27000) — 실제 {remaining}"
+    )
+
+
+@pytest.mark.asyncio
+async def test_j4_3_no_fill_during_launch_window_reserves_full_amount(
+    engine: OrderEngine,
+    strategy: StrategyBase,
+    mock_get_buyable: AsyncMock,
+    mock_insert_trade: AsyncMock,
+    mock_place_order: AsyncMock,
+):
+    """발사 창에 체결이 없었던 압도적 다수의 경우 — 원래 금액 그대로 옮긴다(현행 동일)."""
+    mock_place_order.return_value = _success_result("ORDER-RACE-3")
+
+    await engine.execute_buy("012200", 4500, strategy)
+
+    assert strategy.state.pending_buy_amounts.get(("012200", "ORDER-RACE-3")) == 4500 * 10

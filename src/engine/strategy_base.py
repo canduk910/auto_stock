@@ -129,10 +129,14 @@ class StrategyState:
     # per-ticker 매수 수량 0 cooldown — calc_buy_quantity() == 0인 종목에 대해
     # 매 틱마다 똑같은 경고가 반복되는 로그 스팸 + 무의미 호출 차단. 잔고 sync 시 해제.
     low_funds_tickers: dict[str, float] = field(default_factory=dict)  # ticker -> 만료 epoch
-    # 매수 주문중인 종목의 예정 금액 (ticker -> 가격×수량). pending_buys(set)와 동기 라이프사이클.
-    # 1주 폴백 잔여 자금 계산에 사용 — OrderEngine.execute_buy 에서 pending_buys.add 옆에 동시 등록,
-    # pending_buys.discard 옆에 동시 정리. 시장가/지정가 폴백 양쪽 모두 동일 규약.
-    pending_buy_amounts: dict[str, int] = field(default_factory=dict)
+    # 매수 주문중인 예정 금액 — 키 = `(ticker, order_no)`(cycle436 카드 E, 2026-10-10
+    # 사용자 승인) — 같은 종목에 주문이 둘이면 둘 다 독립적으로 남는다(피라미딩
+    # 착수 선결). `pending_buys`(set, 종목 멤버십)와는 별개로 호출부가 직접
+    # 관리한다. 넣기·빼기·비우기·합계는 `reserve_buy`/`release_buy`/
+    # `clear_buy_reservations`/`total_pending_buy_amount` 를 거쳐서만 한다 —
+    # 이 dict 를 StrategyState 밖에서 직접 읽거나 쓰지 않는다(AST 가드 =
+    # `tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py`).
+    pending_buy_amounts: "dict[tuple[str, str], int]" = field(default_factory=dict)
     # 일일 매매 퍼널 — 신호→주문→체결 단계별 카운터. _reset_daily_state에서 0 초기화.
     signal_count_today: int = 0
     order_attempt_today: int = 0
@@ -183,8 +187,52 @@ class StrategyState:
         self.low_funds_tickers[ticker] = until_ts
 
     def clear_low_funds(self) -> None:
-        """모든 ticker의 low-funds cooldown 해제 (잔고 sync 직후 호출)."""
+        """모든 ticker의 low-funds cooldown 해제 (잔고 sync 시 호출)."""
         self.low_funds_tickers.clear()
+
+    # ------------------------------------------------------------------
+    # pending_buy_amounts 넣기·빼기 단일 진입점 (cycle436 카드 E)
+    #
+    # `pending_buy_amounts` 는 이 네 메서드를 거쳐서만 읽고 쓴다(AST 가드 =
+    # `tests/unit/ast/test_cycle436_ast_pending_buy_reservation.py`). 키 =
+    # `(ticker, order_no)` — 커밋 ② 부터. `pending_buys`(종목 멤버십, set)는
+    # 호출부가 그대로 직접 관리한다 — 이 메서드들은 `pending_buy_amounts` 만
+    # 책임진다(기존 AST 가드들이 `execute_buy` 의 `pending_buys.add`/`.discard`
+    # 를 literal 로 찾으므로 그 모양을 바꾸지 않는다).
+    # ------------------------------------------------------------------
+    def reserve_buy(self, ticker: str, order_no: str, amount: int) -> None:
+        """매수 접수(또는 접수 전 임시 등록) 시 예정 금액을 `(ticker, order_no)`
+        키로 적는다. 같은 종목에 주문이 둘이면 둘 다 독립적으로 남는다.
+
+        `order_no` 를 아직 모르는 자리(접수 응답 전)는 호출부가 만든 임시
+        키(예: `uuid.uuid4().hex`)를 넘긴다 — `place_order` 응답 뒤 실제
+        order_no 로 다시 `reserve_buy` 를 부르기 전에 먼저 `release_buy` 로
+        임시 키를 지운다(`order_engine._rekey_buy_reservation_after_send`).
+        """
+        self.pending_buy_amounts[(ticker, order_no)] = amount
+
+    def release_buy(self, ticker: str, order_no: "str | None" = None) -> "int | None":
+        """예정 금액을 해제한다. 반환 = 해제된 금액(없으면 `None`).
+
+        `order_no` 지정 시 그 주문 하나만(같은 종목의 다른 주문 예약은 그대로
+        남는다 — 피라미딩 선결). `order_no=None` 이면 그 종목의 예약 전체를
+        지운다(정산·종목 차단 해제 등 — 지금은 실제로 쓰는 자리가 없고,
+        필요해지면 쓸 수 있게 남겨 둔다).
+        """
+        if order_no is None:
+            keys = [k for k in self.pending_buy_amounts if k[0] == ticker]
+            if not keys:
+                return None
+            return sum(self.pending_buy_amounts.pop(k) for k in keys)
+        return self.pending_buy_amounts.pop((ticker, order_no), None)
+
+    def clear_buy_reservations(self) -> None:
+        """정산(`_reset_daily_state`) 등 전체 비우기."""
+        self.pending_buy_amounts.clear()
+
+    def total_pending_buy_amount(self) -> int:
+        """전략 잔여 자금 계산용 합계(`_calc_used_funds` 가 쓴다)."""
+        return sum(self.pending_buy_amounts.values())
 
 
 @dataclass(frozen=True)
@@ -619,7 +667,7 @@ class StrategyBase(ABC):
         held = sum(
             pos.buy_price * pos.quantity for pos in self.state.positions.values()
         )
-        pending = sum(self.state.pending_buy_amounts.values())
+        pending = self.state.total_pending_buy_amount()
         return held + pending
 
     def _fallback_one_share(self, current_price: int) -> int:

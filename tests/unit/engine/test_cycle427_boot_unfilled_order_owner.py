@@ -125,7 +125,8 @@ async def test_order_resolved_by_trade_history_order_no_match():
     kojiro = registry.get("kojiro")
     momentum = registry.get("momentum")
     assert "666666" in kojiro.state.pending_buys
-    assert kojiro.state.pending_buy_amounts["666666"] == 10_000
+    # cycle436 카드 E — 키 = (ticker, order_no), 부팅 복구는 order_no 를 안다.
+    assert kojiro.state.pending_buy_amounts[("666666", "ORDER2")] == 10_000
     assert "666666" not in momentum.state.pending_buys
     assert scheduler.order_engine._order_strategy["ORDER2"] == "kojiro"
     assert scheduler.order_engine._order_qty["ORDER2"] == 5
