@@ -364,18 +364,25 @@ def _odno_key(s) -> str:
 
 
 SELL_ORDERS_QUERY_TIMEOUT = 2.0
-_DAILY_ORDERS_PAGE_REAL = 100
-_DAILY_ORDERS_PAGE_VTS = 15
 
 # cycle429 D1 안A (사용자 승인 2026-10-10) — 수량 부족(APBK1234·APBK0400 실보유 0)이
 # 설명 안 됨으로 그날 같은 종목에서 이 횟수째 등록되면 CRITICAL 로 올린다.
 SELL_INSUFFICIENT_CRITICAL_THRESHOLD = 3
 
 
-def _sell_fills_by_order(rows, ticker: str, page_size: int) -> "dict[str, int] | None":
-    """TTTC0081R `output1` → {정규화 주문번호: 그 종목 매도 누적 체결}. 못 믿으면 None."""
+def _sell_fills_by_order(rows, ticker: str) -> "dict[str, int] | None":
+    """TTTC0081R `output1` → {정규화 주문번호: 그 종목 매도 누적 체결}. 못 믿으면 None.
+
+    cycle432 — `get_daily_orders` 가 cycle430 부터 연속조회로 전 쪽을 이어 붙여
+    쪽수 상한이 사라졌다. 「len(rows) >= 쪽 크기 → 못 믿음」(`page_full`) 판정은
+    그 전제(단일 쪽만 읽는다)로 쓰여 있던 거짓 양성이라 제거한다(한 종목 주문이
+    실전 100건·모의 15건 이상이어도 지금은 실제로 잘리지 않았다). 연속조회가
+    진행하지 않아 멈추면 `get_daily_orders` 가 `DailyOrdersPaginationStuckError`
+    를 올리고, 그 예외는 호출자(`_sell_orders_snapshot`)의 `except Exception` 이
+    `reason="error"` 로 받는다 — 이 함수는 그 경로에 닿지 않는다.
+    """
     try:
-        if not isinstance(rows, list) or len(rows) >= page_size:
+        if not isinstance(rows, list):
             return None
         out: dict[str, int] = {}
         for row in rows:
@@ -463,10 +470,16 @@ SELL_RETRY_DELAY = 1.0   # 재시도 간격(초)
 BUYABLE_CACHE_TTL = 60.0  # get_buyable 캐시 유효시간(초)
 BUY_BLOCK_DURATION = 900.0  # 잔고 부족 락 기본 지속(초) — 다음 잔고 sync(15분)와 정합
 LOW_FUNDS_COOLDOWN = 900.0  # per-ticker 매수 수량 0 cooldown — 잔고 sync(15분)와 동일 주기
-# cycle428(F-422-1) — 매도 결과 모름(UNKNOWN) 확인 조회 지연(초). 값은
-# `selling_reconcile.SELLING_RECONCILE_MIN_AGE_S`(15분 재대조 min_age)와 같다
-# (KIS 주문내역 반영 지연을 막는 그 기준을 그대로 쓴다) — import 로 묶지 않고
-# 값만 맞춘다(scheduler 소유 상수를 order_engine 이 참조하면 역방향 import).
+# cycle428(F-422-1) — 매도 결과 모름(UNKNOWN) 확인 조회 지연(초). cycle432 부터
+# leaf `selling_reconcile.SELLING_RECONCILE_MIN_AGE_S`(180.0) 가 정본이고 이
+# 값은 그 값과 **같다**(KIS 주문내역 반영 지연을 막는 15분 재대조 min_age
+# 기준을 180초 단일 종목 확인에도 그대로 쓴다). import 로 객체를 묶지는
+# 않는다 — order_engine.py 의 모듈 최상단 `src.*` import 증가분은 정확히
+# `src.engine.llm_buy_gate` 1건이어야 한다는 구조 가드가 여럿이라
+# (`test_cycle276_ast_order_hook.py::test_c4_2_order_engine_src_imports_delta_is_one`
+# 외 cycle286·287·291 사본) 새 top-level import 를 더하면 전부 붉어진다.
+# `scheduler.py` 의 같은 이름 상수도 이번 사이클 승인 범위 밖이라 별도
+# 리터럴이다 — 세 곳 모두 180 이면 값이 맞다(`src/engine/CLAUDE.md` 참조).
 SELL_UNKNOWN_RECONCILE_DELAY_S = 180.0
 
 
@@ -3609,7 +3622,14 @@ class OrderEngine:
             )
 
     async def _sell_orders_snapshot(self, ticker: str) -> "tuple[dict | None, str, frozenset]":
-        """부록 R2-8 — TTTC0081R 1건. 유일한 await = wait_for. 예외를 밖으로 내지 않는다."""
+        """부록 R2-8 — TTTC0081R 1건. 유일한 await = wait_for. 예외를 밖으로 내지 않는다.
+
+        cycle432 — `page_full` 판정 제거(사용자 승인 2026-10-10). `get_daily_orders`
+        는 cycle430 부터 연속조회라 쪽수 상한이 없다 — 한 종목 주문이 몇 건이든
+        그대로 믿는다. 연속조회가 진행하지 않으면 `get_daily_orders` 자신이
+        `DailyOrdersPaginationStuckError` 를 올리고 아래 `except Exception` 이
+        `reason="error"` 로 받는다(부분 목록을 돌려주지 않는다).
+        """
         try:
             from src.api.balance import get_daily_orders
             rows = await asyncio.wait_for(
@@ -3620,11 +3640,7 @@ class OrderEngine:
             return None, "timeout", frozenset()
         except Exception:
             return None, "error", frozenset()
-        from src.config import settings
-        page = _DAILY_ORDERS_PAGE_REAL if settings.is_production else _DAILY_ORDERS_PAGE_VTS
-        if isinstance(rows, list) and len(rows) >= page:
-            return None, "page_full", frozenset()
-        fills = _sell_fills_by_order(rows, ticker, page)
+        fills = _sell_fills_by_order(rows, ticker)
         if fills is None:
             return None, "bad_row", frozenset()
         return fills, "ok", _sell_orders_placed_before(rows, ticker, self._sell_ledger_since)

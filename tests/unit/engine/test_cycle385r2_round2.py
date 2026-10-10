@@ -299,10 +299,10 @@ async def test_tq3_order_query_failure_freezes_instead_of_firing(monkeypatch, ca
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("reason", ["timeout", "bad_row", "page_full"])
+@pytest.mark.parametrize("reason", ["timeout", "bad_row"])
 async def test_tq3b_untrusted_order_query_freezes_with_reason(monkeypatch, caplog, drain, reason):
-    """🔴 TQ3b — 조회 지연(상수 0.01초 · 가짜 조회 0.5초) / 불량 행 / 1쪽 가득(모의 15행 이상)
-    → 발사 `[10]` · `orders=<이유>`."""
+    """🔴 TQ3b (cycle432 — `page_full` 사례 제거, timeout·bad_row 만 남는다) — 조회
+    지연(상수 0.01초 · 가짜 조회 0.5초) / 불량 행 → 발사 `[10]` · `orders=<이유>`."""
     import src.engine.order_engine as _oe
 
     caplog.set_level(logging.DEBUG, logger=_OE_LOGGER)
@@ -312,10 +312,8 @@ async def test_tq3b_untrusted_order_query_freezes_with_reason(monkeypatch, caplo
     if reason == "timeout":
         monkeypatch.setattr(_oe, "SELL_ORDERS_QUERY_TIMEOUT", 0.01, raising=False)
         _install_acct(monkeypatch, acct, orders="slow")
-    elif reason == "bad_row":
-        _install_acct(monkeypatch, acct, rows_extra=[_row("MTS-C", "")])
     else:
-        _install_acct(monkeypatch, acct, rows_extra=[_row(f"Z{i}", 0) for i in range(16)])
+        _install_acct(monkeypatch, acct, rows_extra=[_row("MTS-C", "")])
 
     await env.engine.execute_sell(TICKER, Signal.STOP_LOSS, "kojiro")
 
@@ -527,41 +525,43 @@ def test_tq8b_query_timeout_constant_is_two_seconds():
 
 
 # ════════════════════════════════════════════════════════════════════════════
-# TQ9 · TQ10 — H7: 쪽 크기는 환경별(실전 100 · 모의 15)
+# TQ9 · TQ10 — cycle432 가 H7(쪽 크기 환경 분기 · `page_full`) 을 제거했다.
+# 과거 기대(`page_full`)는 지금 거짓 양성이므로 새 기대로 뒤집는다(사용자 승인
+# 2026-10-10 「100건 꽉 참 판정은 연속처리 넣었으니 제거하자」).
 # ════════════════════════════════════════════════════════════════════════════
-@pytest.mark.parametrize(
-    "kis_env, n, expect_none",
-    [("vts", 15, True), ("vts", 14, False), ("real", 15, False), ("real", 100, True)],
-)
-def test_tq9_parser_page_size_is_environment_specific(kis_env, n, expect_none):
-    """🔴 TQ9 — `_sell_fills_by_order(rows, ticker, page_size)` 는 `len(rows) >= page_size` 면 None.
-    쪽 크기 상수는 실전 100 · 모의 15(정본 `docs/kis/domestic-stock-order.md` 1회 조회 건수)."""
-    from src.engine.order_engine import (
-        _DAILY_ORDERS_PAGE_REAL,
-        _DAILY_ORDERS_PAGE_VTS,
-        _sell_fills_by_order,
-    )
+@pytest.mark.parametrize("n", [14, 15, 16, 100, 150])
+def test_tq9_parser_no_longer_rejects_by_row_count(n):
+    """🔴 TQ9(뒤집음) — `_sell_fills_by_order(rows, ticker)` 는 행 수와 무관하게(모양이
+    전부 정상이면) `None` 을 돌려주지 않는다 — 쪽 크기 상수·판정이 사라졌다."""
+    from src.engine.order_engine import _sell_fills_by_order
 
-    assert (_DAILY_ORDERS_PAGE_REAL, _DAILY_ORDERS_PAGE_VTS) == (100, 15)
-    page = _DAILY_ORDERS_PAGE_REAL if kis_env == "real" else _DAILY_ORDERS_PAGE_VTS
     rows = [_row(f"X{i}", 0) for i in range(n)]
-    got = _sell_fills_by_order(rows, TICKER, page)
-    assert (got is None) == expect_none, f"{kis_env} {n}행 → {got!r}"
+    got = _sell_fills_by_order(rows, TICKER)
+    assert got is not None and len(got) == n, f"{n}행 → {got!r}"
 
 
-def test_tq9b_parser_page_size_has_no_default():
-    """🔴 TQ9b — `page_size` 는 기본값 없는 세 번째 인자(기본값을 두면 그 기본값이 곧 이 결함)."""
+def test_tq9b_parser_has_two_params_no_default():
+    """🔴 TQ9b(뒤집음) — `page_size` 세 번째 인자가 없다. `(rows, ticker)` 둘 다 기본값 없음."""
     from src.engine.order_engine import _sell_fills_by_order
 
     params = list(inspect.signature(_sell_fills_by_order).parameters.values())
-    assert [p.name for p in params] == ["rows", "ticker", "page_size"], params
-    assert params[2].default is inspect.Parameter.empty, "page_size 에 기본값이 있다"
+    assert [p.name for p in params] == ["rows", "ticker"], params
+    assert all(p.default is inspect.Parameter.empty for p in params), params
+
+
+def test_page_size_constants_are_gone():
+    """🔴 cycle432 — `_DAILY_ORDERS_PAGE_REAL`/`_DAILY_ORDERS_PAGE_VTS` 상수가 없다."""
+    import src.engine.order_engine as _oe
+
+    assert not hasattr(_oe, "_DAILY_ORDERS_PAGE_REAL")
+    assert not hasattr(_oe, "_DAILY_ORDERS_PAGE_VTS")
 
 
 @pytest.mark.asyncio
-async def test_tq10_vts_full_page_falls_back_to_ticker_credit(monkeypatch, caplog, drain):
-    """🔴 TQ10 — 모의(쪽 15) · 다른 주문 15행 · 추적 10 · 계좌 7 → `reason=page_full` · 종목 크레딧 3.
-    쪽 크기를 100 으로 고정하면 잘린 목록을 믿고 주문별 크레딧(0)으로 간다."""
+async def test_tq10_vts_full_page_no_longer_distrusted(monkeypatch, caplog, drain):
+    """🔴 TQ10(뒤집음) — 모의 환경에서 15행(옛 쪽 크기와 같은 건수)이 와도 더는
+    `page_full` 로 불신하지 않는다 — `_sell_orders_snapshot` 이 `ok` 를 돌려줘
+    정상 재대조(「orders」 경로)로 간다. 추적 10 · 계좌 7 → 7 로 보정."""
     caplog.set_level(logging.DEBUG, logger=_OE_LOGGER)
     env = _env(monkeypatch, drain, {"kojiro": 10})
     acct = _Acct(7)
@@ -569,9 +569,15 @@ async def test_tq10_vts_full_page_falls_back_to_ticker_credit(monkeypatch, caplo
 
     await env.engine.execute_sell(TICKER, Signal.STOP_LOSS, "kojiro")
 
-    lines = _warn_lines(caplog, "[sell_qty_reconcile_orders_unavailable]")
-    assert len(lines) == 1 and "reason=page_full" in lines[0], lines
-    assert env.engine._sell_blind_credit.get(TICKER) == 3
+    assert not _warn_lines(caplog, "[sell_qty_reconcile_orders_unavailable]"), (
+        "cycle432 뒤에는 15행도 `ok` 라 이 마커가 나오면 안 된다"
+    )
+    reconciled = _warn_lines(caplog, "[sell_qty_reconciled]")
+    assert len(reconciled) == 1 and "credit_src=orders" in reconciled[0], reconciled
+    assert "page_full" not in "".join(r.getMessage() for r in caplog.records)
+    assert env.engine._sell_blind_credit.get(TICKER) is None, (
+        "ok 경로는 종목 크레딧(_sell_blind_credit) 을 쓰지 않는다"
+    )
 
 
 # ════════════════════════════════════════════════════════════════════════════

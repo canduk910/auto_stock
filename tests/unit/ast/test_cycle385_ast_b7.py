@@ -1192,11 +1192,12 @@ def test_ar2_5_f3_and_reconcile_share_one_query_then_recheck_then_eff(oe):
         )
 
 
-def test_ar2_6_order_snapshot_is_bounded_scoped_and_page_aware(oe):
-    """🔴 AR2-6 (H6 · H7 · XT-K) — `_sell_orders_snapshot`(async): 유일한 await = `asyncio.wait_for(…,
-    timeout=SELL_ORDERS_QUERY_TIMEOUT)` · 그 안 `get_daily_orders` 인자 = 정확히 `exchange="ALL"`·
-    `pdno=ticker` · `settings.is_production` 을 읽는다. `_sell_fills_by_order` 서명
-    `(rows, ticker, page_size)` 기본값 없음 · 모듈에 `>= 100` 리터럴 0 · 모듈 상수 2.0/100/15."""
+def test_ar2_6_order_snapshot_is_bounded_scoped_and_page_unaware(oe):
+    """🔴 AR2-6 (H6 · XT-K · cycle432 로 H7「쪽 크기 환경 분기」 제거) —
+    `_sell_orders_snapshot`(async): 유일한 await = `asyncio.wait_for(…,
+    timeout=SELL_ORDERS_QUERY_TIMEOUT)` · 그 안 `get_daily_orders` 인자 =
+    정확히 `exchange="ALL"`·`pdno=ticker`. `_sell_fills_by_order` 서명
+    `(rows, ticker)` 기본값 없음 · 모듈에 쪽 크기 상수·`page_full` 리터럴 0."""
     src, tree = oe
     fn = _func(tree, "_sell_orders_snapshot")
     assert isinstance(fn, ast.AsyncFunctionDef), "`_sell_orders_snapshot` 는 async def"
@@ -1214,31 +1215,31 @@ def test_ar2_6_order_snapshot_is_bounded_scoped_and_page_aware(oe):
     assert kw == {"exchange": "'ALL'", "pdno": "ticker"}, (
         f"주문 조회 인자 {kw} — 정확히 `exchange=\"ALL\", pdno=ticker`(KRX 만 보면 NXT/SOR 체결을 놓친다)"
     )
-    assert any(
+    assert not any(
         isinstance(n, ast.Attribute) and n.attr == "is_production"
         and isinstance(n.value, ast.Name) and n.value.id == "settings"
         for n in ast.walk(fn)
-    ), "쪽 크기를 환경(`settings.is_production`)으로 고르지 않는다"
+    ), "cycle432 이후 `_sell_orders_snapshot` 가 쪽 크기를 환경으로 고르면 안 된다(page_full 제거)"
 
     parser = _func(tree, "_sell_fills_by_order")
     a = parser.args
-    assert [x.arg for x in a.args] == ["rows", "ticker", "page_size"] and not a.defaults \
+    assert [x.arg for x in a.args] == ["rows", "ticker"] and not a.defaults \
         and not a.kwonlyargs, (
-            f"`_sell_fills_by_order` 서명 {[x.arg for x in a.args]} · 기본값 {len(a.defaults)}"
+            f"`_sell_fills_by_order` 서명 {[x.arg for x in a.args]} · 기본값 {len(a.defaults)} "
+            "(cycle432 — page_size 인자 제거)"
         )
-    lit100 = [
-        n.lineno for n in ast.walk(tree)
-        if isinstance(n, ast.Compare) and any(isinstance(o, ast.GtE) for o in n.ops)
-        and any(isinstance(c, ast.Constant) and c.value == 100 for c in n.comparators)
-    ]
-    assert not lit100, f"`>= 100` 쪽 가득 리터럴이 남았다: L{lit100}"
     consts = {
         t.id: n.value.value for n in tree.body if isinstance(n, ast.Assign)
         for t in n.targets if isinstance(t, ast.Name) and isinstance(n.value, ast.Constant)
     }
     assert consts.get("SELL_ORDERS_QUERY_TIMEOUT") == 2.0
-    assert consts.get("_DAILY_ORDERS_PAGE_REAL") == 100
-    assert consts.get("_DAILY_ORDERS_PAGE_VTS") == 15
+    assert "_DAILY_ORDERS_PAGE_REAL" not in consts, "cycle432 — 쪽 크기 상수가 남아 있다"
+    assert "_DAILY_ORDERS_PAGE_VTS" not in consts, "cycle432 — 쪽 크기 상수가 남아 있다"
+    # 설명 주석(docstring)의 어휘는 제외하고, 코드가 쓰는 문자열 리터럴에서만 확인한다.
+    str_consts = {
+        n.value for n in ast.walk(tree) if isinstance(n, ast.Constant) and isinstance(n.value, str)
+    }
+    assert "page_full" not in str_consts, "cycle432 — `page_full` 문자열 리터럴이 코드에 남아 있다"
 
 
 def test_ar2_7_freeze_released_when_guarded_holding_closes(oe):
@@ -1328,8 +1329,9 @@ def _return_tuples(v: ast.AST) -> list[ast.AST]:
 
 
 def test_ar3_2_order_snapshot_returns_the_pre_ledger_set(oe):
-    """🔴 AR3-2 (R3-1-4) — `_sell_orders_snapshot` 의 모든 `Return` 값이 3-튜플.
-    실패 넷(`timeout`·`error`·`page_full`·`bad_row` — 첫째 `None`)의 셋째 = `frozenset()` ·
+    """🔴 AR3-2 (R3-1-4, cycle432 로 실패 셋으로 축소 — `page_full` 제거) —
+    `_sell_orders_snapshot` 의 모든 `Return` 값이 3-튜플.
+    실패 셋(`timeout`·`error`·`bad_row` — 첫째 `None`)의 셋째 = `frozenset()` ·
     정상(둘째 `"ok"`) 1개의 셋째 = `_sell_orders_placed_before(rows, ticker, self._sell_ledger_since)`.
     분류 기준을 벽시계(`datetime.now(...)`)로 바꾸면(MK17) 재시작 전 주문이 전부 「뒤」가 된다."""
     _, tree = oe
@@ -1350,7 +1352,7 @@ def test_ar3_2_order_snapshot_returns_the_pre_ledger_set(oe):
             )
         else:
             ok.append(v)
-    assert reasons == {"timeout", "error", "page_full", "bad_row"}, reasons
+    assert reasons == {"timeout", "error", "bad_row"}, reasons
     assert len(ok) == 1, f"정상 반환 {len(ok)}개 (기대 1): {[ast.unparse(v) for v in ok]}"
     _, second, third = ok[0].elts
     assert isinstance(second, ast.Constant) and second.value == "ok"
