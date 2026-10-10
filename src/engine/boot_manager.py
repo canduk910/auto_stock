@@ -259,6 +259,83 @@ async def _resolve_unfilled_buy_owner(ticker: str, order_no: str) -> str | None:
     return None
 
 
+async def _seed_partial_fill_recovery(
+    scheduler: "TradingScheduler",
+    *,
+    order: dict,
+    ticker: str,
+    order_no: str,
+    rmn_qty: int,
+    order_unpr: int,
+) -> bool:
+    """장중 재시작 뒤 일부 체결된 매수 주문의 잔량을 복구한다 (cycle441, B-ii).
+
+    자문 = `_workspace/domain_consult/2026-10-10_j4_exact_fill_attribution.md`
+    §4(b) 표 C3·C4. 보유 중인 종목의 미체결 주문은(위 ⑦-F2 분기와 달리) **그
+    주문의 주인이 그 종목의 현재 보유 전략과 같을 때만** 다룬다 — 그 밖(주인
+    미상·주인 ≠ 보유자)은 호출부가 조용히 건너뛴다(이번 범위는 「주인 확인 =
+    보유자」 하나뿐이다).
+
+    세팅 — ① 기존 미체결 복구와 같은 매핑 등록(`_pending_buy_orders`·
+    `_order_qty`·`_order_strategy`·`_order_ticker`) ② `_filled_qty[order_no]
+    = tot_ccld_qty`(KIS 주문내역의 이미 체결된 수량 시드 — 그래야 잔량 통보가
+    `src=map` 으로 오고, J-4(cycle438) 의 `prev_total>0`(E3) 조건이 재시작
+    뒤에도 성립한다) ③ 예약은 **잔량분만** `(ticker, order_no)` 로(카드 E,
+    cycle436) — 이미 체결된 분은 포지션에 이미 있어 예약 대상이 아니다.
+
+    `pos.quantity != tot_ccld_qty` 면 시드하지 않는다 — 사람이 그 사이 일부를
+    팔았거나 다른 경로로 수량이 바뀐 경우, 「덮어쓰기로 판 수량이 되살아나면
+    안 된다」(루트 CLAUDE.md) 원칙을 따른다.
+    """
+    strategy_id = await _resolve_unfilled_buy_owner(ticker, order_no)
+    if strategy_id is None:
+        return False
+
+    holder = None
+    for s in scheduler.registry.all():
+        if ticker in s.state.positions:
+            holder = s
+            break
+    if holder is None or holder.strategy_id != strategy_id:
+        return False
+
+    pos = holder.state.positions[ticker]
+    try:
+        tot_ccld_qty = int(order.get("tot_ccld_qty", "0") or "0")
+    except (TypeError, ValueError):
+        tot_ccld_qty = 0
+
+    if tot_ccld_qty <= 0 or pos.quantity != tot_ccld_qty:
+        logger.warning(
+            "[boot_partial_fill_seed_skipped] reason=qty_mismatch ticker=%s order_no=%s "
+            "pos_qty=%d tot_ccld_qty=%d",
+            ticker, order_no, pos.quantity, tot_ccld_qty,
+        )
+        return False
+
+    target_strategy = _resolve_fallback_owner(scheduler, strategy_id)
+    if target_strategy:
+        target_strategy.state.pending_buys.add(ticker)
+        # 카드 E(cycle436) — 잔량분만 예약한다. 이미 체결된 분은 포지션에
+        # 이미 있다.
+        target_strategy.state.reserve_buy(ticker, order_no, order_unpr * rmn_qty)
+    scheduler.order_engine._pending_buy_orders[order_no] = {
+        "ticker": ticker,
+        "price": order_unpr,
+        "quantity": rmn_qty,
+        "strategy_id": strategy_id,
+    }
+    scheduler.order_engine._order_qty[order_no] = int(order.get("ord_qty", "0"))
+    scheduler.order_engine._order_strategy[order_no] = strategy_id
+    scheduler.order_engine._order_ticker[order_no] = ticker
+    scheduler.order_engine._filled_qty[order_no] = tot_ccld_qty
+    logger.info(
+        "장중 재시작 잔량 복구: %s %d주 (주문번호: %s, 전략: %s, 기체결: %d주)",
+        ticker, rmn_qty, order_no, strategy_id, tot_ccld_qty,
+    )
+    return True
+
+
 async def _previous_trading_day(today):
     """`today` 직전 **영업일**을 돌려준다 (주말 + KIS 휴장일 역산).
 
@@ -709,6 +786,7 @@ async def boot(scheduler: "TradingScheduler") -> None:
     # _order_strategy/pending_buy_amounts 어디에도 올리지 않는다(체결되면
     # `order_engine` 의 고아 귀속 가드 + CRITICAL 이 처리한다, 타이머 없음).
     unfilled_count = 0
+    partial_fill_seeded_count = 0
     for order in all_orders:
         if order.get("sll_buy_dvsn_cd") != "02":  # 매수만
             continue
@@ -718,11 +796,19 @@ async def boot(scheduler: "TradingScheduler") -> None:
         ticker = order.get("pdno", "")
         if not ticker:
             continue
-        # 이미 어떤 전략에 포지션이 있으면 건너뜀
-        if scheduler.registry.is_ticker_held_by_any(ticker):
-            continue
         order_no = order.get("odno", "")
         order_unpr = int(order.get("ord_unpr", "0"))
+
+        # 이미 어떤 전략에 포지션이 있으면 — cycle441(B-ii) 부팅 전 일부 체결된
+        # 주문의 잔량일 수 있다. 주인이 그 보유자와 같을 때만 시드하고, 그 밖은
+        # 지금처럼 건너뛴다(주인 미상·주인 ≠ 보유자·수량 불일치).
+        if scheduler.registry.is_ticker_held_by_any(ticker):
+            if await _seed_partial_fill_recovery(
+                scheduler, order=order, ticker=ticker, order_no=order_no,
+                rmn_qty=rmn_qty, order_unpr=order_unpr,
+            ):
+                partial_fill_seeded_count += 1
+            continue
 
         strategy_id = await _resolve_unfilled_buy_owner(ticker, order_no)
         if strategy_id is None:
@@ -756,11 +842,13 @@ async def boot(scheduler: "TradingScheduler") -> None:
     await write_log(
         "INFO",
         f"기동 완료: 순자산 {summary.net_asset:,}원, "
-        f"보유 {total_pos}종목 (DB복구: {db_restored}, KIS복원: {kis_only}, 미체결: {unfilled_count})",
+        f"보유 {total_pos}종목 (DB복구: {db_restored}, KIS복원: {kis_only}, "
+        f"미체결: {unfilled_count}, 잔량시드: {partial_fill_seeded_count})",
     )
     logger.info(
-        "기동 완료: 순자산 %s, 보유 %d종목 (DB복구: %d, KIS복원: %d, 미체결: %d)",
+        "기동 완료: 순자산 %s, 보유 %d종목 (DB복구: %d, KIS복원: %d, 미체결: %d, 잔량시드: %d)",
         summary.net_asset, total_pos, db_restored, kis_only, unfilled_count,
+        partial_fill_seeded_count,
     )
 
     # I3 (2026-05-12): 보유 + 익일청산 후보 ticker 의 stock_master 캐시 eager 갱신.
