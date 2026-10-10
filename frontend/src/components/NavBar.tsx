@@ -7,6 +7,7 @@ import {
 } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { CONTENT_WIDTH_DEFAULT_LEVEL, contentMaxWidth } from '../utils/contentWidth'
+import AlertLight from './AlertLight'
 
 // cycle288 — 메뉴바 2단 카테고리화. 사용자 지정 묶음(원문) =
 // "대시보드 // 거래내역 // 로그 // 조건검색 추적, 종목마스터 // 전략현황, 전략수정 AI자문 //
@@ -304,6 +305,8 @@ export default function NavBar({ contentWidthLevel, onContentWidthChange }: NavB
 
           {/* 화면 폭 조정 슬라이더 — <main> max-width 사용자 조정, PC 전용(모바일은 소화면이라 조정 불요) */}
           <div className="ml-auto flex items-center gap-2 shrink-0">
+            {/* cycle434 — 대시보드 경고등. 어느 화면에서든 보이게 나브 우측에 둔다. */}
+            <AlertLight />
             <span className="text-xs text-gray-400 select-none" aria-hidden="true">
               폭
             </span>
@@ -326,6 +329,8 @@ export default function NavBar({ contentWidthLevel, onContentWidthChange }: NavB
         <div className="flex sm:hidden items-center justify-between h-14">
           <span className="font-brand font-bold tracking-tight text-gray-900">DK Stock</span>
           <span className="text-sm font-medium text-gray-700">{currentLeaf?.label ?? '메뉴'}</span>
+          {/* cycle434 — 대시보드 경고등(모바일). */}
+          <AlertLight />
           <button
             data-testid="mobile-menu-button"
             aria-label={mobileOpen ? '메뉴 닫기' : '메뉴 열기'}
