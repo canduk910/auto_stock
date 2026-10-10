@@ -22,7 +22,7 @@ from __future__ import annotations
 import logging
 import math
 from dataclasses import dataclass
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from typing import Literal
 
 # ---------------------------------------------------------------------------
@@ -320,11 +320,171 @@ def is_buy_blocked_today(ticker: str, *, today: date | None = None) -> bool:
     return ticker in _BUY_BLOCKED_TODAY.get(_today_key(today), ())
 
 
+#: KST 날짜(ISO) → {ticker: 최초 관측 시각(KST aware)} — "통보 대기" 로 분류된
+#: 종목의 최초 관측 시각(cycle433, 자문 Q4). 15분 동기화가 반복될 때 경과 시간을
+#: 재서 `PENDING_NOTICE_ESCALATE_AFTER` 를 넘기면 통보 유실 확정(`[fill_notice_missing]`
+#: ERROR)으로 올린다. 날짜 키 자기 리셋 — 메모리뿐이라 재시작하면 빈다(안전 —
+#: 다음 15분 사이클이 다시 처음부터 잰다).
+_PENDING_NOTICE_FIRST_SEEN: dict[str, dict[str, datetime]] = {}
+
+#: "통보 대기" → "통보 유실 확정" 까지의 경과 시간. 자문 Q4 「2회차(30분) 넘게
+#: 남으면」 — 15분 동기화 주기 기준 최초 관측 + 2회(=30분) 지속.
+PENDING_NOTICE_ESCALATE_AFTER = timedelta(minutes=30)
+
+
 def reset_state_for_test() -> None:
     """테스트 전용 — 날짜 키 레지스트리를 비운다."""
     _RESCALED_TODAY.clear()
     _BUY_BLOCKED_TODAY.clear()
     _CTRGA_EMITTED_TODAY.clear()
+    _PENDING_NOTICE_FIRST_SEEN.clear()
+
+
+# ---------------------------------------------------------------------------
+# 통보 대기 타이머 — "통보 대기" 로 분류된 종목의 최초 관측 시각 (cycle433)
+# ---------------------------------------------------------------------------
+
+
+def _kst_now() -> datetime:
+    from src.db._kst import KST as _KST
+
+    return datetime.now(_KST)
+
+
+def _pending_notice_elapsed(ticker: str, *, now: datetime | None = None) -> timedelta:
+    """`ticker` 가 "통보 대기" 로 분류된 이후 경과 시간.
+
+    처음 보는 종목은 이 호출에서 최초 관측 시각을 기록하고 `timedelta(0)` 을
+    돌려준다(이번 회차가 1회차).
+    """
+    now = now or _kst_now()
+    key = _today_key(now.date())
+    day_map = _PENDING_NOTICE_FIRST_SEEN.setdefault(key, {})
+    first = day_map.get(ticker)
+    if first is None:
+        day_map[ticker] = now
+        return timedelta(0)
+    return now - first
+
+
+def _pending_notice_clear(ticker: str, *, now: datetime | None = None) -> None:
+    """`ticker` 의 "통보 대기" 최초 관측 시각을 지운다(일치로 돌아왔거나 다른
+    분류로 바뀌었을 때 — 다음 통보 대기 사건이 경과 시간을 이어받지 않게).
+    """
+    now = now or _kst_now()
+    key = _today_key(now.date())
+    _PENDING_NOTICE_FIRST_SEEN.get(key, {}).pop(ticker, None)
+
+
+# ---------------------------------------------------------------------------
+# "우리 주문" 판정 — trade_history 대조 (cycle433, 자문 Q4)
+# ---------------------------------------------------------------------------
+
+
+def _normalize_order_no(value) -> str:
+    """주문번호 선행 0 제거 — REST·체결통보 패딩 흡수(`order_engine._odno_key` 와 같은 규칙).
+
+    빈 값은 `""`(매칭 대상 아님), `"0"`·`"000"` 류는 `"0"` 하나로 접힌다.
+    """
+    s = str(value or "").strip()
+    stripped = s.lstrip("0")
+    if stripped:
+        return stripped
+    return "0" if s else ""
+
+
+def _split_orders_by_ownership(
+    rows: list[dict], our_order_nos: set[str],
+) -> tuple[list[dict], list[dict]]:
+    """그 종목 주문 행을 "우리 주문"과 "그 밖(운영자 등)" 으로 가른다.
+
+    `odno` 를 선행 0 제거 뒤 비교한다. 빈/판정 불가 `odno` 는 "그 밖" 으로
+    떨어진다(우리 주문이라는 적극적 증거가 없다).
+    """
+    ours: list[dict] = []
+    operator: list[dict] = []
+    for row in rows or []:
+        key = _normalize_order_no((row or {}).get("odno"))
+        if key and key in our_order_nos:
+            ours.append(row)
+        else:
+            operator.append(row)
+    return ours, operator
+
+
+async def _our_order_nos_today(ticker: str) -> tuple[set[str], bool]:
+    """그 종목의 오늘 "우리 주문" 번호 집합 (`trade_history` BUY+SELL sync 조회, dedupe 없음).
+
+    둘 다 조회에 성공해야 `ok=True`. 하나라도 실패하면 `(set(), False)` —
+    호출부(`observe_mid_session_sync`)는 이때 소유 판정을 하지 않고 기존처럼
+    묶은 `explained_by_orders` 분류로 남긴다(「정보가 없으면 운영자로 단정하지
+    않는다」, 자문 Q4). never-raise.
+    """
+    from src.db.trade_history import (
+        get_today_buy_trades_for_sync, get_today_sell_trades_for_sync,
+    )
+
+    try:
+        buys = await get_today_buy_trades_for_sync(ticker)
+        sells = await get_today_sell_trades_for_sync(ticker)
+    except Exception:
+        return set(), False
+
+    nos: set[str] = set()
+    for row in (buys or []) + (sells or []):
+        key = _normalize_order_no((row or {}).get("order_no"))
+        if key:
+            nos.add(key)
+    return nos, True
+
+
+# ---------------------------------------------------------------------------
+# 3영업일 연속 설명 안 됨 → CRITICAL 승격 (cycle433, 자문 Q1 B)
+# ---------------------------------------------------------------------------
+
+
+async def unexplained_seen_on_day(ticker: str, day: date) -> bool:
+    """그 날짜(KST)에 `[holding_qty_unexplained]` 가 이 종목에 대해 로그됐는가.
+
+    `system_logs` 전문 검색 — 조회 실패는 `False`(모름 → 승격하지 않는다).
+    never-raise.
+    """
+    from src.db.system_logs import search_logs
+
+    start = f"{day.isoformat()}T00:00:00+09:00"
+    end = f"{day.isoformat()}T23:59:59.999999+09:00"
+    try:
+        result = await search_logs("[holding_qty_unexplained]", start=start, end=end, limit=200)
+    except Exception:
+        return False
+    needle = f"ticker={ticker} "
+    return any(needle in (row.get("message") or "") for row in (result or {}).get("logs", []) or [])
+
+
+async def should_escalate_unexplained(ticker: str, *, today: date) -> bool:
+    """같은 종목이 직전 2영업일과 오늘 모두 「설명 안 됨」이면 CRITICAL(자문 Q1 B).
+
+    영업일을 모르면(`trading_calendar` 조회 실패·`None`) 또는 `system_logs`
+    조회가 실패하면 승격하지 않는다(ERROR 유지) — never-raise, DB 쓰기 0.
+    """
+    from src.engine import trading_calendar as _cal
+
+    try:
+        day1 = await _cal.previous_trading_day(today)
+    except Exception:
+        return False
+    if day1 is None:
+        return False
+    try:
+        day2 = await _cal.previous_trading_day(day1)
+    except Exception:
+        return False
+    if day2 is None:
+        return False
+
+    if not await unexplained_seen_on_day(ticker, day1):
+        return False
+    return await unexplained_seen_on_day(ticker, day2)
 
 
 # ---------------------------------------------------------------------------
@@ -342,12 +502,24 @@ async def observe_mid_session_sync(registry, holdings) -> None:
     장부를 줄이지도 늘리지도 지우지도 않는다(D1 안A 원칙과 정합 — 줄이는
     결정은 매도 시점의 체결통보 보유 축만 한다). 주문내역(TTTC0081R) 조회는
     Δ≠0 인 종목이 있을 때만 1회(`exchange="ALL"`).
+
+    cycle433 — 자문 Q4 5분류 복원: 일치 · 진행 중 · 통보 대기 · 운영자 몫 ·
+    설명 안 됨. 「우리 주문」인지는 `trade_history`(오늘 sync 조회)로만 가른다
+    — 조회가 실패하면 운영자로 단정하지 않고 기존처럼 묶은 `explained_by_orders`
+    로 남긴다.
     """
     holdings_by_ticker = {h.ticker: h for h in holdings}
     tracked_by_ticker: dict[str, int] = {}
     for strategy in registry.all():
         for ticker, pos in strategy.state.positions.items():
             tracked_by_ticker[ticker] = tracked_by_ticker.get(ticker, 0) + pos.quantity
+
+    # 해소된(이제 일치하는) 종목은 통보 대기 타이머를 지운다 — 다음 불일치가
+    # 새 사건이라 경과 시간을 이어받으면 안 된다.
+    for ticker, tracked in tracked_by_ticker.items():
+        h = holdings_by_ticker.get(ticker)
+        if h is not None and h.quantity == tracked:
+            _pending_notice_clear(ticker)
 
     mismatched = [
         t for t, tracked in tracked_by_ticker.items()
@@ -380,14 +552,58 @@ async def observe_mid_session_sync(registry, holdings) -> None:
                 ticker, tracked, kis_qty, delta,
             )
             continue
-        net = net_qty_from_order_rows(ticker_orders)
-        if net == delta:
+
+        net_total = net_qty_from_order_rows(ticker_orders)
+        our_order_nos, lookup_ok = await _our_order_nos_today(ticker)
+        net_ours = net_operator = None
+        if lookup_ok:
+            ours_rows, operator_rows = _split_orders_by_ownership(ticker_orders, our_order_nos)
+            net_ours = net_qty_from_order_rows(ours_rows)
+            net_operator = net_qty_from_order_rows(operator_rows)
+
+        # 통보 대기 — Δ 전체가 "우리 주문"의 아직 반영 안 된 체결로 설명된다.
+        if net_ours is not None and net_ours == delta and net_ours != 0:
+            elapsed = _pending_notice_elapsed(ticker)
+            if elapsed >= PENDING_NOTICE_ESCALATE_AFTER:
+                _sched_logger.error(
+                    "[fill_notice_missing] ticker=%s tracked=%d kis=%d delta=%d elapsed_s=%d",
+                    ticker, tracked, kis_qty, delta, int(elapsed.total_seconds()),
+                )
+            else:
+                _sched_logger.info(
+                    "[corporate_action_midsync] ticker=%s tracked=%d kis=%d delta=%d "
+                    "result=pending_notice elapsed_s=%d",
+                    ticker, tracked, kis_qty, delta, int(elapsed.total_seconds()),
+                )
+            continue
+
+        # 이 회차는 통보 대기가 아니다 — 타이머를 지운다(다음 통보 대기가
+        # 처음부터 잰다).
+        _pending_notice_clear(ticker)
+
+        # 운영자 몫 — Δ>0(보유 증가)이 "우리 매핑에 없는" 주문의 매수 체결로
+        # 설명된다. 추적 수량에는 넣지 않는다(cycle385 불변식).
+        if (
+            delta > 0 and net_operator is not None
+            and net_operator == delta and net_operator != 0
+        ):
+            _sched_logger.info(
+                "[corporate_action_midsync] ticker=%s tracked=%d kis=%d delta=%d "
+                "result=operator_share",
+                ticker, tracked, kis_qty, delta,
+            )
+            continue
+
+        # 소유를 가르지 못했거나(조회 실패) 섞여 있지만 전체 Δ 는 그날 주문
+        # 전부로 설명된다 — 기존 묶은 분류로 남긴다.
+        if net_total == delta:
             _sched_logger.info(
                 "[corporate_action_midsync] ticker=%s tracked=%d kis=%d delta=%d "
                 "result=explained_by_orders",
                 ticker, tracked, kis_qty, delta,
             )
             continue
+
         _sched_logger.error(
             "[holding_qty_unexplained] ticker=%s tracked=%d kis=%d delta=%d phase=midsync",
             ticker, tracked, kis_qty, delta,

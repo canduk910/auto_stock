@@ -202,7 +202,15 @@ async def _reconcile_corporate_actions(
                 )
             else:
                 _car.block_buy_today(ticker, today=today)
-                logger.error(
+                # cycle433 — 같은 종목이 직전 2영업일과 오늘 모두 「설명 안 됨」
+                # 이면 CRITICAL(자문 Q1 B). 영업일·DB 조회 실패는 승격하지
+                # 않는다(ERROR 유지) — never-raise 헬퍼지만 한 번 더 감싼다.
+                try:
+                    escalate = await _car.should_escalate_unexplained(ticker, today=today)
+                except Exception:
+                    escalate = False
+                log_fn = logger.critical if escalate else logger.error
+                log_fn(
                     "[holding_qty_unexplained] ticker=%s tracked=%d kis=%d avg_ours=%d "
                     "avg_kis=%d strategy=%s verdict=%s",
                     ticker, pos.quantity, kis.quantity, pos.buy_price, kis.avg_price,
