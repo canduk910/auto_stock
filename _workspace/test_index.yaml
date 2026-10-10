@@ -192090,7 +192090,7 @@ frontend:
     - frontend/src/pages/__tests__/Dashboard.fix1.cycle414.test.tsx
     - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
     - frontend/src/pages/__tests__/MarketState.test.tsx
-generated_at: '2026-10-10T20:31:36.205593+09:00'
+generated_at: '2026-10-10T20:41:52.705634+09:00'
 stats:
   backend_modules: 188
   backend_tests: 1348

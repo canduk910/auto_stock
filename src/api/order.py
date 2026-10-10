@@ -128,8 +128,8 @@ async def cancel_order(
     호가유형을 실어라" 는 규약이 **없다**(국내주식 정정취소 필드표엔 그
     문장이 없고, 선물옵션 API 만 `[취소] 01 로 입력` = 고정값을 명시하며,
     KIS 공식 취소 샘플도 `ord_dvsn="00"` 을 쓴다). 그래서 이 인자는 **아직
-    호출자 3곳(`_cancel_after_wait`/`_cancel_and_reorder`/`cancel_remaining`)
-    이 전달하지 않는 배관·매핑만이다** — Stage B(실제 전송) 전환은 D+1 이후
+    호출자 2곳(`_cancel_after_wait`/`_cancel_and_reorder`)이 전달하지 않는
+    배관·매핑만이다** — Stage B(실제 전송) 전환은 D+1 이후
     `[after_cancel_result]` 의 `orig_dvsn` 층화 실측 + **매매 행위 변경 =
     별도 승인**이 필요하다. 값 화이트리스트는 두지 않는다(`44` 를 조용히
     지우는 함정을 재현하지 않는다) — falsy(`None`/`""`) 만 `"00"` 으로

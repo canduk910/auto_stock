@@ -425,8 +425,9 @@ _SAME_APPROVAL_FILES = ["src/engine/scheduler.py"]
 #: 경로 → (파일 내용 sha256, 마지막 승인 사유). 승인 도장을 찍는 **유일한** 자리.
 _APPROVED_CONTENT_SHA: dict[str, tuple[str, str]] = {
     "src/api/order.py": (
-        "08c5cafd7b8678ec0d0fa85f856fdea3cce38ad92488c6d74c03cd13faa415bb",
-        "cycle291(2026-09-13) — NXT 프리장 매수 GTP(27) + 취소 호가유형 배관, 8영역 승인",
+        "26ebd3eacf0a1ec0e81de5a43c228c8ab506b33ce9a2eeeb065ee70372a0d7d9",
+        "cycle442(2026-10-10) — docstring 「호출자 3곳」→「호출자 2곳」 정정"
+        "(cycle440 이 cancel_remaining 삭제, 코드 무변경), 사용자 승인",
     ),
     "src/auth/CLAUDE.md": (
         "1d155e95d386b3ecb19f138e966464490ac4912b055f1f8f9da2a154d14ea363",
