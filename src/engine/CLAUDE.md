@@ -27,7 +27,7 @@
     - **미상 주문은 어느 장부에도 올리지 않는다** — `pending_buys`·`pending_buy_amounts`·`_pending_buy_orders`·`_order_qty`·`_order_strategy`·`_order_ticker` 전부 미등록, `[boot_recover_strategy_unknown] path=unfilled_order ticker= order_no= — 장부 미등록` WARNING 1행만 남긴다. 체결되면 `order_engine` 의 고아 귀속 가드(출처 payload · momentum + CRITICAL)가 처리한다 — **타이머가 없다**(우리 주문이면 KRX 정규장 마감 자동취소가 잔량을 회수).
     - **해석된 주문(①·② 적중)은 그대로 등록한다** — 그 전략의 `pending_buys`·`pending_buy_amounts` + `_order_qty`·`_order_strategy`·`_order_ticker`·`_pending_buy_orders`(여전히 `_resolve_fallback_owner` 경유 — 해석된 `strategy_id` 가 현재 레지스트리에 없는 극단적 사례만 `FALLBACK_OWNER_ID` 로 떨어진다). 타이머가 정상 작동한다(`qty_src="map"`).
     - **종목 기준 당일 BUY 는 여전히 `sold_today` 시드 전용** — 같은 루프(`get_today_buys_ticker_strategy`)가 종목 재매수 차단(`sold_today.add`)에는 그대로 쓰이지만, 미체결 주문 소유 해석에는 더 이상 쓰이지 않는다(두 용도를 분리).
-    - **알려진 한계** — 미상 주문이 재시작 뒤 **나눠 체결**되면 두 번째 체결분은 `order_engine` 의 `is_ticker_held_by_any` 조기 return 에 걸려 추적 밖(`[buy_fill_fallback_held_conflict]`)이 된다 — 리팩토링 계획의 **J-4**(8영역, 정확 일치 귀속)가 착지하면 뒤집힌다. 매도 미체결 복구는 열려 있지 않다(부팅이 매도 미체결을 복구하지 않는다).
+    - **알려진 한계** — 미상 주문이 재시작 뒤 **나눠 체결**되면, 그 프로세스가 앞선 체결을 본 적이 없어(`order_engine._filled_qty` 가 비어 있다) **J-4(정확 일치 귀속, cycle438)의 E3 가 불성립**해 두 번째 체결분도 추적 밖(`[buy_fill_fallback_held_conflict]`)으로 남는다 — J-4 는 **같은 프로세스가 이미 본 체결**만 합친다. 매도 미체결 복구는 열려 있지 않다(부팅이 매도 미체결을 복구하지 않는다).
     - 가드 = `tests/unit/engine/test_cycle427_boot_unfilled_order_owner.py`(시나리오 1·4·5·6·7·8 + 구조 검사) · 기존 핀(`test_cycle425_boot_fallback_owner.py` 3번 · `test_cycle425_boot_recover_observability.py` 미체결 마커) 은 이 행위에 맞춰 함께 갱신.
   - **액면병합·분할 등 주문 밖 수량 변경 대사 (cycle431 — 사용자 결정 2026-10-10 안1)** — `_reconcile_corporate_actions(scheduler, holdings, today, yesterday_trading_day)` 를 DB positions 1차 복구 **직후**·KIS 잔고 보완 복구 **앞**(= 재도출보다 한참 앞)에서 부른다. 판정 자체는 leaf `corporate_action_reconcile.classify()`(순수)가 하고, 이 함수는 조회·적용만 한다. 그날 체결은 구조적으로 0(NXT 프리장 08:00 전)이라 자문의 「증거 A」는 공짜다.
     - **`yesterday_trading_day` = 직전 영업일, 달력 어제 아님 (cycle431 follow-up, 2026-10-10)** — 호출부가 `trading_calendar.previous_trading_day(today)`(KIS 휴장일 역산, never-raise → 모르면 `None`)로 구해 넘긴다. 월요일·연휴 다음 날 아침에 달력 어제(일요일·공휴일)의 빈 주문내역을 보면 사용자 결정 ②(통보 유실 맞추기)가 영원히 무력화된다. `None` 이면 아래 ②(어제 주문내역 조회)만 건너뛰고 ①(비율 반영)은 그대로 돈다(`[corporate_action_yesterday_unknown]` WARNING). 🔴 `boot_manager._previous_trading_day`(조회 실패를 영업일로 삼키는 fail-open) 재사용 금지 — 모르면 모른다를 표현 못 한다. `buy_dt` 기본값 등 다른 용도의 `yesterday`(달력 어제)는 무접촉.
@@ -647,12 +647,25 @@ run_periodic_task_loop(*, scheduler, task_label, wait_time, once_callable, recor
 
 - **귀속 단** = 폴백 체인의 `trade_history` **뒤**·B-2 가드 **앞**에 `_resolve_pending_buy_owner(ticker)`. 채택 = `ticker in state.pending_buys` 전략이 **정확히 1개** ∧ 그 전략 **미보유**. 0개·2개 이상·예외 = `None`(fail-open, **결과 집합 ⊆ 현행**). in-memory, `await` 0, never-raise(체결통보 콜백 예외 = `realtime/handler.py` 규약상 **WS 재연결**).
 - 🔴 **B-2 가드 제거 금지** — **출처 모를 매수가 `momentum` 을 우겨 남의 포지션을 덮는 것**(377450 사고)을 막고 수동 매매·외부 주문에 여전히 유효. 수동/외부 매수는 `pending_buys` 에 없어 이 단을 타지 않는다.
-- 🔴 **잔량 취소 타이머 = `qty_src == "map"` ∧ 귀속이 `pending` 단이 **아닐** 때만** — 귀속이 틀린 랏이면 `_cancel_after_wait` 가 30초 뒤 **사람이 낸 주문의 잔량을 취소**(cycle327·cycle329 계열). 우리 주문이면 곧 매핑이 서고 잔여 통보가 `src=map` 으로 와서 건다(손실 0). 보류 = `[buy_partial_no_cancel_timer]` WARNING.
+- 🔴 **잔량 취소 타이머 = `qty_src == "map"` ∧ 귀속이 `pending` 단·**정확 일치 단**(바로 아래) 둘 다 **아닐** 때만** — 귀속이 틀린 랏이면 `_cancel_after_wait` 가 30초 뒤 **사람이 낸 주문의 잔량을 취소**(cycle327·cycle329 계열). 우리 주문이면 곧 매핑이 서고 잔여 통보가 `src=map` 으로 와서 건다(손실 0). 보류 = `[buy_partial_no_cancel_timer]` WARNING.
 - **관측** = `[buy_fill_strategy_from_pending] order_no= ticker= strategy= qty_src= incr= filled_total= ordered=` **무cap WARNING** = 귀속 단 성공 서명(건별 조사 단위). 형제 `[buy_fill_fallback_held_conflict]` = 무cap ERROR, 진짜 미지 출처만 남아 **0 수렴**이 정상.
-- ⚠️ **1주 랏에 집중** — 단일 통보 전량 체결이면 두 번째 통보가 없어 자기 치유 경로가 없다(다주 랏은 잔여 통보 `src=map` 이 포지션을 만든다).
+- ⚠️ **1주 랏에 집중** — 단일 통보 전량 체결이면 두 번째 통보가 없어 자기 치유 경로가 없다(다주 랏은 잔여 통보 `src=map` 이 포지션을 만든다). 다주 랏의 두 번째 통보는 아래 「정확 일치 귀속」 이 받는다.
 - ⚠️ B-2 ERROR 문구 `"타 전략 보유/주문중"` = 판정이 `has_position OR is_buy_pending` 이라 **주문 중**일 수 있다. `top_patterns` 키 = 메시지 전문 → **2026-09-21 전후 패턴 문자열 비교 금지**.
 - **별건 권고** = `scheduler._sync_positions_from_balance` 의 `is_ticker_held_by_any` 를 **보유 축만** 보는 헬퍼로 → 블라인드 창 17~24시간 → ≤15분(소비처 5곳 광역 회귀, 귀속 단 이후 실익 작음).
 - 자문 = `_workspace/domain_consult/cycle331_buy_fill_dropped.md` · 회귀 = `tests/unit/engine/test_cycle331_buy_fill_from_pending.py`
+
+## 매수 두 번째 부분 체결 — 정확 일치 귀속 (cycle438, J-4)
+
+운영 실측(11거래일·매수 72건)으로는 부분 체결이 0/72 라 급하지 않은 장부 정합 작업이지만, 랏이 커지면(입금·비중 확대) 발사 창에 연속 부분 체결이 겹치는 「구멍 C」가 현실화된다. pending 단이 받는 창(발사 창, 매핑 아직 없음)의 **두 번째** 통보는 매핑도 `trade_history` 도 pending 단도 전부 miss 라 B-2 로 떨어져 추적 밖이 됐다.
+
+- **자리** = pending 단(cycle331) **바로 뒤**·B-2 가드 **바로 앞**의 `elif`. `_resolve_exact_order_match(ticker, order_no, prev_total)` — `prev_total = total_filled - quantity`(이번 증분을 더하기 **전** 값, `handle_execution_notice` 가 `_filled_qty` 를 이미 갱신한 뒤라 역산한다).
+- **채택 조건 E1~E4** — E1(매핑·`trade_history`·pending 단 전부 miss)은 이 자리 자체가 보장한다. E2 = 레지스트리 전체에서 `positions[ticker].order_no == order_no`(비어있지 않음)인 전략이 **정확히 1개**. E3 = `prev_total > 0`(이 프로세스가 같은 주문의 앞선 체결을 **이미 세었다** — KIS 주문번호는 날마다 다시 매겨 DB 복구 포지션의 옛 번호와 오늘 사람 주문 번호가 우연히 같을 수 있어, E2 만으로는 그 사고를 못 막는다). E4 = `await` 0·never-raise(판정 예외 = B-2 로 낙하).
+- **수량** = `pos.quantity += quantity`(증분, `pos.quantity == prev_total` 비교는 조건에 **넣지 않는다** — 두 체결 사이 사람이 일부를 팔았으면(cycle385) 덮어쓰기가 판 것을 되살린다). **단가** = 마지막 체결가(`pos.buy_price = price`, map 경로와 같은 규약 — VWAP 전환은 별도 결정). `high_since_buy`·터틀 `_entry_atr`·kojiro 스탬프는 **손대지 않는다**(첫 체결 스탬프 유지). `save_position`(전량 분기)은 `state.positions[ticker].quantity`/`.buy_price` 를 읽는다 — 기존 경로(정확 일치가 아닐 때)는 이 값이 `total_filled`/`price` 와 같아 바이트 동일하다.
+- **타이머** = 위 「잔량 취소 타이머」 조건에 `not strategy_from_exact` 로 합류 — 정확 일치 경로도 pending 단과 같은 이유로 보류한다.
+- **예약** = 자기 코드가 없다 — 공통 후처리(`pending_buys.discard` + `release_buy`)를 그대로 쓴다(카드 E 의 `(ticker, order_no)` 예약과 같은 자리).
+- **범위 밖** = 부팅 복구 포지션(`order_no=""`)의 잔량 체결 — E2·E3 둘 다 불성립해 현행 `held_conflict` 그대로(기존 결함 「PARTIAL 행 덮어쓰기로 수량 감소」는 J-4 가 만든 것도 고치는 것도 아니다, 워크리스트 후속).
+- **관측** = `[buy_fill_exact_order_match] order_no= ticker= strategy= qty_src= incr= filled_total= ordered= prev_qty=` **무cap WARNING**(from_pending 과 같은 이유 — 건별 조사 단위).
+- 자문 = `_workspace/domain_consult/2026-10-10_j4_exact_fill_attribution.md` · 회귀 = `tests/unit/engine/test_cycle438_exact_order_match.py`
 
 ## 체결통보 주문수량 — 출처 3단 (cycle329)
 

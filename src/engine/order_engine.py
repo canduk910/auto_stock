@@ -3073,6 +3073,47 @@ class OrderEngine:
             logger.debug("[buy_fill_strategy_from_pending] 판정 실패", exc_info=True)
             return None
 
+    def _resolve_exact_order_match(
+        self, ticker: str, order_no: str, prev_total: int,
+    ) -> str | None:
+        """같은 주문의 두 번째(이후) 부분 체결을 **정확 일치**로 귀속한다
+        (J-4 자문, domain-consult 2026-10-10 §3.2).
+
+        매핑·`trade_history`·발사 창 pending 단이 전부 miss 인 통보(이 함수가
+        불리는 자리 자체가 그 조건이다)만을 대상으로, 레지스트리에서
+        `positions[ticker].order_no == order_no` 인 전략을 찾는다.
+
+        채택 조건(전부 in-memory · `await` 0 · never-raise):
+        - E2: 그 전략이 **정확히 1개**(`order_no` 가 비어 있지 않아야 한다 —
+          부팅 복구 포지션의 `order_no=""` 가 섞이지 않게).
+        - E3: `prev_total > 0` — **이 프로세스가 같은 주문의 앞선 체결을
+          이미 셌다.** KIS 주문번호는 날마다 다시 매기므로, DB 로 복구한
+          스윙 포지션은 며칠 전 주문번호를 그대로 들고 있다. 오늘 사람이
+          같은 종목에 낸 주문번호가 우연히 같으면 E2 만으로는 남의 주문을
+          우리 포지션에 합친다. `prev_total > 0` 이면 「오늘, 이 프로세스가,
+          이 주문의 앞선 체결로 그 포지션을 만들었다」가 성립한다.
+
+        0개·2개 이상·`prev_total<=0`·판정 예외는 전부 `None`(B-2 로 낙하 —
+        결과 집합은 지금 B-2 가 받는 통보의 부분집합이어야 한다).
+        """
+        if prev_total <= 0 or not order_no:
+            return None
+        try:
+            owners = [
+                s.strategy_id for s in self.registry.all()
+                if (
+                    (pos := s.state.positions.get(ticker)) is not None
+                    and pos.order_no
+                    and pos.order_no == order_no
+                )
+            ]
+            if len(owners) != 1:
+                return None
+            return owners[0]
+        except Exception:
+            logger.debug("[buy_fill_exact_order_match] 판정 실패", exc_info=True)
+            return None
+
     async def _handle_buy_fill(
         self, ticker: str, order_no: str, price: int,
         quantity: int, total_filled: int, ordered_qty: int,
@@ -3121,6 +3162,7 @@ class OrderEngine:
 
         orphan_momentum_fallback = False
         strategy_from_pending = False
+        strategy_from_exact = False
         strategy_id = self._order_strategy.get(order_no)
         if strategy_id is None:
             # 매핑 dict miss — boot/reboot race. trade_history PENDING row 영역 strategy 복구.
@@ -3153,6 +3195,22 @@ class OrderEngine:
                         "qty_src=%s incr=%d filled_total=%d ordered=%d — 발사 창 귀속",
                         order_no, t(ticker), strategy_id, qty_src,
                         quantity, total_filled, ordered_qty,
+                    )
+                # J-4 (cycle438, domain-consult 2026-10-10) — 같은 주문의 두 번째
+                # 부분 체결 정확 일치 귀속. pending 단 바로 뒤·B-2 가드 바로 앞 —
+                # pending 단이 못 받은(발사 창 밖) 통보만 여기 온다.
+                elif (
+                    exact_owner := self._resolve_exact_order_match(
+                        ticker, order_no, total_filled - quantity,
+                    )
+                ) is not None:
+                    strategy_id = exact_owner
+                    strategy_from_exact = True
+                    logger.warning(
+                        "[buy_fill_exact_order_match] order_no=%s ticker=%s strategy=%s "
+                        "qty_src=%s incr=%d filled_total=%d ordered=%d prev_qty=%d",
+                        order_no, t(ticker), strategy_id, qty_src,
+                        quantity, total_filled, ordered_qty, total_filled - quantity,
                     )
                 # P1-B (B-2) — momentum 하드코딩 폴백 직전, ticker 가 이미 어느 전략이든
                 # 보유/주문중이면 덮어쓰기 대신 skip (기존 포지션 보존, 377450 실사고 재현 차단).
@@ -3208,7 +3266,14 @@ class OrderEngine:
                 ))
         else:
             # 추가 체결 (부분 체결 이후) → 수량/가격 갱신
-            pos.quantity = total_filled
+            # J-4 (cycle438, domain-consult 2026-10-10 §4(a)) — 정확 일치 귀속은
+            # 증분으로 더한다. `pos.quantity = total_filled` 덮어쓰기는 두 체결
+            # 사이에 사람이 일부를 팔았으면(cycle385 분할 매도 허용) 판 것을
+            # 되살려 다음 매도가 APBK0400(잔고부족)으로 간다.
+            if strategy_from_exact:
+                pos.quantity += quantity
+            else:
+                pos.quantity = total_filled
             pos.buy_price = price
 
         # pending_buys에서 제거 + 예정 금액 정리 (잔여 자금 폴백 계산용 동기 dict)
@@ -3297,9 +3362,14 @@ class OrderEngine:
             try:
                 from src.db.positions import save_position
                 from src.engine.scanner import ticker_names
+                # J-4 (cycle438) — `pos` 값을 읽는다. 기존 경로(`strategy_from_exact`
+                # 가 아닐 때)는 `pos.quantity == total_filled` · `pos.buy_price == price`
+                # 라 바이트 동일하다. 정확 일치 경로에서 사이에 매도가 있었을 때만
+                # 값이 달라지고, 그때 맞는 쪽이 `pos` 다.
                 await save_position(
                     ticker=ticker, ticker_name=ticker_names.get(ticker, ""),
-                    buy_price=price, quantity=total_filled, order_no=order_no,
+                    buy_price=state.positions[ticker].buy_price,
+                    quantity=state.positions[ticker].quantity, order_no=order_no,
                     strategy_id=strategy_id, buy_date=state.positions[ticker].buy_date,
                 )
             except Exception as exc:
@@ -3351,14 +3421,18 @@ class OrderEngine:
             # cycle327(주문 나간 뒤 재발사 금지)·cycle329(재주문 타이머는 map 한정)와
             # 같은 계열의 사고다. 잃는 것은 없다 — 우리 주문이면 매핑이 곧 서고 잔여
             # 통보가 `src=map` 으로 와서 정상적으로 타이머를 건다.
-            if qty_src == "map" and not strategy_from_pending:
+            # J-4 (cycle438) — 정확 일치 귀속(`strategy_from_exact`)도 pending 단과
+            # 같은 이유로 타이머를 보류한다: 그 전략의 매핑이 아직 안 섰을 수 있는
+            # 창이라, 걸면 사람 주문의 잔량을 취소할 위험이 pending 단과 같다.
+            if qty_src == "map" and not strategy_from_pending and not strategy_from_exact:
                 self._schedule_cancel(ticker, order_no, ordered_qty, strategy_id)
             else:
                 logger.warning(
                     "[buy_partial_no_cancel_timer] order_no=%s ticker=%s strategy=%s "
-                    "src=%s from_pending=%d remaining=%d — 귀속 확정 전이라 취소 타이머 보류",
+                    "src=%s from_pending=%d from_exact=%d remaining=%d — 귀속 확정 전이라 취소 타이머 보류",
                     order_no, t(ticker), strategy_id, qty_src,
-                    int(strategy_from_pending), max(0, ordered_qty - total_filled),
+                    int(strategy_from_pending), int(strategy_from_exact),
+                    max(0, ordered_qty - total_filled),
                 )
             logger.info("매수 부분 체결: %s %d/%d주 @ %d (전략: %s)", t(ticker), total_filled, ordered_qty, price, strategy_id)
 
