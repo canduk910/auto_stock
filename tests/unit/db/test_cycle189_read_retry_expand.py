@@ -4,9 +4,9 @@
 2 모듈 read 로 확장하는 시정의 회귀 가드 (헬퍼 자체 변경 0):
 - `src/db/kis_quote_accounts.py` read 4곳 (list_accounts / get_account /
   get_account_by_label / get_credentials_for_token_manager)
-- `src/db/system_config.py` read 9곳 (get_cash_usage_ratio / get_auto_regime_adjust /
+- `src/db/system_config.py` read 8곳 (get_cash_usage_ratio / get_auto_regime_adjust /
   _get_bool_or_none / get_buy_block_mode / _get_float_or_default / _get_bool_or_default /
-  _get_int_or_default / _get_str_or_default_UNUSED / _get_string_or_none)
+  _get_int_or_default / _get_string_or_none)
 
 불변 계약 (187 답습):
 - 기존 try/except graceful + 기본값 폴백 전부 불변 (retry 소진 시 마지막 예외가
