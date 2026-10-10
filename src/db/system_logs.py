@@ -21,7 +21,7 @@ from datetime import date, datetime, timedelta, timezone
 from typing import Any
 
 import src.db.pg as pg
-from src.db._kst import now_kst_iso
+from src.db._kst import now_kst_iso, today_kst
 
 logger = logging.getLogger(__name__)
 
@@ -262,6 +262,59 @@ async def search_logs(
         total = len(items)
     has_more = total > len(items)
     return {"logs": items, "total": int(total), "has_more": bool(has_more)}
+
+
+# ---------------------------------------------------------------------------
+# 사이클 434 — 대시보드 경고등(`GET /api/system/alerts`) 전용 조회
+# ---------------------------------------------------------------------------
+
+# 경고등 질의 레벨 임계 — WARNING 이상(`log_level` 컬럼 값과 대소문자까지 동일).
+ALERT_LOG_LEVELS: tuple[str, ...] = ("WARNING", "ERROR", "CRITICAL")
+
+
+async def get_today_alert_logs(
+    patterns: list[str] | tuple[str, ...],
+    *,
+    day: date | None = None,
+) -> list[dict]:
+    """오늘(KST) WARNING 이상 로그 중 명부 패턴(ILIKE, OR)에 걸리는 행만 조회한다.
+
+    패턴 명부의 단일 정본 = `src/engine/alert_markers.py::ALL_PATTERNS` — 이 함수는
+    패턴 내용을 모른다(호출자가 넘긴 문자열 그대로 `ILIKE` 바인딩).
+
+    Args:
+        patterns: `ILIKE` 패턴 목록(`%` wildcard 포함). 빈 리스트 = 쿼리 없이 `[]`.
+        day: 대상 KST 날짜. `None` 이면 `today_kst()`(테스트는 명시 날짜를 넘긴다).
+
+    Returns:
+        `{"log_level": str, "message": str, "timestamp": str}` dict 리스트
+        (`timestamp` 은 KST `+09:00` 문자열) — `timestamp` ASC(발생 순).
+    """
+    patterns = list(patterns)
+    if not patterns:
+        return []
+
+    target_day = day if day is not None else today_kst()
+
+    args: list[Any] = [
+        f"{target_day.isoformat()}T00:00:00+09:00",
+        f"{target_day.isoformat()}T23:59:59.999999+09:00",
+        list(ALERT_LOG_LEVELS),
+    ]
+    pattern_conds: list[str] = []
+    for p in patterns:
+        args.append(p)
+        pattern_conds.append(f"message ILIKE ${len(args)}")
+
+    where_sql = (
+        "timestamp >= $1::text::timestamptz"
+        " AND timestamp <= $2::text::timestamptz"
+        " AND log_level = ANY($3::text[])"
+        " AND (" + " OR ".join(pattern_conds) + ")"
+    )
+
+    sql = f"SELECT {_LOG_COLUMNS} FROM system_logs WHERE {where_sql} ORDER BY timestamp ASC"
+    return await pg.fetch(sql, *args)
 
 
 # ---------------------------------------------------------------------------

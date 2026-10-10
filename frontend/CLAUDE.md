@@ -82,6 +82,16 @@ leaf 12개를 **상위 9개**로 묶는다(사용자 지정 묶음·순서 — �
 - 보존 testid 4: `nav-sticky-wrapper` · `content-width-slider` · `mobile-menu-button` · `mobile-menu-drawer`. 그룹용 = `nav-inner` · `nav-mobile-group-{id}` 등.
 - ⚠️ e2e: 접힌 그룹의 하위 라벨은 DOM 에 없다. 본문 제목은 `getByRole("heading", {name})`(`getByText` 는 모바일 헤더의 숨은 span 을 집는다), 그룹 트리거는 `getByRole("button", {name, exact: true})`.
 
+### 대시보드 경고등 — `components/AlertLight.tsx` (cycle434)
+
+나브 우측(데스크톱은 폭 슬라이더 왼쪽, 모바일은 햄버거 왼쪽)에 항상 보이는 경고등. `GET /api/system/alerts` 를 60초 폴링(`refetchIntervalInBackground: false` — 백그라운드 탭은 쉰다, `retry: 1`)한다.
+
+- 4 상태는 **색 + 글자**로 함께 구분한다(색맹 고려) — `red`="위험" · `yellow`="주의" · `green`="정상" · `unknown`="모름"(응답 `data.status` 그대로, 로딩 중엔 "확인 중", 조회 자체가 실패하면 "조회 실패"). testid `alert-light`(`data-status` 속성에 상태 그대로) · `alert-light-dot` · `alert-light-label`.
+- 누르면 `alert-light-panel` 이 열려 범주별(`alert-light-category-{key}`) 건수·최고 레벨·첫/마지막 시각(`utils/kst.ts::formatKstDateTime`)·최근 메시지 3개를 보인다. `count` 가 `null` 이면 "모름"(0 과 구분, `?건` 로 적지 않는다). `alert-light-logs-link` 가 `/logs?tab=system` 으로 간다.
+- 바깥 클릭·Escape 로 닫힌다(`NavBar.tsx` 그룹 드롭다운과 같은 패턴).
+- 타입·API = `types/system-alerts.ts` · `api/system-alerts.ts` — 백엔드 `src/engine/alert_markers.py` 응답 1:1(`src/routes/CLAUDE.md` `/api/system/alerts` 행).
+- MSW 기본 핸들러(`test/handlers.ts`)는 `status: "green"` 고정 응답이다. 가드 `components/__tests__/AlertLight.test.tsx`.
+
 ## 표 스크롤 — `ScrollPane` 단일 진실원
 
 표는 **창 크기에 맞춰** 가로·세로로 스크롤한다. 담당 = `components/ScrollPane.tsx` 하나. 막는 결함 = 높이 상한 없는 `overflow-x-auto` 래퍼의 가로 스크롤바가 래퍼 **바닥**(화면 밖)에 붙는 것.

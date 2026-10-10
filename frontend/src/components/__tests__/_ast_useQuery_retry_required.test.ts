@@ -62,6 +62,9 @@ const TARGET_FILES = [
   // `GET /api/history/journal` 을 부른다. retry 미명시 시 e2e/백엔드 미기동 환경에서 기본
   // retry 가 누적돼 탭이 「불러오는 중」 에 머문다(사이클 65 H3 패턴).
   'JournalTab.tsx',
+  // cycle434 — 대시보드 경고등. NavBar 마운트 시 항상 발화(모든 화면 공통)하므로
+  // retry 미명시 시 e2e/백엔드 미기동 환경에서 전 페이지가 ECONNREFUSED 재시도를 쌓는다.
+  'AlertLight.tsx',
 ]
 
 // 사이클 80 hotfix — Settings.tsx 본체 useQuery 도 retry:1 명시 의무 (사이클 79 e2e

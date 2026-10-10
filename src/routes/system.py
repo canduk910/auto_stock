@@ -17,12 +17,15 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, ConfigDict
 
 import src.db.system_config as _system_config_mod
+from src.db._kst import now_kst_iso
 from src.db.system_config import (
     PriceFilter,
     TradeAmountFilter,
     get_price_filter,
     set_price_filter,
 )
+from src.db.system_logs import get_today_alert_logs
+from src.engine.alert_markers import ALL_PATTERNS, build_summary, unknown_summary
 from src.models.response import ApiResponse
 
 logger = logging.getLogger(__name__)
@@ -139,6 +142,36 @@ async def get_price_filter_endpoint():
     """
     pf = await get_price_filter()
     return ApiResponse(success=True, data=pf.model_dump(), message="ok")
+
+
+# ---------------------------------------------------------------------------
+# 사이클 434 (2026-10-10) — 대시보드 경고등
+# ---------------------------------------------------------------------------
+
+
+@router.get("/alerts", response_model=ApiResponse)
+async def system_alerts():
+    """대시보드 경고등 — 오늘(KST) 장부 불일치 · 주문 결과 모름/청산 실패 · 일일 작업
+    실패를 범주별로 집계한다.
+
+    명부(마커→범주)의 단일 정본 = `src/engine/alert_markers.py`. 매매 행위는 읽지
+    않는다(``system_logs`` 조회 1회뿐 — 8영역·`scheduler.py` 무접촉).
+
+    DB 조회가 실패하면 ``data.status`` 를 ``"green"`` 으로 내리지 않고 ``"unknown"``
+    으로 돌려준다(「모름」과 「없음」을 구분).
+    """
+    try:
+        rows = await get_today_alert_logs(ALL_PATTERNS)
+    except Exception:
+        logger.warning("[system_alerts_query_failed] DB 조회 실패 — unknown 상태", exc_info=True)
+        return ApiResponse(
+            success=True,
+            data=unknown_summary(now_kst_iso()),
+            message="조회 실패 — 모름",
+        )
+
+    data = build_summary(rows, as_of_iso=now_kst_iso())
+    return ApiResponse(success=True, data=data, message="ok")
 
 
 @router.put("/price-filter", response_model=ApiResponse)

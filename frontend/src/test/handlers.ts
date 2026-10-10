@@ -365,6 +365,21 @@ export const handlers = [
     return HttpResponse.json(wrap({ min_amount: body.min_amount ?? 0 }))
   }),
 
+  // 사이클 434 — 대시보드 경고등. 기본은 green(오늘 해당 없음), 각 테스트에서 server.use 로 오버라이드.
+  http.get(`${base}/system/alerts`, () =>
+    HttpResponse.json(
+      wrap({
+        as_of: '2026-10-10T12:00:00+09:00',
+        status: 'green',
+        categories: [
+          { key: 'ledger_mismatch', label: '장부 불일치', color: 'red', count: 0, max_level: null, first_at: null, last_at: null, recent_messages: [] },
+          { key: 'order_unknown_or_exit_failure', label: '주문 결과 모름 · 청산 실패', color: 'red', count: 0, max_level: null, first_at: null, last_at: null, recent_messages: [] },
+          { key: 'daily_job_failure', label: '일일 작업 실패', color: 'yellow', count: 0, max_level: null, first_at: null, last_at: null, recent_messages: [] },
+        ],
+      })
+    )
+  ),
+
   // 사이클 85 — stock_master (READ-ONLY 5 GET 라우트).
   // 사이클 124 Q3=A — stats 4 → 8 키 (with_hts_avls / with_acml_tr_pbmn / total_daily_rows / last_daily_load_at).
   http.get(`${base}/stock-master/stats`, () =>
