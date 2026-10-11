@@ -176,7 +176,9 @@ SYSTEM_PROMPT = (
     "- code_review_notes 에 매크로 의존 로직 도입 제안 가능 (예: VIX 25↑ 시 자동 매수 중단)\n"
     "\n"
     "core_metrics_distribution 이 있으면: 그 전략의 그날 후보·보유 종목이 들고 있는 기술지표\n"
-    "분포(숫자는 median/p25/p75/min/max, 그 밖은 빈도표)이며, 파라미터 임계값과 비교해 해석한다."
+    "분포이며, 각 키의 unit 이 pct 또는 ratio 면 종목 간 비교 가능한 비율값이고 파라미터\n"
+    "임계값과 맞춰 해석한다. unit 이 won 이면 종목마다 가격 스케일이 달라 종목 간 비교에\n"
+    "쓰지 않는다. unit 이 count 면 개수, category 면 문자열 빈도표(counts)다."
 )
 
 NOTES_MAX_LEN = 2000

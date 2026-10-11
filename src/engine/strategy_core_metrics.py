@@ -9,8 +9,9 @@
 
 ## 설계
 
-- **순수 함수**(`summarize_numeric` · `summarize_categorical` · `build_key_distributions`) —
-  표준 라이브러리만 쓰고 `src.*` 를 import 하지 않는다. `await`·로깅·벽시계 0.
+- **순수 함수**(`summarize_numeric` · `summarize_categorical` · `build_key_distributions`
+  · `_apply_price_ratio_rules`) — 표준 라이브러리만 쓰고 `src.*` 를 import 하지 않는다.
+  `await`·로깅·벽시계 0.
 - **얇은 수집기**(`collect_strategy_core_metrics` · `collect_all_core_metrics`) — 호출자가
   이미 들고 있는 **전략 객체**를 받아 `getattr` 로 duck-typing 조회만 한다. 레지스트리를
   스스로 찾지 않는다(호출자가 이미 `registry.all()`/`registry.enabled()` 로 전략 객체를
@@ -42,14 +43,45 @@
 정하고, 키 이름으로 미리 정하지 않는다(어떤 전략이 어떤 타입으로 값을 내는지는
 `llm_context` 쪽 결정이다 — 이 leaf 는 받은 값을 있는 그대로 분류한다).
 
-## 보유 종목의 ATR 비율 보강
+## 가격 무관 비율 — `_apply_price_ratio_rules` (검토 반영, 2026-10-11)
 
-ATR 계열 키(`atr`·`atr14`·`atr20`, 전략마다 쓰는 이름이 다르다)는 원화 절대값이라
-종목 간 비교가 어렵다. **보유 종목만**(매수가가 있어야 비율을 낼 수 있다)
-`strategy.state.positions[ticker].buy_price` 로 `<key>_pct_of_buy_price`(매수가 대비 %)를
-원값과 함께 더한다. 후보 종목은 `llm_context` 가 가격을 주지 않아(의도적으로 제외 —
-이미 AI 매수평가 payload 의 다른 자리에 현재가가 있다) 비율을 못 낸다 — scanner 현재가를
-새로 읽어 오지 않는다(이 leaf 의 범위 밖, 필요해지면 별도 사이클).
+전략마다 쓰는 ATR·EMA 값은 원화 절대값이라, 가격대가 다른 종목을 모아 중앙값·사분위를
+내면 해석이 안 된다(예: ATR 812원짜리 저가주와 ATR 15,000원짜리 고가주가 같은 분포에
+섞인다). `llm_context` 가 이미 주는 값 안에서 — **지어내지 않고** — 이동평균을 가격
+대용으로 써 비율을 만든다. 규칙은 "이 두 키가 둘 다 있으면 이 비율을 더한다"는 선언적
+표(`_PRICE_RATIO_RULES`)이고, 전략 이름으로 분기하지 않는다(여러 전략이 같은 키 이름을
+쓰면(예: donchian·etf_trend 둘 다 `atr`+`ema60`) 자연히 같은 규칙이 적용된다). 분모가
+없거나 0 이거나 결측이면 **그 종목의 그 비율 키만** 빠진다(다른 키·다른 종목은 그대로).
+
+- `atr / ema60 → atr_to_ema60_pct`(%) — donchian·etf_trend.
+- `atr20 / ema60 → atr20_to_ema60_pct`(%) — etf_trend.
+- `atr14 / ema50 → atr14_to_ema50_pct`(%) — vcp.
+- `base_low / ema50 → base_low_to_ema50_ratio` — vcp(베이스 저점이 50일선 대비 어디 있나).
+- `ema50 / ema150 → ema50_to_ema150_ratio`, `ema150 / ema200 → ema150_to_ema200_ratio`
+  — vcp(정배열 정도).
+- `ema_s / ema_m → ema_s_to_ema_m_ratio`, `ema_m / ema_l → ema_m_to_ema_l_ratio`
+  — kojiro(대순환 정렬). kojiro 의 `atr_ratio`(= atr/종가, 이미 가격 무관 비율)와
+  중복이라 `atr`/`ema_m` 비율은 **만들지 않는다** — `atr_ratio` 는 `_ratio` 접미사로
+  `unit="ratio"` 가 그대로 붙는다.
+- `pole_high / pole_start − 1 → pole_rise_pct`(%) — bull_flag(깃대 상승폭). bull_flag 의
+  `atr14` 는 같은 ctx 안에 가격 대용(ema 등)이 없어 비율을 못 만든다 — `unit="won"` 절대값
+  그대로 남는다(아래 「unit」 절 참조).
+- VB·LTV 의 `prev_range` 도 가격 대용이 없어 `unit="won"` 그대로다.
+
+## 보유 종목만 — 매수가 대비 ATR 비율
+
+ATR 계열 키(`atr`·`atr14`·`atr20`)는 **보유 종목만**(매수가가 있어야 비율을 낼 수 있다)
+`strategy.state.positions[ticker].buy_price` 로 `<key>_to_buy_price_pct`(매수가 대비 %)를
+위 이동평균 비율과 **함께** 더한다(둘 다 유용하다 — 매수가 기준은 실제 손익 기준, 이동평균
+기준은 기술적 추세 기준). 후보 종목은 매수가가 없어 이 비율은 홀딩에서만 난다.
+
+## unit 칸 (검토 반영, 2026-10-11)
+
+모든 분포 항목에 `unit` 칸을 붙인다 — 읽는 쪽이 절대값을 종목 간 비교에 잘못 쓰지
+않게 한다. 분류는 **접미사 우선**(`_pct`→"pct", `_ratio`→"ratio") + 범주형이면
+"category" + 그 밖은 `_KEY_UNITS` 조회(없으면 "won" — 미지 키는 보수적으로 "비교 금지"
+쪽으로 떨어진다). `build_key_distributions` 의 반환 dict 는 **pct·ratio 단위 키가 먼저**
+오도록 정렬한다(파이썬 dict 삽입 순서 = JSON 직렬화 순서).
 """
 
 from __future__ import annotations
@@ -59,6 +91,29 @@ from typing import Any, Iterable
 
 #: 보유 종목에서만 매수가 대비 비율을 더하는 ATR 계열 키 이름(전략마다 다르다).
 _ATR_LIKE_KEYS: tuple[str, ...] = ("atr", "atr14", "atr20")
+
+#: (분자 키, 분모 키, 결과 키, 변환) — 전략 이름과 무관하게 두 키가 둘 다 있으면 적용한다.
+#: 변환 = "pct"(분자/분모×100) · "ratio"(분자/분모) · "pct_change"((분자/분모−1)×100).
+_PRICE_RATIO_RULES: tuple[tuple[str, str, str, str], ...] = (
+    ("atr", "ema60", "atr_to_ema60_pct", "pct"),
+    ("atr20", "ema60", "atr20_to_ema60_pct", "pct"),
+    ("atr14", "ema50", "atr14_to_ema50_pct", "pct"),
+    ("base_low", "ema50", "base_low_to_ema50_ratio", "ratio"),
+    ("ema50", "ema150", "ema50_to_ema150_ratio", "ratio"),
+    ("ema150", "ema200", "ema150_to_ema200_ratio", "ratio"),
+    ("ema_s", "ema_m", "ema_s_to_ema_m_ratio", "ratio"),
+    ("ema_m", "ema_l", "ema_m_to_ema_l_ratio", "ratio"),
+    ("pole_high", "pole_start", "pole_rise_pct", "pct_change"),
+)
+
+#: 접미사(`_pct`/`_ratio`)로 못 가르는 키의 단위. 그 밖(원시 가격·EMA·ATR 등)은 "won" 기본값.
+_KEY_UNITS: dict[str, str] = {
+    "avg_volume_20": "count",
+    "flag_avg_volume": "count",
+    "stage": "count",
+    "t7": "ratio",
+    "r4": "ratio",
+}
 
 _EMPTY_BUCKET: dict[str, Any] = {"n_tickers": 0, "n_with_context": 0, "keys": {}}
 
@@ -121,8 +176,23 @@ def summarize_categorical(values: Iterable[Any]) -> "dict | None":
     return {"kind": "categorical", "n": n, "counts": counts}
 
 
+def _unit_for_key(key: str, kind: str) -> str:
+    """`pct`·`ratio`·`won`·`count`·`category` 중 하나. 미지 키는 보수적으로 `won`."""
+    if kind == "categorical":
+        return "category"
+    if key.endswith("_pct"):
+        return "pct"
+    if key.endswith("_ratio"):
+        return "ratio"
+    return _KEY_UNITS.get(key, "won")
+
+
 def build_key_distributions(rows: list[dict]) -> dict[str, dict]:
-    """`llm_context` 값 dict 들을 모아 키별 분포로. 숫자만 모인 키는 숫자 분포, 그 밖은 빈도표."""
+    """`llm_context`(+비율 보강) 값 dict 들을 모아 키별 분포로.
+
+    숫자만 모인 키는 숫자 분포, 그 밖은 빈도표. 각 항목에 `unit` 을 붙이고,
+    `pct`·`ratio` 단위 키가 먼저 오도록 정렬한다(종목 간 비교 가능한 키를 앞에 둔다).
+    """
     raw_by_key: dict[str, list[Any]] = {}
     for row in rows:
         if not isinstance(row, dict):
@@ -132,14 +202,44 @@ def build_key_distributions(rows: list[dict]) -> dict[str, dict]:
                 continue
             raw_by_key.setdefault(k, []).append(v)
 
-    out: dict[str, dict] = {}
+    items: list[tuple[str, dict]] = []
     for key, values in raw_by_key.items():
         if all(_is_finite_number(v) for v in values):
             summary = summarize_numeric(values)
         else:
             summary = summarize_categorical(values)
-        if summary is not None:
-            out[key] = summary
+        if summary is None:
+            continue
+        summary["unit"] = _unit_for_key(key, summary["kind"])
+        items.append((key, summary))
+
+    items.sort(key=lambda kv: 0 if kv[1]["unit"] in ("pct", "ratio") else 1)
+    return dict(items)
+
+
+def _apply_price_ratio_rules(ctx: dict) -> dict:
+    """`_PRICE_RATIO_RULES` 를 ctx 에 적용해 가격 무관 비율 키를 더한다(순수, never-raise)."""
+    if not ctx:
+        return ctx
+    out = dict(ctx)
+    for num_key, den_key, out_key, transform in _PRICE_RATIO_RULES:
+        num = ctx.get(num_key)
+        den = ctx.get(den_key)
+        if not (_is_finite_number(num) and _is_finite_number(den)):
+            continue
+        den_f = float(den)
+        if den_f == 0:
+            continue
+        try:
+            num_f = float(num)
+            if transform == "pct":
+                out[out_key] = round(num_f / den_f * 100.0, 4)
+            elif transform == "ratio":
+                out[out_key] = round(num_f / den_f, 6)
+            elif transform == "pct_change":
+                out[out_key] = round((num_f / den_f - 1.0) * 100.0, 4)
+        except Exception:
+            continue
     return out
 
 
@@ -205,6 +305,7 @@ def _llm_context_for(strategy: Any, ticker: str) -> dict:
 
 
 def _augment_with_atr_ratio(ctx: dict, buy_price: "float | None") -> dict:
+    """보유 종목만 — ATR 계열 키에 매수가 대비 비율(`<key>_to_buy_price_pct`)을 더한다."""
     if not ctx or buy_price is None or buy_price <= 0:
         return ctx
     out = dict(ctx)
@@ -212,7 +313,7 @@ def _augment_with_atr_ratio(ctx: dict, buy_price: "float | None") -> dict:
         v = ctx.get(key)
         if _is_finite_number(v):
             try:
-                out[f"{key}_pct_of_buy_price"] = round(float(v) / buy_price * 100.0, 4)
+                out[f"{key}_to_buy_price_pct"] = round(float(v) / buy_price * 100.0, 4)
             except Exception:
                 pass
     return out
@@ -222,21 +323,28 @@ def collect_strategy_core_metrics(strategy: Any) -> dict:
     """전략 하나의 후보·보유 핵심값 분포. never-raise — 실패하면 빈 버킷 둘을 돌려준다.
 
     반환 = `{"candidates": {n_tickers, n_with_context, keys}, "holdings": {...}}`.
+    `keys` 의 각 항목은 가격 무관 비율(`_apply_price_ratio_rules`)과 `unit` 칸이 붙은
+    원값을 함께 담는다(보유만 매수가 대비 비율도 추가).
     """
     try:
         candidate_tickers = _candidate_tickers(strategy)
         holding_tickers = _holding_tickers(strategy)
 
-        cand_rows = [
-            ctx for ctx in (_llm_context_for(strategy, t) for t in candidate_tickers) if ctx
-        ]
+        cand_rows: list[dict] = []
+        for t in candidate_tickers:
+            ctx = _llm_context_for(strategy, t)
+            if not ctx:
+                continue
+            cand_rows.append(_apply_price_ratio_rules(ctx))
 
         hold_rows: list[dict] = []
         for t in holding_tickers:
             ctx = _llm_context_for(strategy, t)
             if not ctx:
                 continue
-            hold_rows.append(_augment_with_atr_ratio(ctx, _buy_price(strategy, t)))
+            ctx = _apply_price_ratio_rules(ctx)
+            ctx = _augment_with_atr_ratio(ctx, _buy_price(strategy, t))
+            hold_rows.append(ctx)
 
         return {
             "candidates": {

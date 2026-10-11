@@ -90,11 +90,98 @@ def test_build_key_distributions_mixed_type_key_falls_back_to_categorical():
 def test_build_key_distributions_ignores_none_and_non_dict_rows():
     rows = [{"a": 1}, None, {"a": None}, "not-a-dict", {}]
     out = scm.build_key_distributions(rows)
-    assert out == {"a": {"kind": "numeric", "n": 1, "median": 1.0, "p25": 1.0, "p75": 1.0, "min": 1.0, "max": 1.0}}
+    assert out == {
+        "a": {"kind": "numeric", "n": 1, "median": 1.0, "p25": 1.0, "p75": 1.0, "min": 1.0,
+              "max": 1.0, "unit": "won"},
+    }
 
 
 def test_build_key_distributions_empty_rows_is_empty_dict():
     assert scm.build_key_distributions([]) == {}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# unit 칸 (검토 반영) — pct/ratio/won/count/category
+# ─────────────────────────────────────────────────────────────────────────────
+
+def test_build_key_distributions_unit_tagging():
+    rows = [
+        {"atr": 100.0, "last_pullback_pct": 0.08, "atr_ratio": 0.03,
+         "avg_volume_20": 500000, "stage": 3, "cell": "B2"},
+    ]
+    out = scm.build_key_distributions(rows)
+    assert out["atr"]["unit"] == "won", "미지 키 기본값 — 종목 간 비교 금지 신호"
+    assert out["last_pullback_pct"]["unit"] == "pct"
+    assert out["atr_ratio"]["unit"] == "ratio"
+    assert out["avg_volume_20"]["unit"] == "count"
+    assert out["stage"]["unit"] == "count"
+    assert out["cell"]["unit"] == "category"
+
+
+def test_build_key_distributions_sorts_pct_ratio_keys_first():
+    rows = [{"atr": 100.0, "atr_to_ema60_pct": 1.5, "ema_s_to_ema_m_ratio": 1.02, "stage": 3}]
+    out = scm.build_key_distributions(rows)
+    order = list(out.keys())
+    pct_ratio_positions = [i for i, k in enumerate(order) if out[k]["unit"] in ("pct", "ratio")]
+    other_positions = [i for i, k in enumerate(order) if out[k]["unit"] not in ("pct", "ratio")]
+    assert pct_ratio_positions and other_positions
+    assert max(pct_ratio_positions) < min(other_positions), order
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 가격 무관 비율 — `_apply_price_ratio_rules` (검토 반영)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def test_apply_price_ratio_rules_computes_pct_and_ratio_and_pct_change():
+    ctx = {
+        "atr": 150.0, "ema60": 15000.0,
+        "ema_s": 102.0, "ema_m": 100.0, "ema_l": 98.0,
+        "pole_high": 1100.0, "pole_start": 1000.0,
+    }
+    out = scm._apply_price_ratio_rules(ctx)
+    assert out["atr_to_ema60_pct"] == 1.0  # 150/15000*100
+    assert out["ema_s_to_ema_m_ratio"] == 1.02
+    assert out["pole_rise_pct"] == 10.0  # (1100/1000 - 1) * 100
+    # 원값은 그대로 남는다
+    assert out["atr"] == 150.0 and out["ema60"] == 15000.0
+
+
+def test_apply_price_ratio_rules_skips_only_that_ticker_key_on_missing_or_zero_denominator():
+    # 분모 결측
+    out1 = scm._apply_price_ratio_rules({"atr": 10.0})
+    assert "atr_to_ema60_pct" not in out1
+    assert out1["atr"] == 10.0
+
+    # 분모 0
+    out2 = scm._apply_price_ratio_rules({"atr": 10.0, "ema60": 0.0})
+    assert "atr_to_ema60_pct" not in out2
+    assert out2["atr"] == 10.0 and out2["ema60"] == 0.0
+
+
+def test_apply_price_ratio_rules_empty_ctx_is_noop():
+    assert scm._apply_price_ratio_rules({}) == {}
+
+
+def test_kojiro_atr_ratio_not_duplicated_by_atr_ema_m_rule():
+    """kojiro 의 atr_ratio(=atr/종가) 와 중복되므로 atr/ema_m 규칙은 없다."""
+    ctx = {"atr": 100.0, "atr_ratio": 0.03, "ema_s": 102.0, "ema_m": 100.0, "ema_l": 98.0}
+    out = scm._apply_price_ratio_rules(ctx)
+    assert "atr_to_ema_m_pct" not in out
+    assert "atr_to_ema_m_ratio" not in out
+    assert out["atr_ratio"] == 0.03  # 그대로 보존
+
+
+def test_candidates_get_price_ratio_too_not_only_holdings():
+    """검토 지적 — 후보에도 비율이 생겨야 한다(이전엔 보유만 ATR 비율을 받았다)."""
+    strat = _strategy(
+        scanned=["A"],
+        llm_context_map={"A": {"atr": 150.0, "ema60": 15000.0}},
+    )
+    out = scm.collect_strategy_core_metrics(strat)
+    keys = out["candidates"]["keys"]
+    assert "atr_to_ema60_pct" in keys
+    assert keys["atr_to_ema60_pct"]["unit"] == "pct"
+    assert keys["atr_to_ema60_pct"]["median"] == 1.0
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -154,8 +241,9 @@ def test_collect_candidates_and_holdings_build_separate_distributions():
     hk = out["holdings"]["keys"]
     assert hk["atr14"]["n"] == 1
     # 보유는 매수가 대비 ATR 비율이 더해진다 — 50/10000*100 = 0.5%
-    assert hk["atr14_pct_of_buy_price"]["n"] == 1
-    assert hk["atr14_pct_of_buy_price"]["median"] == 0.5
+    assert hk["atr14_to_buy_price_pct"]["n"] == 1
+    assert hk["atr14_to_buy_price_pct"]["median"] == 0.5
+    assert hk["atr14_to_buy_price_pct"]["unit"] == "pct"
 
 
 def test_candidates_without_context_are_excluded_from_distribution_but_counted():
@@ -231,7 +319,7 @@ def test_buy_price_missing_or_nonpositive_skips_ratio_augmentation():
     out = scm.collect_strategy_core_metrics(strat)
     hk = out["holdings"]["keys"]
     assert hk["atr"]["n"] == 2
-    assert "atr_pct_of_buy_price" not in hk
+    assert "atr_to_buy_price_pct" not in hk
 
 
 def test_collect_all_core_metrics_isolates_per_strategy_failures():

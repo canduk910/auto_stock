@@ -206294,7 +206294,7 @@ frontend:
     - frontend/src/pages/__tests__/Dashboard.fix1.cycle414.test.tsx
     - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
     - frontend/src/pages/__tests__/MarketState.test.tsx
-generated_at: '2026-10-11T20:26:54.731110+09:00'
+generated_at: '2026-10-11T20:46:37.094792+09:00'
 stats:
   backend_modules: 196
   backend_tests: 1379
