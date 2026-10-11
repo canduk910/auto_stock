@@ -79466,7 +79466,6 @@ backend:
     - tests/unit/engine/strategies/test_cycle405_donchian_kk_sizing.py
     - tests/unit/engine/test_cycle394_gpt6_luna.py
     - tests/unit/engine/test_cycle445_prompt_version_model.py
-    - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
     - tests/contract/test_cycle171_snapshot_route_steps.py
@@ -80765,6 +80764,7 @@ backend:
     - tests/unit/routes/test_cycle293_kill_switch_route.py
     - tests/unit/routes/test_cycle295_gap_route_surface.py
     - tests/unit/routes/test_cycle295_manual_sell_exempt.py
+    - tests/unit/routes/test_cycle297_llm_retrospective_route.py
     - tests/unit/routes/test_cycle325_weight_zero_abandons_positions.py
     - tests/unit/routes/test_cycle333_weight_zero_backdoor.py
     - tests/unit/routes/test_cycle350_market_ops_funnel_floor.py
@@ -201913,7 +201913,7 @@ frontend:
     - frontend/src/pages/__tests__/Dashboard.fix1.cycle414.test.tsx
     - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
     - frontend/src/pages/__tests__/MarketState.test.tsx
-generated_at: '2026-10-11T17:09:21.347486+09:00'
+generated_at: '2026-10-11T17:20:58.295585+09:00'
 stats:
   backend_modules: 194
   backend_tests: 1360
