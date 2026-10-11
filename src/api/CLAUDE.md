@@ -343,6 +343,26 @@ WebSocket 장운영정보의 **파싱 정본**이다. 구독 송신 = `src/engin
 - **로그** — `[stock_chart_fetch]` INFO(KIS 를 부른 조회마다: `calls`·`bars`·`dropped`·`complete`·`reason`·`elapsed_ms`) · `[stock_chart_partial]` WARNING · `[stock_chart_busy]` WARNING. 캐시 적중은 로그 없음
 - 테스트 seam — `_monotonic`(시계, 모듈 전역 재조회) · `_reset_state_for_tests()`(캐시·inflight·세마포어·마지막 호출 시각 재생성 — asyncio 프리미티브는 처음 기다린 루프에 묶인다). 가드 `tests/unit/api/test_cycle387_period_chart_fetch.py` · `tests/unit/ast/test_cycle387_ast_stock_chart_scope.py`(G1~G7)
 
+## overseas_quote.py — 해외지수 기간별시세 (ndx2x_riskoff 신호 원천, cycle443)
+
+- `fetch_daily_chartprice(start, end, *, iscd=NDX_ISCD) -> list[dict]` — `FHKST03030100`(해외주식
+  종목/지수/환율기간별시세) `/uapi/overseas-price/v1/quotations/inquire-daily-chartprice`,
+  `kis_get_quote`(시세 풀, 화이트리스트 등재 완료) 경유. 파라미터 = `FID_COND_MRKT_DIV_CODE="N"`(해외지수) ·
+  `FID_INPUT_ISCD`(기본 `NDX`=나스닥100, 실측 — `.NDX`·`NAS@NDX`·`IXIC` 는 0행) · `FID_INPUT_DATE_1/2` ·
+  `FID_PERIOD_DIV_CODE="D"`.
+- **실측(2026-10-11, 운영 키)** — `output2` 는 **최신순**(날짜 내림차순), 종가 = `ovrs_nmix_prpr`, 날짜 =
+  `stck_bsop_date`(YYYYMMDD). 한 호출 **최대 100행**(KIS "tr_cont 를 이용한 다음조회 불가") — 더 과거는
+  `FID_INPUT_DATE_2`(종료일) 커서를 과거로 당겨 다시 호출한다. 요청 구간을 넓혀도 "그 구간 안의 최근
+  100행" 만 오고 더 과거는 버려진다.
+- **0행 = 오류**(`rt_cd=="0"` 인 정상 응답이어도) — `OverseasIndexEmptyResponseError`. 잘못된 지수 코드의
+  실측 특징이라 재시도하지 않고 `FID_INPUT_ISCD` 를 재확인한다.
+- **시작일 근처 며칠 누락** — 요청 구간의 시작일 쪽 경계에서 실측상 며칠이 비어 온다(0701→0708·
+  0901→0904·0920→0925 등 비일관). 파서(`src/engine/ndx2x_core.py`)는 이 누락을 직접 다루지 않고,
+  이력 적재(`src/engine/ndx2x_ingest.py`)가 **매 반복의 종료일 커서를 이전 응답의 최저 날짜로 당겨** 겹치게
+  호출해 상쇄한다(그 겹침 날짜는 이전 응답에 실존했던 날이라 이번 응답의 시작 경계가 아니다).
+- 호출자는 **미국 종가 확정 뒤(KST 07:00 이후, 서머타임 전환 양쪽 포함)** 에만 불러야 한다 — 이 모듈은
+  시각을 판단하지 않는다. 소비처 = `ndx2x_ingest.ensure_history` 하나.
+
 ## 새 API 추가 절차
 
 1. `docs/kis/{category}.md` 에서 TR_ID·URL·파라미터 확인. 2026-09-14 제도 변경 이후 사실은 `docs/kis/README.md` 「제도 변경 공지 반영」 절을 먼저 본다

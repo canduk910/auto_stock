@@ -862,9 +862,54 @@ BFB/VCP 매수 신호는 (donchian 의 폴링 루프와 달리) `risk.on_tick`(W
 `unit = floor(예산 × 0.01 ÷ N)` → `compute_unit_qty_guarded`(변동성 floor 0 — ATR20 밴드가 하한) → `_apply_budget_limit` 관문. 유닛이 0 이면 **0 을 돌려준다**(position_ratio 낙하·1주 폴백 없음). `_entry_atr` = 사이징 N.
 
 ### 운영 단계·킬스위치
-- 코드 기본값 `shadow_mode=True`(이 전략만) · `market_unit_mode="shadow"` · 등록 `enabled=False, weight=0`. S1 섀도 = DB `enabled=true`·`weight=0`(카드 #9 가 비중 0 에도 `enabled` 를 지킨다).
+- 코드 기본값 `shadow_mode=True`(ndx2x_riskoff 도 같은 기본값) · `market_unit_mode="shadow"` · 등록 `enabled=False, weight=0`. S1 섀도 = DB `enabled=true`·`weight=0`(카드 #9 가 비중 0 에도 `enabled` 를 지킨다).
 - 신규 진입 중단 = `buy_paused` · 실전→섀도 = `shadow_mode=true` · 전략 정지는 보유 0 확인 뒤만.
 - 이 전략의 키는 `PARAM_RANGES`/`INT_PARAMS`(AI 자동 튜닝)에 하나도 넣지 않는다.
+
+## 6-I. 전략 I: 나스닥2배-위험회피 (ndx2x_riskoff) 상세
+
+자문 = `_workspace/domain_consult/2026-10-06_ndx2x_risk_off.md`. 신호 식 = 연구 규칙 원본
+`tools/replay/ra_us.py::feats_from_close`(규칙 C, 동결 — 새 규칙·최적화·평활·손절 추가 금지).
+순수 함수 = `src/engine/ndx2x_core.py`, 이력 적재 = `src/engine/ndx2x_ingest.py`.
+
+### 등록
+- 명부 끝 1행: `eval_driver="swing_poll"`(등록 분류용 — 공유 매수 폴 루프가 아니라 전용
+  `scheduler._ndx2x_poll_loop` 가 구동) · `breakout_rank=None` · `open_price_target=False` ·
+  `close_at_1520=False` · `market_unit_policy="none"`(미국 지수 규칙에 한국 장세 축소는
+  다른 규칙이 된다).
+- 멀티데이 보유(`_MULTIDAY_STRATEGIES`). 손절이 없는 상태기계 — `check_force_clear()` 호출
+  대상 아님(`close_at_1520=False`).
+
+### 신호 (일일 1회, `sync_daily_decision`)
+- 종목 = **418660(TIGER 미국나스닥100레버리지(합성), 환노출) 하나 고정**.
+- T7 = SMA120(t)/SMA120(t−20) − 1(120일선의 20영업일 기울기). R4 = close(t)/max(종가[t−249..t]) − 1
+  (250일 최고 종가 대비, 당일 포함).
+- 칸 = `f"{int(T7>0)}{int(R4<=-0.20)}"` — `"01"`(기울기 하락 ∧ 고점 −20% 넘게 하락) → **현금**,
+  그 외(`00`·`10`·`11`) → **2배 100%**.
+- 이력 300영업일 미만·T7/R4 결측 = **fail-closed**(매매 없음 + 경보, 직전 상태 유지) — 연구
+  규약("결측=조건 거짓→2배")으로 새지 않는다. 결손 3 미국 영업일 연속 = `[ndx2x_data_stale]` WARNING.
+- 신호 원천 = KIS `FHKST03030100`(해외지수) → `overseas_index_daily`. 미국 종가 확정 뒤(KST
+  07:00 이후)에만 읽는다.
+
+### 집행 (09:30~10:30 KST, 양끝 포함 — 그 밖에는 평가 자체가 없다)
+- 상태 전환이 있는 날만 지정가 1회(매수=매도1호가, 매도=매수1호가) — **시장가 금지**.
+- 2배 진입 수량 = `floor(전략 예산 × position_ratio × 0.995 ÷ 지정가)`, 전량 1회
+  (`_apply_budget_limit` 관문 경유, 1주 폴백·turtle 유닛화 없음).
+- 현금 전환 = 보유 전량. 부분 체결은 같은 창 안 잔량 재주문, 창이 끝나면 다음 날 이어서.
+- 상태 변화가 없으면 매매 0(예산이 바뀌어도 추가 매수·부분 매도 없음).
+
+### 운영 단계·킬스위치·알려진 한계
+- 코드 기본값 `shadow_mode=True`(ndx2x_riskoff 도 etf_trend 와 같은 기본값) · 등록
+  `enabled=True, weight=0`(시드 마이그레이션 049도 같다 — 사용자 결정 2026-10-11
+  "섀도 운영부터 하다가 자금배정"). 전략 정지는 보유 0 확인 뒤만.
+- 이 전략의 키는 `PARAM_RANGES`/`INT_PARAMS`(AI 자동 튜닝)에 하나도 넣지 않는다 — 규칙 C 는
+  동결이고 파라미터로 열지 않는다.
+- 🔴 **실매수 전환 전 확인 항목** — `order_engine.execute_buy` 는 외부에서 지정가를 강제할
+  공개 경로가 없다(시장가 기본, 내부 NXT 프리마켓 전용 변환뿐). 섀도 해제 전 8영역
+  (`order_engine.py`) 승인 + domain-consult 선행 필수. 전용 폴 루프는 섀도 해제 뒤 실 BUY
+  신호가 나면 CRITICAL 로 멈추고 주문을 내지 않는다(안전 측 — 시장가로 새지 않는다).
+  매도(현금 전환)는 `execute_sell` 의 기존 `limit_price` 경로로 지정가가 이미 가능하다.
+  실매수 전환 전 추가 확인 = 418660 레버리지 ETF 매수 자격(사전교육·기본예탁금, 자문 §1(c)).
 
 ## 7. 공통 규칙
 
