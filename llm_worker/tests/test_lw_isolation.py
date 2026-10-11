@@ -131,7 +131,7 @@ def test_i4_requirements_exactly_three_pinned():
     assert _REQS.is_file(), "llm_worker/requirements.txt 가 없다"
     lines = [ln.split("#", 1)[0].strip() for ln in _REQS.read_text(encoding="utf-8").splitlines()]
     lines = [ln for ln in lines if ln]
-    assert sorted(lines) == sorted(["asyncpg==0.30.0", "httpx==0.28.1", "openai==1.54.4"]), lines
+    assert sorted(lines) == sorted(["asyncpg==0.30.0", "httpx==0.28.1", "openai==3.26.1"]), lines
 
 
 def _docker_code_lines() -> list:
