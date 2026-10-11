@@ -1630,7 +1630,7 @@ async def subscribe_filtered_stocks(
     if extra_tickers:
         extra_tickers = await _apply_trade_amount_filter(extra_tickers, protected_tickers=_protected)  # (2)
     if priority_groups:
-        for _taf_pkey in ("breakout", "momentum"):
+        for _taf_pkey in ("breakout", "momentum", "shadow"):  # cycle444 — shadow 도 같은 필터
             if priority_groups.get(_taf_pkey):
                 priority_groups[_taf_pkey] = await _apply_trade_amount_filter(
                     priority_groups[_taf_pkey], protected_tickers=_protected,
@@ -1706,6 +1706,8 @@ async def subscribe_filtered_stocks(
         swing = list(dict.fromkeys(priority_groups.get("swing") or []))
         momentum = list(dict.fromkeys(priority_groups.get("momentum") or []))
         breakout = list(dict.fromkeys(priority_groups.get("breakout") or []))
+        # cycle444 — 섀도 전략 후보(최후순위 LOW 티어). 키 부재(옛 호출자) = 빈 list.
+        shadow = list(dict.fromkeys(priority_groups.get("shadow") or []))
 
         from src.realtime.websocket import MAX_SUBSCRIPTIONS
 
@@ -1753,9 +1755,11 @@ async def subscribe_filtered_stocks(
                 tick_tr_id_for(t, priority="HIGH"), t, priority="HIGH", bypass_limit=True,
             )
 
-        # 3~5) 후순위 — 2-pass 슬롯 흡수 (PR-E P1, 2026-05-15)
-        # LOW 순서 (G안, 2026-05-12): breakout → momentum → swing.
+        # 3~6) 후순위 — 2-pass 슬롯 흡수 (PR-E P1, 2026-05-15)
+        # LOW 순서 (G안, 2026-05-12 + cycle444): breakout → momentum → swing → shadow.
         # donchian_swing 은 Pull 폴링으로 매수 평가하므로 슬롯 손실 안전.
+        # shadow(cycle444, 사용자 지시 2026-10-11) = 섀도 전략 후보 최후순위 —
+        # 실전 셋(breakout/momentum/swing)이 슬롯을 다 쓰면 섀도가 먼저 drop 된다.
         #
         # PR-E (P1, 2026-05-15) — 2-pass 슬롯 흡수:
         #   1차: positions(bypass) → next_day_clear(bypass) → breakout[:cap] → momentum → swing
@@ -1766,7 +1770,7 @@ async def subscribe_filtered_stocks(
         #   [priority_drop] breakout=3 ... total_subscribed=30 max=41 ... low_remaining=11
         #   → 11 슬롯 미사용인데도 breakout overflow 3 종목이 silently drop 되어 운영 슬롯 낭비.
         # 2-pass 로 잔여 슬롯에 overflow 를 흡수해 슬롯 낭비 + 부당 drop 동시 차단.
-        drop_counts: dict[str, int] = {"breakout": 0, "momentum": 0, "swing": 0}
+        drop_counts: dict[str, int] = {"breakout": 0, "momentum": 0, "swing": 0, "shadow": 0}
 
         # 사이클 184 (stale-2) — 풀 총용량 기준 잔여 슬롯 (메인 단독 카운트 → 풀 union)
         # 세션 수는 2-pass 루프 중 불변이라 HIGH 처리 후 LOW 루프 진입 전 1회만 계산.
@@ -1793,6 +1797,7 @@ async def subscribe_filtered_stocks(
             ("breakout", breakout_primary),
             ("momentum", momentum),
             ("swing", swing),
+            ("shadow", shadow),  # cycle444 — 최후순위
         ):
             for t in candidates:
                 if t in already:
@@ -1864,6 +1869,7 @@ async def subscribe_filtered_stocks(
             drop_log = (
                 f"[priority_drop] breakout={drop_counts['breakout']} "
                 f"momentum={drop_counts['momentum']} swing={drop_counts['swing']} "
+                f"shadow={drop_counts['shadow']} "  # cycle444
                 f"total_subscribed={total_subscribed} max={MAX_SUBSCRIPTIONS} "
                 f"high_count={high_count} low_remaining={low_remaining} "
                 f"pool_sessions={_pool_session_count} pool_slots={_pool_total_slots} "
@@ -1885,10 +1891,11 @@ async def subscribe_filtered_stocks(
         swing_c = int(source_counts.get("swing", 0))
         momentum_c = int(source_counts.get("momentum", 0))
         positions_c = int(source_counts.get("positions", 0))
+        shadow_c = int(source_counts.get("shadow", 0))  # cycle444
         logger.info(
             "실시간 시세 구독 완료: total=%d "
-            "(vb=%d, ltv=%d, bfb=%d, vcp=%d, swing=%d, momentum=%d, positions=%d)",
-            len(all_tickers), vb, ltv, bfb, vcp, swing_c, momentum_c, positions_c,
+            "(vb=%d, ltv=%d, bfb=%d, vcp=%d, swing=%d, momentum=%d, positions=%d, shadow=%d)",
+            len(all_tickers), vb, ltv, bfb, vcp, swing_c, momentum_c, positions_c, shadow_c,
         )
     else:
         logger.info("실시간 시세 구독 완료: %d종목 (모멘텀: %d, 기타: %d)",

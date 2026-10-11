@@ -29,7 +29,7 @@ from src.engine.risk import RiskManager
 from src.engine.scanner import scan_stocks, subscribe_filtered_stocks, unsubscribe_all
 from src.engine.session import MarketBoard, session_tracker
 from src.engine.daily_emit_cap import DailyEmitCap
-from src.engine.strategy_base import Signal, StrategyConfig, resolve_force_clear_signal
+from src.engine.strategy_base import Signal, StrategyBase, StrategyConfig, resolve_force_clear_signal
 from src.engine.strategy_manifest import (
     BREAKOUT_IDS, BREAKOUT_SUBSCRIBE_ORDER, CLOSE_AT_1520_IDS, OPEN_PRICE_TARGET_IDS,
     STRATEGY_MANIFEST, SWING_POLL_IDS,
@@ -818,7 +818,12 @@ class TradingScheduler:
 
             if now < TIME_KRX_MAIN_BUY_STOP:
                 tickers = await scan_stocks()
-                extra = self._collect_breakout_tickers() + self._collect_swing_tickers()
+                # cycle444 — 섀도 돌파 후보도 extra 에 실어 채널 워밍 대상에 넣는다
+                # (실제 구독 순위는 priority_groups["shadow"] 가 정한다).
+                extra = (
+                    self._collect_breakout_tickers() + self._collect_swing_tickers()
+                    + self._collect_shadow_breakout_tickers()
+                )
                 source_counts = self._build_subscription_source_counts(momentum_tickers=tickers)
                 priority_groups = self._build_priority_groups(momentum_tickers=tickers)
                 await subscribe_filtered_stocks(
@@ -1765,7 +1770,7 @@ class TradingScheduler:
         await open_price_observe.run_open_source_compare_once(self)
 
     def _collect_breakout_tickers(self) -> list[str]:
-        """돌파 4 전략(VB / LTV / BFB / VCP)의 스캔 종목을 합산한다.
+        """돌파 4 전략(VB / LTV / BFB / VCP) 중 **실전**(섀도 아님) 스캔 종목을 합산한다.
 
         사이클 32 (R4, 2026-05-21) — `_universe_excluded_today` 종목 필터링.
         stale > 5 + 거래량 빈약 자동 제외 (매일 reset).
@@ -1775,6 +1780,10 @@ class TradingScheduler:
         이 함수(= `_scan_loop` extra / `_collect_presubscribe_tickers` / `_build_priority_groups`
         breakout 그룹의 유일한 소스)에 포함되어야 구독 → tick 수신 → 매수 평가가 성립한다.
         미포함 시 유니버스/임계 완화를 해도 BFB/VCP 0건 지속.
+
+        cycle444 — 섀도 전략(`StrategyBase.is_low_ws_priority`)의 후보는 이 함수가 돌려주지
+        않는다. 섀도 후보는 `_collect_shadow_breakout_tickers()` 가 따로 합산해
+        `_build_priority_groups` 의 최후순위 `shadow` 티어로 간다.
         """
         # 병합 순서 = 구독 우선순위 (dedup 순서 보존 → pool 압박 시 tail 부터 잘림).
         # BFB/VCP 를 head 로 (2026-08-08, 사용자 결정) — 종전 VB→LTV→BFB→VCP 는
@@ -1785,8 +1794,29 @@ class TradingScheduler:
         for sid in BREAKOUT_SUBSCRIBE_ORDER:  # cycle398 PR2 — 명부 파생(카드 #3, breakout_rank 오름차순)
             strategy = self.registry.get(sid)
             if strategy and strategy.config.enabled and hasattr(strategy, 'get_scanned_tickers'):
+                if StrategyBase.is_low_ws_priority(strategy):  # cycle444 — 섀도는 여기서 빠진다
+                    continue
                 tickers.extend(strategy.get_scanned_tickers())
         # 사이클 32 — universe 제외 종목 필터링 (사전 init 누락 인스턴스 보호)
+        excluded = getattr(self, "_universe_excluded_today", None) or set()
+        if excluded:
+            tickers = [t for t in tickers if t not in excluded]
+        return tickers
+
+    def _collect_shadow_breakout_tickers(self) -> list[str]:
+        """cycle444 — 돌파 4 전략 중 **섀도** 전략의 스캔 종목만 합산한다.
+
+        `_collect_breakout_tickers()` 와 짝(둘을 합치면 종전 전체 집합과 같다).
+        `_build_priority_groups` 의 `shadow` 티어(LOW 최후순위) 소스 전용 —
+        끊지 않고 순위만 낮춘다(섀도도 WS tick 이 있어야 `[shadow_buy]` 기록이 선다).
+        """
+        tickers: list[str] = []
+        for sid in BREAKOUT_SUBSCRIBE_ORDER:
+            strategy = self.registry.get(sid)
+            if strategy and strategy.config.enabled and hasattr(strategy, 'get_scanned_tickers'):
+                if not StrategyBase.is_low_ws_priority(strategy):
+                    continue
+                tickers.extend(strategy.get_scanned_tickers())
         excluded = getattr(self, "_universe_excluded_today", None) or set()
         if excluded:
             tickers = [t for t in tickers if t not in excluded]
@@ -1816,6 +1846,10 @@ class TradingScheduler:
         자동 포함되어 청산 평가(ATR 트레일링/하드 -7%) 보장.
         """
         tickers: set[str] = set(self._collect_breakout_tickers())
+        # cycle444 — 섀도 돌파 후보도 채널 워밍/후보풀 캐시(`_record_scan_pool_candidates`)
+        # 대상에 들어가야 한다. 실제 구독 순위는 `_build_priority_groups` 의 `shadow`
+        # 티어가 정한다 — 여기서는 후보 집합만 합친다(dedupe).
+        tickers.update(self._collect_shadow_breakout_tickers())
         for s in self.registry.all():
             tickers.update(s.state.positions.keys())
         return list(tickers)
@@ -1832,6 +1866,8 @@ class TradingScheduler:
         - `swing`      : donchian_swing.get_scanned_tickers() 개수
         - `momentum`   : momentum_tickers 인자 길이 (scan_stocks() 결과)
         - `positions`  : 모든 전략 보유 포지션 합산 (중복 가능)
+        - `shadow`     : 섀도 돌파 후보 + (momentum 이 섀도면) momentum 후보 (cycle444,
+                         원본 개수 — `_build_priority_groups` 의 `shadow` 티어 dedup 전)
 
         합집합 후 실제 구독 개수는 `subscribe_filtered_stocks` 가 자체 계산해 `total=` 로 노출.
         어제(2026-05-11) "기타 23종목" 표기에서 VB/LTV 0건 식별 불가 결함 보완.
@@ -1844,6 +1880,7 @@ class TradingScheduler:
             "swing": 0,
             "momentum": len(momentum_tickers) if momentum_tickers else 0,
             "positions": 0,
+            "shadow": 0,
         }
         vb = self.registry.get("volatility_breakout")
         if vb and hasattr(vb, "get_scanned_tickers"):
@@ -1883,25 +1920,42 @@ class TradingScheduler:
             except Exception:
                 pass
         counts["positions"] = positions_total
+
+        # cycle444 — 섀도 티어 원본 개수(돌파 섀도 합산 + momentum 이 섀도면 그 몫).
+        shadow_total = 0
+        try:
+            shadow_total += len(self._collect_shadow_breakout_tickers())
+        except Exception:
+            pass
+        try:
+            mom_strategy = self.registry.get("momentum")
+            if mom_strategy is not None and StrategyBase.is_low_ws_priority(mom_strategy) and momentum_tickers:
+                shadow_total += len(momentum_tickers)
+        except Exception:
+            pass
+        counts["shadow"] = shadow_total
         return counts
 
     def _build_priority_groups(
         self, momentum_tickers: list[str] | None = None,
     ) -> dict[str, list[str]]:
-        """우선순위 큐 구독용 5개 카테고리 dict 를 산출한다 (E1, 2026-05-12).
+        """우선순위 큐 구독용 6개 카테고리 dict 를 산출한다 (E1, 2026-05-12 + cycle444).
 
-        키 (HIGH → LOW):
-        - positions       : 모든 전략 보유 합집합 (dedupe). bypass_limit=True 적용 — 한도 무시 절대 보장
+        키 (HIGH → LOW, LOW 안에서는 breakout → momentum → swing → shadow 순):
+        - positions       : 모든 전략 보유 합집합 (dedupe). bypass_limit=True — 한도 무시 절대 보장
         - next_day_clear  : `_pending_next_day_clear` set 의 ticker (dedupe). 동일 — 절대 보장
-        - swing           : `_collect_swing_tickers()` (donchian_swing 후보)
-        - momentum        : `momentum_tickers` 인자 그대로 (보통 `scan_stocks()` 결과)
-        - breakout        : `_collect_breakout_tickers()` (volatility_breakout + long_tail_volatility
-                            + bull_flag_breakout + vcp_breakout — 사이클 48). LOW + bypass_limit=False.
+        - swing           : `_collect_swing_tickers()` (donchian_swing 후보, 늘 빈 list — G안)
+        - momentum        : `momentum_tickers` 인자 그대로 — **섀도면 제외**(아래로)
+        - breakout        : `_collect_breakout_tickers()` — **실전만**(섀도 제외)
+        - shadow          : 섀도 전략의 돌파·momentum 후보(cycle444) — LOW 최후순위.
 
-        빈 카테고리도 키 자체는 항상 5개 존재 (빈 리스트). `subscribe_filtered_stocks(priority_groups=...)`
-        가 받아 HIGH→LOW 순서로 구독한다. 후순위만 잔여 슬롯 초과 시 drop, HIGH 는 한도 무시.
+        빈 카테고리도 키 자체는 항상 6개 존재. `subscribe_filtered_stocks(priority_groups=...)`
+        가 HIGH→LOW 순서로 구독한다. 후순위만 잔여 슬롯 초과 시 drop, HIGH 는 한도 무시.
 
-        어제·오늘 donchian_swing 조기 손절 사건의 루트 원인(보유 종목 시세 누락) 차단.
+        cycle444 — 섀도 후보는 지우지 않고 `breakout`/`momentum` 에서 `shadow` 로 옮길
+        뿐이다(슬롯이 남으면 여전히 구독). 같은 종목이 실전 후보이기도 하면 실전 쪽에
+        남는다 — 실전 수집이 먼저 채워지고 `subscribe_filtered_stocks` 의 중복 제거가
+        처리 순서(실전 먼저)대로 실전을 우선한다.
         """
         # positions: 전 전략 합집합 — 순서 보존 dedupe (dict.fromkeys)
         position_tickers: list[str] = []
@@ -1918,15 +1972,32 @@ class TradingScheduler:
 
         # G안(2026-05-12): swing 키는 항상 빈 list — donchian_swing 후보는 Pull 폴링으로 평가하므로
         # WebSocket 구독 미사용. 보유 종목은 positions HIGH 그룹으로 별도 유입되어 청산 평가 보장.
-        # 시그니처 호환을 위해 키 자체는 5개 모두 유지.
+        # 시그니처 호환을 위해 키 자체는 유지.
         momentum_list = list(momentum_tickers or [])
         breakout_list = self._collect_breakout_tickers()
+
+        # cycle444 — momentum 전략이 섀도면 momentum 몫 전체를 섀도 티어로 옮긴다
+        # (momentum 급등 스캔은 registry.enabled 와 무관하게 채워지므로 섀도 판정도
+        # 여기서 별도로 본다 — `_collect_breakout_tickers` 는 momentum 을 보지 않는다).
+        shadow_momentum_list: list[str] = []
+        try:
+            mom_strategy = self.registry.get("momentum")
+        except Exception:
+            mom_strategy = None
+        if mom_strategy is not None and StrategyBase.is_low_ws_priority(mom_strategy):
+            shadow_momentum_list = momentum_list
+            momentum_list = []
+
+        shadow_breakout_list = self._collect_shadow_breakout_tickers()
+        shadow_list = list(dict.fromkeys(shadow_breakout_list + shadow_momentum_list))
+
         return {
             "positions": positions,
             "next_day_clear": next_day_clear,
             "swing": [],
             "momentum": momentum_list,
             "breakout": breakout_list,
+            "shadow": shadow_list,
         }
 
     async def _resolve_open_price(
