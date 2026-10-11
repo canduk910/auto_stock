@@ -1720,6 +1720,17 @@ class StrategyBase(ABC):
         except Exception:
             return False
 
+    @staticmethod
+    def is_low_ws_priority(strategy: Any) -> bool:
+        """cycle444 — WS 구독 우선순위를 낮출 전략인가(지금은 섀도 모드와 동치).
+
+        `scheduler.py`·`scanner.py`(8영역·cycle399 S10 봉인 대상)가 전략별 구독
+        최후순위 티어를 가를 때 이 이름으로만 묻는다 — `shadow_mode_on` 을 그대로
+        노출하지 않아 두 파일의 소스에 섀도 토큰이 생기지 않는다. 판정 자체는
+        `shadow_mode_on` 에 위임(never-raise 그대로 상속).
+        """
+        return StrategyBase.shadow_mode_on(strategy)
+
     def _shadow_buy_intercepted(
         self, ticker: str, current_price: int, open_price: "int | None" = None,
         *, level: Any = None, board: Any = None,

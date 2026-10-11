@@ -86,10 +86,10 @@ KIS WebSocket 실시간 시세 수신 + 체결통보 처리. 메인 + 보조 N �
 
 ### 우선순위 정책
 
-- `scanner.subscribe_filtered_stocks(priority_groups=...)` 가 HIGH→LOW (positions → next_day_clear → swing → momentum → breakout) 순으로 처리
+- `scanner.subscribe_filtered_stocks(priority_groups=...)` 가 HIGH→LOW (positions → next_day_clear → breakout → momentum → swing → shadow) 순으로 처리. `shadow` = 섀도 전략(`shadow_mode=true`)의 후보 — 같은 종목이 실전 후보이기도 하면 실전 그룹이 먼저 가져간다. 섀도 전략의 **보유**는 positions(HIGH)다. 그룹 산출 = `scheduler._build_priority_groups`(`src/engine/CLAUDE.md` scanner·scheduler 절)
 - HIGH (보유/익일청산) 는 `bypass_limit=True` 절대 보장
-- 후순위는 잔여 슬롯 초과 시 drop + `[priority_drop] swing=X momentum=Y breakout=Z` INFO. HIGH 단독 41 초과 시 ERROR
-- `_resubscribe_stale_priority`: positions/next_day_clear stale → HIGH + `bypass_limit=True`, 그 외 후보 stale → LOW + `bypass_limit=False` (보유/익일청산 보장 유지 + 후보의 메인 과부하 방지)
+- 후순위는 잔여 슬롯 초과 시 drop + `[priority_drop] breakout=X momentum=Y swing=Z shadow=W …` INFO. HIGH 단독 41 초과 시 ERROR
+- `_resubscribe_stale_priority`: positions/next_day_clear stale → HIGH + `bypass_limit=True`, 그 외 후보 stale → LOW + `bypass_limit=False` (보유/익일청산 보장 유지 + 후보의 메인 과부하 방지). LOW 안에서는 섀도 전용 후보를 맨 뒤로 민다
 
 ### get_subscribed_tickers / get_acked_tickers
 

@@ -735,6 +735,21 @@ async def check_and_resubscribe_stale(scheduler: Any) -> None:
     if high_tickers:
         no_feed_held_cohort = {t for t in high_tickers if no_feed_registry.is_no_feed(t)}
 
+    # cycle444 — LOW 안에서 섀도 전용 후보를 최후순위로 민다(처리 순서만 바꾼다,
+    # 원소 집합은 그대로). HIGH(보유·익일청산)는 `t not in high_tickers` 로 구조적
+    # 면제 — 무조건 원래 자리를 지킨다. 안정 정렬(stable sort)이라 그 밖 순서는
+    # byte 동일(사용자 지시 2026-10-11 「섀도전략들은 웹소켓 시세구독 우선순위를
+    # 낮춰야해」).
+    try:
+        _shadow_desired_for_k_watcher = _collect_shadow_desired(scheduler)
+    except Exception:
+        _shadow_desired_for_k_watcher = set()
+    if _shadow_desired_for_k_watcher:
+        stale_tickers = sorted(
+            stale_tickers,
+            key=lambda t: 1 if (t not in high_tickers and t in _shadow_desired_for_k_watcher) else 0,
+        )
+
     if not stale_tickers:
         # 모두 fresh — 누적 retry 카운터 리셋 (회복 케이스)
         scheduler._stale_retry_count.clear()
@@ -962,6 +977,30 @@ def _collect_low_desired(scheduler: Any) -> tuple[set[str], set[str]]:
     return breakout, momentum
 
 
+def _collect_shadow_desired(scheduler: Any) -> set[str]:
+    """cycle444 — 섀도 전략의 (돌파 + momentum) 후보 ticker 집합. 실패 시 빈 set.
+
+    `_collect_low_desired` 와 짝 — LOW 안에서 섀도 전용 후보를 최후순위로 미는
+    두 호출부(`check_and_resubscribe_stale` 120s · `resubscribe_stale_priority` 5분)
+    가 공유한다. 사용자 지시(2026-10-11) 「섀도전략들은 웹소켓 시세구독 우선순위를
+    낮춰야해」 — 섀도 재구독을 끊지 않고 **순위만** 낮춘다.
+    """
+    shadow: set[str] = set()
+    try:
+        shadow |= set(scheduler._collect_shadow_breakout_tickers() or [])
+    except Exception:
+        pass
+    try:
+        from src.engine.strategy_base import StrategyBase
+        mom_strategy = scheduler.registry.get("momentum")
+        if mom_strategy is not None and StrategyBase.is_low_ws_priority(mom_strategy):
+            from src.engine import scanner as _scanner_mod
+            shadow |= set(getattr(_scanner_mod, "_last_scan_result", None) or [])
+    except Exception:
+        pass
+    return shadow
+
+
 async def resubscribe_stale_priority(scheduler: Any, cap: int = 10) -> list[str]:
     """`_scan_loop` 5분 stale 우선순위 재구독 (사이클 25-B 우선순위 분리 영속).
 
@@ -1074,8 +1113,14 @@ async def resubscribe_stale_priority(scheduler: Any, cap: int = 10) -> list[str]
         _breakout_desired, _momentum_desired = _collect_low_desired(scheduler)
     except Exception:
         _breakout_desired, _momentum_desired = set(), set()
+    # cycle444 — 섀도 desired 도 미리 모아 `_desired_low` 에 합친다. 섀도 전용 후보가
+    # 이 필터에서 걸러지면 최후순위 로직(cap 앞)이 처리할 재료가 남지 않는다.
+    try:
+        _shadow_desired = _collect_shadow_desired(scheduler)
+    except Exception:
+        _shadow_desired = set()
     _filter_active = bool(_breakout_desired) and _high_collect_ok   # momentum 은 게이트 불참(AST G-240-5)
-    _desired_low = _breakout_desired | _momentum_desired
+    _desired_low = _breakout_desired | _momentum_desired | _shadow_desired
     filtered_not_desired: list[str] = []
     if _filter_active and low_targets:
         filtered_not_desired = [t for t in low_targets if t not in _desired_low]
@@ -1105,6 +1150,14 @@ async def resubscribe_stale_priority(scheduler: Any, cap: int = 10) -> list[str]
             and (now - _last_resub[t]).total_seconds() < RESUBSCRIBE_THROTTLE_SECS
         )
     ]
+
+    # cycle444 — LOW 안에서도 섀도 전용 후보(실전 어디에도 없는 종목)는 최후순위로
+    # 밀어 cap 을 실전이 먼저 쓰게 한다. 겹치면(실전+섀도 둘 다 후보) 실전 취급.
+    _live_desired_low = _breakout_desired | _momentum_desired
+    low_targets = (
+        [t for t in low_targets if not (t in _shadow_desired and t not in _live_desired_low)]
+        + [t for t in low_targets if (t in _shadow_desired and t not in _live_desired_low)]
+    )
 
     # Q3 시정: HIGH > cap 시 cap 위반 허용 + WARNING 로그 (운영 가시화)
     if len(high_targets) > cap:

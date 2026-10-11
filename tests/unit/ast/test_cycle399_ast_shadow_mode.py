@@ -13,7 +13,7 @@
 | S07 | `shadow_mode` ∉ `PARAM_RANGES`·`INT_PARAMS`·`_CONSERVATIVE_KEYS` (런타임 + 소스 리터럴) |
 | S08 | 전략 명부 = 등록 명부(`STRATEGY_MANIFEST`) · 명부 파일마다 `DEFAULT_PARAMS["shadow_mode"] = False` |
 | S09 | 8영역 `strategy_registry.update_weights` 의 `enabled` 대입은 정확히 `weight > 0 or (was_enabled and StrategyBase.shadow_mode_on(s))` 하나 |
-| S10 | 8영역(registry 제외)·`scheduler.py`·`boot_manager.py` 에 섀도 토큰 0 · registry 는 `shadow_mode_on` 1회 |
+| S10 | 8영역(registry 제외)·`scheduler.py`·`boot_manager.py` 에 섀도 토큰 0 · registry 는 `shadow_mode_on` 1회. **시세 구독 우선순위 예외(cycle444, 사용자 지시 2026-10-11)** — `StrategyBase.is_low_ws_priority`(`shadow_mode_on` 위임 한 줄)는 `scheduler.py` 의 `_collect_breakout_tickers`·`_collect_shadow_breakout_tickers`·`_build_priority_groups`·`_build_subscription_source_counts`, `stale_watcher_core.py` 의 `_collect_shadow_desired` — 이 5자리에서만 호출 가능. 그 밖(특히 `risk.py`·`order_engine.py`·매수/청산 경로)에서 부르면 위반. `scanner.py` 는 이 메서드를 호출하지 않고 `priority_groups["shadow"]` 키만 받는다(토큰 0) |
 | S11 | `[shadow_buy]` 는 `logger.info` 로만 · `[shadow_mode_config]` 는 `logger.warning` 로만 · `write_log` 0 |
 | S12 | 카탈로그 행(bool · identity · 8전략 · 자동튜닝 아님) · 118키(cycle403) · identity 19 · `cycle403.1` |
 | S13 | 생성 픽스처(프론트·e2e)가 카탈로그를 따른다 |
@@ -403,6 +403,120 @@ def test_s10_untouched_areas_have_no_shadow_tokens():
 def test_s10_registry_knows_shadow_only_once():
     toks = _tokens(REG)
     assert [s for s, _ in toks] == [PROBE], f"[Red] strategy_registry 섀도 토큰 {toks} — 승인 범위는 한 줄"
+
+
+# ===========================================================================
+# S10b~d — 시세 구독 우선순위 예외(cycle444, 사용자 지시 2026-10-11) 명시 봉인
+#
+# `StrategyBase.is_low_ws_priority` 는 `shadow_mode_on` 을 그대로 부르지 못하는
+# S10 봉인 대상(`scheduler.py`) 을 위한 별칭이다. 별칭 자체가 S10 을 조용히
+# 무력화하는 뒷문이 되지 않도록 — (b) 본문이 위임 한 줄인지 (c) 호출 자리가
+# 승인된 구독 우선순위 함수 5곳뿐인지 (d) `scanner.py` 는 호출도 토큰도 0 인지
+# 를 명시적으로 고정한다.
+# ===========================================================================
+WS_PRIORITY_PROBE = "is_low_ws_priority"
+#: path -> 그 안에서 WS_PRIORITY_PROBE 호출이 허용되는 함수 이름 집합(승인 범위 = 그대로).
+WS_PRIORITY_ALLOWED: dict[Path, set[str]] = {
+    SRC / "engine" / "scheduler.py": {
+        "_collect_breakout_tickers",
+        "_collect_shadow_breakout_tickers",
+        "_build_priority_groups",
+        "_build_subscription_source_counts",
+    },
+    SRC / "engine" / "stale_watcher_core.py": {"_collect_shadow_desired"},
+}
+
+
+def _calls_in_file(path: Path, probe: str) -> list[tuple[str | None, int]]:
+    """`path` 안에서 `probe` 를 호출하는 자리를 (둘러싼 함수 이름, lineno) 로 낸다.
+
+    둘러싼 함수가 없으면(모듈 최상위) 이름은 `None`.
+    """
+    tree = _tree(path)
+    out: list[tuple[str | None, int]] = []
+
+    class _V(ast.NodeVisitor):
+        def __init__(self) -> None:
+            self.stack: list[str] = []
+
+        def visit_FunctionDef(self, node):  # type: ignore[no-untyped-def]
+            self.stack.append(node.name)
+            self.generic_visit(node)
+            self.stack.pop()
+
+        visit_AsyncFunctionDef = visit_FunctionDef  # type: ignore[assignment]
+
+        def visit_Call(self, node):  # type: ignore[no-untyped-def]
+            fn = node.func
+            if isinstance(fn, ast.Attribute) and fn.attr == probe:
+                out.append((self.stack[-1] if self.stack else None, node.lineno))
+            self.generic_visit(node)
+
+    _V().visit(tree)
+    return out
+
+
+def test_s10b_is_low_ws_priority_body_is_pure_delegation():
+    """`is_low_ws_priority` 본문 = `shadow_mode_on` 위임 `return` 한 줄뿐(docstring 제외).
+
+    본문이 자기만의 판정을 더 가지면(캐시·추가 조건) 이 별칭이 `shadow_mode_on` 과
+    다른 사실을 말하게 된다 — S10 예외는 "다른 이름, 같은 판정" 이어야 한다.
+    """
+    fn = _fn(_tree(SB), WS_PRIORITY_PROBE)
+    body = [
+        n for n in fn.body
+        if not (isinstance(n, ast.Expr) and isinstance(n.value, ast.Constant) and isinstance(n.value.value, str))
+    ]
+    assert len(body) == 1, f"[Red] {WS_PRIORITY_PROBE} 본문이 위임 한 줄이 아니다: {[ast.unparse(n) for n in body]}"
+    stmt = body[0]
+    assert isinstance(stmt, ast.Return) and stmt.value is not None, "본문은 `return` 이어야 한다"
+    call = stmt.value
+    assert (
+        isinstance(call, ast.Call)
+        and isinstance(call.func, ast.Attribute)
+        and call.func.attr == PROBE
+        and isinstance(call.func.value, ast.Name)
+        and call.func.value.id == "StrategyBase"
+        and len(call.args) == 1
+        and not call.keywords
+    ), f"[Red] `return StrategyBase.{PROBE}(x)` 형태가 아니다: {ast.unparse(stmt)}"
+
+
+def test_s10c_is_low_ws_priority_called_only_from_allowed_functions():
+    """`is_low_ws_priority` 호출 자리는 승인된 구독 우선순위 함수 5곳뿐이다.
+
+    `risk.py`·`order_engine.py` 등 매수/청산 경로가 이 별칭으로 S10 을 우회하면
+    (예: 손절 판정에 섀도 여부를 섞는 식) 여기서 잡는다 — S10 자체(섀도 토큰
+    리터럴 스캔)는 다른 이름을 쓰는 우회를 못 잡으므로 호출자 화이트리스트가
+    유일한 방어선이다.
+    """
+    violations: list[str] = []
+    for p in _src_files():
+        hits = _calls_in_file(p, WS_PRIORITY_PROBE)
+        if not hits:
+            continue
+        allowed_fns = WS_PRIORITY_ALLOWED.get(p, set())
+        for fn_name, lineno in hits:
+            if fn_name not in allowed_fns:
+                violations.append(f"{p.relative_to(ROOT)}:{lineno} in {fn_name or '<module-level>'}")
+    assert violations == [], (
+        f"[Red] 승인 밖에서 `{WS_PRIORITY_PROBE}` 호출 — {violations}. "
+        f"승인 목록 = {{{', '.join(str(p.relative_to(ROOT)) + ':' + ','.join(sorted(fns)) for p, fns in WS_PRIORITY_ALLOWED.items())}}}"
+    )
+
+
+def test_s10d_scanner_never_touches_is_low_ws_priority():
+    """`scanner.py` 는 `is_low_ws_priority` 를 호출도 참조도 하지 않는다 — `shadow` 그룹
+    키(섀도 전략이 산출한 결과)만 받는다. 섀도 판정 자체는 `scheduler.py` 소관이다."""
+    scanner = SRC / "engine" / "scanner.py"
+    hits = _calls_in_file(scanner, WS_PRIORITY_PROBE)
+    assert hits == [], f"[Red] scanner.py 가 `{WS_PRIORITY_PROBE}` 를 호출한다: {hits}"
+    toks = [
+        n for n in ast.walk(_tree(scanner))
+        if (isinstance(n, ast.Name) and n.id == WS_PRIORITY_PROBE)
+        or (isinstance(n, ast.Attribute) and n.attr == WS_PRIORITY_PROBE)
+    ]
+    assert toks == [], f"[Red] scanner.py 에 `{WS_PRIORITY_PROBE}` 토큰 잔존 {len(toks)}건"
 
 
 # ===========================================================================

@@ -455,13 +455,12 @@ _APPROVED_CONTENT_SHA: dict[str, tuple[str, str]] = {
         "(등록용 최소 변경, 사용자 '구현 시작' 승인 범위)",
     ),
     "src/engine/scanner.py": (
-        "1412d55727442ec7a3f1a9eefa5649e161a452d58f0761ed3cbef7774fde95d0",
-        "cycle437(2026-10-10) — 카드 #9: 참조 0인 scan_kospi200/scan_kosdaq150 삭제, 8영역 승인",
+        "0ca6a0f1ddcfa95f540a51560db35c473a9ea2aa47bf4ea1e22758b4cc92d06c",
+        "cycle444 섀도 후보 구독 최후순위 사용자 승인 2026-10-11",
     ),
     "src/engine/scheduler.py": (
-        "10524c6cee8e618046c2ae084aa2e0fbee4c092f27f0052500f0bca22a140078",
-        "cycle443(2026-10-11) — ndx2x_riskoff 전용 폴 task(_ndx2x_poll_loop) 등록"
-        "(필드·start()·cancel 목록 3곳 + 루프 본문, 등록용 최소 변경), 사용자 '구현 시작' 승인",
+        "1e59d9a2cae6cb17b0acc596711b786090b6257c64e1b084eef1fadf0a8e9230",
+        "cycle444 섀도 후보 구독 최후순위 사용자 승인 2026-10-11",
     ),
     "src/engine/session.py": (
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",
@@ -472,8 +471,8 @@ _APPROVED_CONTENT_SHA: dict[str, tuple[str, str]] = {
         "cycle399(2026-10-03, 10-02 R1) — update_weights 섀도 전략 켜짐 유지 한 줄, 8영역 승인",
     ),
     "src/realtime/CLAUDE.md": (
-        "45817e18bff13cef49af02704f1fae7a5f73b7b0be49d84a42d409b7fc4237aa",
-        "cycle374(2026-09-27) — 문서 전용(handler 「접수 전문 기록」 소절)",
+        "77fcf0aaaf1042a2fa6d441c624cac7f3a785dc00bb3bf61f1990aeb537700d6",
+        "cycle444(2026-10-11) — 「우선순위 정책」 을 실제 순서(breakout → momentum → swing → shadow)로 정정, 사용자 승인",
     ),
     "src/realtime/__init__.py": (
         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
