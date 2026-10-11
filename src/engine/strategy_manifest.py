@@ -46,6 +46,7 @@ from src.engine.strategies.vcp_breakout import VcpBreakoutStrategy
 from src.engine.strategies.volatility_breakout import VolatilityBreakoutStrategy
 from src.engine.strategy_base import StrategyBase
 from src.engine.strategies.etf_trend import EtfTrendStrategy
+from src.engine.strategies.ndx2x_riskoff import Ndx2xRiskoffStrategy
 
 #: 매수 평가 방식 — `tick_breakout` = 돌파 구독 그룹으로 후보를 구독하고 틱으로 평가(BFB·VCP·VB·LTV) ·
 #: `tick_scan` = 자기 스캔(`scan_stocks`) 결과로 구독하고 틱으로 평가(momentum) ·
@@ -125,6 +126,19 @@ STRATEGY_MANIFEST: tuple[StrategyEntry, ...] = (
         EtfTrendStrategy, "etf_trend", "ETF 추세", False, 0.0,
         eval_driver="swing_poll", breakout_rank=None, open_price_target=False,
         close_at_1520=True, market_unit_policy="scale",
+    ),
+    # 나스닥2배-위험회피(2026-10) — cycle443, 섀도 시작(사용자 결정 2026-10-11
+    # "섀도 운영부터"). `eval_driver="swing_poll"` 은 **등록(SWING_POLL_IDS 소속)용
+    # 분류일 뿐** — 매수 평가는 공유 스윙 폴 루프가 아니라 전용
+    # `scheduler._ndx2x_poll_loop`(09:30~10:30 KST)가 구동한다
+    # (`get_scanned_tickers()`가 항상 `[]` 이라 공유 루프는 이 전략을 건드리지
+    # 않는다). 청산은 이 등록만으로 `risk.on_tick` generic 보유 순회가 자동
+    # 커버한다(scheduler 추가 배선 0). 고정 종목 1개·시장 유닛 비대상(장세와
+    # 무관한 미국 지수 규칙).
+    StrategyEntry(
+        Ndx2xRiskoffStrategy, "ndx2x_riskoff", "나스닥2배-위험회피", True, 0.0,
+        eval_driver="swing_poll", breakout_rank=None, open_price_target=False,
+        close_at_1520=False, market_unit_policy="none",
     ),
 )
 

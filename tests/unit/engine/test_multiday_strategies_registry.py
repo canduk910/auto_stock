@@ -24,7 +24,7 @@ from src.engine.strategy_base import Position
 
 pytestmark = pytest.mark.unit
 
-_EXPECTED = frozenset({"donchian_swing", "vcp_breakout", "kojiro", "etf_trend"})
+_EXPECTED = frozenset({"donchian_swing", "vcp_breakout", "kojiro", "etf_trend", "ndx2x_riskoff"})
 
 
 def _multiday_literal_members() -> set[str]:

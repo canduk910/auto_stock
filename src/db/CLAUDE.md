@@ -374,6 +374,23 @@ list_paged_by_filter(*, market=None, min_market_cap=0, min_trade_amount=0,
 
 `raw_response` JSONB 는 외부 응답 **원문**이다 — 정규화해서 넣지 않는다(외부 스키마가 바뀐 날 무엇이 왔는지 되짚을 유일한 기록).
 
+## overseas_index.py — 해외지수 일별 종가 (ndx2x_riskoff 신호 원천, cycle443)
+
+테이블 `overseas_index_daily`(migration 048, 가산형 신규 테이블). PK `(index_code, bas_dd)`.
+KIS `FHKST03030100` 종가를 영구 보관 — `ndx2x_riskoff` 전략이 매일 최근 N영업일 종가열로
+T7(120일선 20영업일 기울기)·R4(250일 고점 대비 하락률)를 계산한다.
+
+| 함수 | 계약 |
+|---|---|
+| `upsert_many(index_code, rows, *, raw_by_date=None) -> int` | `rows` = `[(YYYYMMDD, 종가), ...]`. `ON CONFLICT (index_code, bas_dd) DO UPDATE` — **멱등**(같은 날짜 재적재 시 `close_price` 덮어쓰기 허용, KIS `mod_yn`(수정) 반영). 빈 목록 = 0 반환(no-op) |
+| `get_recent_closes(index_code, *, limit=400) -> list[tuple[date, float]]` | **오름차순**(오래된→최신, 지표 계산 입력 순서) — DB 는 `bas_dd DESC LIMIT` 로 가져온 뒤 뒤집는다 |
+| `get_latest_date(index_code) -> date \| None` | `MAX(bas_dd)` |
+
+`raw` JSONB = KIS `output2` row 원본(cycle443 — 다른 모듈의 raw merge 관례와 같되 이 전략은
+이력 전체를 보관하므로 `stock_master_history` 류 직전본 트리거는 두지 않는다). DB 예외는
+전부 흡수(`[]`/`0`/`None` + `logger.exception`) — 호출자(`ndx2x_ingest.ensure_history`)가
+재시도·fail-closed 판단을 맡는다.
+
 ## parameter_recommendations.py — 전략수정 AI자문 이력
 
 - `insert_recommendation()`: 20:00 자문 생성 시 INSERT(status: pending). `(target_date, strategy_id)` UNIQUE 충돌은 `None`

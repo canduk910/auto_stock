@@ -38,7 +38,7 @@ _CONST = "_TICK_BUY_EVAL_SKIP_STRATEGIES"
 # cycle403(2026-10-03, R3 승인) — etf_trend 등록. donchian_swing·kojiro 와 같은 사유
 # (REST 폴 전략 — WS tick 매수 평가가 구조적 낭비). 조용한 추가가 아니라 승인된 세 번째
 # 멤버라 이 핀을 올린다 — 「세 번째가 조용히 들어오면」 경고는 네 번째부터 다시 산다.
-_EXPECTED = frozenset({"donchian_swing", "kojiro", "etf_trend"})
+_EXPECTED = frozenset({"donchian_swing", "kojiro", "etf_trend", "ndx2x_riskoff"})
 _EXIT_CONST = "_PRE_MARKET_EXIT_EVAL_STRATEGIES"
 
 _FORBIDDEN_TOKENS = ("tradable_boards", "sizing_mode", "params", "config")

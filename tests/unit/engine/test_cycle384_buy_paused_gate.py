@@ -324,6 +324,13 @@ def test_t11_exit_signals_and_exit_state_identical_when_paused(sid, monkeypatch)
             ticker=T, buy_price=10_000, quantity=10, order_no="ORD-384",
             strategy_id=sid, buy_date=DAY, high_since_buy=10_000,
         )
+        if sid == "ndx2x_riskoff":
+            # 가격-무관 상태기계 — 청산은 decide_daily 상태가 "cash" 일 때만 난다(§자문
+            # "손절 두지 않는다"). 이 전략만 상태를 뒤집어 청산 경로가 공허하지 않게 한다.
+            from src.engine import ndx2x_core as _ndx2x_core
+            x.s._decision = _ndx2x_core.DailyDecision(
+                t7=-0.01, r4=-0.25, cell="01", desired_state="cash", reason="ok",
+            )
     sa, sb = _run_exit_path(a.s), _run_exit_path(b.s)
     assert any(x != Signal.NONE for x in sa), f"{sid}: 경로에 청산 신호가 하나도 없다 — 비교가 공허하다 {sa}"
     assert sb == sa, f"{sid}: 멈춤이 청산 신호를 바꿨다(M26) — 끔={sa} 멈춤={sb}"

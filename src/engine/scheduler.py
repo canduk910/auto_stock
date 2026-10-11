@@ -378,6 +378,11 @@ class TradingScheduler:
         self._5xx_dedupe_summary_task: asyncio.Task | None = None
         # G안 (2026-05-12) — donchian_swing Pull 폴링 매수 평가 task (09:05~09:30)
         self._swing_poll_task: asyncio.Task | None = None
+        # cycle443 (2026-10-11) — ndx2x_riskoff 전용 폴 task(일일 신호 동기화 +
+        # 집행창 09:30~10:30 매수신호 평가 섀도 가시화). 청산은 SWING_POLL_IDS
+        # 등록만으로 `_swing_rest_poll_loop` 의 risk.on_tick generic 보유 순회가
+        # 커버한다(이 task 는 손대지 않는다).
+        self._ndx2x_poll_task: asyncio.Task | None = None
         # 사이클 13-E-2 — start() 본문 로컬 task 를 속성 승격, finally 좀비 차단
         self._ws_task: asyncio.Task | None = None
         self._scan_task: asyncio.Task | None = None
@@ -636,6 +641,11 @@ class TradingScheduler:
             # WebSocket tick 흐름에서 매수 평가가 빠진 자리를 1분 주기 REST 폴링으로 채운다.
             # 보유 종목 청산(ATR 트레일링/-7%)은 risk.on_tick 의 check_exit_signal 그대로 사용.
             self._swing_poll_task = asyncio.create_task(self._swing_buy_poll_loop())
+
+            # cycle443 (2026-10-11) — ndx2x_riskoff 전용 폴 task. 전용 전략이라
+            # 공유 _swing_buy_poll_loop(09:05~09:30, 시장가)와 섞지 않는다 —
+            # get_scanned_tickers()가 항상 []이라 공유 루프는 이 전략을 건드리지 않는다.
+            self._ndx2x_poll_task = asyncio.create_task(self._ndx2x_poll_loop())
 
             # B (2026-05-15) — donchian_swing 일중 시세 REST 폴링 보강 task (09:30~15:20)
             # WS stale 시에도 보유 종목의 ATR/-7% 손절 평가가 끊기지 않도록 60s 주기 REST 폴링.
@@ -1003,7 +1013,7 @@ class TradingScheduler:
             for task_attr in (
                 "_next_day_task", "_session_task", "_stale_watcher_task",
                 "_session_health_task",  # 사이클 46
-                "_swing_poll_task", "_swing_rest_poll_task",
+                "_swing_poll_task", "_swing_rest_poll_task", "_ndx2x_poll_task",
                 "_5xx_dedupe_summary_task",
                 "_api_recovered_collector_task",  # 사이클 79 추가 — 사이클 76 도입, cancel 누락 시정
                 "_scan_pool_eager_refresh_task",  # 사이클 83 추가 — 후보 풀 eager refresh task
@@ -1131,7 +1141,7 @@ class TradingScheduler:
                 for task_attr in (
                     "_next_day_task", "_session_task", "_stale_watcher_task",
                     "_session_health_task",
-                    "_swing_poll_task", "_swing_rest_poll_task",
+                    "_swing_poll_task", "_swing_rest_poll_task", "_ndx2x_poll_task",
                     "_5xx_dedupe_summary_task",
                     "_api_recovered_collector_task",  # 사이클 79 영속
                     "_scan_pool_eager_refresh_task",  # 사이클 83 추가 — 후보 풀 eager refresh task
@@ -1168,7 +1178,7 @@ class TradingScheduler:
         for task_attr in (
             "_next_day_task", "_session_task", "_stale_watcher_task",
             "_session_health_task",  # 사이클 46
-            "_swing_poll_task", "_swing_rest_poll_task",
+            "_swing_poll_task", "_swing_rest_poll_task", "_ndx2x_poll_task",
             "_5xx_dedupe_summary_task",
             "_api_recovered_collector_task",  # 사이클 79 추가 — 사이클 76 도입, cancel 누락 시정
             "_scan_pool_eager_refresh_task",  # 사이클 83 추가 — 후보 풀 eager refresh task
@@ -2812,6 +2822,65 @@ class TradingScheduler:
             now_dt = _datetime.now(_KST)
             sleep_secs = 60 - (now_dt.second + now_dt.microsecond / 1_000_000)
             await _sleep_chunked(max(sleep_secs, 1.0))
+
+    async def _ndx2x_poll_loop(self) -> None:
+        """ndx2x_riskoff 전용 폴 — 60s 주기(cycle443).
+
+        매 사이클: ① 일일 신호 동기화(`sync_daily_decision`, 날짜 1회 idempotent —
+        이력 적재 + T7/R4 계산 + `[ndx2x_signal]` 로그) ② 집행창(09:30~10:30 KST) 안이면
+        REST 현재가로 `check_buy_signal` 을 평가(섀도 가시화 목적 — 섀도에서는
+        `_shadow_buy_intercepted` 가 `Signal.NONE` 을 돌려주므로 여기서 더 할 일이 없다).
+
+        🔴 실 BUY 가 반환되면(섀도 해제 뒤) 주문을 내지 않고 CRITICAL 로 멈춘다 —
+        `order_engine.execute_buy` 는 외부에서 지정가를 강제할 공개 경로가 없고(내부
+        NXT 프리마켓 전용 변환뿐), 규칙은 시장가를 금지한다(자문 §1(a)). 이 간극을
+        메우는 것은 8영역(`order_engine.py`) 승인 + domain-consult 선행 대상이라
+        이 사이클(섀도만)에서는 손대지 않는다 — 보고서 "실매수 전환 전 확인 항목" 1번.
+
+        청산(SELL)은 이 루프가 다루지 않는다 — `ndx2x_riskoff` 가 명부(`SWING_POLL_IDS`)에
+        등록된 것만으로 `_swing_rest_poll_loop`(09:05~15:20, 60s)의 risk.on_tick generic
+        보유 순회가 자동 커버한다(scheduler 추가 배선 0).
+        """
+        from src.api.condition import fetch_stock_detail
+        from src.engine import ndx2x_core as _ndx2x_core
+        from src.engine.strategy_base import Signal as _Signal
+
+        async def _sleep_chunked(total_secs: float, *, chunk_secs: float = 5.0) -> None:
+            remaining = total_secs
+            while remaining > 0 and self._running:
+                chunk = min(chunk_secs, remaining)
+                await asyncio.sleep(chunk)
+                remaining -= chunk
+
+        while self._running:
+            strategy = self.registry.get("ndx2x_riskoff")
+            if strategy is None or not strategy.config.enabled:
+                await _sleep_chunked(60.0)
+                continue
+
+            try:
+                await strategy.sync_daily_decision()
+            except Exception:
+                logger.exception("[ndx2x_poll] sync_daily_decision 실패")
+
+            now_t = _datetime.now(_KST).time()
+            if _ndx2x_core.in_execution_window(now_t):
+                ticker = strategy.FIXED_TICKER
+                try:
+                    detail = await fetch_stock_detail(ticker)
+                    current_price = int(detail.get("stck_prpr") or 0)
+                    open_price = int(detail.get("stck_oprc") or 0)
+                    if current_price > 0 and open_price > 0:
+                        signal = strategy.check_buy_signal(ticker, current_price, open_price)
+                        if signal == _Signal.BUY:
+                            logger.critical(
+                                "[ndx2x_buy_blocked_no_limit_path] 실매수 전환 전 "
+                                "execute_buy 지정가 경로 필요 — 주문 미발사: %s", ticker,
+                            )
+                except Exception:
+                    logger.exception("[ndx2x_poll] 매수평가 실패")
+
+            await _sleep_chunked(60.0)
 
     async def _run_swing_rest_poll_once(self, *, held_only: bool = False, preserve_last_tick: bool = False) -> dict:
         """donchian_swing 일중 시세 REST 폴링 1사이클 (B, 2026-05-15, 결함 B).

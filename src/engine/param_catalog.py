@@ -144,6 +144,7 @@ STRATEGY_IDS: tuple[str, ...] = (
     "vcp_breakout",
     "kojiro",
     "etf_trend",
+    "ndx2x_riskoff",
 )
 
 #: 화면 아코디언 순서 — (group_id, 한글 라벨, 한 줄 설명)
