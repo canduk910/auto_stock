@@ -531,6 +531,8 @@ _BREAKOUT_LINE_KEYS: "dict[str, tuple[str, ...]]" = {
     "kojiro": (),
     # cycle403 — ETF 추세. `buy_signals` 에 싣는 돌파선 키는 `line`(20일 신고가).
     "etf_trend": ("line",),
+    # cycle443 — 나스닥2배-위험회피. 돌파선 개념이 없다(상태기계 신호, T7/R4 칸).
+    "ndx2x_riskoff": (),
 }
 
 

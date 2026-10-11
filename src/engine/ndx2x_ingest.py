@@ -19,6 +19,7 @@ from datetime import date, datetime, timedelta
 
 from src.api.overseas_quote import NDX_ISCD, OverseasIndexEmptyResponseError, fetch_daily_chartprice
 from src.db import overseas_index as db
+from src.db._kst import today_kst
 from src.engine.ndx2x_core import MIN_HISTORY_DAYS, merge_batches, parse_kis_rows
 
 logger = logging.getLogger(__name__)
@@ -51,7 +52,7 @@ async def ensure_history(
 
     이미 최신(오늘 또는 전날까지 저장)이고 이력이 충분하면 KIS 호출 0회.
     """
-    today = today or date.today()
+    today = today or today_kst()
     latest = await db.get_latest_date(NDX_INDEX_CODE)
     existing = await db.get_recent_closes(NDX_INDEX_CODE, limit=target_days + 50)
     if (

@@ -55,6 +55,7 @@ _STRATEGY_META: tuple[tuple[str, str, str, str], ...] = (
     ("vcp_breakout", "vcp_breakout", "VcpBreakoutStrategy", "VCP 돌파"),
     ("kojiro", "kojiro", "KojiroStrategy", "고지로 대순환"),
     ("etf_trend", "etf_trend", "EtfTrendStrategy", "ETF 추세"),
+    ("ndx2x_riskoff", "ndx2x_riskoff", "Ndx2xRiskoffStrategy", "나스닥2배-위험회피"),
 )
 
 

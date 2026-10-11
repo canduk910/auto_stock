@@ -49,8 +49,11 @@ def test_manifest_has_eight_rows_with_etf_trend_last():
     from src.engine.strategy_manifest import STRATEGY_MANIFEST
 
     ids = [e.strategy_id for e in STRATEGY_MANIFEST]
-    assert len(ids) == 8, f"[Red] 명부 {len(ids)}행 — etf_trend 등록 전"
-    assert ids[-1] == SID, f"etf_trend 는 명부 끝(같은 틱 매수 우선순위 꼴찌): {ids}"
+    # cycle443 — ndx2x_riskoff 가 끝에 더해져 9행. etf_trend 는 그 바로 앞(같은 틱
+    # 매수 우선순위에서 꼴찌는 아니지만 cycle403 당시 추가분 중에서는 여전히 끝).
+    assert len(ids) == 9, f"[Red] 명부 {len(ids)}행 — etf_trend 등록 전"
+    assert ids[-2] == SID, f"etf_trend 는 ndx2x_riskoff 바로 앞: {ids}"
+    assert ids[-1] == "ndx2x_riskoff"
     assert ids[:7] == [
         "momentum", "volatility_breakout", "long_tail_volatility", "donchian_swing",
         "bull_flag_breakout", "vcp_breakout", "kojiro",
@@ -60,7 +63,7 @@ def test_manifest_has_eight_rows_with_etf_trend_last():
 def test_manifest_row_values_l2():
     from src.engine.strategy_manifest import STRATEGY_MANIFEST
 
-    e = STRATEGY_MANIFEST[-1]
+    e = STRATEGY_MANIFEST[-2]
     assert e.strategy_id == SID
     assert e.cls is _cls()
     assert e.name == "ETF 추세"                       # L1
@@ -75,7 +78,8 @@ def test_manifest_row_values_l2():
 def test_manifest_derived_sets_include_etf_trend():
     from src.engine import strategy_manifest as sm
 
-    assert sm.SWING_POLL_IDS == ("donchian_swing", "kojiro", SID), "스윙 폴 순서 = donchian·kojiro 뒤"
+    # cycle443 — ndx2x_riskoff 도 swing_poll 등록이라 SWING_POLL_IDS 끝에 더해진다.
+    assert sm.SWING_POLL_IDS == ("donchian_swing", "kojiro", SID, "ndx2x_riskoff"), "스윙 폴 순서 = donchian·kojiro 뒤"
     # cycle405 — donchian 이 15:20 시간 청산(20봉·250봉)으로 명부 순서대로 끼어든다.
     assert sm.CLOSE_AT_1520_IDS == ("volatility_breakout", "long_tail_volatility", "donchian_swing", SID)
     assert sm.MARKET_UNIT_SCALE_IDS[-1] == SID and len(sm.MARKET_UNIT_SCALE_IDS) == 5
@@ -88,9 +92,11 @@ def test_manifest_import_is_last_in_import_block():
         n for n in tree.body
         if isinstance(n, ast.ImportFrom) and (n.module or "").startswith("src.engine.strategies.")
     ]
-    assert strat_imports and strat_imports[-1].module == "src.engine.strategies.etf_trend", (
+    # cycle443 — ndx2x_riskoff import 가 그 뒤에 더해져 etf_trend 는 끝에서 둘째다.
+    assert strat_imports and strat_imports[-2].module == "src.engine.strategies.etf_trend", (
         "옛 import 순서를 보존하고 새 전략 import 는 블록 끝에 더한다(명세 §1)"
     )
+    assert strat_imports[-1].module == "src.engine.strategies.ndx2x_riskoff"
 
 
 def test_scheduler_registers_etf_trend_last():
@@ -98,7 +104,8 @@ def test_scheduler_registers_etf_trend_last():
 
     sched = TradingScheduler()
     ids = [s.strategy_id for s in sched.registry.all()]
-    assert ids[-1] == SID, ids
+    assert ids[-2] == SID, ids
+    assert ids[-1] == "ndx2x_riskoff"
     s = sched.registry.get(SID)
     assert s.config.enabled is False and s.config.weight == 0.0
 
@@ -134,8 +141,10 @@ def test_status_exit_watch_group_is_swing():
 def test_catalog_strategy_ids_end_with_etf_trend():
     from src.engine import param_catalog as pc
 
-    assert pc.STRATEGY_IDS[-1] == SID
-    assert len(pc.STRATEGY_IDS) == 8
+    # cycle443 — ndx2x_riskoff 가 뒤에 더해져 etf_trend 는 끝에서 둘째, 전체 9개.
+    assert pc.STRATEGY_IDS[-2] == SID
+    assert pc.STRATEGY_IDS[-1] == "ndx2x_riskoff"
+    assert len(pc.STRATEGY_IDS) == 9
 
 
 def test_catalog_turtle_sized_renamed_without_alias():

@@ -47,7 +47,12 @@ ALL_STRATEGIES = list(strategy_classes().items())
 #: cycle405 — donchian 도 같은 이유로 뺀다. 깡토식 설계 랏(R 기반)만 쓰고 비중 사이징·1주 폴백이
 #: 없다(명세 `_workspace/red/cycle405_donchian_kkangto_spec.md` §5). 관문 통과·잔여 클램프는
 #: `tests/unit/engine/strategies/test_cycle405_donchian_kk_sizing.py` R8·R10 이 덮는다.
-_RATIO_DEFAULT_EXCEPTIONS = frozenset({"etf_trend", "donchian_swing"})
+#: cycle443 — ndx2x_riskoff 도 뺀다. 비중 사이징(position_ratio)은 타지만 자문
+#: §3 "1회 투자금액"이 명시한 0.5% 수수료·호가단위 여유(`margin=0.995`)를 곱해
+#: `int(budget*ratio)//price` 보다 항상 작거나 같다 — 이 모듈의 "클램프 전 수량 ==
+#: 순수 비중 수량" 전제가 성립하지 않는다. 여유 자체의 회귀는
+#: `tests/unit/engine/strategies/test_cycle443_ndx2x_riskoff.py::test_calc_buy_quantity_uses_position_ratio_and_margin`.
+_RATIO_DEFAULT_EXCEPTIONS = frozenset({"etf_trend", "donchian_swing", "ndx2x_riskoff"})
 RATIO_DEFAULT_STRATEGIES = [
     (sid, cls) for sid, cls in ALL_STRATEGIES if sid not in _RATIO_DEFAULT_EXCEPTIONS
 ]

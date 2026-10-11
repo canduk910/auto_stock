@@ -57,7 +57,8 @@ class Ndx2xRiskoffStrategy(StrategyBase):
         "exchange": "KRX",
         "order_exchange_clock_mode": "enforce",
         "after_market_exit_division": "44",
-        "llm_gate_mode": "off",  # 상태기계 신호라 LLM 재량 평가 대상이 아니다(etf_trend 와 다른 선택)
+        "llm_gate_mode": "shadow",  # cycle297 결정 2 — 8전략 전부와 같은 기본값. 주문 접수
+        # 시점 기록(order_engine.execute_buy)이라 BUY 가 섀도 관문에서 막히는 동안은 호출 0
         "llm_gate_min_score": 70,
         "llm_gate_daily_call_cap": 20,
         "llm_gate_timeout_secs": 20,
@@ -142,10 +143,10 @@ class Ndx2xRiskoffStrategy(StrategyBase):
 
     def check_buy_signal(self, ticker: str, current_price: int, open_price: int) -> Signal:
         """09:30~10:30 KST, 상태가 "2x" 로 바뀌었고 보유가 없을 때만 1회."""
+        if self._account_soft_gate_blocked(ticker):
+            return Signal.NONE  # buy_paused 는 이 공통 게이트가 함께 본다(cycle384) — 첫 문장(AST GATE_FIRST)
         if ticker != self.FIXED_TICKER:
             return Signal.NONE
-        if self._account_soft_gate_blocked(ticker):
-            return Signal.NONE  # buy_paused 는 이 공통 게이트가 함께 본다(cycle384)
         if self.state.has_position(ticker) or self.state.is_buy_pending(ticker):
             return Signal.NONE
         if ticker in self._bought_today:

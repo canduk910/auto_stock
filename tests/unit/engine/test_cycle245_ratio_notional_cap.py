@@ -1098,7 +1098,9 @@ def test_f245_18_cycle242_markers_still_emitted(maker, caplog):
 #: cycle421(카드 #3) — etf_trend 도 같은 이유로 뺀다: 터틀 전용이라 비중 경로 자체가 없고(후보 ATR 이
 #: 없으면 0 — 1주 폴백·비중 낙하 금지, `etf_trend.calc_buy_quantity`), 이 검사의 전제(「비중 랏」)가
 #: 성립하지 않는다. 명부로 바꾼 뒤 실제로 붉어진 항목이라 이름을 남긴다(보고 = HARNESS_CHANGELOG cycle421).
-_NO_RATIO_LOT = ("donchian_swing", "etf_trend")
+#: cycle443 — ndx2x_riskoff 도 뺀다: 비중 사이징을 쓰지만 자문이 명시한 0.5% 여유
+#: (`margin=0.995`)를 곱해 순수 비중 랏보다 항상 작거나 같다(「비중 랏 그대로」 전제 불성립).
+_NO_RATIO_LOT = ("donchian_swing", "etf_trend", "ndx2x_riskoff")
 
 
 @freeze_time("2026-09-04 10:00:00+09:00")

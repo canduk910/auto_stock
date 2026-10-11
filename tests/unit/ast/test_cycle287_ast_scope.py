@@ -84,7 +84,8 @@ _PINNED_DIRS = ("src/engine/strategies", "src/engine")
 #: 포함한 재귀 집계다. `src/realtime`·`src/auth` 는 8영역이라 정본 `test_ga3_6b` 가 파일 집합을 잰다.
 _PINNED_DIR_FILE_COUNTS = {
     # cycle403 — 신규 전략 파일 `etf_trend.py` 로 8 → 9.
-    "src/engine/strategies": 9,
+    # cycle443 — 신규 전략 파일 `ndx2x_riskoff.py` 로 9 → 10.
+    "src/engine/strategies": 10,
     # cycle351 — 신규 leaf `pyramid_shadow.py` 로 77 → 78.
     # cycle363 — 신규 leaf `trading_calendar.py` 로 78 → 79.
     # cycle364 — 신규 leaf `funnel_capture.py` 로 79 → 80.
@@ -109,7 +110,9 @@ _PINNED_DIR_FILE_COUNTS = {
     # cycle437 커밋 C(리팩토링 카드 #8, 사용자 승인 2026-10-10) — 참조 0인 옛
     # `strategy.py`(Signal·Position·StrategyState·calc_buy_quantity 모듈 프로토타입,
     # 호출부·테스트 0 재확인) 삭제로 98 → 97.
-    "src/engine": 97,
+    # cycle443 — 신규 leaf `ndx2x_core.py`·`ndx2x_ingest.py` + 전략 파일
+    # `strategies/ndx2x_riskoff.py`(재귀 집계) 로 97 → 100.
+    "src/engine": 100,
 }
 
 #: `scheduler.py` cycle257 영구 상한.

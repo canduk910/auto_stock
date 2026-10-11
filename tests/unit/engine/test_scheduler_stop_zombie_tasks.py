@@ -286,6 +286,10 @@ def test_stop_tuple_equals_finally_tuple_members():
         # system_config.trade_cost_reconcile_time, 키 없음 = 실행 안 함). 60초 폴링 루프라
         # cancel 누락 시 `stop()` 뒤에도 KIS `TTTC8715R` 조회를 쏠 수 있다.
         "_trade_cost_reconcile_task",
+        # cycle443 추가 (2026-10-11) — ndx2x_riskoff 전용 폴 task(60초 — 일일 신호
+        # 동기화 + 09:30~10:30 집행창 매수신호 평가). cancel 누락 시 `stop()` 뒤에도
+        # KIS REST 조회·check_buy_signal 평가가 돌 수 있다.
+        "_ndx2x_poll_task",
         "_ws_task",
         "_scan_task",
     }

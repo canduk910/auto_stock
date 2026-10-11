@@ -367,6 +367,7 @@ def _default_params(sid: str) -> dict:
     from src.engine.strategies.kojiro import KojiroStrategy
     from src.engine.strategies.long_tail_volatility import LongTailVolatilityStrategy
     from src.engine.strategies.momentum import MomentumStrategy
+    from src.engine.strategies.ndx2x_riskoff import Ndx2xRiskoffStrategy
     from src.engine.strategies.vcp_breakout import VcpBreakoutStrategy
     from src.engine.strategies.volatility_breakout import VolatilityBreakoutStrategy
 
@@ -379,6 +380,7 @@ def _default_params(sid: str) -> dict:
         "vcp_breakout": VcpBreakoutStrategy,
         "kojiro": KojiroStrategy,
         "etf_trend": EtfTrendStrategy,
+        "ndx2x_riskoff": Ndx2xRiskoffStrategy,
     }
     return dict(table[sid].DEFAULT_PARAMS)
 

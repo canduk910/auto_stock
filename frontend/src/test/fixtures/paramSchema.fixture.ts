@@ -4670,7 +4670,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "exchange": "KRX",
         "order_exchange_clock_mode": "enforce",
         "after_market_exit_division": "44",
-        "llm_gate_mode": "off",
+        "llm_gate_mode": "shadow",
         "llm_gate_min_score": 70,
         "llm_gate_daily_call_cap": 20,
         "llm_gate_timeout_secs": 20
@@ -4688,7 +4688,7 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "exchange": "KRX",
         "order_exchange_clock_mode": "enforce",
         "after_market_exit_division": "44",
-        "llm_gate_mode": "off",
+        "llm_gate_mode": "shadow",
         "llm_gate_min_score": 70,
         "llm_gate_daily_call_cap": 20,
         "llm_gate_timeout_secs": 20

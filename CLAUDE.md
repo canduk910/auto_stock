@@ -126,7 +126,7 @@ cd frontend && npm install && npm run dev
 
 ## 다중 전략 (요약)
 
-7 전략: `momentum` / `volatility_breakout` / `long_tail_volatility` / `donchian_swing` / `bull_flag_breakout` / `vcp_breakout` / `kojiro`(고지로 대순환 스윙). 문서는 코드 기본값을 적는다 — 활성 여부·비중·파라미터의 운영값은 DB `strategy_config` 가 정본이다(`GET /api/strategies`).
+9 전략: `momentum` / `volatility_breakout` / `long_tail_volatility` / `donchian_swing` / `bull_flag_breakout` / `vcp_breakout` / `kojiro`(고지로 대순환 스윙) / `etf_trend`(ETF 추세) / `ndx2x_riskoff`(나스닥2배-위험회피, cycle443 — 섀도 시작). 문서는 코드 기본값을 적는다 — 활성 여부·비중·파라미터의 운영값은 DB `strategy_config` 가 정본이다(`GET /api/strategies`).
 
 상세 매수/청산/tradable_boards/exchange 는 **`src/engine/strategies/CLAUDE.md`** 참조.
 
