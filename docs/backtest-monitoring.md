@@ -17,7 +17,9 @@
 지금 어떤 지표 범위의 종목을 보고 있었나)를 재구성하려면 20:00 자문과 **같은 계산**을
 GET `/api/strategies/core-metrics`(리포터 키 GET 허용 — 운영 키와 동일한 접근 규칙)로
 직접 읽는다. 응답 = 전략마다 `candidates`/`holdings` 두 버킷, 각 키는 숫자 분포
-(`median`·`p25`·`p75`·`min`·`max`) 또는 빈도표(`counts`). 🔴 **시점이 다르다** — 이 GET 은
+(`median`·`p25`·`p75`·`min`·`max`) 또는 빈도표(`counts`) + `unit`(`pct`/`ratio`/`won`/
+`count`/`category`) — **`pct`·`ratio` 단위 키만 종목 간 비교에 쓴다**, `won`(ATR·EMA
+원값 등 원화 절대값)은 종목마다 가격 스케일이 달라 비교하지 않는다. 🔴 **시점이 다르다** — 이 GET 은
 호출 시점(루틴이 읽는 20:30)의 후보·보유를 다시 계산하므로, 20:00 자문이 본 값과
 완전히 같지 않을 수 있다(그 10~30분 사이 체결·재평가로 후보 집합이 바뀔 수 있다).
 정확히 그 자문이 본 값이 필요하면 `parameter_recommendations.metrics`(승률·손절률 등
