@@ -113,6 +113,7 @@ import time
 from datetime import datetime
 from typing import Any, Optional
 
+from src.api.base import mask_account_number
 from src.db._kst import KST
 from src.engine.daily_emit_cap import KstDailyEmitCap
 from src.engine.observer_trace import trace_observer_failure
@@ -492,7 +493,7 @@ async def run_account_risk_watch_once(scheduler: Any) -> Optional[dict]:
         was_active = _gate_active  # cycle239-R1 — 원시값(성공 분기와 동일 규약)
         _gate_active = False  # fail-open — 판정 실패가 매수를 막지 않는다
         _evaluated_mono = _now_mono()  # cycle239 — 실패도 '살아 있음'(연속 실패≠stale)
-        _gate_state = {"level": "error", "reasons": [str(exc)[:150]],
+        _gate_state = {"level": "error", "reasons": [mask_account_number(str(exc))[:150]],
                        "open_risk_pct": None,
                        "evaluated_at": datetime.now(KST).isoformat()}
         try:
@@ -503,9 +504,12 @@ async def run_account_risk_watch_once(scheduler: Any) -> Optional[dict]:
                     "평가 실패로 fail-open 해제. %s", type(exc).__name__,
                 )
             if _peek_emit("watch_failed"):
+                # cycle447(제안 7) — httpx 예외 문자열은 요청 URL 전체(계좌번호
+                # `CANO=` 포함)를 담는다. 마스킹은 150자 절삭 *앞*에 한다(절삭이
+                # 마스킹 패턴을 반 토막 내 일부가 새는 것을 막는다).
                 logger.warning(
                     "[account_risk_watch_failed] 평가 실패 — fail-open(게이트 해제 상태 유지). "
-                    "%s: %s", type(exc).__name__, str(exc)[:150],
+                    "%s: %s", type(exc).__name__, mask_account_number(str(exc))[:150],
                 )
                 _mark_emitted("watch_failed")
         except Exception:

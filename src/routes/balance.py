@@ -11,6 +11,7 @@ from math import ceil, isfinite
 from fastapi import APIRouter, Response
 
 from src.api.balance import get_balance, get_buyable
+from src.api.base import mask_account_number
 from src.db import trade_cost as trade_cost_db
 from src.db import trade_history as trade_history_db
 from src.db._kst import now_kst_iso, today_kst
@@ -172,8 +173,16 @@ async def balance():
     try:
         holdings, summary = await get_balance()
     except Exception as exc:  # noqa: BLE001 — 원인 불문 흡수, 메시지에 남긴다
-        logger.warning("[balance] get_balance 실패 — success=False 로 흡수: %s", exc, exc_info=True)
-        return ApiResponse(success=False, data=None, message=f"잔고 조회 실패: {exc}")
+        # cycle447(제안 7) — httpx 예외 문자열은 요청 URL 전체(계좌번호 `CANO=`
+        # 포함)를 담는다. 로그뿐 아니라 응답 `message` 도 클라이언트에 그대로
+        # 나가므로 둘 다 마스킹한다(`_workspace/analysis/balance_5xx_20261011/
+        # result.md` §4).
+        _masked_exc = mask_account_number(str(exc))
+        logger.warning(
+            "[balance] get_balance 실패 — success=False 로 흡수: %s", _masked_exc,
+            exc_info=True,
+        )
+        return ApiResponse(success=False, data=None, message=f"잔고 조회 실패: {_masked_exc}")
 
     # cycle411 — 예상 매도비용 요율(수수료율+세율, ETF 는 수수료율만). 서버 오늘 기준
     # 30일 창(M2, `today_window_rates`)에 정산 표본이 없으면 기본값으로 떨어진다 — DB

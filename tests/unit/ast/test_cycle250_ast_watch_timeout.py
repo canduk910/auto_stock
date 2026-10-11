@@ -280,7 +280,12 @@ def test_g250_4b_only_timeout_error_is_caught():
 # 거짓 FAIL 을 냈다(04f070d 실측: 로컬 3.13 vs CI). 정당한 본체 변경이면 아래 한 줄을
 # `hashlib.sha256(ast.get_source_segment(src, fn).encode()).hexdigest()` 로 재산출해 갱신한다
 # (핀을 먼저 재산출하지 마라 — 변경 의도를 team-leader 가 확인한 뒤).
-_RUN_ONCE_BODY_SHA256 = "80a2684ee5505d279221a631fca4a03655aa2406707c74abcc54b9f46949f7c0"
+_RUN_ONCE_BODY_SHA256 = "1b1e9fbe9cfdc6ace88ffc051fa4803085f70b5c6d7d29578f26ae62b590bec9"
+# cycle447(제안 7, 2026-10-11, 사용자 지시 "잔고오류는 제안대로 진행해보자") —
+# 실패 분기 로그(`[account_risk_watch_failed]`)·`_gate_state["reasons"]` 가
+# httpx 예외 문자열(요청 URL 전체 = 계좌번호 `CANO=` 포함)을 그대로 실었다
+# (`_workspace/analysis/balance_5xx_20261011/result.md` §4) — `mask_account_number()`
+# 로 가린다. 판정·순서·나머지 로직은 그대로다.
 
 
 def test_g250_5_run_once_body_pinned():
