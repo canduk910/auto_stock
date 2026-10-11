@@ -1,20 +1,23 @@
-"""scheduler._build_priority_groups 헬퍼 (E1, 2026-05-12).
+"""scheduler._build_priority_groups 헬퍼 (E1, 2026-05-12 + cycle444).
 
-`subscribe_filtered_stocks(priority_groups=...)` 가 받을 5개 카테고리 dict 를
+`subscribe_filtered_stocks(priority_groups=...)` 가 받을 6개 카테고리 dict 를
 scheduler 가 산출하는지 검증한다.
 
 카테고리:
 - positions: 모든 전략 보유 합집합 (dedupe)
 - next_day_clear: `_pending_next_day_clear` set 의 ticker (dedupe)
 - swing: `_collect_swing_tickers()` (donchian_swing)
-- momentum: `momentum_tickers` 인자 그대로
+- momentum: `momentum_tickers` 인자 그대로 — 단 momentum 이 섀도면 shadow 로 이동
 - breakout: `_collect_breakout_tickers()` (volatility_breakout + long_tail_volatility
-            + bull_flag_breakout + vcp_breakout — 사이클 48. 본 케이스는 VB/LTV 만 등록)
+            + bull_flag_breakout + vcp_breakout — 사이클 48. 본 케이스는 VB/LTV 만 등록).
+            **실전만**(섀도 제외, cycle444)
+- shadow: 섀도 전략(`shadow_mode=True`)의 돌파·momentum 후보 (cycle444, LOW 최후순위)
+          — 섀도 후보 전용 테스트는 `test_cycle444_shadow_priority.py`
 
 호출 사양:
     `self._build_priority_groups(momentum_tickers: list[str] | None = None) -> dict[str, list[str]]`
 
-빈 카테고리도 반드시 키 자체는 5개 모두 존재 (빈 리스트).
+빈 카테고리도 반드시 키 자체는 6개 모두 존재 (빈 리스트).
 """
 
 from __future__ import annotations
@@ -112,8 +115,12 @@ def test_build_priority_groups_returns_all_five_keys():
     )
     groups = sched._build_priority_groups(momentum_tickers=["M_SCAN1", "M_SCAN2"])
 
-    # 5개 키 모두 존재
-    assert set(groups.keys()) == {"positions", "next_day_clear", "swing", "momentum", "breakout"}
+    # 6개 키 모두 존재 (cycle444 — shadow 티어 추가)
+    assert set(groups.keys()) == {
+        "positions", "next_day_clear", "swing", "momentum", "breakout", "shadow",
+    }
+    # 섀도 전략 없음 — shadow 는 빈 list
+    assert groups["shadow"] == []
 
     # positions: P_VB + P_DS + P_MOM (3개, dedupe)
     assert set(groups["positions"]) == {"P_VB", "P_DS", "P_MOM"}
