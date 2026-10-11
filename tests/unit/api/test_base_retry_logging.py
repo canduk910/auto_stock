@@ -90,8 +90,11 @@ def reset_metrics_before():
 # 않는다(새 계약 = `tests/unit/api/test_cycle428_order_path_retry_restriction.py`).
 # 그 경로를 여기서 계속 쓰면 recovered(2회차 성공) 시나리오가 1회차에서 바로
 # raise 돼 깨진다 — 주문이 아닌 조회성 경로로 바꿔 둘을 분리한다.
-_PATH = "/uapi/domestic-stock/v1/trading/inquire-balance"
-_TR_ID = "TTTC8434R"
+# cycle447(제안 2) — `inquire-balance` 는 이제 **경로별** 재시도 예산(5회·1~2초)이
+# 달라 "경로 무관 일반 계약"의 fixture 로 더는 맞지 않는다(`MAX_RETRIES=3` 가정이
+# 깨진다) — 매수가능조회(여전히 경로 무관 기본값)로 옮긴다.
+_PATH = "/uapi/domestic-stock/v1/trading/inquire-psbl-order"
+_TR_ID = "TTTC8908R"
 
 
 # ---------------------------------------------------------------------------
