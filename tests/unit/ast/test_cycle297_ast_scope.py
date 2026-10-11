@@ -401,10 +401,16 @@ def test_g2_5_catalog_applies_to_is_all_seven(key: str) -> None:
 # G2-6 — 프롬프트 3요소 **불변** (VB·LTV payload byte 동일의 소스 축)
 # ===========================================================================
 #: cycle297 착수 시점(HEAD `a4580b6`) `ast.get_source_segment` sha256.
-#: 🔴 `SYSTEM_PROMPT` 재작문·`_SNAPSHOT_KEYS` 확장(M25)은 이 사이클 범위 밖이다.
+#: 🔴 `SYSTEM_PROMPT` 재작문·`_SNAPSHOT_KEYS` 확장(M25)은 cycle297 범위 밖이었다.
+#: 🔁 cycle445 D2(가) — 사용자 결정(2026-10-11, 주간 자문 2026-10-08 §4.6 제안1·2)으로
+#: `SYSTEM_PROMPT` 에 "데이터 범위와 점수 분포" 절을 추가했다. 핀을 새 값으로 갱신한다
+#: (이 줄의 "범위 밖" 경고는 cycle297 **당시**의 금지였고, cycle445 의 명시 승인은 그
+#: 경고가 막으려던 "조용한 재작문"이 아니다). `_SNAPSHOT_KEYS`·`_USER_PREAMBLE` 은
+#: 이 사이클에서도 byte 동일 — 제안4(VCP 스냅샷 키 확장)는 VCP golden 고정 테스트
+#: (`fixtures/cycle349_golden.json`, "확장 후 재생성 금지")와 충돌해 보류했다.
 _PROMPT_SEGMENT_SHA: dict[str, str] = {
     "SYSTEM_PROMPT":
-        "028d08e51905fad680d4a16c1219aaa13a2719f9dbe8e4e58274f93cad1eeb71",
+        "a411331cc1c7e9ebdd363e7b5eb0cc1c870dd9a24ab6b23ac7de19036268df91",
     "_USER_PREAMBLE":
         "1aa37f98cd96031ea90b2d66283944f0f999a3a880df4a582175cbd6c955e589",
     "_SNAPSHOT_KEYS":
