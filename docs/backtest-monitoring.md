@@ -10,6 +10,22 @@
 반영된다"는 여전히 맞지만 그 "다음 20:00"이 매일이 아니라 다음 주간 자문일이다 —
 근거·반영 범위 = 루트 `CLAUDE.md` 「외부 통합」.
 
+**목요일 20:30 주간 Claude 루틴 — 전략 핵심값 분포 읽기(cycle448, 사용자 결정 2026-10-11).**
+20:00 자문 OpenAI payload 에는 그 전략의 그날 후보·보유 종목이 들고 있는 기술 지표
+분포(`core_metrics_distribution`)가 함께 들어가지만, 이 값 자체는 `parameter_recommendations`
+행에 저장되지 않는다(자문 **입력**일 뿐, 결과가 아니다). 루틴이 자문의 "왜"(그 전략이
+지금 어떤 지표 범위의 종목을 보고 있었나)를 재구성하려면 20:00 자문과 **같은 계산**을
+GET `/api/strategies/core-metrics`(리포터 키 GET 허용 — 운영 키와 동일한 접근 규칙)로
+직접 읽는다. 응답 = 전략마다 `candidates`/`holdings` 두 버킷, 각 키는 숫자 분포
+(`median`·`p25`·`p75`·`min`·`max`) 또는 빈도표(`counts`) + `unit`(`pct`/`ratio`/`won`/
+`count`/`category`) — **`pct`·`ratio` 단위 키만 종목 간 비교에 쓴다**, `won`(ATR·EMA
+원값 등 원화 절대값)은 종목마다 가격 스케일이 달라 비교하지 않는다. 🔴 **시점이 다르다** — 이 GET 은
+호출 시점(루틴이 읽는 20:30)의 후보·보유를 다시 계산하므로, 20:00 자문이 본 값과
+완전히 같지 않을 수 있다(그 10~30분 사이 체결·재평가로 후보 집합이 바뀔 수 있다).
+정확히 그 자문이 본 값이 필요하면 `parameter_recommendations.metrics`(승률·손절률 등
+집계 통계)만 자문 결과에 영속돼 있고, 분포 자체는 재현값임을 염두에 둔다. 응답 상세 =
+`src/routes/CLAUDE.md` 의 `GET /api/strategies/core-metrics` 행.
+
 > 코드 정본:
 > - enqueue + 폴 루프: `src/engine/backtest_orchestration.py` (`_enqueue_backtest_jobs` / `_backtest_poll_loop`) — `recommendation_engine` 이 자문 INSERT 직후 호출
 > - YAML DSL 변환: `src/engine/backtest_yaml.py`

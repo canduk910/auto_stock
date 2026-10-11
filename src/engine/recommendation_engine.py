@@ -22,6 +22,7 @@ from src.db.parameter_recommendations import (
 from src.db.trade_history import get_trades_in_range
 from src.engine.market_regime import get_current_regime
 from src.engine.recommendation_metrics import compute_metrics
+from src.engine import strategy_core_metrics
 
 # refactor B3 (2026-08-18) — 백테스트 오케스트레이션(5 함수 + 3 전역/상수) 이관.
 # module-level 재export 로 기존 import 경로 전부 보존 (scheduler.py:3760 등).
@@ -172,7 +173,12 @@ SYSTEM_PROMPT = (
     " (단, 변동성 큰 모멘텀류는 신중)\n"
     "- ⚠️ 레짐은 매매에 직접 개입하지 않는다(관찰 전용). buy_blocked 는 항상 false — 레짐이 defensive 여도 실제 매수는 차단되지 않으므로 매수 임계 튜닝은 유효하다. block_reason 은 우리 macro 컨테이너 레짐의 방어 '권고' 사유일 뿐이니, defensive 면 매수 파라미터를 보수적으로 권고하는 참고 신호로만 쓰고 매수 튜닝 자체를 스킵하지 마라\n"
     "- weight_reasoning 에 매크로 영향 (예: \"defensive 레짐 + buffett 1.45 → 보수적 비중\") 명시 권장\n"
-    "- code_review_notes 에 매크로 의존 로직 도입 제안 가능 (예: VIX 25↑ 시 자동 매수 중단)"
+    "- code_review_notes 에 매크로 의존 로직 도입 제안 가능 (예: VIX 25↑ 시 자동 매수 중단)\n"
+    "\n"
+    "core_metrics_distribution 이 있으면: 그 전략의 그날 후보·보유 종목이 들고 있는 기술지표\n"
+    "분포이며, 각 키의 unit 이 pct 또는 ratio 면 종목 간 비교 가능한 비율값이고 파라미터\n"
+    "임계값과 맞춰 해석한다. unit 이 won 이면 종목마다 가격 스케일이 달라 종목 간 비교에\n"
+    "쓰지 않는다. unit 이 count 면 개수, category 면 문자열 빈도표(counts)다."
 )
 
 NOTES_MAX_LEN = 2000
@@ -327,11 +333,16 @@ async def _call_openai(
     current_weight: float | None = None,
     peer_weights: dict[str, float] | None = None,
     peer_metrics: dict[str, dict] | None = None,
+    core_metrics: dict | None = None,
 ) -> dict:
     """OpenAI API를 호출하여 JSON 응답을 받는다.
 
     Phase J4 (2026-05-12): 자기 전략 weight + 다른 전략 weight/성과 컨텍스트 추가 —
     자산배정 자문(`recommended_weight`) + 로직 자문(`code_review_notes`) 생성용.
+
+    cycle448 (사용자 결정 2026-10-11): `core_metrics` 는 그 전략의 그날 후보·보유 종목의
+    핵심값 분포(`strategy_core_metrics.collect_strategy_core_metrics`). 분포 키가 하나도
+    없으면(`has_any_keys` 거짓) payload 에 아예 싣지 않는다 — 토큰 낭비 금지.
 
     실패 시 빈 dict 반환.
     """
@@ -361,6 +372,10 @@ async def _call_openai(
         "peer_weights": peer_weights or {},
         "peer_metrics": peer_metrics or {},
     }
+
+    # cycle448 — 전략별 핵심값 분포(후보·보유). 비어 있으면 키 자체를 안 보낸다.
+    if strategy_core_metrics.has_any_keys(core_metrics):
+        user_payload["core_metrics_distribution"] = core_metrics
 
     # 사이클 4 (2026-05-17) — 매크로 레짐 → AI 자문 통합
     # graceful: 싱글톤이 None/empty 면 키 자체 미포함 → 사이클 1 8 필드 회귀 보존
@@ -505,6 +520,15 @@ async def generate_recommendations() -> list[dict]:
                 metrics.get("cumulative_return", 0),
             )
 
+            # cycle448 — 전략별 핵심값 분포(후보·보유). 주간 자문일에만 이 줄에 도달한다
+            # (함수 첫머리 게이트가 막는 날에는 이 루프 자체가 안 돈다 — 계산도 0회).
+            core_metrics: dict = {}
+            try:
+                core_metrics = strategy_core_metrics.collect_strategy_core_metrics(strategy)
+            except Exception:
+                logger.exception("core_metrics 수집 실패: %s", strategy_id)
+                core_metrics = {}
+
             # OpenAI 호출 (30초 타임아웃)
             try:
                 raw = await asyncio.wait_for(
@@ -516,6 +540,7 @@ async def generate_recommendations() -> list[dict]:
                         current_weight=current_weight,
                         peer_weights=peer_weights,
                         peer_metrics=peer_metrics,
+                        core_metrics=core_metrics,
                     ),
                     timeout=30,
                 )

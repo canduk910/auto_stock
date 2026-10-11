@@ -21,6 +21,7 @@ from src.engine import cost_overlay
 from src.engine import param_catalog as pc
 from src.engine.param_validation import BUDGET_KEYS, MAX_BUDGET_PRODUCT, validate_params
 from src.engine.scheduler import trading_scheduler
+from src.engine.strategy_core_metrics import collect_strategy_core_metrics
 from src.engine.te_metrics import compute_te_rr
 from src.models.response import ApiResponse
 
@@ -256,6 +257,33 @@ async def get_strategies_te(months: int = 3):
     ttl = _TE_CACHE_FAILURE_TTL if any_costs_unavailable else _TE_CACHE_TTL
     _te_cache[months] = (time.monotonic() + ttl, data)
     return ApiResponse(success=True, data=data)
+
+
+@router.get("/core-metrics", response_model=ApiResponse)
+async def get_strategies_core_metrics():
+    """전략별 핵심값 분포 — 후보·보유 종목의 기술지표(cycle448, 사용자 결정 2026-10-11).
+
+    목요일 20:30 주간 Claude 루틴이 이 엔드포인트로 자문 보강 재료를 읽는다(사람이 읽는
+    자문 결과 자체는 `GET /api/recommendations`). 등록된 전략 전부(`registry.all()`,
+    꺼진·섀도 전략 포함)에 대해 `engine/strategy_core_metrics.collect_strategy_core_metrics`
+    를 그 자리에서 다시 계산한다 — 전부 메모리 읽기뿐이라 캐시를 두지 않는다. 전략 객체
+    자체가 duck-typing 이라 실패해도 그 전략만 빈 분포(leaf 의 never-raise 계약).
+    """
+    strategies_out: dict[str, dict] = {}
+    for strategy in trading_scheduler.registry.all():
+        sid = strategy.strategy_id
+        try:
+            strategies_out[sid] = collect_strategy_core_metrics(strategy)
+        except Exception:
+            logger.exception("[core_metrics_route_error] 전략 핵심값 분포 계산 실패 sid=%s", sid)
+            strategies_out[sid] = {
+                "candidates": {"n_tickers": 0, "n_with_context": 0, "keys": {}},
+                "holdings": {"n_tickers": 0, "n_with_context": 0, "keys": {}},
+            }
+    return ApiResponse(
+        success=True,
+        data={"generated_at": now_kst_iso(), "strategies": strategies_out},
+    )
 
 
 async def _held_tickers_from_db(strategy_id: str) -> list[str]:
