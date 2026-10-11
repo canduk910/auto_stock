@@ -295,20 +295,13 @@ async def test_generate_daily_log_report_awaits_funnel(monkeypatch):
     async def _fake_trades(*_a, **_kw):
         return []
 
-    from src.engine.log_analysis_engine import _OpenAIMeta
-
-    async def _fake_call(client, metrics, model):
-        captured["metrics"] = metrics
-        return ({"summary": "ok", "findings": []}, _OpenAIMeta())
-
-    async def _fake_insert(*_a, **_kw):
+    async def _fake_insert(**kw):
+        captured["metrics"] = kw.get("metrics")
         return {"id": "row-x"}
 
     monkeypatch.setattr(collector, "_fetch_logs_in_range", _fake_fetch_logs)
     monkeypatch.setattr(collector, "get_trades_in_range", _fake_trades)
-    monkeypatch.setattr(lae, "_call_openai", _fake_call)
     monkeypatch.setattr(lae, "insert_log_report", _fake_insert)
-    monkeypatch.setattr(lae.settings, "openai_api_key", "dummy")
 
     strat = _FakeStrategy(
         strategy_id="long_tail_volatility",

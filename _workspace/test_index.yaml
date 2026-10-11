@@ -82261,7 +82261,6 @@ backend:
     - tests/unit/test_cycle243_auth_fixture.py
   src/engine/log_analysis_engine.py:
     direct_tests:
-    - tests/unit/db/test_cycle283_log_report_upsert.py
     - tests/unit/engine/test_b2_b4_log_analysis_data_collection.py
     - tests/unit/engine/test_cycle199_metrics_integration.py
     - tests/unit/engine/test_cycle249_collect_metrics.py
@@ -82276,7 +82275,6 @@ backend:
     - tests/unit/engine/test_log_analysis_openai_meta.py
     - tests/unit/engine/test_sector_naming.py
     - tests/unit/routes/test_cycle249_log_reports_bundle_external.py
-    - tests/unit/routes/test_cycle285_market_ops_route.py
     - tests/unit/routes/test_log_reports_bundle_past_date_db_overlay.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
@@ -82659,6 +82657,7 @@ backend:
     - tests/unit/db/test_cycle273a_update_trade_status_match_partial.py
     - tests/unit/db/test_cycle273b_trade_status_order_no_and_multi_update.py
     - tests/unit/db/test_cycle276_llm_evaluations_db.py
+    - tests/unit/db/test_cycle283_log_report_upsert.py
     - tests/unit/db/test_cycle285_task_last_success_bulk.py
     - tests/unit/db/test_cycle295_bool_roundtrip_invariant.py
     - tests/unit/db/test_cycle299_retention_expansion.py
@@ -83559,6 +83558,7 @@ backend:
     - tests/unit/routes/test_cycle278_params_validation.py
     - tests/unit/routes/test_cycle282_fixture_sync.py
     - tests/unit/routes/test_cycle282_market_state_route.py
+    - tests/unit/routes/test_cycle285_market_ops_route.py
     - tests/unit/routes/test_cycle290_killswitch_put.py
     - tests/unit/routes/test_cycle293_kill_switch_route.py
     - tests/unit/routes/test_cycle295_gap_route_surface.py
@@ -201913,7 +201913,7 @@ frontend:
     - frontend/src/pages/__tests__/Dashboard.fix1.cycle414.test.tsx
     - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
     - frontend/src/pages/__tests__/MarketState.test.tsx
-generated_at: '2026-10-11T17:20:58.295585+09:00'
+generated_at: '2026-10-11T18:19:39.796734+09:00'
 stats:
   backend_modules: 194
   backend_tests: 1360

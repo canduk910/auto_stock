@@ -55,7 +55,7 @@ def test_aggregate_next_day_clear_empty_when_no_prefix():
 async def test_generate_daily_log_report_exposes_next_day_clear_in_metrics(monkeypatch):
     """generate_daily_log_report 가 metrics dict 에 `next_day_clear` 노출.
 
-    OpenAI/Supabase 호출은 모두 stub — metrics 산출 분기만 검증.
+    cycle445 — OpenAI 호출이 없다. Supabase 호출만 stub — metrics 산출 분기만 검증.
     """
     captured: dict = {}
 
@@ -71,20 +71,13 @@ async def test_generate_daily_log_report_exposes_next_day_clear_in_metrics(monke
     async def _fake_get_trades(*_args, **_kwargs):
         return []
 
-    from src.engine.log_analysis_engine import _OpenAIMeta
-
-    async def _fake_call_openai(client, metrics, model):
-        captured["metrics"] = metrics
-        return ({"summary": "test", "findings": []}, _OpenAIMeta())
-
-    async def _fake_insert(*_args, **_kwargs):
+    async def _fake_insert(**kwargs):
+        captured["metrics"] = kwargs.get("metrics")
         return {"id": "row-1"}
 
     monkeypatch.setattr(collector, "_fetch_logs_in_range", _fake_fetch)
     monkeypatch.setattr(collector, "get_trades_in_range", _fake_get_trades)
-    monkeypatch.setattr(lae, "_call_openai", _fake_call_openai)
     monkeypatch.setattr(lae, "insert_log_report", _fake_insert)
-    monkeypatch.setattr(lae.settings, "openai_api_key", "dummy-key")
 
     # _collect_strategy_funnel 도 무력화 — registry 없는 환경에서도 통과
     # PR-D (2026-05-14): async 변환 — coroutine 반환 필요

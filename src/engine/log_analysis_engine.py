@@ -1,26 +1,29 @@
-"""일일 시스템 로그 분석 엔진 — LLM 호출/저장 계층 (리팩토링 카드 ⑦, cycle259).
+"""일일 시스템 로그 분석 엔진 — 지표 최종 집계 저장 계층 (리팩토링 카드 ⑦, cycle259).
 
 수집/집계 계층(system_logs/trade_history 조회부터 포트폴리오 리스크 스냅샷까지)은
 `src/engine/log_metrics_collector.py` 로 분리됐다(이 파일 922L → 이 파일). 이 모듈은
-OpenAI 호출·응답 검증·비용 계산과 `daily_log_reports` INSERT 만 담당하고,
+`daily_log_reports` INSERT(지표 최종 집계)만 담당하고,
 `collect_daily_log_metrics`/`DAILY_LOG_FETCH_LIMIT`/`HIGH_SEVERITY_FETCH_CAP`/`KST`/
 `_build_portfolio_risk_snapshot` 는 collector 에서 **재export**한다 —
 `routes/log_reports.py:13` 의 `from src.engine.log_analysis_engine import ...` 는 이
 재export 덕에 무변경이다.
 
 매일 정산(21:30, cycle283) 직후 호출되어 당일 system_logs + trade_history를 집계하고
-OpenAI에 개선 리포트 생성을 요청한 뒤 daily_log_reports에 저장한다.
+daily_log_reports 에 지표 최종본으로 저장한다. OpenAI 요약·findings 생성은
+cycle445(사용자 결정 2026-10-11, 워크리스트 참조)로 걷어냈다 — 사람이 읽는 일일
+운영 요약은 20:20 KST 클라우드 루틴이 쓰는 `ext_*` 컬럼이 담당한다. `_validate_report`·
+`SYSTEM_PROMPT`·`_call_openai`·`_OPENAI_PRICING` 등은 과거 행의 재현·외부 리포트
+경로(`POST /api/log-reports/{date}/external`)·AI 매수평가 비용 추정(`llm_buy_gate`)이
+여전히 참조해 이 모듈에 남아 있다.
 
 생성 결과 스키마:
-- summary: 1~2 문장 한국어 총평
-- findings: [{category, severity, title, detail, suggestion}, ...]
+- summary/findings: cycle445 이후 항상 빈 값("" / []) — 과거 행은 그대로 둔다.
 - metrics: 원본 집계 (레벨별 카운트, 상위 WARNING 패턴, 거래/체결 통계) —
-  `log_metrics_collector.collect_daily_log_metrics` 산출을 그대로 프롬프트/INSERT 에 싣는다.
+  `log_metrics_collector.collect_daily_log_metrics` 산출을 그대로 INSERT 에 싣는다.
 """
 
 from __future__ import annotations
 
-import asyncio
 import json
 import logging
 import time
@@ -30,7 +33,6 @@ from decimal import Decimal
 from typing import Any
 
 from src.api.base import reset_request_metrics
-from src.config import settings
 from src.db.log_reports import insert_log_report
 from src.engine.log_metrics_collector import (
     DAILY_LOG_FETCH_LIMIT,
@@ -247,64 +249,42 @@ async def generate_daily_log_report(
         _now_kst: 테스트용 현재 시각 override. None 이면 datetime.now(KST) 사용.
 
     Returns:
-        INSERT된 row, 이미 존재하거나 OpenAI 비활성/실패 시 None.
+        INSERT(upsert)된 row. 저장 자체가 실패하면(`ON CONFLICT` 타깃 불일치 등) None.
     """
-    if not settings.openai_api_key:
-        logger.warning("OPENAI_API_KEY 미설정 — 로그 분석 리포트 건너뜀")
-        return None
-
-    try:
-        from openai import AsyncOpenAI
-    except ImportError:
-        logger.error("openai 패키지가 설치되지 않았습니다")
-        return None
-
     now_kst = _now_kst if _now_kst is not None else datetime.now(KST)
     target_date = now_kst.date()
 
-    # 1. 데이터 수집 — cycle249: `collect_daily_log_metrics` 로 추출(20:20 클라우드
+    # 데이터 수집 — cycle249: `collect_daily_log_metrics` 로 추출(20:20 클라우드
     # 루틴의 번들 GET 과 같은 함수를 공유한다). `now_kst` 를 그대로 넘겨 기존
     # `_now_kst` 주입 seam(장중 수동 호출·`run_now`)을 byte 동일 보존한다.
     metrics = await collect_daily_log_metrics(target_date, now_kst=now_kst)
 
-    # 2. OpenAI 호출 (60초 타임아웃) — 사이클 58 V-2: client/model 주입 + meta 수집
-    model = settings.openai_recommend_model
-    client = AsyncOpenAI(api_key=settings.openai_api_key)
-    meta = _OpenAIMeta()
-    try:
-        raw, meta = await asyncio.wait_for(
-            _call_openai(client, metrics, model), timeout=60
-        )
-    except asyncio.TimeoutError:
-        logger.warning("OpenAI 호출 타임아웃 (log analysis)")
-        raw = None
+    # cycle445 — 이 함수는 더 이상 OpenAI 를 호출하지 않는다. 사람이 읽는 일일
+    # 운영 요약은 20:20 KST 클라우드 루틴이 `POST /api/log-reports/{date}/external`
+    # 로 쓰는 `ext_*` 컬럼이 맡는다(사용자 결정 2026-10-11, 워크리스트 참조).
+    # summary/findings/model/토큰/비용은 그 요약이 따로 들어오기 전까지 빈 값이다.
+    summary = ""
+    findings: list[dict] = []
 
-    if raw is None:
-        raw = {}
-
-    summary, findings = _validate_report(raw)
-    if not summary and not findings:
-        summary = OPENAI_EMPTY_RESPONSE_SUMMARY
-
-    # 3. upsert (cycle283 D6 — `ON CONFLICT (target_date) DO UPDATE`, base 9컬럼만).
-    #    20:05 1차 스냅샷 행을 이 완전판이 덮어쓰고, 20:20 클라우드 루틴의 `ext_*` 는 보존된다.
-    # 사이클 58 V-2: OpenAI 메타(tokens/latency/cost) 함께 저장
+    # upsert (cycle283 D6 — `ON CONFLICT (target_date) DO UPDATE`, base 9컬럼만).
+    # 20:05 1차 스냅샷 행을 이 최종 집계가 덮어쓰고, 20:20 클라우드 루틴의 `ext_*`
+    # 는 보존된다.
     row = await insert_log_report(
         target_date=target_date,
         summary=summary,
         findings=findings,
         metrics=metrics,
-        model=model,
-        input_tokens=meta.input_tokens,
-        output_tokens=meta.output_tokens,
-        total_tokens=meta.total_tokens,
-        latency_ms=meta.latency_ms,
-        cost_estimate_usd=meta.cost_estimate_usd,
+        model=None,
+        input_tokens=None,
+        output_tokens=None,
+        total_tokens=None,
+        latency_ms=None,
+        cost_estimate_usd=None,
     )
     if row:
         logger.info(
-            "로그 분석 리포트 저장 완료 — %s, findings %d건",
-            target_date, len(findings),
+            "로그 지표 최종 집계 저장 완료 — %s",
+            target_date,
         )
     else:
         # cycle283 — upsert 이후 이 분기는 **정상 경로에서 도달 불가**하다.

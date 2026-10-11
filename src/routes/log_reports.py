@@ -11,7 +11,6 @@ from pydantic import BaseModel, Field
 from src.db._kst import KST
 from src.db.log_reports import get_log_report, list_log_reports, upsert_external_report
 from src.engine.log_analysis_engine import (
-    OPENAI_EMPTY_RESPONSE_SUMMARY,
     _validate_report,
     collect_daily_log_metrics,
     generate_daily_log_report,
@@ -153,27 +152,28 @@ async def get_report(target_date: str):
 def _is_complete_report(existing: dict | None) -> bool:
     """그 행이 **덮어쓰면 손해인 완성본**인가 (cycle283 C9-b 재실행 가드의 유일한 판정).
 
-    네 축을 **모두** 만족해야 완성본이다. 한 축이라도 빠지면 재실행을 허용한다 —
-    이 가드의 목적은 "재실행 금지" 가 아니라 "완성본 파괴 방지" 이기 때문이다.
+    cycle445 — OpenAI 요약·findings 생성이 걷힌 뒤에는 `summary`/`model` 이 정상
+    경로에서도 항상 빈 값이라, 그 둘을 완성 판정에 넣으면 21:30 이후 재실행이
+    매번 "미완성"으로 읽혀 파괴적 덮어쓰기 가드가 통째로 무력화된다(사용자 결정
+    2026-10-11, 워크리스트 참조). 그래서 **metrics 축**으로만 판정한다 — 한 축이라도
+    빠지면 재실행을 허용한다(이 가드의 목적은 "재실행 금지" 가 아니라 "완성본 파괴 방지").
 
     1. 행이 있다.
-    2. **1차 스냅샷이 아니다** — `metrics["snapshot_pass"]` 센티널
-       (`daily_metrics_snapshot.SNAPSHOT_SUMMARY` 는 비어 있지 않으므로 `summary` 축
-       만으로는 20:05~21:30 구간을 통째로 막아 버린다. 그래서 이 축이 따로 있다).
-    3. `summary` 가 비어 있지 않고 **OpenAI 실패 placeholder 가 아니다**
-       (`OPENAI_EMPTY_RESPONSE_SUMMARY` — 그 행은 `model` 이 채워져 있어 종전 판정에서
-       '완성본' 으로 오분류됐고, 정작 수동 복구가 필요한 유일한 날이 막혔다).
-    4. `model` 이 채워져 있다(= LLM 경로가 실제로 돌았다).
+    2. `metrics` 가 **실제 내용이 있는 dict** 다(`collect_daily_log_metrics` 가 돌았다는
+       증거 — 빈 dict·`None`은 아직 분석이 돈 적 없는 행이다).
+    3. **1차 스냅샷이 아니다** — `metrics["snapshot_pass"]` 센티널
+       (`daily_metrics_snapshot.SNAPSHOT_SUMMARY` 는 비어 있지 않으므로 이 축이
+       따로 있어야 20:05~21:30 구간을 구별한다).
+
+    cycle445 이전(OpenAI 가 쓴) 행의 `summary`/`model` 은 그대로 남아 있고, 이 판정이
+    그 값을 보지 않더라도 과거 행 데이터는 지우지 않는다 — 판정만 바뀐다.
     """
     if not existing:
         return False
     metrics = existing.get("metrics")
-    if isinstance(metrics, dict) and metrics.get("snapshot_pass"):
+    if not isinstance(metrics, dict) or not metrics:
         return False
-    summary = (existing.get("summary") or "").strip()
-    if not summary or summary == OPENAI_EMPTY_RESPONSE_SUMMARY:
-        return False
-    return bool(existing.get("model"))
+    return not metrics.get("snapshot_pass")
 
 
 @router.post("/run", response_model=ApiResponse)
@@ -189,8 +189,7 @@ async def run_now(force: bool = False):
 
     그래서 **완성 리포트**(`_is_complete_report` 판정)가 이미 있으면 재분석 자체를
     **실행하지 않고** 거부한다. 덮어쓰려면 `?force=1`.
-    막지 않는 세 경우 = 행이 아예 없음 · 1차 스냅샷만 있는 20:05~21:30 구간 ·
-    **OpenAI 가 실패한 날의 행**. 마지막 하나가 이 라우트의 존재 이유다.
+    막지 않는 경우 = 행이 아예 없음 · 1차 스냅샷만 있는 20:05~21:30 구간.
 
     ⚠️ `?force=1` 은 21:30 이후에는 여전히 파괴적이다(그 시점엔 `reset_request_metrics()`
     와 `_reset_daily_state()` 가 이미 돌아 `api_metrics`/`strategy_funnel` 이 0 이다).

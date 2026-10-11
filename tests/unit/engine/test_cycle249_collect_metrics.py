@@ -221,18 +221,12 @@ async def test_generate_when_run_then_delegates_to_collector(monkeypatch):
         calls.append((target_date, now_kst))
         return sentinel
 
-    async def _fake_call_openai(client, metrics, model):
-        captured["openai_metrics"] = metrics
-        return ({"summary": "요약", "findings": []}, lae._OpenAIMeta())
-
     async def _fake_insert(**kwargs):
         captured["insert_metrics"] = kwargs.get("metrics")
         return {"id": "row-1"}
 
     monkeypatch.setattr(lae, "collect_daily_log_metrics", _fake_collect, raising=False)
-    monkeypatch.setattr(lae, "_call_openai", _fake_call_openai)
     monkeypatch.setattr(lae, "insert_log_report", _fake_insert)
-    monkeypatch.setattr(lae.settings, "openai_api_key", "dummy-key")
 
     pinned = datetime(2026, 8, 31, 20, 10, 0, tzinfo=KST)
     await lae.generate_daily_log_report(_now_kst=pinned)
@@ -248,7 +242,6 @@ async def test_generate_when_run_then_delegates_to_collector(monkeypatch):
         "generate_daily_log_report 가 collect_daily_log_metrics 에 now_kst 를 그대로 "
         "넘기지 않았다(재계산/누락 — `_now_kst` 주입 seam 붕괴)"
     )
-    assert captured.get("openai_metrics") is sentinel, "OpenAI 로 다른 metrics 가 갔다"
     assert captured.get("insert_metrics") is sentinel, "INSERT 로 다른 metrics 가 갔다"
 
 
@@ -271,16 +264,11 @@ async def test_generate_when_now_kst_omitted_then_collector_gets_aware_default(
         calls.append((target_date, now_kst))
         return {"target_date": target_date.isoformat(), "logs": {}}
 
-    async def _fake_call_openai(client, metrics, model):
-        return ({"summary": "요약", "findings": []}, lae._OpenAIMeta())
-
     async def _fake_insert(**kwargs):
         return {"id": "row-1"}
 
     monkeypatch.setattr(lae, "collect_daily_log_metrics", _fake_collect, raising=False)
-    monkeypatch.setattr(lae, "_call_openai", _fake_call_openai)
     monkeypatch.setattr(lae, "insert_log_report", _fake_insert)
-    monkeypatch.setattr(lae.settings, "openai_api_key", "dummy-key")
 
     await lae.generate_daily_log_report()  # _now_kst 생략 — 기본 datetime.now(KST)
 
@@ -294,11 +282,12 @@ async def test_generate_when_now_kst_omitted_then_collector_gets_aware_default(
     assert now_kst_arg.tzinfo == KST, now_kst_arg
 
 
-async def test_generate_when_openai_key_missing_then_no_collection(monkeypatch):
-    """C-8 — OpenAI 키/패키지 검사가 **수집보다 앞**(호출 순서 보존).
+async def test_generate_when_no_openai_call_then_collection_still_runs(monkeypatch):
+    """cycle445 — OpenAI 호출이 없으니 `openai_api_key` 유무와 무관하게 항상 수집한다.
 
-    순서가 뒤집히면 키 없는 개발 환경·병행 종료 후에도 매일 20:10 에 로그 3만 건 조회가
-    돈다(무의미한 DB 부하). 명세 §C 의 "검사 후 호출" 문언이 여기서 행위로 봉인된다.
+    이전(C-8)에는 키 부재가 수집 자체를 막았다. OpenAI 호출을 걷어낸 뒤에는 그 조건이
+    사라져, 환경변수 설정과 무관하게 `collect_daily_log_metrics`→`insert_log_report` 가
+    끝까지 돈다(사용자 결정 2026-10-11, 워크리스트 참조).
     """
     called = {"n": 0}
 
@@ -306,13 +295,16 @@ async def test_generate_when_openai_key_missing_then_no_collection(monkeypatch):
         called["n"] += 1
         return {}
 
+    async def _fake_insert(**kwargs):
+        return {"id": "row-1"}
+
     monkeypatch.setattr(lae, "collect_daily_log_metrics", _fake_collect, raising=False)
-    monkeypatch.setattr(lae.settings, "openai_api_key", "")
+    monkeypatch.setattr(lae, "insert_log_report", _fake_insert)
 
     out = await lae.generate_daily_log_report()
 
-    assert out is None
-    assert called["n"] == 0, "OPENAI_API_KEY 미설정인데 수집이 실행됐다"
+    assert out == {"id": "row-1"}
+    assert called["n"] == 1, "collect_daily_log_metrics 가 호출되지 않았다"
 
 
 @freeze_time("2026-09-04 05:00:00")
