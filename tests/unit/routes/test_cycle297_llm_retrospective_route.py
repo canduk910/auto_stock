@@ -498,13 +498,21 @@ def test_g4_11_prompt_version_aliases_map_the_one_time_break(monkeypatch) -> Non
         assert src_sid == dst_sid, f"전략을 가로지르는 등가 — {src_key} → {dst_key}"
         assert src_pv != dst_pv, f"같은 버전끼리 맺혔다 — {src_key}"
         assert len(src_pv) == 12 and len(dst_pv) == 12
-    # 값 축 — 배포 후 키는 현재 소스로 계산한 값과 일치해야 한다(표가 낡으면 붉다).
-    from src.engine.llm_buy_gate import _prompt_version, reset_llm_buy_gate_state
-
-    reset_llm_buy_gate_state()
+    # 값 축 — dst 해시는 cycle297 배포 시점에 고정된 **pin** 이다(이 표가 담은 단절은
+    # 그 시점 하나뿐). 라이브 `_prompt_version()` 재계산과 비교하지 않는다 —
+    # cycle445 가 그 재계산 비교를 깼다: D7(모델 접두 포맷)·D2(가)(SYSTEM_PROMPT
+    # 내용 추가)둘 다 프롬프트를 legit 하게 더 바꿔 "지금 값"이 cycle297 시점 값과
+    # 영원히 달라졌다. 재계산과 맞춰 이 표의 dst 를 "지금 값"으로 올리면 cycle297
+    # 이후의 서로 다른 두 세대(D2(가) 전/후 — 내용이 실제로 바뀐 세대)를 이 표
+    # 하나로 묶어 §7-1 이 금지한 "프롬프트 바뀐 전후 행을 섞은 회귀" 를 조용히
+    # 재현한다. 그래서 값 축은 표 작성 시점의 고정 상수와만 비교한다.
+    _EXPECTED_POST_CYCLE297_HASH = {
+        "volatility_breakout": "9c45283a49c1",
+        "long_tail_volatility": "7a9c45983c0d",
+    }
     for dst_key in aliases.values():
         sid, pv = dst_key.split("|")
-        assert _prompt_version(sid) == pv, (
-            f"{sid}: 등가표의 배포 후 버전 {pv} != 현재 {_prompt_version(sid)} — "
-            "프롬프트를 바꿨으면 `_PROMPT_VERSION_ALIASES` 도 함께 갱신하라"
+        assert _EXPECTED_POST_CYCLE297_HASH.get(sid) == pv, (
+            f"{sid}: 등가표의 배포 후 해시 {pv} != cycle297 pin "
+            f"{_EXPECTED_POST_CYCLE297_HASH.get(sid)!r} — 표 자체가 변조됐다"
         )

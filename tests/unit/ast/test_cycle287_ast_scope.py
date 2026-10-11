@@ -112,7 +112,8 @@ _PINNED_DIR_FILE_COUNTS = {
     # 호출부·테스트 0 재확인) 삭제로 98 → 97.
     # cycle443 — 신규 leaf `ndx2x_core.py`·`ndx2x_ingest.py` + 전략 파일
     # `strategies/ndx2x_riskoff.py`(재귀 집계) 로 97 → 100.
-    "src/engine": 100,
+    # cycle445 — 신규 leaf `weekly_advisory.py`(주간 AI 자문 실행일 판정) 로 100 → 101.
+    "src/engine": 101,
 }
 
 #: `scheduler.py` cycle257 영구 상한.
