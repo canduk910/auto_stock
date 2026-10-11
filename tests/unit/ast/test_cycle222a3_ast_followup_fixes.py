@@ -459,8 +459,9 @@ _APPROVED_CONTENT_SHA: dict[str, tuple[str, str]] = {
         "cycle444 섀도 후보 구독 최후순위 사용자 승인 2026-10-11",
     ),
     "src/engine/scheduler.py": (
-        "1e59d9a2cae6cb17b0acc596711b786090b6257c64e1b084eef1fadf0a8e9230",
-        "cycle444 섀도 후보 구독 최후순위 사용자 승인 2026-10-11",
+        "9a5d294c931306bda9b37a7048d850432ceaa074c34e71cf556d88d80cecf7d6",
+        "cycle447(2026-10-11) — 제안 5: 15분 포지션 동기화 실패 로그 DEBUG→WARNING"
+        "(로그 레벨만, 사용자 지시 '잔고오류는 제안대로 진행해보자')",
     ),
     "src/engine/session.py": (
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",

@@ -2608,7 +2608,10 @@ class TradingScheduler:
                 try:
                     await self._sync_positions_from_balance()
                 except Exception:
-                    logger.debug("포지션 동기화 실패")
+                    # cycle447(제안 5) — DEBUG 는 system_logs(21:30 분석)에 안 보여
+                    # 15분 동기화가 조용히 건너뛰어진 것을 아무도 몰랐다. WARNING
+                    # 으로 올린다(로그 레벨만 — 재시도·로직 무변경).
+                    logger.warning("포지션 동기화 실패")
 
     async def _confirm_breakout_open_prices_if_pending(self) -> None:
         """사이클 164 (2026-06-18) — VB/LTV 시가 확정 chain 재시도 안전망.

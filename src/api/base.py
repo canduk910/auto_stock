@@ -12,6 +12,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import random
+import re
 import time
 from collections import defaultdict
 from typing import Optional
@@ -35,6 +36,22 @@ MAX_RETRIES = 3
 BACKOFF_BASE = 0.5  # 초
 BACKOFF_JITTER = 0.25  # thundering herd 완화
 
+# cycle447(제안 7) — 로그 문자열에서 계좌번호(`CANO=` 쿼리 파라미터)를 가린다.
+# `account_risk_watcher`·`routes/balance.py` 가 httpx 예외 문자열(요청 URL 전체
+# 포함)을 그대로 WARNING 에 싣던 것을 막는다(`_workspace/analysis/
+# balance_5xx_20261011/result.md` §4). 5xx 응답 본문에도 방어적으로 적용한다.
+_CANO_PATTERN = re.compile(r"CANO=\d+")
+
+
+def mask_account_number(text: str) -> str:
+    """로그에 실릴 문자열에서 계좌번호를 가린다. 실패해도 원문을 그대로 돌려준다."""
+    if not text:
+        return text
+    try:
+        return _CANO_PATTERN.sub("CANO=***", text)
+    except Exception:
+        return text
+
 # cycle428(F-422-1, 항목 4 — D2, 사용자 승인 2026-10-10) — 주문 경로는 「보냈을 수
 # 있는」 실패를 재시도하지 않는다. KIS 주문 POST 에는 중복을 막는 클라이언트 키가
 # 없어, 응답만 잃은 재시도가 같은 주문을 두 번 낼 수 있다(cycle327 「주문이 나간
@@ -50,6 +67,39 @@ _ORDER_RETRY_RESTRICTED_PATHS: frozenset[str] = frozenset({
 _ORDER_RETRYABLE_TRANSPORT_ERRORS: tuple[type[Exception], ...] = (
     httpx.ConnectError, httpx.ConnectTimeout, httpx.PoolTimeout,
 )
+
+# cycle447(제안 2, 2026-10-11) — 잔고조회(TTTC8434R)만 재시도 예산을 늘린다.
+# 근거 = `_workspace/analysis/balance_5xx_20261011/result.md` — KIS 공식 문서가
+# 이 TR 에 한해 "원장 유량정책(전 고객 합산 초당 120 TPS)" 초과(EGW00215) 시
+# 재시도를 권고한다. 대부분 두 번째 시도(0.5초 뒤)에서 회복하는 일시적 혼잡이라
+# 시도 횟수·간격을 늘리면 소진(현재 월 15건)이 대부분 사라진다. 🔴 주문 경로
+# (`_ORDER_RETRY_RESTRICTED_PATHS`)의 재시도 제한(cycle428 D2)과는 무관 — 조회
+# 경로 안에서만 더 관대하게 재시도한다.
+_BALANCE_RETRY_OVERRIDE_PATHS: frozenset[str] = frozenset({
+    "/uapi/domestic-stock/v1/trading/inquire-balance",
+})
+_BALANCE_MAX_RETRIES = 5
+_BALANCE_BACKOFF_MIN_SECS = 1.0
+_BALANCE_BACKOFF_MAX_SECS = 2.0
+
+
+def _effective_max_retries(path: str) -> int:
+    """경로별 재시도 예산 — 잔고조회만 `_BALANCE_MAX_RETRIES`, 그 밖은 `MAX_RETRIES`."""
+    if path in _BALANCE_RETRY_OVERRIDE_PATHS:
+        return _BALANCE_MAX_RETRIES
+    return MAX_RETRIES
+
+
+async def _sleep_before_retry(path: str, attempt: int) -> None:
+    """경로별 재시도 백오프 — 잔고조회는 1~2초 균등분포, 그 밖은 기존 지수 백오프."""
+    if path in _BALANCE_RETRY_OVERRIDE_PATHS:
+        await asyncio.sleep(
+            random.uniform(_BALANCE_BACKOFF_MIN_SECS, _BALANCE_BACKOFF_MAX_SECS)
+        )
+        return
+    await asyncio.sleep(
+        BACKOFF_BASE * (2 ** (attempt - 1)) + random.uniform(0, BACKOFF_JITTER)
+    )
 
 # 사이클 181 (2026-06-28) — 토큰만료 분기 msg_cd 화이트리스트 (access token 3종)
 # token_manager.issue() 로 복구 가능한 코드만 포함.
@@ -298,12 +348,56 @@ async def _flush_quote_recovered_collector() -> None:
         pass
 
 
-def _warn_http_status(status: int, attempt: int, max_retries: int, path: str) -> None:
+def _extract_5xx_detail(resp: httpx.Response) -> str:
+    """cycle447(제안 1) — 5xx 응답 본문에서 `msg_cd`/`msg1` 을 뽑거나, 없으면
+    본문 앞 200자를 반환한다.
+
+    `_request` 가 `raise_for_status()` 로 던지는 `HTTPStatusError` 는 종전에
+    본문을 전혀 읽지 않아 `EGW00215`(원장 유량 제한) 같은 실제 거부 코드를 확인할
+    길이 없었다(`_workspace/analysis/balance_5xx_20261011/result.md`). 응답을
+    못 읽는 모든 경우(디코딩 실패 등)는 빈 문자열 — 관측 실패가 재시도를 막지
+    않는다. 방어적으로 계좌번호 마스킹을 거친다.
+    """
+    try:
+        text = resp.text
+    except Exception:
+        return ""
+    if not text:
+        return ""
+    data = None
+    try:
+        import json as _json
+        data = _json.loads(text)
+    except Exception:
+        data = None
+    if isinstance(data, dict) and (data.get("msg_cd") or data.get("msg1")):
+        detail = f"msg_cd={data.get('msg_cd') or ''} msg1={data.get('msg1') or ''}"
+    else:
+        detail = text
+    return mask_account_number(detail)[:200]
+
+
+def _warn_http_status(
+    status: int, attempt: int, max_retries: int, path: str, *, detail: str = "",
+) -> None:
     """사이클 76 — `_request` 5xx WARNING 출력 헬퍼 (G-AST1: `_request` 본문 직접 호출 0건 보장).
 
     G-AST1 AST 가드는 `_request` 함수 본문 내 `logger.warning("HTTP ...")` 직접 호출을 검출.
     본 함수로 추출하면 `_request` 본문에서 제거됨 → 가드 통과.
+
+    cycle447(제안 1) — `detail`(5xx 응답 본문 요약, `_extract_5xx_detail`)이 있으면
+    한 줄에 덧붙인다. 빈 문자열이면 기존 포맷과 byte 동일.
     """
+    if detail:
+        logger.warning(
+            "HTTP %s (attempt %d/%d): %s detail=%s",
+            status,
+            attempt,
+            max_retries,
+            path,
+            detail,
+        )
+        return
     logger.warning(
         "HTTP %s (attempt %d/%d): %s",
         status,
@@ -409,6 +503,10 @@ _request_metrics: dict = {
     "retry_recovered": 0,
     "retry_exhausted": 0,
     "by_path_5xx": defaultdict(int),
+    # cycle447(제안 8) — 경로별 **총** 호출 수(성공·실패 무관, 1회 호출 = 재시도
+    # 무관하게 +1). `by_path_5xx` 와 나누면 경로별 실패율을 바로 낼 수 있다
+    # (`_workspace/analysis/balance_5xx_20261011/result.md` 제안 8).
+    "by_path_total": defaultdict(int),
     # cycle406 M3 — 이 누적이 언제부터 센 것인지(관측 전용). 재기동하면 이 dict 자체가
     # 모듈 재로드로 새로 생겨 암묵적으로 "지금부터"가 되는데, 그 사실이 숫자만 봐서는
     # 안 보여 21:30 리포트가 "재기동 전 5xx 0건"으로 읽힌다(`_workspace/reports/
@@ -433,6 +531,9 @@ def get_request_metrics() -> dict:
             _request_metrics["by_path_5xx"].items(),
             key=lambda x: -x[1],
         )[:5],
+        # cycle447(제안 8) — 경로별 총 호출 수 전체(관측 전용, cap 없음 — 우리가
+        # 부르는 KIS path 종류는 수십 개 수준이라 상한이 필요 없다).
+        "by_path_total": dict(_request_metrics["by_path_total"]),
         # cycle406 M3 — "이 수치는 HH:MM 이후" 를 리포트가 그대로 실을 수 있게.
         "since": _request_metrics["since"],
     }
@@ -452,6 +553,7 @@ def reset_request_metrics() -> None:
     ):
         _request_metrics[k] = 0
     _request_metrics["by_path_5xx"].clear()
+    _request_metrics["by_path_total"].clear()
     _request_metrics["since"] = now_kst_iso()
 
 
@@ -535,8 +637,11 @@ async def _request(
     """공통 요청 래퍼. 재시도 + Rate Limit + 토큰 갱신."""
     url = f"{settings.kis_base_url}{path}"
     _request_metrics["total"] += 1
+    _request_metrics["by_path_total"][path] += 1
+    # cycle447(제안 2) — 잔고조회(inquire-balance)만 재시도 예산이 다르다.
+    _eff_max_retries = _effective_max_retries(path)
 
-    for attempt in range(1, MAX_RETRIES + 1):
+    for attempt in range(1, _eff_max_retries + 1):
         await _rate_limit()
         async with _semaphore:
             token = await token_manager.get_token()
@@ -579,13 +684,18 @@ async def _request(
                             exc_info=True,
                         )
                 if should_emit_warning:
-                    _warn_http_status(status, attempt, MAX_RETRIES, path)
+                    _detail_5xx = (
+                        _extract_5xx_detail(e.response) if 500 <= status < 600 else ""
+                    )
+                    _warn_http_status(
+                        status, attempt, _eff_max_retries, path, detail=_detail_5xx,
+                    )
                 # cycle428(F-422-1 D2) — 주문 경로의 5xx 는 서버가 요청을 받았을
                 # 수 있어 재시도하지 않는다(첫 회에 바로 올린다).
                 _order_path_blocks_retry = (
                     500 <= status < 600 and path in _ORDER_RETRY_RESTRICTED_PATHS
                 )
-                if attempt == MAX_RETRIES or _order_path_blocks_retry:
+                if attempt == _eff_max_retries or _order_path_blocks_retry:
                     # PR-B 보강 (Copilot, 2026-05-14): 5xx 한정 — 영구 4xx 는
                     # exhausted 의미 아님 (retry 자체가 무의미한 클라이언트 에러).
                     if 500 <= status < 600:
@@ -593,7 +703,7 @@ async def _request(
                         try:
                             _log_msg = (
                                 f"[api_retry_exhausted] path={path} tr_id={tr_id} "
-                                f"attempts={MAX_RETRIES} last_status={status} "
+                                f"attempts={_eff_max_retries} last_status={status} "
                                 f"last_msg=HTTPStatusError"
                             )
                             await _system_logs.write_log("ERROR", _log_msg)
@@ -601,17 +711,14 @@ async def _request(
                             pass
                     raise
                 _request_metrics["retries"] += 1
-                await asyncio.sleep(
-                    BACKOFF_BASE * (2 ** (attempt - 1))
-                    + random.uniform(0, BACKOFF_JITTER)
-                )
+                await _sleep_before_retry(path, attempt)
                 continue
             except httpx.RequestError as e:
                 _request_metrics["network_err"] += 1
                 logger.warning(
                     "네트워크 오류 (attempt %d/%d): %s — %s",
                     attempt,
-                    MAX_RETRIES,
+                    _eff_max_retries,
                     path,
                     e,
                 )
@@ -623,13 +730,13 @@ async def _request(
                     path in _ORDER_RETRY_RESTRICTED_PATHS
                     and not isinstance(e, _ORDER_RETRYABLE_TRANSPORT_ERRORS)
                 )
-                if attempt == MAX_RETRIES or _order_path_blocks_retry:
+                if attempt == _eff_max_retries or _order_path_blocks_retry:
                     # PR-B (2026-05-14): 최종 실패 카운터 + 영구 로그
                     _request_metrics["retry_exhausted"] += 1
                     try:
                         _log_msg = (
                             f"[api_retry_exhausted] path={path} tr_id={tr_id} "
-                            f"attempts={MAX_RETRIES} last_status=network "
+                            f"attempts={_eff_max_retries} last_status=network "
                             f"last_msg={type(e).__name__}"
                         )
                         await _system_logs.write_log("ERROR", _log_msg)
@@ -637,10 +744,7 @@ async def _request(
                         pass
                     raise
                 _request_metrics["retries"] += 1
-                await asyncio.sleep(
-                    BACKOFF_BASE * (2 ** (attempt - 1))
-                    + random.uniform(0, BACKOFF_JITTER)
-                )
+                await _sleep_before_retry(path, attempt)
                 continue
 
         # KIS 응답 코드 확인
@@ -670,7 +774,7 @@ async def _request(
         if is_token_expired:
             logger.info("토큰 만료 감지, 재발급 시도")
             await token_manager.issue()
-            if attempt < MAX_RETRIES:
+            if attempt < _eff_max_retries:
                 _request_metrics["retries"] += 1
                 continue
             # PR-B 보강 (Codex, 2026-05-14): 마지막 시도까지 토큰 만료 지속
@@ -679,7 +783,7 @@ async def _request(
             try:
                 _log_msg = (
                     f"[api_retry_exhausted] path={path} tr_id={tr_id} "
-                    f"attempts={MAX_RETRIES} last_status=token_expired "
+                    f"attempts={_eff_max_retries} last_status=token_expired "
                     f"last_msg={msg1}"
                 )
                 await _system_logs.write_log("ERROR", _log_msg)

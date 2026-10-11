@@ -80,7 +80,7 @@ def _install_fakes(monkeypatch, *, balance_raises=False, net_asset=1_000_000,
             raise RuntimeError("KIS 잔고 조회 일시 장애")
         return ([], SimpleNamespace(net_asset=net_asset))
 
-    monkeypatch.setattr(pf, "get_balance", _fake_get_balance, raising=False)
+    monkeypatch.setattr(pf, "get_balance_cached", _fake_get_balance, raising=False)
 
     async def _fake_get(ticker: str):
         if stock_master_raises:
@@ -200,7 +200,7 @@ async def test_route_uses_readable_sector_name_from_bstp_kor_isnm(monkeypatch):
     async def _fake_get_balance(afhr_flpr: str = "N"):
         return ([], SimpleNamespace(net_asset=1_000_000))
 
-    monkeypatch.setattr(pf, "get_balance", _fake_get_balance, raising=False)
+    monkeypatch.setattr(pf, "get_balance_cached", _fake_get_balance, raising=False)
 
     async def _fake_get(ticker: str):
         return SimpleNamespace(raw={"bstp_kor_isnm": "유통"})
@@ -255,7 +255,7 @@ async def test_route_falls_back_to_master_raw_krx_flag(monkeypatch):
     async def _fake_get_balance(afhr_flpr: str = "N"):
         return ([], SimpleNamespace(net_asset=1_000_000))
 
-    monkeypatch.setattr(pf, "get_balance", _fake_get_balance, raising=False)
+    monkeypatch.setattr(pf, "get_balance_cached", _fake_get_balance, raising=False)
 
     async def _fake_get(ticker: str):
         return SimpleNamespace(raw={})  # bstp_kor_isnm 없음 → master_raw 폴백
@@ -301,7 +301,7 @@ async def test_route_empty_registry_zero_snapshot(monkeypatch):
     async def _fake_get_balance(afhr_flpr: str = "N"):
         return ([], SimpleNamespace(net_asset=1_000_000))
 
-    monkeypatch.setattr(pf, "get_balance", _fake_get_balance, raising=False)
+    monkeypatch.setattr(pf, "get_balance_cached", _fake_get_balance, raising=False)
 
     async def _fake_get(ticker: str):
         return SimpleNamespace(raw={})

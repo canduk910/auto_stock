@@ -4,7 +4,9 @@
 - 매수가능조회 (TTTC8908R)
 """
 
+import asyncio
 import logging
+import time
 
 from src.api.base import KisApiError, kis_get
 from src.config import settings
@@ -221,6 +223,55 @@ async def get_balance(afhr_flpr: str = "N") -> tuple[list[StockHolding], Account
     )
 
     return holdings, summary
+
+
+# ---------------------------------------------------------------------------
+# cycle447(제안 3, 2026-10-11) — 짧은 성공 결과 공유 캐시.
+#
+# `_workspace/analysis/balance_5xx_20261011/result.md` — 계좌 위험 감시(300초
+# 주기)·15분 포지션 동기화·대시보드 잔고표(10초 폴링)·포트폴리오 리스크 카드가
+# 각자 `get_balance()` 를 불러 잔고조회(TTTC8434R) 트래픽을 늘린다. 최근 성공
+# 결과를 짧게 공유하면 장중 호출 수가 줄고, 곧 그 TR 의 5xx 노출(원장 유량 제한)
+# 도 준다.
+#
+# 🔴 **매도/매수 직전 재대조는 이 함수를 쓰지 않는다** — `order_engine.py` 의
+# #1.5(`_handle_sell_qty_exceeded`)·D1(`_handle_sell_insufficient_quantity`)
+# 판정과 `selling_reconcile.reconcile_selling_unknown_one`(매도 결과 모름 확인)
+# 은 그 순간의 실제 KIS 잔고가 필요해 **항상 `get_balance()` 를 직접** 부른다.
+# 캐시 사용처 목록 = `src/api/CLAUDE.md` 「balance.py」 절.
+# ---------------------------------------------------------------------------
+_BALANCE_CACHE_TTL_SECS = 20.0
+_balance_cache: dict[str, tuple[list[StockHolding], AccountSummary]] = {}
+_balance_cache_at: dict[str, float] = {}
+_balance_cache_lock = asyncio.Lock()
+
+
+async def get_balance_cached(
+    afhr_flpr: str = "N",
+) -> tuple[list[StockHolding], AccountSummary]:
+    """`get_balance()` 최근 **성공** 결과를 `_BALANCE_CACHE_TTL_SECS`(20초) 동안 공유한다.
+
+    실패는 캐시하지 않는다(다음 호출이 바로 다시 시도). 동시 호출은 락 안에서
+    한 번만 KIS 를 부르고 나머지는 그 결과를 같이 받는다(쏠림 방지).
+
+    🔴 매도/매수 직전 재대조(주문·청산 경로)는 절대 이 함수를 쓰지 않는다 —
+    위 모듈 수준 주석 참조.
+    """
+    async with _balance_cache_lock:
+        now = time.monotonic()
+        cached_at = _balance_cache_at.get(afhr_flpr)
+        if cached_at is not None and (now - cached_at) < _BALANCE_CACHE_TTL_SECS:
+            return _balance_cache[afhr_flpr]
+        result = await get_balance(afhr_flpr)
+        _balance_cache[afhr_flpr] = result
+        _balance_cache_at[afhr_flpr] = time.monotonic()
+        return result
+
+
+def reset_balance_cache_for_test() -> None:
+    """테스트 전용 — 캐시 초기화."""
+    _balance_cache.clear()
+    _balance_cache_at.clear()
 
 
 DAILY_ORDERS_URL = "/uapi/domestic-stock/v1/trading/inquire-daily-ccld"

@@ -16,7 +16,7 @@ import logging
 
 from fastapi import APIRouter
 
-from src.api.balance import get_balance
+from src.api.balance import get_balance_cached
 from src.db import stock_master
 from src.engine.portfolio_risk import (
     compute_portfolio_risk_snapshot,
@@ -32,9 +32,14 @@ router = APIRouter(prefix="/api/portfolio", tags=["portfolio"])
 
 
 async def _net_asset_graceful() -> int:
-    """KIS 잔고 순자산 — 실패 시 0 (관찰 pct 만 0, 스냅샷은 보존)."""
+    """KIS 잔고 순자산 — 실패 시 0 (관찰 pct 만 0, 스냅샷은 보존).
+
+    cycle447(제안 3) — 이 라우트는 **관찰 전용**(매수 차단 0, 결정에 쓰지 않는다)
+    이라 `get_balance_cached()`(20초 공유 캐시)를 쓴다. 매도/매수 직전 재대조는
+    이 함수를 쓰지 않는다(`src/api/balance.py` 모듈 docstring).
+    """
     try:
-        _holdings, summary = await get_balance()
+        _holdings, summary = await get_balance_cached()
         return int(getattr(summary, "net_asset", 0) or 0)
     except Exception:
         logger.debug("[portfolio_risk] get_balance 실패 graceful", exc_info=True)

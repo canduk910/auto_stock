@@ -95,7 +95,7 @@
 | GET | `/api/market-regime/current` | market_regime.py | 메모리 레짐 + 매수 가드 표시 + `cash_usage_ratio` + `auto_regime_adjust` + ETF 레짐(관찰). 🔴 **`buy_blocked` 는 항상 `false`**(라우트 상수 — 레짐은 매수에 개입하지 않는다). `block_reason` = 관찰용 경보 사유. 설정 조회 실패 = graceful(`cash_usage_ratio`=1.0 · `etf_regime_enabled`=`False` · `auto_regime_adjust` 는 판독 불가 = `False`) |
 | GET | `/api/market-regime/history?days=30` | market_regime.py | `market_regime_snapshots` 최근 N일 |
 | PUT | `/api/market-regime/auto-adjust` | market_regime.py | 매크로 레짐 → `cash_usage_ratio` 자동 갱신 토글(키 `auto_regime_adjust`), **다음 영업일 `_boot` 부터 반영**. `/api/integrations/auto-regime-adjust` 와 동일 동작(Settings UI 는 그쪽) |
-| GET | `/api/portfolio/risk` | portfolio.py | 전 전략 포트폴리오 리스크 **관찰 스냅샷**. 🔴 **매수 차단 0**. registry·순자산·섹터 조회가 전부 **graceful**(실패해도 200, 빈 값)이라 이 라우트의 실패가 매매를 멈추지 않는다 |
+| GET | `/api/portfolio/risk` | portfolio.py | 전 전략 포트폴리오 리스크 **관찰 스냅샷**. 🔴 **매수 차단 0**. registry·순자산·섹터 조회가 전부 **graceful**(실패해도 200, 빈 값)이라 이 라우트의 실패가 매매를 멈추지 않는다. 순자산 조회는 `src/api/balance.py::get_balance_cached()`(20초 공유 캐시, cycle447 — 매도·매수 결정 경로가 아니라 캐시를 쓸 수 있다) |
 | GET | `/api/integrations/dkstock-regime` | system_integrations.py | 매크로 레짐 수신 활성 여부(출처 = 우리 `macro` 컨테이너, DB 키 `dkstock_regime_enabled`). `{enabled, source: 'db'\|'env', env_value, db_value}` — DB 우선 / .env fallback(db_value=null 이면 source='env') |
 | PUT | `/api/integrations/dkstock-regime` | system_integrations.py | 수신 토글 `{enabled}`. 켜면 매크로 캐시를 비우고 `_refresh_market_regime_and_persist_safely()` 를 백그라운드 task 로 띄운다. 끄면 메모리 regime 을 `MarketRegime.empty()` 로 리셋(관찰 중단 — 매수 행위 불변). DB 실패 500, fetch 실패는 graceful(토글은 성공) |
 | GET/PUT | `/api/integrations/kis-mcp` | system_integrations.py | 외부 백테스트 서버 활성 조회/토글(응답 구조 동일). 켜도 즉시 fetch 안 함 — 백테스트는 20:00 자문 시점 발화 |

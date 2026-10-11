@@ -103,6 +103,28 @@ ast.dump 동일을 봉인). 계약 `0 < _EVAL_TIMEOUT_SECS <= _WATCH_INTERVAL_SE
   (cap 밖, `reason=eval_failure`/`stale` 와 동형).
 관측 순서 규약 = **peek → 로그 → mark** (cycle226 D-3 — 관측기 자기실패가
 관측 대상을 지우면 안 된다: 로그가 던져도 cap 은 미소비라 다음 평가가 재시도).
+
+**cycle447(제안 4, 축소 적용 — 2026-10-11, 사용자 지시 "잔고오류는 제안대로
+진행해보자")** — 평가 실패(`run_account_risk_watch_once` 의 `except` 분기)가
+`_gate_state`/`_evaluated_mono` 를 **무조건** 즉시 `level=error` 로 덮던 것을,
+직전 평가가 아직 신선(`age <= _GATE_STALE_MAX_SECS`)하면 그 디스플레이 값을
+그대로 유지하도록 좁혔다 — 잔고조회(`inquire-balance`) 5xx 한 번이 대시보드를
+갑자기 `error` 로 깜빡이지 않게 한다(`_workspace/analysis/
+balance_5xx_20261011/result.md` 제안 4). 유지하는 동안 `_evaluated_mono` 도
+갱신하지 않는다 — 그래야 반복 실패가 영원히 "신선"으로 둔갑하지 않고,
+900초 누적 뒤에는 다음 실패에서 자연히 `level=error` 로 떨어진다(= "한도를
+넘으면 지금처럼" 원안 그대로).
+
+🔴 **`_gate_active`(매수 게이트 그 자체)는 이 변경과 무관하게 항상 무조건
+`False`** 다 — F5("활성 게이트가 평가 실패로 풀릴 때 무음 해제 금지")·
+R6("get_balance 예외 → 게이트 False + LOUD WARNING", `test_cycle233_
+watcher_gate.py`)가 명시적으로 검증하는 하드코딩 안전 계약이라 바뀌지 않는다.
+제안 4 원문을 글자 그대로("게이트가… 직전 값을 쓴다") 구현하면 이 두 계약을
+뒤집는데, 그건 매수 게이트 행위를 바꾸는 변경이라 domain-consult + 사용자
+승인이 별도로 필요하다(루트 `CLAUDE.md` 「여전히 승인이 필요한 것」) — 이
+사이클은 그 승인 없이 디스플레이 축소판만 구현했다. 실 프로덕션은
+`account_risk_block_pct` 가 다크런치(None)라 `_gate_active` 가 애초에 항상
+`False` 이므로, 이 변경의 실질 효과는 디스플레이 표시뿐이다.
 """
 
 from __future__ import annotations
@@ -113,6 +135,7 @@ import time
 from datetime import datetime
 from typing import Any, Optional
 
+from src.api.base import mask_account_number
 from src.db._kst import KST
 from src.engine.daily_emit_cap import KstDailyEmitCap
 from src.engine.observer_trace import trace_observer_failure
@@ -490,11 +513,27 @@ async def run_account_risk_watch_once(scheduler: Any) -> Optional[dict]:
         return _gate_state
     except Exception as exc:
         was_active = _gate_active  # cycle239-R1 — 원시값(성공 분기와 동일 규약)
+        # 🔴 `_gate_active` 는 항상 무조건 fail-open — F5/R6(무음 해제 금지·즉시
+        # fail-open) 는 그대로다. 매수 게이트 행위를 바꾸는 쪽은 domain-consult +
+        # 사용자 승인 대상이라 이 사이클 범위 밖이다(모듈 docstring cycle447 절).
         _gate_active = False  # fail-open — 판정 실패가 매수를 막지 않는다
-        _evaluated_mono = _now_mono()  # cycle239 — 실패도 '살아 있음'(연속 실패≠stale)
-        _gate_state = {"level": "error", "reasons": [str(exc)[:150]],
-                       "open_risk_pct": None,
-                       "evaluated_at": datetime.now(KST).isoformat()}
+        # cycle447(제안 4, 축소 적용) — **디스플레이만** 신선도(900초) 안이면
+        # 직전 성공 평가값을 유지한다. 그래서 신선도 판정 자체도 "실패가 갱신한
+        # 스탬프" 가 아니라 직전 성공 스탬프를 기준으로 해야 한다 — 유지하는 동안
+        # `_evaluated_mono` 를 갱신하지 않아야, 반복 실패가 영원히 "신선"으로
+        # 둔갑하지 않는다(한도를 넘기면 다음 실패에서 자연히 error 로 떨어진다).
+        try:
+            _prior_age = _gate_age_secs()
+        except Exception:
+            _prior_age = None
+        _keep_display = not _is_stale(_prior_age)
+        _error_state = {
+            "level": "error", "reasons": [mask_account_number(str(exc))[:150]],
+            "open_risk_pct": None,
+            "evaluated_at": datetime.now(KST).isoformat(),
+        }
+        _gate_state = _gate_state if _keep_display else _error_state
+        _evaluated_mono = _evaluated_mono if _keep_display else _now_mono()
         try:
             if was_active:
                 # 실패로 인한 해제 전이도 명시 (F5 — 무음 해제 금지, cap 밖)
@@ -503,9 +542,17 @@ async def run_account_risk_watch_once(scheduler: Any) -> Optional[dict]:
                     "평가 실패로 fail-open 해제. %s", type(exc).__name__,
                 )
             if _peek_emit("watch_failed"):
+                # cycle447(제안 7) — httpx 예외 문자열은 요청 URL 전체(계좌번호
+                # `CANO=` 포함)를 담는다. 마스킹은 150자 절삭 *앞*에 한다(절삭이
+                # 마스킹 패턴을 반 토막 내 일부가 새는 것을 막는다).
+                # cycle447(제안 4) — `display=` 꼬리로 디스플레이 보존 여부를
+                # 구분한다(`kept` = 신선도 안·직전 값 유지, `reset` = 한도 초과·
+                # error 로 전환 — 매수 게이트 자체는 둘 다 fail-open 그대로).
                 logger.warning(
                     "[account_risk_watch_failed] 평가 실패 — fail-open(게이트 해제 상태 유지). "
-                    "%s: %s", type(exc).__name__, str(exc)[:150],
+                    "%s: %s display=%s",
+                    type(exc).__name__, mask_account_number(str(exc))[:150],
+                    "kept" if _keep_display else "reset",
                 )
                 _mark_emitted("watch_failed")
         except Exception:
