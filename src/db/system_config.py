@@ -1043,6 +1043,27 @@ async def get_account_cluster_mode_raw() -> Optional[str]:
     return _string_from_raw(raw)
 
 
+# ---------------------------------------------------------------------------
+# cycle445 D8 — 주간 AI 자문 실행 요일(사용자 결정 2026-10-11)
+# ---------------------------------------------------------------------------
+_WEEKLY_ADVISORY_WEEKDAY_KEY = "weekly_advisory_weekday"
+
+
+async def get_weekly_advisory_weekday_raw() -> Optional[str]:
+    """20:00 AI 자문 실행 요일 원값(cycle445). 키 없음 → `None`.
+
+    `status_exit_mode`·`account_cluster_mode` 와 같은 이유로 `_select_value` 를 직접
+    불러 **DB 예외를 전파한다** — `src/engine/weekly_advisory.py::should_run_weekly_advisory`
+    가 "키 없음"과 "DB 장애"를 같은 기본값(목)으로 접되, 그 결정은 leaf 쪽 책임이지 이
+    getter 가 먼저 삼키면 안 된다. 모양이 틀린 값(값 없는 dict·JSONB null·숫자·목록)은
+    `_string_from_raw` 가 어휘 밖 마커를 돌려준다(leaf 의 `normalize_weekday` 가
+    요일 코드 집합과 비교해 걸러낸다). 저장 함수는 아직 없다 — 이번 사이클은 PUT
+    라우트가 없다(기본값을 바꾸려면 운영자가 `system_config` 에 직접 쓴다).
+    """
+    raw = await _select_value(_WEEKLY_ADVISORY_WEEKDAY_KEY)
+    return _string_from_raw(raw)
+
+
 async def get_task_last_success(task_label: str) -> Optional[str]:
     """task_last_success_<label> 키 ISO 문자열 조회. 키 부재 / 실패 시 None graceful.
 

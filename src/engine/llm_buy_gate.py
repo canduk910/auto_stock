@@ -769,8 +769,9 @@ _feature_version_cache: "str | None" = None
 
 
 def _prompt_version(strategy_id) -> str:
-    """SYSTEM 프롬프트 + user 템플릿 + **전략별 user payload 스키마**의 sha256 앞 12자
-    (§7-1, C30 → cycle297 §3.4 전략별 확대).
+    """`<model>|<12자리 hex>` — 모델명 + (SYSTEM 프롬프트 + user 템플릿 +
+    **전략별 user payload 스키마**)의 sha256 앞 12자 (§7-1, C30 → cycle297 §3.4
+    전략별 확대 → cycle445 D7 모델명 포함).
 
     프롬프트가 바뀐 뒤의 행과 그 전의 행을 **섞어서 회귀하면 안 된다**. 사용자가 원하는
     재귀 개선의 단위가 전략이므로(명세 §3.4) 버전 축도 **전략별**이다 — kojiro 컨텍스트를
@@ -784,19 +785,28 @@ def _prompt_version(strategy_id) -> str:
     빼면 스냅샷 키/META 문구만 바꾼 사이클이 *같은* `prompt_version` 으로 다른 내용의
     행을 만들어, §7-1 이 금지한 "프롬프트 바뀐 전후 행을 섞은 회귀" 가 조용히 가능해진다.
     지표 키 집합은 `_feature_version` 이 따로 잰다(둘은 서로 다른 축이다).
+
+    🔴 **cycle445 D7 — 모델명을 해시가 아니라 키 앞에 그대로 붙인다.** 프롬프트 글자가
+    모델 선택과 무관해(`settings.openai_buy_gate_model` 문자열은 해시 blob 에 없다),
+    해시만으로는 모델 교체(10-06 `gpt-5.6-luna`→`gpt-6-luna`)를 가르지 못했다 — 실측으로
+    `bull_flag_breakout|77b27be33ac1` 한 키에 두 모델 6건이 섞였다(주간 자문
+    2026-10-08 §4.4). `model|hash` 형식이면 모델이 다르면 키 전체가 달라 자동으로
+    분리된다. 모델 읽기 실패(설정 접근 예외)도 전체 계산 실패로 묶어 `""` 로 낙하한다
+    (모델 접두만 없는 반쪽 버전 문자열을 만들지 않는다).
     """
     sid = str(strategy_id)
     if sid in _prompt_version_cache:
         return _prompt_version_cache[sid]
     try:
         from src.engine import llm_features as _lf
+        model = str(getattr(settings, "openai_buy_gate_model", "") or "")
         blob = (
             str(_lf.SYSTEM_PROMPT)
             + str(_lf._USER_PREAMBLE)
             + "|".join(_lf.snapshot_keys_for(sid))
             + json.dumps(_lf._STRATEGY_META.get(sid, {}), sort_keys=True, ensure_ascii=False)
         ).encode("utf-8")
-        _prompt_version_cache[sid] = hashlib.sha256(blob).hexdigest()[:12]
+        _prompt_version_cache[sid] = f"{model}|{hashlib.sha256(blob).hexdigest()[:12]}"
     except Exception:
         _prompt_version_cache[sid] = ""
     return _prompt_version_cache[sid]
