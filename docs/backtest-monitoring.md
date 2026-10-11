@@ -5,6 +5,11 @@
 외부 MCP 백테스트 서버(`http://43.202.187.5:3846/mcp`, stock-manager) 연동을 운영자가 직접
 점검하는 절차. 백테스트는 **20:00 AI 자문에만 붙는 검증 부가물**이고 자동매매 흐름과는 격리돼 있다(§6).
 
+🔴 **20:00 AI 자문은 주간 자문일(기본 목요일)에만 돈다**(cycle445 — 사용자 결정
+2026-10-11, 판정 = `src/engine/weekly_advisory.py`). 이 문서의 "다음 20:00 자문부터
+반영된다"는 여전히 맞지만 그 "다음 20:00"이 매일이 아니라 다음 주간 자문일이다 —
+근거·반영 범위 = 루트 `CLAUDE.md` 「외부 통합」.
+
 > 코드 정본:
 > - enqueue + 폴 루프: `src/engine/backtest_orchestration.py` (`_enqueue_backtest_jobs` / `_backtest_poll_loop`) — `recommendation_engine` 이 자문 INSERT 직후 호출
 > - YAML DSL 변환: `src/engine/backtest_yaml.py`

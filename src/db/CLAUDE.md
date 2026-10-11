@@ -180,6 +180,8 @@ AWS RDS PostgreSQL CRUD 모듈. DB 클라이언트 정본 = **`pg.py` (asyncpg �
 
 **계좌 묶음 배정 킬스위치 (cycle404)** — `get_account_cluster_mode_raw() -> str | None`, 키 `account_cluster_mode`. 저장 함수는 아직 없다(이번 사이클에 PUT 라우트 없음 — `src/engine/account_cluster.py` leaf 가 읽기만 한다). `status_exit_mode` 와 같은 이유로 `_get_string_or_none` 대신 `_select_value` + `_string_from_raw` 를 직접 써 DB 예외를 전파한다(leaf 가 `reason=read_error` 를 가르는 데 쓴다). 값의 의미 = `src/engine/CLAUDE.md` `account_cluster.py` 모듈 맵 항목.
 
+**주간 AI 자문 실행 요일 (cycle445, 사용자 결정 2026-10-11)** — `get_weekly_advisory_weekday_raw() -> str | None`, 키 `weekly_advisory_weekday`. 저장 함수는 아직 없다(PUT 라우트 없음 — 바꾸려면 운영자가 `system_config` 에 직접 쓴다). 같은 이유로 `_select_value` + `_string_from_raw` 를 직접 써 DB 예외를 전파한다 — leaf `src/engine/weekly_advisory.py::should_run_weekly_advisory` 가 "키 없음"과 "DB 장애"를 같은 기본값(목요일)으로 접되, 그 판정은 leaf 책임이다. 값의 의미 = `src/engine/CLAUDE.md` `weekly_advisory.py` 모듈 맵 항목.
+
 **레짐 표시 설정 (매매가 소비하지 않는다)** — `.env` 폴백 없음(DB 미설정이면 코드 기본값):
 
 - `get_buy_block_mode() -> str` / `set_buy_block_mode(mode)`: 키 `buy_block_mode`, 기본 `HARD`. 4 모드 밖은 `ValueError`
