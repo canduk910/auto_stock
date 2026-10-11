@@ -79,6 +79,7 @@ const CARD_OPEN = {
     na: 'lookup_failed',
   },
   note: null,
+  exit_ai: { status: 'no_evaluation' },
 }
 
 const CARD_BFB = {
@@ -171,6 +172,12 @@ const CARD_BFB = {
     closes_k: 3, closes_n: 3, provisional_dates: ['2026-10-07'], lock_dates: ['2026-10-06'], na: null,
   },
   note: { body: '목표 도달 — 계획대로', updated_at: '2026-10-08T15:05:00+09:00' },
+  exit_ai: {
+    status: 'exit_signaled',
+    first_exit_bar_date: '2026-10-07',
+    first_exit_score: 72,
+    first_exit_rationale: 'EMA20 이탈·MFE 대부분 반납',
+  },
 }
 
 const CARD_VB = {
@@ -253,6 +260,7 @@ const CARD_VB = {
     na: 'not_applicable',
   },
   note: null,
+  exit_ai: { status: 'not_applicable' },
 }
 
 export const JOURNAL_FIXTURE = {

@@ -91,7 +91,9 @@ cd "$(git rev-parse --show-toplevel)"
 #   - `COMPOSE_PARALLEL_LIMIT=1` = compose 의 컨테이너/빌드 작업 동시성 상한
 #   - `COMPOSE_BAKE=0` = bake 경로(여러 타깃을 한 번에 굽는다)를 끄고 서비스별 순차 빌드
 # 서비스가 둘뿐일 때는 무해했다 — **세 번째 이미지가 생긴 순간 임계를 넘었다.**
-# 넷째 이미지(예: `llm_worker`)를 추가하기 전에 이 값을 다시 확인하라.
+# cycle446 — 넷째 이미지 `llm_worker` 추가. `COMPOSE_PARALLEL_LIMIT=1` 이 이미 걸려 있어
+# 순차 빌드(backend → frontend → macro → journal_worker → llm_worker)는 그대로 유지된다
+# — 다섯째 이미지를 추가하기 전에 이 값을 다시 확인하라.
 export COMPOSE_PARALLEL_LIMIT=1
 export COMPOSE_BAKE=0
 
@@ -131,6 +133,11 @@ MACRO_RE='^macro/'
 # 않는다 — 넣으면 워커만 고칠 때마다 매매 backend 가 재시작된다). frontend·macro 와 같은
 # 방식으로 별도 축으로 둔다.
 JOURNAL_RE='^journal_worker/'
+# cycle446 — 청산 AI 섀도 워커(사용자 결정 2026-10-11). `llm_worker/` 는 독립 이미지(빌드
+# 컨텍스트 `./llm_worker`, `src` import 0)라 backend 이미지 입력이 아니다(BACKEND_RE 에
+# 넣지 않는다 — 넣으면 워커만 고칠 때마다 매매 backend 가 재시작된다). frontend·macro·
+# journal 과 같은 방식으로 별도 축으로 둔다.
+LLM_RE='^llm_worker/'
 
 # cycle322 (사용자 결정 D2) — backend 축에 걸리지만 **이미지에는 안 들어가는** 경로.
 # `src/**` 는 확장자 무관 이미지 입력이라 `src/db/CLAUDE.md` 한 줄이 full 을 불러 매매
@@ -209,11 +216,12 @@ else
     fi
 fi
 
-# cycle303 — 서비스 목록 일반화, cycle412 — journal 축 추가로 조합을 더 일반화. backend
-# 축(BACKEND_RE)은 cycle248 과 완전히 동일하게 "하나라도 있으면 full" 이다. backend 가
-# 아닌 나머지는 SERVICES 배열(docker compose 서비스 이름)로 모아 하나의 `--no-deps`
-# 라인을 공유한다. AXES 배열은 같은 순서로 **축 이름**(mode/reason 문구용 — journal 축의
-# 서비스 이름은 `journal_worker` 지만 축 이름은 `journal`)을 모은다.
+# cycle303 — 서비스 목록 일반화, cycle412 — journal 축 추가, cycle446 — llm 축 추가로
+# 조합을 더 일반화. backend 축(BACKEND_RE)은 cycle248 과 완전히 동일하게 "하나라도
+# 있으면 full" 이다. backend 가 아닌 나머지는 SERVICES 배열(docker compose 서비스 이름)로
+# 모아 하나의 `--no-deps` 라인을 공유한다. AXES 배열은 같은 순서로 **축 이름**(mode/reason
+# 문구용 — journal·llm 축의 서비스 이름은 `journal_worker`·`llm_worker` 지만 축 이름은
+# `journal`·`llm`)을 모은다.
 # ⚠️ `set -e` 아래서 `[ -n "$X" ] && ARR+=(x)` 는 조건이 거짓일 때(= 히트 없음) 그 라인의
 # 종료코드가 1 이 되어 스크립트 전체가 죽는다(`&&` 단축평가 실패가 `set -e` 트리거) —
 # 그래서 반드시 `if … then … fi` 로 쓴다.
@@ -226,6 +234,7 @@ if [ -z "$MODE" ]; then
     FRONTEND_HITS="$(printf '%s\n' "$CHANGED" | grep -E "$FRONTEND_RE" || true)"
     MACRO_HITS="$(printf '%s\n' "$CHANGED" | grep -E "$MACRO_RE" || true)"
     JOURNAL_HITS="$(printf '%s\n' "$CHANGED" | grep -E "$JOURNAL_RE" || true)"
+    LLM_HITS="$(printf '%s\n' "$CHANGED" | grep -E "$LLM_RE" || true)"
     if [ -n "$BACKEND_HITS" ]; then
         MODE="full"; REASON="backend_inputs_changed"
     else
@@ -237,6 +246,9 @@ if [ -z "$MODE" ]; then
         fi
         if [ -n "$JOURNAL_HITS" ]; then
             SERVICES+=(journal_worker); AXES+=(journal)
+        fi
+        if [ -n "$LLM_HITS" ]; then
+            SERVICES+=(llm_worker); AXES+=(llm)
         fi
         case "${#AXES[@]}" in
             0)

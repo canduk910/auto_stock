@@ -109,6 +109,27 @@ function buyDateLabel(iso: string | null | undefined): string {
   return iso
 }
 
+/**
+ * cycle446 D-6 — 「현재 AI 판단」 칸. 백엔드 `src/db/exit_ai.py` 읽기 결과 — 「없음」(대상
+ * 전략 아님)과 「모름」(대상인데 아직 평가 없음)을 가른다. `ai_verdict` 가 없는 응답(구
+ * 서버)은 `—`(0 으로 꾸미지 않는다).
+ */
+function aiVerdictLabel(v: Holding['ai_verdict']): string {
+  if (v == null) return '—'
+  if (v.status === 'not_applicable') return '대상 아님'
+  if (v.status === 'no_evaluation') return '평가 없음'
+  const action = v.action === 'exit' ? '청산' : v.action === 'hold' ? '보유' : '—'
+  const score = v.exit_score != null ? ` (${v.exit_score}점)` : ''
+  return `${action}${score}`
+}
+
+function aiVerdictTitle(v: Holding['ai_verdict']): string {
+  if (v == null) return '청산 AI 섀도 기록 미제공(구 서버)'
+  if (v.status === 'not_applicable') return 'AI 청산 섀도 평가 대상 전략이 아닙니다'
+  if (v.status === 'no_evaluation') return '대상 전략이지만 아직 평가 기록이 없습니다'
+  return `기준 봉 ${v.bar_date ?? '—'} · 평가 시각 ${v.evaluated_at ?? '—'}`
+}
+
 interface Props {
   selectedStrategy: string
 }
@@ -262,13 +283,15 @@ export default function BalanceTable({ selectedStrategy }: Props) {
               {/* cycle411c F10 — 1280px 에서 한 자씩 줄바꿈되어 행 높이가 51→85px 로 늘던 결함 */}
               <th className="px-4 py-3 text-right font-medium text-gray-600 whitespace-nowrap">예상 매도비용</th>
               <th className="px-4 py-3 text-right font-medium text-gray-600 whitespace-nowrap">순 평가손익</th>
+              {/* cycle446 D-6 — 청산 AI 섀도 기록(llm_worker)의 「현재 AI 판단」. */}
+              <th className="px-4 py-3 text-right font-medium text-gray-600 whitespace-nowrap">AI 판단</th>
               <th className="px-4 py-3 text-center font-medium text-gray-600"></th>
             </tr>
           </thead>
           <tbody>
             {filteredHoldings.length === 0 ? (
               <tr>
-                <td colSpan={isAll ? 16 : 15} className="px-4 py-8 text-center text-gray-400">
+                <td colSpan={isAll ? 17 : 16} className="px-4 py-8 text-center text-gray-400">
                   보유 종목이 없습니다.
                 </td>
               </tr>
@@ -396,6 +419,13 @@ export default function BalanceTable({ selectedStrategy }: Props) {
                         </td>
                       )
                     })()}
+                    <td
+                      data-testid={`ai-verdict-${h.ticker}`}
+                      title={aiVerdictTitle(h.ai_verdict)}
+                      className="px-4 py-3 text-right text-gray-600 whitespace-nowrap"
+                    >
+                      {aiVerdictLabel(h.ai_verdict)}
+                    </td>
                     <td className="px-4 py-3 text-center">
                       <button
                         onClick={() => setSellTarget({

@@ -1403,15 +1403,18 @@ tick blind — 루트 `CLAUDE.md` 운영 가이드 D6 = cycle232. cycle248 이 �
 
 | 단계 | 범위 | 상태 |
 |------|------|------|
-| 0 | 현재 — compose 서비스 4개(backend / frontend / macro / journal_worker). journal_worker 는 매매 경로 밖 관찰자다 → 15.8 | 가동 중 |
-| 1 | AI 매수평가(LLM)를 `llm_worker` 로 분리 | **진행 중** (cycle279 — 워커 컨테이너 신설) |
+| 0 | 현재 — compose 서비스 5개(backend / frontend / macro / journal_worker / llm_worker). journal_worker 는 거래일지 관찰자(15.8), **`llm_worker` 는 청산 AI 섀도 기록 관찰자다(cycle446, 15.9)** — 둘 다 매매 경로 밖 | 가동 중 |
+| 1 | AI 매수평가(LLM)를 `llm_worker` 컨테이너에 **합류**(새 컨테이너 아님 — 자리는 cycle446 이 먼저 썼다) | 계획 (착수 미정 · cycle279 예약) |
 | 2 | 20:00 자문 · 21:30 로그 분석 · 외부 백테스트 분리 (퍼널은 가를 수 없다 → 15.3) | 계획 (착수 미정) |
 | 3 | 시세 감시 ↔ 전략 판정 ↔ 주문 완전 분리 | **보류** (착수하지 않는다) |
 | 4 | 메시지 기반 5프로세스 (WS·REST 전송 2 + 시세·전략평가 / 주문 / 체결) | **방향 기록** (승인 전 · 3단계를 흡수한다 → 15.5) |
 
-> 1단계가 "진행 중"인 근거는 **사용자 결정(2026-09-11 — "1단계만 진행")** 이다. 사이클 번호
-> `cycle279` 는 예약해 둔 것이고 명세·코드·changelog 항목은 아직 없다. 2·3·4단계는 승인된
-> 설계가 아니라 방향 기록이다.
+> `llm_worker` 컨테이너는 **가동 중**이다(cycle446 — 청산 AI 섀도 기록, 15.9). 그 이름·자리는
+> 원래 1단계(AI 매수평가 분리, cycle279 예약) 가 쓰려던 것이었는데, 사용자 결정(2026-10-11)이
+> 청산 섀도 기록을 먼저 그 이름으로 만들었다 — 1단계가 착수되면 **같은 컨테이너**에 매수평가
+> 큐를 합류시킨다(새 컨테이너·새 배포 축·새 비밀 파일을 또 만들지 않는다). 사이클 번호 `cycle279`
+> 는 예약해 둔 것이고 명세·코드·changelog 항목은 아직 없다. 2·3·4단계는 승인된 설계가 아니라
+> 방향 기록이다.
 
 ### 15.1 0단계 — 현재 (가동 중)
 
@@ -1438,6 +1441,8 @@ flowchart LR
     DB[("AWS RDS PostgreSQL")]
     MAC["macro<br/>매크로 API<br/>(매매 판단 없음)"]
     JW["journal_worker<br/>거래일지 관찰자<br/>(읽기만 · KIS 0)"]
+    LW["llm_worker<br/>청산 AI 섀도 기록 관찰자<br/>(읽기만 · KIS 0 · OpenAI 호출)"]
+    OAI["OpenAI API"]
     FE -->|"/api"| BE
     FE -->|"/api/macro"| MAC
     BE <--> WS
@@ -1447,16 +1452,27 @@ flowchart LR
     JW -->|"GET G0 · G1 (리포터 키)"| BE
     BE -.->|"파일 로그 ./logs (:ro 마운트)"| JW
     JW -->|"trade_journal_* (전용 역할)"| DB
+    LW -->|"GET G0 · G1 (리포터 키, 08:15/08:35/08:55)"| BE
+    LW -->|"확정 일봉 · 체결내역 (SELECT)"| DB
+    LW -->|"청산 판단 질의"| OAI
+    LW -->|"exit_ai_* (전용 역할)"| DB
 ```
 
 KIS REST 와의 연결은 backend 상자 안 `api/base.py` 의 `_semaphore = Semaphore(20)` 을 거친다.
 
-`docker-compose.prod.yml` 의 서비스는 `backend` · `frontend` · `macro` · `journal_worker` 넷이다.
-`macro` 는 매크로 화면 API 이고 매매 판단을 하지 않는다. `journal_worker` 는 backend 가 남긴
-로그와 조회 응답을 읽어 거래일지를 쓰는 관찰자다(15.8). 매매에 관한 일은 전부 backend 상자 안에
-있고, 그 안의 모든 이름은 같은 이벤트 루프 위에서 돈다.
+`docker-compose.prod.yml` 의 서비스는 `backend` · `frontend` · `macro` · `journal_worker` ·
+`llm_worker` 다섯이다. `macro` 는 매크로 화면 API 이고 매매 판단을 하지 않는다. `journal_worker`
+는 backend 가 남긴 로그와 조회 응답을 읽어 거래일지를 쓰는 관찰자다(15.8). `llm_worker` 는
+멀티데이 보유 5전략 포지션마다 아침 1회 확정 일봉으로 OpenAI 에 「오늘 시가 청산 vs 보유」 를
+묻고 기록만 하는 관찰자다(15.9). 매매에 관한 일은 전부 backend 상자 안에 있고, 그 안의 모든
+이름은 같은 이벤트 루프 위에서 돈다.
 
-### 15.2 1단계 — AI 매수평가 분리 (진행 중 · cycle279 = llm_worker 컨테이너 신설)
+### 15.2 1단계 — AI 매수평가 분리 (계획 · 착수 미정 · cycle279 = `llm_worker` 컨테이너 합류)
+
+> 🔴 **`llm_worker` 는 가동 중이다(cycle446, 15.9) — 단 이 절이 설계하는 「AI 매수평가」 일은
+> 그 안에서 아직 하지 않는다.** 아래 마인드맵·표의 "신규 컨테이너"를 "기존 컨테이너에 새 작업
+> 추가"로 바꿔 읽는다. 자리·이름·격리 규약은 그대로이고, 다른 것은 "컨테이너가 이미 있다"는
+> 사실 하나다.
 
 여기서 "AI 매수평가"는 cycle274 가 배선하고 cycle276 이 주문 시점으로 옮긴 **관찰 기능**이다 —
 매수 주문 직후에 LLM 이 점수를 매겨 **기록만** 하고 매수 여부는 바꾸지 않는다(shadow).
@@ -1991,24 +2007,27 @@ UDS+JSON 왕복을 직접 재니 25,231 msg/s(p50 39µs · p99 54µs)로 틱 피
 
 ### 15.6 지금 어디까지 됐고 다음에 무엇을 하나
 
-**지금**: 0단계가 가동 중이고, 1단계는 **설계 단계에서 진행 중**이다 — 코드는
-아직 한 줄도 없다(`src/workers/` 없음 · `llm_worker` 서비스 없음 · migration 043 에 선점 열 없음).
-2·3단계는 착수 전이다. 별도 워커 컨테이너의 첫 코드는 1단계가 아니라 거래일지 관찰자
-`journal_worker` 다(15.8). 1단계가 풀어야 할 「워커 경로」·「컨테이너 정의」 두 항목은 그 선례를
-그대로 따를 수 있다.
+**지금**: 0단계가 가동 중이다 — 워커 컨테이너는 **둘**(`journal_worker`(15.8) ·
+`llm_worker`(15.9, cycle446))이고 둘 다 매매 경로 밖 관찰자다. 1단계(AI 매수평가 분리,
+`migration 043` 을 큐로 쓰는 설계)는 아직 **코드가 없다** — `llm_worker` 컨테이너·이름·
+격리 규약은 cycle446 이 먼저 썼지만 그 안에서 하는 일은 청산 AI 섀도 기록뿐이다. 1단계가
+착수되면 **같은 컨테이너**에 매수평가 선점·조회 작업을 더한다(`src/workers/` 는 여전히 없다 ·
+migration 043 에 선점 열 없음). 2·3단계는 착수 전이다. 1단계가 풀어야 할 「워커 경로」·
+「컨테이너 정의」 두 항목은 `journal_worker`·`llm_worker` 선례를 그대로 따를 수 있다.
 
-**다음**: 1단계의 다음 할 일은 cycle279 명세를 써서 15.2 의 **미확정 4항목**을 확정하는 것이다.
-얻는 것과 위험은 각 절(15.2 · 15.3 · 15.4)에 적혀 있고, 아래 표에는 **무엇이 있어야 그 단계가
-시작되는지**만 적는다.
+**다음**: 1단계의 다음 할 일은 cycle279 명세를 써서 15.2 의 **미확정 4항목** 중 남은 것(선점
+규약 · 요청 행 자리 — 「워커 경로」·「컨테이너 정의」 는 `llm_worker` 가동으로 이미 풀렸다)을
+확정하는 것이다. 얻는 것과 위험은 각 절(15.2 · 15.3 · 15.4)에 적혀 있고, 아래 표에는 **무엇이
+있어야 그 단계가 시작되는지**만 적는다.
 
 | 단계 | 착수 조건 |
 |------|-----------|
-| 1 | 착수됨 (사용자 결정 2026-09-11 "1단계만 진행"). 다음 할 일 = cycle279 명세에서 15.2 의 **미확정 4항목**(선점 규약 · 요청 행 자리 · 워커 경로 · 컨테이너 정의) 확정 |
+| 1 | 승인됨(사용자 결정 2026-09-11 "1단계만 진행") · 코드는 아직 없음. 다음 할 일 = cycle279 명세에서 15.2 의 남은 미확정 항목(선점 규약 · 요청 행 자리) 확정 — 「워커 경로」·「컨테이너 정의」 는 `llm_worker` 가동(cycle446)으로 이미 풀렸다 |
 | 2 | 1단계 워커가 실전에서 안정적으로 돌 것 + 20:00 자문 auto_apply 를 엔진 측 API 로 되돌리는 설계(15.3) + 사용자 승인 |
 | 3 | 15.4 ①~④ 를 프로세스 밖으로 옮기는 별도 설계 + 중복 배달·순서 보장 규약 + 사용자 승인 |
 | 4 | **3단계를 흡수하므로 3단계 선행은 불필요**(15.5.1). 대신 선행 넷 = ① 관측 축(공용 부트스트랩·프로세스 라벨·밀리초·`trace=`) ② 휘발 상태 복구 실증(장외 재시작 1회) ③ scheduler 분해 ④ 1단계 실전 + 15.5.9 의 **미확인 숫자 다섯** 실측 + 15.5.8 제약 A~I 설계 + 사용자 승인 |
 
-### 15.7 배포 모드 — full · 선택 배포(frontend · macro · journal 축) · none
+### 15.7 배포 모드 — full · 선택 배포(frontend · macro · journal · llm 축) · none
 
 모드 판정의 정본은 `tools/deploy/compose_up_changed.sh` 다(`.deployed_sha` 마커와 HEAD 의
 누적 diff → 모드, cycle248).
@@ -2016,23 +2035,27 @@ UDS+JSON 왕복을 직접 재니 25,231 msg/s(p50 39µs · p99 54µs)로 틱 피
 | 모드 | 트리거 경로 | compose 호출 | backend 영향 |
 |------|-------------|--------------|--------------|
 | `full` | `BACKEND_RE` (`tools/deploy/compose_up_changed.sh:113`) — `src/`·`requirements.txt`·`Dockerfile`·compose·`deploy.yml`·`tools/deploy/`. 단 `src/` 안 `.md` 는 뺀다(`IMAGE_EXCLUDED_RE`, `:145`) | `up --build -d --remove-orphans` (`:284`) | 재생성 |
-| 선택 배포 — 걸린 축을 `frontend` · `macro` · `journal` 순서로 `+` 로 이은 이름(`journal` · `frontend+macro` · `frontend+macro+journal` 등) | backend 축 무변경 + `FRONTEND_RE`(`:121` — `frontend/`·`tools/ops/tls_stage2/`) · `MACRO_RE`(`:128` — `macro/`) · `JOURNAL_RE`(`:133` — `journal_worker/`, 서비스 이름은 `journal_worker`) 중 바뀐 축 | `up --build -d --remove-orphans --no-deps <서비스…>` (`:301`) | 무접촉 |
-| `none` | 그 외(tests·`tools/test_impact`·migration 만·…) 또는 마커==HEAD | `up -d --remove-orphans` (`:288`) | 빌드 없음 |
+| 선택 배포 — 걸린 축을 `frontend` · `macro` · `journal` · `llm` 순서로 `+` 로 이은 이름(`journal` · `llm` · `frontend+macro` · `journal+llm` 등) | backend 축 무변경 + `FRONTEND_RE`(`frontend/`·`tools/ops/tls_stage2/`) · `MACRO_RE`(`macro/`) · `JOURNAL_RE`(`journal_worker/`, 서비스 이름은 `journal_worker`) · `LLM_RE`(`llm_worker/`, 서비스 이름은 `llm_worker`, cycle446) 중 바뀐 축 | `up --build -d --remove-orphans --no-deps <서비스…>` | 무접촉 |
+| `none` | 그 외(tests·`tools/test_impact`·migration 만·…) 또는 마커==HEAD | `up -d --remove-orphans` | 빌드 없음 |
 
 선택 배포는 축 이름 배열 `AXES` 와 서비스 이름 배열 `SERVICES` 를 같은 순서로 모은다.
-`case "$MODE"` 는 `full` · `none` · 그 밖(`*`) 셋이고, `*` 가 선택 배포다(`:282-303`). `*` 에
-왔는데 `SERVICES` 가 비어 있으면 `log "internal error: unknown mode"; exit 2` 로 멈춘다(`:299`).
-새 워커 축을 더하는 일 = 정규식 한 줄 + 분류 블록의 `if` 하나다 — `journal` 축이 그 꼴이다.
+`case "$MODE"` 는 `full` · `none` · 그 밖(`*`) 셋이고, `*` 가 선택 배포다. `*` 에
+왔는데 `SERVICES` 가 비어 있으면 `log "internal error: unknown mode"; exit 2` 로 멈춘다.
+새 워커 축을 더하는 일 = 정규식 한 줄 + 분류 블록의 `if` 하나다 — `journal`·`llm` 축이 그 꼴이다.
 
 ⚠️ **워커 서비스는 `docker-compose.prod.yml` 본체에 정의한다.** TLS 처럼 오버레이
 (`docker-compose.tls.yml`/`tls2.yml`)에만 두면, 그 오버레이를 붙이지 않는 `full`·`none` 배포의
-`--remove-orphans`(`:284`/`:288`)가 **돌고 있던 워커 컨테이너를 orphan 으로 삭제한다**.
-`journal_worker` 는 본체에 있다. 대가는 compose 의 그 블록을 고치는 배포가 `full` 이라는 점이다.
+`--remove-orphans` 가 **돌고 있던 워커 컨테이너를 orphan 으로 삭제한다**.
+`journal_worker`·`llm_worker` 는 본체에 있다. 대가는 compose 의 그 블록을 고치는 배포가
+`full` 이라는 점이다.
 
-⚠️ **`BACKEND_RE` 의 첫 대안은 `src/` 다**(`:113`) — 워커 코드를 `src/` 아래에 두면 워커 전용
+⚠️ **`BACKEND_RE` 의 첫 대안은 `src/` 다** — 워커 코드를 `src/` 아래에 두면 워커 전용
 변경도 `full` 로 분류돼 backend 가 재시작된다(D6 발동). 그래서 워커 코드는 `src/` 밖 자기
-디렉터리에 두고 그 디렉터리를 자기 축으로 뗀다(선례 = `journal_worker/` · `JOURNAL_RE`). 모드
-판정 불가는 전부 `full`(fail-safe)이다.
+디렉터리에 두고 그 디렉터리를 자기 축으로 뗀다(선례 = `journal_worker/`·`JOURNAL_RE`,
+`llm_worker/`·`LLM_RE`). 모드 판정 불가는 전부 `full`(fail-safe)이다.
+넷째 이미지(`journal_worker`)까지는 `COMPOSE_PARALLEL_LIMIT=1` 로 무해했다 — 다섯째
+이미지(`llm_worker`, cycle446)를 더할 때도 같은 값이 순차 빌드를 보장한다(09-18 동시 빌드
+OOM 사고 재발 방지, `tools/deploy/compose_up_changed.sh` 주석).
 
 ### 15.8 첫 워커 선례 — `journal_worker` (거래일지 관찰자, cycle412)
 
@@ -2084,8 +2107,65 @@ backend 가 `trade_history` 페어에 `trade_journal_orders`·`_stops`·종가·
 backend 가 `PUT /api/history/journal/notes/{id}` 로 쓴다 — 워커는 메모를 쓰지 않는다. 이 경로도 KIS 호출 0 이다.
 8영역에서는 종목명 캐시 `scanner.ticker_names` 하나를 읽기만 한다(`/api/history/pnl` 과 같은 방식).
 
+### 15.9 둘째 워커 선례 — `llm_worker` (청산 AI 섀도 기록, cycle446)
+
+멀티데이 보유 5전략(`donchian_swing`·`kojiro`·`vcp_breakout`·`bull_flag_breakout`·`etf_trend`)의
+보유 포지션마다 거래일 아침 1회 「오늘 09:00 시가에 전량 파는 것이 현재 청산 규칙대로 들고 가는
+것보다 나을 확률」 을 OpenAI 에 묻고 **기록만** 한다. 주문·청산 경로 · 8영역 · `scheduler.py` 는
+0줄이다(사용자 결정 2026-10-11, 설계 = `_workspace/design/2026-10-11_exit_ai_shadow.md`).
+`journal_worker`(15.8) 와 같은 관찰자 격리 규약을 따르지만, KIS 가 아니라 **OpenAI** 를 호출하는
+첫 워커이고 파일 로그를 읽지 않는다(필요한 입력이 전부 G0·G1·DB 에 있다).
+
+```mermaid
+%%{init: {"flowchart": {"wrappingWidth": 360}}}%%
+flowchart LR
+    subgraph BE["backend (매매 엔진 — 바뀐 줄 0개, G0·G1 재사용)"]
+        G0["G0 GET /api/trading/status<br/>?include=system,holdings,strategies<br/>(기존 라우트)"]
+        G1["G1 GET /api/balance/exit-lines<br/>(journal_worker 와 공유)"]
+    end
+    subgraph LW["llm_worker (src 밖 · KIS 0)"]
+        R["하루 1~3 회전(08:15·08:35·08:55 KST)<br/>G0 → G1 → 사후 채움<br/>→ 대상 선정 → 확정 일봉<br/>→ OpenAI 호출 → 검증 → 기록"]
+    end
+    OAI["OpenAI API<br/>(gpt-6-luna 고정)"]
+    DB[("RDS<br/>stock_master_daily · trade_history<br/>trade_journal_orders (읽기만)<br/>exit_ai_evaluations · _runs (050)")]
+    R -->|"X-API-Key = API_REPORTER_KEY<br/>http://backend:8000 직결"| G0
+    R --> G1
+    R -->|"전용 역할 llm_worker<br/>자동커밋 단문 · 자기 표 둘만 쓴다"| DB
+    R -->|"청산 판단 질의"| OAI
+```
+
+| 구성 | 하는 일 | 코드 |
+|------|---------|------|
+| G0 · G1 | `journal_worker` 와 같은 라우트를 같은 리포터 키로 읽는다 — 새 backend 변경 0줄 | 기존 `routes/trading.py`·`routes/balance.py` |
+| 대상 선정 | 허용 전략 5개 ∧ `buy_date <= bar_date` ∧ `quantity > 0` | `lw/targets.py` |
+| 확정 판정 | `069500`(KODEX 200) 일봉으로 `bar_date` 결정, 그 종목 헤드 봉이 `updated_at` 경계(헤드는 오늘 06:00 KST, 그 전 봉은 bas_dd+1일 06:00) 를 넘겼는지 확인 — 못 넘기면 `skipped reason=provisional_bar` | `lw/bars.py` |
+| 지표 | `src/engine/llm_features.py` 에서 **복사**한 순수 함수(공용 패키지로 빼면 backend 가 재생성된다) — backend 쪽 동등성 테스트로 드리프트를 잡는다 | `lw/features.py` ↔ `tests/unit/engine/test_cycle446_feature_parity.py` |
+| 프롬프트·검증 | 청산 전용 프롬프트(매수평가와 별도 — 점수 정의가 다르다) + 출력 검증(클램프 금지, `action`·`exit_score` 불일치는 버리지 않고 `inconsistent=true` 로 기록) | `lw/prompt.py` |
+| 오케스트레이터 | 종목 단위 예외 격리 · 하루 상한 40회 · 재시도 최대 3회(`attempts`) · 이미 `result='ok'` 인 행은 다시 평가하지 않는다 | `lw/exit_shadow.py` |
+| 사후 채움 | 전날 평가의 반사실 시가(`next_open_won`) + 실제 결과(`outcome_status`, `trade_journal_orders.source` 로 수동 청산 여부도 판정) — 아침 회전 첫 단계 | `lw/outcome.py` |
+| 스케줄 | 08:15 KST 1회 + 08:35·08:55 재시도(실패·잠정 행만). EC2 cron 을 쓰지 않는다 — 컨테이너 안 루프 | `lw/schedule.py` |
+
+이 워커가 1단계(15.2)에 넘겨준 것은 **이름·자리·격리 규약**이다(위 15.2 머리 참고) — 1단계가
+착수되면 새 컨테이너를 또 만들지 않고 이 컨테이너에 매수평가 선점·조회 작업을 더한다.
+
+- **DB 격리** — 운영 DSN 을 함께 쓰지 않고 전용 역할로 붙는다(`llm_worker/ops/role.sql` —
+  `stock_master_daily`·`trade_history`·`trade_journal_orders` 는 SELECT 만, 자기 표(`exit_ai_evaluations`·
+  `exit_ai_runs`)는 SELECT·INSERT·UPDATE(DELETE 없음 — 영구 보존), 그 밖 접근 0).
+- **비밀값** — `LLM_DATABASE_URL`·`OPENAI_API_KEY` 는 메인 `.env` 와 분리된 `secrets/llm_worker.env`
+  하나로만 받는다. 모델·모드(`EXIT_AI_MODEL`·`EXIT_AI_MODE`)는 비밀이 아니라 compose
+  `environment:` 다.
+- **매매 영향 0** — 워커가 만든 값은 backend 로 되돌아가지 않는다(워커는 backend 를 GET 만
+  한다). `src/engine/`·8영역에 `exit_ai_*` 언급이 0 이라는 것을 구조 가드로 고정한다
+  (`tests/unit/ast/test_cycle446_ast_exit_ai_scope.py`).
+
+기록을 읽는 쪽은 backend 다(`src/db/exit_ai.py`, 읽기만) — 잔고 화면의 「AI 판단」 칸
+(`GET /api/balance`), 거래일지 카드의 「AI 청산 의견」(`GET /api/history/journal`), 대시보드
+경고등의 「오늘 워커가 안 돌았다」 최소 판정(`GET /api/system/alerts`, `exit_ai_runs` 오늘
+실패 건수를 「일일 작업 실패」 범주에 더한다 — `llm_worker` 는 `system_logs` 에 쓰지 않아 이
+경로가 유일한 경고등 창이다).
+
 ---
 
-> 본 15장은 **계획 문서**다(15.1 · 15.7 · 15.8 은 지금 코드의 사실). 1단계는 진행 중이고, 2·3·4단계는 착수 승인 전이다.
+> 본 15장은 **계획 문서**다(15.1 · 15.7 · 15.8 · 15.9 는 지금 코드의 사실). 1단계는 승인됐지만 코드가 없고, 2·3·4단계는 착수 승인 전이다.
 > 4단계(15.5)는 3단계를 흡수하는 **방향 기록**이며, 착수 판단에 필요한 숫자 다섯이 아직 미실측이다.
 > 코드가 실제로 들어오면 각 절의 "예정" 표기를 실제 파일 경로로 바꾼다.

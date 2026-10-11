@@ -87,6 +87,30 @@ AWS RDS PostgreSQL CRUD 모듈. DB 클라이언트 정본 = **`pg.py` (asyncpg �
 - `delete_note(anchor_trade_id) -> bool` — 지운 행이 있으면 `True`.
 - 빈 목록 인자 = **쿼리 없이** `[]`. 예외는 **삼키지 않는다** — 라우트(`src/routes/history.py` `/journal`)가 「조회 실패」(`lookup_failed`)와 「행 없음」을 가른다.
 
+## exit_ai.py — 청산 AI 섀도 기록 읽기 (cycle446)
+
+테이블 2종(migration 050) — `exit_ai_evaluations`(평가 1행 = 포지션 × 입력 봉 날짜, 영구 보존) ·
+`exit_ai_runs`(하루 1행). 쓰는 쪽은 `llm_worker` 컨테이너 전용 DB 역할 하나뿐이다(관찰자
+방식) — 이 모듈은 **읽기만** 한다. `src/engine/`·8영역에서 이 모듈을 import 하면 구조 가드
+(`tests/unit/ast/test_cycle446_ast_exit_ai_scope.py`)가 붉어진다 — 매매 판단에 쓰지 않는다.
+
+- `EXIT_AI_STRATEGIES` — `llm_worker/lw/config.py` 와 같은 값의 **읽기 쪽 사본**(별도 배포
+  단위라 공용 import 가 없다. 바꾸면 양쪽을 함께 고친다). `{donchian_swing, kojiro,
+  vcp_breakout, bull_flag_breakout, etf_trend}`.
+- `get_latest_verdicts(pairs: list[tuple[str, str]]) -> dict[(strategy_id, ticker), dict]` —
+  그 (전략, 종목) 쌍의 가장 최근(`bar_date` DESC) `result='ok'` 평가 1행
+  (`action`·`exit_score`·`bar_date`·`evaluated_at_iso`·`rationale`). 빈 입력 = 쿼리 없이 `{}`.
+  OR 조건을 한 쿼리로 엮는다(보유 수가 적어 종목 수만큼 라운드트립하지 않는다). 잔고 화면
+  「현재 AI 판단」 칸 용도(`GET /api/balance`).
+- `get_evaluations_for_position(*, strategy_id, ticker, buy_date, buy_order_no) -> list[dict]` —
+  그 포지션의 평가 전부(`bar_date` ASC). 거래일지 카드 「AI 청산 의견」 요지 용도
+  (`GET /api/history/journal`).
+- `get_today_run_status(target_date) -> dict | None` — `exit_ai_runs` 그날 1행. 「대상 없음」
+  과 「워커가 안 돌았다」 를 가른다. 대시보드 경고등의 최소 판정 용도(`GET /api/system/alerts`,
+  `src/routes/system.py::_merge_exit_ai_run_failure`).
+- 예외는 **삼키지 않는다** — 호출부(라우트)가 graceful 하게 흡수한다(이 모듈 자체는 `try`
+  없이 `pg.fetch`/`pg.fetchrow` 를 그대로 호출한다).
+
 ## positions.py — 보유 포지션 영속화
 
 `positions` 테이블이 메모리 `scheduler.positions` 의 복구 원천이다 — 재시작이 보유를 잃으면 손절이 통째로 사라진다.
@@ -421,6 +445,11 @@ T7(120일선 20영업일 기울기)·R4(250일 고점 대비 하락률)를 계�
   - `trade_journal_cursor` — 로그 꼬리 읽기 커서(`name` PK, 기본 행 `'main'` · `file_name`·`inode`·`byte_offset`). 칸 이름이 `offset` 이 아닌 것은 SQL 예약어라서다.
   - 🔴 **`_orders`·`_stops`·`_cursor` 는 지우지 않는다** — 워커 역할에 DELETE·TRUNCATE 권한이 없다. `_notes` 행은 backend 가 빈 본문 PUT 때 지운다(`delete_note`).
   - ⚠️ 워커 풀에는 backend 의 JSONB codec(「pg.py」 절 `_init_conn`)이 없다. 그래서 워커는 `json.dumps` 문자열을 바인딩한다 — 「asyncpg 계약 패턴」 의 「raw dict 바인딩」 은 backend 풀 규약이다. 워커 코드를 그 규약대로 고치면 INSERT 가 실패한다.
+- **청산 AI 섀도 2표 `exit_ai_*`**(migration 050, 가산형 · cycle446). 쓰는 쪽은 `llm_worker` 컨테이너의 `llm_worker/lw/db.py` 하나이고 전용 DB 역할 `llm_worker`(`llm_worker/ops/role.sql`)로 붙는다. backend 는 위 `exit_ai.py` 로 **읽기만** 한다.
+  - `exit_ai_evaluations` — 평가 1행 = 포지션 × 입력 봉 날짜. `UNIQUE (bar_date, strategy_id, ticker, buy_date, buy_order_no)`. 묶음 = 포지션 스냅샷(G1) · 평가 순간 상태 스냅샷 · 실행 결과(`result`=`ok`/`failed`/`skipped`) · 판단(`action`·`exit_score`·`inconsistent`·`rationale`) · 모델·비용·재현(`input_payload`·`raw_response`) · 사후 채움 ①(`next_open_won`) ② (`outcome_status`·`exit_is_manual` — `trade_journal_orders.source` 로 판정, `external`/`unmatched`=수동).
+  - `exit_ai_runs` — 하루 1행(`run_date` PK). 「대상 없음」(`no_targets`) 과 「워커가 안 돌았다」(`engine_not_running`·`g1_failed`) 를 가른다.
+  - 🔴 **`DELETE` 권한을 주지 않는다** — 영구 보존(사용자 결정 「히스토리도 남겨두자」).
+  - 🔴 매매 경로 무접촉 — `src/engine/`·8영역에 `exit_ai_*` 언급이 있으면 구조 가드(`tests/unit/ast/test_cycle446_ast_exit_ai_scope.py`)가 붉어진다.
 
 ## TIMESTAMPTZ 계약
 

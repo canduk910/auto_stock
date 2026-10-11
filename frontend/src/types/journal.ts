@@ -9,6 +9,18 @@ export type NaKind = 'unknown' | 'before_record' | 'not_applicable' | 'pending' 
 export type ValSrc = 'trade' | 'live' | 'restored' | 'restored_ai' | 'snapshot' | 'derived' | 'inferred' | 'computed'
 export type CostStatus = 'settled' | 'estimated' | 'mixed'
 
+// cycle446 — 청산 AI 섀도 기록(`llm_worker`, `exit_ai_evaluations`) 요지. 「없음」(대상
+// 전략 아님)·「모름」(대상인데 기록 없음·조회 실패)·「보유 유지」·「청산 신호 있었음」 을 가른다.
+export type ExitAiStatus = 'not_applicable' | 'no_evaluation' | 'lookup_failed' | 'hold_all' | 'exit_signaled'
+
+export interface ExitAi {
+  status: ExitAiStatus
+  note?: string
+  first_exit_bar_date?: string | null
+  first_exit_score?: number | null
+  first_exit_rationale?: string | null
+}
+
 export interface JournalResponse {
   record_start: {
     orders_restored: string | null
@@ -71,6 +83,7 @@ export interface JournalCard {
   costs: Costs
   excursion: Excursion
   note: { body: string; updated_at: string } | null
+  exit_ai: ExitAi
 }
 
 export interface OrderLine {

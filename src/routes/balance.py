@@ -14,6 +14,7 @@ from src.api.balance import get_balance, get_buyable
 from src.db import trade_cost as trade_cost_db
 from src.db import trade_history as trade_history_db
 from src.db._kst import now_kst_iso, today_kst
+from src.db.exit_ai import EXIT_AI_STRATEGIES, get_latest_verdicts
 from src.db.stock_master import get as stock_master_get
 from src.engine import cost_overlay
 from src.engine.etf_like import is_etf_like
@@ -231,6 +232,19 @@ async def balance():
     except Exception:
         logger.debug("[buy_date] DB 조회 실패 graceful", exc_info=True)
 
+    # cycle446 D-6 — 「현재 AI 판단」 칸. 대상 전략(exit_lines 의 strategy_id, 청산 AI
+    # 섀도 워커가 평가하는 5전략)만 조회한다. 읽기만 — 매수·매도에 닿지 않는다.
+    ai_verdicts: dict = {}
+    try:
+        ai_pairs = [
+            (exit_lines.get(h.ticker, {}).get("strategy_id"), h.ticker)
+            for h in holdings
+        ]
+        ai_pairs = [(sid, t) for sid, t in ai_pairs if sid in EXIT_AI_STRATEGIES]
+        ai_verdicts = await get_latest_verdicts(ai_pairs)
+    except Exception:
+        logger.debug("[ai_verdict] exit_ai 조회 실패 graceful", exc_info=True)
+
     enriched_holdings: list[dict] = []
     for h in holdings:
         payload = h.model_dump()
@@ -282,6 +296,23 @@ async def balance():
         payload["buy_date"] = merge_buy_date(
             engine_buy_dates.get(h.ticker), db_buy_dates.get(h.ticker)
         )
+        # cycle446 D-6 — 「현재 AI 판단」. 「없음」(대상 전략이 아님)과 「모름」(대상인데
+        # 아직 평가 행이 없음)을 가른다 — 둘 다 빈칸으로 접지 않는다.
+        strategy_id = payload.get("strategy_id")
+        if strategy_id not in EXIT_AI_STRATEGIES:
+            payload["ai_verdict"] = {"status": "not_applicable"}
+        else:
+            row = ai_verdicts.get((strategy_id, h.ticker))
+            if row is None:
+                payload["ai_verdict"] = {"status": "no_evaluation"}
+            else:
+                payload["ai_verdict"] = {
+                    "status": "available",
+                    "action": row.get("action"),
+                    "exit_score": row.get("exit_score"),
+                    "bar_date": str(row["bar_date"]) if row.get("bar_date") else None,
+                    "evaluated_at": row.get("evaluated_at_iso"),
+                }
         enriched_holdings.append(payload)
 
     return ApiResponse(

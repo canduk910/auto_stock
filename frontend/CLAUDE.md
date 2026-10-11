@@ -465,9 +465,10 @@ testid = `strategy-summary-table` · `strategy-summary-row-{sid}` · `strategy-s
   - 손절선 변화 — 접힘이 기본이고 접힌 동안 행을 그리지 않는다(`journal-stop-toggle` 의 `aria-expanded`). 행 `journal-stop-row` 는 `data-event`·`data-direction`(`up`·`down`·`flat`·빈 값)을 단다. 내린 행과 `paused` 는 빨강, `boot` 는 노랑 배경.
   - 400px — 카드 안 `<table>` 0 · 400px 넘는 고정 폭 클래스(`min-w-[NNNpx]`·`w-[NNNpx]`) 0 · 인라인 `style.width`/`minWidth` 0.
   - 메모 — 저장 버튼 `journal-note-save` 로만 PUT 한다(자동 저장 없음). 저장 버튼은 입력이 마지막 저장값과 같거나(바뀐 것 없음) 4,000자를 넘거나 저장 중이면 꺼진다 — 바뀐 것 없이 빈 본문 PUT(= 서버 메모 삭제)이 나가지 않는다. 상태 = 「저장 안 됨」·「저장됨」·「저장 실패」(실패해도 입력은 남는다). 본문은 `<textarea>` 값으로만 보인다. 저장 성공 시 마지막 저장값은 **보낸 본문**(`onSuccess` 의 `variables`)으로 맞춘다 — 응답을 기다리는 동안 더 친 글자는 「저장 안 됨」 으로 남는다. 그리고 `invalidateQueries({queryKey: ['journal']})` 로 캐시를 비운다 — 탭을 옮겼다 오면 저장한 값으로 다시 그린다. 입력칸 상태는 처음 그릴 때의 `note` 로만 초기화하고 `note` prop 이 바뀌어도 다시 맞추지 않는다(다른 카드 저장으로 refetch 돼도 편집 중인 입력이 덮이지 않는다).
+  - **AI 청산 의견 (cycle446 D-6)** — `card.exit_ai`(백엔드 `src/db/exit_ai.py` 읽기 전용, 매매 무접촉). testid `journal-ai-opinion`(`journal-exit-` 접두와 겹치지 않는 이름 — 그 접두는 체결 영역 전용 정규식이 쓴다). `status==='not_applicable'`(대상 전략 5개 밖) = 「대상 전략 아님」 · `'no_evaluation'` = 「아직 평가 없음」 · `'lookup_failed'` = 조회 실패(amber) · `'hold_all'` = `note`(기본 「보유 판단 유지」) · `'exit_signaled'` = 첫 `exit` 평가의 `first_exit_bar_date`·`first_exit_score`·`first_exit_rationale`.
   - 금지 — 이름에 `journal` 이 든 프론트 파일(테스트 제외)에 `dangerouslySetInnerHTML`·새 `Intl.DateTimeFormat` 0(가드 `components/__tests__/handlers.honesty.cycle413.test.ts` JH5).
   - 목 — MSW 기본 핸들러(`src/test/handlers.ts`)의 GET 은 `src/test/fixtures/journal.fixture.ts` 를 그대로 돌려주고, 그 픽스처는 `na` 5종을 모두 담는다. 키 정본 = `tests/fixtures/cycle413_journal_shape.json` — 백엔드 라우트 테스트와 같은 파일이고 객체마다 키 집합이 정확히 같아야 한다(JH1~JH4). e2e 목(`e2e/fixtures/api-mocks.ts` 의 `**/api/history/journal*`·`**/api/history/journal/notes/*`)도 같은 픽스처 파일을 import 한다(사본 금지). 메모는 상태형이다 — PUT 한 본문이 다음 GET 의 카드 `note` 에 실리고, 공백뿐인 PUT 은 지운다. `journalPages`(요청 `page` 별 응답)·`journalPuts`(PUT 본문 기록) 옵션이 있다. ⚠️ `**/api/history*` 글롭은 `/api/history/journal` 을 잡지 못한다(`*` 는 `/` 를 넘지 않는다 — 가드 `_ast_api_mocks_coverage.test.ts`).
-  - 회귀 = `pages/__tests__/History.journal.fix1.cycle413.test.tsx`(QueryClient 를 운영과 같은 캐시 `staleTime` 3초·`gcTime` 5분으로 두고 상태형 MSW 를 쓴다 — 테스트 기본 `gcTime 0` 은 탭을 오갈 때마다 새로 받아 메모 결함을 가린다. 저장 → 탭 왕복 → 값 유지 · 변경 없으면 저장 꺼짐 · 빈 body PUT 0 · 페이지 넘김) · `pages/__tests__/History.journal.fix2.cycle413.test.tsx`(저장 중 더 친 글자 · 세후/세전 → 1쪽 · 「1 / 1」 · 칩 공백) · `pages/__tests__/History.journal.fix3.cycle418j.test.tsx`(비용 합계 조회 실패 배지·exits_na 배지·발동선/손절 미발동 공백·[근사] 표시·락 칩 툴팁·보유 카드 net 조회 실패) · `e2e/journal.spec.ts`(G-E2E-12 — 실브라우저 탭 왕복·페이지 넘김).
+  - 회귀 = `pages/__tests__/History.journal.fix1.cycle413.test.tsx`(QueryClient 를 운영과 같은 캐시 `staleTime` 3초·`gcTime` 5분으로 두고 상태형 MSW 를 쓴다 — 테스트 기본 `gcTime 0` 은 탭을 오갈 때마다 새로 받아 메모 결함을 가린다. 저장 → 탭 왕복 → 값 유지 · 변경 없으면 저장 꺼짐 · 빈 body PUT 0 · 페이지 넘김) · `pages/__tests__/History.journal.fix2.cycle413.test.tsx`(저장 중 더 친 글자 · 세후/세전 → 1쪽 · 「1 / 1」 · 칩 공백) · `pages/__tests__/History.journal.fix3.cycle418j.test.tsx`(비용 합계 조회 실패 배지·exits_na 배지·발동선/손절 미발동 공백·[근사] 표시·락 칩 툴팁·보유 카드 net 조회 실패) · `pages/__tests__/History.journal.exitAi.cycle446.test.tsx`(AI 청산 의견 5상태) · `e2e/journal.spec.ts`(G-E2E-12 — 실브라우저 탭 왕복·페이지 넘김).
 
 ### AI 매수평가 점수 배지 + 상세 팝업
 
@@ -547,7 +548,7 @@ testid = `strategy-summary-table` · `strategy-summary-row-{sid}` · `strategy-s
 
 **섹터 컬럼**: 헤더 순서 `종목명 → 섹터 → 거래시장 → (전략) → …`. `Holding.sector`, 없으면 `-`. `data-testid="sector-{ticker}"`. `/api/balance` 가 **이미 조회한 stock_master basics 를 재사용**한다(추가 DB 호출 0) — `sector_naming` 단일 진실원(`bstp_kor_isnm` → `_kojiro_sector_key(master_raw)` → `미분류-{ticker}`).
 
-⚠️ **컬럼을 늘리면 빈 상태 행 `colSpan` 도 고친다** — 지금 `isAll ? 16 : 15`, 회귀가 헤더 수와 대조한다.
+⚠️ **컬럼을 늘리면 빈 상태 행 `colSpan` 도 고친다** — 지금 `isAll ? 17 : 16`, 회귀가 헤더 수와 대조한다.
 
 **예상 매도비용 · 순 평가손익 (cycle411)**: "수익률" 다음. 백엔드가 보유 종목마다 `sell_cost_rate`(수수료율+세율, ETF 는 수수료율만)·`cost_status="estimated"` 를 싣고, 화면이 (WS 실시간 시세로 덮인) 평가금액에 곱한다 — 예상 매도비용 = `round(평가금액 × sell_cost_rate)`, 순 평가손익 = `round(평가손익 − 예상 매도비용 − buy_fee_paid)`(이미 낸 매수 수수료 — 매매손익 표의 페어 net 과 같은 정의). testid `sell-cost-{ticker}`(「추정」 꼬리표 포함) · `net-pl-{ticker}`. `sell_cost_rate` 가 없으면(구 서버) 둘 다 `—`(숫자를 지어내지 않는다). `buy_fee_paid` 가 `null` 이면(비용 조회 실패 = 「모름」) `net-pl-{ticker}` 는 `—` 다(`?? 0` 금지). `buy_fee_paid` 칸 자체가 없는 응답(구 서버)은 매수 수수료를 빼지 않는다. 기존 "평가손익"(세전) 칸은 그대로. 표 루트 `<table>` 에 `whitespace-nowrap` 을 둔다 — `white-space` 는 상속되므로 모든 칸이 줄바꿈하지 않고, 넘치는 폭은 `ScrollPane` 가로 스크롤이 받는다(1280px 에서 한 자씩 꺾여 행이 높아지던 결함 방지).
 
@@ -561,6 +562,13 @@ testid = `strategy-summary-table` · `strategy-summary-row-{sid}` · `strategy-s
 - 🔴 손절가 툴팁은 「이 가격 전에 팔리는 경로」를 **둘로 갈라** 말한다 — **보유일수만으로**(눌림목 돌파 5영업일 · 15:20 일괄매도 · 익일청산) / **다른 조건이 함께 붙는 것**(20일 신고가 스윙은 2영업일 뒤 **돌파고점 아래일 때만** · 대순환 스테이지 종료). ⚠️ **뭉뚱그려 「가격 무관」이라 적지 않는다** — donchian 2영업일 청산은 `days_held ≥ n ∧ current_price < breakout_high` 라 가격 조건부다.
 - **목표가는 거의 다 `—` 가 정상** — `bull_flag_breakout` 만 `measured_target`(깃대폭 + 깃발고점)을 갖고 그마저 **부분 익절 트리거**라 툴팁이 "전량 청산선이 아니다" 를 밝힌다. ⚠️ **VB·LTV 의 `target_price` 를 이 칸에 넣지 않는다**(매수 트리거 가격이다).
 - 회귀 = `components/__tests__/BalanceTable.exitLines.test.tsx`(**값 검사**).
+
+**AI 판단 컬럼 (cycle446 D-6)**: 맨 오른쪽(매도 버튼 앞). 데이터 = Holding 의 `ai_verdict`(백엔드 `src/db/exit_ai.py` 단일 진실원 — 청산 AI 섀도 기록 `llm_worker`). testid `ai-verdict-{ticker}`.
+
+- `ai_verdict` 가 없으면(구 서버) `—`. `status==='not_applicable'`(대상 전략 5개 밖) = 「대상 아님」. `status==='no_evaluation'`(대상인데 아직 평가 없음) = 「평가 없음」 — **둘 다 숫자 0 이나 빈칸으로 접지 않는다**.
+- `status==='available'` = `action`("보유"/"청산") + `exit_score`(점수) 를 함께 보인다. 툴팁에 기준 봉 날짜·평가 시각.
+- 매일 아침 워커 회전(08:15·08:35·08:55 KST) 뒤 값이 바뀐다 — 장중 재조회는 `/api/balance` 5초 폴링과 같은 주기.
+- 회귀 = `components/__tests__/BalanceTable.aiVerdict.cycle446.test.tsx`(**값 검사**).
 
 **거래시장 배지**("종목명" 옆 "거래시장" 컬럼, `data-testid="market-badge-{ticker}"`) — `Holding.nxt_tradable / krx_halted` 조합 5가지: `KRX+NXT`(nxt ∧ ¬halted, emerald-100/800) / `NXT만`(nxt ∧ halted = **KRX 거래정지라 NXT 에서만 거래 가능** — NXT 전용 상장이 아니다, amber-100/800) / `KRX`(¬nxt ∧ ¬halted, gray-100/700) / `정지`(¬nxt ∧ halted, red-100/800) / `확인중`(둘 다 미캐시, gray-50/500). 베이스 `inline-block px-1.5 py-0.5 rounded text-xs font-medium`
 
