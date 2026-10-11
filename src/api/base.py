@@ -124,6 +124,11 @@ _QUOTE_ALLOWED_PATHS: frozenset[str] = frozenset({
     # KIS 정본 = "변동성완화장치(VI) 현황" subcategory 업종/기타 = 시세성 조회,
     # 요청 파라미터 `FID_*` 전용(계좌·주문 식별자 없음) → 자금 안전 정책 부합.
     "/uapi/domestic-stock/v1/quotations/inquire-vi-status",
+    # cycle443 (2026-10-11) — 해외주식 종목/지수/환율 기간별시세(FHKST03030100).
+    # ndx2x_riskoff 전략의 나스닥100 지수 종가 조회(하루 1회, 시세성 + 민감 식별자
+    # 없음) → 보조 풀 라우팅 자금 안전 정책 부합. 누락 시
+    # `src.api.overseas_quote.fetch_daily_chartprice` → QuotePoolPathError.
+    "/uapi/overseas-price/v1/quotations/inquire-daily-chartprice",
 })
 
 # 보조 매니저별 격리된 Rate Limit 세마포어 (메인 20, 보조 18 보수적)
