@@ -321,8 +321,8 @@ def test_s08_census_equals_registration_manifest():
 
 
 #: cycle403 — ETF 추세(etf_trend)만 섀도 시작(S1, 비중 0 과 이중 안전) 명시 예외(L3).
-_SHADOW_DEFAULT_TRUE_EXCEPTIONS = frozenset({"etf_trend.py"})
-_SHADOW_DEFAULT_TRUE_EXCEPTIONS_BY_SID = frozenset({"etf_trend"})
+_SHADOW_DEFAULT_TRUE_EXCEPTIONS = frozenset({"etf_trend.py", "ndx2x_riskoff.py"})
+_SHADOW_DEFAULT_TRUE_EXCEPTIONS_BY_SID = frozenset({"etf_trend", "ndx2x_riskoff"})
 
 
 def _shadow_mode_literal(fname: str):

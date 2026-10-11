@@ -450,16 +450,18 @@ _APPROVED_CONTENT_SHA: dict[str, tuple[str, str]] = {
         "cycle440(2026-10-10) — 카드 #9: 참조 0인 cancel_remaining 삭제 + 3경로→2경로 주석 정정, 사용자 승인",
     ),
     "src/engine/risk.py": (
-        "a2187b8270446379988d24dfbe39b902d6ab37b112d4b6ce7330ee171434e222",
-        "cycle403(2026-10-03) — etf_trend 를 틱 매수 평가 건너뛰기 목록에 한 줄, 8영역 승인",
+        "340dacde0b888ac6d1bc15e2b4f833afcb169a0be50f543d4079b2127dea5bb0",
+        "cycle443(2026-10-11) — ndx2x_riskoff 를 틱 매수 평가 건너뛰기 목록에 한 줄"
+        "(등록용 최소 변경, 사용자 '구현 시작' 승인 범위)",
     ),
     "src/engine/scanner.py": (
         "1412d55727442ec7a3f1a9eefa5649e161a452d58f0761ed3cbef7774fde95d0",
         "cycle437(2026-10-10) — 카드 #9: 참조 0인 scan_kospi200/scan_kosdaq150 삭제, 8영역 승인",
     ),
     "src/engine/scheduler.py": (
-        "84ac4f2891efc50710cb07447bfadbf53aeb34f6ab7032f8896f64fbe32ec6b6",
-        "cycle440(2026-10-10) — 카드 #9: 참조 0인 _force_clear_intraday_strategies 삭제, 사용자 승인",
+        "10524c6cee8e618046c2ae084aa2e0fbee4c092f27f0052500f0bca22a140078",
+        "cycle443(2026-10-11) — ndx2x_riskoff 전용 폴 task(_ndx2x_poll_loop) 등록"
+        "(필드·start()·cancel 목록 3곳 + 루프 본문, 등록용 최소 변경), 사용자 '구현 시작' 승인",
     ),
     "src/engine/session.py": (
         "36257d86af1c26a868dc991a74a9eb139c98a9358d739d24600f5be2f9c5666c",

@@ -50,10 +50,12 @@ ALL7: tuple[str, ...] = (
     "vcp_breakout",
     "kojiro",
     "etf_trend",
+    "ndx2x_riskoff",
 )
 # cycle403 — etf_trend 의 게이트도 check_buy_signal 첫 문장(폴/래치형과 같은 위치).
+# cycle443 — ndx2x_riskoff 는 고정종목 일치 검사 다음 문장이 게이트다(prime 불필요, GATE_FIRST5 합류).
 GATE_FIRST5 = ("long_tail_volatility", "donchian_swing", "bull_flag_breakout", "vcp_breakout", "kojiro",
-               "etf_trend")
+               "etf_trend", "ndx2x_riskoff")
 PRE_BUY2 = ("momentum", "volatility_breakout")
 
 _CLASSES = {
@@ -65,6 +67,7 @@ _CLASSES = {
     "vcp_breakout": ("src.engine.strategies.vcp_breakout", "VcpBreakoutStrategy"),
     "kojiro": ("src.engine.strategies.kojiro", "KojiroStrategy"),
     "etf_trend": ("src.engine.strategies.etf_trend", "EtfTrendStrategy"),
+    "ndx2x_riskoff": ("src.engine.strategies.ndx2x_riskoff", "Ndx2xRiskoffStrategy"),
 }
 
 #: 전략별 「사는 순간」 시각 — 창 안(donchian·kojiro 09:05~09:30 · BFB/VCP 진입창 · 15:20 컷 앞)
@@ -77,6 +80,7 @@ AT = {
     "etf_trend": (9, 10),
     "bull_flag_breakout": (10, 0),
     "vcp_breakout": (10, 0),
+    "ndx2x_riskoff": (9, 45),  # 집행창 09:30~10:30 KST 안
 }
 
 
@@ -195,6 +199,19 @@ class Buyable:
             }
             self.prime_px, self.fire_px, self.open = 9_900, 10_060, 9_600
             tick_volume.record_acml_vol(ticker, 50_000)                          # 임계 20,000
+        elif sid == "ndx2x_riskoff":
+            from datetime import timezone, timedelta as _td
+            from src.engine import ndx2x_core as _ndx2x_core
+
+            # 고정 종목 1개 — 하네스 기본 ticker(T) 대신 FIXED_TICKER 를 쓴다(check_buy_signal
+            # 첫 문장이 ticker 일치를 본다). shadow_mode=False — 다른 6전략과 같은 베이스라인.
+            self.s = make(sid, shadow_mode=False, **params)
+            self.t = self.s.FIXED_TICKER
+            self.s._decision = _ndx2x_core.DailyDecision(
+                t7=0.01, r4=-0.05, cell="10", desired_state="2x", reason="ok",
+            )
+            self.s._decision_date = day
+            self.prime_px, self.fire_px, self.open = None, 42_000, 41_800
         elif sid == "vcp_breakout":
             self.s = make(sid, **params)
             self.level = 10_000

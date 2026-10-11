@@ -82,7 +82,7 @@ def test_t00_behaviour_matrix_covers_the_census():
 # t01 — 기본값
 # ===========================================================================
 #: cycle403 — etf_trend 만 섀도 시작(S1, L3) 명시 예외. 기본값이 True 다.
-_SHADOW_DEFAULT_TRUE_EXCEPTIONS = frozenset({"etf_trend"})
+_SHADOW_DEFAULT_TRUE_EXCEPTIONS = frozenset({"etf_trend", "ndx2x_riskoff"})
 
 
 @pytest.mark.parametrize("sid", [s for s in ALL7 if s not in _SHADOW_DEFAULT_TRUE_EXCEPTIONS])
@@ -132,7 +132,8 @@ def test_t03_shadow_buy_marker_once_per_ticker_per_day(sid, monkeypatch, caplog)
     got = _buy_lines(caplog, sid)
     assert len(got) == 1, f"[Red] {sid}: [shadow_buy] {len(got)}줄 — 1줄이어야 한다: {got}"
     ln = got[0]
-    assert field(ln, "ticker") == T
+    # cycle443 — ndx2x_riskoff 는 고정 종목 1개라 하네스가 FIXED_TICKER(`r.t`)로 쏜다(≠ 공용 T).
+    assert field(ln, "ticker") == r.t
     assert field(ln, "price") == str(r.fire_px)
     # BFB·VCP 는 BUY 가 거래량 게이트 헬퍼(`_evaluate_vol_gate`) 안에서 나고 그 헬퍼는 시가를 받지 않는다 — '-'
     want_open = "-" if sid in ("bull_flag_breakout", "vcp_breakout") else str(r.open)
@@ -341,6 +342,13 @@ def test_t09_exit_signals_identical_when_shadow(sid, monkeypatch):
             ticker=T, buy_price=10_000, quantity=10, order_no="ORD-399",
             strategy_id=sid, buy_date=DAY, high_since_buy=10_000,
         )
+        if sid == "ndx2x_riskoff":
+            # 가격-무관 상태기계 — 청산은 decide_daily 상태가 "cash" 일 때만 난다(§자문
+            # "손절 두지 않는다"). 이 전략만 상태를 뒤집어 청산 경로가 공허하지 않게 한다.
+            from src.engine import ndx2x_core as _ndx2x_core
+            x.s._decision = _ndx2x_core.DailyDecision(
+                t7=-0.01, r4=-0.25, cell="01", desired_state="cash", reason="ok",
+            )
     sa, sb = _run_exit_path(a.s), _run_exit_path(b.s)
     assert any(x != Signal.NONE for x in sa), f"{sid}: 청산 신호가 하나도 없다 — 비교가 공허하다 {sa}"
     assert sb == sa, f"{sid}: 섀도가 청산 신호를 바꿨다 — 끔={sa} 섀도={sb}"

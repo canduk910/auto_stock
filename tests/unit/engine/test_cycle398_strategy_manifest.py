@@ -78,12 +78,13 @@ def test_manifest_eval_driver_columns_match_current_literals():
         "vcp_breakout": ("tick_breakout", 1, False, False, "scale"),
         "kojiro": ("swing_poll", None, False, False, "scale"),
         "etf_trend": ("swing_poll", None, False, True, "scale"),
+        "ndx2x_riskoff": ("swing_poll", None, False, False, "none"),
     }
 
 
 def test_derived_sets_match_current_scheduler_literals():
     """파생 집합 네 개가 지금 `scheduler.py` 에 있던 리터럴과 순서까지 같다(설계 §3.3)."""
-    assert SWING_POLL_IDS == ("donchian_swing", "kojiro", "etf_trend")
+    assert SWING_POLL_IDS == ("donchian_swing", "kojiro", "etf_trend", "ndx2x_riskoff")
     assert BREAKOUT_IDS == ("volatility_breakout", "long_tail_volatility", "bull_flag_breakout", "vcp_breakout")
     assert BREAKOUT_SUBSCRIBE_ORDER == ("bull_flag_breakout", "vcp_breakout", "volatility_breakout", "long_tail_volatility")
     assert OPEN_PRICE_TARGET_IDS == ("volatility_breakout", "long_tail_volatility")

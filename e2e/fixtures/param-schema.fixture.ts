@@ -1657,7 +1657,8 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "bull_flag_breakout",
         "vcp_breakout",
         "kojiro",
-        "etf_trend"
+        "etf_trend",
+        "ndx2x_riskoff"
       ],
       "help": "cycle384 — 켜면(true) 이 전략의 **신규 매수 신호만** 멈춘다. 보유 종목의 손절·트레일링·익일청산·15:20 강제청산·종목상태 청산·시간 청산은 그대로 돈다. 전략을 끄거나 비중을 0 으로 하는 것과 다르다 — 그 둘은 보유분의 손절까지 멈춘다. 후보 준비·퍼널 기록·시세 구독도 계속된다. 멈춘 동안 그 전략의 매수 신호 뒤쪽 관측(시장 유닛 기록·LLM 매수평가·갭/돌파 관측)은 함께 멈춘다. 기본 false. 키 부재는 멈추지 않음으로 읽고 INFO 로 남는다 — 참/거짓이 아닌 값만 멈추지 않음 + **WARNING** 이다(모양이 틀렸다는 뜻). `PUT /api/strategies/{id}/params` 로 즉시 반영되고 DB 에도 저장돼 재시작 뒤에도 유지된다. `[buy_paused_config]` WARNING 은 그 전략이 그날 매수 신호를 실제로 평가한 날에만 남는다(돈키언은 09:05~09:30 폴에 후보가 있어야, momentum/VB 는 기준선 크로싱이 있어야 게이트에 닿는다) — 멈춤 여부는 이 WARNING 이 아니라 `GET /api/strategies` 응답 또는 DB `strategy_config.params` 로 확인한다. AI 자동 튜닝 대상이 아니다(`PARAM_RANGES`/`INT_PARAMS` 편입 금지)."
     },
@@ -1688,7 +1689,8 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "bull_flag_breakout",
         "vcp_breakout",
         "kojiro",
-        "etf_trend"
+        "etf_trend",
+        "ndx2x_riskoff"
       ],
       "help": "cycle399 — 켜면(true) 이 전략은 **신규 매수 신호가 나는 순간 주문하지 않고** `[shadow_buy]` 로그만 남긴다(종목당 하루 1번). 신호 판단은 실전과 똑같이 끝까지 하고 방아쇠만 뺀다 — 그래서 「실전이었으면 무엇을 샀을지」 가 남는다. 보유 종목의 손절·트레일링·익일청산·15:20 강제청산·종목상태 청산은 그대로 돈다. 켜져 있는 섀도 전략은 비중 0 이어도 켜짐이 유지된다(비중 저장으로 꺼지지 않는다). 섀도가 아닌 전략의 비중 0 은 여전히 전략을 끈다. 신규 매수 멈춤(buy_paused)이 켜져 있으면 그쪽이 먼저 막아 기록도 없다. 섀도는 보유·주문을 만들지 않으므로 최대 보유 수·업종 상한·예산 소진에 걸리지 않는다 — 기록은 실전보다 많을 수 있다. 🔴 끌 때는 비중을 먼저 정한다 — 비중 0 인 채로 끄면 켜진 채 예산 0 으로 남아 매수 신호가 「투자금 부족」 으로 끝난다(실전으로 올리려면 비중 > 0 을 먼저 저장). 기본 false. 참/거짓이 아닌 값은 섀도 아님 + **WARNING**. `PUT /api/strategies/{id}/params` 로 즉시 반영되고 DB 에도 저장된다. AI 자동 튜닝 대상이 아니다(`PARAM_RANGES`/`INT_PARAMS` 편입 금지)."
     },
@@ -1774,7 +1776,8 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "bull_flag_breakout",
         "vcp_breakout",
         "kojiro",
-        "etf_trend"
+        "etf_trend",
+        "ndx2x_riskoff"
       ],
       "help": "그날 전략 손익이 이 비율 이하가 되면 그 전략의 신규 매수를 멈춘다. 판정은 전략 파일이 아니라 공통 관문 `strategy_base` 한 곳에서 한다. **음수여야 한다.**"
     },
@@ -2303,7 +2306,8 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "bull_flag_breakout",
         "vcp_breakout",
         "kojiro",
-        "etf_trend"
+        "etf_trend",
+        "ndx2x_riskoff"
       ],
       "help": "종목당 매수금액 = 순자산 × 현금사용비율 × (전략비중 / Σ비중) × 이 값. **비율 저장**(0.25 = 25%). ⚠️ `position_ratio × max_positions <= 1.0` 불변식이 있고 7 전략 중 6 전략이 정확히 1.0 이라, 이 값을 올리려면 `max_positions` 를 **같은 요청에서 함께** 내려야 한다."
     },
@@ -2334,7 +2338,8 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "bull_flag_breakout",
         "vcp_breakout",
         "kojiro",
-        "etf_trend"
+        "etf_trend",
+        "ndx2x_riskoff"
       ],
       "help": "이 전략이 동시에 들 수 있는 종목 수. **리스크 정체성 상수**라 AI 자동 튜닝 대상이 아니다(사이클 208 이전에 kojiro 10×0.20 = 예산 200% 사고). `position_ratio` 와 곱이 1.0 이하여야 한다."
     },
@@ -2660,7 +2665,8 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "bull_flag_breakout",
         "vcp_breakout",
         "kojiro",
-        "etf_trend"
+        "etf_trend",
+        "ndx2x_riskoff"
       ],
       "help": "랏 명목을 `배수 × position_ratio × 전략예산` 이하로 자른다. 1주도 못 사면 매수하지 않는다. **키를 지우면 OFF**(`max_lot_units` 와 규약이 반대). 하한 1.0 은 정상 비중 랏 무접촉의 전제, 상한 20.0 은 롤백 다이얼. 실효는 대부분 1주 폴백 랏이다."
     },
@@ -2956,7 +2962,8 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "bull_flag_breakout",
         "vcp_breakout",
         "kojiro",
-        "etf_trend"
+        "etf_trend",
+        "ndx2x_riskoff"
       ],
       "help": "**매수 진입 전용**이다 — 매도·손절·트레일링·익일청산·15:20 강제청산은 보드와 무관하게 항상 작동한다. ⚠️ 알 수 없는 값은 코드가 경고 후 조용히 무시하고, 전부 무시되면 기본 보드로 폴백한다(오타가 무증상). 그래서 화면·서버 양쪽이 값 집합을 강제한다. ⚠️ **빈 목록은 거부한다**(`min_items=1`) — 효과가 전략마다 정반대이기 때문이다. momentum·VB·LTV·donchian 은 `session._DEFAULT_TRADABLE_BOARDS` 로 폴백해 매수가 그대로 이어지고(= 저장했는데 아무 일도 안 일어난다), BFB·VCP·kojiro 는 폴백 항목이 없어 공집합 = **매수 전면 중단**이다. 매수를 멈추려면 이 목록을 비우지 말고 전략을 비활성화한다."
     },
@@ -3006,7 +3013,8 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "bull_flag_breakout",
         "vcp_breakout",
         "kojiro",
-        "etf_trend"
+        "etf_trend",
+        "ndx2x_riskoff"
       ],
       "help": "주문 전송 시 KIS 에 넘기는 거래소 코드. ⚠️ cycle287(2026-09-12)부터 이 값이 실제로 쓰이는 구간은 **프리장(08:00~09:00)뿐**이다 — 09:00~15:30 정규장과 16:00~20:00 애프터마켓은 시각이 KRX 를 강제한다 (`order_engine._route_exchange_by_clock`, 킬스위치 `order_exchange_clock_mode`). SOR 은 폐기됐다(사용자 결정). 모의투자(VTS) 환경에서 NXT/SOR 는 거부된다. 종목이 NXT 비대상이면 코드가 KRX 로 자동 다운그레이드한다."
     },
@@ -3106,7 +3114,8 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "bull_flag_breakout",
         "vcp_breakout",
         "kojiro",
-        "etf_trend"
+        "etf_trend",
+        "ndx2x_riskoff"
       ],
       "help": "cycle287 **규칙 1 킬스위치**. `enforce`(기본)면 정규장(09:00~15:30)과 KRX 애프터마켓(16:00~20:00, 2026-09-14 신설)의 주문이 저장된 `exchange` 값과 무관하게 KRX 로 나간다. 프리장(08:00~09:00)은 세 값 모두에서 무접촉이다.\n**사고 중 조작 순서** — 스위치를 만지기 전에 ① `[order_channel_config]` 로 살아 있는 값 ② `[after_exit_division]` 의 `cur=` ③ `[after_exit_rejected]`/`[after_exit_giveup]` 을 읽어 **거부 / 미체결 / 악체결**을 먼저 가른다. 처방이 반대다. ⑴ **매도 거부**면 이 키는 만지지 않고 `after_market_exit_division` 을 본다. ⑵ **매수만 거부**(LTV 야간)면 `sell_only` — 애프터 청산이 살아 있는 유일한 정당 용도다. ⑶ 그래도 안 되면 `off` 가 아니라 `PUT {\"exchange\":\"KRX\"}` — clause 1 이 mode 검사보다 앞서 발화해 KRX 로 고정되면서 **44/41 전환이 보존된다**(부작용은 프리장 주문도 KRX 로 가는 것 하나). ⑷ `off` 는 라우터 자체가 엉뚱한 시장으로 보낸다는 증거가 있을 때만.\n⚠️ **`off` 는 애프터마켓 청산도 함께 끈다** — 44/41 변환의 게이트가 \"거래소가 KRX 인가\"라서, 라우팅을 끄면 거래소가 저장값으로 남아 변환 분기에 도달하지 않고 16:00~20:00 청산이 NXT 애프터로 시장가를 발사한다(NXT 는 시장가를 받지 않는다). 09:00~15:30 손절도 같은 이유로 거부 한 왕복을 더 탄 뒤 5호가 지정가로 떨어진다. 게다가 **NXT 비대상 종목(`nxt_tradable=False`)에는 `off` 가 듣지 않는다** — 이미 KRX 로 다운그레이드돼 계속 44/41 을 탄다. 절반만 꺼지는 스위치다.\n⚠️ `sell_only` 는 **16:00~19:50 LTV 야간 매수를 다시 켠다** — `enforce` 에서는 그 매수가 KRX 로 라우팅돼 시장가를 받지 않는 창에서 전량 거부되고 있다. 순수 방어 다이얼이 아니다.\n⚠️ 오타·대소문자(`OFF`)는 이 선택지 목록이 422 로 막지만, DB 를 직접 UPDATE 해 들어온 미지 값은 읽는 쪽이 **`enforce`** 로 해석한다(라우터에 mode 화이트리스트가 없다). 그래서 오타를 막는 관문은 이 enum **하나**다.\nPUT 은 **즉시** 반영되고 `strategy_config` SQL 은 다음 재시작에서만 반영된다 — 보유 중 장중 재시작은 금지(D6)이므로 장중 실효 수단은 PUT 뿐이다. ⚠️ **이 키는 전략별이다** — 전역 스위치가 없으므로 보유 중인 전략 각각에 PUT 한다. 반영의 즉시 증거는 PUT 200 응답의 `data.applied`다. `[order_channel_config] strategy= mode= division=` 카나리아는 **그 전략이 실제로 주문을 낼 때만** 1행 찍히므로 부재가 실패의 증거는 아니다(`off` 는 `[order_channel]` 을 아예 남기지 않는다). ⚠️ **이 스위치는 그 전략의 `exchange` 가 `NXT`/`SOR` 일 때만 효력이 있다** — clause 1 이 mode 검사보다 앞서 `exchange=\"KRX\"` 면 세 값 모두 무동작이다(`reason=base_krx` 가 그 증거). AI 자동 튜닝 대상이 아니다(`PARAM_RANGES` 편입 금지)."
     },
@@ -3150,7 +3159,8 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "bull_flag_breakout",
         "vcp_breakout",
         "kojiro",
-        "etf_trend"
+        "etf_trend",
+        "ndx2x_riskoff"
       ],
       "help": "cycle287 **규칙 2 다이얼**. KRX 애프터마켓(16:00~20:00)에서 시장가 청산을 어떤 호가유형으로 바꿔 보낼지 고른다 — 그 창의 KRX 는 시장가(`01`)도 지정가(`00`)도 받지 않고 `41~47` 만 받는다.\n`\"44\"`(기본, 최유리지정가 `ORD_UNPR=0`) = 반대편 최우선호가에 즉시 붙는다. **현재가가 없어도 주문이 성립**하고, 거부되면 `41` 로 성격이 다른 폴백을 한 번 탄다.\n`\"41\"`(지정가 `현재가 5호가 아래`) = 우리가 가격을 통제한다. **언제 쓰는가** = 주문은 접수됐는데 **미체결이거나 최유리가 얇은 호가를 크로스해 악체결**될 때. 코드 재배포 없이 쓸 수 있는 유일한 완화책이다.\n🔴 **`41` 로 바꾸기 전에 `[after_exit_division]` 의 `cur=` 을 확인하라.** 현재가를 못 받는 종목(WS 무송출 등)에서는 변환이 취소되고 **시장가가 그대로 나가 100% 거부되는데, 그때는 거부 관측(`[after_exit_rejected]`)·30초 TTL·그날 밤 포기 래치가 전부 작동하지 않는다** — 애프터마켓은 실시간 연속체결이라 브레이크 없는 반복 발사가 된다. `44` 에는 이 창이 아예 없다(`unpr=0` 이라 현재가가 불필요). `cur=0` 이면 44 로 두고 포기 래치가 다음 09:00 청산으로 착지시키게 두는 것이 옳다.\n⚠️ `41` 의 폴백도 `41` 이라 **호가유형이 다변화되지 않는다**(가격만 다시 계산한 재발사).\n⚠️ **문자열로 보낸다** — `44`(정수)는 선택지 밖으로 거부된다. 허용 집합 밖·부재·예외는 읽는 쪽이 `\"44\"` 로 폴백한다(클램프가 아니라 화이트리스트). IOC/FOK(42/43/45/46)는 잔량 자동취소로 손절 잔여를 잃고 47(최우선지정가)은 체결 보장이 없어 제외됐다.\n이 값은 **청산 판정을 바꾸지 않는다**(팔지 말지·언제 팔지는 그대로) — 이미 결정된 매도 주문의 호가 표현만 고른다. 정규장·프리장·15:30~16:00 은 무관하고, `order_exchange_clock_mode=\"off\"` 에서는 애프터 청산이 KRX 로 가지 않아 이 값이 읽히지 않는다. 이 변환은 실전(`is_production=True`) 계정에서만 발화한다(모의투자는 무접촉). AI 자동 튜닝 대상이 아니다."
     },
@@ -3257,7 +3267,8 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "bull_flag_breakout",
         "vcp_breakout",
         "kojiro",
-        "etf_trend"
+        "etf_trend",
+        "ndx2x_riskoff"
       ],
       "help": "`shadow` 는 판단을 기록만 하고 매수를 막지 않는다. 알 수 없는 값은 `off` 로 해석한다 — **돈을 쓰는 기능은 설정이 불확실하면 하지 않는다**(`open_price_scope_mode` 와 정반대 규약)."
     },
@@ -3288,7 +3299,8 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "bull_flag_breakout",
         "vcp_breakout",
         "kojiro",
-        "etf_trend"
+        "etf_trend",
+        "ndx2x_riskoff"
       ],
       "help": "이 점수 이상이면 통과로 기록한다(shadow 모드에서는 기록만). 범위 밖이면 읽는 쪽이 기본값 70 으로 되돌린다."
     },
@@ -3319,7 +3331,8 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "bull_flag_breakout",
         "vcp_breakout",
         "kojiro",
-        "etf_trend"
+        "etf_trend",
+        "ndx2x_riskoff"
       ],
       "help": "하루 호출 횟수 상한. **0 = 호출 안 함**이고, 키가 없어도 0 이다(비용이 드는 기능의 기본은 '안 함')."
     },
@@ -3350,7 +3363,8 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "bull_flag_breakout",
         "vcp_breakout",
         "kojiro",
-        "etf_trend"
+        "etf_trend",
+        "ndx2x_riskoff"
       ],
       "help": "응답을 기다리는 최대 초. 초과하면 게이트를 건너뛴다(매수를 막지 않는다)."
     },
@@ -4605,6 +4619,64 @@ export const PARAM_SCHEMA_FIXTURE: ParamSchemaData = {
         "order_exchange_clock_mode": "enforce",
         "after_market_exit_division": "44",
         "llm_gate_mode": "shadow",
+        "llm_gate_min_score": 70,
+        "llm_gate_daily_call_cap": 20,
+        "llm_gate_timeout_secs": 20
+      },
+      "deprecated_for_keys": []
+    },
+    {
+      "strategy_id": "ndx2x_riskoff",
+      "name": "나스닥2배-위험회피",
+      "enabled": true,
+      "keys": [
+        "buy_paused",
+        "shadow_mode",
+        "daily_loss_limit",
+        "position_ratio",
+        "max_positions",
+        "max_lot_ratio_mult",
+        "tradable_boards",
+        "exchange",
+        "order_exchange_clock_mode",
+        "after_market_exit_division",
+        "llm_gate_mode",
+        "llm_gate_min_score",
+        "llm_gate_daily_call_cap",
+        "llm_gate_timeout_secs"
+      ],
+      "params": {
+        "buy_paused": false,
+        "shadow_mode": true,
+        "daily_loss_limit": -8.0,
+        "position_ratio": 1.0,
+        "max_positions": 1,
+        "max_lot_ratio_mult": 2.5,
+        "tradable_boards": [
+          "main"
+        ],
+        "exchange": "KRX",
+        "order_exchange_clock_mode": "enforce",
+        "after_market_exit_division": "44",
+        "llm_gate_mode": "off",
+        "llm_gate_min_score": 70,
+        "llm_gate_daily_call_cap": 20,
+        "llm_gate_timeout_secs": 20
+      },
+      "defaults": {
+        "buy_paused": false,
+        "shadow_mode": true,
+        "daily_loss_limit": -8.0,
+        "position_ratio": 1.0,
+        "max_positions": 1,
+        "max_lot_ratio_mult": 2.5,
+        "tradable_boards": [
+          "main"
+        ],
+        "exchange": "KRX",
+        "order_exchange_clock_mode": "enforce",
+        "after_market_exit_division": "44",
+        "llm_gate_mode": "off",
         "llm_gate_min_score": 70,
         "llm_gate_daily_call_cap": 20,
         "llm_gate_timeout_secs": 20

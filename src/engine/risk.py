@@ -86,7 +86,10 @@ _PRE_MARKET_EXIT_EVAL_STRATEGIES = frozenset({"long_tail_volatility"})
 #   대비 타이밍 비용이 근거다(kojiro 용은 검증된 적 없는 donchian 판단을
 #   복붙하지 않는다). 매수는 `_swing_buy_poll_loop`(REST `stck_oprc`)에서만.
 # etf_trend = cycle403 ETF 등록 — 사용자 승인 10-03.
-_TICK_BUY_EVAL_SKIP_STRATEGIES = frozenset({"donchian_swing", "kojiro", "etf_trend"})
+# ndx2x_riskoff = cycle443(2026-10-11) — 하루 한 번 판단형(swing_poll 등록). 매수
+# 평가는 전용 `scheduler._ndx2x_poll_loop`(09:30~10:30 KST)만 구동한다 — WS 틱
+# 평가는 구조적으로 쓰지 않는다(등록용 최소 변경, 사용자 "구현 시작" 승인 범위).
+_TICK_BUY_EVAL_SKIP_STRATEGIES = frozenset({"donchian_swing", "kojiro", "etf_trend", "ndx2x_riskoff"})
 
 
 def _tick_buy_eval_blocked_by_channel(ticker: str) -> bool:

@@ -61,7 +61,7 @@ _MOMENTUM_SCAN = ["900001", "900002"]
 #: 종목 번호가 따라 바뀌어 모든 묶음이 붉어지는 대신, 순서에 기대는 묶음만 붉어진다.
 _SID_INDEX = {
     "momentum": 0, "volatility_breakout": 1, "long_tail_volatility": 2, "donchian_swing": 3,
-    "bull_flag_breakout": 4, "vcp_breakout": 5, "kojiro": 6, "etf_trend": 7,
+    "bull_flag_breakout": 4, "vcp_breakout": 5, "kojiro": 6, "etf_trend": 7, "ndx2x_riskoff": 8,
 }
 
 # 전략 id 판정용 — 등록 표와 별개로 고정(골든 대상을 고르는 체이므로 등록에서 뽑지 않는다).
@@ -705,9 +705,10 @@ def test_g1b_registry_literal():
     """G1 의 리터럴 사본 — 골든 파일을 다시 만들어 G1 을 덮어도 이 줄은 남는다."""
     assert [r[0] for r in snap_registry()] == [
         "momentum", "volatility_breakout", "long_tail_volatility", "donchian_swing",
-        "bull_flag_breakout", "vcp_breakout", "kojiro", "etf_trend",
+        "bull_flag_breakout", "vcp_breakout", "kojiro", "etf_trend", "ndx2x_riskoff",
     ]
-    assert [(r[2], r[3]) for r in snap_registry()] == [(True, 1.0)] + [(False, 0.0)] * 7
+    # ndx2x_riskoff(cycle443) 는 섀도 시작이라 다른 7개(꺼짐·비중0)와 달리 켜짐·비중0 이다.
+    assert [(r[2], r[3]) for r in snap_registry()] == [(True, 1.0)] + [(False, 0.0)] * 7 + [(True, 0.0)]
 
 
 @pytest.mark.parametrize("name", sorted(json.loads(GOLDEN.read_text(encoding="utf-8"))["constants"])
@@ -723,7 +724,9 @@ def test_g2b_risk_tick_buy_skip_set_is_donchian_kojiro_etf_trend():
     합류해 지금 값은 {donchian_swing, kojiro, etf_trend} 이고 스윙 폴 대상과 같다."""
     from src.engine import risk, scheduler
 
-    assert risk._TICK_BUY_EVAL_SKIP_STRATEGIES == frozenset({"donchian_swing", "kojiro", "etf_trend"})
+    assert risk._TICK_BUY_EVAL_SKIP_STRATEGIES == frozenset(
+        {"donchian_swing", "kojiro", "etf_trend", "ndx2x_riskoff"}
+    )
     assert frozenset(scheduler._SWING_POLL_STRATEGIES) == risk._TICK_BUY_EVAL_SKIP_STRATEGIES, (
         "틱 매수 평가 제외(risk.py:88)와 스윙 폴 대상이 갈라졌다 — 폴형 전략을 더했으면 risk.py:88 도 함께"
     )
@@ -803,6 +806,7 @@ async def test_g8_boot_restore_hooks(mask):
         ("donchian_swing", "recompute_held_atr"),
         ("kojiro", "recompute_held_atr"),
         ("etf_trend", "recompute_held_atr"),
+        ("ndx2x_riskoff", "recompute_held_atr"),
         ("vcp_breakout", "recompute_high_since_buy"),
         ("bull_flag_breakout", "recompute_high_since_buy"),
     ], f"복구 훅 순서·횟수가 바뀌었다(mask={mask}): {pairs}"

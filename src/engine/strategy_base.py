@@ -42,7 +42,10 @@ _MAX_LOT_RATIO_MULT_MAX = 20.0      # 09-04 예산에서 K=20 컷오프가 비�
 # (momentum) 발사 순간 자체가 곧 후보 증거라 항상 「후보」로 센다. 폴·래치형
 # 5전략(첫 문장 게이트)은 실제 `_targets`/`_candidates`/`get_scanned_tickers()`
 # 멤버십으로 판정한다 — 그래야 skip 카운트가 "어느 전략이 사려 했는지" 를 말한다.
-_ALWAYS_STATUS_GATE_CANDIDATE_SIDS = frozenset({"momentum", "volatility_breakout"})
+# cycle443 — ndx2x_riskoff 는 고정 종목 1개라 스캔 후보 목록이 구조적으로 없다
+# (`get_scanned_tickers()` 항상 `[]`) — 게이트에 닿는 것 자체가 그 종목을 봤다는
+# 증거라 momentum·VB 와 같은 "항상 후보" 쪽에 둔다.
+_ALWAYS_STATUS_GATE_CANDIDATE_SIDS = frozenset({"momentum", "volatility_breakout", "ndx2x_riskoff"})
 
 #: cycle384 — 신규 매수 멈춤 키. PARAM_RANGES/INT_PARAMS 편입 금지(AI 가 켜고 끄면 안 된다).
 BUY_PAUSED_KEY = "buy_paused"
@@ -89,7 +92,7 @@ class Position:
     # (import-order 독립 단일 진실원). vcp_breakout 은 과거 import 시점 동적 side-effect 로
     # 자기를 추가하던 취약 패턴(리뷰어 오판 유발)을 2026-07 에 리터럴로 통합.
     _MULTIDAY_STRATEGIES: ClassVar[frozenset[str]] = frozenset(
-        {"donchian_swing", "vcp_breakout", "kojiro", "etf_trend"}
+        {"donchian_swing", "vcp_breakout", "kojiro", "etf_trend", "ndx2x_riskoff"}
     )
 
     @property
