@@ -614,22 +614,16 @@ async def test_s5_when_064400_scenario_then_report_metrics_accurate(
     fake_trades_supabase = _FakeTradesPg(trades_rows)
     monkeypatch.setattr(trade_history, "pg", fake_trades_supabase)
 
-    # --- OpenAI / insert mock ---
+    # --- insert mock (cycle445 — OpenAI 제거, metrics 는 insert_log_report 로 캡처) ---
     captured_metrics: dict = {}
 
-    from src.engine.log_analysis_engine import _OpenAIMeta
-
-    async def _fake_call_openai(client, metrics, model):
-        captured_metrics["metrics"] = metrics
-        return ({"summary": "test", "findings": []}, _OpenAIMeta())
-
-    async def _fake_insert(*_args, **_kwargs):
+    async def _fake_insert(**kwargs):
+        captured_metrics["metrics"] = kwargs.get("metrics")
         return {"id": "row-1"}
 
     async def _empty_funnel() -> dict:
         return {}
 
-    monkeypatch.setattr(lae, "_call_openai", _fake_call_openai)
     monkeypatch.setattr(lae, "insert_log_report", _fake_insert)
     monkeypatch.setattr(collector, "_collect_strategy_funnel", _empty_funnel)
 
@@ -638,7 +632,6 @@ async def test_s5_when_064400_scenario_then_report_metrics_accurate(
 
     # cycle351 — 셰도 진입점 대역(DB·30초 상한 무접촉). Green 전에는 속성이 없어 raising=False.
     monkeypatch.setattr(collector, "_collect_pyramid_shadow", _no_pyramid_shadow, raising=False)
-    monkeypatch.setattr(lae.settings, "openai_api_key", "dummy-key")
 
     # api_metrics 도 차단 (외부 영향 없음)
     monkeypatch.setattr(collector, "get_request_metrics", lambda: {})
@@ -651,7 +644,7 @@ async def test_s5_when_064400_scenario_then_report_metrics_accurate(
     await lae.generate_daily_log_report(_now_kst=_fixed_now_kst)
 
     metrics = captured_metrics.get("metrics")
-    assert metrics is not None, "generate_daily_log_report 가 _call_openai 호출 안 함"
+    assert metrics is not None, "generate_daily_log_report 가 insert_log_report 에 metrics 를 넘기지 않음"
 
     # 핵심 1: drained_success 정확 카운트
     ndc = metrics.get("next_day_clear", {})
@@ -786,22 +779,16 @@ async def test_s6_when_18000_logs_then_generate_report_counts_drained_at_7668(
     fake_trades_supabase = _FakeTradesPg(trades_rows)
     monkeypatch.setattr(trade_history, "pg", fake_trades_supabase)
 
-    # --- OpenAI / insert / strategy_funnel / api_metrics mock ---
+    # --- insert / strategy_funnel / api_metrics mock (cycle445 — OpenAI 제거) ---
     captured_metrics: dict = {}
 
-    from src.engine.log_analysis_engine import _OpenAIMeta
-
-    async def _fake_call_openai(client, metrics, model):
-        captured_metrics["metrics"] = metrics
-        return ({"summary": "test", "findings": []}, _OpenAIMeta())
-
-    async def _fake_insert(*_args, **_kwargs):
+    async def _fake_insert(**kwargs):
+        captured_metrics["metrics"] = kwargs.get("metrics")
         return {"id": "row-1"}
 
     async def _empty_funnel() -> dict:
         return {}
 
-    monkeypatch.setattr(lae, "_call_openai", _fake_call_openai)
     monkeypatch.setattr(lae, "insert_log_report", _fake_insert)
     monkeypatch.setattr(collector, "_collect_strategy_funnel", _empty_funnel)
 
@@ -810,7 +797,6 @@ async def test_s6_when_18000_logs_then_generate_report_counts_drained_at_7668(
 
     # cycle351 — 셰도 진입점 대역(DB·30초 상한 무접촉). Green 전에는 속성이 없어 raising=False.
     monkeypatch.setattr(collector, "_collect_pyramid_shadow", _no_pyramid_shadow, raising=False)
-    monkeypatch.setattr(lae.settings, "openai_api_key", "dummy-key")
     monkeypatch.setattr(collector, "get_request_metrics", lambda: {})
     monkeypatch.setattr(lae, "reset_request_metrics", lambda: None)
 
@@ -819,7 +805,7 @@ async def test_s6_when_18000_logs_then_generate_report_counts_drained_at_7668(
     await lae.generate_daily_log_report(_now_kst=_fixed_now_kst)
 
     metrics = captured_metrics.get("metrics")
-    assert metrics is not None, "generate_daily_log_report 가 _call_openai 호출 안 함"
+    assert metrics is not None, "generate_daily_log_report 가 insert_log_report 에 metrics 를 넘기지 않음"
 
     # 핵심 1: total_logs >= 18,000 — 페이지네이션이 운영 부피 완전 fetch
     logs_metrics = metrics.get("logs", {})

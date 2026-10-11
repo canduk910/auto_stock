@@ -405,16 +405,38 @@ async def _call_openai(
 
 
 async def generate_recommendations() -> list[dict]:
-    """매일 16:00에 호출. 전략별로 추천 생성·DB 저장.
+    """주간 자문일(cycle445 D8, 기본 목요일)에 20:00 호출. 전략별로 추천 생성·DB 저장.
 
     Returns:
-        생성된(또는 이미 존재하는) 레코드 목록.
+        생성된(또는 이미 존재하는) 레코드 목록. 주간 자문일이 아니면 **빈 목록**(OpenAI
+        호출·DB INSERT·백테스트 enqueue 전부 0 — 매일 돌리던 비용을 끈다. 근거 =
+        `_workspace/domain_consult/weekly_advice_2026-10-08.md` §5.3 30일 589:2 조임·
+        반영 0건). 20:05 metrics 1차 스냅샷·20:30 일봉 적재·21:30 정산은 이 결정과
+        무관하게 매일 그대로 돈다(호출부가 다르다).
     """
     if not settings.openai_api_key:
         logger.warning("OPENAI_API_KEY 미설정 — 추천 건너뜀")
         return []
 
-    target_date = datetime.now(KST).date()
+    now = datetime.now(KST)
+    target_date = now.date()
+
+    # cycle445 D8 — 주간 자문일 판정. leaf `weekly_advisory.py` 가 설정 조회 + 요일
+    # 비교를 묶는다(never-raise). 공휴일은 이 함수에 도달하기 전에 `run_daily()` 가
+    # 이미 그날 전체를 건너뛴다(leaf 모듈 docstring) — 그래서 "휴장 목요일" 처리가
+    # 여기 따로 없다.
+    from src.engine import weekly_advisory as _weekly_advisory
+    advisory_decision = await _weekly_advisory.should_run_weekly_advisory(now)
+    if not advisory_decision.get("run"):
+        logger.info(
+            "[weekly_advisory_skip] target_date=%s weekday_code=%s configured_valid=%s"
+            " — 주간 자문일이 아니라 20:00 AI 자문·백테스트 enqueue 를 건너뜀",
+            target_date,
+            advisory_decision.get("weekday_code"),
+            advisory_decision.get("configured_valid"),
+        )
+        return []
+
     inserted: list[dict] = []
 
     # 어제 이전의 pending 추천을 expired로 마킹

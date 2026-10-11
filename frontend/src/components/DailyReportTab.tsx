@@ -201,6 +201,9 @@ function ReportCard({ report }: { report: LogReportItem }) {
   const trades = report.metrics?.trades
   // cycle366 (P6) — 휴장일이면 이 날의 0건/적은 건수가 결함이 아니라 정상임을 밝힌다.
   const marketClosed = report.metrics?.report_accuracy?.market_closed === true
+  // cycle445 — OpenAI 요약 생성이 걷힌 뒤에는 `summary` 가 항상 빈 값이다. 과거
+  // 행(이전 OpenAI 경로가 쓴 것)만 여기서 그대로 보인다 — 값은 바뀌지 않는다.
+  const hasLegacySummary = Boolean(report.summary && report.summary.trim().length > 0)
 
   return (
     <div className="space-y-6">
@@ -265,29 +268,41 @@ function ReportCard({ report }: { report: LogReportItem }) {
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <h2 className="text-lg font-semibold text-gray-900">{report.target_date} 총평</h2>
-            {marketClosed && (
-              <span
-                data-testid="report-holiday-badge"
-                title="휴장일 — 거래·로그 0건(또는 적은 건수)은 결함이 아니라 정상입니다."
-                className="px-1.5 py-0.5 text-[10px] font-medium bg-gray-100 text-gray-500 border border-gray-300 rounded"
-              >
-                휴장일
-              </span>
-            )}
+      {(hasLegacySummary || !hasExtAnalysis(report)) && (
+        <div className="bg-white rounded-lg shadow p-6" data-testid="legacy-summary-card">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-gray-900">{report.target_date} 총평</h2>
+              {marketClosed && (
+                <span
+                  data-testid="report-holiday-badge"
+                  title="휴장일 — 거래·로그 0건(또는 적은 건수)은 결함이 아니라 정상입니다."
+                  className="px-1.5 py-0.5 text-[10px] font-medium bg-gray-100 text-gray-500 border border-gray-300 rounded"
+                >
+                  휴장일
+                </span>
+              )}
+            </div>
+            <span className="text-xs text-gray-400">
+              생성 {formatDateTime(report.created_at)}
+              {report.model && ` · ${report.model}`}
+            </span>
           </div>
-          <span className="text-xs text-gray-400">
-            생성 {formatDateTime(report.created_at)}
-            {report.model && ` · ${report.model}`}
-          </span>
+          {hasLegacySummary ? (
+            <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">
+              {report.summary}
+            </p>
+          ) : (
+            <p
+              className="text-sm text-gray-500 italic"
+              data-testid="summary-pending-notice"
+            >
+              이 영업일의 운영 요약은 20:20 KST Claude 루틴이 작성합니다 — 아직
+              도착하지 않았습니다. 지표(아래 "원본 메트릭")는 이미 저장돼 있습니다.
+            </p>
+          )}
         </div>
-        <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">
-          {report.summary || '요약이 없습니다.'}
-        </p>
-      </div>
+      )}
 
       <div>
         <h3 className="text-base font-semibold text-gray-800 mb-3">
@@ -483,9 +498,11 @@ export default function DailyReportTab() {
 
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
         <p className="text-sm text-blue-800">
-          매일 정산(20:10) 직후 OpenAI가 당일 시스템 로그와 거래 내역을 분석해 운영 개선 리포트를 자동 생성합니다.
+          매일 저녁(21:30 정산 직후) 당일 시스템 로그·거래 내역 지표를 자동 집계해
+          저장합니다. 사람이 읽는 운영 요약은 20:20 KST 클라우드 루틴이 작성해 위쪽에
+          별도 카드로 붙습니다.
           {' '}
-          오늘 리포트가 아직 없다면 우상단 버튼으로 즉시 실행할 수 있습니다(영업일당 1건).
+          오늘 지표 리포트가 아직 없다면 우상단 버튼으로 즉시 실행할 수 있습니다(영업일당 1건).
         </p>
       </div>
 
@@ -504,7 +521,7 @@ export default function DailyReportTab() {
         <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500">
           저장된 리포트가 없습니다.
           <br />
-          <span className="text-sm">매일 정산(20:10) 후 자동 생성되거나 위 버튼으로 즉시 실행 가능합니다.</span>
+          <span className="text-sm">매일 저녁(21:30 정산) 후 자동 생성되거나 위 버튼으로 즉시 실행 가능합니다.</span>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-6">

@@ -521,16 +521,17 @@ testid = `strategy-summary-table` · `strategy-summary-row-{sid}` · `strategy-s
 
 ### 일일 로그 분석 (`DailyReportTab.tsx`)
 
-좌측 영업일 리스트(최근 30일) / 우측 summary + findings 카드(severity + category 칩) + 원본 메트릭 접기. "지금 분석 실행" → `POST /api/log-reports/run`(영업일당 1건 UNIQUE).
+좌측 영업일 리스트(최근 30일) / 우측 총평(legacy-summary-card) + findings 카드(severity + category 칩) + 원본 메트릭 접기. "지금 분석 실행" → `POST /api/log-reports/run`(영업일당 1건 UNIQUE, cycle445 이후 지표 집계만 실행한다 — OpenAI 호출 없음).
 
 - **`ext_*` 6컬럼** `daily_log_reports.ext_provider/ext_model/ext_summary/ext_findings/ext_report_md/ext_created_at`(전부 NULL 허용) — 20:20 KST 클라우드 루틴이 `POST /api/log-reports/{date}/external` 로 채우고, `GET /api/log-reports*`(SELECT *) 응답을 `LogReportItem` 6개 선택 필드가 1:1 매핑한다.
-- **표시 규칙**: `ext_summary` 또는 비어 있지 않은 `ext_findings` 가 있을 때만 `data-testid="ext-analysis-card"` 를 OpenAI 총평 **위에** — 헤더 "{target_date} Claude 분석" + "생성 {ext_created_at} · {ext_provider} · {ext_model}"(null 조각만 생략) + `ext_summary`(`whitespace-pre-line`, `data-testid="ext-summary"`) + "개선 항목 (N건)"(`FindingCard` 재사용, severity 정렬, key 접두 `ext-`) + `ext_report_md` 가 있으면 접이식 "상세 리포트"(`data-testid="ext-report-md-toggle"`) 안 `<pre className="whitespace-pre-wrap text-xs …">` 원문.
+- **표시 규칙**: `ext_summary` 또는 비어 있지 않은 `ext_findings` 가 있을 때만 `data-testid="ext-analysis-card"` 를 총평 **위에** — 헤더 "{target_date} Claude 분석" + "생성 {ext_created_at} · {ext_provider} · {ext_model}"(null 조각만 생략) + `ext_summary`(`whitespace-pre-line`, `data-testid="ext-summary"`) + "개선 항목 (N건)"(`FindingCard` 재사용, severity 정렬, key 접두 `ext-`) + `ext_report_md` 가 있으면 접이식 "상세 리포트"(`data-testid="ext-report-md-toggle"`) 안 `<pre className="whitespace-pre-wrap text-xs …">` 원문.
 - 🔴 **마크다운 렌더 라이브러리 추가 금지**(의존성 0) — `<pre>` 원문은 감사에 유리하고 XSS 표면(`dangerouslySetInnerHTML`)을 열지 않는다.
-- **파리티 계약**: ext 6필드가 전부 없으면 `hasExtAnalysis()` 가 `false` 라 블록이 트리에 없다(기존 OpenAI 총평/findings/원본 메트릭 DOM byte 동일). 좌측 목록은 `ext_summary` 있는 행만 배지 "Claude"(`data-testid="ext-badge-{id}"`).
+- **총평 카드(`data-testid="legacy-summary-card"`) 표시 규칙(cycle445)** — `report.summary` 가 비어 있지 않은 **과거 행만** 그 값을 그린다(OpenAI 가 쓰던 경로, 값은 그대로 보존). `summary` 가 빈 값이고(cycle445 이후 모든 신규 행) ext 분석이 있으면 이 카드 자체를 그리지 않는다(Claude 분석 카드가 이미 사람이 읽을 요약을 보인다, `hasLegacySummary || !hasExtAnalysis(report)` 조건). `summary` 가 비었고 ext 도 아직 없으면 카드는 뜨되 "요약이 없습니다" 가 아니라 대기 안내(`data-testid="summary-pending-notice"` — "운영 요약은 20:20 KST 클라우드 루틴이 작성합니다")를 보인다. findings 섹션은 `summary` 와 독립이라 그대로 "특이사항이 없습니다"(cycle445 이후 findings 는 항상 빈 배열이라 이 문구가 정상이다).
+- **파리티 계약**: ext 6필드가 전부 없고 `summary` 가 채워진 과거 행은 `hasExtAnalysis()` 가 `false` 라 ext 블록이 트리에 없다(기존 총평/findings/원본 메트릭 DOM byte 동일). 좌측 목록은 `ext_summary` 있는 행만 배지 "Claude"(`data-testid="ext-badge-{id}"`).
 - **항목 내부 정규화**: `ExternalReportIn.findings` 는 항목 내부를 검증하지 않는 `list[dict]` 라, `sortedExtFindings` 에서 `normalizeExtFinding`(같은 파일)이 severity ∉ `{high,medium,low}` → `medium`, category ∉ 9종 → `etc`, title/detail/suggestion 비문자열 → `JSON.stringify`, title·detail 빈 문자열 → 항목 **드롭**한다(없으면 "Objects are not valid as a React child" 로 탭이 빈다).
-- **레거시 `findings` 는 정규화하지 않는다**(`log_analysis_engine._validate_report` 가 검증). 대신 `ReportCard` 를 `ReportCardBoundary`(같은 파일, class error boundary, `key={report.id}` 로 전환 시 리셋)로 감싸 예외가 나도 `data-testid="report-card-error"` 카드 하나만 대체된다.
+- **레거시 `findings` 는 정규화하지 않는다**(`log_analysis_engine._validate_report` 가 검증 — cycle445 이후에도 이 정규화기는 외부 리포트 경로를 위해 남아 있다). 대신 `ReportCard` 를 `ReportCardBoundary`(같은 파일, class error boundary, `key={report.id}` 로 전환 시 리셋)로 감싸 예외가 나도 `data-testid="report-card-error"` 카드 하나만 대체된다.
 - **휴장일 배지 (cycle366)**: `report.metrics?.report_accuracy?.market_closed === true` 일 때만 총평 헤더에 회색 배지(`data-testid="report-holiday-badge"`, "휴장일" + 툴팁 "거래·로그 0건은 결함이 아니라 정상"). `report_accuracy` 없는 옛 행·`trading_day: null`("모름")·`market_closed: false` 는 안 그린다. `LogReportMetrics.report_accuracy`(`types/log_reports.ts::LogReportAccuracy`)는 옵셔널.
-- 회귀 = `components/__tests__/DailyReportTab.ext.test.tsx`(파리티·정규화·error boundary 포함) + `DailyReportTab.holiday.test.tsx`
+- 회귀 = `components/__tests__/DailyReportTab.ext.test.tsx`(파리티·정규화·error boundary 포함) + `DailyReportTab.holiday.test.tsx` + `DailyReportTab.cycle445.test.tsx`(총평 카드 표시 규칙 3종)
 - **「원본 메트릭 → 거래 통계」 실현손익 라벨 = 「실현손익(세전)」 (cycle411)** — 이 숫자는 그날 저장된 스냅샷(`metrics.trades.realized_pnl`)이라 비용을 빼지 않고 그대로 보이고, 라벨만 세전임을 밝힌다(다른 실적 화면의 net 기본과 다르다).
 
 ## Recommendations (`/recommendations`)

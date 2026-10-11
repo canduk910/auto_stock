@@ -108,6 +108,16 @@ async def test_full_flow_20_00_recommendation_backtest(
     monkeypatch.setattr(rec_mod, "_call_openai", fake_call_openai)
     monkeypatch.setattr(rec_mod, "insert_recommendation", fake_insert_recommendation)
 
+    # cycle445 D8 — 2026-05-16 은 토요일(주간 자문일 아님)이라 게이트가 막는다.
+    # 이 파일은 20:00 자문 ↔ 백테스트 통합 흐름을 재는 것이라 요일 게이트는
+    # 항상 통과시킨다.
+    from src.engine import weekly_advisory as _wa_mod
+
+    async def _fake_should_run_weekly(now):
+        return {"run": True, "weekday_code": "thu", "configured_valid": False}
+
+    monkeypatch.setattr(_wa_mod, "should_run_weekly_advisory", _fake_should_run_weekly)
+
     # ---- backtest_runs DB 모킹 ----
     runs_store: dict[str, dict] = {}
 
@@ -283,6 +293,16 @@ async def test_settlement_race_preserves_recommendation_insert(
     monkeypatch.setattr(rec_mod, "compute_metrics", fake_compute_metrics)
     monkeypatch.setattr(rec_mod, "_call_openai", fake_call_openai)
     monkeypatch.setattr(rec_mod, "insert_recommendation", fake_insert_recommendation)
+
+    # cycle445 D8 — 2026-05-16 은 토요일(주간 자문일 아님)이라 게이트가 막는다.
+    # 이 파일은 20:00 자문 ↔ 백테스트 통합 흐름을 재는 것이라 요일 게이트는
+    # 항상 통과시킨다.
+    from src.engine import weekly_advisory as _wa_mod
+
+    async def _fake_should_run_weekly(now):
+        return {"run": True, "weekday_code": "thu", "configured_valid": False}
+
+    monkeypatch.setattr(_wa_mod, "should_run_weekly_advisory", _fake_should_run_weekly)
 
     runs_store: dict[str, dict] = {}
 

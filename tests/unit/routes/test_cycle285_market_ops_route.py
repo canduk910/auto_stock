@@ -328,20 +328,21 @@ def test_g5d_metrics_snapshot_no_row_yet_is_not_fired(client, mo):
 
 
 # ===========================================================================
-# G6 — log_analysis: OpenAI 빈 응답 placeholder → failed (오분류 차단)
+# G6 — log_analysis: metrics 없는 행은 완료가 아니다 (cycle445 — OpenAI 제거)
 # ===========================================================================
-def test_g6_log_analysis_openai_empty_is_failed_not_done(client, mo, monkeypatch):
-    from src.engine.log_analysis_engine import OPENAI_EMPTY_RESPONSE_SUMMARY
-
+def test_g6_log_analysis_no_metrics_is_not_fired(client, mo, monkeypatch):
+    """cycle445 — OpenAI 요약·findings 가 없어 "실패 placeholder" 개념 자체가 없다
+    (사용자 결정 2026-10-11, 워크리스트 참조). `metrics` 가 비어 있으면(아직 분석이
+    돈 적 없는 행) `summary`/`model` 값과 무관하게 `not_fired` 다."""
     monkeypatch.setattr(
         mo, "get_log_report",
         AsyncMock(return_value={
-            "metrics": None, "summary": OPENAI_EMPTY_RESPONSE_SUMMARY, "model": "gpt-5.6",
+            "metrics": None, "summary": "", "model": None,
         }),
     )
     data = _at(client, datetime(2026, 9, 14, 21, 45, tzinfo=_KST))
     by_id = {t["id"]: t for t in data["tasks"]}
-    assert by_id["log_analysis"]["status"] == "failed"
+    assert by_id["log_analysis"]["status"] == "not_fired"
 
 
 def test_g6b_log_analysis_complete_report_is_done(client, mo, monkeypatch):

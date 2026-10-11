@@ -85,7 +85,6 @@ from src.db import system_config
 from src.db._kst import to_date
 from src.db.log_reports import get_log_report
 from src.engine import refresh_progress
-from src.engine.log_analysis_engine import OPENAI_EMPTY_RESPONSE_SUMMARY
 from src.engine.quote_token_refresh import TIME_QUOTE_TOKEN_REFRESH
 from src.engine.scheduler import (
     TIME_EVENING_FUNNEL_CAPTURE,
@@ -416,14 +415,17 @@ def _metrics_snapshot_status(
 def _log_analysis_status(
     *, log_report: "dict | None", now_t: time, scheduled: "time | None"
 ) -> str:
-    """cycle283 의 4축 판정기(`_is_complete_report`)를 **그대로 재사용**한다 — 새로
-    쓰면 그 4축(1차 스냅샷 배제·OpenAI 빈 응답 배제·model 필수)을 다시 틀린다."""
-    if log_report is not None:
-        summary = (log_report.get("summary") or "").strip()
-        if summary == OPENAI_EMPTY_RESPONSE_SUMMARY:
-            return "failed"
-        if _is_complete_report(log_report):
-            return "done"
+    """`_is_complete_report`(metrics 기반 2축 판정)를 **그대로 재사용**한다 — 새로
+    쓰면 그 판정을 다시 틀린다.
+
+    cycle445 — OpenAI 요약·findings 생성이 걷힌 뒤에는 "OpenAI 실패 placeholder"
+    라는 개념이 없다(사용자 결정 2026-10-11, 워크리스트 참조). `generate_daily_log_report`
+    는 `collect_daily_log_metrics` 수집·저장만 하고 실패 문구를 남기지 않는다 —
+    이 함수가 구별하는 것은 "metrics 가 실제로 돌았다"(done)와 "아직"(scheduled/not_fired)
+    뿐이다.
+    """
+    if log_report is not None and _is_complete_report(log_report):
+        return "done"
     if scheduled is not None and now_t < scheduled:
         return "scheduled"
     return "not_fired"

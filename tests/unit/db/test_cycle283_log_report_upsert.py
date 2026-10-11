@@ -309,32 +309,31 @@ async def test_c283_c9b_3_rerun_with_force_is_allowed():
 
 @pytest.mark.asyncio
 async def test_c283_c9b_4_rerun_is_allowed_when_no_complete_report_yet():
-    """1차 스냅샷만 있는 상태(20:05~21:30)의 수동 실행은 **막지 않는다**.
+    """1차 스냅샷만 있거나(20:05~21:30) 행에 실제 metrics 가 없는 상태의 수동 실행은
+    **막지 않는다**.
 
-    그 시간대엔 덮어쓸 완성본이 없다. 막으면 20:10 OpenAI 가 실패한 날의 수동 복구
-    경로가 사라진다 — 그게 이 라우트의 존재 이유다.
+    cycle445 — `summary`/`model` 은 더는 완성 판정에 쓰지 않는다(사용자 결정
+    2026-10-11, 워크리스트 참조) — `metrics` 가 실제 내용이 있는지만 본다. 그 시간대엔
+    덮어쓸 완성본이 없다.
     """
     from src.routes import log_reports as route
 
     from src.engine.daily_metrics_snapshot import SNAPSHOT_SUMMARY
-    from src.engine.log_analysis_engine import OPENAI_EMPTY_RESPONSE_SUMMARY
 
     # ⚠️ 픽스처는 **프로덕션이 실제로 쓰는 행 모양**이어야 한다. 1차 스냅샷의
-    # `summary` 는 비어 있지 않다(`SNAPSHOT_SUMMARY`) — `{"summary": ""}` 로 재면
-    # `summary` 축 하나만으로 통과해 `model` 축을 지우는 뮤테이션이 살아남는다
-    # (적대 검증 M23 ESCAPED). 상수를 import 해 단일 출처로 묶는다.
+    # `summary` 는 비어 있지 않다(`SNAPSHOT_SUMMARY`) — 상수를 import 해 단일
+    # 출처로 묶는다.
     snapshot_only = {"target_date": "2026-09-14", "summary": SNAPSHOT_SUMMARY,
                      "model": None,
                      "metrics": {"logs": {"total_logs": 12}, "snapshot_pass": 1}}
-    # 20:10(현 21:30) OpenAI 가 타임아웃·빈 응답으로 끝난 날의 행 — `model` 이 채워져
-    # 있어 종전 2축 판정에서 '완성본' 으로 오분류됐다. **이 라우트의 존재 이유**가
-    # 그날의 수동 복구인데 정작 그 경로가 막혀 있었다(통합 검증 F1).
-    openai_failed = {"target_date": "2026-09-14",
-                     "summary": OPENAI_EMPTY_RESPONSE_SUMMARY,
-                     "model": "gpt-5-mini",
-                     "metrics": {"logs": {"total_logs": 12}}}
+    # metrics 가 아직 비어 있는 행(그날 분석이 한 번도 끝까지 돌지 않은 상태) —
+    # `summary`/`model` 값과 무관하게 막지 않는다.
+    no_real_metrics = {"target_date": "2026-09-14",
+                       "summary": "",
+                       "model": None,
+                       "metrics": {}}
     gen = AsyncMock(return_value={"id": "new"})
-    for existing in (None, snapshot_only, openai_failed):
+    for existing in (None, snapshot_only, no_real_metrics):
         gen.reset_mock()
         with patch.object(route, "get_log_report", AsyncMock(return_value=existing)), \
                 patch.object(route, "generate_daily_log_report", gen):
@@ -345,26 +344,28 @@ async def test_c283_c9b_4_rerun_is_allowed_when_no_complete_report_yet():
 
 @pytest.mark.asyncio
 async def test_c283_c9b_5_both_axes_of_the_snapshot_verdict_are_live():
-    """스냅샷 판정의 두 축(`snapshot_pass` 센티널 · 실패 placeholder)이 **각각** 산다.
-
-    같은 `summary`(1차 스냅샷 문구)를 두고 `model` 만 다른 두 행을 **대조**한다 —
-    한 축만으로 판정하면 둘 중 하나가 반드시 틀린다.
+    """스냅샷 판정의 두 축(`metrics` 실제 내용 유무 · `snapshot_pass` 센티널)이
+    **각각** 산다(cycle445 — `summary`/`model` 은 더는 판정에 쓰지 않는다).
     """
     from src.routes import log_reports as route
     from src.engine.daily_metrics_snapshot import SNAPSHOT_SUMMARY
 
-    # 센티널이 있으면 `model` 이 채워져 있어도 1차 행이다 → 막지 않는다.
+    # 센티널이 있으면 `model` 이 채워져 있어도 1차 행이다 → 완성본 아니다.
     snapshot_with_model = {"summary": SNAPSHOT_SUMMARY, "model": "gpt-5-mini",
-                           "metrics": {"snapshot_pass": 1}}
+                           "metrics": {"logs": {"total_logs": 1}, "snapshot_pass": 1}}
     assert route._is_complete_report(snapshot_with_model) is False, (
         "`metrics.snapshot_pass` 센티널을 무시한다 — 1차 행을 완성본으로 오분류"
     )
-    # 센티널이 없고 `model` 도 없으면(=1차 행의 기본형) 역시 완성본이 아니다.
+    # metrics 가 없거나 빈 dict 면(`summary`/`model` 값과 무관) 완성본이 아니다.
     assert route._is_complete_report({"summary": SNAPSHOT_SUMMARY, "model": None}) is False, (
-        "`model` 축이 죽었다 — `summary` 만으로 판정하면 20:05~21:30 수동 실행이 전부 막힌다"
+        "`metrics` 축이 죽었다 — metrics 없이도 완성본으로 읽히면 20:05~21:30 수동 실행이 막힌다"
     )
-    # 네 축을 모두 만족하는 행만 완성본이다.
     assert route._is_complete_report(
-        {"summary": "오늘의 분석", "model": "gpt-5-mini", "metrics": {"logs": {}}}
+        {"summary": "", "model": None, "metrics": {}}
+    ) is False, "빈 metrics dict 는 완성본이 아니다"
+    # metrics 에 실제 내용이 있고 snapshot_pass 가 없으면 완성본이다
+    # (summary/model 은 cycle445 이후 항상 빈 값이어도 상관없다).
+    assert route._is_complete_report(
+        {"summary": "", "model": None, "metrics": {"logs": {"total_logs": 5}}}
     ) is True
     assert route._is_complete_report(None) is False

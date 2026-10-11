@@ -35,13 +35,8 @@ def _stub_common(monkeypatch, captured: dict):
     async def _fake_get_trades(*_a, **_kw):
         return []
 
-    from src.engine.log_analysis_engine import _OpenAIMeta
-
-    async def _fake_call_openai(client, metrics, model):
-        captured["metrics"] = metrics
-        return ({"summary": "ok", "findings": []}, _OpenAIMeta())
-
     async def _fake_insert(*_a, **_kw):
+        captured["metrics"] = _kw.get("metrics")
         captured["insert_metrics"] = _kw.get("metrics")
         return {"id": "row-H"}
 
@@ -53,9 +48,7 @@ def _stub_common(monkeypatch, captured: dict):
 
     monkeypatch.setattr(collector, "_fetch_logs_in_range", _fake_fetch_logs)
     monkeypatch.setattr(collector, "get_trades_in_range", _fake_get_trades)
-    monkeypatch.setattr(lae, "_call_openai", _fake_call_openai)
     monkeypatch.setattr(lae, "insert_log_report", _fake_insert)
-    monkeypatch.setattr(lae.settings, "openai_api_key", "dummy-key")
     monkeypatch.setattr(collector, "_collect_strategy_funnel", _coarse)
     monkeypatch.setattr(collector, "_collect_strategy_funnel_stages", _stages, raising=False)
 

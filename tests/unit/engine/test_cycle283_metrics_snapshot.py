@@ -327,18 +327,18 @@ async def test_c283_c7_8b_marker_says_saved_zero_when_the_row_is_empty(caplog):
 
 @pytest.mark.asyncio
 async def test_c283_c8_1_settlement_path_still_resets_request_metrics():
-    """C8 — 리셋은 **마지막 패스에서만**. `generate_daily_log_report` 는 현행 유지."""
+    """C8 — 리셋은 **마지막 패스에서만**. `generate_daily_log_report` 는 현행 유지.
+
+    cycle445 — 이 경로는 OpenAI 를 더는 호출하지 않는다(워크리스트 참조). 그래도
+    `reset_request_metrics()` 는 여전히 1회 불린다.
+    """
     import src.engine.log_analysis_engine as lae
 
     reset = MagicMock()
-    with patch.object(lae.settings, "openai_api_key", "sk-test"), \
-            patch.object(lae, "collect_daily_log_metrics",
-                         AsyncMock(return_value={"logs": {}})), \
+    with patch.object(lae, "collect_daily_log_metrics",
+                       AsyncMock(return_value={"logs": {}})), \
             patch.object(lae, "insert_log_report", AsyncMock(return_value={"id": "x"})), \
-            patch.object(lae, "reset_request_metrics", reset), \
-            patch.object(lae, "_call_openai",
-                         AsyncMock(return_value=({"summary": "s", "findings": []},
-                                                 lae._OpenAIMeta()))):
+            patch.object(lae, "reset_request_metrics", reset):
         await lae.generate_daily_log_report()
 
     assert reset.call_count == 1, (
@@ -347,14 +347,14 @@ async def test_c283_c8_1_settlement_path_still_resets_request_metrics():
     )
 
 
-def test_c283_c8_2_openai_key_absent_still_returns_early():
-    """C8 조건 분기(자문) — `openai_api_key` 부재면 `generate_daily_log_report` 는
-    **맨 위에서 return** 한다: metrics 저장도 `reset_request_metrics()` 도 일어나지 않는다.
+@pytest.mark.asyncio
+async def test_c283_c8_2_no_openai_key_check_remains():
+    """cycle445 — OpenAI 호출이 걷혀 `openai_api_key` 유무를 보는 조기 return 자체가 없다.
 
-    C7+C9 이후 이 경우 **20:05 행이 그날의 유일한 행**으로 남는다(개선). 대신
-    `reset_request_metrics()` 가 영원히 안 돌아 `api_metrics` 가 날짜를 넘겨 누적된다
-    — 기존 결함이고 이번 범위 밖이지만 changelog 에 한 줄 남긴다. 이 테스트는 그
-    구조(조기 return)가 유지되는지만 잠근다.
+    이전(C8)에는 키 부재가 함수 첫 문장에서 돌려보냈다. 그 분기를 걷어낸 뒤에는
+    키 설정과 무관하게 `collect_daily_log_metrics`→`insert_log_report` 가 항상 돈다 —
+    이 테스트는 그 사실(소스에 `openai_api_key` 조기 return 패턴이 없음 + 실제로
+    끝까지 실행됨)을 함께 본다.
     """
     import src.engine.log_analysis_engine as lae
 
@@ -366,37 +366,48 @@ def test_c283_c8_2_openai_key_absent_still_returns_early():
         and n.name == "generate_daily_log_report"
     )
     body = [n for n in fn.body if not isinstance(n, ast.Expr)]
-    assert isinstance(body[0], ast.If), "키 검사가 함수 첫 문장이 아니다"
-    assert "openai_api_key" in ast.dump(body[0].test)
+    assert not any(
+        isinstance(n, ast.If) and "openai_api_key" in ast.dump(n.test) for n in body
+    ), "openai_api_key 를 보는 조기 return 이 되살아났다"
+
+    insert = AsyncMock(return_value={"id": "row-1"})
+    with patch.object(lae, "collect_daily_log_metrics",
+                       AsyncMock(return_value={"logs": {}})), \
+            patch.object(lae, "insert_log_report", insert), \
+            patch.object(lae, "reset_request_metrics", MagicMock()):
+        row = await lae.generate_daily_log_report()
+
+    assert row is not None, "openai_api_key 설정과 무관하게 metrics 저장이 끝까지 돈다"
+    assert insert.await_count == 1
 
 
 @pytest.mark.asyncio
 async def test_c283_c8_3_settlement_overwrites_the_snapshot_row():
-    """C8 + C9 — 21:30 완전판은 1차 행을 **덮어쓴다**(같은 `target_date`).
+    """C8 + C9 — 21:30 완전판(지표 최종 집계)은 1차 행을 **덮어쓴다**(같은 `target_date`).
 
     upsert 이전에는 `insert_log_report` 가 UNIQUE 충돌로 `None` 을 반환하고
     `log_analysis_engine.py` 가 `if row:` 뿐이라 **조용히 끝났다** — 그날 `metrics`
-    JSONB 가 통째로 유실된다(OpenAI 텍스트만이 아니다).
+    JSONB 가 통째로 유실된다. cycle445 이후 `summary`/`model` 은 항상 빈 값이고
+    OpenAI 가 채우던 자리는 이제 없다 — 덮어쓰기 자체는 `metrics` 인자로 확인한다.
     """
     import src.engine.log_analysis_engine as lae
 
-    insert = AsyncMock(return_value={"id": "row-1", "summary": "완전판"})
-    with patch.object(lae.settings, "openai_api_key", "sk-test"), \
-            patch.object(lae, "collect_daily_log_metrics",
-                         AsyncMock(return_value={"logs": {"total_logs": 100}})), \
+    insert = AsyncMock(return_value={"id": "row-1"})
+    with patch.object(lae, "collect_daily_log_metrics",
+                       AsyncMock(return_value={"logs": {"total_logs": 100}})), \
             patch.object(lae, "insert_log_report", insert), \
-            patch.object(lae, "reset_request_metrics", MagicMock()), \
-            patch.object(lae, "_call_openai",
-                         AsyncMock(return_value=({"summary": "완전판", "findings": []},
-                                                 lae._OpenAIMeta()))):
+            patch.object(lae, "reset_request_metrics", MagicMock()):
         row = await lae.generate_daily_log_report()
 
     assert row is not None, (
         "완전판 저장이 None 을 돌려준다 — upsert 이후 정상 경로에서 None 은 없어야 한다"
     )
     kw = insert.await_args.kwargs
-    assert kw["summary"], "완전판은 summary 를 채운다(1차 행을 덮어쓰는 증거)"
-    assert kw["model"], "완전판은 model 을 채운다"
+    assert kw["metrics"]["logs"]["total_logs"] == 100, (
+        "완전판은 그 시점의 metrics 를 그대로 넘긴다(1차 행을 덮어쓰는 증거)"
+    )
+    assert kw["summary"] == "", "cycle445 이후 summary 는 항상 빈 값이다"
+    assert kw["model"] is None, "cycle445 이후 model 은 항상 None 이다"
 
 
 def test_c283_c8_4_not_saved_branch_rings_a_bell():

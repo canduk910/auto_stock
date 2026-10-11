@@ -806,6 +806,25 @@ class BullFlagBreakoutStrategy(StrategyBase):
     def get_scan_stats(self) -> dict:
         return dict(self._scan_stats)
 
+    def llm_context(self, ticker: str) -> dict:
+        """AI 매수평가 핵심값(cycle445 B) — `_candidates` 의 폴·플래그 측정값을 읽기만 한다.
+
+        `flag_high`(돌파선)는 이미 `_BREAKOUT_LINE_KEYS` 로 실린다. 여기서는
+        폴 시작·고점·플래그 평균거래량만 더한다(측정된 이동 목표의 입력값).
+        """
+        try:
+            info = self._candidates.get(ticker)
+            if not isinstance(info, dict):
+                return {}
+            out: dict = {}
+            for key in ("atr14", "pole_high", "pole_start", "flag_avg_volume"):
+                v = info.get(key)
+                if v is not None:
+                    out[key] = v
+            return out
+        except Exception:
+            return {}
+
     def get_targets_status(self) -> dict[str, dict]:
         """대시보드 후보 그리드용 — "왜 안 사는가" 진단 필드 포함 (P3a, 2026-08-06).
 

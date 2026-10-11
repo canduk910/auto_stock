@@ -141,6 +141,25 @@ class Ndx2xRiskoffStrategy(StrategyBase):
         건드리지 않게 한다. 매수 평가 구동은 `scheduler._ndx2x_poll_loop` 전용."""
         return []
 
+    def llm_context(self, ticker: str) -> dict:
+        """AI 매수평가 핵심값(cycle445 B) — 일일 결정(`DailyDecision`)을 읽기만 한다."""
+        try:
+            decision = self._decision
+            if decision is None:
+                return {}
+            out: dict = {}
+            if decision.t7 is not None:
+                out["t7"] = decision.t7
+            if decision.r4 is not None:
+                out["r4"] = decision.r4
+            if decision.cell is not None:
+                out["cell"] = decision.cell
+            if decision.desired_state is not None:
+                out["desired_state"] = str(decision.desired_state)
+            return out
+        except Exception:
+            return {}
+
     def check_buy_signal(self, ticker: str, current_price: int, open_price: int) -> Signal:
         """09:30~10:30 KST, 상태가 "2x" 로 바뀌었고 보유가 없을 때만 1회."""
         if self._account_soft_gate_blocked(ticker):

@@ -1830,6 +1830,19 @@ class StrategyBase(ABC):
         except Exception:
             trace_observer_failure("[shadow_buy]", ticker, self._shadow_logged)
 
+    def llm_context(self, ticker: str) -> dict:
+        """AI 매수평가 입력에 실리는 전략별 핵심값(cycle445 B, 사용자 결정 2026-10-11).
+
+        기본은 빈 dict — 전략이 재정의하지 않으면 추가 핵심값이 없다는 뜻이다.
+        순수 메모리 조회만 허용한다(`await`·DB·HTTP 0, never-raise — 전략 쪽에서도
+        예외를 흡수해 빈 dict 를 돌려준다). 반환값은 전부 JSON 직렬화 가능한
+        원시값(str/int/float/bool/None)이어야 한다. UI·`_candidates`·`buy_signals`
+        에는 노출되지 않는 별도 경로다 — 기존에 전략이 이미 들고 있는 값을 읽기만
+        해서, cycle349 의 "`_candidates` 에 새 키를 추가하지 않는다" 결정과
+        충돌하지 않는다.
+        """
+        return {}
+
     def _emit_budget_clamp(
         self, ticker: str | None, requested: int, clamped: int, remaining: int,
     ) -> None:

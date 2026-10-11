@@ -1578,6 +1578,27 @@ class DonchianSwingStrategy(StrategyBase):
         """단계별 스캔/탈락 통계 — 프론트 깔때기 시각화용."""
         return dict(self._scan_stats)
 
+    def llm_context(self, ticker: str) -> dict:
+        """AI 매수평가 핵심값(cycle445 B) — `_candidates` 의 ATR·EMA60 을 읽기만 한다.
+
+        돌파선(`donchian_high`)은 이미 `_BREAKOUT_LINE_KEYS` 로 실린다. 여기서는
+        그 외의 핵심값만 더한다.
+        """
+        try:
+            info = self._candidates.get(ticker)
+            if not isinstance(info, dict):
+                return {}
+            out: dict = {}
+            atr = info.get("atr")
+            if atr is not None:
+                out["atr"] = atr
+            ema60 = info.get("ema60")
+            if ema60 is not None:
+                out["ema60"] = ema60
+            return out
+        except Exception:
+            return {}
+
     def get_targets_status(self) -> dict[str, dict]:
         """대시보드 노출용 — Donchian/EMA/ATR 정보."""
         return {

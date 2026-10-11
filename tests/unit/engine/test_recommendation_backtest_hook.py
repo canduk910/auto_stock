@@ -127,6 +127,15 @@ async def test_generate_recommendations_calls_enqueue_after_insert(
     monkeypatch.setattr(rec_mod, "_call_openai", fake_call_openai)
     monkeypatch.setattr(rec_mod, "insert_recommendation", fake_insert_recommendation)
 
+    # cycle445 D8 — 2026-05-16 은 토요일(주간 자문일 아님)이라 게이트가 막는다.
+    # 이 테스트는 백테스트 enqueue 배선을 재는 것이라 요일 게이트는 항상 통과시킨다.
+    from src.engine import weekly_advisory as wa_mod
+
+    async def fake_should_run(now):
+        return {"run": True, "weekday_code": "thu", "configured_valid": False}
+
+    monkeypatch.setattr(wa_mod, "should_run_weekly_advisory", fake_should_run)
+
     # ---- _enqueue_backtest_jobs 추적 ----
     calls: list[dict] = []
 

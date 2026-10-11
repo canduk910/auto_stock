@@ -34,6 +34,7 @@ from __future__ import annotations
 import hashlib
 import importlib
 import json
+import re
 from datetime import datetime, timedelta, timezone
 
 import pytest
@@ -552,7 +553,10 @@ def test_g1_10a_prompt_version_takes_strategy_id_and_differs_per_strategy() -> N
     gate = _gate()
     versions = {sid: gate._prompt_version(sid) for sid in _strategy_ids()}
     for sid, v in versions.items():
-        assert isinstance(v, str) and len(v) == 12, f"{sid}: prompt_version={v!r}"
+        # cycle445 D7 — `<model>|<12자리 hex>` 형식(모델명이 키 앞에 붙는다).
+        assert isinstance(v, str) and re.fullmatch(r"[^|]+\|[0-9a-f]{12}", v), (
+            f"{sid}: prompt_version={v!r}"
+        )
     assert len(set(versions.values())) == len(versions), (
         f"전략별로 갈리지 않는다 — {versions}"
     )

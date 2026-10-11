@@ -1030,6 +1030,29 @@ class VcpBreakoutStrategy(StrategyBase):
     def get_scan_stats(self) -> dict:
         return dict(self._scan_stats)
 
+    def llm_context(self, ticker: str) -> dict:
+        """AI 매수평가 핵심값(cycle445 B) — `_candidates` 의 베이스·EMA·거래량 값을 읽기만 한다.
+
+        `base_high`(돌파선)는 이미 `_BREAKOUT_LINE_KEYS` 로 실린다. cycle349 §4.6
+        제안4(보류)가 막혔던 "golden 고정 테스트 재생성" 문제를 이 별도 메서드로
+        우회한다 — `buy_signals`/`_candidates` 는 그대로 두고 여기서만 더 읽는다.
+        """
+        try:
+            info = self._candidates.get(ticker)
+            if not isinstance(info, dict):
+                return {}
+            out: dict = {}
+            for key in (
+                "atr14", "ema50", "ema150", "ema200", "avg_volume_20",
+                "base_low", "last_pullback_pct",
+            ):
+                v = info.get(key)
+                if v is not None:
+                    out[key] = v
+            return out
+        except Exception:
+            return {}
+
     def get_targets_status(self) -> dict[str, dict]:
         """대시보드 후보 그리드용 — "왜 안 사는가" 진단 필드 포함 (P3a, 2026-08-06).
 

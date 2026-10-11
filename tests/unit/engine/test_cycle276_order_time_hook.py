@@ -1500,10 +1500,14 @@ def test_c30_2_prompt_and_feature_version_are_12_hex():
 
     🔁 cycle297 — `_prompt_version` 이 `strategy_id` 인자를 받는 **전략별** 함수로
     바뀌었다(명세 §3.4). `_feature_version` 은 무인자 그대로다.
+    🔁 cycle445 D7 — `_prompt_version` 이 `<model>|<12자리 hex>` 형식으로 모델명을
+    키에 포함한다(모델 교체가 같은 해시로 섞이는 것을 막는다). `_feature_version` 은
+    모델과 무관해 그대로 12자리 hex 단독이다.
     """
     mod = _g()
-    assert re.fullmatch(r"[0-9a-f]{12}", mod._prompt_version(_VB)), (
-        f"_prompt_version({_VB!r}) 이 12자리 hex 가 아니다"
+    pv = mod._prompt_version(_VB)
+    assert re.fullmatch(r"[^|]+\|[0-9a-f]{12}", pv), (
+        f"_prompt_version({_VB!r}) = {pv!r} 이 `<model>|<12자리 hex>` 형식이 아니다"
     )
     fv = getattr(mod, "_feature_version", None)
     assert fv is not None, "`_feature_version` 이 없다(Red)"
@@ -1528,7 +1532,7 @@ def test_c30_2b_prompt_version_covers_snapshot_schema(monkeypatch):
     # seam 이다(`reset_llm_buy_gate_state` 는 래치·cap·일봉 캐시만 건드린다).
     monkeypatch.setattr(mod, "_prompt_version_cache", {})
     base = mod._prompt_version(_VB)
-    assert re.fullmatch(r"[0-9a-f]{12}", base), f"prompt_version={base!r}"
+    assert re.fullmatch(r"[^|]+\|[0-9a-f]{12}", base), f"prompt_version={base!r}"
 
     monkeypatch.setattr(lf, "_SNAPSHOT_KEYS", tuple(lf._SNAPSHOT_KEYS) + ("extra_key",))
     monkeypatch.setattr(mod, "_prompt_version_cache", {})
@@ -1537,7 +1541,7 @@ def test_c30_2b_prompt_version_covers_snapshot_schema(monkeypatch):
     assert changed != base, (
         "스냅샷 키를 바꿨는데 prompt_version 이 그대로다 — payload 스키마가 버전에서 빠졌다"
     )
-    assert re.fullmatch(r"[0-9a-f]{12}", changed)
+    assert re.fullmatch(r"[^|]+\|[0-9a-f]{12}", changed)
 
 
 def test_c30_2c_payload_schema_version_literal_is_current_cycle() -> None:
@@ -1586,7 +1590,9 @@ async def test_c30_4_versions_are_persisted_on_success(monkeypatch):
     await _drain()
 
     assert calls, "upsert 가 호출되지 않았다(Red)"
-    assert re.fullmatch(r"[0-9a-f]{12}", calls[0]["prompt_version"] or "")
+    # cycle445 D7 — prompt_version 은 `<model>|<12자리 hex>`, feature_version 은 모델과
+    # 무관해 그대로 12자리 hex 단독이다.
+    assert re.fullmatch(r"[^|]+\|[0-9a-f]{12}", calls[0]["prompt_version"] or "")
     assert re.fullmatch(r"[0-9a-f]{12}", calls[0]["feature_version"] or "")
 
 
