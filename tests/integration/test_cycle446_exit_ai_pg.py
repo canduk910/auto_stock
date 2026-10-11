@@ -20,6 +20,7 @@
 from __future__ import annotations
 
 import re
+import secrets
 from datetime import date
 from pathlib import Path
 from urllib.parse import urlsplit, urlunsplit
@@ -31,7 +32,8 @@ pytestmark = [pytest.mark.integration, pytest.mark.slow]
 _ROOT = Path(__file__).resolve().parents[2]
 _MIG = _ROOT / "supabase" / "migrations" / "050_exit_ai_evaluations.sql"
 _ROLE = _ROOT / "llm_worker" / "ops" / "role.sql"
-_PW = "cycle446-test-pw"
+# 일회용 시험 DB 역할 비밀번호 — 실행마다 새로 만든다(고정 문자열은 비밀 탐지기 오탐을 부른다).
+_PW = secrets.token_hex(16)
 _TABLES = ("exit_ai_evaluations", "exit_ai_runs")
 
 

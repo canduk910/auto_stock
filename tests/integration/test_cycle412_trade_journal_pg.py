@@ -22,6 +22,7 @@
 from __future__ import annotations
 
 import re
+import secrets
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import urlsplit, urlunsplit
@@ -34,7 +35,8 @@ KST = timezone(timedelta(hours=9))
 _ROOT = Path(__file__).resolve().parents[2]
 _MIG = _ROOT / "supabase" / "migrations" / "047_trade_journal.sql"
 _ROLE = _ROOT / "journal_worker" / "ops" / "role.sql"
-_PW = "cycle412-test-pw"
+# 일회용 시험 DB 역할 비밀번호 — 실행마다 새로 만든다(고정 문자열은 비밀 탐지기 오탐을 부른다).
+_PW = secrets.token_hex(16)
 _TABLES = ("trade_journal_orders", "trade_journal_stops", "trade_journal_notes", "trade_journal_cursor")
 
 
