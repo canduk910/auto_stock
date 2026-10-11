@@ -88,6 +88,8 @@ def _run_and_read(cmd: list[str]) -> list[str]:
         backup.unlink(missing_ok=True)
 
 
+# 실제 인덱스 생성 도구를 돌린다 — 로컬 약 14초, CI 러너에서 60초를 넘긴 적이 있다(10-10·10-11).
+@pytest.mark.timeout(300)
 def test_backend_tool_keeps_frontend_entries() -> None:
     """백엔드 도구를 돌려도 프론트 미매핑이 남는가 — 결함이 났던 바로 그 방향."""
     after = _run_and_read(["python", str(BACKEND_TOOL)])
@@ -96,6 +98,8 @@ def test_backend_tool_keeps_frontend_entries() -> None:
     )
 
 
+# 실제 인덱스 생성 도구를 돌린다 — 로컬 약 14초, CI 러너에서 60초를 넘긴 적이 있다(10-10·10-11).
+@pytest.mark.timeout(300)
 def test_frontend_tool_keeps_backend_entries_without_duplicating() -> None:
     """프론트 도구를 돌려도 백엔드 미매핑이 남고, 자기 항목을 중복시키지 않는가."""
     if not (ROOT / "frontend/node_modules/js-yaml").exists():
