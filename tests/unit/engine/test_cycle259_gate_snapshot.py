@@ -134,7 +134,8 @@ def snapshot_deps(monkeypatch):
     monkeypatch.setattr(sector_mod, "resolve_sector_names", _fake_resolve)
     monkeypatch.setattr(trading_scheduler, "registry", fake_registry)
     # 라우트 경로 (모듈 레벨 import — 라우트 네임스페이스를 갈아끼운다)
-    monkeypatch.setattr(portfolio_mod, "get_balance", _fake_get_balance)
+    # cycle447 — 라우트는 20초 공유 캐시(`get_balance_cached`)를 import 한다.
+    monkeypatch.setattr(portfolio_mod, "get_balance_cached", _fake_get_balance)
     monkeypatch.setattr(portfolio_mod, "resolve_sector_names", _fake_resolve)
     monkeypatch.setattr(portfolio_mod, "trading_scheduler", SimpleNamespace(registry=fake_registry))
     yield
