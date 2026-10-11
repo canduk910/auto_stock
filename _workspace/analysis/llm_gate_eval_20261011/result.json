@@ -1,0 +1,1802 @@
+{
+ "prereg": {
+  "path": "_workspace/analysis/llm_gate_eval_20261011/prereg.frozen.md",
+  "sha256": "03d0f3339c4cb483d58527e1c8e544ee314b720c64e258c71fdb3942a4d4a2bc",
+  "frozen_at_kst": "2026-10-11 16:36"
+ },
+ "data_pulled_kst": "2026-10-11 ~16:40",
+ "source": "EC2 prod RDS read-only — get_trade_pairs() + llm_retrospective.join_pairs_with_evaluations",
+ "population": {
+  "llm_rows_total": 80,
+  "llm_rows_ok": 79,
+  "llm_rows_failed": {
+   "no_bars": 1
+  },
+  "eval_kind": {
+   "order": 80
+  },
+  "mode": {
+   "shadow": 80
+  },
+  "dup_trade_date_order_no": 0,
+  "evaluated_orders_status": {
+   "COMPLETED": 80
+  },
+  "min_score_values": [
+   70
+  ],
+  "closed_pairs_buy_since_2026_09_14": 76,
+  "S_scored_closed": 70,
+  "closed_failed_eval": 1,
+  "closed_no_eval": 5,
+  "open_pairs_with_eval": 9,
+  "S_buy_range": [
+   "2026-09-14",
+   "2026-10-07"
+  ],
+  "S_sell_range": [
+   "2026-09-14",
+   "2026-10-08"
+  ],
+  "S_by_strategy": {
+   "volatility_breakout": 21,
+   "long_tail_volatility": 17,
+   "momentum": 15,
+   "bull_flag_breakout": 11,
+   "kojiro": 3,
+   "donchian_swing": 2,
+   "vcp_breakout": 1
+  },
+  "S_by_model": {
+   "gpt-5.6-luna": 61,
+   "gpt-6-luna": 9
+  }
+ },
+ "overall": {
+  "n": 70,
+  "rho": -0.12160381543718429,
+  "rho_ci": [
+   -0.37379347979510164,
+   0.13796114021028028
+  ],
+  "perm_p_one_sided": 0.8397160283971603,
+  "auc": 0.4827968923418424,
+  "auc_ci": [
+   0.3103570046439629,
+   0.659921052631579
+  ],
+  "median_score": 45.0,
+  "n_hi": 42,
+  "n_lo": 28,
+  "hi_mean_rnet": -2.001152380952381,
+  "lo_mean_rnet": -1.3862785714285715,
+  "diff_mean_rnet": -0.6148738095238095,
+  "diff_ci": [
+   -2.7988223722335275,
+   1.7738324056579495
+  ],
+  "hi_win": 0.23809523809523808,
+  "lo_win": 0.25,
+  "win_diff_ci": [
+   -0.2246376811594203,
+   0.19638687313105915
+  ],
+  "mean_r": -1.505202857142857,
+  "median_r": -1.758,
+  "win_rate": 0.24285714285714285,
+  "pnl_sum": -90320.0,
+  "score_min": 28,
+  "score_max": 68,
+  "mdr_80": 0.30383540811413107,
+  "verdict": "의미 없음"
+ },
+ "buckets": [
+  {
+   "bucket": "1-40",
+   "n": 7,
+   "mean_r": -2.304785714285714,
+   "median_r": -0.8934,
+   "win_rate": 0.2857142857142857,
+   "pnl_sum": -12050.0
+  },
+  {
+   "bucket": "41-50",
+   "n": 46,
+   "mean_r": -1.4026565217391305,
+   "median_r": -1.5964,
+   "win_rate": 0.2391304347826087,
+   "pnl_sum": -65335.0
+  },
+  {
+   "bucket": "51-60",
+   "n": 13,
+   "mean_r": -3.0949999999999998,
+   "median_r": -5.0,
+   "win_rate": 0.15384615384615385,
+   "pnl_sum": -34095.0
+  },
+  {
+   "bucket": "61-100",
+   "n": 4,
+   "mean_r": 3.881625,
+   "median_r": -2.1174500000000003,
+   "win_rate": 0.5,
+   "pnl_sum": 21160.0
+  }
+ ],
+ "counterfactual": {
+  "actual_pnl": -90320.0,
+  "actual_mean_rnet": -1.755202857142857,
+  "thresholds": [
+   {
+    "T": 70,
+    "n_pass": 0,
+    "n_block": 70,
+    "pass_pnl": 0,
+    "block_pnl": -90320.0,
+    "delta_vs_actual": 90320.0,
+    "pass_mean_rnet": null,
+    "pass_win": null
+   },
+   {
+    "T": 60,
+    "n_pass": 8,
+    "n_block": 62,
+    "pass_pnl": 13610.0,
+    "block_pnl": -103930.0,
+    "delta_vs_actual": 103930.0,
+    "pass_mean_rnet": 1.5329625,
+    "pass_win": 0.5
+   },
+   {
+    "T": 55,
+    "n_pass": 14,
+    "n_block": 56,
+    "pass_pnl": -6745.0,
+    "block_pnl": -83575.0,
+    "delta_vs_actual": 83575.0,
+    "pass_mean_rnet": -0.9400285714285713,
+    "pass_win": 0.2857142857142857
+   },
+   {
+    "T": 50,
+    "n_pass": 17,
+    "n_block": 53,
+    "pass_pnl": -12935.0,
+    "block_pnl": -77385.0,
+    "delta_vs_actual": 77385.0,
+    "pass_mean_rnet": -1.7034411764705886,
+    "pass_win": 0.23529411764705882
+   },
+   {
+    "T": 45,
+    "n_pass": 42,
+    "n_block": 28,
+    "pass_pnl": -75865.0,
+    "block_pnl": -14455.0,
+    "delta_vs_actual": 14455.0,
+    "pass_mean_rnet": -2.001152380952381,
+    "pass_win": 0.23809523809523808
+   }
+  ]
+ },
+ "current_model_gpt6": {
+  "n": 9,
+  "rho": 0.3193390065900868,
+  "rho_ci": [
+   -0.47676953399635663,
+   0.9266055045871558
+  ],
+  "perm_p_one_sided": 0.19858014198580143,
+  "auc": 0.6875,
+  "auc_ci": [
+   0.375,
+   1.0
+  ],
+  "median_score": 45.0,
+  "n_hi": 5,
+  "n_lo": 4,
+  "hi_mean_rnet": -2.2017800000000003,
+  "lo_mean_rnet": -5.8037,
+  "diff_mean_rnet": 3.60192,
+  "diff_ci": [
+   -1.4777937500000005,
+   8.7673225
+  ],
+  "hi_win": 0.2,
+  "lo_win": 0.0,
+  "win_diff_ci": [
+   0.0,
+   0.6666666666666666
+  ],
+  "mean_r": -3.5526333333333335,
+  "median_r": -5.0943,
+  "win_rate": 0.1111111111111111,
+  "pnl_sum": -21670.0,
+  "score_min": 39,
+  "score_max": 55,
+  "mdr_80": 1.0153134983836274,
+  "verdict": "판단 불가"
+ },
+ "by_model": {
+  "gpt-5.6-luna": {
+   "n": 61,
+   "rho": -0.23381445848762722,
+   "rho_ci": [
+    -0.4885889737201867,
+    0.050013442064426476
+   ],
+   "perm_p_one_sided": 0.9651034896510349,
+   "auc": 0.46111111111111114,
+   "auc_ci": [
+    0.28122855392156865,
+    0.6512158054711246
+   ],
+   "median_score": 45.0,
+   "n_hi": 37,
+   "n_lo": 24,
+   "hi_mean_rnet": -1.9740405405405406,
+   "lo_mean_rnet": -0.6500416666666667,
+   "diff_mean_rnet": -1.3239988738738737,
+   "diff_ci": [
+    -3.6750678367364893,
+    1.2475879817331743
+   ],
+   "hi_win": 0.24324324324324326,
+   "lo_win": 0.2916666666666667,
+   "win_diff_ci": [
+    -0.2816554138534633,
+    0.18303805358350192
+   ],
+   "mean_r": -1.2031229508196721,
+   "median_r": -1.6484,
+   "win_rate": 0.26229508196721313,
+   "pnl_sum": -68650.0,
+   "score_min": 28,
+   "score_max": 68,
+   "mdr_80": 0.32655909852213
+  },
+  "gpt-6-luna": {
+   "n": 9,
+   "rho": 0.3193390065900868,
+   "rho_ci": [
+    -0.47676953399635663,
+    0.9266055045871558
+   ],
+   "perm_p_one_sided": 0.19858014198580143,
+   "auc": 0.6875,
+   "auc_ci": [
+    0.375,
+    1.0
+   ],
+   "median_score": 45.0,
+   "n_hi": 5,
+   "n_lo": 4,
+   "hi_mean_rnet": -2.2017800000000003,
+   "lo_mean_rnet": -5.8037,
+   "diff_mean_rnet": 3.60192,
+   "diff_ci": [
+    -1.4777937500000005,
+    8.7673225
+   ],
+   "hi_win": 0.2,
+   "lo_win": 0.0,
+   "win_diff_ci": [
+    0.0,
+    0.6666666666666666
+   ],
+   "mean_r": -3.5526333333333335,
+   "median_r": -5.0943,
+   "win_rate": 0.1111111111111111,
+   "pnl_sum": -21670.0,
+   "score_min": 39,
+   "score_max": 55,
+   "mdr_80": 1.0153134983836274
+  }
+ },
+ "by_strategy": {
+  "bull_flag_breakout": {
+   "n": 11,
+   "rho": 0.08257228238447704,
+   "rho_ci": [
+    -0.6738428140572656,
+    0.6925463503768745
+   ],
+   "mean_r": -0.24819090909090935,
+   "win_rate": 0.2727272727272727,
+   "pnl_sum": -9310.0,
+   "score_min": 40,
+   "score_max": 68,
+   "buckets": [
+    {
+     "bucket": "1-40",
+     "n": 1,
+     "mean_r": -7.0702,
+     "median_r": -7.0702,
+     "win_rate": 0.0,
+     "pnl_sum": -4380.0
+    },
+    {
+     "bucket": "41-50",
+     "n": 6,
+     "mean_r": -0.39265000000000017,
+     "median_r": -3.1497,
+     "win_rate": 0.3333333333333333,
+     "pnl_sum": -6540.0
+    },
+    {
+     "bucket": "51-60",
+     "n": 2,
+     "mean_r": -6.5327,
+     "median_r": -6.5327,
+     "win_rate": 0.0,
+     "pnl_sum": -21550.0
+    },
+    {
+     "bucket": "61-100",
+     "n": 2,
+     "mean_r": 9.880700000000001,
+     "median_r": 9.880700000000001,
+     "win_rate": 0.5,
+     "pnl_sum": 23160.0
+    }
+   ]
+  },
+  "donchian_swing": {
+   "n": 2,
+   "rho": null,
+   "rho_ci": null,
+   "mean_r": null,
+   "win_rate": null,
+   "pnl_sum": null,
+   "score_min": null,
+   "score_max": null,
+   "buckets": [
+    {
+     "bucket": "1-40",
+     "n": 1,
+     "mean_r": -0.3297,
+     "median_r": -0.3297,
+     "win_rate": 0.0,
+     "pnl_sum": -300.0
+    },
+    {
+     "bucket": "41-50",
+     "n": 1,
+     "mean_r": -3.3333,
+     "median_r": -3.3333,
+     "win_rate": 0.0,
+     "pnl_sum": -7000.0
+    },
+    {
+     "bucket": "51-60",
+     "n": 0
+    },
+    {
+     "bucket": "61-100",
+     "n": 0
+    }
+   ]
+  },
+  "kojiro": {
+   "n": 3,
+   "rho": -0.8660254037844387,
+   "rho_ci": [
+    -1.0,
+    -0.8660254037844387
+   ],
+   "mean_r": -5.6128333333333345,
+   "win_rate": 0.0,
+   "pnl_sum": -27550.0,
+   "score_min": 47,
+   "score_max": 48,
+   "buckets": [
+    {
+     "bucket": "1-40",
+     "n": 0
+    },
+    {
+     "bucket": "41-50",
+     "n": 3,
+     "mean_r": -5.6128333333333345,
+     "median_r": -8.2298,
+     "win_rate": 0.0,
+     "pnl_sum": -27550.0
+    },
+    {
+     "bucket": "51-60",
+     "n": 0
+    },
+    {
+     "bucket": "61-100",
+     "n": 0
+    }
+   ]
+  },
+  "long_tail_volatility": {
+   "n": 17,
+   "rho": -0.42505281915293713,
+   "rho_ci": [
+    -0.8630808753942726,
+    0.1550975678316224
+   ],
+   "mean_r": -2.269447058823529,
+   "win_rate": 0.23529411764705882,
+   "pnl_sum": -21320.0,
+   "score_min": 36,
+   "score_max": 58,
+   "buckets": [
+    {
+     "bucket": "1-40",
+     "n": 2,
+     "mean_r": -0.18500000000000005,
+     "median_r": -0.18500000000000005,
+     "win_rate": 0.5,
+     "pnl_sum": -250.0
+    },
+    {
+     "bucket": "41-50",
+     "n": 12,
+     "mean_r": -1.8838583333333332,
+     "median_r": -1.9889,
+     "win_rate": 0.25,
+     "pnl_sum": -15145.0
+    },
+    {
+     "bucket": "51-60",
+     "n": 3,
+     "mean_r": -5.201433333333333,
+     "median_r": -5.1845,
+     "win_rate": 0.0,
+     "pnl_sum": -5925.0
+    },
+    {
+     "bucket": "61-100",
+     "n": 0
+    }
+   ]
+  },
+  "momentum": {
+   "n": 15,
+   "rho": 0.1487464751670257,
+   "rho_ci": [
+    -0.3826962015635097,
+    0.655716291181222
+   ],
+   "mean_r": -1.3233000000000001,
+   "win_rate": 0.3333333333333333,
+   "pnl_sum": -9690.0,
+   "score_min": 44,
+   "score_max": 63,
+   "buckets": [
+    {
+     "bucket": "1-40",
+     "n": 0
+    },
+    {
+     "bucket": "41-50",
+     "n": 8,
+     "mean_r": -1.1616874999999998,
+     "median_r": -3.5206999999999997,
+     "win_rate": 0.25,
+     "pnl_sum": -4950.0
+    },
+    {
+     "bucket": "51-60",
+     "n": 5,
+     "mean_r": -1.2642200000000003,
+     "median_r": -1.4085,
+     "win_rate": 0.4,
+     "pnl_sum": -2740.0
+    },
+    {
+     "bucket": "61-100",
+     "n": 2,
+     "mean_r": -2.1174500000000003,
+     "median_r": -2.1174500000000003,
+     "win_rate": 0.5,
+     "pnl_sum": -2000.0
+    }
+   ]
+  },
+  "vcp_breakout": {
+   "n": 1,
+   "rho": null,
+   "rho_ci": null,
+   "mean_r": null,
+   "win_rate": null,
+   "pnl_sum": null,
+   "score_min": null,
+   "score_max": null,
+   "buckets": [
+    {
+     "bucket": "1-40",
+     "n": 1,
+     "mean_r": -9.1569,
+     "median_r": -9.1569,
+     "win_rate": 0.0,
+     "pnl_sum": -8200.0
+    },
+    {
+     "bucket": "41-50",
+     "n": 0
+    },
+    {
+     "bucket": "51-60",
+     "n": 0
+    },
+    {
+     "bucket": "61-100",
+     "n": 0
+    }
+   ]
+  },
+  "volatility_breakout": {
+   "n": 21,
+   "rho": -0.12932900272501863,
+   "rho_ci": [
+    -0.5270118004068421,
+    0.3462442693258384
+   ],
+   "mean_r": -0.692647619047619,
+   "win_rate": 0.23809523809523808,
+   "pnl_sum": -6950.0,
+   "score_min": 36,
+   "score_max": 60,
+   "buckets": [
+    {
+     "bucket": "1-40",
+     "n": 2,
+     "mean_r": 0.39665000000000006,
+     "median_r": 0.39665000000000006,
+     "win_rate": 0.5,
+     "pnl_sum": 1080.0
+    },
+    {
+     "bucket": "41-50",
+     "n": 16,
+     "mean_r": -0.63091875,
+     "median_r": -0.8987999999999999,
+     "win_rate": 0.25,
+     "pnl_sum": -4150.0
+    },
+    {
+     "bucket": "51-60",
+     "n": 3,
+     "mean_r": -1.7480666666666667,
+     "median_r": -0.2442,
+     "win_rate": 0.0,
+     "pnl_sum": -3880.0
+    },
+    {
+     "bucket": "61-100",
+     "n": 0
+    }
+   ]
+  }
+ },
+ "by_prompt_version": {
+  "gpt-5.6-luna|2d1303f75c96": {
+   "n": 11,
+   "rho": 0.022831288248861156,
+   "mean_r": -1.1945818181818186,
+   "pnl_sum": -7960.0
+  },
+  "gpt-5.6-luna|4162dc5fcea0": {
+   "n": 7,
+   "rho": -0.1454785934906616,
+   "mean_r": -3.1589142857142853,
+   "pnl_sum": -8210.0
+  },
+  "gpt-5.6-luna|77b27be33ac1": {
+   "n": 9,
+   "rho": -0.2881769890388444,
+   "mean_r": 1.2743555555555552,
+   "pnl_sum": 1730.0
+  },
+  "gpt-5.6-luna|7a9c45983c0d": {
+   "n": 12,
+   "rho": -0.7160772254706663,
+   "mean_r": -1.3691583333333333,
+   "pnl_sum": -13510.0
+  },
+  "gpt-5.6-luna|9c45283a49c1": {
+   "n": 17,
+   "rho": -0.011132085183514509,
+   "mean_r": -0.7456176470588235,
+   "pnl_sum": -5850.0
+  },
+  "gpt-5.6-luna|bea23800d8d2": {
+   "n": 2,
+   "rho": null,
+   "mean_r": null,
+   "pnl_sum": null
+  },
+  "gpt-5.6-luna|fcb24e7adc9b": {
+   "n": 3,
+   "rho": -0.8660254037844387,
+   "mean_r": -5.6128333333333345,
+   "pnl_sum": -27550.0
+  },
+  "gpt-6-luna|2d1303f75c96": {
+   "n": 4,
+   "rho": 0.6000000000000001,
+   "mean_r": -1.6772749999999998,
+   "pnl_sum": -1730.0
+  },
+  "gpt-6-luna|77b27be33ac1": {
+   "n": 2,
+   "rho": null,
+   "mean_r": null,
+   "pnl_sum": null
+  },
+  "gpt-6-luna|86b17bedc7b9": {
+   "n": 1,
+   "rho": null,
+   "mean_r": null,
+   "pnl_sum": null
+  },
+  "gpt-6-luna|9c45283a49c1": {
+   "n": 2,
+   "rho": null,
+   "mean_r": null,
+   "pnl_sum": null
+  }
+ },
+ "power": {
+  "mdr_rho_80pct_n70": 0.30383540811413107,
+  "n_needed": {
+   "0.2": 154,
+   "0.3": 68,
+   "0.4": 38
+  }
+ },
+ "sensitivity": {
+  "rho_ci_other_seeds": [
+   [
+    -0.373,
+    0.14
+   ],
+   [
+    -0.369,
+    0.137
+   ],
+   [
+    -0.375,
+    0.131
+   ],
+   [
+    -0.375,
+    0.138
+   ]
+  ],
+  "fisher_ci": [
+   -0.359,
+   0.131
+  ],
+  "pearson": 0.06437771166077387,
+  "kendall": -0.1001149616180361,
+  "spearman_excl_top_bottom_r": -0.2352859694445093,
+  "score_vs_post_order_drift_spearman": -0.00592541179710627
+ },
+ "exploratory_not_preregistered": {
+  "exit_reason_in_S": {
+   "n_with_reason": 64,
+   "FORCE_CLEAR": {
+    "n": 25,
+    "mean_r": 0.12
+   },
+   "STOP_LOSS": {
+    "n": 22,
+    "mean_r": -5.68
+   },
+   "NEXT_DAY_CLEAR": {
+    "n": 11,
+    "mean_r": 0.06
+   },
+   "TIME_EXIT": {
+    "n": 5,
+    "mean_r": 2.27
+   },
+   "TAKE_PROFIT": {
+    "n": 1,
+    "mean_r": 24.97
+   },
+   "unknown": {
+    "n": 6,
+    "mean_r": -3.37
+   }
+  },
+  "score_vs_stopout": {
+   "mean_score_stopped": 50.27,
+   "mean_score_not": 46.57,
+   "auc_higher_score_not_stopped": 0.339
+  },
+  "T60_random_keep8_p": 0.079,
+  "T60_pass_pnl_excl_232140": -16150
+ },
+ "cost_latency": {
+  "calls": 80,
+  "cost_usd_est_total": 0.4513,
+  "by_model": {
+   "gpt-5.6-luna": {
+    "n": 69,
+    "tokens_in": 190452,
+    "tokens_out": 42000,
+    "cost_usd": 0.4425,
+    "latency_ms_p50": 7502,
+    "p90": 9615,
+    "max": 12212
+   },
+   "gpt-6-luna": {
+    "n": 11,
+    "tokens_in": 31530,
+    "tokens_out": 11300,
+    "cost_usd": 0.0088,
+    "latency_ms_p50": 10398,
+    "p90": 14121,
+    "max": 15967
+   }
+  },
+  "cost_note": "코드 단가표 log_analysis_engine._OPENAI_PRICING 기준 추정 — 청구서와 대조 안 함",
+  "order_delay": "0 — observe_order 는 place_order 성공 뒤 동기·never-raise 로 create_task 만 걸고 반환(llm_buy_gate.py). enforce(선평가)로 바꾸면 7.5~16초 진입 지연"
+ },
+ "verdicts": {
+  "Q1_overall": "의미 없음",
+  "Q1_current_model_gpt6": "판단 불가 (n=9)",
+  "Q2_min_score70": "이 기간에 대해 '이롭다'(+90,320원) — 단 통과 0건, 즉 전면 매수 중지와 같다. AI 분별력이 아니라 표본 전체가 손실이었던 결과"
+ },
+ "exit_ai_recommendation": "넣지 않음(권고). 손절 유예·청산 판단을 AI 에 맡기는 형태는 기각. 꼭 데이터를 원하면 멀티데이 보유분 일 1회 섀도 기록만(행위 0, backend 밖)",
+ "S_rows": [
+  {
+   "score": 46,
+   "r": -7.1291,
+   "pnl": -6660.0,
+   "strategy": "bull_flag_breakout",
+   "ticker": "069540",
+   "name": "빛과전자",
+   "buy": "2026-10-07",
+   "sell": "2026-10-08",
+   "model": "gpt-6-luna",
+   "pv": "77b27be33ac1",
+   "drift": 19.305,
+   "notional": 93240,
+   "board": "main"
+  },
+  {
+   "score": 39,
+   "r": -9.1569,
+   "pnl": -8200.0,
+   "strategy": "vcp_breakout",
+   "ticker": "003350",
+   "name": "한국화장품제조",
+   "buy": "2026-10-07",
+   "sell": "2026-10-08",
+   "model": "gpt-6-luna",
+   "pv": "86b17bedc7b9",
+   "drift": 0.0,
+   "notional": 89550,
+   "board": "main"
+  },
+  {
+   "score": 40,
+   "r": -7.0702,
+   "pnl": -4380.0,
+   "strategy": "bull_flag_breakout",
+   "ticker": "356680",
+   "name": "엑스게이트",
+   "buy": "2026-10-06",
+   "sell": "2026-10-07",
+   "model": "gpt-6-luna",
+   "pv": "77b27be33ac1",
+   "drift": -24.2131,
+   "notional": 61950,
+   "board": "main"
+  },
+  {
+   "score": 55,
+   "r": -1.4085,
+   "pnl": -500.0,
+   "strategy": "momentum",
+   "ticker": "158430",
+   "name": "아톤",
+   "buy": "2026-10-06",
+   "sell": "2026-10-07",
+   "model": "gpt-6-luna",
+   "pv": "2d1303f75c96",
+   "drift": 14.0845,
+   "notional": 35500,
+   "board": "main"
+  },
+  {
+   "score": 46,
+   "r": 5.0204,
+   "pnl": 1480.0,
+   "strategy": "momentum",
+   "ticker": "042510",
+   "name": "라온시큐어",
+   "buy": "2026-10-06",
+   "sell": "2026-10-07",
+   "model": "gpt-6-luna",
+   "pv": "2d1303f75c96",
+   "drift": -33.8295,
+   "notional": 29560,
+   "board": "main"
+  },
+  {
+   "score": 45,
+   "r": -5.2267,
+   "pnl": -1360.0,
+   "strategy": "momentum",
+   "ticker": "047920",
+   "name": "HLB제약",
+   "buy": "2026-10-06",
+   "sell": "2026-10-07",
+   "model": "gpt-6-luna",
+   "pv": "2d1303f75c96",
+   "drift": 15.4799,
+   "notional": 25840,
+   "board": "main"
+  },
+  {
+   "score": 44,
+   "r": -5.0943,
+   "pnl": -1350.0,
+   "strategy": "momentum",
+   "ticker": "263860",
+   "name": "지니언스",
+   "buy": "2026-10-06",
+   "sell": "2026-10-06",
+   "model": "gpt-6-luna",
+   "pv": "2d1303f75c96",
+   "drift": 0.0,
+   "notional": 26500,
+   "board": "main"
+  },
+  {
+   "score": 49,
+   "r": -1.015,
+   "pnl": -380.0,
+   "strategy": "volatility_breakout",
+   "ticker": "010170",
+   "name": "대한광통신",
+   "buy": "2026-10-06",
+   "sell": "2026-10-06",
+   "model": "gpt-6-luna",
+   "pv": "9c45283a49c1",
+   "drift": -10.6838,
+   "notional": 37440,
+   "board": "main"
+  },
+  {
+   "score": 39,
+   "r": -0.8934,
+   "pnl": -320.0,
+   "strategy": "volatility_breakout",
+   "ticker": "047040",
+   "name": "대우건설",
+   "buy": "2026-10-06",
+   "sell": "2026-10-06",
+   "model": "gpt-6-luna",
+   "pv": "9c45283a49c1",
+   "drift": 83.7989,
+   "notional": 35800,
+   "board": "main"
+  },
+  {
+   "score": 47,
+   "r": 0.0545,
+   "pnl": 20.0,
+   "strategy": "momentum",
+   "ticker": "217590",
+   "name": "티엠씨",
+   "buy": "2026-10-02",
+   "sell": "2026-10-06",
+   "model": "gpt-5.6-luna",
+   "pv": "2d1303f75c96",
+   "drift": -21.7746,
+   "notional": 36740,
+   "board": "main"
+  },
+  {
+   "score": 45,
+   "r": 0.4172,
+   "pnl": 150.0,
+   "strategy": "volatility_breakout",
+   "ticker": "009830",
+   "name": "한화솔루션",
+   "buy": "2026-10-02",
+   "sell": "2026-10-02",
+   "model": "gpt-5.6-luna",
+   "pv": "9c45283a49c1",
+   "drift": 13.9276,
+   "notional": 35900,
+   "board": "main"
+  },
+  {
+   "score": 48,
+   "r": -2.0363,
+   "pnl": -740.0,
+   "strategy": "volatility_breakout",
+   "ticker": "010170",
+   "name": "대한광통신",
+   "buy": "2026-10-02",
+   "sell": "2026-10-02",
+   "model": "gpt-5.6-luna",
+   "pv": "9c45283a49c1",
+   "drift": 0.0,
+   "notional": 36340,
+   "board": "main"
+  },
+  {
+   "score": 45,
+   "r": -5.0549,
+   "pnl": -1840.0,
+   "strategy": "volatility_breakout",
+   "ticker": "072950",
+   "name": "빛샘전자",
+   "buy": "2026-10-02",
+   "sell": "2026-10-02",
+   "model": "gpt-5.6-luna",
+   "pv": "9c45283a49c1",
+   "drift": 5.5036,
+   "notional": 36340,
+   "board": "main"
+  },
+  {
+   "score": 44,
+   "r": -1.0791,
+   "pnl": -480.0,
+   "strategy": "volatility_breakout",
+   "ticker": "036540",
+   "name": "SFA반도체",
+   "buy": "2026-10-01",
+   "sell": "2026-10-01",
+   "model": "gpt-5.6-luna",
+   "pv": "9c45283a49c1",
+   "drift": -9.0009,
+   "notional": 44440,
+   "board": "main"
+  },
+  {
+   "score": 42,
+   "r": -0.5413,
+   "pnl": -260.0,
+   "strategy": "volatility_breakout",
+   "ticker": "018880",
+   "name": "한온시스템",
+   "buy": "2026-10-01",
+   "sell": "2026-10-01",
+   "model": "gpt-5.6-luna",
+   "pv": "9c45283a49c1",
+   "drift": -13.5318,
+   "notional": 48035,
+   "board": "main"
+  },
+  {
+   "score": 64,
+   "r": 24.9664,
+   "pnl": 29760.0,
+   "strategy": "bull_flag_breakout",
+   "ticker": "232140",
+   "name": "와이씨",
+   "buy": "2026-09-30",
+   "sell": "2026-10-06",
+   "model": "gpt-5.6-luna",
+   "pv": "77b27be33ac1",
+   "drift": -6.7159,
+   "notional": 119120,
+   "board": "main"
+  },
+  {
+   "score": 48,
+   "r": 7.4912,
+   "pnl": 9540.0,
+   "strategy": "bull_flag_breakout",
+   "ticker": "425040",
+   "name": "티이엠씨",
+   "buy": "2026-09-30",
+   "sell": "2026-10-08",
+   "model": "gpt-5.6-luna",
+   "pv": "77b27be33ac1",
+   "drift": -7.0972,
+   "notional": 126810,
+   "board": "main"
+  },
+  {
+   "score": 45,
+   "r": -1.2917,
+   "pnl": -1200.0,
+   "strategy": "bull_flag_breakout",
+   "ticker": "126340",
+   "name": "비나텍",
+   "buy": "2026-09-30",
+   "sell": "2026-10-08",
+   "model": "gpt-5.6-luna",
+   "pv": "77b27be33ac1",
+   "drift": -21.5517,
+   "notional": 92800,
+   "board": "main"
+  },
+  {
+   "score": 44,
+   "r": 8.8235,
+   "pnl": 10080.0,
+   "strategy": "bull_flag_breakout",
+   "ticker": "417200",
+   "name": "LS머트리얼즈",
+   "buy": "2026-09-30",
+   "sell": "2026-10-08",
+   "model": "gpt-5.6-luna",
+   "pv": "77b27be33ac1",
+   "drift": -14.0056,
+   "notional": 114240,
+   "board": "main"
+  },
+  {
+   "score": 55,
+   "r": 0.0,
+   "pnl": 0.0,
+   "strategy": "volatility_breakout",
+   "ticker": "043260",
+   "name": "성호전자",
+   "buy": "2026-09-30",
+   "sell": "2026-09-30",
+   "model": "gpt-5.6-luna",
+   "pv": "9c45283a49c1",
+   "drift": 0.0,
+   "notional": 26450,
+   "board": "main"
+  },
+  {
+   "score": 44,
+   "r": -1.0309,
+   "pnl": -400.0,
+   "strategy": "volatility_breakout",
+   "ticker": "178320",
+   "name": "서진시스템",
+   "buy": "2026-09-30",
+   "sell": "2026-09-30",
+   "model": "gpt-5.6-luna",
+   "pv": "9c45283a49c1",
+   "drift": -12.87,
+   "notional": 38850,
+   "board": "main"
+  },
+  {
+   "score": 62,
+   "r": 0.8881,
+   "pnl": 500.0,
+   "strategy": "momentum",
+   "ticker": "052260",
+   "name": "현대바이오랜드",
+   "buy": "2026-09-29",
+   "sell": "2026-09-30",
+   "model": "gpt-5.6-luna",
+   "pv": "2d1303f75c96",
+   "drift": -141.5929,
+   "notional": 56500,
+   "board": "main"
+  },
+  {
+   "score": 60,
+   "r": 4.0416,
+   "pnl": 2450.0,
+   "strategy": "momentum",
+   "ticker": "950250",
+   "name": "테라뷰",
+   "buy": "2026-09-29",
+   "sell": "2026-09-30",
+   "model": "gpt-5.6-luna",
+   "pv": "2d1303f75c96",
+   "drift": 11.5607,
+   "notional": 60550,
+   "board": "main"
+  },
+  {
+   "score": 56,
+   "r": -5.2335,
+   "pnl": -2600.0,
+   "strategy": "momentum",
+   "ticker": "047920",
+   "name": "HLB제약",
+   "buy": "2026-09-29",
+   "sell": "2026-09-29",
+   "model": "gpt-5.6-luna",
+   "pv": "2d1303f75c96",
+   "drift": -24.1741,
+   "notional": 49640,
+   "board": "main"
+  },
+  {
+   "score": 45,
+   "r": 0.0,
+   "pnl": 0.0,
+   "strategy": "volatility_breakout",
+   "ticker": "440110",
+   "name": "파두",
+   "buy": "2026-09-29",
+   "sell": "2026-09-29",
+   "model": "gpt-5.6-luna",
+   "pv": "9c45283a49c1",
+   "drift": -23.9234,
+   "notional": 83600,
+   "board": "main"
+  },
+  {
+   "score": 43,
+   "r": 5.1724,
+   "pnl": 3000.0,
+   "strategy": "volatility_breakout",
+   "ticker": "403870",
+   "name": "HPSP",
+   "buy": "2026-09-29",
+   "sell": "2026-09-29",
+   "model": "gpt-5.6-luna",
+   "pv": "9c45283a49c1",
+   "drift": 0.0,
+   "notional": 58000,
+   "board": "main"
+  },
+  {
+   "score": 63,
+   "r": -5.123,
+   "pnl": -2500.0,
+   "strategy": "momentum",
+   "ticker": "387690",
+   "name": "레메디",
+   "buy": "2026-09-28",
+   "sell": "2026-09-28",
+   "model": "gpt-5.6-luna",
+   "pv": "2d1303f75c96",
+   "drift": -82.1355,
+   "notional": 48700,
+   "board": "main"
+  },
+  {
+   "score": 43,
+   "r": 6.3665,
+   "pnl": 3075.0,
+   "strategy": "long_tail_volatility",
+   "ticker": "303810",
+   "name": "동국생명과학",
+   "buy": "2026-09-28",
+   "sell": "2026-09-28",
+   "model": "gpt-5.6-luna",
+   "pv": "7a9c45983c0d",
+   "drift": 109.2044,
+   "notional": 48075,
+   "board": "main"
+  },
+  {
+   "score": 48,
+   "r": -5.0777,
+   "pnl": -2940.0,
+   "strategy": "momentum",
+   "ticker": "393210",
+   "name": "토마토시스템",
+   "buy": "2026-09-28",
+   "sell": "2026-09-28",
+   "model": "gpt-5.6-luna",
+   "pv": "2d1303f75c96",
+   "drift": 145.0777,
+   "notional": 57900,
+   "board": "main"
+  },
+  {
+   "score": 48,
+   "r": -0.5325,
+   "pnl": -400.0,
+   "strategy": "volatility_breakout",
+   "ticker": "047040",
+   "name": "대우건설",
+   "buy": "2026-09-28",
+   "sell": "2026-09-28",
+   "model": "gpt-5.6-luna",
+   "pv": "9c45283a49c1",
+   "drift": 10.661,
+   "notional": 75040,
+   "board": "main"
+  },
+  {
+   "score": 58,
+   "r": -5.1845,
+   "pnl": -2375.0,
+   "strategy": "long_tail_volatility",
+   "ticker": "054920",
+   "name": "한컴위드",
+   "buy": "2026-09-28",
+   "sell": "2026-09-28",
+   "model": "gpt-5.6-luna",
+   "pv": "7a9c45983c0d",
+   "drift": -39.3701,
+   "notional": 45720,
+   "board": "main"
+  },
+  {
+   "score": 39,
+   "r": 5.0394,
+   "pnl": 1600.0,
+   "strategy": "long_tail_volatility",
+   "ticker": "009830",
+   "name": "한화솔루션",
+   "buy": "2026-09-28",
+   "sell": "2026-09-28",
+   "model": "gpt-5.6-luna",
+   "pv": "7a9c45983c0d",
+   "drift": 63.0915,
+   "notional": 31700,
+   "board": "main"
+  },
+  {
+   "score": 57,
+   "r": -5.0,
+   "pnl": -3680.0,
+   "strategy": "volatility_breakout",
+   "ticker": "010170",
+   "name": "대한광통신",
+   "buy": "2026-09-28",
+   "sell": "2026-09-28",
+   "model": "gpt-5.6-luna",
+   "pv": "9c45283a49c1",
+   "drift": 5.4407,
+   "notional": 73520,
+   "board": "main"
+  },
+  {
+   "score": 41,
+   "r": 0.7503,
+   "pnl": 350.0,
+   "strategy": "long_tail_volatility",
+   "ticker": "092870",
+   "name": "엑시콘",
+   "buy": "2026-09-28",
+   "sell": "2026-09-28",
+   "model": "gpt-5.6-luna",
+   "pv": "7a9c45983c0d",
+   "drift": 32.1888,
+   "notional": 46600,
+   "board": "main"
+  },
+  {
+   "score": 43,
+   "r": -5.0382,
+   "pnl": -1980.0,
+   "strategy": "long_tail_volatility",
+   "ticker": "356680",
+   "name": "엑스게이트",
+   "buy": "2026-09-28",
+   "sell": "2026-09-28",
+   "model": "gpt-5.6-luna",
+   "pv": "7a9c45983c0d",
+   "drift": -71.1382,
+   "notional": 39360,
+   "board": "main"
+  },
+  {
+   "score": 52,
+   "r": -4.6283,
+   "pnl": -2640.0,
+   "strategy": "momentum",
+   "ticker": "394800",
+   "name": "쓰리빌리언",
+   "buy": "2026-09-28",
+   "sell": "2026-09-29",
+   "model": "gpt-5.6-luna",
+   "pv": "2d1303f75c96",
+   "drift": 42.0757,
+   "notional": 57040,
+   "board": "main"
+  },
+  {
+   "score": 45,
+   "r": -4.6745,
+   "pnl": -2800.0,
+   "strategy": "momentum",
+   "ticker": "396300",
+   "name": "세아메카닉스",
+   "buy": "2026-09-23",
+   "sell": "2026-09-28",
+   "model": "gpt-5.6-luna",
+   "pv": "2d1303f75c96",
+   "drift": -117.2529,
+   "notional": 59700,
+   "board": "main"
+  },
+  {
+   "score": 68,
+   "r": -5.205,
+   "pnl": -6600.0,
+   "strategy": "bull_flag_breakout",
+   "ticker": "295310",
+   "name": "에이치브이엠",
+   "buy": "2026-09-23",
+   "sell": "2026-09-28",
+   "model": "gpt-5.6-luna",
+   "pv": "77b27be33ac1",
+   "drift": 15.7978,
+   "notional": 126600,
+   "board": "main"
+  },
+  {
+   "score": 60,
+   "r": 0.9076,
+   "pnl": 550.0,
+   "strategy": "momentum",
+   "ticker": "115440",
+   "name": "우리넷",
+   "buy": "2026-09-23",
+   "sell": "2026-09-28",
+   "model": "gpt-5.6-luna",
+   "pv": "2d1303f75c96",
+   "drift": 41.425,
+   "notional": 60350,
+   "board": "main"
+  },
+  {
+   "score": 60,
+   "r": -0.2442,
+   "pnl": -200.0,
+   "strategy": "volatility_breakout",
+   "ticker": "103590",
+   "name": "일진전기",
+   "buy": "2026-09-23",
+   "sell": "2026-09-23",
+   "model": "gpt-5.6-luna",
+   "pv": "9c45283a49c1",
+   "drift": 0.0,
+   "notional": 81900,
+   "board": "main"
+  },
+  {
+   "score": 48,
+   "r": -5.0077,
+   "pnl": -8730.0,
+   "strategy": "bull_flag_breakout",
+   "ticker": "356680",
+   "name": "엑스게이트",
+   "buy": "2026-09-23",
+   "sell": "2026-09-23",
+   "model": "gpt-5.6-luna",
+   "pv": "77b27be33ac1",
+   "drift": -30.9757,
+   "notional": 174330,
+   "board": "main"
+  },
+  {
+   "score": 42,
+   "r": 1.1525,
+   "pnl": 1700.0,
+   "strategy": "volatility_breakout",
+   "ticker": "096770",
+   "name": "SK이노베이션",
+   "buy": "2026-09-23",
+   "sell": "2026-09-23",
+   "model": "gpt-5.6-luna",
+   "pv": "9c45283a49c1",
+   "drift": 33.8983,
+   "notional": 147500,
+   "board": "main"
+  },
+  {
+   "score": 28,
+   "r": -0.3297,
+   "pnl": -300.0,
+   "strategy": "donchian_swing",
+   "ticker": "067310",
+   "name": "하나마이크론",
+   "buy": "2026-09-23",
+   "sell": "2026-09-29",
+   "model": "gpt-5.6-luna",
+   "pv": "bea23800d8d2",
+   "drift": 0.0,
+   "notional": 90900,
+   "board": "main"
+  },
+  {
+   "score": 45,
+   "r": -3.3333,
+   "pnl": -7000.0,
+   "strategy": "donchian_swing",
+   "ticker": "095340",
+   "name": "ISC",
+   "buy": "2026-09-23",
+   "sell": "2026-09-29",
+   "model": "gpt-5.6-luna",
+   "pv": "bea23800d8d2",
+   "drift": -23.8095,
+   "notional": 210000,
+   "board": "main"
+  },
+  {
+   "score": 43,
+   "r": -1.5444,
+   "pnl": -1200.0,
+   "strategy": "long_tail_volatility",
+   "ticker": "103590",
+   "name": "일진전기",
+   "buy": "2026-09-22",
+   "sell": "2026-09-22",
+   "model": "gpt-5.6-luna",
+   "pv": "7a9c45983c0d",
+   "drift": 0.0,
+   "notional": 77700,
+   "board": "main"
+  },
+  {
+   "score": 48,
+   "r": 8.0717,
+   "pnl": 3600.0,
+   "strategy": "momentum",
+   "ticker": "486990",
+   "name": "노타",
+   "buy": "2026-09-22",
+   "sell": "2026-09-23",
+   "model": "gpt-5.6-luna",
+   "pv": "2d1303f75c96",
+   "drift": -66.9643,
+   "notional": 44800,
+   "board": "main"
+  },
+  {
+   "score": 58,
+   "r": -7.0976,
+   "pnl": -11200.0,
+   "strategy": "bull_flag_breakout",
+   "ticker": "100840",
+   "name": "SNT에너지",
+   "buy": "2026-09-22",
+   "sell": "2026-09-23",
+   "model": "gpt-5.6-luna",
+   "pv": "77b27be33ac1",
+   "drift": 0.0,
+   "notional": 157600,
+   "board": "main"
+  },
+  {
+   "score": 48,
+   "r": -5.2421,
+   "pnl": -9570.0,
+   "strategy": "bull_flag_breakout",
+   "ticker": "149950",
+   "name": "아바텍",
+   "buy": "2026-09-22",
+   "sell": "2026-09-22",
+   "model": "gpt-5.6-luna",
+   "pv": "77b27be33ac1",
+   "drift": 0.0,
+   "notional": 182560,
+   "board": "main"
+  },
+  {
+   "score": 44,
+   "r": -2.3669,
+   "pnl": -1600.0,
+   "strategy": "momentum",
+   "ticker": "007810",
+   "name": "코리아써키트",
+   "buy": "2026-09-22",
+   "sell": "2026-09-23",
+   "model": "gpt-5.6-luna",
+   "pv": "2d1303f75c96",
+   "drift": 59.2593,
+   "notional": 67500,
+   "board": "main"
+  },
+  {
+   "score": 60,
+   "r": -5.9678,
+   "pnl": -10350.0,
+   "strategy": "bull_flag_breakout",
+   "ticker": "052710",
+   "name": "아모텍",
+   "buy": "2026-09-22",
+   "sell": "2026-09-28",
+   "model": "gpt-5.6-luna",
+   "pv": "77b27be33ac1",
+   "drift": 124.805,
+   "notional": 173070,
+   "board": "main"
+  },
+  {
+   "score": 44,
+   "r": -5.0372,
+   "pnl": -2440.0,
+   "strategy": "long_tail_volatility",
+   "ticker": "457370",
+   "name": "한켐",
+   "buy": "2026-09-22",
+   "sell": "2026-09-22",
+   "model": "gpt-5.6-luna",
+   "pv": "7a9c45983c0d",
+   "drift": -74.3187,
+   "notional": 48440,
+   "board": "main"
+  },
+  {
+   "score": 47,
+   "r": -5.0676,
+   "pnl": -6000.0,
+   "strategy": "long_tail_volatility",
+   "ticker": "007660",
+   "name": "이수페타시스",
+   "buy": "2026-09-22",
+   "sell": "2026-09-22",
+   "model": "gpt-5.6-luna",
+   "pv": "7a9c45983c0d",
+   "drift": 8.4531,
+   "notional": 118300,
+   "board": "main"
+  },
+  {
+   "score": 52,
+   "r": -5.4094,
+   "pnl": -2590.0,
+   "strategy": "long_tail_volatility",
+   "ticker": "024840",
+   "name": "KBI메탈",
+   "buy": "2026-09-22",
+   "sell": "2026-09-22",
+   "model": "gpt-5.6-luna",
+   "pv": "7a9c45983c0d",
+   "drift": 0.0,
+   "notional": 47810,
+   "board": "main"
+  },
+  {
+   "score": 48,
+   "r": -8.3503,
+   "pnl": -16450.0,
+   "strategy": "kojiro",
+   "ticker": "035760",
+   "name": "CJ ENM",
+   "buy": "2026-09-22",
+   "sell": "2026-10-01",
+   "model": "gpt-5.6-luna",
+   "pv": "fcb24e7adc9b",
+   "drift": -12.6904,
+   "notional": 197000,
+   "board": "main"
+  },
+  {
+   "score": 47,
+   "r": -8.2298,
+   "pnl": -10600.0,
+   "strategy": "kojiro",
+   "ticker": "011170",
+   "name": "롯데케미칼",
+   "buy": "2026-09-22",
+   "sell": "2026-09-28",
+   "model": "gpt-5.6-luna",
+   "pv": "fcb24e7adc9b",
+   "drift": -15.528,
+   "notional": 128800,
+   "board": "main"
+  },
+  {
+   "score": 43,
+   "r": -2.13,
+   "pnl": -1900.0,
+   "strategy": "volatility_breakout",
+   "ticker": "017670",
+   "name": "SK텔레콤",
+   "buy": "2026-09-22",
+   "sell": "2026-09-22",
+   "model": "gpt-5.6-luna",
+   "pv": "9c45283a49c1",
+   "drift": -11.2233,
+   "notional": 89100,
+   "board": "main"
+  },
+  {
+   "score": 47,
+   "r": 1.1803,
+   "pnl": 1800.0,
+   "strategy": "volatility_breakout",
+   "ticker": "010950",
+   "name": "S-Oil",
+   "buy": "2026-09-22",
+   "sell": "2026-09-22",
+   "model": "gpt-5.6-luna",
+   "pv": "9c45283a49c1",
+   "drift": -58.9777,
+   "notional": 152600,
+   "board": "main"
+  },
+  {
+   "score": 44,
+   "r": -2.1102,
+   "pnl": -1800.0,
+   "strategy": "long_tail_volatility",
+   "ticker": "126340",
+   "name": "비나텍",
+   "buy": "2026-09-21",
+   "sell": "2026-09-21",
+   "model": "gpt-5.6-luna",
+   "pv": "7a9c45983c0d",
+   "drift": 0.0,
+   "notional": 85300,
+   "board": "main"
+  },
+  {
+   "score": 43,
+   "r": -0.7826,
+   "pnl": -1400.0,
+   "strategy": "volatility_breakout",
+   "ticker": "105560",
+   "name": "KB금융",
+   "buy": "2026-09-21",
+   "sell": "2026-09-21",
+   "model": "gpt-5.6-luna",
+   "pv": "9c45283a49c1",
+   "drift": -5.5897,
+   "notional": 178900,
+   "board": "main"
+  },
+  {
+   "score": 45,
+   "r": 1.2567,
+   "pnl": 350.0,
+   "strategy": "long_tail_volatility",
+   "ticker": "078350",
+   "name": "한양디지텍",
+   "buy": "2026-09-21",
+   "sell": "2026-09-21",
+   "model": "gpt-5.6-luna",
+   "pv": "7a9c45983c0d",
+   "drift": -17.9533,
+   "notional": 27850,
+   "board": "main"
+  },
+  {
+   "score": 47,
+   "r": -0.2584,
+   "pnl": -500.0,
+   "strategy": "kojiro",
+   "ticker": "000520",
+   "name": "삼일제약",
+   "buy": "2026-09-21",
+   "sell": "2026-09-23",
+   "model": "gpt-5.6-luna",
+   "pv": "fcb24e7adc9b",
+   "drift": 0.0,
+   "notional": 193500,
+   "board": "main"
+  },
+  {
+   "score": 42,
+   "r": -0.4513,
+   "pnl": -500.0,
+   "strategy": "long_tail_volatility",
+   "ticker": "007660",
+   "name": "이수페타시스",
+   "buy": "2026-09-21",
+   "sell": "2026-09-21",
+   "model": "gpt-5.6-luna",
+   "pv": "7a9c45983c0d",
+   "drift": 0.0,
+   "notional": 110700,
+   "board": "main"
+  },
+  {
+   "score": 42,
+   "r": -2.1661,
+   "pnl": -1200.0,
+   "strategy": "volatility_breakout",
+   "ticker": "119850",
+   "name": "지엔씨에너지",
+   "buy": "2026-09-18",
+   "sell": "2026-09-18",
+   "model": "gpt-5.6-luna",
+   "pv": "9c45283a49c1",
+   "drift": -18.0505,
+   "notional": 55400,
+   "board": "main"
+  },
+  {
+   "score": 42,
+   "r": -1.8676,
+   "pnl": -1100.0,
+   "strategy": "long_tail_volatility",
+   "ticker": "047050",
+   "name": "포스코인터내셔널",
+   "buy": "2026-09-17",
+   "sell": "2026-09-17",
+   "model": "gpt-5.6-luna",
+   "pv": "4162dc5fcea0",
+   "drift": 0.0,
+   "notional": 58800,
+   "board": "main"
+  },
+  {
+   "score": 36,
+   "r": 1.6867,
+   "pnl": 1400.0,
+   "strategy": "volatility_breakout",
+   "ticker": "086520",
+   "name": "에코프로",
+   "buy": "2026-09-15",
+   "sell": "2026-09-15",
+   "model": "gpt-5.6-luna",
+   "pv": "4162dc5fcea0",
+   "drift": 0.0,
+   "notional": 83000,
+   "board": "main"
+  },
+  {
+   "score": 52,
+   "r": -5.0104,
+   "pnl": -960.0,
+   "strategy": "long_tail_volatility",
+   "ticker": "441270",
+   "name": "파인엠텍",
+   "buy": "2026-09-15",
+   "sell": "2026-09-15",
+   "model": "gpt-5.6-luna",
+   "pv": "4162dc5fcea0",
+   "drift": 0.0,
+   "notional": 19140,
+   "board": "main"
+  },
+  {
+   "score": 44,
+   "r": -5.059,
+   "pnl": -1200.0,
+   "strategy": "long_tail_volatility",
+   "ticker": "101730",
+   "name": "위메이드맥스",
+   "buy": "2026-09-15",
+   "sell": "2026-09-15",
+   "model": "gpt-5.6-luna",
+   "pv": "4162dc5fcea0",
+   "drift": -100.5025,
+   "notional": 23880,
+   "board": "pre_nxt"
+  },
+  {
+   "score": 48,
+   "r": -4.8043,
+   "pnl": -2700.0,
+   "strategy": "long_tail_volatility",
+   "ticker": "000670",
+   "name": "영풍",
+   "buy": "2026-09-15",
+   "sell": "2026-09-15",
+   "model": "gpt-5.6-luna",
+   "pv": "4162dc5fcea0",
+   "drift": -123.4568,
+   "notional": 56700,
+   "board": "pre_nxt"
+  },
+  {
+   "score": 36,
+   "r": -5.4094,
+   "pnl": -1850.0,
+   "strategy": "long_tail_volatility",
+   "ticker": "124500",
+   "name": "아이티센글로벌",
+   "buy": "2026-09-15",
+   "sell": "2026-09-15",
+   "model": "gpt-5.6-luna",
+   "pv": "4162dc5fcea0",
+   "drift": -43.5414,
+   "notional": 34450,
+   "board": "pre_nxt"
+  },
+  {
+   "score": 44,
+   "r": -1.6484,
+   "pnl": -1800.0,
+   "strategy": "volatility_breakout",
+   "ticker": "007660",
+   "name": "이수페타시스",
+   "buy": "2026-09-14",
+   "sell": "2026-09-14",
+   "model": "gpt-5.6-luna",
+   "pv": "4162dc5fcea0",
+   "drift": -9.1659,
+   "notional": 109100,
+   "board": "main"
+  }
+ ]
+}

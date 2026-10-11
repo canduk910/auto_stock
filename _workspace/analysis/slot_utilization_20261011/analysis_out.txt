@@ -1,0 +1,160 @@
+보유 재구성 일수 88 (2026-06-01~2026-10-08) · 보유 초과 매도 경고 3건
+  oversell {'strategy': 'momentum', 'ticker': '064400', 'date': '2026-06-01', 'held': 0, 'sell_qty': 1}
+  oversell {'strategy': 'volatility_breakout', 'ticker': '000250', 'date': '2026-06-10', 'held': 0, 'sell_qty': 1}
+  oversell {'strategy': 'volatility_breakout', 'ticker': '073240', 'date': '2026-07-22', 'held': 0, 'sell_qty': 13}
+
+[교차검증] 2026-10-08 재구성 vs positions 테이블: 불일치 0건
+
+[전략별 일자 표] 날짜 | 예산 | 장마감 보유수/정원 | 장중최대 | 장마감 매입원가 | 장중최대 매입원가
+
+== bull_flag_breakout (평가일 8: 09-21, 09-22, 09-23, 09-30, 10-01, 10-02, 10-06, 10-07)
+  2026-09-21 |   752,411 | 2/4 | 2 |   144,800 |   144,800
+  2026-09-22 |   754,228 | 3/4 | 4 |   394,630 |   577,190
+  2026-09-23 |   747,159 | 3/4 | 4 |   363,630 |   568,960
+  2026-09-30 |   736,740 | 4/4 | 4 |   453,690 |   453,690
+  2026-10-01 |   733,673 | 4/4 | 4 |   453,690 |   453,690
+  2026-10-02 |   743,364 | 4/4 | 4 |   453,690 |   453,690
+  2026-10-06 |   743,364 | 4/4 | 4 |   396,440 |   453,690
+  2026-10-07 |   948,482 | 4/4 | 4 |   427,910 |   427,910
+  → {'strategy': 'bull_flag_breakout', 'eval_days': 8, 'max_positions_now': 4, 'position_ratio_now': 0.25, 'sizing_mode_now': 'turtle', 'full_days_eod': 5, 'full_days_eod_pct': 62, 'full_days_intraday': 7, 'full_days_intraday_pct': 88, 'avg_slot_use_eod_pct': 88, 'avg_slot_use_intraday_pct': 94, 'zero_days_eod': 0, 'budget_use_eod_mean_pct': 50, 'budget_use_eod_median_pct': 53, 'budget_use_intraday_mean_pct': 58, 'buys': 11, 'one_share_pct': 9, 'median_qty': 8, 'median_q': 9.79}
+
+== donchian_swing (평가일 4: 09-21, 09-22, 09-23, 10-07)
+  2026-09-21 |   752,411 | 3/5 | 3 |    88,940 |    88,940
+  2026-09-22 |   754,228 | 2/5 | 2 |    52,940 |    88,940
+  2026-09-23 |   747,159 | 3/5 | 4 |   326,100 |   353,940
+  2026-10-07 | 1,185,603 | 2/6 | 2 |   244,880 |   244,880
+  → {'strategy': 'donchian_swing', 'eval_days': 4, 'max_positions_now': 6, 'position_ratio_now': 0.15, 'sizing_mode_now': 'turtle', 'full_days_eod': 0, 'full_days_eod_pct': 0, 'full_days_intraday': 0, 'full_days_intraday_pct': 0, 'avg_slot_use_eod_pct': 48, 'avg_slot_use_intraday_pct': 53, 'zero_days_eod': 0, 'budget_use_eod_mean_pct': 21, 'budget_use_eod_median_pct': 16, 'budget_use_intraday_mean_pct': 23, 'buys': 4, 'one_share_pct': 25, 'median_qty': 2.0, 'median_q': 3.2}
+
+== etf_trend (평가일 1: 10-07)
+  2026-10-07 |    94,848 | 0/4 | 0 |         0 |         0
+  → {'strategy': 'etf_trend', 'eval_days': 1, 'max_positions_now': 4, 'position_ratio_now': 0.25, 'sizing_mode_now': 'turtle', 'full_days_eod': 0, 'full_days_eod_pct': 0, 'full_days_intraday': 0, 'full_days_intraday_pct': 0, 'avg_slot_use_eod_pct': 0, 'avg_slot_use_intraday_pct': 0, 'zero_days_eod': 1, 'budget_use_eod_mean_pct': 0, 'budget_use_eod_median_pct': 0, 'budget_use_intraday_mean_pct': 0, 'buys': 0, 'one_share_pct': None, 'median_qty': None, 'median_q': None}
+
+== kojiro (평가일 10: 09-21, 09-22, 09-23, 09-28, 09-29, 09-30, 10-01, 10-02, 10-06, 10-07)
+  2026-09-21 | 2,006,431 | 4/6 | 5 |   439,700 |   569,700
+  2026-09-22 | 2,011,277 | 6/6 | 6 |   765,500 |   765,500
+  2026-09-23 | 1,992,425 | 4/6 | 5 |   505,900 |   765,500
+  2026-09-28 | 1,983,869 | 6/6 | 6 |   968,500 |   968,500
+  2026-09-29 | 1,969,613 | 5/6 | 5 |   844,500 |   968,500
+  2026-09-30 | 1,964,330 | 6/6 | 6 | 1,045,520 | 1,045,520
+  2026-10-01 | 1,956,152 | 5/6 | 5 |   848,520 | 1,045,520
+  2026-10-02 | 1,981,992 | 6/6 | 6 |   956,520 |   956,520
+  2026-10-06 | 1,981,992 | 6/6 | 6 |   956,520 |   956,520
+  2026-10-07 | 1,422,723 | 6/6 | 6 |   956,520 |   956,520
+  → {'strategy': 'kojiro', 'eval_days': 10, 'max_positions_now': 6, 'position_ratio_now': 0.166, 'sizing_mode_now': 'turtle', 'full_days_eod': 6, 'full_days_eod_pct': 60, 'full_days_intraday': 6, 'full_days_intraday_pct': 60, 'avg_slot_use_eod_pct': 90, 'avg_slot_use_intraday_pct': 93, 'zero_days_eod': 0, 'budget_use_eod_mean_pct': 44, 'budget_use_eod_median_pct': 46, 'budget_use_intraday_mean_pct': 47, 'buys': 8, 'one_share_pct': 25, 'median_qty': 3.0, 'median_q': 6.44}
+
+== long_tail_volatility (평가일 4: 09-21, 09-22, 09-23, 09-28)
+  2026-09-21 |   250,803 | 0/4 | 3 |         0 |   223,950
+  2026-09-22 |   251,409 | 0/4 | 3 |         0 |   243,980
+  2026-09-23 |   249,053 | 0/4 | 0 |         0 |         0
+  2026-09-28 |   247,983 | 0/4 | 4 |         0 |   163,510
+  → {'strategy': 'long_tail_volatility', 'eval_days': 4, 'max_positions_now': 4, 'position_ratio_now': 0.2, 'sizing_mode_now': None, 'full_days_eod': 0, 'full_days_eod_pct': 0, 'full_days_intraday': 1, 'full_days_intraday_pct': 25, 'avg_slot_use_eod_pct': 0, 'avg_slot_use_intraday_pct': 62, 'zero_days_eod': 4, 'budget_use_eod_mean_pct': 0, 'budget_use_eod_median_pct': 0, 'budget_use_intraday_mean_pct': 63, 'buys': 13, 'one_share_pct': 54, 'median_qty': 1, 'median_q': 1.8}
+
+== momentum (평가일 10: 09-21, 09-22, 09-23, 09-28, 09-29, 09-30, 10-01, 10-02, 10-06, 10-07)
+  2026-09-21 |   250,803 | 0/4 | 0 |         0 |         0
+  2026-09-22 |   251,409 | 2/4 | 2 |   112,200 |   112,200
+  2026-09-23 |   249,053 | 2/4 | 2 |   120,500 |   120,500
+  2026-09-28 |   247,983 | 1/4 | 2 |    57,040 |   120,500
+  2026-09-29 |   152,683 | 2/4 | 2 |   116,920 |   116,920
+  2026-09-30 |   147,441 | 0/4 | 1 |         0 |   116,920
+  2026-10-01 |   146,827 | 0/4 | 0 |         0 |         0
+  2026-10-02 |   148,767 | 1/4 | 1 |    36,680 |    36,680
+  2026-10-06 |   148,767 | 3/4 | 3 |    91,000 |    91,000
+  2026-10-07 |   142,272 | 0/4 | 2 |         0 |    91,000
+  → {'strategy': 'momentum', 'eval_days': 10, 'max_positions_now': 4, 'position_ratio_now': 0.25, 'sizing_mode_now': None, 'full_days_eod': 0, 'full_days_eod_pct': 0, 'full_days_intraday': 0, 'full_days_intraday_pct': 0, 'avg_slot_use_eod_pct': 28, 'avg_slot_use_intraday_pct': 38, 'zero_days_eod': 4, 'budget_use_eod_mean_pct': 28, 'budget_use_eod_median_pct': 24, 'budget_use_intraday_mean_pct': 45, 'buys': 15, 'one_share_pct': 13, 'median_qty': 4, 'median_q': 3.07}
+
+== vcp_breakout (평가일 10: 09-21, 09-22, 09-23, 09-28, 09-29, 09-30, 10-01, 10-02, 10-06, 10-07)
+  2026-09-21 |   752,411 | 0/5 | 0 |         0 |         0
+  2026-09-22 |   754,228 | 0/5 | 0 |         0 |         0
+  2026-09-23 |   747,159 | 0/5 | 0 |         0 |         0
+  2026-09-28 |   743,950 | 1/5 | 1 |   126,200 |   126,200
+  2026-09-29 |   933,189 | 1/5 | 1 |   126,200 |   126,200
+  2026-09-30 |   933,173 | 1/5 | 1 |   126,200 |   126,200
+  2026-10-01 |   929,288 | 2/5 | 2 |   291,450 |   291,450
+  2026-10-02 |   941,564 | 2/5 | 2 |   291,450 |   291,450
+  2026-10-06 |   941,564 | 2/5 | 2 |   291,450 |   291,450
+  2026-10-07 |   948,482 | 3/5 | 3 |   381,000 |   381,000
+  → {'strategy': 'vcp_breakout', 'eval_days': 10, 'max_positions_now': 5, 'position_ratio_now': 0.2, 'sizing_mode_now': 'turtle', 'full_days_eod': 0, 'full_days_eod_pct': 0, 'full_days_intraday': 0, 'full_days_intraday_pct': 0, 'avg_slot_use_eod_pct': 24, 'avg_slot_use_intraday_pct': 24, 'zero_days_eod': 3, 'budget_use_eod_mean_pct': 18, 'budget_use_eod_median_pct': 15, 'budget_use_intraday_mean_pct': 18, 'buys': 3, 'one_share_pct': 0, 'median_qty': 5, 'median_q': 5.62}
+
+== volatility_breakout (평가일 9: 09-21, 09-22, 09-23, 09-28, 09-29, 09-30, 10-01, 10-02, 10-06)
+  2026-09-21 |   250,803 | 0/2 | 1 |         0 |   178,900
+  2026-09-22 |   251,409 | 0/2 | 2 |         0 |   241,700
+  2026-09-23 |   249,053 | 0/2 | 2 |         0 |   229,400
+  2026-09-28 |   247,983 | 0/2 | 2 |         0 |   148,720
+  2026-09-29 |   144,443 | 0/2 | 2 |         0 |   141,600
+  2026-09-30 |   147,441 | 0/2 | 2 |         0 |    65,250
+  2026-10-01 |   146,827 | 0/2 | 2 |         0 |    92,515
+  2026-10-02 |   151,197 | 0/2 | 2 |         0 |    72,740
+  2026-10-06 |   148,767 | 0/2 | 2 |         0 |    73,260
+  → {'strategy': 'volatility_breakout', 'eval_days': 9, 'max_positions_now': 2, 'position_ratio_now': 0.35, 'sizing_mode_now': None, 'full_days_eod': 0, 'full_days_eod_pct': 0, 'full_days_intraday': 8, 'full_days_intraday_pct': 89, 'avg_slot_use_eod_pct': 0, 'avg_slot_use_intraday_pct': 94, 'zero_days_eod': 9, 'budget_use_eod_mean_pct': 0, 'budget_use_eod_median_pct': 0, 'budget_use_intraday_mean_pct': 69, 'buys': 18, 'one_share_pct': 56, 'median_qty': 1.0, 'median_q': 1.71}
+
+[스윙 funnel] 날짜별 최종 단계 생존 수 · 그날 장마감 보유 · 미매수 생존 · 칸 찬 날 여부
+  kojiro 2026-09-21 funnel 없음
+  kojiro 2026-09-22 funnel 없음
+  kojiro 2026-09-23 funnel 없음
+  kojiro 2026-09-28 step99 생존 7 · 보유 6 · 미매수 4 · 칸찬날=True
+  kojiro 2026-09-29 step99 생존 13 · 보유 5 · 미매수 12 · 칸찬날=False
+  kojiro 2026-09-30 step99 생존 21 · 보유 6 · 미매수 15 · 칸찬날=True
+  kojiro 2026-10-01 step99 생존 27 · 보유 5 · 미매수 22 · 칸찬날=False
+  kojiro 2026-10-02 step99 생존 42 · 보유 6 · 미매수 38 · 칸찬날=True
+  kojiro 2026-10-06 step99 생존 42 · 보유 6 · 미매수 42 · 칸찬날=True
+  kojiro 2026-10-07 step99 생존 55 · 보유 6 · 미매수 49 · 칸찬날=True
+  → kojiro: 칸찬날 n=5 평균 29.6 · 아닌날 n=2 평균 17
+  donchian_swing 2026-09-21 funnel 없음
+  donchian_swing 2026-09-22 funnel 없음
+  donchian_swing 2026-09-23 funnel 없음
+  donchian_swing 2026-10-07 step99 생존 10 · 보유 2 · 미매수 8 · 칸찬날=False
+  → donchian_swing: 칸찬날 n=0 평균 - · 아닌날 n=1 평균 8
+  bull_flag_breakout 2026-09-21 funnel 없음
+  bull_flag_breakout 2026-09-22 funnel 없음
+  bull_flag_breakout 2026-09-23 funnel 없음
+  bull_flag_breakout 2026-09-30 step99 생존 47 · 보유 4 · 미매수 43 · 칸찬날=True
+  bull_flag_breakout 2026-10-01 step99 생존 54 · 보유 4 · 미매수 51 · 칸찬날=True
+  bull_flag_breakout 2026-10-02 step99 생존 50 · 보유 4 · 미매수 48 · 칸찬날=True
+  bull_flag_breakout 2026-10-06 step99 생존 45 · 보유 4 · 미매수 44 · 칸찬날=True
+  bull_flag_breakout 2026-10-07 step99 생존 51 · 보유 4 · 미매수 48 · 칸찬날=True
+  → bull_flag_breakout: 칸찬날 n=5 평균 46.8 · 아닌날 n=0 평균 -
+  vcp_breakout 2026-09-21 funnel 없음
+  vcp_breakout 2026-09-22 funnel 없음
+  vcp_breakout 2026-09-23 funnel 없음
+  vcp_breakout 2026-09-28 step99 생존 12 · 보유 1 · 미매수 11 · 칸찬날=False
+  vcp_breakout 2026-09-29 step99 생존 11 · 보유 1 · 미매수 10 · 칸찬날=False
+  vcp_breakout 2026-09-30 step99 생존 8 · 보유 1 · 미매수 7 · 칸찬날=False
+  vcp_breakout 2026-10-01 step99 생존 6 · 보유 2 · 미매수 4 · 칸찬날=False
+  vcp_breakout 2026-10-02 step99 생존 4 · 보유 2 · 미매수 3 · 칸찬날=False
+  vcp_breakout 2026-10-06 step99 생존 5 · 보유 2 · 미매수 5 · 칸찬날=False
+  vcp_breakout 2026-10-07 step99 생존 8 · 보유 3 · 미매수 5 · 칸찬날=False
+  → vcp_breakout: 칸찬날 n=0 평균 - · 아닌날 n=7 평균 6.428571428571429
+  etf_trend 2026-10-07 step99 생존 11 · 보유 0 · 미매수 11 · 칸찬날=False
+  → etf_trend: 칸찬날 n=0 평균 - · 아닌날 n=1 평균 11
+
+[계좌 전체] 날짜 | 순자산(total 행) | 전 전략 장마감 매입원가 | 주식 비중 | 현금 비중 | 의도 현금 | 의도 밖 현금
+  2026-09-21 |  5,028,193 |    673,440 |  13.4% |  86.6% | 0% |  86.6%
+  2026-09-22 |  4,981,063 |  1,325,270 |  26.6% |  73.4% | 0% |  73.4%
+  2026-09-23 |  4,959,673 |  1,316,130 |  26.5% |  73.5% | 0% |  73.5%
+  2026-09-28 |  4,916,479 |  1,477,840 |  30.1% |  69.9% | 0% |  69.9%
+  2026-09-29 |  4,911,441 |  1,087,620 |  22.1% |  77.9% | 5% |  72.9%
+  2026-09-30 |  4,890,994 |  1,625,410 |  33.2% |  66.8% | 5% |  61.8%
+  2026-10-01 |  4,939,842 |  1,593,660 |  32.3% |  67.7% | 5% |  62.7%
+  2026-10-02 |  4,955,600 |  1,738,340 |  35.1% |  64.9% | 5% |  59.9%
+  2026-10-06 |  4,992,016 |  1,735,410 |  34.8% |  65.2% | 5% |  60.2%
+  2026-10-07 |  4,963,931 |  2,010,310 |  40.5% |  59.5% | 5% |  54.5%
+  2026-10-08 |  4,946,632 |  1,492,850 |  30.2% |  69.8% | 5% |  64.8%
+
+[표본] 주 기간 평가일 중 매도 체결 건수(청산 표본)
+  bull_flag_breakout: 6
+  donchian_swing: 2
+  etf_trend: 0
+  kojiro: 8
+  long_tail_volatility: 13
+  momentum: 15
+  vcp_breakout: 0
+  volatility_breakout: 18
+
+[비교 기간] 2026-06-24~2026-09-18 (60거래일, 입금 전 — 주 기간과 섞지 않음)
+  bull_flag_breakout: 장마감 칸찬날 0/60 · 장중 칸찬날 0 · 평균보유 0.42/4 · 예산사용 평균 11% · 매수 8건 1주 38%  (※ 정원은 현재값 가정 — 비교 기간 중 변경 이력 미보존)
+  donchian_swing: 장마감 칸찬날 0/60 · 장중 칸찬날 0 · 평균보유 1.12/5 · 예산사용 평균 26% · 매수 26건 1주 69%  (※ 정원은 현재값 가정 — 비교 기간 중 변경 이력 미보존)
+  kojiro: 장마감 칸찬날 23/60 · 장중 칸찬날 29 · 평균보유 3.87/6 · 예산사용 평균 68% · 매수 23건 1주 52%  (※ 정원은 현재값 가정 — 비교 기간 중 변경 이력 미보존)
+  long_tail_volatility: 장마감 칸찬날 0/60 · 장중 칸찬날 1 · 평균보유 0.05/4 · 예산사용 평균 3% · 매수 48건 1주 83%  (※ 정원은 현재값 가정 — 비교 기간 중 변경 이력 미보존)
+  momentum: 장마감 칸찬날 0/60 · 장중 칸찬날 0 · 평균보유 0.07/4 · 예산사용 평균 4% · 매수 5건 1주 100%  (※ 정원은 현재값 가정 — 비교 기간 중 변경 이력 미보존)
+  vcp_breakout: 장마감 칸찬날 0/60 · 장중 칸찬날 0 · 평균보유 0.00/5 · 예산사용 평균 0% · 매수 0건 1주 0%  (※ 정원은 현재값 가정 — 비교 기간 중 변경 이력 미보존)
+  volatility_breakout: 장마감 칸찬날 0/60 · 장중 칸찬날 26 · 평균보유 0.10/2 · 예산사용 평균 7% · 매수 76건 1주 92%  (※ 정원은 현재값 가정 — 비교 기간 중 변경 이력 미보존)
