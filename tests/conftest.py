@@ -887,3 +887,28 @@ def _reset_cost_overlay_memo():
     _reset_cost_overlay_memo_now()
     yield
     _reset_cost_overlay_memo_now()
+
+
+# ---------------------------------------------------------------------------
+# cycle447(제안 3) — `src/api/balance.py::get_balance_cached` 의 20초 TTL 캐시도
+# 모듈 전역이다. 그대로 두면 한 테스트가 채운 잔고값이 (실제 벽시계로는 20초가
+# 안 지나) 다음 테스트의 monkeypatch 된 `get_balance` 를 건너뛰고 캐시값을
+# 돌려줄 수 있다 — `_reset_cost_overlay_memo` 와 같은 이유·같은 패턴.
+# ---------------------------------------------------------------------------
+def _reset_balance_cache_now() -> None:
+    mod = sys.modules.get("src.api.balance")
+    if mod is None:
+        return
+    reset = getattr(mod, "reset_balance_cache_for_test", None)
+    if callable(reset):
+        try:
+            reset()
+        except Exception:
+            pass
+
+
+@pytest.fixture(autouse=True)
+def _reset_balance_cache():
+    _reset_balance_cache_now()
+    yield
+    _reset_balance_cache_now()
