@@ -600,6 +600,24 @@ class LongTailVolatilityStrategy(StrategyBase):
         """
         return dict(self._scan_stats)
 
+    def llm_context(self, ticker: str) -> dict:
+        """AI 매수평가 핵심값(cycle445 B) — `_targets` 의 전일 range 를 읽기만 한다.
+
+        목표가(`target_price`)·K 값은 이미 `_BREAKOUT_LINE_KEYS`/`_match_signal` 로
+        실린다. 여기서는 그 산출 근거인 전일 range 만 더한다.
+        """
+        try:
+            info = self._targets.get(ticker)
+            if not isinstance(info, dict):
+                return {}
+            out: dict = {}
+            prev_range = info.get("prev_range")
+            if prev_range is not None:
+                out["prev_range"] = prev_range
+            return out
+        except Exception:
+            return {}
+
     def get_targets_status(self) -> dict[str, dict]:
         """종목별 타겟 가격 정보 (활성 보드 필터링 — VB와 동일 형식 + `limit_up_reached`).
 

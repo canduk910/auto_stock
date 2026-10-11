@@ -525,6 +525,24 @@ class EtfTrendStrategy(StrategyBase):
     def get_scan_stats(self) -> dict:
         return dict(self._scan_stats)
 
+    def llm_context(self, ticker: str) -> dict:
+        """AI 매수평가 핵심값(cycle445 B) — `_candidates` 의 ATR·거래대금·EMA60 을 읽기만 한다.
+
+        `line`(돌파선)은 이미 `_BREAKOUT_LINE_KEYS` 로 실린다.
+        """
+        try:
+            info = self._candidates.get(ticker)
+            if not isinstance(info, dict):
+                return {}
+            out: dict = {}
+            for key in ("atr", "atr20", "tv20", "ema60"):
+                v = info.get(key)
+                if v is not None:
+                    out[key] = v
+            return out
+        except Exception:
+            return {}
+
     def get_targets_status(self) -> dict:
         out = {}
         for t in self._scanned_tickers:

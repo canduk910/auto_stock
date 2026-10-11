@@ -701,6 +701,13 @@ _BOARD_NOTE_PRE_NXT = (
 # 남겨 두면 항상 `null` 이 실린다. SYSTEM_PROMPT 는 "결측 필드가 3개 이상이면
 # score 는 50 을 넘기지 않는다" 고 지시하므로, 영구 null 필드는 점수를 구조적으로
 # 끌어내린다(자문 R7 · 명세 §14-4).
+# cycle445 B — `strategy_metrics` 블록(전략별 핵심값, `llm_buy_gate.py`
+# `_read_strategy_llm_context` 출처)이 user 메시지에 추가될 때만 바뀌는
+# 스키마 버전 표시자. `llm_buy_gate._prompt_version()` 의 해시 blob 에
+# 들어가 SYSTEM_PROMPT·스냅샷 키·META 중 어느 것도 안 바뀐 배포에서도
+# `prompt_version` 이 전 전략 동시에 한 번 갈리게 한다.
+LLM_CONTEXT_SCHEMA_VERSION = "strategy_metrics_v1"
+
 _SNAPSHOT_KEYS = (
     "board", "order_kst", "mins_from_krx_open",
     "order_price_won", "board_open_won", "target_won", "k",
@@ -790,6 +797,16 @@ def build_messages(payload: dict, tech: dict, bars30: list) -> list[dict]:
     if board == "pre_nxt":
         snapshot["board_note"] = _BOARD_NOTE_PRE_NXT
 
+    # cycle445 B — 전략별 핵심값(ATR·EMA·스테이지 등). `snapshot` 과 별도의
+    # top-level 키에 둔다 — `snapshot` 에 섞으면 SYSTEM_PROMPT 의 "결측 3개
+    # 이상이면 score ≤ 50" 규칙이 전략마다 다른 키 수를 결측으로 셀 수 있다.
+    # 전략이 값을 안 내거나(기본 `{}`) 읽기 실패했으면 키 자체를 뺀다(0 위장 금지).
+    strategy_metrics = payload.get("strategy_llm_context")
+    if isinstance(strategy_metrics, dict) and strategy_metrics:
+        strategy_metrics_block = dict(strategy_metrics)
+    else:
+        strategy_metrics_block = None
+
     meta_block = {
         "market": "KRX", "currency": "KRW", "tz": "Asia/Seoul",
         "asof_kst": payload.get("order_kst", ""),
@@ -816,6 +833,8 @@ def build_messages(payload: dict, tech: dict, bars30: list) -> list[dict]:
         "recent_bars_desc": rows,
         "absent_fields": list(_ABSENT_FIELDS),
     }
+    if strategy_metrics_block:
+        user_obj["strategy_metrics"] = strategy_metrics_block
 
     # 검증 파인딩 #1 — **여기서 삼키지 않는다.** 종전 `except Exception: "{}"`
     # 폴백이 이 함수의 모든 실패(예: 직렬화 불가 값이 새어 들어온 경우)를

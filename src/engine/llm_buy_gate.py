@@ -678,6 +678,32 @@ def _read_scanner_snapshot(ticker):
     return name, market_cap_eok, trade_amount_eok, prdy_close, board_open
 
 
+def _read_strategy_llm_context(strategy_id, ticker) -> dict:
+    """전략별 핵심값(cycle445 B) — 레지스트리의 살아 있는 전략 객체에서
+    `llm_context(ticker)` 를 읽기만 한다.
+
+    `scheduler` 는 §10 leaf 허용 import 목록 밖이라(순환 차단 — `order_engine` 이
+    모듈 최상단에서 이 모듈을 import 한다) **함수 내 지연 import** 다
+    (`recommendation_engine.py` 의 같은 패턴). 전략이 `llm_context` 를
+    재정의하지 않았거나 조회 시점에 레지스트리가 비어 있으면 빈 dict — 그
+    전략이 아직 핵심값을 안 낸다는 뜻이지 실패를 감춘 것이 아니다.
+    """
+    try:
+        from src.engine.scheduler import trading_scheduler
+        strategy = trading_scheduler.registry.get(str(strategy_id))
+        if strategy is None:
+            return {}
+        fn = getattr(strategy, "llm_context", None)
+        if fn is None:
+            return {}
+        ctx = fn(str(ticker))
+        if not isinstance(ctx, dict):
+            return {}
+        return dict(ctx)
+    except Exception:
+        return {}
+
+
 def _board_by_clock(order_kst) -> str:
     """주문 접수 KST 시각만으로 파생하는 보드.
 
@@ -793,6 +819,11 @@ def _prompt_version(strategy_id) -> str:
     2026-10-08 §4.4). `model|hash` 형식이면 모델이 다르면 키 전체가 달라 자동으로
     분리된다. 모델 읽기 실패(설정 접근 예외)도 전체 계산 실패로 묶어 `""` 로 낙하한다
     (모델 접두만 없는 반쪽 버전 문자열을 만들지 않는다).
+
+    🔴 **cycle445 B — `llm_features.LLM_CONTEXT_SCHEMA_VERSION` 도 해시 blob 에
+    포함한다.** 전략별 핵심값(`strategy_metrics` 블록)이 user 메시지에 추가되면
+    SYSTEM_PROMPT·스냅샷 키·META 는 안 바뀌어도 실제 프롬프트 내용은 바뀐다 — 이
+    상수 하나로 그 구조 변화를 전 전략에 동시에 반영한다.
     """
     sid = str(strategy_id)
     if sid in _prompt_version_cache:
@@ -805,6 +836,11 @@ def _prompt_version(strategy_id) -> str:
             + str(_lf._USER_PREAMBLE)
             + "|".join(_lf.snapshot_keys_for(sid))
             + json.dumps(_lf._STRATEGY_META.get(sid, {}), sort_keys=True, ensure_ascii=False)
+            # cycle445 B — `strategy_metrics` 블록 추가로 user 메시지 구조가 바뀌어
+            # SYSTEM_PROMPT·스냅샷 키·META 중 어느 것도 안 바뀐 채 prompt_version 이
+            # 그대로일 수 있었다. 이 상수가 바뀌면(이번 배포에서 1회) 전 전략 버전이
+            # 함께 갈려 D7 과 같은 자리에 한 번만 리셋된다.
+            + str(getattr(_lf, "LLM_CONTEXT_SCHEMA_VERSION", ""))
         ).encode("utf-8")
         _prompt_version_cache[sid] = f"{model}|{hashlib.sha256(blob).hexdigest()[:12]}"
     except Exception:
@@ -983,6 +1019,10 @@ def observe_order(
             # §3.3 배선용 — 모델에는 실리지 않고(`snapshot_keys_for` 화이트리스트)
             # `input_payload` 에도 남지 않는다(`_PAYLOAD_EXCLUDED_KEYS`).
             "_stop_params": _read_stop_params(params),
+            # cycle445 B — 전략별 핵심값(ATR·EMA·스테이지 등). 전략이 재정의하지
+            # 않으면 빈 dict. `_PAYLOAD_EXCLUDED_KEYS` 밖이라 `input_payload` 감사
+            # 기록에 남는다.
+            "strategy_llm_context": _read_strategy_llm_context(strategy_id, tkr),
             "min_score": min_score,
             "daily_cap": daily_cap,
             "timeout_s": timeout_s,

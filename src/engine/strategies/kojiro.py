@@ -1526,6 +1526,21 @@ class KojiroStrategy(StrategyBase):
     def get_scan_stats(self) -> dict:
         return dict(self._scan_stats)
 
+    def llm_context(self, ticker: str) -> dict:
+        """AI 매수평가 핵심값(cycle445 B) — `_candidates` 의 ATR·스테이지·EMA 를 읽기만 한다."""
+        try:
+            info = self._candidates.get(ticker)
+            if not isinstance(info, dict):
+                return {}
+            out: dict = {}
+            for key in ("atr", "atr_ratio", "stage", "ema_s", "ema_m", "ema_l"):
+                v = info.get(key)
+                if v is not None:
+                    out[key] = v
+            return out
+        except Exception:
+            return {}
+
     def get_targets_status(self) -> dict[str, dict]:
         from src.engine.scanner import resolve_ticker_name
         return {
