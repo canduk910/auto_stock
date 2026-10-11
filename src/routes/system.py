@@ -17,7 +17,8 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, ConfigDict
 
 import src.db.system_config as _system_config_mod
-from src.db._kst import now_kst_iso
+from src.db._kst import now_kst_iso, today_kst
+from src.db.exit_ai import get_today_run_status
 from src.db.system_config import (
     PriceFilter,
     TradeAmountFilter,
@@ -149,13 +150,51 @@ async def get_price_filter_endpoint():
 # ---------------------------------------------------------------------------
 
 
+def _merge_exit_ai_run_failure(data: dict, run: dict) -> None:
+    """cycle446 D-6(최소안) — `llm_worker` 는 `system_logs` 에 쓰지 않으므로 오늘 워커
+    실행 자체를 `exit_ai_runs` 로 관찰한다. 실패가 있으면 「일일 작업 실패」(yellow)
+    범주에 1건을 더한다. `build_summary` 반환값을 그 자리에서 수정한다(매매 행위 0 —
+    청산 AI 섀도 기록은 읽기만 한다).
+    """
+    try:
+        n_failed = int(run.get("n_failed") or 0)
+    except (TypeError, ValueError):
+        n_failed = 0
+    if n_failed <= 0:
+        return
+    for cat in data.get("categories", []):
+        if cat.get("key") != "daily_job_failure":
+            continue
+        cat["count"] = (cat.get("count") or 0) + 1
+        if cat.get("max_level") is None:
+            cat["max_level"] = "WARNING"
+        finished = run.get("finished_at_iso")
+        if finished:
+            if cat.get("first_at") is None or finished < cat["first_at"]:
+                cat["first_at"] = finished
+            if cat.get("last_at") is None or finished > cat["last_at"]:
+                cat["last_at"] = finished
+        recents = cat.get("recent_messages") or []
+        if len(recents) < 5:
+            recents.append({
+                "level": "WARNING",
+                "message": f"[exit_ai_runs] run_date={run.get('run_date')} n_failed={n_failed} "
+                          f"status={run.get('status')}",
+                "timestamp": finished,
+            })
+        cat["recent_messages"] = recents
+        if data.get("status") == "green":
+            data["status"] = "yellow"
+        break
+
+
 @router.get("/alerts", response_model=ApiResponse)
 async def system_alerts():
     """대시보드 경고등 — 오늘(KST) 장부 불일치 · 주문 결과 모름/청산 실패 · 일일 작업
     실패를 범주별로 집계한다.
 
     명부(마커→범주)의 단일 정본 = `src/engine/alert_markers.py`. 매매 행위는 읽지
-    않는다(``system_logs`` 조회 1회뿐 — 8영역·`scheduler.py` 무접촉).
+    않는다(``system_logs`` 조회 1회 + `exit_ai_runs` 조회 1회 — 8영역·`scheduler.py` 무접촉).
 
     DB 조회가 실패하면 ``data.status`` 를 ``"green"`` 으로 내리지 않고 ``"unknown"``
     으로 돌려준다(「모름」과 「없음」을 구분).
@@ -171,6 +210,15 @@ async def system_alerts():
         )
 
     data = build_summary(rows, as_of_iso=now_kst_iso())
+
+    # cycle446 D-6(최소안) — 실패해도 system_logs 집계는 그대로 돌려준다(graceful).
+    try:
+        run = await get_today_run_status(today_kst())
+        if run is not None:
+            _merge_exit_ai_run_failure(data, run)
+    except Exception:
+        logger.debug("[system_alerts_exit_ai_check_failed] exit_ai_runs 조회 실패 graceful", exc_info=True)
+
     return ApiResponse(success=True, data=data, message="ok")
 
 

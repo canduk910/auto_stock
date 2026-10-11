@@ -39,6 +39,15 @@ export interface Holding {
   // 화면은 기존 식(평가손익 − 예상 매도비용)을 그대로 쓴다.
   buy_fee_paid?: number | null
   buy_fee_status?: 'settled' | 'estimated' | 'mixed' | null
+  // cycle446 D-6 — 청산 AI 섀도 기록(`llm_worker`)의 최근 판단. 「없음」(대상 전략 아님)과
+  // 「모름」(대상인데 아직 평가 없음·조회 실패)을 가른다 — 빈칸으로 접지 않는다.
+  ai_verdict?: {
+    status: 'not_applicable' | 'no_evaluation' | 'available'
+    action?: 'hold' | 'exit' | null
+    exit_score?: number | null
+    bar_date?: string | null
+    evaluated_at?: string | null
+  } | null
 }
 
 export interface BalanceSummary {

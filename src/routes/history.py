@@ -16,6 +16,7 @@ from src.db import stock_master_daily
 from src.db import trade_cost as trade_cost_db
 from src.db import trade_history as trade_history_db
 from src.db import trade_journal
+from src.db.exit_ai import EXIT_AI_STRATEGIES, get_evaluations_for_position
 from src.db.trade_history import get_trade_pairs, get_trades
 from src.engine import cost_overlay
 from src.engine import journal_view
@@ -264,6 +265,46 @@ def _journal_date(s: str | None) -> date | None:
         return None
 
 
+def _exit_ai_summary(rows: list) -> dict:
+    """cycle446 D-6 — 거래일지 카드의 「AI 청산 의견」 요지. `rows` = `bar_date` ASC 평가 전부.
+
+    신호가 한 번도 없으면(`action='hold'` 뿐이거나 기록이 전혀 없음) 「보유 판단 유지」로
+    묶는다 — 「없음」(대상 전략 아님)·「모름」(기록 자체가 없음)은 호출부가 가른다.
+    """
+    exits = [r for r in rows if r.get("action") == "exit"]
+    if not exits:
+        return {"status": "hold_all", "note": "보유 판단 유지"}
+    first = exits[0]
+    return {
+        "status": "exit_signaled",
+        "first_exit_bar_date": str(first["bar_date"]) if first.get("bar_date") else None,
+        "first_exit_score": first.get("exit_score"),
+        "first_exit_rationale": first.get("rationale"),
+    }
+
+
+async def _attach_exit_ai(card: dict, pair: dict) -> None:
+    """읽기만 — `card["exit_ai"]` 를 그 자리에서 채운다. 실패해도 카드 전체는 그대로 나간다."""
+    strategy_id = pair.get("strategy")
+    if strategy_id not in EXIT_AI_STRATEGIES:
+        card["exit_ai"] = {"status": "not_applicable"}
+        return
+    buy_date = _journal_date(pair.get("buy_date"))
+    if buy_date is None:
+        card["exit_ai"] = {"status": "no_evaluation"}
+        return
+    order_no = (pair.get("buy_order_nos") or [""])[0] or ""
+    try:
+        rows = await get_evaluations_for_position(
+            strategy_id=strategy_id, ticker=pair.get("ticker"), buy_date=buy_date, buy_order_no=order_no,
+        )
+    except Exception as exc:
+        logger.warning("%s get_evaluations_for_position 실패: %r", _JOURNAL_ERROR, exc, exc_info=True)
+        card["exit_ai"] = {"status": "lookup_failed"}
+        return
+    card["exit_ai"] = {"status": "no_evaluation"} if not rows else _exit_ai_summary(rows)
+
+
 def _pair_amount(pair: dict, basis: str):
     if basis == "net":
         v = pair.get("net_profit_loss")
@@ -509,11 +550,15 @@ async def trade_journal_view(
             | set(p.get("partial_sell_trade_ids") or [])
         pair_fills = None if fills is None else [f for f in fills if f.get("id") in want_ids]
         note = notes_by_id.get(p["buy_trade_ids"][0]) if p.get("buy_trade_ids") else None
-        cards.append(journal_view.build_card(
+        card = journal_view.build_card(
             p, fills=pair_fills, orders=orders, stops=stops, note=note, closes=closes,
             business_days=business_days, llm_evals=llm_evals, costs=per_fill_costs,
             record_start=record_start, now=now,
-        ))
+        )
+        # cycle446 D-6 — build_card(순수 leaf)의 계약을 바꾸지 않고 카드에 한 키를
+        # 덧붙인다. llm_worker 가 쓴 exit_ai_evaluations 를 읽기만 한다.
+        await _attach_exit_ai(card, p)
+        cards.append(card)
 
     return ApiResponse(success=True, data={
         "record_start": record_start,

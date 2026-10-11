@@ -10,7 +10,7 @@ import { strategyLabel } from '../utils/strategyMeta'
 import { formatKstDateTime } from '../utils/kst'
 import type { CostBasis } from '../utils/costBasis'
 import type {
-  Costs, Excursion, ExitLine, ExPoint, JournalCard as JournalCardType, OrderLine, Reason,
+  Costs, ExitAi, Excursion, ExitLine, ExPoint, JournalCard as JournalCardType, OrderLine, Reason,
   StopPoint, StopTrack, Target,
 } from '../types/journal'
 import type { NaKind } from '../types/journal'
@@ -392,6 +392,32 @@ function ExcursionBlock({ excursion }: { excursion: Excursion }) {
 }
 
 // ── 메모 ─────────────────────────────────────────────────────────────────────
+// cycle446 — 청산 AI 섀도 기록(`llm_worker`) 요지. 「없음」(대상 전략 아님)·「모름」(대상인데
+// 기록 없음·조회 실패)·「보유 판단 유지」·「청산 신호 있었음」 을 가른다(빈칸으로 접지 않는다).
+function ExitAiBlock({ exitAi }: { exitAi: ExitAi }) {
+  if (exitAi.status === 'not_applicable') {
+    return <div data-testid="journal-ai-opinion" className="text-xs text-gray-400">AI 청산 의견 — 대상 전략 아님</div>
+  }
+  if (exitAi.status === 'no_evaluation') {
+    return <div data-testid="journal-ai-opinion" className="text-xs text-gray-500">AI 청산 의견 — 아직 평가 없음</div>
+  }
+  if (exitAi.status === 'lookup_failed') {
+    return <div data-testid="journal-ai-opinion" className="text-xs text-amber-600">AI 청산 의견 — 조회 실패</div>
+  }
+  if (exitAi.status === 'hold_all') {
+    return <div data-testid="journal-ai-opinion" className="text-xs text-gray-600">AI 청산 의견 — {exitAi.note ?? '보유 판단 유지'}</div>
+  }
+  return (
+    <div data-testid="journal-ai-opinion" className="text-xs text-gray-700 space-y-0.5">
+      <div>
+        AI 청산 의견 — {exitAi.first_exit_bar_date} 보유 → 청산
+        {exitAi.first_exit_score != null && <> (점수 {exitAi.first_exit_score})</>}
+      </div>
+      {exitAi.first_exit_rationale && <div className="text-gray-500">{exitAi.first_exit_rationale}</div>}
+    </div>
+  )
+}
+
 function NoteBlock({ anchorTradeId, note }: { anchorTradeId: string; note: { body: string; updated_at: string } | null }) {
   const savedBody = note?.body ?? ''
   const [draft, setDraft] = useState(savedBody)
@@ -594,6 +620,10 @@ export default function JournalCard({ card, basis, stopsRecordStart }: Props) {
 
       <div className="border-t pt-2">
         <ExcursionBlock excursion={card.excursion} />
+      </div>
+
+      <div className="border-t pt-2">
+        <ExitAiBlock exitAi={card.exit_ai} />
       </div>
 
       <div className="border-t pt-2">
