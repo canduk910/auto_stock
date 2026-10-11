@@ -101,6 +101,17 @@ def _common_recommendation_mocks(monkeypatch: pytest.MonkeyPatch):
         return row
 
     monkeypatch.setattr(rec_mod, "insert_recommendation", fake_insert_recommendation)
+
+    # cycle445 D8 — 이 파일의 frozen 시각(2026-05-18, 월)은 주간 자문일(기본 목)이
+    # 아니라 게이트가 막는다. graceful degrade 경로를 재는 테스트라 요일 게이트는
+    # 항상 통과시킨다.
+    from src.engine import weekly_advisory as wa_mod
+
+    async def fake_should_run(now):
+        return {"run": True, "weekday_code": "thu", "configured_valid": False}
+
+    monkeypatch.setattr(wa_mod, "should_run_weekly_advisory", fake_should_run)
+
     return pr_store
 
 
