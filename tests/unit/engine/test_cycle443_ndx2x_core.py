@@ -90,28 +90,26 @@ def test_decide_daily_uses_last_index_and_matches_oracle():
 
 
 def test_r4_boundary_exactly_minus_20pct_is_cash_side():
-    """R4 == -0.20 정확히 → `<=` 라 조건2 성립(현금 성분). 돌연변이 표적 `<=`→`<`."""
-    # 완만히 하락하는 249개 값(최댓값 = ramp[0] = 100.0) + 마지막날 종가 = peak*0.80
-    # → R4 = close(t)/max(최근 250일 종가) - 1 = -0.20 정확히(부동소수 오차 없음).
-    ramp = [100.0 - 0.01 * i for i in range(249)]
-    closes = ramp + [80.0]
-    i = len(closes) - 1
-    r4 = core.compute_r4(closes, i)
-    assert r4 is not None and math.isclose(r4, core.R4_THRESHOLD, rel_tol=0, abs_tol=1e-12)
-    t7 = core.compute_t7(closes, i)
-    assert t7 is not None and t7 <= 0  # 완만한 하락 흐름 → 기울기 하락(조건1 거짓)
-    cell = core.research_cell(t7, r4)
+    """R4 == -0.20 정확히 → `<=` 라 조건2 성립(현금 성분). 돌연변이 표적 `<=`→`<`.
+
+    경계는 `research_cell`(칸 결정 함수)의 비교 연산 자체를 직접 겨눈다 — 부동소수
+    나눗셈으로 -0.20 을 bit-identical 하게 재현하는 것은 일반적으로 불가능하다
+    (`0.8 - 1.0 != -0.2`, IEEE754). 나눗셈 공식 자체의 날짜별 일치는 위 오라클
+    파라미터 테스트가 전 구간을 돈다.
+    """
+    cell = core.research_cell(t7=-0.01, r4=core.R4_THRESHOLD)
     assert cell == "01"
     assert core.state_for_cell(cell) == "cash"
 
 
 def test_t7_boundary_exactly_zero_is_slope_down_side():
     """T7 == 0 정확히 → `> 0` 이 아니므로 조건1 거짓(기울기 하락 성립). 돌연변이 표적 `>`→`>=`."""
-    flat = [100.0] * 400  # 평탄 — SMA120(t)와 SMA120(t-20) 이 항상 같다(T7 == 0)
-    i = 399
-    t7 = core.compute_t7(flat, i)
-    assert t7 == 0.0
-    assert core.research_cell(t7, 0.0)[0] == "0"  # 조건1 거짓 비트
+    cell = core.research_cell(t7=0.0, r4=0.0)
+    assert cell[0] == "0"  # 조건1 거짓 비트
+
+    # compute_t7 자체도 평탄 종가열에서 정확히 0.0 을 낸다는 사실(공식 계층)을 확인.
+    flat = [100.0] * 400  # SMA120(t) == SMA120(t-20) 항상 같다
+    assert core.compute_t7(flat, 399) == 0.0
 
 
 def test_insufficient_history_is_fail_closed_not_research_default():
