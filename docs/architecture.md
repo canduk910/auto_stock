@@ -279,8 +279,8 @@ flowchart TD
 | VolatilityBreakoutStrategy | `_targets`(K · `prev_range` · `target_offset_base` · `boards: {board: {open_price, target_price, target_offset}}`) · `_open_confirmed` · `_prev_price`(둘 다 보드별 dict) · `_cooldown_until` · `_failed_breakout_count` · `_next_day_clear_pending` |
 | LongTailVolatilityStrategy | VB 와 같은 `_targets` · `_open_confirmed` · `_prev_price` + `_limit_up_reached`(상한가 모드 종목) · `_cooldown_until`(2영업일) · `_next_day_clear_pending` |
 | DonchianSwingStrategy | `_candidates` · `_bought_today` · `_breakout_high`(진입 돌파선) · `_channel_low` · `_entry_atr`(터틀 랏 스탬프) · `_trading_days`(영업일 계산) |
-| BullFlagBreakoutStrategy | `_candidates` · `_bought_today` · `_breakout_first_seen`(돌파 유지 대기) · `_vol_latch`(거래량 래치) · `_cooldown_until`(3영업일) · `_position_setup`(진입 구조 스탬프) · `_partial_exit` · `_entry_atr` |
-| VcpBreakoutStrategy | `_candidates` · `_bought_today` · `_vol_latch` · `_cooldown_until`(7영업일) · `_position_setup` · `_entry_atr` · `_breakout_watch`(관측 전용) |
+| BullFlagBreakoutStrategy | `_candidates` · `_bought_today` · `_prev_price`(직전 틱 가격 — 돌파 순간 판정, 슬롯이 찬 동안에도 갱신) · `_breakout_first_seen`(돌파 유지 대기) · `_vol_latch`(거래량 래치) · `_cooldown_until`(3영업일) · `_position_setup`(진입 구조 스탬프) · `_partial_exit` · `_entry_atr` |
+| VcpBreakoutStrategy | `_candidates` · `_bought_today` · `_prev_price`(BFB 와 같다) · `_vol_latch` · `_cooldown_until`(7영업일) · `_position_setup` · `_entry_atr` · `_breakout_watch`(관측 전용) |
 | KojiroStrategy | `_candidates`(스테이지 · ATR · 점수) · `_bought_today` · `_stop_floor`(조이기만 하는 2ATR 손절선) · `_position_atr` · `_position_sectors` · `_held_stage3`(스테이지3 청산 판정) |
 
 **SessionTracker**
@@ -786,6 +786,8 @@ flowchart TD
 ```
 
 폴 루프가 없어 **WS 구독이 곧 매수 기회**다 — 후보는 `breakout` 그룹(LOW)으로 구독된다.
+
+`max_positions` 가 찬 동안에도 직전 틱 가격은 따라간다. 슬롯이 비는 첫 틱에 이미 `flag_high` 위에 있던 종목을 「방금 돌파」로 읽지 않기 위해서다. 그런 종목은 선 아래로 내려갔다가 다시 넘어야 산다(8.6 VCP 도 같다 · 규칙 = `src/engine/strategies/CLAUDE.md` 각주 ①).
 
 ### 8.6 VCP 돌파 (미네르비니)
 

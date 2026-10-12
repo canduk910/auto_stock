@@ -1418,6 +1418,36 @@ class VcpBreakoutStrategy(StrategyBase):
     # ------------------------------------------------------------------
     # 신호 평가
     # ------------------------------------------------------------------
+    def _track_baseline_while_full(self, ticker, current_price) -> None:
+        """cycle449 — 만석(`is_max_positions`)인 동안에도 직전 가격(`_prev_price`)을 따라간다.
+
+        얼려 두면 슬롯이 빈 첫 틱에 이미 `base_high` 위에 있던 종목이 `prev < base_high <=
+        current` 로 읽혀 거짓 돌파로 산다(VB·LTV 09:00 진입 보류와 같은 규약). 래치 무장
+        종목은 건드리지 않는다(`_prev_price` 는 fresh 경로에서만 read-then-write).
+        동기·순수 메모리·never-raise.
+        """
+        try:
+            info = self._candidates.get(ticker)
+            if not info or current_price <= 0:
+                return
+            if ticker in self._vol_latch and self._latch_entry(ticker) is not None:
+                return  # 오늘자 래치만 불가침 — 낡은 래치는 `_latch_entry` 가 읽으며 지운다
+            self._roll_gate_day_if_needed()
+            prev = self._prev_price.get(ticker, 0)
+            try:
+                base_high = info["base_high"]
+                if base_high > 0 and 0 < prev < base_high <= current_price:
+                    if self._gate_should_emit(ticker, "full_cross"):
+                        logger.info(
+                            "[vcp_full_cross_skipped] ticker=%s base_high=%s price=%s prev=%s",
+                            ticker, base_high, current_price, prev,
+                        )
+            except Exception:
+                pass  # 관측 실패가 아래 직전 가격 갱신을 막으면 안 된다
+            self._prev_price[ticker] = current_price
+        except Exception:
+            return
+
     def check_buy_signal(self, ticker, current_price, open_price) -> Signal:
         # cycle233 — 계좌 SOFT Σ상한 순간 게이트 (다크런치·fail-open, 신규 매수만)
         if self._account_soft_gate_blocked(ticker):
@@ -1433,6 +1463,7 @@ class VcpBreakoutStrategy(StrategyBase):
         if ticker in self._bought_today:
             return Signal.NONE
         if self.is_max_positions():
+            self._track_baseline_while_full(ticker, current_price)
             return Signal.NONE
         if self.is_daily_loss_exceeded():
             return Signal.NONE

@@ -974,6 +974,37 @@ class BullFlagBreakoutStrategy(StrategyBase):
     # ------------------------------------------------------------------
     # 신호 평가
     # ------------------------------------------------------------------
+    def _track_baseline_while_full(self, ticker, current_price) -> None:
+        """cycle449 — 만석(`is_max_positions`)인 동안에도 직전 가격(`_prev_price`)을 따라간다.
+
+        얼려 두면 슬롯이 빈 첫 틱에 이미 `flag_high` 위에 있던 종목이 `prev < flag_high <=
+        current` 로 읽혀 거짓 돌파로 산다(VB·LTV 09:00 진입 보류와 같은 규약). 래치 무장
+        종목은 건드리지 않는다(`_prev_price` 는 fresh 경로에서만 read-then-write). 만석이
+        지운 돌파 대기는 「후퇴」가 아니라 카운터·로그 없이 버린다. 동기·순수 메모리·never-raise.
+        """
+        try:
+            info = self._candidates.get(ticker)
+            if not info or current_price <= 0:
+                return
+            if ticker in self._vol_latch and self._latch_entry(ticker) is not None:
+                return  # 오늘자 래치만 불가침 — 낡은 래치는 `_latch_entry` 가 읽으며 지운다
+            self._roll_gate_day_if_needed()
+            self._breakout_first_seen.pop(ticker, None)
+            prev = self._prev_price.get(ticker, 0)
+            try:
+                flag_high = info["flag_high"]
+                if flag_high > 0 and 0 < prev < flag_high <= current_price:
+                    if self._gate_should_emit(ticker, "full_cross"):
+                        logger.info(
+                            "[bfb_full_cross_skipped] ticker=%s flag_high=%s price=%s prev=%s",
+                            ticker, flag_high, current_price, prev,
+                        )
+            except Exception:
+                pass  # 관측 실패가 아래 직전 가격 갱신을 막으면 안 된다
+            self._prev_price[ticker] = current_price
+        except Exception:
+            return
+
     def check_buy_signal(self, ticker, current_price, open_price) -> Signal:
         # cycle233 — 계좌 SOFT Σ상한 순간 게이트 (다크런치·fail-open, 신규 매수만)
         if self._account_soft_gate_blocked(ticker):
@@ -987,6 +1018,7 @@ class BullFlagBreakoutStrategy(StrategyBase):
         if ticker in self._bought_today:
             return Signal.NONE
         if self.is_max_positions():
+            self._track_baseline_while_full(ticker, current_price)
             return Signal.NONE
         if self.is_daily_loss_exceeded():
             return Signal.NONE
@@ -1043,7 +1075,8 @@ class BullFlagBreakoutStrategy(StrategyBase):
 
         # 사이클 23 P2-1 — breakout_retention_minutes 유지시간 가드 (기존 상태
         # 기계, cycle228 변경 0 — 명세 A2 "edge-crossing 등 기존 진입 로직 무변경".
-        # ⚠️ `_prev_price` 는 **이 fresh 경로에서만** read-then-write 한다 — 래치
+        # ⚠️ `_prev_price` 는 **이 fresh 경로에서만** read-then-write 한다(그 밖의
+        # 쓰기는 만석 추적 `_track_baseline_while_full` 하나, cycle449) — 래치
         # 재평가 경로(위)에서 건드리면 "붕괴가 만든 거래량으로 죽은 셋업을 사는"
         # 역선택이 미관측 재무장으로 되살아난다(001450 회귀, flag_low 이탈 후
         # 되돌아온 가격은 **진짜 edge-crossing 없이는** 재평가되지 않아야 한다).

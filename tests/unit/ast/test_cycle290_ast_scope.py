@@ -158,8 +158,11 @@ _SEGMENT_SHA: dict[tuple[str, str], str] = {
     # 🔁 cycle382 재핀 — `_refresh_market_unit` 호출 삽입(`_resolve_prepare_as_of` 직후).
     ("donchian_swing", "prepare"):
         "a2c018d3fa4e416bb7c92325d325d9fad7c88f86a62328500e410c3c455d930a",
+    # 🔁 cycle449 재핀 — 만석 직전 가격 추적(사용자 결정 2026-10-12): `is_max_positions()` 반환
+    # 앞에 `_track_baseline_while_full(...)` 호출 1줄 + fresh 경로 주석에 만석 추적 언급 1줄.
+    # 그 밖 무변경. 직전 값 = `b39b26fb398ca352edaf91816b4aed04cd50f47aef29d13a8b82af0f6580ed7d`.
     ("bull_flag_breakout", "check_buy_signal"):
-        "b39b26fb398ca352edaf91816b4aed04cd50f47aef29d13a8b82af0f6580ed7d",
+        "6cdde2b094d986e85fd5ad57d461b8d705fa860d154ac95e7b3941478170f248",
     ("bull_flag_breakout", "check_exit_signal"):
         "850f503be242249b164d44cbb6100f2f764cfa23fa8e95a669b422c22d95daed",
     # 🔁 cycle382 재핀 — 시장 유닛(단계형) `_market_unit_sizing` 진입 훅.
@@ -177,7 +180,10 @@ _SEGMENT_SHA: dict[tuple[str, str], str] = {
     ("vcp_breakout", "check_buy_signal"):
         # cycle349 재핀 — VCP 관측 ①③(돌파선 거리 줄 · 틱 관측 훅 · watch). 매매 경로 diff 0
         # = 확장 전 HEAD 산출 골든 G1(prepare)·G2(check_buy_signal) 완전 일치로 확인.
-        "e50969e3ffcdd8f7b5f8ce0bd61e67852436e4ead7130c54006a2f22c11adb6f",
+        # 🔁 cycle449 재핀 — 만석 직전 가격 추적(사용자 결정 2026-10-12): `is_max_positions()`
+        # 반환 앞에 `_track_baseline_while_full(...)` 호출 1줄. 그 밖 무변경.
+        # 직전 값 = `e50969e3ffcdd8f7b5f8ce0bd61e67852436e4ead7130c54006a2f22c11adb6f`.
+        "00cefe90167f96c4f6b287d07801c5604696fd7f600e5fac32cd5a6a74e1532d",
     ("vcp_breakout", "check_exit_signal"):
         "abfb25485f91e18aa4a1297002575990ef58aa4b4f3db791efbb29bfe4cdc877",
     # 🔁 cycle382 재핀 — 시장 유닛(단계형) `_market_unit_sizing` 진입 훅.
