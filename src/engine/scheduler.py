@@ -2915,8 +2915,10 @@ class TradingScheduler:
         등록된 것만으로 `_swing_rest_poll_loop`(09:05~15:20, 60s)의 risk.on_tick generic
         보유 순회가 자동 커버한다(scheduler 추가 배선 0).
         """
+        from datetime import datetime as _datetime
         from src.api.condition import fetch_stock_detail
         from src.engine import ndx2x_core as _ndx2x_core
+        from src.engine.scanner import KST_TZ as _KST
         from src.engine.strategy_base import Signal as _Signal
 
         async def _sleep_chunked(total_secs: float, *, chunk_secs: float = 5.0) -> None:
