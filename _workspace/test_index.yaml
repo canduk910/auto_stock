@@ -1037,6 +1037,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
@@ -2415,6 +2416,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -3803,6 +3805,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -5183,6 +5186,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -6565,6 +6569,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -7949,6 +7954,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -9333,6 +9339,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -10718,6 +10725,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -12106,6 +12114,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -13486,6 +13495,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -14869,6 +14879,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -16329,6 +16340,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -17711,6 +17723,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -19115,6 +19128,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -20500,6 +20514,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -21893,6 +21908,7 @@ backend:
     - tests/unit/engine/test_cycle448_strategy_core_metrics.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -23266,6 +23282,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -24653,6 +24670,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -26035,6 +26053,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -27419,6 +27438,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -28890,6 +28910,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -30274,6 +30295,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -31660,6 +31682,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -33042,6 +33065,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -34426,6 +34450,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -35810,6 +35835,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -37194,6 +37220,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -38578,6 +38605,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -39965,6 +39993,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -41351,6 +41380,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -42731,6 +42761,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -44114,6 +44145,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -45500,6 +45532,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -46882,6 +46915,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -48270,6 +48304,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -49657,6 +49692,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -51039,6 +51075,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -52426,6 +52463,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -53880,6 +53918,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -55265,6 +55304,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -56649,6 +56689,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -58034,6 +58075,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -59491,6 +59533,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -60876,6 +60919,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -62259,6 +62303,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -63643,6 +63688,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -65027,6 +65073,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -66411,6 +66458,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -66779,6 +66827,7 @@ backend:
     - tests/unit/engine/test_cycle411b_cost_overlay_engine_fixes.py
     - tests/unit/engine/test_cycle411c_cost_overlay_engine_fixes2.py
     - tests/unit/engine/test_cycle411d_cost_overlay_warn_fixes.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/routes/test_cycle411b_cost_overlay_route_fixes.py
     transitive_tests:
     - tests/contract/test_backtest_mcp_health.py
@@ -67884,6 +67933,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -69274,6 +69324,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -70653,6 +70704,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -72037,6 +72089,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -73421,6 +73474,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -74806,6 +74860,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -76189,6 +76244,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -77647,6 +77703,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -79031,6 +79088,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -80417,6 +80475,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -81799,6 +81858,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -83183,6 +83243,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -84648,6 +84709,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -86030,6 +86092,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -87484,6 +87547,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -88872,6 +88936,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -90263,6 +90328,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -91709,6 +91775,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -93095,6 +93162,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -94477,6 +94545,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -95861,6 +95930,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -97245,6 +97315,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -98629,6 +98700,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -100013,6 +100085,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -101397,6 +101470,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -102781,6 +102855,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -104164,6 +104239,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -105652,6 +105728,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -107124,6 +107201,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -108680,6 +108758,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -110065,6 +110144,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -111449,6 +111529,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -112842,6 +112923,7 @@ backend:
     - tests/unit/engine/test_cycle448_strategy_core_metrics.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -114219,6 +114301,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -115604,6 +115687,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -116983,6 +117067,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -118440,6 +118525,7 @@ backend:
     - tests/unit/engine/test_cycle448_strategy_core_metrics.py
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -119840,6 +119926,7 @@ backend:
     - tests/unit/engine/test_cycle447_account_risk_masking.py
     - tests/unit/engine/test_cycle448_strategy_core_metrics.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle61_phase2A2_dataclass_completeness.py
     - tests/unit/engine/test_cycle61_phase2A2_dependency_direction.py
@@ -121138,6 +121225,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -122522,6 +122610,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -123904,6 +123993,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -125287,6 +125377,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -126673,6 +126764,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -128076,6 +128168,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -129440,6 +129533,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -130842,6 +130936,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -132209,6 +132304,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -133591,6 +133687,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -134975,6 +135072,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -136360,6 +136458,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -137744,6 +137843,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -139128,6 +139228,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -140516,6 +140617,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -141928,6 +142030,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -143315,6 +143418,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -144694,6 +144798,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -146084,6 +146189,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -147463,6 +147569,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -148847,6 +148954,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -150229,6 +150337,7 @@ backend:
     - tests/unit/engine/test_cycle448_strategy_core_metrics.py
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -151617,6 +151726,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -153002,6 +153112,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -154417,6 +154528,7 @@ backend:
     - tests/unit/engine/test_cycle447_account_risk_masking.py
     - tests/unit/engine/test_cycle448_strategy_core_metrics.py
     - tests/unit/engine/test_cycle448_weekly_payload.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle48_stale_tracker_state.py
@@ -155765,6 +155877,7 @@ backend:
     - tests/unit/engine/test_cycle447_account_risk_masking.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -157151,6 +157264,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -158555,6 +158669,7 @@ backend:
     - tests/unit/engine/test_cycle448_strategy_core_metrics.py
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -159918,6 +160033,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -161301,6 +161417,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -162775,6 +162892,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -164160,6 +164278,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -165542,6 +165661,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -166929,6 +167049,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -168310,6 +168431,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -169694,6 +169816,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -171077,6 +171200,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -172463,6 +172587,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -173846,6 +173971,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -175237,6 +175363,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -176618,6 +176745,7 @@ backend:
     - tests/unit/engine/test_cycle448_strategy_core_metrics.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -178073,6 +178201,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -179457,6 +179586,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -180845,6 +180975,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -182234,6 +182365,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -183687,6 +183819,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -185073,6 +185206,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -186531,6 +186665,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -188111,6 +188246,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -189568,6 +189704,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -190982,6 +191119,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -192348,6 +192486,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -193749,6 +193888,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -195132,6 +195272,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
     - tests/unit/engine/test_cycle48_bfb_vcp_subscription_wiring.py
@@ -198486,6 +198627,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -199867,6 +200009,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -201254,6 +201397,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -202635,6 +202779,7 @@ backend:
     - tests/unit/engine/test_cycle448_weekly_payload.py
     - tests/unit/engine/test_cycle44_resolve_ticker_name.py
     - tests/unit/engine/test_cycle450_ndx2x_poll_loop.py
+    - tests/unit/engine/test_cycle451_latest_day_rates.py
     - tests/unit/engine/test_cycle45_cache_auto_evict.py
     - tests/unit/engine/test_cycle46_session_health_loop.py
     - tests/unit/engine/test_cycle47_funnel_pipeline_dry.py
@@ -206582,10 +206727,10 @@ frontend:
     - frontend/src/pages/__tests__/Dashboard.fix1.cycle414.test.tsx
     - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
     - frontend/src/pages/__tests__/MarketState.test.tsx
-generated_at: '2026-10-13T07:05:53.038574+09:00'
+generated_at: '2026-10-13T10:39:42.792699+09:00'
 stats:
   backend_modules: 196
-  backend_tests: 1381
+  backend_tests: 1382
   frontend_modules: 158
   frontend_tests: 174
   unmapped_modules:

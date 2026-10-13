@@ -1,0 +1,342 @@
+
+===== IDX_1997_2026 83960 1997-01-03 2026-10-02
+ -- KOSDAQ
+    QQ {'n': 27365, 'mean': np.float64(-0.682), 'ci90': [-1.101, -0.241], 'median': np.float64(-7.151), 'win': np.float64(0.239), 'R': np.float64(-0.027), 'weeks': 940}
+    K0Q+ {'n': 3045, 'mean': np.float64(-1.455), 'ci90': [-2.838, -0.11], 'median': np.float64(-7.217), 'win': np.float64(0.239), 'R': np.float64(-0.155), 'weeks': 148}
+    K+Q0 {'n': 4417, 'mean': np.float64(-2.354), 'ci90': [-3.02, -1.639], 'median': np.float64(-7.309), 'win': np.float64(0.234), 'R': np.float64(-0.187), 'weeks': 294}
+    00 {'n': 5330, 'mean': np.float64(-2.69), 'ci90': [-3.644, -1.688], 'median': np.float64(-8.093), 'win': np.float64(0.224), 'R': np.float64(-0.219), 'weeks': 331}
+    K0Q+_minus_00 {'diff': 1.235, 'lo90': -0.416, 'hi90': 2.984, 'nA': 3045, 'nB': 5330}
+    K+Q0_minus_QQ {'diff': -1.672, 'lo90': -2.482, 'hi90': -0.881, 'nA': 4417, 'nB': 27365}
+    K0Q+_minus_QQ {'diff': -0.773, 'lo90': -2.221, 'hi90': 0.739, 'nA': 3045, 'nB': 27365}
+    K+Q0_minus_00 {'diff': 0.337, 'lo90': -0.847, 'hi90': 1.511, 'nA': 4417, 'nB': 5330}
+    split_by_kq {'diff': 1.779, 'lo90': 0.999, 'hi90': 2.504, 'nA': 30410, 'nB': 9747}
+    split_by_kp {'diff': 1.327, 'lo90': 0.429, 'hi90': 2.295, 'nA': 31782, 'nB': 8375}
+    large {'QQ': {'n': 9346, 'mean': np.float64(0.136)}, 'K0Q+': {'n': 1081, 'mean': np.float64(-0.488)}, 'K+Q0': {'n': 1720, 'mean': np.float64(-1.168)}, '00': {'n': 1969, 'mean': np.float64(-0.98)}}
+      K0Q+-00 {'diff': 0.492, 'lo90': -1.992, 'hi90': 3.057, 'nA': 1081, 'nB': 1969} K+Q0-QQ {'diff': -1.304, 'lo90': -2.381, 'hi90': -0.175, 'nA': 1720, 'nB': 9346}
+      by_kq {'diff': 1.139, 'lo90': -0.08, 'hi90': 2.356, 'nA': 10427, 'nB': 3689} by_kp {'diff': 0.739, 'lo90': -0.89, 'hi90': 2.179, 'nA': 11066, 'nB': 3050}
+    small {'QQ': {'n': 18019, 'mean': np.float64(-1.106)}, 'K0Q+': {'n': 1964, 'mean': np.float64(-1.987)}, 'K+Q0': {'n': 2697, 'mean': np.float64(-3.11)}, '00': {'n': 3361, 'mean': np.float64(-3.692)}}
+      K0Q+-00 {'diff': 1.705, 'lo90': 0.152, 'hi90': 3.404, 'nA': 1964, 'nB': 3361} K+Q0-QQ {'diff': -2.004, 'lo90': -2.875, 'hi90': -1.073, 'nA': 2697, 'nB': 18019}
+      by_kq {'diff': 2.241, 'lo90': 1.509, 'hi90': 3.005, 'nA': 19983, 'nB': 6058} by_kp {'diff': 1.697, 'lo90': 0.825, 'hi90': 2.613, 'nA': 20716, 'nB': 5325}
+ -- KOSPI
+    QQ {'n': 27650, 'mean': np.float64(0.499), 'ci90': [-0.008, 1.026], 'median': np.float64(-5.364), 'win': np.float64(0.282), 'R': np.float64(0.115), 'weeks': 973}
+    K0Q+ {'n': 2911, 'mean': np.float64(-2.578), 'ci90': [-3.39, -1.745], 'median': np.float64(-5.993), 'win': np.float64(0.217), 'R': np.float64(-0.276), 'weeks': 160}
+    K+Q0 {'n': 7079, 'mean': np.float64(-0.373), 'ci90': [-1.889, 1.354], 'median': np.float64(-5.692), 'win': np.float64(0.261), 'R': np.float64(0.031), 'weeks': 313}
+    00 {'n': 6163, 'mean': np.float64(-0.7), 'ci90': [-1.975, 0.702], 'median': np.float64(-6.376), 'win': np.float64(0.24), 'R': np.float64(-0.087), 'weeks': 367}
+    K0Q+_minus_00 {'diff': -1.878, 'lo90': -3.452, 'hi90': -0.396, 'nA': 2911, 'nB': 6163}
+    K+Q0_minus_QQ {'diff': -0.872, 'lo90': -2.543, 'hi90': 0.959, 'nA': 7079, 'nB': 27650}
+    K0Q+_minus_QQ {'diff': -3.076, 'lo90': -4.087, 'hi90': -2.134, 'nA': 2911, 'nB': 27650}
+    K+Q0_minus_00 {'diff': 0.327, 'lo90': -1.489, 'hi90': 2.223, 'nA': 7079, 'nB': 6163}
+    split_by_kq {'diff': 0.731, 'lo90': -0.505, 'hi90': 1.911, 'nA': 30561, 'nB': 13242}
+    split_by_kp {'diff': 1.623, 'lo90': 0.548, 'hi90': 2.678, 'nA': 34729, 'nB': 9074}
+    large {'QQ': {'n': 13362, 'mean': np.float64(1.241)}, 'K0Q+': {'n': 1320, 'mean': np.float64(-2.053)}, 'K+Q0': {'n': 3782, 'mean': np.float64(-0.079)}, '00': {'n': 3154, 'mean': np.float64(-0.751)}}
+      K0Q+-00 {'diff': -1.302, 'lo90': -2.7, 'hi90': 0.053, 'nA': 1320, 'nB': 3154} K+Q0-QQ {'diff': -1.32, 'lo90': -2.71, 'hi90': 0.252, 'nA': 3782, 'nB': 13362}
+      by_kq {'diff': 1.329, 'lo90': 0.157, 'hi90': 2.435, 'nA': 14682, 'nB': 6936} by_kp {'diff': 2.084, 'lo90': 1.026, 'hi90': 3.057, 'nA': 17144, 'nB': 4474}
+    small {'QQ': {'n': 14288, 'mean': np.float64(-0.195)}, 'K0Q+': {'n': 1591, 'mean': np.float64(-3.013)}, 'K+Q0': {'n': 3297, 'mean': np.float64(-0.71)}, '00': {'n': 3009, 'mean': np.float64(-0.646)}}
+      K0Q+-00 {'diff': -2.367, 'lo90': -4.717, 'hi90': -0.28, 'nA': 1591, 'nB': 3009} K+Q0-QQ {'diff': -0.515, 'lo90': -2.435, 'hi90': 1.725, 'nA': 3297, 'nB': 14288}
+      by_kq {'diff': 0.202, 'lo90': -1.354, 'hi90': 1.652, 'nA': 15879, 'nB': 6306} by_kp {'diff': 1.173, 'lo90': -0.312, 'hi90': 2.574, 'nA': 17585, 'nB': 4600}
+ methods ALL
+    U_균등 {'buyable': 1.0, 'mean_m': 1.0, 'eff_pct': np.float64(-0.578), 'cap_pct': np.float64(-0.5775), 'eff_minus_A': [-0.591, -0.422, -0.237], 'cap_minus_A': [-0.6283, -0.469, -0.2994]}
+    A_코스피 {'buyable': 0.792, 'mean_m': 0.711, 'eff_pct': np.float64(-0.156), 'cap_pct': np.float64(-0.1111), 'eff_minus_A': [0.0, 0.0, 0.0], 'cap_minus_A': [0.0, 0.0, 0.0]}
+    B_소속시장 {'buyable': 0.776, 'mean_m': 0.687, 'eff_pct': np.float64(-0.078), 'cap_pct': np.float64(-0.0538), 'eff_minus_A': [-0.0, 0.079, 0.157], 'cap_minus_A': [0.0021, 0.0584, 0.1132]}
+    C_min {'buyable': 0.655, 'mean_m': 0.556, 'eff_pct': np.float64(0.009), 'cap_pct': np.float64(0.0052), 'eff_minus_A': [-0.025, 0.175, 0.346], 'cap_minus_A': [-0.0159, 0.1223, 0.2353]}
+    D_max {'buyable': 0.863, 'mean_m': 0.787, 'eff_pct': np.float64(-0.316), 'cap_pct': np.float64(-0.2489), 'eff_minus_A': [-0.249, -0.158, -0.07], 'cap_minus_A': [-0.2034, -0.1364, -0.0738]}
+    E_평균 {'buyable': 0.863, 'mean_m': 0.671, 'eff_pct': np.float64(-0.181), 'cap_pct': np.float64(-0.1218), 'eff_minus_A': [-0.119, -0.019, 0.068], 'cap_minus_A': [-0.0817, -0.0079, 0.0582]}
+ methods KOSDAQ
+    U_균등 {'buyable': 1.0, 'mean_m': 1.0, 'eff_pct': np.float64(-1.191), 'cap_pct': np.float64(-1.1908), 'eff_minus_A': [-0.609, -0.406, -0.2], 'cap_minus_A': [-0.811, -0.631, -0.451]}
+    A_코스피 {'buyable': 0.791, 'mean_m': 0.711, 'eff_pct': np.float64(-0.782), 'cap_pct': np.float64(-0.556), 'eff_minus_A': [0.0, 0.0, 0.0], 'cap_minus_A': [0.0, 0.0, 0.0]}
+    B_소속시장 {'buyable': 0.757, 'mean_m': 0.66, 'eff_pct': np.float64(-0.661), 'cap_pct': np.float64(-0.4362), 'eff_minus_A': [-0.046, 0.126, 0.294], 'cap_minus_A': [0.0043, 0.1224, 0.2373]}
+    C_min {'buyable': 0.681, 'mean_m': 0.578, 'eff_pct': np.float64(-0.544), 'cap_pct': np.float64(-0.3146), 'eff_minus_A': [0.118, 0.239, 0.364], 'cap_minus_A': [0.1668, 0.2424, 0.3148]}
+    D_max {'buyable': 0.867, 'mean_m': 0.793, 'eff_pct': np.float64(-0.855), 'cap_pct': np.float64(-0.6776), 'eff_minus_A': [-0.193, -0.072, 0.055], 'cap_minus_A': [-0.2117, -0.1203, -0.0276]}
+    E_평균 {'buyable': 0.867, 'mean_m': 0.685, 'eff_pct': np.float64(-0.724), 'cap_pct': np.float64(-0.4961), 'eff_minus_A': [-0.022, 0.061, 0.141], 'cap_minus_A': [0.0021, 0.0612, 0.1187]}
+ methods KOSPI
+    U_균등 {'buyable': 1.0, 'mean_m': 1.0, 'eff_pct': np.float64(-0.015), 'cap_pct': np.float64(-0.0152), 'eff_minus_A': [-0.66, -0.442, -0.188], 'cap_minus_A': [-0.5322, -0.3188, -0.0893]}
+    A_코스피 {'buyable': 0.793, 'mean_m': 0.711, 'eff_pct': np.float64(0.417), 'cap_pct': np.float64(0.2968), 'eff_minus_A': [0.0, 0.0, 0.0], 'cap_minus_A': [0.0, 0.0, 0.0]}
+    B_소속시장 {'buyable': 0.793, 'mean_m': 0.711, 'eff_pct': np.float64(0.417), 'cap_pct': np.float64(0.2968), 'eff_minus_A': [0.0, 0.0, 0.0], 'cap_minus_A': [0.0, 0.0, 0.0]}
+    C_min {'buyable': 0.631, 'mean_m': 0.535, 'eff_pct': np.float64(0.558), 'cap_pct': np.float64(0.2985), 'eff_minus_A': [-0.181, 0.158, 0.441], 'cap_minus_A': [-0.2216, 0.0146, 0.2033]}
+    D_max {'buyable': 0.859, 'mean_m': 0.783, 'eff_pct': np.float64(0.184), 'cap_pct': np.float64(0.1442), 'eff_minus_A': [-0.326, -0.23, -0.147], 'cap_minus_A': [-0.2107, -0.1506, -0.0988]}
+    E_평균 {'buyable': 0.859, 'mean_m': 0.659, 'eff_pct': np.float64(0.336), 'cap_pct': np.float64(0.2213), 'eff_minus_A': [-0.233, -0.073, 0.059], 'cap_minus_A': [-0.1905, -0.0707, 0.0315]}
+
+===== IDX_1997_2008 26761 1997-01-03 2008-12-30
+ -- KOSDAQ
+    QQ {'n': 6755, 'mean': np.float64(-1.79), 'ci90': [-2.807, -0.711], 'median': np.float64(-8.929), 'win': np.float64(0.215), 'R': np.float64(-0.084), 'weeks': 327}
+    K0Q+ {'n': 226, 'mean': np.float64(-4.306), 'ci90': [-9.998, 2.04], 'median': np.float64(-12.371), 'win': np.float64(0.221), 'R': np.float64(-0.243), 'weeks': 17}
+    K+Q0 {'n': 1331, 'mean': np.float64(-3.905), 'ci90': [-5.259, -2.44], 'median': np.float64(-9.087), 'win': np.float64(0.201), 'R': np.float64(-0.333), 'weeks': 108}
+    00 {'n': 1665, 'mean': np.float64(-4.537), 'ci90': [-7.017, -1.793], 'median': np.float64(-11.386), 'win': np.float64(0.175), 'R': np.float64(-0.306), 'weeks': 151}
+    K0Q+_minus_00 {'diff': 0.23, 'lo90': -5.92, 'hi90': 6.538, 'nA': 226, 'nB': 1665}
+    K+Q0_minus_QQ {'diff': -2.115, 'lo90': -3.811, 'hi90': -0.425, 'nA': 1331, 'nB': 6755}
+    K0Q+_minus_QQ {'diff': -2.516, 'lo90': -8.209, 'hi90': 3.785, 'nA': 226, 'nB': 6755}
+    K+Q0_minus_00 {'diff': 0.631, 'lo90': -2.295, 'hi90': 3.432, 'nA': 1331, 'nB': 1665}
+    split_by_kq {'diff': 2.385, 'lo90': 0.439, 'hi90': 4.33, 'nA': 6981, 'nB': 2996}
+    split_by_kp {'diff': 2.371, 'lo90': -0.296, 'hi90': 4.917, 'nA': 8086, 'nB': 1891}
+    large {'QQ': {'n': 2940, 'mean': np.float64(-0.667)}, 'K0Q+': {'n': 106, 'mean': np.float64(-1.889)}, 'K+Q0': {'n': 603, 'mean': np.float64(-3.111)}, '00': {'n': 784, 'mean': np.float64(-1.261)}}
+      K0Q+-00 {'diff': -0.628, 'lo90': -8.356, 'hi90': 8.5, 'nA': 106, 'nB': 784} K+Q0-QQ {'diff': -2.445, 'lo90': -4.579, 'hi90': -0.23, 'nA': 603, 'nB': 2940}
+      by_kq {'diff': 1.356, 'lo90': -1.691, 'hi90': 4.163, 'nA': 3046, 'nB': 1387} by_kp {'diff': 0.253, 'lo90': -4.02, 'hi90': 4.183, 'nA': 3543, 'nB': 890}
+    small {'QQ': {'n': 3815, 'mean': np.float64(-2.656)}, 'K0Q+': {'n': 120, 'mean': np.float64(-6.441)}, 'K+Q0': {'n': 728, 'mean': np.float64(-4.563)}, '00': {'n': 881, 'mean': np.float64(-7.452)}}
+      K0Q+-00 {'diff': 1.01, 'lo90': -5.552, 'hi90': 7.73, 'nA': 120, 'nB': 881} K+Q0-QQ {'diff': -1.907, 'lo90': -3.974, 'hi90': 0.174, 'nA': 728, 'nB': 3815}
+      by_kq {'diff': 3.373, 'lo90': 1.617, 'hi90': 5.201, 'nA': 3935, 'nB': 1609} by_kp {'diff': 4.369, 'lo90': 2.238, 'hi90': 6.55, 'nA': 4543, 'nB': 1001}
+ -- KOSPI
+    QQ {'n': 10001, 'mean': np.float64(1.055), 'ci90': [-0.095, 2.251], 'median': np.float64(-6.634), 'win': np.float64(0.291), 'R': np.float64(0.236), 'weeks': 360}
+    K0Q+ {'n': 510, 'mean': np.float64(-5.997), 'ci90': [-8.76, -3.169], 'median': np.float64(-9.745), 'win': np.float64(0.19), 'R': np.float64(-0.478), 'weeks': 31}
+    K+Q0 {'n': 3327, 'mean': np.float64(-0.095), 'ci90': [-3.179, 3.695], 'median': np.float64(-8.054), 'win': np.float64(0.24), 'R': np.float64(0.101), 'weeks': 126}
+    00 {'n': 2946, 'mean': np.float64(-0.526), 'ci90': [-2.905, 1.945], 'median': np.float64(-8.684), 'win': np.float64(0.209), 'R': np.float64(-0.011), 'weeks': 187}
+    K0Q+_minus_00 {'diff': -5.472, 'lo90': -9.182, 'hi90': -1.94, 'nA': 510, 'nB': 2946}
+    K+Q0_minus_QQ {'diff': -1.15, 'lo90': -4.534, 'hi90': 2.514, 'nA': 3327, 'nB': 10001}
+    K0Q+_minus_QQ {'diff': -7.052, 'lo90': -9.939, 'hi90': -3.985, 'nA': 510, 'nB': 10001}
+    K+Q0_minus_00 {'diff': 0.431, 'lo90': -3.135, 'hi90': 4.353, 'nA': 3327, 'nB': 2946}
+    split_by_kq {'diff': 1.01, 'lo90': -1.678, 'hi90': 3.437, 'nA': 10511, 'nB': 6273}
+    split_by_kp {'diff': 2.101, 'lo90': -0.213, 'hi90': 4.484, 'nA': 13328, 'nB': 3456}
+    large {'QQ': {'n': 4898, 'mean': np.float64(2.189)}, 'K0Q+': {'n': 219, 'mean': np.float64(-3.036)}, 'K+Q0': {'n': 1716, 'mean': np.float64(0.263)}, '00': {'n': 1527, 'mean': np.float64(-1.41)}}
+      K0Q+-00 {'diff': -1.626, 'lo90': -5.401, 'hi90': 1.831, 'nA': 219, 'nB': 1527} K+Q0-QQ {'diff': -1.926, 'lo90': -4.845, 'hi90': 1.336, 'nA': 1716, 'nB': 4898}
+      by_kq {'diff': 2.491, 'lo90': 0.076, 'hi90': 4.729, 'nA': 5117, 'nB': 3243} by_kp {'diff': 3.304, 'lo90': 1.303, 'hi90': 5.3, 'nA': 6614, 'nB': 1746}
+    small {'QQ': {'n': 5103, 'mean': np.float64(-0.035)}, 'K0Q+': {'n': 291, 'mean': np.float64(-8.226)}, 'K+Q0': {'n': 1611, 'mean': np.float64(-0.476)}, '00': {'n': 1419, 'mean': np.float64(0.426)}}
+      K0Q+-00 {'diff': -8.652, 'lo90': -13.297, 'hi90': -4.129, 'nA': 291, 'nB': 1419} K+Q0-QQ {'diff': -0.442, 'lo90': -4.432, 'hi90': 4.135, 'nA': 1611, 'nB': 5103}
+      by_kq {'diff': -0.423, 'lo90': -3.847, 'hi90': 2.763, 'nA': 5394, 'nB': 3030} by_kp {'diff': 0.905, 'lo90': -2.892, 'hi90': 4.229, 'nA': 6714, 'nB': 1710}
+ methods ALL
+    U_균등 {'buyable': 1.0, 'mean_m': 1.0, 'eff_pct': np.float64(-0.755), 'cap_pct': np.float64(-0.7546), 'eff_minus_A': [-1.045, -0.608, -0.178], 'cap_minus_A': [-1.0555, -0.6496, -0.211]}
+    A_코스피 {'buyable': 0.8, 'mean_m': 0.718, 'eff_pct': np.float64(-0.142), 'cap_pct': np.float64(-0.1018), 'eff_minus_A': [0.0, 0.0, 0.0], 'cap_minus_A': [0.0, 0.0, 0.0]}
+    B_소속시장 {'buyable': 0.759, 'mean_m': 0.671, 'eff_pct': np.float64(0.089), 'cap_pct': np.float64(0.0594), 'eff_minus_A': [0.101, 0.231, 0.358], 'cap_minus_A': [0.0783, 0.161, 0.245]}
+    C_min {'buyable': 0.626, 'mean_m': 0.538, 'eff_pct': np.float64(0.082), 'cap_pct': np.float64(0.0439), 'eff_minus_A': [-0.341, 0.226, 0.715], 'cap_minus_A': [-0.2523, 0.1498, 0.4874]}
+    D_max {'buyable': 0.828, 'mean_m': 0.75, 'eff_pct': np.float64(-0.347), 'cap_pct': np.float64(-0.2607), 'eff_minus_A': [-0.372, -0.195, -0.063], 'cap_minus_A': [-0.2805, -0.1515, -0.0538]}
+    E_평균 {'buyable': 0.828, 'mean_m': 0.644, 'eff_pct': np.float64(-0.168), 'cap_pct': np.float64(-0.1084), 'eff_minus_A': [-0.286, -0.023, 0.213], 'cap_minus_A': [-0.2092, -0.0017, 0.1734]}
+ methods KOSDAQ
+    U_균등 {'buyable': 1.0, 'mean_m': 1.0, 'eff_pct': np.float64(-2.588), 'cap_pct': np.float64(-2.5877), 'eff_minus_A': [-1.2, -0.689, -0.126], 'cap_minus_A': [-1.6598, -1.2118, -0.6707]}
+    A_코스피 {'buyable': 0.81, 'mean_m': 0.732, 'eff_pct': np.float64(-1.915), 'cap_pct': np.float64(-1.4011), 'eff_minus_A': [0.0, 0.0, 0.0], 'cap_minus_A': [0.0, 0.0, 0.0]}
+    B_소속시장 {'buyable': 0.7, 'mean_m': 0.605, 'eff_pct': np.float64(-1.603), 'cap_pct': np.float64(-0.9688), 'eff_minus_A': [-0.032, 0.312, 0.672], 'cap_minus_A': [0.2115, 0.4341, 0.6498]}
+    C_min {'buyable': 0.677, 'mean_m': 0.58, 'eff_pct': np.float64(-1.481), 'cap_pct': np.float64(-0.8585), 'eff_minus_A': [0.143, 0.43, 0.75], 'cap_minus_A': [0.374, 0.543, 0.7129]}
+    D_max {'buyable': 0.833, 'mean_m': 0.757, 'eff_pct': np.float64(-1.997), 'cap_pct': np.float64(-1.5114), 'eff_minus_A': [-0.264, -0.074, 0.077], 'cap_minus_A': [-0.2598, -0.105, 0.019]}
+    E_평균 {'buyable': 0.833, 'mean_m': 0.668, 'eff_pct': np.float64(-1.774), 'cap_pct': np.float64(-1.185), 'eff_minus_A': [-0.014, 0.14, 0.302], 'cap_minus_A': [0.1058, 0.217, 0.3249]}
+ methods KOSPI
+    U_균등 {'buyable': 1.0, 'mean_m': 1.0, 'eff_pct': np.float64(0.335), 'cap_pct': np.float64(0.3351), 'eff_minus_A': [-1.125, -0.601, -0.081], 'cap_minus_A': [-0.8112, -0.331, 0.2196]}
+    A_코스피 {'buyable': 0.794, 'mean_m': 0.71, 'eff_pct': np.float64(0.945), 'cap_pct': np.float64(0.6706), 'eff_minus_A': [0.0, 0.0, 0.0], 'cap_minus_A': [0.0, 0.0, 0.0]}
+    B_소속시장 {'buyable': 0.794, 'mean_m': 0.71, 'eff_pct': np.float64(0.945), 'cap_pct': np.float64(0.6706), 'eff_minus_A': [0.0, 0.0, 0.0], 'cap_minus_A': [0.0, 0.0, 0.0]}
+    C_min {'buyable': 0.596, 'mean_m': 0.514, 'eff_pct': np.float64(1.13), 'cap_pct': np.float64(0.5803), 'eff_minus_A': [-0.662, 0.194, 0.961], 'cap_minus_A': [-0.696, -0.076, 0.4263]}
+    D_max {'buyable': 0.824, 'mean_m': 0.747, 'eff_pct': np.float64(0.647), 'cap_pct': np.float64(0.4828), 'eff_minus_A': [-0.471, -0.284, -0.145], 'cap_minus_A': [-0.3033, -0.1806, -0.0857]}
+    E_평균 {'buyable': 0.824, 'mean_m': 0.63, 'eff_pct': np.float64(0.844), 'cap_pct': np.float64(0.5316), 'eff_minus_A': [-0.485, -0.094, 0.245], 'cap_minus_A': [-0.4409, -0.1309, 0.1311]}
+
+===== IDX_2009_2019 31951 2009-01-02 2019-12-30
+ -- KOSDAQ
+    QQ {'n': 10564, 'mean': np.float64(-0.675), 'ci90': [-1.248, -0.097], 'median': np.float64(-6.463), 'win': np.float64(0.254), 'R': np.float64(-0.04), 'weeks': 373}
+    K0Q+ {'n': 1814, 'mean': np.float64(-2.02), 'ci90': [-3.457, -0.55], 'median': np.float64(-7.337), 'win': np.float64(0.227), 'R': np.float64(-0.178), 'weeks': 92}
+    K+Q0 {'n': 2071, 'mean': np.float64(-1.183), 'ci90': [-2.041, -0.3], 'median': np.float64(-6.377), 'win': np.float64(0.26), 'R': np.float64(-0.08), 'weeks': 139}
+    00 {'n': 1537, 'mean': np.float64(-1.613), 'ci90': [-2.723, -0.467], 'median': np.float64(-6.763), 'win': np.float64(0.249), 'R': np.float64(-0.155), 'weeks': 96}
+    K0Q+_minus_00 {'diff': -0.407, 'lo90': -2.324, 'hi90': 1.397, 'nA': 1814, 'nB': 1537}
+    K+Q0_minus_QQ {'diff': -0.507, 'lo90': -1.532, 'hi90': 0.561, 'nA': 2071, 'nB': 10564}
+    K0Q+_minus_QQ {'diff': -1.344, 'lo90': -2.912, 'hi90': 0.293, 'nA': 1814, 'nB': 10564}
+    K+Q0_minus_00 {'diff': 0.43, 'lo90': -1.017, 'hi90': 1.836, 'nA': 2071, 'nB': 1537}
+    split_by_kq {'diff': 0.494, 'lo90': -0.408, 'hi90': 1.301, 'nA': 12378, 'nB': 3608}
+    split_by_kp {'diff': 1.074, 'lo90': -0.074, 'hi90': 2.129, 'nA': 12635, 'nB': 3351}
+    large {'QQ': {'n': 3784, 'mean': np.float64(0.283)}, 'K0Q+': {'n': 678, 'mean': np.float64(-1.628)}, 'K+Q0': {'n': 824, 'mean': np.float64(0.607)}, '00': {'n': 588, 'mean': np.float64(-1.692)}}
+      K0Q+-00 {'diff': 0.064, 'lo90': -2.347, 'hi90': 2.862, 'nA': 678, 'nB': 588} K+Q0-QQ {'diff': 0.323, 'lo90': -1.103, 'hi90': 1.797, 'nA': 824, 'nB': 3784}
+      by_kq {'diff': 0.343, 'lo90': -0.785, 'hi90': 1.548, 'nA': 4462, 'nB': 1412} by_kp {'diff': 1.999, 'lo90': 0.424, 'hi90': 3.458, 'nA': 4608, 'nB': 1266}
+    small {'QQ': {'n': 6780, 'mean': np.float64(-1.21)}, 'K0Q+': {'n': 1136, 'mean': np.float64(-2.253)}, 'K+Q0': {'n': 1247, 'mean': np.float64(-2.365)}, '00': {'n': 949, 'mean': np.float64(-1.564)}}
+      K0Q+-00 {'diff': -0.689, 'lo90': -2.758, 'hi90': 1.249, 'nA': 1136, 'nB': 949} K+Q0-QQ {'diff': -1.155, 'lo90': -2.368, 'hi90': 0.028, 'nA': 1247, 'nB': 6780}
+      by_kq {'diff': 0.659, 'lo90': -0.32, 'hi90': 1.699, 'nA': 7916, 'nB': 2196} by_kp {'diff': 0.55, 'lo90': -0.5, 'hi90': 1.734, 'nA': 8027, 'nB': 2085}
+ -- KOSPI
+    QQ {'n': 10148, 'mean': np.float64(0.004), 'ci90': [-0.659, 0.731], 'median': np.float64(-4.826), 'win': np.float64(0.286), 'R': np.float64(0.015), 'weeks': 373}
+    K0Q+ {'n': 1580, 'mean': np.float64(-2.01), 'ci90': [-2.885, -1.038], 'median': np.float64(-5.728), 'win': np.float64(0.222), 'R': np.float64(-0.225), 'weeks': 90}
+    K+Q0 {'n': 2733, 'mean': np.float64(-0.698), 'ci90': [-1.278, -0.076], 'median': np.float64(-4.551), 'win': np.float64(0.278), 'R': np.float64(-0.061), 'weeks': 140}
+    00 {'n': 1504, 'mean': np.float64(-1.157), 'ci90': [-1.839, -0.448], 'median': np.float64(-4.593), 'win': np.float64(0.293), 'R': np.float64(-0.126), 'weeks': 96}
+    K0Q+_minus_00 {'diff': -0.853, 'lo90': -1.989, 'hi90': 0.27, 'nA': 1580, 'nB': 1504}
+    K+Q0_minus_QQ {'diff': -0.702, 'lo90': -1.643, 'hi90': 0.175, 'nA': 2733, 'nB': 10148}
+    K0Q+_minus_QQ {'diff': -2.014, 'lo90': -3.126, 'hi90': -0.935, 'nA': 1580, 'nB': 10148}
+    K+Q0_minus_00 {'diff': 0.459, 'lo90': -0.389, 'hi90': 1.307, 'nA': 2733, 'nB': 1504}
+    split_by_kq {'diff': 0.594, 'lo90': -0.156, 'hi90': 1.411, 'nA': 11728, 'nB': 4237}
+    split_by_kp {'diff': 1.449, 'lo90': 0.617, 'hi90': 2.275, 'nA': 12881, 'nB': 3084}
+    large {'QQ': {'n': 4994, 'mean': np.float64(0.013)}, 'K0Q+': {'n': 707, 'mean': np.float64(-2.092)}, 'K+Q0': {'n': 1542, 'mean': np.float64(-0.561)}, '00': {'n': 808, 'mean': np.float64(-0.885)}}
+      K0Q+-00 {'diff': -1.208, 'lo90': -2.304, 'hi90': -0.059, 'nA': 707, 'nB': 808} K+Q0-QQ {'diff': -0.574, 'lo90': -1.434, 'hi90': 0.285, 'nA': 1542, 'nB': 4994}
+      by_kq {'diff': 0.424, 'lo90': -0.272, 'hi90': 1.186, 'nA': 5701, 'nB': 2350} by_kp {'diff': 1.325, 'lo90': 0.625, 'hi90': 2.064, 'nA': 6536, 'nB': 1515}
+    small {'QQ': {'n': 5154, 'mean': np.float64(-0.004)}, 'K0Q+': {'n': 873, 'mean': np.float64(-1.943)}, 'K+Q0': {'n': 1191, 'mean': np.float64(-0.875)}, '00': {'n': 696, 'mean': np.float64(-1.473)}}
+      K0Q+-00 {'diff': -0.47, 'lo90': -2.199, 'hi90': 1.195, 'nA': 873, 'nB': 696} K+Q0-QQ {'diff': -0.871, 'lo90': -2.087, 'hi90': 0.333, 'nA': 1191, 'nB': 5154}
+      by_kq {'diff': 0.81, 'lo90': -0.223, 'hi90': 1.897, 'nA': 6027, 'nB': 1887} by_kp {'diff': 1.567, 'lo90': 0.486, 'hi90': 2.686, 'nA': 6345, 'nB': 1569}
+ methods ALL
+    U_균등 {'buyable': 1.0, 'mean_m': 1.0, 'eff_pct': np.float64(-0.704), 'cap_pct': np.float64(-0.7044), 'eff_minus_A': [-0.492, -0.306, -0.124], 'cap_minus_A': [-0.5821, -0.4251, -0.2729]}
+    A_코스피 {'buyable': 0.799, 'mean_m': 0.704, 'eff_pct': np.float64(-0.396), 'cap_pct': np.float64(-0.2789), 'eff_minus_A': [0.0, 0.0, 0.0], 'cap_minus_A': [0.0, 0.0, 0.0]}
+    B_소속시장 {'buyable': 0.791, 'mean_m': 0.689, 'eff_pct': np.float64(-0.411), 'cap_pct': np.float64(-0.2829), 'eff_minus_A': [-0.152, -0.014, 0.123], 'cap_minus_A': [-0.1001, -0.0044, 0.093]}
+    C_min {'buyable': 0.648, 'mean_m': 0.526, 'eff_pct': np.float64(-0.232), 'cap_pct': np.float64(-0.1222), 'eff_minus_A': [-0.019, 0.159, 0.343], 'cap_minus_A': [0.0746, 0.1559, 0.2391]}
+    D_max {'buyable': 0.905, 'mean_m': 0.823, 'eff_pct': np.float64(-0.565), 'cap_pct': np.float64(-0.465), 'eff_minus_A': [-0.309, -0.167, -0.031], 'cap_minus_A': [-0.2958, -0.1858, -0.0732]}
+    E_평균 {'buyable': 0.905, 'mean_m': 0.675, 'eff_pct': np.float64(-0.435), 'cap_pct': np.float64(-0.2936), 'eff_minus_A': [-0.137, -0.039, 0.064], 'cap_minus_A': [-0.0837, -0.0158, 0.0554]}
+ methods KOSDAQ
+    U_균등 {'buyable': 1.0, 'mean_m': 1.0, 'eff_pct': np.float64(-0.984), 'cap_pct': np.float64(-0.9838), 'eff_minus_A': [-0.478, -0.242, 0.006], 'cap_minus_A': [-0.6879, -0.4693, -0.2437]}
+    A_코스피 {'buyable': 0.79, 'mean_m': 0.693, 'eff_pct': np.float64(-0.746), 'cap_pct': np.float64(-0.5169), 'eff_minus_A': [0.0, 0.0, 0.0], 'cap_minus_A': [0.0, 0.0, 0.0]}
+    B_소속시장 {'buyable': 0.774, 'mean_m': 0.664, 'eff_pct': np.float64(-0.791), 'cap_pct': np.float64(-0.5251), 'eff_minus_A': [-0.323, -0.044, 0.236], 'cap_minus_A': [-0.1981, -0.0088, 0.1857]}
+    C_min {'buyable': 0.661, 'mean_m': 0.534, 'eff_pct': np.float64(-0.585), 'cap_pct': np.float64(-0.3127), 'eff_minus_A': [-0.031, 0.158, 0.337], 'cap_minus_A': [0.1039, 0.2042, 0.3035]}
+    D_max {'buyable': 0.904, 'mean_m': 0.823, 'eff_pct': np.float64(-0.887), 'cap_pct': np.float64(-0.7293), 'eff_minus_A': [-0.336, -0.141, 0.055], 'cap_minus_A': [-0.3714, -0.2131, -0.0524]}
+    E_평균 {'buyable': 0.904, 'mean_m': 0.678, 'eff_pct': np.float64(-0.768), 'cap_pct': np.float64(-0.521), 'eff_minus_A': [-0.159, -0.021, 0.115], 'cap_minus_A': [-0.099, -0.0044, 0.0928]}
+ methods KOSPI
+    U_균등 {'buyable': 1.0, 'mean_m': 1.0, 'eff_pct': np.float64(-0.425), 'cap_pct': np.float64(-0.4247), 'eff_minus_A': [-0.563, -0.361, -0.186], 'cap_minus_A': [-0.5249, -0.379, -0.2494]}
+    A_코스피 {'buyable': 0.807, 'mean_m': 0.714, 'eff_pct': np.float64(-0.057), 'cap_pct': np.float64(-0.0405), 'eff_minus_A': [0.0, 0.0, 0.0], 'cap_minus_A': [0.0, 0.0, 0.0]}
+    B_소속시장 {'buyable': 0.807, 'mean_m': 0.714, 'eff_pct': np.float64(-0.057), 'cap_pct': np.float64(-0.0405), 'eff_minus_A': [0.0, 0.0, 0.0], 'cap_minus_A': [0.0, 0.0, 0.0]}
+    C_min {'buyable': 0.636, 'mean_m': 0.517, 'eff_pct': np.float64(0.133), 'cap_pct': np.float64(0.0687), 'eff_minus_A': [-0.04, 0.182, 0.437], 'cap_minus_A': [0.0086, 0.1084, 0.2083]}
+    D_max {'buyable': 0.906, 'mean_m': 0.824, 'eff_pct': np.float64(-0.243), 'cap_pct': np.float64(-0.2003), 'eff_minus_A': [-0.311, -0.185, -0.062], 'cap_minus_A': [-0.2582, -0.1609, -0.0671]}
+    E_평균 {'buyable': 0.906, 'mean_m': 0.671, 'eff_pct': np.float64(-0.098), 'cap_pct': np.float64(-0.0658), 'eff_minus_A': [-0.145, -0.044, 0.062], 'cap_minus_A': [-0.094, -0.0267, 0.0445]}
+
+===== IDX_2020_2026 25248 2020-01-02 2026-10-02
+ -- KOSDAQ
+    QQ {'n': 10046, 'mean': np.float64(0.057), 'ci90': [-0.707, 0.822], 'median': np.float64(-6.967), 'win': np.float64(0.239), 'R': np.float64(0.027), 'weeks': 242}
+    K0Q+ {'n': 1005, 'mean': np.float64(0.205), 'ci90': [-2.625, 3.351], 'median': np.float64(-6.704), 'win': np.float64(0.265), 'R': np.float64(-0.096), 'weeks': 39}
+    K+Q0 {'n': 1015, 'mean': np.float64(-2.708), 'ci90': [-4.226, -1.133], 'median': np.float64(-7.439), 'win': np.float64(0.224), 'R': np.float64(-0.215), 'weeks': 47}
+    00 {'n': 2128, 'mean': np.float64(-2.024), 'ci90': [-3.064, -0.966], 'median': np.float64(-7.24), 'win': np.float64(0.245), 'R': np.float64(-0.197), 'weeks': 84}
+    K0Q+_minus_00 {'diff': 2.23, 'lo90': -0.824, 'hi90': 5.393, 'nA': 1005, 'nB': 2128}
+    K+Q0_minus_QQ {'diff': -2.765, 'lo90': -4.562, 'hi90': -1.095, 'nA': 1015, 'nB': 10046}
+    K0Q+_minus_QQ {'diff': 0.148, 'lo90': -2.925, 'hi90': 3.214, 'nA': 1005, 'nB': 10046}
+    K+Q0_minus_00 {'diff': -0.684, 'lo90': -2.57, 'hi90': 1.262, 'nA': 1015, 'nB': 2128}
+    split_by_kq {'diff': 2.316, 'lo90': 1.215, 'hi90': 3.517, 'nA': 11051, 'nB': 3143}
+    split_by_kp {'diff': 1.112, 'lo90': -0.341, 'hi90': 2.506, 'nA': 11061, 'nB': 3133}
+    large {'QQ': {'n': 2622, 'mean': np.float64(0.823)}, 'K0Q+': {'n': 297, 'mean': np.float64(2.614)}, 'K+Q0': {'n': 293, 'mean': np.float64(-2.161)}, '00': {'n': 597, 'mean': np.float64(0.089)}}
+      K0Q+-00 {'diff': 2.525, 'lo90': -1.09, 'hi90': 6.557, 'nA': 297, 'nB': 597} K+Q0-QQ {'diff': -2.985, 'lo90': -5.816, 'hi90': -0.162, 'nA': 293, 'nB': 2622}
+      by_kq {'diff': 1.657, 'lo90': 0.081, 'hi90': 3.348, 'nA': 2919, 'nB': 890} by_kp {'diff': -0.405, 'lo90': -2.419, 'hi90': 1.485, 'nA': 2915, 'nB': 894}
+    small {'QQ': {'n': 7424, 'mean': np.float64(-0.213)}, 'K0Q+': {'n': 708, 'mean': np.float64(-0.805)}, 'K+Q0': {'n': 722, 'mean': np.float64(-2.93)}, '00': {'n': 1531, 'mean': np.float64(-2.848)}}
+      K0Q+-00 {'diff': 2.043, 'lo90': -1.14, 'hi90': 5.397, 'nA': 708, 'nB': 1531} K+Q0-QQ {'diff': -2.716, 'lo90': -4.426, 'hi90': -1.128, 'nA': 722, 'nB': 7424}
+      by_kq {'diff': 2.609, 'lo90': 1.499, 'hi90': 3.841, 'nA': 8132, 'nB': 2253} by_kp {'diff': 1.748, 'lo90': 0.223, 'hi90': 3.214, 'nA': 8146, 'nB': 2239}
+ -- KOSPI
+    QQ {'n': 7501, 'mean': np.float64(0.427), 'ci90': [-0.246, 1.097], 'median': np.float64(-5.189), 'win': np.float64(0.263), 'R': np.float64(0.089), 'weeks': 242}
+    K0Q+ {'n': 821, 'mean': np.float64(-1.546), 'ci90': [-2.975, -0.128], 'median': np.float64(-5.34), 'win': np.float64(0.225), 'R': np.float64(-0.249), 'weeks': 39}
+    K+Q0 {'n': 1019, 'mean': np.float64(-0.41), 'ci90': [-1.994, 1.31], 'median': np.float64(-4.734), 'win': np.float64(0.286), 'R': np.float64(0.049), 'weeks': 47}
+    00 {'n': 1713, 'mean': np.float64(-0.598), 'ci90': [-2.204, 1.37], 'median': np.float64(-5.27), 'win': np.float64(0.248), 'R': np.float64(-0.184), 'weeks': 84}
+    K0Q+_minus_00 {'diff': -0.949, 'lo90': -3.262, 'hi90': 0.996, 'nA': 821, 'nB': 1713}
+    K+Q0_minus_QQ {'diff': -0.837, 'lo90': -2.34, 'hi90': 0.755, 'nA': 1019, 'nB': 7501}
+    K0Q+_minus_QQ {'diff': -1.973, 'lo90': -3.484, 'hi90': -0.38, 'nA': 821, 'nB': 7501}
+    K+Q0_minus_00 {'diff': 0.187, 'lo90': -2.372, 'hi90': 2.417, 'nA': 1019, 'nB': 1713}
+    split_by_kq {'diff': 0.76, 'lo90': -0.686, 'hi90': 2.009, 'nA': 8322, 'nB': 2732}
+    split_by_kp {'diff': 1.232, 'lo90': -0.386, 'hi90': 2.665, 'nA': 8520, 'nB': 2534}
+    large {'QQ': {'n': 3470, 'mean': np.float64(1.669)}, 'K0Q+': {'n': 394, 'mean': np.float64(-1.435)}, 'K+Q0': {'n': 524, 'mean': np.float64(0.216)}, '00': {'n': 819, 'mean': np.float64(0.612)}}
+      K0Q+-00 {'diff': -2.046, 'lo90': -5.946, 'hi90': 0.732, 'nA': 394, 'nB': 819} K+Q0-QQ {'diff': -1.453, 'lo90': -3.543, 'hi90': 0.887, 'nA': 524, 'nB': 3470}
+      by_kq {'diff': 0.895, 'lo90': -1.545, 'hi90': 2.747, 'nA': 3864, 'nB': 1343} by_kp {'diff': 1.532, 'lo90': -0.979, 'hi90': 3.519, 'nA': 3994, 'nB': 1213}
+    small {'QQ': {'n': 4031, 'mean': np.float64(-0.642)}, 'K0Q+': {'n': 427, 'mean': np.float64(-1.65)}, 'K+Q0': {'n': 495, 'mean': np.float64(-1.074)}, '00': {'n': 894, 'mean': np.float64(-1.706)}}
+      K0Q+-00 {'diff': 0.056, 'lo90': -2.468, 'hi90': 2.533, 'nA': 427, 'nB': 894} K+Q0-QQ {'diff': -0.432, 'lo90': -1.939, 'hi90': 1.168, 'nA': 495, 'nB': 4031}
+      by_kq {'diff': 0.742, 'lo90': -0.631, 'hi90': 2.018, 'nA': 4458, 'nB': 1389} by_kp {'diff': 0.998, 'lo90': -0.543, 'hi90': 2.396, 'nA': 4526, 'nB': 1321}
+ methods ALL
+    U_균등 {'buyable': 1.0, 'mean_m': 1.0, 'eff_pct': np.float64(-0.229), 'cap_pct': np.float64(-0.2292), 'eff_minus_A': [-0.646, -0.361, -0.048], 'cap_minus_A': [-0.5728, -0.33, -0.0373]}
+    A_코스피 {'buyable': 0.776, 'mean_m': 0.713, 'eff_pct': np.float64(0.128), 'cap_pct': np.float64(0.0914), 'eff_minus_A': [0.0, 0.0, 0.0], 'cap_minus_A': [0.0, 0.0, 0.0]}
+    B_소속시장 {'buyable': 0.775, 'mean_m': 0.701, 'eff_pct': np.float64(0.166), 'cap_pct': np.float64(0.1163), 'eff_minus_A': [-0.125, 0.034, 0.216], 'cap_minus_A': [-0.0918, 0.0222, 0.1486]}
+    C_min {'buyable': 0.695, 'mean_m': 0.612, 'eff_pct': np.float64(0.205), 'cap_pct': np.float64(0.1255), 'eff_minus_A': [-0.085, 0.078, 0.25], 'cap_minus_A': [-0.0855, 0.0369, 0.1568]}
+    D_max {'buyable': 0.848, 'mean_m': 0.781, 'eff_pct': np.float64(0.047), 'cap_pct': np.float64(0.0371), 'eff_minus_A': [-0.233, -0.087, 0.096], 'cap_minus_A': [-0.1692, -0.0598, 0.0771]}
+    E_평균 {'buyable': 0.848, 'mean_m': 0.696, 'eff_pct': np.float64(0.117), 'cap_pct': np.float64(0.0813), 'eff_minus_A': [-0.129, -0.013, 0.115], 'cap_minus_A': [-0.0956, -0.0103, 0.08]}
+ methods KOSDAQ
+    U_균등 {'buyable': 1.0, 'mean_m': 1.0, 'eff_pct': np.float64(-0.442), 'cap_pct': np.float64(-0.4422), 'eff_minus_A': [-0.787, -0.426, -0.076], 'cap_minus_A': [-0.7253, -0.4387, -0.1279]}
+    A_코스피 {'buyable': 0.779, 'mean_m': 0.716, 'eff_pct': np.float64(-0.008), 'cap_pct': np.float64(-0.006), 'eff_minus_A': [0.0, 0.0, 0.0], 'cap_minus_A': [0.0, 0.0, 0.0]}
+    B_소속시장 {'buyable': 0.779, 'mean_m': 0.695, 'eff_pct': np.float64(0.055), 'cap_pct': np.float64(0.0384), 'eff_minus_A': [-0.227, 0.056, 0.381], 'cap_minus_A': [-0.1644, 0.0395, 0.2666]}
+    C_min {'buyable': 0.708, 'mean_m': 0.627, 'eff_pct': np.float64(0.105), 'cap_pct': np.float64(0.0656), 'eff_minus_A': [-0.066, 0.112, 0.301], 'cap_minus_A': [-0.0499, 0.0741, 0.1965]}
+    D_max {'buyable': 0.85, 'mean_m': 0.784, 'eff_pct': np.float64(-0.042), 'cap_pct': np.float64(-0.0332), 'eff_minus_A': [-0.239, -0.044, 0.203], 'cap_minus_A': [-0.1804, -0.0358, 0.1556]}
+    E_평균 {'buyable': 0.85, 'mean_m': 0.705, 'eff_pct': np.float64(0.023), 'cap_pct': np.float64(0.0162), 'eff_minus_A': [-0.112, 0.028, 0.188], 'cap_minus_A': [-0.0822, 0.0197, 0.1333]}
+ methods KOSPI
+    U_균등 {'buyable': 1.0, 'mean_m': 1.0, 'eff_pct': np.float64(0.044), 'cap_pct': np.float64(0.0444), 'eff_minus_A': [-0.602, -0.27, 0.108], 'cap_minus_A': [-0.4646, -0.1896, 0.1781]}
+    A_코스피 {'buyable': 0.771, 'mean_m': 0.709, 'eff_pct': np.float64(0.305), 'cap_pct': np.float64(0.2165), 'eff_minus_A': [0.0, 0.0, 0.0], 'cap_minus_A': [0.0, 0.0, 0.0]}
+    B_소속시장 {'buyable': 0.771, 'mean_m': 0.709, 'eff_pct': np.float64(0.305), 'cap_pct': np.float64(0.2165), 'eff_minus_A': [0.0, 0.0, 0.0], 'cap_minus_A': [0.0, 0.0, 0.0]}
+    C_min {'buyable': 0.679, 'mean_m': 0.593, 'eff_pct': np.float64(0.342), 'cap_pct': np.float64(0.2024), 'eff_minus_A': [-0.166, 0.039, 0.253], 'cap_minus_A': [-0.1712, -0.011, 0.1413]}
+    D_max {'buyable': 0.845, 'mean_m': 0.777, 'eff_pct': np.float64(0.164), 'cap_pct': np.float64(0.1274), 'eff_minus_A': [-0.268, -0.138, -0.021], 'cap_minus_A': [-0.1754, -0.0882, -0.0027]}
+    E_평균 {'buyable': 0.845, 'mean_m': 0.685, 'eff_pct': np.float64(0.241), 'cap_pct': np.float64(0.1649), 'eff_minus_A': [-0.18, -0.062, 0.054], 'cap_minus_A': [-0.1366, -0.0497, 0.0356]}
+
+===== ETF_2016_2026 36438 2016-03-02 2026-10-02
+ -- KOSDAQ
+    QQ {'n': 13070, 'mean': np.float64(-0.49), 'ci90': [-1.039, 0.129], 'median': np.float64(-6.696), 'win': np.float64(0.233), 'R': np.float64(-0.042), 'weeks': 347}
+    K0Q+ {'n': 1434, 'mean': np.float64(-0.271), 'ci90': [-2.647, 2.108], 'median': np.float64(-7.049), 'win': np.float64(0.258), 'R': np.float64(-0.123), 'weeks': 59}
+    K+Q0 {'n': 2611, 'mean': np.float64(-0.7), 'ci90': [-1.858, 0.505], 'median': np.float64(-6.619), 'win': np.float64(0.26), 'R': np.float64(0.01), 'weeks': 115}
+    00 {'n': 2940, 'mean': np.float64(-2.523), 'ci90': [-3.312, -1.709], 'median': np.float64(-7.135), 'win': np.float64(0.232), 'R': np.float64(-0.248), 'weeks': 129}
+    K0Q+_minus_00 {'diff': 2.252, 'lo90': -0.164, 'hi90': 4.76, 'nA': 1434, 'nB': 2940}
+    K+Q0_minus_QQ {'diff': -0.21, 'lo90': -1.634, 'hi90': 1.144, 'nA': 2611, 'nB': 13070}
+    K0Q+_minus_QQ {'diff': 0.219, 'lo90': -2.151, 'hi90': 2.603, 'nA': 1434, 'nB': 13070}
+    K+Q0_minus_00 {'diff': 1.823, 'lo90': 0.313, 'hi90': 3.235, 'nA': 2611, 'nB': 2940}
+    split_by_kq {'diff': 1.197, 'lo90': 0.235, 'hi90': 2.184, 'nA': 14504, 'nB': 5551}
+    split_by_kp {'diff': 1.26, 'lo90': 0.098, 'hi90': 2.381, 'nA': 15681, 'nB': 4374}
+    large {'QQ': {'n': 3710, 'mean': np.float64(0.6)}, 'K0Q+': {'n': 460, 'mean': np.float64(0.839)}, 'K+Q0': {'n': 783, 'mean': np.float64(0.289)}, '00': {'n': 881, 'mean': np.float64(-0.92)}}
+      K0Q+-00 {'diff': 1.759, 'lo90': -0.921, 'hi90': 4.957, 'nA': 460, 'nB': 881} K+Q0-QQ {'diff': -0.311, 'lo90': -2.215, 'hi90': 1.544, 'nA': 783, 'nB': 3710}
+      by_kq {'diff': 0.977, 'lo90': -0.318, 'hi90': 2.332, 'nA': 4170, 'nB': 1664} by_kp {'diff': 0.862, 'lo90': -0.557, 'hi90': 2.262, 'nA': 4493, 'nB': 1341}
+    small {'QQ': {'n': 9360, 'mean': np.float64(-0.922)}, 'K0Q+': {'n': 974, 'mean': np.float64(-0.795)}, 'K+Q0': {'n': 1828, 'mean': np.float64(-1.123)}, '00': {'n': 2059, 'mean': np.float64(-3.209)}}
+      K0Q+-00 {'diff': 2.414, 'lo90': -0.181, 'hi90': 5.035, 'nA': 974, 'nB': 2059} K+Q0-QQ {'diff': -0.201, 'lo90': -1.688, 'hi90': 1.37, 'nA': 1828, 'nB': 9360}
+      by_kq {'diff': 1.318, 'lo90': 0.257, 'hi90': 2.395, 'nA': 10334, 'nB': 3887} by_kp {'diff': 1.479, 'lo90': 0.261, 'hi90': 2.642, 'nA': 11188, 'nB': 3033}
+ -- KOSPI
+    QQ {'n': 10078, 'mean': np.float64(-0.434), 'ci90': [-0.893, 0.017], 'median': np.float64(-5.079), 'win': np.float64(0.249), 'R': np.float64(-0.052), 'weeks': 347}
+    K0Q+ {'n': 1179, 'mean': np.float64(-0.862), 'ci90': [-2.475, 0.786], 'median': np.float64(-5.281), 'win': np.float64(0.23), 'R': np.float64(-0.205), 'weeks': 59}
+    K+Q0 {'n': 2664, 'mean': np.float64(0.155), 'ci90': [-1.243, 1.529], 'median': np.float64(-4.658), 'win': np.float64(0.28), 'R': np.float64(0.104), 'weeks': 116}
+    00 {'n': 2462, 'mean': np.float64(-1.485), 'ci90': [-2.466, -0.13], 'median': np.float64(-5.276), 'win': np.float64(0.24), 'R': np.float64(-0.245), 'weeks': 129}
+    K0Q+_minus_00 {'diff': 0.623, 'lo90': -1.39, 'hi90': 2.531, 'nA': 1179, 'nB': 2462}
+    K+Q0_minus_QQ {'diff': 0.589, 'lo90': -0.798, 'hi90': 2.042, 'nA': 2664, 'nB': 10078}
+    K0Q+_minus_QQ {'diff': -0.428, 'lo90': -2.122, 'hi90': 1.324, 'nA': 1179, 'nB': 10078}
+    K+Q0_minus_00 {'diff': 1.641, 'lo90': -0.276, 'hi90': 3.413, 'nA': 2664, 'nB': 2462}
+    split_by_kq {'diff': 0.154, 'lo90': -0.915, 'hi90': 1.127, 'nA': 11257, 'nB': 5126}
+    split_by_kp {'diff': 0.973, 'lo90': -0.131, 'hi90': 1.969, 'nA': 12742, 'nB': 3641}
+    large {'QQ': {'n': 4861, 'mean': np.float64(0.488)}, 'K0Q+': {'n': 564, 'mean': np.float64(-1.57)}, 'K+Q0': {'n': 1319, 'mean': np.float64(0.615)}, '00': {'n': 1213, 'mean': np.float64(-0.158)}}
+      K0Q+-00 {'diff': -1.412, 'lo90': -4.095, 'hi90': 0.573, 'nA': 564, 'nB': 1213} K+Q0-QQ {'diff': 0.127, 'lo90': -1.6, 'hi90': 1.985, 'nA': 1319, 'nB': 4861}
+      by_kq {'diff': 0.029, 'lo90': -1.544, 'hi90': 1.42, 'nA': 5425, 'nB': 2532} by_kp {'diff': 1.121, 'lo90': -0.659, 'hi90': 2.533, 'nA': 6180, 'nB': 1777}
+    small {'QQ': {'n': 5217, 'mean': np.float64(-1.292)}, 'K0Q+': {'n': 615, 'mean': np.float64(-0.213)}, 'K+Q0': {'n': 1345, 'mean': np.float64(-0.295)}, '00': {'n': 1249, 'mean': np.float64(-2.775)}}
+      K0Q+-00 {'diff': 2.562, 'lo90': 0.167, 'hi90': 5.162, 'nA': 615, 'nB': 1249} K+Q0-QQ {'diff': 0.997, 'lo90': -0.471, 'hi90': 2.427, 'nA': 1345, 'nB': 5217}
+      by_kq {'diff': 0.31, 'lo90': -0.741, 'hi90': 1.366, 'nA': 5832, 'nB': 2594} by_kp {'diff': 0.842, 'lo90': -0.316, 'hi90': 1.936, 'nA': 6562, 'nB': 1864}
+ methods ALL
+    U_균등 {'buyable': 1.0, 'mean_m': 1.0, 'eff_pct': np.float64(-0.677), 'cap_pct': np.float64(-0.677), 'eff_minus_A': [-0.558, -0.337, -0.11], 'cap_minus_A': [-0.6227, -0.4417, -0.2362]}
+    A_코스피 {'buyable': 0.78, 'mean_m': 0.711, 'eff_pct': np.float64(-0.336), 'cap_pct': np.float64(-0.2393), 'eff_minus_A': [0.0, 0.0, 0.0], 'cap_minus_A': [0.0, 0.0, 0.0]}
+    B_소속시장 {'buyable': 0.748, 'mean_m': 0.668, 'eff_pct': np.float64(-0.338), 'cap_pct': np.float64(-0.2259), 'eff_minus_A': [-0.161, 0.003, 0.161], 'cap_minus_A': [-0.0987, 0.0183, 0.1273]}
+    C_min {'buyable': 0.635, 'mean_m': 0.544, 'eff_pct': np.float64(-0.356), 'cap_pct': np.float64(-0.1938), 'eff_minus_A': [-0.268, -0.008, 0.223], 'cap_minus_A': [-0.1154, 0.0544, 0.1989]}
+    D_max {'buyable': 0.852, 'mean_m': 0.782, 'eff_pct': np.float64(-0.378), 'cap_pct': np.float64(-0.2959), 'eff_minus_A': [-0.173, -0.044, 0.104], 'cap_minus_A': [-0.1574, -0.0575, 0.0514]}
+    E_평균 {'buyable': 0.852, 'mean_m': 0.663, 'eff_pct': np.float64(-0.369), 'cap_pct': np.float64(-0.2449), 'eff_minus_A': [-0.159, -0.03, 0.098], 'cap_minus_A': [-0.0992, -0.0019, 0.0886]}
+ methods KOSDAQ
+    U_균등 {'buyable': 1.0, 'mean_m': 1.0, 'eff_pct': np.float64(-0.8), 'cap_pct': np.float64(-0.7997), 'eff_minus_A': [-0.7, -0.446, -0.17], 'cap_minus_A': [-0.7669, -0.5524, -0.3196]}
+    A_코스피 {'buyable': 0.782, 'mean_m': 0.712, 'eff_pct': np.float64(-0.356), 'cap_pct': np.float64(-0.2532), 'eff_minus_A': [0.0, 0.0, 0.0], 'cap_minus_A': [0.0, 0.0, 0.0]}
+    B_소속시장 {'buyable': 0.723, 'mean_m': 0.634, 'eff_pct': np.float64(-0.361), 'cap_pct': np.float64(-0.2289), 'eff_minus_A': [-0.312, 0.004, 0.308], 'cap_minus_A': [-0.1791, 0.0332, 0.2314]}
+    C_min {'buyable': 0.652, 'mean_m': 0.56, 'eff_pct': np.float64(-0.316), 'cap_pct': np.float64(-0.1769), 'eff_minus_A': [-0.205, 0.05, 0.287], 'cap_minus_A': [-0.0807, 0.0882, 0.2257]}
+    D_max {'buyable': 0.853, 'mean_m': 0.785, 'eff_pct': np.float64(-0.389), 'cap_pct': np.float64(-0.3052), 'eff_minus_A': [-0.201, -0.038, 0.154], 'cap_minus_A': [-0.1767, -0.0575, 0.086]}
+    E_평균 {'buyable': 0.853, 'mean_m': 0.673, 'eff_pct': np.float64(-0.358), 'cap_pct': np.float64(-0.241), 'eff_minus_A': [-0.147, 0.002, 0.145], 'cap_minus_A': [-0.0896, 0.0166, 0.1157]}
+ methods KOSPI
+    U_균등 {'buyable': 1.0, 'mean_m': 1.0, 'eff_pct': np.float64(-0.527), 'cap_pct': np.float64(-0.5268), 'eff_minus_A': [-0.447, -0.217, 0.057], 'cap_minus_A': [-0.5203, -0.313, -0.0464]}
+    A_코스피 {'buyable': 0.778, 'mean_m': 0.71, 'eff_pct': np.float64(-0.313), 'cap_pct': np.float64(-0.2222), 'eff_minus_A': [0.0, 0.0, 0.0], 'cap_minus_A': [0.0, 0.0, 0.0]}
+    B_소속시장 {'buyable': 0.778, 'mean_m': 0.71, 'eff_pct': np.float64(-0.313), 'cap_pct': np.float64(-0.2222), 'eff_minus_A': [0.0, 0.0, 0.0], 'cap_minus_A': [0.0, 0.0, 0.0]}
+    C_min {'buyable': 0.615, 'mean_m': 0.524, 'eff_pct': np.float64(-0.409), 'cap_pct': np.float64(-0.2144), 'eff_minus_A': [-0.417, -0.084, 0.206], 'cap_minus_A': [-0.1995, 0.0171, 0.2001]}
+    D_max {'buyable': 0.85, 'mean_m': 0.779, 'eff_pct': np.float64(-0.365), 'cap_pct': np.float64(-0.2846), 'eff_minus_A': [-0.171, -0.05, 0.084], 'cap_minus_A': [-0.1544, -0.0614, 0.0371]}
+    E_평균 {'buyable': 0.85, 'mean_m': 0.652, 'eff_pct': np.float64(-0.383), 'cap_pct': np.float64(-0.2495), 'eff_minus_A': [-0.217, -0.065, 0.075], 'cap_minus_A': [-0.1367, -0.0241, 0.0778]}
+
+===== IDX_2016_2026 36438 2016-03-02 2026-10-02
+ -- KOSDAQ
+    QQ {'n': 14033, 'mean': np.float64(-0.269), 'ci90': [-0.834, 0.299], 'median': np.float64(-6.631), 'win': np.float64(0.241), 'R': np.float64(-0.008), 'weeks': 371}
+    K0Q+ {'n': 1367, 'mean': np.float64(-0.224), 'ci90': [-2.558, 2.324], 'median': np.float64(-6.858), 'win': np.float64(0.26), 'R': np.float64(-0.119), 'weeks': 57}
+    K+Q0 {'n': 1648, 'mean': np.float64(-2.702), 'ci90': [-3.744, -1.575], 'median': np.float64(-7.122), 'win': np.float64(0.215), 'R': np.float64(-0.247), 'weeks': 94}
+    00 {'n': 3007, 'mean': np.float64(-2.494), 'ci90': [-3.31, -1.639], 'median': np.float64(-7.272), 'win': np.float64(0.231), 'R': np.float64(-0.247), 'weeks': 131}
+    K0Q+_minus_00 {'diff': 2.27, 'lo90': -0.159, 'hi90': 4.826, 'nA': 1367, 'nB': 3007}
+    K+Q0_minus_QQ {'diff': -2.433, 'lo90': -3.593, 'hi90': -1.236, 'nA': 1648, 'nB': 14033}
+    K0Q+_minus_QQ {'diff': 0.046, 'lo90': -2.353, 'hi90': 2.768, 'nA': 1367, 'nB': 14033}
+    K+Q0_minus_00 {'diff': -0.208, 'lo90': -1.565, 'hi90': 1.105, 'nA': 1648, 'nB': 3007}
+    split_by_kq {'diff': 2.303, 'lo90': 1.461, 'hi90': 3.168, 'nA': 15400, 'nB': 4655}
+    split_by_kp {'diff': 1.26, 'lo90': 0.167, 'hi90': 2.329, 'nA': 15681, 'nB': 4374}
+    large {'QQ': {'n': 3974, 'mean': np.float64(0.782)}, 'K0Q+': {'n': 428, 'mean': np.float64(0.943)}, 'K+Q0': {'n': 519, 'mean': np.float64(-1.266)}, '00': {'n': 913, 'mean': np.float64(-0.907)}}
+      K0Q+-00 {'diff': 1.85, 'lo90': -0.936, 'hi90': 4.99, 'nA': 428, 'nB': 913} K+Q0-QQ {'diff': -2.048, 'lo90': -4.008, 'hi90': 0.144, 'nA': 519, 'nB': 3974}
+      by_kq {'diff': 1.835, 'lo90': 0.548, 'hi90': 2.998, 'nA': 4402, 'nB': 1432} by_kp {'diff': 0.862, 'lo90': -0.549, 'hi90': 2.231, 'nA': 4493, 'nB': 1341}
+    small {'QQ': {'n': 10059, 'mean': np.float64(-0.685)}, 'K0Q+': {'n': 939, 'mean': np.float64(-0.755)}, 'K+Q0': {'n': 1129, 'mean': np.float64(-3.363)}, '00': {'n': 2094, 'mean': np.float64(-3.186)}}
+      K0Q+-00 {'diff': 2.431, 'lo90': -0.138, 'hi90': 5.098, 'nA': 939, 'nB': 2094} K+Q0-QQ {'diff': -2.678, 'lo90': -3.93, 'hi90': -1.556, 'nA': 1129, 'nB': 10059}
+      by_kq {'diff': 2.557, 'lo90': 1.682, 'hi90': 3.483, 'nA': 10998, 'nB': 3223} by_kp {'diff': 1.479, 'lo90': 0.244, 'hi90': 2.668, 'nA': 11188, 'nB': 3033}
+ -- KOSPI
+    QQ {'n': 10973, 'mean': np.float64(-0.155), 'ci90': [-0.627, 0.35], 'median': np.float64(-5.038), 'win': np.float64(0.257), 'R': np.float64(-0.003), 'weeks': 372}
+    K0Q+ {'n': 1116, 'mean': np.float64(-1.387), 'ci90': [-2.589, -0.044], 'median': np.float64(-5.455), 'win': np.float64(0.213), 'R': np.float64(-0.233), 'weeks': 57}
+    K+Q0 {'n': 1769, 'mean': np.float64(-1.277), 'ci90': [-2.247, -0.2], 'median': np.float64(-4.84), 'win': np.float64(0.245), 'R': np.float64(-0.122), 'weeks': 94}
+    00 {'n': 2525, 'mean': np.float64(-1.238), 'ci90': [-2.318, 0.139], 'median': np.float64(-5.194), 'win': np.float64(0.247), 'R': np.float64(-0.232), 'weeks': 131}
+    K0Q+_minus_00 {'diff': -0.15, 'lo90': -1.84, 'hi90': 1.487, 'nA': 1116, 'nB': 2525}
+    K+Q0_minus_QQ {'diff': -1.122, 'lo90': -2.121, 'hi90': -0.098, 'nA': 1769, 'nB': 10973}
+    K0Q+_minus_QQ {'diff': -1.233, 'lo90': -2.543, 'hi90': 0.102, 'nA': 1116, 'nB': 10973}
+    K+Q0_minus_00 {'diff': -0.039, 'lo90': -1.739, 'hi90': 1.479, 'nA': 1769, 'nB': 2525}
+    split_by_kq {'diff': 0.985, 'lo90': 0.098, 'hi90': 1.846, 'nA': 12089, 'nB': 4294}
+    split_by_kp {'diff': 0.973, 'lo90': -0.128, 'hi90': 2.018, 'nA': 12742, 'nB': 3641}
+    large {'QQ': {'n': 5238, 'mean': np.float64(0.751)}, 'K0Q+': {'n': 528, 'mean': np.float64(-1.535)}, 'K+Q0': {'n': 942, 'mean': np.float64(-0.799)}, '00': {'n': 1249, 'mean': np.float64(-0.213)}}
+      K0Q+-00 {'diff': -1.322, 'lo90': -3.88, 'hi90': 0.598, 'nA': 528, 'nB': 1249} K+Q0-QQ {'diff': -1.551, 'lo90': -2.847, 'hi90': -0.2, 'nA': 942, 'nB': 5238}
+      by_kq {'diff': 1.007, 'lo90': -0.537, 'hi90': 2.22, 'nA': 5766, 'nB': 2191} by_kp {'diff': 1.121, 'lo90': -0.612, 'hi90': 2.532, 'nA': 6180, 'nB': 1777}
+    small {'QQ': {'n': 5735, 'mean': np.float64(-0.982)}, 'K0Q+': {'n': 588, 'mean': np.float64(-1.255)}, 'K+Q0': {'n': 827, 'mean': np.float64(-1.821)}, '00': {'n': 1276, 'mean': np.float64(-2.241)}}
+      K0Q+-00 {'diff': 0.986, 'lo90': -1.205, 'hi90': 3.118, 'nA': 588, 'nB': 1276} K+Q0-QQ {'diff': -0.839, 'lo90': -1.922, 'hi90': 0.254, 'nA': 827, 'nB': 5735}
+      by_kq {'diff': 1.068, 'lo90': 0.101, 'hi90': 2.005, 'nA': 6323, 'nB': 2103} by_kp {'diff': 0.842, 'lo90': -0.304, 'hi90': 1.91, 'nA': 6562, 'nB': 1864}
+ methods ALL
+    U_균등 {'buyable': 1.0, 'mean_m': 1.0, 'eff_pct': np.float64(-0.677), 'cap_pct': np.float64(-0.677), 'eff_minus_A': [-0.56, -0.338, -0.102], 'cap_minus_A': [-0.626, -0.4422, -0.2369]}
+    A_코스피 {'buyable': 0.78, 'mean_m': 0.711, 'eff_pct': np.float64(-0.336), 'cap_pct': np.float64(-0.2393), 'eff_minus_A': [0.0, 0.0, 0.0], 'cap_minus_A': [0.0, 0.0, 0.0]}
+    B_소속시장 {'buyable': 0.772, 'mean_m': 0.693, 'eff_pct': np.float64(-0.297), 'cap_pct': np.float64(-0.2058), 'eff_minus_A': [-0.086, 0.039, 0.178], 'cap_minus_A': [-0.055, 0.0332, 0.1297]}
+    C_min {'buyable': 0.686, 'mean_m': 0.593, 'eff_pct': np.float64(-0.22), 'cap_pct': np.float64(-0.1303), 'eff_minus_A': [-0.017, 0.116, 0.259], 'cap_minus_A': [0.0151, 0.1089, 0.2047]}
+    D_max {'buyable': 0.848, 'mean_m': 0.781, 'eff_pct': np.float64(-0.388), 'cap_pct': np.float64(-0.303), 'eff_minus_A': [-0.168, -0.054, 0.085], 'cap_minus_A': [-0.1513, -0.0643, 0.0343]}
+    E_평균 {'buyable': 0.848, 'mean_m': 0.687, 'eff_pct': np.float64(-0.315), 'cap_pct': np.float64(-0.2166), 'eff_minus_A': [-0.067, 0.021, 0.122], 'cap_minus_A': [-0.04, 0.0222, 0.094]}
+ methods KOSDAQ
+    U_균등 {'buyable': 1.0, 'mean_m': 1.0, 'eff_pct': np.float64(-0.8), 'cap_pct': np.float64(-0.7997), 'eff_minus_A': [-0.714, -0.435, -0.157], 'cap_minus_A': [-0.7749, -0.5457, -0.3065]}
+    A_코스피 {'buyable': 0.782, 'mean_m': 0.712, 'eff_pct': np.float64(-0.356), 'cap_pct': np.float64(-0.2532), 'eff_minus_A': [0.0, 0.0, 0.0], 'cap_minus_A': [0.0, 0.0, 0.0]}
+    B_소속시장 {'buyable': 0.768, 'mean_m': 0.679, 'eff_pct': np.float64(-0.283), 'cap_pct': np.float64(-0.1925), 'eff_minus_A': [-0.16, 0.071, 0.327], 'cap_minus_A': [-0.1, 0.0601, 0.2361]}
+    C_min {'buyable': 0.7, 'mean_m': 0.607, 'eff_pct': np.float64(-0.215), 'cap_pct': np.float64(-0.1308), 'eff_minus_A': [-0.007, 0.139, 0.297], 'cap_minus_A': [0.0234, 0.1224, 0.2213]}
+    D_max {'buyable': 0.85, 'mean_m': 0.784, 'eff_pct': np.float64(-0.402), 'cap_pct': np.float64(-0.3149), 'eff_minus_A': [-0.211, -0.048, 0.143], 'cap_minus_A': [-0.1892, -0.0643, 0.0749]}
+    E_평균 {'buyable': 0.85, 'mean_m': 0.696, 'eff_pct': np.float64(-0.32), 'cap_pct': np.float64(-0.2229), 'eff_minus_A': [-0.078, 0.035, 0.159], 'cap_minus_A': [-0.05, 0.0301, 0.118]}
+ methods KOSPI
+    U_균등 {'buyable': 1.0, 'mean_m': 1.0, 'eff_pct': np.float64(-0.527), 'cap_pct': np.float64(-0.5268), 'eff_minus_A': [-0.451, -0.218, 0.046], 'cap_minus_A': [-0.5208, -0.3124, -0.0667]}
+    A_코스피 {'buyable': 0.778, 'mean_m': 0.71, 'eff_pct': np.float64(-0.313), 'cap_pct': np.float64(-0.2222), 'eff_minus_A': [0.0, 0.0, 0.0], 'cap_minus_A': [0.0, 0.0, 0.0]}
+    B_소속시장 {'buyable': 0.778, 'mean_m': 0.71, 'eff_pct': np.float64(-0.313), 'cap_pct': np.float64(-0.2222), 'eff_minus_A': [0.0, 0.0, 0.0], 'cap_minus_A': [0.0, 0.0, 0.0]}
+    C_min {'buyable': 0.67, 'mean_m': 0.575, 'eff_pct': np.float64(-0.225), 'cap_pct': np.float64(-0.1297), 'eff_minus_A': [-0.069, 0.085, 0.254], 'cap_minus_A': [-0.0197, 0.0926, 0.2108]}
+    D_max {'buyable': 0.846, 'mean_m': 0.778, 'eff_pct': np.float64(-0.37), 'cap_pct': np.float64(-0.2884), 'eff_minus_A': [-0.154, -0.057, 0.041], 'cap_minus_A': [-0.1393, -0.0664, 0.005]}
+    E_평균 {'buyable': 0.846, 'mean_m': 0.677, 'eff_pct': np.float64(-0.309), 'cap_pct': np.float64(-0.209), 'eff_minus_A': [-0.089, 0.006, 0.093], 'cap_minus_A': [-0.0549, 0.014, 0.0803]}
