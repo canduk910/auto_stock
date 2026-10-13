@@ -1170,6 +1170,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -2563,6 +2564,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -3962,6 +3964,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -5357,6 +5360,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -6753,6 +6757,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -8151,6 +8156,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_observe.py
     - tests/unit/engine/test_rs_score.py
@@ -9548,6 +9554,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_observe.py
     - tests/unit/engine/test_rs_score.py
@@ -10944,6 +10951,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -12342,6 +12350,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -13742,6 +13751,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -15136,6 +15146,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -16532,6 +16543,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -18004,6 +18016,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -19400,6 +19413,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -20817,6 +20831,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -22215,6 +22230,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -23620,6 +23636,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -25007,6 +25024,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -26406,6 +26424,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_score.py
@@ -27802,6 +27821,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -29200,6 +29220,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_score.py
@@ -30596,6 +30617,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -32082,6 +32104,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_score.py
     - tests/unit/engine/test_scan_loop_delta_only.py
@@ -33477,6 +33500,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -34874,6 +34898,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -36273,6 +36298,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -37668,6 +37694,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -39065,6 +39092,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -40462,6 +40490,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -41859,6 +41888,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -43256,6 +43286,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -44654,6 +44685,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -46051,6 +46083,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_score.py
@@ -47453,6 +47486,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_observe.py
     - tests/unit/engine/test_rs_score.py
@@ -48844,6 +48878,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -50242,6 +50277,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_observe.py
     - tests/unit/engine/test_rs_score.py
@@ -51640,6 +51676,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -53035,6 +53072,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -54436,6 +54474,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -55836,6 +55875,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -57231,6 +57271,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -58631,6 +58672,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -60098,6 +60140,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -61496,6 +61539,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -62893,6 +62937,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -64291,6 +64336,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -65761,6 +65807,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -67158,6 +67205,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -68555,6 +68603,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -69952,6 +70001,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -71349,6 +71399,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -72746,6 +72797,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -74233,6 +74285,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -75634,6 +75687,7 @@ backend:
     - tests/unit/engine/test_risk_on_tick_selling_skip.py
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -77028,6 +77082,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -78426,6 +78481,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
     - tests/unit/engine/test_rs_score.py
@@ -79822,6 +79878,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -81220,6 +81277,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -81461,6 +81519,7 @@ backend:
     - tests/unit/workflows/test_cycle145_deploy_migration.py
   src/engine/fundamental_load_tasks.py:
     direct_tests:
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     transitive_tests:
@@ -84015,6 +84074,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_score.py
     - tests/unit/engine/test_scan_loop_delta_only.py
@@ -85410,6 +85470,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -86881,6 +86942,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -88278,6 +88340,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -89676,6 +89739,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -91072,6 +91136,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -92469,6 +92534,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -93943,6 +94009,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -95337,6 +95404,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -96808,6 +96876,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -98210,6 +98279,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -99604,6 +99674,7 @@ backend:
     - tests/unit/engine/test_risk_donchian_skip_buy.py
     - tests/unit/engine/test_risk_on_tick_selling_skip.py
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -101073,6 +101144,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -102472,6 +102544,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -103867,6 +103940,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -105264,6 +105338,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -106661,6 +106736,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -108058,6 +108134,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -109455,6 +109532,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -110852,6 +110930,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -112249,6 +112328,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -113645,6 +113725,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -115146,6 +115227,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -116630,6 +116712,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -118200,6 +118283,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -119597,6 +119681,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -120995,6 +121080,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -122391,6 +122477,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -123788,6 +123875,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -125188,6 +125276,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -126581,6 +126670,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -127980,6 +128070,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_score.py
@@ -129378,6 +129469,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_scan_loop_delta_only.py
@@ -130817,6 +130909,7 @@ backend:
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_observe.py
     - tests/unit/engine/test_rs_score.py
     - tests/unit/engine/test_scan_loop_reprepare.py
@@ -132206,6 +132299,7 @@ backend:
     - tests/unit/engine/test_risk_on_tick_selling_skip.py
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -133569,6 +133663,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -134966,6 +135061,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -136361,6 +136457,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -137757,6 +137854,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -139156,6 +139254,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -140552,6 +140651,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -141949,6 +142049,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -143346,6 +143447,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -144743,6 +144845,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -146139,6 +146242,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -147536,6 +147640,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -148934,6 +149039,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -150331,6 +150437,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -151728,6 +151835,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -153125,6 +153233,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -154553,6 +154662,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -155952,6 +156062,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -157346,6 +157457,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -158748,6 +158860,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_score.py
@@ -160141,6 +160254,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -161538,6 +161652,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -162933,6 +163048,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -164332,6 +164448,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -165732,6 +165849,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -167142,6 +167260,7 @@ backend:
     - tests/unit/engine/test_regime_observation_honesty.py
     - tests/unit/engine/test_report_tick_coverage_pool.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -168521,6 +168640,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -169919,6 +170039,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -171326,6 +171447,7 @@ backend:
     - tests/unit/engine/test_risk_buy_block_modes.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -172712,6 +172834,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -174109,6 +174232,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -175596,6 +175720,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -176994,6 +177119,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -178389,6 +178515,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -179789,6 +179916,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -181183,6 +181311,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -182580,6 +182709,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -183976,6 +184106,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -185375,6 +185506,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -186771,6 +186903,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -188172,6 +188305,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -189568,6 +189702,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -191037,6 +191172,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -192434,6 +192570,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -193835,6 +193972,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -195236,6 +195374,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -196703,6 +196842,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -198102,6 +198242,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -199571,6 +199712,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -201163,6 +201305,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -202633,6 +202776,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -204060,6 +204204,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -205442,6 +205587,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -206852,6 +206998,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -208248,6 +208395,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -211618,6 +211766,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -213013,6 +213162,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -214413,6 +214563,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -215807,6 +215958,7 @@ backend:
     - tests/unit/engine/test_risk_pre_market_exit_gate.py
     - tests/unit/engine/test_risk_regime_guard.py
     - tests/unit/engine/test_risk_silent_skip_emit.py
+    - tests/unit/engine/test_rs_phase2_extra_load_pacing.py
     - tests/unit/engine/test_rs_phase2_financial_wiring.py
     - tests/unit/engine/test_rs_phase2_fundamental_load_tasks.py
     - tests/unit/engine/test_rs_phase2_observe.py
@@ -219631,10 +219783,10 @@ frontend:
     - frontend/src/pages/__tests__/Dashboard.fix1.cycle414.test.tsx
     - frontend/src/pages/__tests__/Dashboard.strategyMonitor.cycle414.test.tsx
     - frontend/src/pages/__tests__/MarketState.test.tsx
-generated_at: '2026-10-13T23:22:40.102026+09:00'
+generated_at: '2026-10-14T07:05:17.072704+09:00'
 stats:
   backend_modules: 204
-  backend_tests: 1394
+  backend_tests: 1395
   frontend_modules: 158
   frontend_tests: 174
   unmapped_modules:
