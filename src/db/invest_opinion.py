@@ -105,3 +105,28 @@ async def get_opinions(ticker: str, date_from: date, date_to: date) -> list[dict
         logger.exception("invest_opinion_history 조회 실패: %s", ticker)
         return []
     return [dict(r) for r in rows or []]
+
+
+async def latest_bsop_dates(tickers) -> dict[str, date]:
+    """종목별 DB 최신 `bsop_date` — 행 없는 종목은 키 없음. 일괄 1쿼리.
+
+    다른 함수와 달리 예외를 전파한다 — 빈 결과로 삼키면 호출자(추가 적재)가 전 종목을 400일치 재조회한다.
+    """
+    tickers = list(tickers)
+    if not tickers:
+        return {}
+    rows = await pg.fetch(
+        "SELECT ticker, max(bsop_date) AS latest FROM invest_opinion_history "
+        "WHERE ticker = ANY($1::text[]) GROUP BY ticker",
+        tickers,
+    )
+    return {r["ticker"]: r["latest"] for r in rows or [] if r.get("latest") is not None}
+
+
+async def estimate_snapshot_tickers(snapshot_month: date) -> set[str]:
+    """그 달(`snapshot_month`) 추정실적 스냅샷 행이 있는 종목. 예외 전파(위와 같은 이유)."""
+    rows = await pg.fetch(
+        "SELECT ticker FROM estimate_perform_snapshot WHERE snapshot_month = $1",
+        to_date(snapshot_month),
+    )
+    return {r["ticker"] for r in rows or []}

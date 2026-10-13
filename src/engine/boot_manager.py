@@ -922,6 +922,13 @@ async def boot(scheduler: "TradingScheduler") -> None:
     except Exception:
         logger.exception("[account_cluster_assign] boot spawn 실패 graceful")
 
+    # RS·재무·목표가 리비전 2단계 — 후보·보유 점수 관찰 기록(DB 쓰기만, 매매 행위 0). await 없음.
+    try:
+        from src.engine import rs_fundamental_observe
+        rs_fundamental_observe.spawn_boot_observe(scheduler)
+    except Exception:
+        logger.exception("[rs_observe_failed] stage=boot_spawn graceful")
+
     # cycle233 — 계좌 리스크 감시 부팅 동기 1회 (자문 cycle232 §2.5-γ 반례 2 요구사항:
     # 이게 없으면 07:55 부팅 ~ 첫 주기 평가 사이 09:05 매수창이 무평가로 열린다)
     # + 5분 자기 종료 감시 루프 스폰(idempotent — scheduler 라인 상한 가드 존중,
