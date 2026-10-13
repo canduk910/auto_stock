@@ -1,5 +1,4 @@
 -- RS·재무·목표가 리비전 1단계 — 증권사 투자의견 이력 + 추정실적 월초 스냅샷 (가산형 신규 테이블).
--- 번호는 병합 직전 main 마지막 번호 + 1 로 재확정한다.
 
 CREATE TABLE IF NOT EXISTS invest_opinion_history (
     ticker          TEXT NOT NULL,

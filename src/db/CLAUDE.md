@@ -465,7 +465,6 @@ T7(120일선 20영업일 기울기)·R4(250일 고점 대비 하락률)를 계�
 - **RS·재무 1단계 2표**(migration 051, 가산형 `CREATE TABLE IF NOT EXISTS` 만). 읽기·쓰기 = 위 `invest_opinion.py`. 🔴 소비처 없음 · 2단계 배선 대기.
   - `invest_opinion_history` — PK `(ticker, bsop_date, mbcr_name)`. 칸 = `invt_opnn`·`rgbf_invt_opnn` TEXT · `hts_goal_prc`·`stck_prdy_clpr` BIGINT · `dprt` NUMERIC(10,2) · `raw` JSONB NOT NULL(기본 `{}`) · `fetched_at` TIMESTAMPTZ NOT NULL.
   - `estimate_perform_snapshot` — PK `(ticker, snapshot_month)`(DATE). 칸 = `settle_months` TEXT[] NOT NULL(기본 `{}`) · `raw` JSONB NOT NULL(기본 `{}`) · `fetched_at` TIMESTAMPTZ NOT NULL.
-  - ⚠️ 번호 051 은 병합 직전 main 의 마지막 번호 + 1 로 다시 확정한다(SQL 머리 주석).
 
 ## TIMESTAMPTZ 계약
 
